@@ -1,0 +1,1737 @@
+{
+  "scope": "20_EXISTING_FINAL_OWNER_REQUESTS_OFFLINE_NO_PROVIDER",
+  "decision": "NO_CONTEXT_FIT_RENDERER_OR_ADVISORY_PROMPT_PATCH",
+  "entries": [
+    {
+      "run": "R1",
+      "caseId": "sales-discovery-advice:need",
+      "artifact": "journey-openings/provider-attempt-1.json",
+      "artifactSha256": "2a71e9fd6b8fc941a713cb9858d10fbf62c58f1b53f7780e925e0e0e6cda15cb",
+      "requestFile": "journey-openings/provider-requests.jsonl",
+      "requestLine": 5,
+      "generationId": "0fc57b71-4e6d-4afe-b20a-0ea89ec019c2:owner:3",
+      "requestSha256": "782d6ce21284baf4b1ebbd231b49a38fe2315f1b7fab0f4da05488e952a43b8b",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Chị tìm bộ áo quần đi làm, dưới một triệu thôi, đừng bó bụng quá.",
+      "history": [],
+      "terminal": "HANDOFF",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SQ2447",
+          "availableOffers": [
+            "AO",
+            "QUAN",
+            "SET_QUAN"
+          ],
+          "content": {
+            "description": "Thiết kế đồng bộ, tinh tế với chất liệu tơ Hàn thêu cao cấp cho cả áo và quần, mang lại cảm giác nhẹ nhàng, mềm mại và bay bổng khi mặc. Bề mặt vải được thêu họa tiết tinh xảo, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế form nhẹ nhàng, giúp tôn dáng thanh thoát nhưng vẫn đảm bảo sự thoải mái. Các chi tiết thêu được xử lý tỉ mỉ, tạo hiệu ứng nổi bật nhưng không quá cầu kỳ, giữ được nét dịu dàng và thanh lịch. Quần được làm từ tơ Hàn thêu đồng bộ, mềm mịn, có độ rũ nhẹ giúp tổng thể trang phục hài hòa và tinh tế hơn. Thiết kế quần dễ mặc, phù hợp với nhiều vóc dáng. Tổng thể set đồ mang phong cách nữ tính – thanh lịch – hiện đại, dễ ứng dụng trong nhiều hoàn cảnh khác nhau.",
+            "productName": "Set quần Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        },
+        {
+          "subjectRef": "SQ748",
+          "availableOffers": [
+            "AO",
+            "QUAN",
+            "SET_QUAN"
+          ],
+          "content": {
+            "description": "Màu sắc Tone kem phối họa tiết thổ cẩm hồng pastel và be nhạt, mang đến tổng thể ngọt ngào, thanh lịch và nữ tính. Set được may từ vải thô đũi cao cấp với bề mặt mềm mịn, thoáng khí và thấm hút tốt, mang lại cảm giác nhẹ nhàng, dễ chịu khi mặc Set gồm á kết hợp quần short lưng chun đồng bộ, chi tiết bèo xếp tầng ở gấu áo giúp tôn vòng eo và tạo hiệu ứng mềm mại, nữ tính. Quần short form suông, chiều dài vừa vặn giúp tôn dáng và tạo sự thoải mái khi vận động.",
+            "productName": "SET QUẦN UYỂN HOA",
+            "productUrl": null
+          },
+          "attributes": null
+        },
+        {
+          "subjectRef": "V406",
+          "availableOffers": [
+            "DIRECT"
+          ],
+          "content": {
+            "description": "Thiết kế nữ tính, thanh lịch với sự kết hợp giữa ren hoa nổi sang trọng và tơ ống mềm nhẹ, tạo cảm giác mềm mại, thoáng mát và bay nhẹ khi mặc. Chất liệu mịn, rũ tự nhiên giúp tôn lên vẻ dịu dàng và tinh tế cho người mặc. Phần váy yếm 2 lớp tơ ống được thiết kế form nhẹ nhàng, tạo độ rủ mềm và giúp dáng váy đứng form đẹp. Đi kèm là khăn choàng ren hoa nổi 1 lớp, tạo điểm nhấn duyên dáng, tăng thêm nét sang trọng và nữ tính cho tổng thể trang phục. Sự kết hợp giữa váy yếm và khăn ren giúp set đồ trở nên nổi bật, vừa mềm mại vừa thanh lịch.",
+            "productName": "Váy Ngọc Trâm",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [
+        "STOCK",
+        "PRICE",
+        "PRICE",
+        "STOCK"
+      ],
+      "fitFacts": [],
+      "currentQuote": null,
+      "fitPreference": "RELAXED",
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    },
+    {
+      "run": "R1",
+      "caseId": "media-decision:ask",
+      "artifact": "media-followup/provider-attempt-7.json",
+      "artifactSha256": "bb5ee1be1da80b80a423e5b77ce05f8934b0597535d6de5472915dd929be4bbc",
+      "requestFile": "media-followup/provider-requests.jsonl",
+      "requestLine": 18,
+      "generationId": "e520eca4-a594-4f9f-99d0-d2e5fcd34202:owner:2",
+      "requestSha256": "e09677c702b4a6909090933cb2ae8efe78e67a11e2699a39c84ad7d6bdf3a42c",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Chị thích bộ Thạch Thảo mà sợ phần ren trông hơi nhiều. Chị mặc đi ăn cưới buổi trưa thôi.",
+      "history": [],
+      "terminal": "SEND_ELIGIBLE",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [
+        "STOCK",
+        "STOCK",
+        "PRICE",
+        "PRICE",
+        "STOCK",
+        "PRICE"
+      ],
+      "fitFacts": [],
+      "currentQuote": null,
+      "fitPreference": null,
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    },
+    {
+      "run": "R1",
+      "caseId": "b1-buying-concern",
+      "artifact": "b1-first/attempt-7.json",
+      "artifactSha256": "e2f6b6c7137d972dbed9b7b87171edfef61787a1b2497c51fc02e724cf7b1cc2",
+      "requestFile": "b1-first/requests.jsonl",
+      "requestLine": 59,
+      "generationId": "f745528793144944d13f4e023e538ee7ff48d2afd486196902ce4bd68aada397:owner:2",
+      "requestSha256": "c8fd7a87e74ee0cb4a566c8832fcec90c4ba8a305587b6618f0822f31ef5c786",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.",
+      "history": [],
+      "terminal": "SEND_ELIGIBLE",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [
+        "STOCK",
+        "PRICE",
+        "STOCK",
+        "PRICE"
+      ],
+      "fitFacts": [],
+      "currentQuote": null,
+      "fitPreference": null,
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    },
+    {
+      "run": "R1",
+      "caseId": "b1-buying-concern-v2",
+      "artifact": "b1-rest/attempt-15.json",
+      "artifactSha256": "a84a7429136db2fd186892a5565ad9a9c1d26ae1be0f2f52b4c214a43718fe02",
+      "requestFile": "b1-rest/requests.jsonl",
+      "requestLine": 51,
+      "generationId": "fac11a749c09e7e6db4095238f326ea367fa844e799ee125bae93e9402c507a0:owner:2",
+      "requestSha256": "f41a2adc8008f478e4cbe25d894d0e0257c52804e0df61e8204ecaf6e31b7b34",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Chị hay mặc đồ trơn, ít họa tiết. Set Thạch Thảo nhìn đẹp nhưng chị sợ lên người hơi điệu quá. Chị cần một bộ để đi ăn cưới ban ngày, em tư vấn thật là có nên lấy không?",
+      "history": [],
+      "terminal": "SEND_ELIGIBLE",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [
+        "STOCK",
+        "PRICE"
+      ],
+      "fitFacts": [],
+      "currentQuote": null,
+      "fitPreference": null,
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    },
+    {
+      "run": "R1",
+      "caseId": "b1-buying-concern-v3",
+      "artifact": "b1-rest/attempt-23.json",
+      "artifactSha256": "7a3c4ac389850a09c5fa872c3a70be55973a55c617d0f094b539114dca4ddd9e",
+      "requestFile": "b1-rest/requests.jsonl",
+      "requestLine": 114,
+      "generationId": "6869f3c918c2db82a4e17d469658c4477d122024be93a0df57a7ba27d5dec99e:owner:2",
+      "requestSha256": "894a63335e662e386fb2499c5da45144eedc2190f1b4ce0cadf8be08d13d89da",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Theo em chị mua riêng áo Thạch Thảo hay lấy cả bộ? Chị muốn mặc lại nhiều lần, ngân sách tầm 850 nghìn.",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị có sẵn chân váy đen dáng suông rồi."
+        }
+      ],
+      "terminal": "SEND_ELIGIBLE",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [
+        "PRICE",
+        "STOCK",
+        "STOCK",
+        "PRICE"
+      ],
+      "fitFacts": [],
+      "currentQuote": null,
+      "fitPreference": null,
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    },
+    {
+      "run": "R1",
+      "caseId": "b1-changed-occasion",
+      "artifact": "b1-first/attempt-1.json",
+      "artifactSha256": "b2977db1661c95fcb2d95f3ed0df1fce5dfa8d98f578073559290ac207d8fa60",
+      "requestFile": "b1-first/requests.jsonl",
+      "requestLine": 10,
+      "generationId": "361ff12ccf061b27d987f93594ce56656c4617301f61f0f4abf69cf14c022fe2:owner:3",
+      "requestSha256": "55dd19ed9e7dec24ce8cbb877e65f39a94455c163a6f59cc1f0f3a589a275a00",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé.",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị định lấy set Thạch Thảo mặc đi đám cưới."
+        },
+        {
+          "role": "shop",
+          "text": "Đi đám cưới mặc bộ này đẹp chị ạ."
+        }
+      ],
+      "terminal": "SEND_ELIGIBLE",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/8",
+          "label": "Lịch sử công cụ đã hoàn tất"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SQ675",
+          "availableOffers": [
+            "AO",
+            "QUAN",
+            "SET_QUAN"
+          ],
+          "content": {
+            "description": "Màu sắc: Be dịu dàng và thanh lịch, mang đến vẻ đẹp nhẹ nhàng, tinh khôi nhưng vẫn đủ nổi bật nhờ những điểm nhấn nâu đất ấm áp. Thiết kế: Set gồm áo dáng suông tay lửng phối ren hoa laze nổi bật ở thân trước và tay áo, kết hợp dây buộc cổ mềm mại tạo nét nữ tính và duyên dáng. Quần dài ống rộng cạp chun nhún bèo nhẹ giúp tôn dáng tự nhiên, mang lại sự thoải mái và thanh thoát trong từng chuyển động. Chất liệu: Thô hoa laze phối thô ướt cao cấp, bề mặt mềm mại, thoáng mát và có độ rủ nhẹ tự nhiên. Lót habutai kem ngà bên trong giúp trang phục lên form đẹp, dễ chịu và kín đáo khi mặc. Điểm nhấn: Chi tiết ren thang kem được phối tinh tế tạo hiệu ứng thủ công nhẹ nhàng, kết hợp dây tua đính hạt ngọc loang tông nâu nhạt và nâu đậm mang đến nét mộc mạc nhưng sang trọng. Thiết kế phù hợp cho những chuyến du lịch, dạo phố, café cuối tuần hoặc những dịp cần sự thanh lịch và thoải mái.",
+            "productName": "SET QUẦN SQ675",
+            "productUrl": null
+          },
+          "attributes": null
+        },
+        {
+          "subjectRef": "SQ748",
+          "availableOffers": [
+            "AO",
+            "QUAN",
+            "SET_QUAN"
+          ],
+          "content": {
+            "description": "Màu sắc Tone kem phối họa tiết thổ cẩm hồng pastel và be nhạt, mang đến tổng thể ngọt ngào, thanh lịch và nữ tính. Set được may từ vải thô đũi cao cấp với bề mặt mềm mịn, thoáng khí và thấm hút tốt, mang lại cảm giác nhẹ nhàng, dễ chịu khi mặc Set gồm á kết hợp quần short lưng chun đồng bộ, chi tiết bèo xếp tầng ở gấu áo giúp tôn vòng eo và tạo hiệu ứng mềm mại, nữ tính. Quần short form suông, chiều dài vừa vặn giúp tôn dáng và tạo sự thoải mái khi vận động.",
+            "productName": "SET QUẦN UYỂN HOA",
+            "productUrl": null
+          },
+          "attributes": null
+        },
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        },
+        {
+          "subjectRef": "V406",
+          "availableOffers": [
+            "DIRECT"
+          ],
+          "content": {
+            "description": "Thiết kế nữ tính, thanh lịch với sự kết hợp giữa ren hoa nổi sang trọng và tơ ống mềm nhẹ, tạo cảm giác mềm mại, thoáng mát và bay nhẹ khi mặc. Chất liệu mịn, rũ tự nhiên giúp tôn lên vẻ dịu dàng và tinh tế cho người mặc. Phần váy yếm 2 lớp tơ ống được thiết kế form nhẹ nhàng, tạo độ rủ mềm và giúp dáng váy đứng form đẹp. Đi kèm là khăn choàng ren hoa nổi 1 lớp, tạo điểm nhấn duyên dáng, tăng thêm nét sang trọng và nữ tính cho tổng thể trang phục. Sự kết hợp giữa váy yếm và khăn ren giúp set đồ trở nên nổi bật, vừa mềm mại vừa thanh lịch.",
+            "productName": "Váy Ngọc Trâm",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [
+        "STOCK",
+        "PRICE",
+        "PRICE",
+        "STOCK"
+      ],
+      "fitFacts": [],
+      "currentQuote": null,
+      "fitPreference": null,
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    },
+    {
+      "run": "R1",
+      "caseId": "b1-changed-occasion-v2",
+      "artifact": "b1-rest/attempt-9.json",
+      "artifactSha256": "7084aec2ebf549a774d59e476d5b003e87e91d169db5a72f0e6a49aa80aca73f",
+      "requestFile": "b1-rest/requests.jsonl",
+      "requestLine": 2,
+      "generationId": "1422ad881c2a5ff48f5a16830e8aea31afe99558d90d9b1b7d39aac428832eda:owner:1",
+      "requestSha256": "a652059ad5b0d381e99a65992b56e007d6245727a91046a20791b593dab14af6",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Mà tiệc chuyển ra sân vườn rồi em, chị phải ở ngoài trời khá lâu mà lại dễ nóng. Mặc bộ này có bí quá không?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị đang xem set Thạch Thảo để đi tiệc trưa."
+        },
+        {
+          "role": "shop",
+          "text": "Tiệc trưa mặc bộ này xinh chị ạ."
+        }
+      ],
+      "terminal": "SEND_ELIGIBLE",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [],
+      "fitFacts": [],
+      "currentQuote": null,
+      "fitPreference": null,
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    },
+    {
+      "run": "R1",
+      "caseId": "b1-changed-occasion-v3",
+      "artifact": "b1-rest/attempt-17.json",
+      "artifactSha256": "5e2b8a6a72329e13f4cc8a251b73936e2010b67ac1384f91d7bb889858bbd92a",
+      "requestFile": "b1-rest/requests.jsonl",
+      "requestLine": 65,
+      "generationId": "a0e8b387733a80bc664e21f5ac1f4628f225779d89de8b4e0c12e638cf753c78:owner:1",
+      "requestSha256": "3152adb88357927cb00b74874d9176367a388d39df60b761f9a8bba7befe33fe",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Mà lịch đổi rồi, sáng chị mặc đi gặp khách hàng. Chị muốn nhìn gọn hơn thì nên lấy cả bộ hay chỉ lấy áo thôi em?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị định lấy cả bộ Thạch Thảo đi tiệc tối."
+        },
+        {
+          "role": "shop",
+          "text": "Đi tiệc tối mặc cả bộ đẹp chị ạ."
+        }
+      ],
+      "terminal": "SEND_ELIGIBLE",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [],
+      "fitFacts": [],
+      "currentQuote": null,
+      "fitPreference": null,
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    },
+    {
+      "run": "R1",
+      "caseId": "negotiation-price-objection",
+      "artifact": "negotiation/provider-attempt-2.json",
+      "artifactSha256": "9ba402c99a8923a07926664f43549306a97e74f74da67255e2c8b3a9e2d75619",
+      "requestFile": "negotiation/provider-requests.jsonl",
+      "requestLine": 10,
+      "generationId": "4a359e84-2409-4592-ad5f-bc1a5c3ebdf8:owner:2",
+      "requestSha256": "3dc409fd8901857292c618cc5398f52bf4bce186cb314f04cafd858efa9bfbb1",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Bớt cho chị chút được không?",
+      "history": [],
+      "terminal": "SEND_ELIGIBLE",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [
+        "STOCK",
+        "PRICE"
+      ],
+      "fitFacts": [],
+      "currentQuote": {
+        "cartId": "0a63001f-1529-5809-8c96-e37ae028db4e",
+        "cartVersion": 2,
+        "discountTotalVnd": 30000,
+        "grandTotalVnd": 499000,
+        "shippingFeeVnd": 30000,
+        "subtotalVnd": 499000
+      },
+      "fitPreference": null,
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    },
+    {
+      "run": "R1",
+      "caseId": "sales-size-advice:height-weight",
+      "artifact": "journey-openings/provider-attempt-3.json",
+      "artifactSha256": "dad8326620819a7ed00508b9b94ea8190dfc2c3f6b7931ae9c36502435db7f93",
+      "requestFile": "journey-openings/provider-requests.jsonl",
+      "requestLine": 16,
+      "generationId": "8ef4aa67-0ea0-4582-9142-377fd44d6c5d:owner:2",
+      "requestSha256": "56be8cdc691034263f32ece5d7eb69e2321dcc75353b4ef2d6734e3a3ab402bb",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Chị cao 1m58, nặng 52kg, bộ Thạch Thảo mặc size nào em? Chị thích rộng một chút.",
+      "history": [],
+      "terminal": "SEND_ELIGIBLE",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [
+        "SIZE_FIT"
+      ],
+      "fitFacts": [
+        {
+          "type": "SIZE_FIT",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": null
+          },
+          "value": {
+            "alternativeSizes": [],
+            "customerProfileId": "56d8c28e-3c1c-4f01-a7ae-faeccb908db3",
+            "customerProfileRevision": 2,
+            "evidenceBasis": "MEASUREMENTS",
+            "measurementFingerprint": "650e18561b4476a47d0debbd11244043f35716aa5f8658891fa761494aab9a5f",
+            "recommendedSizes": [
+              "M"
+            ]
+          }
+        }
+      ],
+      "currentQuote": null,
+      "fitPreference": "RELAXED",
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    },
+    {
+      "run": "R2",
+      "caseId": "sales-discovery-advice:need",
+      "artifact": "journey-openings/provider-attempt-1.json",
+      "artifactSha256": "144d53a8843d7e48238ec8590b9591d1fb0a3c311b5306291f65418fbad2231c",
+      "requestFile": "journey-openings/provider-requests.jsonl",
+      "requestLine": 5,
+      "generationId": "15706ab3-0a46-4dce-85ee-214d0a8f9325:owner:3",
+      "requestSha256": "a56496a0903ece4fa2126f5beeb93ced4b2db3b17c69ea0320f8037854b05743",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Chị tìm bộ áo quần đi làm, dưới một triệu thôi, đừng bó bụng quá.",
+      "history": [],
+      "terminal": "HANDOFF",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SQ2447",
+          "availableOffers": [
+            "AO",
+            "QUAN",
+            "SET_QUAN"
+          ],
+          "content": {
+            "description": "Thiết kế đồng bộ, tinh tế với chất liệu tơ Hàn thêu cao cấp cho cả áo và quần, mang lại cảm giác nhẹ nhàng, mềm mại và bay bổng khi mặc. Bề mặt vải được thêu họa tiết tinh xảo, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế form nhẹ nhàng, giúp tôn dáng thanh thoát nhưng vẫn đảm bảo sự thoải mái. Các chi tiết thêu được xử lý tỉ mỉ, tạo hiệu ứng nổi bật nhưng không quá cầu kỳ, giữ được nét dịu dàng và thanh lịch. Quần được làm từ tơ Hàn thêu đồng bộ, mềm mịn, có độ rũ nhẹ giúp tổng thể trang phục hài hòa và tinh tế hơn. Thiết kế quần dễ mặc, phù hợp với nhiều vóc dáng. Tổng thể set đồ mang phong cách nữ tính – thanh lịch – hiện đại, dễ ứng dụng trong nhiều hoàn cảnh khác nhau.",
+            "productName": "Set quần Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        },
+        {
+          "subjectRef": "SQ748",
+          "availableOffers": [
+            "AO",
+            "QUAN",
+            "SET_QUAN"
+          ],
+          "content": {
+            "description": "Màu sắc Tone kem phối họa tiết thổ cẩm hồng pastel và be nhạt, mang đến tổng thể ngọt ngào, thanh lịch và nữ tính. Set được may từ vải thô đũi cao cấp với bề mặt mềm mịn, thoáng khí và thấm hút tốt, mang lại cảm giác nhẹ nhàng, dễ chịu khi mặc Set gồm á kết hợp quần short lưng chun đồng bộ, chi tiết bèo xếp tầng ở gấu áo giúp tôn vòng eo và tạo hiệu ứng mềm mại, nữ tính. Quần short form suông, chiều dài vừa vặn giúp tôn dáng và tạo sự thoải mái khi vận động.",
+            "productName": "SET QUẦN UYỂN HOA",
+            "productUrl": null
+          },
+          "attributes": null
+        },
+        {
+          "subjectRef": "V406",
+          "availableOffers": [
+            "DIRECT"
+          ],
+          "content": {
+            "description": "Thiết kế nữ tính, thanh lịch với sự kết hợp giữa ren hoa nổi sang trọng và tơ ống mềm nhẹ, tạo cảm giác mềm mại, thoáng mát và bay nhẹ khi mặc. Chất liệu mịn, rũ tự nhiên giúp tôn lên vẻ dịu dàng và tinh tế cho người mặc. Phần váy yếm 2 lớp tơ ống được thiết kế form nhẹ nhàng, tạo độ rủ mềm và giúp dáng váy đứng form đẹp. Đi kèm là khăn choàng ren hoa nổi 1 lớp, tạo điểm nhấn duyên dáng, tăng thêm nét sang trọng và nữ tính cho tổng thể trang phục. Sự kết hợp giữa váy yếm và khăn ren giúp set đồ trở nên nổi bật, vừa mềm mại vừa thanh lịch.",
+            "productName": "Váy Ngọc Trâm",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [
+        "STOCK",
+        "PRICE",
+        "STOCK",
+        "PRICE"
+      ],
+      "fitFacts": [],
+      "currentQuote": null,
+      "fitPreference": null,
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    },
+    {
+      "run": "R2",
+      "caseId": "media-decision:ask",
+      "artifact": "media-followup/provider-attempt-7.json",
+      "artifactSha256": "5c4bc8f9efe0d998599a68d5804631b6eb4c8b630707e7610a01076232b8e470",
+      "requestFile": "media-followup/provider-requests.jsonl",
+      "requestLine": 18,
+      "generationId": "bcd7afcc-9609-4d91-bb13-9883bc1eb49c:owner:2",
+      "requestSha256": "5802f95bed164ab6953c2e419fd6feb2cfbc9d3d63f62801b61c238c2f02f2ac",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Chị thích bộ Thạch Thảo mà sợ phần ren trông hơi nhiều. Chị mặc đi ăn cưới buổi trưa thôi.",
+      "history": [],
+      "terminal": "SEND_ELIGIBLE",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [],
+      "fitFacts": [],
+      "currentQuote": null,
+      "fitPreference": null,
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    },
+    {
+      "run": "R2",
+      "caseId": "b1-buying-concern",
+      "artifact": "b1-first/attempt-7.json",
+      "artifactSha256": "4861bae1aaa806e46cda06b565f27807aa57d593e5ce816d2a085591a454de12",
+      "requestFile": "b1-first/requests.jsonl",
+      "requestLine": 55,
+      "generationId": "5540975b57551ca54bd10cfc4d8de14e6d4190c110fe7dd3208dd8dad97aa069:owner:2",
+      "requestSha256": "231f69319f181518e3dc2013c2c04ea7441e93921b53fd10371338afde438bd0",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.",
+      "history": [],
+      "terminal": "SEND_ELIGIBLE",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [
+        "STOCK",
+        "PRICE",
+        "PRICE",
+        "STOCK",
+        "PRICE",
+        "STOCK"
+      ],
+      "fitFacts": [],
+      "currentQuote": null,
+      "fitPreference": null,
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    },
+    {
+      "run": "R2",
+      "caseId": "b1-buying-concern-v2",
+      "artifact": "b1-rest/attempt-15.json",
+      "artifactSha256": "d6660a8fd5cf9f6e73928dcb58705b0b2f20d8feea96e0affa50da609da273da",
+      "requestFile": "b1-rest/requests.jsonl",
+      "requestLine": 47,
+      "generationId": "f15efc4290cd7467fdbe39e5701e1e4b23df8d800b3e478d5716623a9138450d:owner:1",
+      "requestSha256": "3af133af87d1d786faf0e567f1e26e235e25f8f7f42d316ff0c15194f3e0ae0a",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Chị hay mặc đồ trơn, ít họa tiết. Set Thạch Thảo nhìn đẹp nhưng chị sợ lên người hơi điệu quá. Chị cần một bộ để đi ăn cưới ban ngày, em tư vấn thật là có nên lấy không?",
+      "history": [],
+      "terminal": "SEND_ELIGIBLE",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [],
+      "fitFacts": [],
+      "currentQuote": null,
+      "fitPreference": null,
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    },
+    {
+      "run": "R2",
+      "caseId": "b1-buying-concern-v3",
+      "artifact": "b1-rest/attempt-23.json",
+      "artifactSha256": "795f373040741f680a00acc41059ba998abf82a93a75be85709e3c5384813026",
+      "requestFile": "b1-rest/requests.jsonl",
+      "requestLine": 110,
+      "generationId": "05b8b8925fbdff6c6738bddfbe76caf52f2edfd575f87808dd5de29fe50cc8cc:owner:2",
+      "requestSha256": "2f8ba23b1d5e84ab7254aea7b406e6ce6d6bbc56822c693b555aad445c059d5c",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Theo em chị mua riêng áo Thạch Thảo hay lấy cả bộ? Chị muốn mặc lại nhiều lần, ngân sách tầm 850 nghìn.",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị có sẵn chân váy đen dáng suông rồi."
+        }
+      ],
+      "terminal": "SEND_ELIGIBLE",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [
+        "PRICE",
+        "PRICE",
+        "STOCK",
+        "STOCK"
+      ],
+      "fitFacts": [],
+      "currentQuote": null,
+      "fitPreference": null,
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    },
+    {
+      "run": "R2",
+      "caseId": "b1-changed-occasion",
+      "artifact": "b1-first/attempt-1.json",
+      "artifactSha256": "e43e1c53c717857bd44c892e4c61b6448d77c9f966a0a52c8cc2d684a16e0df2",
+      "requestFile": "b1-first/requests.jsonl",
+      "requestLine": 6,
+      "generationId": "c3be5419666fb1314f6d0a84642007532535898f06185598b933e8c0ecc29846:owner:2",
+      "requestSha256": "d7dbb1034af523851cd81a40ba989a7b6625d2c1ee315433dd8af2e903b8a093",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé.",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị định lấy set Thạch Thảo mặc đi đám cưới."
+        },
+        {
+          "role": "shop",
+          "text": "Đi đám cưới mặc bộ này đẹp chị ạ."
+        }
+      ],
+      "terminal": "SEND_ELIGIBLE",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SV1561",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Thiết kế nữ tính, nhẹ nhàng với chất liệu thô boi phối ren cho cả áo và chân váy, mang lại cảm giác thoáng mát, mềm nhẹ và dễ chịu khi mặc. Sự kết hợp giữa chất vải thô mộc mạc và ren tinh tế tạo nên tổng thể hài hòa, vừa gần gũi vừa thanh lịch. Áo được thiết kế form suông nhẹ, dễ mặc và phù hợp với nhiều dáng người. Các chi tiết phối ren tinh tế giúp tạo điểm nhấn mềm mại, tăng thêm nét nữ tính cho trang phục. Chân váy được làm từ thô boi phối ren, form váy nhẹ nhàng với độ rũ tự nhiên. Thiết kế cạp chun linh hoạt, giúp mặc thoải mái và dễ dàng, phù hợp với nhiều vóc dáng. Phần ren được xử lý khéo léo, tạo độ bay nhẹ và tăng tính thẩm mỹ cho tổng thể.",
+            "productName": "Set váy Khánh Trang",
+            "productUrl": null
+          },
+          "attributes": null
+        },
+        {
+          "subjectRef": "SV244",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Thiết kế nữ tính và nổi bật với chất liệu ren lưới đính hoa 3D, kết hợp cùng chân váy tơ mềm mịn nhẹ bay, mang lại cảm giác thanh thoát và tinh tế khi mặc. Bề mặt vải được trang trí hoa 3D nổi bật, tạo điểm nhấn sang trọng và thu hút. Áo được thiết kế 2 lớp từ ren hoa 3D, chất liệu mát, nhẹ và thoáng. Form áo đuôi cá rủ xòe nhẹ, giúp tạo độ bay mềm mại và tôn dáng nữ tính. Thiết kế rộng suông nhẹ mang lại cảm giác thoải mái nhưng vẫn giữ được nét thanh lịch. Chân váy được thiết kế 2 lớp cạp chun, phần váy 3 tầng đan nhau tạo độ bồng bềnh và chuyển động mềm mại khi di chuyển. Form váy bay nhẹ giúp tổng thể trang phục thêm phần nổi bật và duyên dáng.",
+            "productName": "Set váy Diễm Hoa",
+            "productUrl": null
+          },
+          "attributes": null
+        },
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        },
+        {
+          "subjectRef": "SV462",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Thiết kế thanh lịch và nữ tính với chất liệu tơ Pháp vân ngang cao cấp, bề mặt vải mềm mịn, nhẹ bay nhưng vẫn giữ form đẹp, mang lại cảm giác sang trọng và thoải mái khi mặc. Bên trong được lót habutai giúp tăng độ mềm mại và dễ chịu. Áo được thiết kế 2 lớp dáng peplum đuôi cá, giúp tôn eo và tạo hiệu ứng dáng thon gọn. Phần phối dây ren ngang thân tạo điểm nhấn tinh tế, kết hợp hoa nhựa đính trang trí mang lại vẻ đẹp nổi bật nhưng vẫn thanh lịch. Thiết kế khóa sau, lớp lót mềm không gây cộm ngứa, đảm bảo sự thoải mái khi mặc. Chân váy được thiết kế cạp chun thân sau kết hợp khóa sườn, giúp mặc dễ dàng và ôm dáng vừa phải. Phần chân váy phối dây ren trang trí tạo sự hài hòa với áo, mang lại tổng thể nữ tính và tinh tế.",
+            "productName": "Set váy Thanh Sương",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [],
+      "fitFacts": [],
+      "currentQuote": null,
+      "fitPreference": null,
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    },
+    {
+      "run": "R2",
+      "caseId": "b1-changed-occasion-v2",
+      "artifact": "b1-rest/attempt-9.json",
+      "artifactSha256": "7e918410188154f6ebee4e0a542ab3a35ef301af552239a21786dad9f63b3118",
+      "requestFile": "b1-rest/requests.jsonl",
+      "requestLine": 2,
+      "generationId": "7c544a27b18a516470f1707d064d6fbd542310989216729fa3b38214d0433016:owner:1",
+      "requestSha256": "dc4dfe8fb03aa6df0c697cb63effc874aa3a329697edca307325c62ba38b2418",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Mà tiệc chuyển ra sân vườn rồi em, chị phải ở ngoài trời khá lâu mà lại dễ nóng. Mặc bộ này có bí quá không?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị đang xem set Thạch Thảo để đi tiệc trưa."
+        },
+        {
+          "role": "shop",
+          "text": "Tiệc trưa mặc bộ này xinh chị ạ."
+        }
+      ],
+      "terminal": "SEND_ELIGIBLE",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [],
+      "fitFacts": [],
+      "currentQuote": null,
+      "fitPreference": null,
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    },
+    {
+      "run": "R2",
+      "caseId": "b1-changed-occasion-v3",
+      "artifact": "b1-rest/attempt-17.json",
+      "artifactSha256": "a0bff70a87138bca0287877417abc3cf52059f6f50a74d4af4cf12e847604277",
+      "requestFile": "b1-rest/requests.jsonl",
+      "requestLine": 61,
+      "generationId": "a5e6b0a4dc8e91d43059ea402ebd3532404f0b029eb052beb4e7957a1bb1ab14:owner:1",
+      "requestSha256": "6f9d7f4c207fb9239b024a2fcb148bea09388e76dcdc75b80a746aa7e1e43ef3",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Mà lịch đổi rồi, sáng chị mặc đi gặp khách hàng. Chị muốn nhìn gọn hơn thì nên lấy cả bộ hay chỉ lấy áo thôi em?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị định lấy cả bộ Thạch Thảo đi tiệc tối."
+        },
+        {
+          "role": "shop",
+          "text": "Đi tiệc tối mặc cả bộ đẹp chị ạ."
+        }
+      ],
+      "terminal": "SEND_ELIGIBLE",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [],
+      "fitFacts": [],
+      "currentQuote": null,
+      "fitPreference": null,
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    },
+    {
+      "run": "R2",
+      "caseId": "negotiation-price-objection",
+      "artifact": "negotiation/provider-attempt-2.json",
+      "artifactSha256": "5444633ea336ff9217dc570630c3c6763c80b909c42f979c6cfceb4aea74b842",
+      "requestFile": "negotiation/provider-requests.jsonl",
+      "requestLine": 10,
+      "generationId": "16db5454-68fb-44f5-8e3f-1115943cce86:owner:2",
+      "requestSha256": "7f3dae77c196efc7087dfa801584cdd898135000cc1ad4c05ce8a5f5edd8c6ad",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Bớt cho chị chút được không?",
+      "history": [],
+      "terminal": "SEND_ELIGIBLE",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [
+        "PRICE",
+        "STOCK"
+      ],
+      "fitFacts": [],
+      "currentQuote": {
+        "cartId": "5031c0d0-a962-52dd-8f60-f977c3abff90",
+        "cartVersion": 2,
+        "discountTotalVnd": 30000,
+        "grandTotalVnd": 499000,
+        "shippingFeeVnd": 30000,
+        "subtotalVnd": 499000
+      },
+      "fitPreference": null,
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    },
+    {
+      "run": "R2",
+      "caseId": "sales-size-advice:height-weight",
+      "artifact": "journey-openings/provider-attempt-3.json",
+      "artifactSha256": "0bf01245331ddfdaa2d5044bd71446955053f796eab7cbbee39677e538c8906d",
+      "requestFile": "journey-openings/provider-requests.jsonl",
+      "requestLine": 14,
+      "generationId": "05a57bc0-10f3-437a-83c7-1646d8b72749:owner:2",
+      "requestSha256": "f292d7ea3290cd50a436a0a4a68bced488ec2f8ccb7ae589f87763b5f8b30d94",
+      "requestJsonHashPolicy": "UTF8_COMPACT_PARSED_JSON_NOT_RAW_LINE_BYTES",
+      "latest": "Chị cao 1m58, nặng 52kg, bộ Thạch Thảo mặc size nào em? Chị thích rộng một chút.",
+      "history": [],
+      "terminal": "SEND_ELIGIBLE",
+      "wireSections": [
+        {
+          "path": "/contents/0/parts/0/text/section/0",
+          "label": "Thời điểm xử lý"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/1",
+          "label": "Sản phẩm"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/2",
+          "label": "Giá, tồn và kết quả đã xác minh"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/3",
+          "label": "Quy định và dữ liệu nguồn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/4",
+          "label": "Hồ sơ và trạng thái hiện tại"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/5",
+          "label": "Kết quả thao tác đã xác nhận"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/6",
+          "label": "Đối tượng đã gắn"
+        },
+        {
+          "path": "/contents/0/parts/0/text/section/7",
+          "label": "Khả năng thực hiện lượt này"
+        }
+      ],
+      "productEvidence": [
+        {
+          "subjectRef": "SV2447",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "content": {
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productName": "Set váy Thạch Thảo",
+            "productUrl": null
+          },
+          "attributes": null
+        }
+      ],
+      "factTypes": [
+        "SIZE_FIT"
+      ],
+      "fitFacts": [
+        {
+          "type": "SIZE_FIT",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": null
+          },
+          "value": {
+            "alternativeSizes": [],
+            "customerProfileId": "b541b577-3142-4125-8eb4-85be3e39534d",
+            "customerProfileRevision": 2,
+            "evidenceBasis": "MEASUREMENTS",
+            "measurementFingerprint": "cf8f14221150319d03bf644b3669da85f12a4fba70614ff4487f7b76568ddff1",
+            "recommendedSizes": [
+              "M"
+            ]
+          }
+        }
+      ],
+      "currentQuote": null,
+      "fitPreference": "RELAXED",
+      "sourceDecision": "NO_CONTEXT_PATCH",
+      "classification": "OWNER_DECISION_ADHERENCE_LIMITATION_OR_ACCEPTED_ADVISORY_VARIANCE",
+      "limits": "Exact existing context and roles retained; no truncation or wrong subject observed in this audited final wire. This does not prove every retrieved property is sufficient for every sales claim."
+    }
+  ]
+}
