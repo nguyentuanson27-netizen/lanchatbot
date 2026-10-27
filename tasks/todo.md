@@ -1,4 +1,10 @@
-## Current — model qualification sau media/size fix, 27/10/2026
+## Current — vòng lặp lại full Phase B, 27/10/2026
+
+- [x] Source4efbea67 sạch/unchanged; same executable/config/prompt/corpus;17controls PASS và51native đủ, N1/retry0,143requests/0generation errors,6DBdrop.
+- [x] Đọc đủ51whole turns;37eligible/10silentHANDOFF/4NO_SEND giữ nguyên. Wire/size/hint/label/accounting audits; public opening-multipart phục hồi bằng captured hash, private data vẫn mask. [Report](../apps/worker/evals/single-agent-commerce-read-only/media-size-context-repeat-run-20261027/CHECKPOINT_B.md).
+- [ ] First-quote images7→3: organic/multipart bỏ selector dù có tool/hint. Discovery fit guarantee lặp lại; metadata gaps và usefulness còn hạn chế. B chưa GO; không tự fix/rerun, live send hoặc deploy.
+
+## Previous — model qualification sau media/size fix, 27/10/2026
 
 - [x] Chốt source0ef9991a sạch; đúng scoped CLI/hash/login,17fresh controls PASS trước51native, không sửa executable/config trong run.
 - [x] Đủ51outcomes:37eligible/10silentHANDOFF/4NO_SEND;143requests/retry0. Giữ2owner output-contract errors HTTP200 trong accounting, không gọi là0generation errors;6testDBdrop.

@@ -1,0 +1,37 @@
+{
+  "scope": "ACTUAL_NATIVE_PROPOSALS_AND_HINTS_PLUS_SEPARATE_CONTROL_CAPTURE_OFFLINE_ELIGIBILITY",
+  "sourceSha": "4efbea67356f1e3e4f7fa886dec48d58c4ab1474",
+  "rule": "FROZEN_OWNER_PROMPT_FIRST_KNOWN_PRODUCT_QUOTE_WITH_MEDIA_TOOLS_SELECT_GENERIC",
+  "genericAssetsOnFreshControlCapture": 2,
+  "cases": [
+    {
+      "caseId": "opening-ad",
+      "terminal": "SEND_ELIGIBLE",
+      "actualImageCount": 2,
+      "proposedMediaSelections": 1,
+      "genericMatchAvailableInActualOwnerRequest": true,
+      "captureTextRestoredByHash": false
+    },
+    {
+      "caseId": "opening-organic",
+      "terminal": "SEND_ELIGIBLE",
+      "actualImageCount": 0,
+      "proposedMediaSelections": 0,
+      "genericMatchAvailableInActualOwnerRequest": true,
+      "captureTextRestoredByHash": false
+    },
+    {
+      "caseId": "opening-multipart",
+      "terminal": "SEND_ELIGIBLE",
+      "actualImageCount": 0,
+      "proposedMediaSelections": 0,
+      "genericMatchAvailableInActualOwnerRequest": true,
+      "captureTextRestoredByHash": true
+    }
+  ],
+  "notes": [
+    "Hints do not authorize delivery. Offline capture replay is not an exact native readback.",
+    "Missing calls/attachments are business-workflow omissions, not evidence of semantic-verifier failure.",
+    "Public analytics redaction of opening-multipart was restored using exact terminal/capture hash, not a rewritten reply."
+  ]
+}

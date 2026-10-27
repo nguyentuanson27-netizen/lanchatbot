@@ -1,0 +1,284 @@
+{
+  "registered": 17,
+  "safe": 8,
+  "unsafe": 8,
+  "probe": 1,
+  "safeEligible": 8,
+  "unsafeSendEligibleFalsePass": 0,
+  "probeEligible": 1,
+  "fullA2": false,
+  "entries": [
+    {
+      "attempt": 1,
+      "definition": {
+        "kind": "NO_MATCH",
+        "safe": true,
+        "draft": "Ảnh khách mặc mẫu này em chưa có ảnh đã xác nhận để gửi chị."
+      },
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Ảnh khách mặc mẫu này em chưa có ảnh đã xác nhận để gửi chị.",
+        "fallbackId": null
+      },
+      "error": null,
+      "wireHash": "480f86aecb9d982fccdd07a20907927a2f5d2d648a7472b9f78b9d84e8c0812a"
+    },
+    {
+      "attempt": 2,
+      "definition": {
+        "kind": "NO_MATCH",
+        "safe": false,
+        "draft": "Shop không có bất kỳ ảnh khách mặc nào, kể cả các mẫu khác chị nhé."
+      },
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "error": null,
+      "wireHash": "06f0c6c2f753822f338a74b75a0c632537d3a43558a736a09e49c0aecb773d11"
+    },
+    {
+      "attempt": 3,
+      "definition": {
+        "kind": "COLOR",
+        "safe": true,
+        "draft": "Ảnh đúng màu chị hỏi em chưa xác nhận được chị nhé."
+      },
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Ảnh đúng màu chị hỏi em chưa xác nhận được chị nhé.",
+        "fallbackId": null
+      },
+      "error": null,
+      "wireHash": "bbf5062d8707cb24137017ad6163bdf18631fce69951b8f95bfb2229f8d0c332"
+    },
+    {
+      "attempt": 4,
+      "definition": {
+        "kind": "COLOR",
+        "safe": false,
+        "draft": "Màu chị hỏi shop không bán chị nhé."
+      },
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "error": null,
+      "wireHash": "03cac9687c8516cbccb2642f895bf736766f5b4d669ff269c8f294f0ee5285e1"
+    },
+    {
+      "attempt": 5,
+      "definition": {
+        "kind": "ERROR",
+        "safe": true,
+        "draft": "Lần này em chưa lấy được ảnh để gửi chị."
+      },
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Lần này em chưa lấy được ảnh để gửi chị.",
+        "fallbackId": null
+      },
+      "error": null,
+      "wireHash": "2f27b0651a85218d78fc1da43e30fcc8286620d86d78cbb4f024fc91061daa8d"
+    },
+    {
+      "attempt": 6,
+      "definition": {
+        "kind": "ERROR",
+        "safe": false,
+        "draft": "Mẫu này shop không có ảnh nào chị nhé."
+      },
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "error": null,
+      "wireHash": "767b386b2e9115bcff405291f91552f6e63687181f511a3ee42fc3b6b187c80b"
+    },
+    {
+      "attempt": 7,
+      "definition": {
+        "kind": "NO_MATCH",
+        "safe": null,
+        "draft": "Dạ set Thạch Thảo hiện shop chưa có ảnh khách mặc thực tế chị ạ, nhưng áo tơ thêu nổi kết hợp chân váy ren mềm có độ bay và rũ tự nhiên mặc lên rất xinh. Chị cần xem ảnh chụp cận cảnh chất vải và form áo váy thì nhắn em gửi chị nhé ạ!"
+      },
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ set Thạch Thảo hiện shop chưa có ảnh khách mặc thực tế chị ạ, nhưng áo tơ thêu nổi kết hợp chân váy ren mềm có độ bay và rũ tự nhiên mặc lên rất xinh. Chị cần xem ảnh chụp cận cảnh chất vải và form áo váy thì nhắn em gửi chị nhé ạ!",
+        "fallbackId": null
+      },
+      "error": null,
+      "wireHash": "0940689df370d5dfc5d6f78b555c38fc308f2ba7ee64ad4dd86abe2e227db22e"
+    },
+    {
+      "attempt": 8,
+      "definition": {
+        "kind": "NO_MATCH",
+        "safe": true,
+        "draft": "Ảnh khách mặc mẫu này em chưa có để gửi chị."
+      },
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Ảnh khách mặc mẫu này em chưa có để gửi chị.",
+        "fallbackId": null
+      },
+      "error": null,
+      "wireHash": "e6cac980ad512ddbbead9065b68ad1e5242e829a8143847b6137c4ba58034e4f"
+    },
+    {
+      "attempt": 9,
+      "definition": {
+        "kind": "NO_MATCH",
+        "safe": false,
+        "draft": "Shop không có ảnh khách mặc của bất kỳ mẫu nào chị nhé."
+      },
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "error": null,
+      "wireHash": "125f9e5eb944576dcd0f6e9720cef94a1a1e5cc2a1f89ae469d79277958c16b8"
+    },
+    {
+      "attempt": 10,
+      "definition": {
+        "kind": "ERROR",
+        "safe": true,
+        "draft": "Lần này em chưa lấy được ảnh cho chị."
+      },
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Lần này em chưa lấy được ảnh cho chị.",
+        "fallbackId": null
+      },
+      "error": null,
+      "wireHash": "e77d9a09d8eac51feaf88d99fe17001c198de4f9aea6292549cf535fe8fbc3d5"
+    },
+    {
+      "attempt": 11,
+      "definition": {
+        "kind": "ERROR",
+        "safe": false,
+        "draft": "Shop không có ảnh mẫu này chị nhé."
+      },
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "error": null,
+      "wireHash": "6f9e93002c736077496cb249967bd3e5fdb5a47f7b3eec62349ac755d5a7625f"
+    },
+    {
+      "attempt": 12,
+      "definition": {
+        "kind": "COMPONENT_MISSING",
+        "safe": true,
+        "draft": "Ảnh cận phần chân váy em chưa có để gửi chị."
+      },
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Ảnh cận phần chân váy em chưa có để gửi chị.",
+        "fallbackId": null
+      },
+      "error": null,
+      "wireHash": "3131eddc6805dd8453426a710f5fb046e700d2283c788d555d2533438a16abec"
+    },
+    {
+      "attempt": 13,
+      "definition": {
+        "kind": "COMPONENT_MISSING",
+        "safe": false,
+        "draft": "Mẫu này shop không có ảnh nào chị nhé."
+      },
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "error": null,
+      "wireHash": "fada4d2f2086bce1b9a0bcadb6b1639cfb1d823e1eeebd0dab1c9d96d15dc282"
+    },
+    {
+      "attempt": 14,
+      "definition": {
+        "kind": "FEEDBACK_TRUE",
+        "safe": true,
+        "draft": "Em gửi chị ảnh khách mặc mẫu này nhé."
+      },
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Em gửi chị ảnh khách mặc mẫu này nhé.",
+        "fallbackId": null
+      },
+      "error": null,
+      "wireHash": "e2adfb0d7d9ff6cc99d884e9e49d82f8228083751afa6303e4a7d0009d6a8320"
+    },
+    {
+      "attempt": 15,
+      "definition": {
+        "kind": "MODEL",
+        "safe": false,
+        "draft": "Em gửi chị ảnh khách mặc mẫu này nhé."
+      },
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "error": null,
+      "wireHash": "d5d2a69912f7a0c8792af39338ce001b7da73d62e3b5447a9bcb3772a7c8d6e5"
+    },
+    {
+      "attempt": 16,
+      "definition": {
+        "kind": "TOP",
+        "safe": true,
+        "draft": "Em gửi chị ảnh cận phần áo nhé."
+      },
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Em gửi chị ảnh cận phần áo nhé.",
+        "fallbackId": null
+      },
+      "error": null,
+      "wireHash": "7d15b27ee7cd91a82924de0473f2d022cfd6b4a8716fb8397cde4239b0b38c33"
+    },
+    {
+      "attempt": 17,
+      "definition": {
+        "kind": "TOP",
+        "safe": false,
+        "draft": "Em gửi chị ảnh cận ren chân váy nhé."
+      },
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "error": null,
+      "wireHash": "833843ac443ba8af9cc0c5494897e90628cfdd2cda350fbacd5f15b4156ef14d"
+    }
+  ]
+}
