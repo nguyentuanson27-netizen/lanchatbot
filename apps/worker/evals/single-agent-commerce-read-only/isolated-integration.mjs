@@ -26,6 +26,7 @@ import {createCommerceTools} from '../../dist/single-agent-commerce.js';
 import {createReadOnlyTools} from '../../dist/single-agent-commerce-read-only-tools.js';
 import {evaluateRealtimeSalesCycle} from '../../dist/realtime-sales-cycle.js';
 import {fixtureProfile,fixtureProduct,fixturePolicy,fixtureSizeInput,fixtureCartLine} from '../../dist/single-agent-commerce.test-support.js';
+import {validateToolWorkAccounting} from './protocol.mjs';
 import {statefulPreflight,createStatefulProvider} from './stateful-provider.mjs';
 import {isolatedHandoffRecords,handoffContentHash} from './candidate-handoff.mjs';
 import {publicCapturedAttachments,publicCapturedTextHashes} from './delivery-capture.mjs';
@@ -420,12 +421,13 @@ try{
    assert(batch&&batch.conversationHash===customerHash,'CURRENT_BATCH');
    let owners=0,verifiers=0,faultInjected=false;const toolResponses=[];
    const result=await runPersistedCommerceIngress({batch,fence:batch.generation,scope:bound,store:runtime,inbox,history:historyStore,transaction:async fn=>{await beforeCommit();try{const value=await withTransaction(pool,async client=>{const applied=await fn(client);if(rollbackCommitReply&&!faultInjected){faultInjected=true;throw Error('CONTROLLED_ROLLBACK_REPLY_LOST');}return applied;});if(loseCommitReply&&!faultInjected){faultInjected=true;throw Error('CONTROLLED_COMMIT_REPLY_LOST');}return value;}catch(error){report.composedCommitDiagnostic=/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name;save();throw error;}},
-    read,facts,policy,resolveTagId:()=> 'synthetic-tag',clock:()=>new Date(),
+    ...(live&&providerFreeze.m.quoteTask?{quoteTask:providerFreeze.m.quoteTask}:{}),read,facts,policy,resolveTagId:()=> 'synthetic-tag',clock:()=>new Date(),
     ...(live?{handoffReply:{approvedHoldingHashes:providerFreeze.m.handoffReply.approvedHoldingHashes}}:deferredHandoff?{handoffReply:{approvedHoldingHashes:[commerceHash(dependencyHoldingReply)]}}:{}),
     ownerPrompt:live?providerPorts.ownerPrompt:'Synthetic owner transport, never a provider run.',verifierPrompt:live?providerPorts.verifierPrompt:'Synthetic verifier transport.',
     owner:async request=>{owners++;inspect(request);toolResponses.push(...request.contents.flatMap(c=>c.parts.flatMap(p=>p.functionResponse?[p.functionResponse]:[])));if(live)return providerPorts.owner(request);
       const next=outputs.shift();if(!next)throw new Error('CONTROLLED_GENERATION_FAILURE');return typeof next==='function'?next(request):next;},
     verifier:async request=>{verifiers++;const v=live?await providerPorts.verifier(request):{result:{verdict,violations:[]}};await afterVerify();return v;}});
+   validateToolWorkAccounting(result);
    return {result,owners,verifiers,batch,toolResponses,inboundMessages};
   }
   const state=async()=>(await runtime.loadOrCreateSalesCycle(pageId,bound.conversationId,()=>{throw new Error('STATE_REQUIRED');})).state;

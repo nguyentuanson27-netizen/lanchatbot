@@ -1,4 +1,5 @@
 import {createMediaCapabilityCache} from "./single-agent-commerce-media-capabilities.js";
+import {withExplicitQuoteTask,validateQuoteTask,type ExplicitQuoteTask} from "./single-agent-commerce-quote.js";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
 import { createCustomerStateTools } from "./single-agent-commerce-state.js";
 import { createCommerceEffectTools } from "./single-agent-commerce-effects.js";
@@ -31,6 +32,7 @@ function requiredReadHandoffReason(call: CommerceToolCall, result: CommerceToolR
 
 /** Candidate composition only. The caller supplies existing scoped ports; no live entrypoint or writer is created here. */
 export async function createCommerceTools(input: {
+  quoteTask?: ExplicitQuoteTask;
   read: Parameters<typeof createReadOnlyTools>[0];
   state?: Omit<Parameters<typeof createCustomerStateTools>[0], "base" | "scope" | "clock">;
   effects?: Omit<Parameters<typeof createCommerceEffectTools>[0], "base" | "scope" | "clock"> &
@@ -91,6 +93,8 @@ export async function createCommerceTools(input: {
     availableTools.push("select_product_media","view_product_media");
   }
   const composed = tools;
+  let primitiveDispatches=0;
+  const countDispatch=(calls:CommerceToolCall[])=>{primitiveDispatches+=calls.filter(c=>c.name!=="request_handoff").length;};
   let missingInformationAttempted=false, missingInformationUnproved=false;
   async function handoffRequiredRead(calls: CommerceToolCall[], results: CommerceToolResult[]) {
     if (!input.handoff || missingInformationAttempted) return;
@@ -102,8 +106,8 @@ export async function createCommerceTools(input: {
       missingInformationUnproved=outcome.status!=="OK";
     } catch { missingInformationUnproved=true; }
   }
-  return { ...composed, ...(hints?{mediaCapabilities:()=>hints.get(composed.snapshot()),mediaCapabilityDiagnostics:()=>hints.takeDiagnostics()}:{}), prepare: () => readTools.prepare(), availableTools, invoke: call => missingInformationUnproved
-    ? Promise.resolve({status:"REJECTED",reason:"SHOP_INFORMATION_HANDOFF_UNPROVED"}) : availableTools.includes(call.name) ? composed.invoke(call)
+  const guarded:CommerceTools = { ...composed, ...(input.quoteTask?{primitiveToolInvocations:()=>primitiveDispatches}:{}), ...(hints?{mediaCapabilities:()=>hints.get(composed.snapshot()),mediaCapabilityDiagnostics:()=>hints.takeDiagnostics()}:{}), prepare: () => readTools.prepare(), availableTools, invoke: call => missingInformationUnproved
+    ? Promise.resolve({status:"REJECTED",reason:"SHOP_INFORMATION_HANDOFF_UNPROVED"}) : availableTools.includes(call.name) ? (countDispatch([call]),composed.invoke(call))
     .then(async result=>{await handoffRequiredRead([call],[result]);return result;})
     : Promise.resolve({ status: "REJECTED", reason: "CAPABILITY_UNAVAILABLE" }),
     ...(input.handoff?{async terminalOutcome(){
@@ -112,9 +116,12 @@ export async function createCommerceTools(input: {
     }}:{}),
     async invokeBatch(calls) {
       if(missingInformationUnproved)return calls.map(()=>({status:"REJECTED",reason:"SHOP_INFORMATION_HANDOFF_UNPROVED"}));
-      const allowed = calls.filter(c => availableTools.includes(c.name)), results = await composed.invokeBatch(allowed);
+      const allowed = calls.filter(c => availableTools.includes(c.name));countDispatch(allowed);
+      const results = await composed.invokeBatch(allowed);
       await handoffRequiredRead(allowed,results);
       return calls.map(c => availableTools.includes(c.name) ? results[allowed.indexOf(c)]!
         : { status: "REJECTED", reason: "CAPABILITY_UNAVAILABLE" });
     } };
+  if(input.quoteTask!==undefined){validateQuoteTask(input.quoteTask);return withExplicitQuoteTask(guarded,scope,input.read.entry?.firstContact??null);}
+  return guarded;
 }

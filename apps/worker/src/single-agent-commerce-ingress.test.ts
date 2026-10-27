@@ -46,7 +46,7 @@ function fixture(productIds = ["SM613"]) {
   const history = {recordInboundCustomerMessage: vi.fn(async (_input:unknown) => ({messagePk:"90000000-0000-4000-8000-000000000001"})), listConversationHistory: vi.fn(async () => [] as unknown[])};
   let readOverride: Parameters<typeof runPersistedCommerceIngress>[0]["read"] | undefined;
   const run = (owner: Parameters<typeof runPersistedCommerceIngress>[0]["owner"] = async () => ({ kind: "FINAL", text: "Dạ chị." }),
-    handoffReply?: Parameters<typeof runPersistedCommerceIngress>[0]["handoffReply"]) => runPersistedCommerceIngress({
+    handoffReply?: Parameters<typeof runPersistedCommerceIngress>[0]["handoffReply"],quoteTask?:Parameters<typeof runPersistedCommerceIngress>[0]["quoteTask"]) => runPersistedCommerceIngress({
     batch, fence: 1, scope, store, inbox,
     history, transaction: async (work: (client: never) => Promise<unknown>) => { await beforeTransaction(); return work({} as never); },
     facts: { ready: async () => true, resolve: async () => {}, close: async () => {}, resolveCartSelection: select }, policy,
@@ -54,6 +54,7 @@ function fixture(productIds = ["SM613"]) {
       readProduct: catalogRead, searchText: async () => ({ status: "NOT_FOUND" }) } },
     resolveTagId: () => tagId, clock: () => commerceNow, ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm tra.", owner, verifier,
     ...(handoffReply?{handoffReply}:{}),
+    ...(quoteTask?{quoteTask}:{}),
   } as unknown as Parameters<typeof runPersistedCommerceIngress>[0]);
   return { run, store, inbox, commit, verifier, select, profileWrite, policy, message, products, catalogRead, history, setRead: (read: typeof readOverride) => { readOverride = read; }, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
     setCycle: (state: typeof cycle) => { cycle = state; }, cycle: () => cycle, batch,
@@ -977,4 +978,18 @@ it.each(["ad", "explicit", "missing-ad"])("composes ingress with the real scoped
     expect(result.terminal.text).toBe(draft);
     expect(f.verifier).toHaveBeenCalledTimes(1);
   }
+});
+
+
+it.each(["unchanged","revision","media"])("explicit quote uses the real group egress before committing: %s",async mode=>{
+ const {EXPLICIT_QUOTE_TASK}=await import("./single-agent-commerce-quote.js");
+ const f=fixture(),p=f.products[0]!.product;f.message.text="SM613 bao nhiêu em?";
+ p.images=[{url:"https://content.pancake.vn/front.jpg",role:"PRIMARY",angle:"FRONT",imageType:"MODEL",intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
+ let n=0;f.verifier.mockImplementation(async()=>{if(mode==="revision")f.changeRevision();if(mode==="media")p.images=[];return {result:{verdict:"PASS",violations:[]}};});
+ const call={name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"]}};
+ const result=await f.run(async()=>++n===1?{kind:"TOOLS",calls:[call],content:{role:"model",parts:[{functionCall:call}]}}:{kind:"FINAL",text:"Áo 499.000đ chị nhé."},undefined,EXPLICIT_QUOTE_TASK);
+ const messages=f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[]);
+ if(mode==="unchanged"){expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(messages).toEqual([{kind:"TEXT",text:"Áo 499.000đ chị nhé."},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);}
+ else{expect(result.terminal.disposition).toBe("NO_SEND");expect(messages).toEqual([]);}
+ expect(f.verifier).toHaveBeenCalledOnce();
 });

@@ -55,6 +55,7 @@ if phase == 'controls':
         'cohorts': [{'name': n, 'flags': f, 'slots': s, 'phase': p} for n, f, s, p in cohorts],
         'hashes': {n: hashlib.sha256((base / n).read_bytes()).hexdigest() for n in names},
         'driverSha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+    if 'quoteTask' in manifest: registration['quoteTask'] = manifest['quoteTask']
     (out / 'REGISTRATION.json').write_text(json.dumps(registration, indent=2), encoding='utf-8')
     status = {'sourceSha': source, 'status': 'REGISTERED', 'completedCohorts': [],
               'nativeNotRun': [n for n, _, _, _ in cohorts]}

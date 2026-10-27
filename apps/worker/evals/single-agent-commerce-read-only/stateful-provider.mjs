@@ -6,7 +6,7 @@ import {ProductSearchService,QdrantStableCatalogSearchAdapter} from '@lana/busin
 import {RedisBusinessFactsReader} from '../../dist/redis-business-facts.js';
 import {VertexShadowModel} from '../../dist/vertex.js';
 import {createCommerceReadSources} from '../../dist/single-agent-commerce-read-only-sources.js';
-import {createGeminiCommerceInference,buildGeminiCommerceRequest,readOnlyDeclarations,stateDeclarations,effectDeclarations,handoffDeclarations,mediaDeclarations,OWNER_IMAGE_BOUNDS} from './gemini-inference.mjs';
+import {createGeminiCommerceInference,buildGeminiCommerceRequest,readOnlyDeclarations,stateDeclarations,effectDeclarations,handoffDeclarations,mediaDeclarations,quoteDeclarations,OWNER_IMAGE_BOUNDS} from './gemini-inference.mjs';
 import {createCommerceVerifier,buildVerifierRequest,validateProtocol,requiredSourceConfig,sha256} from './protocol.mjs';
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
 import {ASSUMPTION,assumedFeedback} from './assumed-feedback.mjs';
@@ -14,6 +14,9 @@ import {candidateDescription,candidateSearchResult} from './candidate-descriptio
 import {nativePresentation,withNativePresentation} from './native-presentation.mjs';
 import {registerOpeningQuotes,registerJourneyOpenings,registerNegotiationProbe,selectStatefulThrough,registerMediaProbe,registerMediaFollowup,registerMissingPos} from './sales-journeys-registration.mjs';
 
+export function statefulToolSchemaHash(m,quoteSchema=quoteDeclarations){
+ return sha256(JSON.stringify([...readOnlyDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations,...mediaDeclarations,...(m.quoteTask?quoteSchema:[])]));
+}
 export function scopedProviderFacts(facts,mode,counters){
  assert(['LIVE','POS_UNAVAILABLE'].includes(mode),'SOURCE_MODE');
  if(mode==='LIVE')return facts;
@@ -49,8 +52,9 @@ export function statefulPreflight(root){
  const credential=JSON.parse(readFileSync(process.env.C3_VERTEX_CREDENTIAL_FILE,'utf8'));assert.equal(credential.type,'service_account');assert.equal(credential.project_id,config.vertex.projectId);
  return {m,config,cases,registration:{sourceSha:head,mode:'PROVIDER_REAL_POSTGRES_LIVE_PUBLIC_CATALOG_CURRENT_CAPTURED_POLICY_CAPTURE_DELIVERY',
   ...(ownerContextPresentation?{ownerContextPresentation}:{}),
-  models:m.models,promptHashes:m.promptHashes,schemaHash:m.schemaHash,requestBounds:m.requestBounds,toolSchemaHash:sha256(JSON.stringify([...readOnlyDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations,...mediaDeclarations])),
+  models:m.models,promptHashes:m.promptHashes,schemaHash:m.schemaHash,requestBounds:m.requestBounds,toolSchemaHash:statefulToolSchemaHash(m),
   toolBudget:{normalRounds:m.toolRounds,normalCalls:m.toolCalls,terminalHandoffAttempts:m.terminalHandoffAttempts,maximumExecutedToolInvocations:m.maximumExecutedToolInvocations},
+  ...(m.quoteTask?{quoteTask:m.quoteTask}:{}),
   handoffReply:{...m.handoffReply,rendererSourceSha256:sha256(readFileSync(new URL('../../src/single-agent-commerce-read-only-tools.ts',import.meta.url)))},
   assumedFeedback:assumeFeedback?{...ASSUMPTION,sourceHash:sha256(readFileSync(new URL('./assumed-feedback.mjs',import.meta.url)))}:null,
   fallbackCatalog:{default:m.fallback,recovery:m.recoveryFallbacks,mediaUnavailable:m.recoveryFallbacks.find(f=>f.id==='C3_B_MEDIA_UNAVAILABLE_V1')},

@@ -11,6 +11,7 @@ export interface CommerceTurnTime { processingAt: string; timeZone: "Asia/Ho_Chi
 export type OwnerGeneration = { kind: "FINAL"; text: string; telemetry?: unknown } |
   { kind: "TOOLS"; calls: CommerceToolCall[]; content: NativeContent; telemetry?: unknown };
 export interface OwnerRequest { generationId: string; instructions: string; contents: NativeContent[]; context: TrustedContext; toolsAllowed: boolean;
+  toolWorkAccounting?: "PRIMITIVE_WORK_V2";
   terminalHandoffAllowed?: boolean;
   pendingHandoff?: { reason: string };
   historyMetadata?: import("./single-agent-commerce-public-history.js").CommerceHistoryMetadata;
@@ -26,6 +27,10 @@ export interface VerifierRequest { generationId: string; instructions: string; f
   latest: string; history: { role: "customer" | "shop"; text: string }[]; binding: VerifierBinding; signal: AbortSignal }
 export interface VerifierGeneration { result: unknown; telemetry?: unknown }
 export interface CommerceTools {
+  /** Admitted primitive dispatches, excluding preparation and terminal handoff. */
+  primitiveToolInvocations?():number;
+  toolWorkAccounting?: "PRIMITIVE_WORK_V2";
+  quoteTaskWork?(): readonly import("./single-agent-commerce-quote.js").QuoteTaskWork[];
   handoffSources?(): import("@lana/contracts").CommerceHandoffSourceCheckV1[] | null;
   boundedPrice?(): { text: string; claims: import("@lana/contracts").ProtectedClaimV1[] } | null;
   sealHandoffReply?(text: string, trusted: TrustedContext, images: readonly import("./single-agent-commerce-media-delivery.js").MediaDeliveryImage[]): string;
@@ -62,7 +67,7 @@ function resultBudgetView(calls: CommerceToolCall[], results: CommerceToolResult
     const data = result.data;
     if (calls[i]?.name === "search_products" && Array.isArray(data.products))
       return {...result, data:{...data, products:data.products.map(product)}};
-    if (calls[i]?.name === "read_product") {
+    if (["read_product","quote_product"].includes(calls[i]?.name??"")) {
       const availability = record(data.availability) ? data.availability : {};
       if (["price", "stock"].some(k => record(availability[k]) && availability[k].status !== "OK")) return result;
       return {...result, data:product(data)};
@@ -90,6 +95,8 @@ export async function runCommerceTurn(input: {
   const gateFallback = () => {const value=selectedFallback();return {id:value.fallbackId??"",text:value.text??""};};
   const turnTime: Readonly<CommerceTurnTime> = Object.freeze({ processingAt: input.clock().toISOString(), timeZone: "Asia/Ho_Chi_Minh" });
   let ownerGenerations = 0, verifierGenerations = 0, toolRounds = 0, toolCalls = 0;
+  let executedNormalToolInvocations=0,quoteAttempted=false;
+  const primitiveAccounting=input.tools.toolWorkAccounting==="PRIMITIVE_WORK_V2";
   let terminalHandoffCalls = 0, proposedToolCalls = 0, rejectedToolCalls = 0;
   let toolLatencyMs = 0, verificationStarted: number | undefined;
   const generations: { id: string; role: "owner" | "verifier"; status: string; latencyMs: number; telemetry?: unknown }[] = [];
@@ -108,7 +115,10 @@ export async function runCommerceTurn(input: {
     }
     const handoff = input.tools.handoffStatus?.();
     terminalHandoffCalls = Math.max(terminalHandoffCalls, handoff?.attempts ?? 0);
+    const quoteTaskWork=input.tools.quoteTaskWork?.()??[];
     return { terminal, recovery, sendEnabled: false as const, ownerGenerations, verifierGenerations, toolRounds,
+      ...(primitiveAccounting?{toolWorkAccounting:"PRIMITIVE_WORK_V2" as const,quoteTaskWork,executedNormalToolInvocations:executedNormalToolInvocations+(input.tools.primitiveToolInvocations?.()??0),
+        executedToolInvocations:executedNormalToolInvocations+(input.tools.primitiveToolInvocations?.()??0)+terminalHandoffCalls}:{}),
       normalToolCalls: toolCalls, terminalHandoffCalls, toolCalls: toolCalls + terminalHandoffCalls,
       proposedToolCalls, rejectedToolCalls, handoff: handoff ?? null, generations,
       toolLatencyMs, verificationLatencyMs: verificationStarted === undefined ? null : performance.now()-verificationStarted };
@@ -149,9 +159,11 @@ export async function runCommerceTurn(input: {
     return finish({ disposition: "NO_SEND", reason: "PERMISSION_OR_PRIVACY", text: null, fallbackId: null });
   }
   const preparationStarted = performance.now();
+  if(primitiveAccounting&&!input.tools.primitiveToolInvocations)return finish({disposition:"NO_SEND",reason:"TOOL_ACCOUNTING_UNAVAILABLE",text:null,fallbackId:null});
   try { toolCalls += await input.tools.prepare?.() ?? 0; }
   catch { return finish(fallback("PREPARATION_UNAVAILABLE")); }
   toolLatencyMs += performance.now() - preparationStarted;
+  executedNormalToolInvocations=toolCalls;
   for (let index = 0; index < 3; index++) {
     const context = input.tools.snapshot();
     if (!context.state.permission || context.state.conversationOwner !== "BOT" || !context.state.privacyAllowed) {
@@ -161,6 +173,7 @@ export async function runCommerceTurn(input: {
     const handoff = input.tools.handoffStatus?.(), pendingHandoff = handoff?.status === "PREPARED" ? {reason:handoff.reason} : undefined;
     const terminalHandoffAllowed = !handoff && terminalHandoffCalls === 0 && input.tools.availableTools?.includes("request_handoff") === true;
     const request = { generationId: id, instructions: input.ownerPrompt, contents: structuredClone(contents), context, turnTime,
+      ...(primitiveAccounting?{toolWorkAccounting:"PRIMITIVE_WORK_V2" as const}:{}),
       terminalHandoffAllowed, ...(pendingHandoff ? {pendingHandoff} : {}),
       ...(input.historyMetadata?.publicCartEvents.length?{historyMetadata:structuredClone(input.historyMetadata)}:{}),
       ...(input.tools.catalogImages?{catalogImages:input.tools.catalogImages()}:{}),
@@ -177,6 +190,11 @@ export async function runCommerceTurn(input: {
     if (output.kind === "TOOLS") {
       if(!Array.isArray(output.calls)||output.calls.some(c=>!c||typeof c.name!=="string"))return finish(fallback("MALFORMED"));
       proposedToolCalls += output.calls.length;
+      const quoteCalls=output.calls.filter(c=>c.name==="quote_product");
+      if(quoteCalls.length&&(output.calls.length!==1||quoteAttempted)){
+        rejectedToolCalls+=output.calls.length;return finish(fallback("OWNER_TOOL_MODE"));
+      }
+      const units=primitiveAccounting&&quoteCalls.length?2:output.calls.length;
       const handoffCalls = output.calls.filter(c => c.name === "request_handoff");
       const terminalCall = handoffCalls.length === 1 && output.calls.length === 1;
       if (handoffCalls.length && (!terminalCall || (!terminalHandoffAllowed && (!request.toolsAllowed || input.tools.availableTools !== undefined)))) {
@@ -190,10 +208,11 @@ export async function runCommerceTurn(input: {
         rejectedToolCalls += output.calls.length;
         return finish(fallback("OWNER_TOOL_MODE"));
       }
-      if (!output.calls.length || (!terminalCall && (toolRounds >= 2 || toolCalls + output.calls.length > 6))) {
+      if (!output.calls.length || (!terminalCall && (toolRounds >= 2 || toolCalls + units > 6))) {
         rejectedToolCalls += output.calls.length;return finish(fallback("BUDGET"));
       }
-      if (terminalCall) terminalHandoffCalls++; else {toolRounds++; toolCalls += output.calls.length;}
+      if(quoteCalls.length)quoteAttempted=true;
+      if (terminalCall) terminalHandoffCalls++; else {toolRounds++; toolCalls += units;}
       const toolStarted = performance.now();
       const results = await input.tools.invokeBatch(output.calls).catch(() => output.calls.map(() => ({ status: "UNAVAILABLE" as const, reason: "TOOL_ERROR" })));
       rejectedToolCalls += results.filter(result=>result.status==="REJECTED").length;

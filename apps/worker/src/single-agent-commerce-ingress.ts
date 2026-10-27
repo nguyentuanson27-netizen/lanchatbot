@@ -103,6 +103,7 @@ export async function runPersistedCommerceIngress(input: {
   resolveTagId: Parameters<typeof createPersistedCommerceExecutor>[0]["resolveTagId"];
   clock: () => Date; ownerPrompt: string; verifierPrompt: string;
   media?: Parameters<typeof createCommerceTools>[0]["media"];
+  quoteTask?: Parameters<typeof createCommerceTools>[0]["quoteTask"];
   handoffReply?: { approvedHoldingHashes: readonly string[] };
   owner: Parameters<typeof runCommerceTurn>[0]["owner"]; verifier: Parameters<typeof runCommerceTurn>[0]["verifier"];
 }) {
@@ -214,7 +215,7 @@ export async function runPersistedCommerceIngress(input: {
   const projectedHistory=projectCommerceHistoryMetadata(commerceHistory(rows),recentCartEvents);
   const historyMetadata=projectedHistory.metadata;
   const history=commerceHistory(rows,recentMedia,historyMetadata.publicCartEvents.length?Buffer.byteLength(JSON.stringify(historyMetadata)):0);
-  const tools: CommerceTools = await createCommerceTools({ read: { ...scopedRead, scope, clock: input.clock,
+  const tools: CommerceTools = await createCommerceTools({ ...(input.quoteTask?{quoteTask:input.quoteTask}:{}), read: { ...scopedRead, scope, clock: input.clock,
     entry: {firstContact: rows.length > 0 || recentMedia.length > 0 || recentCartEvents.length > 0 ? false : mediaHistoryUnavailable || publicHistoryUnavailable ? null : true, fromAd: ads.length > 0} }, state: { store: profilePort,
     sourceMessages,
     sizeInput: async ref => { const { product } = await input.read.catalog.readProduct(ref, false);
