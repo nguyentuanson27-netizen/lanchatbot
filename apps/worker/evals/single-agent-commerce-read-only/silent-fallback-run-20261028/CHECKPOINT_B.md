@@ -63,7 +63,8 @@ Các hạn chế nhẹ vẫn được chấp nhận: tư vấn concern nhiều t
 4. Cùng launcher, phase `native`: exit0, readiness và tám cohort preflight/run, đủ 51 outcomes. [20 exact child commands](COMMANDS.json) COMPLETE/exit0, không hidden retry.
 5. External `node .../c3-b-silent-fallback-model-20261028-auth-refresh/ANALYZE.mjs` và `python .../COMPARE.py`: exit0, offline audit/export/comparison, không generation.
 6. `node apps/worker/evals/single-agent-commerce-read-only/feedback-native-gates.mjs --job <external cohort directory>` cho sáu persisted cohorts: 6/6 exit0, CAPTURE_JOB_PASS. [Results](CAPTURE_JOB_VALIDATION.json).
-7. Offline assertions về 51 unique IDs, 30 VALID, 9 silent handoffs, ba opening targets/sáu ảnh, prompt hashes và source/dist giữ nguyên: PASS. [Raw inventory](RAW_SHA256.json).
+7. Staged `git diff --cached --check` ban đầu báo trailing whitespace trong Markdown export từ exact model text; sửa phần hiển thị bằng cách bỏ khoảng trắng cuối dòng, giữ nguyên exact strings/hashes trong JSON và raw attempts. Không thay kết quả model.
+8. Offline assertions về 51 unique IDs, 30 VALID, 9 silent handoffs, ba opening targets/sáu ảnh, prompt hashes và source/dist giữ nguyên: PASS. [Raw inventory](RAW_SHA256.json).
 
 Unit tests/typecheck/build/lint của implementation có báo cáo riêng; không chạy lại full suites trong task model hoặc dùng test code thay quality review. Full coherent COD/BANK synthetic acceptance sau hai driver fixes cuối vẫn chưa chạy lại; giữ hai run FAIL cũ trong implementation report.
 

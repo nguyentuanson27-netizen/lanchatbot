@@ -1,5 +1,7 @@
 # Full Phase B Compact V2 — actual customer outcomes
 
+Display export trims end-of-line spaces only; exact final strings and hashes remain in ACTUAL_TERMINALS.json and raw attempts.
+
 N1, 51 existing native outcomes. B1 is eligibility only; other cohorts use isolated persisted ingress/capture, never live send. HANDOFF is silent. NO_SEND may include a separately code-owned customer question; read actualMessages. Fixture private values remain redacted.
 
 ## 1. opening-ad (opening-quotes)
@@ -38,7 +40,7 @@ Khách: Set Thạch Thảo SV2447 bao nhiêu vậy shop?
 
 Terminal: SEND_ELIGIBLE / PASS. Actual isolated capture.
 
-Dạ, set váy Thạch Thảo có giá 799.000đ ạ. 
+Dạ, set váy Thạch Thảo có giá 799.000đ ạ.
 
 Thiết kế gồm áo tơ Hàn thêu họa tiết nổi form nhẹ và chân váy ren tơ Hàn mềm có độ bay rũ tự nhiên. Mẫu này hiện có sẵn các size S, M, L, XL chị nhé!
 
@@ -68,7 +70,7 @@ Khách: Set Thạch Thảo SV2447 giá bao nhiêu? Chị mua áo riêng được
 
 Terminal: SEND_ELIGIBLE / PASS. Actual isolated capture.
 
-Dạ, set váy Thạch Thảo giá 799.000đ ạ (gồm áo tơ Hàn thêu nổi form nhẹ và chân váy ren tơ Hàn mềm rũ tự nhiên, đủ size S, M, L, XL). 
+Dạ, set váy Thạch Thảo giá 799.000đ ạ (gồm áo tơ Hàn thêu nổi form nhẹ và chân váy ren tơ Hàn mềm rũ tự nhiên, đủ size S, M, L, XL).
 
 Chị hoàn toàn mua áo riêng được nha chị, áo lẻ giá 499.000đ ạ! Em gửi chị xem mẫu nhé.
 
@@ -214,7 +216,7 @@ Terminal: SEND_ELIGIBLE / PASS. Eligibility only; no delivery capture.
 
 Ngữ cảnh được cấp: [{"role":"customer","text":"Chị định lấy set Thạch Thảo mặc đi đám cưới."},{"role":"shop","text":"Đi đám cưới mặc bộ này đẹp chị ạ."}]
 
-Set Thạch Thảo dùng chất tơ Hàn và ren mềm, có độ bay tự nhiên nên khi ngồi ô tô 3 tiếng có thể sẽ bị hằn nếp gấp nhẹ ở tà váy ạ. 
+Set Thạch Thảo dùng chất tơ Hàn và ren mềm, có độ bay tự nhiên nên khi ngồi ô tô 3 tiếng có thể sẽ bị hằn nếp gấp nhẹ ở tà váy ạ.
 
 Các mẫu thiết kế dự tiệc hiện tại của shop đều ưu tiên chất liệu tơ và ren mang lại cảm giác mềm mại, bay bổng nên không thuộc dòng vải chống nhăn chuyên dụng. Nếu chị muốn tìm mẫu giữ form tốt hơn khi di chuyển, Váy Diệp An với thiết kế 2 lớp đứng form gọn gàng sẽ là lựa chọn phù hợp để mình cân nhắc ạ.
 
@@ -286,7 +288,7 @@ Khách: Chị đã mặc bộ này đi làm một buổi rồi nhưng về thấ
 
 Terminal: SEND_ELIGIBLE / PASS. Eligibility only; no delivery capture.
 
-Dạ chính sách đổi hàng của shop yêu cầu sản phẩm phải còn nguyên tem mác, chưa qua sử dụng và chưa giặt (chỉ hỗ trợ ướm thử bên ngoài). Do mình đã mặc đi làm một buổi rồi nên sản phẩm không đủ điều kiện để đổi sang màu khác ạ. 
+Dạ chính sách đổi hàng của shop yêu cầu sản phẩm phải còn nguyên tem mác, chưa qua sử dụng và chưa giặt (chỉ hỗ trợ ướm thử bên ngoài). Do mình đã mặc đi làm một buổi rồi nên sản phẩm không đủ điều kiện để đổi sang màu khác ạ.
 
 Nếu đổi hàng hợp lệ thì tổng phí vận chuyển 2 chiều là 30.000đ, nhưng trường hợp của chị thì hiện không hỗ trợ đổi được, mong chị thông cảm giúp em nhé ạ!
 
@@ -356,7 +358,7 @@ Khách: Chị hay mặc đồ trơn, ít họa tiết. Set Thạch Thảo nhìn 
 
 Terminal: SEND_ELIGIBLE / PASS. Eligibility only; no delivery capture.
 
-Dạ, set Thạch Thảo mang lại cảm giác nhẹ nhàng và rất hợp đi ăn cưới ban ngày. Dù có áo thêu nổi và chân váy ren, bộ này dùng chất tơ ren mềm với phom nhẹ và độ rũ tự nhiên, nên lên người tạo sự thanh thoát, tinh tế chứ không bị phồng cứng hay điệu đà quá mức. 
+Dạ, set Thạch Thảo mang lại cảm giác nhẹ nhàng và rất hợp đi ăn cưới ban ngày. Dù có áo thêu nổi và chân váy ren, bộ này dùng chất tơ ren mềm với phom nhẹ và độ rũ tự nhiên, nên lên người tạo sự thanh thoát, tinh tế chứ không bị phồng cứng hay điệu đà quá mức.
 
 Chị hay mặc đồ trơn hoàn toàn có thể chọn set này vì nét nữ tính ở đây rất nhã nhặn, vừa đủ sang trọng cho không gian tiệc ngày mà không làm chị thấy lạ lẫm hay quá sến ạ.
 
