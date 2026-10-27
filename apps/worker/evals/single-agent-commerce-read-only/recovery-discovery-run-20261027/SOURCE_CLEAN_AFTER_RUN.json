@@ -1,0 +1,13 @@
+{
+  "sourceSha": "574ef87db95b8109bf39689c30f7c33b9dc0112d",
+  "sourceCleanAfterRun": true,
+  "checkedAtUtc": "2026-10-27T12:53:06.247712+00:00",
+  "completedCommands": 20,
+  "completedCohorts": 8,
+  "nativeOutcomes": 51,
+  "persistedCapture": 30,
+  "eligibilityOnly": 21,
+  "allPersistedQualificationsValid": true,
+  "allNineHandoffsCommittedSilent": true,
+  "providerRequestsAddedByAudit": 0
+}

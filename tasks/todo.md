@@ -1,10 +1,17 @@
-## Current — implementation recovery/discovery, 27/10/2026
+## Current — model qualification recovery/discovery, 27/10/2026
+
+- [x] Seal source574ef87d sạch trước/sau; đúng pinnedCLI/hash/login,17controlsPASS trước51native;N1/retry0,141actualgenerationrequests,0provider/qualificationerrors,6testDBdrop. [Report](../apps/worker/evals/single-agent-commerce-read-only/recovery-discovery-run-20261027/CHECKPOINT_B.md).
+- [x] Đủ51outcomes/wholeturnselfreview:37eligible/9HANDOFF/4NO_SEND/1fallback;30persistedqualifiersVALID/21B1eligibilityonly. Actual141wires/86ownerprompt hashes/34explicitverifier+21B1telemetry matches, no boundedlabel/keyleak. [Hội thoại](../apps/worker/evals/single-agent-commerce-read-only/recovery-discovery-run-20261027/CONVERSATIONS.md).
+- [x] Quan sát được discoverybatch2mẫudướibudget, ETAlookuptrướcreply, negotiationdùngship30k; không quyN1thànhcausal/stabilityproof. Privateintakeowner0/verifier0;9handoffcommitHUMAN/event/tag/0capture đúng,2NO_SENDcheckoutcócodequestion/preview.
+- [ ] CònfallbackSQ223 doowner gộpáo1lớp thànhcảset; discoveryPASS có lời khônglobóbụng khiSIZE_FIT0 cầnreviewnghĩatrên exactdraft/source, khôngclaimnativezero falsePASS. Mediaupstreamchưaxácminh; giọngminorvẫnhạnchế. BchưaGO, khôngautofix/rerun/live/publish/deploy.
+
+## Previous — implementation recovery/discovery, 27/10/2026
 
 - [x] W1 ingressV2 observedRED2→minimumGREEN; rejected/unknown/readback branches; retainedattempt/error/counterUNKNOWN semantics; sharedDBqueue latch/no-drain/NOT_RUN và newcampaignconsumer/driver; diagnostic allowlist. [Record](../docs/specs/c3-phase-b-recovery-discovery-implementation-20261027.md).
 - [x] W2 publicrepresentativefixture→realcomposition/core/projection/mockHTTP feasibility2candidates complete/OKpartial/read-levelerror;MAX4/charged3220–3484B/wiremax36187B. W2/W3 chỉ3instructionregions +tool descriptions, không đổiengine/verifier/budget/corpus.
 - [x] W4 offlinecapture+sourcechainaudit11assets; không mấtfieldđãchứngminh→NO_MEDIA_CODE_PATCH, upstream IMAGE_ID/approval/version hiệnhành UPSTREAM_UNVERIFIED. Không tựgắnnhãn/publish.
 - [x] Final480worker/227Node/3newPython+2historicalPython PASS;directtypecheck/build/lintPASS;PostgreSQLworktree1scenarioPASS/provider0/testDBdroptrue. Cùngreviewer105worker/6Node/3PythonPASS→APPROVE14fileinventory `764302c9713189639be1f91388aa40fa2d83ee81da25fec33222baecebb41cac`, không cònP1/P2.
-- [ ] Providerqualification/modeladherence/quality chưa chạy; B chưaGO. Nguồnảnhcầnrecordauditriêng nếu muốn bổsungevence; không tựrerun/sourcewrite/live/deploy.
+- [x] Freshmodelcampaign đãthựchiện ởtasksauthựcimplementation, xemcurrentreport. Modelquality/fit-scopevànguồnảnhchưađóng; BchưaGO, không tựrerun/sourcewrite/live/deploy.
 
 ## Previous — kế hoạch recovery/discovery sau review năm vòng, 27/10/2026
 

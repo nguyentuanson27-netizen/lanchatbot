@@ -1,0 +1,9 @@
+{
+  "sourceSha": "574ef87db95b8109bf39689c30f7c33b9dc0112d",
+  "defaultEnvironmentClientInspection": "CODEX_CLIENT_VERSION before any registration/generation",
+  "providerRequestsForFailedInspection": 0,
+  "resolution": "Existing isolated APPDATA runtime c3-eval-runtime-01592 scoped to launcher child environment; frozen CLI0.159.2/binary hash/login verified before controls. No model substitution or generation retry.",
+  "sourceWorktreeChanged": false,
+  "command": "python C:/Users/nguye/Documents/Sản phẩm AI/c3-b-recovery-discovery-launch-20261027.py controls; then native after controlsPass=true",
+  "note": "Preflight-only environment correction is separate from registered attempt denominator."
+}
