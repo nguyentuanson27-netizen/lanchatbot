@@ -1,4 +1,10 @@
-## Current — vòng lặp lại full Phase B, 27/10/2026
+## Current — kế hoạch quote completion và audit tư vấn, 27/10/2026
+
+- [x] Viết [plan](../docs/specs/c3-phase-b-quote-completion-advice-plan-20261027.md): corrigendum4media/3controlledPOS; explicit quote operation và completion bounds; exact-wire advisory audit/no-patch mặc định; acceptance và lệnh dự kiến.
+- [x] Cùng reviewer REVISE3P2→revision2fix→APPROVE canonicalLF hash `526ac86377593db4f652c72cb2159c514081a8d4e8b24df6189da14bca77b468`; standalonebatch, explicitprimitivecounting/protocolcompat và resultconsumer chain đã đóng. [Trail](../docs/specs/c3-phase-b-quote-completion-advice-plan-review-20261027.md).
+- [ ] Implementation/provider qualification chưa chạy, chỉ thực hiện trong task tiếp theo; không source writes, live send hoặc BGO từ approval kế hoạch.
+
+## Previous — vòng lặp lại full Phase B, 27/10/2026
 
 - [x] Source4efbea67 sạch/unchanged; same executable/config/prompt/corpus;17controls PASS và51native đủ, N1/retry0,143requests/0generation errors,6DBdrop.
 - [x] Đọc đủ51whole turns;37eligible/10silentHANDOFF/4NO_SEND giữ nguyên. Wire/size/hint/label/accounting audits; public opening-multipart phục hồi bằng captured hash, private data vẫn mask. [Report](../apps/worker/evals/single-agent-commerce-read-only/media-size-context-repeat-run-20261027/CHECKPOINT_B.md).
