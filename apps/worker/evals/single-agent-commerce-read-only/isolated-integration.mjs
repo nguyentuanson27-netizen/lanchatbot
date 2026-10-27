@@ -48,8 +48,8 @@ const report={sourceSha:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encodi
 const save=()=>writeFileSync(resolve(out,'integration.json'),JSON.stringify(report,null,2));
 const check=async(name,fn)=>{if((checkPrefix&&!name.startsWith(checkPrefix))||providerRun||(process.argv.includes('--composed-only')&&!name.startsWith('B composed')) ||
  (process.argv.includes('--handoff-delivery-only')&&!['B composed snapshot invalidation ','B composed dependency holding delivery ','B composed candidate first ',
-  'B composed no-chart preserves','B composed mixed media','B composed N5 ','B composed missing private checkout','B composed configured private dependency'].some(prefix=>name.startsWith(prefix))) ||
- (process.argv.includes('--media-handoff-only')&&!name.startsWith('B composed candidate first')&&!name.startsWith('B composed no-chart preserves')&&!name.startsWith('B composed mixed media')))return;
+  'B composed no-chart fallback','B composed mixed media','B composed N5 ','B composed missing private checkout','B composed configured private dependency'].some(prefix=>name.startsWith(prefix))) ||
+ (process.argv.includes('--media-handoff-only')&&!name.startsWith('B composed candidate first')&&!name.startsWith('B composed no-chart fallback')&&!name.startsWith('B composed mixed media')))return;
  try{await fn();report.cases.push({name,status:'PASS'});save();console.log(name+': PASS');}
  catch(error){report.cases.push({name,status:'FAIL',error:error.message});save();throw error;}};
 const adminUrl=process.env.C3_B_TEST_ADMIN_DATABASE_URL;assert(adminUrl,'C3_B_TEST_ADMIN_DATABASE_URL');
