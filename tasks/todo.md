@@ -1,4 +1,10 @@
-## Current — implementation quote completion và audit tư vấn, 27/10/2026
+## Current — model qualification sau quote completion, 27/10/2026
+
+- [x] Source342ef0cfclean/unchanged,17controlsPASS→51nativeđủN1,141requests/retry0/0errors,6testDBdrop; [report](../apps/worker/evals/single-agent-commerce-read-only/quote-completion-run-20261027/CHECKPOINT_B.md).
+- [x] Baquote_product/6reservedunits/3read+3selection,2ảnhactualmỗiopeningtarget;6cohortschemahashes/counters/wirefirewallPASS,wholeturnreview51. Native37eligible/10HANDOFF/4NO_SEND giữnguyên;actualimages9.
+- [ ] Discovery chưa giải quyết nhu cầu: đọcgiá1.279triệuvượtbudget rồiPRICE_UNAVAILABLEhandoff,0verifier; negotiation/usefulness vẫn hạnchế. BchưaGO, khônggộp3controlledPOSthànhlivedatagap, khôngtựfix/rerun/live/deploy.
+
+## Previous — implementation quote completion và audit tư vấn, 27/10/2026
 
 - [x] P0corrigendum4media/3controlledPOS/1verifier/2businesshandoff; P2audit20exactfinalrequests và22mediaobservations, khôngwiredefect cụthể→khôngcontext/fit/voicepatch. [Audit](../docs/specs/c3-phase-b-quote-completion-corrigendum-audit-20261027.md).
 - [x] P1observedRED→GREEN: explicitquote_product, standalone/strictsubjectofferscolor, canonicalPRICE+media quaexistingtools, silenthandoff, opt-in/legacyB1 và exactfinalgate. Newnative/finalwire/metadata/accounting/protocol/schemahash consumers.

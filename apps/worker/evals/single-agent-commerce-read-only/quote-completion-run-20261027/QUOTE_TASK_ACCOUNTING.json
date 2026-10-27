@@ -1,0 +1,1067 @@
+{
+  "sourceSha": "342ef0cff2888908518872f707ea33ede0f9c290",
+  "quoteTask": {
+    "version": "EXPLICIT_QUOTE_V1",
+    "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+    "normalUnits": 2,
+    "standalone": true,
+    "maxPerTurn": 1
+  },
+  "schemaChecks": [
+    {
+      "cohort": "opening-quotes",
+      "toolSchemaHash": "43e9f0c4f34023852f5c5f0365f10c90800a56f474ea7a0324f287d3865508fa",
+      "status": "MATCH"
+    },
+    {
+      "cohort": "media-followup",
+      "toolSchemaHash": "43e9f0c4f34023852f5c5f0365f10c90800a56f474ea7a0324f287d3865508fa",
+      "status": "MATCH"
+    },
+    {
+      "cohort": "missing-pos",
+      "toolSchemaHash": "43e9f0c4f34023852f5c5f0365f10c90800a56f474ea7a0324f287d3865508fa",
+      "status": "MATCH"
+    },
+    {
+      "cohort": "journey-openings",
+      "toolSchemaHash": "43e9f0c4f34023852f5c5f0365f10c90800a56f474ea7a0324f287d3865508fa",
+      "status": "MATCH"
+    },
+    {
+      "cohort": "stateful",
+      "toolSchemaHash": "43e9f0c4f34023852f5c5f0365f10c90800a56f474ea7a0324f287d3865508fa",
+      "status": "MATCH"
+    },
+    {
+      "cohort": "negotiation",
+      "toolSchemaHash": "43e9f0c4f34023852f5c5f0365f10c90800a56f474ea7a0324f287d3865508fa",
+      "status": "MATCH"
+    }
+  ],
+  "totals": {
+    "outerQuoteCalls": 3,
+    "reservedQuoteUnits": 6,
+    "quoteReadInvocations": 3,
+    "quoteSelectionInvocations": 3,
+    "versionedResults": 27
+  },
+  "openingQuoteObservations": [
+    {
+      "caseId": "opening-ad",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "ownerCalls": [
+        {
+          "name": "quote_product",
+          "args": {
+            "subjectRef": "SV2447",
+            "offerTypes": [
+              "SET_VAY"
+            ]
+          }
+        }
+      ],
+      "quoteCalls": 1,
+      "quoteTaskWork": [
+        {
+          "reservedUnits": 2,
+          "readInvocations": 1,
+          "selectionInvocations": 1
+        }
+      ],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 3,
+      "executedNormalToolInvocations": 3,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 3,
+      "actualImageCount": 2,
+      "actualCaptureCount": 3,
+      "owners": 2,
+      "verifiers": 1
+    },
+    {
+      "caseId": "opening-organic",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "ownerCalls": [
+        {
+          "name": "quote_product",
+          "args": {
+            "subjectRef": "SV2447",
+            "offerTypes": [
+              "SET_VAY"
+            ]
+          }
+        }
+      ],
+      "quoteCalls": 1,
+      "quoteTaskWork": [
+        {
+          "reservedUnits": 2,
+          "readInvocations": 1,
+          "selectionInvocations": 1
+        }
+      ],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 3,
+      "executedNormalToolInvocations": 3,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 3,
+      "actualImageCount": 2,
+      "actualCaptureCount": 3,
+      "owners": 2,
+      "verifiers": 1
+    },
+    {
+      "caseId": "opening-multipart",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "ownerCalls": [
+        {
+          "name": "quote_product",
+          "args": {
+            "subjectRef": "SV2447",
+            "offerTypes": [
+              "SET_VAY",
+              "AO"
+            ]
+          }
+        }
+      ],
+      "quoteCalls": 1,
+      "quoteTaskWork": [
+        {
+          "reservedUnits": 2,
+          "readInvocations": 1,
+          "selectionInvocations": 1
+        }
+      ],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 3,
+      "executedNormalToolInvocations": 3,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 3,
+      "actualImageCount": 2,
+      "actualCaptureCount": 3,
+      "owners": 2,
+      "verifiers": 1
+    }
+  ],
+  "rows": [
+    {
+      "caseId": "opening-ad",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "ownerCalls": [
+        {
+          "name": "quote_product",
+          "args": {
+            "subjectRef": "SV2447",
+            "offerTypes": [
+              "SET_VAY"
+            ]
+          }
+        }
+      ],
+      "quoteCalls": 1,
+      "quoteTaskWork": [
+        {
+          "reservedUnits": 2,
+          "readInvocations": 1,
+          "selectionInvocations": 1
+        }
+      ],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 3,
+      "executedNormalToolInvocations": 3,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 3,
+      "actualImageCount": 2,
+      "actualCaptureCount": 3,
+      "owners": 2,
+      "verifiers": 1
+    },
+    {
+      "caseId": "opening-ad-repeat",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "ownerCalls": [
+        {
+          "name": "read_product",
+          "args": {
+            "subjectRef": "SV2447",
+            "offerType": "SET_VAY"
+          }
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 2,
+      "executedNormalToolInvocations": 2,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 2,
+      "actualImageCount": 0,
+      "actualCaptureCount": 1,
+      "owners": 2,
+      "verifiers": 1
+    },
+    {
+      "caseId": "opening-organic",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "ownerCalls": [
+        {
+          "name": "quote_product",
+          "args": {
+            "subjectRef": "SV2447",
+            "offerTypes": [
+              "SET_VAY"
+            ]
+          }
+        }
+      ],
+      "quoteCalls": 1,
+      "quoteTaskWork": [
+        {
+          "reservedUnits": 2,
+          "readInvocations": 1,
+          "selectionInvocations": 1
+        }
+      ],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 3,
+      "executedNormalToolInvocations": 3,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 3,
+      "actualImageCount": 2,
+      "actualCaptureCount": 3,
+      "owners": 2,
+      "verifiers": 1
+    },
+    {
+      "caseId": "opening-unresolved",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "ownerCalls": [],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 0,
+      "executedNormalToolInvocations": 0,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 0,
+      "actualImageCount": 0,
+      "actualCaptureCount": 1,
+      "owners": 1,
+      "verifiers": 1
+    },
+    {
+      "caseId": "opening-multipart",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "ownerCalls": [
+        {
+          "name": "quote_product",
+          "args": {
+            "subjectRef": "SV2447",
+            "offerTypes": [
+              "SET_VAY",
+              "AO"
+            ]
+          }
+        }
+      ],
+      "quoteCalls": 1,
+      "quoteTaskWork": [
+        {
+          "reservedUnits": 2,
+          "readInvocations": 1,
+          "selectionInvocations": 1
+        }
+      ],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 3,
+      "executedNormalToolInvocations": 3,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 3,
+      "actualImageCount": 2,
+      "actualCaptureCount": 3,
+      "owners": 2,
+      "verifiers": 1
+    },
+    {
+      "caseId": "media-overview-next:ask",
+      "terminal": "HANDOFF",
+      "reason": "RESPONSE_UNAVAILABLE",
+      "ownerCalls": [
+        {
+          "name": "request_handoff",
+          "args": {
+            "reason": "RESPONSE_UNAVAILABLE"
+          }
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 1,
+      "executedNormalToolInvocations": 1,
+      "terminalHandoffCalls": 1,
+      "executedToolInvocations": 2,
+      "actualImageCount": 0,
+      "actualCaptureCount": 0,
+      "owners": 1,
+      "verifiers": 0
+    },
+    {
+      "caseId": "media-overview-next:continue",
+      "terminal": "NO_SEND",
+      "reason": "HUMAN_OWNS_CONVERSATION",
+      "ownerCalls": [],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": null,
+      "consumedNormalUnits": null,
+      "executedNormalToolInvocations": null,
+      "terminalHandoffCalls": null,
+      "executedToolInvocations": null,
+      "actualImageCount": 0,
+      "actualCaptureCount": 0,
+      "owners": 0,
+      "verifiers": 0
+    },
+    {
+      "caseId": "media-detail-next:ask",
+      "terminal": "HANDOFF",
+      "reason": "RESPONSE_UNAVAILABLE",
+      "ownerCalls": [
+        {
+          "name": "request_handoff",
+          "args": {
+            "reason": "RESPONSE_UNAVAILABLE"
+          }
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 1,
+      "executedNormalToolInvocations": 1,
+      "terminalHandoffCalls": 1,
+      "executedToolInvocations": 2,
+      "actualImageCount": 0,
+      "actualCaptureCount": 0,
+      "owners": 1,
+      "verifiers": 0
+    },
+    {
+      "caseId": "media-detail-next:continue",
+      "terminal": "NO_SEND",
+      "reason": "HUMAN_OWNS_CONVERSATION",
+      "ownerCalls": [],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": null,
+      "consumedNormalUnits": null,
+      "executedNormalToolInvocations": null,
+      "terminalHandoffCalls": null,
+      "executedToolInvocations": null,
+      "actualImageCount": 0,
+      "actualCaptureCount": 0,
+      "owners": 0,
+      "verifiers": 0
+    },
+    {
+      "caseId": "media-and-price:ask",
+      "terminal": "HANDOFF",
+      "reason": "RESPONSE_UNAVAILABLE",
+      "ownerCalls": [
+        {
+          "name": "request_handoff",
+          "args": {
+            "reason": "RESPONSE_UNAVAILABLE"
+          }
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 1,
+      "executedNormalToolInvocations": 1,
+      "terminalHandoffCalls": 1,
+      "executedToolInvocations": 2,
+      "actualImageCount": 0,
+      "actualCaptureCount": 0,
+      "owners": 1,
+      "verifiers": 0
+    },
+    {
+      "caseId": "media-and-size:ask",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "ownerCalls": [
+        {
+          "name": "select_product_media",
+          "args": {
+            "subjectRef": "SV2447",
+            "componentRole": "TOP",
+            "intent": "DETAIL"
+          }
+        },
+        {
+          "name": "recommend_size",
+          "args": {
+            "subjectRef": "SV2447",
+            "customerStateOps": [
+              {
+                "op": "SET",
+                "field": "measurements.HEIGHT_CM",
+                "value": 158,
+                "sourceQuote": "Chị cao 1m58, nặng 52kg"
+              },
+              {
+                "sourceQuote": "Chị cao 1m58, nặng 52kg",
+                "field": "measurements.WEIGHT_KG",
+                "value": 52,
+                "op": "SET"
+              }
+            ]
+          }
+        },
+        {
+          "name": "recommend_size",
+          "args": {
+            "subjectRef": "SV2447",
+            "customerStateOps": [
+              {
+                "sourceQuote": "1m58",
+                "op": "SET",
+                "value": 158,
+                "field": "measurements.HEIGHT_CM"
+              },
+              {
+                "field": "measurements.WEIGHT_KG",
+                "sourceQuote": "52kg",
+                "value": 52,
+                "op": "SET"
+              }
+            ]
+          }
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 4,
+      "executedNormalToolInvocations": 4,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 4,
+      "actualImageCount": 1,
+      "actualCaptureCount": 2,
+      "owners": 3,
+      "verifiers": 1
+    },
+    {
+      "caseId": "media-decision:ask",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "ownerCalls": [
+        {
+          "name": "select_product_media",
+          "args": {
+            "subjectRef": "SV2447",
+            "intent": "GENERIC"
+          }
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 2,
+      "executedNormalToolInvocations": 2,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 2,
+      "actualImageCount": 2,
+      "actualCaptureCount": 3,
+      "owners": 2,
+      "verifiers": 1
+    },
+    {
+      "caseId": "b1-partial-source",
+      "terminal": "HANDOFF",
+      "reason": "PRICE_UNAVAILABLE",
+      "ownerCalls": [
+        {
+          "name": "request_handoff",
+          "args": {
+            "reason": "PRICE_UNAVAILABLE"
+          }
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 1,
+      "executedNormalToolInvocations": 1,
+      "terminalHandoffCalls": 1,
+      "executedToolInvocations": 2,
+      "actualImageCount": 0,
+      "actualCaptureCount": 0,
+      "owners": 1,
+      "verifiers": 0
+    },
+    {
+      "caseId": "b1-partial-source-v2",
+      "terminal": "HANDOFF",
+      "reason": "PRICE_UNAVAILABLE",
+      "ownerCalls": [
+        {
+          "name": "read_product",
+          "args": {
+            "subjectRef": "SV2447",
+            "detailsOnly": true
+          }
+        },
+        {
+          "name": "request_handoff",
+          "args": {
+            "reason": "PRICE_UNAVAILABLE"
+          }
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 2,
+      "executedNormalToolInvocations": 2,
+      "terminalHandoffCalls": 1,
+      "executedToolInvocations": 3,
+      "actualImageCount": 0,
+      "actualCaptureCount": 0,
+      "owners": 2,
+      "verifiers": 0
+    },
+    {
+      "caseId": "b1-partial-source-v3",
+      "terminal": "HANDOFF",
+      "reason": "PRICE_UNAVAILABLE",
+      "ownerCalls": [
+        {
+          "name": "request_handoff",
+          "args": {
+            "reason": "PRICE_UNAVAILABLE"
+          }
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 1,
+      "executedNormalToolInvocations": 1,
+      "terminalHandoffCalls": 1,
+      "executedToolInvocations": 2,
+      "actualImageCount": 0,
+      "actualCaptureCount": 0,
+      "owners": 1,
+      "verifiers": 0
+    },
+    {
+      "caseId": "sales-discovery-advice:need",
+      "terminal": "HANDOFF",
+      "reason": "PRICE_UNAVAILABLE",
+      "ownerCalls": [
+        {
+          "name": "apply_customer_state",
+          "args": {
+            "ops": [
+              {
+                "value": "RELAXED",
+                "field": "fitPreference",
+                "op": "SET",
+                "sourceQuote": "đừng bó bụng quá"
+              }
+            ]
+          }
+        },
+        {
+          "name": "search_products",
+          "args": {
+            "query": "bộ công sở đi làm"
+          }
+        },
+        {
+          "name": "read_product",
+          "args": {
+            "offerType": "SET_QUAN",
+            "subjectRef": "SQ675"
+          }
+        },
+        {
+          "name": "request_handoff",
+          "args": {
+            "reason": "PRICE_UNAVAILABLE"
+          }
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 3,
+      "executedNormalToolInvocations": 3,
+      "terminalHandoffCalls": 1,
+      "executedToolInvocations": 4,
+      "actualImageCount": 0,
+      "actualCaptureCount": 0,
+      "owners": 3,
+      "verifiers": 0
+    },
+    {
+      "caseId": "sales-product-gallery:overview",
+      "terminal": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "ownerCalls": [
+        {
+          "name": "read_product",
+          "args": {
+            "offerType": "SET_VAY",
+            "subjectRef": "SV2447"
+          }
+        },
+        {
+          "name": "select_product_media",
+          "args": {
+            "color": "be",
+            "subjectRef": "SV2447",
+            "intent": "GENERIC"
+          }
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 3,
+      "executedNormalToolInvocations": 3,
+      "terminalHandoffCalls": 1,
+      "executedToolInvocations": 4,
+      "actualImageCount": 0,
+      "actualCaptureCount": 0,
+      "owners": 1,
+      "verifiers": 0
+    },
+    {
+      "caseId": "sales-size-advice:height-weight",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "ownerCalls": [
+        {
+          "name": "recommend_size",
+          "args": {
+            "subjectRef": "SV2447",
+            "customerStateOps": [
+              {
+                "value": 158,
+                "op": "SET",
+                "sourceQuote": "cao 1m58",
+                "field": "measurements.HEIGHT_CM"
+              },
+              {
+                "value": 52,
+                "field": "measurements.WEIGHT_KG",
+                "sourceQuote": "nặng 52kg",
+                "op": "SET"
+              },
+              {
+                "sourceQuote": "Chị thích rộng một chút",
+                "value": "RELAXED",
+                "field": "fitPreference",
+                "op": "SET"
+              }
+            ]
+          }
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 2,
+      "executedNormalToolInvocations": 2,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 2,
+      "actualImageCount": 0,
+      "actualCaptureCount": 1,
+      "owners": 2,
+      "verifiers": 1
+    },
+    {
+      "caseId": "sales-southern-delivery:deadline",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "ownerCalls": [
+        {
+          "name": "read_product",
+          "args": {
+            "deliveryRegion": "Cần Thơ",
+            "offerType": "SET_VAY",
+            "subjectRef": "SV2447"
+          }
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 2,
+      "executedNormalToolInvocations": 2,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 2,
+      "actualImageCount": 0,
+      "actualCaptureCount": 1,
+      "owners": 2,
+      "verifiers": 1
+    },
+    {
+      "caseId": "stateful-open",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "ownerCalls": [
+        {
+          "name": "apply_customer_state",
+          "args": {
+            "ops": [
+              {
+                "field": "measurements.WAIST_CM",
+                "value": 76,
+                "op": "SET",
+                "sourceQuote": "Eo chị 76"
+              },
+              {
+                "value": 98,
+                "field": "measurements.HIPS_CM",
+                "op": "SET",
+                "sourceQuote": "mông 98"
+              }
+            ]
+          }
+        },
+        {
+          "name": "add_to_cart",
+          "args": {
+            "size": "M",
+            "color": "be",
+            "quantity": 1,
+            "offerType": "AO",
+            "subjectRef": "SV2447"
+          }
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 3,
+      "executedNormalToolInvocations": 3,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 3,
+      "actualImageCount": 0,
+      "actualCaptureCount": 1,
+      "owners": 2,
+      "verifiers": 1
+    },
+    {
+      "caseId": "stateful-variant-quantity",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "ownerCalls": [
+        {
+          "name": "change_cart_item",
+          "args": {
+            "size": "L",
+            "subjectRef": "9c1835d8-4032-5fbc-8535-d548865bd5c8",
+            "action": "SET_COMPONENT_VARIANT",
+            "componentRole": "TOP",
+            "color": "BE"
+          }
+        },
+        {
+          "name": "change_cart_item",
+          "args": {
+            "subjectRef": "9c1835d8-4032-5fbc-8535-d548865bd5c8",
+            "action": "SET_QUANTITY",
+            "quantity": 2
+          }
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 3,
+      "executedNormalToolInvocations": 3,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 3,
+      "actualImageCount": 0,
+      "actualCaptureCount": 1,
+      "owners": 2,
+      "verifiers": 1
+    },
+    {
+      "caseId": "stateful-quote",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "ownerCalls": [],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 1,
+      "executedNormalToolInvocations": 1,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 1,
+      "actualImageCount": 0,
+      "actualCaptureCount": 1,
+      "owners": 1,
+      "verifiers": 1
+    },
+    {
+      "caseId": "stateful-correction",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "ownerCalls": [
+        {
+          "name": "apply_customer_state",
+          "args": {
+            "ops": [
+              {
+                "field": "measurements.WAIST_CM",
+                "op": "SET",
+                "value": 74,
+                "sourceQuote": "eo 74"
+              },
+              {
+                "value": 96,
+                "op": "SET",
+                "sourceQuote": "mông 96",
+                "field": "measurements.HIPS_CM"
+              }
+            ]
+          }
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 2,
+      "executedNormalToolInvocations": 2,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 2,
+      "actualImageCount": 0,
+      "actualCaptureCount": 1,
+      "owners": 2,
+      "verifiers": 1
+    },
+    {
+      "caseId": "stateful-request-checkout",
+      "terminal": "NO_SEND",
+      "reason": "CHECKOUT_DETAILS_MISSING",
+      "ownerCalls": [
+        {
+          "name": "confirm_purchase",
+          "args": {}
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 2,
+      "executedNormalToolInvocations": 2,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 2,
+      "actualImageCount": 0,
+      "actualCaptureCount": 1,
+      "owners": 1,
+      "verifiers": 0
+    },
+    {
+      "caseId": "stateful-private-checkout",
+      "terminal": "NO_SEND",
+      "reason": "PRIVATE_CHECKOUT_COMMITTED",
+      "ownerCalls": [],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": null,
+      "consumedNormalUnits": null,
+      "executedNormalToolInvocations": null,
+      "terminalHandoffCalls": null,
+      "executedToolInvocations": null,
+      "actualImageCount": 0,
+      "actualCaptureCount": 1,
+      "owners": 0,
+      "verifiers": 0
+    },
+    {
+      "caseId": "stateful-confirm",
+      "terminal": "HANDOFF",
+      "reason": "PURCHASE_CONFIRMED",
+      "ownerCalls": [
+        {
+          "name": "confirm_purchase",
+          "args": {}
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 2,
+      "executedNormalToolInvocations": 2,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 2,
+      "actualImageCount": 0,
+      "actualCaptureCount": 0,
+      "owners": 1,
+      "verifiers": 0
+    },
+    {
+      "caseId": "stateful-human-request",
+      "terminal": "HANDOFF",
+      "reason": "CUSTOMER_REQUESTED_HUMAN",
+      "ownerCalls": [
+        {
+          "name": "request_handoff",
+          "args": {
+            "reason": "CUSTOMER_REQUESTED_HUMAN"
+          }
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 1,
+      "executedNormalToolInvocations": 1,
+      "terminalHandoffCalls": 1,
+      "executedToolInvocations": 2,
+      "actualImageCount": 0,
+      "actualCaptureCount": 0,
+      "owners": 1,
+      "verifiers": 0
+    },
+    {
+      "caseId": "negotiation-cart-setup",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "ownerCalls": [
+        {
+          "name": "apply_customer_state",
+          "args": {
+            "ops": [
+              {
+                "field": "measurements.WAIST_CM",
+                "value": 76,
+                "op": "SET",
+                "sourceQuote": "Eo chị 76, mông 98."
+              },
+              {
+                "value": 98,
+                "field": "measurements.HIPS_CM",
+                "sourceQuote": "Eo chị 76, mông 98.",
+                "op": "SET"
+              }
+            ]
+          }
+        },
+        {
+          "name": "add_to_cart",
+          "args": {
+            "size": "M",
+            "subjectRef": "SV2447",
+            "color": "be",
+            "offerType": "AO"
+          }
+        },
+        {
+          "name": "apply_customer_state",
+          "args": {
+            "ops": [
+              {
+                "sourceQuote": "Eo chị 76",
+                "field": "measurements.WAIST_CM",
+                "op": "SET",
+                "value": 76
+              },
+              {
+                "sourceQuote": "mông 98",
+                "value": 98,
+                "op": "SET",
+                "field": "measurements.HIPS_CM"
+              }
+            ]
+          }
+        },
+        {
+          "name": "add_to_cart",
+          "args": {
+            "subjectRef": "SV2447",
+            "offerType": "AO",
+            "size": "M",
+            "color": "be"
+          }
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 5,
+      "executedNormalToolInvocations": 5,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 5,
+      "actualImageCount": 0,
+      "actualCaptureCount": 1,
+      "owners": 3,
+      "verifiers": 1
+    },
+    {
+      "caseId": "negotiation-price-objection",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "ownerCalls": [
+        {
+          "name": "record_negotiation",
+          "args": {
+            "intent": "PRICE_OBJECTION",
+            "sourceQuote": "Bớt cho chị chút được không?"
+          }
+        }
+      ],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 2,
+      "executedNormalToolInvocations": 2,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 2,
+      "actualImageCount": 0,
+      "actualCaptureCount": 1,
+      "owners": 2,
+      "verifiers": 1
+    },
+    {
+      "caseId": "negotiation-total-control",
+      "terminal": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "ownerCalls": [],
+      "quoteCalls": 0,
+      "quoteTaskWork": [],
+      "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+      "consumedNormalUnits": 1,
+      "executedNormalToolInvocations": 1,
+      "terminalHandoffCalls": 0,
+      "executedToolInvocations": 1,
+      "actualImageCount": 0,
+      "actualCaptureCount": 1,
+      "owners": 1,
+      "verifiers": 1
+    }
+  ],
+  "limitations": [
+    "Primitive admission attempts include an invoked handler that returns REJECTED; they are not database/HTTP/source-read counts.",
+    "Task completion and actual sales usefulness require whole-exchange review, not tool adoption or semantic PASS alone.",
+    "Three missing-pos slots are controlled faults. No live POS data gap is inferred."
+  ]
+}
