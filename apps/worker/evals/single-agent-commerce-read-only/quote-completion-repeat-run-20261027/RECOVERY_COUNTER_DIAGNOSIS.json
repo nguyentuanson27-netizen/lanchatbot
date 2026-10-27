@@ -1,0 +1,57 @@
+{
+  "sourceSha": "bb87949347bc8c1b3f28d41a475f57202824e83a",
+  "scope": "OFFLINE_ACTUAL_ARTIFACT_LOG_AND_SOURCE_READ; NO_RUNTIME_FIX_OR_RETRY",
+  "records": [
+    {
+      "caseId": "b1-partial-source-v3",
+      "artifact": "missing-pos/provider-attempt-3.json",
+      "runtimeErrorCode": "TOOL_WORK_COUNTER",
+      "reportedTerminal": {
+        "disposition": "NO_SEND",
+        "reason": "ATTEMPT_UNAVAILABLE",
+        "text": null,
+        "fallbackId": null
+      },
+      "handoffEvidence": {
+        "conversationOwner": "HUMAN",
+        "events": 1,
+        "tags": 1
+      },
+      "actualCustomerCapture": [],
+      "actualImageCount": 0,
+      "generationErrors": [
+        {
+          "generationId": "66bdaf78-ac94-4774-a5b9-ed523e502236:owner:1",
+          "role": "owner",
+          "failureCode": "OWNER_TOOL_OUTPUT",
+          "httpStatus": 200,
+          "providerRequests": 1,
+          "inputTokens": 7842,
+          "outputTokens": 2567,
+          "thinkingTokens": 2540
+        }
+      ],
+      "originalRuntimeCountersAvailable": false,
+      "diagnosis": "Provider generation telemetry survives in actual request/error logs although the harness exception replaced the result envelope. Do not count this as zero generations or discard its tokens. Actual HUMAN/event/tag and empty capture are separate observed facts.",
+      "sourceInference": "Ingress recovery updates terminalHandoffCalls/toolCalls after runCommerceTurn finish but does not synchronize executedToolInvocations. Its returned V2 result is then checked by validateToolWorkAccounting; that exception is captured as ATTEMPT_UNAVAILABLE. This is an inference from the observed error and exact source path, not reconstructed original numeric counters or a fresh deterministic reproduction."
+    }
+  ],
+  "sourceChecks": [
+    {
+      "path": "apps/worker/src/single-agent-commerce-ingress.ts",
+      "sha256": "ffc4fc1da6da115a585e63f2c6649a3e1353bce42a9e0f4fb9765c4202b70ba4"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-read-only.ts",
+      "sha256": "cc169ad07961dac6ba4c0547fef005a64864b8273fb42486b6adab1a0f4c5a42"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "sha256": "ce63332c810ac217d79f552b4133caa14f570dd23e8b8236ef102deb14a3a5d5"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/protocol.mjs",
+      "sha256": "09929f7f528c78bd93b44ffc97a74bc32a6feb9383dbb41d2d90cb4250a66341"
+    }
+  ]
+}

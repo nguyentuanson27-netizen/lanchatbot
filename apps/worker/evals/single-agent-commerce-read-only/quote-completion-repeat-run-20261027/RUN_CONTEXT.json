@@ -1,0 +1,40 @@
+{
+  "sourceSha": "bb87949347bc8c1b3f28d41a475f57202824e83a",
+  "sourceClean": true,
+  "implementationBaseSha": "008fa28210e8587e6e248486b6b85537800bfc43",
+  "verifiedExecutableSha": "cc068a8f72b58e5b186705e6f07cfd03b398991e",
+  "approvedWorkerSnapshotSha256": "49590a51e4c34e99954bc22bd5afa3606843bd419b53ab9278e4d269353bc454",
+  "native51Scope": {
+    "persistedCapture": 30,
+    "eligibilityOnly": 21
+  },
+  "additionalHashes": {
+    "apps/worker/dist/single-agent-commerce-quote.js": "1aab5ebb3d926158fc32b45a8526bb96eea28cffa7dc4ef31ac7792d09b9bf37",
+    "apps/worker/dist/single-agent-commerce-read-only.js": "7b37465f643679355556069df220b90433c550478f4f81d9b8114eda6039c0b6",
+    "apps/worker/dist/single-agent-commerce.js": "6cd03d93d2114254e661a46be2634da0364a1d598b648f463761a53707f634b6",
+    "apps/worker/dist/single-agent-commerce-ingress.js": "aae40f9247e04ca7de6518635db841df353ac70f515a17c2cb484d56bef3af5e"
+  },
+  "quoteTask": {
+    "version": "EXPLICIT_QUOTE_V1",
+    "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+    "normalUnits": 2,
+    "standalone": true,
+    "maxPerTurn": 1
+  },
+  "cli": {
+    "version": "codex-cli 0.159.2",
+    "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+  },
+  "providerRequestsAtPrecheck": 0,
+  "sendEnabled": false,
+  "liveSends": 0,
+  "sourceStoreWrites": 0,
+  "repeatPolicy": "ONE_NEW_ATTEMPT_PER_REGISTERED_CASE_N1_NO_RETRY",
+  "priors": [
+    "media-size-context-run-20261027",
+    "media-size-context-repeat-run-20261027"
+  ],
+  "POSFailureClassification": "THREE_CONTROLLED_FAULTS_NOT_LIVE_DATA_GAP",
+  "priorModelSourceSha": "342ef0cff2888908518872f707ea33ede0f9c290",
+  "sameExecutableConfigPromptCorpusAsPrior": true
+}

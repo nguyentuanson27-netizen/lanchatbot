@@ -1,4 +1,10 @@
-## Current — model qualification sau quote completion, 27/10/2026
+## Current — lặp lại model quote task, 27/10/2026
+
+- [x] Run sourcebb879493 sạch/unchanged;17controlsPASS và51native đủ N1/retry0;138generationrequests,6DBdrop. [Report](../apps/worker/evals/single-agent-commerce-read-only/quote-completion-repeat-run-20261027/CHECKPOINT_B.md).
+- [x] Quote3/3haiảnh mỗi ca,6cohortschema matches;26counter envelopes validate và1missing sau runtimeexception ghi riêng. Wholeturnreview51; actual generation accounting phục hồi từ log cho1lost envelope, không sửa raw/counters gốc.
+- [ ] Fix task sau: OWNER_TOOL_OUTPUT HTTP200 và recovery TOOL_WORK_COUNTER cùng1case; deadline prematureETA-handoff; discovery/negotiation vẫn hạn chế. B chưa GO; không tự runtimefix/rerun/sourcewrite/deploy. Reduced generation/input không chứng minh cải thiện hiệu năng hay bán hàng.
+
+## Previous — model qualification sau quote completion, 27/10/2026
 
 - [x] Source342ef0cfclean/unchanged,17controlsPASS→51nativeđủN1,141requests/retry0/0errors,6testDBdrop; [report](../apps/worker/evals/single-agent-commerce-read-only/quote-completion-run-20261027/CHECKPOINT_B.md).
 - [x] Baquote_product/6reservedunits/3read+3selection,2ảnhactualmỗiopeningtarget;6cohortschemahashes/counters/wirefirewallPASS,wholeturnreview51. Native37eligible/10HANDOFF/4NO_SEND giữnguyên;actualimages9.
