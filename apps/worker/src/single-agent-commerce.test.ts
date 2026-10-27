@@ -16,7 +16,7 @@ describe("Phase B capability composition", () => {
     expect((await tools.invoke({ name: "request_handoff", args: { reason: "EXCHANGE" } })).status).toBe("REJECTED");
     expect((await tools.invoke({ name: "add_to_cart", args: { subjectRef: "SM613" } })).status).toBe("REJECTED");
   });
-  it("retains accepted state across instances and uses corrections before dependent size and cart operations", async () => {
+  it("retains committed corrections and cart across instances when final evidence is rejected", async () => {
     const scope = commerceScope(), f = fixtureProduct("QU714"), policy = (await fixturePolicy()).bundle!;
     let profile = fixtureProfile();
     let cycle = createSalesCycleRuntimeState(scope.conversationId, {pageId:scope.pageId,conversationId:scope.conversationId}, commerceNow);
@@ -59,7 +59,11 @@ describe("Phase B capability composition", () => {
       verifier:async request=>{
         expect(request.trusted.effectReceipts).toEqual(expect.arrayContaining([expect.objectContaining({ effect:"CUSTOMER_STATE_UPDATED",subjectRef:profile.profile.profileId,stateRevision:request.trusted.state.revision })]));
         return {result:{verdict:"PASS",violations:[]}}; }});
-    expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(result.sendEnabled).toBe(false);
+    // This mixed fixture has an existing variant-scope mismatch. Retain its
+    // committed state without the old receipt reply that masked the rejection.
+    expect(result.terminal).toMatchObject({disposition:"NO_SEND",text:null});
+    expect(result.recovery).toMatchObject({originalReason:"STALE",originalDiagnostic:{reasonCodes:["PROTECTED_CLAIM_VARIANT_SCOPE_MISMATCH"]}});
+    expect(result.verifierGenerations).toBe(0);expect(result.sendEnabled).toBe(false);
     expect(tools.handoffSources?.()?.map(s=>s.kind)).toEqual(expect.arrayContaining(["SALES_STATE","RECEIPT"]));
     expect(cycle.cart).not.toBeNull();expect(profile.profile.revision).toBe(2);
     expect(tools.snapshot().policyLiterals.some(p=>p.ref==="offers:QU714")).toBe(true);

@@ -263,7 +263,7 @@ it("does not ask the customer to repeat an image choice after a failed feedback 
  const r=await runCommerceTurn({scope:s.scope,tools:s.tools,latest:"Có ảnh khách mặc không em?",history:[],clock:()=>commerceNow,
  ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm nghĩa",owner:async()=>({kind:"FINAL",text:"Shop không có ảnh."}),
  verifier:async()=>({result:{verdict:"UNCERTAIN",violations:[]}})});
- expect(r.terminal).toMatchObject({disposition:"FALLBACK",fallbackId:"C3_B_MEDIA_UNAVAILABLE_V1",text:"Lúc này em chưa gửi được ảnh chị cần."});
+ expect(r.terminal).toMatchObject({disposition:"NO_SEND",fallbackId:null,text:null});
 });
 
 it("retains feedback provenance but does not blame available media for a semantic rejection",async()=>{
@@ -273,7 +273,7 @@ it("retains feedback provenance but does not blame available media for a semanti
  expect(JSON.parse(media.text).assets[0].feedback).toBe(true);
  const r=await runCommerceTurn({scope:s.scope,tools:s.tools,latest:"Ảnh khách mặc nhé",history:[],clock:()=>commerceNow,
  ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm nghĩa",owner:async()=>({kind:"FINAL",text:"Ảnh đây chị"}),verifier:async()=>({result:{verdict:"UNCERTAIN",violations:[]}})});
- expect(r.terminal.fallbackId).toBe("C3_A_NONPROTECTED_V2");
+ expect(r.terminal).toMatchObject({disposition:"NO_SEND",fallbackId:null,text:null});
 });
 
 it("does not claim an image was unavailable after a successful visual read for sales advice",async()=>{
@@ -285,8 +285,8 @@ it("does not claim an image was unavailable after a successful visual read for s
   const r=await runCommerceTurn({scope:s.scope,tools:s.tools,latest:"Đi gặp khách thì lấy cả bộ hay áo thôi em?",history:[],clock:()=>commerceNow,
    ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm nghĩa",owner:async()=>({kind:"FINAL",text:"Chân váy này dài đến mắt cá."}),
    verifier:async()=>({result:{verdict:"FAIL",violations:[{kind:"UNSUPPORTED_PROTECTED_ASSERTION",protectedRef:`product:${s.f.product.productId}`,excerpt:"dài đến mắt cá",basis:"Nguồn chưa xác nhận chiều dài."}]}})});
-  expect(r.terminal).toMatchObject({disposition:"FALLBACK",reason:"FAIL",fallbackId:"C3_A_NONPROTECTED_V2"});
-  expect(r.terminal.text).not.toMatch(/ảnh/);
+  expect(r.terminal).toMatchObject({disposition:"NO_SEND",text:null,fallbackId:null});
+  expect(r.recovery?.originalReason).toBe("FAIL");
  }finally{fetched.mockRestore();}
 });
 

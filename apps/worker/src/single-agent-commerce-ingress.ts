@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import { CustomerProfileV1Schema, InboundMessageV1Schema, canonicalCartStateV1, canonicalCartStateHashPreimageV1, CommercePublicCartSummaryV1Schema, type ProtectedClaimV1, type HandoffReasonV2 } from "@lana/contracts";
+import { CustomerProfileV1Schema, InboundMessageV1Schema, canonicalCartStateV1, canonicalCartStateHashPreimageV1, CommercePublicCartSummaryV1Schema, type ProtectedClaimV1 } from "@lana/contracts";
 import {projectCommerceHistoryMetadata} from "./single-agent-commerce-public-history.js";
 import { buildProtectedClaimsFromCartSelectionsV1, buildProtectedCartPolicyClaimsV1, canonicalCartPolicyLinesV2, evaluateDeterministicEffectReadinessV1, normalizeCatalogToken, normalizeProductCode } from "@lana/business-tools";
 import { createConversationState, type ConversationState } from "@lana/conversation-engine";
@@ -16,29 +16,15 @@ import { createCommerceHandoffTools } from "./single-agent-commerce-handoff.js";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
 import { runCommerceTurn, type CommerceTools } from "./single-agent-commerce-read-only.js";
 import { commerceHash, commerceUuid } from "./single-agent-commerce-read-only-context.js";
-import { hardPrecheck, terminalFallback, makeBinding, MAX_RUNTIME_PRODUCTS, type TerminalOutcome, type TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
+import { makeBinding, MAX_RUNTIME_PRODUCTS, type TerminalOutcome } from "./single-agent-semantic-verifier-boundary.js";
 import { extractAdProductCodes } from "./media-resolution.js";
 import { checkoutDetails, selectionsMatchCartLines } from "./realtime-sales-cycle.js";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
 import { makeCommerceMediaDeliveryBinding } from "./single-agent-commerce-media-delivery.js";
-import { commerceProductGroup, commerceSizeSource, type CommerceProductGroup } from "./single-agent-commerce-product-groups.js";
+import { commerceSizeSource } from "./single-agent-commerce-product-groups.js";
 
 const textHash = (text: string) => createHash("sha256").update(text, "utf8").digest("hex");
 const noSend = (reason: string) => ({ terminal: { disposition: "NO_SEND", reason, text: null, fallbackId: null } as TerminalOutcome, sendEnabled: false as const, enqueued: 0 });
-function mediaRequestProduct(latest: string, world: TrustedContext, hintedProductId: string | null, hasInputHint: boolean, groups: readonly CommerceProductGroup[] = []) {
-  if (hasInputHint) return hintedProductId;
-  // Exact full source title, then explicit owner-approved group names. Neither
-  // a recommendation nor a selected asset supplies request authority.
-  const customerText = `_${normalizeCatalogToken(latest)}_`;
-  const named = (world.runtimeProducts ?? []).filter(p => p.content?.productName &&
-    customerText.includes(`_${normalizeCatalogToken(p.content.productName)}_`)).map(p => p.subjectRef);
-  if (named.length) return named.length === 1 ? named[0]! : null;
-  const grouped = (world.runtimeProducts ?? []).filter(p => {
-    const group = commerceProductGroup(p.subjectRef, p.content?.productName ?? "", groups);
-    return group?.customerNames.some(name => customerText.includes(`_${normalizeCatalogToken(name)}_`));
-  }).map(p => p.subjectRef);
-  return grouped.length === 1 ? grouped[0]! : grouped.length > 1 ? null : world.state.currentProductId;
-}
 const privateMarkers = ["[PHONE]", "[ADDRESS]", "[NAME]", "[EMAIL]", "[ID]", "[PII_REDACTED_MESSAGE]"];
 export function isPrivateCommerceText(text: string): boolean {
   const redacted = redactAnalyticsMessage(text).text, details = checkoutDetails(text, undefined);
@@ -186,9 +172,6 @@ export async function runPersistedCommerceIngress(input: {
   // The existing ad extractor also finds fragments inside height/weight text.
   // Only a literal whole code token or a successfully resolved code is a hint;
   // do not add a measurement parser or let an unknown code inherit old focus.
-  const literalCodes = explicitCodes.filter(code => `_${normalizeCatalogToken(latest)}_`.includes(`_${code}_`));
-  const recoveryHasHint = explicit.length > 0 || literalCodes.length > 0 || ads.length > 0;
-  const recoveryHintId = literalCodes.length > 1 ? null : hinted.length === 1 ? hinted[0]!.productId : null;
   const focused = hinted.length || ads.length ? hinted : record.state.currentProductId ? await lookup([normalizeProductCode(record.state.currentProductId)]) : [];
   const currentProductId = focused.length === 1 ? focused[0]!.productId : null;
   const initialProducts = [...new Map([...(ads.length && !hinted.length ? [] : [...focused,...(input.read.initialProducts ?? [])])]
@@ -201,7 +184,7 @@ export async function runPersistedCommerceIngress(input: {
   }, input.clock, { read: readAuthority, inboxBatchGuard: guard });
   const profile = await profilePort.read();
   const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction: input.transaction,
-    read: readAuthority, inboxBatchGuard: guard, completeInboxBatch: false, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId });
+    read: readAuthority, inboxBatchGuard: guard, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId });
   const rows = await input.history.listConversationHistory(scope.conversationId, { before: new Date(messages[0]!.occurredAt), limit: 30 });
   let mediaHistoryUnavailable = false;
   const recentMedia = input.store.readAcceptedCommerceMedia ? await input.store.readAcceptedCommerceMedia({
@@ -229,30 +212,15 @@ export async function runPersistedCommerceIngress(input: {
       authorize: async () => (await readAuthority()).permission && await input.inbox.isBatchCurrent(batch), policy: policyBundle,
       select: q => facts.resolveCartSelection!(q, input.clock()), readAuthority: async () => { const a = await readAuthority(); return { ...scope, revision: a.stateVersion,
         conversationOwner: a.state.conversationOwner, permission: a.permission, bindingVersion: a.bindingVersion }; } },
-    handoff: { ...handoff, policy: policyBundle,...(input.handoffReply?{deferredReply:input.handoffReply}:{}), prepareSizeHandoffMedia: async before => {
-      const images = [...new Map((tools.mediaSelection?.() ?? []).map(image => [commerceHash([image.productId, image.url]), image])).values()];
-      if (!images.length) return undefined;
-      const prepared = tools.snapshot(), world = await tools.readback();
-      if (commerceHash(prepared) !== commerceHash(world) || world.state.conversationRevision !== before.stateVersion ||
-        !before.permission || !before.privacyAllowed || before.bindingVersion !== scope.bindingVersion ||
-        !await input.inbox.isBatchCurrent(batch) || hardPrecheck(world, terminalFallback("C3_B_VERIFIED_MEDIA_V1").text!, input.clock())) return undefined;
-      const productId = mediaRequestProduct(latest, world, recoveryHintId, recoveryHasHint, input.read.productGroups);
-      const claims = (world.protectedClaims as ProtectedClaimV1[]).filter(c => c.type === "PRODUCT_MEDIA");
-      if (!images.every(a => a.productId === productId && claims.some(c => c.type === "PRODUCT_MEDIA" &&
-        c.scope.kind === "PRODUCT" && c.scope.productId === a.productId && c.value.assetSha256 === commerceHash(a.url) &&
-        c.provenance.sourceVersion === a.sourceVersion))) return undefined;
-      return { images, claims, policy: await policyBundle(), validate: async () => {
-        try {
-          const authority = await readAuthority();
-          return authority.permission && authority.privacyAllowed && authority.stateVersion === before.stateVersion &&
-            authority.bindingVersion === before.bindingVersion && authority.recipient === before.recipient &&
-            await input.inbox.isBatchCurrent(batch) && commerceHash(await tools.readback()) === commerceHash(world);
-        } catch { return false; }
-      } };
-    } },
+    handoff: { ...handoff, policy: policyBundle,...(input.handoffReply?{deferredReply:input.handoffReply}:{}) },
     media: input.media ?? {allowedHostSuffixes:(process.env.PRODUCT_SEARCH_ALLOWED_IMAGE_HOSTS ?? "lanadesign.vn,content.pancake.vn,fbcdn.net,fbsbx.com").split(",").map(s=>s.trim()).filter(Boolean)} });
   const execution = await runCommerceTurn({ scope, tools, latest, history, historyMetadata, clock: input.clock, ownerPrompt: input.ownerPrompt, verifierPrompt: input.verifierPrompt, owner: input.owner, verifier: input.verifier });
   const result={...execution,publicHistoryProjection:{...projectedHistory.dropped,unavailable:publicHistoryUnavailable}};
+  // Handoff commits own Inbox completion. Never enqueue a second response or
+  // mutate state again after a rejected/unknown handoff transaction.
+  if (result.terminal.disposition !== "SEND_ELIGIBLE") return {
+    ...result, ...(result.terminal.disposition === "FALLBACK" ? noSend("FALLBACK_OUTPUT_FORBIDDEN") : {}),
+    enqueued: handoff.outboxCount()+executor.outboxCount() };
   // Holding replies (with or without independent media) belong to the atomic
   // handoff group with Inbox completion. Do not enqueue another BOT reply.
   if (handoff.outboxCount()) return { ...result, enqueued: handoff.outboxCount() };
@@ -270,69 +238,21 @@ export async function runPersistedCommerceIngress(input: {
         changedBindingFields: (Object.keys(accepted) as (keyof typeof accepted)[]).filter(k=>accepted[k]!==makeBinding(scope.requestId,result.terminal.text??"",world)[k]) } };
   if (!await input.inbox.isBatchCurrent(batch)) return { ...result, enqueued: executor.outboxCount() }; // A confirmation already committed its atomic terminal intents.
   const state = (await executor.repository.read(scope.conversationId))!, cart = state.cart?.value;
-  // The model draft remains rejected. A separate code-owned image response is
-  // eligible only after the unchanged world above and full current authority check.
-  // Never recover across stale state, privacy failure, handoff or an unknown commit.
+  // Rejected drafts have already taken the atomic silent handoff path in finish().
+  // A defensive delivery guard also forbids static/image/receipt fallback output.
+  if (result.recovery)
+    return { ...result, ...await closeWithoutSend("FALLBACK_OUTPUT_FORBIDDEN") };
   const selectedMedia = [...new Map((tools.mediaSelection?.() ?? []).map(image => [commerceHash([image.productId, image.url]), image])).values()];
-  const mediaFallback = terminalFallback("C3_B_VERIFIED_MEDIA_V1");
-  const mediaClaims = (world.protectedClaims as ProtectedClaimV1[]).filter(c=>c.type==="PRODUCT_MEDIA");
-  const recoveryProductId = mediaRequestProduct(latest, world, recoveryHintId, recoveryHasHint, input.read.productGroups);
-  const recoveredMedia = result.terminal.disposition === "FALLBACK" && selectedMedia.length > 0 &&
-    ["FAIL","UNCERTAIN","MALFORMED","TIMEOUT","PROVIDER_ERROR","BUDGET","OWNER_TOOL_MODE","OWNER_OUTPUT_ARTIFACT"].includes(result.terminal.reason) &&
-    current.permission && current.privacyAllowed && current.state.conversationOwner === "BOT" &&
-    hardPrecheck(world, mediaFallback.text!, input.clock()) === null &&
-    selectedMedia.every(a=>a.productId===recoveryProductId && mediaClaims.some(c=>c.type==="PRODUCT_MEDIA" &&
-      c.scope.kind==="PRODUCT" && c.scope.productId===a.productId && c.value.assetSha256===commerceHash(a.url) &&
-      c.provenance.sourceVersion===a.sourceVersion));
-  if (recoveredMedia) result.terminal = { ...result.terminal, ...mediaFallback, reason: result.terminal.reason };
-  // Candidate recovery only, after independent media recovery has had its chance.
-  // A configured policy rule is required; existing consumers do not gain a new default.
-  const recoveryReasons: Record<string,HandoffReasonV2> = {
-    PROVIDER_ERROR:"DEPENDENCY_FAILURE",TIMEOUT:"DEPENDENCY_FAILURE",
-    FAIL:"RESPONSE_UNAVAILABLE",UNCERTAIN:"RESPONSE_UNAVAILABLE",MALFORMED:"RESPONSE_UNAVAILABLE",
-    BUDGET:"RESPONSE_UNAVAILABLE",OWNER_TOOL_MODE:"RESPONSE_UNAVAILABLE",OWNER_OUTPUT_ARTIFACT:"RESPONSE_UNAVAILABLE",
-  };
-  const recoveryReason = result.terminal.disposition === "FALLBACK" && !recoveredMedia ? recoveryReasons[result.terminal.reason] : undefined;
-  if (recoveryReason && result.terminalHandoffCalls===0 && !tools.handoffStatus?.()?.attempts && current.permission && current.privacyAllowed && current.state.conversationOwner === "BOT" &&
-    hardPrecheck(world,terminalFallback("C3_A_NONPROTECTED_V2").text!,input.clock())===null) {
-    const policy = await policyBundle();
-    if (policy.artifacts.handoffMatrix?.rules.some(rule=>rule.reason===recoveryReason)) {
-      const original=result.terminal;
-      const port=createPersistedCommerceHandoffPort({scope,clock:input.clock,store:input.store,transaction:input.transaction,
-        read:readAuthority,inboxBatchGuard:guard,resolveTagId:input.resolveTagId,deliveryRecipient:last.senderId});
-      const recovery=createCommerceHandoffTools({...port,base:tools,scope,clock:input.clock,policy:policyBundle});
-      let outcome: TerminalOutcome | null | undefined;
-      let readbackFailed=false;
-      try {
-        await recovery.invoke({name:"request_handoff",args:{reason:recoveryReason}});
-        outcome=await recovery.terminalOutcome?.();
-      } catch { readbackFailed=true; }
-      finally {
-        const status=recovery.handoffStatus?.();
-        const recoveryAttempts=status?.attempts??0;
-        result.terminalHandoffCalls+=recoveryAttempts;
-        result.toolCalls=result.normalToolCalls+result.terminalHandoffCalls;
-        if(result.toolWorkAccounting==="PRIMITIVE_WORK_V2"&&typeof result.executedToolInvocations==="number")
-          result.executedToolInvocations+=recoveryAttempts;
-        if(status)result.handoff=status;
-      }
-      if(readbackFailed)return {...result,...noSend("RECOVERY_HANDOFF_READBACK_UNAVAILABLE"),enqueued:port.outboxCount()};
-      if (outcome?.disposition === "HANDOFF" || outcome?.disposition === "NO_SEND") return {...result,terminal:outcome,
-        recovery:{originalDisposition:original.disposition,originalReason:original.reason},enqueued:port.outboxCount()};
-      return {...result,...await closeWithoutSend("RECOVERY_HANDOFF_UNAVAILABLE")};
-    }
-  }
   const generatedPass = result.terminal.disposition === "SEND_ELIGIBLE" && result.terminal.reason === "PASS";
-  const allowedText = ["SEND_ELIGIBLE", "FALLBACK", "HANDOFF"].includes(result.terminal.disposition) ? result.terminal.text : null;
+  const allowedText = result.terminal.disposition === "SEND_ELIGIBLE" ? result.terminal.text : null;
   const messagesOut = [...(allowedText ? [{ kind: "TEXT" as const, text: allowedText }] : []),
-    ...(generatedPass || recoveredMedia ? selectedMedia.map(a=>({kind:"IMAGE" as const,imageUrl:a.url})) : [])];
+    ...(generatedPass ? selectedMedia.map(a=>({kind:"IMAGE" as const,imageUrl:a.url})) : [])];
   if (allowedText && allowedText.length > 2000) return { ...result, ...await closeWithoutSend("DELIVERY_TEXT_BOUND") };
   const sourceHash = textHash(scope.sourceMessageId);
   const cartSummary = result.terminal.disposition === "SEND_ELIGIBLE" && result.terminal.reason === "RECEIPT_BACKED_CART_SUMMARY";
   // Recovery totals use the same cart/fact readiness as generated cart replies.
   // A receipt-only ACK still makes no current catalog or price assertion.
-  let claims = generatedPass ? world.protectedClaims as ProtectedClaimV1[] : recoveredMedia
-    ? mediaClaims : [];
+  let claims = generatedPass ? world.protectedClaims as ProtectedClaimV1[] : [];
   const bindCart = (generatedPass || cartSummary) && cart !== undefined;
   const productIds = bindCart ? [...new Set(cart!.lines.map(l => l.parentProductId))].sort() :
     [...new Set(claims.flatMap(c => c.scope.kind === "PRODUCT" ? [c.scope.productId] : []))].sort();
@@ -374,7 +294,7 @@ export async function runPersistedCommerceIngress(input: {
   const publicCartSummary=publicAmounts ? CommercePublicCartSummaryV1Schema.parse({...publicAmounts as object,kind:"C3_PUBLIC_CART_SUMMARY_V1",
     pageId:scope.pageId,conversationId:scope.conversationId,customerHash:scope.customerHash,recipientHash:scope.recipient,
     responseGroupId,sequence:0,messageHash:commerceHash(messagesOut[0])}) : undefined;
-  const mediaBinding = (generatedPass || recoveredMedia) && selectedMedia.length ? makeCommerceMediaDeliveryBinding({ scope, generation: batch.generation, responseGroupId,
+  const mediaBinding = (generatedPass) && selectedMedia.length ? makeCommerceMediaDeliveryBinding({ scope, generation: batch.generation, responseGroupId,
     nextState, messages: messagesOut, policy: await policyBundle(), images: selectedMedia, now }) : undefined;
   const committed = await input.transaction(client => input.store.commitWithinTransaction(client, { pageId: scope.pageId, conversationId: scope.conversationId, customerHash: scope.customerHash,
     expectedStateVersion: verifiedRevision, state: nextState, inboxBatchGuard: guard,

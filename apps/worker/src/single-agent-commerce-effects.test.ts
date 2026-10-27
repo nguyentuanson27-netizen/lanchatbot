@@ -564,7 +564,7 @@ describe("code-owned commerce effects and recovery", () => {
     }) }));
     expect(JSON.stringify([result, s.tools.snapshot()])).not.toMatch(/0984997797|Synthetic Customer|Synthetic test address|118619000/);
   });
-  it("recovers a generation failure after commit with a current receipt, without replaying", async () => {
+  it("keeps a committed effect but sends no receipt fallback after generation failure", async () => {
     const s = await setup(); let n = 0;
     const result = await runCommerceTurn({ ...s, latest: "Lấy áo navy M cho chị.", history: [], clock: () => commerceNow,
       ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm reply.", owner: async (): Promise<OwnerGeneration> => {
@@ -572,11 +572,11 @@ describe("code-owned commerce effects and recovery", () => {
         throw new Error("provider stream failed");
       }, verifier: async () => ({ result: { verdict: "PASS", violations: [] } }) });
     expect(s.commits).toHaveLength(1);
-    expect(result.terminal.reason).toBe("RECEIPT_BACKED_CART_SUMMARY");
-    expect(result.terminal.text).toBe("Em đã thêm món chị chọn vào giỏ. Tổng 524.000đ, đã gồm phí giao hàng.");
+    expect(result.terminal).toMatchObject({disposition:"NO_SEND",text:null,fallbackId:null});
+    expect(result.recovery?.originalReason).toBe("PROVIDER_ERROR");
     expect(result.sendEnabled).toBe(false);
   });
-  it("recovers the committed total when an owner asks for another tool under NONE, without running that tool or generation again", async () => {
+  it("does not send a committed total when an owner asks for another tool under NONE, without running that tool or generation again", async () => {
     const s = await setup(), invoke = vi.spyOn(s.base, "invoke"); let n = 0;
     const result = await runCommerceTurn({ ...s, latest: "Cả tiền ship là bao nhiêu em?", history: [], clock: () => commerceNow,
       ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm reply.", owner: async (): Promise<OwnerGeneration> => {
@@ -584,7 +584,7 @@ describe("code-owned commerce effects and recovery", () => {
           : n === 2 ? [s.add] : [{ name: "quote_cart", args: {} }];
         return { kind: "TOOLS", calls, content: { role: "model", parts: calls.map(functionCall => ({ functionCall })) } };
       }, verifier: async () => { throw new Error("SHOULD_NOT_RUN"); } });
-    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Em đã thêm món chị chọn vào giỏ. Tổng 524.000đ, đã gồm phí giao hàng." });
+    expect(result.terminal).toMatchObject({disposition:"NO_SEND",text:null,fallbackId:null});
     expect(result.recovery?.originalReason).toBe("OWNER_TOOL_MODE");
     expect(result.generations.at(-1)?.status).toBe("PROVIDER_ERROR");
     expect(invoke.mock.calls.some(([call]) => call.name === "quote_cart")).toBe(false);
@@ -641,17 +641,17 @@ describe("code-owned commerce effects and recovery", () => {
       expect(s.tools.publicCartSummary!()).toBeUndefined();
       expect(s.commits).toHaveLength(1);
     });
-  it("acknowledges a committed cart change as a change, without claiming a new cart or order", async () => {
+  it("preserves committed quantity without sending a fallback acknowledgement", async () => {
     const s = await setup(); await s.tools.invoke(s.add);
     const lineId = s.current().cart!.value.lines[0]!.lineId;
     await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: lineId, action: "SET_QUANTITY", quantity: 2 } });
     const result = await runCommerceTurn({ scope: s.scope, tools: s.tools, clock: () => commerceNow, latest: "Lấy hai chiếc chị nhé.", history: [],
       ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm.", owner: async () => { throw new Error("provider unavailable"); },
       verifier: async () => { throw new Error("SHOULD_NOT_RUN"); } });
-    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Giỏ của chị: 2 áo SM613 màu navy, size M. Tổng 973.100đ, đã gồm phí giao hàng." });
+    expect(result.terminal).toMatchObject({disposition:"NO_SEND",text:null,fallbackId:null});
     expect(s.commits).toHaveLength(2);
   });
-  it("reports the committed quantity after a variant-only change without claiming the whole customer request completed", async () => {
+  it("preserves a variant-only commit without sending a fallback or claiming the whole request completed", async () => {
     const s = await setup(); await s.tools.invoke(s.add);
     const selected = await s.select(); selected.line.components[0]!.size = "L"; s.select.mockResolvedValue(selected);
     await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: s.current().cart!.value.lines[0]!.lineId,
@@ -659,7 +659,7 @@ describe("code-owned commerce effects and recovery", () => {
     const result = await runCommerceTurn({ scope: s.scope, tools: s.tools, clock: () => commerceNow,
       latest: "Đổi L, lấy hai chiếc cho chị nhé.", history: [], ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm.",
       owner: async () => { throw new Error("provider unavailable"); }, verifier: async () => { throw new Error("SHOULD_NOT_RUN"); } });
-    expect(result.terminal).toMatchObject({ reason: "RECEIPT_BACKED_CART_SUMMARY", text: "Giỏ của chị: 1 áo SM613 màu navy, size L. Tổng 524.000đ, đã gồm phí giao hàng." });
+    expect(result.terminal).toMatchObject({disposition:"NO_SEND",text:null,fallbackId:null});
     expect(s.current().cart!.value.lines[0]!.quantity).toBe(1); expect(s.commits).toHaveLength(2);
   });
   it("does not describe one component's size or color as the configuration of a mixed cart", async () => {
@@ -701,8 +701,7 @@ describe("code-owned commerce effects and recovery", () => {
         else { const changed = structuredClone(selected); changed.line.components[0]!.componentSku = "CHANGED-SOURCE-SKU"; s.select.mockResolvedValue(changed); }
         return { result: { verdict: "PASS", violations: [] } };
       } });
-    expect(result.terminal).toMatchObject(source === "CHANGED" ? { disposition: "NO_SEND", text: null }
-      : { disposition: "SEND_ELIGIBLE", reason: "RECEIPT_BACKED_ACK" });
+    expect(result.terminal).toMatchObject({disposition:"NO_SEND",text:null,fallbackId:null});
     expect(s.tools.snapshot().effectReceipts).toHaveLength(source === "CHANGED" ? 0 : 1);
     expect(s.commits).toHaveLength(1);
   });

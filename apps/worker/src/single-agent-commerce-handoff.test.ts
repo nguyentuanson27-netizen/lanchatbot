@@ -111,16 +111,17 @@ describe("Phase B handoff follows current code policy and committed ownership", 
     expect((await tools.invoke({ name: "request_handoff", args: { reason: "EXCHANGE" } })).status).toBe("OK");
     expect(await tools.terminalOutcome!()).toMatchObject({ disposition: "HANDOFF" });
   });
-  it("rejects a mixed handoff batch without committing handoff or sibling effects", async () => {
+  it("rejects a mixed handoff batch and performs only code-owned silent recovery", async () => {
     const s = await setup(), owner = vi.fn(async () => ({ kind: "TOOLS" as const,
       calls: [{ name: "request_handoff", args: { reason: "CUSTOMER_REQUESTED_HUMAN" } }, { name: "add_to_cart", args: { subjectRef: "invented" } }],
       content: { role: "model" as const, parts: [{ functionCall: { name: "request_handoff", args: { reason: "CUSTOMER_REQUESTED_HUMAN" } } }] } }));
     const invokeBatch = vi.spyOn(s.base, "invokeBatch"), verifier = vi.fn();
     const r = await runCommerceTurn({ scope: s.scope, clock: () => commerceNow, latest: "Cho chị gặp nhân viên.", history: [],
       ownerPrompt: "Tư vấn", verifierPrompt: "Kiểm reply", tools: s.tools, owner, verifier });
-    expect(r.terminal).toMatchObject({ disposition: "FALLBACK", reason:"OWNER_TOOL_MODE" });
+    expect(r.terminal).toMatchObject({ disposition: "HANDOFF", text:null });
+    expect(r.recovery?.originalReason).toBe("OWNER_TOOL_MODE");
     expect(r.sendEnabled).toBe(false); expect(owner).toHaveBeenCalledTimes(1); expect(verifier).not.toHaveBeenCalled();
-    expect(invokeBatch).not.toHaveBeenCalled(); expect(s.commit).not.toHaveBeenCalled();
+    expect(invokeBatch).not.toHaveBeenCalled(); expect(s.commit).toHaveBeenCalledOnce();
   });
   it("does not call either model when a previous turn already belongs to a human", async () => {
     const s = await setup(); s.change({ state: { ...s.current().state, conversationOwner: "HUMAN" } });
@@ -203,7 +204,7 @@ it("prepares an approved holding without changing ownership until the exact repl
  expect(r.ownerGenerations).toBe(1);expect(ownerCalls).toBe(1);expect(r.verifierGenerations).toBe(1);expect(s.commit).toHaveBeenCalledOnce();
 });
 
-it.each(["single","compare"])("last-generation handoff preserves only bounded single-offer prices (%s)",async mode=>{
+it.each(["single","compare"])("last-generation fallback hands off without prices or holding copy (%s)",async mode=>{
  const s=await setup(),f=fixtureProduct(),holding="Bên em sẽ kiểm tra lại hàng rồi báo chị nhé.";
  f.snapshot.offers.DIRECT!.rows[0]!.stock_quantity=null;
  if(mode==="compare")f.snapshot.offers.AO=structuredClone(f.snapshot.offers.DIRECT!);
@@ -222,8 +223,7 @@ it.each(["single","compare"])("last-generation handoff preserves only bounded si
    return {kind:"TOOLS",calls:[call],content:{role:"model",parts:[{functionCall:call}]}};},
   verifier:async()=>{throw Error("NO_FOURTH_GENERATION");}});
  expect(r.ownerGenerations).toBe(3);expect(r.verifierGenerations).toBe(0);expect(r.terminal.disposition).toBe("HANDOFF");expect(s.commit).toHaveBeenCalledOnce();
- if(mode==="single")expect(r.terminal.text).toContain("499.000đ");else expect(r.terminal.text).toBe(holding);
- expect(r.terminal.text).toContain(holding);expect(r.terminalHandoffCalls).toBe(1);
+ expect(r.terminal.text).toBeNull();expect(r.terminalHandoffCalls).toBe(1);
 });
 
 it.each(["reject","policy-changed","conflict"])("pending handoff never salvages a rejected draft or retries a failed commit (%s)",async fault=>{
@@ -238,7 +238,7 @@ it.each(["reject","policy-changed","conflict"])("pending handoff never salvages 
   owner:async()=>({kind:"FINAL",text:"UNVERIFIED_DRAFT_SHOULD_NEVER_BE_REUSED"}),verifier:async()=>{
    if(fault==="policy-changed")Object.assign(s.policy.versionReferences[0]!,{pointerRevision:s.policy.versionReferences[0]!.pointerRevision+1});
    return {result:{verdict:fault==="reject"?"UNCERTAIN":"PASS",violations:[]}};}});
- if(fault==="reject"){expect(r.terminal).toMatchObject({disposition:"HANDOFF",text:holding});expect(s.commit).toHaveBeenCalledOnce();}
+ if(fault==="reject"){expect(r.terminal).toMatchObject({disposition:"HANDOFF",text:null});expect(s.commit).toHaveBeenCalledOnce();}
  else expect(r.terminal.disposition).toBe("NO_SEND");
  expect(r.terminal.text??"").not.toContain("UNVERIFIED_DRAFT");expect(s.commit.mock.calls.length).toBeLessThanOrEqual(1);
  await tools.recover!(r.terminal);expect(s.commit.mock.calls.length).toBeLessThanOrEqual(1);

@@ -113,8 +113,9 @@ it.each(["provider","malformed-finish","timeout","fail","uncertain","malformed-v
   expect(result.toolCalls).toBe(result.normalToolCalls+1);
   const handoffs=f.commit.mock.calls.filter(c=>c[1].handoffEventPlan);
   expect(handoffs).toHaveLength(1);
-  expect(handoffs[0]![1]).toMatchObject({pancakeTagPlan:{desiredTag:"NHAN_VIEN"},metaPlan:{messages:[{kind:"TEXT",text:result.terminal.text}]}});
-  expect(result.enqueued).toBe(1); expect(owner).toHaveBeenCalledTimes(1);
+  expect(handoffs[0]![1]).toMatchObject({pancakeTagPlan:{desiredTag:"NHAN_VIEN"}});
+  expect(handoffs[0]![1].metaPlan).toBeUndefined(); expect(result.terminal.text).toBeNull();
+  expect(result.enqueued).toBe(0); expect(owner).toHaveBeenCalledTimes(1);
   expect(f.verifier).toHaveBeenCalledTimes(providerFault?0:1);
 });
 
@@ -123,7 +124,7 @@ it("fails closed if recovery commit readback becomes unavailable",async()=>{
   f.checkCommit(async()=>{f.store.loadOrCreate=async()=>{throw new Error("READBACK_UNAVAILABLE");};});
   const result=await f.run(async()=>{throw new Error("HTTP_429");});
   expect(result.terminal).toMatchObject({disposition:"NO_SEND",text:null});
-  expect(result.enqueued).toBe(1);
+  expect(result.enqueued).toBe(0);
   expect(f.commit.mock.calls.filter(c=>c[1].handoffEventPlan)).toHaveLength(1);
   expect(result).toMatchObject({terminalHandoffCalls:1,handoff:{attempts:1,status:"COMMITTED"}});
   if(!("toolCalls" in result&&"normalToolCalls" in result))throw Error("NATIVE_ACCOUNTING_REQUIRED");
@@ -174,7 +175,7 @@ it.each(["rejected","unknown","readback"])("accounts V2 recovery attempt when co
 
 it.each(["conflict","ambiguous","superseded","missing-rule"])("does not acknowledge an automatic handoff after %s",async fault=>{
   const f=fixture();await enableRecoveryHandoff(f);
-  if(fault==="missing-rule")f.policy.mockImplementation(()=>fixturePolicy());
+  if(fault==="missing-rule"){const resolved=await fixturePolicy(); Object.assign(resolved.bundle!.artifacts,{handoffMatrix:{schemaVersion:1,kind:"HANDOFF_MATRIX",sourceMetadata:resolved.bundle!.artifacts.shopPolicy.sourceMetadata,rules:[{reason:"EXCHANGE",customerMessagePolicy:"SILENT_HANDOFF",holdingReply:null,tag:"NHAN_VIEN"}]}});f.policy.mockResolvedValue(resolved);}
   if(fault==="conflict")f.commit.mockResolvedValue({stateCommitted:false,metaOutboxCreated:0,inboxBatchStatus:"STALE",handoffEventCreated:false,pancakeTagOutboxCreated:false} as never);
   if(fault==="ambiguous")f.commit.mockRejectedValue(new Error("COMMIT_UNKNOWN"));
   const result=await f.run(async()=>{if(fault==="superseded")f.supersede();throw new Error("HTTP_429");});
@@ -186,7 +187,7 @@ it.each(["conflict","ambiguous","superseded","missing-rule"])("does not acknowle
     expect(result).toMatchObject({terminalHandoffCalls:1,handoff:{attempts:1,status:fault==="conflict"?"BLOCKED":"UNKNOWN"}});
     if(!("toolCalls" in result&&"normalToolCalls" in result))throw Error("NATIVE_ACCOUNTING_REQUIRED");
   expect(result.toolCalls).toBe(result.normalToolCalls+1);
-  }else expect(result.terminalHandoffCalls).toBe(0);
+  }else expect(result.terminalHandoffCalls).toBe(1);
 });
 
 it.each(["Không lấy Thạch Thảo nữa, gửi chị mẫu kia.","Chị đang so Thạch Thảo với Diệp An.","Cho chị xem bộ Thạch Thảo.","Mẫu kia cơ em."])("does not manufacture durable product focus from unbound prose: %s",async text=>{
@@ -195,7 +196,7 @@ it.each(["Không lấy Thạch Thảo nữa, gửi chị mẫu kia.","Chị đan
   expect((f.commit.mock.calls.at(-1)![1].state as {currentProductId:unknown}).currentProductId).toBeNull();
 });
 
-it.each(["metadata-refresh","rejected-caption"])("delivers independent closeup without a new handoff after %s",async mode=>{
+it.each(["metadata-refresh","rejected-caption"])("keeps verified closeup on PASS and silently hands off rejected captions (%s)",async mode=>{
   const f=fixture(); await enableRecoveryHandoff(f);f.setFocus("SM613");f.message.text="Cho chị xem cận phần thêu nhé.";
   const product=f.products[0]!;
   product.snapshot.synced_at=new Date(commerceNow.getTime()-60_000).toISOString();
@@ -206,11 +207,16 @@ it.each(["metadata-refresh","rejected-caption"])("delivers independent closeup w
   const tools=[{name:"select_product_media",args:{subjectRef:"SM613",intent:"DETAIL"}}];
   const result=await f.run(async()=>++calls===1?{kind:"TOOLS",calls:tools,content:{role:"model",parts:tools.map(c=>({functionCall:c}))}}:
     {kind:"FINAL",text:"Em gửi chị ảnh cận áo nhé."});
-  expect(result.enqueued).toBe(2);expect(f.commit.mock.calls.filter(c=>c[1].handoffEventPlan)).toHaveLength(0);
-  expect(f.commit.mock.calls.at(-1)![1].metaPlan!.messages[1]).toEqual({kind:"IMAGE",imageUrl:product.product.images[0]!.url});
-  expect(result.terminal.disposition).toBe(mode==="metadata-refresh"?"SEND_ELIGIBLE":"FALLBACK");
-  if(mode==="rejected-caption")expect(result.terminal.fallbackId).toBe("C3_B_VERIFIED_MEDIA_V1");
+  if(mode==="metadata-refresh") {
+    expect(result.enqueued).toBe(2); expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");
+    expect(f.commit.mock.calls.at(-1)![1].metaPlan!.messages[1]).toEqual({kind:"IMAGE",imageUrl:product.product.images[0]!.url});
+  } else {
+    expect(result).toMatchObject({enqueued:0,terminal:{disposition:"HANDOFF",text:null}});
+    expect(f.commit.mock.calls.filter(c=>c[1].handoffEventPlan)).toHaveLength(1);
+    expect(f.commit.mock.calls.every(c=>!c[1].metaPlan)).toBe(true);
+  }
 });
+
 
 it("preserves a benign caption through the shared history redactor", async () => {
   const { redactAnalyticsMessage } = await import("@lana/database");
@@ -259,7 +265,7 @@ it("does not call an unavailable delivery history an empty first contact", async
   expect(entry).toEqual({ firstContact: null, fromAd: false });
 });
 
-it.each(["code", "source-title", "approved-group"])("recovers first-contact images with a verified turn product and no persisted focus (%s)", async mode => {
+it.each(["code", "source-title", "approved-group"])("hands off rejected first-contact image captions without sending images (%s)", async mode => {
   const f = fixture(), product = fixtureProduct();
   product.product.title = "Áo Thanh Mai";
   product.product.images = ["FRONT", "BACK"].map((angle, index) => ({
@@ -277,6 +283,7 @@ it.each(["code", "source-title", "approved-group"])("recovers first-contact imag
     productTitles: { SM613: product.product.title }, approvalRef: "owner-decision", sharedSize: { artifactKey: "unused", sourceProductId: "SM613",
       brand: "LANA", category: "TOP", componentRole: "TOP" as const } }] } : {}) });
   f.message.text = `Cho chị xem ảnh ${mode === "code" ? "SM613" : mode === "approved-group" ? "Thanh Mai" : "Áo Thanh Mai"} màu be nhé.`;
+  f.enableHandoff();
   f.verifier.mockResolvedValue({ result: { verdict: "UNCERTAIN", violations: [] } });
   let n = 0;
   const result = await f.run(async () => {
@@ -287,11 +294,9 @@ it.each(["code", "source-title", "approved-group"])("recovers first-contact imag
     if (n === (mode === "code" ? 2 : 3)) return { kind: "FINAL", text: "DRAFT_MUST_NOT_BE_SENT" };
     return { kind: "TOOLS", calls, content: { role: "model", parts: calls.map(c => ({ functionCall: c })) } };
   });
-  expect(result.terminal).toMatchObject({ disposition: "FALLBACK", reason: "UNCERTAIN", fallbackId: "C3_B_VERIFIED_MEDIA_V1" });
-  const meta = f.commit.mock.calls.at(-1)![1].metaPlan!;
-  expect(meta.messages).toEqual([{ kind: "TEXT", text: result.terminal.text },
-    ...product.product.images.map(image => ({ kind: "IMAGE", imageUrl: image.url }))]);
-  expect(JSON.stringify(meta)).not.toContain("DRAFT_MUST_NOT_BE_SENT");
+  expect(result).toMatchObject({enqueued:0,terminal:{disposition:"HANDOFF",text:null,fallbackId:null}});
+  expect(f.commit.mock.calls.filter(c=>c[1].handoffEventPlan)).toHaveLength(1);
+  expect(f.commit.mock.calls.every(c=>!c[1].metaPlan)).toBe(true);
   expect(f.verifier).toHaveBeenCalledTimes(1);
 });
 
@@ -322,21 +327,20 @@ it.each(["not-requested", "two-titles", "unresolved-ad", "unresolved-code", "sho
   expect(f.commit.mock.calls.flatMap(c => c[1].metaPlan?.messages ?? []).filter(m => m.kind === "IMAGE")).toEqual([]);
 });
 
-it.each([false,true])("preserves a selected image in a code-owned fallback group without sending the rejected draft (cart=%s)",async withCart=>{
+it.each([false,true])("hands off instead of sending selected images after rejected drafts (cart=%s)",async withCart=>{
   const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);
   if(withCart)await seedCart(f);
   p.images=[{url:"https://content.pancake.vn/detail.jpg",role:"PRIMARY",angle:"CLOSEUP",imageType:"DETAIL",intents:[],sortOrder:0,qualityScore:null,feedback:false,
     reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
   f.message.text="Cho chị xem cận áo nhé.";
+  f.enableHandoff();
   f.verifier.mockResolvedValue({result:{verdict:"UNCERTAIN",violations:[]}});
   let n=0;const calls=[{name:"select_product_media",args:{subjectRef:p.productId,intent:"DETAIL"}}];
   const result=await f.run(async()=>++n===1?{kind:"TOOLS",calls,content:{role:"model",parts:calls.map(c=>({functionCall:c}))}}:
     {kind:"FINAL",text:"DRAFT_MUST_NOT_BE_SENT"});
-  expect(result.terminal).toMatchObject({disposition:"FALLBACK",reason:"UNCERTAIN",fallbackId:"C3_B_VERIFIED_MEDIA_V1"});
-  const meta=f.commit.mock.calls.at(-1)![1].metaPlan!;
-  expect(meta.messages).toEqual([{kind:"TEXT",text:result.terminal.text},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);
-  expect(meta.protectedClaims?.some(c=>c.type==="PRODUCT_MEDIA")).toBe(true);
-  expect(JSON.stringify(meta)).not.toContain("DRAFT_MUST_NOT_BE_SENT");
+  expect(result).toMatchObject({enqueued:0,terminal:{disposition:"HANDOFF",text:null,fallbackId:null}});
+  expect(f.commit.mock.calls.filter(c=>c[1].handoffEventPlan)).toHaveLength(1);
+  expect(f.commit.mock.calls.every(c=>!c[1].metaPlan)).toBe(true);
   expect(f.verifier).toHaveBeenCalledTimes(1);
 });
 
@@ -385,14 +389,12 @@ it("finishes mixed media and size intake after a corrected inline call within th
   expect(result.normalToolCalls).toBeLessThanOrEqual(6);expect(result.terminalHandoffCalls).toBe(1);expect(result.toolCalls).toBeLessThanOrEqual(7);expect(n).toBe(2);
   expect(f.profileWrite).toHaveBeenCalledTimes(1);expect(f.verifier).not.toHaveBeenCalled();
   const handoffCommit = f.commit.mock.calls.find(c => c[1].handoffEventPlan)![1];
-  expect(handoffCommit.metaPlan?.messages).toEqual([{kind:"TEXT",text:"Em gửi chị ảnh của mẫu để mình xem trước nhé."},
-    {kind:"IMAGE",imageUrl:p.images[0]!.url}, {kind:"TEXT",text:result.terminal.text}]);
-  expect(handoffCommit.metaPlan?.sendAfterOwnerHandoff).toBe(true);
-  expect(handoffCommit.metaPlan?.protectedClaims?.some(c => c.type === "PRODUCT_MEDIA")).toBe(true);
-  expect(f.commit.mock.calls.filter(c => c[1].metaPlan)).toHaveLength(1);
+  expect(handoffCommit.metaPlan).toBeUndefined(); expect(result.terminal.text).toBeNull();
+  expect(f.commit.mock.calls.filter(c => c[1].metaPlan)).toHaveLength(0);
   expect(handoffCommit.completeInboxBatch).not.toBe(false);
-  expect(result.enqueued).toBe(3);
+  expect(result.enqueued).toBe(0);
 });
+
 
 it.each(["source", "human", "revision", "inbox", "policy", "unknown-transaction"])("does not enqueue a partial mixed handoff group after %s changes", async fault => {
   const f = fixture(), p = f.products[0]!.product; f.setFocus(p.productId); f.enableHandoff();
@@ -420,7 +422,8 @@ it.each(["source", "human", "revision", "inbox", "policy", "unknown-transaction"
     { name: "recommend_size", args: { subjectRef: p.productId } }];
   const result = await f.run(async () => ({ kind: "TOOLS", calls, content: { role: "model", parts: calls.map(c => ({ functionCall: c })) } }));
   expect(f.commit.mock.calls.flatMap(c => c[1].metaPlan?.messages ?? []).filter(m => m.kind === "IMAGE")).toEqual([]);
-  expect(f.commit.mock.calls.filter(c => c[1].handoffEventPlan)).toHaveLength(0);
+  expect(f.commit.mock.calls.filter(c => c[1].handoffEventPlan)).toHaveLength(fault==="source"?1:0);
+  expect(f.commit.mock.calls.every(c=>!c[1].metaPlan)).toBe(true);
   expect(f.verifier).not.toHaveBeenCalled();
   expect(result.terminal.disposition).not.toBe("SEND_ELIGIBLE");
 });
@@ -440,8 +443,8 @@ it("keeps customer-requested handoff free of images even when media was selected
   expect(f.verifier).not.toHaveBeenCalled();
 });
 
-it.each(["GENERIC","DETAIL"])("continues after a verified-media caption fallback with history and persisted product (%s)",async intent=>{
-  const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);
+it.each(["GENERIC","DETAIL"])("keeps subsequent media requests silent after caption fallback handoff (%s)",async intent=>{
+  const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);f.enableHandoff();
   p.images=[{url:"https://content.pancake.vn/detail.jpg",role:"PRIMARY",angle:"CLOSEUP",imageType:"DETAIL",intents:[],sortOrder:0,qualityScore:null,feedback:false,
     reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
   p.images=[...p.images,{...p.images[0]!,url:"https://content.pancake.vn/feedback.jpg",role:"ADDITIONAL",feedback:true}];
@@ -451,30 +454,19 @@ it.each(["GENERIC","DETAIL"])("continues after a verified-media caption fallback
   f.verifier.mockResolvedValueOnce({result:{verdict:"UNCERTAIN",violations:[]}});
   let calls=0;
   const first=await f.run(async()=>++calls===1?tool("FEEDBACK"):{kind:"FINAL",text:"Ảnh khách mặc em chưa có để gửi chị."});
-  expect(first.terminal.fallbackId).toBe("C3_B_VERIFIED_MEDIA_V1");
-  const sent=f.commit.mock.calls.at(-1)![1].metaPlan!.messages;
-  expect(sent).toEqual([{kind:"TEXT",text:first.terminal.text},{kind:"IMAGE",imageUrl:p.images[1]!.url}]);
-  // Delivery history must contain the terminal text, never the rejected owner draft.
-  f.history.listConversationHistory.mockResolvedValue([
-    {senderType:"CUSTOMER",text:f.message.text},{senderType:"BOT",text:first.terminal.text}]);
+  expect(first).toMatchObject({enqueued:0,terminal:{disposition:"HANDOFF",text:null}});
+  expect(f.commit.mock.calls.every(c=>!c[1].metaPlan)).toBe(true);
   f.message.text=intent==="GENERIC"?"Ảnh tổng thể em.":"Cận phần thêu nhé.";
   f.message.messageId="next-media-message";f.message.eventKey="next-media-message";
-  calls=0;let observed:OwnerRequest|undefined;
-  const second=await f.run(async request=>{
-    observed??=request;
-    return ++calls===1?tool(intent):{kind:"FINAL",text:"Em gửi ảnh chị nhé."};
-  });
-  expect(observed!.context.state.currentProductId).toBe(p.productId);
-  expect(observed!.contents[1]!.parts[0]!.text).toBe(first.terminal.text);
-  expect(JSON.stringify(observed!.contents)).not.toContain("Ảnh khách mặc em chưa có để gửi chị.");
-  expect(second.terminal.disposition,JSON.stringify(second.terminal)).toBe("SEND_ELIGIBLE");
-  expect(f.commit.mock.calls.at(-1)![1].metaPlan!.messages).toEqual([
-    {kind:"TEXT",text:"Em gửi ảnh chị nhé."},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);
-  expect(f.verifier).toHaveBeenCalledTimes(2);
+  const owner=vi.fn(async()=>tool(intent));
+  const second=await f.run(owner);
+  expect(second).toMatchObject({enqueued:0,terminal:{disposition:"NO_SEND",reason:"HUMAN_OWNS_CONVERSATION",text:null}});
+  expect(owner).not.toHaveBeenCalled();expect(f.verifier).toHaveBeenCalledTimes(1);
 });
 
+
 it.each(["PASS","UNCERTAIN"])("keeps a mixed price/media reply only after whole-draft verification (%s)",async verdict=>{
-  const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);
+  const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);f.enableHandoff();
   p.images=[{url:"https://content.pancake.vn/feedback.jpg",role:"PRIMARY",angle:"FRONT",imageType:"MODEL",intents:[],sortOrder:0,qualityScore:null,feedback:true,
     reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
   f.message.text="Cho chị xem ảnh khách mặc, áo này bao nhiêu em?";
@@ -490,11 +482,16 @@ it.each(["PASS","UNCERTAIN"])("keeps a mixed price/media reply only after whole-
     return {kind:"FINAL",text:draft};
   });
   expect(f.verifier).toHaveBeenCalledTimes(1);
-  const delivered=f.commit.mock.calls.at(-1)![1].metaPlan!.messages;
-  expect(delivered).toEqual([{kind:"TEXT",text:result.terminal.text},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);
-  if(verdict==="PASS")expect(result.terminal.text).toBe(draft);
-  else {expect(result.terminal.disposition).toBe("FALLBACK");expect(JSON.stringify(delivered)).not.toContain("499");}
+  if(verdict==="PASS") {
+    const delivered=f.commit.mock.calls.at(-1)![1].metaPlan!.messages;
+    expect(delivered).toEqual([{kind:"TEXT",text:draft},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);
+    expect(result.terminal.text).toBe(draft);
+  } else {
+    expect(result).toMatchObject({enqueued:0,terminal:{disposition:"HANDOFF",text:null}});
+    expect(f.commit.mock.calls.every(c=>!c[1].metaPlan)).toBe(true);
+  }
 });
+
 
 it("hands off missing requested feedback even when the price in the same batch is available",async()=>{
   const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);await enableRecoveryHandoff(f);
@@ -542,8 +539,8 @@ async function seedCart(f: ReturnType<typeof fixture>) {
     sourceAuthority:"POS_SNAPSHOT",stockStatus:"IN_STOCK",stockAvailableQuantity:4,sourceObservedAt:commerceNow.toISOString(),sourceExpiresAt:new Date(commerceNow.getTime()+1200000).toISOString()});
 }
 
-it("persists a real recovery public outcome and feeds only its accepted numeric history to both models next turn",async()=>{
-  const f=fixture();await seedCart(f);
+it("preserves committed negotiation and silently hands off instead of sending a recovery summary",async()=>{
+  const f=fixture();await seedCart(f);f.enableHandoff();
   f.message.text="Bớt cho chị chút";
   let calls=0;
   const first=await f.run(async()=>{
@@ -551,32 +548,18 @@ it("persists a real recovery public outcome and feeds only its accepted numeric 
       content:{role:"model",parts:[{functionCall:{name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:f.message.text}}}]}};
     throw new Error("OUTPUT_FAILURE");
   });
-  expect(first.terminal.reason).toBe("RECEIPT_BACKED_CART_SUMMARY");
-  const meta=f.commit.mock.calls.at(-1)![1].metaPlan!;
-  expect(meta.publicCartSummary).toMatchObject({kind:"C3_PUBLIC_CART_SUMMARY_V1",cartId:f.cycle().cart!.value.cartId,
-    grandTotalVnd:f.cycle().cart!.value.grandTotalVnd});
-  const proof=meta.publicCartSummary as Record<string,unknown>;
-  const cipher=new LocalEnvelopeCipher("00".repeat(32),"test"),outboxId="accepted-summary";
-  const payload=cipher.encryptJson({...meta.messages[0],commercePublicCartSummary:proof},`lana:meta-payload:v2:${commerceScope().pageId}:${outboxId}`,new Date(Date.now()+60000));
-  const reader=new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost/unused",cipher);
-  (reader as unknown as {pool:unknown}).pool={query:async()=>({rows:[{outbox_id:outboxId,page_id:commerceScope().pageId,conversation_id:commerceScope().conversationId,
-    response_group_id:meta.responseGroupId,sequence_no:0,status:"SENT_ACCEPTED",meta_message_id:"accepted",accepted_at:new Date(commerceNow.getTime()-1),
-    payload_ciphertext:payload.ciphertext,payload_nonce:payload.nonce,payload_auth_tag:payload.authTag,payload_encrypted_dek:payload.encryptedDek,payload_key_ref:payload.keyRef,payload_expires_at:payload.expiresAt}]})};
-  Object.assign(f.store,{readAcceptedCommerceCartSummaries:reader.readAcceptedCommerceCartSummaries.bind(reader)});
-  f.history.listConversationHistory.mockResolvedValue([{senderType:"BOT",text:"[ADDRESS]"},{senderType:"CUSTOMER",text:"Giữ size M nhé."}]);
+  expect(first).toMatchObject({enqueued:0,terminal:{disposition:"HANDOFF",text:null}});
+  expect("recovery" in first && first.recovery?.originalReason).toBe("PROVIDER_ERROR");
+  expect(f.cycle().negotiation!.consumedObjectionEvidenceIds).toHaveLength(1);
+  expect(f.commit.mock.calls.filter(c=>c[1].salesCyclePlan)).toHaveLength(1);
+  expect(f.commit.mock.calls.every(c=>!c[1].metaPlan)).toBe(true);
   f.message.messageId="total-next";f.message.eventKey="total-next";f.message.text="Cả ship bao nhiêu em?";
   const owner=vi.fn(async()=>({kind:"FINAL" as const,text:"Dạ chị."}));
   const second=await f.run(owner);
-  expect(second.terminal.disposition).toBe("SEND_ELIGIBLE");
-  expect(owner.mock.calls).toHaveLength(1);
-  const ownerRequest=(owner.mock.calls as unknown as [Parameters<typeof runPersistedCommerceIngress>[0]["owner"] extends (r:infer R)=>unknown?R:never][])[0]![0];
-  expect(ownerRequest.historyMetadata?.publicCartEvents).toHaveLength(1);
-  expect(ownerRequest.context.effectReceipts).toEqual([]);
-  expect(ownerRequest.context.state.cartQuote).toMatchObject({grandTotalVnd:f.cycle().cart!.value.grandTotalVnd});
-  const verify=(f.verifier.mock.calls as unknown as [{historyMetadata:unknown}][]).at(-1)![0];
-  expect(verify.historyMetadata).toEqual(ownerRequest.historyMetadata);
-  expect(JSON.stringify(ownerRequest.contents)).not.toContain("[ADDRESS]");
+  expect(second.terminal).toMatchObject({disposition:"NO_SEND",reason:"HUMAN_OWNS_CONVERSATION",text:null});
+  expect(owner).not.toHaveBeenCalled();
 });
+
 
 it("does not count the same objection again when a superseded batch gains a new tail",async()=>{
   const f=fixture(); await seedCart(f);
@@ -814,7 +797,7 @@ describe("persisted ingress source and final revision", () => {
     expect(f.commit.mock.calls.at(-1)![1].salesCyclePlan).toMatchObject({ state: { cart: { value: { lines: [line] } } } });
   });
 
-  it.each(["READY", "PRICE_CHANGED", "UNAVAILABLE"] as const)("binds a code-owned cart summary to current cart/fact readiness before enqueue (%s)", async source => {
+  it.each(["READY", "PRICE_CHANGED", "UNAVAILABLE"] as const)("never sends a legacy cart-summary fallback regardless of current source (%s)", async source => {
     const f = fixture(), scope = commerceScope(), policy = (await fixturePolicy()).bundle!.policy;
     let state = createSalesCycleRuntimeState(scope.conversationId, { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
     for (const kind of ["FACTS_PRESENTED", "MEASUREMENTS_REQUIRED", "SIZE_RECOMMENDED"] as const) state = applySalesCycleCommand({ state,
@@ -843,24 +826,17 @@ describe("persisted ingress source and final revision", () => {
     });
     const result = await f.run(async () => { throw new Error("owner unavailable"); });
     expect(f.verifier).not.toHaveBeenCalled();
-    if (source === "READY") {
-      expect(result.enqueued, JSON.stringify(result.terminal)).toBe(1);
-      const meta = f.commit.mock.calls[0]![1].metaPlan!;
-      expect(meta.effectReadiness!.binding.cart).toMatchObject({ cartId: draft.identity.cartId, cartRevision: state.cart!.value.revision });
-      expect(meta.protectedClaimTypes).toEqual(expect.arrayContaining(["PRICE", "STOCK", "SHIPPING_FEE"]));
-    } else {
-      expect(result).toMatchObject({ enqueued: 0, terminal: { disposition: "NO_SEND", reason: "EGRESS_CART_SOURCE_CHANGED" } });
-      expect(f.commit).not.toHaveBeenCalled();
-    }
+    expect(result).toMatchObject({enqueued:0,terminal:{disposition:"NO_SEND",text:null}});
+    expect(f.commit.mock.calls.every(c=>!c[1].metaPlan)).toBe(true);
   });
-  it.each([{ ids: [] }, { ids: ["SM613", "OTHER1", "OTHER2"] }])("enqueues a code-owned fallback without unrelated product coverage ($ids)", async ({ ids }) => {
+
+  it.each([{ ids: [] }, { ids: ["SM613", "OTHER1", "OTHER2"] }])("does not send a static fallback when handoff is unavailable ($ids)", async ({ ids }) => {
     const f = fixture(ids), result = await f.run(async () => { throw new Error("provider unavailable"); });
-    expect(result.terminal.disposition).toBe("FALLBACK"); expect(result.enqueued).toBe(1);
+    expect(result).toMatchObject({enqueued:0,terminal:{disposition:"NO_SEND",text:null}});
     expect(f.verifier).not.toHaveBeenCalled();
-    const meta = f.commit.mock.calls[0]![1].metaPlan!;
-    expect(meta.protectedClaims).toEqual([]); expect(meta.effectReadiness).toMatchObject({ outcome: "READY", productIds: [], cartId: null });
-    expect(meta.sourceMessageIdHash).toBeTruthy();
+    expect(f.commit.mock.calls.every(c=>!c[1].metaPlan)).toBe(true);
   });
+
   it("enqueues a policy-only generated reply without a product and still verifies it", async () => {
     const f = fixture([]), outputs: OwnerGeneration[] = [{ kind: "TOOLS", calls: [{ name: "read_policy", args: {} }],
       content: { role: "model", parts: [{ functionCall: { name: "read_policy", args: {} } }] } },
@@ -877,7 +853,7 @@ describe("persisted ingress source and final revision", () => {
     expect(result.terminal.reason).toBe("PASS"); expect(result.enqueued).toBe(1);
     expect(f.commit.mock.calls[0]![1].metaPlan!.effectReadiness!.productIds).toEqual(["SM613"]);
   });
-  it("enqueues a static fallback when an existing cart cannot be refreshed", async () => {
+  it("does not send a static fallback or replay an existing unrefreshable cart", async () => {
     const f = fixture(), scope = commerceScope(), policy = (await fixturePolicy()).bundle!.policy;
     let state = createSalesCycleRuntimeState(scope.conversationId, { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
     for (const kind of ["FACTS_PRESENTED", "MEASUREMENTS_REQUIRED", "SIZE_RECOMMENDED"] as const) state = applySalesCycleCommand({ state,
@@ -889,11 +865,11 @@ describe("persisted ingress source and final revision", () => {
       trustedPorts: { resolveCartDraft: () => draft, resolveShopPolicy: () => policy, resolveCartMutation: () => null, resolveInboundMessage: () => null, revalidateCheckout: () => null } }).state;
     f.setCycle(state);
     const result = await f.run(async () => { throw new Error("provider unavailable"); });
-    expect(result.terminal.disposition).toBe("FALLBACK"); expect(result.enqueued).toBe(1);
-    const prepared = f.commit.mock.calls[0]![1];
-    expect(prepared.salesCyclePlan).toMatchObject({ expectedRevision: state.revision, state, events: [] });
-    expect(prepared.salesCyclePlan!.effectReadiness).toBeUndefined(); expect(prepared.metaPlan!.effectReadiness!.binding.cart).toBeNull();
+    expect(result).toMatchObject({enqueued:0,terminal:{disposition:"NO_SEND",text:null}});
+    expect(f.commit.mock.calls.every(c=>!c[1].metaPlan)).toBe(true);
+    expect(f.cycle()).toEqual(state);
   });
+
   it("does not write customer state after a newer Inbox generation arrives during owner generation", async () => {
     const f = fixture();
     const result = await f.run(async () => {

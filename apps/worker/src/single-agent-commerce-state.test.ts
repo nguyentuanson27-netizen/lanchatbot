@@ -347,7 +347,7 @@ describe("accepted effective state before dependent tools", () => {
  const s=await setup();s.sizeInput.mockResolvedValue({...fixtureSizeInput(),charts:[]});let calls=0;
  const r=await runCommerceTurn({scope:commerceScope(),tools:s.tools,latest:"Tư vấn size chị nhé",history:[],clock:()=>commerceNow,
  ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",owner:async()=>{calls++;const c={name:calls===1?"read_product":"recommend_size",args:{subjectRef:"QU714"}};return {kind:"TOOLS",calls:[c],content:{role:"model",parts:[{functionCall:c}]}};},verifier:async()=>{throw Error("NO_DRAFT_EXPECTED");}});
- expect(calls).toBe(2);expect(r.verifierGenerations).toBe(0);expect(r.terminal).toMatchObject({disposition:"FALLBACK",reason:"SIZE_RULE_UNAVAILABLE",fallbackId:"C3_A_NONPROTECTED_V2"});
+ expect(calls).toBe(2);expect(r.verifierGenerations).toBe(0);expect(r.terminal).toMatchObject({disposition:"NO_SEND",text:null,fallbackId:null});expect(r.recovery?.originalReason).toBe("SIZE_RULE_UNAVAILABLE");
  });
 
 it("co-locates received fit preference and only the alternatives authorized by the current size claim",async()=>{

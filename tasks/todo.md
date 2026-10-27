@@ -1,4 +1,11 @@
-## Current — model qualification recovery/discovery, 27/10/2026
+## Current — fallback chuyển handoff im lặng, 28/10/2026
+
+- [x] Theo quyết định owner: mọi fallback -> atomic SILENT_HANDOFF, không text/ảnh/price fragment/receipt ACK thay thế; không có capability hoặc commit/readback không chứng minh được -> NO_SEND.
+- [x] TDD observed RED 12 failures -> GREEN; thêm guards input/preparation/budget/size/malformed/provider/verdict, giữ state đã commit và không replay. Một handoff attempt; V2 counters giữ đúng; không enqueue/commit lần hai sau bàn giao hoặc unknown.
+- [x] Cập nhật protocol/terminal map và các expectations cũ; final 682 commerce/boundary +39 protected/assembly Vitest PASS, 228 Node PASS, provider adapter 24 PASS/1 SKIP, worker build/direct typecheck/lint PASS. [Record](../docs/specs/c3-phase-b-silent-fallback-20261028.md).
+- [ ] Fresh model và PostgreSQL qualification sau fix chưa chạy; B1 read-only không xác nhận được bàn giao, upstream media/chất lượng tư vấn/SLA handoff còn hạn chế. Không thay số campaign cũ, không B GO/live/publish/merge/deploy.
+
+## Previous — model qualification recovery/discovery, 27/10/2026
 
 - [x] Seal source574ef87d sạch trước/sau; đúng pinnedCLI/hash/login,17controlsPASS trước51native;N1/retry0,141actualgenerationrequests,0provider/qualificationerrors,6testDBdrop. [Report](../apps/worker/evals/single-agent-commerce-read-only/recovery-discovery-run-20261027/CHECKPOINT_B.md).
 - [x] Đủ51outcomes/wholeturnselfreview:37eligible/9HANDOFF/4NO_SEND/1fallback;30persistedqualifiersVALID/21B1eligibilityonly. Actual141wires/86ownerprompt hashes/34explicitverifier+21B1telemetry matches, no boundedlabel/keyleak. [Hội thoại](../apps/worker/evals/single-agent-commerce-read-only/recovery-discovery-run-20261027/CONVERSATIONS.md).

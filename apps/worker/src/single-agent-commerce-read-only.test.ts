@@ -22,7 +22,8 @@ it("allows one separately accounted terminal handoff after six normal calls with
     return calls.map(()=>({status:"OK" as const}));
   });
   const tools={...s.tools,prepare:async()=>0,availableTools:["read_policy","request_handoff"],invokeBatch,
-    terminalOutcome:async()=>committed?{disposition:"HANDOFF" as const,reason:"STOCK_UNAVAILABLE",text:"Bên em kiểm tra rồi báo chị nhé.",fallbackId:null}:null};
+    terminalOutcome:async()=>committed?{disposition:"HANDOFF" as const,reason:"STOCK_UNAVAILABLE",text:null,fallbackId:null}:null,
+    handoffStatus:()=>committed?{attempts:1,status:"COMMITTED" as const,reason:"STOCK_UNAVAILABLE"}:null};
   const r=await runCommerceTurn({...s,tools,owner:async request=>{
     if(++step===3){expect(request.toolsAllowed).toBe(false);expect(request).toMatchObject({terminalHandoffAllowed:true});return tool("request_handoff",{reason:"STOCK_UNAVAILABLE"});}
     const calls=Array.from({length:3},()=>({name:"read_policy",args:{}}));
@@ -45,7 +46,7 @@ it("rejects a mixed handoff/read batch without executing either call",async()=>{
   const s=setup(),invokeBatch=vi.fn(async()=>[]),calls=[{name:"request_handoff",args:{reason:"EXCHANGE"}},{name:"read_policy",args:{}}];
   const r=await runCommerceTurn({...s,tools:{...s.tools,availableTools:["read_policy","request_handoff"],invokeBatch},
     owner:async()=>({kind:"TOOLS",calls,content:{role:"model",parts:calls.map(functionCall=>({functionCall}))}})});
-  expect(invokeBatch).not.toHaveBeenCalled();expect(r.terminal.disposition).toBe("FALLBACK");
+  expect(invokeBatch).not.toHaveBeenCalled();expect(r.terminal.disposition).toBe("NO_SEND");
   expect(r).toMatchObject({proposedToolCalls:2,rejectedToolCalls:2,terminalHandoffCalls:0});
 });
 
@@ -53,8 +54,8 @@ describe("one conversational owner, tools and exact egress", () => {
   it.each(["[asset:declared]", "asset:unknown", "[asset:", "Chị xem ảnh asset:from-history nhé"])("rejects transport artifacts before verification: %s", async text => {
     const s = setup();
     const result = await runCommerceTurn({ ...s, history: [{role:"shop",text:"asset:from-history"}], owner:async()=>final(text) });
-    expect(result.terminal.disposition).toBe("FALLBACK");
-    expect(result.terminal.reason).toBe("OWNER_OUTPUT_ARTIFACT");
+    expect(result.terminal.disposition).toBe("NO_SEND");
+    expect(result.recovery?.originalReason).toBe("OWNER_OUTPUT_ARTIFACT");
     expect(s.verifier).not.toHaveBeenCalled();
     expect(result.ownerGenerations).toBe(1);
   });
@@ -151,8 +152,8 @@ describe("one conversational owner, tools and exact egress", () => {
     expect(result.toolRounds).toBe(2);
     expect(result.toolCalls).toBe(2);
     expect(result.verifierGenerations).toBe(1);
-    expect(result.terminal.disposition).toBe(changed ? "HANDOFF" : "SEND_ELIGIBLE");
-    expect(result.terminal.reason).toBe(changed ? "CURRENT_READBACK_UNAVAILABLE" : "PASS");
+    expect(result.terminal.disposition).toBe(changed ? "NO_SEND" : "SEND_ELIGIBLE");
+    expect(changed ? result.recovery?.originalReason : result.terminal.reason).toBe(changed ? "CURRENT_READBACK_UNAVAILABLE" : "PASS");
     expect(result.sendEnabled).toBe(false);
   });
   it("does not reject a read batch solely because product evidence is duplicated in the trusted snapshot", async () => {
@@ -195,7 +196,7 @@ describe("one conversational owner, tools and exact egress", () => {
     const owner = vi.fn(async () => tool(kind === "other-tool" ? "read_policy" : "read_product", {subjectRef:"SM613"}));
     const result = await runCommerceTurn({...s, owner, tools:{...s.tools, prepare:async()=>0, snapshot:()=>({...context,runtimeProducts:[product]}),
       invokeBatch:async()=>[{status:kind === "error" ? "UNAVAILABLE" as const : "OK" as const, data}]}});
-    expect(result.terminal.reason).toBe("TOOL_RESULT_BOUND");
+    expect(result.recovery?.originalReason).toBe("TOOL_RESULT_BOUND");
     expect(owner).toHaveBeenCalledOnce(); expect(s.verifier).not.toHaveBeenCalled();
   });
   it("keeps every discovery candidate and unknown price when duplicate search descriptions exceed 8KB", async () => {
@@ -287,26 +288,26 @@ describe("one conversational owner, tools and exact egress", () => {
     const r = await runCommerceTurn({ ...s, owner });
     expect(owner).toHaveBeenCalledTimes(1);
     expect(s.verifier).not.toHaveBeenCalled();
-    expect(r.terminal.fallbackId).toBe("C3_A_NONPROTECTED_V2");
+    expect(r.terminal).toMatchObject({disposition:"NO_SEND",text:null,fallbackId:null});
   });
-  it("retains the original failure when a code-owned receipt acknowledgement recovers it", async () => {
+  it("retains the original failure without sending a legacy receipt acknowledgement", async () => {
     const s = setup();
     const owner = vi.fn(async () => { throw new Error("provider rejected"); });
     const result = await runCommerceTurn({ ...s, owner, tools: { ...s.tools, recover: async () => ({
       disposition: "SEND_ELIGIBLE", reason: "RECEIPT_BACKED_ACK", text: "Đã thêm áo vào giỏ.", fallbackId: null,
     }) } });
-    expect(result.terminal.reason).toBe("RECEIPT_BACKED_ACK");
+    expect(result.terminal).toMatchObject({disposition:"NO_SEND",text:null});
     expect(result).toMatchObject({ recovery: { originalDisposition: "FALLBACK", originalReason: "PROVIDER_ERROR" } });
     expect(owner).toHaveBeenCalledOnce(); expect(s.verifier).not.toHaveBeenCalled();
     expect(JSON.stringify(result.recovery)).not.toContain("Đã thêm áo");
   });
-  it("retains the final-gate diagnostic when existing code-owned recovery replaces a stale terminal", async () => {
+  it("retains stale final-gate diagnostics without authorizing a receipt acknowledgement", async () => {
     const s = setup(), readback = s.tools.readback;
     const result = await runCommerceTurn({ ...s, owner: async () => final("Dạ chị."), tools: { ...s.tools,
       readback: async () => { const current = await readback(); current.state.revision++; return current; },
       recover: async () => ({ disposition: "SEND_ELIGIBLE", reason: "RECEIPT_BACKED_ACK", text: "Đã thêm áo vào giỏ.", fallbackId: null }),
     } });
-    expect(result.terminal.reason).toBe("RECEIPT_BACKED_ACK");
+    expect(result.terminal).toMatchObject({disposition:"NO_SEND",text:null});
     expect(result.recovery).toMatchObject({ originalDisposition: "HANDOFF", originalReason: "STALE",
       originalDiagnostic: { check: "CURRENT_SNAPSHOT", expectedRevision: s.scope.revision, currentRevision: s.scope.revision + 1, reasonCodes: [] } });
   });
@@ -317,11 +318,11 @@ describe("one conversational owner, tools and exact egress", () => {
     expect(owner).toHaveBeenCalledTimes(3);
     expect(r.toolRounds).toBe(2);
     expect(invokeBatch).toHaveBeenCalledTimes(2);
-    expect(r.terminal.reason).toBe("OWNER_TOOL_MODE");
+    expect(r.recovery?.originalReason).toBe("OWNER_TOOL_MODE");
     expect(r.generations.map(g => g.status)).toEqual(["OK", "OK", "PROVIDER_ERROR"]);
     expect(s.verifier).not.toHaveBeenCalled();
   });
-  it("preserves the tool-mode failure when existing receipt recovery supplies the terminal", async () => {
+  it("preserves tool-mode failure without invoking legacy receipt recovery", async () => {
     const s = setup();
     const r = await runCommerceTurn({ ...s, owner: async () => tool("read_policy"), tools: { ...s.tools,
       recover: async () => ({ disposition: "SEND_ELIGIBLE", reason: "RECEIPT_BACKED_ACK", text: "Đã nhận lựa chọn.", fallbackId: null }),
@@ -330,25 +331,24 @@ describe("one conversational owner, tools and exact egress", () => {
     expect(r.generations.at(-1)?.status).toBe("PROVIDER_ERROR");
     expect(r.ownerGenerations).toBe(3); expect(r.verifierGenerations).toBe(0);
   });
-  it.each(["FAIL", "UNCERTAIN"])("%s scores the actual frozen fallback", async verdict => {
+  it.each(["FAIL", "UNCERTAIN"])("%s has no customer output without a committed handoff", async verdict => {
     const s = setup(); s.verifier.mockImplementation(async () => ({ result: { verdict, violations: [] } }));
     const r = await runCommerceTurn({ ...s, owner: async () => final() });
-    expect(r.terminal.disposition).toBe("FALLBACK");
-    expect(r.terminal.text).toBe("Phần này em chưa trả lời được, chị nhé.");
+    expect(r.terminal.disposition).toBe("NO_SEND");
+    expect(r.terminal.text).toBeNull();
   });
   it("does not mention staff or the bot after a failed verdict just because handoff is available",async()=>{
     const s=setup();s.verifier.mockResolvedValue({result:{verdict:"FAIL",violations:[]}});
     const tools={...s.tools,availableTools:["request_handoff"],fallbackId:()=>"C3_A_NONPROTECTED_V2"};
     const r=await runCommerceTurn({...s,tools,owner:async()=>final()});
-    expect(r.terminal).toMatchObject({disposition:"FALLBACK",reason:"FAIL",fallbackId:"C3_A_NONPROTECTED_V2",
-      text:"Phần này em chưa trả lời được, chị nhé."});
-    expect(r.terminal.text).not.toMatch(/nhân viên|bot|đã chuyển|đã nhờ/i);
+    expect(r.terminal).toMatchObject({disposition:"NO_SEND",text:null,fallbackId:null});
+    expect(r.recovery?.originalReason).toBe("FAIL");
   });
-  it("keeps a media-source failure specific even when handoff is available",async()=>{
+  it("does not send the media-source fallback when handoff is unproved",async()=>{
     const s=setup();s.verifier.mockResolvedValue({result:{verdict:"FAIL",violations:[]}});
     const tools={...s.tools,availableTools:["request_handoff"],fallbackId:()=>"C3_B_MEDIA_UNAVAILABLE_V1"};
     const r=await runCommerceTurn({...s,tools,owner:async()=>final()});
-    expect(r.terminal.fallbackId).toBe("C3_B_MEDIA_UNAVAILABLE_V1");
+    expect(r.terminal).toMatchObject({disposition:"NO_SEND",text:null,fallbackId:null});
   });
   it("invalidates PASS if permission changes during verification", async () => {
     const s = setup(), readback = s.tools.readback;
@@ -369,7 +369,7 @@ describe("one conversational owner, tools and exact egress", () => {
     const s = setup();
     const verifier = vi.fn(() => new Promise<never>(() => {}));
     const r = await runCommerceTurn({ ...s, timeoutMs: 5, owner: async () => final(), verifier });
-    expect(r.terminal.reason).toBe("TIMEOUT");
+    expect(r.recovery?.originalReason).toBe("TIMEOUT");
     expect(r.verifierGenerations).toBe(1);
     expect(verifier).toHaveBeenCalledTimes(1);
   });
@@ -377,7 +377,7 @@ describe("one conversational owner, tools and exact egress", () => {
     const s = setup(), timeout = vi.fn(async () => { throw Object.assign(new Error("PROVIDER_TIMEOUT"), { telemetry: { providerRequests: 1, failureCode: "TIMEOUT" } }); });
     const result = await runCommerceTurn({ ...s, owner: role === "owner" ? timeout : async () => final("Dạ chị."),
       verifier: role === "verifier" ? timeout : s.verifier });
-    expect(result.terminal.reason).toBe("TIMEOUT"); expect(timeout).toHaveBeenCalledOnce();
+    expect(result.recovery?.originalReason).toBe("TIMEOUT"); expect(timeout).toHaveBeenCalledOnce();
     expect(result.generations.find(g => g.role === role)).toMatchObject({ status: "TIMEOUT", telemetry: { providerRequests: 1 } });
   });
 });

@@ -6,6 +6,16 @@ import {join} from 'node:path';
 import {runtimeCase,readRegisteredCases,buildVerifierRequest,createCommerceVerifier,validateProtocol,requiredSourceConfig,sha256,dispatchRange} from './protocol.mjs';
 const manifest=JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url),'utf8'));
 
+test('all rejected Phase B replies require silent handoff or no-send, never fallback text or media',()=>{
+ assert.doesNotThrow(()=>validateProtocol(manifest));
+ for(const patch of [{mode:'STATIC_FALLBACK'},{customerText:true},{images:true},{effectReplay:true},{unavailable:'STATIC_FALLBACK'}]){
+  const changed=structuredClone(manifest);Object.assign(changed.fallbackDelivery,patch);
+  assert.throws(()=>validateProtocol(changed),/FALLBACK_DELIVERY_POLICY/);
+ }
+ const changed=structuredClone(manifest);changed.terminalMap.FAIL='STATIC_FALLBACK';
+ assert.throws(()=>validateProtocol(changed),/TERMINAL_DISPOSITION_MAP/);
+});
+
 test('current registration cannot silently re-enable holding or protected partial replies on handoff',()=>{
  assert.equal(manifest.handoffReply.customerMessagePolicy,'SILENT_HANDOFF');
  assert.deepEqual(manifest.handoffReply.approvedHoldingHashes,[]);

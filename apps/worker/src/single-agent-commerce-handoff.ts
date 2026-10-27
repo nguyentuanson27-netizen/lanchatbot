@@ -97,20 +97,23 @@ export function createCommerceHandoffTools(input: {
       text: committed.text ?? committed.decision.customerMessages[0] ?? null, fallbackId: null };
   }
   async function execute(reason: HandoffReasonV2, independentSizeMedia = false,
-    reply?: CommerceHandoffCommit["reply"], checkReply?:()=>Promise<boolean>): Promise<CommerceToolResult> {
+    reply?: CommerceHandoffCommit["reply"], checkReply?:()=>Promise<boolean>, silentFallback = false): Promise<CommerceToolResult> {
     if (uncertain) return { status: "UNAVAILABLE", reason: "HANDOFF_COMMIT_UNPROVED" };
     if (committed) return { status: "REJECTED", reason: "ALREADY_HANDED_OFF" };
     const before = await read();
     if (!scopeMatches(before) || !before.permission || before.state.conversationOwner !== "BOT" || before.state.routingOwner !== "APP" ||
       before.stateVersion !== (input.base.snapshot().state.conversationRevision ?? input.scope.revision) ||
       before.state.revision !== before.stateVersion) return { status: "REJECTED", reason: "HANDOFF_AUTHORITY" };
-    const policy = await input.policy(), decision = selectCommerceHandoff(policy, input.scope, reason, input.clock());
+    const policy = await input.policy(), selected = selectCommerceHandoff(policy, input.scope, reason, input.clock());
+    // Keep source rule/tag authority; the owner-approved recovery only removes output.
+    const decision: HandoffDecisionV2 = silentFallback
+      ? { ...selected, customerMessagePolicy: "SILENT_HANDOFF", customerMessages: [] } : selected;
     if(pending&&(commerceHash(before)!==commerceHash(pending.before)||policyIdentity(policy)!==pending.policyHash))
       return {status:"REJECTED",reason:"HANDOFF_PREDECESSOR_CHANGED"};
     let media: CommerceHandoffCommit["media"];
     // Only automatic no-chart recovery can preserve independent media. An
     // explicit customer/model handoff and a silent policy keep their contract.
-    if (independentSizeMedia && decision.customerMessages.length && input.prepareSizeHandoffMedia) {
+    if (!silentFallback && independentSizeMedia && decision.customerMessages.length && input.prepareSizeHandoffMedia) {
       try { media = await input.prepareSizeHandoffMedia(before); } catch { media = undefined; }
     }
     if (media) {
@@ -143,7 +146,7 @@ export function createCommerceHandoffTools(input: {
     return outcome?.disposition === "HANDOFF" ? { status: "OK", data: { handoffAccepted: true } }
       : { status: "UNAVAILABLE", reason: "HANDOFF_SCOPE_CHANGED" };
   }
-  async function request(reason: HandoffReasonV2, independentSizeMedia = false): Promise<CommerceToolResult> {
+  async function request(reason: HandoffReasonV2, independentSizeMedia = false, silentFallback = false): Promise<CommerceToolResult> {
     if(attempts)return {status:"REJECTED",reason:"HANDOFF_ALREADY_ATTEMPTED"};
     attempts=1;attemptedReason=reason;
     const before=await read();
@@ -151,12 +154,12 @@ export function createCommerceHandoffTools(input: {
       before.stateVersion!==(input.base.snapshot().state.conversationRevision??input.scope.revision)||before.state.revision!==before.stateVersion)
       return {status:"REJECTED",reason:"HANDOFF_AUTHORITY"};
     const policy=await input.policy(),decision=selectCommerceHandoff(policy,input.scope,reason,input.clock());
-    if(input.deferredReply&&!independentSizeMedia&&reason!=="CUSTOMER_REQUESTED_HUMAN"&&decision.customerMessages.length&&
+    if(!silentFallback&&input.deferredReply&&!independentSizeMedia&&reason!=="CUSTOMER_REQUESTED_HUMAN"&&decision.customerMessages.length&&
       decision.customerMessages.every(text=>input.deferredReply!.approvedHoldingHashes.includes(commerceHash(text)))) {
       pending={before:structuredClone(before),decision,policyHash:policyIdentity(policy)};status="PREPARED";
       return {status:"OK",data:{handoffPrepared:true}};
     }
-    const result=await execute(reason,independentSizeMedia);status=committed?"COMMITTED":uncertain?"UNKNOWN":"BLOCKED";return result;
+    const result=await execute(reason,independentSizeMedia,undefined,undefined,silentFallback);status=committed?"COMMITTED":uncertain?"UNKNOWN":"BLOCKED";return result;
   }
   const sealHandoffReply=(text:string,trusted:TrustedContext,images:readonly MediaDeliveryImage[])=>{
     if(!pending)return text;
@@ -203,6 +206,24 @@ export function createCommerceHandoffTools(input: {
     try { return await request(parsed.data); } catch { return { status: "UNAVAILABLE", reason: "HANDOFF_POLICY_OR_SOURCE" }; }
   }
   return { ...input.base, invoke, snapshot, terminalOutcome,sealHandoffReply,completeHandoff,
+    async recoverFallback(outcome) {
+      if(outcome.disposition==="NO_SEND")return outcome;
+      try {
+        if(pending&&!committed&&!uncertain&&status==="PREPARED") {
+          await execute(pending.decision.reason,false,undefined,undefined,true);
+          status=committed?"COMMITTED":uncertain?"UNKNOWN":"BLOCKED";
+        } else if(!attempts) {
+          const reason=outcome.reason==="SIZE_RULE_UNAVAILABLE"?"SIZE_RULE_UNAVAILABLE":
+            ["PROVIDER_ERROR","TIMEOUT","PREPARATION_UNAVAILABLE","CURRENT_READBACK_UNAVAILABLE","STALE"].includes(outcome.reason)
+              ?"DEPENDENCY_FAILURE":"RESPONSE_UNAVAILABLE";
+          await request(reason,false,true);
+        }
+        const actual=await terminalOutcome();
+        if(actual?.disposition==="HANDOFF"&&actual.text===null)return actual;
+        if(actual?.disposition==="NO_SEND")return actual;
+      } catch { /* Unknown/rejected commits never authorize output or another attempt. */ }
+      return {disposition:"NO_SEND",reason:"FALLBACK_HANDOFF_UNPROVED",text:null,fallbackId:null};
+    },
     handoffStatus:()=>attempts?{attempts,status,reason:attemptedReason}:null,
     async readback() { await input.base.readback(); await read(); return snapshot(); }, async invokeBatch(calls) {
     if (committed || uncertain || pending) return calls.map(() => ({ status: "REJECTED", reason: "HANDOFF_TERMINAL" }));

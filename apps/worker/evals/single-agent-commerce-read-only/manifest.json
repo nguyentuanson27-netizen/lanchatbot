@@ -142,12 +142,12 @@
   },
   "terminalMap": {
     "PASS": "SEND_ELIGIBLE_SEND_DISABLED",
-    "FAIL": "STATIC_FALLBACK",
-    "UNCERTAIN": "STATIC_FALLBACK",
-    "MALFORMED": "STATIC_FALLBACK",
-    "TIMEOUT": "STATIC_FALLBACK",
-    "PROVIDER_ERROR": "STATIC_FALLBACK",
-    "STALE": "HANDOFF_NO_SEND_CAPABILITY",
+    "FAIL": "SILENT_HANDOFF_OR_NO_SEND",
+    "UNCERTAIN": "SILENT_HANDOFF_OR_NO_SEND",
+    "MALFORMED": "SILENT_HANDOFF_OR_NO_SEND",
+    "TIMEOUT": "SILENT_HANDOFF_OR_NO_SEND",
+    "PROVIDER_ERROR": "SILENT_HANDOFF_OR_NO_SEND",
+    "STALE": "SILENT_HANDOFF_OR_NO_SEND",
     "PERMISSION": "NO_SEND",
     "PRIVACY": "NO_SEND",
     "RECIPIENT": "NO_SEND"
@@ -190,5 +190,12 @@
     "normalUnits": 2,
     "standalone": true,
     "maxPerTurn": 1
+  },
+  "fallbackDelivery": {
+    "mode": "SILENT_HANDOFF",
+    "unavailable": "NO_SEND",
+    "customerText": false,
+    "images": false,
+    "effectReplay": false
   }
 }

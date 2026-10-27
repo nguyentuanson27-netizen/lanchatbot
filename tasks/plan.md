@@ -1,4 +1,8 @@
-## Current — model qualification recovery/discovery, 27/10/2026
+## Current — fallback chuyển handoff im lặng, 28/10/2026
+
+Owner yêu cầu mọi fallback bàn giao và không gửi tin. Đã thực hiện ở terminal boundary + atomic handoff + ingress; không gửi static/ảnh/receipt replacement, không replay effect; handoff không chứng minh được thì NO_SEND. Standalone B1 thiếu capability thì NO_SEND, không giả có bàn giao. [Implementation/verification](../docs/specs/c3-phase-b-silent-fallback-20261028.md). 682 commerce/boundary +39 protected/assembly Vitest PASS, 228 Node PASS, provider adapter 24 PASS/1 SKIP; worker build/direct typecheck/lint PASS. Chưa fresh model/PostgreSQL qualification, không đổi evidence campaign cũ hoặc B GO, chưa live/merge/deploy.
+
+## Previous — model qualification recovery/discovery, 27/10/2026
 
 **COMPLETE17controls+51native; B chưaGO.** Source574ef87d sạch/unchanged; Gemini3.5FlashLiteHIGH/GPT6.1SolHIGH/CompactV2/N1/retry0. [Report](../apps/worker/evals/single-agent-commerce-read-only/recovery-discovery-run-20261027/CHECKPOINT_B.md), [51hội thoại](../apps/worker/evals/single-agent-commerce-read-only/recovery-discovery-run-20261027/CONVERSATIONS.md).37eligible/9silentHANDOFF/4NO_SEND/1fallback;141requests,0generation/provider/qualificationerrors,6DBdrop,141actualwirechecks/no boundedlabel/secretleak. Discoverybatchread2mẫudướibudget/ETAlookup/currentconcession30k đãthựchiện; vẫn1fallbackSQ223 vìáo1lớp bịmởrộng cảset, vàdiscoveryPASS khônglobóbụng/SIZE_FIT0 cầnreviewphạmvinghĩa, khôngclaimnativezero falsePASS.9handoff=4mediaevidence/3controlledPOS/2business;2codecheckoutoutcomeskhôngphảiimlặng. Wholeturnselfreview51, khôngindependentreviewrunmới/stability/live/BGOclaim. Khôngautofix/rerun/publish/deploy.
 

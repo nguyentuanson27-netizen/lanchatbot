@@ -66,7 +66,7 @@ describe("explicit quote operation",()=>{
    return n===3?{kind:"FINAL",text:"Áo 499.000đ chị nhé."}:{kind:"TOOLS",calls:selected,content:{role:"model",parts:selected.map(functionCall=>({functionCall}))}};
   }});
   if(calls===3)expect(result).toMatchObject({normalToolCalls:6,executedNormalToolInvocations:6,executedToolInvocations:6,terminal:{disposition:"SEND_ELIGIBLE"}});
-  else{expect(result.terminal.reason).toBe("BUDGET");expect(s.tools.quoteTaskWork!()).toEqual([]);expect(verifier).not.toHaveBeenCalled();}
+  else{expect(result.recovery?.originalReason).toBe("BUDGET");expect(s.tools.quoteTaskWork!()).toEqual([]);expect(verifier).not.toHaveBeenCalled();}
  });
  it("leaves an early FINAL untouched: first contact alone cannot select images",async()=>{
   const s=await setup();const result=await runCommerceTurn({scope:s.scope,tools:s.tools,clock:()=>commerceNow,latest:"Sáng mai kịp không?",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",verifier:async()=>({result:{verdict:"PASS",violations:[]}}),owner:async()=>({kind:"FINAL",text:"Shop không nhận hẹn sáng mai chị nhé."})});

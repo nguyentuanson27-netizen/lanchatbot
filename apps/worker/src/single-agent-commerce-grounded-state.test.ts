@@ -111,7 +111,7 @@ describe("grounded numeric customer state", () => {
     const result = await runCommerceTurn({ scope: s.scope, tools: s.tools, clock: () => commerceNow, latest: "Eo 74, mông 96.",
       history: [], ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm nghĩa.", owner, verifier });
     expect(result.ownerGenerations).toBe(3);
-    expect(result.terminal.disposition).toBe(complete ? "SEND_ELIGIBLE" : "FALLBACK");
+    expect(result.terminal.disposition).toBe(complete ? "SEND_ELIGIBLE" : "NO_SEND");
     expect(verifier).toHaveBeenCalledTimes(complete ? 1 : 0);
   });
 });

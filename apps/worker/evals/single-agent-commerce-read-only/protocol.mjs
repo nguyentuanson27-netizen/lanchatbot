@@ -43,6 +43,11 @@ export function validateToolWorkAccounting(r){
  for(const w of r.quoteTaskWork)check(w.reservedUnits===2&&[0,1].includes(w.readInvocations)&&[0,1].includes(w.selectionInvocations)&&w.selectionInvocations<=w.readInvocations&&w.readInvocations+w.selectionInvocations<=r.executedNormalToolInvocations,'QUOTE_WORK_TRACE');
 }
 export function validateProtocol(m){
+ check(m.fallbackDelivery?.mode==='SILENT_HANDOFF'&&m.fallbackDelivery.unavailable==='NO_SEND'&&
+  m.fallbackDelivery.customerText===false&&m.fallbackDelivery.images===false&&m.fallbackDelivery.effectReplay===false,'FALLBACK_DELIVERY_POLICY');
+ check(JSON.stringify(m.terminalMap)===JSON.stringify({PASS:'SEND_ELIGIBLE_SEND_DISABLED',FAIL:'SILENT_HANDOFF_OR_NO_SEND',
+  UNCERTAIN:'SILENT_HANDOFF_OR_NO_SEND',MALFORMED:'SILENT_HANDOFF_OR_NO_SEND',TIMEOUT:'SILENT_HANDOFF_OR_NO_SEND',
+  PROVIDER_ERROR:'SILENT_HANDOFF_OR_NO_SEND',STALE:'SILENT_HANDOFF_OR_NO_SEND',PERMISSION:'NO_SEND',PRIVACY:'NO_SEND',RECIPIENT:'NO_SEND'}),'TERMINAL_DISPOSITION_MAP');
  if(m.quoteTask!==undefined)check(JSON.stringify(Object.entries(m.quoteTask).sort())===JSON.stringify(Object.entries({version:'EXPLICIT_QUOTE_V1',toolWorkAccounting:'PRIMITIVE_WORK_V2',normalUnits:2,standalone:true,maxPerTurn:1}).sort()),'QUOTE_TASK_CONFIG');
  check(m.schemaVersion===1&&m.sendEnabled===false&&m.ownerGenerations===3&&m.toolRounds===2&&m.toolCalls===6&&m.verifierGenerations===1,'PROTOCOL');
  check(m.terminalHandoffAttempts===1&&m.maximumExecutedToolInvocations===7,'TERMINAL_HANDOFF_BUDGET');

@@ -35,6 +35,8 @@ export interface CommerceTools {
   boundedPrice?(): { text: string; claims: import("@lana/contracts").ProtectedClaimV1[] } | null;
   sealHandoffReply?(text: string, trusted: TrustedContext, images: readonly import("./single-agent-commerce-media-delivery.js").MediaDeliveryImage[]): string;
   completeHandoff?(outcome: TerminalOutcome, readback: () => Promise<TrustedContext>): Promise<TerminalOutcome>;
+  /** Code-only recovery: atomically transfer ownership without customer output. */
+  recoverFallback?(outcome: TerminalOutcome): Promise<TerminalOutcome>;
   handoffStatus?(): { attempts: number; status: "PREPARED" | "COMMITTED" | "BLOCKED" | "UNKNOWN"; reason: string } | null;
   publicCartSummary?(): unknown;
   /** Code-owned exact static fallback identity after a tool outcome. */
@@ -100,18 +102,23 @@ export async function runCommerceTurn(input: {
   let terminalHandoffCalls = 0, proposedToolCalls = 0, rejectedToolCalls = 0;
   let toolLatencyMs = 0, verificationStarted: number | undefined;
   const generations: { id: string; role: "owner" | "verifier"; status: string; latencyMs: number; telemetry?: unknown }[] = [];
-  const finish = async (terminal: TerminalOutcome) => {
-    if (input.tools.completeHandoff && input.tools.handoffStatus?.()?.status === "PREPARED") {
-      try { terminal = await input.tools.completeHandoff(terminal, () => input.tools.readback()); }
-      catch { terminal = {disposition:"NO_SEND",reason:"HANDOFF_FINALIZE_UNAVAILABLE",text:null,fallbackId:null}; }
-    }
+  const finish = async (terminal: TerminalOutcome, committedTerminal = false) => {
     let recovery: { originalDisposition: TerminalOutcome["disposition"]; originalReason: string;
       originalDiagnostic?: TerminalOutcome["diagnostic"] } | null = null;
-    if (terminal.disposition !== "SEND_ELIGIBLE" && input.tools.recover) {
+    const rejected = terminal.disposition === "FALLBACK" ||
+      (terminal.disposition === "HANDOFF" && !committedTerminal && input.tools.handoffStatus?.()?.status !== "COMMITTED");
+    if (rejected) {
       recovery = { originalDisposition: terminal.disposition, originalReason: terminal.reason,
         ...(terminal.diagnostic ? { originalDiagnostic: terminal.diagnostic } : {}) };
-      try { terminal = await input.tools.recover(terminal); }
-      catch { terminal = { disposition: "NO_SEND", reason: "RECOVERY_UNAVAILABLE", text: null, fallbackId: null }; }
+      try {
+        terminal = await input.tools.recoverFallback?.(terminal) ??
+          { disposition: "NO_SEND", reason: "FALLBACK_HANDOFF_UNAVAILABLE", text: null, fallbackId: null };
+        if (!["HANDOFF", "NO_SEND"].includes(terminal.disposition) || terminal.text !== null || terminal.fallbackId !== null)
+          terminal = { disposition: "NO_SEND", reason: "FALLBACK_HANDOFF_UNPROVED", text: null, fallbackId: null };
+      } catch { terminal = { disposition: "NO_SEND", reason: "FALLBACK_HANDOFF_UNAVAILABLE", text: null, fallbackId: null }; }
+    } else if (input.tools.completeHandoff && input.tools.handoffStatus?.()?.status === "PREPARED") {
+      try { terminal = await input.tools.completeHandoff(terminal, () => input.tools.readback()); }
+      catch { terminal = {disposition:"NO_SEND",reason:"HANDOFF_FINALIZE_UNAVAILABLE",text:null,fallbackId:null}; }
     }
     const handoff = input.tools.handoffStatus?.();
     terminalHandoffCalls = Math.max(terminalHandoffCalls, handoff?.attempts ?? 0);
@@ -153,7 +160,7 @@ export async function runCommerceTurn(input: {
   }
   const contents: NativeContent[] = [...input.history.map(m => ({ role: m.role === "customer" ? "user" as const : "model" as const,
     parts: [{ text: m.text }] })), { role: "user", parts: [{ text: input.latest }] }];
-  const initialTerminal = await effectTerminal(); if (initialTerminal) return finish(initialTerminal);
+  const initialTerminal = await effectTerminal(); if (initialTerminal) return finish(initialTerminal, true);
   const initial = input.tools.snapshot();
   if (!initial.state.permission || initial.state.conversationOwner !== "BOT" || !initial.state.privacyAllowed) {
     return finish({ disposition: "NO_SEND", reason: "PERMISSION_OR_PRIVACY", text: null, fallbackId: null });
@@ -218,7 +225,7 @@ export async function runCommerceTurn(input: {
       rejectedToolCalls += results.filter(result=>result.status==="REJECTED").length;
       toolLatencyMs += performance.now()-toolStarted;
       const actual = await effectTerminal();
-      if (actual) return finish(actual);
+      if (actual) return finish(actual, true);
       if(terminalCall&&(results.length!==1||results[0]?.status!=="OK"))
         return finish({disposition:"NO_SEND",reason:"HANDOFF_REQUEST_REJECTED",text:null,fallbackId:null});
       if (input.tools.sizeOutcome?.()?.status === "NO_VERIFIED_CHART") return finish(fallback("SIZE_RULE_UNAVAILABLE"));
