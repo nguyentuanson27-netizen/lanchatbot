@@ -1,0 +1,17 @@
+{
+  "sourceSha": "cee48bb768989cf2ae0dda9d6c84b9c99b0ab3c4",
+  "sourceDirty": true,
+  "mode": "REAL_POSTGRES_SYNTHETIC_DOMAIN_INPUTS_CURRENT_POLICY_CAPTURE",
+  "status": "PASS",
+  "providerGenerations": 0,
+  "cases": [
+    {
+      "name": "B qualification shared queue preserves an invalid observed attempt without later dispatch",
+      "status": "PASS"
+    }
+  ],
+  "testDatabaseDropped": true,
+  "checkPrefix": "B qualification",
+  "rawSha256": "b169e9bb5828609d626ba1015a90112a7ef94a64b940d01fda93a3c4203c7b25",
+  "scope": "WORKTREE_POSTGRES_SCENARIO_NOT_CLEAN_SOURCE_OR_PROVIDER_QUALIFICATION"
+}

@@ -58,7 +58,7 @@ const bytes = (v: unknown) => Buffer.byteLength(typeof v === "string" ? v : JSON
 
 // Charge the 8KB tool batch for evidence not already in the snapshot. Raw results stay
 // in the transcript so a later change can still expose the old/different evidence.
-function resultBudgetView(calls: CommerceToolCall[], results: CommerceToolResult[], context: TrustedContext) {
+export function resultBudgetView(calls: CommerceToolCall[], results: CommerceToolResult[], context: TrustedContext) {
   const record = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
   const product = (v: unknown) => record(v)
     ? omitCurrentProductDuplicates(v, context.runtimeProducts?.find(p => p.subjectRef === v.subjectRef)) : v;

@@ -1,4 +1,12 @@
-## Current — kế hoạch recovery/discovery sau review năm vòng, 27/10/2026
+## Current — implementation recovery/discovery, 27/10/2026
+
+- [x] W1 ingressV2 observedRED2→minimumGREEN; rejected/unknown/readback branches; retainedattempt/error/counterUNKNOWN semantics; sharedDBqueue latch/no-drain/NOT_RUN và newcampaignconsumer/driver; diagnostic allowlist. [Record](../docs/specs/c3-phase-b-recovery-discovery-implementation-20261027.md).
+- [x] W2 publicrepresentativefixture→realcomposition/core/projection/mockHTTP feasibility2candidates complete/OKpartial/read-levelerror;MAX4/charged3220–3484B/wiremax36187B. W2/W3 chỉ3instructionregions +tool descriptions, không đổiengine/verifier/budget/corpus.
+- [x] W4 offlinecapture+sourcechainaudit11assets; không mấtfieldđãchứngminh→NO_MEDIA_CODE_PATCH, upstream IMAGE_ID/approval/version hiệnhành UPSTREAM_UNVERIFIED. Không tựgắnnhãn/publish.
+- [x] Final480worker/227Node/3newPython+2historicalPython PASS;directtypecheck/build/lintPASS;PostgreSQLworktree1scenarioPASS/provider0/testDBdroptrue. Cùngreviewer105worker/6Node/3PythonPASS→APPROVE14fileinventory `764302c9713189639be1f91388aa40fa2d83ee81da25fec33222baecebb41cac`, không cònP1/P2.
+- [ ] Providerqualification/modeladherence/quality chưa chạy; B chưaGO. Nguồnảnhcầnrecordauditriêng nếu muốn bổsungevence; không tựrerun/sourcewrite/live/deploy.
+
+## Previous — kế hoạch recovery/discovery sau review năm vòng, 27/10/2026
 
 - [x] Đối chiếu review kết luận/source/cap; planR1/self-review→cùng reviewer REVISE3P2→R2 REVISE1P2 sharedqueue→[revision3 APPROVE](../docs/specs/c3-phase-b-recovery-discovery-fix-plan-20261027.md), canonicalLF hash `762769e338908b8733900bda9af96760dea0b440a5509ad68a758a9633f0d698`; [trail](../docs/specs/c3-phase-b-recovery-discovery-fix-plan-review-20261027.md). Không còn P1/P2 mở ở scope kế hoạch; chưa implementation/test/provider qualification.
 - [ ] W1: observed RED ingress V2 recovery → sửa counter/retained envelope → GREEN; giữ request/error/token và UNKNOWN thực tế.

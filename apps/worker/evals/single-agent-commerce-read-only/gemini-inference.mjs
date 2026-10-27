@@ -35,7 +35,7 @@ const string={type:'STRING'};
 const offerLabels={AO:'áo lẻ',CV:'chân váy lẻ',QUAN:'quần lẻ',VAY:'váy',SET:'cả bộ',COMPOSITE:'cả bộ',
  SET_VAY:'bộ có váy',SET_CV:'bộ có chân váy',SET_QUAN:'bộ có quần',COMBO_3:'combo 3 món',DIRECT:'sản phẩm'};
 export const readOnlyDeclarations=[
- {name:'search_products',description:'Tìm sản phẩm: có mã thì truyền riêng productCode; tìm theo tên hoặc nhu cầu thì dùng query. Cần ít nhất một trường; có cả hai thì ưu tiên mã. products.subjectRef dùng để đọc tiếp. MATCHED là tìm được mẫu; AMBIGUOUS chỉ là các gợi ý chưa xác định đúng mẫu khách hỏi. Khi tìm theo nhu cầu, dùng description để sàng ứng viên trước khi đọc giá/tồn; kết quả gần nghĩa chưa chứng minh phù hợp. Chỉ đọc tiếp món định tư vấn khi còn thiếu dữ liệu cần thiết, không mở mọi offers của mọi kết quả. PRODUCT_BOUND nghĩa là đã đầy context, dùng các sản phẩm đã có.',parameters:{type:'OBJECT',properties:{productCode:string,query:string}}},
+ {name:'search_products',description:'Tìm sản phẩm: có mã thì truyền riêng productCode; tìm theo tên hoặc nhu cầu thì dùng query. Cần ít nhất một trường; có cả hai thì ưu tiên mã. products.subjectRef dùng để đọc tiếp. MATCHED là tìm được mẫu; AMBIGUOUS chỉ là các gợi ý chưa xác định đúng mẫu khách hỏi. Khi tìm theo nhu cầu, dùng description loại món sai loại/hoàn cảnh; ứng viên chưa xác nhận giá hay phù hợp. Còn một tool round và cần kiểm dữ liệu để chọn thì batch read_product cho tối đa hai ứng viên hợp lý, đúng phần bán và budget còn lại; sau kết quả mới chọn. Không mở mọi offers của mọi kết quả. PRODUCT_BOUND nghĩa là đã đầy context, dùng các sản phẩm đã có.',parameters:{type:'OBJECT',properties:{productCode:string,query:string}}},
  {name:'read_product',description:'Đọc PRODUCT theo selection bắt buộc: SINGLE đọc một offerType từ availableOffers/offerLabels; COMPARE chỉ đọc 2–3 offerTypes được chọn để so sánh; DETAILS_ONLY chỉ đọc mô tả/metadata, không cấp giá/tồn. Không truyền null hoặc mở toàn bộ offers ngầm. Mua cả bộ chọn đúng mã cả bộ; mua lẻ chọn đúng phần. Có màu/size/khu vực thì truyền ngay. Size chỉ xem tồn, không chứng minh mặc vừa.',parameters:{type:'OBJECT',properties:{subjectRef:string,selection:{type:'STRING',enum:['SINGLE','COMPARE','DETAILS_ONLY']},offerType:string,offerTypes:{type:'ARRAY',items:string,minItems:2,maxItems:3},color:string,size:string,deliveryRegion:string},required:['subjectRef','selection']}},
  {name:'read_policy',description:'Đọc quy định hiện hành của shop. Không đọc lịch sử đơn hoặc duyệt điều kiện đổi của riêng khách; orderEligibility=null nghĩa là chưa xét đơn.',parameters:{type:'OBJECT',properties:{}}},
 ];
@@ -64,7 +64,7 @@ sizeDeclaration.parametersJsonSchema={type:'object',additionalProperties:false,r
  subjectRef:{type:'string'},customerStateOps:structuredClone(stateDeclarations[0].parametersJsonSchema.properties.ops)}};
 export const quoteDeclarations=[{name:'quote_product',description:'Báo giá mở đầu kèm ảnh cho khách mới hỏi giá mẫu đã xác định. Gọi riêng một mình trong batch, chọn đúng 1–2 offerTypes từ nguồn. Code đọc giá và chọn ảnh GENERIC cùng mẫu/màu trước khi trả kết quả. Không dùng khi hỏi lại giá, deadline, chọn size, tồn size cụ thể, sửa giỏ hoặc yêu cầu ảnh feedback/detail; dùng công cụ tương ứng. Không gọi lại trong lượt. Kết quả chỉ chuẩn bị, chưa gửi; thiếu nguồn cần thiết thì code handoff im lặng.',parametersJsonSchema:{type:'object',additionalProperties:false,required:['subjectRef','offerTypes'],properties:{subjectRef:{type:'string'},offerTypes:{type:'array',items:{type:'string',minLength:1,maxLength:64},minItems:1,maxItems:2,uniqueItems:true},color:{type:'string',minLength:1,maxLength:64}}}}];
 export const effectDeclarations=[
- {name:'record_negotiation',description:'Khách phản đối giá hoặc nói sẵn sàng mua giỏ hiện tại thì báo ý nghĩa tin đó bằng PRICE_OBJECTION/PURCHASE_READY. sourceQuote trích nguyên văn từ tin hiện tại; không lấy history. Hỏi giá/tổng tiền thông thường hoặc chê kiểu dáng không phải phản đối giá. Code kiểm nguồn, tự quyết ưu đãi và trả current cartQuote. Không truyền tiền, tier hay policy; không hứa giảm trước kết quả.',parameters:{type:'OBJECT',properties:{intent:{type:'STRING',enum:['PRICE_OBJECTION','PURCHASE_READY']},sourceQuote:{type:'STRING',maxLength:512}},required:['intent','sourceQuote']}},
+ {name:'record_negotiation',description:'Khách phản đối giá hoặc nói sẵn sàng mua giỏ hiện tại thì báo ý nghĩa tin đó bằng PRICE_OBJECTION/PURCHASE_READY. sourceQuote trích nguyên văn từ tin hiện tại; không lấy history. Hỏi giá/tổng tiền thông thường hoặc chê kiểu dáng không phải phản đối giá. Code kiểm nguồn, tự quyết ưu đãi và trả current cartQuote. Dùng quyền lợi vừa được xác nhận để đáp phản đối giá trước khi mời mua thêm; không nói không có hỗ trợ khi quote có ưu đãi và không gọi tổng ưu đãi đang có là giảm thêm. Không truyền tiền, tier hay policy; không hứa giảm trước kết quả.',parameters:{type:'OBJECT',properties:{intent:{type:'STRING',enum:['PRICE_OBJECTION','PURCHASE_READY']},sourceQuote:{type:'STRING',maxLength:512}},required:['intent','sourceQuote']}},
  {name:'add_to_cart',description:'Thêm món khách yêu cầu mua bằng PRODUCT subjectRef. Bắt buộc truyền offerType đúng lựa chọn bán từ nguồn; chưa biết thì đọc bằng tool hiện có, không đoán. Lấy size, color, quantity từ lựa chọn hiện tại của khách; phần không đổi giữ theo hội thoại/giỏ đã có. color chỉ là null khi khách thực sự chưa chọn màu, không bỏ màu đã nói hoặc tự chọn thay. Đã biết offer và khách tự chọn size thì gọi trực tiếp, không cần recommend_size hay đọc lại sản phẩm; code tự kiểm cấu hình, giá và tồn. Kết quả OK xác nhận thao tác, cartItems cho biết lựa chọn hiện tại và trạng thái hàng.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,size:string,color:{type:'STRING',nullable:true},quantity:{type:'INTEGER',minimum:1,maximum:20}},required:['subjectRef','offerType','color']}},
  {name:'change_cart_item',description:'Sửa dòng giỏ bằng CART_LINE ref code cấp. Phần khách không đổi giữ từ cartItems/hội thoại; đổi size hoặc số lượng không bỏ màu đã chọn. SET_COMPONENT_VARIANT nhận componentRole và size/color; SET_QUANTITY chỉ nhận quantity; REMOVE_LINE không nhận field sửa. Đổi size/màu và số lượng thì gọi hai action trong cùng batch, mỗi action commit riêng. Không cần read_product trước vì code kiểm biến thể, giá/tồn, quyền và commit. Field lẫn action bị từ chối trước commit.',parameters:{type:'OBJECT',properties:{subjectRef:string,action:{type:'STRING',enum:['SET_QUANTITY','REMOVE_LINE','SET_COMPONENT_VARIANT']},quantity:{type:'INTEGER',minimum:1,maximum:20},size:string,color:string,componentRole:string},required:['subjectRef','action']}},
  {name:'confirm_purchase',description:'Khi khách yêu cầu chốt mua giỏ hiện tại, gọi tool này. Chưa đủ thông tin nhận hàng thì code hỏi phần còn thiếu và kết thúc lượt; không tự xin thông tin riêng tư. Chỉ xác nhận mua sau preview và revalidation hợp lệ từ code. Không gọi chỉ vì khách thêm/đổi một món; không tự tạo đơn POS.',parameters:{type:'OBJECT',properties:{}}},
@@ -285,27 +285,29 @@ export function parseGeminiGeneration(body){
   ...(typeof p.functionCall.id==='string'?{id:p.functionCall.id}:{})}));
  if(calls.length){requireThat(calls.length<=6&&calls.every(c=>typeof c.name==='string'&&c.args&&typeof c.args==='object'&&!Array.isArray(c.args)),'OWNER_TOOL_OUTPUT');
   const domainCalls=calls.map(c=>{
+   const check=(ok,field='ARGS')=>{if(!ok){const known=[...readOnlyDeclarations,...quoteDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations,...mediaDeclarations].some(d=>d.name===c.name);
+    throw Object.assign(new Error('OWNER_TOOL_OUTPUT'),{toolOutputDiagnostic:{schemaCode:'OWNER_TOOL_OUTPUT',tool:known?c.name:'UNKNOWN_TOOL',field,valueType:Array.isArray(c.args)?'ARRAY':c.args===null?'NULL':typeof c.args==='object'?'OBJECT':'OTHER'}});}};
    if(c.name==='quote_product'){
     const a=c.args;
-    requireThat(Object.keys(a).every(k=>['subjectRef','offerTypes','color'].includes(k))&&typeof a.subjectRef==='string'&&Array.isArray(a.offerTypes)&&a.offerTypes.length>=1&&a.offerTypes.length<=2&&a.offerTypes.every(x=>typeof x==='string'&&x.trim()&&bytes(x)<=64)&&new Set(a.offerTypes).size===a.offerTypes.length&&(a.color===undefined||typeof a.color==='string'&&a.color.trim()&&bytes(a.color)<=64),'OWNER_TOOL_OUTPUT');return c;
+    check(Object.keys(a).every(k=>['subjectRef','offerTypes','color'].includes(k))&&typeof a.subjectRef==='string'&&Array.isArray(a.offerTypes)&&a.offerTypes.length>=1&&a.offerTypes.length<=2&&a.offerTypes.every(x=>typeof x==='string'&&x.trim()&&bytes(x)<=64)&&new Set(a.offerTypes).size===a.offerTypes.length&&(a.color===undefined||typeof a.color==='string'&&a.color.trim()&&bytes(a.color)<=64));return c;
    }
    if(c.name==='read_product'){
     const {selection,...args}=c.args;
-    requireThat(Object.keys(args).every(k=>['subjectRef','offerType','offerTypes','color','size','deliveryRegion'].includes(k)),'OWNER_TOOL_OUTPUT');
+    check(Object.keys(args).every(k=>['subjectRef','offerType','offerTypes','color','size','deliveryRegion'].includes(k)),'UNKNOWN_FIELD');
     const validOffer=v=>typeof v==='string'&&v.trim().length>0&&bytes(v)<=64;
     if(selection==='SINGLE'){
-     requireThat(validOffer(args.offerType)&&!Object.hasOwn(args,'offerTypes'),'OWNER_TOOL_OUTPUT');return {...c,args};
+     check(validOffer(args.offerType)&&!Object.hasOwn(args,'offerTypes'),'offerType');return {...c,args};
     }
     if(selection==='COMPARE'){
-     requireThat(!Object.hasOwn(args,'offerType')&&Array.isArray(args.offerTypes)&&args.offerTypes.length>=2&&args.offerTypes.length<=3&&
-      args.offerTypes.every(validOffer)&&new Set(args.offerTypes).size===args.offerTypes.length,'OWNER_TOOL_OUTPUT');return {...c,args};
+     check(!Object.hasOwn(args,'offerType')&&Array.isArray(args.offerTypes)&&args.offerTypes.length>=2&&args.offerTypes.length<=3&&
+      args.offerTypes.every(validOffer)&&new Set(args.offerTypes).size===args.offerTypes.length,'offerTypes');return {...c,args};
     }
-    requireThat(selection==='DETAILS_ONLY'&&!Object.hasOwn(args,'offerType')&&!Object.hasOwn(args,'offerTypes'),'OWNER_TOOL_OUTPUT');
+    check(selection==='DETAILS_ONLY'&&!Object.hasOwn(args,'offerType')&&!Object.hasOwn(args,'offerTypes'),'selection');
     return {...c,args:{...args,detailsOnly:true}};
    }
    const opsKey=c.name==='apply_customer_state'?'ops':c.name==='recommend_size'&&Object.hasOwn(c.args,'customerStateOps')?'customerStateOps':null;
    if(!opsKey)return c;
-   requireThat(Array.isArray(c.args[opsKey])&&c.args[opsKey].every(op=>op&&Object.hasOwn(stateFieldPaths,op.field)),'OWNER_TOOL_OUTPUT');
+   check(Array.isArray(c.args[opsKey])&&c.args[opsKey].every(op=>op&&Object.hasOwn(stateFieldPaths,op.field)),opsKey);
    return {...c,args:{...c.args,[opsKey]:c.args[opsKey].map(op=>({...op,field:stateFieldPaths[op.field]}))}};
   });
   return {kind:'TOOLS',calls:domainCalls,content:structuredClone(content)};}
@@ -373,6 +375,12 @@ export function createGeminiCommerceInference(config,dependencies={}){
    const timedOut=signal.aborted||error?.name==='AbortError'||error?.name==='TimeoutError';
    if(error?.message==='OWNER_REQUEST_BOUND'&&Number.isSafeInteger(error.requestBytes))telemetry.requestBytes=error.requestBytes;
    telemetry.failureStage=stage;
+   if(error?.message==='OWNER_TOOL_OUTPUT'&&error.toolOutputDiagnostic){
+    const d=error.toolOutputDiagnostic,known=[...readOnlyDeclarations,...quoteDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations,...mediaDeclarations];
+    telemetry.toolOutputDiagnostic={schemaCode:'OWNER_TOOL_OUTPUT',tool:known.some(t=>t.name===d.tool)?d.tool:'UNKNOWN_TOOL',
+     field:['ARGS','UNKNOWN_FIELD','offerType','offerTypes','selection','ops','customerStateOps'].includes(d.field)?d.field:'UNKNOWN_FIELD',
+     valueType:['ARRAY','NULL','OBJECT','OTHER'].includes(d.valueType)?d.valueType:'OTHER'};
+   }
    telemetry.failureCode=timedOut?'TIMEOUT':safeFailureCodes.has(error?.message)?error.message:
     stage==='AUTH'?'AUTH_UNAVAILABLE':stage==='GENERATION'?'TRANSPORT_ERROR':stage==='RESPONSE'?'RESPONSE_INVALID':'UNKNOWN';
    throw Object.assign(new Error(timedOut?'PROVIDER_TIMEOUT':'PROVIDER_ERROR'),{telemetry});

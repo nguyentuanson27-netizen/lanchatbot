@@ -139,6 +139,39 @@ it("keeps an automatic recovery handoff silent when current policy is silent",as
   expect(c.metaPlan).toBeUndefined();expect(c.completeInboxBatch).not.toBe(false);
 });
 
+it.each([false,true])("retains V2 executed counters after ingress recovery (normal read=%s)",async readFirst=>{
+  const f=fixture();await enableRecoveryHandoff(f,"silent");
+  const quoteTask={version:"EXPLICIT_QUOTE_V1",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:2,standalone:true,maxPerTurn:1} as const;
+  let n=0;
+  const owner=vi.fn(async():Promise<OwnerGeneration>=>{
+    if(readFirst&&++n===1){const call={name:"read_policy",args:{}};return {kind:"TOOLS",calls:[call],content:{role:"model",parts:[{functionCall:call}]}};}
+    throw new Error("OWNER_TOOL_OUTPUT");
+  });
+  const result=await f.run(owner,undefined,quoteTask);
+  expect(result.terminal).toMatchObject({disposition:"HANDOFF",reason:"DEPENDENCY_FAILURE",text:null});
+  expect(result).toMatchObject({toolWorkAccounting:"PRIMITIVE_WORK_V2",terminalHandoffCalls:1});
+  if(!("executedToolInvocations" in result&&"executedNormalToolInvocations" in result))throw Error("V2_ACCOUNTING_REQUIRED");
+  expect(result.executedToolInvocations).toBe(result.executedNormalToolInvocations!+1);
+  expect(result.toolCalls).toBe(result.normalToolCalls+1);
+  expect(f.commit.mock.calls.filter(c=>c[1].handoffEventPlan)).toHaveLength(1);
+  expect(result.enqueued).toBe(0);expect(owner).toHaveBeenCalledTimes(readFirst?2:1);
+  expect(result.generations).toHaveLength(readFirst?2:1);expect(f.verifier).not.toHaveBeenCalled();
+});
+
+it.each(["rejected","unknown","readback"])("accounts V2 recovery attempt when commit is %s",async fault=>{
+  const f=fixture();await enableRecoveryHandoff(f,"silent");
+  if(fault==="rejected")f.commit.mockResolvedValue({stateCommitted:false,metaOutboxCreated:0,inboxBatchStatus:"STALE",handoffEventCreated:false,pancakeTagOutboxCreated:false} as never);
+  if(fault==="unknown")f.commit.mockRejectedValue(Error("COMMIT_UNKNOWN"));
+  if(fault==="readback")f.checkCommit(async()=>{f.store.loadOrCreate=async()=>{throw Error("READBACK_UNAVAILABLE");};});
+  const quoteTask={version:"EXPLICIT_QUOTE_V1",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:2,standalone:true,maxPerTurn:1} as const;
+  const result=await f.run(async()=>{throw Error("HTTP_429");},undefined,quoteTask);
+  expect(result.terminal).toMatchObject({disposition:"NO_SEND",text:null});
+  expect(result).toMatchObject({toolWorkAccounting:"PRIMITIVE_WORK_V2",terminalHandoffCalls:1});
+  if(!("executedToolInvocations" in result&&"executedNormalToolInvocations" in result))throw Error("V2_ACCOUNTING_REQUIRED");
+  expect(result.executedToolInvocations).toBe(result.executedNormalToolInvocations!+1);
+  expect(result.generations).toHaveLength(1);expect(f.verifier).not.toHaveBeenCalled();
+});
+
 it.each(["conflict","ambiguous","superseded","missing-rule"])("does not acknowledge an automatic handoff after %s",async fault=>{
   const f=fixture();await enableRecoveryHandoff(f);
   if(fault==="missing-rule")f.policy.mockImplementation(()=>fixturePolicy());

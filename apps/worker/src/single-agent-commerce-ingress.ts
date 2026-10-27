@@ -309,8 +309,11 @@ export async function runPersistedCommerceIngress(input: {
       } catch { readbackFailed=true; }
       finally {
         const status=recovery.handoffStatus?.();
-        result.terminalHandoffCalls+=status?.attempts??0;
+        const recoveryAttempts=status?.attempts??0;
+        result.terminalHandoffCalls+=recoveryAttempts;
         result.toolCalls=result.normalToolCalls+result.terminalHandoffCalls;
+        if(result.toolWorkAccounting==="PRIMITIVE_WORK_V2"&&typeof result.executedToolInvocations==="number")
+          result.executedToolInvocations+=recoveryAttempts;
         if(status)result.handoff=status;
       }
       if(readbackFailed)return {...result,...noSend("RECOVERY_HANDOFF_READBACK_UNAVAILABLE"),enqueued:port.outboxCount()};

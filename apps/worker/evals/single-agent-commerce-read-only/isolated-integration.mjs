@@ -27,6 +27,7 @@ import {createReadOnlyTools} from '../../dist/single-agent-commerce-read-only-to
 import {evaluateRealtimeSalesCycle} from '../../dist/realtime-sales-cycle.js';
 import {fixtureProfile,fixtureProduct,fixturePolicy,fixtureSizeInput,fixtureCartLine} from '../../dist/single-agent-commerce.test-support.js';
 import {validateToolWorkAccounting} from './protocol.mjs';
+import {createAttemptQueue,retainObservedAttempt,unobservedAttempt,summarizeAttemptQualification} from './attempt-evidence.mjs';
 import {statefulPreflight,createStatefulProvider} from './stateful-provider.mjs';
 import {isolatedHandoffRecords,handoffContentHash} from './candidate-handoff.mjs';
 import {publicCapturedAttachments,publicCapturedTextHashes} from './delivery-capture.mjs';
@@ -55,6 +56,7 @@ const databaseName='c3_b_test_'+randomBytes(8).toString('hex');
 assert(/^c3_b_test_[a-f0-9]{16}$/.test(databaseName));
 const admin=new Pool({connectionString:adminUrl,max:1}),testUrl=new URL(adminUrl);testUrl.pathname='/'+databaseName;
 let pool,runtime,inbox,policyStore,livePolicyStore,historyStore,providerPorts,created=false;
+const attemptQueue=createAttemptQueue(); // Exactly this process's disposable DB, shared by all journey dispatchers.
 function handoffGate(base,policy,receiptAvailable=()=>true,readReplySource,observe){const gate=createCommerceHandoffPreSendGate({base,clock:()=>new Date(),policy,...(readReplySource?{readReplySource}:{}),
  readAuthority:async b=>{const row=await runtime.loadOrCreate(b.pageId,b.customerHash,'APP',()=>{throw Error('DELIVERY_CONVERSATION_REQUIRED');});
   assert.equal(row.conversationId,b.conversationId);return {...row,generation:await inbox.readGeneration(b.pageId,b.customerHash)};},
@@ -350,10 +352,10 @@ try{
    return {status:200,headers:{},body:{recipient_id:body.recipient.id,message_id:'captured-'+randomUUID()}};
   }},{sendEnabled:true}),new SinglePageMetaTokenRegistry(pageId,'synthetic-token'),
   handoffGate({authorize:async()=>({status:'ALLOWED',reasonCode:null,blockingTag:null,observedAt:new Date()})},async()=>h.policy),{workerId:'handoff-candidate-capture'});
-  for(let n=0;n<20&&await dispatcher.processOne();n++);
+  for(let n=0;n<20&&await attemptQueue.dispatch(()=>dispatcher.processOne());n++);
   assert.deepEqual(captured,[]);
   assert.equal((await h.tools.invoke({name:'request_handoff',args:{reason}})).status,'REJECTED');
-  for(let n=0;n<20&&await dispatcher.processOne();n++);
+  for(let n=0;n<20&&await attemptQueue.dispatch(()=>dispatcher.processOne());n++);
   assert.deepEqual(captured,[]);
   assert.deepEqual(await h.counts(),{events:1,tags:1,messages:0});
  });
@@ -408,8 +410,10 @@ try{
     readProduct:async id=>{if(read.catalog.resolveProductCode)assert(await read.catalog.resolveProductCode(id));return (await read.catalog.readProduct(id,false)).product;},
    }),async()=>{const r=await policy();assert(r.bundle);return r.bundle;},()=>receiptAvailable,readReplySource,r=>deliveryObservations.push(r)),{workerId:'c3-b-capture'},undefined,historyStore);
   let dispatcher=makeDispatcher();
-  const drain=async()=>{for(let i=0;i<20&&await dispatcher.processOne();i++);};
-  async function turn(text,outputs,{verdict='PASS',inspect=()=>{},beforeCommit=async()=>{},afterVerify=async()=>{},messages=null,loseCommitReply=false,rollbackCommitReply=false}={}){
+  const drain=async()=>{for(let i=0;i<20&&await attemptQueue.dispatch(()=>dispatcher.processOne());i++);};
+  async function turn(text,outputs,{verdict='PASS',inspect=()=>{},beforeCommit=async()=>{},afterVerify=async()=>{},messages=null,loseCommitReply=false,rollbackCommitReply=false,slot='DETERMINISTIC_TURN',testQuoteTask,testQualificationValidator}={}){
+   if(attemptQueue.blocked())return attemptQueue.run(slot,()=>{throw Error('BLOCKED_WORK_MUST_NOT_RUN');});
+   assert(!live||(!testQuoteTask&&!testQualificationValidator),'TEST_HOOK_FORBIDDEN_IN_PROVIDER_RUN');
    const now=new Date(),id='stateful-'+randomUUID(),envelope={schemaVersion:1,customerSendEnabled:false,routing:{owner:'APP'},message:{schemaVersion:1,traceId:randomUUID(),eventKey:id,pageId,messageId:id,
     senderId:'synthetic-recipient-'+customerHash,conversationId:'synthetic-meta-conversation',occurredAt:now.toISOString(),isEcho:false,appId:null,text,attachments:[]}};
    const inboundMessages=(messages??[{text,attachments:[]}]).map((m,index)=>({...envelope.message,...m,messageId:id+':'+index,eventKey:id+':'+index}));
@@ -421,14 +425,14 @@ try{
    assert(batch&&batch.conversationHash===customerHash,'CURRENT_BATCH');
    let owners=0,verifiers=0,faultInjected=false;const toolResponses=[];
    const result=await runPersistedCommerceIngress({batch,fence:batch.generation,scope:bound,store:runtime,inbox,history:historyStore,transaction:async fn=>{await beforeCommit();try{const value=await withTransaction(pool,async client=>{const applied=await fn(client);if(rollbackCommitReply&&!faultInjected){faultInjected=true;throw Error('CONTROLLED_ROLLBACK_REPLY_LOST');}return applied;});if(loseCommitReply&&!faultInjected){faultInjected=true;throw Error('CONTROLLED_COMMIT_REPLY_LOST');}return value;}catch(error){report.composedCommitDiagnostic=/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name;save();throw error;}},
-    ...(live&&providerFreeze.m.quoteTask?{quoteTask:providerFreeze.m.quoteTask}:{}),read,facts,policy,resolveTagId:()=> 'synthetic-tag',clock:()=>new Date(),
+    ...(live&&providerFreeze.m.quoteTask?{quoteTask:providerFreeze.m.quoteTask}:testQuoteTask?{quoteTask:testQuoteTask}:{}),read,facts,policy,resolveTagId:()=> 'synthetic-tag',clock:()=>new Date(),
     ...(live?{handoffReply:{approvedHoldingHashes:providerFreeze.m.handoffReply.approvedHoldingHashes}}:deferredHandoff?{handoffReply:{approvedHoldingHashes:[commerceHash(dependencyHoldingReply)]}}:{}),
     ownerPrompt:live?providerPorts.ownerPrompt:'Synthetic owner transport, never a provider run.',verifierPrompt:live?providerPorts.verifierPrompt:'Synthetic verifier transport.',
     owner:async request=>{owners++;inspect(request);toolResponses.push(...request.contents.flatMap(c=>c.parts.flatMap(p=>p.functionResponse?[p.functionResponse]:[])));if(live)return providerPorts.owner(request);
       const next=outputs.shift();if(!next)throw new Error('CONTROLLED_GENERATION_FAILURE');return typeof next==='function'?next(request):next;},
     verifier:async request=>{verifiers++;const v=live?await providerPorts.verifier(request):{result:{verdict,violations:[]}};await afterVerify();return v;}});
-   validateToolWorkAccounting(result);
-   return {result,owners,verifiers,batch,toolResponses,inboundMessages};
+   return retainObservedAttempt({result,owners,verifiers,batch,toolResponses,inboundMessages},
+    {queue:attemptQueue,slot,validate:testQualificationValidator??validateToolWorkAccounting});
   }
   const state=async()=>(await runtime.loadOrCreateSalesCycle(pageId,bound.conversationId,()=>{throw new Error('STATE_REQUIRED');})).state;
   // Fault injection in the disposable database only: change cart without changing conversation authority.
@@ -733,13 +737,37 @@ try{
   await assert.rejects(withTransaction(pool,client=>client.query(clarificationDown)),/SALES_CLARIFICATION_EVENTS_REQUIRE_COMPATIBLE_SCHEMA/);
   assert.equal(await commandConstraint(),definition);assert.equal(Number((await pool.query("SELECT count(*) AS n FROM sales_cycle_events WHERE command_kind IN ('CLARIFICATION_REQUESTED','CLARIFICATION_RESOLVED')")).rows[0].n),count);
  });
+ await check('B qualification shared queue preserves an invalid observed attempt without later dispatch',async()=>{
+  const first=await statefulFixture(),second=await statefulFixture();
+  const before=(await pool.query('SELECT count(*)::int AS n FROM meta_outbox')).rows[0].n;
+  const invalid=await first.turn('Em ơi',[say('Dạ chị.')],{slot:'qualification-first',testQualificationValidator:()=>{throw Error('TOOL_WORK_COUNTER');}});
+  assert.equal(invalid.qualification.status,'INVALID');assert(invalid.result.generations.length>0);
+  const rows=await pool.query('SELECT outbox_id,status FROM meta_outbox ORDER BY outbox_id');
+  assert(rows.rows.length>before,'OBSERVED_COMMIT_REQUIRED');
+  await first.drain();await second.drain();first.restartDelivery();await first.drain();
+  const blocked=await second.turn('Em ơi',[()=>{throw Error('BLOCKED_GENERATION_EXECUTED');}],{slot:'qualification-second'});
+  assert.equal(blocked.executionStatus,'NOT_RUN_BY_QUALIFICATION');assert.equal(blocked.result,undefined);
+  assert.deepEqual((await pool.query('SELECT outbox_id,status FROM meta_outbox ORDER BY outbox_id')).rows,rows.rows);
+  assert.deepEqual(first.capture,[]);assert.deepEqual(second.capture,[]);
+  assert.deepEqual(summarizeAttemptQualification([invalid,blocked]),{registered:2,executed:1,notRun:1,observedTerminals:{SEND_ELIGIBLE:1},unknownTerminals:0,qualificationErrors:1});
+ });
  if(providerRun){
-  const journeys=new Map();report.outcomes=[];
+  const journeys=new Map(),qualifiedAttempts=[];report.outcomes=[];
   let invitationSucceeded=false;
   const selectedCases=process.argv.includes('--opening-only')?providerFreeze.cases.slice(0,1):providerFreeze.cases;
   for(const [index,c] of selectedCases.entries()){
+   if(attemptQueue.blocked()){
+    const attempt=await attemptQueue.run(c.caseId,()=>{throw Error('BLOCKED_WORK_MUST_NOT_RUN');});
+    const blocked={caseId:c.caseId,journeyId:c.journeyId,sourceMode:c.sourceMode??'LIVE',...attempt,counts:{...providerPorts.counters}};
+    writeFileSync(resolve(out,'provider-attempt-'+(index+1)+'.json'),JSON.stringify(blocked,null,2),{flag:'wx'});
+    qualifiedAttempts.push(attempt);report.outcomes.push({caseId:c.caseId,...attempt});save();continue;
+   }
    providerPorts.setSlot(c.caseId);const beforeCounts={...providerPorts.counters};
-   const started=performance.now();let j=journeys.get(c.journeyId);if(!j){j=await statefulFixture({live:true,initialProductCodes:c.runtime.initialProductCodes,sourceMode:c.sourceMode??'LIVE'});journeys.set(c.journeyId,j);}
+   const started=performance.now();let j=journeys.get(c.journeyId);
+   if(!j){try{j=await statefulFixture({live:true,initialProductCodes:c.runtime.initialProductCodes,sourceMode:c.sourceMode??'LIVE'});journeys.set(c.journeyId,j);}
+    catch(error){const attempt=unobservedAttempt(error,{queue:attemptQueue,slot:c.caseId});qualifiedAttempts.push(attempt);
+     writeFileSync(resolve(out,'provider-attempt-'+(index+1)+'.json'),JSON.stringify({caseId:c.caseId,journeyId:c.journeyId,...attempt,counts:{...providerPorts.counters}},null,2),{flag:'wx'});
+     report.outcomes.push({caseId:c.caseId,...attempt});save();continue;}}
    const capturedBefore=j.capture.length;
    const attachmentsBefore=j.capturePayloads.length;
    const outboxBefore=new Set((await pool.query('SELECT outbox_id FROM meta_outbox WHERE conversation_id=$1',[j.bound.conversationId])).rows.map(r=>r.outbox_id));
@@ -748,10 +776,13 @@ try{
    try{
     if(c.evaluator?.requiresCurrentCart&&!(await j.state()).cart)attempt={result:{terminal:{disposition:'NO_SEND',reason:'SETUP_CART_NOT_COMPLETED',text:null,fallbackId:null},sendEnabled:false},status:'BLOCKED'};
     else if((c.runtime.privateCheckoutFixture||c.caseId==='stateful-confirm')&&!invitationSucceeded)attempt={result:{terminal:{disposition:'NO_SEND',reason:'CHECKOUT_INVITATION_NOT_COMPLETED',text:null,fallbackId:null},sendEnabled:false},status:'BLOCKED'};
-    else {attempt=await j.turn(latest,[],c.runtime.messages?{messages:c.runtime.messages}:{});await j.drain();}
+    else {attempt=await j.turn(latest,[],{...(c.runtime.messages?{messages:c.runtime.messages}:{}),slot:c.caseId});
+     if(attempt.qualification?.status==='VALID')await j.drain();}
     if(c.caseId==='stateful-request-checkout')invitationSucceeded=j.capture.length>capturedBefore&&(await j.state()).clarification?.reasonCode==='CHECKOUT_DETAILS_MISSING';
    }
-   catch(error){attempt={result:{terminal:{disposition:'NO_SEND',reason:'ATTEMPT_UNAVAILABLE',text:null,fallbackId:null},sendEnabled:false},errorCode:/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name};}
+   catch(error){attempt=attempt?.result
+    ?retainObservedAttempt(attempt,{queue:attemptQueue,slot:c.caseId,stage:'CONSUMER',validate:()=>{throw error;}})
+    :unobservedAttempt(error,{queue:attemptQueue,slot:c.caseId});}
    const stored=await runtime.loadOrCreateSalesCycle(pageId,j.bound.conversationId,()=>createSalesCycleRuntimeState(j.bound.conversationId,{pageId,conversationId:j.bound.conversationId},new Date()));
    const profile=await runtime.loadOrCreateCustomerProfile(pageId,j.bound.customerHash,()=>{throw new Error('PROFILE_MISSING');});
    const authority=await runtime.loadOrCreate(pageId,j.bound.customerHash,'APP',()=>{throw Error('CONVERSATION_REQUIRED');});
@@ -767,16 +798,19 @@ try{
      negotiation:stored.state.negotiation?{tier:stored.state.negotiation.customerState,version:stored.state.negotiation.stateVersion,objectionEvidenceCount:stored.state.negotiation.consumedObjectionEvidenceIds.length}:null},
     counts:{...providerPorts.counters}};
    writeFileSync(resolve(out,'provider-attempt-'+(index+1)+'.json'),JSON.stringify(result,null,2),{flag:'wx'});
-   report.outcomes.push({caseId:c.caseId,disposition:attempt.result.terminal.disposition,captured:result.actualCapturedMessages.length,
+   qualifiedAttempts.push(attempt);
+   report.outcomes.push({caseId:c.caseId,disposition:attempt.result?.terminal?.disposition??'UNKNOWN',qualification:attempt.qualification,captured:result.actualCapturedMessages.length,
     ownerRequests:providerPorts.counters.owner-beforeCounts.owner,verifierRequests:providerPorts.counters.verifier-beforeCounts.verifier});
    report.providerGenerations=providerPorts.counters.owner+providerPorts.counters.verifier;save();
   }
-  report.providerCounts={...providerPorts.counters};report.registeredOutcomes=selectedCases.length;report.completedOutcomes=report.outcomes.length;
+  report.providerCounts={...providerPorts.counters};report.registeredOutcomes=selectedCases.length;
+  report.qualificationSummary=summarizeAttemptQualification(qualifiedAttempts);
+  report.completedOutcomes=report.qualificationSummary.executed;report.queueLatch=attemptQueue.blocked();
   assert.equal(execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),providerFreeze.registration.sourceSha,'RUN_SOURCE_CHANGED');
   const finalFreeze=statefulPreflight(root);assert.equal(finalFreeze.registration.sourceConfigHash,providerFreeze.registration.sourceConfigHash,'RUN_CONFIG_CHANGED');
  }
  if(checkPrefix){assert(report.cases.length>0,'CHECK_PREFIX_MATCHED_NOTHING');report.checkPrefix=checkPrefix;}
- report.status=providerRun?'COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW':'PASS';save();
+ report.status=providerRun?(attemptQueue.blocked()?'QUALIFICATION_FAILED':'COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW'):'PASS';save();
 }catch(error){report.status='FAIL';report.errorType=error.name;report.error=error.message;save();console.error(error.stack);process.exitCode=1;}
 finally{
  await Promise.allSettled([runtime?.close(),inbox?.close(),policyStore?.close(),livePolicyStore?.close(),historyStore?.close(),providerPorts?.close(),pool?.end()]);
