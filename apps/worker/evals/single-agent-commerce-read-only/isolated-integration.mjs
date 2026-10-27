@@ -7,6 +7,7 @@ import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import {resolve} from 'node:path';
 import {execFileSync} from 'node:child_process';
+import {HandoffMatrixAdminContentV1Schema} from '@lana/contracts';
 import {PostgresRealtimeRuntimeStore,PostgresRealtimeInboxStore,PostgresRuntimePolicyStore,PostgresChatHistoryStore,LocalEnvelopeCipher,withTransaction,redactAnalyticsMessage} from '@lana/database';
 import {MetaDeliveryAdapter} from '@lana/meta-delivery';
 import {MetaOutboxDispatcher,SinglePageMetaTokenRegistry} from '../../dist/meta-outbox-dispatcher.js';
@@ -383,8 +384,9 @@ try{
   const policy=async()=>{resolver.invalidate(pageId,'PUBLISHED');const resolved=await resolver.resolve({pageId,channel:'PUBLISHED',pin:{scopeType:'SALES_EPISODE',scopeId:bound.conversationId},now:new Date()});
    if(!dependencyHoldingReply&&!sizeHoldingReply&&!policyChanged&&!missingDependencyRule)return resolved;
    // Controlled domain input only: never publish/replace the real shop policy.
-   return {...resolved,bundle:{...resolved.bundle,artifacts:{...resolved.bundle.artifacts,handoffMatrix:{schemaVersion:1,kind:'HANDOFF_MATRIX',
-    sourceMetadata:resolved.bundle.artifacts.shopPolicy.sourceMetadata,rules:[{reason:missingDependencyRule?'EXCHANGE':sizeHoldingReply?'SIZE_RULE_UNAVAILABLE':'DEPENDENCY_FAILURE',customerMessagePolicy:policyChanged?'SILENT_HANDOFF':'HOLDING_REPLY_THEN_HANDOFF',holdingReply:policyChanged?null:sizeHoldingReply??dependencyHoldingReply,tag:'NHAN_VIEN'}]}}}};};
+   const matrix=HandoffMatrixAdminContentV1Schema.parse({schemaVersion:1,kind:'HANDOFF_MATRIX',
+    sourceMetadata:resolved.bundle.artifacts.shopPolicy.sourceMetadata,rules:[{reason:missingDependencyRule?'EXCHANGE':sizeHoldingReply?'SIZE_RULE_UNAVAILABLE':'DEPENDENCY_FAILURE',customerMessagePolicy:policyChanged||missingDependencyRule?'SILENT_HANDOFF':'HOLDING_REPLY_THEN_HANDOFF',holdingReply:policyChanged||missingDependencyRule?null:sizeHoldingReply??dependencyHoldingReply,tag:'NHAN_VIEN'}]});
+   return {...resolved,bundle:{...resolved.bundle,artifacts:{...resolved.bundle.artifacts,handoffMatrix:matrix}}};};
   if(media)product.product.images=[{url:'https://content.pancake.vn/c3-synthetic-product-back.jpg',role:'PRIMARY',angle:'BACK',imageType:'PRODUCT_ONLY',intents:[],sortOrder:0,qualityScore:null,feedback:false,
    reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:at.toISOString()}];
   const read=live?await providerPorts.read(bound,policyStore,policy,initialProductCodes,facts):{policy,catalog:{readProduct:async()=>mediaChanged?{...product,product:{...product.product,images:[]}}:product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
