@@ -1,4 +1,12 @@
-## Current — fallback chuyển handoff im lặng, 28/10/2026
+## Current — silent fallback independent review closed, 28/10/2026
+
+- [x] P1 private fallback vào silent recovery, giữ source linkage và transaction/tag authority; holding policy không tạo text/ảnh.
+- [x] P2 current Inbox completion phân biệt committed/definite no-commit/unknown, cả transaction và profile CAS; không double-complete checkout hoặc xử lý lại definite blocked batch.
+- [x] P2/P3 current acceptance cập nhật silent output/variant STALE, schema-valid missing-rule fixture, focused no-chart filters và prerequisites qua real ports. Cùng reviewer APPROVE24a2ed1b, không còn finding mở trong scope. [Record](../docs/specs/c3-phase-b-silent-fallback-review-fixes-20261028.md).
+- [x] 732Vitest/228NodePASS; worker directbuild/typecheck/lintPASS; reviewer200focusedPASS. PG focused6PASS/7DBdrop/provider0; giữ2fullFAILdoassertcũ (61PASS/1FAILmỗi run), không đổi raw thànhPASS.
+- [ ] Chưa fresh model campaign hoặc full coherent COD/BANK acceptance sau driver-onlyfixes cuối; mixed-media candidate-only callbacks trong default fullruns không tính coverage. Không BGO/live/publish/merge/deploy; chất lượng tư vấn/upstream media/SLA handoff vẫn là giới hạn riêng.
+
+## Previous — fallback chuyển handoff im lặng, 28/10/2026
 
 - [x] Theo quyết định owner: mọi fallback -> atomic SILENT_HANDOFF, không text/ảnh/price fragment/receipt ACK thay thế; không có capability hoặc commit/readback không chứng minh được -> NO_SEND.
 - [x] TDD observed RED 12 failures -> GREEN; thêm guards input/preparation/budget/size/malformed/provider/verdict, giữ state đã commit và không replay. Một handoff attempt; V2 counters giữ đúng; không enqueue/commit lần hai sau bàn giao hoặc unknown.

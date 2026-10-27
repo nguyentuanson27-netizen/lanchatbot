@@ -1,4 +1,8 @@
-## Current — fallback chuyển handoff im lặng, 28/10/2026
+## Current — silent fallback review closed, 28/10/2026
+
+Đã đóng P1 private holding, P2 definite no-commit Inbox, P2 stale acceptance và P3 fixture/filter; cùng reviewer độc lập APPROVE executable source24a2ed1b. Runtime33e0fc14: silent recovery chung private/public, quan sát transaction/profile uncertainty, chỉ complete current Inbox khi đủ căn cứ; không gửi text/ảnh/ACK hoặc replay mutation. [Record và review chain](../docs/specs/c3-phase-b-silent-fallback-review-fixes-20261028.md). 732Vitest/228NodePASS; direct build/typecheck/lintPASS; independent200focusedPASS. PostgreSQL focused6checksPASS,7/7DBdrop,provider0. Hai fullSQLrun đầu giữFAIL61PASS/1staleassertFAIL mỗi run; đã sửa assertion và chạy lại affected/suffix, khôngclaimfullPASS hoặc model/BGO. Không live/merge/deploy.
+
+## Previous — fallback chuyển handoff im lặng, 28/10/2026
 
 Owner yêu cầu mọi fallback bàn giao và không gửi tin. Đã thực hiện ở terminal boundary + atomic handoff + ingress; không gửi static/ảnh/receipt replacement, không replay effect; handoff không chứng minh được thì NO_SEND. Standalone B1 thiếu capability thì NO_SEND, không giả có bàn giao. [Implementation/verification](../docs/specs/c3-phase-b-silent-fallback-20261028.md). 682 commerce/boundary +39 protected/assembly Vitest PASS, 228 Node PASS, provider adapter 24 PASS/1 SKIP; worker build/direct typecheck/lint PASS. Chưa fresh model/PostgreSQL qualification, không đổi evidence campaign cũ hoặc B GO, chưa live/merge/deploy.
 
