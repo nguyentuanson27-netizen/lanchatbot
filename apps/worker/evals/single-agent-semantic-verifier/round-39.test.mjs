@@ -4,10 +4,13 @@ import {readFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {generateKeyPairSync} from 'node:crypto';
-import {hash,validateProtocol,projectRuntime,buildRequest} from './protocol.mjs';
-import * as a2Runner from './run-a2.mjs';
-import {evaluateA3Attempt,validateA3Evidence,humanView,scoreWholeReplies,a3Operational} from './run-a3.mjs';
-import {createGeminiInference} from './gemini-inference.mjs';
+// Fixed-round validators read the active input root at module initialization.
+// This test process owns R39 even when a caller is checking the current R68 protocol.
+process.env.C3_CHECKPOINT_A_ROUND='39';
+const {hash,validateProtocol,projectRuntime,buildRequest}=await import('./protocol.mjs');
+const a2Runner=await import('./run-a2.mjs');
+const {evaluateA3Attempt,validateA3Evidence,humanView,scoreWholeReplies,a3Operational}=await import('./run-a3.mjs');
+const {createGeminiInference}=await import('./gemini-inference.mjs');
 const raw=(round,file)=>readFileSync(new URL('./round-'+round+'/'+file,import.meta.url),'utf8');
 const read=(round,file)=>JSON.parse(raw(round,file));
 const m=read(39,'manifest.json'),old=read(38,'manifest.json'),a2=read(39,'corpus-a2.json'),a3=read(39,'corpus-a3.json');

@@ -1,0 +1,288 @@
+{
+  "caseId": "sales-southern-delivery:deadline",
+  "journeyId": "sales-southern-delivery",
+  "elapsedMs": 17499.401000000013,
+  "result": {
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "ETA_UNAVAILABLE",
+      "text": null,
+      "fallbackId": null
+    },
+    "recovery": {
+      "originalDisposition": "HANDOFF",
+      "originalReason": "ETA_UNAVAILABLE"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 2,
+    "verifierGenerations": 0,
+    "toolRounds": 2,
+    "toolCalls": 3,
+    "generations": [
+      {
+        "id": "f2cf00b8-05fe-46fc-a509-76563e43401c:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2539.140900000013,
+        "telemetry": {
+          "generationId": "f2cf00b8-05fe-46fc-a509-76563e43401c:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4939,
+          "outputTokens": 516,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 25619,
+          "requestHash": "58bbee5d75a0fe14aa0f4e5e71250437de58c3edcd98101b50c3b826140e08c9",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 475,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "f2cf00b8-05fe-46fc-a509-76563e43401c:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2566.585400000011,
+        "telemetry": {
+          "generationId": "f2cf00b8-05fe-46fc-a509-76563e43401c:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5884,
+          "outputTokens": 405,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 30002,
+          "requestHash": "d1f0ddfdc44feed30e26071ec5b44731800680f71b2581eabce970d8d08afa6a",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 385,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      }
+    ],
+    "toolLatencyMs": 2993.8364000000147,
+    "verificationLatencyMs": null,
+    "enqueued": 0,
+    "commitStatus": "COMMITTED"
+  },
+  "owners": 2,
+  "verifiers": 0,
+  "batch": {
+    "pageId": "1198992073286645",
+    "conversationHash": "5466c9ac62da10c93bb392572e3ca37589df5e437aa64aff7568d853f2e04534",
+    "generation": 4,
+    "leaseToken": "76e8e346-7397-4d4d-b2b5-25467ba1e6e1",
+    "inboxIds": [
+      "259cdb35-ac94-4f2c-ba2d-49da9a903833"
+    ],
+    "evaluationGroupId": "f2cf00b8-05fe-46fc-a509-76563e43401c",
+    "eventKind": "CUSTOMER",
+    "firstReceiveSequence": 4,
+    "lastReceiveSequence": 4,
+    "attemptCount": 1,
+    "items": [
+      {
+        "inboxId": "259cdb35-ac94-4f2c-ba2d-49da9a903833",
+        "pageId": "1198992073286645",
+        "eventKey": "stateful-a3318597-71bf-4ebe-bb6d-89b0af2ee8b1:0",
+        "conversationHash": "5466c9ac62da10c93bb392572e3ca37589df5e437aa64aff7568d853f2e04534",
+        "occurredAt": "2026-10-22T05:22:59.289Z",
+        "receivedAt": "2026-10-22T05:22:59.289Z",
+        "receiveSequence": 4,
+        "attemptCount": 1,
+        "leaseToken": "76e8e346-7397-4d4d-b2b5-25467ba1e6e1",
+        "eventKind": "CUSTOMER",
+        "envelope": {
+          "schemaVersion": 1,
+          "customerSendEnabled": false,
+          "routing": {
+            "owner": "APP"
+          },
+          "message": {
+            "schemaVersion": 1,
+            "traceId": "483ec585-df55-43e2-8f05-f61fb072fa63",
+            "eventKey": "stateful-a3318597-71bf-4ebe-bb6d-89b0af2ee8b1:0",
+            "pageId": "1198992073286645",
+            "messageId": "stateful-a3318597-71bf-4ebe-bb6d-89b0af2ee8b1:0",
+            "senderId": "synthetic-recipient-5466c9ac62da10c93bb392572e3ca37589df5e437aa64aff7568d853f2e04534",
+            "conversationId": "synthetic-meta-conversation",
+            "occurredAt": "2026-10-22T05:22:59.289Z",
+            "isEcho": false,
+            "appId": null,
+            "text": "Chị cần bộ này sáng thứ Sáu, ship về Cần Thơ có kịp không em?",
+            "attachments": []
+          }
+        }
+      }
+    ]
+  },
+  "toolResponses": [
+    {
+      "name": "read_product",
+      "response": {
+        "status": "OK",
+        "data": {
+          "subjectRef": "SV2447",
+          "label": "Set váy Thạch Thảo",
+          "variantId": "offer:SV2447:SET_VAY",
+          "offerType": "SET_VAY",
+          "requestedOfferType": "SET_VAY",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "sellingOptions": [
+            {
+              "offerType": "SET_VAY",
+              "variantId": "offer:SV2447:SET_VAY",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-22T05:04:23.752Z",
+              "expiresAt": "2026-10-22T07:04:23.752Z",
+              "facts": [
+                {
+                  "type": "PRICE",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SV2447",
+                    "variantId": "offer:SV2447:SET_VAY"
+                  },
+                  "value": {
+                    "amountVnd": 799000,
+                    "currency": "VND"
+                  }
+                },
+                {
+                  "type": "STOCK",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SV2447",
+                    "variantId": "offer:SV2447:SET_VAY"
+                  },
+                  "value": {
+                    "status": "IN_STOCK",
+                    "availableQuantity": 47
+                  }
+                }
+              ],
+              "availability": {
+                "price": {
+                  "status": "OK",
+                  "reason": null
+                },
+                "stock": {
+                  "status": "OK",
+                  "reason": null
+                },
+                "eta": {
+                  "status": "NOT_FOUND",
+                  "reason": "ETA_DATA_MISSING_OR_EXPIRED"
+                }
+              }
+            }
+          ],
+          "attributes": null,
+          "sizeCharts": [],
+          "content": {
+            "productName": "Set váy Thạch Thảo",
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productUrl": null,
+            "metadata": {
+              "authority": "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+              "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98",
+              "observedAt": "2026-09-28T04:31:05.725Z",
+              "expiresAt": null,
+              "freshForSeconds": null,
+              "freshnessState": "FRESH"
+            }
+          },
+          "facts": [
+            {
+              "type": "PRICE",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:SET_VAY"
+              },
+              "value": {
+                "amountVnd": 799000,
+                "currency": "VND"
+              }
+            },
+            {
+              "type": "STOCK",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:SET_VAY"
+              },
+              "value": {
+                "status": "IN_STOCK",
+                "availableQuantity": 47
+              }
+            }
+          ],
+          "availability": {
+            "price": {
+              "status": "OK",
+              "reason": null
+            },
+            "stock": {
+              "status": "OK",
+              "reason": null
+            },
+            "eta": {
+              "status": "NOT_FOUND",
+              "reason": "ETA_DATA_MISSING_OR_EXPIRED"
+            }
+          },
+          "missing": [
+            "ATTRIBUTES"
+          ]
+        }
+      },
+      "id": "call_1678224"
+    }
+  ],
+  "inboundMessages": [
+    {
+      "schemaVersion": 1,
+      "traceId": "483ec585-df55-43e2-8f05-f61fb072fa63",
+      "eventKey": "stateful-a3318597-71bf-4ebe-bb6d-89b0af2ee8b1:0",
+      "pageId": "1198992073286645",
+      "messageId": "stateful-a3318597-71bf-4ebe-bb6d-89b0af2ee8b1:0",
+      "senderId": "synthetic-recipient-5466c9ac62da10c93bb392572e3ca37589df5e437aa64aff7568d853f2e04534",
+      "conversationId": "synthetic-meta-conversation",
+      "occurredAt": "2026-10-22T05:22:59.289Z",
+      "isEcho": false,
+      "appId": null,
+      "text": "Chị cần bộ này sáng thứ Sáu, ship về Cần Thơ có kịp không em?",
+      "attachments": []
+    }
+  ],
+  "actualCapturedMessages": [],
+  "committedPublicState": {
+    "stage": "DISCOVERY",
+    "revision": 0,
+    "cart": null,
+    "measurements": [],
+    "customerProfileRevision": 1
+  },
+  "counts": {
+    "embedding": 1,
+    "owner": 10,
+    "verifier": 2,
+    "catalogReads": 23,
+    "posReads": 14,
+    "selectorCalls": 0,
+    "readPolicyCalls": 0
+  }
+}

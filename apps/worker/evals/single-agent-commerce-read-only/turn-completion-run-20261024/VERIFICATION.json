@@ -1,0 +1,559 @@
+{
+  "sourceSha": "235d570a90f792a096e37d4094e6feaf3c7eee95",
+  "checks": [
+    {
+      "name": "b1-provider-preflight",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/run.mjs",
+        "--config",
+        "apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json",
+        "--cases",
+        "apps/worker/evals/single-agent-commerce-read-only/cases.b1.json",
+        "--range",
+        "1:1",
+        "--preflight"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 10.128289699554443
+    },
+    {
+      "name": "bank-integration-final-run",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "C:/Users/nguye/Documents/Sản phẩm AI/c3-turn-completion-checks-20261024/bank-integration-final",
+        "BANK_TRANSFER",
+        "--candidate-handoff",
+        "--composed-only"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 135.8020396232605
+    },
+    {
+      "name": "bank-integration-qualified-run",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "C:/Users/nguye/Documents/Sản phẩm AI/c3-turn-completion-checks-20261024/bank-integration-qualified",
+        "BANK_TRANSFER",
+        "--candidate-handoff",
+        "--handoff-delivery-only"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 415.8959004878998
+    },
+    {
+      "name": "bank-integration-qualified2-run",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "C:/Users/nguye/Documents/Sản phẩm AI/c3-turn-completion-checks-20261024/bank-integration-qualified2",
+        "BANK_TRANSFER",
+        "--candidate-handoff",
+        "--handoff-delivery-only"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 439.7769627571106
+    },
+    {
+      "name": "bank-integration-ready-run",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "C:/Users/nguye/Documents/Sản phẩm AI/c3-turn-completion-checks-20261024/bank-integration-ready",
+        "BANK_TRANSFER",
+        "--candidate-handoff",
+        "--composed-only"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 148.72898364067078
+    },
+    {
+      "name": "bank-integration-run",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "C:/Users/nguye/Documents/Sản phẩm AI/c3-turn-completion-checks-20261024/bank-integration",
+        "BANK_TRANSFER",
+        "--candidate-handoff",
+        "--composed-only"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 136.78827381134033
+    },
+    {
+      "name": "bank-integration-sealed-run",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "C:/Users/nguye/Documents/Sản phẩm AI/c3-turn-completion-checks-20261024/bank-integration-sealed",
+        "BANK_TRANSFER",
+        "--candidate-handoff",
+        "--composed-only"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 179.0515649318695
+    },
+    {
+      "name": "caption-redaction-diagnostic",
+      "command": [
+        "node",
+        "--input-type=module",
+        "-e",
+        "import {redactAnalyticsMessage} from './packages/database/dist/index.js'; const text='Em gửi chị xem ảnh cận cảnh họa tiết thêu nổi trên áo để mình dễ dàng quan sát từng đường nét thêu nhé ạ.'; const result=redactAnalyticsMessage(text); if(result.text!=='[ADDRESS]')throw Error('EXPECTED_REDACTION_NOT_REPRODUCED'); console.log(JSON.stringify({status:'REPRODUCED',redacted:result.text,rawPlaintextHashRetained:false}));"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.6951665878295898
+    },
+    {
+      "name": "capture-gate-journey-openings",
+      "command": [
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/feedback-native-gates.mjs",
+        "--job",
+        "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-turn-completion-model-20261024\\journey-openings"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.3244750499725342
+    },
+    {
+      "name": "capture-gate-media-followup",
+      "command": [
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/feedback-native-gates.mjs",
+        "--job",
+        "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-turn-completion-model-20261024\\media-followup"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 1.0727179050445557
+    },
+    {
+      "name": "capture-gate-negotiation",
+      "command": [
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/feedback-native-gates.mjs",
+        "--job",
+        "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-turn-completion-model-20261024\\negotiation"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.0179548263549805
+    },
+    {
+      "name": "capture-gate-opening-quotes",
+      "command": [
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/feedback-native-gates.mjs",
+        "--job",
+        "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-turn-completion-model-20261024\\opening-quotes"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.1615614891052246
+    },
+    {
+      "name": "capture-gate-stateful",
+      "command": [
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/feedback-native-gates.mjs",
+        "--job",
+        "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-turn-completion-model-20261024\\stateful"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.439009428024292
+    },
+    {
+      "name": "cod-integration-final-run",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "C:/Users/nguye/Documents/Sản phẩm AI/c3-turn-completion-checks-20261024/cod-integration-final",
+        "COD",
+        "--candidate-handoff",
+        "--composed-only"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 141.84682202339172
+    },
+    {
+      "name": "cod-integration-qualified-run",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "C:/Users/nguye/Documents/Sản phẩm AI/c3-turn-completion-checks-20261024/cod-integration-qualified",
+        "COD",
+        "--candidate-handoff",
+        "--handoff-delivery-only"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 415.90500926971436
+    },
+    {
+      "name": "cod-integration-qualified2-run",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "C:/Users/nguye/Documents/Sản phẩm AI/c3-turn-completion-checks-20261024/cod-integration-qualified2",
+        "COD",
+        "--candidate-handoff",
+        "--handoff-delivery-only"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 442.0627281665802
+    },
+    {
+      "name": "cod-integration-ready-run",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "C:/Users/nguye/Documents/Sản phẩm AI/c3-turn-completion-checks-20261024/cod-integration-ready",
+        "COD",
+        "--candidate-handoff",
+        "--composed-only"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 156.2023684978485
+    },
+    {
+      "name": "cod-integration-run",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "C:/Users/nguye/Documents/Sản phẩm AI/c3-turn-completion-checks-20261024/cod-integration",
+        "COD",
+        "--candidate-handoff",
+        "--composed-only"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 143.62821555137634
+    },
+    {
+      "name": "cod-integration-sealed-run",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "C:/Users/nguye/Documents/Sản phẩm AI/c3-turn-completion-checks-20261024/cod-integration-sealed",
+        "COD",
+        "--candidate-handoff",
+        "--composed-only"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 181.7380211353302
+    },
+    {
+      "name": "contracts-typecheck",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@lana/contracts",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.9280142784118652
+    },
+    {
+      "name": "controls-dry",
+      "command": [
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/feedback-controls-20261023.mjs",
+        "C:/Users/nguye/Documents/Sản phẩm AI/c3-turn-completion-controls-dry-20261024",
+        "--capture",
+        "C:/Users/nguye/Documents/Sản phẩm AI/c3-turn-completion-source-20261024/capture.json",
+        "--preflight"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.9363467693328857
+    },
+    {
+      "name": "database-focused-t1",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@lana/database",
+        "exec",
+        "vitest",
+        "run",
+        "src/realtime-runtime.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 23.945860624313354
+    },
+    {
+      "name": "database-typecheck",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@lana/database",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 6.110310316085815
+    },
+    {
+      "name": "node-final",
+      "command": [
+        "node",
+        "--test",
+        "apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/delivery-capture.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/candidate-handoff.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/feedback-controls.test.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 2.4089014530181885
+    },
+    {
+      "name": "node-t1",
+      "command": [
+        "node",
+        "--test",
+        "apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/delivery-capture.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/candidate-handoff.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/feedback-controls.test.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 5.975377798080444
+    },
+    {
+      "name": "protected-focused",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@lana/business-tools",
+        "exec",
+        "vitest",
+        "run",
+        "src/protected-claims.test.ts",
+        "src/reply-assembler.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 5.79407262802124
+    },
+    {
+      "name": "public-atomic-green",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@lana/worker",
+        "exec",
+        "vitest",
+        "run",
+        "src/single-agent-commerce-persistence.test.ts",
+        "src/single-agent-commerce-ingress.test.ts",
+        "src/single-agent-commerce-handoff.test.ts",
+        "src/single-agent-commerce-handoff-delivery.test.ts",
+        "src/meta-outbox-dispatcher.test.ts",
+        "src/single-agent-commerce-media-delivery.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 8.010404348373413
+    },
+    {
+      "name": "public-atomic-red",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@lana/worker",
+        "exec",
+        "vitest",
+        "run",
+        "src/single-agent-commerce-persistence.test.ts"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 4.631552696228027
+    },
+    {
+      "name": "shared-focused-t1",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@lana/contracts",
+        "exec",
+        "vitest",
+        "run",
+        "src/commerce-handoff-delivery.test.ts",
+        "src/commerce-media-delivery.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 16.964423656463623
+    },
+    {
+      "name": "source-capture-final",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/feedback-source-capture.mjs",
+        "C:/Users/nguye/Documents/Sản phẩm AI/c3-turn-completion-source-final-20261024"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 13.142155408859253
+    },
+    {
+      "name": "source-capture-provider",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/feedback-source-capture.mjs",
+        "C:/Users/nguye/Documents/Sản phẩm AI/c3-turn-completion-source-provider-20261024"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 11.620382070541382
+    },
+    {
+      "name": "source-capture",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/feedback-source-capture.mjs",
+        "C:/Users/nguye/Documents/Sản phẩm AI/c3-turn-completion-source-20261024"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 11.564332723617554
+    },
+    {
+      "name": "stateful-provider-preflight",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "C:/Users/nguye/Documents/Sản phẩm AI/c3-turn-completion-preflight-unused",
+        "COD",
+        "--provider-run",
+        "--candidate-handoff",
+        "--journey-openings",
+        "--provider-preflight"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 9.8710458278656
+    },
+    {
+      "name": "worker-build-final",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@lana/worker",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 37.19583797454834
+    },
+    {
+      "name": "worker-build-t1",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@lana/worker",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 200.7119517326355
+    },
+    {
+      "name": "worker-focused-t1",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@lana/worker",
+        "exec",
+        "vitest",
+        "run",
+        "src/single-agent-commerce-handoff-delivery.test.ts",
+        "src/single-agent-commerce-handoff.test.ts",
+        "src/single-agent-commerce-persistence.test.ts",
+        "src/single-agent-commerce-ingress.test.ts",
+        "src/single-agent-commerce-media-delivery.test.ts",
+        "src/meta-outbox-dispatcher.test.ts",
+        "src/single-agent-commerce-read-only.test.ts",
+        "src/single-agent-commerce-read-only-tools.test.ts",
+        "src/single-agent-commerce-product-groups.test.ts",
+        "src/single-agent-commerce-media.test.ts",
+        "src/single-agent-commerce-state.test.ts",
+        "src/single-agent-semantic-verifier-boundary.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 41.37811875343323
+    },
+    {
+      "name": "worker-lint-final",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@lana/worker",
+        "lint"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.537975311279297
+    },
+    {
+      "name": "worker-lint",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@lana/worker",
+        "lint"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 6.747120380401611
+    },
+    {
+      "name": "worker-typecheck-final",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@lana/worker",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 31.711852550506592
+    },
+    {
+      "name": "worker-typecheck",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@lana/worker",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 56.345192432403564
+    }
+  ],
+  "notes": [
+    "Includes observed RED and failed/incomplete PostgreSQL attempts; never treat them as PASS.",
+    "Runtime source bytes after public holding fix passed143focused tests/build/typecheck/lint; earlier369focused tests preceded that fix. Shared2/database46/Node94/protected21 recorded separately.",
+    "Docker local engine unavailable; isolated PostgreSQL over existing approved source session. Two network-reset orphan databases cleaned using exact recorded database+artifact identities.",
+    "No provider API change, generation retries, full A2/A3, merge, deploy or live send."
+  ]
+}

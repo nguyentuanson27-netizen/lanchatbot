@@ -1,0 +1,22 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: FIXTURE_OPERATION_STATUS
++ actual - expected
+
++ 'UNAVAILABLE'
+- 'OK'
+
+    at assertOperation (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/feedback-control-inputs.mjs:57:9)
+    at prepareControls (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/feedback-control-inputs.mjs:84:81)
+    at async file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/feedback-controls-20261023.mjs:19:9 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 'UNAVAILABLE',
+  expected: 'OK',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

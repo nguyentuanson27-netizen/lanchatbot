@@ -1,0 +1,158 @@
+{
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "runSourceSha": "ea983ad05034ea2fbfa2e8b656d8734aa2e2848f",
+  "reviewedFixHead": "8c7099dd35b31259f01132741a44a26e4a644ec5",
+  "rawSavepoint": "ee519ea37c64fb613dca3ac97f42dc3b33c80f3f",
+  "primarySavepoint": "57ac945a69350b0559e47b3bba00ea47233d2a17",
+  "referenceBlobs": {
+    "docs/specs/c3-single-agent-commerce-architecture-20261004.md": "7e0265e3b6b3d556d8fb0f3c7267abccef5de86a",
+    "docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md": "4a09b55d2f3a972a65697738876cc5eab21e7a2b",
+    "docs/specs/c3-phase-b-execution-20261014.md": "c397034d68897c0ee96947dce39b1a550e940920",
+    "docs/specs/c3-phase-b-integration-audit-20261015.md": "ebabfde37d188d81028a65369a85952055079109",
+    "tasks/plan.md": "3bf52262c86ec36ad080dcfbf61d960eb1a6856b",
+    "tasks/todo.md": "ad495405de5961bd2e950ddf7cb182134ed0cd86"
+  },
+  "commands": [
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/run.mjs --preflight --config apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json --cases apps/worker/evals/single-agent-commerce-read-only/cases.b1.json",
+      "exitCode": 0,
+      "result": "CONFIG_READY_CONNECTIONS_UNVERIFIED; zero generation"
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/run.mjs --source-check --config apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json --cases apps/worker/evals/single-agent-commerce-read-only/cases.b1.json --out 'C:/Users/nguye/AppData/Local/Temp/c3-b24-rootfix-source-20261016'",
+      "exitCode": 0,
+      "result": "SOURCE_ADAPTERS_READ_BACK; canonical worker build passed; zero generation"
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/run.mjs --run --config apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json --cases apps/worker/evals/single-agent-commerce-read-only/cases.b1.json --out 'C:/Users/nguye/AppData/Local/Temp/c3-b24-rootfix-provider-20261016'",
+      "exitCode": 0,
+      "result": "AWAITING_WHOLE_REPLY_REVIEW;24/24; canonical worker build passed"
+    },
+    {
+      "command": "node 'C:/Users/nguye/AppData/Local/Temp/c3-b24-rootfix-preserve.mjs' 'C:/Users/nguye/AppData/Local/Temp/c3-b24-rootfix-provider-20261016' ea983ad05034ea2fbfa2e8b656d8734aa2e2848f",
+      "exitCode": 0,
+      "result": "27raw+source readback;28hashes;zero secret-pattern matches"
+    },
+    {
+      "command": "node 'C:/Users/nguye/AppData/Local/Temp/c3-b24-rootfix-primary-view.mjs' apps/worker/evals/single-agent-commerce-read-only/rootcause-fix-20261016",
+      "exitCode": 0,
+      "result": "all24actual terminals; no rejected draft in primary view"
+    },
+    {
+      "command": "node 'C:/Users/nguye/AppData/Local/Temp/c3-b24-rootfix-score.mjs' apps/worker/evals/single-agent-commerce-read-only/rootcause-fix-20261016",
+      "exitCode": 0,
+      "result": {
+        "FALLBACK_OR_NO_SEND": 8,
+        "USABLE": 14,
+        "NEEDS_EDIT": 2
+      }
+    },
+    {
+      "command": "node 'C:/Users/nguye/AppData/Local/Temp/c3-b24-rootfix-audit.mjs' apps/worker/evals/single-agent-commerce-read-only/rootcause-fix-20261016",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node 'C:/Users/nguye/AppData/Local/Temp/c3-b24-rootfix-name-source-probe.mjs'",
+      "exitCode": 0,
+      "result": "POST_PRIMARY_READ_ONLY_EXACT_CODE_DIAGNOSIS;SV1561 found;0embedding/owner/verifier generation;separate from24-case batch"
+    }
+  ],
+  "logs": {
+    "c3-b-contract-red-worker-20261016.log": {
+      "sha256": "9a73bfa0291fc3728eace2e36dbbe625b71621b3419dd5cbe734ce0beece2e14",
+      "bytes": 5400
+    },
+    "c3-b-contract-red-adapter-20261016.log": {
+      "sha256": "a8a17f9903992c9d549ec09f70385a9c4f478dfb6a99f1c5e66263bff92ee30b",
+      "bytes": 3727
+    },
+    "c3-b-stock-scope-red-20261016.log": {
+      "sha256": "0e49082732570f4693f32b880775b2bf329aa8bff503732024980f0b0c8116eb",
+      "bytes": 4489
+    },
+    "c3-b-canonical-red-20261016.log": {
+      "sha256": "8134ceafbd43cbedfb9334c93e64e868991aaa0a7166da16acdaad4e8ca51865",
+      "bytes": 1434
+    },
+    "c3-b-contract-worker-full-20261016.log": {
+      "sha256": "9fd938b9b15e0222d76ac03fc5b1b9292d8bf542a5b60108f7a211b53a7378b8",
+      "bytes": 22461
+    },
+    "c3-b-contract-worker-src-final-20261016.log": {
+      "sha256": "9f3bf65955ce393ec8ae27fd3e6b728fcef6a1247425c054584a58425f4fbc46",
+      "bytes": 13300
+    },
+    "c3-b-contract-evals-final-20261016.log": {
+      "sha256": "9a1e04c422e00399d7cb2a6bbf21968e05b5bcc0197a8628f5ce11a39f2e6e4c",
+      "bytes": 55522
+    },
+    "c3-b-contract-typecheck-20261016.log": {
+      "sha256": "940b1a1dfeb7d93eb308d2412218cfb7fad7445e01ef034a75ec2c15b3f4708e",
+      "bytes": 5266
+    },
+    "c3-b-contract-build-20261016.log": {
+      "sha256": "8a03edc29d2f20630007b25eb38effc6e27df2115f7aa8029dba5506e1bc9bcf",
+      "bytes": 5249
+    },
+    "c3-b-contract-lint-20261016.log": {
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "bytes": 171
+    },
+    "c3-b-review-status-red-20261016.log": {
+      "sha256": "5f4e20b2c25db0abcdb9ebd7a1e1639ab6c855596bf32d08e4b1d0e052d37b4f",
+      "bytes": 4938
+    },
+    "c3-b-review-status-green-20261016.log": {
+      "sha256": "89e097ce53aeb01066b40e45f699e0078e5b1e0272f1c037d71e386791384536",
+      "bytes": 646
+    },
+    "c3-b-review-status-typecheck-20261016.log": {
+      "sha256": null,
+      "bytes": null,
+      "status": "NO_STDOUT_LOG_FILE; command completed exit0 without output"
+    },
+    "c3-b-review-status-build-20261016.log": {
+      "sha256": null,
+      "bytes": null,
+      "status": "NO_STDOUT_LOG_FILE; command completed exit0 without output"
+    },
+    "c3-b-contract-protected-reply-20261016.log": {
+      "sha256": "229e3ef6452eeb014191503af88343d9c3192ade271243810a2609e97d8c7492",
+      "bytes": 428
+    },
+    "c3-b-contract-protected-boundary-20261016.log": {
+      "sha256": "c0a543194b3a661171a03562e8f91d524f603e132bd53691a4564b37acaf3f8d",
+      "bytes": 383
+    },
+    "c3-b24-rootfix-preflight-20261016.log": {
+      "sha256": "ce85161caeef3ce20cbfb6ebafe5c608384db6f1a8288c6a245a6df6206c9404",
+      "bytes": 227
+    },
+    "c3-b24-rootfix-source-20261016.log": {
+      "sha256": "a61211cad7da727157abb3cd26f05fcaf97b31e9cc57565014748246c895c10a",
+      "bytes": 185
+    },
+    "c3-b24-rootfix-provider-20261016.log": {
+      "sha256": "77d590e61c42ea9847ed2feea255f6d3ed2a26b513cfbc262ca5ddd95c446e40",
+      "bytes": 1795
+    },
+    "c3-b24-rootfix-name-source-probe-20261016.log": {
+      "sha256": "58f518bb8262849ac339a3677a9b12aca93eba3aa1f87fc7d48d6993b029252c",
+      "bytes": 279
+    }
+  },
+  "analysisScripts": {
+    "c3-b24-rootfix-freeze.mjs": "65a48ba06231ec571be95af88583aebc153a167cc1a5c9f332b623ee533c00ce",
+    "c3-b24-rootfix-preserve.mjs": "4a62f00aeed2c9c4614efc4f5db6696ea950929fefd454a20828ff3c035f879f",
+    "c3-b24-rootfix-primary-view.mjs": "39259a02d2fc6990f7bca3866a5d1746acd5f52238108062c344c873682132e7",
+    "c3-b24-rootfix-score.mjs": "fc82e214f237346dfbf257fc6e6e56a63acb6e34ad5132d2878bc4ed7bbf9ec8",
+    "c3-b24-rootfix-audit.mjs": "466291edecafde43289b3bcd4897b0c5e7cf4a07661009cac0bad78a7c03f2ee",
+    "c3-b24-rootfix-diagnostics.mjs": "04307990b41582080a9f0ef8b9f9fe15a67e55f2ccad6f060f2ac605b316a798",
+    "c3-b24-rootfix-report.mjs": "b6869962dacef42fe58043eb52136b700f2a367df4c3487b7438fab35384dfe0",
+    "c3-b24-rootfix-name-source-probe.mjs": "c07482fcb1852ff77fb7618c3c972ab4ca8f039b498b430c2f5362bdb20a17cd"
+  },
+  "sourceReadbackStatus": "PASS",
+  "humanAcceptance": null,
+  "sendEnabled": false
+}

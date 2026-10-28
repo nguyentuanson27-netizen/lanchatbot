@@ -1,0 +1,694 @@
+{
+  "caseId": "sales-discovery-advice:need",
+  "journeyId": "sales-discovery-advice",
+  "elapsedMs": 40732.336,
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "OWNER_TOOL_MODE",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "OWNER_TOOL_MODE"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 3,
+    "verifierGenerations": 0,
+    "toolRounds": 2,
+    "toolCalls": 4,
+    "generations": [
+      {
+        "id": "4a2e5292-fcdb-4a1f-8859-fe4bb8624f00:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 10312.575100000002,
+        "telemetry": {
+          "generationId": "4a2e5292-fcdb-4a1f-8859-fe4bb8624f00:owner:1",
+          "providerRequests": 1,
+          "authRequests": 1,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5331,
+          "outputTokens": 316,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 29241,
+          "requestHash": "121f61993946e4f44e4b27927f58a85393b029d00004a5a81c18247910676f0a",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 297,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "4a2e5292-fcdb-4a1f-8859-fe4bb8624f00:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1980.9858000000022,
+        "telemetry": {
+          "generationId": "4a2e5292-fcdb-4a1f-8859-fe4bb8624f00:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 6517,
+          "outputTokens": 300,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 34838,
+          "requestHash": "d736650b9e7edd74092610726661beb335f1a2845063eee1c5e38950e9c0df4b",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 225,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "4a2e5292-fcdb-4a1f-8859-fe4bb8624f00:owner:3",
+        "role": "owner",
+        "status": "PROVIDER_ERROR",
+        "latencyMs": 3091.977399999996,
+        "telemetry": {
+          "generationId": "4a2e5292-fcdb-4a1f-8859-fe4bb8624f00:owner:3",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 6474,
+          "outputTokens": 344,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 29627,
+          "requestHash": "1ffda825d4dbdf8882c519671ad571dc7d00d5faa92b130a00ae0eb94592e9db",
+          "functionCallingMode": "NONE",
+          "declaredToolCount": 0,
+          "thinkingTokens": 328,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": true
+        }
+      }
+    ],
+    "toolLatencyMs": 4985.543699999995,
+    "verificationLatencyMs": null,
+    "enqueued": 1,
+    "commitStatus": "COMMITTED"
+  },
+  "owners": 3,
+  "verifiers": 0,
+  "batch": {
+    "pageId": "1198992073286645",
+    "conversationHash": "0244ab90bb3c84358a29807fb7847583fa10af3cf440627381dc5509ecef5f3b",
+    "generation": 1,
+    "leaseToken": "c2804b59-335e-45b4-a403-0b2214272993",
+    "inboxIds": [
+      "995935d6-8010-4e43-86c6-57d796b94755"
+    ],
+    "evaluationGroupId": "4a2e5292-fcdb-4a1f-8859-fe4bb8624f00",
+    "eventKind": "CUSTOMER",
+    "firstReceiveSequence": 1,
+    "lastReceiveSequence": 1,
+    "attemptCount": 1,
+    "items": [
+      {
+        "inboxId": "995935d6-8010-4e43-86c6-57d796b94755",
+        "pageId": "1198992073286645",
+        "eventKey": "stateful-83dee181-151d-48eb-88da-36626ac3fc38:0",
+        "conversationHash": "0244ab90bb3c84358a29807fb7847583fa10af3cf440627381dc5509ecef5f3b",
+        "occurredAt": "2026-10-23T16:01:11.866Z",
+        "receivedAt": "2026-10-23T16:01:11.866Z",
+        "receiveSequence": 1,
+        "attemptCount": 1,
+        "leaseToken": "c2804b59-335e-45b4-a403-0b2214272993",
+        "eventKind": "CUSTOMER",
+        "envelope": {
+          "schemaVersion": 1,
+          "customerSendEnabled": false,
+          "routing": {
+            "owner": "APP"
+          },
+          "message": {
+            "schemaVersion": 1,
+            "traceId": "29126296-64d0-4290-8fa4-3a1dd3092c81",
+            "eventKey": "stateful-83dee181-151d-48eb-88da-36626ac3fc38:0",
+            "pageId": "1198992073286645",
+            "messageId": "stateful-83dee181-151d-48eb-88da-36626ac3fc38:0",
+            "senderId": "synthetic-recipient-0244ab90bb3c84358a29807fb7847583fa10af3cf440627381dc5509ecef5f3b",
+            "conversationId": "synthetic-meta-conversation",
+            "occurredAt": "2026-10-23T16:01:11.866Z",
+            "isEcho": false,
+            "appId": null,
+            "text": "Chị tìm bộ áo quần đi làm, dưới một triệu thôi, đừng bó bụng quá.",
+            "attachments": []
+          }
+        }
+      }
+    ]
+  },
+  "toolResponses": [
+    {
+      "name": "search_products",
+      "response": {
+        "status": "OK",
+        "data": {
+          "status": "AMBIGUOUS",
+          "subjects": [
+            {
+              "ref": "V406",
+              "kind": "PRODUCT",
+              "label": "Váy Ngọc Trâm",
+              "bindingVersion": "commerce:1:c1fae6ecef2b9caa474d40ae85ebc47c172171fd5b98638c0e278234b33b742e"
+            },
+            {
+              "ref": "SQ748",
+              "kind": "PRODUCT",
+              "label": "SET QUẦN UYỂN HOA",
+              "bindingVersion": "commerce:1:c1fae6ecef2b9caa474d40ae85ebc47c172171fd5b98638c0e278234b33b742e"
+            },
+            {
+              "ref": "SQ629",
+              "kind": "PRODUCT",
+              "label": "SET QUẦN SQ629",
+              "bindingVersion": "commerce:1:c1fae6ecef2b9caa474d40ae85ebc47c172171fd5b98638c0e278234b33b742e"
+            }
+          ],
+          "products": [
+            {
+              "ref": "product:V406",
+              "subjectRef": "V406",
+              "content": {
+                "productName": "Váy Ngọc Trâm",
+                "description": "Thiết kế nữ tính, thanh lịch với sự kết hợp giữa ren hoa nổi sang trọng và tơ ống mềm nhẹ, tạo cảm giác mềm mại, thoáng mát và bay nhẹ khi mặc. Chất liệu mịn, rũ tự nhiên giúp tôn lên vẻ dịu dàng và tinh tế cho người mặc. Phần váy yếm 2 lớp tơ ống được thiết kế form nhẹ nhàng, tạo độ rủ mềm và giúp dáng váy đứng form đẹp. Đi kèm là khăn choàng ren hoa nổi 1 lớp, tạo điểm nhấn duyên dáng, tăng thêm nét sang trọng và nữ tính cho tổng thể trang phục. Sự kết hợp giữa váy yếm và khăn ren giúp set đồ trở nên nổi bật, vừa mềm mại vừa thanh lịch.",
+                "productUrl": null,
+                "metadata": {
+                  "authority": "WEBSTORE_XML",
+                  "sourceVersion": "catalog-v2",
+                  "observedAt": "2026-09-05T10:07:31.041Z",
+                  "expiresAt": null,
+                  "freshForSeconds": null,
+                  "freshnessState": "FRESH"
+                }
+              }
+            },
+            {
+              "ref": "product:SQ748",
+              "subjectRef": "SQ748",
+              "content": {
+                "productName": "SET QUẦN UYỂN HOA",
+                "description": "Màu sắc Tone kem phối họa tiết thổ cẩm hồng pastel và be nhạt, mang đến tổng thể ngọt ngào, thanh lịch và nữ tính. Set được may từ vải thô đũi cao cấp với bề mặt mềm mịn, thoáng khí và thấm hút tốt, mang lại cảm giác nhẹ nhàng, dễ chịu khi mặc Set gồm á kết hợp quần short lưng chun đồng bộ, chi tiết bèo xếp tầng ở gấu áo giúp tôn vòng eo và tạo hiệu ứng mềm mại, nữ tính. Quần short form suông, chiều dài vừa vặn giúp tôn dáng và tạo sự thoải mái khi vận động.",
+                "productUrl": null,
+                "metadata": {
+                  "authority": "WEBSTORE_XML",
+                  "sourceVersion": "catalog-v2",
+                  "observedAt": "2026-09-28T04:31:05.725Z",
+                  "expiresAt": null,
+                  "freshForSeconds": null,
+                  "freshnessState": "FRESH"
+                }
+              }
+            },
+            {
+              "ref": "product:SQ629",
+              "subjectRef": "SQ629",
+              "content": {
+                "productName": "SET QUẦN SQ629",
+                "description": "Màu sắc: Kem sáng nhẹ nhàng, thanh lịch và dễ mặc, mang tinh thần nữ tính tinh khôi của mùa hè. Thiết kế: Set gồm áo tay cánh dơi dáng rộng nhẹ phối ren dệt lỗ 3D tạo hiệu ứng thoáng và mềm mại. Phần eo bo chun nhẹ giúp tôn dáng tự nhiên, đi kèm áo quây rời 2 lớp kín đáo và tiện dụng. Quần short cạp chun co giãn thoải mái, form suông nhẹ kết hợp ren dệt nổi tạo tổng thể đồng điệu và tinh tế. Chất liệu: Ren dệt sợi cotton lỗ mềm phối thô boy đục lỗ laze, bề mặt có độ thoáng nhẹ và mềm mịn khi mặc. Lót habutai bên trong giúp đứng form, thoải mái và không gây bí nóng. Điểm nhấn: Họa tiết ren đục khắc lỗ 3D cùng chi tiết tua dây cổ mang cảm giác boho nữ tính, nhẹ nhàng nhưng vẫn nổi bật. Set đồ phù hợp diện đi biển, café cuối tuần, resort hoặc những buổi dạo phố mùa hè cần sự thoải mái và thanh lịch.",
+                "productUrl": null,
+                "metadata": {
+                  "authority": "WEBSTORE_XML",
+                  "sourceVersion": "catalog-v2",
+                  "observedAt": "2026-09-28T04:31:05.725Z",
+                  "expiresAt": null,
+                  "freshForSeconds": null,
+                  "freshnessState": "FRESH"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "id": "call_3991731"
+    },
+    {
+      "name": "search_products",
+      "response": {
+        "status": "OK",
+        "data": {
+          "status": "AMBIGUOUS",
+          "subjects": [
+            {
+              "ref": "V406",
+              "kind": "PRODUCT",
+              "label": "Váy Ngọc Trâm",
+              "bindingVersion": "commerce:1:c1fae6ecef2b9caa474d40ae85ebc47c172171fd5b98638c0e278234b33b742e"
+            },
+            {
+              "ref": "SQ748",
+              "kind": "PRODUCT",
+              "label": "SET QUẦN UYỂN HOA",
+              "bindingVersion": "commerce:1:c1fae6ecef2b9caa474d40ae85ebc47c172171fd5b98638c0e278234b33b742e"
+            },
+            {
+              "ref": "SQ629",
+              "kind": "PRODUCT",
+              "label": "SET QUẦN SQ629",
+              "bindingVersion": "commerce:1:c1fae6ecef2b9caa474d40ae85ebc47c172171fd5b98638c0e278234b33b742e"
+            }
+          ],
+          "products": [
+            {
+              "ref": "product:V406",
+              "subjectRef": "V406",
+              "content": {
+                "productName": "Váy Ngọc Trâm",
+                "description": "Thiết kế nữ tính, thanh lịch với sự kết hợp giữa ren hoa nổi sang trọng và tơ ống mềm nhẹ, tạo cảm giác mềm mại, thoáng mát và bay nhẹ khi mặc. Chất liệu mịn, rũ tự nhiên giúp tôn lên vẻ dịu dàng và tinh tế cho người mặc. Phần váy yếm 2 lớp tơ ống được thiết kế form nhẹ nhàng, tạo độ rủ mềm và giúp dáng váy đứng form đẹp. Đi kèm là khăn choàng ren hoa nổi 1 lớp, tạo điểm nhấn duyên dáng, tăng thêm nét sang trọng và nữ tính cho tổng thể trang phục. Sự kết hợp giữa váy yếm và khăn ren giúp set đồ trở nên nổi bật, vừa mềm mại vừa thanh lịch.",
+                "productUrl": null,
+                "metadata": {
+                  "authority": "WEBSTORE_XML",
+                  "sourceVersion": "catalog-v2",
+                  "observedAt": "2026-09-05T10:07:31.041Z",
+                  "expiresAt": null,
+                  "freshForSeconds": null,
+                  "freshnessState": "FRESH"
+                }
+              }
+            },
+            {
+              "ref": "product:SQ748",
+              "subjectRef": "SQ748",
+              "content": {
+                "productName": "SET QUẦN UYỂN HOA",
+                "description": "Màu sắc Tone kem phối họa tiết thổ cẩm hồng pastel và be nhạt, mang đến tổng thể ngọt ngào, thanh lịch và nữ tính. Set được may từ vải thô đũi cao cấp với bề mặt mềm mịn, thoáng khí và thấm hút tốt, mang lại cảm giác nhẹ nhàng, dễ chịu khi mặc Set gồm á kết hợp quần short lưng chun đồng bộ, chi tiết bèo xếp tầng ở gấu áo giúp tôn vòng eo và tạo hiệu ứng mềm mại, nữ tính. Quần short form suông, chiều dài vừa vặn giúp tôn dáng và tạo sự thoải mái khi vận động.",
+                "productUrl": null,
+                "metadata": {
+                  "authority": "WEBSTORE_XML",
+                  "sourceVersion": "catalog-v2",
+                  "observedAt": "2026-09-28T04:31:05.725Z",
+                  "expiresAt": null,
+                  "freshForSeconds": null,
+                  "freshnessState": "FRESH"
+                }
+              }
+            },
+            {
+              "ref": "product:SQ629",
+              "subjectRef": "SQ629",
+              "content": {
+                "productName": "SET QUẦN SQ629",
+                "description": "Màu sắc: Kem sáng nhẹ nhàng, thanh lịch và dễ mặc, mang tinh thần nữ tính tinh khôi của mùa hè. Thiết kế: Set gồm áo tay cánh dơi dáng rộng nhẹ phối ren dệt lỗ 3D tạo hiệu ứng thoáng và mềm mại. Phần eo bo chun nhẹ giúp tôn dáng tự nhiên, đi kèm áo quây rời 2 lớp kín đáo và tiện dụng. Quần short cạp chun co giãn thoải mái, form suông nhẹ kết hợp ren dệt nổi tạo tổng thể đồng điệu và tinh tế. Chất liệu: Ren dệt sợi cotton lỗ mềm phối thô boy đục lỗ laze, bề mặt có độ thoáng nhẹ và mềm mịn khi mặc. Lót habutai bên trong giúp đứng form, thoải mái và không gây bí nóng. Điểm nhấn: Họa tiết ren đục khắc lỗ 3D cùng chi tiết tua dây cổ mang cảm giác boho nữ tính, nhẹ nhàng nhưng vẫn nổi bật. Set đồ phù hợp diện đi biển, café cuối tuần, resort hoặc những buổi dạo phố mùa hè cần sự thoải mái và thanh lịch.",
+                "productUrl": null,
+                "metadata": {
+                  "authority": "WEBSTORE_XML",
+                  "sourceVersion": "catalog-v2",
+                  "observedAt": "2026-09-28T04:31:05.725Z",
+                  "expiresAt": null,
+                  "freshForSeconds": null,
+                  "freshnessState": "FRESH"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "id": "call_3991731"
+    },
+    {
+      "name": "read_product",
+      "response": {
+        "status": "OK",
+        "data": {
+          "subjectRef": "SQ629",
+          "label": "SET QUẦN SQ629",
+          "variantId": "offer:SQ629:SET_QUAN",
+          "offerType": "SET_QUAN",
+          "requestedOfferType": null,
+          "availableOffers": [
+            "AO",
+            "QUAN",
+            "SET_QUAN"
+          ],
+          "sellingOptions": [
+            {
+              "offerType": "AO",
+              "variantId": "offer:SQ629:AO",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-23T15:34:29.666Z",
+              "expiresAt": "2026-10-23T17:34:29.666Z",
+              "facts": [
+                {
+                  "type": "PRICE",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SQ629",
+                    "variantId": "offer:SQ629:AO"
+                  },
+                  "value": {
+                    "amountVnd": 479000,
+                    "currency": "VND"
+                  }
+                },
+                {
+                  "type": "STOCK",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SQ629",
+                    "variantId": "offer:SQ629:AO"
+                  },
+                  "value": {
+                    "status": "PRE_ORDER",
+                    "availableQuantity": 0
+                  }
+                }
+              ],
+              "availability": {
+                "price": {
+                  "status": "OK",
+                  "reason": null
+                },
+                "stock": {
+                  "status": "OK",
+                  "reason": null
+                }
+              }
+            },
+            {
+              "offerType": "QUAN",
+              "variantId": "offer:SQ629:QUAN",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-23T15:34:29.666Z",
+              "expiresAt": "2026-10-23T17:34:29.666Z",
+              "facts": [
+                {
+                  "type": "PRICE",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SQ629",
+                    "variantId": "offer:SQ629:QUAN"
+                  },
+                  "value": {
+                    "amountVnd": 429000,
+                    "currency": "VND"
+                  }
+                },
+                {
+                  "type": "STOCK",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SQ629",
+                    "variantId": "offer:SQ629:QUAN"
+                  },
+                  "value": {
+                    "status": "IN_STOCK",
+                    "availableQuantity": 2
+                  }
+                }
+              ],
+              "availability": {
+                "price": {
+                  "status": "OK",
+                  "reason": null
+                },
+                "stock": {
+                  "status": "OK",
+                  "reason": null
+                }
+              }
+            },
+            {
+              "offerType": "SET_QUAN",
+              "variantId": "offer:SQ629:SET_QUAN",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-23T15:34:29.666Z",
+              "expiresAt": "2026-10-23T17:34:29.666Z",
+              "facts": [
+                {
+                  "type": "PRICE",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SQ629",
+                    "variantId": "offer:SQ629:SET_QUAN"
+                  },
+                  "value": {
+                    "amountVnd": 749000,
+                    "currency": "VND"
+                  }
+                },
+                {
+                  "type": "STOCK",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SQ629",
+                    "variantId": "offer:SQ629:SET_QUAN"
+                  },
+                  "value": {
+                    "status": "PRE_ORDER",
+                    "availableQuantity": 0
+                  }
+                }
+              ],
+              "availability": {
+                "price": {
+                  "status": "OK",
+                  "reason": null
+                },
+                "stock": {
+                  "status": "OK",
+                  "reason": null
+                }
+              }
+            }
+          ],
+          "attributes": null,
+          "sizeCharts": [],
+          "content": {
+            "productName": "SET QUẦN SQ629",
+            "description": "Màu sắc: Kem sáng nhẹ nhàng, thanh lịch và dễ mặc, mang tinh thần nữ tính tinh khôi của mùa hè. Thiết kế: Set gồm áo tay cánh dơi dáng rộng nhẹ phối ren dệt lỗ 3D tạo hiệu ứng thoáng và mềm mại. Phần eo bo chun nhẹ giúp tôn dáng tự nhiên, đi kèm áo quây rời 2 lớp kín đáo và tiện dụng. Quần short cạp chun co giãn thoải mái, form suông nhẹ kết hợp ren dệt nổi tạo tổng thể đồng điệu và tinh tế. Chất liệu: Ren dệt sợi cotton lỗ mềm phối thô boy đục lỗ laze, bề mặt có độ thoáng nhẹ và mềm mịn khi mặc. Lót habutai bên trong giúp đứng form, thoải mái và không gây bí nóng. Điểm nhấn: Họa tiết ren đục khắc lỗ 3D cùng chi tiết tua dây cổ mang cảm giác boho nữ tính, nhẹ nhàng nhưng vẫn nổi bật. Set đồ phù hợp diện đi biển, café cuối tuần, resort hoặc những buổi dạo phố mùa hè cần sự thoải mái và thanh lịch.",
+            "productUrl": null,
+            "metadata": {
+              "authority": "WEBSTORE_XML",
+              "sourceVersion": "catalog-v2",
+              "observedAt": "2026-09-28T04:31:05.725Z",
+              "expiresAt": null,
+              "freshForSeconds": null,
+              "freshnessState": "FRESH"
+            }
+          },
+          "facts": [
+            {
+              "type": "PRICE",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SQ629",
+                "variantId": "offer:SQ629:SET_QUAN"
+              },
+              "value": {
+                "amountVnd": 749000,
+                "currency": "VND"
+              }
+            },
+            {
+              "type": "STOCK",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SQ629",
+                "variantId": "offer:SQ629:SET_QUAN"
+              },
+              "value": {
+                "status": "PRE_ORDER",
+                "availableQuantity": 0
+              }
+            }
+          ],
+          "availability": {
+            "price": {
+              "status": "OK",
+              "reason": null
+            },
+            "stock": {
+              "status": "OK",
+              "reason": null
+            }
+          },
+          "missing": [
+            "ATTRIBUTES"
+          ]
+        }
+      },
+      "id": "call_2136501"
+    },
+    {
+      "name": "read_product",
+      "response": {
+        "status": "REJECTED",
+        "reason": "SUBJECT_BOUND"
+      },
+      "id": "call_2136502"
+    },
+    {
+      "name": "read_product",
+      "response": {
+        "status": "OK",
+        "data": {
+          "subjectRef": "V406",
+          "label": "Váy Ngọc Trâm",
+          "variantId": "offer:V406:DIRECT",
+          "offerType": "DIRECT",
+          "requestedOfferType": null,
+          "availableOffers": [
+            "DIRECT"
+          ],
+          "sellingOptions": [
+            {
+              "offerType": "DIRECT",
+              "variantId": "offer:V406:DIRECT",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-23T15:34:29.666Z",
+              "expiresAt": "2026-10-23T17:34:29.666Z",
+              "facts": [
+                {
+                  "type": "PRICE",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "V406",
+                    "variantId": "offer:V406:DIRECT"
+                  },
+                  "value": {
+                    "amountVnd": 699000,
+                    "currency": "VND"
+                  }
+                },
+                {
+                  "type": "STOCK",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "V406",
+                    "variantId": "offer:V406:DIRECT"
+                  },
+                  "value": {
+                    "status": "IN_STOCK",
+                    "availableQuantity": 56
+                  }
+                }
+              ],
+              "availability": {
+                "price": {
+                  "status": "OK",
+                  "reason": null
+                },
+                "stock": {
+                  "status": "OK",
+                  "reason": null
+                }
+              }
+            }
+          ],
+          "attributes": null,
+          "sizeCharts": [],
+          "content": {
+            "productName": "Váy Ngọc Trâm",
+            "description": "Thiết kế nữ tính, thanh lịch với sự kết hợp giữa ren hoa nổi sang trọng và tơ ống mềm nhẹ, tạo cảm giác mềm mại, thoáng mát và bay nhẹ khi mặc. Chất liệu mịn, rũ tự nhiên giúp tôn lên vẻ dịu dàng và tinh tế cho người mặc. Phần váy yếm 2 lớp tơ ống được thiết kế form nhẹ nhàng, tạo độ rủ mềm và giúp dáng váy đứng form đẹp. Đi kèm là khăn choàng ren hoa nổi 1 lớp, tạo điểm nhấn duyên dáng, tăng thêm nét sang trọng và nữ tính cho tổng thể trang phục. Sự kết hợp giữa váy yếm và khăn ren giúp set đồ trở nên nổi bật, vừa mềm mại vừa thanh lịch.",
+            "productUrl": null,
+            "metadata": {
+              "authority": "WEBSTORE_XML",
+              "sourceVersion": "catalog-v2",
+              "observedAt": "2026-09-05T10:07:31.041Z",
+              "expiresAt": null,
+              "freshForSeconds": null,
+              "freshnessState": "FRESH"
+            }
+          },
+          "facts": [
+            {
+              "type": "PRICE",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "V406",
+                "variantId": "offer:V406:DIRECT"
+              },
+              "value": {
+                "amountVnd": 699000,
+                "currency": "VND"
+              }
+            },
+            {
+              "type": "STOCK",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "V406",
+                "variantId": "offer:V406:DIRECT"
+              },
+              "value": {
+                "status": "IN_STOCK",
+                "availableQuantity": 56
+              }
+            }
+          ],
+          "availability": {
+            "price": {
+              "status": "OK",
+              "reason": null
+            },
+            "stock": {
+              "status": "OK",
+              "reason": null
+            }
+          },
+          "missing": [
+            "ATTRIBUTES"
+          ]
+        }
+      },
+      "id": "call_2136503"
+    }
+  ],
+  "inboundMessages": [
+    {
+      "schemaVersion": 1,
+      "traceId": "29126296-64d0-4290-8fa4-3a1dd3092c81",
+      "eventKey": "stateful-83dee181-151d-48eb-88da-36626ac3fc38:0",
+      "pageId": "1198992073286645",
+      "messageId": "stateful-83dee181-151d-48eb-88da-36626ac3fc38:0",
+      "senderId": "synthetic-recipient-0244ab90bb3c84358a29807fb7847583fa10af3cf440627381dc5509ecef5f3b",
+      "conversationId": "synthetic-meta-conversation",
+      "occurredAt": "2026-10-23T16:01:11.866Z",
+      "isEcho": false,
+      "appId": null,
+      "text": "Chị tìm bộ áo quần đi làm, dưới một triệu thôi, đừng bó bụng quá.",
+      "attachments": []
+    }
+  ],
+  "actualCapturedMessages": [
+    "Phần này em chưa trả lời được, chị nhé."
+  ],
+  "actualCapturedAttachments": [],
+  "deliveryEvidence": {
+    "outboxRows": [
+      {
+        "id": "be0c5bfc-bd38-44ac-832f-c02a2fdba952",
+        "group": "c2691541-a927-404b-8a55-b77a66735a55",
+        "sequence": 0,
+        "status": "SENT_ACCEPTED"
+      }
+    ]
+  },
+  "committedPublicState": {
+    "stage": "DISCOVERY",
+    "revision": 0,
+    "cart": null,
+    "measurements": [],
+    "customerProfileRevision": 1,
+    "negotiation": null
+  },
+  "counts": {
+    "embedding": 1,
+    "owner": 3,
+    "verifier": 0,
+    "catalogReads": 6,
+    "posReads": 5,
+    "selectorCalls": 0,
+    "readPolicyCalls": 0
+  }
+}

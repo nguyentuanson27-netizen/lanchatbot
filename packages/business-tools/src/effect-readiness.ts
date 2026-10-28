@@ -39,7 +39,7 @@ export interface EvaluateDeterministicEffectReadinessV1Input {
   readonly deterministicEvidenceHash?: string | null;
   readonly parentReadinessHash?: string | null;
   readonly payloadHash?: string | null;
-  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | null;
+  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | "SET_COMPONENT_VARIANT" | null;
   readonly mutationQuantity?: number | null;
   readonly checkedAt: Date;
 }
@@ -50,7 +50,10 @@ export function evaluateDeterministicEffectReadinessV1(
   const reasons = new Set<DeterministicEffectReadinessV1["reasonCodes"][number]>();
   const canonicalProducts = canonicalizeReadinessProductIdsV1(input.productIds);
   const productIds = [...canonicalProducts.productIds];
-  if (canonicalProducts.unresolved) reasons.add("PRODUCT_UNRESOLVED");
+  const productlessPayload = input.effect === "PROTECTED_OUTBOUND" && !canonicalProducts.invalid &&
+    productIds.length === 0 && input.claims.length === 0 && (input.protectedClaimTypes?.length ?? 0) === 0 &&
+    input.cartId === null && !!input.deterministicEvidenceHash && input.payloadHash === input.deterministicEvidenceHash;
+  if (canonicalProducts.unresolved && !productlessPayload) reasons.add("PRODUCT_UNRESOLVED");
   if (canonicalProducts.invalid) reasons.add("PRODUCT_SCOPE_INVALID");
   const usesCartCapacity = input.effect === "CART_OPEN" ||
     input.effect === "CART_MUTATION" || input.effect === "CART_READY";
@@ -64,7 +67,7 @@ export function evaluateDeterministicEffectReadinessV1(
   if (requiresIntent) {
     if (input.buyingIntent?.decision !== "COMMITTED") {
       reasons.add("BUYING_INTENT_MISSING");
-    } else if (!input.buyingIntent.contributors.includes("DETERMINISTIC_RUNTIME")) {
+    } else if (!input.buyingIntent.contributors.some(c => c === "DETERMINISTIC_RUNTIME" || c === "NATIVE_TOOL_PERMISSION")) {
       reasons.add("BUYING_INTENT_MISSING");
     } else if (
       input.buyingIntent.productId === null ||
@@ -187,10 +190,15 @@ export function evaluateDeterministicEffectReadinessV1(
   }
   const offerProductIds = [...new Set(offerBindings.map(({ productId }) => productId))]
     .sort((left, right) => left < right ? -1 : left > right ? 1 : 0);
+  const productScopeMatchesCart = offerProductIds.length === productIds.length &&
+    offerProductIds.every((productId, index) => productId === productIds[index]);
+  const catalogMediaAlongsideCart = input.effect === "PROTECTED_OUTBOUND" &&
+    offerProductIds.every(productId => productIds.includes(productId)) &&
+    productIds.every(productId => offerProductIds.includes(productId) || input.claims.some(claim =>
+      claim.type === "PRODUCT_MEDIA" && claim.scope.kind === "PRODUCT" && claim.scope.variantId === null && claim.scope.productId === productId));
   const canBindCart = input.cartId !== null && input.cartVersion !== null &&
     input.cartStateHash !== null && offerBindings.length > 0 &&
-    offerProductIds.length === productIds.length &&
-    offerProductIds.every((productId, index) => productId === productIds[index]);
+    (productScopeMatchesCart || catalogMediaAlongsideCart);
   if (input.cartId !== null && offerBindings.length > 0 && !canBindCart) {
     reasons.add("OFFER_BINDING_MISMATCH");
   }

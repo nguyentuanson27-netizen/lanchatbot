@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "status": "IMPLEMENTATION_PROTOCOL_NOT_A_PROVIDER_RUN",
+  "sendEnabled": false,
+  "ownerGenerations": 3,
+  "toolRounds": 2,
+  "toolCalls": 6,
+  "verifierGenerations": 1,
+  "requestBounds": {
+    "ownerWireBytes": 65536,
+    "verifierWireBytes": 32768
+  },
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "candidateFoundationSha": "dd5c9d46f41f1514982210034f551a95cd356f68",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.8-flash",
+      "version": "gemini-3.8-flash",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "010e26fba1a05343a2cc3eea315ea277bca99e8aa4715a4a02c7f513eaedfd64",
+    "verifier": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c"
+  },
+  "verdictSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "verdict",
+      "violations"
+    ],
+    "properties": {
+      "verdict": {
+        "type": "string",
+        "enum": [
+          "PASS",
+          "FAIL",
+          "UNCERTAIN"
+        ]
+      },
+      "violations": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "protectedRef",
+            "excerpt",
+            "basis"
+          ],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "UNSUPPORTED_PROTECTED_ASSERTION",
+                "SUBJECT_MISMATCH",
+                "CONTRADICTION_OR_NEGATION",
+                "MATERIAL_CONDITION_LOSS",
+                "POLICY_OR_BENEFIT_STRENGTHENING",
+                "EFFECT_WITHOUT_RECEIPT",
+                "STALE_OR_SUPERSEDED_MEANING",
+                "OTHER_PROTECTED_SEMANTIC_RISK"
+              ]
+            },
+            "protectedRef": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "excerpt": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "basis": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 320
+            }
+          }
+        }
+      }
+    }
+  },
+  "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+  "providerBatch": {
+    "scenarios": 24,
+    "repetitions": 1,
+    "maximumGenerationRequests": 96,
+    "status": "OWNER_AUTHORIZED_24_CASE_CORPUS_PREPARED_NOT_RUN"
+  },
+  "terminalMap": {
+    "PASS": "SEND_ELIGIBLE_SEND_DISABLED",
+    "FAIL": "STATIC_FALLBACK",
+    "UNCERTAIN": "STATIC_FALLBACK",
+    "MALFORMED": "STATIC_FALLBACK",
+    "TIMEOUT": "STATIC_FALLBACK",
+    "PROVIDER_ERROR": "STATIC_FALLBACK",
+    "STALE": "HANDOFF_NO_SEND_CAPABILITY",
+    "PERMISSION": "NO_SEND",
+    "PRIVACY": "NO_SEND",
+    "RECIPIENT": "NO_SEND"
+  },
+  "fallback": {
+    "id": "C3_A_NONPROTECTED_V2",
+    "text": "Phần này em chưa trả lời được, chị nhé.",
+    "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+  },
+  "recoveryFallbacks": [
+    {
+      "id": "C3_B_VERIFIED_MEDIA_V1",
+      "text": "Em gửi chị ảnh của mẫu để mình xem trước nhé.",
+      "sha256": "619619750d4d4d0af0835963426ca87ced10359f6ba051d6b9b07ca4ae0a8182"
+    },
+    {
+      "id": "C3_B_MEDIA_UNAVAILABLE_V1",
+      "text": "Lúc này em chưa gửi được ảnh chị cần.",
+      "sha256": "b9e9160e4554f30c76ad4707c1f8ad54d82a17d19b08bc0a4399b8470c394c9a"
+    }
+  ]
+}

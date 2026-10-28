@@ -1,0 +1,184 @@
+{
+  "sourceSha": "c31e206bbb030c77706d33c8d58a419b737bc4f6",
+  "registeredOutcomes": 33,
+  "completedControls": 17,
+  "completedDiagnostic": 16,
+  "controls": "PASS",
+  "generationRequests": 49,
+  "maximumRequestsPerGeneration": 1,
+  "retry": 0,
+  "providerErrors": 0,
+  "timeouts": 0,
+  "capturedWires": 49,
+  "ownerHashChecks": 16,
+  "verifierWireChecks": 33,
+  "ownerHashesMatch": true,
+  "verifierActualWiresMatch": true,
+  "evaluatorOrSecretKeyLeaks": 0,
+  "caseIdStringLeaks": 0,
+  "controlOutcomes": {
+    "safe": {
+      "SEND_ELIGIBLE": 8
+    },
+    "unsafe": {
+      "FALLBACK": 8
+    },
+    "probe": {
+      "SEND_ELIGIBLE": 1
+    }
+  },
+  "diagnosticDispositions": {
+    "SEND_ELIGIBLE": 16
+  },
+  "tokens": {
+    "input": 290707,
+    "output": 25947,
+    "thinkingIncludedInOutput": 23026
+  },
+  "tokensByRole": {
+    "control": {
+      "input": 125623,
+      "output": 2230,
+      "thinkingIncludedInOutput": 975
+    },
+    "owner": {
+      "input": 84146,
+      "output": 22506,
+      "thinkingIncludedInOutput": 21224
+    },
+    "verifier": {
+      "input": 80938,
+      "output": 1211,
+      "thinkingIncludedInOutput": 827
+    }
+  },
+  "cost": null,
+  "verificationLatencyMs": {
+    "samples": 16,
+    "p50": 9342.436300000001,
+    "p95": 29445.828299999994
+  },
+  "verifierProviderLatencyMs": {
+    "samples": 33,
+    "p50": 10541,
+    "p95": 29444
+  },
+  "armUsage": {
+    "A": {
+      "owner": {
+        "input": 41827,
+        "output": 12452,
+        "thinkingIncludedInOutput": 11767
+      },
+      "ownerRequestBytes": 198910,
+      "totalSlotLatencyMs": {
+        "samples": 8,
+        "p50": 20024.892399999997,
+        "p95": 33935.08859999999
+      },
+      "addedVerificationLatencyMs": {
+        "samples": 8,
+        "p50": 12838.011299999998,
+        "p95": 29445.828299999994
+      }
+    },
+    "B": {
+      "owner": {
+        "input": 42319,
+        "output": 10054,
+        "thinkingIncludedInOutput": 9457
+      },
+      "ownerRequestBytes": 200389,
+      "totalSlotLatencyMs": {
+        "samples": 8,
+        "p50": 13218.131699999998,
+        "p95": 24004.757299999997
+      },
+      "addedVerificationLatencyMs": {
+        "samples": 8,
+        "p50": 8908.9682,
+        "p95": 17761.486800000013
+      }
+    }
+  },
+  "review": {
+    "independent": false,
+    "freezeHash": "99e918432fec750d874c1806fc39b0900649a62102c395edcec571ecccf7ef86",
+    "wins": {
+      "NEITHER": 2,
+      "TIE": 4,
+      "A": 1,
+      "B": 1
+    },
+    "concernBClearWins": 0
+  },
+  "sourceAndConfigHashes": {
+    "sourceSha": "c31e206bbb030c77706d33c8d58a419b737bc4f6",
+    "manifestHash": "cf1db09a6390e8ddd06e7f61339e2a99e9a0c78d2373e022a18ad4225ec5eb92",
+    "sourceConfigHash": "b4c15f1823bf16d63a1ff67eb3a11711b28ed6592ec7bc1e65e0ceb3fbbc0d59",
+    "promptHashes": {
+      "owner": "71292eea99022f78c3ba5264eb4de6c8394dd2f345eb80bacb10a933c4e8e8db",
+      "verifier": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c"
+    },
+    "models": {
+      "conversation": {
+        "provider": "VERTEX_AI",
+        "model": "gemini-3.5-flash-lite",
+        "version": "gemini-3.5-flash-lite",
+        "effort": "high",
+        "location": "global",
+        "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+        "generationConfig": {
+          "candidateCount": 1,
+          "responseMimeType": "text/plain",
+          "maxOutputTokens": 8192,
+          "thinkingConfig": {
+            "thinkingLevel": "HIGH",
+            "includeThoughts": false
+          },
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "retry": 0,
+          "timeoutMs": 90000
+        }
+      },
+      "verifier": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      }
+    },
+    "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+    "corpusHashes": {
+      "cases.b1.json": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+      "stateful-cases.json": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+      "sales-journeys.candidate.json": "b2575660b7d412eb6a2d11befb04de75fd840789c7126026bb257ce60f183a93",
+      "sales-media-followup-cases.json": "dff5c57dff681f75ac35e484c014b0c62965bde2169941aa5b488ce879bba93a"
+    }
+  },
+  "inputHash": "7c5d962a6fccc9cbc82cfe5e17a35d629a3df50c10bf4f8093e68eea97557458",
+  "bundleHash": "7750ba0d398766a8e61127c3c5fb9cf6e6fec0fe2b7ba0e83706968fc53f6dd2"
+}

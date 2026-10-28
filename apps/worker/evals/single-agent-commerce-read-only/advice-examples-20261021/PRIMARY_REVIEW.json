@@ -1,0 +1,30 @@
+{
+  "status": "COMPLETE_12_STOP_NO_DEFAULT_PROMOTION",
+  "reviewer": "AGENT_NOT_OWNER_ADJUDICATION",
+  "basis": "Whole history and actual terminal replies, before rejected drafts/verifier diagnosis. Not blind. No keyword score or mandatory cheap option.",
+  "outcomes": [
+    {"id":"s01","arm":"control","caseSlot":7,"label":"NEEDS_EDIT","reason":"Chọn bộ nhưng lời giải thích chủ yếu là mềm, bay, rũ và chuỗi lời khen; chưa giải quyết rõ lo ngại về mức độ trang trí. Kết thúc bằng mời kiểm tra size dù B1 không có recommend_size. Không coi nhận xét thẩm mỹ tự nó là unsafe."},
+    {"id":"s02","arm":"candidate","caseSlot":7,"label":"NEEDS_EDIT","reason":"Bỏ được lời mời kiểm tra size không dùng được và bớt dài, nhưng vẫn suy từ ren mềm/form nhẹ/rũ sang không rườm rà rồi khen cực kỳ hợp. Lý do chưa giúp khách cân nhắc phần ren đang ngại; không yêu cầu phải chọn áo lẻ hay từ chối set."},
+    {"id":"s03","arm":"candidate","caseSlot":15,"label":"NEEDS_EDIT","reason":"Vẫn trấn an bằng nhiều lời khen và phủ nhận điệu quá; câu nếu chị hay mặc đồ trơn thì lấy cả bộ là sang và vừa vặn nhất chưa có lý do gắn với gu khách. Sau đó lại đưa áo lẻ như lựa chọn thứ hai mà chưa phân định rõ. Vừa vặn trong đoạn này không tự bị chấm là cam kết size."},
+    {"id":"s04","arm":"control","caseSlot":15,"label":"NEEDS_EDIT","reason":"Có thừa nhận cả bộ điệu hơn gu thường ngày, nhưng đoạn dài với nhiều lời quảng cáo rồi đưa cả áo lẻ/váy lẻ và hỏi lại. Chưa giúp khách chọn rõ cho buổi ăn cưới. Không chấm hỏng vì có nhiều hơn một phương án, mà vì không làm rõ phương án nên ưu tiên."},
+    {"id":"s05","arm":"control","caseSlot":23,"label":"USABLE_WITH_POLISH","reason":"Chọn rõ áo lẻ 499k, dùng được chân váy đen khách đã có và lý do mặc lại nhiều lần; không hỏi lại. Còn cách nói mảnh ghép cực kỳ linh hoạt/tận dụng tối đa khá quảng cáo, nhưng quyết định và lý do chính dùng được. Không bắt buộc upsell mới được đạt."},
+    {"id":"s06","arm":"candidate","caseSlot":23,"label":"USABLE_WITH_POLISH","reason":"Upsell cả bộ 799k trong ngân sách, giải thích đúng thêm300k có chân váy và vẫn dùng áo với chân váy đen của khách. Có áp dụng cách so sánh từ ví dụ sang giá thật; không dùng giá giả định. Còn chuỗi lời khen và câu nếu chưa có dáng váy khá giống cấu trúc ví dụ, chưa chứng minh giọng tốt hơn đối chứng."},
+    {"id":"s07","arm":"candidate","caseSlot":17,"label":"NEEDS_EDIT","reason":"Đầu đoạn chọn áo lẻ hợp buổi gặp khách, nhưng nửa sau lại quảng bá cả bộ rồi hỏi khách thích gọn chuyên nghiệp hay dịu dàng, dù khách đã nói muốn gọn. Ưu tiên đã biết bị trả lại cho khách. Tiết kiệm hơn kèm giá váy lẻ449k không bị đánh đồng với lỗi so set799k rẻ hơn chỉ áo499k của run trước."},
+    {"id":"s08","arm":"control","caseSlot":17,"label":"USABLE_WITH_POLISH","reason":"Đổi lời khuyên sang áo lẻ rõ ràng, phân biệt cả bộ đi tiệc với gặp đối tác buổi sáng và giải thích theo mong muốn gọn của khách. Đoạn hai vẫn dài và lặp ý, nhưng không quay lại hỏi lựa chọn đã rõ. Nhận xét phong cách là tư vấn định tính được phép."},
+    {"id":"s09","arm":"control","caseSlot":3,"label":"USABLE_WITH_POLISH","reason":"Trả chất liệu cả áo và váy, nói chưa tra được giá/tồn size M khi POS không khả dụng, không bịa hàng hay hứa theo dõi. Có thể gọn hơn và bỏ một lần dạ, nhưng không mất yêu cầu hoặc đưa bước không thực hiện được."},
+    {"id":"s10","arm":"candidate","caseSlot":3,"label":"USABLE_WITH_POLISH","reason":"Giữ đủ phần chất liệu và thông báo giá/tồn size M chưa tra được; không lấy giá trong ví dụ điền vào chỗ thiếu. Giọng và độ dài tương tự đối chứng; không có cải thiện đáng kể."},
+    {"id":"s11","arm":"candidate","caseSlot":12,"label":"NEEDS_EDIT","reason":"Khách chỉ hỏi giá cả bộ, reply thêm giá hai món lẻ, đoạn khen chất liệu và câu hỏi xem thêm/tư vấn size. Toàn đoạn làm nặng yêu cầu đơn giản và mời tư vấn size ngoài capability B1. Không chấm hỏng chỉ vì dùng ngoặc; vấn đề là nội dung và bước tiếp theo không cần/không dùng được."},
+    {"id":"s12","arm":"control","caseSlot":12,"label":"USABLE_WITH_POLISH","reason":"Hiểu cả bộ từ history và báo đúng799k trong một câu dùng được. Không thêm lời quảng cáo hoặc hỏi size. Nhãn USABLE_WITH_POLISH được dùng thống nhất trong phép đo, không có nghĩa câu này bắt buộc phải sửa."}
+  ],
+  "pairs": [
+    {"caseSlot":7,"finding":"Candidate bớt dài và bỏ CTA size, nhưng cả hai vẫn NEEDS_EDIT do lý do chưa giải quyết rõ lo ren. Cải thiện cục bộ, chưa thành whole-turn improvement.","comparison":"PARTIAL_ONLY"},
+    {"caseSlot":15,"finding":"Cả hai vẫn NEEDS_EDIT: lời khen dài và chưa chọn rõ theo gu/dịp. Candidate không tốt hơn rõ.","comparison":"NO_CLEAR_BENEFIT"},
+    {"caseSlot":23,"finding":"Hai lựa chọn khác nhau đều bán hàng hợp lý: control chọn áo để dùng cùng váy có sẵn; candidate upsell bằng chênh300k. Không lấy giá trị đơn cao hơn tự động làm điểm chất lượng cao hơn.","comparison":"BOTH_USABLE_DIFFERENT_VALID_CHOICES"},
+    {"caseSlot":17,"finding":"Control chọn áo lẻ và giữ lập trường; candidate lại mở set và trả việc chọn cho khách. Candidate kém hơn trên mẫu quan sát này.","comparison":"CANDIDATE_REGRESSION"},
+    {"caseSlot":3,"finding":"Cả hai trả phần có nguồn và giữ unknown giá/tồn; không phát hiện ví dụ làm bịa giá. Chất lượng tương tự.","comparison":"BOTH_USABLE"},
+    {"caseSlot":12,"finding":"Control một câu đúng việc; candidate mở rộng sang quảng cáo và size không thực hiện được. Candidate kém hơn.","comparison":"CANDIDATE_REGRESSION"}
+  ],
+  "counts": {"control":{"USABLE_WITH_POLISH":4,"NEEDS_EDIT":2},"candidate":{"USABLE_WITH_POLISH":2,"NEEDS_EDIT":4},"fallback":0},
+  "decision":"STOP_AFTER_REGISTERED_12_KEEP_BASELINE",
+  "limitations":["One sample per arm; no stability or causal proof", "Known development situations mostly one product", "No stateful, competing-price or image-capability result", "Examples plus shorter abstract guidance are a combined treatment"]
+}

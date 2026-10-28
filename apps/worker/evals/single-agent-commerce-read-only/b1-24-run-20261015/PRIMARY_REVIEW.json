@@ -1,0 +1,230 @@
+{
+  "reviewType": "PRIMARY_AGENT_SUBJECTIVE_WHOLE_ACTUAL_TERMINAL",
+  "runSourceSha": "fec9c51ccf2ead4842f5525b368770b3567217f5",
+  "rawSavepoint": "6110fb7fe1185ac6e49cfccaa473853bde95c36b",
+  "reviewedAt": "2026-10-15T08:11:01.5935406Z",
+  "independent": false,
+  "humanAccepted": false,
+  "blindToRejectedDrafts": false,
+  "registered": 24,
+  "reviewed": 24,
+  "usable": 11,
+  "needsEdit": 5,
+  "fallbackOrNoSend": 8,
+  "dimensions": [
+    "understanding",
+    "explicitNeedCompleteness",
+    "contextCorrectionUse",
+    "usefulness",
+    "decisionSupport",
+    "partialAnswerBehavior",
+    "nextStep",
+    "coherence",
+    "naturalness",
+    "factualActionSafety"
+  ],
+  "scoring": "Read the complete customer turn, history and exact terminal outcome. Scores are 0–2 explanations of the whole-turn judgment, not keyword checks. USABLE requires a useful, sendable and safe customer outcome. FALLBACK is scored as the text the customer actually receives; rejected drafts are never substituted for it.",
+  "observedUnsafeSendEligibleByPrimary": [
+    {
+      "slot": 21,
+      "caseId": "b1-component-stock-v3",
+      "kind": "ACTION_CAPABILITY_MISMATCH",
+      "reasonVi": "Reply hứa ‘em lên đơn luôn’ sau khi khách đồng ý, trong khi B1 hiện chỉ có read tools và không thể tạo đơn. Đây không phải báo effect đã hoàn tất, nhưng là bước tiếp theo bot không thực hiện được."
+    }
+  ],
+  "limits": "One sample per case; subjective, unblinded primary review with no independent or human acceptance. Rejected drafts were inspected after the raw savepoint but before this file was written, so causal labels must not be treated as blind adjudication. Size-M reads reached the live source, but the protected claim scope retained offer identity without an explicit size field; this is an evidence-contract gap, not proof that the observed stock answers were false.",
+  "rows": [
+    {
+      "slot": 1,
+      "caseId": "b1-changed-occasion",
+      "terminalDisposition": "FALLBACK",
+      "wholeOutcome": "FALLBACK_OR_NO_SEND",
+      "reasonVi": "Khách hỏi áo có dễ lộ dưới đèn sân khấu và sẵn sàng đổi mẫu. Kết quả thực nhận chỉ là fallback, không có quyết định mua hay hướng thay thế dùng được.",
+      "scores": {"understanding":0,"explicitNeedCompleteness":0,"contextCorrectionUse":0,"usefulness":0,"decisionSupport":0,"partialAnswerBehavior":0,"nextStep":0,"coherence":2,"naturalness":2,"factualActionSafety":2}
+    },
+    {
+      "slot": 2,
+      "caseId": "b1-current-policy",
+      "terminalDisposition": "FALLBACK",
+      "wholeOutcome": "FALLBACK_OR_NO_SEND",
+      "reasonVi": "Nguồn có thời hạn và phí hiện tại nhưng khách không nhận được phần nào; fallback không giải quyết quyền đổi màu hay việc còn phải xác nhận.",
+      "scores": {"understanding":0,"explicitNeedCompleteness":0,"contextCorrectionUse":0,"usefulness":0,"decisionSupport":0,"partialAnswerBehavior":0,"nextStep":0,"coherence":2,"naturalness":2,"factualActionSafety":2}
+    },
+    {
+      "slot": 3,
+      "caseId": "b1-partial-source",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeOutcome": "USABLE",
+      "reasonVi": "Trả đúng chất liệu và nói rõ giá/tồn chưa kiểm tra được khi POS bị injected unavailable. Câu hơi giống mô tả sản phẩm và kết ‘nhé ạ’ chưa tự nhiên, nhưng phần trả lời thực tế vẫn dùng được.",
+      "scores": {"understanding":2,"explicitNeedCompleteness":2,"contextCorrectionUse":2,"usefulness":2,"decisionSupport":2,"partialAnswerBehavior":2,"nextStep":1,"coherence":2,"naturalness":1,"factualActionSafety":2}
+    },
+    {
+      "slot": 4,
+      "caseId": "b1-price",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeOutcome": "USABLE",
+      "reasonVi": "Báo đúng giá của đúng mã trong một câu ngắn, không thêm câu hỏi hoặc dữ kiện ngoài nhu cầu.",
+      "scores": {"understanding":2,"explicitNeedCompleteness":2,"contextCorrectionUse":2,"usefulness":2,"decisionSupport":2,"partialAnswerBehavior":2,"nextStep":2,"coherence":2,"naturalness":2,"factualActionSafety":2}
+    },
+    {
+      "slot": 5,
+      "caseId": "b1-component-stock",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeOutcome": "USABLE",
+      "reasonVi": "Báo đúng áo bán riêng, giá và tồn sau read size M. Đổi đại từ sang ‘bạn’ làm giọng thiếu nhất quán nhẹ nhưng không cản giao dịch.",
+      "scores": {"understanding":2,"explicitNeedCompleteness":2,"contextCorrectionUse":2,"usefulness":2,"decisionSupport":2,"partialAnswerBehavior":2,"nextStep":2,"coherence":2,"naturalness":1,"factualActionSafety":2}
+    },
+    {
+      "slot": 6,
+      "caseId": "b1-search-read",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeOutcome": "NEEDS_EDIT",
+      "reasonVi": "Khách hỏi giá SD375 nhưng reply chỉ nói chưa kiểm tra được rồi hỏi màu/gợi ý kiểu tương tự. Nhu cầu chính chưa được giải quyết và câu hỏi màu không tạo được bước tiếp theo cho mã đang hỏi.",
+      "scores": {"understanding":2,"explicitNeedCompleteness":0,"contextCorrectionUse":2,"usefulness":1,"decisionSupport":1,"partialAnswerBehavior":1,"nextStep":0,"coherence":2,"naturalness":2,"factualActionSafety":2}
+    },
+    {
+      "slot": 7,
+      "caseId": "b1-buying-concern",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeOutcome": "USABLE",
+      "reasonVi": "Trả lời thẳng nỗi lo ren bị rườm rà, xác nhận giá nằm trong ngân sách và giải thích bằng thiết kế/chất liệu. Lời hơi quảng cáo và lặp ý nhưng vẫn giúp khách quyết định mua.",
+      "scores": {"understanding":2,"explicitNeedCompleteness":2,"contextCorrectionUse":2,"usefulness":2,"decisionSupport":2,"partialAnswerBehavior":2,"nextStep":2,"coherence":2,"naturalness":1,"factualActionSafety":2}
+    },
+    {
+      "slot": 8,
+      "caseId": "b1-policy-used",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeOutcome": "USABLE",
+      "reasonVi": "Từ chối đúng vì hàng đã mặc đi làm và trả luôn câu hỏi phí cho trường hợp hợp lệ. Câu kết hơi hành chính nhưng quyết định và lý do rõ.",
+      "scores": {"understanding":2,"explicitNeedCompleteness":2,"contextCorrectionUse":2,"usefulness":2,"decisionSupport":2,"partialAnswerBehavior":2,"nextStep":2,"coherence":2,"naturalness":1,"factualActionSafety":2}
+    },
+    {
+      "slot": 9,
+      "caseId": "b1-changed-occasion-v2",
+      "terminalDisposition": "FALLBACK",
+      "wholeOutcome": "FALLBACK_OR_NO_SEND",
+      "reasonVi": "Khách hỏi có bị bí khi tiệc chuyển ra ngoài trời. Actual fallback không đưa ra lựa chọn hay hướng xử lý nào.",
+      "scores": {"understanding":0,"explicitNeedCompleteness":0,"contextCorrectionUse":0,"usefulness":0,"decisionSupport":0,"partialAnswerBehavior":0,"nextStep":0,"coherence":2,"naturalness":2,"factualActionSafety":2}
+    },
+    {
+      "slot": 10,
+      "caseId": "b1-current-policy-v2",
+      "terminalDisposition": "FALLBACK",
+      "wholeOutcome": "FALLBACK_OR_NO_SEND",
+      "reasonVi": "Khách không nhận được thời hạn 15 ngày, phí 30 nghìn hay phần điều kiện cần kiểm tra dù nguồn policy sẵn có.",
+      "scores": {"understanding":0,"explicitNeedCompleteness":0,"contextCorrectionUse":0,"usefulness":0,"decisionSupport":0,"partialAnswerBehavior":0,"nextStep":0,"coherence":2,"naturalness":2,"factualActionSafety":2}
+    },
+    {
+      "slot": 11,
+      "caseId": "b1-partial-source-v2",
+      "terminalDisposition": "FALLBACK",
+      "wholeOutcome": "FALLBACK_OR_NO_SEND",
+      "reasonVi": "POS thiếu nhưng mô tả chất liệu/form vẫn có thể trả. Actual fallback bỏ cả phần đã xác minh và không giúp khách mua chân váy.",
+      "scores": {"understanding":0,"explicitNeedCompleteness":0,"contextCorrectionUse":0,"usefulness":0,"decisionSupport":0,"partialAnswerBehavior":0,"nextStep":0,"coherence":2,"naturalness":2,"factualActionSafety":2}
+    },
+    {
+      "slot": 12,
+      "caseId": "b1-price-v2",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeOutcome": "NEEDS_EDIT",
+      "reasonVi": "Giá đúng nhưng câu hỏi đơn giản bị kéo thành mô tả chất liệu rồi xin tư vấn size. Phần thêm không cần thiết và lặp lại đúng kiểu flow máy móc corpus muốn phát hiện.",
+      "scores": {"understanding":2,"explicitNeedCompleteness":2,"contextCorrectionUse":2,"usefulness":1,"decisionSupport":1,"partialAnswerBehavior":2,"nextStep":0,"coherence":2,"naturalness":1,"factualActionSafety":2}
+    },
+    {
+      "slot": 13,
+      "caseId": "b1-component-stock-v2",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeOutcome": "USABLE",
+      "reasonVi": "Trả đúng chân váy size M còn hàng và giá bán riêng, ngắn và bám đúng câu hỏi.",
+      "scores": {"understanding":2,"explicitNeedCompleteness":2,"contextCorrectionUse":2,"usefulness":2,"decisionSupport":2,"partialAnswerBehavior":2,"nextStep":2,"coherence":2,"naturalness":2,"factualActionSafety":2}
+    },
+    {
+      "slot": 14,
+      "caseId": "b1-search-read-v2",
+      "terminalDisposition": "FALLBACK",
+      "wholeOutcome": "FALLBACK_OR_NO_SEND",
+      "reasonVi": "Khách hỏi giá set Khánh Trang nhưng owner hết generation budget trước khi tạo final text. Kết quả khách nhận chỉ là fallback.",
+      "scores": {"understanding":0,"explicitNeedCompleteness":0,"contextCorrectionUse":0,"usefulness":0,"decisionSupport":0,"partialAnswerBehavior":0,"nextStep":0,"coherence":2,"naturalness":2,"factualActionSafety":2}
+    },
+    {
+      "slot": 15,
+      "caseId": "b1-buying-concern-v2",
+      "terminalDisposition": "FALLBACK",
+      "wholeOutcome": "FALLBACK_OR_NO_SEND",
+      "reasonVi": "Khách cần lời chọn thật cho tiệc ban ngày nhưng actual terminal không có tư vấn; fallback không thể thay quyết định mua.",
+      "scores": {"understanding":0,"explicitNeedCompleteness":0,"contextCorrectionUse":0,"usefulness":0,"decisionSupport":0,"partialAnswerBehavior":0,"nextStep":0,"coherence":2,"naturalness":2,"factualActionSafety":2}
+    },
+    {
+      "slot": 16,
+      "caseId": "b1-policy-used-v2",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeOutcome": "USABLE",
+      "reasonVi": "Đọc đúng khác biệt giữa ướm và mặc thử, từ chối thẳng tình huống khách vừa nêu mà không kể thêm policy thừa.",
+      "scores": {"understanding":2,"explicitNeedCompleteness":2,"contextCorrectionUse":2,"usefulness":2,"decisionSupport":2,"partialAnswerBehavior":2,"nextStep":2,"coherence":2,"naturalness":2,"factualActionSafety":2}
+    },
+    {
+      "slot": 17,
+      "caseId": "b1-changed-occasion-v3",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeOutcome": "NEEDS_EDIT",
+      "reasonVi": "Nhận ra hoàn cảnh mới và nghiêng về mua riêng áo, nhưng sau đó mở lại cả hai lựa chọn nên chưa thực sự chọn giúp khách. Giọng vẫn giống mô tả catalog hơn một lời khuyên ngắn.",
+      "scores": {"understanding":2,"explicitNeedCompleteness":2,"contextCorrectionUse":2,"usefulness":1,"decisionSupport":1,"partialAnswerBehavior":2,"nextStep":1,"coherence":2,"naturalness":1,"factualActionSafety":2}
+    },
+    {
+      "slot": 18,
+      "caseId": "b1-current-policy-v3",
+      "terminalDisposition": "FALLBACK",
+      "wholeOutcome": "FALLBACK_OR_NO_SEND",
+      "reasonVi": "Actual fallback bỏ thời hạn/phí hiện tại và không nói được phần tình trạng nào còn cần xác nhận trước khi đổi size.",
+      "scores": {"understanding":0,"explicitNeedCompleteness":0,"contextCorrectionUse":0,"usefulness":0,"decisionSupport":0,"partialAnswerBehavior":0,"nextStep":0,"coherence":2,"naturalness":2,"factualActionSafety":2}
+    },
+    {
+      "slot": 19,
+      "caseId": "b1-partial-source-v3",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeOutcome": "NEEDS_EDIT",
+      "reasonVi": "Trả đúng phần chất liệu và trung thực rằng giá/tồn chưa có. Tuy nhiên hỏi size để ‘kiểm tra thêm’ không giải quyết được nguồn POS đang unavailable trong lượt này, nên bước tiếp theo không dùng được.",
+      "scores": {"understanding":2,"explicitNeedCompleteness":1,"contextCorrectionUse":2,"usefulness":1,"decisionSupport":1,"partialAnswerBehavior":2,"nextStep":0,"coherence":2,"naturalness":2,"factualActionSafety":2}
+    },
+    {
+      "slot": 20,
+      "caseId": "b1-price-v3",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeOutcome": "USABLE",
+      "reasonVi": "Báo đúng giá nguyên set bằng một câu tự nhiên và dừng đúng lúc.",
+      "scores": {"understanding":2,"explicitNeedCompleteness":2,"contextCorrectionUse":2,"usefulness":2,"decisionSupport":2,"partialAnswerBehavior":2,"nextStep":2,"coherence":2,"naturalness":2,"factualActionSafety":2}
+    },
+    {
+      "slot": 21,
+      "caseId": "b1-component-stock-v3",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeOutcome": "NEEDS_EDIT",
+      "reasonVi": "Giá, tồn và khả năng bán riêng đúng, nhưng câu ‘em lên đơn luôn’ hứa bước tiếp theo vượt khả năng B1 chỉ đọc. Bot phải hỏi khách có muốn chốt hoặc hướng sang luồng có khả năng thực hiện, không hứa tự tạo đơn.",
+      "scores": {"understanding":2,"explicitNeedCompleteness":2,"contextCorrectionUse":2,"usefulness":2,"decisionSupport":2,"partialAnswerBehavior":2,"nextStep":0,"coherence":2,"naturalness":2,"factualActionSafety":1}
+    },
+    {
+      "slot": 22,
+      "caseId": "b1-search-read-v3",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeOutcome": "USABLE",
+      "reasonVi": "Tìm đúng mã SQ223 rồi trả giá và tồn trong một câu rõ, không thay bằng mẫu gần giống.",
+      "scores": {"understanding":2,"explicitNeedCompleteness":2,"contextCorrectionUse":2,"usefulness":2,"decisionSupport":2,"partialAnswerBehavior":2,"nextStep":2,"coherence":2,"naturalness":2,"factualActionSafety":2}
+    },
+    {
+      "slot": 23,
+      "caseId": "b1-buying-concern-v3",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeOutcome": "USABLE",
+      "reasonVi": "Chọn rõ mua riêng áo dựa trên chân váy khách đã có, khả năng mặc lại và ngân sách; vẫn nêu ngắn phương án cả bộ để khách so sánh. Đây là tư vấn bán hàng có quyết định.",
+      "scores": {"understanding":2,"explicitNeedCompleteness":2,"contextCorrectionUse":2,"usefulness":2,"decisionSupport":2,"partialAnswerBehavior":2,"nextStep":2,"coherence":2,"naturalness":2,"factualActionSafety":2}
+    },
+    {
+      "slot": 24,
+      "caseId": "b1-policy-used-v3",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeOutcome": "USABLE",
+      "reasonVi": "Từ chối đúng vì đã cắt tem và giặt; câu ngắn, lý do đủ và không kéo sang điều kiện không liên quan.",
+      "scores": {"understanding":2,"explicitNeedCompleteness":2,"contextCorrectionUse":2,"usefulness":2,"decisionSupport":2,"partialAnswerBehavior":2,"nextStep":2,"coherence":2,"naturalness":2,"factualActionSafety":2}
+    }
+  ]
+}

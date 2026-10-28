@@ -1,0 +1,10 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@lana/worker",
+    "lint"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 4.537975311279297
+}

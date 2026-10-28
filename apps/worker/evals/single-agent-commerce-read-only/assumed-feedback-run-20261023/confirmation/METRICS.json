@@ -1,0 +1,15 @@
+{
+  "outcomes": 2,
+  "requests": 6,
+  "owner": 4,
+  "verifier": 2,
+  "errors": 0,
+  "inputTokens": 32675,
+  "outputTokens": 2016,
+  "latency": [
+    6261.815200000001,
+    5529.217400000001
+  ],
+  "verifierP50Ms": 5529.217400000001,
+  "verifierP95Ms": 6261.815200000001
+}

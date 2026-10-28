@@ -1,0 +1,925 @@
+[
+  {
+    "caseId": "b1-changed-occasion",
+    "runtime": {
+      "latest": "Mà chị vừa được xếp lên sân khấu, đèn rọi khá mạnh. Áo có dễ lộ bên trong không em? Nếu có thì chị đổi mẫu khác.",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị đang tính lấy set Thạch Thảo để mặc đi tiệc trong nhà."
+        },
+        {
+          "role": "shop",
+          "text": "Dịp đó mặc set này hợp chị ạ."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "requests": [
+      {
+        "generationId": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:owner:1",
+        "toolsAllowed": true,
+        "capturedAt": "2026-10-19T00:22:38.886Z",
+        "context": {
+          "boundSubjects": [
+            {
+              "bindingVersion": "c3-b1-source-v1",
+              "kind": "PRODUCT",
+              "label": "Set váy Thạch Thảo",
+              "ref": "SV2447"
+            }
+          ],
+          "effectReceipts": [],
+          "policyLiterals": [
+            {
+              "expiresAt": "2026-10-19T02:04:10.942Z",
+              "observedAt": "2026-10-19T00:04:10.942Z",
+              "ref": "offers:SV2447",
+              "sourceVersion": "cbfb6e874f5cba157cd996131ce6067e71075883fe901a5057bd98ab2990c2c2",
+              "text": "{\"productId\":\"SV2447\",\"availableOffers\":[\"AO\",\"CV\",\"SET_VAY\"]}"
+            },
+            {
+              "expiresAt": null,
+              "observedAt": "2026-10-19T00:22:37.679Z",
+              "ref": "preparation:SV2447",
+              "sourceVersion": "311601cc8a9c3ca42ceb02391a76bc593cf9cdc1e3f4db3d6e496cca6034ea64",
+              "text": "{\"subjectRef\":\"SV2447\",\"availability\":{\"content\":{\"status\":\"OK\",\"reason\":null},\"offers\":{\"status\":\"OK\",\"reason\":null}},\"notRead\":[\"PRICE\",\"STOCK\",\"ETA\",\"SIZE_FIT\"]}"
+            }
+          ],
+          "protectedClaims": [],
+          "runtimeProducts": [
+            {
+              "content": {
+                "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+                "metadata": {
+                  "authority": "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+                  "expiresAt": null,
+                  "freshForSeconds": null,
+                  "freshnessState": "FRESH",
+                  "observedAt": "2026-09-28T04:31:05.725Z",
+                  "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98"
+                },
+                "productName": "Set váy Thạch Thảo",
+                "productUrl": null
+              },
+              "ref": "product:SV2447",
+              "subjectRef": "SV2447"
+            }
+          ],
+          "state": {
+            "bindingVersion": "c3-b1-source-v1",
+            "conversationOwner": "BOT",
+            "currentProductId": null,
+            "factSnapshotVersion": "c194ec3c894c35e71ead697b937989c1b69e3b9c514c5a9cf9922a77325a5125",
+            "permission": true,
+            "privacyAllowed": true,
+            "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+            "revision": 1
+          }
+        },
+        "providerRequests": 1
+      },
+      {
+        "generationId": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:owner:2",
+        "toolsAllowed": true,
+        "capturedAt": "2026-10-19T00:22:42.256Z",
+        "context": {
+          "boundSubjects": [
+            {
+              "bindingVersion": "c3-b1-source-v1",
+              "kind": "VARIANT",
+              "label": "Set váy Thạch Thảo AO __NO_COLOR__",
+              "productId": "SV2447",
+              "ref": "offer:SV2447:AO"
+            },
+            {
+              "bindingVersion": "c3-b1-source-v1",
+              "kind": "VARIANT",
+              "label": "Set váy Thạch Thảo CV __NO_COLOR__",
+              "productId": "SV2447",
+              "ref": "offer:SV2447:CV"
+            },
+            {
+              "bindingVersion": "c3-b1-source-v1",
+              "kind": "VARIANT",
+              "label": "Set váy Thạch Thảo SET_VAY",
+              "productId": "SV2447",
+              "ref": "offer:SV2447:SET_VAY"
+            },
+            {
+              "bindingVersion": "c3-b1-source-v1",
+              "kind": "PRODUCT",
+              "label": "Set váy Thạch Thảo",
+              "ref": "SV2447",
+              "variantId": null
+            }
+          ],
+          "effectReceipts": [],
+          "policyLiterals": [
+            {
+              "expiresAt": "2026-10-19T02:04:10.942Z",
+              "observedAt": "2026-10-19T00:04:10.942Z",
+              "ref": "offers:SV2447",
+              "sourceVersion": "cbfb6e874f5cba157cd996131ce6067e71075883fe901a5057bd98ab2990c2c2",
+              "text": "{\"productId\":\"SV2447\",\"availableOffers\":[\"AO\",\"CV\",\"SET_VAY\"]}"
+            }
+          ],
+          "protectedClaims": [
+            {
+              "authorization": "NONE",
+              "claimId": "0b19c1f9-6408-5183-8441-a05a067b81e0",
+              "provenance": {
+                "authority": "POS_SNAPSHOT",
+                "contentHash": "7ae2212e0aeae7cd31796721c2f5624877fddb494dc0b5488924e69766401ede",
+                "evidenceRef": "business-fact:stock:c6a721240ac34f92b4f866d49c5eb85f875341ed3e293eb54b5521af91898ae4",
+                "expiresAt": "2026-10-19T02:04:10.942Z",
+                "observedAt": "2026-10-19T00:04:10.942Z",
+                "sourceVersion": "POS_SNAPSHOT:2026-10-19T00:04:10.942Z"
+              },
+              "schemaVersion": 1,
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:CV"
+              },
+              "type": "STOCK",
+              "value": {
+                "availableQuantity": 62,
+                "status": "IN_STOCK"
+              }
+            },
+            {
+              "authorization": "NONE",
+              "claimId": "5cabe03c-b0ea-5540-8950-7681a9313877",
+              "provenance": {
+                "authority": "POS_SNAPSHOT",
+                "contentHash": "ea93369c5257231d0c1c76cf9bbf56f5bacb9dfa6bbbaf424876a7d32b1a189f",
+                "evidenceRef": "business-fact:stock:34b15c7ba9cd21ca694b1bdd1c7adba6abac671b772d0ef20302711fad424482",
+                "expiresAt": "2026-10-19T02:04:10.942Z",
+                "observedAt": "2026-10-19T00:04:10.942Z",
+                "sourceVersion": "POS_SNAPSHOT:2026-10-19T00:04:10.942Z"
+              },
+              "schemaVersion": 1,
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:SET_VAY"
+              },
+              "type": "STOCK",
+              "value": {
+                "availableQuantity": 51,
+                "status": "IN_STOCK"
+              }
+            },
+            {
+              "authorization": "NONE",
+              "claimId": "7554cb41-3882-5b0b-88db-7f9ccf39bc34",
+              "provenance": {
+                "authority": "POS_SNAPSHOT",
+                "contentHash": "7e42c52dd1c713db99ce52fcc8e0f3ed45b007c603fc9d895aa42ffd2c410017",
+                "evidenceRef": "business-fact:price:aa43664895296d3700b66771bc570db97b198bb79ff53d89eac754fbc01c5b38",
+                "expiresAt": "2026-10-19T02:04:10.942Z",
+                "observedAt": "2026-10-19T00:04:10.942Z",
+                "sourceVersion": "POS_SNAPSHOT:2026-10-19T00:04:10.942Z"
+              },
+              "schemaVersion": 1,
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:AO"
+              },
+              "type": "PRICE",
+              "value": {
+                "amountVnd": 499000,
+                "currency": "VND"
+              }
+            },
+            {
+              "authorization": "NONE",
+              "claimId": "b880f8c4-7cbf-56f6-839e-2aa4ae1661e0",
+              "provenance": {
+                "authority": "POS_SNAPSHOT",
+                "contentHash": "9496586d27473a4c81c212cd1d12d0ebcfaf1178a2c053f1f3293423a365867d",
+                "evidenceRef": "business-fact:stock:0117ab0da0f58c9567df56937d04baf5696676b602b1f510071915086ca21b09",
+                "expiresAt": "2026-10-19T02:04:10.942Z",
+                "observedAt": "2026-10-19T00:04:10.942Z",
+                "sourceVersion": "POS_SNAPSHOT:2026-10-19T00:04:10.942Z"
+              },
+              "schemaVersion": 1,
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:AO"
+              },
+              "type": "STOCK",
+              "value": {
+                "availableQuantity": 109,
+                "status": "IN_STOCK"
+              }
+            },
+            {
+              "authorization": "NONE",
+              "claimId": "e73acdd3-8187-56c7-8bd5-85ca45035e18",
+              "provenance": {
+                "authority": "POS_SNAPSHOT",
+                "contentHash": "3c1e524beb7e17e2fff79455264f7b6d6bfc6fcfd02229bb233b5f0b65a7b794",
+                "evidenceRef": "business-fact:price:37d50ae5b977cb3f1f2f253ece7c7d476aeb3a690de542a8ef3f6e26c1c315f4",
+                "expiresAt": "2026-10-19T02:04:10.942Z",
+                "observedAt": "2026-10-19T00:04:10.942Z",
+                "sourceVersion": "POS_SNAPSHOT:2026-10-19T00:04:10.942Z"
+              },
+              "schemaVersion": 1,
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:CV"
+              },
+              "type": "PRICE",
+              "value": {
+                "amountVnd": 449000,
+                "currency": "VND"
+              }
+            },
+            {
+              "authorization": "NONE",
+              "claimId": "f4625399-38df-5b27-8052-73e752dd18fb",
+              "provenance": {
+                "authority": "POS_SNAPSHOT",
+                "contentHash": "0e63c426c5021367ada8408ef2b632a2c5f718951ad0e2faaca8f5e5ed0f19a7",
+                "evidenceRef": "business-fact:price:88ffa2f6eea8905a0861f71b5f1321abb6f79cacf19bf5aa4627a53479f41ddd",
+                "expiresAt": "2026-10-19T02:04:10.942Z",
+                "observedAt": "2026-10-19T00:04:10.942Z",
+                "sourceVersion": "POS_SNAPSHOT:2026-10-19T00:04:10.942Z"
+              },
+              "schemaVersion": 1,
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:SET_VAY"
+              },
+              "type": "PRICE",
+              "value": {
+                "amountVnd": 799000,
+                "currency": "VND"
+              }
+            }
+          ],
+          "runtimeProducts": [
+            {
+              "content": {
+                "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+                "metadata": {
+                  "authority": "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+                  "expiresAt": null,
+                  "freshForSeconds": null,
+                  "freshnessState": "FRESH",
+                  "observedAt": "2026-09-28T04:31:05.725Z",
+                  "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98"
+                },
+                "productName": "Set váy Thạch Thảo",
+                "productUrl": null
+              },
+              "ref": "product:SV2447",
+              "subjectRef": "SV2447"
+            }
+          ],
+          "state": {
+            "bindingVersion": "c3-b1-source-v1",
+            "conversationOwner": "BOT",
+            "currentProductId": null,
+            "factSnapshotVersion": "57232069b7d5e524e966b6ac008cb8e78efb0c0c92e158ed5837cdfd791535f9",
+            "permission": true,
+            "privacyAllowed": true,
+            "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+            "revision": 1
+          }
+        },
+        "providerRequests": 1
+      }
+    ],
+    "sourceSha": "d699bb4a387ca3cc191e729218dbe9262724ef9b"
+  },
+  {
+    "caseId": "b1-partial-source-v2",
+    "runtime": {
+      "latest": "Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "requests": [
+      {
+        "generationId": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:owner:1",
+        "toolsAllowed": true,
+        "capturedAt": "2026-10-19T00:22:51.292Z",
+        "context": {
+          "boundSubjects": [
+            {
+              "bindingVersion": "c3-b1-source-v1",
+              "kind": "PRODUCT",
+              "label": "Set váy Thạch Thảo",
+              "ref": "SV2447"
+            }
+          ],
+          "effectReceipts": [],
+          "policyLiterals": [
+            {
+              "expiresAt": null,
+              "observedAt": "2026-10-19T00:22:50.852Z",
+              "ref": "preparation:SV2447",
+              "sourceVersion": "9730b9a848a862a45414b3619228bae7d94c8fd9b1bfd34b67ae52c7abb6c1cf",
+              "text": "{\"subjectRef\":\"SV2447\",\"availability\":{\"content\":{\"status\":\"OK\",\"reason\":null},\"offers\":{\"status\":\"UNAVAILABLE\",\"reason\":\"SOURCE_UNAVAILABLE\"}},\"notRead\":[\"PRICE\",\"STOCK\",\"ETA\",\"SIZE_FIT\"]}"
+            }
+          ],
+          "protectedClaims": [],
+          "runtimeProducts": [
+            {
+              "content": {
+                "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+                "metadata": {
+                  "authority": "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+                  "expiresAt": null,
+                  "freshForSeconds": null,
+                  "freshnessState": "FRESH",
+                  "observedAt": "2026-09-28T04:31:05.725Z",
+                  "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98"
+                },
+                "productName": "Set váy Thạch Thảo",
+                "productUrl": null
+              },
+              "ref": "product:SV2447",
+              "subjectRef": "SV2447"
+            }
+          ],
+          "state": {
+            "bindingVersion": "c3-b1-source-v1",
+            "conversationOwner": "BOT",
+            "currentProductId": null,
+            "factSnapshotVersion": "b8d193a8aaaa3cb6a6253e247bf2e2a4466c9e957d3c0646cfcf1cb16b3fc899",
+            "permission": true,
+            "privacyAllowed": true,
+            "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+            "revision": 1
+          }
+        },
+        "providerRequests": 1
+      },
+      {
+        "generationId": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:owner:2",
+        "toolsAllowed": true,
+        "capturedAt": "2026-10-19T00:22:53.396Z",
+        "context": {
+          "boundSubjects": [
+            {
+              "bindingVersion": "c3-b1-source-v1",
+              "kind": "PRODUCT",
+              "label": "Set váy Thạch Thảo",
+              "ref": "SV2447",
+              "variantId": null
+            }
+          ],
+          "effectReceipts": [],
+          "policyLiterals": [],
+          "protectedClaims": [],
+          "runtimeProducts": [
+            {
+              "content": {
+                "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+                "metadata": {
+                  "authority": "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+                  "expiresAt": null,
+                  "freshForSeconds": null,
+                  "freshnessState": "FRESH",
+                  "observedAt": "2026-09-28T04:31:05.725Z",
+                  "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98"
+                },
+                "productName": "Set váy Thạch Thảo",
+                "productUrl": null
+              },
+              "ref": "product:SV2447",
+              "subjectRef": "SV2447"
+            }
+          ],
+          "state": {
+            "bindingVersion": "c3-b1-source-v1",
+            "conversationOwner": "BOT",
+            "currentProductId": null,
+            "factSnapshotVersion": "abfecdefe4defcaf605e50c8c8e2a3d306e929d592254d29eb88af959d89412d",
+            "permission": true,
+            "privacyAllowed": true,
+            "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+            "revision": 1
+          }
+        },
+        "providerRequests": 1
+      }
+    ],
+    "sourceSha": "d699bb4a387ca3cc191e729218dbe9262724ef9b"
+  },
+  {
+    "caseId": "b1-buying-concern",
+    "runtime": {
+      "latest": "Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "requests": [
+      {
+        "generationId": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:owner:1",
+        "toolsAllowed": true,
+        "capturedAt": "2026-10-19T00:23:01.997Z",
+        "context": {
+          "boundSubjects": [
+            {
+              "bindingVersion": "c3-b1-source-v1",
+              "kind": "PRODUCT",
+              "label": "Set váy Thạch Thảo",
+              "ref": "SV2447"
+            }
+          ],
+          "effectReceipts": [],
+          "policyLiterals": [
+            {
+              "expiresAt": "2026-10-19T02:04:10.942Z",
+              "observedAt": "2026-10-19T00:04:10.942Z",
+              "ref": "offers:SV2447",
+              "sourceVersion": "cbfb6e874f5cba157cd996131ce6067e71075883fe901a5057bd98ab2990c2c2",
+              "text": "{\"productId\":\"SV2447\",\"availableOffers\":[\"AO\",\"CV\",\"SET_VAY\"]}"
+            },
+            {
+              "expiresAt": null,
+              "observedAt": "2026-10-19T00:23:01.490Z",
+              "ref": "preparation:SV2447",
+              "sourceVersion": "311601cc8a9c3ca42ceb02391a76bc593cf9cdc1e3f4db3d6e496cca6034ea64",
+              "text": "{\"subjectRef\":\"SV2447\",\"availability\":{\"content\":{\"status\":\"OK\",\"reason\":null},\"offers\":{\"status\":\"OK\",\"reason\":null}},\"notRead\":[\"PRICE\",\"STOCK\",\"ETA\",\"SIZE_FIT\"]}"
+            }
+          ],
+          "protectedClaims": [],
+          "runtimeProducts": [
+            {
+              "content": {
+                "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+                "metadata": {
+                  "authority": "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+                  "expiresAt": null,
+                  "freshForSeconds": null,
+                  "freshnessState": "FRESH",
+                  "observedAt": "2026-09-28T04:31:05.725Z",
+                  "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98"
+                },
+                "productName": "Set váy Thạch Thảo",
+                "productUrl": null
+              },
+              "ref": "product:SV2447",
+              "subjectRef": "SV2447"
+            }
+          ],
+          "state": {
+            "bindingVersion": "c3-b1-source-v1",
+            "conversationOwner": "BOT",
+            "currentProductId": null,
+            "factSnapshotVersion": "4ee656e3051b41d43344cbc68e39aa9bbdd943d3c586c79407aa32f2cc4a97e2",
+            "permission": true,
+            "privacyAllowed": true,
+            "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+            "revision": 1
+          }
+        },
+        "providerRequests": 1
+      },
+      {
+        "generationId": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:owner:2",
+        "toolsAllowed": true,
+        "capturedAt": "2026-10-19T00:23:04.568Z",
+        "context": {
+          "boundSubjects": [
+            {
+              "bindingVersion": "c3-b1-source-v1",
+              "kind": "VARIANT",
+              "label": "Set váy Thạch Thảo AO __NO_COLOR__",
+              "productId": "SV2447",
+              "ref": "offer:SV2447:AO"
+            },
+            {
+              "bindingVersion": "c3-b1-source-v1",
+              "kind": "VARIANT",
+              "label": "Set váy Thạch Thảo CV __NO_COLOR__",
+              "productId": "SV2447",
+              "ref": "offer:SV2447:CV"
+            },
+            {
+              "bindingVersion": "c3-b1-source-v1",
+              "kind": "VARIANT",
+              "label": "Set váy Thạch Thảo SET_VAY",
+              "productId": "SV2447",
+              "ref": "offer:SV2447:SET_VAY"
+            },
+            {
+              "bindingVersion": "c3-b1-source-v1",
+              "kind": "PRODUCT",
+              "label": "Set váy Thạch Thảo",
+              "ref": "SV2447",
+              "variantId": null
+            }
+          ],
+          "effectReceipts": [],
+          "policyLiterals": [
+            {
+              "expiresAt": "2026-10-19T02:04:10.942Z",
+              "observedAt": "2026-10-19T00:04:10.942Z",
+              "ref": "offers:SV2447",
+              "sourceVersion": "cbfb6e874f5cba157cd996131ce6067e71075883fe901a5057bd98ab2990c2c2",
+              "text": "{\"productId\":\"SV2447\",\"availableOffers\":[\"AO\",\"CV\",\"SET_VAY\"]}"
+            }
+          ],
+          "protectedClaims": [
+            {
+              "authorization": "NONE",
+              "claimId": "0b19c1f9-6408-5183-8441-a05a067b81e0",
+              "provenance": {
+                "authority": "POS_SNAPSHOT",
+                "contentHash": "7ae2212e0aeae7cd31796721c2f5624877fddb494dc0b5488924e69766401ede",
+                "evidenceRef": "business-fact:stock:c6a721240ac34f92b4f866d49c5eb85f875341ed3e293eb54b5521af91898ae4",
+                "expiresAt": "2026-10-19T02:04:10.942Z",
+                "observedAt": "2026-10-19T00:04:10.942Z",
+                "sourceVersion": "POS_SNAPSHOT:2026-10-19T00:04:10.942Z"
+              },
+              "schemaVersion": 1,
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:CV"
+              },
+              "type": "STOCK",
+              "value": {
+                "availableQuantity": 62,
+                "status": "IN_STOCK"
+              }
+            },
+            {
+              "authorization": "NONE",
+              "claimId": "5cabe03c-b0ea-5540-8950-7681a9313877",
+              "provenance": {
+                "authority": "POS_SNAPSHOT",
+                "contentHash": "ea93369c5257231d0c1c76cf9bbf56f5bacb9dfa6bbbaf424876a7d32b1a189f",
+                "evidenceRef": "business-fact:stock:34b15c7ba9cd21ca694b1bdd1c7adba6abac671b772d0ef20302711fad424482",
+                "expiresAt": "2026-10-19T02:04:10.942Z",
+                "observedAt": "2026-10-19T00:04:10.942Z",
+                "sourceVersion": "POS_SNAPSHOT:2026-10-19T00:04:10.942Z"
+              },
+              "schemaVersion": 1,
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:SET_VAY"
+              },
+              "type": "STOCK",
+              "value": {
+                "availableQuantity": 51,
+                "status": "IN_STOCK"
+              }
+            },
+            {
+              "authorization": "NONE",
+              "claimId": "7554cb41-3882-5b0b-88db-7f9ccf39bc34",
+              "provenance": {
+                "authority": "POS_SNAPSHOT",
+                "contentHash": "7e42c52dd1c713db99ce52fcc8e0f3ed45b007c603fc9d895aa42ffd2c410017",
+                "evidenceRef": "business-fact:price:aa43664895296d3700b66771bc570db97b198bb79ff53d89eac754fbc01c5b38",
+                "expiresAt": "2026-10-19T02:04:10.942Z",
+                "observedAt": "2026-10-19T00:04:10.942Z",
+                "sourceVersion": "POS_SNAPSHOT:2026-10-19T00:04:10.942Z"
+              },
+              "schemaVersion": 1,
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:AO"
+              },
+              "type": "PRICE",
+              "value": {
+                "amountVnd": 499000,
+                "currency": "VND"
+              }
+            },
+            {
+              "authorization": "NONE",
+              "claimId": "b880f8c4-7cbf-56f6-839e-2aa4ae1661e0",
+              "provenance": {
+                "authority": "POS_SNAPSHOT",
+                "contentHash": "9496586d27473a4c81c212cd1d12d0ebcfaf1178a2c053f1f3293423a365867d",
+                "evidenceRef": "business-fact:stock:0117ab0da0f58c9567df56937d04baf5696676b602b1f510071915086ca21b09",
+                "expiresAt": "2026-10-19T02:04:10.942Z",
+                "observedAt": "2026-10-19T00:04:10.942Z",
+                "sourceVersion": "POS_SNAPSHOT:2026-10-19T00:04:10.942Z"
+              },
+              "schemaVersion": 1,
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:AO"
+              },
+              "type": "STOCK",
+              "value": {
+                "availableQuantity": 109,
+                "status": "IN_STOCK"
+              }
+            },
+            {
+              "authorization": "NONE",
+              "claimId": "e73acdd3-8187-56c7-8bd5-85ca45035e18",
+              "provenance": {
+                "authority": "POS_SNAPSHOT",
+                "contentHash": "3c1e524beb7e17e2fff79455264f7b6d6bfc6fcfd02229bb233b5f0b65a7b794",
+                "evidenceRef": "business-fact:price:37d50ae5b977cb3f1f2f253ece7c7d476aeb3a690de542a8ef3f6e26c1c315f4",
+                "expiresAt": "2026-10-19T02:04:10.942Z",
+                "observedAt": "2026-10-19T00:04:10.942Z",
+                "sourceVersion": "POS_SNAPSHOT:2026-10-19T00:04:10.942Z"
+              },
+              "schemaVersion": 1,
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:CV"
+              },
+              "type": "PRICE",
+              "value": {
+                "amountVnd": 449000,
+                "currency": "VND"
+              }
+            },
+            {
+              "authorization": "NONE",
+              "claimId": "f4625399-38df-5b27-8052-73e752dd18fb",
+              "provenance": {
+                "authority": "POS_SNAPSHOT",
+                "contentHash": "0e63c426c5021367ada8408ef2b632a2c5f718951ad0e2faaca8f5e5ed0f19a7",
+                "evidenceRef": "business-fact:price:88ffa2f6eea8905a0861f71b5f1321abb6f79cacf19bf5aa4627a53479f41ddd",
+                "expiresAt": "2026-10-19T02:04:10.942Z",
+                "observedAt": "2026-10-19T00:04:10.942Z",
+                "sourceVersion": "POS_SNAPSHOT:2026-10-19T00:04:10.942Z"
+              },
+              "schemaVersion": 1,
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:SET_VAY"
+              },
+              "type": "PRICE",
+              "value": {
+                "amountVnd": 799000,
+                "currency": "VND"
+              }
+            }
+          ],
+          "runtimeProducts": [
+            {
+              "content": {
+                "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+                "metadata": {
+                  "authority": "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+                  "expiresAt": null,
+                  "freshForSeconds": null,
+                  "freshnessState": "FRESH",
+                  "observedAt": "2026-09-28T04:31:05.725Z",
+                  "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98"
+                },
+                "productName": "Set váy Thạch Thảo",
+                "productUrl": null
+              },
+              "ref": "product:SV2447",
+              "subjectRef": "SV2447"
+            }
+          ],
+          "state": {
+            "bindingVersion": "c3-b1-source-v1",
+            "conversationOwner": "BOT",
+            "currentProductId": null,
+            "factSnapshotVersion": "57232069b7d5e524e966b6ac008cb8e78efb0c0c92e158ed5837cdfd791535f9",
+            "permission": true,
+            "privacyAllowed": true,
+            "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+            "revision": 1
+          }
+        },
+        "providerRequests": 1
+      }
+    ],
+    "sourceSha": "d699bb4a387ca3cc191e729218dbe9262724ef9b"
+  },
+  {
+    "caseId": "b1-search-read",
+    "runtime": {
+      "latest": "Em xem giúp chị áo dài mã SD375 giá bao nhiêu nhé.",
+      "history": [],
+      "initialProductCodes": []
+    },
+    "requests": [
+      {
+        "generationId": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:1",
+        "toolsAllowed": true,
+        "capturedAt": "2026-10-19T00:23:12.343Z",
+        "context": {
+          "boundSubjects": [],
+          "effectReceipts": [],
+          "policyLiterals": [],
+          "protectedClaims": [],
+          "runtimeProducts": [],
+          "state": {
+            "bindingVersion": "c3-b1-source-v1",
+            "conversationOwner": "BOT",
+            "currentProductId": null,
+            "factSnapshotVersion": "0ab3c65faf27b68c0d4d83b50b9787a94c0cf9bfbbcc13c7e321a71d4dfbe640",
+            "permission": true,
+            "privacyAllowed": true,
+            "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+            "revision": 1
+          }
+        },
+        "providerRequests": 1
+      },
+      {
+        "generationId": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:2",
+        "toolsAllowed": true,
+        "capturedAt": "2026-10-19T00:23:13.809Z",
+        "context": {
+          "boundSubjects": [
+            {
+              "bindingVersion": "c3-b1-source-v1",
+              "kind": "PRODUCT",
+              "label": "SD375",
+              "ref": "SD375"
+            }
+          ],
+          "effectReceipts": [],
+          "policyLiterals": [],
+          "protectedClaims": [],
+          "runtimeProducts": [],
+          "state": {
+            "bindingVersion": "c3-b1-source-v1",
+            "conversationOwner": "BOT",
+            "currentProductId": null,
+            "factSnapshotVersion": "892644e6ce6ddb5214c72145bfb3970603ef9c4a56bd6cb9e94a2727ad01482b",
+            "permission": true,
+            "privacyAllowed": true,
+            "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+            "revision": 1
+          }
+        },
+        "providerRequests": 1
+      },
+      {
+        "generationId": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:3",
+        "toolsAllowed": false,
+        "capturedAt": "2026-10-19T00:23:15.451Z",
+        "context": {
+          "boundSubjects": [
+            {
+              "bindingVersion": "c3-b1-source-v1",
+              "kind": "VARIANT",
+              "label": "SD375 AO",
+              "productId": "SD375",
+              "ref": "offer:SD375:AO"
+            },
+            {
+              "bindingVersion": "c3-b1-source-v1",
+              "kind": "VARIANT",
+              "label": "SD375 COMPOSITE",
+              "productId": "SD375",
+              "ref": "offer:SD375:COMPOSITE"
+            },
+            {
+              "bindingVersion": "c3-b1-source-v1",
+              "kind": "PRODUCT",
+              "label": "SD375",
+              "ref": "SD375",
+              "variantId": null
+            }
+          ],
+          "effectReceipts": [],
+          "policyLiterals": [
+            {
+              "expiresAt": "2026-10-19T02:04:10.942Z",
+              "observedAt": "2026-10-19T00:04:10.942Z",
+              "ref": "offers:SD375",
+              "sourceVersion": "e95543b71d2dfd8a0ad027f3b46edaa2e3c762afa57e724cdc5db78f14d61232",
+              "text": "{\"productId\":\"SD375\",\"availableOffers\":[\"AO\",\"COMPOSITE\"]}"
+            }
+          ],
+          "protectedClaims": [
+            {
+              "authorization": "NONE",
+              "claimId": "00bacd5e-705c-5cf5-8e01-3225b0f5ae73",
+              "provenance": {
+                "authority": "POS_SNAPSHOT",
+                "contentHash": "5128cfc142ea87a26c25ed773e8f2bbc21242ba31f6e4443c2be67bebf6bb29b",
+                "evidenceRef": "business-fact:price:33bd994363c569a365cbd62e6c184c83313111ffd87c99dd84c4b4fdd45cc12b",
+                "expiresAt": "2026-10-19T02:04:10.942Z",
+                "observedAt": "2026-10-19T00:04:10.942Z",
+                "sourceVersion": "POS_SNAPSHOT:2026-10-19T00:04:10.942Z"
+              },
+              "schemaVersion": 1,
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SD375",
+                "variantId": "offer:SD375:COMPOSITE"
+              },
+              "type": "PRICE",
+              "value": {
+                "amountVnd": 1065000,
+                "currency": "VND"
+              }
+            },
+            {
+              "authorization": "NONE",
+              "claimId": "317a7d54-af3c-5b63-827f-50fb29cbb1fc",
+              "provenance": {
+                "authority": "POS_SNAPSHOT",
+                "contentHash": "445fe8b2c36158196f2e2bdb3c51f1e0f8dcdd91dee06cc4361f4b43b88f9df4",
+                "evidenceRef": "business-fact:stock:29ca9e432791af47e1d68f4629b74d45f0d4fa02ce81d7d4183c8e2157c98570",
+                "expiresAt": "2026-10-19T02:04:10.942Z",
+                "observedAt": "2026-10-19T00:04:10.942Z",
+                "sourceVersion": "POS_SNAPSHOT:2026-10-19T00:04:10.942Z"
+              },
+              "schemaVersion": 1,
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SD375",
+                "variantId": "offer:SD375:AO"
+              },
+              "type": "STOCK",
+              "value": {
+                "availableQuantity": 35,
+                "status": "IN_STOCK"
+              }
+            },
+            {
+              "authorization": "NONE",
+              "claimId": "95de81de-ea65-5b86-813c-4e3bc9651681",
+              "provenance": {
+                "authority": "POS_SNAPSHOT",
+                "contentHash": "d1daf4df544b841e3c96cf2851bb8ef682b2b4668027a0966eeb82417649154e",
+                "evidenceRef": "business-fact:price:505ab7e26f9d7b2d77440276d5f893039334c0d31be0777c2e9429d0d18a163f",
+                "expiresAt": "2026-10-19T02:04:10.942Z",
+                "observedAt": "2026-10-19T00:04:10.942Z",
+                "sourceVersion": "POS_SNAPSHOT:2026-10-19T00:04:10.942Z"
+              },
+              "schemaVersion": 1,
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SD375",
+                "variantId": "offer:SD375:AO"
+              },
+              "type": "PRICE",
+              "value": {
+                "amountVnd": 929000,
+                "currency": "VND"
+              }
+            },
+            {
+              "authorization": "NONE",
+              "claimId": "9773f522-7687-5319-89f2-efbec08bf1d4",
+              "provenance": {
+                "authority": "POS_SNAPSHOT",
+                "contentHash": "4e7b561f6e6cc496e4b713b271c21f83c04ec6801558ca6e1cc6ebd67becc9fe",
+                "evidenceRef": "business-fact:stock:a6dfa57aa089d9e522a6f89a9670a8291a3609d8c41a9b9a169ac83d6a6a95b9",
+                "expiresAt": "2026-10-19T02:04:10.942Z",
+                "observedAt": "2026-10-19T00:04:10.942Z",
+                "sourceVersion": "POS_SNAPSHOT:2026-10-19T00:04:10.942Z"
+              },
+              "schemaVersion": 1,
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SD375",
+                "variantId": "offer:SD375:COMPOSITE"
+              },
+              "type": "STOCK",
+              "value": {
+                "availableQuantity": 34,
+                "status": "IN_STOCK"
+              }
+            }
+          ],
+          "runtimeProducts": [],
+          "state": {
+            "bindingVersion": "c3-b1-source-v1",
+            "conversationOwner": "BOT",
+            "currentProductId": null,
+            "factSnapshotVersion": "a9764cf194d9832e0140d3caec51aa44feb4c557c47f3a17b52f8c313a03be87",
+            "permission": true,
+            "privacyAllowed": true,
+            "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+            "revision": 1
+          }
+        },
+        "providerRequests": 1
+      }
+    ],
+    "sourceSha": "d699bb4a387ca3cc191e729218dbe9262724ef9b"
+  }
+]

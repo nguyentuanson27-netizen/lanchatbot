@@ -1,0 +1,112 @@
+{
+  "runSourceSha": "76d821bb3dce1ee335d2210203e9ff8750762755",
+  "registeredSlots": 32,
+  "recordedSlots": 32,
+  "generationRequests": 88,
+  "retry": 0,
+  "families": {
+    "stateful": {
+      "slots": 8,
+      "terminal": {
+        "SEND_ELIGIBLE": 4,
+        "NO_SEND": 3,
+        "HANDOFF": 1
+      },
+      "reasons": {
+        "PASS": 4,
+        "EGRESS_WORLD_CHANGED": 1,
+        "CHECKOUT_INVITATION_NOT_COMPLETED": 2,
+        "CUSTOMER_REQUESTED_HUMAN": 1
+      },
+      "providerRequests": 13,
+      "verifierLatencyMs": {
+        "n": 4,
+        "p50": 5682.525600000001,
+        "p95": 7085.861979999999
+      },
+      "addedVerificationLatencyMs": {
+        "n": 4,
+        "p50": 9115.213,
+        "p95": 10189.778874999985
+      },
+      "providerErrors": 1
+    },
+    "b1": {
+      "slots": 24,
+      "terminal": {
+        "SEND_ELIGIBLE": 24
+      },
+      "reasons": {
+        "PASS": 24
+      },
+      "providerRequests": 75,
+      "verifierLatencyMs": {
+        "n": 24,
+        "p50": 5997.515799999994,
+        "p95": 8593.757574999994
+      },
+      "addedVerificationLatencyMs": {
+        "n": 24,
+        "p50": 6573.043250000017,
+        "p95": 9911.46387499999
+      },
+      "providerErrors": 0
+    }
+  },
+  "roles": {
+    "owner": {
+      "requests": 60,
+      "inputTokens": 244001,
+      "outputTokens": 38802,
+      "missingUsage": 1,
+      "modelVersions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "latencyMs": {
+        "n": 60,
+        "p50": 2738.046399999992,
+        "p95": 6651.213109999982
+      }
+    },
+    "verifier": {
+      "requests": 28,
+      "inputTokens": 124486,
+      "outputTokens": 2038,
+      "missingUsage": 0,
+      "modelVersions": [
+        "gpt-6.1-sol"
+      ],
+      "latencyMs": {
+        "n": 28,
+        "p50": 5849.803399999997,
+        "p95": 8483.442474999989
+      }
+    }
+  },
+  "verdictCounts": {
+    "PASS": 28
+  },
+  "wireCapturesChecked": 120,
+  "leaks": [],
+  "cleanup": {
+    "stateful-1": {
+      "testDatabaseDropped": true,
+      "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+      "completedOutcomes": 8
+    }
+  },
+  "cost": "NOT_EXPOSED",
+  "requestCountDistribution": {
+    "1": 88
+  },
+  "providerErrors": 1,
+  "providerTimeouts": 0,
+  "providerErrorRate": 0.011363636363636364,
+  "fallbackRateAllSlots": 0.0,
+  "sourceEmbeddingCalls": {
+    "sourceCheck": 1,
+    "stateful": 0,
+    "b1": 1
+  },
+  "embeddingAccounting": "B1 attempt counters are cumulative; use final attempt once."
+}

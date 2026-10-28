@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "capturedRequestWiresChecked": 66,
+  "protocolTestsPass": 100,
+  "providerGenerationRequests": 66,
+  "wireProjection": "Only request payloads scanned; caseId in evaluator log envelope is excluded from provider request.",
+  "requestPhaseWiresChecked": 56,
+  "verifierTelemetryWiresChecked": 10
+}

@@ -613,3 +613,9 @@ describe("P2.3B chế độ vét", () => {
     expect(summary.lock_released).toBe(true);
   });
 });
+
+it("keeps verified product-color fields in the manual review region without shifting existing columns",()=>{
+ expect(IMAGE_REGISTRY_HEADERS.indexOf("VERIFIED_PRODUCT_COLOR")).toBe(42);
+ expect(IMAGE_REGISTRY_HEADERS.indexOf("COLOR_BINDING_IMAGE_HASH")).toBe(43);
+ expect(IMAGE_REGISTRY_HEADERS.indexOf("NOTES")).toBe(41);
+});

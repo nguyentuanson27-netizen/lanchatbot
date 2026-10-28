@@ -1,0 +1,110 @@
+{
+  "reviewMode": "AGENT_WHOLE_ACTUAL_TERMINAL_BEFORE_TOOL_AND_VERIFIER_DIAGNOSIS",
+  "humanAdjudication": false,
+  "runSourceSha": "05be90e8ef73cb09aa82c8f6e3a6e627b0933e81",
+  "processCounts": {
+    "CORRECT_OBSERVED": 4,
+    "PENDING_CUSTOMER_INPUT": 1
+  },
+  "replyCounts": {
+    "USABLE": 3,
+    "NEEDS_EDIT": 2
+  },
+  "rows": [
+    {
+      "slot": 1,
+      "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+      "actual": "Dạ, quy định đổi hàng của shop yêu cầu sản phẩm chỉ ướm bên ngoài chứ không mặc vào người. Việc mình đã mặc thử vào người, dù còn tem và chưa mặc ra ngoài, thì không đáp ứng điều kiện đổi hàng ạ.",
+      "surface": "SEND_ELIGIBLE_NOT_DELIVERED",
+      "disposition": "SEND_ELIGIBLE",
+      "committedPublicState": {
+        "conversationOwner": "BOT",
+        "revision": 0
+      },
+      "counts": {
+        "events": 0,
+        "tags": 0,
+        "messages": 0
+      },
+      "processRating": "CORRECT_OBSERVED",
+      "replyRating": "USABLE",
+      "reason": "Từ chối đúng việc đã mặc vào không đáp ứng đổi tự nguyện. Có giải thích trực tiếp liên quan; vẫn hơi hành chính và lặp nhưng dùng được, không cần bắt thiếu điều kiện khác."
+    },
+    {
+      "slot": 2,
+      "latest": "Chị mới ướm bộ này bên ngoài thôi, chưa mặc vào. Muốn đổi sang size L thì được không em?",
+      "actual": "Dạ, shop hỗ trợ đổi size cho mình chị nhé. Chị nhận hàng được mấy hôm rồi ạ, sản phẩm còn nguyên tem mác, sạch sẽ và chưa giặt không chị?",
+      "surface": "SEND_ELIGIBLE_NOT_DELIVERED",
+      "disposition": "SEND_ELIGIBLE",
+      "committedPublicState": {
+        "conversationOwner": "BOT",
+        "revision": 0
+      },
+      "counts": {
+        "events": 0,
+        "tags": 0,
+        "messages": 0
+      },
+      "processRating": "PENDING_CUSTOMER_INPUT",
+      "replyRating": "NEEDS_EDIT",
+      "reason": "Câu mở nghe như đồng ý đổi cho riêng khách, rồi mới hỏi ngày nhận và nhiều tình trạng hàng. Các thông tin này còn thiếu và có liên quan; hỏi thêm không tự thân là sai, cũng chưa có lời báo đã chuyển hay đã duyệt. Tuy vậy câu trả lời nên thể hiện rõ đang xác nhận yêu cầu, ngắn và có thứ tự; hiện khách phải xử lý một cụm câu hỏi. Không coi việc chưa handoff là lỗi thực thi khi chưa có lệnh chuyển."
+    },
+    {
+      "slot": 3,
+      "latest": "Chị thử bộ này rồi, giờ muốn đổi size thì được không?",
+      "actual": "Dạ, shop hỗ trợ đổi size trong 15 ngày kể từ khi nhận hàng nếu sản phẩm còn nguyên tem mác, chưa giặt và chỉ ướm bên ngoài chứ chưa mặc vào người. Không biết lúc nãy mình chỉ ướm bên ngoài hay đã mặc thử vào người rồi ạ?",
+      "surface": "SEND_ELIGIBLE_NOT_DELIVERED",
+      "disposition": "SEND_ELIGIBLE",
+      "committedPublicState": {
+        "conversationOwner": "BOT",
+        "revision": 0
+      },
+      "counts": {
+        "events": 0,
+        "tags": 0,
+        "messages": 0
+      },
+      "processRating": "CORRECT_OBSERVED",
+      "replyRating": "NEEDS_EDIT",
+      "reason": "Đã hỏi đúng việc chỉ ướm hay mặc vào, không cấp ngoại lệ cho mặc thử. Nhưng trước câu hỏi quyết định vẫn đọc thời hạn và các điều kiện mà khách chưa hỏi; chưa đạt mục tiêu hỏi rõ trước, trả lời gọn. Có thể bỏ cả câu chính sách đầu mà vẫn giữ câu hỏi cần thiết."
+    },
+    {
+      "slot": 4,
+      "latest": "Shop cho đổi size trong mấy ngày, phí đổi bao nhiêu em?",
+      "actual": "Dạ, shop hỗ trợ đổi size trong vòng 15 ngày kể từ ngày nhận hàng chị ạ. Phí vận chuyển 2 chiều khi đổi hàng là 30.000đ chị nhé.",
+      "surface": "SEND_ELIGIBLE_NOT_DELIVERED",
+      "disposition": "SEND_ELIGIBLE",
+      "committedPublicState": {
+        "conversationOwner": "BOT",
+        "revision": 0
+      },
+      "counts": {
+        "events": 0,
+        "tags": 0,
+        "messages": 0
+      },
+      "processRating": "CORRECT_OBSERVED",
+      "replyRating": "USABLE",
+      "reason": "Trả đủ đúng hai điều khách hỏi: 15 ngày từ nhận và phí hai chiều 30.000đ. Hai câu rõ, không kéo thêm checklist."
+    },
+    {
+      "slot": 5,
+      "latest": "Đường may ở nách áo bị lỗi, chị mặc vào mới thấy. Chị nhận hôm qua, giờ shop xử lý sao em?",
+      "actual": "Em đã chuyển nhân viên hỗ trợ lỗi sản phẩm cho chị. Nhân viên sẽ kiểm tra và hướng dẫn chị đổi/trả nhé.",
+      "surface": "DISPATCHER_CAPTURE",
+      "disposition": "HANDOFF",
+      "committedPublicState": {
+        "conversationOwner": "HUMAN",
+        "revision": 1
+      },
+      "counts": {
+        "events": 1,
+        "tags": 1,
+        "messages": 1
+      },
+      "processRating": "CORRECT_OBSERVED",
+      "replyRating": "USABLE",
+      "reason": "Tiếp nhận lỗi và thông báo chuyển nhân viên kèm bước kiểm tra/hướng dẫn đổi trả. Không bắt khách nghe lại điều kiện, không tự xác nhận lỗi đã được duyệt; tin đã được dispatcher capture và state HUMAN. Câu cố định vẫn chung, không coi đây là lời tư vấn do model viết."
+    }
+  ]
+}

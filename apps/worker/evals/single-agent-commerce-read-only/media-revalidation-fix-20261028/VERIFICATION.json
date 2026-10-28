@@ -1,0 +1,87 @@
+{
+  "implementationBaseSha": "57fb94deaf906d575f352f9b5422e1ad8c117c5a",
+  "sourceInventory": {
+    "apps/worker/src/p23c-hash-v3.test.ts": "935be223ba5a752d895fbcb4c2feaccedf01edf5dbb505e3f9e63e449b3751f3",
+    "apps/worker/src/p23c-hash-v3.ts": "f9648d6bbc8e156b9d7da1fea543f52f2aff1961be01978eaf8dd05fa223b835",
+    "apps/worker/src/p23c-publisher.test.ts": "9950f92eb918471eb557433aa3eed7c5f315f3b367d31f8d4f21b0e4de5af75a",
+    "apps/worker/src/p23c-publisher.ts": "3fada70cb3b95e01585c3f2583146f295624951f854830c481416ee6447ad574",
+    "apps/worker/src/p23c-server.ts": "4c71df272c38811e88e2657f738854eec3a260fe38b05600d2e9033c82e17ede",
+    "apps/worker/src/single-agent-commerce-media-eligibility.ts": "e13b491cc7197da4c2d2963ea619d1e71201fefc25ef4eb2b5e774bafca7c99f",
+    "apps/worker/src/single-agent-commerce-media.test.ts": "b58e4ada3f98f60c5eab0246589f644cccd768a00d3fb43f45776ebaad770d23",
+    "apps/worker/src/single-agent-commerce-media.ts": "43c88082b4b9a38243c891592dd76f498c873e1fd463b6ef1fe593c58d8e32ae",
+    "packages/business-tools/src/index.ts": "3a2453345f256b109b54cd8a78e2e5fc40949e41a89d845a9c6bfb5ce0e75a44",
+    "packages/business-tools/src/qdrant.ts": "44501b345862454478f4034b0bd16694eba983486a730027b85e6de4bb1fa94f",
+    "packages/business-tools/src/search.ts": "7619dc6f0df5775425aeedcf5d5f9546e55f5e0dc76b7fbb36650d0b0b6e8402",
+    "packages/business-tools/src/types.ts": "dfdb8a6f9e1a614a14c5399b946e5d638e5c39538f6725b4e900ba9ce108597b",
+    "apps/worker/evals/single-agent-commerce-read-only/media-revalidation-operator.mjs": "b8612c95e79872c8c0030198263b3bd60f6b0c72f9aea99034ad88639275ef93",
+    "apps/worker/src/p23c-media-revalidation.test.ts": "a963f7c5d8958f7bc9211fd7ed81ed2442bf6e95186a6de745811a651967ac5f",
+    "apps/worker/src/p23c-media-revalidation.ts": "34876b1fb340027873c7e2a01a7ed17b92ad554aa14e4dc6b28647c9f5ed2934",
+    "apps/worker/src/single-agent-commerce-media-revalidation.test.ts": "1680574d7a0e205f1d6d884b11597d0ecc04ebacfdb64732779931b2f489a094",
+    "packages/business-tools/src/media-revalidation.test.ts": "76edfb95ff4bbe1daf2e44e6c8cb0c0143d895545ec4016bccdd2a0f81fb0b0a",
+    "packages/business-tools/src/media-revalidation.ts": "b0540e91b49f6a62e56501ade7e2f27f186fde48e138c08b8f9552ffcf1c24f7"
+  },
+  "redObserved": {
+    "command": "pnpm exec vitest run apps/worker/src/single-agent-commerce-media-revalidation.test.ts --reporter=dot",
+    "failed": 2,
+    "passed": 3
+  },
+  "greenBoundaryTests": 5,
+  "finalFocusedTests": {
+    "command": "pnpm exec vitest run packages/business-tools/src apps/worker/src/single-agent-commerce apps/worker/src/single-agent-semantic-verifier-boundary.test.ts apps/worker/src/p23c-media-revalidation.test.ts apps/worker/src/p23c-publisher.test.ts apps/worker/src/p23c-hash-v3.test.ts --reporter=dot",
+    "passed": 1113,
+    "failed": 0,
+    "files": 53
+  },
+  "evalNodeTests": {
+    "command": "node --test --test-concurrency=1 \"apps/worker/evals/single-agent-commerce-read-only/*.test.mjs\"",
+    "passed": 228,
+    "failed": 0
+  },
+  "commandsPassed": [
+    "pnpm --filter @lana/business-tools build",
+    "pnpm --filter @lana/business-tools exec tsc -p tsconfig.json --noEmit",
+    "pnpm exec tsc -p apps/worker/tsconfig.json",
+    "pnpm --filter @lana/worker lint"
+  ],
+  "earlierCorrectedFailures": [
+    "shared exactOptionalPropertyTypes required explicit undefined",
+    "URL port required string serialization",
+    "test asserted claim field and readback error path incorrectly; corrected to actual provenance and MEDIA_SOURCE_CHANGED",
+    "operator preflights r1-r4 failed without writes because deployment client/config interfaces differed; bundled tested candidate client and memory-only credential bridge corrected route",
+    "pnpm exec esbuild was unavailable; used installed transitive esbuild@0.28.1; stale bundle input guard added"
+  ],
+  "operatorPreflight": {
+    "attempt": "r7",
+    "bundleSha256": "b8f779dce6f060c1d8932c8d851c460d4f2cd5829ccc0d674731eff4aa00ec5a",
+    "wouldVerify": 10,
+    "wouldInvalidate": 1,
+    "writes": 0,
+    "status": "PASS"
+  },
+  "independentReview": false,
+  "selfReview": {
+    "sourceRereadBeforeAndAfterCanonicalCheck": true,
+    "changedSubjectOrMetadataStopsBeforeWrite": true,
+    "readbackKeyOrderIndependent": true,
+    "revalidationDoesNotAffectSemanticHashesOrEmbeddings": true,
+    "publicationAndApprovalUnchanged": true,
+    "newMethodUsesBoundedSsrfSafeDownload": true,
+    "freshnessTtlUnchangedSeconds": 2592000,
+    "modelRolesAdded": 0,
+    "providerGenerations": 0
+  },
+  "sourceRefresh": {
+    "sourceSha": "57fb9f320655f15d43af2300682b5c3923c90066",
+    "status": "COMPLETE",
+    "writesDispatched": 11,
+    "verified": 10,
+    "invalid": 1,
+    "semanticFieldsUnchanged": true,
+    "providerRequests": 0,
+    "embeddingRequests": 0,
+    "sheetsWrites": 0,
+    "vectorUpserts": 0,
+    "readback": "CONFIRMED_EACH_POINT"
+  },
+  "modelRun": "NOT_STARTED"
+}

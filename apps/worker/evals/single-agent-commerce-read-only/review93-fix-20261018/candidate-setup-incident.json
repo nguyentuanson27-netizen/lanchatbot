@@ -1,0 +1,12 @@
+{
+  "kind": "PRE_REGISTRATION_LOCAL_CODEX_LOGIN_STATUS_FAILURE",
+  "rep": 1,
+  "slot": 23,
+  "providerRequests": 0,
+  "outputDirectoryCreated": false,
+  "requestOrAttemptFilesCreated": false,
+  "failedLogSha256": "202debb3abe6118c94e97fb54f9c4663e97a5491af00179cd4ba507564ea3d6e",
+  "laterReadOnlyLoginStatus": "PASS_SAME_CLI_VERSION_AND_BINARY_HASH",
+  "underlyingTransientCause": "UNKNOWN",
+  "decision": "Resume only undispatched slots; retain failed setup process. No generation retry, replacement, or model change."
+}

@@ -1,0 +1,209 @@
+{
+  "primaryLockCommit": "0dbb6fb5d36406ba125cd6690d5b894487cbcbba",
+  "arms": {
+    "control": {
+      "slots": 6,
+      "primaryCounts": {
+        "USABLE": 6
+      },
+      "fallbacks": 0,
+      "families": {
+        "b1-changed-occasion": {
+          "USABLE": 3
+        },
+        "b1-buying-concern": {
+          "USABLE": 3
+        }
+      }
+    },
+    "candidate": {
+      "slots": 6,
+      "primaryCounts": {
+        "USABLE": 4,
+        "UNUSABLE": 2
+      },
+      "fallbacks": 2,
+      "families": {
+        "b1-changed-occasion": {
+          "USABLE": 1,
+          "UNUSABLE": 2
+        },
+        "b1-buying-concern": {
+          "USABLE": 3
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "slot": 1,
+      "arm": "control",
+      "family": "b1-changed-occasion",
+      "repetition": 1,
+      "primaryVerdict": "USABLE",
+      "disposition": "SEND_ELIGIBLE",
+      "actual": [
+        "Ngồi xe 3 tiếng thì set Thạch Thảo với chất tơ mềm sẽ dễ bị hằn nếp gấp chị ạ. \n\nChị chuyển sang set Thanh Vũ giúp em nhé; áo ren dệt cotton kết hợp chân váy tơ crep đứng dáng hơn và ít bị nhăn khi ngồi lâu. Mẫu này mặc đi đám cưới vừa thanh lịch vừa giữ form gọn gàng suốt chuyến đi ạ."
+      ],
+      "voiceFindings": [
+        "Chị chuyển sang…giúp em gượng; hai câu lý do/khen dài; vẫn nhắc cả hoàn cảnh."
+      ]
+    },
+    {
+      "slot": 2,
+      "arm": "candidate",
+      "family": "b1-changed-occasion",
+      "repetition": 1,
+      "primaryVerdict": "USABLE",
+      "disposition": "SEND_ELIGIBLE",
+      "actual": [
+        "Set Thạch Thảo dùng chất tơ và ren tơ nên ngồi ô tô 3 tiếng đi đường dài sẽ dễ bị hằn nếp và nhăn nhẹ chị ạ. \n\nEm đổi sang **set Diễm Hoa** giúp chị nhé. Áo ren lưới 2 lớp cùng chân váy tơ mềm giữ phom tốt hơn, ít bị lộ nếp gấp khi ngồi xe lâu, mặc đi đám cưới vừa sang trọng lại vừa gọn gàng ạ."
+      ],
+      "voiceFindings": [
+        "Trực tiếp hơn ở em đổi sang nhưng lời lý do vẫn chuỗi chất liệu→giữ phom→sang/gọn; chưa chứng minh hơn control."
+      ]
+    },
+    {
+      "slot": 3,
+      "arm": "control",
+      "family": "b1-buying-concern",
+      "repetition": 1,
+      "primaryVerdict": "USABLE",
+      "disposition": "SEND_ELIGIBLE",
+      "actual": [
+        "Set váy Thạch Thảo dùng ren tơ Hàn mềm cùng độ rũ tự nhiên, kết hợp áo tơ thêu nhẹ nhàng và bay bổng nên mặc đi tiệc ban ngày rất sang và thanh thoát, không hề bị rườm rà hay nặng nề đâu chị nhé. \n\nGiá trọn bộ là 799.000đ, hoàn toàn vừa vặn với ngân sách 900 nghìn của chị. Chị lấy trọn bộ này luôn không ạ?"
+      ],
+      "voiceFindings": [
+        "Lời mềm/rũ/bay/sang chưa thuyết phục mạnh về lượng ren; lặp ngân sách và CTA hơi gấp."
+      ]
+    },
+    {
+      "slot": 4,
+      "arm": "candidate",
+      "family": "b1-buying-concern",
+      "repetition": 1,
+      "primaryVerdict": "USABLE",
+      "disposition": "SEND_ELIGIBLE",
+      "actual": [
+        "Em thấy set này mặc đi tiệc ban ngày rất hợp và không hề rườm rà đâu chị nhé. Chân váy dùng ren tơ Hàn mềm có độ rũ tự nhiên, kết hợp cùng áo tơ thêu form nhẹ tạo nét bay bổng, thanh lịch chứ không bị nặng nề. Ngân sách 900 nghìn của chị thoải mái chọn trọn bộ luôn vì giá set hiện tại là 799.000đ ạ."
+      ],
+      "voiceFindings": [
+        "Vẫn mềm/rũ/bay/thanh lịch và nhắc ngân sách; không có thay đổi input nên không quy khác biệt cho treatment."
+      ]
+    },
+    {
+      "slot": 5,
+      "arm": "candidate",
+      "family": "b1-changed-occasion",
+      "repetition": 2,
+      "primaryVerdict": "UNUSABLE",
+      "disposition": "FALLBACK",
+      "actual": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "voiceFindings": [
+        "Không có lời tư vấn gửi khách để đánh giá giọng."
+      ]
+    },
+    {
+      "slot": 6,
+      "arm": "control",
+      "family": "b1-changed-occasion",
+      "repetition": 2,
+      "primaryVerdict": "USABLE",
+      "disposition": "SEND_ELIGIBLE",
+      "actual": [
+        "Dạ, set Thạch Thảo dùng chất tơ Hàn và ren tơ mềm mịn nên đi ô tô gần 3 tiếng có thể sẽ hơi hằn nếp gấp khi ngồi lâu chị ạ. \n\nNếu chị ngại việc này, em đổi sang **Set Diễm Hoa** giúp chị nhé. Mẫu này dùng ren lưới đính hoa 3D giữ form tốt hơn và ít bị hằn nếp khi di chuyển đường dài, mặc lên vẫn rất sang trọng và nổi bật cho dịp đám cưới."
+      ],
+      "voiceFindings": [
+        "Nếu chị ngại việc này lặp nhu cầu đã rõ; kết nhiều lời khen."
+      ]
+    },
+    {
+      "slot": 7,
+      "arm": "candidate",
+      "family": "b1-buying-concern",
+      "repetition": 2,
+      "primaryVerdict": "USABLE",
+      "disposition": "SEND_ELIGIBLE",
+      "actual": [
+        "Dạ set này mặc đi tiệc ban ngày rất hợp và không bị rườm rà đâu chị nhé. Chất tơ Hàn thêu và ren mềm có form nhẹ, độ bay và rũ tự nhiên nên lên dáng rất thanh thoát và nhẹ nhàng. \n\nNgân sách 900 nghìn của chị chọn trọn bộ giá 799.000đ là vừa đẹp luôn ạ."
+      ],
+      "voiceFindings": [
+        "Vẫn lặp mềm/nhẹ/bay/rũ rồi ngân sách; không tự fail chỉ do các tính từ này."
+      ]
+    },
+    {
+      "slot": 8,
+      "arm": "control",
+      "family": "b1-buying-concern",
+      "repetition": 2,
+      "primaryVerdict": "USABLE",
+      "disposition": "SEND_ELIGIBLE",
+      "actual": [
+        "Dạ, set này dùng chất liệu tơ Hàn và ren tơ mềm, form nhẹ có độ rũ tự nhiên nên mặc đi tiệc ban ngày rất thanh thoát, không bị rườm rà đâu chị nhé. \n\nGiá trọn bộ là 799.000đ, vừa vặn với ngân sách 900 nghìn của chị luôn ạ. Chị có muốn em hỗ trợ lên đơn set này luôn không ạ?"
+      ],
+      "voiceFindings": [
+        "Hỗ trợ lên đơn…luôn còn khuôn và lặp luôn; lý do mềm/rũ chưa mạnh."
+      ]
+    },
+    {
+      "slot": 9,
+      "arm": "control",
+      "family": "b1-changed-occasion",
+      "repetition": 3,
+      "primaryVerdict": "USABLE",
+      "disposition": "SEND_ELIGIBLE",
+      "actual": [
+        "Đi ô tô 3 tiếng ngồi lâu thì set Thạch Thảo với chất tơ Hàn và ren tơ mềm sẽ có độ nhăn nhẹ ở phần áo tơ ạ. \n\nChị đổi sang set váy Diễm Hoa giúp em nhé. Bộ này dùng ren lưới đính hoa 3D kết hợp chân váy tơ mềm mịn 2 lớp, ít nhăn hơn và giữ form bồng bềnh rất đẹp sau khi xuống xe."
+      ],
+      "voiceFindings": [
+        "Chị đổi sang…giúp em gượng; nhắc hoàn cảnh và khen dài."
+      ]
+    },
+    {
+      "slot": 10,
+      "arm": "candidate",
+      "family": "b1-changed-occasion",
+      "repetition": 3,
+      "primaryVerdict": "UNUSABLE",
+      "disposition": "FALLBACK",
+      "actual": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "voiceFindings": [
+        "Không có lời tư vấn gửi khách để đánh giá giọng."
+      ]
+    },
+    {
+      "slot": 11,
+      "arm": "control",
+      "family": "b1-buying-concern",
+      "repetition": 3,
+      "primaryVerdict": "USABLE",
+      "disposition": "SEND_ELIGIBLE",
+      "actual": [
+        "Dạ set này dùng tơ Hàn và ren mềm, form nhẹ nhàng với độ bay và rũ tự nhiên nên mặc đi tiệc ban ngày rất thanh thoát, không bị rườm rà đâu chị nhé. \n\nCả bộ có giá 799.000đ, hoàn toàn vừa vặn với ngân sách 900 nghìn của mình ạ."
+      ],
+      "voiceFindings": [
+        "Khuôn mềm/nhẹ/bay/rũ/thanh thoát/ngân sách chưa cải thiện."
+      ]
+    },
+    {
+      "slot": 12,
+      "arm": "candidate",
+      "family": "b1-buying-concern",
+      "repetition": 3,
+      "primaryVerdict": "USABLE",
+      "disposition": "SEND_ELIGIBLE",
+      "actual": [
+        "Dạ chị yên tâm, chân váy dùng chất ren tơ Hàn mềm với form nhẹ và độ rũ tự nhiên, kết hợp cùng áo tơ thêu thanh thoát nên tổng thể rất nhã nhặn, mặc đi tiệc ban ngày sang trọng mà không bị rườm rà đâu ạ. \n\nTrọn bộ này giá 799.000đ, vừa vặn trong ngân sách 900 nghìn của chị nhé ạ."
+      ],
+      "voiceFindings": [
+        "Chuỗi mềm/nhẹ/rũ/nhã/sang dài; chị nhé ạ khuôn; input nguyên nên không kết luận regression do context."
+      ]
+    }
+  ],
+  "decision": "STOP_BEFORE_INTEGRATED16",
+  "conclusion": "No demonstrated improvement from this context edit. Two candidate actual fallbacks: one unsupported owner recovery claim and one reviewer/verifier scope disagreement. Concern uses identical owner requests across arms; its variations are not treatment effects. Three samples per arm/family are exploratory, not population stability evidence."
+}

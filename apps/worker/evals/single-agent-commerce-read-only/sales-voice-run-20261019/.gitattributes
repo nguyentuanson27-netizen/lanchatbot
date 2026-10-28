@@ -1,0 +1,4 @@
+# Raw captures and quoted replies retain provider whitespace as evidence.
+raw/** -text -whitespace
+CONVERSATIONS_AND_REVIEW.md -whitespace
+FALLBACKS.md -whitespace

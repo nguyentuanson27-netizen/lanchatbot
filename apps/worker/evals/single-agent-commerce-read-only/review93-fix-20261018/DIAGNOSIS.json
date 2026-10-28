@@ -1,0 +1,3364 @@
+{
+  "source": "bfb82f7fa48a968df59234084d975047515bf94f",
+  "primarySavepoint": "9b1132ea",
+  "errors": [
+    {
+      "rep": 1,
+      "population": "B2_B3",
+      "slot": 2,
+      "scopedId": "1:7b535280-2fab-409e-a762-bcefe176d302:owner:3",
+      "caseId": "stateful-variant-quantity",
+      "id": "7b535280-2fab-409e-a762-bcefe176d302:owner:3",
+      "role": "owner",
+      "status": "PROVIDER_ERROR",
+      "latencyMs": 19023.349800000004,
+      "providerRequests": 1,
+      "httpStatus": null,
+      "inputTokens": null,
+      "outputTokens": null,
+      "thinkingTokens": null,
+      "rawFinishReason": null,
+      "failureCode": "TRANSPORT_ERROR",
+      "requestBytes": 26572,
+      "verdict": null
+    },
+    {
+      "rep": 1,
+      "population": "B1",
+      "slot": 5,
+      "scopedId": "1:4fc3d80aeadcec63d773ae3f62e5a55f1eb5a08703e92a22ae1a53d409b4eadb:verifier:1",
+      "caseId": "b1-partial-source-v2",
+      "id": "4fc3d80aeadcec63d773ae3f62e5a55f1eb5a08703e92a22ae1a53d409b4eadb:verifier:1",
+      "role": "verifier",
+      "status": "PROVIDER_ERROR",
+      "latencyMs": 2108.617600000005,
+      "providerRequests": 1,
+      "httpStatus": 429,
+      "inputTokens": null,
+      "outputTokens": null,
+      "thinkingTokens": null,
+      "rawFinishReason": null,
+      "failureCode": "usage_limit_reached",
+      "requestBytes": null,
+      "verdict": null
+    },
+    {
+      "rep": 1,
+      "population": "B1",
+      "slot": 6,
+      "scopedId": "1:fe4eb0d8c0083ef59e72cee1162553c8341cc901049cdedfccc49f185c7796e3:verifier:1",
+      "caseId": "b1-buying-concern-v2",
+      "id": "fe4eb0d8c0083ef59e72cee1162553c8341cc901049cdedfccc49f185c7796e3:verifier:1",
+      "role": "verifier",
+      "status": "PROVIDER_ERROR",
+      "latencyMs": 6306.4547999999995,
+      "providerRequests": 1,
+      "httpStatus": 429,
+      "inputTokens": null,
+      "outputTokens": null,
+      "thinkingTokens": null,
+      "rawFinishReason": null,
+      "failureCode": "usage_limit_reached",
+      "requestBytes": null,
+      "verdict": null
+    },
+    {
+      "rep": 1,
+      "population": "B1",
+      "slot": 8,
+      "scopedId": "1:8f581b8a0c6afb599ee2d7a45d2122023e2e0219e286c6367d4272da79b196a2:verifier:1",
+      "caseId": "b1-partial-source",
+      "id": "8f581b8a0c6afb599ee2d7a45d2122023e2e0219e286c6367d4272da79b196a2:verifier:1",
+      "role": "verifier",
+      "status": "PROVIDER_ERROR",
+      "latencyMs": 2332.874499999998,
+      "providerRequests": 1,
+      "httpStatus": 429,
+      "inputTokens": null,
+      "outputTokens": null,
+      "thinkingTokens": null,
+      "rawFinishReason": null,
+      "failureCode": "usage_limit_reached",
+      "requestBytes": null,
+      "verdict": null
+    },
+    {
+      "rep": 1,
+      "population": "B1",
+      "slot": 17,
+      "scopedId": "1:df2108d9cf6c1ea65bba9a8e0790a65b9536ca0bcc96c8f567c720a220fa5cf2:verifier:1",
+      "caseId": "b1-changed-occasion-v3",
+      "id": "df2108d9cf6c1ea65bba9a8e0790a65b9536ca0bcc96c8f567c720a220fa5cf2:verifier:1",
+      "role": "verifier",
+      "status": "PROVIDER_ERROR",
+      "latencyMs": 2127.5359000000026,
+      "providerRequests": 1,
+      "httpStatus": 429,
+      "inputTokens": null,
+      "outputTokens": null,
+      "thinkingTokens": null,
+      "rawFinishReason": null,
+      "failureCode": "usage_limit_reached",
+      "requestBytes": null,
+      "verdict": null
+    },
+    {
+      "rep": 1,
+      "population": "B1",
+      "slot": 19,
+      "scopedId": "1:74a35740402540bdad12a7616eca36bf9142595a24db84f90cc858f4f91ecd6b:verifier:1",
+      "caseId": "b1-partial-source-v3",
+      "id": "74a35740402540bdad12a7616eca36bf9142595a24db84f90cc858f4f91ecd6b:verifier:1",
+      "role": "verifier",
+      "status": "PROVIDER_ERROR",
+      "latencyMs": 2877.7778999999937,
+      "providerRequests": 1,
+      "httpStatus": 429,
+      "inputTokens": null,
+      "outputTokens": null,
+      "thinkingTokens": null,
+      "rawFinishReason": null,
+      "failureCode": "usage_limit_reached",
+      "requestBytes": null,
+      "verdict": null
+    },
+    {
+      "rep": 2,
+      "population": "B2_B3",
+      "slot": 1,
+      "scopedId": "2:d609cc3a-a3a1-42c8-bdb2-9fe0bd0df645:owner:2",
+      "caseId": "stateful-open",
+      "id": "d609cc3a-a3a1-42c8-bdb2-9fe0bd0df645:owner:2",
+      "role": "owner",
+      "status": "PROVIDER_ERROR",
+      "latencyMs": 19045.9628,
+      "providerRequests": 1,
+      "httpStatus": null,
+      "inputTokens": null,
+      "outputTokens": null,
+      "thinkingTokens": null,
+      "rawFinishReason": null,
+      "failureCode": "TRANSPORT_ERROR",
+      "requestBytes": 28331,
+      "verdict": null
+    }
+  ],
+  "rows": [
+    {
+      "rep": 1,
+      "population": "B2_B3",
+      "slot": 1,
+      "caseId": "stateful-open",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "BUDGET",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "BUDGET"
+      },
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_685188"
+            },
+            {
+              "name": "apply_customer_state",
+              "args": {
+                "ops": [
+                  {
+                    "sourceQuote": "Eo chị 76",
+                    "op": "SET",
+                    "field": "measurements.WAIST_CM",
+                    "value": 76
+                  },
+                  {
+                    "value": 98,
+                    "field": "measurements.HIPS_CM",
+                    "op": "SET",
+                    "sourceQuote": "mông 98"
+                  }
+                ]
+              },
+              "id": "call_685189"
+            }
+          ]
+        },
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "offerType": "AO",
+                "subjectRef": "SV2447"
+              },
+              "id": "call_89352"
+            }
+          ]
+        },
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "recommend_size",
+              "args": {
+                "customerProfileId": "aedbfa7e-994a-4d96-93aa-995963b34d97",
+                "subjectRef": "SV2447"
+              },
+              "id": "call_611809"
+            }
+          ]
+        }
+      ],
+      "toolStatuses": [
+        {
+          "name": "read_product",
+          "status": "OK"
+        },
+        {
+          "name": "apply_customer_state",
+          "status": "OK"
+        },
+        {
+          "name": "read_product",
+          "status": "OK"
+        }
+      ],
+      "generations": [
+        {
+          "id": "728251d2-e6f6-4b95-97f2-bb48a678f015:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "728251d2-e6f6-4b95-97f2-bb48a678f015:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "728251d2-e6f6-4b95-97f2-bb48a678f015:owner:3",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "NONE",
+          "unexpectedToolCall": true
+        }
+      ],
+      "verifier": []
+    },
+    {
+      "rep": 1,
+      "population": "B2_B3",
+      "slot": 2,
+      "caseId": "stateful-variant-quantity",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "PROVIDER_ERROR"
+      },
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "apply_customer_state",
+              "args": {
+                "ops": [
+                  {
+                    "value": 76,
+                    "op": "SET",
+                    "field": "measurements.WAIST_CM",
+                    "sourceQuote": "Eo chị 76"
+                  },
+                  {
+                    "value": 98,
+                    "field": "measurements.HIPS_CM",
+                    "sourceQuote": "mông 98",
+                    "op": "SET"
+                  }
+                ]
+              },
+              "id": "call_348145"
+            },
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_348146"
+            }
+          ]
+        },
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "quantity": 2,
+                "offerType": "AO",
+                "subjectRef": "SV2447",
+                "color": "be",
+                "size": "L"
+              },
+              "id": "call_34137"
+            }
+          ]
+        }
+      ],
+      "toolStatuses": [
+        {
+          "name": "apply_customer_state",
+          "status": "REJECTED",
+          "reason": "MEASUREMENT_SOURCE_INVALID"
+        },
+        {
+          "name": "read_product",
+          "status": "OK"
+        },
+        {
+          "name": "add_to_cart",
+          "status": "REJECTED",
+          "reason": "DEPENDENT_STATE_REJECTED"
+        }
+      ],
+      "generations": [
+        {
+          "id": "7b535280-2fab-409e-a762-bcefe176d302:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "7b535280-2fab-409e-a762-bcefe176d302:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "7b535280-2fab-409e-a762-bcefe176d302:owner:3",
+          "role": "owner",
+          "status": "PROVIDER_ERROR",
+          "failureCode": "TRANSPORT_ERROR",
+          "failureStage": "GENERATION",
+          "httpStatus": null,
+          "mode": "NONE"
+        }
+      ],
+      "verifier": []
+    },
+    {
+      "rep": 1,
+      "population": "B2_B3",
+      "slot": 3,
+      "caseId": "stateful-quote",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "BUDGET",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "BUDGET"
+      },
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_357087"
+            }
+          ]
+        },
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "offerType": "AO",
+                "subjectRef": "SV2447"
+              },
+              "id": "call_378299"
+            }
+          ]
+        },
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "size": "L",
+                "subjectRef": "SV2447",
+                "offerType": "AO",
+                "quantity": 2
+              },
+              "id": "call_1772"
+            }
+          ]
+        }
+      ],
+      "toolStatuses": [
+        {
+          "name": "read_product",
+          "status": "OK"
+        },
+        {
+          "name": "read_product",
+          "status": "OK"
+        }
+      ],
+      "generations": [
+        {
+          "id": "82971a51-ef56-48d7-a90a-5d806af849dd:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "82971a51-ef56-48d7-a90a-5d806af849dd:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "82971a51-ef56-48d7-a90a-5d806af849dd:owner:3",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "NONE",
+          "unexpectedToolCall": true
+        }
+      ],
+      "verifier": []
+    },
+    {
+      "rep": 1,
+      "population": "B2_B3",
+      "slot": 4,
+      "caseId": "stateful-correction",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, em ghi nhận số đo eo 74, mông 96 của chị rồi ạ. 2 chiếc áo Thạch Thảo màu be size L này là hàng đặt trước chị nhé. \n\nTổng thanh toán 2 áo cả phí ship là 978.100đ (đã áp ưu đãi giảm 49.900đ cho đơn từ 2 sản phẩm và gồm 30.000đ phí vận chuyển ạ).",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "apply_customer_state",
+              "args": {
+                "ops": [
+                  {
+                    "sourceQuote": "eo 74",
+                    "op": "REPLACE",
+                    "field": "measurements.WAIST_CM",
+                    "value": 74
+                  },
+                  {
+                    "sourceQuote": "mông 96",
+                    "op": "REPLACE",
+                    "field": "measurements.HIPS_CM",
+                    "value": 96
+                  }
+                ]
+              },
+              "id": "call_123857"
+            },
+            {
+              "name": "read_product",
+              "args": {
+                "size": "L",
+                "subjectRef": "SV2447",
+                "color": "be"
+              },
+              "id": "call_123858"
+            }
+          ]
+        },
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "color": "be",
+                "size": "L",
+                "subjectRef": "SV2447",
+                "quantity": 2,
+                "offerType": "AO"
+              },
+              "id": "call_327332"
+            },
+            {
+              "name": "quote_cart",
+              "args": {},
+              "id": "call_327333"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Dạ, em ghi nhận số đo eo 74, mông 96 của chị rồi ạ. 2 chiếc áo Thạch Thảo màu be size L này là hàng đặt trước chị nhé. \n\nTổng thanh toán 2 áo cả phí ship là 978.100đ (đã áp ưu đãi giảm 49.900đ cho đơn từ 2 sản phẩm và gồm 30.000đ phí vận chuyển ạ)."
+        }
+      ],
+      "toolStatuses": [
+        {
+          "name": "apply_customer_state",
+          "status": "OK"
+        },
+        {
+          "name": "read_product",
+          "status": "OK"
+        },
+        {
+          "name": "add_to_cart",
+          "status": "OK"
+        },
+        {
+          "name": "quote_cart",
+          "status": "OK"
+        }
+      ],
+      "generations": [
+        {
+          "id": "0b68d9c6-93de-4cd2-8392-154a4b3ea04d:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "0b68d9c6-93de-4cd2-8392-154a4b3ea04d:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "0b68d9c6-93de-4cd2-8392-154a4b3ea04d:owner:3",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "NONE",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "0b68d9c6-93de-4cd2-8392-154a4b3ea04d:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Dạ, em ghi nhận số đo eo 74, mông 96 của chị rồi ạ. 2 chiếc áo Thạch Thảo màu be size L này là hàng đặt trước chị nhé. \n\nTổng thanh toán 2 áo cả phí ship là 978.100đ (đã áp ưu đãi giảm 49.900đ cho đơn từ 2 sản phẩm và gồm 30.000đ phí vận chuyển ạ).",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 1,
+      "population": "B2_B3",
+      "slot": 5,
+      "caseId": "stateful-private-checkout",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "PRIVATE_CHECKOUT_COMMITTED",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [],
+      "toolStatuses": [],
+      "generations": [],
+      "verifier": []
+    },
+    {
+      "rep": 1,
+      "population": "B2_B3",
+      "slot": 6,
+      "caseId": "stateful-confirm",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "PURCHASE_CONFIRMED",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "PURCHASE_CONFIRMED"
+      },
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "confirm_purchase",
+              "args": {},
+              "id": "call_77168"
+            }
+          ]
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "ae9cacff-67ac-45b1-b318-a010963e1fdd:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        }
+      ],
+      "verifier": []
+    },
+    {
+      "rep": 1,
+      "population": "B2_B3",
+      "slot": 7,
+      "caseId": "stateful-human-request",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "CUSTOMER_REQUESTED_HUMAN",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "CUSTOMER_REQUESTED_HUMAN"
+      },
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "request_handoff",
+              "args": {
+                "reason": "CUSTOMER_REQUESTED_HUMAN"
+              },
+              "id": "call_125498"
+            }
+          ]
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "9ac71207-1569-4a5d-afb9-9ba4d2abfe4d:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        }
+      ],
+      "verifier": []
+    },
+    {
+      "rep": 1,
+      "population": "B1",
+      "slot": 1,
+      "caseId": "b1-changed-occasion",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Áo làm từ chất liệu tơ Hàn thêu có độ bay và thoáng, nên dưới ánh đèn rọi mạnh trên sân khấu có thể hơi thấu quang một chút. Chị có thể mặc kèm một chiếc áo hai dây tệp màu bên trong là hoàn toàn yên tâm và thoải mái tỏa sáng trên sân khấu mà không cần đổi sang mẫu khác đâu ạ.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_7469"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Áo làm từ chất liệu tơ Hàn thêu có độ bay và thoáng, nên dưới ánh đèn rọi mạnh trên sân khấu có thể hơi thấu quang một chút. Chị có thể mặc kèm một chiếc áo hai dây tệp màu bên trong là hoàn toàn yên tâm và thoải mái tỏa sáng trên sân khấu mà không cần đổi sang mẫu khác đâu ạ."
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "3decdae9c1e9880cdf08445155088cc4c1fe247d23e3a3b3a587f95fcb2295dd:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "3decdae9c1e9880cdf08445155088cc4c1fe247d23e3a3b3a587f95fcb2295dd:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "3decdae9c1e9880cdf08445155088cc4c1fe247d23e3a3b3a587f95fcb2295dd:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Áo làm từ chất liệu tơ Hàn thêu có độ bay và thoáng, nên dưới ánh đèn rọi mạnh trên sân khấu có thể hơi thấu quang một chút. Chị có thể mặc kèm một chiếc áo hai dây tệp màu bên trong là hoàn toàn yên tâm và thoải mái tỏa sáng trên sân khấu mà không cần đổi sang mẫu khác đâu ạ.",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 1,
+      "population": "B1",
+      "slot": 3,
+      "caseId": "b1-buying-concern",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Cả set váy Thạch Thảo có giá 799.000đ, hoàn toàn nằm trong ngân sách 900 nghìn của chị ạ. \n\nChân váy dùng chất ren tơ Hàn mềm kết hợp cùng áo tơ thêu nổi form nhẹ, có độ bay và rũ tự nhiên nên mặc đi tiệc ban ngày rất thanh thoát, sang trọng và không bị rườm rà đâu ạ. Chị lấy nguyên set này diện tiệc rất hợp và xinh nhé!",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_107815"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Cả set váy Thạch Thảo có giá 799.000đ, hoàn toàn nằm trong ngân sách 900 nghìn của chị ạ. \n\nChân váy dùng chất ren tơ Hàn mềm kết hợp cùng áo tơ thêu nổi form nhẹ, có độ bay và rũ tự nhiên nên mặc đi tiệc ban ngày rất thanh thoát, sang trọng và không bị rườm rà đâu ạ. Chị lấy nguyên set này diện tiệc rất hợp và xinh nhé!"
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "810eafb0b6f6ed2a366f38a4fce014e4c380ac5c75e7c1c2b9ec80a684ce26c2:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "810eafb0b6f6ed2a366f38a4fce014e4c380ac5c75e7c1c2b9ec80a684ce26c2:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "810eafb0b6f6ed2a366f38a4fce014e4c380ac5c75e7c1c2b9ec80a684ce26c2:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Cả set váy Thạch Thảo có giá 799.000đ, hoàn toàn nằm trong ngân sách 900 nghìn của chị ạ. \n\nChân váy dùng chất ren tơ Hàn mềm kết hợp cùng áo tơ thêu nổi form nhẹ, có độ bay và rũ tự nhiên nên mặc đi tiệc ban ngày rất thanh thoát, sang trọng và không bị rườm rà đâu ạ. Chị lấy nguyên set này diện tiệc rất hợp và xinh nhé!",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 1,
+      "population": "B1",
+      "slot": 5,
+      "caseId": "b1-partial-source-v2",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447",
+                "size": "M"
+              },
+              "id": "call_31717"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Chân váy dùng chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên mặc rất thướt tha, thoải mái. Hiện hệ thống chưa có sẵn thông tin giá và tồn kho riêng cho chân váy lẻ size M, chị tham khảo lấy luôn cả set nhé ạ."
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "4fc3d80aeadcec63d773ae3f62e5a55f1eb5a08703e92a22ae1a53d409b4eadb:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "4fc3d80aeadcec63d773ae3f62e5a55f1eb5a08703e92a22ae1a53d409b4eadb:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "4fc3d80aeadcec63d773ae3f62e5a55f1eb5a08703e92a22ae1a53d409b4eadb:verifier:1",
+          "role": "verifier",
+          "status": "PROVIDER_ERROR",
+          "httpStatus": 429
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Chân váy dùng chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên mặc rất thướt tha, thoải mái. Hiện hệ thống chưa có sẵn thông tin giá và tồn kho riêng cho chân váy lẻ size M, chị tham khảo lấy luôn cả set nhé ạ.",
+          "httpStatus": 429,
+          "error": "UPSTREAM_HTTP",
+          "errorStage": "GENERATION_HTTP",
+          "providerErrorCode": "usage_limit_reached"
+        }
+      ]
+    },
+    {
+      "rep": 1,
+      "population": "B1",
+      "slot": 6,
+      "caseId": "b1-buying-concern-v2",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_662451"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Set Thạch Thảo rất hợp để đi ăn cưới ban ngày vì vừa trang nhã, thanh lịch lại bắt sáng tốt dưới ánh sáng tự nhiên. \n\nChị hay mặc đồ trơn và sợ bị điệu thì cứ yên tâm, set này không kiểu bèo nhún hay xòe phồng công chúa đâu ạ. Áo là tơ Hàn có họa tiết thêu nổi tinh tế kết hợp chân váy ren mềm, form dáng nhẹ nhàng và có độ rũ tự nhiên nên tổng thể rất sang và nhã nhặn. Họa tiết thêu nổi trên nền tơ tạo điểm nhấn lịch sự vừa đủ, diện đi tiệc cưới ban ngày cực kỳ hợp cảnh mà không bị quá rườm rà hay sến. \n\nChị lấy nguyên set mặc lên vừa đồng bộ, vừa tôn dáng lại thanh lịch đúng ý thích tối giản mà vẫn đủ nổi bật cho ngày vui nhé ạ!"
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "fe4eb0d8c0083ef59e72cee1162553c8341cc901049cdedfccc49f185c7796e3:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "fe4eb0d8c0083ef59e72cee1162553c8341cc901049cdedfccc49f185c7796e3:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "fe4eb0d8c0083ef59e72cee1162553c8341cc901049cdedfccc49f185c7796e3:verifier:1",
+          "role": "verifier",
+          "status": "PROVIDER_ERROR",
+          "httpStatus": 429
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Set Thạch Thảo rất hợp để đi ăn cưới ban ngày vì vừa trang nhã, thanh lịch lại bắt sáng tốt dưới ánh sáng tự nhiên. \n\nChị hay mặc đồ trơn và sợ bị điệu thì cứ yên tâm, set này không kiểu bèo nhún hay xòe phồng công chúa đâu ạ. Áo là tơ Hàn có họa tiết thêu nổi tinh tế kết hợp chân váy ren mềm, form dáng nhẹ nhàng và có độ rũ tự nhiên nên tổng thể rất sang và nhã nhặn. Họa tiết thêu nổi trên nền tơ tạo điểm nhấn lịch sự vừa đủ, diện đi tiệc cưới ban ngày cực kỳ hợp cảnh mà không bị quá rườm rà hay sến. \n\nChị lấy nguyên set mặc lên vừa đồng bộ, vừa tôn dáng lại thanh lịch đúng ý thích tối giản mà vẫn đủ nổi bật cho ngày vui nhé ạ!",
+          "httpStatus": 429,
+          "error": "UPSTREAM_HTTP",
+          "errorStage": "GENERATION_HTTP",
+          "providerErrorCode": "usage_limit_reached"
+        }
+      ]
+    },
+    {
+      "rep": 1,
+      "population": "B1",
+      "slot": 8,
+      "caseId": "b1-partial-source",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "size": "M",
+                "subjectRef": "SV2447"
+              },
+              "id": "call_166396"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Set Thạch Thảo có áo làm từ tơ Hàn thêu họa tiết nổi, vải mềm, thoáng và bay bổng tự nhiên, còn chân váy bằng ren tơ Hàn mềm, form nhẹ có độ rũ tự nhiên chị nhé. Hiện shop chưa kiểm tra được giá và tình trạng còn hàng của size M."
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "8f581b8a0c6afb599ee2d7a45d2122023e2e0219e286c6367d4272da79b196a2:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "8f581b8a0c6afb599ee2d7a45d2122023e2e0219e286c6367d4272da79b196a2:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "8f581b8a0c6afb599ee2d7a45d2122023e2e0219e286c6367d4272da79b196a2:verifier:1",
+          "role": "verifier",
+          "status": "PROVIDER_ERROR",
+          "httpStatus": 429
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Set Thạch Thảo có áo làm từ tơ Hàn thêu họa tiết nổi, vải mềm, thoáng và bay bổng tự nhiên, còn chân váy bằng ren tơ Hàn mềm, form nhẹ có độ rũ tự nhiên chị nhé. Hiện shop chưa kiểm tra được giá và tình trạng còn hàng của size M.",
+          "httpStatus": 429,
+          "error": "UPSTREAM_HTTP",
+          "errorStage": "GENERATION_HTTP",
+          "providerErrorCode": "usage_limit_reached"
+        }
+      ]
+    },
+    {
+      "rep": 1,
+      "population": "B1",
+      "slot": 17,
+      "caseId": "b1-changed-occasion-v3",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_57984"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Chị lấy cả bộ đi chị ạ. Mặc nguyên set áo thêu và chân váy ren sẽ tạo tổng thể đồng bộ, thanh lịch và rất chỉn chu khi gặp khách hàng buổi sáng, sang buổi tối đi tiệc cũng hợp lý và sang trọng luôn. \n\nThêm nữa, lấy cả bộ (799k) sẽ gọn gàng hơn việc áo mặc rời phải tìm đồ phối, lại tiết kiệm hơn so với mua lẻ từng món (áo 499k, chân váy 449k). Chị chốt lấy cả bộ nhé ạ?"
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "df2108d9cf6c1ea65bba9a8e0790a65b9536ca0bcc96c8f567c720a220fa5cf2:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "df2108d9cf6c1ea65bba9a8e0790a65b9536ca0bcc96c8f567c720a220fa5cf2:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "df2108d9cf6c1ea65bba9a8e0790a65b9536ca0bcc96c8f567c720a220fa5cf2:verifier:1",
+          "role": "verifier",
+          "status": "PROVIDER_ERROR",
+          "httpStatus": 429
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Chị lấy cả bộ đi chị ạ. Mặc nguyên set áo thêu và chân váy ren sẽ tạo tổng thể đồng bộ, thanh lịch và rất chỉn chu khi gặp khách hàng buổi sáng, sang buổi tối đi tiệc cũng hợp lý và sang trọng luôn. \n\nThêm nữa, lấy cả bộ (799k) sẽ gọn gàng hơn việc áo mặc rời phải tìm đồ phối, lại tiết kiệm hơn so với mua lẻ từng món (áo 499k, chân váy 449k). Chị chốt lấy cả bộ nhé ạ?",
+          "httpStatus": 429,
+          "error": "UPSTREAM_HTTP",
+          "errorStage": "GENERATION_HTTP",
+          "providerErrorCode": "usage_limit_reached"
+        }
+      ]
+    },
+    {
+      "rep": 1,
+      "population": "B1",
+      "slot": 19,
+      "caseId": "b1-partial-source-v3",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_489397"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Áo làm bằng tơ Hàn thêu với họa tiết thêu nổi, mặc mềm, thoáng và có độ bay tự nhiên; còn chân váy là ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên chị nha. \n\nHiện tại em chưa kiểm tra được chính xác giá và tình trạng còn hàng của set này ạ."
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "74a35740402540bdad12a7616eca36bf9142595a24db84f90cc858f4f91ecd6b:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "74a35740402540bdad12a7616eca36bf9142595a24db84f90cc858f4f91ecd6b:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "74a35740402540bdad12a7616eca36bf9142595a24db84f90cc858f4f91ecd6b:verifier:1",
+          "role": "verifier",
+          "status": "PROVIDER_ERROR",
+          "httpStatus": 429
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Áo làm bằng tơ Hàn thêu với họa tiết thêu nổi, mặc mềm, thoáng và có độ bay tự nhiên; còn chân váy là ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên chị nha. \n\nHiện tại em chưa kiểm tra được chính xác giá và tình trạng còn hàng của set này ạ.",
+          "httpStatus": 429,
+          "error": "UPSTREAM_HTTP",
+          "errorStage": "GENERATION_HTTP",
+          "providerErrorCode": "usage_limit_reached"
+        }
+      ]
+    },
+    {
+      "rep": 1,
+      "population": "B1",
+      "slot": 23,
+      "caseId": "b1-buying-concern-v3",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Với ngân sách 850 nghìn, chị lấy luôn cả bộ 799 nghìn là hợp lý nhất ạ. \n\nCả bộ vừa vặn trong ngân sách của chị, lại cực kỳ linh hoạt: chị vừa có nguyên set áo thêu và chân váy ren tơ đồng bộ điệu đà để đi tiệc hoặc đi chơi, vừa có thể tách chiếc áo tơ thêu này phối cùng chân váy đen dáng suông sẵn có để mặc đi làm. Như vậy chị vừa có thêm nhiều kiểu phối, vừa tận dụng tối đa đồ sẵn có mà vẫn rất lịch sự, thanh lịch.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_207446"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Với ngân sách 850 nghìn, chị lấy luôn cả bộ 799 nghìn là hợp lý nhất ạ. \n\nCả bộ vừa vặn trong ngân sách của chị, lại cực kỳ linh hoạt: chị vừa có nguyên set áo thêu và chân váy ren tơ đồng bộ điệu đà để đi tiệc hoặc đi chơi, vừa có thể tách chiếc áo tơ thêu này phối cùng chân váy đen dáng suông sẵn có để mặc đi làm. Như vậy chị vừa có thêm nhiều kiểu phối, vừa tận dụng tối đa đồ sẵn có mà vẫn rất lịch sự, thanh lịch."
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "75c4b9dba8b07f495f686b82024fd479fdb9a3596f4b537cd85518c3f8f19ea0:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "75c4b9dba8b07f495f686b82024fd479fdb9a3596f4b537cd85518c3f8f19ea0:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "75c4b9dba8b07f495f686b82024fd479fdb9a3596f4b537cd85518c3f8f19ea0:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Với ngân sách 850 nghìn, chị lấy luôn cả bộ 799 nghìn là hợp lý nhất ạ. \n\nCả bộ vừa vặn trong ngân sách của chị, lại cực kỳ linh hoạt: chị vừa có nguyên set áo thêu và chân váy ren tơ đồng bộ điệu đà để đi tiệc hoặc đi chơi, vừa có thể tách chiếc áo tơ thêu này phối cùng chân váy đen dáng suông sẵn có để mặc đi làm. Như vậy chị vừa có thêm nhiều kiểu phối, vừa tận dụng tối đa đồ sẵn có mà vẫn rất lịch sự, thanh lịch.",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 2,
+      "population": "B2_B3",
+      "slot": 1,
+      "caseId": "stateful-open",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "PROVIDER_ERROR"
+      },
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "apply_customer_state",
+              "args": {
+                "ops": [
+                  {
+                    "value": 76,
+                    "field": "measurements.WAIST_CM",
+                    "sourceQuote": "Eo chị 76",
+                    "op": "SET"
+                  },
+                  {
+                    "value": 98,
+                    "field": "measurements.HIPS_CM",
+                    "sourceQuote": "mông 98",
+                    "op": "SET"
+                  }
+                ]
+              },
+              "id": "call_127693"
+            },
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_127694"
+            }
+          ]
+        }
+      ],
+      "toolStatuses": [
+        {
+          "name": "apply_customer_state",
+          "status": "OK"
+        },
+        {
+          "name": "read_product",
+          "status": "OK"
+        }
+      ],
+      "generations": [
+        {
+          "id": "d609cc3a-a3a1-42c8-bdb2-9fe0bd0df645:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "d609cc3a-a3a1-42c8-bdb2-9fe0bd0df645:owner:2",
+          "role": "owner",
+          "status": "PROVIDER_ERROR",
+          "failureCode": "TRANSPORT_ERROR",
+          "failureStage": "GENERATION",
+          "httpStatus": null,
+          "mode": "AUTO"
+        }
+      ],
+      "verifier": []
+    },
+    {
+      "rep": 2,
+      "population": "B2_B3",
+      "slot": 2,
+      "caseId": "stateful-variant-quantity",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "BUDGET",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "BUDGET"
+      },
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_233921"
+            }
+          ]
+        },
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "offerType": "AO",
+                "subjectRef": "SV2447"
+              },
+              "id": "call_75986"
+            }
+          ]
+        },
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "recommend_size",
+              "args": {
+                "subjectRef": "SV2447",
+                "offerType": "AO"
+              },
+              "id": "call_24316"
+            }
+          ]
+        }
+      ],
+      "toolStatuses": [
+        {
+          "name": "read_product",
+          "status": "OK"
+        },
+        {
+          "name": "read_product",
+          "status": "OK"
+        }
+      ],
+      "generations": [
+        {
+          "id": "acb4027a-becf-4b93-8892-db6435ea9575:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "acb4027a-becf-4b93-8892-db6435ea9575:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "acb4027a-becf-4b93-8892-db6435ea9575:owner:3",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "NONE",
+          "unexpectedToolCall": true
+        }
+      ],
+      "verifier": []
+    },
+    {
+      "rep": 2,
+      "population": "B2_B3",
+      "slot": 3,
+      "caseId": "stateful-quote",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "RECEIPT_BACKED_ACK",
+        "text": "Em đã thêm món chị chọn vào giỏ.",
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "BUDGET"
+      },
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447",
+                "size": "L",
+                "color": "be"
+              },
+              "id": "call_16128"
+            }
+          ]
+        },
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "quantity": 2,
+                "subjectRef": "SV2447",
+                "color": "be",
+                "offerType": "AO",
+                "size": "L"
+              },
+              "id": "call_1126590"
+            }
+          ]
+        },
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "quote_cart",
+              "args": {},
+              "id": "call_1372775"
+            }
+          ]
+        }
+      ],
+      "toolStatuses": [
+        {
+          "name": "read_product",
+          "status": "OK"
+        },
+        {
+          "name": "add_to_cart",
+          "status": "OK"
+        }
+      ],
+      "generations": [
+        {
+          "id": "13397e69-f174-4c6b-a36a-7403834d3372:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "13397e69-f174-4c6b-a36a-7403834d3372:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "13397e69-f174-4c6b-a36a-7403834d3372:owner:3",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "NONE",
+          "unexpectedToolCall": true
+        }
+      ],
+      "verifier": []
+    },
+    {
+      "rep": 2,
+      "population": "B2_B3",
+      "slot": 4,
+      "caseId": "stateful-correction",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, em cập nhật số đo mới của chị rồi ạ. Hai áo màu be size L tổng cộng là 978.100đ (đã gồm 30.000đ phí ship) chị nhé!",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "apply_customer_state",
+              "args": {
+                "ops": [
+                  {
+                    "sourceQuote": "eo 74",
+                    "op": "REPLACE",
+                    "value": 74,
+                    "field": "measurements.WAIST_CM"
+                  },
+                  {
+                    "op": "REPLACE",
+                    "sourceQuote": "mông 96",
+                    "field": "measurements.HIPS_CM",
+                    "value": 96
+                  }
+                ]
+              },
+              "id": "call_128537"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Dạ, em cập nhật số đo mới của chị rồi ạ. Hai áo màu be size L tổng cộng là 978.100đ (đã gồm 30.000đ phí ship) chị nhé!"
+        }
+      ],
+      "toolStatuses": [
+        {
+          "name": "apply_customer_state",
+          "status": "OK"
+        }
+      ],
+      "generations": [
+        {
+          "id": "8e944d39-0a64-4f9b-abd6-01d7a7c02c0b:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "8e944d39-0a64-4f9b-abd6-01d7a7c02c0b:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "8e944d39-0a64-4f9b-abd6-01d7a7c02c0b:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Dạ, em cập nhật số đo mới của chị rồi ạ. Hai áo màu be size L tổng cộng là 978.100đ (đã gồm 30.000đ phí ship) chị nhé!",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 2,
+      "population": "B2_B3",
+      "slot": 5,
+      "caseId": "stateful-private-checkout",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "PRIVATE_CHECKOUT_COMMITTED",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [],
+      "toolStatuses": [],
+      "generations": [],
+      "verifier": []
+    },
+    {
+      "rep": 2,
+      "population": "B2_B3",
+      "slot": 6,
+      "caseId": "stateful-confirm",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "PURCHASE_CONFIRMED",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "PURCHASE_CONFIRMED"
+      },
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "confirm_purchase",
+              "args": {},
+              "id": "call_28374"
+            }
+          ]
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "6d903aca-a887-49f8-a2dd-901dcd1fab03:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        }
+      ],
+      "verifier": []
+    },
+    {
+      "rep": 2,
+      "population": "B2_B3",
+      "slot": 7,
+      "caseId": "stateful-human-request",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "CUSTOMER_REQUESTED_HUMAN",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "CUSTOMER_REQUESTED_HUMAN"
+      },
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "request_handoff",
+              "args": {
+                "reason": "CUSTOMER_REQUESTED_HUMAN"
+              },
+              "id": "call_328161"
+            }
+          ]
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "58f3445f-e965-4b95-ae8d-86971f2592d9:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        }
+      ],
+      "verifier": []
+    },
+    {
+      "rep": 2,
+      "population": "B1",
+      "slot": 1,
+      "caseId": "b1-changed-occasion",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_144002"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Áo chất tơ Hàn mềm và có độ bay tự nhiên nên dưới đèn sân khấu rọi mạnh sẽ dễ thấy mờ bên trong chị ạ. Để yên tâm lên sân khấu, chị mặc kèm một chiếc áo hai dây trơn bên trong là hoàn toàn kín đáo mà vẫn giữ nguyên được nét thanh thoát của set đồ."
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "3decdae9c1e9880cdf08445155088cc4c1fe247d23e3a3b3a587f95fcb2295dd:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "3decdae9c1e9880cdf08445155088cc4c1fe247d23e3a3b3a587f95fcb2295dd:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "3decdae9c1e9880cdf08445155088cc4c1fe247d23e3a3b3a587f95fcb2295dd:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Áo chất tơ Hàn mềm và có độ bay tự nhiên nên dưới đèn sân khấu rọi mạnh sẽ dễ thấy mờ bên trong chị ạ. Để yên tâm lên sân khấu, chị mặc kèm một chiếc áo hai dây trơn bên trong là hoàn toàn kín đáo mà vẫn giữ nguyên được nét thanh thoát của set đồ.",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+                "protectedRef": "product:SV2447"
+              }
+            ]
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 2,
+      "population": "B1",
+      "slot": 3,
+      "caseId": "b1-buying-concern",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ set váy Thạch Thảo diện đi tiệc ban ngày rất hợp và không bị rườm rà đâu chị ạ! \n\nÁo dùng chất tơ Hàn thêu nổi form nhẹ kết hợp chân váy ren tơ Hàn mềm, có độ bay và rũ tự nhiên nên tổng thể rất thanh thoát, nhẹ nhàng chứ không hề nặng nề. Nguyên set có giá 799.000đ, vừa vặn trong ngân sách 900k của mình luôn đó ạ.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_342522"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Dạ set váy Thạch Thảo diện đi tiệc ban ngày rất hợp và không bị rườm rà đâu chị ạ! \n\nÁo dùng chất tơ Hàn thêu nổi form nhẹ kết hợp chân váy ren tơ Hàn mềm, có độ bay và rũ tự nhiên nên tổng thể rất thanh thoát, nhẹ nhàng chứ không hề nặng nề. Nguyên set có giá 799.000đ, vừa vặn trong ngân sách 900k của mình luôn đó ạ."
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "810eafb0b6f6ed2a366f38a4fce014e4c380ac5c75e7c1c2b9ec80a684ce26c2:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "810eafb0b6f6ed2a366f38a4fce014e4c380ac5c75e7c1c2b9ec80a684ce26c2:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "810eafb0b6f6ed2a366f38a4fce014e4c380ac5c75e7c1c2b9ec80a684ce26c2:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Dạ set váy Thạch Thảo diện đi tiệc ban ngày rất hợp và không bị rườm rà đâu chị ạ! \n\nÁo dùng chất tơ Hàn thêu nổi form nhẹ kết hợp chân váy ren tơ Hàn mềm, có độ bay và rũ tự nhiên nên tổng thể rất thanh thoát, nhẹ nhàng chứ không hề nặng nề. Nguyên set có giá 799.000đ, vừa vặn trong ngân sách 900k của mình luôn đó ạ.",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 2,
+      "population": "B1",
+      "slot": 5,
+      "caseId": "b1-partial-source-v2",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "size": "M",
+                "subjectRef": "SV2447"
+              },
+              "id": "call_1152"
+            }
+          ]
+        },
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "search_products",
+              "args": {
+                "query": "chân váy Thạch Thảo"
+              },
+              "id": "call_1333568"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Dạ set váy Thạch Thảo shop bán nguyên set gồm cả áo thêu và chân váy ren chứ không tách bán lẻ chân váy chị nha. \n\nChân váy làm bằng chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên rất bay bổng và nữ tính. Chị có muốn lấy nguyên set luôn không ạ?"
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "4fc3d80aeadcec63d773ae3f62e5a55f1eb5a08703e92a22ae1a53d409b4eadb:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "4fc3d80aeadcec63d773ae3f62e5a55f1eb5a08703e92a22ae1a53d409b4eadb:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "4fc3d80aeadcec63d773ae3f62e5a55f1eb5a08703e92a22ae1a53d409b4eadb:owner:3",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "NONE",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "4fc3d80aeadcec63d773ae3f62e5a55f1eb5a08703e92a22ae1a53d409b4eadb:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Dạ set váy Thạch Thảo shop bán nguyên set gồm cả áo thêu và chân váy ren chứ không tách bán lẻ chân váy chị nha. \n\nChân váy làm bằng chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên rất bay bổng và nữ tính. Chị có muốn lấy nguyên set luôn không ạ?",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+                "protectedRef": "product:SV2447"
+              }
+            ]
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 2,
+      "population": "B1",
+      "slot": 6,
+      "caseId": "b1-buying-concern-v2",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set này rất hợp để chị mặc đi ăn cưới ban ngày đấy ạ. \n\nChất liệu tơ Hàn thêu nổi kết hợp cùng chân váy ren có độ bay và rũ tự nhiên, tạo cảm giác rất thanh lịch, nhẹ nhàng chứ không bị bèo nhún rườm rà hay sến súa. Dù chị quen mặc đồ trơn, set này diện lên vẫn giữ được nét nhã nhặn, sang trọng vừa đủ, không sợ bị quá điệu đà hay lồng lộn đâu ạ. \n\nDưới ánh sáng ban ngày, chất tơ và ren mềm bắt sáng rất sang, vừa lịch sự lại vừa nổi bật vừa phải cho một bữa tiệc cưới. Chị cứ lấy nguyên set diện đi tiệc đảm bảo sẽ ưng ý và vừa vặn với phong cách của mình nhé!",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_859800"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Set này rất hợp để chị mặc đi ăn cưới ban ngày đấy ạ. \n\nChất liệu tơ Hàn thêu nổi kết hợp cùng chân váy ren có độ bay và rũ tự nhiên, tạo cảm giác rất thanh lịch, nhẹ nhàng chứ không bị bèo nhún rườm rà hay sến súa. Dù chị quen mặc đồ trơn, set này diện lên vẫn giữ được nét nhã nhặn, sang trọng vừa đủ, không sợ bị quá điệu đà hay lồng lộn đâu ạ. \n\nDưới ánh sáng ban ngày, chất tơ và ren mềm bắt sáng rất sang, vừa lịch sự lại vừa nổi bật vừa phải cho một bữa tiệc cưới. Chị cứ lấy nguyên set diện đi tiệc đảm bảo sẽ ưng ý và vừa vặn với phong cách của mình nhé!"
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "fe4eb0d8c0083ef59e72cee1162553c8341cc901049cdedfccc49f185c7796e3:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "fe4eb0d8c0083ef59e72cee1162553c8341cc901049cdedfccc49f185c7796e3:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "fe4eb0d8c0083ef59e72cee1162553c8341cc901049cdedfccc49f185c7796e3:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Set này rất hợp để chị mặc đi ăn cưới ban ngày đấy ạ. \n\nChất liệu tơ Hàn thêu nổi kết hợp cùng chân váy ren có độ bay và rũ tự nhiên, tạo cảm giác rất thanh lịch, nhẹ nhàng chứ không bị bèo nhún rườm rà hay sến súa. Dù chị quen mặc đồ trơn, set này diện lên vẫn giữ được nét nhã nhặn, sang trọng vừa đủ, không sợ bị quá điệu đà hay lồng lộn đâu ạ. \n\nDưới ánh sáng ban ngày, chất tơ và ren mềm bắt sáng rất sang, vừa lịch sự lại vừa nổi bật vừa phải cho một bữa tiệc cưới. Chị cứ lấy nguyên set diện đi tiệc đảm bảo sẽ ưng ý và vừa vặn với phong cách của mình nhé!",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 2,
+      "population": "B1",
+      "slot": 8,
+      "caseId": "b1-partial-source",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set Thạch Thảo có phần áo làm bằng tơ Hàn thêu họa tiết nổi, mềm thoáng và bay bổng, còn chân váy dùng ren tơ Hàn mềm có độ rũ tự nhiên chị nhé. Hiện tại phần giá và tồn kho size M shop chưa kiểm tra được thông tin cụ thể.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447",
+                "size": "M"
+              },
+              "id": "call_89125"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Set Thạch Thảo có phần áo làm bằng tơ Hàn thêu họa tiết nổi, mềm thoáng và bay bổng, còn chân váy dùng ren tơ Hàn mềm có độ rũ tự nhiên chị nhé. Hiện tại phần giá và tồn kho size M shop chưa kiểm tra được thông tin cụ thể."
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "8f581b8a0c6afb599ee2d7a45d2122023e2e0219e286c6367d4272da79b196a2:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "8f581b8a0c6afb599ee2d7a45d2122023e2e0219e286c6367d4272da79b196a2:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "8f581b8a0c6afb599ee2d7a45d2122023e2e0219e286c6367d4272da79b196a2:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Set Thạch Thảo có phần áo làm bằng tơ Hàn thêu họa tiết nổi, mềm thoáng và bay bổng, còn chân váy dùng ren tơ Hàn mềm có độ rũ tự nhiên chị nhé. Hiện tại phần giá và tồn kho size M shop chưa kiểm tra được thông tin cụ thể.",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 2,
+      "population": "B1",
+      "slot": 17,
+      "caseId": "b1-changed-occasion-v3",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Lấy cả bộ đi chị, mặc nguyên set vừa đồng bộ, lịch sự lại rất chỉn chu khi gặp khách hàng. Áo tơ thêu nhẹ nhàng kết hợp cùng chân váy ren tơ form rũ tự nhiên tạo tổng thể thanh lịch, nhã nhặn chứ không hề rườm rà đâu ạ.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_8041"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Lấy cả bộ đi chị, mặc nguyên set vừa đồng bộ, lịch sự lại rất chỉn chu khi gặp khách hàng. Áo tơ thêu nhẹ nhàng kết hợp cùng chân váy ren tơ form rũ tự nhiên tạo tổng thể thanh lịch, nhã nhặn chứ không hề rườm rà đâu ạ."
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "df2108d9cf6c1ea65bba9a8e0790a65b9536ca0bcc96c8f567c720a220fa5cf2:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "df2108d9cf6c1ea65bba9a8e0790a65b9536ca0bcc96c8f567c720a220fa5cf2:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "df2108d9cf6c1ea65bba9a8e0790a65b9536ca0bcc96c8f567c720a220fa5cf2:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Lấy cả bộ đi chị, mặc nguyên set vừa đồng bộ, lịch sự lại rất chỉn chu khi gặp khách hàng. Áo tơ thêu nhẹ nhàng kết hợp cùng chân váy ren tơ form rũ tự nhiên tạo tổng thể thanh lịch, nhã nhặn chứ không hề rườm rà đâu ạ.",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 2,
+      "population": "B1",
+      "slot": 19,
+      "caseId": "b1-partial-source-v3",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Áo của set là tơ Hàn thêu mềm, thoáng, có độ bay tự nhiên, còn chân váy làm bằng ren tơ Hàn mềm với độ rũ nhẹ nhàng chị ạ. Hiện tại em chưa kiểm tra được chính xác giá và tình trạng còn hàng của set này trên hệ thống.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_54601"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Áo của set là tơ Hàn thêu mềm, thoáng, có độ bay tự nhiên, còn chân váy làm bằng ren tơ Hàn mềm với độ rũ nhẹ nhàng chị ạ. Hiện tại em chưa kiểm tra được chính xác giá và tình trạng còn hàng của set này trên hệ thống."
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "74a35740402540bdad12a7616eca36bf9142595a24db84f90cc858f4f91ecd6b:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "74a35740402540bdad12a7616eca36bf9142595a24db84f90cc858f4f91ecd6b:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "74a35740402540bdad12a7616eca36bf9142595a24db84f90cc858f4f91ecd6b:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Áo của set là tơ Hàn thêu mềm, thoáng, có độ bay tự nhiên, còn chân váy làm bằng ren tơ Hàn mềm với độ rũ nhẹ nhàng chị ạ. Hiện tại em chưa kiểm tra được chính xác giá và tình trạng còn hàng của set này trên hệ thống.",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 2,
+      "population": "B1",
+      "slot": 23,
+      "caseId": "b1-buying-concern-v3",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chị nên lấy cả bộ (799 nghìn), hoàn toàn nằm trong ngân sách 850 nghìn của mình. \n\nLấy cả set sẽ tối ưu hơn rất nhiều vì chị vừa có sẵn set váy chuẩn thiết kế để mặc đồng bộ, vừa có thể tách áo thêu nổi phối cùng chân váy đen dáng suông sẵn có của chị. Nhờ vậy, mình dễ dàng thay đổi kiểu linh hoạt và mặc lại được nhiều lần cho các dịp khác nhau mà không lo nhàm chán.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_9513"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Chị nên lấy cả bộ (799 nghìn), hoàn toàn nằm trong ngân sách 850 nghìn của mình. \n\nLấy cả set sẽ tối ưu hơn rất nhiều vì chị vừa có sẵn set váy chuẩn thiết kế để mặc đồng bộ, vừa có thể tách áo thêu nổi phối cùng chân váy đen dáng suông sẵn có của chị. Nhờ vậy, mình dễ dàng thay đổi kiểu linh hoạt và mặc lại được nhiều lần cho các dịp khác nhau mà không lo nhàm chán."
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "75c4b9dba8b07f495f686b82024fd479fdb9a3596f4b537cd85518c3f8f19ea0:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "75c4b9dba8b07f495f686b82024fd479fdb9a3596f4b537cd85518c3f8f19ea0:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "75c4b9dba8b07f495f686b82024fd479fdb9a3596f4b537cd85518c3f8f19ea0:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Chị nên lấy cả bộ (799 nghìn), hoàn toàn nằm trong ngân sách 850 nghìn của mình. \n\nLấy cả set sẽ tối ưu hơn rất nhiều vì chị vừa có sẵn set váy chuẩn thiết kế để mặc đồng bộ, vừa có thể tách áo thêu nổi phối cùng chân váy đen dáng suông sẵn có của chị. Nhờ vậy, mình dễ dàng thay đổi kiểu linh hoạt và mặc lại được nhiều lần cho các dịp khác nhau mà không lo nhàm chán.",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 3,
+      "population": "B2_B3",
+      "slot": 1,
+      "caseId": "stateful-open",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, shop đã thêm áo Thạch Thảo màu be size M vào giỏ rồi ạ. Mẫu này là hàng đặt trước chị nhé!",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "apply_customer_state",
+              "args": {
+                "ops": [
+                  {
+                    "field": "measurements.WAIST_CM",
+                    "value": 76,
+                    "sourceQuote": "Eo chị 76",
+                    "op": "SET"
+                  },
+                  {
+                    "value": 98,
+                    "field": "measurements.HIPS_CM",
+                    "sourceQuote": "mông 98",
+                    "op": "SET"
+                  }
+                ]
+              },
+              "id": "call_409473"
+            },
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_409474"
+            }
+          ]
+        },
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "offerType": "AO",
+                "subjectRef": "SV2447",
+                "quantity": 1,
+                "color": "be",
+                "size": "M"
+              },
+              "id": "call_88043"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Dạ, shop đã thêm áo Thạch Thảo màu be size M vào giỏ rồi ạ. Mẫu này là hàng đặt trước chị nhé!"
+        }
+      ],
+      "toolStatuses": [
+        {
+          "name": "apply_customer_state",
+          "status": "OK"
+        },
+        {
+          "name": "read_product",
+          "status": "OK"
+        },
+        {
+          "name": "add_to_cart",
+          "status": "OK"
+        }
+      ],
+      "generations": [
+        {
+          "id": "2567851a-e5ef-432f-b026-31c9b4d17568:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "2567851a-e5ef-432f-b026-31c9b4d17568:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "2567851a-e5ef-432f-b026-31c9b4d17568:owner:3",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "NONE",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "2567851a-e5ef-432f-b026-31c9b4d17568:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Dạ, shop đã thêm áo Thạch Thảo màu be size M vào giỏ rồi ạ. Mẫu này là hàng đặt trước chị nhé!",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 3,
+      "population": "B2_B3",
+      "slot": 2,
+      "caseId": "stateful-variant-quantity",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, shop đã đổi sang 2 chiếc áo Thạch Thảo màu be size L cho mình rồi ạ.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "change_cart_item",
+              "args": {
+                "subjectRef": "4cbd7f30-3aa1-59f1-8a89-7bba9e111f5e",
+                "action": "SET_COMPONENT_VARIANT",
+                "color": "BE",
+                "size": "L",
+                "componentRole": "TOP"
+              },
+              "id": "call_1084061"
+            },
+            {
+              "name": "change_cart_item",
+              "args": {
+                "subjectRef": "4cbd7f30-3aa1-59f1-8a89-7bba9e111f5e",
+                "action": "SET_QUANTITY",
+                "quantity": 2
+              },
+              "id": "call_1084062"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Dạ, shop đã đổi sang 2 chiếc áo Thạch Thảo màu be size L cho mình rồi ạ."
+        }
+      ],
+      "toolStatuses": [
+        {
+          "name": "change_cart_item",
+          "status": "OK"
+        },
+        {
+          "name": "change_cart_item",
+          "status": "OK"
+        }
+      ],
+      "generations": [
+        {
+          "id": "50d72caa-c96d-44d3-9ce1-61b0b53fd10c:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "50d72caa-c96d-44d3-9ce1-61b0b53fd10c:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "50d72caa-c96d-44d3-9ce1-61b0b53fd10c:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Dạ, shop đã đổi sang 2 chiếc áo Thạch Thảo màu be size L cho mình rồi ạ.",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 3,
+      "population": "B2_B3",
+      "slot": 3,
+      "caseId": "stateful-quote",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, tổng thanh toán 2 áo gồm cả 30.000đ phí ship là 978.100đ chị nha.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "FINAL",
+          "text": "Dạ, tổng thanh toán 2 áo gồm cả 30.000đ phí ship là 978.100đ chị nha."
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "841712a4-3683-426c-ac33-136837b9cfa7:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "841712a4-3683-426c-ac33-136837b9cfa7:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Dạ, tổng thanh toán 2 áo gồm cả 30.000đ phí ship là 978.100đ chị nha.",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 3,
+      "population": "B2_B3",
+      "slot": 4,
+      "caseId": "stateful-correction",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ vâng, shop đã cập nhật lại số đo (eo 74, mông 96) cho mình rồi ạ. Đơn 2 áo Thạch Thảo màu be size L của chị vẫn được giữ nguyên nha!",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "apply_customer_state",
+              "args": {
+                "ops": [
+                  {
+                    "field": "measurements.WAIST_CM",
+                    "value": 74,
+                    "op": "SET",
+                    "sourceQuote": "eo 74"
+                  },
+                  {
+                    "value": 96,
+                    "field": "measurements.HIPS_CM",
+                    "op": "SET",
+                    "sourceQuote": "mông 96"
+                  }
+                ]
+              },
+              "id": "call_1086770"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Dạ vâng, shop đã cập nhật lại số đo (eo 74, mông 96) cho mình rồi ạ. Đơn 2 áo Thạch Thảo màu be size L của chị vẫn được giữ nguyên nha!"
+        }
+      ],
+      "toolStatuses": [
+        {
+          "name": "apply_customer_state",
+          "status": "OK"
+        }
+      ],
+      "generations": [
+        {
+          "id": "aabaaedf-5668-48e3-a4a6-003a06ec455f:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "aabaaedf-5668-48e3-a4a6-003a06ec455f:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "aabaaedf-5668-48e3-a4a6-003a06ec455f:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Dạ vâng, shop đã cập nhật lại số đo (eo 74, mông 96) cho mình rồi ạ. Đơn 2 áo Thạch Thảo màu be size L của chị vẫn được giữ nguyên nha!",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 3,
+      "population": "B2_B3",
+      "slot": 5,
+      "caseId": "stateful-private-checkout",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "PRIVATE_CHECKOUT_COMMITTED",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [],
+      "toolStatuses": [],
+      "generations": [],
+      "verifier": []
+    },
+    {
+      "rep": 3,
+      "population": "B2_B3",
+      "slot": 6,
+      "caseId": "stateful-confirm",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "PURCHASE_CONFIRMED",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "PURCHASE_CONFIRMED"
+      },
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "confirm_purchase",
+              "args": {},
+              "id": "call_7524"
+            }
+          ]
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "bf8ccdd9-9543-4322-bcf6-b2202f9f37cb:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        }
+      ],
+      "verifier": []
+    },
+    {
+      "rep": 3,
+      "population": "B2_B3",
+      "slot": 7,
+      "caseId": "stateful-human-request",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "CUSTOMER_REQUESTED_HUMAN",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "CUSTOMER_REQUESTED_HUMAN"
+      },
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "request_handoff",
+              "args": {
+                "reason": "CUSTOMER_REQUESTED_HUMAN"
+              },
+              "id": "call_46087"
+            }
+          ]
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "6d8a7b55-4893-4fbe-910f-55e58712f0f1:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        }
+      ],
+      "verifier": []
+    },
+    {
+      "rep": 3,
+      "population": "B1",
+      "slot": 1,
+      "caseId": "b1-changed-occasion",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Áo làm từ chất tơ Hàn thêu có độ mềm, thoáng và bay tự nhiên nên dưới ánh đèn sân khấu rọi mạnh sẽ có thể hơi thấu sáng nhẹ chị ạ. \n\nĐể hoàn toàn tự tin và thoải mái dưới ánh đèn, mình chỉ cần mặc kèm một chiếc áo hai dây hoặc áo lót mỏng màu nude bên trong là rất kín đáo và sang trọng. Set này thêu nổi rất đẹp và hợp mặc đi tiệc, chị giữ lại mẫu này diện lên sân khấu rất nổi bật đấy ạ.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_65040"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Áo làm từ chất tơ Hàn thêu có độ mềm, thoáng và bay tự nhiên nên dưới ánh đèn sân khấu rọi mạnh sẽ có thể hơi thấu sáng nhẹ chị ạ. \n\nĐể hoàn toàn tự tin và thoải mái dưới ánh đèn, mình chỉ cần mặc kèm một chiếc áo hai dây hoặc áo lót mỏng màu nude bên trong là rất kín đáo và sang trọng. Set này thêu nổi rất đẹp và hợp mặc đi tiệc, chị giữ lại mẫu này diện lên sân khấu rất nổi bật đấy ạ."
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "3decdae9c1e9880cdf08445155088cc4c1fe247d23e3a3b3a587f95fcb2295dd:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "3decdae9c1e9880cdf08445155088cc4c1fe247d23e3a3b3a587f95fcb2295dd:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "3decdae9c1e9880cdf08445155088cc4c1fe247d23e3a3b3a587f95fcb2295dd:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Áo làm từ chất tơ Hàn thêu có độ mềm, thoáng và bay tự nhiên nên dưới ánh đèn sân khấu rọi mạnh sẽ có thể hơi thấu sáng nhẹ chị ạ. \n\nĐể hoàn toàn tự tin và thoải mái dưới ánh đèn, mình chỉ cần mặc kèm một chiếc áo hai dây hoặc áo lót mỏng màu nude bên trong là rất kín đáo và sang trọng. Set này thêu nổi rất đẹp và hợp mặc đi tiệc, chị giữ lại mẫu này diện lên sân khấu rất nổi bật đấy ạ.",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 3,
+      "population": "B1",
+      "slot": 3,
+      "caseId": "b1-buying-concern",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Bộ này nguyên set là 799.000đ, vừa vặn trong ngân sách 900 nghìn của chị ạ. \n\nChị yên tâm là set này mặc đi tiệc ban ngày không bị rườm rà đâu ạ. Chân váy dùng chất ren tơ Hàn mềm với form nhẹ và độ rũ tự nhiên, kết hợp cùng áo tơ Hàn thêu nổi thanh thoát, tạo cảm giác bay bổng, nhã nhặn chứ không bị cứng hay nặng nề. Lên hình hay ra ánh sáng tự nhiên trông rất sang và thơ ạ.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_117258"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Bộ này nguyên set là 799.000đ, vừa vặn trong ngân sách 900 nghìn của chị ạ. \n\nChị yên tâm là set này mặc đi tiệc ban ngày không bị rườm rà đâu ạ. Chân váy dùng chất ren tơ Hàn mềm với form nhẹ và độ rũ tự nhiên, kết hợp cùng áo tơ Hàn thêu nổi thanh thoát, tạo cảm giác bay bổng, nhã nhặn chứ không bị cứng hay nặng nề. Lên hình hay ra ánh sáng tự nhiên trông rất sang và thơ ạ."
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "810eafb0b6f6ed2a366f38a4fce014e4c380ac5c75e7c1c2b9ec80a684ce26c2:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "810eafb0b6f6ed2a366f38a4fce014e4c380ac5c75e7c1c2b9ec80a684ce26c2:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "810eafb0b6f6ed2a366f38a4fce014e4c380ac5c75e7c1c2b9ec80a684ce26c2:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Bộ này nguyên set là 799.000đ, vừa vặn trong ngân sách 900 nghìn của chị ạ. \n\nChị yên tâm là set này mặc đi tiệc ban ngày không bị rườm rà đâu ạ. Chân váy dùng chất ren tơ Hàn mềm với form nhẹ và độ rũ tự nhiên, kết hợp cùng áo tơ Hàn thêu nổi thanh thoát, tạo cảm giác bay bổng, nhã nhặn chứ không bị cứng hay nặng nề. Lên hình hay ra ánh sáng tự nhiên trông rất sang và thơ ạ.",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 3,
+      "population": "B1",
+      "slot": 5,
+      "caseId": "b1-partial-source-v2",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447",
+                "size": "M"
+              },
+              "id": "call_209008"
+            }
+          ]
+        },
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "search_products",
+              "args": {
+                "query": "chân váy Thạch Thảo"
+              },
+              "id": "call_147271"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Chân váy Thạch Thảo được làm từ chất liệu ren tơ Hàn mềm, có form nhẹ và độ rũ tự nhiên rất thướt tha, thoải mái ạ. \n\nMẫu này shop bán nguyên set gồm cả áo thêu và chân váy chứ hiện chưa hỗ trợ bán lẻ riêng chân váy, nên em chưa có giá và size M riêng cho chân váy chị nhé. Chị tham khảo lấy nguyên set luôn giúp em nha!"
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "4fc3d80aeadcec63d773ae3f62e5a55f1eb5a08703e92a22ae1a53d409b4eadb:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "4fc3d80aeadcec63d773ae3f62e5a55f1eb5a08703e92a22ae1a53d409b4eadb:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "4fc3d80aeadcec63d773ae3f62e5a55f1eb5a08703e92a22ae1a53d409b4eadb:owner:3",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "NONE",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "4fc3d80aeadcec63d773ae3f62e5a55f1eb5a08703e92a22ae1a53d409b4eadb:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Chân váy Thạch Thảo được làm từ chất liệu ren tơ Hàn mềm, có form nhẹ và độ rũ tự nhiên rất thướt tha, thoải mái ạ. \n\nMẫu này shop bán nguyên set gồm cả áo thêu và chân váy chứ hiện chưa hỗ trợ bán lẻ riêng chân váy, nên em chưa có giá và size M riêng cho chân váy chị nhé. Chị tham khảo lấy nguyên set luôn giúp em nha!",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+                "protectedRef": "product:SV2447"
+              }
+            ]
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 3,
+      "population": "B1",
+      "slot": 6,
+      "caseId": "b1-buying-concern-v2",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, nói thật với chị là set Thạch Thảo này có áo tơ thêu nổi kết hợp chân váy ren tơ Hàn nên bản chất đúng là mang nét nữ tính, bay bổng và có độ điệu nhất định ạ. \n\nNhưng đi ăn cưới ban ngày thì diện mạo tươi tắn, thanh nhã và có độ bay nhẹ nhàng lại cực kỳ hợp, không bị quá lồng lộn hay nặng nề như tiệc tối. \n\nNếu chị quen mặc đồ trơn và sợ nguyên set hơi nhiều chi tiết thêu với ren cùng lúc, mình có thể chọn mua lẻ **chân váy ren** (449k) rồi phối với áo trơn sẵn có ở nhà để cân bằng lại độ điệu, hoặc lấy **áo thêu** (499k) mặc cùng chân váy/quần trơn. Còn nếu lấy trọn **cả set** (799k), vì chất vải tơ và ren mềm có độ rũ tự nhiên, form nhẹ chứ không đính kết cứng nhắc, mặc lên vẫn giữ được nét nhã nhặn, gọn gàng chứ không bị sến đâu chị nhé. \n\nChị thấy mình thích phương án mặc cả set hay lấy rời từng món để dễ phối hơn ạ?",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_59015"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Dạ, nói thật với chị là set Thạch Thảo này có áo tơ thêu nổi kết hợp chân váy ren tơ Hàn nên bản chất đúng là mang nét nữ tính, bay bổng và có độ điệu nhất định ạ. \n\nNhưng đi ăn cưới ban ngày thì diện mạo tươi tắn, thanh nhã và có độ bay nhẹ nhàng lại cực kỳ hợp, không bị quá lồng lộn hay nặng nề như tiệc tối. \n\nNếu chị quen mặc đồ trơn và sợ nguyên set hơi nhiều chi tiết thêu với ren cùng lúc, mình có thể chọn mua lẻ **chân váy ren** (449k) rồi phối với áo trơn sẵn có ở nhà để cân bằng lại độ điệu, hoặc lấy **áo thêu** (499k) mặc cùng chân váy/quần trơn. Còn nếu lấy trọn **cả set** (799k), vì chất vải tơ và ren mềm có độ rũ tự nhiên, form nhẹ chứ không đính kết cứng nhắc, mặc lên vẫn giữ được nét nhã nhặn, gọn gàng chứ không bị sến đâu chị nhé. \n\nChị thấy mình thích phương án mặc cả set hay lấy rời từng món để dễ phối hơn ạ?"
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "fe4eb0d8c0083ef59e72cee1162553c8341cc901049cdedfccc49f185c7796e3:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "fe4eb0d8c0083ef59e72cee1162553c8341cc901049cdedfccc49f185c7796e3:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "fe4eb0d8c0083ef59e72cee1162553c8341cc901049cdedfccc49f185c7796e3:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Dạ, nói thật với chị là set Thạch Thảo này có áo tơ thêu nổi kết hợp chân váy ren tơ Hàn nên bản chất đúng là mang nét nữ tính, bay bổng và có độ điệu nhất định ạ. \n\nNhưng đi ăn cưới ban ngày thì diện mạo tươi tắn, thanh nhã và có độ bay nhẹ nhàng lại cực kỳ hợp, không bị quá lồng lộn hay nặng nề như tiệc tối. \n\nNếu chị quen mặc đồ trơn và sợ nguyên set hơi nhiều chi tiết thêu với ren cùng lúc, mình có thể chọn mua lẻ **chân váy ren** (449k) rồi phối với áo trơn sẵn có ở nhà để cân bằng lại độ điệu, hoặc lấy **áo thêu** (499k) mặc cùng chân váy/quần trơn. Còn nếu lấy trọn **cả set** (799k), vì chất vải tơ và ren mềm có độ rũ tự nhiên, form nhẹ chứ không đính kết cứng nhắc, mặc lên vẫn giữ được nét nhã nhặn, gọn gàng chứ không bị sến đâu chị nhé. \n\nChị thấy mình thích phương án mặc cả set hay lấy rời từng món để dễ phối hơn ạ?",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 3,
+      "population": "B1",
+      "slot": 8,
+      "caseId": "b1-partial-source",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set Thạch Thảo có áo may bằng tơ Hàn thêu với họa tiết thêu nổi, vải mềm, thoáng và có độ bay tự nhiên; chân váy làm bằng ren tơ Hàn mềm, form nhẹ, rũ tự nhiên chị nhé. \n\nPhần giá và tình trạng còn hàng size M thì hiện tại shop chưa kiểm tra được thông tin này ạ.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447",
+                "size": "M"
+              },
+              "id": "call_29075"
+            }
+          ]
+        },
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_500671"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Set Thạch Thảo có áo may bằng tơ Hàn thêu với họa tiết thêu nổi, vải mềm, thoáng và có độ bay tự nhiên; chân váy làm bằng ren tơ Hàn mềm, form nhẹ, rũ tự nhiên chị nhé. \n\nPhần giá và tình trạng còn hàng size M thì hiện tại shop chưa kiểm tra được thông tin này ạ."
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "8f581b8a0c6afb599ee2d7a45d2122023e2e0219e286c6367d4272da79b196a2:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "8f581b8a0c6afb599ee2d7a45d2122023e2e0219e286c6367d4272da79b196a2:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "8f581b8a0c6afb599ee2d7a45d2122023e2e0219e286c6367d4272da79b196a2:owner:3",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "NONE",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "8f581b8a0c6afb599ee2d7a45d2122023e2e0219e286c6367d4272da79b196a2:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Set Thạch Thảo có áo may bằng tơ Hàn thêu với họa tiết thêu nổi, vải mềm, thoáng và có độ bay tự nhiên; chân váy làm bằng ren tơ Hàn mềm, form nhẹ, rũ tự nhiên chị nhé. \n\nPhần giá và tình trạng còn hàng size M thì hiện tại shop chưa kiểm tra được thông tin này ạ.",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 3,
+      "population": "B1",
+      "slot": 17,
+      "caseId": "b1-changed-occasion-v3",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chị nên lấy cả bộ ạ. Mặc đồng bộ áo thêu và chân váy ren sẽ giúp tổng thể liền mạch, chỉn chu và thanh lịch hơn rất nhiều khi gặp khách hàng buổi sáng. Thiết kế form nhẹ với độ rũ tự nhiên vừa giữ được nét trang nhã, sang trọng lại gọn gàng, chuyên nghiệp nên chị cứ yên tâm diện cả set nhé.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_4572"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Chị nên lấy cả bộ ạ. Mặc đồng bộ áo thêu và chân váy ren sẽ giúp tổng thể liền mạch, chỉn chu và thanh lịch hơn rất nhiều khi gặp khách hàng buổi sáng. Thiết kế form nhẹ với độ rũ tự nhiên vừa giữ được nét trang nhã, sang trọng lại gọn gàng, chuyên nghiệp nên chị cứ yên tâm diện cả set nhé."
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "df2108d9cf6c1ea65bba9a8e0790a65b9536ca0bcc96c8f567c720a220fa5cf2:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "df2108d9cf6c1ea65bba9a8e0790a65b9536ca0bcc96c8f567c720a220fa5cf2:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "df2108d9cf6c1ea65bba9a8e0790a65b9536ca0bcc96c8f567c720a220fa5cf2:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Chị nên lấy cả bộ ạ. Mặc đồng bộ áo thêu và chân váy ren sẽ giúp tổng thể liền mạch, chỉn chu và thanh lịch hơn rất nhiều khi gặp khách hàng buổi sáng. Thiết kế form nhẹ với độ rũ tự nhiên vừa giữ được nét trang nhã, sang trọng lại gọn gàng, chuyên nghiệp nên chị cứ yên tâm diện cả set nhé.",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 3,
+      "population": "B1",
+      "slot": 19,
+      "caseId": "b1-partial-source-v3",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Áo làm bằng tơ Hàn thêu có họa tiết thêu nổi, chất mềm mại, thoáng và bay bổng tự nhiên, còn chân váy là ren tơ Hàn mềm form nhẹ rũ tự nhiên chị nhé. Hiện tại phần giá và tồn kho của set này em chưa kiểm tra được ạ.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_324598"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Áo làm bằng tơ Hàn thêu có họa tiết thêu nổi, chất mềm mại, thoáng và bay bổng tự nhiên, còn chân váy là ren tơ Hàn mềm form nhẹ rũ tự nhiên chị nhé. Hiện tại phần giá và tồn kho của set này em chưa kiểm tra được ạ."
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "74a35740402540bdad12a7616eca36bf9142595a24db84f90cc858f4f91ecd6b:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "74a35740402540bdad12a7616eca36bf9142595a24db84f90cc858f4f91ecd6b:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "74a35740402540bdad12a7616eca36bf9142595a24db84f90cc858f4f91ecd6b:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Áo làm bằng tơ Hàn thêu có họa tiết thêu nổi, chất mềm mại, thoáng và bay bổng tự nhiên, còn chân váy là ren tơ Hàn mềm form nhẹ rũ tự nhiên chị nhé. Hiện tại phần giá và tồn kho của set này em chưa kiểm tra được ạ.",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    },
+    {
+      "rep": 3,
+      "population": "B1",
+      "slot": 23,
+      "caseId": "b1-buying-concern-v3",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chị lấy cả bộ Thạch Thảo đi ạ, giá 799.000đ vẫn nằm gọn trong ngân sách 850.000đ của chị. \n\nLấy cả set vừa giúp chị có sẵn diện mạo đồng bộ, thướt tha với chân váy ren điệu đà, vừa linh hoạt vì áo thêu có thể tách ra phối cùng chân váy đen dáng suông sẵn có của chị, đổi gió thoải mái cho nhiều dịp khác nhau.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "ownerOutputs": [
+        {
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_211951"
+            }
+          ]
+        },
+        {
+          "kind": "FINAL",
+          "text": "Chị lấy cả bộ Thạch Thảo đi ạ, giá 799.000đ vẫn nằm gọn trong ngân sách 850.000đ của chị. \n\nLấy cả set vừa giúp chị có sẵn diện mạo đồng bộ, thướt tha với chân váy ren điệu đà, vừa linh hoạt vì áo thêu có thể tách ra phối cùng chân váy đen dáng suông sẵn có của chị, đổi gió thoải mái cho nhiều dịp khác nhau."
+        }
+      ],
+      "toolStatuses": [],
+      "generations": [
+        {
+          "id": "75c4b9dba8b07f495f686b82024fd479fdb9a3596f4b537cd85518c3f8f19ea0:owner:1",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "75c4b9dba8b07f495f686b82024fd479fdb9a3596f4b537cd85518c3f8f19ea0:owner:2",
+          "role": "owner",
+          "status": "OK",
+          "httpStatus": 200,
+          "rawFinishReason": "STOP",
+          "mode": "AUTO",
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "75c4b9dba8b07f495f686b82024fd479fdb9a3596f4b537cd85518c3f8f19ea0:verifier:1",
+          "role": "verifier",
+          "status": "OK",
+          "httpStatus": 200
+        }
+      ],
+      "verifier": [
+        {
+          "draft": "Chị lấy cả bộ Thạch Thảo đi ạ, giá 799.000đ vẫn nằm gọn trong ngân sách 850.000đ của chị. \n\nLấy cả set vừa giúp chị có sẵn diện mạo đồng bộ, thướt tha với chân váy ren điệu đà, vừa linh hoạt vì áo thêu có thể tách ra phối cùng chân váy đen dáng suông sẵn có của chị, đổi gió thoải mái cho nhiều dịp khác nhau.",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "httpStatus": 200,
+          "providerErrorCode": null
+        }
+      ]
+    }
+  ]
+}

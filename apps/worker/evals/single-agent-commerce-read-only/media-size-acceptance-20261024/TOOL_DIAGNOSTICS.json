@@ -1,0 +1,163 @@
+[
+  {
+    "caseId": "b1-changed-occasion",
+    "returned": [
+      {
+        "generationId": "e7d411b057939467a2928268d1ad6a8c16f03cb3bd02a8e62fdb43637363296b:owner:1",
+        "kind": "TOOLS",
+        "calls": [
+          {
+            "name": "search_products",
+            "args": {
+              "query": "đầm dự tiệc"
+            },
+            "id": "call_8151222"
+          }
+        ]
+      },
+      {
+        "generationId": "e7d411b057939467a2928268d1ad6a8c16f03cb3bd02a8e62fdb43637363296b:owner:2",
+        "kind": "TOOLS",
+        "calls": [
+          {
+            "name": "search_products",
+            "args": {
+              "query": "váy"
+            },
+            "id": "call_661583"
+          }
+        ]
+      },
+      {
+        "generationId": "e7d411b057939467a2928268d1ad6a8c16f03cb3bd02a8e62fdb43637363296b:owner:3",
+        "kind": "TOOLS",
+        "calls": [
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "V168"
+            },
+            "id": "call_1419031"
+          },
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "V039"
+            },
+            "id": "call_1419032"
+          },
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "V406"
+            },
+            "id": "call_1419033"
+          }
+        ]
+      }
+    ],
+    "telemetry": [
+      {
+        "id": "e7d411b057939467a2928268d1ad6a8c16f03cb3bd02a8e62fdb43637363296b:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "declaredToolCount": 3,
+        "functionCallingMode": "AUTO",
+        "unexpectedToolCall": false
+      },
+      {
+        "id": "e7d411b057939467a2928268d1ad6a8c16f03cb3bd02a8e62fdb43637363296b:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "declaredToolCount": 3,
+        "functionCallingMode": "AUTO",
+        "unexpectedToolCall": false
+      },
+      {
+        "id": "e7d411b057939467a2928268d1ad6a8c16f03cb3bd02a8e62fdb43637363296b:owner:3",
+        "role": "owner",
+        "status": "PROVIDER_ERROR",
+        "declaredToolCount": 0,
+        "functionCallingMode": "NONE",
+        "unexpectedToolCall": true
+      }
+    ]
+  },
+  {
+    "caseId": "sales-discovery-advice:need",
+    "returned": [
+      {
+        "generationId": "a2bac5d9-60f4-4643-a0b1-f65e6f209707:owner:1",
+        "kind": "TOOLS",
+        "calls": [
+          {
+            "name": "search_products",
+            "args": {
+              "query": "bộ áo quần đi làm"
+            },
+            "id": "call_2083371"
+          }
+        ]
+      },
+      {
+        "generationId": "a2bac5d9-60f4-4643-a0b1-f65e6f209707:owner:2",
+        "kind": "TOOLS",
+        "calls": [
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "SQ748"
+            },
+            "id": "call_47100"
+          },
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "SQ2447"
+            },
+            "id": "call_47101"
+          }
+        ]
+      },
+      {
+        "generationId": "a2bac5d9-60f4-4643-a0b1-f65e6f209707:owner:3",
+        "kind": "TOOLS",
+        "calls": [
+          {
+            "name": "search_products",
+            "args": {
+              "query": "Set quần Thạch Thảo"
+            },
+            "id": "call_2831407"
+          }
+        ]
+      }
+    ],
+    "telemetry": [
+      {
+        "id": "a2bac5d9-60f4-4643-a0b1-f65e6f209707:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "declaredToolCount": 13,
+        "functionCallingMode": "AUTO",
+        "unexpectedToolCall": false
+      },
+      {
+        "id": "a2bac5d9-60f4-4643-a0b1-f65e6f209707:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "declaredToolCount": 13,
+        "functionCallingMode": "AUTO",
+        "unexpectedToolCall": false
+      },
+      {
+        "id": "a2bac5d9-60f4-4643-a0b1-f65e6f209707:owner:3",
+        "role": "owner",
+        "status": "PROVIDER_ERROR",
+        "declaredToolCount": 0,
+        "functionCallingMode": "NONE",
+        "unexpectedToolCall": true
+      }
+    ]
+  }
+]

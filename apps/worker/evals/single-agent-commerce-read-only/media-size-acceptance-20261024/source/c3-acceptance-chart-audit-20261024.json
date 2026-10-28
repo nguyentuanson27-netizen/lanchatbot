@@ -1,0 +1,3343 @@
+{
+  "observedAt": "2026-10-24T10:51:15.270Z",
+  "providerRequests": 0,
+  "embeddingRequests": 0,
+  "sourceWrites": 0,
+  "products": [
+    {
+      "id": "SV2447",
+      "product": {
+        "images": [
+          {
+            "url": "https://content.pancake.vn/web-media-262/s3000x3000/6a/2d/75/b3/97a0cc14210c5ad56ebd4193b2669e7b5b4ff2c1275167a871e9626b-w:1500-h:1500-l:228804-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "UNKNOWN",
+            "imageType": "SIZE_GUIDE",
+            "intents": [
+              "SIZE_GUIDE"
+            ],
+            "partsVisible": [
+              "UNKNOWN"
+            ],
+            "sortOrder": 10,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/d9/a1/e3/e9/02be5da5317318f897bfb1d9832209119f6bd9ce6375c86e1732fdf1-w:3689-h:4356-l:748803-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "FRONT",
+            "imageType": "MODEL",
+            "intents": [
+              "LOOKBOOK",
+              "STYLE_REFERENCE"
+            ],
+            "partsVisible": [
+              "FULL_SET"
+            ],
+            "sortOrder": 9,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "b3d828d8ce15114441c356abf66feab67652201b00f53ad77350cc6e703b96c8",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/98/2e/e9/c9/fa4ef428affd10887671ae2e0a291a5233f8b54e6415b0421300eb51-w:2363-h:2560-l:262232-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "FRONT",
+            "imageType": "SIZE_GUIDE",
+            "intents": [
+              "SIZE_GUIDE",
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "AO",
+              "CHAN_VAY"
+            ],
+            "sortOrder": 8,
+            "qualityScore": 0.9,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "3a321ad8b6b888fa470bdda8b83ae24c19238ca5132a56fbeab3dabe3ef7c2fc",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/42/0c/f9/40/34c6621718647ef30d581165b0f1f640e7ca636b9bdcaa159081513d-w:5783-h:3855-l:1697298-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "CLOSEUP",
+            "imageType": "DETAIL",
+            "intents": [
+              "MATERIAL_CLOSEUP",
+              "DETAIL"
+            ],
+            "partsVisible": [
+              "UNKNOWN"
+            ],
+            "sortOrder": 6,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "e651cf09b93cc24f14b21c3539f33430df24346b96d76f580e7e4fcd7d4dd4a3",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "CLOSEUP",
+            "imageType": "DETAIL",
+            "intents": [
+              "DETAIL",
+              "MATERIAL_CLOSEUP"
+            ],
+            "partsVisible": [
+              "AO"
+            ],
+            "sortOrder": 4,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "4faaa0ba7fea7dc2058d6e7ece47f6d422be40c96ff06ab6ea568ba9c0aa1961",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/33/8b/6b/7b/525c1b16d31d503968a755c5ad8e3b1bcc85755422b037b28381446e-w:3816-h:5724-l:1368979-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "FRONT",
+            "imageType": "MODEL",
+            "intents": [
+              "LOOKBOOK",
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "AO",
+              "CHAN_VAY"
+            ],
+            "sortOrder": 5,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "8ff6f315a32aaee37d9a6bad154579241ca6aa2116d6106c34332ba7a98cad56",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/03/b8/b3/49/e18d1ca313e0a94d9e5c586b6bddd7d1bece7ad48e67ff95935da1a5-w:3739-h:5705-l:1249262-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "FRONT",
+            "imageType": "MODEL",
+            "intents": [
+              "LOOKBOOK",
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "FULL_SET"
+            ],
+            "sortOrder": 1,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "fde1e4c575c26587d753dad576701b4a51634a25ef6ac1dd5510b5db16e14f9f",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "BACK",
+            "imageType": "MODEL",
+            "intents": [
+              "LOOKBOOK",
+              "STYLE_REFERENCE"
+            ],
+            "partsVisible": [
+              "FULL_SET"
+            ],
+            "sortOrder": 3,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "7844275ffdb4d48159d8c10ab9f1fba6b920188471f7994940fda725d46d02cf",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg",
+            "role": "PRIMARY",
+            "angle": "FRONT",
+            "imageType": "MODEL",
+            "intents": [
+              "LOOKBOOK",
+              "STYLE_REFERENCE"
+            ],
+            "partsVisible": [
+              "AO",
+              "CHAN_VAY"
+            ],
+            "sortOrder": 2,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "2052d1c8bf997f04e8f4e9f80dcbc59b62797bb1865b146f41b775197b36cb6a",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/af/4d/2e/c4/4bf9c44dee7e5d96280b0260373a562d3db98b2072b5975812f70879-w:4000-h:6000-l:804536-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "FRONT",
+            "imageType": "MODEL",
+            "intents": [
+              "LOOKBOOK",
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "AO",
+              "CHAN_VAY"
+            ],
+            "sortOrder": 8,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "6c35b67587902c75a223c1e82f13d98ef8208128e3cb95362641a2dc555a9af9",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/79/0c/78/d8/a10cffdc9d29de26105f87f0fc08ba1dbe4197c8a76c6843d7d3d870-w:3588-h:5382-l:1102566-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "FRONT",
+            "imageType": "PRODUCT_ONLY",
+            "intents": [
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "AO",
+              "CHAN_VAY"
+            ],
+            "sortOrder": 7,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "36652f18a147e6369d608be9bb1748f70c5cbad9ee57fd608f8e46864774a1c7",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          }
+        ],
+        "productId": "SV2447",
+        "parentProductId": "SV2447",
+        "canonicalCode": "SV2447",
+        "aliases": [
+          "SET VÁY THẠCH THẢO",
+          "SV2447"
+        ],
+        "title": "Set váy Thạch Thảo",
+        "descriptionXml": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+        "descriptionAuthority": "WEBSTORE_XML",
+        "descriptionSourceVersion": "catalog-v2",
+        "attributes": null,
+        "colors": [],
+        "materials": [
+          "REN",
+          "TƠ"
+        ],
+        "silhouettes": [],
+        "occasions": [],
+        "imageUrls": [
+          "https://content.pancake.vn/web-media-262/s3000x3000/6a/2d/75/b3/97a0cc14210c5ad56ebd4193b2669e7b5b4ff2c1275167a871e9626b-w:1500-h:1500-l:228804-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/d9/a1/e3/e9/02be5da5317318f897bfb1d9832209119f6bd9ce6375c86e1732fdf1-w:3689-h:4356-l:748803-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/98/2e/e9/c9/fa4ef428affd10887671ae2e0a291a5233f8b54e6415b0421300eb51-w:2363-h:2560-l:262232-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/42/0c/f9/40/34c6621718647ef30d581165b0f1f640e7ca636b9bdcaa159081513d-w:5783-h:3855-l:1697298-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/33/8b/6b/7b/525c1b16d31d503968a755c5ad8e3b1bcc85755422b037b28381446e-w:3816-h:5724-l:1368979-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/03/b8/b3/49/e18d1ca313e0a94d9e5c586b6bddd7d1bece7ad48e67ff95935da1a5-w:3739-h:5705-l:1249262-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/af/4d/2e/c4/4bf9c44dee7e5d96280b0260373a562d3db98b2072b5975812f70879-w:4000-h:6000-l:804536-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/79/0c/78/d8/a10cffdc9d29de26105f87f0fc08ba1dbe4197c8a76c6843d7d3d870-w:3588-h:5382-l:1102566-t:image/jpeg.jpeg"
+        ],
+        "catalogVersion": "catalog-v2",
+        "observedAt": "2026-09-28T04:31:05.725Z"
+      },
+      "snapshot": {
+        "schema_version": 3,
+        "release_id": "p2-default",
+        "catalog_version": "catalog-v2",
+        "policy_version": "policy-v1",
+        "shop_alias": "LANA",
+        "brand": "lanadesign",
+        "product_id": "SV2447",
+        "synced_at": "2026-10-24T10:34:32.960Z",
+        "data_status": "OK",
+        "fulfillment_policy": {
+          "tinh_trang": "READY-STOCK",
+          "can_order_when_zero": true,
+          "prep_min_days": 1,
+          "prep_max_days": 2,
+          "zero_stock_policy": "PRE-ORDER",
+          "zero_stock_prep_min_days": 5,
+          "zero_stock_prep_max_days": 8,
+          "eta_valid_until": "",
+          "eta_updated_at": ""
+        },
+        "selling_rules": {
+          "allow_mixed_sizes": false,
+          "allow_component_sale": false,
+          "source_version": "catalog-v2"
+        },
+        "shipping_eta": {
+          "NOI-THANH-HN": {
+            "transit_min_days": 1,
+            "transit_max_days": 2
+          },
+          "MIEN-BAC": {
+            "transit_min_days": 2,
+            "transit_max_days": 4
+          },
+          "MIEN-TRUNG": {
+            "transit_min_days": 3,
+            "transit_max_days": 5
+          },
+          "MIEN-NAM": {
+            "transit_min_days": 3,
+            "transit_max_days": 6
+          }
+        },
+        "offers": {
+          "SET_VAY": {
+            "list_price": null,
+            "sale_price": 799000,
+            "price_status": "OK",
+            "rows": [
+              {
+                "offer_type": "SET_VAY",
+                "color": "__NO_COLOR__",
+                "size": "*",
+                "stock_quantity": 0,
+                "list_price": null,
+                "sale_price": 799000,
+                "stock_status": "OK",
+                "price_sku": "SV2447",
+                "component_1_sku": "SV2447-AO",
+                "component_2_sku": "SV2447-CV",
+                "pos_updated_at": "2026-08-13T02:42:11.472751",
+                "inventory_source": "PANCAKE_BOM",
+                "bom_status": "OK",
+                "parent_variation_id": "cd0e794b-f023-472a-8d5f-f1378cdb9221|d10d87d9-0ff5-487d-ba11-d074a9400388|e1f1231e-dbb3-4756-b823-b07712374483|fe229af7-37be-42c2-ae32-231051e4fda8",
+                "parent_variation_sku": "SV2447-BE-S|SV2447-BE-M|SV2447-BE-L|SV2447-BE-XL",
+                "bom_components": "SV2447-AO x1 | SV2447-CV x1 | SV2447-AO x1 | SV2447-CV x1 | SV2447-CV x1 | SV2447-AO x1 | SV2447-CV x1 | SV2447-AO x1",
+                "component_count": 8,
+                "components": [
+                  {
+                    "component_id": "91f7be3a-78b7-4649-9118-aad031514e56",
+                    "quantity": 1,
+                    "product_sku": "SV2447-AO",
+                    "variation_sku": "SV2447-AO-BE-S",
+                    "color": "BE",
+                    "size": "S"
+                  },
+                  {
+                    "component_id": "f0bfb4d5-e397-4fa0-88ce-7614281ec5ce",
+                    "quantity": 1,
+                    "product_sku": "SV2447-CV",
+                    "variation_sku": "SV2447-CV-BE-S",
+                    "color": "BE",
+                    "size": "S"
+                  },
+                  {
+                    "component_id": "2f7a5e91-2d6d-4f5a-920f-4e821d58d2e9",
+                    "quantity": 1,
+                    "product_sku": "SV2447-AO",
+                    "variation_sku": "SV2447-AO-BE-M",
+                    "color": "BE",
+                    "size": "M"
+                  },
+                  {
+                    "component_id": "be9f5be1-a978-433b-866e-d1a60deb1609",
+                    "quantity": 1,
+                    "product_sku": "SV2447-CV",
+                    "variation_sku": "SV2447-CV-BE-M",
+                    "color": "BE",
+                    "size": "M"
+                  },
+                  {
+                    "component_id": "54607242-b0d3-4d54-b2ff-49845e12b75f",
+                    "quantity": 1,
+                    "product_sku": "SV2447-CV",
+                    "variation_sku": "SV2447-CV-BE-L",
+                    "color": "BE",
+                    "size": "L"
+                  },
+                  {
+                    "component_id": "e18b755f-93ce-49de-90a1-441c6aceeb48",
+                    "quantity": 1,
+                    "product_sku": "SV2447-AO",
+                    "variation_sku": "SV2447-AO-BE-L",
+                    "color": "BE",
+                    "size": "L"
+                  },
+                  {
+                    "component_id": "545008fa-8bf0-4c75-bfdf-60056e0fb8ab",
+                    "quantity": 1,
+                    "product_sku": "SV2447-CV",
+                    "variation_sku": "SV2447-CV-BE-XL",
+                    "color": "BE",
+                    "size": "XL"
+                  },
+                  {
+                    "component_id": "7090b69c-31f3-4ad1-ae7a-953b159bda05",
+                    "quantity": 1,
+                    "product_sku": "SV2447-AO",
+                    "variation_sku": "SV2447-AO-BE-XL",
+                    "color": "BE",
+                    "size": "XL"
+                  }
+                ]
+              },
+              {
+                "offer_type": "SET_VAY",
+                "color": "__NO_COLOR__",
+                "size": "S",
+                "stock_quantity": 12,
+                "list_price": null,
+                "sale_price": 799000,
+                "stock_status": "OK",
+                "price_sku": "SV2447",
+                "component_1_sku": "SV2447-AO",
+                "component_2_sku": "SV2447-CV",
+                "pos_updated_at": "2026-10-07T10:08:06.226360",
+                "inventory_source": "PANCAKE_BOM",
+                "bom_status": "OK",
+                "parent_variation_id": "b05df499-403f-427c-8580-d4557572c085",
+                "parent_variation_sku": "SV2447-S",
+                "bom_components": "SV2447-AO x1 | SV2447-CV x1",
+                "component_count": 2,
+                "components": [
+                  {
+                    "component_id": "6c73f61a-0138-488a-bc3b-ec0cadd4f81d",
+                    "quantity": 1,
+                    "product_sku": "SV2447-AO",
+                    "variation_sku": "SV2447-AO-S",
+                    "color": "",
+                    "size": "S"
+                  },
+                  {
+                    "component_id": "f023c65c-668d-4c2e-8d59-4ac103d947b5",
+                    "quantity": 1,
+                    "product_sku": "SV2447-CV",
+                    "variation_sku": "SV2447-CV-S",
+                    "color": "",
+                    "size": "S"
+                  }
+                ]
+              },
+              {
+                "offer_type": "SET_VAY",
+                "color": "__NO_COLOR__",
+                "size": "M",
+                "stock_quantity": 8,
+                "list_price": null,
+                "sale_price": 799000,
+                "stock_status": "OK",
+                "price_sku": "SV2447",
+                "component_1_sku": "SV2447-AO",
+                "component_2_sku": "SV2447-CV",
+                "pos_updated_at": "2026-10-07T10:08:06.239623",
+                "inventory_source": "PANCAKE_BOM",
+                "bom_status": "OK",
+                "parent_variation_id": "f14cd814-ec6f-4305-b92a-5de266313b51",
+                "parent_variation_sku": "SV2447-M",
+                "bom_components": "SV2447-AO x1 | SV2447-CV x1",
+                "component_count": 2,
+                "components": [
+                  {
+                    "component_id": "06f90d6d-94d6-43da-8569-b8b54da1a1d5",
+                    "quantity": 1,
+                    "product_sku": "SV2447-AO",
+                    "variation_sku": "SV2447-AO-M",
+                    "color": "",
+                    "size": "M"
+                  },
+                  {
+                    "component_id": "f8270638-1c96-42f1-95ba-ad4420674a17",
+                    "quantity": 1,
+                    "product_sku": "SV2447-CV",
+                    "variation_sku": "SV2447-CV-M",
+                    "color": "",
+                    "size": "M"
+                  }
+                ]
+              },
+              {
+                "offer_type": "SET_VAY",
+                "color": "__NO_COLOR__",
+                "size": "L",
+                "stock_quantity": 11,
+                "list_price": null,
+                "sale_price": 799000,
+                "stock_status": "OK",
+                "price_sku": "SV2447",
+                "component_1_sku": "SV2447-CV",
+                "component_2_sku": "SV2447-AO",
+                "pos_updated_at": "2026-10-07T10:08:06.247123",
+                "inventory_source": "PANCAKE_BOM",
+                "bom_status": "OK",
+                "parent_variation_id": "5c62762a-29b2-444a-bd4c-c77942866def",
+                "parent_variation_sku": "SV2447-L",
+                "bom_components": "SV2447-CV x1 | SV2447-AO x1",
+                "component_count": 2,
+                "components": [
+                  {
+                    "component_id": "6bfe8f71-9ee3-4461-8f00-ddadb5276810",
+                    "quantity": 1,
+                    "product_sku": "SV2447-CV",
+                    "variation_sku": "SV2447-CV-L",
+                    "color": "",
+                    "size": "L"
+                  },
+                  {
+                    "component_id": "dd8596c6-34c6-40ce-805a-134aa529a247",
+                    "quantity": 1,
+                    "product_sku": "SV2447-AO",
+                    "variation_sku": "SV2447-AO-L",
+                    "color": "",
+                    "size": "L"
+                  }
+                ]
+              },
+              {
+                "offer_type": "SET_VAY",
+                "color": "__NO_COLOR__",
+                "size": "XL",
+                "stock_quantity": 7,
+                "list_price": null,
+                "sale_price": 799000,
+                "stock_status": "OK",
+                "price_sku": "SV2447",
+                "component_1_sku": "SV2447-CV",
+                "component_2_sku": "SV2447-AO",
+                "pos_updated_at": "2026-10-07T10:06:04.279809",
+                "inventory_source": "PANCAKE_BOM",
+                "bom_status": "OK",
+                "parent_variation_id": "a2891714-fa67-4bf8-bc53-7f8c3faba5e3",
+                "parent_variation_sku": "SV2447-XL",
+                "bom_components": "SV2447-CV x1 | SV2447-AO x1",
+                "component_count": 2,
+                "components": [
+                  {
+                    "component_id": "042e865a-b24a-46e3-9daf-90be25d67a30",
+                    "quantity": 1,
+                    "product_sku": "SV2447-CV",
+                    "variation_sku": "SV2447-CV-XL",
+                    "color": "",
+                    "size": "XL"
+                  },
+                  {
+                    "component_id": "ed310f5d-863f-4394-9806-a4d36e0881a0",
+                    "quantity": 1,
+                    "product_sku": "SV2447-AO",
+                    "variation_sku": "SV2447-AO-XL",
+                    "color": "",
+                    "size": "XL"
+                  }
+                ]
+              }
+            ],
+            "inventory_source": "PANCAKE_BOM"
+          },
+          "AO": {
+            "list_price": null,
+            "sale_price": 499000,
+            "price_status": "OK",
+            "rows": [
+              {
+                "offer_type": "AO",
+                "color": "__NO_COLOR__",
+                "size": "S",
+                "stock_quantity": 42,
+                "list_price": null,
+                "sale_price": 499000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-AO",
+                "component_1_sku": "SV2447-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:52:52.765513",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "AO",
+                "color": "__NO_COLOR__",
+                "size": "M",
+                "stock_quantity": 20,
+                "list_price": null,
+                "sale_price": 499000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-AO",
+                "component_1_sku": "SV2447-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:52:52.781031",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "AO",
+                "color": "__NO_COLOR__",
+                "size": "L",
+                "stock_quantity": 12,
+                "list_price": null,
+                "sale_price": 499000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-AO",
+                "component_1_sku": "SV2447-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:52:52.787635",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "AO",
+                "color": "__NO_COLOR__",
+                "size": "XL",
+                "stock_quantity": 21,
+                "list_price": null,
+                "sale_price": 499000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-AO",
+                "component_1_sku": "SV2447-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:52:52.796494",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "AO",
+                "color": "BE",
+                "size": "S",
+                "stock_quantity": 0,
+                "list_price": null,
+                "sale_price": 499000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-AO",
+                "component_1_sku": "SV2447-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:52:52.804492",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "AO",
+                "color": "BE",
+                "size": "M",
+                "stock_quantity": 0,
+                "list_price": null,
+                "sale_price": 499000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-AO",
+                "component_1_sku": "SV2447-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:52:52.811597",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "AO",
+                "color": "BE",
+                "size": "L",
+                "stock_quantity": 0,
+                "list_price": null,
+                "sale_price": 499000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-AO",
+                "component_1_sku": "SV2447-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:52:52.820513",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "AO",
+                "color": "BE",
+                "size": "XL",
+                "stock_quantity": 0,
+                "list_price": null,
+                "sale_price": 499000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-AO",
+                "component_1_sku": "SV2447-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:52:52.831177",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              }
+            ],
+            "inventory_source": "PANCAKE_DIRECT"
+          },
+          "CV": {
+            "list_price": null,
+            "sale_price": 449000,
+            "price_status": "OK",
+            "rows": [
+              {
+                "offer_type": "CV",
+                "color": "__NO_COLOR__",
+                "size": "S",
+                "stock_quantity": 16,
+                "list_price": null,
+                "sale_price": 449000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-CV",
+                "component_1_sku": "SV2447-CV",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:53:11.362032",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "CV",
+                "color": "__NO_COLOR__",
+                "size": "M",
+                "stock_quantity": 9,
+                "list_price": null,
+                "sale_price": 449000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-CV",
+                "component_1_sku": "SV2447-CV",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:53:11.381938",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "CV",
+                "color": "__NO_COLOR__",
+                "size": "L",
+                "stock_quantity": 18,
+                "list_price": null,
+                "sale_price": 449000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-CV",
+                "component_1_sku": "SV2447-CV",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:53:11.400113",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "CV",
+                "color": "__NO_COLOR__",
+                "size": "XL",
+                "stock_quantity": 7,
+                "list_price": null,
+                "sale_price": 449000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-CV",
+                "component_1_sku": "SV2447-CV",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:53:11.411653",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "CV",
+                "color": "BE",
+                "size": "S",
+                "stock_quantity": 0,
+                "list_price": null,
+                "sale_price": 449000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-CV",
+                "component_1_sku": "SV2447-CV",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:53:11.420786",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "CV",
+                "color": "BE",
+                "size": "M",
+                "stock_quantity": 0,
+                "list_price": null,
+                "sale_price": 449000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-CV",
+                "component_1_sku": "SV2447-CV",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:53:11.432782",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "CV",
+                "color": "BE",
+                "size": "L",
+                "stock_quantity": 0,
+                "list_price": null,
+                "sale_price": 449000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-CV",
+                "component_1_sku": "SV2447-CV",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:53:11.445050",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "CV",
+                "color": "BE",
+                "size": "XL",
+                "stock_quantity": 0,
+                "list_price": null,
+                "sale_price": 449000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-CV",
+                "component_1_sku": "SV2447-CV",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:53:11.460651",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              }
+            ],
+            "inventory_source": "PANCAKE_DIRECT"
+          }
+        }
+      }
+    },
+    {
+      "id": "SQ2447",
+      "product": {
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/e1/c4/21/c5/4e01c0b7c089fd256dd7464ae3bff8e948333ba7b672c6fab2699eb7-w:6846-h:9173-l:4677509-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "CLOSEUP",
+            "imageType": "DETAIL",
+            "intents": [
+              "DETAIL",
+              "MATERIAL_CLOSEUP"
+            ],
+            "partsVisible": [
+              "QUAN"
+            ],
+            "sortOrder": 8,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "069381798b0f7c9f3249998bbc44aab2c22d86d764d6374b451b2f47c1c6dffd",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/web-media-262/s3000x3000/6a/2d/75/b3/97a0cc14210c5ad56ebd4193b2669e7b5b4ff2c1275167a871e9626b-w:1500-h:1500-l:228804-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "UNKNOWN",
+            "imageType": "SIZE_GUIDE",
+            "intents": [
+              "SIZE_GUIDE"
+            ],
+            "partsVisible": [
+              "UNKNOWN"
+            ],
+            "sortOrder": 9,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/01/b2/21/e5/6922ff9efab9aeece511971c25886a2f5e8ba8a3da797c4f27298946-w:3754-h:5630-l:890081-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "FRONT",
+            "imageType": "MODEL",
+            "intents": [
+              "LOOKBOOK",
+              "STYLE_REFERENCE"
+            ],
+            "partsVisible": [
+              "AO",
+              "QUAN"
+            ],
+            "sortOrder": 1,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "0acf48ac2b435872a9e6dec3f4fd98d63c7759ccf3d02c401f8ff0b7285a3ee4",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/70/35/78/34/8b195ad69191f4a0805af069bcb78d8a15c476491125d0294e3698b1-w:4000-h:6000-l:1079993-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "FRONT",
+            "imageType": "MODEL",
+            "intents": [
+              "LOOKBOOK",
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "FULL_SET"
+            ],
+            "sortOrder": 4,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "1863cc870690930bb4b5598c201d4c2bc85648d9176e09e30f8d1317e988ba42",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/95/8f/5c/c9/b3686e54da270dfebc4954b9673f201bf8db35d3c966742b46500cbd-w:4000-h:6000-l:875502-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "FRONT",
+            "imageType": "MODEL",
+            "intents": [
+              "LOOKBOOK",
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "AO",
+              "QUAN"
+            ],
+            "sortOrder": 6,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "84acb9f5f97fb0d737433f8b822849ec614c6d71097d7156dd935f3b178a9b80",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "CLOSEUP",
+            "imageType": "DETAIL",
+            "intents": [
+              "DETAIL",
+              "MATERIAL_CLOSEUP"
+            ],
+            "partsVisible": [
+              "AO"
+            ],
+            "sortOrder": 2,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "4faaa0ba7fea7dc2058d6e7ece47f6d422be40c96ff06ab6ea568ba9c0aa1961",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/67/8a/4f/3a/0cf58588fcd21f80a5ff8a11bd57c62f820bb105802782ca2350f85f-w:3658-h:5487-l:1151930-t:image/jpeg.jpeg",
+            "role": "PRIMARY",
+            "angle": "FRONT",
+            "imageType": "MODEL",
+            "intents": [
+              "LOOKBOOK",
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "FULL_SET",
+              "AO",
+              "QUAN"
+            ],
+            "sortOrder": 3,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "cce4ab435f8a217821ddf4f543cb640eb467e3e123397ced6da158a56d97b852",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/d3/62/b5/09/2986d278d1dd49aeeb59389eed7015578059c58872f7ea8cb3578758-w:3627-h:5440-l:1133007-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "FRONT",
+            "imageType": "MODEL",
+            "intents": [
+              "LOOKBOOK",
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "FULL_SET",
+              "AO",
+              "QUAN"
+            ],
+            "sortOrder": 7,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "fae11ef2bda362e620a34b5ebb475259366f0f905a6f5eb7cae8d0f1156cb36a",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/98/2e/e9/c9/fa4ef428affd10887671ae2e0a291a5233f8b54e6415b0421300eb51-w:2363-h:2560-l:262232-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "FRONT",
+            "imageType": "SIZE_GUIDE",
+            "intents": [
+              "SIZE_GUIDE",
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "AO",
+              "QUAN"
+            ],
+            "sortOrder": 0,
+            "qualityScore": 0.9,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "3a321ad8b6b888fa470bdda8b83ae24c19238ca5132a56fbeab3dabe3ef7c2fc",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/78/11/d4/83/1ee7b77a370f9803c4c83dcddf42726390b18df4abef27b0cf273da3-w:3911-h:5866-l:1381350-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "BACK",
+            "imageType": "MODEL",
+            "intents": [
+              "LOOKBOOK",
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "AO",
+              "QUAN"
+            ],
+            "sortOrder": 5,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "5e733134c4e0ed6031dd1af396872b86893fe5398d6c7e33a3cf0ce1159161e0",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          }
+        ],
+        "productId": "SQ2447",
+        "parentProductId": "SQ2447",
+        "canonicalCode": "SQ2447",
+        "aliases": [
+          "SET QUẦN THẠCH THẢO",
+          "SQ2447"
+        ],
+        "title": "Set quần Thạch Thảo",
+        "descriptionXml": "Thiết kế đồng bộ, tinh tế với chất liệu tơ Hàn thêu cao cấp cho cả áo và quần, mang lại cảm giác nhẹ nhàng, mềm mại và bay bổng khi mặc. Bề mặt vải được thêu họa tiết tinh xảo, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế form nhẹ nhàng, giúp tôn dáng thanh thoát nhưng vẫn đảm bảo sự thoải mái. Các chi tiết thêu được xử lý tỉ mỉ, tạo hiệu ứng nổi bật nhưng không quá cầu kỳ, giữ được nét dịu dàng và thanh lịch. Quần được làm từ tơ Hàn thêu đồng bộ, mềm mịn, có độ rũ nhẹ giúp tổng thể trang phục hài hòa và tinh tế hơn. Thiết kế quần dễ mặc, phù hợp với nhiều vóc dáng. Tổng thể set đồ mang phong cách nữ tính – thanh lịch – hiện đại, dễ ứng dụng trong nhiều hoàn cảnh khác nhau.",
+        "descriptionAuthority": "WEBSTORE_XML",
+        "descriptionSourceVersion": "catalog-v2",
+        "attributes": null,
+        "colors": [],
+        "materials": [
+          "TƠ"
+        ],
+        "silhouettes": [],
+        "occasions": [],
+        "imageUrls": [
+          "https://content.pancake.vn/1/s3000x3000/e1/c4/21/c5/4e01c0b7c089fd256dd7464ae3bff8e948333ba7b672c6fab2699eb7-w:6846-h:9173-l:4677509-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/web-media-262/s3000x3000/6a/2d/75/b3/97a0cc14210c5ad56ebd4193b2669e7b5b4ff2c1275167a871e9626b-w:1500-h:1500-l:228804-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/01/b2/21/e5/6922ff9efab9aeece511971c25886a2f5e8ba8a3da797c4f27298946-w:3754-h:5630-l:890081-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/70/35/78/34/8b195ad69191f4a0805af069bcb78d8a15c476491125d0294e3698b1-w:4000-h:6000-l:1079993-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/95/8f/5c/c9/b3686e54da270dfebc4954b9673f201bf8db35d3c966742b46500cbd-w:4000-h:6000-l:875502-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/67/8a/4f/3a/0cf58588fcd21f80a5ff8a11bd57c62f820bb105802782ca2350f85f-w:3658-h:5487-l:1151930-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/d3/62/b5/09/2986d278d1dd49aeeb59389eed7015578059c58872f7ea8cb3578758-w:3627-h:5440-l:1133007-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/98/2e/e9/c9/fa4ef428affd10887671ae2e0a291a5233f8b54e6415b0421300eb51-w:2363-h:2560-l:262232-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/78/11/d4/83/1ee7b77a370f9803c4c83dcddf42726390b18df4abef27b0cf273da3-w:3911-h:5866-l:1381350-t:image/jpeg.jpeg"
+        ],
+        "catalogVersion": "catalog-v2",
+        "observedAt": "2026-09-28T04:31:05.725Z"
+      },
+      "snapshot": {
+        "schema_version": 3,
+        "release_id": "p2-default",
+        "catalog_version": "catalog-v2",
+        "policy_version": "policy-v1",
+        "shop_alias": "LANA",
+        "brand": "lanadesign",
+        "product_id": "SQ2447",
+        "synced_at": "2026-10-24T10:34:32.960Z",
+        "data_status": "OK",
+        "fulfillment_policy": {
+          "tinh_trang": "READY-STOCK",
+          "can_order_when_zero": true,
+          "prep_min_days": 1,
+          "prep_max_days": 2,
+          "zero_stock_policy": "PRE-ORDER",
+          "zero_stock_prep_min_days": 5,
+          "zero_stock_prep_max_days": 8,
+          "eta_valid_until": "",
+          "eta_updated_at": ""
+        },
+        "selling_rules": {
+          "allow_mixed_sizes": false,
+          "allow_component_sale": false,
+          "source_version": "catalog-v2"
+        },
+        "shipping_eta": {
+          "NOI-THANH-HN": {
+            "transit_min_days": 1,
+            "transit_max_days": 2
+          },
+          "MIEN-BAC": {
+            "transit_min_days": 2,
+            "transit_max_days": 4
+          },
+          "MIEN-TRUNG": {
+            "transit_min_days": 3,
+            "transit_max_days": 5
+          },
+          "MIEN-NAM": {
+            "transit_min_days": 3,
+            "transit_max_days": 6
+          }
+        },
+        "offers": {
+          "SET_QUAN": {
+            "list_price": null,
+            "sale_price": 769000,
+            "price_status": "OK",
+            "rows": [
+              {
+                "offer_type": "SET_QUAN",
+                "color": "__NO_COLOR__",
+                "size": "S",
+                "stock_quantity": 36,
+                "list_price": null,
+                "sale_price": 769000,
+                "stock_status": "OK",
+                "price_sku": "SQ2447",
+                "component_1_sku": "SQ2447-QUAN",
+                "component_2_sku": "SV2447-AO",
+                "pos_updated_at": "2026-10-07T10:10:25.884338",
+                "inventory_source": "PANCAKE_BOM",
+                "bom_status": "OK",
+                "parent_variation_id": "5aaaa5e2-956f-43b6-9f60-cb4b88413ce0",
+                "parent_variation_sku": "SQ2447-S",
+                "bom_components": "SQ2447-QUAN x1 | SV2447-AO x1",
+                "component_count": 2,
+                "components": [
+                  {
+                    "component_id": "14715dd4-3904-47e6-a55e-eab231fdad1e",
+                    "quantity": 1,
+                    "product_sku": "SQ2447-QUAN",
+                    "variation_sku": "SQ2447-QUAN-S",
+                    "color": "",
+                    "size": "S"
+                  },
+                  {
+                    "component_id": "6c73f61a-0138-488a-bc3b-ec0cadd4f81d",
+                    "quantity": 1,
+                    "product_sku": "SV2447-AO",
+                    "variation_sku": "SV2447-AO-S",
+                    "color": "",
+                    "size": "S"
+                  }
+                ]
+              },
+              {
+                "offer_type": "SET_QUAN",
+                "color": "__NO_COLOR__",
+                "size": "M",
+                "stock_quantity": 16,
+                "list_price": null,
+                "sale_price": 769000,
+                "stock_status": "OK",
+                "price_sku": "SQ2447",
+                "component_1_sku": "SQ2447-QUAN",
+                "component_2_sku": "SV2447-AO",
+                "pos_updated_at": "2026-10-07T10:10:25.895010",
+                "inventory_source": "PANCAKE_BOM",
+                "bom_status": "OK",
+                "parent_variation_id": "79c3d1a2-bee7-4d16-98b0-23f22920cbc5",
+                "parent_variation_sku": "SQ2447-M",
+                "bom_components": "SQ2447-QUAN x1 | SV2447-AO x1",
+                "component_count": 2,
+                "components": [
+                  {
+                    "component_id": "05ccfab5-5f3b-44c2-86b9-472c26c9652c",
+                    "quantity": 1,
+                    "product_sku": "SQ2447-QUAN",
+                    "variation_sku": "SQ2447-QUAN-M",
+                    "color": "",
+                    "size": "M"
+                  },
+                  {
+                    "component_id": "06f90d6d-94d6-43da-8569-b8b54da1a1d5",
+                    "quantity": 1,
+                    "product_sku": "SV2447-AO",
+                    "variation_sku": "SV2447-AO-M",
+                    "color": "",
+                    "size": "M"
+                  }
+                ]
+              },
+              {
+                "offer_type": "SET_QUAN",
+                "color": "__NO_COLOR__",
+                "size": "L",
+                "stock_quantity": 8,
+                "list_price": null,
+                "sale_price": 769000,
+                "stock_status": "OK",
+                "price_sku": "SQ2447",
+                "component_1_sku": "SQ2447-QUAN",
+                "component_2_sku": "SV2447-AO",
+                "pos_updated_at": "2026-10-07T10:10:25.901616",
+                "inventory_source": "PANCAKE_BOM",
+                "bom_status": "OK",
+                "parent_variation_id": "bd00e7c4-a32e-4e69-83b3-3f72dc4d60ce",
+                "parent_variation_sku": "SQ2447-L",
+                "bom_components": "SQ2447-QUAN x1 | SV2447-AO x1",
+                "component_count": 2,
+                "components": [
+                  {
+                    "component_id": "4d2f9d44-827b-444d-8a7a-147ca7968198",
+                    "quantity": 1,
+                    "product_sku": "SQ2447-QUAN",
+                    "variation_sku": "SQ2447-QUAN-L",
+                    "color": "",
+                    "size": "L"
+                  },
+                  {
+                    "component_id": "dd8596c6-34c6-40ce-805a-134aa529a247",
+                    "quantity": 1,
+                    "product_sku": "SV2447-AO",
+                    "variation_sku": "SV2447-AO-L",
+                    "color": "",
+                    "size": "L"
+                  }
+                ]
+              },
+              {
+                "offer_type": "SET_QUAN",
+                "color": "__NO_COLOR__",
+                "size": "XL",
+                "stock_quantity": 18,
+                "list_price": null,
+                "sale_price": 769000,
+                "stock_status": "OK",
+                "price_sku": "SQ2447",
+                "component_1_sku": "SQ2447-QUAN",
+                "component_2_sku": "SV2447-AO",
+                "pos_updated_at": "2026-10-07T10:10:25.910349",
+                "inventory_source": "PANCAKE_BOM",
+                "bom_status": "OK",
+                "parent_variation_id": "a412051b-ca51-42b2-bfb4-f30b0a2fd941",
+                "parent_variation_sku": "SQ2447-XL",
+                "bom_components": "SQ2447-QUAN x1 | SV2447-AO x1",
+                "component_count": 2,
+                "components": [
+                  {
+                    "component_id": "339a344f-75f2-4855-8f1f-6eb1902bade1",
+                    "quantity": 1,
+                    "product_sku": "SQ2447-QUAN",
+                    "variation_sku": "SQ2447-QUAN-XL",
+                    "color": "",
+                    "size": "XL"
+                  },
+                  {
+                    "component_id": "ed310f5d-863f-4394-9806-a4d36e0881a0",
+                    "quantity": 1,
+                    "product_sku": "SV2447-AO",
+                    "variation_sku": "SV2447-AO-XL",
+                    "color": "",
+                    "size": "XL"
+                  }
+                ]
+              }
+            ],
+            "inventory_source": "PANCAKE_BOM"
+          },
+          "AO": {
+            "list_price": null,
+            "sale_price": 499000,
+            "price_status": "OK",
+            "rows": [
+              {
+                "offer_type": "AO",
+                "color": "__NO_COLOR__",
+                "size": "S",
+                "stock_quantity": 42,
+                "list_price": null,
+                "sale_price": 499000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-AO",
+                "component_1_sku": "SV2447-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:52:52.765513",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "AO",
+                "color": "__NO_COLOR__",
+                "size": "M",
+                "stock_quantity": 20,
+                "list_price": null,
+                "sale_price": 499000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-AO",
+                "component_1_sku": "SV2447-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:52:52.781031",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "AO",
+                "color": "__NO_COLOR__",
+                "size": "L",
+                "stock_quantity": 12,
+                "list_price": null,
+                "sale_price": 499000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-AO",
+                "component_1_sku": "SV2447-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:52:52.787635",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "AO",
+                "color": "__NO_COLOR__",
+                "size": "XL",
+                "stock_quantity": 21,
+                "list_price": null,
+                "sale_price": 499000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-AO",
+                "component_1_sku": "SV2447-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:52:52.796494",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "AO",
+                "color": "BE",
+                "size": "S",
+                "stock_quantity": 0,
+                "list_price": null,
+                "sale_price": 499000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-AO",
+                "component_1_sku": "SV2447-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:52:52.804492",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "AO",
+                "color": "BE",
+                "size": "M",
+                "stock_quantity": 0,
+                "list_price": null,
+                "sale_price": 499000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-AO",
+                "component_1_sku": "SV2447-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:52:52.811597",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "AO",
+                "color": "BE",
+                "size": "L",
+                "stock_quantity": 0,
+                "list_price": null,
+                "sale_price": 499000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-AO",
+                "component_1_sku": "SV2447-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:52:52.820513",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "AO",
+                "color": "BE",
+                "size": "XL",
+                "stock_quantity": 0,
+                "list_price": null,
+                "sale_price": 499000,
+                "stock_status": "OK",
+                "price_sku": "SV2447-AO",
+                "component_1_sku": "SV2447-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:52:52.831177",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              }
+            ],
+            "inventory_source": "PANCAKE_DIRECT"
+          },
+          "QUAN": {
+            "list_price": null,
+            "sale_price": 429000,
+            "price_status": "OK",
+            "rows": [
+              {
+                "offer_type": "QUAN",
+                "color": "__NO_COLOR__",
+                "size": "S",
+                "stock_quantity": 38,
+                "list_price": null,
+                "sale_price": 429000,
+                "stock_status": "OK",
+                "price_sku": "SQ2447-QUAN",
+                "component_1_sku": "SQ2447-QUAN",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:53:26.795075",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "QUAN",
+                "color": "__NO_COLOR__",
+                "size": "M",
+                "stock_quantity": 28,
+                "list_price": null,
+                "sale_price": 429000,
+                "stock_status": "OK",
+                "price_sku": "SQ2447-QUAN",
+                "component_1_sku": "SQ2447-QUAN",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:53:26.812153",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "QUAN",
+                "color": "__NO_COLOR__",
+                "size": "L",
+                "stock_quantity": 14,
+                "list_price": null,
+                "sale_price": 429000,
+                "stock_status": "OK",
+                "price_sku": "SQ2447-QUAN",
+                "component_1_sku": "SQ2447-QUAN",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:53:26.820386",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "QUAN",
+                "color": "__NO_COLOR__",
+                "size": "XL",
+                "stock_quantity": 22,
+                "list_price": null,
+                "sale_price": 429000,
+                "stock_status": "OK",
+                "price_sku": "SQ2447-QUAN",
+                "component_1_sku": "SQ2447-QUAN",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-26T02:53:26.829990",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              }
+            ],
+            "inventory_source": "PANCAKE_DIRECT"
+          }
+        }
+      }
+    },
+    {
+      "id": "SQ520",
+      "product": {
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/55/1f/3c/2c/d5e5ceca060f3e428ed98367c068552f324f5b35e9b0669a6540f68c-w:3855-h:5783-l:925460-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "FRONT",
+            "imageType": "MODEL",
+            "intents": [
+              "LOOKBOOK",
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "FULL_SET",
+              "AO",
+              "QUAN",
+              "PHU_KIEN"
+            ],
+            "sortOrder": 5,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "5758213faad9e9711783213aacdfde657dee9869f547c4483a150daeac6e5acc",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/0b/ac/8e/83/b596513d3e38bd71b816e304ed9620c1c7b30b49d71372e9237a46df-w:1365-h:2048-l:265968-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "CLOSEUP",
+            "imageType": "DETAIL",
+            "intents": [
+              "MATERIAL_CLOSEUP",
+              "DETAIL"
+            ],
+            "partsVisible": [
+              "FULL_SET"
+            ],
+            "sortOrder": 1,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "3e46825e54937c630c935b64c7cdd2c8211f08cecd6022014380431a7a088533",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/web-media-262/s3000x3000/5b/f3/ae/a1/3c7799ea5ab31af6749079c4f9e554620934d3d54a3f49370a31d2b2-w:1200-h:1300-l:146307-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "FRONT",
+            "imageType": "SIZE_GUIDE",
+            "intents": [
+              "SIZE_GUIDE",
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "FULL_SET"
+            ],
+            "sortOrder": 0,
+            "qualityScore": 0.9,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "6bc7d355879a652a7aa14bb617e16067447df007916381227db0a12fe1b9b029",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/93/21/12/74/c3e3d258ceaa26c6a2296a02c379bb3dbd7e97e13c1fb0f14289f818-w:3855-h:5783-l:821848-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "FRONT",
+            "imageType": "MODEL",
+            "intents": [
+              "LOOKBOOK",
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "AO",
+              "QUAN",
+              "PHU_KIEN"
+            ],
+            "sortOrder": 8,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "1a4351b6ecbef98c6dbd1dc5a49d34915208c97ddba21b744f6fe16604b35d08",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/40/02/eb/a6/7b900cab09dd4637873f535aa77bf14fcc0a313430e7a8ec14e1238c-w:1024-h:526-l:35212-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "UNKNOWN",
+            "imageType": "SIZE_GUIDE",
+            "intents": [
+              "SIZE_GUIDE"
+            ],
+            "partsVisible": [
+              "UNKNOWN"
+            ],
+            "sortOrder": 0,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "7f00903a9dca739f184a04da8b37ceb40174d0e7deb15e5a2a888db438b19570",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/7a/5f/42/34/500f982f595904075786dbc17eb9046b1e7c20b29ae49dc9788a21c3-w:3764-h:5647-l:774567-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "SIDE",
+            "imageType": "MODEL",
+            "intents": [
+              "LOOKBOOK",
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "AO",
+              "QUAN",
+              "PHU_KIEN"
+            ],
+            "sortOrder": 7,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "1c4af75165b61f9b60122be640746711d0c661a247d1abf117f448d1a4a9157f",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/4a/a3/6c/59/5a66ff8a1af450f6b6800d17689dd9bfcfa3ccd53149aa28dff3f678-w:3778-h:5712-l:525333-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "FRONT",
+            "imageType": "MODEL",
+            "intents": [
+              "LOOKBOOK",
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "FULL_SET",
+              "AO",
+              "QUAN",
+              "PHU_KIEN"
+            ],
+            "sortOrder": 3,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "5ed68627bd10544aea2bc646784b29828108cafceb5b85c7709399307fd8faa7",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/c6/14/21/e0/ee449f8a3f61e7f3347f490575c4529ff43bd7b365568291ef8d1c73-w:3769-h:5653-l:881114-t:image/jpeg.jpeg",
+            "role": "PRIMARY",
+            "angle": "FRONT",
+            "imageType": "MODEL",
+            "intents": [
+              "LOOKBOOK",
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "FULL_SET",
+              "AO",
+              "QUAN",
+              "PHU_KIEN"
+            ],
+            "sortOrder": 9,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "44d085e5682ad977f2ffcec25e6f922a9e1332a552afc97fd98cc15d2b90047c",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/49/8a/41/6d/eda45a27efc28df5ff630363485662d058d51cbfaab34ae73e05bd50-w:3855-h:5783-l:911911-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "FRONT",
+            "imageType": "MODEL",
+            "intents": [
+              "LOOKBOOK",
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "FULL_SET",
+              "AO",
+              "QUAN",
+              "PHU_KIEN"
+            ],
+            "sortOrder": 2,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "829d31ef3cb3fff2911da9fd352518632109ae5d2dae7e609ba012416f7dcf04",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/6e/fa/a5/06/955b270ffe949b7614d39de65f1282ef69ca74acb86f6a39e09a2893-w:3856-h:5784-l:491471-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "FRONT",
+            "imageType": "MODEL",
+            "intents": [
+              "LOOKBOOK",
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "FULL_SET",
+              "AO",
+              "QUAN",
+              "PHU_KIEN"
+            ],
+            "sortOrder": 6,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "f6ddfa711ea7e4faf6f1e5493ef0bb84d1044c5ad9b8e1a35610708fa4dac0c5",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/54/c1/04/8e/9adcf7aa59c93e8621db8fa319fa862aedfb3af63973e5e6e9f1f56a-w:3610-h:5414-l:8762566-t:image/png.png",
+            "role": "ADDITIONAL",
+            "angle": "FRONT",
+            "imageType": "FLATLAY",
+            "intents": [
+              "PRODUCT_OVERVIEW"
+            ],
+            "partsVisible": [
+              "FULL_SET"
+            ],
+            "sortOrder": 4,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "793dea0999cf2dd98903f5e20c155416ebbc89bf57147b15985a633556d3e068",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          },
+          {
+            "url": "https://content.pancake.vn/web-media-262/s3000x3000/6a/2d/75/b3/97a0cc14210c5ad56ebd4193b2669e7b5b4ff2c1275167a871e9626b-w:1500-h:1500-l:228804-t:image/jpeg.jpeg",
+            "role": "ADDITIONAL",
+            "angle": "UNKNOWN",
+            "imageType": "SIZE_GUIDE",
+            "intents": [
+              "SIZE_GUIDE"
+            ],
+            "partsVisible": [
+              "UNKNOWN"
+            ],
+            "sortOrder": 10,
+            "qualityScore": 0.95,
+            "feedback": false,
+            "observedAt": null,
+            "sourceContentSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+            "reviewStatus": "APPROVED",
+            "metadataVerified": true
+          }
+        ],
+        "productId": "SQ520",
+        "parentProductId": "SQ520",
+        "canonicalCode": "SQ520",
+        "aliases": [
+          "SET QUẦN NGỰ ĐIỆP",
+          "SET QUẦN SQ520",
+          "SQ520"
+        ],
+        "title": "SET QUẦN SQ520",
+        "descriptionXml": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa vải tơ kính thêu nổi nhẹ bay và satin lụa mềm mịn, mang lại cảm giác mềm mại, thoải mái và sang trọng khi mặc. Chất liệu có độ rũ nhẹ giúp tổng thể trang phục trở nên thanh thoát và tinh tế. Áo được thiết kế 2 lớp, lớp ngoài là tơ kính thêu nổi nhẹ, bên trong lót habutai giúp mặc thoải mái và kín đáo. Áo khóa thân sau, phần tay tơ 2 lớp xòe nhẹ tạo độ bay mềm mại. Thân áo đánh vảy đuôi cá 2 lớp giúp tôn dáng nữ tính và tạo điểm nhấn nổi bật. Chi tiết đính kết thủ công dây nơ mang lại vẻ đẹp tinh tế và sang trọng. Quần được thiết kế 2 lớp với vải chính lụa satin, mềm mịn và có độ che phủ tốt. Cạp chun thân sau kết hợp khóa sườn giúp mặc dễ dàng và ôm dáng vừa phải. Bên trong có quần lót đùi, tăng độ kín đáo và thoải mái khi mặc, đồng thời có túi quần tiện lợi.",
+        "descriptionAuthority": "WEBSTORE_XML",
+        "descriptionSourceVersion": "catalog-v2",
+        "attributes": null,
+        "colors": [],
+        "materials": [
+          "LỤA SATIN",
+          "TƠ",
+          "TƠ KÍNH",
+          "TƠ KÍNH THÊU"
+        ],
+        "silhouettes": [
+          "ÔM",
+          "XÒE"
+        ],
+        "occasions": [],
+        "imageUrls": [
+          "https://content.pancake.vn/1/s3000x3000/55/1f/3c/2c/d5e5ceca060f3e428ed98367c068552f324f5b35e9b0669a6540f68c-w:3855-h:5783-l:925460-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/0b/ac/8e/83/b596513d3e38bd71b816e304ed9620c1c7b30b49d71372e9237a46df-w:1365-h:2048-l:265968-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/web-media-262/s3000x3000/5b/f3/ae/a1/3c7799ea5ab31af6749079c4f9e554620934d3d54a3f49370a31d2b2-w:1200-h:1300-l:146307-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/93/21/12/74/c3e3d258ceaa26c6a2296a02c379bb3dbd7e97e13c1fb0f14289f818-w:3855-h:5783-l:821848-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/40/02/eb/a6/7b900cab09dd4637873f535aa77bf14fcc0a313430e7a8ec14e1238c-w:1024-h:526-l:35212-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/7a/5f/42/34/500f982f595904075786dbc17eb9046b1e7c20b29ae49dc9788a21c3-w:3764-h:5647-l:774567-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/4a/a3/6c/59/5a66ff8a1af450f6b6800d17689dd9bfcfa3ccd53149aa28dff3f678-w:3778-h:5712-l:525333-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/c6/14/21/e0/ee449f8a3f61e7f3347f490575c4529ff43bd7b365568291ef8d1c73-w:3769-h:5653-l:881114-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/49/8a/41/6d/eda45a27efc28df5ff630363485662d058d51cbfaab34ae73e05bd50-w:3855-h:5783-l:911911-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/6e/fa/a5/06/955b270ffe949b7614d39de65f1282ef69ca74acb86f6a39e09a2893-w:3856-h:5784-l:491471-t:image/jpeg.jpeg",
+          "https://content.pancake.vn/1/s3000x3000/54/c1/04/8e/9adcf7aa59c93e8621db8fa319fa862aedfb3af63973e5e6e9f1f56a-w:3610-h:5414-l:8762566-t:image/png.png",
+          "https://content.pancake.vn/web-media-262/s3000x3000/6a/2d/75/b3/97a0cc14210c5ad56ebd4193b2669e7b5b4ff2c1275167a871e9626b-w:1500-h:1500-l:228804-t:image/jpeg.jpeg"
+        ],
+        "catalogVersion": "catalog-v2",
+        "observedAt": "2026-09-28T04:31:05.725Z"
+      },
+      "snapshot": {
+        "schema_version": 3,
+        "release_id": "p2-default",
+        "catalog_version": "catalog-v2",
+        "policy_version": "policy-v1",
+        "shop_alias": "LANA",
+        "brand": "lanadesign",
+        "product_id": "SQ520",
+        "synced_at": "2026-10-24T10:34:32.960Z",
+        "data_status": "OK",
+        "fulfillment_policy": {
+          "tinh_trang": "READY-STOCK",
+          "can_order_when_zero": true,
+          "prep_min_days": 1,
+          "prep_max_days": 2,
+          "zero_stock_policy": "PRE-ORDER",
+          "zero_stock_prep_min_days": 5,
+          "zero_stock_prep_max_days": 8,
+          "eta_valid_until": "",
+          "eta_updated_at": ""
+        },
+        "selling_rules": {
+          "allow_mixed_sizes": false,
+          "allow_component_sale": false,
+          "source_version": "catalog-v2"
+        },
+        "shipping_eta": {
+          "NOI-THANH-HN": {
+            "transit_min_days": 1,
+            "transit_max_days": 2
+          },
+          "MIEN-BAC": {
+            "transit_min_days": 2,
+            "transit_max_days": 4
+          },
+          "MIEN-TRUNG": {
+            "transit_min_days": 3,
+            "transit_max_days": 5
+          },
+          "MIEN-NAM": {
+            "transit_min_days": 3,
+            "transit_max_days": 6
+          }
+        },
+        "offers": {
+          "SET_QUAN": {
+            "list_price": null,
+            "sale_price": 1089000,
+            "price_status": "OK",
+            "rows": [
+              {
+                "offer_type": "SET_QUAN",
+                "color": "__NO_COLOR__",
+                "size": "S",
+                "stock_quantity": 32,
+                "list_price": null,
+                "sale_price": 1089000,
+                "stock_status": "OK",
+                "price_sku": "SQ520",
+                "component_1_sku": "SQ520-QUAN",
+                "component_2_sku": "SQ520-AO",
+                "pos_updated_at": "2026-10-02T04:29:39.535801",
+                "inventory_source": "PANCAKE_BOM",
+                "bom_status": "OK",
+                "parent_variation_id": "78b8c3cb-9a24-43d5-9dba-1380f0433fd0",
+                "parent_variation_sku": "SQ520-S",
+                "bom_components": "SQ520-QUAN x1 | SQ520-AO x1",
+                "component_count": 2,
+                "components": [
+                  {
+                    "component_id": "96bb208b-2dad-4b14-8d62-275dcc6b170a",
+                    "quantity": 1,
+                    "product_sku": "SQ520-QUAN",
+                    "variation_sku": "SQ520-QUAN-S",
+                    "color": "",
+                    "size": "S"
+                  },
+                  {
+                    "component_id": "da8e3c22-6173-4f41-abe2-d5e00e813d84",
+                    "quantity": 1,
+                    "product_sku": "SQ520-AO",
+                    "variation_sku": "SQ520-AO-S",
+                    "color": "",
+                    "size": "S"
+                  }
+                ]
+              },
+              {
+                "offer_type": "SET_QUAN",
+                "color": "__NO_COLOR__",
+                "size": "M",
+                "stock_quantity": 15,
+                "list_price": null,
+                "sale_price": 1089000,
+                "stock_status": "OK",
+                "price_sku": "SQ520",
+                "component_1_sku": "SQ520-AO",
+                "component_2_sku": "SQ520-QUAN",
+                "pos_updated_at": "2026-10-02T04:29:39.555958",
+                "inventory_source": "PANCAKE_BOM",
+                "bom_status": "OK",
+                "parent_variation_id": "879a2947-b640-4853-af14-1a1ae511f66e",
+                "parent_variation_sku": "SQ520-M",
+                "bom_components": "SQ520-AO x1 | SQ520-QUAN x1",
+                "component_count": 2,
+                "components": [
+                  {
+                    "component_id": "366715af-5030-42ef-9dea-010fd38a07d9",
+                    "quantity": 1,
+                    "product_sku": "SQ520-AO",
+                    "variation_sku": "SQ520-AO-M",
+                    "color": "",
+                    "size": "M"
+                  },
+                  {
+                    "component_id": "e3000030-2e19-4607-acba-e832f6a5adc6",
+                    "quantity": 1,
+                    "product_sku": "SQ520-QUAN",
+                    "variation_sku": "SQ520-QUAN-M",
+                    "color": "",
+                    "size": "M"
+                  }
+                ]
+              },
+              {
+                "offer_type": "SET_QUAN",
+                "color": "__NO_COLOR__",
+                "size": "L",
+                "stock_quantity": 20,
+                "list_price": null,
+                "sale_price": 1089000,
+                "stock_status": "OK",
+                "price_sku": "SQ520",
+                "component_1_sku": "SQ520-AO",
+                "component_2_sku": "SQ520-QUAN",
+                "pos_updated_at": "2026-10-02T04:29:39.565258",
+                "inventory_source": "PANCAKE_BOM",
+                "bom_status": "OK",
+                "parent_variation_id": "334a0d8c-5ed7-4e7e-b067-6994c0315d28",
+                "parent_variation_sku": "SQ520-L",
+                "bom_components": "SQ520-AO x1 | SQ520-QUAN x1",
+                "component_count": 2,
+                "components": [
+                  {
+                    "component_id": "c17452ed-a6ca-446b-b75c-5289d487d06d",
+                    "quantity": 1,
+                    "product_sku": "SQ520-AO",
+                    "variation_sku": "SQ520-AO-L",
+                    "color": "",
+                    "size": "L"
+                  },
+                  {
+                    "component_id": "c4a142f1-170a-40cf-8489-cdb7596c9526",
+                    "quantity": 1,
+                    "product_sku": "SQ520-QUAN",
+                    "variation_sku": "SQ520-QUAN-L",
+                    "color": "",
+                    "size": "L"
+                  }
+                ]
+              },
+              {
+                "offer_type": "SET_QUAN",
+                "color": "__NO_COLOR__",
+                "size": "XL",
+                "stock_quantity": 11,
+                "list_price": null,
+                "sale_price": 1089000,
+                "stock_status": "OK",
+                "price_sku": "SQ520",
+                "component_1_sku": "SQ520-QUAN",
+                "component_2_sku": "SQ520-AO",
+                "pos_updated_at": "2026-10-02T04:29:39.576538",
+                "inventory_source": "PANCAKE_BOM",
+                "bom_status": "OK",
+                "parent_variation_id": "45427903-cc42-4f0d-9d72-1e1db5753ce1",
+                "parent_variation_sku": "SQ520-XL",
+                "bom_components": "SQ520-QUAN x1 | SQ520-AO x1",
+                "component_count": 2,
+                "components": [
+                  {
+                    "component_id": "8d49f952-b7ca-4e08-81ac-4e661b9ee43b",
+                    "quantity": 1,
+                    "product_sku": "SQ520-QUAN",
+                    "variation_sku": "SQ520-QUAN-XL",
+                    "color": "",
+                    "size": "XL"
+                  },
+                  {
+                    "component_id": "b17b6db9-b508-4d80-867e-d023a84aad73",
+                    "quantity": 1,
+                    "product_sku": "SQ520-AO",
+                    "variation_sku": "SQ520-AO-XL",
+                    "color": "",
+                    "size": "XL"
+                  }
+                ]
+              }
+            ],
+            "inventory_source": "PANCAKE_BOM"
+          },
+          "AO": {
+            "list_price": null,
+            "sale_price": 729000,
+            "price_status": "OK",
+            "rows": [
+              {
+                "offer_type": "AO",
+                "color": "__NO_COLOR__",
+                "size": "S",
+                "stock_quantity": 33,
+                "list_price": null,
+                "sale_price": 729000,
+                "stock_status": "OK",
+                "price_sku": "SQ520-AO",
+                "component_1_sku": "SQ520-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-11T09:26:36.444067",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "AO",
+                "color": "__NO_COLOR__",
+                "size": "M",
+                "stock_quantity": 16,
+                "list_price": null,
+                "sale_price": 729000,
+                "stock_status": "OK",
+                "price_sku": "SQ520-AO",
+                "component_1_sku": "SQ520-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-11T09:26:36.457767",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "AO",
+                "color": "__NO_COLOR__",
+                "size": "L",
+                "stock_quantity": 30,
+                "list_price": null,
+                "sale_price": 729000,
+                "stock_status": "OK",
+                "price_sku": "SQ520-AO",
+                "component_1_sku": "SQ520-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-11T09:26:36.467040",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "AO",
+                "color": "__NO_COLOR__",
+                "size": "XL",
+                "stock_quantity": 11,
+                "list_price": null,
+                "sale_price": 729000,
+                "stock_status": "OK",
+                "price_sku": "SQ520-AO",
+                "component_1_sku": "SQ520-AO",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-08-11T09:26:36.475134",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              }
+            ],
+            "inventory_source": "PANCAKE_DIRECT"
+          },
+          "QUAN": {
+            "list_price": null,
+            "sale_price": 449000,
+            "price_status": "OK",
+            "rows": [
+              {
+                "offer_type": "QUAN",
+                "color": "__NO_COLOR__",
+                "size": "S",
+                "stock_quantity": 33,
+                "list_price": null,
+                "sale_price": 449000,
+                "stock_status": "OK",
+                "price_sku": "SQ520-QUAN",
+                "component_1_sku": "SQ520-QUAN",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-03-05T04:54:30.450352",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "QUAN",
+                "color": "__NO_COLOR__",
+                "size": "M",
+                "stock_quantity": 22,
+                "list_price": null,
+                "sale_price": 449000,
+                "stock_status": "OK",
+                "price_sku": "SQ520-QUAN",
+                "component_1_sku": "SQ520-QUAN",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-03-05T04:54:30.472046",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "QUAN",
+                "color": "__NO_COLOR__",
+                "size": "L",
+                "stock_quantity": 20,
+                "list_price": null,
+                "sale_price": 449000,
+                "stock_status": "OK",
+                "price_sku": "SQ520-QUAN",
+                "component_1_sku": "SQ520-QUAN",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-03-05T04:54:30.483688",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              },
+              {
+                "offer_type": "QUAN",
+                "color": "__NO_COLOR__",
+                "size": "XL",
+                "stock_quantity": 15,
+                "list_price": null,
+                "sale_price": 449000,
+                "stock_status": "OK",
+                "price_sku": "SQ520-QUAN",
+                "component_1_sku": "SQ520-QUAN",
+                "component_2_sku": "",
+                "pos_updated_at": "2026-03-05T04:54:30.492921",
+                "inventory_source": "PANCAKE_DIRECT",
+                "bom_status": "NOT_APPLICABLE",
+                "parent_variation_id": "",
+                "parent_variation_sku": "",
+                "bom_components": "",
+                "component_count": 0,
+                "components": []
+              }
+            ],
+            "inventory_source": "PANCAKE_DIRECT"
+          }
+        }
+      }
+    }
+  ],
+  "charts": [
+    {
+      "key": "size-chart:SD276",
+      "value": {
+        "schemaVersion": 1,
+        "kind": "SIZE_CHART",
+        "chart": {
+          "schemaVersion": 1,
+          "reference": {
+            "chartId": "image_registry:09bb0478-dd3b-5328-917f-48c1cadd2b82:SD276",
+            "version": "size-chart-v1.0.0-523d5951f9dd",
+            "source": "IMAGE_EXTRACTION",
+            "sourceArtifactRef": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg",
+            "sourceContentSha256": "c1481347dbde0567c746fb7e16019c27b875a219267d9a9f83dbf8a25274a0fd",
+            "verificationStatus": "VERIFIED",
+            "verifiedByRef": "5cec00ea5233806b4844245293a83ce76627b9854e2804bbd3ddd5045fb10b5f",
+            "verifiedAt": "2026-08-03T08:35:27.770Z"
+          },
+          "brand": "La.na Design",
+          "category": "ÁO DÀI",
+          "componentRole": "OTHER",
+          "boundaryPolicy": "REQUIRE_HUMAN_REVIEW",
+          "bands": [
+            {
+              "size": "S",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 86,
+                  "maxInclusive": 86
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 62,
+                  "maxInclusive": 78
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 96,
+                  "maxInclusive": 96
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 153,
+                  "maxInclusive": 160
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 43,
+                  "maxInclusive": 52
+                }
+              ],
+              "note": null
+            },
+            {
+              "size": "M",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 92,
+                  "maxInclusive": 92
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 66,
+                  "maxInclusive": 82
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 102,
+                  "maxInclusive": 102
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 158,
+                  "maxInclusive": 165
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 52,
+                  "maxInclusive": 62
+                }
+              ],
+              "note": null
+            },
+            {
+              "size": "L",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 98,
+                  "maxInclusive": 98
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 70,
+                  "maxInclusive": 86
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 108,
+                  "maxInclusive": 108
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 160,
+                  "maxInclusive": 170
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 62,
+                  "maxInclusive": 72
+                }
+              ],
+              "note": null
+            }
+          ]
+        },
+        "scope": {
+          "level": "COMPONENT",
+          "parentProductIds": [
+            "SD276"
+          ],
+          "categories": [
+            "ÁO DÀI"
+          ],
+          "componentRole": "OTHER",
+          "forms": [],
+          "materials": []
+        },
+        "extraction": {
+          "measurementBasis": "BODY",
+          "confidence": 0.95,
+          "extractorVersion": "size-chart-v1.0.0"
+        },
+        "sourceMetadata": {
+          "source": "IMAGE_EXTRACTION",
+          "sourceReference": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg",
+          "sourceVersion": "size-chart-v1.0.0",
+          "observedAt": "2026-07-31T08:52:25.418Z"
+        }
+      }
+    },
+    {
+      "key": "size-chart:SD365",
+      "value": {
+        "schemaVersion": 1,
+        "kind": "SIZE_CHART",
+        "chart": {
+          "schemaVersion": 1,
+          "reference": {
+            "chartId": "image_registry:9c4a587e-e100-5911-8731-3100b5ab721e:SD365",
+            "version": "size-chart-v1.0.0-0ec5c388646c",
+            "source": "IMAGE_EXTRACTION",
+            "sourceArtifactRef": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg",
+            "sourceContentSha256": "c1481347dbde0567c746fb7e16019c27b875a219267d9a9f83dbf8a25274a0fd",
+            "verificationStatus": "VERIFIED",
+            "verifiedByRef": "5cec00ea5233806b4844245293a83ce76627b9854e2804bbd3ddd5045fb10b5f",
+            "verifiedAt": "2026-08-03T08:35:31.622Z"
+          },
+          "brand": "La.na Design",
+          "category": "ÁO DÀI",
+          "componentRole": "DRESS",
+          "boundaryPolicy": "REQUIRE_HUMAN_REVIEW",
+          "bands": [
+            {
+              "size": "S",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 86,
+                  "maxInclusive": 86
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 62,
+                  "maxInclusive": 78
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 96,
+                  "maxInclusive": 96
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 153,
+                  "maxInclusive": 160
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 43,
+                  "maxInclusive": 52
+                }
+              ],
+              "note": null
+            },
+            {
+              "size": "M",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 92,
+                  "maxInclusive": 92
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 66,
+                  "maxInclusive": 82
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 102,
+                  "maxInclusive": 102
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 158,
+                  "maxInclusive": 165
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 52,
+                  "maxInclusive": 62
+                }
+              ],
+              "note": null
+            },
+            {
+              "size": "L",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 98,
+                  "maxInclusive": 98
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 70,
+                  "maxInclusive": 86
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 108,
+                  "maxInclusive": 108
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 160,
+                  "maxInclusive": 170
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 62,
+                  "maxInclusive": 72
+                }
+              ],
+              "note": null
+            }
+          ]
+        },
+        "scope": {
+          "level": "COMPONENT",
+          "parentProductIds": [
+            "SD365"
+          ],
+          "categories": [
+            "ÁO DÀI"
+          ],
+          "componentRole": "DRESS",
+          "forms": [],
+          "materials": []
+        },
+        "extraction": {
+          "measurementBasis": "BODY",
+          "confidence": 0.95,
+          "extractorVersion": "size-chart-v1.0.0"
+        },
+        "sourceMetadata": {
+          "source": "IMAGE_EXTRACTION",
+          "sourceReference": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg",
+          "sourceVersion": "size-chart-v1.0.0",
+          "observedAt": "2026-07-31T08:52:37.146Z"
+        }
+      }
+    },
+    {
+      "key": "size-chart:SD375",
+      "value": {
+        "schemaVersion": 1,
+        "kind": "SIZE_CHART",
+        "chart": {
+          "schemaVersion": 1,
+          "reference": {
+            "chartId": "image_registry:41800bcc-4b82-550f-9744-ca5ad6a4420c:SD375",
+            "version": "size-chart-v1.0.0-c482fd6045c9",
+            "source": "IMAGE_EXTRACTION",
+            "sourceArtifactRef": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg",
+            "sourceContentSha256": "c1481347dbde0567c746fb7e16019c27b875a219267d9a9f83dbf8a25274a0fd",
+            "verificationStatus": "VERIFIED",
+            "verifiedByRef": "5cec00ea5233806b4844245293a83ce76627b9854e2804bbd3ddd5045fb10b5f",
+            "verifiedAt": "2026-08-03T02:30:18.648Z"
+          },
+          "brand": "La.na Design",
+          "category": "AO DAI",
+          "componentRole": "DRESS",
+          "boundaryPolicy": "REQUIRE_HUMAN_REVIEW",
+          "bands": [
+            {
+              "size": "S",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 86,
+                  "maxInclusive": 86
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 62,
+                  "maxInclusive": 78
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 96,
+                  "maxInclusive": 96
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 153,
+                  "maxInclusive": 160
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 43,
+                  "maxInclusive": 52
+                }
+              ],
+              "note": null
+            },
+            {
+              "size": "M",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 92,
+                  "maxInclusive": 92
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 66,
+                  "maxInclusive": 82
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 102,
+                  "maxInclusive": 102
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 158,
+                  "maxInclusive": 165
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 52,
+                  "maxInclusive": 62
+                }
+              ],
+              "note": null
+            },
+            {
+              "size": "L",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 98,
+                  "maxInclusive": 98
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 70,
+                  "maxInclusive": 86
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 108,
+                  "maxInclusive": 108
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 160,
+                  "maxInclusive": 170
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 62,
+                  "maxInclusive": 72
+                }
+              ],
+              "note": null
+            }
+          ]
+        },
+        "scope": {
+          "level": "COMPONENT",
+          "parentProductIds": [
+            "SD375"
+          ],
+          "categories": [
+            "AO DAI"
+          ],
+          "componentRole": "DRESS",
+          "forms": [],
+          "materials": []
+        },
+        "extraction": {
+          "measurementBasis": "BODY",
+          "confidence": 0.95,
+          "extractorVersion": "size-chart-v1.0.0"
+        },
+        "sourceMetadata": {
+          "source": "IMAGE_EXTRACTION",
+          "sourceReference": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg",
+          "sourceVersion": "size-chart-v1.0.0",
+          "observedAt": "2026-08-01T08:55:38.895Z"
+        }
+      }
+    },
+    {
+      "key": "size-chart:SD396",
+      "value": {
+        "schemaVersion": 1,
+        "kind": "SIZE_CHART",
+        "chart": {
+          "schemaVersion": 1,
+          "reference": {
+            "chartId": "image_registry:d78d3317-408e-5951-94f7-e7289d8c4fc8:SD396",
+            "version": "size-chart-v1.0.0-b1cdf46d53cc",
+            "source": "IMAGE_EXTRACTION",
+            "sourceArtifactRef": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg",
+            "sourceContentSha256": "c1481347dbde0567c746fb7e16019c27b875a219267d9a9f83dbf8a25274a0fd",
+            "verificationStatus": "VERIFIED",
+            "verifiedByRef": "5cec00ea5233806b4844245293a83ce76627b9854e2804bbd3ddd5045fb10b5f",
+            "verifiedAt": "2026-08-03T08:35:49.836Z"
+          },
+          "brand": "La.na Design",
+          "category": "ÁO DÀI",
+          "componentRole": "DRESS",
+          "boundaryPolicy": "REQUIRE_HUMAN_REVIEW",
+          "bands": [
+            {
+              "size": "S",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 86,
+                  "maxInclusive": 86
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 62,
+                  "maxInclusive": 78
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 96,
+                  "maxInclusive": 96
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 153,
+                  "maxInclusive": 160
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 43,
+                  "maxInclusive": 52
+                }
+              ],
+              "note": null
+            },
+            {
+              "size": "M",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 92,
+                  "maxInclusive": 92
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 66,
+                  "maxInclusive": 82
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 102,
+                  "maxInclusive": 102
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 158,
+                  "maxInclusive": 165
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 52,
+                  "maxInclusive": 62
+                }
+              ],
+              "note": null
+            },
+            {
+              "size": "L",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 98,
+                  "maxInclusive": 98
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 70,
+                  "maxInclusive": 86
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 108,
+                  "maxInclusive": 108
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 160,
+                  "maxInclusive": 170
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 62,
+                  "maxInclusive": 72
+                }
+              ],
+              "note": null
+            }
+          ]
+        },
+        "scope": {
+          "level": "COMPONENT",
+          "parentProductIds": [
+            "SD396"
+          ],
+          "categories": [
+            "ÁO DÀI"
+          ],
+          "componentRole": "DRESS",
+          "forms": [],
+          "materials": []
+        },
+        "extraction": {
+          "measurementBasis": "BODY",
+          "confidence": 0.95,
+          "extractorVersion": "size-chart-v1.0.0"
+        },
+        "sourceMetadata": {
+          "source": "IMAGE_EXTRACTION",
+          "sourceReference": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg",
+          "sourceVersion": "size-chart-v1.0.0",
+          "observedAt": "2026-07-31T08:52:49.272Z"
+        }
+      }
+    },
+    {
+      "key": "size-chart:SD398",
+      "value": {
+        "schemaVersion": 1,
+        "kind": "SIZE_CHART",
+        "chart": {
+          "schemaVersion": 1,
+          "reference": {
+            "chartId": "image_registry:efe31c09-b307-5977-bfff-565532bbc329:SD398",
+            "version": "size-chart-v1.0.0-fbc5b6714dd1",
+            "source": "IMAGE_EXTRACTION",
+            "sourceArtifactRef": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg",
+            "sourceContentSha256": "c1481347dbde0567c746fb7e16019c27b875a219267d9a9f83dbf8a25274a0fd",
+            "verificationStatus": "VERIFIED",
+            "verifiedByRef": "5cec00ea5233806b4844245293a83ce76627b9854e2804bbd3ddd5045fb10b5f",
+            "verifiedAt": "2026-08-03T08:35:46.411Z"
+          },
+          "brand": "La.na Design",
+          "category": "ÁO DÀI",
+          "componentRole": "DRESS",
+          "boundaryPolicy": "REQUIRE_HUMAN_REVIEW",
+          "bands": [
+            {
+              "size": "S",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 86,
+                  "maxInclusive": 86
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 62,
+                  "maxInclusive": 78
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 96,
+                  "maxInclusive": 96
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 153,
+                  "maxInclusive": 160
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 43,
+                  "maxInclusive": 52
+                }
+              ],
+              "note": null
+            },
+            {
+              "size": "M",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 92,
+                  "maxInclusive": 92
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 66,
+                  "maxInclusive": 82
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 102,
+                  "maxInclusive": 102
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 158,
+                  "maxInclusive": 165
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 52,
+                  "maxInclusive": 62
+                }
+              ],
+              "note": null
+            },
+            {
+              "size": "L",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 98,
+                  "maxInclusive": 98
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 70,
+                  "maxInclusive": 86
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 108,
+                  "maxInclusive": 108
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 160,
+                  "maxInclusive": 170
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 62,
+                  "maxInclusive": 72
+                }
+              ],
+              "note": null
+            }
+          ]
+        },
+        "scope": {
+          "level": "COMPONENT",
+          "parentProductIds": [
+            "SD398"
+          ],
+          "categories": [
+            "ÁO DÀI"
+          ],
+          "componentRole": "DRESS",
+          "forms": [],
+          "materials": []
+        },
+        "extraction": {
+          "measurementBasis": "BODY",
+          "confidence": 0.95,
+          "extractorVersion": "size-chart-v1.0.0"
+        },
+        "sourceMetadata": {
+          "source": "IMAGE_EXTRACTION",
+          "sourceReference": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg",
+          "sourceVersion": "size-chart-v1.0.0",
+          "observedAt": "2026-07-31T08:52:57.228Z"
+        }
+      }
+    },
+    {
+      "key": "size-chart:SQ2447",
+      "value": {
+        "schemaVersion": 1,
+        "kind": "SIZE_CHART",
+        "chart": {
+          "schemaVersion": 1,
+          "reference": {
+            "chartId": "image_registry:42e42d5a-c407-5927-af69-0fe8ab21a8e4:SQ2447",
+            "version": "size-chart-v1.0.0-1395f0b5e842",
+            "source": "IMAGE_EXTRACTION",
+            "sourceArtifactRef": "https://content.pancake.vn/web-media-262/s3000x3000/6a/2d/75/b3/97a0cc14210c5ad56ebd4193b2669e7b5b4ff2c1275167a871e9626b-w:1500-h:1500-l:228804-t:image/jpeg.jpeg",
+            "sourceContentSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+            "verificationStatus": "VERIFIED",
+            "verifiedByRef": "5cec00ea5233806b4844245293a83ce76627b9854e2804bbd3ddd5045fb10b5f",
+            "verifiedAt": "2026-08-10T04:37:04.454Z"
+          },
+          "brand": "La.na Design",
+          "category": "SET",
+          "componentRole": "OTHER",
+          "boundaryPolicy": "REQUIRE_HUMAN_REVIEW",
+          "bands": [
+            {
+              "size": "S",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 86,
+                  "maxInclusive": 86
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 62,
+                  "maxInclusive": 74
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 98,
+                  "maxInclusive": 98
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 155,
+                  "maxInclusive": 168
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 43,
+                  "maxInclusive": 51
+                }
+              ],
+              "note": null
+            },
+            {
+              "size": "M",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 90,
+                  "maxInclusive": 90
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 66,
+                  "maxInclusive": 78
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 102,
+                  "maxInclusive": 102
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 155,
+                  "maxInclusive": 168
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 51,
+                  "maxInclusive": 57
+                }
+              ],
+              "note": null
+            },
+            {
+              "size": "L",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 94,
+                  "maxInclusive": 94
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 70,
+                  "maxInclusive": 82
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 106,
+                  "maxInclusive": 106
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 155,
+                  "maxInclusive": 168
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 57,
+                  "maxInclusive": 65
+                }
+              ],
+              "note": null
+            },
+            {
+              "size": "XL",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 98,
+                  "maxInclusive": 98
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 74,
+                  "maxInclusive": 88
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 110,
+                  "maxInclusive": 110
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 155,
+                  "maxInclusive": 168
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 65,
+                  "maxInclusive": 75
+                }
+              ],
+              "note": null
+            }
+          ]
+        },
+        "scope": {
+          "level": "COMPONENT",
+          "parentProductIds": [
+            "SQ2447"
+          ],
+          "categories": [
+            "SET"
+          ],
+          "componentRole": "OTHER",
+          "forms": [],
+          "materials": []
+        },
+        "extraction": {
+          "measurementBasis": "BODY",
+          "confidence": 0.95,
+          "extractorVersion": "size-chart-v1.0.0"
+        },
+        "sourceMetadata": {
+          "source": "IMAGE_EXTRACTION",
+          "sourceReference": "https://content.pancake.vn/web-media-262/s3000x3000/6a/2d/75/b3/97a0cc14210c5ad56ebd4193b2669e7b5b4ff2c1275167a871e9626b-w:1500-h:1500-l:228804-t:image/jpeg.jpeg",
+          "sourceVersion": "size-chart-v1.0.0",
+          "observedAt": "2026-07-31T08:53:20.984Z"
+        }
+      }
+    },
+    {
+      "key": "size-chart:SQ520",
+      "value": {
+        "schemaVersion": 1,
+        "kind": "SIZE_CHART",
+        "chart": {
+          "schemaVersion": 1,
+          "reference": {
+            "chartId": "image_registry:fc7c5508-cc45-522c-8ce7-d9907cb38d6b:SQ520",
+            "version": "size-chart-v1.0.0-e81ee282e1b5",
+            "source": "IMAGE_EXTRACTION",
+            "sourceArtifactRef": "https://content.pancake.vn/web-media-262/s3000x3000/6a/2d/75/b3/97a0cc14210c5ad56ebd4193b2669e7b5b4ff2c1275167a871e9626b-w:1500-h:1500-l:228804-t:image/jpeg.jpeg",
+            "sourceContentSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+            "verificationStatus": "VERIFIED",
+            "verifiedByRef": "5cec00ea5233806b4844245293a83ce76627b9854e2804bbd3ddd5045fb10b5f",
+            "verifiedAt": "2026-08-10T04:35:34.802Z"
+          },
+          "brand": "La.na Design",
+          "category": "DRESS",
+          "componentRole": "DRESS",
+          "boundaryPolicy": "REQUIRE_HUMAN_REVIEW",
+          "bands": [
+            {
+              "size": "S",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 86,
+                  "maxInclusive": 86
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 62,
+                  "maxInclusive": 74
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 98,
+                  "maxInclusive": 98
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 155,
+                  "maxInclusive": 168
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 43,
+                  "maxInclusive": 51
+                }
+              ],
+              "note": null
+            },
+            {
+              "size": "M",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 90,
+                  "maxInclusive": 90
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 66,
+                  "maxInclusive": 78
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 102,
+                  "maxInclusive": 102
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 155,
+                  "maxInclusive": 168
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 51,
+                  "maxInclusive": 57
+                }
+              ],
+              "note": null
+            },
+            {
+              "size": "L",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 94,
+                  "maxInclusive": 94
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 70,
+                  "maxInclusive": 82
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 106,
+                  "maxInclusive": 106
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 155,
+                  "maxInclusive": 168
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 57,
+                  "maxInclusive": 65
+                }
+              ],
+              "note": null
+            },
+            {
+              "size": "XL",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "minInclusive": 98,
+                  "maxInclusive": 98
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "minInclusive": 74,
+                  "maxInclusive": 88
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "minInclusive": 110,
+                  "maxInclusive": 110
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "minInclusive": 155,
+                  "maxInclusive": 168
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "minInclusive": 65,
+                  "maxInclusive": 75
+                }
+              ],
+              "note": null
+            }
+          ]
+        },
+        "scope": {
+          "level": "COMPONENT",
+          "parentProductIds": [
+            "SQ520"
+          ],
+          "categories": [
+            "DRESS"
+          ],
+          "componentRole": "DRESS",
+          "forms": [],
+          "materials": []
+        },
+        "extraction": {
+          "measurementBasis": "BODY",
+          "confidence": 0.95,
+          "extractorVersion": "size-chart-v1.0.0"
+        },
+        "sourceMetadata": {
+          "source": "IMAGE_EXTRACTION",
+          "sourceReference": "https://content.pancake.vn/web-media-262/s3000x3000/6a/2d/75/b3/97a0cc14210c5ad56ebd4193b2669e7b5b4ff2c1275167a871e9626b-w:1500-h:1500-l:228804-t:image/jpeg.jpeg",
+          "sourceVersion": "size-chart-v1.0.0",
+          "observedAt": "2026-07-31T08:53:24.962Z"
+        }
+      }
+    }
+  ],
+  "policyStatus": "RESOLVED"
+}

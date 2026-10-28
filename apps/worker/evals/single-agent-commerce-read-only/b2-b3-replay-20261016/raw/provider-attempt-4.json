@@ -1,0 +1,309 @@
+{
+  "caseId": "stateful-correction",
+  "journeyId": "sales",
+  "elapsedMs": 40447.592399999994,
+  "result": {
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "RECEIPT_BACKED_ACK",
+      "text": "Giỏ hàng đã được cập nhật, chị nhé.",
+      "fallbackId": null
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 2,
+    "verifierGenerations": 0,
+    "toolRounds": 2,
+    "toolCalls": 4,
+    "generations": [
+      {
+        "id": "9947c61b-1877-4a20-bfb9-9fe161a74bc0:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 4285.9997,
+        "telemetry": {
+          "generationId": "9947c61b-1877-4a20-bfb9-9fe161a74bc0:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3334,
+          "outputTokens": 1221,
+          "cost": null,
+          "thinkingTokens": 1139
+        }
+      },
+      {
+        "id": "9947c61b-1877-4a20-bfb9-9fe161a74bc0:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1920.061400000006,
+        "telemetry": {
+          "generationId": "9947c61b-1877-4a20-bfb9-9fe161a74bc0:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5561,
+          "outputTokens": 384,
+          "cost": null,
+          "thinkingTokens": 298
+        }
+      }
+    ],
+    "toolLatencyMs": 10812.598299999983,
+    "verificationLatencyMs": null,
+    "enqueued": 1,
+    "commitStatus": "COMMITTED"
+  },
+  "owners": 2,
+  "verifiers": 0,
+  "batch": {
+    "pageId": "1198992073286645",
+    "conversationHash": "34470658d9e3d524fa83d54122b3be6670adfa1abad97ac35a09e829f20dcdd6",
+    "generation": 4,
+    "leaseToken": "6a62b554-4e35-40fa-a7e7-ae6c9fdeb1d1",
+    "inboxIds": [
+      "68fefec6-2a61-4592-9408-99d4f518e59c"
+    ],
+    "evaluationGroupId": "9947c61b-1877-4a20-bfb9-9fe161a74bc0",
+    "eventKind": "CUSTOMER",
+    "firstReceiveSequence": 4,
+    "lastReceiveSequence": 4,
+    "attemptCount": 1,
+    "items": [
+      {
+        "inboxId": "68fefec6-2a61-4592-9408-99d4f518e59c",
+        "pageId": "1198992073286645",
+        "eventKey": "stateful-21ad39d3-22b9-4785-9ac1-6269f9a98c2a",
+        "conversationHash": "34470658d9e3d524fa83d54122b3be6670adfa1abad97ac35a09e829f20dcdd6",
+        "occurredAt": "2026-10-15T23:10:45.527Z",
+        "receivedAt": "2026-10-15T23:10:45.527Z",
+        "receiveSequence": 4,
+        "attemptCount": 1,
+        "leaseToken": "6a62b554-4e35-40fa-a7e7-ae6c9fdeb1d1",
+        "eventKind": "CUSTOMER",
+        "envelope": {
+          "schemaVersion": 1,
+          "customerSendEnabled": false,
+          "routing": {
+            "owner": "APP"
+          },
+          "message": {
+            "schemaVersion": 1,
+            "traceId": "49c8c2af-4005-4284-b24d-264e93c38a56",
+            "eventKey": "stateful-21ad39d3-22b9-4785-9ac1-6269f9a98c2a",
+            "pageId": "1198992073286645",
+            "messageId": "stateful-21ad39d3-22b9-4785-9ac1-6269f9a98c2a",
+            "senderId": "synthetic-recipient-34470658d9e3d524fa83d54122b3be6670adfa1abad97ac35a09e829f20dcdd6",
+            "conversationId": "synthetic-meta-conversation",
+            "occurredAt": "2026-10-15T23:10:45.527Z",
+            "isEcho": false,
+            "appId": null,
+            "text": "Số đo lúc nãy chị nhắn nhầm, eo 74, mông 96 nhé. Chị vẫn lấy size L.",
+            "attachments": []
+          }
+        }
+      }
+    ]
+  },
+  "toolResponses": [
+    {
+      "name": "apply_customer_state",
+      "response": {
+        "status": "OK",
+        "data": {
+          "revision": 3,
+          "measurements": [
+            {
+              "kind": "WAIST_CM",
+              "value": 74
+            },
+            {
+              "kind": "HIPS_CM",
+              "value": 96
+            }
+          ]
+        }
+      },
+      "id": "call_1947770"
+    },
+    {
+      "name": "read_product",
+      "response": {
+        "status": "OK",
+        "data": {
+          "subjectRef": "SV2447",
+          "label": "Set váy Thạch Thảo",
+          "variantId": "offer:SV2447:SET_VAY",
+          "offerType": "SET_VAY",
+          "requestedOfferType": null,
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "attributes": null,
+          "sizeCharts": [],
+          "content": {
+            "productName": "Set váy Thạch Thảo",
+            "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+            "productUrl": null,
+            "metadata": {
+              "authority": "WEBSTORE_XML",
+              "sourceVersion": "catalog-v2",
+              "observedAt": "2026-09-28T04:31:05.725Z",
+              "expiresAt": null,
+              "freshForSeconds": null,
+              "freshnessState": "FRESH"
+            }
+          },
+          "facts": [
+            {
+              "type": "PRICE",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:SET_VAY"
+              },
+              "value": {
+                "amountVnd": 799000,
+                "currency": "VND"
+              }
+            },
+            {
+              "type": "STOCK",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:SET_VAY"
+              },
+              "value": {
+                "status": "IN_STOCK",
+                "availableQuantity": 55
+              }
+            }
+          ],
+          "availability": {
+            "price": {
+              "status": "OK",
+              "reason": null
+            },
+            "stock": {
+              "status": "OK",
+              "reason": null
+            }
+          },
+          "missing": [
+            "ATTRIBUTES"
+          ]
+        }
+      },
+      "id": "call_1947771"
+    }
+  ],
+  "actualCapturedMessages": [
+    "Giỏ hàng đã được cập nhật, chị nhé."
+  ],
+  "committedPublicState": {
+    "stage": "CART_OPEN",
+    "revision": 4,
+    "cart": {
+      "schemaVersion": 1,
+      "cartId": "4b7674e3-e46a-59b1-8a65-d5d65b50f71c",
+      "salesEpisodeId": "78b6fee6-d010-5cb2-86c9-7741058dca3e",
+      "customerProfileId": "abd2794b-ccc4-44b9-9238-c815d2fd31d7",
+      "revision": 1,
+      "currency": "VND",
+      "status": "OPEN",
+      "checkoutEligibility": "ELIGIBLE",
+      "lines": [
+        {
+          "lineId": "e9d2ea2c-33d7-5516-8736-4ea63cec814e",
+          "parentProductId": "SV2447",
+          "offerId": "AO",
+          "offerKind": "DIRECT",
+          "quantity": 2,
+          "components": [
+            {
+              "componentProductId": "SV2447_AO",
+              "componentSku": "SV2447_AO",
+              "componentRole": "TOP",
+              "color": "BE",
+              "size": "L",
+              "quantity": 1
+            }
+          ],
+          "allowMixedSizes": false,
+          "allowComponentSale": false,
+          "posUnitPriceVnd": 499000,
+          "priceAuthority": {
+            "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+            "shopId": "LANA_DESIGN",
+            "parentProductId": "SV2447",
+            "offerId": "AO",
+            "offerPriceKind": "DIRECT",
+            "componentProductId": null,
+            "metadata": {
+              "authority": "PANCAKE_POS",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-15T23:02:38.268Z",
+              "expiresAt": "2026-10-17T23:02:38.268Z",
+              "freshForSeconds": 172800,
+              "freshnessState": "FRESH"
+            }
+          },
+          "lineTotalVnd": 998000
+        }
+      ],
+      "adjustments": [
+        {
+          "adjustmentId": "265b5d71-5481-5403-a599-96e236f13bb9",
+          "kind": "PERCENT_DISCOUNT",
+          "amountVnd": 49900,
+          "percentageBps": 500,
+          "policyAuthorization": {
+            "policyBundleId": "admin-policy:1198992073286645",
+            "policyBundleVersion": "1a618942f5821335db2e00be8c71ea7a",
+            "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+            "decisionId": "1bc7b6df-2d40-5baf-a0e0-cc2808cfdfb1",
+            "authorizedAt": "2026-10-15T23:11:06.593Z"
+          }
+        }
+      ],
+      "shippingFeeVnd": 30000,
+      "subtotalVnd": 998000,
+      "discountTotalVnd": 49900,
+      "grandTotalVnd": 978100,
+      "createdAt": "2026-10-15T23:11:06.593Z",
+      "updatedAt": "2026-10-15T23:11:06.593Z"
+    },
+    "measurements": [
+      {
+        "kind": "WAIST_CM",
+        "value": 74,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-15T23:10:45.527Z",
+          "sourceEventHash": "d5a4bf0843579c3cc3d4209b9994d6a020dfb14cf1fcbd9fe85119dcf8edd477"
+        }
+      },
+      {
+        "kind": "HIPS_CM",
+        "value": 96,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-15T23:10:45.527Z",
+          "sourceEventHash": "d5a4bf0843579c3cc3d4209b9994d6a020dfb14cf1fcbd9fe85119dcf8edd477"
+        }
+      }
+    ],
+    "customerProfileRevision": 3
+  },
+  "counts": {
+    "embedding": 1,
+    "owner": 11,
+    "verifier": 1
+  }
+}

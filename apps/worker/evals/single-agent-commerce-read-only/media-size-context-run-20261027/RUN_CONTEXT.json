@@ -1,0 +1,29 @@
+{
+  "sourceSha": "0ef9991a578e8da33f9bfbd4f81a86765380fe9f",
+  "latestFixBaseSha": "b86825a1de84314175bf98d88a991fb940a7ddf2",
+  "verifiedImplementationExecutableSha": "ff5e0543fb425ddf0f2a1b5ec6d722a690e831f9",
+  "priorModelSourceSha": "50753ec7aab3d7365fdabc2e2c71152c448719ea",
+  "capturedAt": "2026-10-26T19:20:33.990021+00:00",
+  "sourceClean": true,
+  "dataReadiness": "REAL_METADATA_NOT_OVERRIDDEN; PRIOR_CAPTURE_HAS_UNRESOLVED_FEEDBACK_COMPONENT_COLOR_LABELS",
+  "native51Scope": {
+    "persistedCapture": 30,
+    "eligibilityOnly": 21
+  },
+  "additionalHashes": {
+    "apps/worker/src/single-agent-commerce-media-capabilities.ts": "647c140fa63ede7b4a4d3e0e5ac9590966b9a530bb22bee13470a3abc0fb0dd5",
+    "apps/worker/src/single-agent-commerce-media-eligibility.ts": "22d53c3653bf47f07a87bb1df2bf3a6a82557f3b361c461c299e1a880f935d5e",
+    "packages/business-tools/src/image-color-binding.ts": "ea6d02ebefecf7526218f3d954754369c9149d0f615f470fd26a0c36d8aa7225",
+    "apps/worker/evals/single-agent-commerce-read-only/media-capabilities.mjs": "7ad9d6b46c1bc14389e910c0d4a93a61315a96a5465072c72fc7d5e40a05191e",
+    "apps/worker/src/single-agent-commerce-state.ts": "cd94ba2120d99756b417d99e35d6f941603b92c2d8f2ccc092d5e5d1363782b2",
+    "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs": "7dba401c5064077c4c0951933887aab33ceead89feb38b1ffc65b0b7eb667835",
+    "apps/worker/dist/single-agent-commerce-media-capabilities.js": "a38e09791c3f1a573473e172ab2c21bec74d638e7359451de9e5a83dc27c1615",
+    "apps/worker/dist/single-agent-commerce-media-eligibility.js": "8396ee97ee7d21d68842011e1d4f4a1a296291b5ba770d05a71c6a89c2357692",
+    "apps/worker/dist/single-agent-commerce-state.js": "3ae0ae75a6985deb3d6fa8c236b4477f66619d1cac3b88eb9a49c4c4151115d1"
+  },
+  "planSha256": "2cb2803f96e65511cee7daf0b9471fc957eceef875a991826c115ce9fe18e4ba",
+  "semanticRoles": 2,
+  "sendEnabled": false,
+  "liveSends": 0,
+  "shopMetadataWrites": 0
+}

@@ -1,0 +1,6 @@
+{"slot":10,"recorded":1,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":11,"recorded":2,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":12,"recorded":3,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":13,"recorded":4,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":14,"recorded":5,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"status":"DISPATCH_RANGE_COMPLETE_REVIEW_PENDING","registered":24,"recorded":5,"out":"C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-repeat39-20261023\\b1-10-14","sendEnabled":false}

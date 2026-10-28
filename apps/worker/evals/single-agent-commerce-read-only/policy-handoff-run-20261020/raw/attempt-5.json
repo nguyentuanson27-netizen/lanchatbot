@@ -1,0 +1,98 @@
+{
+  "caseId": "policy-handoff-5",
+  "runtime": {
+    "latest": "Đường may ở nách áo bị lỗi, chị mặc vào mới thấy. Chị nhận hôm qua, giờ shop xử lý sao em?",
+    "history": [],
+    "initialProductCodes": []
+  },
+  "result": {
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "DEFECT",
+      "text": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "fallbackId": null
+    },
+    "recovery": {
+      "originalDisposition": "HANDOFF",
+      "originalReason": "DEFECT"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "toolRounds": 1,
+    "toolCalls": 2,
+    "generations": [
+      {
+        "id": "handoff-6f07502d-7db2-4d6c-a34e-a76557ab6337:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 3119.5910000000003,
+        "telemetry": {
+          "generationId": "handoff-6f07502d-7db2-4d6c-a34e-a76557ab6337:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3022,
+          "outputTokens": 869,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 15722,
+          "requestHash": "d84d9bf9fdd4c3d8f652bc212f94c4c720a6be7761fce98c50e482e6969f682e",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 4,
+          "thinkingTokens": 841,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      }
+    ],
+    "toolLatencyMs": 1555.2988999999798,
+    "verificationLatencyMs": null
+  },
+  "calls": [
+    {
+      "calls": [
+        {
+          "name": "read_policy",
+          "args": {},
+          "id": "call_229343"
+        },
+        {
+          "name": "request_handoff",
+          "args": {
+            "reason": "DEFECT"
+          },
+          "id": "call_229344"
+        }
+      ],
+      "results": [
+        {
+          "status": "REJECTED",
+          "reason": "HANDOFF_TAKES_PRECEDENCE"
+        },
+        {
+          "status": "OK",
+          "data": {
+            "handoffAccepted": true
+          }
+        }
+      ]
+    }
+  ],
+  "actualCapturedMessages": [
+    "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ."
+  ],
+  "eligibleText": null,
+  "committedPublicState": {
+    "conversationOwner": "HUMAN",
+    "revision": 1
+  },
+  "counts": {
+    "events": 1,
+    "tags": 1,
+    "messages": 1
+  },
+  "elapsedMs": 8122.679499999998,
+  "sendEnabled": false
+}

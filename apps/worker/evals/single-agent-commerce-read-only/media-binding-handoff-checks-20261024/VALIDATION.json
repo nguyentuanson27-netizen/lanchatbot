@@ -1,0 +1,69 @@
+{
+  "implementationBaseSha": "db4f2dbb",
+  "finalExecutableSha": "871ba419769ece9bd17b089959ac0409355c7a31",
+  "mode": "DETERMINISTIC_CODE_AND_REAL_POSTGRES_CAPTURE_NO_PROVIDER",
+  "jobs": [
+    {
+      "job": "cod",
+      "sourceSha": "59861c86d02efe54bce18cc9d973add359b2b4d6",
+      "sourceDirty": true,
+      "checks": 37,
+      "status": "PASS",
+      "testDatabaseDropped": true,
+      "providerGenerations": 0,
+      "exactFinalSource": false
+    },
+    {
+      "job": "cod-final",
+      "sourceSha": "6bad1143d6225de6c4644729d4e9a9e4534f8ea6",
+      "sourceDirty": false,
+      "checks": 23,
+      "status": "PASS",
+      "testDatabaseDropped": true,
+      "providerGenerations": 0,
+      "exactFinalSource": false
+    },
+    {
+      "job": "bank",
+      "sourceSha": "6bad1143d6225de6c4644729d4e9a9e4534f8ea6",
+      "sourceDirty": false,
+      "checks": 23,
+      "status": "PASS",
+      "testDatabaseDropped": true,
+      "providerGenerations": 0,
+      "exactFinalSource": false
+    },
+    {
+      "job": "final-cod",
+      "sourceSha": "871ba419769ece9bd17b089959ac0409355c7a31",
+      "sourceDirty": false,
+      "checks": 5,
+      "status": "PASS",
+      "testDatabaseDropped": true,
+      "providerGenerations": 0,
+      "exactFinalSource": true
+    },
+    {
+      "job": "final-bank",
+      "sourceSha": "871ba419769ece9bd17b089959ac0409355c7a31",
+      "sourceDirty": false,
+      "checks": 5,
+      "status": "PASS",
+      "testDatabaseDropped": true,
+      "providerGenerations": 0,
+      "exactFinalSource": true
+    }
+  ],
+  "localFinalTests": {
+    "worker": 247,
+    "node": 92
+  },
+  "providerGenerations": 0,
+  "liveSend": false,
+  "allFiveTestDatabasesDropped": true,
+  "limits": [
+    "No provider quality or 17-controls qualification",
+    "Shortened source title remains unbound without authoritative alias",
+    "Post-commit catalog revalidation before first delivery is not connected"
+  ]
+}

@@ -1,0 +1,520 @@
+{
+  "schemaVersion": 1,
+  "scope": "CANDIDATE_CODE_DETERMINISTIC_AND_ISOLATED_POSTGRES_ONLY",
+  "implementationBaseSha": "b86825a1de84314175bf98d88a991fb940a7ddf2",
+  "verifiedExecutableSourceSha": "ff5e0543fb425ddf0f2a1b5ec6d722a690e831f9",
+  "sourceCleanAtVerificationStart": true,
+  "providerGenerations": 0,
+  "liveCustomerSends": 0,
+  "shopMetadataWrites": 0,
+  "dataReadiness": "DATA_NOT_READY",
+  "freshModelQualification": "NOT_RUN",
+  "implementationReview": "SELF_REVIEW",
+  "bGo": false,
+  "checks": [
+    {
+      "name": "worker-focused",
+      "status": "PASS",
+      "exitCode": 0,
+      "tests": 537,
+      "files": 17,
+      "logSha256": "352a51c24e5d56348b737dd9a62760e90ebf125c18d295fb4666b4b439c23836"
+    },
+    {
+      "name": "shared-plan-focused",
+      "status": "PASS",
+      "exitCode": 0,
+      "tests": 192,
+      "files": 7,
+      "logSha256": "dea75194543cb5cafab2c6a9a0c539f3818458a4dc657dd7824cb8573ec99fa9"
+    },
+    {
+      "name": "shared-focused",
+      "status": "PASS",
+      "exitCode": 0,
+      "tests": 116,
+      "files": 7,
+      "logSha256": "738508b16777630f72279314328251a4bb3277b9f86e1fcfe5f851ebd1ec4c1b"
+    },
+    {
+      "name": "commerce-evals",
+      "status": "PASS",
+      "exitCode": 0,
+      "tests": 216,
+      "files": null,
+      "logSha256": "224d8db0b644ec373a72daf7f0d1a7a740836d1188917994424580917788a49c"
+    },
+    {
+      "name": "driver-stubs-direct",
+      "status": "PASS",
+      "exitCode": 0,
+      "tests": 2,
+      "files": null,
+      "logSha256": "74002fbcfebca2f999b786f2321ab1c2d3ed8b923a69e89cfe673514306814f1"
+    },
+    {
+      "name": "worker-typecheck",
+      "status": "PASS",
+      "exitCode": 0,
+      "tests": null,
+      "files": null,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "worker-build-final",
+      "status": "PASS",
+      "exitCode": 0,
+      "tests": null,
+      "files": null,
+      "logSha256": "aca67e9699a1762519933eeb57dc50a374353a0c441d2ba999e7b4a75bb88980"
+    },
+    {
+      "name": "worker-lint",
+      "status": "PASS",
+      "exitCode": 0,
+      "tests": null,
+      "files": null,
+      "logSha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415"
+    },
+    {
+      "name": "shared-typecheck",
+      "status": "PASS",
+      "exitCode": 0,
+      "tests": null,
+      "files": null,
+      "logSha256": "3333868def9afe9b4c5ecc6803cd7da86599de45e5774ed721cb470e8e77ad5d"
+    },
+    {
+      "name": "shared-build",
+      "status": "PASS",
+      "exitCode": 0,
+      "tests": null,
+      "files": null,
+      "logSha256": "30facdba4dc6a66f5fd1dee92a5a02de29e6f94c7704b236e0da566f43b0e38c"
+    }
+  ],
+  "coverageNote": "shared-focused overlaps shared-plan-focused; do not sum as unique tests",
+  "postgres": [
+    {
+      "paymentMethod": "COD",
+      "mode": "REAL_POSTGRES_SYNTHETIC_DOMAIN_INPUTS_CURRENT_POLICY_CAPTURE",
+      "tests": 49,
+      "testDatabaseDropped": true,
+      "rawReportSha256": "ebef2f98437aa731de0b8665b89811238817e82f8fd2323a44d2d8769ed1da1d",
+      "cases": [
+        {
+          "name": "B composed existing clarification migration rolls back exactly before new events",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed recovery accounting committed",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed recovery accounting conflict",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed recovery accounting commit-response-lost",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed recovery accounting rollback-response-lost",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial verified",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial owner-error",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial source-changed-before-delivery",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial commit-response-lost",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial rollback-response-lost",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial cart-receipt",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial cart-source-changed",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff existing cart unchanged",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff existing cart cart-changed",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed snapshot invalidation source-refresh preserves the exact verified reply without renewing evidence",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed snapshot invalidation stock-change discards draft and captures only committed holding reply",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed snapshot invalidation expired discards draft and captures only committed holding reply",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery unchanged uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery before-commit uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery after-commit uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery restart uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery cached-allowed uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery receipt-unavailable uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery lost-commit-reply uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed candidate first CUSTOMER_REQUESTED_HUMAN commits silently and does not resume after handoff",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed candidate first SIZE_RULE_UNAVAILABLE commits silently and does not resume after handoff",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed no-chart preserves verified requested images in the atomic handoff group when holding policy allows it",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media handoff source never leaves partial intents",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media handoff rollback never leaves partial intents",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media delivery restart revalidates unchanged before any message",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media delivery restart revalidates source before any message",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media delivery restart revalidates revision before any message",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed N1 single-field private checkout keeps bare answers out of both models and public history",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed N4 sends exact text and selected image in one response group without replay duplicates",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed N5 image-first text-last handoff links the attachment history and retains encrypted source",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed N7 one negotiation event updates the persisted quote and cart reprice retains its evidence",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed generation failure preserves the committed total through cart readiness and captures recovery once",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed ingress commits an open cart, authorizes the exact reply and captures delivery once",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed two native mutations retain one source and next owner receives accepted history and current cart",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed committed profile correction carries its receipt through the effect bridge and final readback",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed private checkout bypasses both models and persists the existing guarded preview",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed confirmation uses existing revalidation and commits checkout handoff once",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed later failed mutation hands off the partial committed result, without replay",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed missing private checkout evidence commits a real handoff with zero model requests and completes the source",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed newer inbound between final readback and commit cancels eligibility without an Outbox",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed configured private dependency holding reply commits and is captured exactly once with the handoff",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed superseded source cannot persist customer measurements during generation",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed exact cart variant is checked again before Outbox even when price and quantity stay unchanged",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed clarification rollback refuses to destroy existing append-only events",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "paymentMethod": "BANK_TRANSFER",
+      "mode": "REAL_POSTGRES_SYNTHETIC_DOMAIN_INPUTS_CURRENT_POLICY_CAPTURE",
+      "tests": 49,
+      "testDatabaseDropped": true,
+      "rawReportSha256": "be91a51eb22a0183ca74b982745cbc693e488a96455403a3ca74d35be6811e67",
+      "cases": [
+        {
+          "name": "B composed existing clarification migration rolls back exactly before new events",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed recovery accounting committed",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed recovery accounting conflict",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed recovery accounting commit-response-lost",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed recovery accounting rollback-response-lost",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial verified",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial owner-error",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial source-changed-before-delivery",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial commit-response-lost",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial rollback-response-lost",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial cart-receipt",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial cart-source-changed",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff existing cart unchanged",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff existing cart cart-changed",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed snapshot invalidation source-refresh preserves the exact verified reply without renewing evidence",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed snapshot invalidation stock-change discards draft and captures only committed holding reply",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed snapshot invalidation expired discards draft and captures only committed holding reply",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery unchanged uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery before-commit uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery after-commit uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery restart uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery cached-allowed uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery receipt-unavailable uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery lost-commit-reply uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed candidate first CUSTOMER_REQUESTED_HUMAN commits silently and does not resume after handoff",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed candidate first SIZE_RULE_UNAVAILABLE commits silently and does not resume after handoff",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed no-chart preserves verified requested images in the atomic handoff group when holding policy allows it",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media handoff source never leaves partial intents",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media handoff rollback never leaves partial intents",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media delivery restart revalidates unchanged before any message",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media delivery restart revalidates source before any message",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media delivery restart revalidates revision before any message",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed N1 single-field private checkout keeps bare answers out of both models and public history",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed N4 sends exact text and selected image in one response group without replay duplicates",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed N5 image-first text-last handoff links the attachment history and retains encrypted source",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed N7 one negotiation event updates the persisted quote and cart reprice retains its evidence",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed generation failure preserves the committed total through cart readiness and captures recovery once",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed ingress commits an open cart, authorizes the exact reply and captures delivery once",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed two native mutations retain one source and next owner receives accepted history and current cart",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed committed profile correction carries its receipt through the effect bridge and final readback",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed private checkout bypasses both models and persists the existing guarded preview",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed confirmation uses existing revalidation and commits checkout handoff once",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed later failed mutation hands off the partial committed result, without replay",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed missing private checkout evidence commits a real handoff with zero model requests and completes the source",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed newer inbound between final readback and commit cancels eligibility without an Outbox",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed configured private dependency holding reply commits and is captured exactly once with the handoff",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed superseded source cannot persist customer measurements during generation",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed exact cart variant is checked again before Outbox even when price and quantity stay unchanged",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed clarification rollback refuses to destroy existing append-only events",
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "nonEvidenceInvocation": {
+    "command": "python -m unittest discover -s apps/worker/evals/single-agent-commerce-read-only/compact-native-full-run-20261026 -p driver.test.py",
+    "discoveredTests": 0,
+    "countedAsPass": false
+  },
+  "hashes": {
+    "docs/specs/c3-phase-b-media-size-context-fix-plan-20261027.md": "2cb2803f96e65511cee7daf0b9471fc957eceef875a991826c115ce9fe18e4ba",
+    "apps/worker/evals/single-agent-commerce-read-only/manifest.json": "31c6e645d991cf7a173adccbc7065828d58a9a3b45f6f28165737f7d7a4f32e4",
+    "apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt": "ecc60d49142849d34263471bb8b9a14d54d33747a0ef078af64d308ed947dff6",
+    "apps/worker/evals/single-agent-commerce-read-only/prompts/verifier.vi.txt": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c"
+  }
+}

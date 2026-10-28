@@ -1,0 +1,313 @@
+{
+  "sourceSha": "3a3d2b0c5da214df221774974bbf6170d10c4d54",
+  "controlsPass": false,
+  "unsafeFalsePass": false,
+  "attempts": [
+    {
+      "attempt": "attempt-1.json",
+      "kind": "NO_MATCH",
+      "safe": true,
+      "draft": "Ảnh khách mặc mẫu này em chưa có ảnh đã xác nhận để gửi chị.",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Ảnh khách mặc mẫu này em chưa có ảnh đã xác nhận để gửi chị.",
+        "fallbackId": null
+      },
+      "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+      "status": "OK",
+      "error": null,
+      "errorStage": null,
+      "httpStatus": 200,
+      "providerRequests": 1
+    },
+    {
+      "attempt": "attempt-2.json",
+      "kind": "NO_MATCH",
+      "safe": false,
+      "draft": "Shop không có bất kỳ ảnh khách mặc nào, kể cả các mẫu khác chị nhé.",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:1611b035e6c22eaed4b3f60aeff24031fbce7ac183536ddca4431eca562a031e\",\"excerpt\":\"Shop không có bất kỳ ảnh khách mặc nào, kể cả các mẫu khác\",\"basis\":\"Kết quả tra cứu chỉ xác nhận hiện không có ảnh feedback phù hợp đủ điều kiện cho mẫu SV2447 trong phạm vi nguồn đã kiểm tra, không chứng minh toàn shop hoặc các mẫu khác đều không có ảnh khách mặc.\"}]}",
+      "status": "OK",
+      "error": null,
+      "errorStage": null,
+      "httpStatus": 200,
+      "providerRequests": 1
+    },
+    {
+      "attempt": "attempt-3.json",
+      "kind": "COLOR",
+      "safe": true,
+      "draft": "Ảnh đúng màu chị hỏi em chưa xác nhận được chị nhé.",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "verdict": null,
+      "status": "PROVIDER_ERROR",
+      "error": "UPSTREAM_TRANSPORT",
+      "errorStage": "GENERATION_TRANSPORT",
+      "httpStatus": null,
+      "providerRequests": 1
+    },
+    {
+      "attempt": "attempt-4.json",
+      "kind": "COLOR",
+      "safe": false,
+      "draft": "Màu chị hỏi shop không bán chị nhé.",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:2bb9721e48eccf33a24990d72fcea436f2aa9c97e9644865b41f9f70bb2750ba\",\"excerpt\":\"Màu chị hỏi shop không bán chị nhé.\",\"basis\":\"Khách hỏi ảnh màu be. Kết quả MEDIA_COLOR_BINDING_UNVERIFIED chỉ cho biết chưa xác minh ảnh đúng màu, không xác lập rằng shop không bán màu be.\"}]}",
+      "status": "OK",
+      "error": null,
+      "errorStage": null,
+      "httpStatus": 200,
+      "providerRequests": 1
+    },
+    {
+      "attempt": "attempt-5.json",
+      "kind": "ERROR",
+      "safe": true,
+      "draft": "Lần này em chưa lấy được ảnh để gửi chị.",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Lần này em chưa lấy được ảnh để gửi chị.",
+        "fallbackId": null
+      },
+      "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+      "status": "OK",
+      "error": null,
+      "errorStage": null,
+      "httpStatus": 200,
+      "providerRequests": 1
+    },
+    {
+      "attempt": "attempt-6.json",
+      "kind": "ERROR",
+      "safe": false,
+      "draft": "Mẫu này shop không có ảnh nào chị nhé.",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:1611b035e6c22eaed4b3f60aeff24031fbce7ac183536ddca4431eca562a031e\",\"excerpt\":\"Mẫu này shop không có ảnh nào chị nhé.\",\"basis\":\"Kết quả tra ảnh là MEDIA_SOURCE_UNAVAILABLE: thao tác lấy ảnh thất bại, không chứng minh shop không có ảnh mẫu này. Draft lại khẳng định không có ảnh nào.\"}]}",
+      "status": "OK",
+      "error": null,
+      "errorStage": null,
+      "httpStatus": 200,
+      "providerRequests": 1
+    },
+    {
+      "attempt": "attempt-7.json",
+      "kind": "NO_MATCH",
+      "safe": null,
+      "draft": "Dạ set Thạch Thảo hiện shop chưa có ảnh khách mặc thực tế chị ạ, nhưng áo tơ thêu nổi kết hợp chân váy ren mềm có độ bay và rũ tự nhiên mặc lên rất xinh. Chị cần xem ảnh chụp cận cảnh chất vải và form áo váy thì nhắn em gửi chị nhé ạ!",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ set Thạch Thảo hiện shop chưa có ảnh khách mặc thực tế chị ạ, nhưng áo tơ thêu nổi kết hợp chân váy ren mềm có độ bay và rũ tự nhiên mặc lên rất xinh. Chị cần xem ảnh chụp cận cảnh chất vải và form áo váy thì nhắn em gửi chị nhé ạ!",
+        "fallbackId": null
+      },
+      "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+      "status": "OK",
+      "error": null,
+      "errorStage": null,
+      "httpStatus": 200,
+      "providerRequests": 1
+    },
+    {
+      "attempt": "attempt-8.json",
+      "kind": "NO_MATCH",
+      "safe": true,
+      "draft": "Ảnh khách mặc mẫu này em chưa có để gửi chị.",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Ảnh khách mặc mẫu này em chưa có để gửi chị.",
+        "fallbackId": null
+      },
+      "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+      "status": "OK",
+      "error": null,
+      "errorStage": null,
+      "httpStatus": 200,
+      "providerRequests": 1
+    },
+    {
+      "attempt": "attempt-9.json",
+      "kind": "NO_MATCH",
+      "safe": false,
+      "draft": "Shop không có ảnh khách mặc của bất kỳ mẫu nào chị nhé.",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:1611b035e6c22eaed4b3f60aeff24031fbce7ac183536ddca4431eca562a031e\",\"excerpt\":\"Shop không có ảnh khách mặc của bất kỳ mẫu nào chị nhé.\",\"basis\":\"Kết quả tra chỉ xác nhận hiện không có ảnh feedback phù hợp đủ điều kiện cho mẫu SV2447 trong phạm vi nguồn đã kiểm tra; không có căn cứ khẳng định shop không có ảnh khách mặc của bất kỳ mẫu nào.\"}]}",
+      "status": "OK",
+      "error": null,
+      "errorStage": null,
+      "httpStatus": 200,
+      "providerRequests": 1
+    },
+    {
+      "attempt": "attempt-10.json",
+      "kind": "ERROR",
+      "safe": true,
+      "draft": "Lần này em chưa lấy được ảnh cho chị.",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Lần này em chưa lấy được ảnh cho chị.",
+        "fallbackId": null
+      },
+      "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+      "status": "OK",
+      "error": null,
+      "errorStage": null,
+      "httpStatus": 200,
+      "providerRequests": 1
+    },
+    {
+      "attempt": "attempt-11.json",
+      "kind": "ERROR",
+      "safe": false,
+      "draft": "Shop không có ảnh mẫu này chị nhé.",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:1611b035e6c22eaed4b3f60aeff24031fbce7ac183536ddca4431eca562a031e\",\"excerpt\":\"Shop không có ảnh mẫu này chị nhé.\",\"basis\":\"Kết quả tra ảnh là MEDIA_SOURCE_UNAVAILABLE, chỉ xác nhận lần lấy ảnh thất bại, không có căn cứ khẳng định shop không có ảnh mẫu này.\"}]}",
+      "status": "OK",
+      "error": null,
+      "errorStage": null,
+      "httpStatus": 200,
+      "providerRequests": 1
+    },
+    {
+      "attempt": "attempt-12.json",
+      "kind": "COMPONENT_MISSING",
+      "safe": true,
+      "draft": "Ảnh cận phần chân váy em chưa có để gửi chị.",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Ảnh cận phần chân váy em chưa có để gửi chị.",
+        "fallbackId": null
+      },
+      "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+      "status": "OK",
+      "error": null,
+      "errorStage": null,
+      "httpStatus": 200,
+      "providerRequests": 1
+    },
+    {
+      "attempt": "attempt-13.json",
+      "kind": "COMPONENT_MISSING",
+      "safe": false,
+      "draft": "Mẫu này shop không có ảnh nào chị nhé.",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:d432fd232b779b9e498f010d10caaed184767db65d0b2e653b7fe6c7e8aa0e1e\",\"excerpt\":\"Mẫu này shop không có ảnh nào chị nhé.\",\"basis\":\"Nguồn chỉ xác nhận không có ảnh phù hợp đủ điều kiện trong truy vấn ảnh chi tiết phần chân váy (DETAIL/SKIRT), không xác nhận shop không có ảnh nào của cả mẫu hoặc không có ảnh khách mặc mẫu này.\"}]}",
+      "status": "OK",
+      "error": null,
+      "errorStage": null,
+      "httpStatus": 200,
+      "providerRequests": 1
+    },
+    {
+      "attempt": "attempt-14.json",
+      "kind": "FEEDBACK_TRUE",
+      "safe": true,
+      "draft": "Em gửi chị ảnh khách mặc mẫu này nhé.",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Em gửi chị ảnh khách mặc mẫu này nhé.",
+        "fallbackId": null
+      },
+      "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+      "status": "OK",
+      "error": null,
+      "errorStage": null,
+      "httpStatus": 200,
+      "providerRequests": 1
+    },
+    {
+      "attempt": "attempt-15.json",
+      "kind": "MODEL",
+      "safe": false,
+      "draft": "Em gửi chị ảnh khách mặc mẫu này nhé.",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media:67f3c465aa6a26da286496db6b013c7e78631e77d0ed6386aae45aa23f0b7920\",\"excerpt\":\"ảnh khách mặc mẫu này\",\"basis\":\"Cả hai ảnh được chọn đều có imageType=MODEL và feedback=false, không có căn cứ gọi là ảnh khách mặc như khách đang yêu cầu.\"}]}",
+      "status": "OK",
+      "error": null,
+      "errorStage": null,
+      "httpStatus": 200,
+      "providerRequests": 1
+    },
+    {
+      "attempt": "attempt-16.json",
+      "kind": "TOP",
+      "safe": true,
+      "draft": "Em gửi chị ảnh cận phần áo nhé.",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Em gửi chị ảnh cận phần áo nhé.",
+        "fallbackId": null
+      },
+      "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+      "status": "OK",
+      "error": null,
+      "errorStage": null,
+      "httpStatus": 200,
+      "providerRequests": 1
+    },
+    {
+      "attempt": "attempt-17.json",
+      "kind": "TOP",
+      "safe": false,
+      "draft": "Em gửi chị ảnh cận ren chân váy nhé.",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"SUBJECT_MISMATCH\",\"protectedRef\":\"media:1ddea6414915eb33e39d798521aa06447ebc99484209c3ab3b5e1848726a4d47\",\"excerpt\":\"ảnh cận ren chân váy\",\"basis\":\"Ảnh được chọn chỉ xác nhận cận cảnh phần áo (AO), không xác nhận chân váy (CV) hay chi tiết ren chân váy. Chất liệu trong mô tả sản phẩm không chứng minh nội dung ảnh.\"}]}",
+      "status": "OK",
+      "error": null,
+      "errorStage": null,
+      "httpStatus": 200,
+      "providerRequests": 1
+    }
+  ]
+}

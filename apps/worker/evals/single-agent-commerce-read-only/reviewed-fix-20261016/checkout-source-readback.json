@@ -1,0 +1,33 @@
+{
+  "mode": "POST_FIX_READ_ONLY_CHECKOUT_PREREQUISITES",
+  "sourceSha": "a39434334aa1114e08b43867e6a19106b672bb37",
+  "observedAt": "2026-10-16T02:23:17.163Z",
+  "providerGenerations": 0,
+  "sendEnabled": false,
+  "doesNotReconstructHistoricalFailure": true,
+  "checks": [
+    {
+      "checkoutRegionRequested": false,
+      "status": "READY",
+      "reasonCode": null,
+      "productId": "SV2447",
+      "offerId": "AO",
+      "unitPriceVnd": 499000,
+      "stockStatus": "PRE_ORDER",
+      "eta": null,
+      "etaExpiresAt": null,
+      "sourceObservedAt": "2026-10-16T02:02:38.704Z",
+      "sourceExpiresAt": "2026-10-18T02:02:38.704Z"
+    },
+    {
+      "checkoutRegionRequested": true,
+      "status": "ETA_UNAVAILABLE",
+      "reasonCode": "CART_ETA_UNAVAILABLE"
+    }
+  ],
+  "policy": {
+    "shopId": "LANA_DESIGN",
+    "bundleHash": "sha256:4e85428d3686d4e8082473dc327c41c007463854469d3f6d2f92b85047b21479"
+  },
+  "status": "READBACK_COMPLETE"
+}

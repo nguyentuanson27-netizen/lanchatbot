@@ -1,0 +1,3677 @@
+{
+  "attempts": [
+    {
+      "run": "advice-1",
+      "caseId": "b1-changed-occasion",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": null,
+      "toolCalls": null,
+      "toolRounds": null,
+      "addedVerificationLatencyMs": 9709.8132,
+      "elapsedMs": 15657.018399999999
+    },
+    {
+      "run": "advice-1",
+      "caseId": "b1-partial-source-v2",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chân váy được làm từ chất ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên chị nhé. Hiện tại em chưa kiểm tra được giá cũng như tình trạng size M cho riêng chân váy này.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": null,
+      "toolRounds": null,
+      "addedVerificationLatencyMs": 4694.639500000001,
+      "elapsedMs": 9737.8443
+    },
+    {
+      "run": "advice-1",
+      "caseId": "b1-buying-concern",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chân váy dùng chất ren tơ Hàn mềm với form nhẹ và độ rũ tự nhiên, kết hợp cùng áo tơ thêu nên mặc đi tiệc ban ngày trông rất bay bổng, thanh nhã chứ không bị rườm rà đâu chị ạ. \n\nNguyên set này có giá 799.000đ, hoàn toàn vừa vặn với ngân sách tầm 900 nghìn của chị. Chị lấy set này luôn nhé ạ?",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": null,
+      "toolRounds": null,
+      "addedVerificationLatencyMs": 9493.467400000001,
+      "elapsedMs": 14344.828499999996
+    },
+    {
+      "run": "advice-1",
+      "caseId": "b1-search-read",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, mẫu SD375 bên em có 2 lựa chọn:\n- Phần áo lẻ: 929.000đ\n- Cả bộ: 1.065.000đ\n\nChị muốn lấy áo lẻ hay cả bộ ạ?",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": null,
+      "toolRounds": null,
+      "addedVerificationLatencyMs": 4068.058100000002,
+      "elapsedMs": 6774.772199999999
+    },
+    {
+      "run": "advice-2",
+      "caseId": "b1-changed-occasion",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": null,
+      "toolCalls": null,
+      "toolRounds": null,
+      "addedVerificationLatencyMs": 6541.409799999999,
+      "elapsedMs": 14573.4929
+    },
+    {
+      "run": "advice-2",
+      "caseId": "b1-partial-source-v2",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chân váy Thạch Thảo làm từ chất ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên chị nhé. \n\nDạ hiện tại em chưa kiểm tra được giá và tình trạng còn size M của chân váy lẻ.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": null,
+      "toolRounds": null,
+      "addedVerificationLatencyMs": 4580.480800000001,
+      "elapsedMs": 8955.9814
+    },
+    {
+      "run": "advice-2",
+      "caseId": "b1-buying-concern",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chất ren tơ Hàn của chân váy mềm, form nhẹ và có độ rũ tự nhiên nên mặc lên tạo cảm giác bay bổng, thanh thoát chứ không bị nặng nề hay rườm rà đâu chị nhé, đi tiệc ban ngày rất hợp và lịch sự ạ. \n\nGiá mua trọn set là 799.000đ, vừa vặn trong ngân sách 900 nghìn của chị luôn nha.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": null,
+      "toolRounds": null,
+      "addedVerificationLatencyMs": 4378.587100000001,
+      "elapsedMs": 8007.856
+    },
+    {
+      "run": "advice-2",
+      "caseId": "b1-search-read",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ áo dài SD375 hiện có 2 lựa chọn giá:\n- Áo lẻ: 929.000đ\n- Nguyên set: 1.065.000đ",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": null,
+      "toolRounds": null,
+      "addedVerificationLatencyMs": 3706.8066000000035,
+      "elapsedMs": 6923.881000000005
+    },
+    {
+      "run": "advice-3",
+      "caseId": "b1-changed-occasion",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": null,
+      "toolCalls": null,
+      "toolRounds": null,
+      "addedVerificationLatencyMs": 5833.7179,
+      "elapsedMs": 12168.701000000001
+    },
+    {
+      "run": "advice-3",
+      "caseId": "b1-partial-source-v2",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chân váy làm bằng chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên chị nha. Hiện tại hệ thống của shop đang ghi nhận nguyên set Thạch Thảo nên em chưa kiểm tra được giá và tồn kho riêng cho chân váy size M.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": null,
+      "toolRounds": null,
+      "addedVerificationLatencyMs": 5579.548300000002,
+      "elapsedMs": 9357.639
+    },
+    {
+      "run": "advice-3",
+      "caseId": "b1-buying-concern",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chất ren tơ Hàn của chân váy mềm và có độ rũ tự nhiên nên mặc đi tiệc ban ngày rất nhã nhặn, không bị rườm rà đâu chị ạ. Nguyên set có giá 799.000đ, hoàn toàn nằm trong ngân sách 900.000đ của mình.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": null,
+      "toolRounds": null,
+      "addedVerificationLatencyMs": 4396.531500000001,
+      "elapsedMs": 8985.167100000002
+    },
+    {
+      "run": "advice-3",
+      "caseId": "b1-search-read",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, mẫu áo dài SD375 hiện có 2 lựa chọn với mức giá như sau ạ:\n- Áo lẻ: 929.000đ\n- Cả set: 1.065.000đ\n\nChị muốn chọn phương án nào ạ?",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": null,
+      "toolRounds": null,
+      "addedVerificationLatencyMs": 9037.877099999998,
+      "elapsedMs": 12434.902699999999
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-changed-occasion",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": null,
+      "toolCalls": 3,
+      "toolRounds": 2,
+      "addedVerificationLatencyMs": 9770.118699999999,
+      "elapsedMs": 23537.093499999995
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-partial-source-v2",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chân váy Thạch Thảo làm bằng chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên rất nhẹ nhàng ạ. \n\nHiện tại em chưa kiểm tra được giá, tồn kho cũng như chưa xác định rõ việc bán lẻ riêng chân váy này, nên em chưa báo chính xác cho chị được nhé ạ.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 2,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": 4595.552299999996,
+      "elapsedMs": 10563.373900000006
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-buying-concern",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Mặc đi tiệc ban ngày rất nhã nhặn và sang trọng chị nhé, không bị rườm rà đâu ạ vì chân váy dùng ren tơ Hàn mềm với độ rũ tự nhiên, kết hợp cùng áo tơ thêu nổi form nhẹ nhàng, thanh thoát. \n\nCả set có giá 799.000đ, nằm trọn trong ngân sách 900 nghìn của chị luôn nha. Chị có muốn chốt luôn nguyên set này không ạ?",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 2,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": 5709.817299999995,
+      "elapsedMs": 11572.671700000006
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-search-read",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Áo dài SD375 bên shop có hai lựa chọn giá để chị cân nhắc:\n- Mua áo lẻ: 929.000đ\n- Mua cả set: 1.065.000đ\n\nChị muốn lấy áo lẻ hay nguyên set ạ?",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 2,
+      "toolRounds": 2,
+      "addedVerificationLatencyMs": 11764.830200000011,
+      "elapsedMs": 16105.671799999996
+    },
+    {
+      "run": "b1-2",
+      "caseId": "b1-changed-occasion",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": null,
+      "toolCalls": 3,
+      "toolRounds": 2,
+      "addedVerificationLatencyMs": 13348.401999999995,
+      "elapsedMs": 28680.157
+    },
+    {
+      "run": "b1-2",
+      "caseId": "b1-partial-source-v2",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chân váy làm từ chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên rất đẹp chị ạ. \n\nHiện tại hệ thống của shop chưa tra được chính xác thông tin tồn kho, giá cũng như việc có bán lẻ riêng chân váy hay không, nên em chưa báo ngay cho chị được. Chị cần em hỗ trợ thêm mẫu nào khác không ạ?",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 2,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": 5139.4614,
+      "elapsedMs": 10157.603600000002
+    },
+    {
+      "run": "b1-2",
+      "caseId": "b1-buying-concern",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Trọn bộ set váy này có giá 799.000đ, hoàn toàn vừa vặn trong ngân sách 900k của chị nhé ạ. \n\nChị yên tâm là chất liệu ren tơ Hàn rất mềm, form nhẹ và có độ rũ, bay tự nhiên nên mặc đi tiệc ban ngày không bị rườm rà hay nặng nề đâu ạ. Phần áo tơ thêu nổi thanh nhã kết hợp cùng chân váy ren mềm tạo cảm giác nhẹ nhàng, sang trọng và rất vừa vặn cho không gian tiệc ban ngày.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 2,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": 5668.73490000001,
+      "elapsedMs": 10818.279299999995
+    },
+    {
+      "run": "b1-2",
+      "caseId": "b1-search-read",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Áo dài mã SD375 hiện có 2 lựa chọn mua cho chị:\n- Mua lẻ áo (AO): 929.000đ\n- Mua cả set (COMPOSITE): 1.065.000đ\n\nChị muốn lấy áo lẻ hay nguyên set ạ?",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 2,
+      "toolRounds": 2,
+      "addedVerificationLatencyMs": 4774.856700000004,
+      "elapsedMs": 8972.953600000008
+    },
+    {
+      "run": "b1-3",
+      "caseId": "b1-changed-occasion",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": null,
+      "toolCalls": 2,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": 5763.957699999999,
+      "elapsedMs": 13171.818500000001
+    },
+    {
+      "run": "b1-3",
+      "caseId": "b1-partial-source-v2",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chân váy dùng chất ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên, mặc lên rất mềm mại và bay bổng chị ạ. \n\nHiện tại hệ thống chưa cập nhật thông tin giá và tồn kho riêng cho chân váy lẻ hay size M, nên em chưa kiểm tra chính xác được phần này với chị nha.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 2,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": 5546.339699999997,
+      "elapsedMs": 10635.5262
+    },
+    {
+      "run": "b1-3",
+      "caseId": "b1-buying-concern",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Mặc đi tiệc ban ngày hoàn toàn hợp lý nha chị, không bị rườm rà đâu ạ. Set này dùng chất ren tơ Hàn mềm kết hợp áo tơ thêu form nhẹ, có độ bay và rũ tự nhiên nên nhìn rất thanh thoát, sang trọng mà vẫn mềm mại, nhẹ nhàng cho ban ngày.\n\nCả set có giá 799.000đ, nằm trọn trong ngân sách 900.000đ của chị luôn nha. Chị lấy nguyên set này không ạ?",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 2,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": 5542.888200000001,
+      "elapsedMs": 10851.822200000002
+    },
+    {
+      "run": "b1-3",
+      "caseId": "b1-search-read",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ áo dài SD375 bên shop có 2 lựa chọn bán:\n- Áo lẻ: 929.000đ\n- Cả set: 1.065.000đ\n\nChị muốn lấy áo lẻ hay nguyên set ạ?",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 2,
+      "toolRounds": 2,
+      "addedVerificationLatencyMs": 4368.085699999996,
+      "elapsedMs": 8749.715500000006
+    },
+    {
+      "run": "baseline-1",
+      "caseId": "stateful-open",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "OWNER_TOOL_MODE",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "OWNER_TOOL_MODE"
+      },
+      "toolCalls": 3,
+      "toolRounds": 2,
+      "addedVerificationLatencyMs": null,
+      "elapsedMs": 30463.199099999998
+    },
+    {
+      "run": "baseline-2",
+      "caseId": "stateful-open",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chị ơi, áo Thạch Thảo màu be size M là hàng đặt trước (pre-order) nên shop đã thêm vào giỏ cho mình rồi nhé ạ!",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 3,
+      "toolRounds": 2,
+      "addedVerificationLatencyMs": 8594.343800000002,
+      "elapsedMs": 44935.020300000004
+    },
+    {
+      "run": "baseline-3",
+      "caseId": "stateful-open",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "RECEIPT_BACKED_CART_SUMMARY",
+        "text": "Em đã thêm món chị chọn vào giỏ. Tổng 529.000đ, đã gồm phí giao hàng. Có món đặt trước, chị nhé.",
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "OWNER_TOOL_MODE"
+      },
+      "toolCalls": 4,
+      "toolRounds": 2,
+      "addedVerificationLatencyMs": null,
+      "elapsedMs": 39189.358
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-open",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Em đã thêm áo Thạch Thảo màu be size M vào giỏ cho mình rồi ạ. Mẫu này là hàng đặt trước nha chị. Tổng đơn của mình là 529.000đ (gồm 499.000đ tiền áo và 30.000đ phí ship).",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 4,
+      "toolRounds": 2,
+      "addedVerificationLatencyMs": 7522.287600000003,
+      "elapsedMs": 47083.4979
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-variant-quantity",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Em đã đổi sang áo Thạch Thảo màu be, size L và tăng thành 2 chiếc cho mình rồi ạ. Tổng đơn của mình là 978.100đ (đã gồm phí ship).",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 4,
+      "toolRounds": 2,
+      "addedVerificationLatencyMs": 8706.198399999994,
+      "elapsedMs": 43794.3796
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-quote",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Hai áo là 998.000đ, phí ship 30.000đ, được giảm 49.900đ nên tổng cộng thanh toán là 978.100đ chị nhé.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 1,
+      "toolRounds": 0,
+      "addedVerificationLatencyMs": 6160.762799999997,
+      "elapsedMs": 23352.1495
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-correction",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Em đã cập nhật số đo mới (eo 74, mông 96) vào hồ sơ cho mình rồi ạ. Đơn hàng 2 áo Thạch Thảo màu be size L của chị vẫn được giữ nguyên nhé!",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 2,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": 8572.173699999985,
+      "elapsedMs": 30409.906799999997
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-request-checkout",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "CHECKOUT_DETAILS_MISSING",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "NO_SEND",
+        "originalReason": "CHECKOUT_DETAILS_MISSING"
+      },
+      "toolCalls": 2,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": null,
+      "elapsedMs": 20366.90539999999
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-private-checkout",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "PRIVATE_CHECKOUT_COMMITTED",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": null,
+      "toolRounds": null,
+      "addedVerificationLatencyMs": null,
+      "elapsedMs": 7683.805900000007
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-confirm",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "PURCHASE_CONFIRMED",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "PURCHASE_CONFIRMED"
+      },
+      "toolCalls": 2,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": null,
+      "elapsedMs": 21611.83229999998
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-human-request",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "CUSTOMER_REQUESTED_HUMAN",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "CUSTOMER_REQUESTED_HUMAN"
+      },
+      "toolCalls": 2,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": null,
+      "elapsedMs": 19480.68609999999
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-open",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chị đã thêm áo Thạch Thảo màu be size M vào giỏ rồi nhé. Mẫu này hiện là hàng đặt trước, chị xem lại giỏ hoặc báo em khi cần hỗ trợ thêm nha!",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 3,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": 8557.530599999998,
+      "elapsedMs": 45411.2406
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-variant-quantity",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chị đã đổi áo Thạch Thảo màu be sang size L và lấy 2 chiếc nhé ạ. Mẫu này hiện là hàng đặt trước nha chị!",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 3,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": 7129.633300000001,
+      "elapsedMs": 39513.9553
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-quote",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Tổng 2 áo sau ưu đãi và cộng 30.000đ phí ship là 978.100đ chị nhé.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 1,
+      "toolRounds": 0,
+      "addedVerificationLatencyMs": 12333.679400000008,
+      "elapsedMs": 30085.7037
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-correction",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ em cập nhật lại số đo cho chị rồi ạ, mình vẫn giữ size L nhé!",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 2,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": 6801.954599999997,
+      "elapsedMs": 28246.07639999999
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-request-checkout",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "CHECKOUT_DETAILS_MISSING",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "NO_SEND",
+        "originalReason": "CHECKOUT_DETAILS_MISSING"
+      },
+      "toolCalls": 2,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": null,
+      "elapsedMs": 21284.614699999976
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-private-checkout",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "PRIVATE_CHECKOUT_COMMITTED",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": null,
+      "toolRounds": null,
+      "addedVerificationLatencyMs": null,
+      "elapsedMs": 7642.255600000004
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-confirm",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "PURCHASE_CONFIRMED",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "PURCHASE_CONFIRMED"
+      },
+      "toolCalls": 2,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": null,
+      "elapsedMs": 21827.155300000013
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-human-request",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "CUSTOMER_REQUESTED_HUMAN",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "CUSTOMER_REQUESTED_HUMAN"
+      },
+      "toolCalls": 2,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": null,
+      "elapsedMs": 18758.61169999998
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-open",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, em đã thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ. Mẫu này là hàng đặt trước nha chị ơi!",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 3,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": 8430.032200000001,
+      "elapsedMs": 43350.35249999999
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-variant-quantity",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, em đã đổi áo Thạch Thảo màu be sang size L và cập nhật số lượng thành 2 chiếc cho chị rồi ạ.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 3,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": 8172.931299999997,
+      "elapsedMs": 40320.25889999999
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-quote",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, tổng thanh toán cho 2 chiếc áo size L là 978.100đ (đã gồm 30.000đ phí ship) ạ.",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 1,
+      "toolRounds": 0,
+      "addedVerificationLatencyMs": 6668.686499999996,
+      "elapsedMs": 24708.733699999997
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-correction",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, em đã cập nhật lại số đo eo 74, mông 96 cho chị và giữ nguyên 2 áo size L ở giỏ hàng nhé ạ!",
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": 2,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": 8928.802599999995,
+      "elapsedMs": 29852.535300000003
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-request-checkout",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "CHECKOUT_DETAILS_MISSING",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "NO_SEND",
+        "originalReason": "CHECKOUT_DETAILS_MISSING"
+      },
+      "toolCalls": 2,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": null,
+      "elapsedMs": 20466.534599999984
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-private-checkout",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "PRIVATE_CHECKOUT_COMMITTED",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": null,
+      "toolCalls": null,
+      "toolRounds": null,
+      "addedVerificationLatencyMs": null,
+      "elapsedMs": 7613.505499999999
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-confirm",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "PURCHASE_CONFIRMED",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "PURCHASE_CONFIRMED"
+      },
+      "toolCalls": 2,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": null,
+      "elapsedMs": 23268.800400000007
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-human-request",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "CUSTOMER_REQUESTED_HUMAN",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "CUSTOMER_REQUESTED_HUMAN"
+      },
+      "toolCalls": 2,
+      "toolRounds": 1,
+      "addedVerificationLatencyMs": null,
+      "elapsedMs": 19150.54269999999
+    }
+  ],
+  "generations": [
+    {
+      "run": "advice-1",
+      "caseId": "b1-changed-occasion",
+      "id": "0",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "inputTokens": 4167,
+      "outputTokens": 1946,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "advice-1",
+      "caseId": "b1-changed-occasion",
+      "id": "1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 9704,
+      "inputTokens": 5907,
+      "outputTokens": 344,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "advice-1",
+      "caseId": "b1-partial-source-v2",
+      "id": "0",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "inputTokens": 2884,
+      "outputTokens": 1623,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "advice-1",
+      "caseId": "b1-partial-source-v2",
+      "id": "1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4693,
+      "inputTokens": 3309,
+      "outputTokens": 63,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "advice-1",
+      "caseId": "b1-buying-concern",
+      "id": "0",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "inputTokens": 3332,
+      "outputTokens": 1576,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "advice-1",
+      "caseId": "b1-buying-concern",
+      "id": "1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 9490,
+      "inputTokens": 5085,
+      "outputTokens": 86,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "advice-1",
+      "caseId": "b1-search-read",
+      "id": "0",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "inputTokens": 2929,
+      "outputTokens": 753,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "advice-1",
+      "caseId": "b1-search-read",
+      "id": "1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4066,
+      "inputTokens": 4266,
+      "outputTokens": 42,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "advice-2",
+      "caseId": "b1-changed-occasion",
+      "id": "0",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "inputTokens": 4246,
+      "outputTokens": 2661,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "advice-2",
+      "caseId": "b1-changed-occasion",
+      "id": "1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 6536,
+      "inputTokens": 6021,
+      "outputTokens": 152,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "advice-2",
+      "caseId": "b1-partial-source-v2",
+      "id": "0",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "inputTokens": 2884,
+      "outputTokens": 1339,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "advice-2",
+      "caseId": "b1-partial-source-v2",
+      "id": "1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4579,
+      "inputTokens": 3315,
+      "outputTokens": 51,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "advice-2",
+      "caseId": "b1-buying-concern",
+      "id": "0",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "inputTokens": 3332,
+      "outputTokens": 1033,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "advice-2",
+      "caseId": "b1-buying-concern",
+      "id": "1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4374,
+      "inputTokens": 5078,
+      "outputTokens": 66,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "advice-2",
+      "caseId": "b1-search-read",
+      "id": "0",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "inputTokens": 2929,
+      "outputTokens": 898,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "advice-2",
+      "caseId": "b1-search-read",
+      "id": "1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3704,
+      "inputTokens": 4251,
+      "outputTokens": 52,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "advice-3",
+      "caseId": "b1-changed-occasion",
+      "id": "0",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "inputTokens": 3350,
+      "outputTokens": 1666,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "advice-3",
+      "caseId": "b1-changed-occasion",
+      "id": "1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 5828,
+      "inputTokens": 5122,
+      "outputTokens": 149,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "advice-3",
+      "caseId": "b1-partial-source-v2",
+      "id": "0",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "inputTokens": 2884,
+      "outputTokens": 895,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "advice-3",
+      "caseId": "b1-partial-source-v2",
+      "id": "1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 5578,
+      "inputTokens": 3323,
+      "outputTokens": 127,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "advice-3",
+      "caseId": "b1-buying-concern",
+      "id": "0",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "inputTokens": 3332,
+      "outputTokens": 1397,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "advice-3",
+      "caseId": "b1-buying-concern",
+      "id": "1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4394,
+      "inputTokens": 5048,
+      "outputTokens": 54,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "advice-3",
+      "caseId": "b1-search-read",
+      "id": "0",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": null,
+      "inputTokens": 2929,
+      "outputTokens": 950,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "advice-3",
+      "caseId": "b1-search-read",
+      "id": "1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 9035,
+      "inputTokens": 4268,
+      "outputTokens": 22,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-changed-occasion",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2714.1719999999987,
+      "inputTokens": 3252,
+      "outputTokens": 698,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-changed-occasion",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2928.2560999999987,
+      "inputTokens": 4831,
+      "outputTokens": 707,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-changed-occasion",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:owner:3",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3007.7437999999966,
+      "inputTokens": 6135,
+      "outputTokens": 883,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-changed-occasion",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 8410.2301,
+      "inputTokens": 5944,
+      "outputTokens": 183,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-partial-source-v2",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2165.7602999999945,
+      "inputTokens": 3217,
+      "outputTokens": 565,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-partial-source-v2",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3162.1829,
+      "inputTokens": 3974,
+      "outputTokens": 911,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-partial-source-v2",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3928.3073000000004,
+      "inputTokens": 3352,
+      "outputTokens": 53,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-buying-concern",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2883.824800000002,
+      "inputTokens": 3234,
+      "outputTokens": 792,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-buying-concern",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2140.8482000000076,
+      "inputTokens": 4907,
+      "outputTokens": 441,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-buying-concern",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4993.77410000001,
+      "inputTokens": 5104,
+      "outputTokens": 89,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-search-read",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1153.9167000000016,
+      "inputTokens": 2899,
+      "outputTokens": 95,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-search-read",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 949.3065999999963,
+      "inputTokens": 3045,
+      "outputTokens": 92,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-search-read",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:3",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1650.4151999999885,
+      "inputTokens": 3470,
+      "outputTokens": 293,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-search-read",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 11012.186699999991,
+      "inputTokens": 4279,
+      "outputTokens": 53,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "b1-2",
+      "caseId": "b1-changed-occasion",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3874.0962999999974,
+      "inputTokens": 3252,
+      "outputTokens": 1133,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-2",
+      "caseId": "b1-changed-occasion",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2911.2728999999963,
+      "inputTokens": 5266,
+      "outputTokens": 683,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-2",
+      "caseId": "b1-changed-occasion",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:owner:3",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3130.4668999999994,
+      "inputTokens": 6623,
+      "outputTokens": 937,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-2",
+      "caseId": "b1-changed-occasion",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 11958.0893,
+      "inputTokens": 6056,
+      "outputTokens": 370,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "b1-2",
+      "caseId": "b1-partial-source-v2",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2216.340299999996,
+      "inputTokens": 3217,
+      "outputTokens": 611,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-2",
+      "caseId": "b1-partial-source-v2",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2141.9217000000062,
+      "inputTokens": 4020,
+      "outputTokens": 528,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-2",
+      "caseId": "b1-partial-source-v2",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4467.652100000007,
+      "inputTokens": 3357,
+      "outputTokens": 64,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "b1-2",
+      "caseId": "b1-buying-concern",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2345.977199999994,
+      "inputTokens": 3234,
+      "outputTokens": 610,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-2",
+      "caseId": "b1-buying-concern",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1943.7978000000003,
+      "inputTokens": 4725,
+      "outputTokens": 465,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-2",
+      "caseId": "b1-buying-concern",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4972.190799999997,
+      "inputTokens": 5125,
+      "outputTokens": 89,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "b1-2",
+      "caseId": "b1-search-read",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1106.5651999999973,
+      "inputTokens": 2899,
+      "outputTokens": 98,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-2",
+      "caseId": "b1-search-read",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 912.6312999999936,
+      "inputTokens": 3048,
+      "outputTokens": 89,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-2",
+      "caseId": "b1-search-read",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:3",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1659.1110999999946,
+      "inputTokens": 3470,
+      "outputTokens": 328,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-2",
+      "caseId": "b1-search-read",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4058.275800000003,
+      "inputTokens": 4284,
+      "outputTokens": 52,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "b1-3",
+      "caseId": "b1-changed-occasion",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3070.6134999999995,
+      "inputTokens": 3252,
+      "outputTokens": 755,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-3",
+      "caseId": "b1-changed-occasion",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2827.8903999999966,
+      "inputTokens": 4888,
+      "outputTokens": 713,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-3",
+      "caseId": "b1-changed-occasion",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 5044.275300000001,
+      "inputTokens": 5138,
+      "outputTokens": 145,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "b1-3",
+      "caseId": "b1-partial-source-v2",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1878.2963999999993,
+      "inputTokens": 3217,
+      "outputTokens": 486,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-3",
+      "caseId": "b1-partial-source-v2",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2544.3208000000013,
+      "inputTokens": 3895,
+      "outputTokens": 650,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-3",
+      "caseId": "b1-partial-source-v2",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4918.729599999999,
+      "inputTokens": 3351,
+      "outputTokens": 123,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "b1-3",
+      "caseId": "b1-buying-concern",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2276.8145000000004,
+      "inputTokens": 3234,
+      "outputTokens": 574,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-3",
+      "caseId": "b1-buying-concern",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2229.213100000001,
+      "inputTokens": 4689,
+      "outputTokens": 518,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-3",
+      "caseId": "b1-buying-concern",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4782.0534999999945,
+      "inputTokens": 5112,
+      "outputTokens": 73,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "b1-3",
+      "caseId": "b1-search-read",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1222.5478000000003,
+      "inputTokens": 2899,
+      "outputTokens": 117,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-3",
+      "caseId": "b1-search-read",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1322.5969999999943,
+      "inputTokens": 3067,
+      "outputTokens": 212,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-3",
+      "caseId": "b1-search-read",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:3",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1271.9404000000068,
+      "inputTokens": 3612,
+      "outputTokens": 241,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "b1-3",
+      "caseId": "b1-search-read",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3638.880400000009,
+      "inputTokens": 4275,
+      "outputTokens": 43,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "baseline-1",
+      "caseId": "stateful-open",
+      "id": "5fa78ff6-1047-47fb-bc7f-34a6eef6c3e5:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3082.149300000001,
+      "inputTokens": 4096,
+      "outputTokens": 702,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "baseline-1",
+      "caseId": "stateful-open",
+      "id": "5fa78ff6-1047-47fb-bc7f-34a6eef6c3e5:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2021.0599000000002,
+      "inputTokens": 6356,
+      "outputTokens": 336,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "baseline-1",
+      "caseId": "stateful-open",
+      "id": "5fa78ff6-1047-47fb-bc7f-34a6eef6c3e5:owner:3",
+      "role": "owner",
+      "status": "PROVIDER_ERROR",
+      "providerRequests": 1,
+      "latencyMs": 1906.8543999999965,
+      "inputTokens": 5340,
+      "outputTokens": 444,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "baseline-2",
+      "caseId": "stateful-open",
+      "id": "af8361c7-51f9-4179-8e90-ce9d8bda0247:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4109.560999999998,
+      "inputTokens": 4097,
+      "outputTokens": 933,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "baseline-2",
+      "caseId": "stateful-open",
+      "id": "af8361c7-51f9-4179-8e90-ce9d8bda0247:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2352.7742,
+      "inputTokens": 6577,
+      "outputTokens": 461,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "baseline-2",
+      "caseId": "stateful-open",
+      "id": "af8361c7-51f9-4179-8e90-ce9d8bda0247:owner:3",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1661.5988999999972,
+      "inputTokens": 6918,
+      "outputTokens": 312,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "baseline-2",
+      "caseId": "stateful-open",
+      "id": "af8361c7-51f9-4179-8e90-ce9d8bda0247:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 5295.640399999997,
+      "inputTokens": 6563,
+      "outputTokens": 89,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "baseline-3",
+      "caseId": "stateful-open",
+      "id": "a723e979-df78-4f2f-b9d4-4e1dea5bfbbf:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2326.673899999998,
+      "inputTokens": 4093,
+      "outputTokens": 580,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "baseline-3",
+      "caseId": "stateful-open",
+      "id": "a723e979-df78-4f2f-b9d4-4e1dea5bfbbf:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3673.9281999999985,
+      "inputTokens": 5892,
+      "outputTokens": 1018,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "baseline-3",
+      "caseId": "stateful-open",
+      "id": "a723e979-df78-4f2f-b9d4-4e1dea5bfbbf:owner:3",
+      "role": "owner",
+      "status": "PROVIDER_ERROR",
+      "providerRequests": 1,
+      "latencyMs": 1398.6589000000022,
+      "inputTokens": 7141,
+      "outputTokens": 133,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-open",
+      "id": "2cf8a0cd-a20d-4e1c-a810-55a0f6ca5852:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4406.784800000001,
+      "inputTokens": 4379,
+      "outputTokens": 1263,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-open",
+      "id": "2cf8a0cd-a20d-4e1c-a810-55a0f6ca5852:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3131.7732000000033,
+      "inputTokens": 7382,
+      "outputTokens": 785,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-open",
+      "id": "2cf8a0cd-a20d-4e1c-a810-55a0f6ca5852:owner:3",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2909.287599999996,
+      "inputTokens": 6887,
+      "outputTokens": 670,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-open",
+      "id": "2cf8a0cd-a20d-4e1c-a810-55a0f6ca5852:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4527.963500000005,
+      "inputTokens": 5723,
+      "outputTokens": 70,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-variant-quantity",
+      "id": "e7daa9d2-03cb-46d4-a618-e9865ecefbbb:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3888.439299999998,
+      "inputTokens": 4993,
+      "outputTokens": 1189,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-variant-quantity",
+      "id": "e7daa9d2-03cb-46d4-a618-e9865ecefbbb:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1849.2900000000081,
+      "inputTokens": 7180,
+      "outputTokens": 239,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-variant-quantity",
+      "id": "e7daa9d2-03cb-46d4-a618-e9865ecefbbb:owner:3",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1534.6906000000017,
+      "inputTokens": 6173,
+      "outputTokens": 324,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-variant-quantity",
+      "id": "e7daa9d2-03cb-46d4-a618-e9865ecefbbb:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 5703.848700000002,
+      "inputTokens": 5482,
+      "outputTokens": 61,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-quote",
+      "id": "2199c234-5246-4da2-b9ca-4317a68a5e9a:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3296.1872999999905,
+      "inputTokens": 5053,
+      "outputTokens": 887,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-quote",
+      "id": "2199c234-5246-4da2-b9ca-4317a68a5e9a:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3832.429600000003,
+      "inputTokens": 4896,
+      "outputTokens": 63,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-correction",
+      "id": "8b8eaf17-4680-42fd-bf7e-08555a9cd34f:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3254.744299999991,
+      "inputTokens": 5134,
+      "outputTokens": 1030,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-correction",
+      "id": "8b8eaf17-4680-42fd-bf7e-08555a9cd34f:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2053.709499999997,
+      "inputTokens": 6513,
+      "outputTokens": 383,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-correction",
+      "id": "8b8eaf17-4680-42fd-bf7e-08555a9cd34f:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 6071.341799999995,
+      "inputTokens": 5274,
+      "outputTokens": 91,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-request-checkout",
+      "id": "44f87466-12b9-4349-910e-358f2dbeb5db:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1581.002600000007,
+      "inputTokens": 5196,
+      "outputTokens": 261,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-confirm",
+      "id": "ea8ae15e-c192-491a-9176-3f5f180937e9:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1385.3636999999871,
+      "inputTokens": 5047,
+      "outputTokens": 224,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-human-request",
+      "id": "a0989f13-997f-48fa-be91-663d9ce68cb3:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1975.2309999999998,
+      "inputTokens": 4362,
+      "outputTokens": 394,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-open",
+      "id": "065dc47a-17ed-4811-9227-ae14e4c0af8c:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 7728.654299999998,
+      "inputTokens": 4380,
+      "outputTokens": 2497,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-open",
+      "id": "065dc47a-17ed-4811-9227-ae14e4c0af8c:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1719.1224999999977,
+      "inputTokens": 8643,
+      "outputTokens": 293,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-open",
+      "id": "065dc47a-17ed-4811-9227-ae14e4c0af8c:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 5253.811300000001,
+      "inputTokens": 5667,
+      "outputTokens": 121,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-variant-quantity",
+      "id": "229289bf-c654-4b2e-869e-bf58ef4b026a:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4335.619299999991,
+      "inputTokens": 4983,
+      "outputTokens": 1546,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-variant-quantity",
+      "id": "229289bf-c654-4b2e-869e-bf58ef4b026a:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1776.4510999999911,
+      "inputTokens": 7540,
+      "outputTokens": 301,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-variant-quantity",
+      "id": "229289bf-c654-4b2e-869e-bf58ef4b026a:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3856.6868000000104,
+      "inputTokens": 5425,
+      "outputTokens": 63,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-quote",
+      "id": "8702b728-45e4-48de-a2eb-86e6a8fbd36a:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3903.443900000013,
+      "inputTokens": 5030,
+      "outputTokens": 1234,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-quote",
+      "id": "8702b728-45e4-48de-a2eb-86e6a8fbd36a:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 8730.7347,
+      "inputTokens": 4838,
+      "outputTokens": 48,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-correction",
+      "id": "ffe4e07f-a440-4a31-9e26-3594126d7ff3:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2970.747799999983,
+      "inputTokens": 5091,
+      "outputTokens": 855,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-correction",
+      "id": "ffe4e07f-a440-4a31-9e26-3594126d7ff3:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1882.4830000000075,
+      "inputTokens": 6289,
+      "outputTokens": 326,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-correction",
+      "id": "ffe4e07f-a440-4a31-9e26-3594126d7ff3:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4347.508799999981,
+      "inputTokens": 5187,
+      "outputTokens": 66,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-request-checkout",
+      "id": "b9931f31-343c-4283-b3e9-82414f976d21:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1897.6424999999872,
+      "inputTokens": 5124,
+      "outputTokens": 397,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-confirm",
+      "id": "266a6a35-ff24-41cb-b568-ded7b9193b94:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1566.5564000000013,
+      "inputTokens": 5015,
+      "outputTokens": 338,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-2",
+      "caseId": "stateful-human-request",
+      "id": "bca55f2f-b60b-4c9a-8940-5b90e232d639:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1535.2595000000147,
+      "inputTokens": 4360,
+      "outputTokens": 186,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-open",
+      "id": "25a79fcb-6294-47f0-b31c-879045acb9f1:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 5370.6201,
+      "inputTokens": 4379,
+      "outputTokens": 1648,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-open",
+      "id": "25a79fcb-6294-47f0-b31c-879045acb9f1:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2324.3717000000033,
+      "inputTokens": 7759,
+      "outputTokens": 447,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-open",
+      "id": "25a79fcb-6294-47f0-b31c-879045acb9f1:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 5050.7549,
+      "inputTokens": 5653,
+      "outputTokens": 64,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-variant-quantity",
+      "id": "a7a5fbc2-2225-4fc2-bf6d-e71bf76629ca:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4176.877499999995,
+      "inputTokens": 4959,
+      "outputTokens": 1408,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-variant-quantity",
+      "id": "a7a5fbc2-2225-4fc2-bf6d-e71bf76629ca:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1623.8491000000067,
+      "inputTokens": 7359,
+      "outputTokens": 238,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-variant-quantity",
+      "id": "a7a5fbc2-2225-4fc2-bf6d-e71bf76629ca:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4882.429099999994,
+      "inputTokens": 5428,
+      "outputTokens": 51,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-quote",
+      "id": "c39bed0c-d863-4a2d-b524-426ddbc19ea9:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4198.534599999999,
+      "inputTokens": 5003,
+      "outputTokens": 1415,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-quote",
+      "id": "c39bed0c-d863-4a2d-b524-426ddbc19ea9:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3922.606899999999,
+      "inputTokens": 4826,
+      "outputTokens": 52,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-correction",
+      "id": "16051177-fba4-49b7-99ae-55e7293b2ae1:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3124.4072000000015,
+      "inputTokens": 5072,
+      "outputTokens": 811,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-correction",
+      "id": "16051177-fba4-49b7-99ae-55e7293b2ae1:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1197.498900000006,
+      "inputTokens": 6233,
+      "outputTokens": 125,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-correction",
+      "id": "16051177-fba4-49b7-99ae-55e7293b2ae1:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 6513.812599999976,
+      "inputTokens": 5201,
+      "outputTokens": 85,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gpt-6.1-sol",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-request-checkout",
+      "id": "e8631524-5ee9-4609-ac0c-fc5f34c37017:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1882.686699999991,
+      "inputTokens": 5122,
+      "outputTokens": 445,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-confirm",
+      "id": "8ce6c810-2177-4625-8eac-545495d713d3:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2539.792000000016,
+      "inputTokens": 5025,
+      "outputTokens": 699,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    },
+    {
+      "run": "stateful-3",
+      "caseId": "stateful-human-request",
+      "id": "ab6e7ce2-750d-4a58-8135-93cb1620c527:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1679.9437000000034,
+      "inputTokens": 4360,
+      "outputTokens": 277,
+      "httpStatus": 200,
+      "cost": null,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "failureCode": null
+    }
+  ],
+  "wireCaptureHashes": [
+    {
+      "run": "advice-1",
+      "id": "7d73cd86-e6d7-48a1-a085-364a9bf153a3:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "f07b2ce3d8d0954a5f6f7a587b0dbe511a7404f7cafdc97de7de43d958661f91"
+    },
+    {
+      "run": "advice-1",
+      "id": "7d73cd86-e6d7-48a1-a085-364a9bf153a3:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "26d10ca1f7dd047404c09c1cfc25d18cbe0fcd8bca766c6551b126d17f4f951e"
+    },
+    {
+      "run": "advice-1",
+      "id": "7d73cd86-e6d7-48a1-a085-364a9bf153a3:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "26d10ca1f7dd047404c09c1cfc25d18cbe0fcd8bca766c6551b126d17f4f951e"
+    },
+    {
+      "run": "advice-1",
+      "id": "7d73cd86-e6d7-48a1-a085-364a9bf153a3:verifier:1",
+      "phase": "RESULT",
+      "hash": "26d10ca1f7dd047404c09c1cfc25d18cbe0fcd8bca766c6551b126d17f4f951e"
+    },
+    {
+      "run": "advice-1",
+      "id": "ce4b9132-90d9-4c1d-8f28-6fdefd695748:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "d11c3a161358592a58f4b9585e83361ed434c435dde6eb3b3494fe8ab8e94c58"
+    },
+    {
+      "run": "advice-1",
+      "id": "ce4b9132-90d9-4c1d-8f28-6fdefd695748:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "1733edfcab81bad66400ef0ce4ebf23c6ffe079785fe7ff0de17da6659f11bf6"
+    },
+    {
+      "run": "advice-1",
+      "id": "ce4b9132-90d9-4c1d-8f28-6fdefd695748:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "1733edfcab81bad66400ef0ce4ebf23c6ffe079785fe7ff0de17da6659f11bf6"
+    },
+    {
+      "run": "advice-1",
+      "id": "ce4b9132-90d9-4c1d-8f28-6fdefd695748:verifier:1",
+      "phase": "RESULT",
+      "hash": "1733edfcab81bad66400ef0ce4ebf23c6ffe079785fe7ff0de17da6659f11bf6"
+    },
+    {
+      "run": "advice-1",
+      "id": "d069961e-b021-4856-8ffb-062c35703624:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "1655c205351c28654d40c9852539b0ceb790d1ebfdbd37bb1c96ed4034bfdb7d"
+    },
+    {
+      "run": "advice-1",
+      "id": "d069961e-b021-4856-8ffb-062c35703624:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "812c5f87c1932dbc085ba94d2ca41b50c151afb2af29c8edc477c12e809e13e2"
+    },
+    {
+      "run": "advice-1",
+      "id": "d069961e-b021-4856-8ffb-062c35703624:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "812c5f87c1932dbc085ba94d2ca41b50c151afb2af29c8edc477c12e809e13e2"
+    },
+    {
+      "run": "advice-1",
+      "id": "d069961e-b021-4856-8ffb-062c35703624:verifier:1",
+      "phase": "RESULT",
+      "hash": "812c5f87c1932dbc085ba94d2ca41b50c151afb2af29c8edc477c12e809e13e2"
+    },
+    {
+      "run": "advice-1",
+      "id": "a78554d2-f53d-42bd-afe8-ef8151291088:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "cb791b1f3c03443790d7a04e25d2691f1d801178ab26d0599fb7343b648187a1"
+    },
+    {
+      "run": "advice-1",
+      "id": "a78554d2-f53d-42bd-afe8-ef8151291088:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "b11c432b45c18b2f180ef3f1902dc12c7830af67656a52705b05ef7ec0a3ce35"
+    },
+    {
+      "run": "advice-1",
+      "id": "a78554d2-f53d-42bd-afe8-ef8151291088:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "b11c432b45c18b2f180ef3f1902dc12c7830af67656a52705b05ef7ec0a3ce35"
+    },
+    {
+      "run": "advice-1",
+      "id": "a78554d2-f53d-42bd-afe8-ef8151291088:verifier:1",
+      "phase": "RESULT",
+      "hash": "b11c432b45c18b2f180ef3f1902dc12c7830af67656a52705b05ef7ec0a3ce35"
+    },
+    {
+      "run": "advice-2",
+      "id": "2e932655-8e8b-4d7a-beb7-1ed502045532:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "426403da542dc73c095cb17d4b01bd72a9f8defe3b960e20a7a86cc6fc5c4d6d"
+    },
+    {
+      "run": "advice-2",
+      "id": "2e932655-8e8b-4d7a-beb7-1ed502045532:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "9833692500fe86353c2c0d8cd374a8849f1d2c6aed742f20b99293ceefdfa927"
+    },
+    {
+      "run": "advice-2",
+      "id": "2e932655-8e8b-4d7a-beb7-1ed502045532:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "9833692500fe86353c2c0d8cd374a8849f1d2c6aed742f20b99293ceefdfa927"
+    },
+    {
+      "run": "advice-2",
+      "id": "2e932655-8e8b-4d7a-beb7-1ed502045532:verifier:1",
+      "phase": "RESULT",
+      "hash": "9833692500fe86353c2c0d8cd374a8849f1d2c6aed742f20b99293ceefdfa927"
+    },
+    {
+      "run": "advice-2",
+      "id": "aaca5e6b-b450-4c1e-8552-c3b863ec62f0:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "d11c3a161358592a58f4b9585e83361ed434c435dde6eb3b3494fe8ab8e94c58"
+    },
+    {
+      "run": "advice-2",
+      "id": "aaca5e6b-b450-4c1e-8552-c3b863ec62f0:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "dff4aa0bb1f9ca1bde9593cc4cfa8f420e8ebadb071f0e302cac5de96cc55fd2"
+    },
+    {
+      "run": "advice-2",
+      "id": "aaca5e6b-b450-4c1e-8552-c3b863ec62f0:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "dff4aa0bb1f9ca1bde9593cc4cfa8f420e8ebadb071f0e302cac5de96cc55fd2"
+    },
+    {
+      "run": "advice-2",
+      "id": "aaca5e6b-b450-4c1e-8552-c3b863ec62f0:verifier:1",
+      "phase": "RESULT",
+      "hash": "dff4aa0bb1f9ca1bde9593cc4cfa8f420e8ebadb071f0e302cac5de96cc55fd2"
+    },
+    {
+      "run": "advice-2",
+      "id": "8a637514-1167-4a7c-b779-f0ad38be0e5e:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "1655c205351c28654d40c9852539b0ceb790d1ebfdbd37bb1c96ed4034bfdb7d"
+    },
+    {
+      "run": "advice-2",
+      "id": "8a637514-1167-4a7c-b779-f0ad38be0e5e:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "43f472236f82cdff1bdf089c40f847d96710185bb95a96824fd51f7d01dabb46"
+    },
+    {
+      "run": "advice-2",
+      "id": "8a637514-1167-4a7c-b779-f0ad38be0e5e:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "43f472236f82cdff1bdf089c40f847d96710185bb95a96824fd51f7d01dabb46"
+    },
+    {
+      "run": "advice-2",
+      "id": "8a637514-1167-4a7c-b779-f0ad38be0e5e:verifier:1",
+      "phase": "RESULT",
+      "hash": "43f472236f82cdff1bdf089c40f847d96710185bb95a96824fd51f7d01dabb46"
+    },
+    {
+      "run": "advice-2",
+      "id": "69b39099-e7f1-4b6d-9ff2-7503fb6b1f63:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "cb791b1f3c03443790d7a04e25d2691f1d801178ab26d0599fb7343b648187a1"
+    },
+    {
+      "run": "advice-2",
+      "id": "69b39099-e7f1-4b6d-9ff2-7503fb6b1f63:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "e18330c4bdf4fda1ce3441f64144c60731f01976ea8ea523786f5342fd952ef3"
+    },
+    {
+      "run": "advice-2",
+      "id": "69b39099-e7f1-4b6d-9ff2-7503fb6b1f63:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "e18330c4bdf4fda1ce3441f64144c60731f01976ea8ea523786f5342fd952ef3"
+    },
+    {
+      "run": "advice-2",
+      "id": "69b39099-e7f1-4b6d-9ff2-7503fb6b1f63:verifier:1",
+      "phase": "RESULT",
+      "hash": "e18330c4bdf4fda1ce3441f64144c60731f01976ea8ea523786f5342fd952ef3"
+    },
+    {
+      "run": "advice-3",
+      "id": "d5146b11-06b7-4b6b-acdb-8fedb28d0368:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "a06e7725acb90fb87381d49555f9020d22b8f93b1cbf015cc6a5f355a2cfd863"
+    },
+    {
+      "run": "advice-3",
+      "id": "d5146b11-06b7-4b6b-acdb-8fedb28d0368:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "03d9ebce1de9c8049a4602efc03ffd837d3c94f8ddcd91aab867311edf9e9a8b"
+    },
+    {
+      "run": "advice-3",
+      "id": "d5146b11-06b7-4b6b-acdb-8fedb28d0368:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "03d9ebce1de9c8049a4602efc03ffd837d3c94f8ddcd91aab867311edf9e9a8b"
+    },
+    {
+      "run": "advice-3",
+      "id": "d5146b11-06b7-4b6b-acdb-8fedb28d0368:verifier:1",
+      "phase": "RESULT",
+      "hash": "03d9ebce1de9c8049a4602efc03ffd837d3c94f8ddcd91aab867311edf9e9a8b"
+    },
+    {
+      "run": "advice-3",
+      "id": "f8c07405-0d1e-4abd-87a2-10e1c0ad20a8:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "d11c3a161358592a58f4b9585e83361ed434c435dde6eb3b3494fe8ab8e94c58"
+    },
+    {
+      "run": "advice-3",
+      "id": "f8c07405-0d1e-4abd-87a2-10e1c0ad20a8:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "b2bd9ed050df71d1a54200a0a951a653c975bcec24c4baabe6079bc58f7b0784"
+    },
+    {
+      "run": "advice-3",
+      "id": "f8c07405-0d1e-4abd-87a2-10e1c0ad20a8:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "b2bd9ed050df71d1a54200a0a951a653c975bcec24c4baabe6079bc58f7b0784"
+    },
+    {
+      "run": "advice-3",
+      "id": "f8c07405-0d1e-4abd-87a2-10e1c0ad20a8:verifier:1",
+      "phase": "RESULT",
+      "hash": "b2bd9ed050df71d1a54200a0a951a653c975bcec24c4baabe6079bc58f7b0784"
+    },
+    {
+      "run": "advice-3",
+      "id": "813b8272-ef13-42bf-88ea-0095e43242d0:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "1655c205351c28654d40c9852539b0ceb790d1ebfdbd37bb1c96ed4034bfdb7d"
+    },
+    {
+      "run": "advice-3",
+      "id": "813b8272-ef13-42bf-88ea-0095e43242d0:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "d7538b4fdadd7942c4dc7897eed33617c7831eba8483c00ff4e2946e4acc9dcc"
+    },
+    {
+      "run": "advice-3",
+      "id": "813b8272-ef13-42bf-88ea-0095e43242d0:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "d7538b4fdadd7942c4dc7897eed33617c7831eba8483c00ff4e2946e4acc9dcc"
+    },
+    {
+      "run": "advice-3",
+      "id": "813b8272-ef13-42bf-88ea-0095e43242d0:verifier:1",
+      "phase": "RESULT",
+      "hash": "d7538b4fdadd7942c4dc7897eed33617c7831eba8483c00ff4e2946e4acc9dcc"
+    },
+    {
+      "run": "advice-3",
+      "id": "e8b044c6-deda-48bb-88c4-febfa0f36e91:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "cb791b1f3c03443790d7a04e25d2691f1d801178ab26d0599fb7343b648187a1"
+    },
+    {
+      "run": "advice-3",
+      "id": "e8b044c6-deda-48bb-88c4-febfa0f36e91:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "a5a4ce0b35432031acf9b786cf44ea6989c7bbe501d9bfad4bb4e2c091455dee"
+    },
+    {
+      "run": "advice-3",
+      "id": "e8b044c6-deda-48bb-88c4-febfa0f36e91:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "a5a4ce0b35432031acf9b786cf44ea6989c7bbe501d9bfad4bb4e2c091455dee"
+    },
+    {
+      "run": "advice-3",
+      "id": "e8b044c6-deda-48bb-88c4-febfa0f36e91:verifier:1",
+      "phase": "RESULT",
+      "hash": "a5a4ce0b35432031acf9b786cf44ea6989c7bbe501d9bfad4bb4e2c091455dee"
+    },
+    {
+      "run": "b1-1",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "d2290813dee598aaf2a80d36b718f6ae0ec20fb334e0d7f7f8d4285c34c74961"
+    },
+    {
+      "run": "b1-1",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "e9742f680945053fef8737bb0d27042e168d8b161528f32818d31117b02c9670"
+    },
+    {
+      "run": "b1-1",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:owner:3",
+      "phase": "OWNER_REQUEST",
+      "hash": "ca5e3f8758e2c8d6b414cdec60f48d4bcacd3da87d2273ea5a02ef0c37467232"
+    },
+    {
+      "run": "b1-1",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "51c32c38bb2313821a67dda6b900ce7837a1a21a5bee70f3acdbc38791df534d"
+    },
+    {
+      "run": "b1-1",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:verifier:1",
+      "phase": "RESULT",
+      "hash": "51c32c38bb2313821a67dda6b900ce7837a1a21a5bee70f3acdbc38791df534d"
+    },
+    {
+      "run": "b1-1",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "52fbe929f38553ba3147ef98024b3cb7002f3a25b452dab711cc128742ea2e88"
+    },
+    {
+      "run": "b1-1",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "dd8a4981e39a8edc7c212f24b76a271d291fd6b5d1c900630599737a599c0ffc"
+    },
+    {
+      "run": "b1-1",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "325ebc06df093a69c299457589180702a30e07206a1f2f777ddefb64e686efa3"
+    },
+    {
+      "run": "b1-1",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:verifier:1",
+      "phase": "RESULT",
+      "hash": "325ebc06df093a69c299457589180702a30e07206a1f2f777ddefb64e686efa3"
+    },
+    {
+      "run": "b1-1",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "e94998dae5569a3d0859f9af40cf7ac4ee064cbb7358ecf238a6a6f55982a275"
+    },
+    {
+      "run": "b1-1",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "27720f757f370ffbc975fe8a4c269473ffc4473f3d3e2a4c65504d51ba9fa2ef"
+    },
+    {
+      "run": "b1-1",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "bd0889f6fbbdb51ab7746c7eb14aacfd16afb9984698ad555f9b1e017cacefc8"
+    },
+    {
+      "run": "b1-1",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:verifier:1",
+      "phase": "RESULT",
+      "hash": "bd0889f6fbbdb51ab7746c7eb14aacfd16afb9984698ad555f9b1e017cacefc8"
+    },
+    {
+      "run": "b1-1",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "45435902664a2f94a12026db74bcf030c25ef43c1d51d377029bd8a4de4d1615"
+    },
+    {
+      "run": "b1-1",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "3b445420fc6578c4a94a6b1b6310f21859bb869ab98dfabdc430f17d6bdf86db"
+    },
+    {
+      "run": "b1-1",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:3",
+      "phase": "OWNER_REQUEST",
+      "hash": "764794b2a7bf549a970a4619913df11263dc49270cad988fdd084127720989a9"
+    },
+    {
+      "run": "b1-1",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "261d46b1e8f0f1f3b7a54e98bbde5d11bdfd0547bb85f8529a6c13cf5160067e"
+    },
+    {
+      "run": "b1-1",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:verifier:1",
+      "phase": "RESULT",
+      "hash": "261d46b1e8f0f1f3b7a54e98bbde5d11bdfd0547bb85f8529a6c13cf5160067e"
+    },
+    {
+      "run": "b1-2",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "d2290813dee598aaf2a80d36b718f6ae0ec20fb334e0d7f7f8d4285c34c74961"
+    },
+    {
+      "run": "b1-2",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "d58c6cc23683f6ea61cb332bba759b8af171d743ed2f6227bef4b84a9a051959"
+    },
+    {
+      "run": "b1-2",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:owner:3",
+      "phase": "OWNER_REQUEST",
+      "hash": "78e1300c3767e3f4e28da538cc1efb4ca6e622fdc54b772d1f1879375311d580"
+    },
+    {
+      "run": "b1-2",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "c9d3b13302a7f59485e414a23723f2a35b28a933b3d0e2fd36e2335824b19392"
+    },
+    {
+      "run": "b1-2",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:verifier:1",
+      "phase": "RESULT",
+      "hash": "c9d3b13302a7f59485e414a23723f2a35b28a933b3d0e2fd36e2335824b19392"
+    },
+    {
+      "run": "b1-2",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "52fbe929f38553ba3147ef98024b3cb7002f3a25b452dab711cc128742ea2e88"
+    },
+    {
+      "run": "b1-2",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "fad7cf0addd8d77357619dbe1195bb5c8ce0184c8f03741836f14a896835486f"
+    },
+    {
+      "run": "b1-2",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "16107a4e183734e3c7eee369522271ad82ca045f601ccc930e224624168b06dd"
+    },
+    {
+      "run": "b1-2",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:verifier:1",
+      "phase": "RESULT",
+      "hash": "16107a4e183734e3c7eee369522271ad82ca045f601ccc930e224624168b06dd"
+    },
+    {
+      "run": "b1-2",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "e94998dae5569a3d0859f9af40cf7ac4ee064cbb7358ecf238a6a6f55982a275"
+    },
+    {
+      "run": "b1-2",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "6eed646979033128de085d322f8085a2e710e63b8e1720c474fc2bf421feed17"
+    },
+    {
+      "run": "b1-2",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "818a36c629d0de3ad1d688a445982c8ee50f227cac09408b9c3fd83f2e6f948f"
+    },
+    {
+      "run": "b1-2",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:verifier:1",
+      "phase": "RESULT",
+      "hash": "818a36c629d0de3ad1d688a445982c8ee50f227cac09408b9c3fd83f2e6f948f"
+    },
+    {
+      "run": "b1-2",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "45435902664a2f94a12026db74bcf030c25ef43c1d51d377029bd8a4de4d1615"
+    },
+    {
+      "run": "b1-2",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "509c8eaeedeece03d0ad2c839f58537cb6fe9dd923dd7dc817c045a1aba0a278"
+    },
+    {
+      "run": "b1-2",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:3",
+      "phase": "OWNER_REQUEST",
+      "hash": "e3066629f2ea0059e073861eb7b785f2ecba121c00a828f9d94dbd636318261b"
+    },
+    {
+      "run": "b1-2",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "c92f6e4ed72833f0201afaa059acb6739eaec92021088ebd0bbf95698cd1fcb6"
+    },
+    {
+      "run": "b1-2",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:verifier:1",
+      "phase": "RESULT",
+      "hash": "c92f6e4ed72833f0201afaa059acb6739eaec92021088ebd0bbf95698cd1fcb6"
+    },
+    {
+      "run": "b1-3",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "d2290813dee598aaf2a80d36b718f6ae0ec20fb334e0d7f7f8d4285c34c74961"
+    },
+    {
+      "run": "b1-3",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "b14c62e248756af27343977a093903c55e9c1eeb02ae8824e2b1c436cdb35d08"
+    },
+    {
+      "run": "b1-3",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "990dbc1085b5f73b80794c745b2345f478a7bb46b414f00ac240b74d94f0d4bc"
+    },
+    {
+      "run": "b1-3",
+      "id": "149c5b67736eaad97532360ae0de98c90610fdff475a52633931ca2b125230b9:verifier:1",
+      "phase": "RESULT",
+      "hash": "990dbc1085b5f73b80794c745b2345f478a7bb46b414f00ac240b74d94f0d4bc"
+    },
+    {
+      "run": "b1-3",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "52fbe929f38553ba3147ef98024b3cb7002f3a25b452dab711cc128742ea2e88"
+    },
+    {
+      "run": "b1-3",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "d47bdd6ba968876aa57cbe0255e77396e8bbfbea4f7aa89548e48e43a9abcc1f"
+    },
+    {
+      "run": "b1-3",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "3afa4f099da614b317a3d580d8b4571aa7d30540d036c224610af30f0f920855"
+    },
+    {
+      "run": "b1-3",
+      "id": "d8b9be241de963ecde275a83f500842bf1fbeae31d679f7bcc93821f4fd230fd:verifier:1",
+      "phase": "RESULT",
+      "hash": "3afa4f099da614b317a3d580d8b4571aa7d30540d036c224610af30f0f920855"
+    },
+    {
+      "run": "b1-3",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "e94998dae5569a3d0859f9af40cf7ac4ee064cbb7358ecf238a6a6f55982a275"
+    },
+    {
+      "run": "b1-3",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "65267f12be26262e70a1ece8db12327abcf2f0d7939caee6474a3ad1f616f67b"
+    },
+    {
+      "run": "b1-3",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "6d8ac20cd4d2f801710cd18619e8d53b6cf2f76d79e84fe43c1b2453d5d37417"
+    },
+    {
+      "run": "b1-3",
+      "id": "0d066d077f7373551757f6b80dbb3cc711fbb8a58c25cd0b3b428b150eff1b20:verifier:1",
+      "phase": "RESULT",
+      "hash": "6d8ac20cd4d2f801710cd18619e8d53b6cf2f76d79e84fe43c1b2453d5d37417"
+    },
+    {
+      "run": "b1-3",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "45435902664a2f94a12026db74bcf030c25ef43c1d51d377029bd8a4de4d1615"
+    },
+    {
+      "run": "b1-3",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "69685bc054ecaca68d033b25206e6a8ac430788eb704afad79572d41ccc82ebc"
+    },
+    {
+      "run": "b1-3",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:owner:3",
+      "phase": "OWNER_REQUEST",
+      "hash": "562e9cf7411d80a16491752846c4f3c26a197a0885c84bfb28f3b4c70b62dec4"
+    },
+    {
+      "run": "b1-3",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "7b38b5eee71c1d8f41436713661aeca4db7edce84c03eb5161744a55f537f17d"
+    },
+    {
+      "run": "b1-3",
+      "id": "a462cc26f6009b48ac227fa712008f3cc07061306abb22b74dfec3074cb556a2:verifier:1",
+      "phase": "RESULT",
+      "hash": "7b38b5eee71c1d8f41436713661aeca4db7edce84c03eb5161744a55f537f17d"
+    },
+    {
+      "run": "baseline-1",
+      "id": "5fa78ff6-1047-47fb-bc7f-34a6eef6c3e5:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "bf6959483eadd54d2165ce5343a5b5710bfe27f2afb8f7d085e83b53da103c9f"
+    },
+    {
+      "run": "baseline-1",
+      "id": "5fa78ff6-1047-47fb-bc7f-34a6eef6c3e5:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "442d2b06a64c698741f2331a7c4281fcc4f3538ed7c9c065e4ea3faf2941fb1b"
+    },
+    {
+      "run": "baseline-1",
+      "id": "5fa78ff6-1047-47fb-bc7f-34a6eef6c3e5:owner:3",
+      "phase": "OWNER_REQUEST",
+      "hash": "e7a030f2bdf1fe25b7533f1f9feaed2a401778da1c2a309b53254a9fd87c8f29"
+    },
+    {
+      "run": "baseline-2",
+      "id": "af8361c7-51f9-4179-8e90-ce9d8bda0247:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "577216134f84868247feb494ee0707be146a08d7f6c4a6c79c7b337e114fafba"
+    },
+    {
+      "run": "baseline-2",
+      "id": "af8361c7-51f9-4179-8e90-ce9d8bda0247:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "243f53a063accc242744a95ef4270723190be046648554d12157a512ec3a8fb4"
+    },
+    {
+      "run": "baseline-2",
+      "id": "af8361c7-51f9-4179-8e90-ce9d8bda0247:owner:3",
+      "phase": "OWNER_REQUEST",
+      "hash": "373e28d2b0df0672a03ef26b5c01fdd03a862a23012b4fe444acf67fb7c36c19"
+    },
+    {
+      "run": "baseline-2",
+      "id": "af8361c7-51f9-4179-8e90-ce9d8bda0247:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "bcd15125ab67a9d57f0c57483145290b77c19134e27c782bdecfa198a2b1c1c3"
+    },
+    {
+      "run": "baseline-2",
+      "id": "af8361c7-51f9-4179-8e90-ce9d8bda0247:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "bcd15125ab67a9d57f0c57483145290b77c19134e27c782bdecfa198a2b1c1c3"
+    },
+    {
+      "run": "baseline-2",
+      "id": "af8361c7-51f9-4179-8e90-ce9d8bda0247:verifier:1",
+      "phase": "RESULT",
+      "hash": "bcd15125ab67a9d57f0c57483145290b77c19134e27c782bdecfa198a2b1c1c3"
+    },
+    {
+      "run": "baseline-3",
+      "id": "a723e979-df78-4f2f-b9d4-4e1dea5bfbbf:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "c3315246a90baf1f2ea4cc164eb2299dece0e2dce7aec327dd9946661ad4fefd"
+    },
+    {
+      "run": "baseline-3",
+      "id": "a723e979-df78-4f2f-b9d4-4e1dea5bfbbf:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "aee47f8eb281d48a7369a060aa846bf98f00a795a4b434e9264aaf1998237f7f"
+    },
+    {
+      "run": "baseline-3",
+      "id": "a723e979-df78-4f2f-b9d4-4e1dea5bfbbf:owner:3",
+      "phase": "OWNER_REQUEST",
+      "hash": "6b7d0f712224de818e1dad89f52a17a713b1bd4ab741a33de1891b13dba8b260"
+    },
+    {
+      "run": "stateful-1",
+      "id": "2cf8a0cd-a20d-4e1c-a810-55a0f6ca5852:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "bf574d1716c191d5385476a6df0e38b89785c7b5c3d679bce64c1e5a41366316"
+    },
+    {
+      "run": "stateful-1",
+      "id": "2cf8a0cd-a20d-4e1c-a810-55a0f6ca5852:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "80d4f5dcd463e08e1b9708faf0325448399d9d04c40c336b92184c659ab88146"
+    },
+    {
+      "run": "stateful-1",
+      "id": "2cf8a0cd-a20d-4e1c-a810-55a0f6ca5852:owner:3",
+      "phase": "OWNER_REQUEST",
+      "hash": "6bb7c167058858a286281f74005524e77c1835b7b6e46e43597533e210f70c4a"
+    },
+    {
+      "run": "stateful-1",
+      "id": "2cf8a0cd-a20d-4e1c-a810-55a0f6ca5852:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "b3f4ad1d883ca5e0deaed59f85bb5bf3f2c28df3ba9692a4cbd108dddf7d85ee"
+    },
+    {
+      "run": "stateful-1",
+      "id": "2cf8a0cd-a20d-4e1c-a810-55a0f6ca5852:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "b3f4ad1d883ca5e0deaed59f85bb5bf3f2c28df3ba9692a4cbd108dddf7d85ee"
+    },
+    {
+      "run": "stateful-1",
+      "id": "2cf8a0cd-a20d-4e1c-a810-55a0f6ca5852:verifier:1",
+      "phase": "RESULT",
+      "hash": "b3f4ad1d883ca5e0deaed59f85bb5bf3f2c28df3ba9692a4cbd108dddf7d85ee"
+    },
+    {
+      "run": "stateful-1",
+      "id": "e7daa9d2-03cb-46d4-a618-e9865ecefbbb:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "49e8aa3b3f422f45569995e7f8d1ebd34e0573a552c28505162811f150ff6693"
+    },
+    {
+      "run": "stateful-1",
+      "id": "e7daa9d2-03cb-46d4-a618-e9865ecefbbb:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "af0d7e71bea3defe1650d432dbd13d11c9c3c04467d2db15093d02231b402c08"
+    },
+    {
+      "run": "stateful-1",
+      "id": "e7daa9d2-03cb-46d4-a618-e9865ecefbbb:owner:3",
+      "phase": "OWNER_REQUEST",
+      "hash": "923e16d745dcc84daf88c0f91188e418b8cceda7accc72d08d9a24ba6c15656a"
+    },
+    {
+      "run": "stateful-1",
+      "id": "e7daa9d2-03cb-46d4-a618-e9865ecefbbb:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "3dfb0e06b98afedd44e669f7ffe27314d5dfeabce7fac4f8e13860ae40edced2"
+    },
+    {
+      "run": "stateful-1",
+      "id": "e7daa9d2-03cb-46d4-a618-e9865ecefbbb:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "3dfb0e06b98afedd44e669f7ffe27314d5dfeabce7fac4f8e13860ae40edced2"
+    },
+    {
+      "run": "stateful-1",
+      "id": "e7daa9d2-03cb-46d4-a618-e9865ecefbbb:verifier:1",
+      "phase": "RESULT",
+      "hash": "3dfb0e06b98afedd44e669f7ffe27314d5dfeabce7fac4f8e13860ae40edced2"
+    },
+    {
+      "run": "stateful-1",
+      "id": "2199c234-5246-4da2-b9ca-4317a68a5e9a:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "a9be4c40a974fc8249f2943dd7536ceb20d0189499fbf6b8069edc1bc3c23151"
+    },
+    {
+      "run": "stateful-1",
+      "id": "2199c234-5246-4da2-b9ca-4317a68a5e9a:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "20046479a1f18fd7d28e162fc935fa18b66316bdb9fe92eb2a7b278e539759c0"
+    },
+    {
+      "run": "stateful-1",
+      "id": "2199c234-5246-4da2-b9ca-4317a68a5e9a:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "20046479a1f18fd7d28e162fc935fa18b66316bdb9fe92eb2a7b278e539759c0"
+    },
+    {
+      "run": "stateful-1",
+      "id": "2199c234-5246-4da2-b9ca-4317a68a5e9a:verifier:1",
+      "phase": "RESULT",
+      "hash": "20046479a1f18fd7d28e162fc935fa18b66316bdb9fe92eb2a7b278e539759c0"
+    },
+    {
+      "run": "stateful-1",
+      "id": "8b8eaf17-4680-42fd-bf7e-08555a9cd34f:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "142f9718634ada20027f2c707ff53e195e786c18db53849a5e9b03e0a4fd8a29"
+    },
+    {
+      "run": "stateful-1",
+      "id": "8b8eaf17-4680-42fd-bf7e-08555a9cd34f:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "7a2312ce64044277bcb33a4184a436dda12a263816d798ce94c216d0a7e90587"
+    },
+    {
+      "run": "stateful-1",
+      "id": "8b8eaf17-4680-42fd-bf7e-08555a9cd34f:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "9d13d0990fa0cc72747d08848903ffbae4dfc8aa9c787cfbabde62108a491bbf"
+    },
+    {
+      "run": "stateful-1",
+      "id": "8b8eaf17-4680-42fd-bf7e-08555a9cd34f:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "9d13d0990fa0cc72747d08848903ffbae4dfc8aa9c787cfbabde62108a491bbf"
+    },
+    {
+      "run": "stateful-1",
+      "id": "8b8eaf17-4680-42fd-bf7e-08555a9cd34f:verifier:1",
+      "phase": "RESULT",
+      "hash": "9d13d0990fa0cc72747d08848903ffbae4dfc8aa9c787cfbabde62108a491bbf"
+    },
+    {
+      "run": "stateful-1",
+      "id": "44f87466-12b9-4349-910e-358f2dbeb5db:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "1813e08935ec826775e75645c2445c64ccdb2a53ef47f0a6918b85c2032ddace"
+    },
+    {
+      "run": "stateful-1",
+      "id": "ea8ae15e-c192-491a-9176-3f5f180937e9:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "157c05164083d4f7c02446184bcd6f9ef7fb45eab4aa072fb0b8a67e5a6b2483"
+    },
+    {
+      "run": "stateful-1",
+      "id": "a0989f13-997f-48fa-be91-663d9ce68cb3:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "01511a611d328351ac3eb31992854c427d146154d928861dde275827cb1dde7f"
+    },
+    {
+      "run": "stateful-2",
+      "id": "065dc47a-17ed-4811-9227-ae14e4c0af8c:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "734f57953327d1074f4e61c56efddc2341536f86cb144f1813af79a016ef5f63"
+    },
+    {
+      "run": "stateful-2",
+      "id": "065dc47a-17ed-4811-9227-ae14e4c0af8c:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "d56fb1344489f453898fcb4f53b44c4f975598730b05bd5d678bd052207ee44a"
+    },
+    {
+      "run": "stateful-2",
+      "id": "065dc47a-17ed-4811-9227-ae14e4c0af8c:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "455810320ad0cf965df0702ba0cd6931e6e1c9cb7386359d59ca02909447a8f3"
+    },
+    {
+      "run": "stateful-2",
+      "id": "065dc47a-17ed-4811-9227-ae14e4c0af8c:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "455810320ad0cf965df0702ba0cd6931e6e1c9cb7386359d59ca02909447a8f3"
+    },
+    {
+      "run": "stateful-2",
+      "id": "065dc47a-17ed-4811-9227-ae14e4c0af8c:verifier:1",
+      "phase": "RESULT",
+      "hash": "455810320ad0cf965df0702ba0cd6931e6e1c9cb7386359d59ca02909447a8f3"
+    },
+    {
+      "run": "stateful-2",
+      "id": "229289bf-c654-4b2e-869e-bf58ef4b026a:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "f14f0cb3543b17971b182814ec1ebeb1184ce86378126eb6c4e0cf83d297b073"
+    },
+    {
+      "run": "stateful-2",
+      "id": "229289bf-c654-4b2e-869e-bf58ef4b026a:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "b27f139dfb8ad5d2fe3fd0344c3d8f6bc5d218e33d3b391ec25050bcd93456d6"
+    },
+    {
+      "run": "stateful-2",
+      "id": "229289bf-c654-4b2e-869e-bf58ef4b026a:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "c0aa70e3884992095bc102c8049cf5404dfe3f3f1fc2b077c505fdb4305ff3e0"
+    },
+    {
+      "run": "stateful-2",
+      "id": "229289bf-c654-4b2e-869e-bf58ef4b026a:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "c0aa70e3884992095bc102c8049cf5404dfe3f3f1fc2b077c505fdb4305ff3e0"
+    },
+    {
+      "run": "stateful-2",
+      "id": "229289bf-c654-4b2e-869e-bf58ef4b026a:verifier:1",
+      "phase": "RESULT",
+      "hash": "c0aa70e3884992095bc102c8049cf5404dfe3f3f1fc2b077c505fdb4305ff3e0"
+    },
+    {
+      "run": "stateful-2",
+      "id": "8702b728-45e4-48de-a2eb-86e6a8fbd36a:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "650d981f0990c5df37bbd69d377be8a188ee375371e5cfc4134b8f4d480f6cef"
+    },
+    {
+      "run": "stateful-2",
+      "id": "8702b728-45e4-48de-a2eb-86e6a8fbd36a:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "5595ce94e355089e7834d744b23e35f7c287f066213e902bbcd98e34c7f9f3d0"
+    },
+    {
+      "run": "stateful-2",
+      "id": "8702b728-45e4-48de-a2eb-86e6a8fbd36a:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "5595ce94e355089e7834d744b23e35f7c287f066213e902bbcd98e34c7f9f3d0"
+    },
+    {
+      "run": "stateful-2",
+      "id": "8702b728-45e4-48de-a2eb-86e6a8fbd36a:verifier:1",
+      "phase": "RESULT",
+      "hash": "5595ce94e355089e7834d744b23e35f7c287f066213e902bbcd98e34c7f9f3d0"
+    },
+    {
+      "run": "stateful-2",
+      "id": "ffe4e07f-a440-4a31-9e26-3594126d7ff3:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "55c5bc32bf3d80f09a77a8b084656ae8700d840e244cf5cec2da4afdbbfabf75"
+    },
+    {
+      "run": "stateful-2",
+      "id": "ffe4e07f-a440-4a31-9e26-3594126d7ff3:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "60b19a509385cf26d02a9392422a78c2287eed86c2a089e30fd84404a5164584"
+    },
+    {
+      "run": "stateful-2",
+      "id": "ffe4e07f-a440-4a31-9e26-3594126d7ff3:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "d38baf53e59055dc4c2f90b2f166bb50a23294f9933b5775d195ff27d22969c2"
+    },
+    {
+      "run": "stateful-2",
+      "id": "ffe4e07f-a440-4a31-9e26-3594126d7ff3:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "d38baf53e59055dc4c2f90b2f166bb50a23294f9933b5775d195ff27d22969c2"
+    },
+    {
+      "run": "stateful-2",
+      "id": "ffe4e07f-a440-4a31-9e26-3594126d7ff3:verifier:1",
+      "phase": "RESULT",
+      "hash": "d38baf53e59055dc4c2f90b2f166bb50a23294f9933b5775d195ff27d22969c2"
+    },
+    {
+      "run": "stateful-2",
+      "id": "b9931f31-343c-4283-b3e9-82414f976d21:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "5584c9a0d2e1c9d2e2ee6cc85c4626e8cc783c7e6633ca840545e3e9b7d284dd"
+    },
+    {
+      "run": "stateful-2",
+      "id": "266a6a35-ff24-41cb-b568-ded7b9193b94:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "bcb006e63669a7a6ac06f72ff74caa47821d2867c5cf928a9c8732bca02985dc"
+    },
+    {
+      "run": "stateful-2",
+      "id": "bca55f2f-b60b-4c9a-8940-5b90e232d639:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "08ee450182df165f68b6124b70a379f8bc1ff97d06936b4146f374d84b701415"
+    },
+    {
+      "run": "stateful-3",
+      "id": "25a79fcb-6294-47f0-b31c-879045acb9f1:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "f4d0b0696f02c6ecd48c02119a85466d6f38dac3f7eeb493ff5403fae4bb2b73"
+    },
+    {
+      "run": "stateful-3",
+      "id": "25a79fcb-6294-47f0-b31c-879045acb9f1:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "182fd17627a82e4c65c208463d9587506732609cff7ad7ccf055f5852dade3da"
+    },
+    {
+      "run": "stateful-3",
+      "id": "25a79fcb-6294-47f0-b31c-879045acb9f1:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "1ae4394ae48c2fef055d4501b82daa61d62c5c356ed3139f46639bf739de9da1"
+    },
+    {
+      "run": "stateful-3",
+      "id": "25a79fcb-6294-47f0-b31c-879045acb9f1:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "1ae4394ae48c2fef055d4501b82daa61d62c5c356ed3139f46639bf739de9da1"
+    },
+    {
+      "run": "stateful-3",
+      "id": "25a79fcb-6294-47f0-b31c-879045acb9f1:verifier:1",
+      "phase": "RESULT",
+      "hash": "1ae4394ae48c2fef055d4501b82daa61d62c5c356ed3139f46639bf739de9da1"
+    },
+    {
+      "run": "stateful-3",
+      "id": "a7a5fbc2-2225-4fc2-bf6d-e71bf76629ca:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "a4358ccdcfdc32c40b8b0616f6d76e8e8cf7d411698ee788b4118c9bd7d86759"
+    },
+    {
+      "run": "stateful-3",
+      "id": "a7a5fbc2-2225-4fc2-bf6d-e71bf76629ca:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "6677d0f5cacb6416c05460ac6bdcc561be7003690f950d22836982f1a9b77048"
+    },
+    {
+      "run": "stateful-3",
+      "id": "a7a5fbc2-2225-4fc2-bf6d-e71bf76629ca:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "a1ce9f8f4c05c3ae77e94ccae1baf9a735339a73a3d72d634264a90e1380b0e2"
+    },
+    {
+      "run": "stateful-3",
+      "id": "a7a5fbc2-2225-4fc2-bf6d-e71bf76629ca:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "a1ce9f8f4c05c3ae77e94ccae1baf9a735339a73a3d72d634264a90e1380b0e2"
+    },
+    {
+      "run": "stateful-3",
+      "id": "a7a5fbc2-2225-4fc2-bf6d-e71bf76629ca:verifier:1",
+      "phase": "RESULT",
+      "hash": "a1ce9f8f4c05c3ae77e94ccae1baf9a735339a73a3d72d634264a90e1380b0e2"
+    },
+    {
+      "run": "stateful-3",
+      "id": "c39bed0c-d863-4a2d-b524-426ddbc19ea9:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "f82649ee9e26a200bbcde569e9a00a33dee725b17482be7d05502ee820f21f35"
+    },
+    {
+      "run": "stateful-3",
+      "id": "c39bed0c-d863-4a2d-b524-426ddbc19ea9:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "33a94c09011b55d3247d9569bc83fbff255c6c8dda4c47fb409fa94125ce89c6"
+    },
+    {
+      "run": "stateful-3",
+      "id": "c39bed0c-d863-4a2d-b524-426ddbc19ea9:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "33a94c09011b55d3247d9569bc83fbff255c6c8dda4c47fb409fa94125ce89c6"
+    },
+    {
+      "run": "stateful-3",
+      "id": "c39bed0c-d863-4a2d-b524-426ddbc19ea9:verifier:1",
+      "phase": "RESULT",
+      "hash": "33a94c09011b55d3247d9569bc83fbff255c6c8dda4c47fb409fa94125ce89c6"
+    },
+    {
+      "run": "stateful-3",
+      "id": "16051177-fba4-49b7-99ae-55e7293b2ae1:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "f524eb9b8c5e9687fe132f09f2b5ab339dd1368f8129ba66a9c94f9f7ecd2dfd"
+    },
+    {
+      "run": "stateful-3",
+      "id": "16051177-fba4-49b7-99ae-55e7293b2ae1:owner:2",
+      "phase": "OWNER_REQUEST",
+      "hash": "289e81e8c662378898b0acb2b765e2096808cb5ed0e998e3f144d79e6c84794a"
+    },
+    {
+      "run": "stateful-3",
+      "id": "16051177-fba4-49b7-99ae-55e7293b2ae1:verifier:1",
+      "phase": "VERIFIER_REQUEST",
+      "hash": "ea95f84c69c83fdbd0c45b85e002d5892883c7e00c53283a0a13e73e4d1df072"
+    },
+    {
+      "run": "stateful-3",
+      "id": "16051177-fba4-49b7-99ae-55e7293b2ae1:verifier:1",
+      "phase": "DISPATCHED",
+      "hash": "ea95f84c69c83fdbd0c45b85e002d5892883c7e00c53283a0a13e73e4d1df072"
+    },
+    {
+      "run": "stateful-3",
+      "id": "16051177-fba4-49b7-99ae-55e7293b2ae1:verifier:1",
+      "phase": "RESULT",
+      "hash": "ea95f84c69c83fdbd0c45b85e002d5892883c7e00c53283a0a13e73e4d1df072"
+    },
+    {
+      "run": "stateful-3",
+      "id": "e8631524-5ee9-4609-ac0c-fc5f34c37017:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "1c1b0c131ddd6d635ffb4b6fcca53447ea8396bdebc2317b836ac88d1b756c04"
+    },
+    {
+      "run": "stateful-3",
+      "id": "8ce6c810-2177-4625-8eac-545495d713d3:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "ba359afb9cf94aafd3d341db0326e7e3846db1f25cfd9db3fc2850abce894eb6"
+    },
+    {
+      "run": "stateful-3",
+      "id": "ab6e7ce2-750d-4a58-8135-93cb1620c527:owner:1",
+      "phase": "OWNER_REQUEST",
+      "hash": "3b674ac515cfd04963cc63e000790fb2d01d57205c5fb31762e546c892d66a58"
+    }
+  ]
+}

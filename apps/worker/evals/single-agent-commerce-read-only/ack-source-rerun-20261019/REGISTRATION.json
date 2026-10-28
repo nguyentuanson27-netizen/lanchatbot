@@ -1,0 +1,108 @@
+{
+  "kind": "PRE_PROVIDER_REGISTRATION",
+  "runSourceSha": "CAPTURE_HEAD_AT_RUNTIME_AFTER_CLEAN_COMMIT_DO_NOT_WRITE_BACK",
+  "preparationBaseSha": "8478e5a4ed687c541e44b82fd408e4fa105b2e2b",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "81e187d379f017397897c513eeae0cad214f20cb7b05ad449ee69b7d84c9289f",
+    "verifier": "8a75dec909a24acf8962b421a9a6cf1f1d208ec01b89401ce94c27ba1dc5299a"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "inputHash": "3ae7e9ade11048b2a01523f148bb4d3ebed10eeb0e7fde0b558b976279cae335",
+  "activeCorpusHash": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+  "statefulCorpusHash": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+  "sourceConfigHash": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+  "selectedB1CaseIds": [
+    "b1-changed-occasion",
+    "b1-partial-source-v2",
+    "b1-buying-concern",
+    "b1-search-read"
+  ],
+  "dispatch": "1:4",
+  "repetitions": 1,
+  "registeredSlots": 16,
+  "maximumGenerationRequests": 52,
+  "retry": 0,
+  "runOrder": [
+    "stateful 8x1",
+    "integrated B1 4x1",
+    "captured advice 4x1"
+  ],
+  "sourceMode": "LIVE_PUBLIC_READERS_DESCRIPTIVE_NOT_PAIRED_CAUSAL",
+  "adviceMode": "CAPTURED_WORLD_REPLAY_NOT_LIVE_ELIGIBILITY",
+  "captureRule": "first dispatched final-only request, else last dispatched request of the same attempt; providerRequests>0; missing capture remains BLOCKED",
+  "rubric": "Read whole customer turn, history, actual customer outcome and public state. Judge whether advice helps choose and buy shop goods, resolves the stated hesitation, and offers a usable next step when useful. USABLE/NEEDS_EDIT/UNUSABLE/OWNERSHIP_CONTROL before verifier diagnosis. Ordinary aesthetic/material advice accepted; no keyword/fact-count scoring, forced CTA, forced alternative or lowest-price preference. NEEDS_EDIT must identify content that needs rewriting before sending; minor voice polish alone does not overturn an otherwise useful answer. Missing source deliberately injected by a fixture is reported separately from model errors. Preserve historical labels and counts; supplemental comparison is descriptive.",
+  "acceptance": "One sample per case is descriptive only. Preserve all errors/fallbacks/downstream blocks; no retries, replacement samples or automatic next round. Report observed protected false PASS separately; no certification or live GO.",
+  "sendEnabled": false,
+  "launcherHash": "84a43f0c8ba5c46a48db6552f61910d2e93e198f5b6807c4afc4de8d581eeab3",
+  "ownerPromptSource": {
+    "path": "apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt",
+    "bytes": 9435,
+    "sha256": "81e187d379f017397897c513eeae0cad214f20cb7b05ad449ee69b7d84c9289f",
+    "transformation": "NONE_ACTIVE_BYTES"
+  },
+  "verifierPolicy": "Current approved verifier, including qualitative sales advice acceptance; Gemini-supplied verifier is not used.",
+  "comparisonRun": "ack-source-run-20261019",
+  "change": "New owner-authorized full 16-slot run after previous source/provider errors. Exact same active owner/verifier prompts, runtime, models, config, corpora, budgets and scoring. Prior failed attempts preserved; no replacement or retry within either run.",
+  "runnerReuse": {
+    "path": "apps/worker/evals/single-agent-commerce-read-only/ack-source-rerun-20261019/run.py",
+    "sha256": "5f0888f55584ccd3fc8dc54bda05e6c6e288fdc1604bb88244b4c6b95ba2e5ba",
+    "originalPath": "apps/worker/evals/single-agent-commerce-read-only/ack-source-run-20261019/run.py",
+    "originalSha256": "5f0888f55584ccd3fc8dc54bda05e6c6e288fdc1604bb88244b4c6b95ba2e5ba",
+    "transformation": "EXACT_BYTES_COPY_TO_READ_NEW_SIBLING_REGISTRATION_AND_CASES"
+  },
+  "reviewClarification": "docs/specs/c3-phase-b-sales-context-fix-20261019.md",
+  "reviewClarificationHash": "bafe29038e62f54ed864421b8a0236ad439cb82cde1f1f87404f134c5332263e",
+  "supplementalReviewRule": "Acknowledge corrected information and preserve the customer-selected option; repeating the corrected values is legitimate when useful. Mild administrative wording is voice polish, not an automatic unusable reply. Missing POS deliberately injected remains a source limitation; assess how clearly and naturally the customer is told what cannot be confirmed, without forcing a fabricated price, retail permission or unavailable handoff. NEEDS_EDIT requires explaining what materially needs rewriting, not a forbidden-word count. Preserve original historical scores; explicitly disclose classification changes when comparing.",
+  "reviewDecisionSource": "Supplemental rule frozen in ack-source-run-20261019 registration; owner correction review allows relevant repetition and treats minor administrative wording as polish. Current rerun retains this rule without change."
+}

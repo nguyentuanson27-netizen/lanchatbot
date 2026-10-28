@@ -1,0 +1,14 @@
+{
+  "ownerPromptHashChecks": 85,
+  "explicitNativeVerifierPromptHashChecks": 17,
+  "silentCommittedHandoffs": 9,
+  "handoffMessages": 0,
+  "handoffImages": 0,
+  "nativeFallbackTerminals": 0,
+  "nativeVerifierRejections": 0,
+  "semanticFallbackBranchesNotForcedInNativeN1": true,
+  "openingRequiredImages": 6,
+  "actualTotalImages": 7,
+  "persistedOutcomes": 30,
+  "eligibilityOnlyB1": 21
+}

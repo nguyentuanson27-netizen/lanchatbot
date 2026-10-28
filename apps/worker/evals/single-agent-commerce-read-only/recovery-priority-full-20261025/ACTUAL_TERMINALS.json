@@ -1,0 +1,783 @@
+{
+  "sourceSha": "33d83f685411f44dffd2a0d7c61c92a607c34d62",
+  "sendEnabled": false,
+  "registered": 51,
+  "actualTerminals": [
+    {
+      "ordinal": 1,
+      "group": "B1",
+      "caseId": "b1-changed-occasion",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ set Thạch Thảo dùng chất tơ Hàn và ren tơ mềm, có độ bay tự nhiên nên khi chị ngồi ô tô gần 3 tiếng sẽ dễ bị hằn nếp nhăn ạ. \n\nEm gợi ý chị chuyển sang **Váy Diệu Thanh** nhé. Mẫu này làm từ ren Hàn cao cấp có lớp lót lụa habutai bên trong, giúp giữ form dáng đứng đắn, phẳng phiu tốt hơn và hạn chế nhăn nhiều khi di chuyển xa. Váy có giá 799.000đ và hiện shop có sẵn các size S, L, XL ạ."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 30744.6961,
+      "recovery": null
+    },
+    {
+      "ordinal": 2,
+      "group": "B1",
+      "caseId": "b1-current-policy",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, mình đổi màu vẫn kịp chị nhé! Quy định đổi hàng bên em là trong vòng 15 ngày kể từ ngày nhận hàng nên đơn của mình nhận 10 hôm vẫn còn trong thời hạn ạ.\n\nPhí đổi hàng (vận chuyển 2 chiều) là 30.000đ chị nha."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 17017.868300000002,
+      "recovery": null
+    },
+    {
+      "ordinal": 3,
+      "group": "B1",
+      "caseId": "b1-partial-source",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, áo của set Thạch Thảo được may bằng tơ Hàn thêu với họa tiết thêu nổi, vải mềm, thoáng và có độ bay tự nhiên; chân váy làm bằng ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên chị nha. Còn giá và tình trạng size M hiện tại em chưa tra được thông tin ạ."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 27373.2871,
+      "recovery": null
+    },
+    {
+      "ordinal": 4,
+      "group": "B1",
+      "caseId": "b1-price",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, set váy Thạch Thảo (mã SV2447) có giá 799.000đ ạ. Set hiện có sẵn các size S, M, L, XL. Chị lấy set này hay cần em tư vấn thêm size nào không ạ?"
+      ],
+      "imageCount": 0,
+      "elapsedMs": 14809.33690000001,
+      "recovery": null
+    },
+    {
+      "ordinal": 5,
+      "group": "B1",
+      "caseId": "b1-component-stock",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, áo của set Thạch Thảo size M nhà em vẫn còn chị nhé. Áo bán riêng có giá 499.000đ ạ."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 16487.66519999999,
+      "recovery": null
+    },
+    {
+      "ordinal": 6,
+      "group": "B1",
+      "caseId": "b1-search-read",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, áo dài mã SD375 có giá tùy theo lựa chọn của mình ạ:\n\n- Áo lẻ: 929.000đ\n- Cả bộ: 1.065.000đ\n\nSản phẩm hiện có sẵn các size S, M, L chị nhé."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 22899.640400000004,
+      "recovery": null
+    },
+    {
+      "ordinal": 7,
+      "group": "B1",
+      "caseId": "b1-buying-concern",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, nguyên set có giá 799.000đ, nằm trọn trong ngân sách 900.000đ của chị ạ.\n\nVề độ rườm rà, chất liệu của set dùng tơ Hàn thêu phom nhẹ cho áo và ren tơ Hàn mềm có độ rũ tự nhiên cho chân váy. Cả hai chất liệu đều mềm mại, thoáng và có độ bay nhẹ nhàng chứ không bị cứng hay nặng nề, nên mặc đi tiệc ban ngày rất thanh nhã và vừa vặn, không bị rườm rà đâu chị nhé."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 18168.890799999994,
+      "recovery": null
+    },
+    {
+      "ordinal": 8,
+      "group": "B1",
+      "caseId": "b1-policy-used",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, sản phẩm mình đã mặc đi làm rồi nên shop không hỗ trợ đổi hàng được nữa ạ, vì quy định đổi hàng bên em yêu cầu sản phẩm phải còn nguyên vẹn và hoàn toàn chưa qua sử dụng. Mong chị thông cảm giúp em nhé ạ!"
+      ],
+      "imageCount": 0,
+      "elapsedMs": 14907.496400000004,
+      "recovery": null
+    },
+    {
+      "ordinal": 9,
+      "group": "B1",
+      "caseId": "b1-changed-occasion-v2",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, chất liệu áo là tơ Hàn thêu mềm, thoáng và có độ bay tự nhiên, kết hợp cùng chân váy ren tơ Hàn mềm, form nhẹ nên mặc khá nhẹ nhàng và thoáng chị nha."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 15111.788,
+      "recovery": null
+    },
+    {
+      "ordinal": 10,
+      "group": "B1",
+      "caseId": "b1-current-policy-v2",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ đơn nhận 12 hôm trước là vẫn trong thời hạn 15 ngày đổi hàng, chị đổi size hoàn toàn kịp ạ. Phí ship đổi hàng 2 chiều là 30.000đ nha chị."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 13731.190100000007,
+      "recovery": null
+    },
+    {
+      "ordinal": 11,
+      "group": "B1",
+      "caseId": "b1-partial-source-v2",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Chân váy của set Thạch Thảo được làm từ chất liệu ren tơ Hàn mềm, thiết kế form nhẹ và có độ rũ tự nhiên rất đẹp chị ạ. \n\nHiện tại hệ thống chưa tra cứu được thông tin giá và tình trạng tồn kho cụ thể nên em chưa báo chính xác giá cũng như size M cho mình được."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 16391.31270000001,
+      "recovery": null
+    },
+    {
+      "ordinal": 12,
+      "group": "B1",
+      "caseId": "b1-price-v2",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, set váy Thạch Thảo có giá 799.000đ ạ. Mẫu này bên em có sẵn các size S, M, L, XL chị nhé."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 21111.805599999963,
+      "recovery": null
+    },
+    {
+      "ordinal": 13,
+      "group": "B1",
+      "caseId": "b1-component-stock-v2",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ chân váy size M của set Thạch Thảo nhà em hiện còn hàng chị nha, giá mua riêng là 449.000đ ạ."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 14353.651499999978,
+      "recovery": null
+    },
+    {
+      "ordinal": 14,
+      "group": "B1",
+      "caseId": "b1-search-read-v2",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ shop có chị nhé! Set váy Khánh Trang có giá 999.000đ ạ. Ngoài ra shop có bán lẻ áo hoặc chân váy với giá 499.000đ/món nếu chị muốn phối riêng nha."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 20244.740900000033,
+      "recovery": null
+    },
+    {
+      "ordinal": 15,
+      "group": "B1",
+      "caseId": "b1-buying-concern-v2",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, set Thạch Thảo gồm áo tơ Hàn thêu nổi và chân váy ren mềm, có độ bay và rũ tự nhiên nên mang nét nữ tính, thanh lịch rất hợp không khí đi ăn cưới ban ngày. \n\nTuy nhiên, vì áo có thêu nổi và chân váy bằng ren, nếu chị quen mặc đồ trơn hoàn toàn thì diện nguyên bộ có thể sẽ thấy hơi điệu hơn phong cách thường ngày một chút. \n\nNếu chị muốn vừa có điểm nhấn cho ngày cưới mà vẫn giữ được sự đơn giản quen thuộc, nhà em có bán rời từng món. Chị có thể chọn mua áo thêu lẻ phối cùng quần hoặc chân váy trơn, hoặc lấy chân váy ren phối với một chiếc áo trơn tối giản để vừa thoải mái, vừa tinh tế ạ. Chị muốn thử theo phương án mặc cả bộ hay tách lẻ món nào không ạ?"
+      ],
+      "imageCount": 0,
+      "elapsedMs": 20726.639999999956,
+      "recovery": null
+    },
+    {
+      "ordinal": 16,
+      "group": "B1",
+      "caseId": "b1-policy-used-v2",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ quy định đổi hàng của shop yêu cầu sản phẩm chưa mặc thử vào người (chỉ ướm bên ngoài), nên trường hợp chị đã mặc thử thì bên em không hỗ trợ đổi size được ạ."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 18851.04349999997,
+      "recovery": null
+    },
+    {
+      "ordinal": 17,
+      "group": "B1",
+      "caseId": "b1-changed-occasion-v3",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Đi gặp khách hàng buổi sáng, chị lấy áo lẻ sẽ gọn gàng và lịch sự hơn ạ. Áo chất tơ Hàn thêu form nhẹ, thanh nhã, khi phối cùng quần hoặc chân váy gọn gàng sẽ tạo phong thái chuyên nghiệp; trong khi đó chân váy ren tơ có độ rũ và bay tự nhiên sẽ hợp với đi tiệc tối hơn.\n\nÁo lẻ giá 499.000đ (cả bộ là 799.000đ) chị nhé."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 20516.94339999999,
+      "recovery": null
+    },
+    {
+      "ordinal": 18,
+      "group": "B1",
+      "caseId": "b1-current-policy-v3",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, hiện bên em hỗ trợ đổi hàng trong 15 ngày từ khi nhận nên 9 ngày mình vẫn đổi size được bình thường chị nhé. Phí đổi hàng 2 chiều là 30.000đ ạ."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 19917.907399999967,
+      "recovery": null
+    },
+    {
+      "ordinal": 19,
+      "group": "B1",
+      "caseId": "b1-partial-source-v3",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Áo dùng chất liệu tơ Hàn thêu với họa tiết thêu nổi, form nhẹ, vải mềm, thoáng và có độ bay tự nhiên chị nhé. Còn chân váy làm bằng ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên ạ. \n\nDạ hiện tại em chưa tra được thông tin cụ thể về giá cũng như tình trạng còn hàng của set này."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 18442.727500000037,
+      "recovery": null
+    },
+    {
+      "ordinal": 20,
+      "group": "B1",
+      "caseId": "b1-price-v3",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, nguyên set váy Thạch Thảo có giá 799.000đ ạ. Mẫu này shop sẵn các size S, M, L, XL chị nhé."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 14083.512199999997,
+      "recovery": null
+    },
+    {
+      "ordinal": 21,
+      "group": "B1",
+      "caseId": "b1-component-stock-v3",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Áo Thạch Thảo có bán riêng chị nhé. Mẫu áo lẻ size M hiện còn hàng, giá 499.000đ ạ."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 13673.0184,
+      "recovery": null
+    },
+    {
+      "ordinal": 22,
+      "group": "B1",
+      "caseId": "b1-search-read-v3",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, mẫu Set quần Xuân Thảo (SQ223) nhà em vẫn còn hàng chị nha. Chi tiết giá và các phân loại hiện có:\n\n- Cả bộ: 699.000đ (đủ size S, M, L)\n- Áo lẻ: 429.000đ (đủ size S, M, L, XL)\n- Quần lẻ: 429.000đ (đủ size S, M, L)\n\nChị đang quan tâm phân loại nào hoặc cần em tư vấn thêm size thì báo em nhé ạ!"
+      ],
+      "imageCount": 0,
+      "elapsedMs": 25614.40399999998,
+      "recovery": null
+    },
+    {
+      "ordinal": 23,
+      "group": "B1",
+      "caseId": "b1-buying-concern-v3",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Chị lấy riêng áo Thạch Thảo (499.000đ) là hợp lý nhất ạ. Vì chị đã có sẵn chân váy đen dáng suông, chiếc áo tơ thêu nổi này rất dễ phối cùng để mặc đi làm hay đi chơi nhiều lần, vừa linh hoạt làm mới phong cách với đồ có sẵn trong tủ lại vừa vặn với ngân sách của chị."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 26029.001699999964,
+      "recovery": null
+    },
+    {
+      "ordinal": 24,
+      "group": "B1",
+      "caseId": "b1-policy-used-v3",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, chính sách đổi hàng của shop yêu cầu sản phẩm phải còn nguyên tem và chưa qua giặt ạ. Do sản phẩm của chị đã cắt tem và giặt rồi nên shop rất tiếc chưa thể hỗ trợ mình đổi sang mẫu khác được ạ."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 12421.362200000032,
+      "recovery": null
+    },
+    {
+      "ordinal": 25,
+      "group": "stateful",
+      "caseId": "stateful-open",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, em đã thêm áo Thạch Thảo màu be size M (hàng đặt trước) vào giỏ cho chị rồi ạ."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 54585.1474,
+      "recovery": null,
+      "publicTerminalText": "Dạ, em đã thêm áo Thạch Thảo màu be size M (hàng đặt trước) vào giỏ cho chị rồi ạ.",
+      "capturedTerminalSha256": "773dd77513d8afde05395ddc7e15f36078ec9aab465e4be78bd4a5b3881359a7",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 26,
+      "group": "stateful",
+      "caseId": "stateful-variant-quantity",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Em đã đổi sang 2 chiếc áo Thạch Thảo màu be size L (hàng đặt trước) cho chị rồi ạ. Tổng giỏ hàng hiện tại của mình là 978.100đ chị nhé."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 49908.2313,
+      "recovery": null,
+      "publicTerminalText": "Em đã đổi sang 2 chiếc áo Thạch Thảo màu be size L (hàng đặt trước) cho chị rồi ạ. Tổng giỏ hàng hiện tại của mình là 978.100đ chị nhé.",
+      "capturedTerminalSha256": "e5d24d7b7d193fccafa02e0b30d7885d56c9b3f6ba3ed31089b6717a4b377de0",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 27,
+      "group": "stateful",
+      "caseId": "stateful-quote",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, 2 chiếc áo của mình có giá 998.000đ, phí ship 30.000đ và được giảm 49.900đ ưu đãi, tổng cộng cả phí ship là 978.100đ chị nhé ạ."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 41043.77519999999,
+      "recovery": null,
+      "publicTerminalText": "Dạ, 2 chiếc áo của mình có giá 998.000đ, phí ship 30.000đ và được giảm 49.900đ ưu đãi, tổng cộng cả phí ship là 978.100đ chị nhé ạ.",
+      "capturedTerminalSha256": "1795b2f596e9dbd86f836a674710677c045fd091591cfb181144121293911921",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 28,
+      "group": "stateful",
+      "caseId": "stateful-correction",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ vâng ạ, em ghi nhận số đo mới và giữ nguyên 2 áo Thạch Thảo màu be size L cho mình chị nhé."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 39092.23510000002,
+      "recovery": null,
+      "publicTerminalText": "Dạ vâng ạ, em ghi nhận số đo mới và giữ nguyên 2 áo Thạch Thảo màu be size L cho mình chị nhé.",
+      "capturedTerminalSha256": "64483feee3fd104cc85f7d4a9f5f317eb8a2864fde97a456b23f013d86fd861f",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 29,
+      "group": "stateful",
+      "caseId": "stateful-request-checkout",
+      "disposition": "NO_SEND",
+      "reason": "CHECKOUT_DETAILS_MISSING",
+      "actualMessages": [
+        "Chị cho em [NAME]"
+      ],
+      "imageCount": 0,
+      "elapsedMs": 21979.439199999993,
+      "recovery": {
+        "originalDisposition": "NO_SEND",
+        "originalReason": "CHECKOUT_DETAILS_MISSING"
+      }
+    },
+    {
+      "ordinal": 30,
+      "group": "stateful",
+      "caseId": "stateful-private-checkout",
+      "disposition": "NO_SEND",
+      "reason": "PRIVATE_CHECKOUT_COMMITTED",
+      "actualMessages": [
+        "2 áo (mẫu “Set váy Thạch Thảo”) màu be, size L: 998.000đ\nTạm tính: 998.000đ\nƯu đãi: -49.900đ\nPhí ship: 30.000đ\nTổng: 978.100đ\nSet váy Thạch Thảo: hàng đặt trước\nNgười nhận: Khách thử nghiệm - [PHONE]\n[ADDRESS]\nThanh toán: COD\nDự kiến nhận hàng: 8-14 ngày.\nChị xác nhận chốt đơn nhé."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 8404.19140000001,
+      "recovery": null
+    },
+    {
+      "ordinal": 31,
+      "group": "stateful",
+      "caseId": "stateful-confirm",
+      "disposition": "HANDOFF",
+      "reason": "PURCHASE_CONFIRMED",
+      "actualMessages": [
+        "Dạ, shop đã nhận yêu cầu đặt hàng của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 24668.163100000005,
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "PURCHASE_CONFIRMED"
+      }
+    },
+    {
+      "ordinal": 32,
+      "group": "stateful",
+      "caseId": "stateful-human-request",
+      "disposition": "HANDOFF",
+      "reason": "CUSTOMER_REQUESTED_HUMAN",
+      "actualMessages": [
+        "Dạ, em đã chuyển lời nhắn của chị rồi ạ."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 18754.989100000006,
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "CUSTOMER_REQUESTED_HUMAN"
+      },
+      "publicTerminalText": "Dạ, em đã chuyển lời nhắn của chị rồi ạ.",
+      "capturedTerminalSha256": "48bb462fd1f2a7487cf4f2f4107e7c731de70c544c9622bbfcb02e1eb928347d",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 33,
+      "group": "journey-openings",
+      "caseId": "sales-discovery-advice:need",
+      "disposition": "HANDOFF",
+      "reason": "RESPONSE_UNAVAILABLE",
+      "actualMessages": [
+        "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 35572.5713,
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "OWNER_TOOL_MODE"
+      },
+      "publicTerminalText": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé.",
+      "capturedTerminalSha256": "9a428cbdf8db2cfca1bd86fb197175bce3099b61109a36b81e25ebc11f0c0a17",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 34,
+      "group": "journey-openings",
+      "caseId": "sales-product-gallery:overview",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, em gửi chị hình ảnh của set váy Thạch Thảo ạ. Set có giá 799.000đ, hiện có các size từ S đến XL chị nhé.",
+        "[CODE_IMAGE]",
+        "[CODE_IMAGE]"
+      ],
+      "imageCount": 2,
+      "elapsedMs": 55052.4552,
+      "recovery": null,
+      "publicTerminalText": "Dạ, em gửi chị hình ảnh của set váy Thạch Thảo ạ. Set có giá 799.000đ, hiện có các size từ S đến XL chị nhé.",
+      "capturedTerminalSha256": "b5c15e6bd38c7dd3745d3c539acc8403a4087f21161db907a7bbbb0bd61a8c78",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 35,
+      "group": "journey-openings",
+      "caseId": "sales-size-advice:height-weight",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ với chiều cao 1m58, cân nặng 52kg và sở thích mặc rộng thoải mái, set váy Thạch Thảo chị chọn mặc **size M** là đẹp chị nha."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 47044.39710000002,
+      "recovery": null,
+      "publicTerminalText": "Dạ với chiều cao 1m58, cân nặng 52kg và sở thích mặc rộng thoải mái, set váy Thạch Thảo chị chọn mặc **size M** là đẹp chị nha.",
+      "capturedTerminalSha256": "b066fe764f94275b525775c3aad7bde7f31cf2932371d947618778b50058140f",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 36,
+      "group": "journey-openings",
+      "caseId": "sales-southern-delivery:deadline",
+      "disposition": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "actualMessages": [
+        "Em chưa tra được thông tin này ngay. Shop sẽ kiểm tra lại rồi trả lời chị nhé."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 28123.860199999996,
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "PROVIDER_ERROR"
+      },
+      "publicTerminalText": "Em chưa tra được thông tin này ngay. Shop sẽ kiểm tra lại rồi trả lời chị nhé.",
+      "capturedTerminalSha256": "4d288cca356b4b0a79717bf0dcd58e2ed406b8876cbf95859ed7354bb9c565f6",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 37,
+      "group": "media-followup",
+      "caseId": "media-overview-next:ask",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ hiện tại set Thạch Thảo shop chưa có sẵn ảnh khách mặc thực tế, nhưng em gửi chị ảnh mẫu mặc của set để mình dễ hình dung form dáng và chi tiết nhé ạ!",
+        "[CODE_IMAGE]",
+        "[CODE_IMAGE]"
+      ],
+      "imageCount": 2,
+      "elapsedMs": 48511.9921,
+      "recovery": null,
+      "publicTerminalText": "Dạ hiện tại set Thạch Thảo shop chưa có sẵn ảnh khách mặc thực tế, nhưng em gửi chị ảnh mẫu mặc của set để mình dễ hình dung form dáng và chi tiết nhé ạ!",
+      "capturedTerminalSha256": "0c144ec3ca4fe88c8400fac512a601a140506b733feea5fb6e5b5fc75cca57f6",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 38,
+      "group": "media-followup",
+      "caseId": "media-overview-next:continue",
+      "disposition": "HANDOFF",
+      "reason": "RESPONSE_UNAVAILABLE",
+      "actualMessages": [
+        "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 52908.38160000001,
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "FAIL"
+      },
+      "publicTerminalText": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé.",
+      "capturedTerminalSha256": "9a428cbdf8db2cfca1bd86fb197175bce3099b61109a36b81e25ebc11f0c0a17",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 39,
+      "group": "media-followup",
+      "caseId": "media-detail-next:ask",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ bộ Thạch Thảo hiện chưa có ảnh khách mặc thực tế chị ạ. Em gửi chị ảnh mẫu mặc set này để mình dễ hình dung form dáng nha chị!",
+        "[CODE_IMAGE]",
+        "[CODE_IMAGE]"
+      ],
+      "imageCount": 2,
+      "elapsedMs": 50267.95750000002,
+      "recovery": null,
+      "publicTerminalText": "Dạ bộ Thạch Thảo hiện chưa có ảnh khách mặc thực tế chị ạ. Em gửi chị ảnh mẫu mặc set này để mình dễ hình dung form dáng nha chị!",
+      "capturedTerminalSha256": "df0e0775f0c63d046a4bf4f33a2fd1b9a7809ea8000f33035c56391bfd996dbe",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 40,
+      "group": "media-followup",
+      "caseId": "media-detail-next:continue",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ em gửi chị ảnh cận cảnh chi tiết thêu nổi trên áo nhé ạ!",
+        "[CODE_IMAGE]"
+      ],
+      "imageCount": 1,
+      "elapsedMs": 41161.4295,
+      "recovery": null,
+      "publicTerminalText": "Dạ em gửi chị ảnh cận cảnh chi tiết thêu nổi trên áo nhé ạ!",
+      "capturedTerminalSha256": "bb5155c9ac689888daff7ddc30c60c0ff34c64ad1b0b4f1650ab5c03b9233a10",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 41,
+      "group": "media-followup",
+      "caseId": "media-and-price:ask",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Em gửi chị ảnh mẫu áo Thạch Thảo ạ. Áo lẻ hiện có giá 499.000đ chị nhé.",
+        "[CODE_IMAGE]",
+        "[CODE_IMAGE]"
+      ],
+      "imageCount": 2,
+      "elapsedMs": 48390.3817,
+      "recovery": null,
+      "publicTerminalText": "Em gửi chị ảnh mẫu áo Thạch Thảo ạ. Áo lẻ hiện có giá 499.000đ chị nhé.",
+      "capturedTerminalSha256": "5ade902ea6e4ca1970be2739d739744580dc465ba8d6035bd6946e534e9ca1c0",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 42,
+      "group": "media-followup",
+      "caseId": "media-and-size:ask",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, em gửi chị ảnh cận cảnh chi tiết thêu ở áo nhé ạ. Với chiều cao 1m58 và cân nặng 52kg, chị mặc size M là vừa đẹp chị nha.",
+        "[CODE_IMAGE]"
+      ],
+      "imageCount": 1,
+      "elapsedMs": 50182.57619999998,
+      "recovery": null,
+      "publicTerminalText": "Dạ, em gửi chị ảnh cận cảnh chi tiết thêu ở áo nhé ạ. Với chiều cao 1m58 và cân nặng 52kg, chị mặc size M là vừa đẹp chị nha.",
+      "capturedTerminalSha256": "07b6db339e7e15e4dd255bf18c6c734accb64643c3d602f23eaf89dadda108dd",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 43,
+      "group": "media-followup",
+      "caseId": "media-decision:ask",
+      "disposition": "HANDOFF",
+      "reason": "RESPONSE_UNAVAILABLE",
+      "actualMessages": [
+        "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 50962.865700000024,
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "FAIL"
+      },
+      "publicTerminalText": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé.",
+      "capturedTerminalSha256": "9a428cbdf8db2cfca1bd86fb197175bce3099b61109a36b81e25ebc11f0c0a17",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 44,
+      "group": "negotiation",
+      "caseId": "negotiation-cart-setup",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Em đã thêm áo Thạch Thảo màu be, size M (hàng đặt trước) vào giỏ hàng cho chị rồi ạ. Tổng giỏ hàng hiện tại của mình là 529.000đ (đã gồm 30.000đ phí vận chuyển). Chị cần xem thêm gì cứ báo em nhé ạ!"
+      ],
+      "imageCount": 0,
+      "elapsedMs": 64458.15359999999,
+      "recovery": null,
+      "publicTerminalText": "Em đã thêm áo Thạch Thảo màu be, size M (hàng đặt trước) vào giỏ hàng cho chị rồi ạ. Tổng giỏ hàng hiện tại của mình là 529.000đ (đã gồm 30.000đ phí vận chuyển). Chị cần xem thêm gì cứ báo em nhé ạ!",
+      "capturedTerminalSha256": "ba2de50054eded7881a21a2c1cb9c4c161358a90b93f452b1d70090f055ff768",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 45,
+      "group": "negotiation",
+      "caseId": "negotiation-price-objection",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "RECEIPT_BACKED_CART_SUMMARY",
+      "actualMessages": [
+        "[ADDRESS]"
+      ],
+      "imageCount": 0,
+      "elapsedMs": 69483.40490000001,
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "FAIL"
+      },
+      "publicTerminalText": "Ưu đãi 30.000đ. Tổng 499.000đ, đã gồm phí giao hàng. Có món đặt trước, chị nhé. Giỏ của chị: 1 áo (mẫu “Set váy Thạch Thảo”) màu be, size M.",
+      "capturedTerminalSha256": "ed9fe934f53b167211a0e40bb1978cdf978d6a9f12fb7927174bf8f4163d05c9",
+      "capturedDisplayRedacted": true
+    },
+    {
+      "ordinal": 46,
+      "group": "negotiation",
+      "caseId": "negotiation-total-control",
+      "disposition": "HANDOFF",
+      "reason": "RESPONSE_UNAVAILABLE",
+      "actualMessages": [
+        "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 62676.846100000024,
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "FAIL"
+      },
+      "publicTerminalText": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé.",
+      "capturedTerminalSha256": "9a428cbdf8db2cfca1bd86fb197175bce3099b61109a36b81e25ebc11f0c0a17",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 47,
+      "group": "opening-quotes",
+      "caseId": "opening-ad",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, set váy Thạch Thảo có giá 799.000đ chị nha. Nếu mình thích mua lẻ thì áo có giá 499.000đ và chân váy có giá 449.000đ ạ.",
+        "[CODE_IMAGE]",
+        "[CODE_IMAGE]"
+      ],
+      "imageCount": 2,
+      "elapsedMs": 49730.2842,
+      "recovery": null,
+      "publicTerminalText": "Dạ, set váy Thạch Thảo có giá 799.000đ chị nha. Nếu mình thích mua lẻ thì áo có giá 499.000đ và chân váy có giá 449.000đ ạ.",
+      "capturedTerminalSha256": "1171a5e9e2a089724fd50567b6212655e6798bf08a41166a15c264546eb55e7e",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 48,
+      "group": "opening-quotes",
+      "caseId": "opening-ad-repeat",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, set váy Thạch Thảo có giá 799.000đ chị nha."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 33969.947499999995,
+      "recovery": null,
+      "publicTerminalText": "Dạ, set váy Thạch Thảo có giá 799.000đ chị nha.",
+      "capturedTerminalSha256": "49fe753ad016d6d604ff2b4089c139e773c3e08d6abed42005c54ad429a165d4",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 49,
+      "group": "opening-quotes",
+      "caseId": "opening-organic",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, set váy Thạch Thảo có giá 799.000đ ạ. Mẫu này hiện shop có sẵn các size S, M, L, XL. Chị cần em tư vấn chọn size phù hợp cứ báo em nha!",
+        "[CODE_IMAGE]",
+        "[CODE_IMAGE]"
+      ],
+      "imageCount": 2,
+      "elapsedMs": 44470.93770000001,
+      "recovery": null,
+      "publicTerminalText": "Dạ, set váy Thạch Thảo có giá 799.000đ ạ. Mẫu này hiện shop có sẵn các size S, M, L, XL. Chị cần em tư vấn chọn size phù hợp cứ báo em nha!",
+      "capturedTerminalSha256": "a1f7eea2af0838c1fd0f3c348bfd96c098a1464823c7992bff65eb68e7b8f372",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 50,
+      "group": "opening-quotes",
+      "caseId": "opening-unresolved",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, chị gửi giúp em hình ảnh hoặc tên mẫu chị đang xem để em báo giá chính xác cho mình nha ạ!"
+      ],
+      "imageCount": 0,
+      "elapsedMs": 27249.35949999999,
+      "recovery": null,
+      "publicTerminalText": "Dạ, chị gửi giúp em hình ảnh hoặc tên mẫu chị đang xem để em báo giá chính xác cho mình nha ạ!",
+      "capturedTerminalSha256": "7f48fc0e3a516c9af3286206a402a90f82b49635d93e0be233b3468a5c5f0caf",
+      "capturedDisplayRedacted": false
+    },
+    {
+      "ordinal": 51,
+      "group": "opening-quotes",
+      "caseId": "opening-multipart",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, set váy Thạch Thảo có giá 799.000đ ạ. Chị hoàn toàn có thể mua áo riêng được nhé, áo lẻ có giá 499.000đ ạ."
+      ],
+      "imageCount": 0,
+      "elapsedMs": 30436.502099999983,
+      "recovery": null,
+      "publicTerminalText": "Dạ, set váy Thạch Thảo có giá 799.000đ ạ. Chị hoàn toàn có thể mua áo riêng được nhé, áo lẻ có giá 499.000đ ạ.",
+      "capturedTerminalSha256": "115c052d2dc8b1118a4cb12156c66d4f2282045e90bc0270ffd213994e564308",
+      "capturedDisplayRedacted": false
+    }
+  ]
+}

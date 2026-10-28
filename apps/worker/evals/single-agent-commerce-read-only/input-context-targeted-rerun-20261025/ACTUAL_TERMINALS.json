@@ -1,0 +1,317 @@
+{
+  "sourceSha": "d4c8187134eb24c3bebf1f69a843ca7dd1945ac0",
+  "sendEnabled": false,
+  "actualTerminals": [
+    {
+      "caseId": "b1-partial-source-v2",
+      "group": "b1-errors-11-13",
+      "role": "TARGET",
+      "previousDisposition": "FALLBACK",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ chân váy làm từ chất liệu ren tơ Hàn mềm, có thiết kế form nhẹ và độ rũ tự nhiên ạ. \n\nHiện tại em chưa tra được thông tin bán lẻ riêng chân váy cũng như giá và tình trạng size M, nên em chưa báo chính xác cho chị được nha."
+      ],
+      "images": 0,
+      "elapsedMs": 21627.772000000004,
+      "recovery": null,
+      "customerMessages": [
+        "Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé."
+      ],
+      "semanticDiagnostics": null,
+      "ownerGenerations": 3,
+      "verifierGenerations": 1
+    },
+    {
+      "caseId": "b1-price-v2",
+      "group": "b1-errors-11-13",
+      "role": "TARGET",
+      "previousDisposition": "FALLBACK",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ, set váy Thạch Thảo có giá 799.000đ chị nhé. Bộ này hiện có sẵn các size từ S đến XL ạ."
+      ],
+      "images": 0,
+      "elapsedMs": 18905.672399999996,
+      "recovery": null,
+      "customerMessages": [
+        "Cho chị xin giá cả bộ với em."
+      ],
+      "semanticDiagnostics": null,
+      "ownerGenerations": 2,
+      "verifierGenerations": 1
+    },
+    {
+      "caseId": "b1-component-stock-v2",
+      "group": "b1-errors-11-13",
+      "role": "TARGET",
+      "previousDisposition": "FALLBACK",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Chân váy Thạch Thảo size M hiện còn hàng chị nhé, mua riêng chân váy có giá 449.000đ ạ."
+      ],
+      "images": 0,
+      "elapsedMs": 17686.04340000001,
+      "recovery": null,
+      "customerMessages": [
+        "Chân váy size M còn không em, mua riêng là bao nhiêu?"
+      ],
+      "semanticDiagnostics": null,
+      "ownerGenerations": 2,
+      "verifierGenerations": 1
+    },
+    {
+      "caseId": "b1-changed-occasion-v3",
+      "group": "b1-error-17",
+      "role": "TARGET",
+      "previousDisposition": "FALLBACK",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Sáng đi gặp khách hàng cần sự gọn gàng và lịch sự, chị lấy áo lẻ (499.000đ) phối cùng quần hoặc chân váy công sở sẽ hợp hơn ạ. Áo có form nhẹ và họa tiết thêu nổi tinh tế, giúp diện mạo chỉn chu mà vẫn thanh lịch. \n\nCòn nguyên set (799.000đ, thêm 300.000đ) có chân váy ren tơ Hàn với độ rũ và bay tự nhiên nên sẽ mềm mại, thướt tha, hợp đi tiệc hơn chị nhé."
+      ],
+      "images": 0,
+      "elapsedMs": 28735.888100000004,
+      "recovery": null,
+      "customerMessages": [
+        "Mà lịch đổi rồi, sáng chị mặc đi gặp khách hàng. Chị muốn nhìn gọn hơn thì nên lấy cả bộ hay chỉ lấy áo thôi em?"
+      ],
+      "semanticDiagnostics": null,
+      "ownerGenerations": 2,
+      "verifierGenerations": 1
+    },
+    {
+      "caseId": "sales-discovery-advice:need",
+      "group": "journey-openings",
+      "role": "TARGET",
+      "previousDisposition": "FALLBACK",
+      "disposition": "HANDOFF",
+      "reason": "RESPONSE_UNAVAILABLE",
+      "actualMessages": [
+        "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé."
+      ],
+      "images": 0,
+      "elapsedMs": 44062.399600000004,
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "OWNER_TOOL_MODE"
+      },
+      "customerMessages": [
+        "Chị tìm bộ áo quần đi làm, dưới một triệu thôi, đừng bó bụng quá."
+      ],
+      "publicTerminalText": "Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé.",
+      "capturedTerminalSha256": "9a428cbdf8db2cfca1bd86fb197175bce3099b61109a36b81e25ebc11f0c0a17",
+      "semanticDiagnostics": null,
+      "ownerGenerations": 3,
+      "verifierGenerations": 0
+    },
+    {
+      "caseId": "sales-product-gallery:overview",
+      "group": "journey-openings",
+      "role": "TARGET",
+      "previousDisposition": "FALLBACK",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ em gửi chị ảnh chung của set váy Thạch Thảo nhé ạ.",
+        "[CODE_IMAGE]",
+        "[CODE_IMAGE]"
+      ],
+      "images": 2,
+      "elapsedMs": 45565.1307,
+      "recovery": null,
+      "customerMessages": [
+        "Cho chị xem ảnh set Thạch Thảo màu be nhé."
+      ],
+      "publicTerminalText": "Dạ em gửi chị ảnh chung của set váy Thạch Thảo nhé ạ.",
+      "capturedTerminalSha256": "57a684e7afe3e821d552cb84d4ccc4aa9a33d86f65b637c8e9413d22ad92ede5",
+      "semanticDiagnostics": null,
+      "ownerGenerations": 3,
+      "verifierGenerations": 1
+    },
+    {
+      "caseId": "stateful-open",
+      "group": "stateful",
+      "role": "PREREQUISITE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Em đã thêm áo lẻ Thạch Thảo màu be size M vào giỏ cho chị rồi ạ. Mẫu này là hàng đặt trước (pre-order) chị nhé!"
+      ],
+      "images": 0,
+      "elapsedMs": 62531.09249999999,
+      "recovery": null,
+      "customerMessages": [
+        "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98."
+      ],
+      "publicTerminalText": "Em đã thêm áo lẻ Thạch Thảo màu be size M vào giỏ cho chị rồi ạ. Mẫu này là hàng đặt trước (pre-order) chị nhé!",
+      "capturedTerminalSha256": "99aa15a48f20d672e251474716a26e490672ae12901f5e3e34129814e90d0491",
+      "semanticDiagnostics": null,
+      "ownerGenerations": 2,
+      "verifierGenerations": 1
+    },
+    {
+      "caseId": "stateful-variant-quantity",
+      "group": "stateful",
+      "role": "PREREQUISITE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Em đã đổi sang size L và cập nhật số lượng thành 2 chiếc áo lẻ Thạch Thảo màu be cho chị rồi ạ."
+      ],
+      "images": 0,
+      "elapsedMs": 53198.835699999996,
+      "recovery": null,
+      "customerMessages": [
+        "Đổi áo sang L cho chị, lấy hai chiếc nhé."
+      ],
+      "publicTerminalText": "Em đã đổi sang size L và cập nhật số lượng thành 2 chiếc áo lẻ Thạch Thảo màu be cho chị rồi ạ.",
+      "capturedTerminalSha256": "1c305382948e0ba696f2b87272aed2cd7f08ec52dc372306b57d6dac8ed5a96e",
+      "semanticDiagnostics": null,
+      "ownerGenerations": 2,
+      "verifierGenerations": 1
+    },
+    {
+      "caseId": "stateful-quote",
+      "group": "stateful",
+      "role": "PREREQUISITE",
+      "previousDisposition": "SEND_ELIGIBLE",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Tổng tiền 2 chiếc áo lẻ Thạch Thảo màu be size L của chị là 978.100đ (đã gồm 30.000đ phí ship và được giảm 49.900đ ưu đãi, tiền hàng là 998.000đ) ạ."
+      ],
+      "images": 0,
+      "elapsedMs": 31449.540899999993,
+      "recovery": null,
+      "customerMessages": [
+        "Hai áo cả phí ship là bao nhiêu em?"
+      ],
+      "publicTerminalText": "Tổng tiền 2 chiếc áo lẻ Thạch Thảo màu be size L của chị là 978.100đ (đã gồm 30.000đ phí ship và được giảm 49.900đ ưu đãi, tiền hàng là 998.000đ) ạ.",
+      "capturedTerminalSha256": "f1be598064fbeac7510de3492301722f7c8a4db3783f32c6a115aa69b27ec1c7",
+      "semanticDiagnostics": null,
+      "ownerGenerations": 1,
+      "verifierGenerations": 1
+    },
+    {
+      "caseId": "stateful-correction",
+      "group": "stateful",
+      "role": "TARGET",
+      "previousDisposition": "HANDOFF",
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "actualMessages": [
+        "Dạ em ghi nhận số đo mới của chị nhé. 2 chiếc áo size L của chị vẫn được giữ nguyên ạ!"
+      ],
+      "images": 0,
+      "elapsedMs": 42752.4547,
+      "recovery": null,
+      "customerMessages": [
+        "Số đo lúc nãy chị nhắn nhầm, eo 74, mông 96 nhé. Chị vẫn lấy size L."
+      ],
+      "publicTerminalText": "Dạ em ghi nhận số đo mới của chị nhé. 2 chiếc áo size L của chị vẫn được giữ nguyên ạ!",
+      "capturedTerminalSha256": "fb30664bcc41992fd425fce3566d127d9b8cec12893fde5aa2700d2f26e0fc3f",
+      "semanticDiagnostics": null,
+      "ownerGenerations": 2,
+      "verifierGenerations": 1
+    },
+    {
+      "caseId": "stateful-request-checkout",
+      "group": "stateful",
+      "role": "TARGET",
+      "previousDisposition": "NO_SEND",
+      "disposition": "NO_SEND",
+      "reason": "CHECKOUT_DETAILS_MISSING",
+      "actualMessages": [
+        "Chị cho em [NAME]"
+      ],
+      "images": 0,
+      "elapsedMs": 22667.272999999986,
+      "recovery": {
+        "originalDisposition": "NO_SEND",
+        "originalReason": "CHECKOUT_DETAILS_MISSING"
+      },
+      "customerMessages": [
+        "Chị đặt hai áo này nhé, lên đơn cho chị."
+      ],
+      "semanticDiagnostics": null,
+      "ownerGenerations": 1,
+      "verifierGenerations": 0,
+      "publicTerminalText": "Chị cho em tên người nhận nhé.",
+      "capturedTerminalSha256": "d04585b28fb64c62250f917950ddf3293a2436ec31506184cbab99bd9f532125",
+      "displayRedactionNote": "Public question over-redacted by analytics; hash verified against accepted capture"
+    },
+    {
+      "caseId": "stateful-private-checkout",
+      "group": "stateful",
+      "role": "TARGET",
+      "previousDisposition": "NO_SEND",
+      "disposition": "NO_SEND",
+      "reason": "PRIVATE_CHECKOUT_COMMITTED",
+      "actualMessages": [
+        "2 áo (mẫu “Set váy Thạch Thảo”) màu be, size L: 998.000đ\nTạm tính: 998.000đ\nƯu đãi: -49.900đ\nPhí ship: 30.000đ\nTổng: 978.100đ\nSet váy Thạch Thảo: hàng đặt trước\nNgười nhận: Khách thử nghiệm - [PHONE]\n[ADDRESS]\nThanh toán: COD\nDự kiến nhận hàng: 8-14 ngày.\nChị xác nhận chốt đơn nhé."
+      ],
+      "images": 0,
+      "elapsedMs": 8341.077600000019,
+      "recovery": null,
+      "customerMessages": [
+        "[PRIVATE_CODE_CHECKOUT — omitted]"
+      ],
+      "semanticDiagnostics": null,
+      "ownerGenerations": 0,
+      "verifierGenerations": 0
+    },
+    {
+      "caseId": "stateful-confirm",
+      "group": "stateful",
+      "role": "TARGET",
+      "previousDisposition": "NO_SEND",
+      "disposition": "HANDOFF",
+      "reason": "PURCHASE_CONFIRMED",
+      "actualMessages": [
+        "Dạ, shop đã nhận yêu cầu đặt hàng của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé."
+      ],
+      "images": 0,
+      "elapsedMs": 26617.343199999974,
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "PURCHASE_CONFIRMED"
+      },
+      "customerMessages": [
+        "Chốt đơn cho chị nhé."
+      ],
+      "semanticDiagnostics": null,
+      "ownerGenerations": 1,
+      "verifierGenerations": 0
+    },
+    {
+      "caseId": "stateful-human-request",
+      "group": "stateful",
+      "role": "TARGET",
+      "previousDisposition": "HANDOFF",
+      "disposition": "HANDOFF",
+      "reason": "CUSTOMER_REQUESTED_HUMAN",
+      "actualMessages": [
+        "Dạ, em đã chuyển lời nhắn của chị rồi ạ."
+      ],
+      "images": 0,
+      "elapsedMs": 20381.83389999997,
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "CUSTOMER_REQUESTED_HUMAN"
+      },
+      "customerMessages": [
+        "Cho chị gặp nhân viên shop nhé."
+      ],
+      "publicTerminalText": "Dạ, em đã chuyển lời nhắn của chị rồi ạ.",
+      "capturedTerminalSha256": "48bb462fd1f2a7487cf4f2f4107e7c731de70c544c9622bbfcb02e1eb928347d",
+      "semanticDiagnostics": null,
+      "ownerGenerations": 1,
+      "verifierGenerations": 0
+    }
+  ]
+}

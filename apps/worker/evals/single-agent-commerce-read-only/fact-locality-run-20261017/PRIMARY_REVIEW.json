@@ -1,0 +1,87 @@
+{
+  "runSourceSha": "c6476301539988f134f0843a0e3f2a31fff0560e",
+  "rawSavepoint": "2dffdfa7733bd0c2311d87814803c2aabd1f8178",
+  "protocol": "WHOLE_ACTUAL_TERMINAL_AND_COMMITTED_PUBLIC_STATE_BEFORE_REJECTED_DRAFT_VERDICT_DIAGNOSIS",
+  "subjective": true,
+  "independent": false,
+  "humanAcceptance": null,
+  "counts": {
+    "USABLE": 5,
+    "NEEDS_EDIT": 0,
+    "FALLBACK_OR_NO_SEND": 2
+  },
+  "salesJourneyCompleted": false,
+  "sourceCommunicationCaveat": "Preflight complete selections are PRE_ORDER. None of the four captured ACK/quote replies discloses preorder. No reply explicitly claims in-stock and no purchase was completed. Material preorder disclosure before any real purchase remains unproven; USABLE milestones do not mean sales acceptance.",
+  "rows": [
+    {
+      "slot": 1,
+      "caseId": "stateful-open",
+      "journeyId": "sales",
+      "outcome": "USABLE",
+      "terminal": "SEND_ELIGIBLE",
+      "wholeTurnReason": "Đã thêm đúng áo lẻ be/M×1; profile nhận76/98, giỏ revision1. Câu ACK đúng tác vụ khách yêu cầu, không đọc lại số đo hay tự chứng minh fit. USABLE chỉ ở bước tạo giỏ; chưa phải hàng sẵn hoặc giao dịch mua hoàn tất.",
+      "completeness": "REGISTERED_CART_OR_PROFILE_TASK_COMPLETED",
+      "humanAcceptance": null
+    },
+    {
+      "slot": 2,
+      "caseId": "stateful-variant-quantity",
+      "journeyId": "sales",
+      "outcome": "USABLE",
+      "terminal": "SEND_ELIGIBLE",
+      "wholeTurnReason": "Đổi đúng L và quantity2 ngay trong lượt; màuBE giữ nguyên, giỏ revision3. Câu trả lời khớp cả hai thay đổi, không cần lượt sau cứu số lượng.",
+      "completeness": "REGISTERED_CART_OR_PROFILE_TASK_COMPLETED",
+      "humanAcceptance": null
+    },
+    {
+      "slot": 3,
+      "caseId": "stateful-quote",
+      "journeyId": "sales",
+      "outcome": "USABLE",
+      "terminal": "SEND_ELIGIBLE",
+      "wholeTurnReason": "Trả đúng tổng978.100đ và phí ship30.000đ theo giỏ hiện hành. Đáp ứng câu hỏi tiền, không tự thêm một bước mua hoặc khẳng định đã tạo đơn.",
+      "completeness": "REGISTERED_CART_OR_PROFILE_TASK_COMPLETED",
+      "humanAcceptance": null
+    },
+    {
+      "slot": 4,
+      "caseId": "stateful-correction",
+      "journeyId": "sales",
+      "outcome": "USABLE",
+      "terminal": "SEND_ELIGIBLE",
+      "wholeTurnReason": "Profile nhận correction74/96/revision3; giỏ vẫn L/BE×2. ACK xác nhận sửa và giữ lựa chọn đúng yêu cầu, không đọc lại toàn bộ số đo hoặc chốt fit. Giọng còn dài ở phần báo trạng thái và “nhé ạ!”, nhưng chưa làm câu trả lời sai/lủng củng đến mức bác kết quả tác vụ.",
+      "completeness": "REGISTERED_CART_OR_PROFILE_TASK_COMPLETED",
+      "humanAcceptance": null
+    },
+    {
+      "slot": 5,
+      "caseId": "stateful-private-checkout",
+      "journeyId": "sales",
+      "outcome": "FALLBACK_OR_NO_SEND",
+      "terminal": "HANDOFF",
+      "wholeTurnReason": "Không có preview/tin capture hoặc mua hàng hoàn tất; terminal handoff dependency. Đúng boundary không thay việc khách chưa hoàn thành checkout; chưa đọc trace để gán nguyên nhân cụ thể.",
+      "completeness": "NOT_RESOLVED",
+      "humanAcceptance": null
+    },
+    {
+      "slot": 6,
+      "caseId": "stateful-confirm",
+      "journeyId": "sales",
+      "outcome": "FALLBACK_OR_NO_SEND",
+      "terminal": "NO_SEND",
+      "wholeTurnReason": "Không có tin capture hoặc xác nhận mua; authority đã đổi sau bước trước. Đây là kết quả phụ thuộc của cùng hành trình chưa hoàn tất, không phải một lỗi model mới độc lập.",
+      "completeness": "NOT_RESOLVED",
+      "humanAcceptance": null
+    },
+    {
+      "slot": 7,
+      "caseId": "stateful-human-request",
+      "journeyId": "handoff",
+      "outcome": "USABLE",
+      "terminal": "HANDOFF",
+      "wholeTurnReason": "Chuyển ownership theo yêu cầu trong harness. USABLE ở phạm vi ownership-only; không chứng minh nhân viên thật nhận/phục vụ hoặc một đơn mua thành công.",
+      "completeness": "OWNERSHIP_REQUEST_ONLY",
+      "humanAcceptance": null
+    }
+  ]
+}

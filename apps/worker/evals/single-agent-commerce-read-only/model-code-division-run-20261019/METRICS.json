@@ -1,0 +1,213 @@
+{
+  "runSourceSha": "d699bb4a387ca3cc191e729218dbe9262724ef9b",
+  "registeredSlots": 51,
+  "recordedSlots": 51,
+  "generationRequests": 119,
+  "requestCountDistribution": {
+    "1": 119
+  },
+  "generationRows": 119,
+  "retry": 0,
+  "families": {
+    "baseline": {
+      "slots": 3,
+      "terminal": {
+        "FALLBACK": 1,
+        "SEND_ELIGIBLE": 2
+      },
+      "reasons": {
+        "OWNER_TOOL_MODE": 1,
+        "PASS": 1,
+        "RECEIPT_BACKED_CART_SUMMARY": 1
+      },
+      "providerRequests": 10,
+      "ownerRequests": 9,
+      "verifierRequests": 1,
+      "verifierLatencyMs": {
+        "p50": 5295.640399999997,
+        "p95": 5295.640399999997
+      },
+      "addedVerificationLatencyMs": {
+        "p50": 8594.343800000002,
+        "p95": 8594.343800000002
+      },
+      "inputTokens": 57073,
+      "outputTokens": 5008,
+      "missingUsage": 0,
+      "cost": "NOT_EXPOSED",
+      "conformanceErrors": 2,
+      "providerTimeoutOrHttpErrors": 0
+    },
+    "stateful": {
+      "slots": 24,
+      "terminal": {
+        "SEND_ELIGIBLE": 12,
+        "NO_SEND": 6,
+        "HANDOFF": 6
+      },
+      "reasons": {
+        "PASS": 12,
+        "CHECKOUT_DETAILS_MISSING": 3,
+        "PRIVATE_CHECKOUT_COMMITTED": 3,
+        "PURCHASE_CONFIRMED": 3,
+        "CUSTOMER_REQUESTED_HUMAN": 3
+      },
+      "providerRequests": 44,
+      "ownerRequests": 32,
+      "verifierRequests": 12,
+      "verifierLatencyMs": {
+        "p50": 4966.591999999997,
+        "p95": 7511.427544999986
+      },
+      "addedVerificationLatencyMs": {
+        "p50": 8301.481749999999,
+        "p95": 10460.997159999999
+      },
+      "inputTokens": 243625,
+      "outputTokens": 23970,
+      "missingUsage": 0,
+      "cost": "NOT_EXPOSED",
+      "conformanceErrors": 0,
+      "providerTimeoutOrHttpErrors": 0
+    },
+    "b1": {
+      "slots": 12,
+      "terminal": {
+        "FALLBACK": 3,
+        "SEND_ELIGIBLE": 9
+      },
+      "reasons": {
+        "FAIL": 3,
+        "PASS": 9
+      },
+      "providerRequests": 41,
+      "ownerRequests": 29,
+      "verifierRequests": 12,
+      "verifierLatencyMs": {
+        "p50": 4945.460199999998,
+        "p95": 11437.842869999995
+      },
+      "addedVerificationLatencyMs": {
+        "p50": 5607.537300000004,
+        "p95": 12477.437510000003
+      },
+      "inputTokens": 166848,
+      "outputTokens": 16562,
+      "missingUsage": 0,
+      "cost": "NOT_EXPOSED",
+      "conformanceErrors": 0,
+      "providerTimeoutOrHttpErrors": 0
+    },
+    "advice": {
+      "slots": 12,
+      "terminal": {
+        "FALLBACK": 3,
+        "SEND_ELIGIBLE": 9
+      },
+      "reasons": {
+        "FAIL": 3,
+        "PASS": 9
+      },
+      "providerRequests": 24,
+      "ownerRequests": 12,
+      "verifierRequests": 12,
+      "verifierLatencyMs": {
+        "p50": 5135.5,
+        "p95": 9586.3
+      },
+      "addedVerificationLatencyMs": {
+        "p50": 5137.093900000002,
+        "p95": 9590.82301
+      },
+      "inputTokens": 94191,
+      "outputTokens": 17945,
+      "missingUsage": 0,
+      "cost": "NOT_EXPOSED",
+      "conformanceErrors": 0,
+      "providerTimeoutOrHttpErrors": 0
+    }
+  },
+  "roleTotals": {
+    "owner": {
+      "requests": 82,
+      "inputTokens": 381204,
+      "outputTokens": 60016
+    },
+    "verifier": {
+      "requests": 37,
+      "inputTokens": 180533,
+      "outputTokens": 3469
+    }
+  },
+  "verdictCounts": {
+    "FAIL": 6,
+    "PASS": 31
+  },
+  "evaluatorOrPrivateLeaks": [],
+  "wireCapturesChecked": 181,
+  "sourceCounters": {
+    "stateful-1": {
+      "embedding": 0,
+      "owner": 12,
+      "verifier": 4,
+      "catalogReads": 20,
+      "posReads": 18,
+      "selectorCalls": 30,
+      "readPolicyCalls": 0
+    },
+    "stateful-2": {
+      "embedding": 0,
+      "owner": 10,
+      "verifier": 4,
+      "catalogReads": 20,
+      "posReads": 18,
+      "selectorCalls": 30,
+      "readPolicyCalls": 0
+    },
+    "stateful-3": {
+      "embedding": 0,
+      "owner": 10,
+      "verifier": 4,
+      "catalogReads": 20,
+      "posReads": 18,
+      "selectorCalls": 30,
+      "readPolicyCalls": 0
+    }
+  },
+  "baselineSourceSha": "f60c87b241956c20f52646d84862920dd81fd5f1",
+  "percentileMethod": "linear interpolation; families separate",
+  "modelVersionsObserved": {
+    "owner": {
+      "gemini-3.5-flash-lite": 82
+    },
+    "verifier": {
+      "gpt-6.1-sol": 37
+    }
+  },
+  "b1SourcePortCounters": {
+    "b1-1": {
+      "embeddingCalls": 1,
+      "policyReads": 0,
+      "catalogReads": 17,
+      "posReads": 11
+    },
+    "b1-2": {
+      "embeddingCalls": 1,
+      "policyReads": 0,
+      "catalogReads": 17,
+      "posReads": 11
+    },
+    "b1-3": {
+      "embeddingCalls": 0,
+      "policyReads": 0,
+      "catalogReads": 14,
+      "posReads": 11
+    }
+  },
+  "sourcePreflightCounters": {
+    "embeddingCalls": 1,
+    "policyReads": 0,
+    "catalogReads": 1,
+    "posReads": 0
+  }
+}

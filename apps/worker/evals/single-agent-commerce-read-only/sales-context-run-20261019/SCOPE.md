@@ -1,0 +1,9 @@
+# Sales context model run — 2026-10-19
+
+Owner yêu cầu chạy model sau bản sửa cd5d4da0. Dùng Gemini 3.5 Flash Lite HIGH owner và GPT-6.1 Sol high verifier, cùng generation config/credential route đã duyệt, send disabled. Tái sử dụng 16 slots hiện hữu: 8 stateful (gồm private code path và human ownership control), 4 integrated B1, 4 advice replay từ đúng capture mới. N1, tối đa 52 generation requests, retry0; không thêm mẫu bù hoặc sửa giữa run. Đây không phải full24 B1 hoặc full A2/A3.
+
+Copy exact bytes runner/cases hiện hữu sang folder này chỉ để runner đọc registration mới; không đổi executable logic. REGISTRATION.json freeze prompt/schema/corpus/config/launcher/rubric trước provider. Commit sạch rồi chụp current HEAD vào runtime RUN_SOURCE.json, không ghi source SHA ngược vào frozen inputs. Preflight và source-check trước generation. Mọi lỗi/fallback/blocked giữ trong denominator; nguồn hoặc credential không available thì báo đúng phần bị chặn, không substitute.
+
+Review whole actual outcomes và public state trước khi mở rejected draft/verdict diagnosis. Áp dụng cách đánh giá đã chốt trong docs/specs/c3-phase-b-sales-context-fix-20261019.md; tách lời tư vấn giải quyết được việc mua nhưng còn polish với phần thực sự cần viết lại. Không dùng keyword hoặc đòi suy luận thẩm mỹ theo một câu mẫu. Giữ nguyên raw/primary/counts lịch sử. So với run trước chỉ mang tính mô tả vì live source/sampling và clarification review có thể khác; advice replay phụ thuộc integrated capture, không phải hội thoại độc lập.
+
+Lưu request accounting/token/latency, public raw artifacts đã kiểm PII và actual conversations. Delivery capture only, private checkout không đưa PII vào model; DB test phải được drop. Khóa primary rồi diagnosis, báo findings và STOP readiness nếu còn vấn đề; không tự sửa/chạy vòng tiếp hoặc live action. A OWNER_BYPASS, B chưa live GO.

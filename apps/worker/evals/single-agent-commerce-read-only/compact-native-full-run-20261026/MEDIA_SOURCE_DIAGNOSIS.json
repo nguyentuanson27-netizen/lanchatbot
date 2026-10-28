@@ -1,0 +1,140 @@
+{
+  "scope": "OFFLINE_SELECTOR_REPLAY_ON_FRESH_CONTROL_CAPTURE_NOT_EXACT_EACH_NATIVE_READBACK",
+  "captureAt": "2026-10-26T16:49:45.308Z",
+  "images": [
+    {
+      "imageType": "SIZE_GUIDE",
+      "angle": "UNKNOWN",
+      "feedback": false,
+      "partsVisible": [
+        "UNKNOWN"
+      ]
+    },
+    {
+      "imageType": "MODEL",
+      "angle": "FRONT",
+      "feedback": false,
+      "partsVisible": [
+        "FULL_SET"
+      ]
+    },
+    {
+      "imageType": "SIZE_GUIDE",
+      "angle": "FRONT",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ]
+    },
+    {
+      "imageType": "DETAIL",
+      "angle": "CLOSEUP",
+      "feedback": false,
+      "partsVisible": [
+        "UNKNOWN"
+      ]
+    },
+    {
+      "imageType": "DETAIL",
+      "angle": "CLOSEUP",
+      "feedback": false,
+      "partsVisible": [
+        "AO"
+      ]
+    },
+    {
+      "imageType": "MODEL",
+      "angle": "FRONT",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ]
+    },
+    {
+      "imageType": "MODEL",
+      "angle": "FRONT",
+      "feedback": false,
+      "partsVisible": [
+        "FULL_SET"
+      ]
+    },
+    {
+      "imageType": "MODEL",
+      "angle": "BACK",
+      "feedback": false,
+      "partsVisible": [
+        "FULL_SET"
+      ]
+    },
+    {
+      "imageType": "MODEL",
+      "angle": "FRONT",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ]
+    },
+    {
+      "imageType": "MODEL",
+      "angle": "FRONT",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ]
+    },
+    {
+      "imageType": "PRODUCT_ONLY",
+      "angle": "FRONT",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "query": {
+        "subjectRef": "SV2447",
+        "intent": "FEEDBACK"
+      },
+      "status": "UNAVAILABLE",
+      "reason": "NO_VERIFIED_MATCHING_MEDIA",
+      "assetCount": 0
+    },
+    {
+      "query": {
+        "subjectRef": "SV2447",
+        "intent": "GENERIC",
+        "color": "be"
+      },
+      "status": "UNAVAILABLE",
+      "reason": "MEDIA_COLOR_BINDING_UNVERIFIED",
+      "assetCount": 0
+    },
+    {
+      "query": {
+        "subjectRef": "SV2447",
+        "intent": "DETAIL",
+        "componentRole": "SKIRT"
+      },
+      "status": "UNAVAILABLE",
+      "reason": "NO_VERIFIED_MATCHING_MEDIA",
+      "assetCount": 0
+    },
+    {
+      "query": {
+        "subjectRef": "SV2447",
+        "intent": "DETAIL",
+        "componentRole": "TOP"
+      },
+      "status": "OK",
+      "reason": null,
+      "assetCount": 1
+    }
+  ]
+}

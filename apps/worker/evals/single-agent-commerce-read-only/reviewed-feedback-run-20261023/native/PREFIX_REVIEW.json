@@ -1,0 +1,289 @@
+{
+  "identity": {
+    "sourceSha": "362876e83be4014c28fae60abcaf2e5a3243adb1",
+    "manifestHash": "652116f4e8a3050ae6a51bf88a288f95275c3b0dfdae47c9bf2a4b3a1c655532",
+    "sourceConfigHash": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+    "promptHashes": {
+      "owner": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
+      "verifier": "02a727ab7b188c11b15fc74ee46744d7027d63c016f7a34f163a1517ae722800"
+    },
+    "models": {
+      "conversation": {
+        "provider": "VERTEX_AI",
+        "model": "gemini-3.5-flash-lite",
+        "version": "gemini-3.5-flash-lite",
+        "effort": "high",
+        "location": "global",
+        "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+        "generationConfig": {
+          "candidateCount": 1,
+          "responseMimeType": "text/plain",
+          "maxOutputTokens": 8192,
+          "thinkingConfig": {
+            "thinkingLevel": "HIGH",
+            "includeThoughts": false
+          },
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "retry": 0,
+          "timeoutMs": 90000
+        }
+      },
+      "verifier": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      }
+    },
+    "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+    "corpusHashes": {
+      "cases.b1.json": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+      "stateful-cases.json": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+      "sales-journeys.candidate.json": "4b888f6e44f5b4e144125da38d70bf175946dc5277eabb8d0ab5a6639077fbeb",
+      "sales-media-followup-cases.json": "dff5c57dff681f75ac35e484c014b0c62965bde2169941aa5b488ce879bba93a"
+    }
+  },
+  "allowRest": false,
+  "status": "STOP",
+  "registeredNative": 46,
+  "completed": 14,
+  "missingPrefix": 7,
+  "notRunTotal": 32,
+  "reason": "OWNER_TOOL_MODE_PROTOCOL_ERROR; prefix incomplete. No majority vote, retry or source change.",
+  "entries": [
+    {
+      "caseId": "b1-partial-source",
+      "path": "native/b1-3-3/attempt-3.json",
+      "artifactHash": "f408499edb39fc1ba61a43752b2ee650b722b748d0b96b1e65a44ebe0f3debd6",
+      "customerOutcomeHash": "f424bd80834d5de0ef7ad57bb7a7e5623857f2f89e6bfea43cf6502c2178558a",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set Thạch Thảo có phần áo may bằng tơ Hàn thêu với họa tiết thêu nổi, vải mềm, thoáng và có độ bay tự nhiên; chân váy làm từ ren tơ Hàn mềm mại, form nhẹ và có độ rũ tự nhiên chị nhé. \n\nHiện tại hệ thống chưa hiển thị sẵn giá và tình trạng tồn kho cụ thể cho size M, nên em chưa tra được thông tin này ạ.",
+        "fallbackId": null
+      },
+      "evidenceMode": "SEND_ELIGIBILITY_ONLY",
+      "quality": "NEEDS_EDIT",
+      "finding": "Giữ phần chất liệu đã biết nhưng vẫn gọi hệ thống và dừng ở chưa tra được giá/tồn; cùng lỗi giọng/dead-end ở full-phase-b-run trước, chưa regression rõ."
+    },
+    {
+      "caseId": "b1-price",
+      "path": "native/b1-4-4/attempt-4.json",
+      "artifactHash": "6278499e9dbc6cb92059eb114d8f2bc495697df08f2da5938e2d26a6bcfae6a7",
+      "customerOutcomeHash": "cd8f1d5da7d2006936db33aae636b6e60ba0e4cc377ebd9776ce71f5cde16b9a",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set váy Thạch Thảo có giá 799.000đ chị nhé. Ngoài ra, shop có bán lẻ áo giá 499.000đ và chân váy giá 449.000đ ạ. Các sản phẩm này hiện đều có sẵn hàng.",
+        "fallbackId": null
+      },
+      "evidenceMode": "SEND_ELIGIBILITY_ONLY",
+      "quality": "USABLE",
+      "finding": "Trả giá nguyên set trước, thêm giá bán lẻ/tồn gọn. Không tự gọi đó là lỗi vì nhiều hơn một fact; giá/tồn cần đối chiếu source trong whole-turn review."
+    },
+    {
+      "caseId": "b1-component-stock",
+      "path": "native/b1-5-5/attempt-5.json",
+      "artifactHash": "b09f870201bd1fa4d4097767de4bfe47e44b95a4bf1db6ae4ac62f6b707050ff",
+      "customerOutcomeHash": "9851e462676915aebd1ffb44a0ab2f3dc48fb4263c1d0dd8ff1210078755a7ce",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, áo lẻ Thạch Thảo size M bên em còn hàng chị nhé, giá áo là 499.000đ ạ.",
+        "fallbackId": null
+      },
+      "evidenceMode": "SEND_ELIGIBILITY_ONLY",
+      "quality": "USABLE",
+      "finding": "Trả đúng áo lẻ, size khách hỏi, giá và tồn; ngắn, tự nhiên, không tự kết luận fit."
+    },
+    {
+      "caseId": "b1-buying-concern",
+      "path": "native/b1-7-7/attempt-7.json",
+      "artifactHash": "63d8e6a0c71cb7479f4784c98c386ef2855691722a58d0dad39a02a593916718",
+      "customerOutcomeHash": "29f3d362c46096f877f494ccb9f16101fef1ac37f8baf03021753eee86c8e975",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ set này mặc đi tiệc ban ngày rất thanh nhã và sang trọng ạ, chất tơ Hàn và ren mềm có độ bay và độ rũ tự nhiên nên không bị rườm rà đâu chị nhé. \n\nNgân sách 900 nghìn của chị hoàn toàn thoải mái vì nguyên set váy Thạch Thảo hiện có giá 799.000đ ạ.",
+        "fallbackId": null
+      },
+      "evidenceMode": "SEND_ELIGIBILITY_ONLY",
+      "quality": "USABLE_WITH_STYLE_NOTE",
+      "finding": "Trả thẳng nên mặc dịp ban ngày và đủ ngân sách, không lạc sang lựa chọn thứ hai. Lý do còn dựa chủ yếu mô tả vải/tính từ; chưa chứng minh cải thiện thuyết phục ổn định."
+    },
+    {
+      "caseId": "b1-policy-used",
+      "path": "native/b1-8-8/attempt-8.json",
+      "artifactHash": "69606fca1f1157faf17be24c3cc0dbf1d4f0132a3489b8af494245777e9cea24",
+      "customerOutcomeHash": "53d9d3c7402c1c7aabe8b0765e07d5a515116b45f869fb8c899f8f8d6bba5842",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, quy định đổi hàng của shop yêu cầu sản phẩm chưa qua sử dụng và chưa mặc ra ngoài. Do chị đã mặc đi làm nên sản phẩm không đủ điều kiện đổi hàng ạ. \n\nTrường hợp đổi hàng hợp lệ, tổng phí vận chuyển hai chiều là 30.000đ do chị chi trả ạ.",
+        "fallbackId": null
+      },
+      "evidenceMode": "SEND_ELIGIBILITY_ONLY",
+      "quality": "USABLE_WITH_STYLE_NOTE",
+      "finding": "Từ chối đổi vì đã mặc đi làm, không mở đầu bằng cấp quyền rồi phủ định. Phí30k hai chiều khớp customerCare.exchange.totalTwoWayShippingFeeVnd trong policy hiện tại. Giọng còn theo quy định nhưng không có policy contradiction."
+    },
+    {
+      "caseId": "b1-changed-occasion-v2",
+      "path": "native/b1-9-9/attempt-9.json",
+      "artifactHash": "3647b7152ce083fa588cc19ae695663f99ad6034da8cd46bbb0bf2da2747334a",
+      "customerOutcomeHash": "1e39e3a945b57e894163ff88ab9de393da723ee10c601c3e0fee779109bd4f6e",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set Thạch Thảo dùng chất liệu áo tơ Hàn thêu và chân váy ren tơ Hàn mềm, thoáng, có độ bay tự nhiên nên mặc nhẹ nhàng, không bị hầm nặng. Tuy nhiên, vì chị ở ngoài trời khá lâu và dễ nóng, nếu cần ưu tiên độ thấm hút mồ hôi, set quần Uyển Hoa với vải thô đũi thoáng khí sẽ mang lại cảm giác mát mẻ và thoải mái hơn cho không gian sân vườn.",
+        "fallbackId": null
+      },
+      "evidenceMode": "SEND_ELIGIBILITY_ONLY",
+      "quality": "USABLE_WITH_STYLE_NOTE",
+      "finding": "Đã đưa món thay Uyển Hoa từ catalog để ưu tiên mát khi bối cảnh đổi; cần kiểm source sản phẩm/material và có thể nói quyết định gọn hơn. Không ép phải có phép thử riêng cho so sánh cảm nhận định tính."
+    },
+    {
+      "caseId": "b1-partial-source-v2",
+      "path": "native/b1-11-11/attempt-11.json",
+      "artifactHash": "bcf338170ffb5711a45270956f2c0fe32d212398bc6070d999b0dd67fe1d8265",
+      "customerOutcomeHash": "b7f09f03dc5f550790a2632940362fd7f2c3d8e495b0de9a0d5d86ef61c8eb15",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chân váy làm từ chất liệu ren tơ Hàn mềm, có form nhẹ và độ rũ tự nhiên ạ. Dạ hiện tại em chưa có sẵn thông tin giá và tồn kho khi mua riêng chân váy nên chưa báo chính xác cho chị được nhé ạ.",
+        "fallbackId": null
+      },
+      "evidenceMode": "SEND_ELIGIBILITY_ONLY",
+      "quality": "USABLE_WITH_STYLE_NOTE",
+      "finding": "Giữ câu trả lời về chân váy và báo rõ chưa có giá/tồn trong fault POS. Gọn hơn ca partial đầu, không tự hỏi lại khách để chữa lỗi nguồn. Chưa có next-step thực trong B1 read-only; không hứa handoff chưa có."
+    },
+    {
+      "caseId": "b1-buying-concern-v2",
+      "path": "native/b1-15-15/attempt-15.json",
+      "artifactHash": "76923a1f54b44933275961c6f94ba56201752679b3dfe8c1961aaa6ef442da16",
+      "customerOutcomeHash": "bc897ab434e4de9e7622eff5c8880d1049166fb7f7dc1520927567e6d9581e13",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, chị hoàn toàn có thể yên tâm lấy set Thạch Thảo này để đi ăn cưới ban ngày ạ. Áo tơ thêu nổi và chân váy ren có form nhẹ, độ bay và rũ tự nhiên nên lên người rất thanh thoát, sang trọng mà không hề bị bồng bềnh hay sến sẩm. \n\nVì chị quen mặc đồ trơn, chất liệu tơ ren nhã nhặn của set sẽ vừa đủ tạo điểm nhấn tinh tế cho ngày tiệc mà vẫn giữ được nét thanh lịch quen thuộc. Set có giá 799.000đ ạ.",
+        "fallbackId": null
+      },
+      "evidenceMode": "SEND_ELIGIBILITY_ONLY",
+      "quality": "NEEDS_EDIT",
+      "finding": "Chọn cả bộ tự tin nhưng nhiều tính từ và phủ định sến/bồng bềnh; lý do chưa đi sâu đánh đổi với khách vốn thích trơn. Lỗi giọng/thuyết phục cũ, không phải phát hiện protected false PASS."
+    },
+    {
+      "caseId": "b1-changed-occasion-v3",
+      "path": "native/b1-17-17/attempt-17.json",
+      "artifactHash": "b9a4723ce9fbf7556b8d0e6ab555e886e015aaee77d5898e0cdc1e352983375c",
+      "customerOutcomeHash": "831683735eb3df6bcb7d9805ad0453418c76b14c3da49f29ef7cea2115f45872",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, đi gặp khách hàng mà chị muốn nhìn gọn gàng và sắc sảo hơn thì mình lấy áo lẻ thôi chị ạ. Áo có form nhẹ cùng họa tiết thêu nổi, khi kết hợp với quần âu hoặc chân váy ôm sẵn có sẽ rất lịch sự và chuyên nghiệp. \n\nCòn chân váy ren trong set có độ rũ và độ bay tự nhiên, hợp với không gian tiệc tối mềm mại hơn. Áo lẻ giá 499.000đ chị nhé.",
+        "fallbackId": null
+      },
+      "evidenceMode": "SEND_ELIGIBILITY_ONLY",
+      "quality": "USABLE_WITH_STYLE_NOTE",
+      "finding": "Đã đổi quyết định sang áo lẻ cho cuộc gặp buổi sáng, giải thích so với cả bộ và báo499k. Nhắc tiệc tối ở đây có liên quan tới so sánh hai lựa chọn khách hỏi, không tự fail chỉ vì có cụm đó; vẫn hơi dài và dùng đồ sẵn có chưa xác nhận."
+    },
+    {
+      "caseId": "b1-buying-concern-v3",
+      "path": "native/b1-23-23/attempt-23.json",
+      "artifactHash": "0166e1a8617eefff60a4c34cfa5bbaafc971608cbf89442c6e2d86f75bd57129",
+      "customerOutcomeHash": "1d441a367f46614f5f6cec887f04f5bb98ff3d40373463b27a3608e28430a9c8",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chị lấy cả bộ Thạch Thảo giá 799.000đ nhé, vừa vặn trong ngân sách 850 nghìn của chị. \n\nMua cả bộ sẽ tiết kiệm hơn đáng kể so với mua lẻ từng món (áo 499k và chân váy 449k), đồng thời giúp chị có nhiều cách phối đồ để mặc lại nhiều lần: chị có thể diện nguyên set ren tơ đi làm hay đi chơi, hoặc tách áo thêu tơ Hàn phối với chân váy đen suông sẵn có, và dùng chân váy ren phối với các áo khác trong tủ đồ. Nhờ vậy chị vừa tối ưu được ngân sách vừa biến hóa được nhiều phong cách khác nhau ạ.",
+        "fallbackId": null
+      },
+      "evidenceMode": "SEND_ELIGIBILITY_ONLY",
+      "quality": "USABLE_WITH_STYLE_NOTE",
+      "finding": "Upsell cả bộ799k trong850k, giải thích mặc tách nhiều lần và dùng chân váy đen khách đã nói có. Không chấm mua thêm là lỗi chỉ vì áo lẻ rẻ hơn; câu còn dài/giọng quảng cáo."
+    },
+    {
+      "caseId": "sales-discovery-advice:need",
+      "path": "native/openings/provider-attempt-1.json",
+      "artifactHash": "baa278ecc26cdb27729fbab5c4622b685f4128450bda255b85fbd050ae264dae",
+      "customerOutcomeHash": "41f1aa3a70c3697bd1a54194b8eaa8aea690580f27d8be4715ef4ba4a946b1af",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "OWNER_TOOL_MODE",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "evidenceMode": "CAPTURE_TRANSPORT",
+      "quality": "FALLBACK",
+      "finding": "Search rồi đọc3món đã đủ2toolrounds; lượt cuối NONE/0declarations vẫn phát search_products query khoảng trắng. HTTP200 nhưng vi phạm tool mode, không phải auth/quota hoặc lỗi APIHTTP. Code capture staticfallback đúng; customer không nhận được lựa chọn."
+    },
+    {
+      "caseId": "sales-product-gallery:overview",
+      "path": "native/openings/provider-attempt-2.json",
+      "artifactHash": "b37edc576fff7392b930c38299551937dc8cd042260f95a5aacc10f58bb68333",
+      "customerOutcomeHash": "e56d19cda57ff5b465493d95593048bb73fdffc54d891afaea474f4192e8ac27",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?",
+        "fallbackId": "C3_B_MEDIA_NEXT_STEP_V1"
+      },
+      "evidenceMode": "CAPTURE_TRANSPORT",
+      "quality": "FALLBACK",
+      "finding": "Select ảnh be chỉ trả COLOR_BINDING_UNVERIFIED. Model dừng luôn và nói gửi ảnh chung nhưng chưa có Generic selection thành công. Verifier báo unsupported theo media-lookup. Cần phân biệt câu thiếu ảnh màu có thể là cách nói availability với việc thực tế chưa chuẩn bị ảnh chung; không thể chữa thiếu selection chỉ bằng nới verify."
+    },
+    {
+      "caseId": "sales-size-advice:height-weight",
+      "path": "native/openings/provider-attempt-3.json",
+      "artifactHash": "63cf08f0474c1bca50f3ac13212afc267bed3ec3cdaf6941d4b7d352750d85ea",
+      "customerOutcomeHash": "7628d7de6f972ac57e7ed68d556af81fc63a410510d260a1477cfb66c6db9deb",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "SIZE_RULE_UNAVAILABLE",
+        "text": "Em chuyển nhân viên chọn size cho chị nhé.",
+        "fallbackId": null
+      },
+      "evidenceMode": "CAPTURE_TRANSPORT",
+      "quality": "EXPECTED_HANDOFF",
+      "finding": "Thiếu chart đúng authority/scope, code commit handoff và capture đúng holding reply. Đây là gap nguồn chart đã biết, không phải lỗi model hiểu số đo hoặc mất message."
+    },
+    {
+      "caseId": "sales-southern-delivery:deadline",
+      "path": "native/openings/provider-attempt-4.json",
+      "artifactHash": "132444f45b573c65481f49ab78ba3601f0ba88e8fd38d193a3e2b5a6088a281d",
+      "customerOutcomeHash": "c9956ead965fc4d2976e1fd4f6bf2fb6c965aa970e54f6283d195035b85b1659",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "evidenceMode": "CAPTURE_TRANSPORT",
+      "quality": "FALLBACK",
+      "finding": "Draft dùng đúng ETA4–8ngày và trả lời gọn. Owner từng chấp nhận báo không kịp khi shop không thể nhận hẹn chắc lịch, nên không tự kết luận owner nói sai chỉ từ cụm không kịp. Verifier chỉ báo unsupported/ETA, không có span/reason: có khả năng chặn nặng cách nói từ chối nhận hẹn. Đồng thời câu hỏi thứSáu chưa có ngày tháng, processingAt là tối thứSáu; cần tách cách hiểu cam kết dịch vụ với dự đoán giao thực tế. Actual customer outcome vẫn là fallback, chưa dùng draft để chấm PASS.",
+      "draftAssessment": "POSSIBLE_VERIFIER_OVERBLOCK_SERVICE_COMMITMENT; TEMPORAL_INPUT_AMBIGUOUS"
+    }
+  ]
+}

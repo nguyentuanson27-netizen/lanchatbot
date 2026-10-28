@@ -1,0 +1,91 @@
+{
+  "status": "COMPARED",
+  "changes": [
+    {
+      "path": "/claims/PRICE:{\"kind\":\"PRODUCT\",\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:AO\"}/source/evidenceRef",
+      "before": "business-fact:price:d475c9a3dc79252724533eb56c9f16ff0a884633ace011523e584431aad19903",
+      "after": "business-fact:price:f2064cdb81b24c2599cebd2369266594de8f47e4a7ecd947f373b9652ec2b203"
+    },
+    {
+      "path": "/claims/PRICE:{\"kind\":\"PRODUCT\",\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:AO\"}/source/expiresAt",
+      "before": "2026-10-22T09:04:24.138Z",
+      "after": "2026-10-22T09:34:24.184Z"
+    },
+    {
+      "path": "/claims/PRICE:{\"kind\":\"PRODUCT\",\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:AO\"}/source/observedAt",
+      "before": "2026-10-22T07:04:24.138Z",
+      "after": "2026-10-22T07:34:24.184Z"
+    },
+    {
+      "path": "/claims/PRICE:{\"kind\":\"PRODUCT\",\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:AO\"}/source/sourceVersion",
+      "before": "POS_SNAPSHOT:2026-10-22T07:04:24.138Z",
+      "after": "POS_SNAPSHOT:2026-10-22T07:34:24.184Z"
+    },
+    {
+      "path": "/claims/PRICE:{\"kind\":\"PRODUCT\",\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:CV\"}/source/evidenceRef",
+      "before": "business-fact:price:1c9f5a9d8e50c76c8a4cd1b3cddae01979c48beb1521d7ceabef9dac92fd0b18",
+      "after": "business-fact:price:63786a80173cffd565dcff6ecf1ab5e195609a6419410184a3816a2069f05e26"
+    },
+    {
+      "path": "/claims/PRICE:{\"kind\":\"PRODUCT\",\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:CV\"}/source/expiresAt",
+      "before": "2026-10-22T09:04:24.138Z",
+      "after": "2026-10-22T09:34:24.184Z"
+    },
+    {
+      "path": "/claims/PRICE:{\"kind\":\"PRODUCT\",\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:CV\"}/source/observedAt",
+      "before": "2026-10-22T07:04:24.138Z",
+      "after": "2026-10-22T07:34:24.184Z"
+    },
+    {
+      "path": "/claims/PRICE:{\"kind\":\"PRODUCT\",\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:CV\"}/source/sourceVersion",
+      "before": "POS_SNAPSHOT:2026-10-22T07:04:24.138Z",
+      "after": "POS_SNAPSHOT:2026-10-22T07:34:24.184Z"
+    },
+    {
+      "path": "/claims/PRICE:{\"kind\":\"PRODUCT\",\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:SET_VAY\"}/source/evidenceRef",
+      "before": "business-fact:price:b7fa17cad35cf3749f0c2c5c576bd1e510506cc02fd015d8e9d91c61d35e9c67",
+      "after": "business-fact:price:95b0c47cd9e7882fcc8362bbabf61c20f0395c2ed498d66edbd62a80a0c4182f"
+    },
+    {
+      "path": "/claims/PRICE:{\"kind\":\"PRODUCT\",\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:SET_VAY\"}/source/expiresAt",
+      "before": "2026-10-22T09:04:24.138Z",
+      "after": "2026-10-22T09:34:24.184Z"
+    },
+    {
+      "path": "/claims/PRICE:{\"kind\":\"PRODUCT\",\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:SET_VAY\"}/source/observedAt",
+      "before": "2026-10-22T07:04:24.138Z",
+      "after": "2026-10-22T07:34:24.184Z"
+    },
+    {
+      "path": "/claims/PRICE:{\"kind\":\"PRODUCT\",\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:SET_VAY\"}/source/sourceVersion",
+      "before": "POS_SNAPSHOT:2026-10-22T07:04:24.138Z",
+      "after": "POS_SNAPSHOT:2026-10-22T07:34:24.184Z"
+    },
+    {
+      "path": "/claims/STOCK:{\"kind\":\"PRODUCT\",\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:AO\"}/source/evidenceRef",
+      "before": "business-fact:stock:e26de64d0f575a1eb616b2779e7bec6c989f8f39b1e34db63c4194f6d33fd6e8",
+      "after": "business-fact:stock:346522bc441b64d4f8019e7d9d41eb4f73c51f69a151e1813ac9fb4c4f9ea899"
+    },
+    {
+      "path": "/claims/STOCK:{\"kind\":\"PRODUCT\",\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:AO\"}/source/expiresAt",
+      "before": "2026-10-22T09:04:24.138Z",
+      "after": "2026-10-22T09:34:24.184Z"
+    },
+    {
+      "path": "/claims/STOCK:{\"kind\":\"PRODUCT\",\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:AO\"}/source/observedAt",
+      "before": "2026-10-22T07:04:24.138Z",
+      "after": "2026-10-22T07:34:24.184Z"
+    },
+    {
+      "path": "/claims/STOCK:{\"kind\":\"PRODUCT\",\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:AO\"}/source/sourceVersion",
+      "before": "POS_SNAPSHOT:2026-10-22T07:04:24.138Z",
+      "after": "POS_SNAPSHOT:2026-10-22T07:34:24.184Z"
+    },
+    {
+      "path": "/claims/STOCK:{\"kind\":\"PRODUCT\",\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:CV\"}/source/expiresAt",
+      "before": "2026-10-22T09:04:24.138Z",
+      "after": "2026-10-22T09:34:24.184Z"
+    }
+  ],
+  "truncated": true
+}

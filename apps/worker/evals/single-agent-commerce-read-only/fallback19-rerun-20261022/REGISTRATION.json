@@ -1,0 +1,318 @@
+{
+  "status": "FROZEN_BEFORE_GENERATION",
+  "registeredAt": "2026-10-22T14:06:28.508508+00:00",
+  "runSourceSha": "24d8ec62457f95865c80719a2e0c08fea697c657",
+  "previousReportSourceSha": "ae9c0cb39f47b32d0dbd79da1d9e63aa8592c98b",
+  "previousRunSourceSha": "6e38c54104010c7e137481a560b99da21e961e73",
+  "selection": "All and only 19 previous FALLBACK outcomes, N1; no quality early-stop or automatic retry. Four real provider prerequisite turns registered separately; no synthetic cart/history. Stateful history is regenerated, not byte-identical replay.",
+  "targetCount": 19,
+  "prerequisiteCount": 4,
+  "totalPublicTurns": 23,
+  "maximumGenerationRequests": 92,
+  "repetitions": 1,
+  "retry": 0,
+  "sendEnabled": false,
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "inputAndRunnerHashes": {
+    "manifest.json": "cb7c9da52a614179fb8ba8744232ff64df80be8ba31d1b8811e6b9060fcf766f",
+    "source-config.b1.json": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+    "cases.b1.json": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+    "stateful-cases.json": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+    "sales-journeys.candidate.json": "4b888f6e44f5b4e144125da38d70bf175946dc5277eabb8d0ab5a6639077fbeb",
+    "prompts/owner.vi.txt": "a7beafb9cf4ad14b0a76fe4213f46cece0bca1b3dff83ab0041eda5c316e89a6",
+    "prompts/verifier.vi.txt": "0b240599a04d9a86c25ed2b3b815c152e83106c85e61940efde15b020e4c2fde",
+    "run.mjs": "0f7c59dfa9091781cac8f46ed41e36ec3f66ee171438a80ee4dcb362119b9688",
+    "stateful-provider.mjs": "b560f6e1c5cdac110472d6f584ee01fdb474bb4d67e13848de177e8aabdfa466",
+    "isolated-integration.mjs": "55072218fa975a3370fa08d138e4541c175bc975c81897f24fd14f2a58ae87b2",
+    "sales-journeys-registration.mjs": "afbcb2ca7a8f2d72c57ab376c1bf728c3069f3e0db2b7fdee33e9a878cb827a8",
+    "gemini-inference.mjs": "f4d52413946ad165cf17d83a422cf959470232cb9e903bab55184cc2e3cb5700",
+    "protocol.mjs": "7d84a24496e3373023b32986e8d6023826785ec873cf9fe0f8a6b434469f1a40"
+  },
+  "quotaReadOnlyBeforeDispatch": {
+    "ordinaryUsageAllowed": true,
+    "primaryUsedPercent": 16,
+    "secondaryUsedPercent": 55,
+    "rateLimitReachedType": null,
+    "providerGenerations": 0
+  },
+  "targets": [
+    {
+      "cohort": "b1",
+      "caseId": "b1-changed-occasion",
+      "previousRaw": "b1\\attempt-1.json",
+      "previousTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "cohort": "b1",
+      "caseId": "b1-partial-source-v2",
+      "previousRaw": "b1\\attempt-11.json",
+      "previousTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "cohort": "b1",
+      "caseId": "b1-price-v2",
+      "previousRaw": "b1\\attempt-12.json",
+      "previousTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "cohort": "b1",
+      "caseId": "b1-component-stock-v2",
+      "previousRaw": "b1\\attempt-13.json",
+      "previousTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "cohort": "b1",
+      "caseId": "b1-search-read-v2",
+      "previousRaw": "b1\\attempt-14.json",
+      "previousTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "cohort": "b1",
+      "caseId": "b1-buying-concern-v2",
+      "previousRaw": "b1\\attempt-15.json",
+      "previousTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "cohort": "b1",
+      "caseId": "b1-policy-used-v2",
+      "previousRaw": "b1\\attempt-16.json",
+      "previousTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "cohort": "b1",
+      "caseId": "b1-changed-occasion-v3",
+      "previousRaw": "b1\\attempt-17.json",
+      "previousTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "cohort": "b1",
+      "caseId": "b1-current-policy-v3",
+      "previousRaw": "b1\\attempt-18.json",
+      "previousTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "cohort": "b1",
+      "caseId": "b1-partial-source-v3",
+      "previousRaw": "b1\\attempt-19.json",
+      "previousTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "cohort": "b1",
+      "caseId": "b1-price-v3",
+      "previousRaw": "b1\\attempt-20.json",
+      "previousTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "cohort": "b1",
+      "caseId": "b1-component-stock-v3",
+      "previousRaw": "b1\\attempt-21.json",
+      "previousTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "cohort": "b1",
+      "caseId": "b1-search-read-v3",
+      "previousRaw": "b1\\attempt-22.json",
+      "previousTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "cohort": "b1",
+      "caseId": "b1-buying-concern-v3",
+      "previousRaw": "b1\\attempt-23.json",
+      "previousTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "cohort": "b1",
+      "caseId": "b1-policy-used-v3",
+      "previousRaw": "b1\\attempt-24.json",
+      "previousTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "cohort": "stateful",
+      "caseId": "stateful-quote",
+      "previousRaw": "stateful\\provider-attempt-3.json",
+      "previousTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "cohort": "stateful",
+      "caseId": "stateful-correction",
+      "previousRaw": "stateful\\provider-attempt-4.json",
+      "previousTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "cohort": "openings",
+      "caseId": "sales-discovery-advice:need",
+      "previousRaw": "openings\\provider-attempt-1.json",
+      "previousTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "cohort": "negotiation",
+      "caseId": "negotiation-total-control",
+      "previousRaw": "negotiation\\provider-attempt-3.json",
+      "previousTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    }
+  ],
+  "prerequisites": [
+    {
+      "cohort": "stateful",
+      "caseId": "stateful-open"
+    },
+    {
+      "cohort": "stateful",
+      "caseId": "stateful-variant-quantity"
+    },
+    {
+      "cohort": "negotiation",
+      "caseId": "negotiation-cart-setup"
+    },
+    {
+      "cohort": "negotiation",
+      "caseId": "negotiation-price-objection"
+    }
+  ],
+  "orchestratorHash": "9cd12509ab9ae3977c9cee347d581d17aa4038e6078d49c0fac686cb4f291881"
+}

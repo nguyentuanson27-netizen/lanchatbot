@@ -29,6 +29,19 @@ const provenance = {
 };
 
 describe("HandoffDecisionV2", () => {
+  it("allows silent after-sales only with a bound admin matrix, no customer text and the original routing tag", () => {
+    const decision = { schemaVersion: 2, decisionId: "56c33819-5c44-4d90-a592-d8fd0901571d", category: "AFTER_SALES", reason: "EXCHANGE",
+      customerMessagePolicy: "SILENT_HANDOFF", customerMessages: [], tag: "VAN_DON",
+      provenance: { ...provenance, decisionSource: "ADMIN_CONTROL", rulesetVersion: "matrix:"+"a".repeat(64) }, decidedAt: "2026-07-22T04:00:00.000Z" };
+    expect(HandoffDecisionV2Schema.safeParse(decision).success).toBe(true);
+    for (const changed of [
+      { ...decision, customerMessages: ["Shop sẽ kiểm tra rồi báo lại."] },
+      { ...decision, tag: "NHAN_VIEN" },
+      { ...decision, provenance: { ...decision.provenance, decisionSource: "DETERMINISTIC_RULE_ENGINE" } },
+      { ...decision, provenance: { ...decision.provenance, rulesetVersion: "not-a-matrix" } },
+    ]) expect(HandoffDecisionV2Schema.safeParse(changed).success).toBe(false);
+  });
+
   it("requires one holding reply and VAN_DON for after-sales", () => {
     expect(
       HandoffDecisionV2Schema.parse({
@@ -90,6 +103,17 @@ describe("HandoffDecisionV2", () => {
     expect(
       HandoffDecisionV2Schema.safeParse({ ...base, tag: "VAN_DON" }).success,
     ).toBe(false);
+  });
+
+  it("accepts a bounded non-after-sales holding reply only from an explicit admin matrix", () => {
+    const decision = { schemaVersion: 2, decisionId: "56c33819-5c44-4d90-a592-d8fd0901571d", category: "SYSTEM_FAILURE", reason: "DEPENDENCY_FAILURE",
+      customerMessagePolicy: "HOLDING_REPLY_THEN_HANDOFF", customerMessages: ["Nhân viên sẽ kiểm tra thông tin nhận hàng của chị."], tag: "NHAN_VIEN",
+      provenance: { ...provenance, decisionSource: "ADMIN_CONTROL", rulesetVersion: "matrix:"+"a".repeat(64) }, decidedAt: "2026-07-22T04:00:00.000Z" };
+    expect(HandoffDecisionV2Schema.safeParse(decision).success).toBe(true);
+    expect(HandoffDecisionV2Schema.safeParse({ ...decision, customerMessages: [] }).success).toBe(false);
+    expect(HandoffDecisionV2Schema.safeParse({ ...decision, tag: "VAN_DON" }).success).toBe(false);
+    expect(HandoffDecisionV2Schema.safeParse({ ...decision, provenance: { ...decision.provenance, decisionSource: "DETERMINISTIC_RULE_ENGINE" } }).success).toBe(false);
+    expect(HandoffDecisionV2Schema.safeParse({ ...decision, provenance: { ...decision.provenance, rulesetVersion: "not-a-matrix" } }).success).toBe(false);
   });
 
   it("is strict and rejects fields that could bypass the policy", () => {

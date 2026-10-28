@@ -1,0 +1,241 @@
+{
+  "sourceSha": "bb87949347bc8c1b3f28d41a475f57202824e83a",
+  "scope": "OFFLINE_EXACT_FINAL_OWNER_REQUESTS_NO_PROVIDER",
+  "discovery": {
+    "caseId": "sales-discovery-advice:need",
+    "customer": "Chị tìm bộ áo quần đi làm, dưới một triệu thôi, đừng bó bụng quá.",
+    "terminal": "HANDOFF",
+    "reason": "PRICE_UNAVAILABLE",
+    "ownerGenerations": 3,
+    "verifierGenerations": 0,
+    "actualSourceMode": "LIVE",
+    "finalWirePriceFacts": [
+      {
+        "type": "PRICE",
+        "scope": {
+          "kind": "PRODUCT",
+          "productId": "SQ675",
+          "variantId": "offer:SQ675:SET_QUAN"
+        },
+        "value": {
+          "amountVnd": 1279000,
+          "currency": "VND"
+        }
+      }
+    ],
+    "toolProposalSequence": [
+      {
+        "generationId": "af85974f-8e59-4858-9d5d-86f8398acf0c:owner:1",
+        "calls": [
+          {
+            "name": "apply_customer_state",
+            "args": {
+              "ops": [
+                {
+                  "value": "RELAXED",
+                  "field": "fitPreference",
+                  "op": "SET",
+                  "sourceQuote": "đừng bó bụng quá"
+                }
+              ]
+            }
+          },
+          {
+            "name": "search_products",
+            "args": {
+              "query": "bộ công sở đi làm"
+            }
+          }
+        ]
+      },
+      {
+        "generationId": "af85974f-8e59-4858-9d5d-86f8398acf0c:owner:2",
+        "calls": [
+          {
+            "name": "read_product",
+            "args": {
+              "offerType": "SET_QUAN",
+              "subjectRef": "SQ675"
+            }
+          }
+        ]
+      },
+      {
+        "generationId": "af85974f-8e59-4858-9d5d-86f8398acf0c:owner:3",
+        "calls": [
+          {
+            "name": "request_handoff",
+            "args": {
+              "reason": "PRICE_UNAVAILABLE"
+            }
+          }
+        ]
+      }
+    ],
+    "diagnosis": "Owner read a 1279000VND candidate above the under-1-million budget, then requested PRICE_UNAVAILABLE instead of completing a suitable choice. Current-price evidence exists for that read product; prices for other candidates were not read. Do not call this a proven missing-price source incident or a fixed fit-claim case.",
+    "unknowns": "Model internal reason for handoff is not available; no causal attribution to quote_product from this N1 campaign."
+  },
+  "deadline": {
+    "caseId": "sales-southern-delivery:deadline",
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "ETA_UNAVAILABLE",
+      "text": null,
+      "fallbackId": null
+    },
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "availableExecution": {
+      "availableTools": [
+        "search_products",
+        "read_product",
+        "read_policy",
+        "apply_customer_state",
+        "recommend_size",
+        "quote_cart",
+        "add_to_cart",
+        "change_cart_item",
+        "confirm_purchase",
+        "record_negotiation",
+        "request_handoff",
+        "select_product_media",
+        "view_product_media",
+        "quote_product"
+      ],
+      "toolsAllowed": true,
+      "callableTools": [
+        "search_products",
+        "read_product",
+        "read_policy",
+        "apply_customer_state",
+        "recommend_size",
+        "quote_cart",
+        "add_to_cart",
+        "change_cart_item",
+        "confirm_purchase",
+        "record_negotiation",
+        "request_handoff",
+        "select_product_media",
+        "view_product_media",
+        "quote_product"
+      ],
+      "phase": "TOOL_OR_REPLY",
+      "toolBudget": {
+        "roundsRemaining": 2,
+        "callsRemaining": 5,
+        "accounting": "PRIMITIVE_WORK_V2"
+      },
+      "mediaCapabilities": [
+        {
+          "schemaVersion": 1,
+          "subjectRef": "SV2447",
+          "observedAt": "2026-10-27T05:32:19.337Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "mediaSourceHash": "83281f47166bd8c70d5c5b0c8709d144f32f12215e440f5cff1c66eee8056570",
+          "queries": [
+            {
+              "intent": "GENERIC",
+              "componentRole": null,
+              "color": null,
+              "status": "MATCH_AVAILABLE"
+            },
+            {
+              "intent": "FEEDBACK",
+              "componentRole": null,
+              "color": null,
+              "status": "NO_VERIFIED_MATCH"
+            },
+            {
+              "intent": "DETAIL",
+              "componentRole": "TOP",
+              "color": null,
+              "status": "MATCH_AVAILABLE"
+            },
+            {
+              "intent": "DETAIL",
+              "componentRole": "SKIRT",
+              "color": null,
+              "status": "NO_VERIFIED_MATCH"
+            },
+            {
+              "intent": "DETAIL",
+              "componentRole": "PANTS",
+              "color": null,
+              "status": "NO_VERIFIED_MATCH"
+            },
+            {
+              "intent": "BACK",
+              "componentRole": null,
+              "color": null,
+              "status": "MATCH_AVAILABLE"
+            }
+          ]
+        }
+      ]
+    },
+    "products": [
+      {
+        "subjectRef": "SV2447",
+        "availableOffers": [
+          "AO",
+          "CV",
+          "SET_VAY"
+        ],
+        "offerLabels": {
+          "AO": "áo lẻ",
+          "CV": "chân váy lẻ",
+          "SET_VAY": "bộ có váy"
+        },
+        "preparation": {
+          "availability": {
+            "content": {
+              "status": "OK",
+              "reason": null
+            },
+            "offers": {
+              "status": "OK",
+              "reason": null
+            }
+          },
+          "notRead": [
+            "PRICE",
+            "STOCK",
+            "ETA",
+            "SIZE_FIT"
+          ]
+        },
+        "attributes": null,
+        "content": {
+          "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+          "productName": "Set váy Thạch Thảo",
+          "productUrl": null
+        },
+        "presentation": null,
+        "sizeCharts": []
+      }
+    ],
+    "toolProposals": [
+      {
+        "name": "request_handoff",
+        "args": {
+          "reason": "ETA_UNAVAILABLE"
+        },
+        "id": "call_5434217"
+      }
+    ],
+    "diagnosis": "Owner hands off ETA_UNAVAILABLE before any ETA lookup despite available read tools. Correct HUMAN commit does not establish missing live ETA source. Prior response4-8days is historical supporting evidence, not a fresh ETA read for this attempt."
+  },
+  "negotiation": {
+    "caseId": "negotiation-price-objection",
+    "currentQuote": {
+      "cartId": "78b3342e-6e53-5662-8c4e-3bfdd83fa095",
+      "cartVersion": 2,
+      "discountTotalVnd": 30000,
+      "grandTotalVnd": 499000,
+      "shippingFeeVnd": 30000,
+      "subtotalVnd": 499000
+    },
+    "actualFinalText": "Dạ áo lẻ Thạch Thảo có giá 499.000đ chị ạ. Giá này là giá niêm yết của hãng, tuy nhiên nếu chị lấy từ 2 sản phẩm trở lên thì shop sẽ có ưu đãi giảm 5% cho đơn hàng nha chị!",
+    "diagnosis": "Receipt-backed shipping support is available; owner omits that benefit in objection reply and only explains it in the following total question. Verifier PASS is semantic eligibility, not sales-quality approval."
+  }
+}

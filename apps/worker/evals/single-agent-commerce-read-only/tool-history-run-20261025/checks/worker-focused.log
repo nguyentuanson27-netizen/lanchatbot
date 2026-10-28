@@ -1,0 +1,20 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+ ✓ src/meta-outbox-dispatcher.test.ts (13 tests) 70ms
+ ✓ src/single-agent-commerce-media-delivery.test.ts (13 tests) 527ms
+ ✓ src/single-agent-semantic-verifier-boundary.test.ts (56 tests) 473ms
+ ✓ src/single-agent-commerce-handoff-delivery.test.ts (16 tests) 801ms
+ ✓ src/single-agent-commerce-read-only.test.ts (30 tests) 2532ms
+   ✓ one conversational owner, tools and exact egress > lets the transport bound the exact provider projection instead of rejecting duplicated internal context  803ms
+ ✓ src/single-agent-commerce-media.test.ts (28 tests) 1384ms
+ ✓ src/single-agent-commerce-read-only-tools.test.ts (64 tests) 3737ms
+   ✓ read-only domain tools > preserves the existing claim bound across independently filtered multi-option reads  549ms
+ ✓ src/single-agent-commerce-ingress.test.ts (69 tests) 4088ms
+   ✓ recovers first-contact images with a verified turn product and no persisted focus (code)  582ms
+
+ Test Files  8 passed (8)
+      Tests  289 passed (289)
+   Start at  02:18:10
+   Duration  27.93s (transform 25.06s, setup 0ms, collect 91.50s, tests 13.61s, environment 28ms, prepare 24.02s)
+

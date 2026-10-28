@@ -1,0 +1,33 @@
+{
+  "sourceSha": "a7adf18de6eb24ce6410205ba395d99346685d8e",
+  "capturedAt": "2026-10-28T05:24:07.365Z",
+  "priorCapturedAt": "2026-10-27T21:35:03.945Z",
+  "productObservedAt": "2026-09-28T04:31:05.725Z",
+  "mediaFreshForSeconds": 2592000,
+  "allImageObservedAtAbsent": true,
+  "fallbackToProductObservedAt": true,
+  "expiresAt": "2026-10-28T04:31:05.725Z",
+  "secondsAfterExpiry": 3182,
+  "productByteEquivalentToPriorCapture": true,
+  "observations": [
+    {
+      "kind": "FEEDBACK_TRUE",
+      "status": "UNAVAILABLE",
+      "reason": "NO_VERIFIED_MATCHING_MEDIA"
+    },
+    {
+      "kind": "MODEL",
+      "status": "UNAVAILABLE",
+      "reason": "NO_VERIFIED_MATCHING_MEDIA"
+    },
+    {
+      "kind": "TOP",
+      "status": "UNAVAILABLE",
+      "reason": "NO_VERIFIED_MATCHING_MEDIA"
+    }
+  ],
+  "providerRequests": 0,
+  "sourceWrites": 0,
+  "nativeNotRun": 51,
+  "controlProviderAttempts": 0
+}

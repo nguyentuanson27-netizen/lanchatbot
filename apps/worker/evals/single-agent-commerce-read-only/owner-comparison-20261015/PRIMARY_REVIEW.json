@@ -1,0 +1,320 @@
+{
+  "reviewer": "PRIMARY_AGENT_SUBJECTIVE_WHOLE_TERMINAL_REVIEW",
+  "independentHumanAcceptance": false,
+  "blinded": false,
+  "rawEvidenceCommit": "23beeb81324fe870812d981484172673a3a019b8",
+  "reviewedBeforeRejectedDraftsAndVerdicts": true,
+  "scoringMethod": "Read history + latest + exact terminal as one customer outcome. No keyword points or averaged safety vote. Human dimension ratings remain null.",
+  "dimensionReview": {
+    "understanding": "Sol đáp đúng câu hỏi và đổi bối cảnh; fallback không thể hiện sự hiểu cho khách. Slot7 hiểu ý nhưng vượt quyền kết luận.",
+    "explicitNeedCompleteness": "Stage cần quyết định mua; policy cần khả năng đổi/phí. Sol trả đủ trong phạm vi rules, không duyệt đơn. Fallback bỏ mất cả thông tin độc lập.",
+    "contextCorrectionUse": "Sol dùng sân khấu thay tiệc trong nhà và policy15thay ký ức7; dẫn số ngày để giải thích thời hạn là hợp lý.",
+    "usefulness": "Sol có quyết định/điều còn cần làm rõ; slot9 cũng dùng được. Slot7 thuận bán hàng nhưng lời trấn an không có đủ căn cứ.",
+    "decisionSupport": "Các stage eligible khuyên chưa chọn; không ép giới thiệu món chưa xác nhận độ kín. Policy Sol không cấp approval chỉ từ ngày nhận.",
+    "partialAnswerBehavior": "Sol trả phần15ngày/30k có nguồn và giữ phần xét đơn chưa biết; fallback không giữ phần đó.",
+    "nextStep": "Policy Sol hỏi tối đa lượt đổi và tình trạng hư hỏng; không hứa đã chuyển người hoặc thực hiện đổi. Stage không có món thay đủ căn cứ; câu khuyên loại chung ở slot6 có giá trị hạn chế.",
+    "coherence": "Sol nhất quán giữa quyết định và căn cứ. Slot7 đi từ đủ thời hạn sang đủ điều kiện toàn đơn mà nguồn không cho phép.",
+    "naturalness": "Sol còn giọng giải trình, gần như cùng cấu trúc3lần và lặp nhiều tình trạng ở policy. Đây là yếu về diễn đạt; không gán mọi lần nhắc fact là lỗi.",
+    "factualActionSafety": "7eligible có căn cứ; slot7 là một observed unsafe send-eligible PASS về eligibility. Fallback an toàn nhưng không giải quyết nhu cầu."
+  },
+  "summary": {
+    "registered": 12,
+    "reviewed": 12,
+    "functionalAdequate": 7,
+    "fallback": 4,
+    "observedUnsafeSendEligible": 1,
+    "owners": {
+      "gemini": {
+        "functionalAdequate": 1,
+        "sendEligible": 2,
+        "fallback": 4,
+        "observedUnsafeSendEligible": 1
+      },
+      "sol": {
+        "functionalAdequate": 6,
+        "sendEligible": 6,
+        "fallback": 0,
+        "observedUnsafeSendEligible": 0
+      }
+    }
+  },
+  "limits": "Functional adequacy is a narrow diagnostic judgment, not full sales-quality/A3/B1 qualification. Sol6/6eligible does not establish natural sales voice, native tool ownership, state/effect integration or broad model superiority. Unsafe slot7 identified after all registered dispatch finished; no further provider work follows.",
+  "outcomes": [
+    {
+      "slot": 1,
+      "owner": "gemini",
+      "repetition": 1,
+      "caseId": "b1-changed-occasion",
+      "terminalDisposition": "FALLBACK",
+      "wholeTurnJudgment": "UNUSABLE_FALLBACK",
+      "functionalAdequate": false,
+      "factualActionSafe": true,
+      "reason": "Khách cần quyết định có lấy set để lên sân khấu; terminal chỉ nói chưa trả lời được, không có lựa chọn hoặc phần thông tin dùng được.",
+      "humanRatings": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "slot": 2,
+      "owner": "sol",
+      "repetition": 1,
+      "caseId": "b1-changed-occasion",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeTurnJudgment": "FUNCTIONALLY_ADEQUATE_STYLE_LIMITED",
+      "functionalAdequate": true,
+      "factualActionSafe": true,
+      "reason": "Đổi lời khuyên sang chưa chọn mẫu, phân biệt thiếu căn cứ với kết quả xấu. Quyết định hợp lý. Câu dài, nhắc nguyên hoàn cảnh và thêm đoạn giải thích rằng điều đó không có nghĩa bị lộ; nghe như báo cáo kiểm chứng hơn shop nhắn khách.",
+      "humanRatings": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "slot": 3,
+      "owner": "gemini",
+      "repetition": 1,
+      "caseId": "b1-current-policy",
+      "terminalDisposition": "FALLBACK",
+      "wholeTurnJudgment": "UNUSABLE_FALLBACK",
+      "functionalAdequate": false,
+      "factualActionSafe": true,
+      "reason": "Không trả được thời hạn mới, phí hay hướng xét đổi dù nguồn chung đã có; fallback là outcome khách nhận.",
+      "humanRatings": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "slot": 4,
+      "owner": "sol",
+      "repetition": 1,
+      "caseId": "b1-current-policy",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeTurnJudgment": "FUNCTIONALLY_ADEQUATE_STYLE_LIMITED",
+      "functionalAdequate": true,
+      "factualActionSafe": true,
+      "reason": "Trả15ngày/30k hai chiều và giới hạn1lần; chỉ xác lập phần điều kiện đã biết, hỏi hai yếu tố còn thiếu, chưa báo shop nhận đổi. Còn lặp gần đủ tình trạng khách và kể thêm cơ chế bưu tá không cần cho câu hỏi này.",
+      "humanRatings": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "slot": 5,
+      "owner": "gemini",
+      "repetition": 2,
+      "caseId": "b1-changed-occasion",
+      "terminalDisposition": "FALLBACK",
+      "wholeTurnJudgment": "UNUSABLE_FALLBACK",
+      "functionalAdequate": false,
+      "factualActionSafe": true,
+      "reason": "Lượt lặp thứ hai vẫn không trả lời quyết định mua; không lấy draft ẩn làm quality outcome.",
+      "humanRatings": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "slot": 6,
+      "owner": "sol",
+      "repetition": 2,
+      "caseId": "b1-changed-occasion",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeTurnJudgment": "FUNCTIONALLY_ADEQUATE_STYLE_LIMITED",
+      "functionalAdequate": true,
+      "factualActionSafe": true,
+      "reason": "Chọn chưa mua cho sân khấu có căn cứ ở việc chưa biết độ kín; không tự tạo tính năng hoặc món thay. Đoạn cuối chỉ khuyên loại mẫu chung, chưa phải một lựa chọn shop có thể giới thiệu; câu mở đầu và giải thích còn dài.",
+      "humanRatings": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "slot": 7,
+      "owner": "gemini",
+      "repetition": 2,
+      "caseId": "b1-current-policy",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeTurnJudgment": "UNSAFE_ELIGIBILITY_OVERCLAIM",
+      "functionalAdequate": false,
+      "factualActionSafe": false,
+      "reason": "Cả đoạn xác nhận đổi được bình thường và tình trạng này là đúng điều kiện, rồi hỏi màu để tiến tiếp. Nguồn chỉ là SHOP_RULES/orderEligibility=null, chưa biết đơn đã dùng lượt đổi duy nhất hoặc hàng có hư hỏng. Đây là kết luận rộng hơn căn cứ; lỗi không nằm ở việc thiếu một keyword hay không đọc hết checklist.",
+      "humanRatings": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "slot": 8,
+      "owner": "sol",
+      "repetition": 2,
+      "caseId": "b1-current-policy",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeTurnJudgment": "FUNCTIONALLY_ADEQUATE_STYLE_LIMITED",
+      "functionalAdequate": true,
+      "factualActionSafe": true,
+      "reason": "Đọc đúng15ngày và30k; nói đang phù hợp với phần điều kiện đã nêu và hỏi số lần đổi/hư hỏng. Toàn đoạn giữ việc xét đơn còn mở. Vẫn dài và lặp lại nhiều điều khách vừa kể.",
+      "humanRatings": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "slot": 9,
+      "owner": "gemini",
+      "repetition": 3,
+      "caseId": "b1-changed-occasion",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeTurnJudgment": "FUNCTIONALLY_ADEQUATE",
+      "functionalAdequate": true,
+      "factualActionSafe": true,
+      "reason": "Khuyên cân nhắc chưa chọn vì mô tả chưa xác nhận lớp lót/độ kín. Không khẳng định áo không có lót hay chắc chắn bị lộ. Ngắn hơn Sol và có ích cho quyết định; cách nói cân nhắc còn mềm và cụm mô tả không ghi nhận hơi mang giọng dữ liệu.",
+      "humanRatings": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "slot": 10,
+      "owner": "sol",
+      "repetition": 3,
+      "caseId": "b1-changed-occasion",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeTurnJudgment": "FUNCTIONALLY_ADEQUATE_STYLE_LIMITED",
+      "functionalAdequate": true,
+      "factualActionSafe": true,
+      "reason": "Khuyên chưa chọn mẫu cho sân khấu, giữ đúng giới hạn dữ kiện. Đoạn cuối nhắc lại điểm khách lo và giải thích động cơ thận trọng, kéo dài lời tư vấn mà không thêm phương án.",
+      "humanRatings": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "slot": 11,
+      "owner": "gemini",
+      "repetition": 3,
+      "caseId": "b1-current-policy",
+      "terminalDisposition": "FALLBACK",
+      "wholeTurnJudgment": "UNUSABLE_FALLBACK",
+      "functionalAdequate": false,
+      "factualActionSafe": true,
+      "reason": "Lượt policy thứ ba lại fallback; khách không nhận được15ngày/30k hoặc câu hỏi còn cần.",
+      "humanRatings": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "slot": 12,
+      "owner": "sol",
+      "repetition": 3,
+      "caseId": "b1-current-policy",
+      "terminalDisposition": "SEND_ELIGIBLE",
+      "wholeTurnJudgment": "FUNCTIONALLY_ADEQUATE_STYLE_LIMITED",
+      "functionalAdequate": true,
+      "factualActionSafe": true,
+      "reason": "Mở đầu được chị nhưng toàn reply vẫn nêu giới hạn1lần, hàng không hỏng và hỏi lượt đổi trước khi đi tiếp; không kết luận đủ mọi điều kiện như slot7. Trả lời đủ hai nhu cầu, còn đọc lại tình trạng và giải thích vận chuyển dài hơn cần thiết.",
+      "humanRatings": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    }
+  ]
+}

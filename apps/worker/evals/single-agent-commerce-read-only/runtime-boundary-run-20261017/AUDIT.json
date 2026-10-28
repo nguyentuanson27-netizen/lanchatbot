@@ -1,0 +1,32 @@
+{
+  "runSourceSha": "13e69d43dc3ae9f792140ba8d16e9ad3057fcbb7",
+  "newProviderGenerations": 0,
+  "completeOutcomes": 7,
+  "rawDiskAndGitHashMatches": 14,
+  "frozenInputAndRuntimeFileHashes": 16,
+  "actualOwnerWireHashMatches": 13,
+  "verifierRequestBindingsChecked": 0,
+  "verifierRequestBindingsStatus": "NOT_EXERCISED",
+  "actualCapturedTerminalMatches": 4,
+  "observedEvaluatorOrPrivateFixtureLeaks": 0,
+  "privateCheckoutModelInvocations": 0,
+  "dependentConfirmModelInvocations": 0,
+  "finalOnlyViolations": 4,
+  "allFinalOnlyToolsBlocked": true,
+  "runtimeStaleDiagnostics": "NOT_EXERCISED_UNIT_AND_CONTROL_EVIDENCE_ONLY",
+  "runtimeRegionUnresolvedBranch": "NOT_EXERCISED_NO_TRANSITION_PLAN",
+  "testDatabaseDropped": true,
+  "sourceCodeChangedDuringCollection": false,
+  "frozenSpecPlanBlobMatches": 6,
+  "referenceCheckUsesRunSourceCommit": true,
+  "structuralComplexityDelta": {
+    "existingRuntimeFilesChanged": 5,
+    "insertions": 52,
+    "deletions": 29,
+    "netLines": 23,
+    "newRuntimeModules": 0,
+    "newSemanticRoles": 0,
+    "newSemanticLayers": 0,
+    "newGatesStoresFrameworks": 0
+  }
+}

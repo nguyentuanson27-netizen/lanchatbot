@@ -1,0 +1,20 @@
+{
+  "scope": "CURRENT_TASK_CHANGED_FILES",
+  "files": 106,
+  "newSecretPatternMatches": 0,
+  "existingTestUriFixtureHits": [
+    {
+      "path": "packages/database/src/realtime-runtime.test.ts",
+      "matches": 22,
+      "unchangedBaselineTestValue": true
+    },
+    {
+      "path": "packages/database/src/realtime-inbox.test.ts",
+      "matches": 9,
+      "unchangedBaselineTestValue": true
+    }
+  ],
+  "historicalAEvidenceChanged": 0,
+  "noProductionEntrypointImport": true,
+  "windowsAliasRestored": true
+}

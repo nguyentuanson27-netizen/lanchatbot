@@ -1,0 +1,18 @@
+{
+  "command": [
+    "cmd",
+    "/d",
+    "/c",
+    "pnpm",
+    "--filter",
+    "@lana/database",
+    "exec",
+    "vitest",
+    "run",
+    "src/realtime-runtime.test.ts",
+    "src/shadow-mirror.test.ts",
+    "src/chat-history.test.ts"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 24.216590404510498
+}

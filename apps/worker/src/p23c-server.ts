@@ -146,6 +146,7 @@ async function main(): Promise<void> {
   );
 
   const publisher = new P23cPublisher({
+    mediaRevalidationProductIds:(process.env.P23C_MEDIA_REVALIDATION_PRODUCTS??"").split(",").map(v=>v.trim()).filter(Boolean),
     redis,
     sheets: new GoogleSheetsClient({
       serviceAccount: { email: credential.email, privateKey: credential.privateKey },

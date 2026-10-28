@@ -1,0 +1,20 @@
+{
+  "deterministic-cod": {
+    "status": "PASS",
+    "checks": 28,
+    "completedOutcomes": null,
+    "testDatabaseDropped": true
+  },
+  "deterministic-bank": {
+    "status": "PASS",
+    "checks": 28,
+    "completedOutcomes": null,
+    "testDatabaseDropped": true
+  },
+  "stateful-1": {
+    "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+    "checks": 0,
+    "completedOutcomes": 8,
+    "testDatabaseDropped": true
+  }
+}

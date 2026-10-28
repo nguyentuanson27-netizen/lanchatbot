@@ -1,0 +1,117 @@
+{
+  "caseId": "stateful-human-request",
+  "journeyId": "handoff",
+  "elapsedMs": 17110.374299999996,
+  "result": {
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "CUSTOMER_REQUESTED_HUMAN",
+      "text": null,
+      "fallbackId": null
+    },
+    "recovery": {
+      "originalDisposition": "HANDOFF",
+      "originalReason": "CUSTOMER_REQUESTED_HUMAN"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "toolRounds": 1,
+    "toolCalls": 1,
+    "generations": [
+      {
+        "id": "58f3445f-e965-4b95-ae8d-86971f2592d9:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1411.181500000006,
+        "telemetry": {
+          "generationId": "58f3445f-e965-4b95-ae8d-86971f2592d9:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3797,
+          "outputTokens": 153,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 19735,
+          "requestHash": "d323575c72f1f549bc97c0fb80e2e0758015708bf245d6bab2647f34a2762ad8",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 10,
+          "thinkingTokens": 130,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      }
+    ],
+    "toolLatencyMs": 2964.4575000000186,
+    "verificationLatencyMs": null,
+    "enqueued": 0,
+    "commitStatus": "COMMITTED"
+  },
+  "owners": 1,
+  "verifiers": 0,
+  "batch": {
+    "pageId": "1198992073286645",
+    "conversationHash": "e73ec95ffb3deadfdfda3c38acd6f94abafe72bdbb00cca8944b32387bfba2e7",
+    "generation": 7,
+    "leaseToken": "13257077-9d41-4825-8cbe-0f2356cd1af5",
+    "inboxIds": [
+      "d9ae00ee-b02d-4cbc-9c54-befcbfa81403"
+    ],
+    "evaluationGroupId": "58f3445f-e965-4b95-ae8d-86971f2592d9",
+    "eventKind": "CUSTOMER",
+    "firstReceiveSequence": 7,
+    "lastReceiveSequence": 7,
+    "attemptCount": 1,
+    "items": [
+      {
+        "inboxId": "d9ae00ee-b02d-4cbc-9c54-befcbfa81403",
+        "pageId": "1198992073286645",
+        "eventKey": "stateful-516e372f-00ad-4066-b521-9db8f51b84c9",
+        "conversationHash": "e73ec95ffb3deadfdfda3c38acd6f94abafe72bdbb00cca8944b32387bfba2e7",
+        "occurredAt": "2026-10-18T01:00:44.433Z",
+        "receivedAt": "2026-10-18T01:00:44.433Z",
+        "receiveSequence": 7,
+        "attemptCount": 1,
+        "leaseToken": "13257077-9d41-4825-8cbe-0f2356cd1af5",
+        "eventKind": "CUSTOMER",
+        "envelope": {
+          "schemaVersion": 1,
+          "customerSendEnabled": false,
+          "routing": {
+            "owner": "APP"
+          },
+          "message": {
+            "schemaVersion": 1,
+            "traceId": "728bf323-c4e5-40bb-a71e-3be68eaa8f9d",
+            "eventKey": "stateful-516e372f-00ad-4066-b521-9db8f51b84c9",
+            "pageId": "1198992073286645",
+            "messageId": "stateful-516e372f-00ad-4066-b521-9db8f51b84c9",
+            "senderId": "synthetic-recipient-e73ec95ffb3deadfdfda3c38acd6f94abafe72bdbb00cca8944b32387bfba2e7",
+            "conversationId": "synthetic-meta-conversation",
+            "occurredAt": "2026-10-18T01:00:44.433Z",
+            "isEcho": false,
+            "appId": null,
+            "text": "Cho chị gặp nhân viên shop nhé.",
+            "attachments": []
+          }
+        }
+      }
+    ]
+  },
+  "toolResponses": [],
+  "actualCapturedMessages": [],
+  "committedPublicState": {
+    "stage": "DISCOVERY",
+    "revision": 0,
+    "cart": null,
+    "measurements": [],
+    "customerProfileRevision": 1
+  },
+  "counts": {
+    "embedding": 0,
+    "owner": 12,
+    "verifier": 1
+  }
+}

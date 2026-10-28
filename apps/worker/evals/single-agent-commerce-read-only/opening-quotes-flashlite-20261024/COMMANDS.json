@@ -1,0 +1,17 @@
+[
+  {
+    "command": "node --test apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-commerce-read-only/sales-journeys-registration.test.mjs",
+    "exitCode": 0,
+    "testsPassed": 86
+  },
+  {
+    "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-opening-quotes-flashlite-20261024 COD --provider-preflight --candidate-handoff --opening-quotes",
+    "exitCode": 0,
+    "providerGenerations": 0
+  },
+  {
+    "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-opening-quotes-flashlite-20261024 COD --provider-run --candidate-handoff --opening-quotes",
+    "exitCode": 0,
+    "outcomes": 5
+  }
+]

@@ -1,0 +1,28 @@
+{
+  "priorSource": "468d85ea6577c428cf2f6f155c9774926537364b",
+  "currentSource": "50753ec7aab3d7365fdabc2e2c71152c448719ea",
+  "same51CaseIds": true,
+  "dispositionChanges": [
+    {
+      "caseId": "media-decision:ask",
+      "old": "SEND_ELIGIBLE",
+      "new": "HANDOFF"
+    },
+    {
+      "caseId": "sales-discovery-advice:need",
+      "old": "HANDOFF",
+      "new": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "sales-size-advice:height-weight",
+      "old": "SEND_ELIGIBLE",
+      "new": "HANDOFF"
+    }
+  ],
+  "causalClaim": false,
+  "caveats": [
+    "N1 generation variance",
+    "Live POS/catalog/policy clocks read anew",
+    "Native V2 differs from forced-final paired ordering treatment"
+  ]
+}

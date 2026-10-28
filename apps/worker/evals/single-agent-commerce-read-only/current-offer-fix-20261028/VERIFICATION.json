@@ -1,0 +1,67 @@
+{
+  "baseSha": "f67d39165296497cf8f09555c92ab0b15553391b",
+  "scope": "owner current-offer response instruction and owner prompt hash only",
+  "sourceFiles": {
+    "apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt": "9887885e8cfa284a8a8fa45e4df28c7550684f1228a3c3e1995072ba26d8c392",
+    "apps/worker/evals/single-agent-commerce-read-only/manifest.json": "200c9352abd55d6dc7e2a2b0c6fd482939e4582c3959e50738f3abe4cd6d6671"
+  },
+  "ownerBytesBefore": 21042,
+  "ownerBytesAfter": 21279,
+  "ownerBytesDelta": 237,
+  "instructionRegionsChanged": 1,
+  "commands": [
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-commerce-read-only/owner-data-presentation.test.mjs apps/worker/evals/single-agent-commerce-read-only/native-presentation.test.mjs",
+      "exitCode": 0,
+      "passed": 25,
+      "failed": 0
+    },
+    {
+      "command": "pnpm exec vitest run apps/worker/src/single-agent-commerce-effects.test.ts --reporter=dot",
+      "exitCode": 0,
+      "passed": 75,
+      "failed": 0
+    }
+  ],
+  "selfReview": {
+    "byteReversalMatchesBaseOwner": true,
+    "parsedManifestOnlyOwnerHashChanged": true,
+    "currentPromptHashMatches": true,
+    "unchangedVerifierCorpusProjectionEffects": "PASS canonical-LF comparison and git diff; first raw-byte comparison flagged existing CRLF checkout versus LF Git blob in effects.ts, no source edits",
+    "approvedExecutableInventoryStillMatches": true
+  },
+  "providerGenerations": 0,
+  "qualityImprovementVerified": false,
+  "workerTypecheckBuildLintRerun": false,
+  "runtimeTypeScriptChanged": false,
+  "status": "INDEPENDENT_IMPLEMENTATION_APPROVE",
+  "independentReview": {
+    "reviewer": "/root/current_offer_independent_review",
+    "plan": "APPROVE",
+    "implementation": "APPROVE",
+    "blockingFindings": 0,
+    "independentlyRanNodeTests": 25,
+    "independentlyRanEffectsTests": false,
+    "independentDiffCheck": "PASS",
+    "reviewedFiles": {
+      "apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt": "9887885e8cfa284a8a8fa45e4df28c7550684f1228a3c3e1995072ba26d8c392",
+      "apps/worker/evals/single-agent-commerce-read-only/manifest.json": "200c9352abd55d6dc7e2a2b0c6fd482939e4582c3959e50738f3abe4cd6d6671"
+    },
+    "target": "two-file worktree inventory at base SHA; not an uncreated commit",
+    "providerGenerations": 0
+  },
+  "committedHeadReview": {
+    "reviewer": "/root/current_offer_independent_review",
+    "exactHead": "db6787e58f22dcd73808f627958e09e9a9d8ac5a",
+    "worktreeCleanAtReview": true,
+    "decision": "APPROVE",
+    "blockingFindings": 0,
+    "approvedExecutableHashesMatch": true,
+    "testRerun": false,
+    "reasonNoTestRerun": "Executable bytes unchanged from independently tested and approved inventory",
+    "rootCommittedBlobHashChecks": 2,
+    "rootDiffCheck": "PASS",
+    "providerGenerations": 0,
+    "additionalSourceFixRequired": false
+  }
+}

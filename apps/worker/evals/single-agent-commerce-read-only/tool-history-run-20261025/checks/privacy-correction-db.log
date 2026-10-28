@@ -1,0 +1,12 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/packages/database
+
+ ✓ src/shadow-mirror.test.ts (14 tests) 47ms
+ ✓ src/chat-history.test.ts (4 tests) 31ms
+ ✓ src/realtime-runtime.test.ts (53 tests) 257ms
+
+ Test Files  3 passed (3)
+      Tests  71 passed (71)
+   Start at  03:10:17
+   Duration  2.40s (transform 892ms, setup 0ms, collect 1.82s, tests 335ms, environment 1ms, prepare 1.32s)
+

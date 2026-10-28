@@ -1,0 +1,18 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+ ✓ src/meta-outbox-dispatcher.test.ts (13 tests) 16ms
+ ✓ src/single-agent-commerce-media-delivery.test.ts (13 tests) 121ms
+ ✓ src/single-agent-semantic-verifier-boundary.test.ts (56 tests) 139ms
+ ✓ src/single-agent-commerce-handoff-delivery.test.ts (16 tests) 138ms
+ ✓ src/single-agent-commerce-read-only.test.ts (30 tests) 574ms
+ ✓ src/single-agent-commerce-media.test.ts (28 tests) 289ms
+ ✓ src/single-agent-commerce-read-only-tools.test.ts (64 tests) 1359ms
+ ✓ src/single-agent-commerce-ingress.test.ts (71 tests) 2971ms
+   ✓ keeps an accepted-image conversation returning when the text history write was lost  582ms
+
+ Test Files  8 passed (8)
+      Tests  291 passed (291)
+   Start at  03:14:51
+   Duration  6.83s (transform 4.35s, setup 0ms, collect 17.62s, tests 5.61s, environment 3ms, prepare 2.87s)
+

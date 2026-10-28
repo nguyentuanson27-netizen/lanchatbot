@@ -1,0 +1,69 @@
+{
+  "status": "APPROVE",
+  "policy": "SHA256 of raw worktree file bytes; inventory hash of sorted path/sha256 entries as compact UTF8 JSON",
+  "implementationBaseSha": "cee48bb768989cf2ae0dda9d6c84b9c99b0ab3c4",
+  "inventoryHash": "764302c9713189639be1f91388aa40fa2d83ee81da25fec33222baecebb41cac",
+  "files": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/attempt-evidence.mjs",
+      "sha256": "54614fd4fd45df477569554d2641ff70f17439b163ae7eaf8a50e6dd36e9c5a2"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/attempt-evidence.test.mjs",
+      "sha256": "8118951b81d00afc1152719a04be2533987df2853a787d7c1b6a2fdca99694ef"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/fixtures/discovery-feasibility.public.json",
+      "sha256": "40205873e1a87cb2afe67e6a996dab5fbf86195789d815735dd405eed7240133"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs",
+      "sha256": "7d948a94c49e904d1bc61979c93115626f8bb67cd399ab9d4c12607216f10a81"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "sha256": "ec321d311e4d7b5d6e8dea99bd21b5659b950accfc7e3cb3ce0b120df0951abe"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/manifest.json",
+      "sha256": "ab954798f76f555115ee0bc7bcacf820e657223dd641d7038fb093ea14422b2a"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt",
+      "sha256": "445ed64be5b33eb0b1cb0035ed28103336a4559823e234cb723cbbee247aef11"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/recovery-discovery-implementation-20261027/DISPATCH_DRIVER.py",
+      "sha256": "b00cc8859f49715bef82efcdc054e7c23361d6d2d36d6fc31f8ded2548d26c7c"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/recovery-discovery-implementation-20261027/driver.test.py",
+      "sha256": "14889c45e21a2c55936c261f1aa7d2d09950480e5f758cbe023b24eba887d3e4"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/tool-output-diagnostic.test.mjs",
+      "sha256": "d61f0a691c8ba8fd8151689e8d927cd1df165098989ae5c9e71dc65dccf7c682"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-discovery-feasibility.test.ts",
+      "sha256": "d1ef1e21a96106a7d7f20cddd166cdb942f0f99762f9a7fe31db27aa750a9587"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-ingress.test.ts",
+      "sha256": "1df8f9a6a6681cb58c5da8ef45b758de5c48f42e5b447f6f80ecd922d76242e5"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-ingress.ts",
+      "sha256": "7474b10e1c5bfd11130eb59b9b632476b9e86c03eb526ee3df28ea233472db79"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-read-only.ts",
+      "sha256": "7120a8b9faa9dcae92e01d1c4fa5b8368bcd428abe3e4f1c7fad05e6f35a7d82"
+    }
+  ],
+  "reviewer": "five_run_conclusions_independent_review",
+  "approvalScope": "Implementation only; no model quality/provider/B GO approval",
+  "planCanonicalLfSha256": "762769e338908b8733900bda9af96760dea0b440a5509ad68a758a9633f0d698",
+  "canonicalLfInventoryHash": "fae20cd8c1e2bca6460b62a4609fb846e9902a24ab065d8090e04b6824c521b0",
+  "canonicalLfPolicy": "sorted path + TAB + SHA256(canonical LF bytes) + LF"
+}

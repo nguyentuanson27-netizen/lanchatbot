@@ -1,0 +1,14 @@
+{
+  "ownerActualPromptHashChecks": 86,
+  "nativeExplicitVerifierPromptHashChecks": 17,
+  "sourceSha": "574ef87db95b8109bf39689c30f7c33b9dc0112d",
+  "captureJobValidation": {
+    "opening-quotes": "PASS",
+    "media-followup": "PASS",
+    "missing-pos": "PASS",
+    "journey-openings": "PASS",
+    "stateful": "PASS",
+    "negotiation": "PASS"
+  },
+  "providerRequestsAddedByAudit": 0
+}

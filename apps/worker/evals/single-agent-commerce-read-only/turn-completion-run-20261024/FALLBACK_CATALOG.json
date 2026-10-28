@@ -1,0 +1,27 @@
+{
+  "fallback": {
+    "id": "C3_A_NONPROTECTED_V2",
+    "text": "Phần này em chưa trả lời được, chị nhé.",
+    "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+  },
+  "recoveryFallbacks": [
+    {
+      "id": "C3_B_VERIFIED_MEDIA_V1",
+      "text": "Em gửi chị ảnh của mẫu để mình xem trước nhé.",
+      "sha256": "619619750d4d4d0af0835963426ca87ced10359f6ba051d6b9b07ca4ae0a8182"
+    },
+    {
+      "id": "C3_B_MEDIA_UNAVAILABLE_V1",
+      "text": "Lúc này em chưa gửi được ảnh chị cần.",
+      "sha256": "b9e9160e4554f30c76ad4707c1f8ad54d82a17d19b08bc0a4399b8470c394c9a"
+    }
+  ],
+  "dependencyHandoff": {
+    "reason": "DEPENDENCY_FAILURE",
+    "customerMessagePolicy": "HOLDING_REPLY_THEN_HANDOFF",
+    "holdingReply": "Em chuyển nhân viên hỗ trợ tiếp cho chị nhé.",
+    "tag": "NHAN_VIEN",
+    "textSha256": "204f00c2732437970c72725c3f66572a700f9844451b325cedb72f88b54f49eb",
+    "authority": "Committed handoff event and durable group binding, current policy and delivery gate; not a verifier PASS."
+  }
+}

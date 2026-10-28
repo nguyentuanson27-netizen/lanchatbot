@@ -1,0 +1,10 @@
+{
+  "sourceSha": "362876e83be4014c28fae60abcaf2e5a3243adb1",
+  "closedAt": "2026-10-23T16:19:53.455858+00:00",
+  "status": "STOP",
+  "providerRequests": 66,
+  "executedOutcomes": 35,
+  "notRunOutcomes": 32,
+  "automaticRerun": false,
+  "nativeDatabaseDropped": true
+}

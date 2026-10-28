@@ -1,0 +1,206 @@
+{
+  "kind": "PRE_PROVIDER_REGISTRATION",
+  "preparationBaseSha": "2470a79da74081fe16cb04debd34cf8f18c61316",
+  "runSourceSha": "CAPTURE_CLEAN_HEAD_AT_RUNTIME_DO_NOT_WRITE_BACK",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "e10fad7aa815038e0bb1d48ac4bc97e4d4913227807b14f40d7f8ee881eddee5",
+    "verifier": "0b240599a04d9a86c25ed2b3b815c152e83106c85e61940efde15b020e4c2fde"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "fallback": {
+    "id": "C3_A_NONPROTECTED_V2",
+    "text": "Phần này em chưa trả lời được, chị nhé.",
+    "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+  },
+  "requestBounds": {
+    "ownerWireBytes": 65536,
+    "verifierWireBytes": 32768
+  },
+  "registeredSlots": 18,
+  "repetitions": 3,
+  "maximumGenerationRequests": 72,
+  "retry": 0,
+  "sendEnabled": false,
+  "slots": [
+    {
+      "id": "r1-case02",
+      "caseSlot": 2,
+      "caseId": "b1-current-policy",
+      "repetition": 1
+    },
+    {
+      "id": "r1-case04",
+      "caseSlot": 4,
+      "caseId": "b1-price",
+      "repetition": 1
+    },
+    {
+      "id": "r1-case09",
+      "caseSlot": 9,
+      "caseId": "b1-changed-occasion-v2",
+      "repetition": 1
+    },
+    {
+      "id": "r1-case15",
+      "caseSlot": 15,
+      "caseId": "b1-buying-concern-v2",
+      "repetition": 1
+    },
+    {
+      "id": "r1-case17",
+      "caseSlot": 17,
+      "caseId": "b1-changed-occasion-v3",
+      "repetition": 1
+    },
+    {
+      "id": "r1-case23",
+      "caseSlot": 23,
+      "caseId": "b1-buying-concern-v3",
+      "repetition": 1
+    },
+    {
+      "id": "r2-case02",
+      "caseSlot": 2,
+      "caseId": "b1-current-policy",
+      "repetition": 2
+    },
+    {
+      "id": "r2-case04",
+      "caseSlot": 4,
+      "caseId": "b1-price",
+      "repetition": 2
+    },
+    {
+      "id": "r2-case09",
+      "caseSlot": 9,
+      "caseId": "b1-changed-occasion-v2",
+      "repetition": 2
+    },
+    {
+      "id": "r2-case15",
+      "caseSlot": 15,
+      "caseId": "b1-buying-concern-v2",
+      "repetition": 2
+    },
+    {
+      "id": "r2-case17",
+      "caseSlot": 17,
+      "caseId": "b1-changed-occasion-v3",
+      "repetition": 2
+    },
+    {
+      "id": "r2-case23",
+      "caseSlot": 23,
+      "caseId": "b1-buying-concern-v3",
+      "repetition": 2
+    },
+    {
+      "id": "r3-case02",
+      "caseSlot": 2,
+      "caseId": "b1-current-policy",
+      "repetition": 3
+    },
+    {
+      "id": "r3-case04",
+      "caseSlot": 4,
+      "caseId": "b1-price",
+      "repetition": 3
+    },
+    {
+      "id": "r3-case09",
+      "caseSlot": 9,
+      "caseId": "b1-changed-occasion-v2",
+      "repetition": 3
+    },
+    {
+      "id": "r3-case15",
+      "caseSlot": 15,
+      "caseId": "b1-buying-concern-v2",
+      "repetition": 3
+    },
+    {
+      "id": "r3-case17",
+      "caseSlot": 17,
+      "caseId": "b1-changed-occasion-v3",
+      "repetition": 3
+    },
+    {
+      "id": "r3-case23",
+      "caseSlot": 23,
+      "caseId": "b1-buying-concern-v3",
+      "repetition": 3
+    }
+  ],
+  "launcherHash": "84a43f0c8ba5c46a48db6552f61910d2e93e198f5b6807c4afc4de8d581eeab3",
+  "wrapperHash": "15f4bdec0af6c486e8a96083177620c32c39292f0cf346e6e80e7543ba18e407",
+  "frozenFiles": {
+    "cases.b1.json": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+    "stateful-cases.json": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+    "source-config.b1.json": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+    "manifest.json": "00743d4f313b3b05ded1fb11afe5e4b4282585ec1984fbaec7bebd14f5b0c00f",
+    "prompts/owner.vi.txt": "e10fad7aa815038e0bb1d48ac4bc97e4d4913227807b14f40d7f8ee881eddee5",
+    "prompts/verifier.vi.txt": "0b240599a04d9a86c25ed2b3b815c152e83106c85e61940efde15b020e4c2fde",
+    "run.mjs": "0321dc30c35a94e4cccc227a232c75cfdddfd48157201da4a7240cfed430ed5c",
+    "protocol.mjs": "cede7628accbdc34943d735ef45a62810473fd456da01f5ea4eb12ccb562654d",
+    "gemini-inference.mjs": "79e6b5d4d38d443aa65181fca014e2d1ccdba7649416323c267d1e8c2fd2c749",
+    "stateful-provider.mjs": "785095f6555bc2e9c6658be2b304b55bf01fde51a84f6b67ff38e9c7ff932c4b",
+    "isolated-integration.mjs": "d1822dcc553102c1e71f3110991d11f678f852fffc5d035f3a3b1f953c4f1129",
+    "source-session.py": "94b6cac60dff03506badc1751ba4e8ea54cce278ec82ff448eeb0e8a6a44294d",
+    "decision-scope-focus-20261021/run.py": "15f4bdec0af6c486e8a96083177620c32c39292f0cf346e6e80e7543ba18e407",
+    "decision-scope-focus-20261021/SCOPE.md": "d27699ec0b32481cbec97de14bcf05eafa600c191664d9eca9da3ec24f485b38"
+  },
+  "review": "Whole history and actual terminal outcome before rejected draft/verdict diagnosis; follow SCOPE.md. Minor polish allowed. Preserve all errors and labels from earlier runs.",
+  "conditionalFull": "All18 actual outcomes USABLE, no observed protected violation; else stop. Fresh full registration if admitted.",
+  "failurePolicy": "Complete18 independent attempts; no retry/replacement or in-run source fix; source/provider preflight failure blocks dependent dispatch."
+}

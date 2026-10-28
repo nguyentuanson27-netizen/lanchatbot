@@ -1,0 +1,113 @@
+{
+  "sourceSha": "9ecbbe5cd12e6a910c2b81f8271921846d55640a",
+  "nativeCompleted": 51,
+  "controlsCompleted": 17,
+  "terminalCounts": {
+    "SEND_ELIGIBLE": 40,
+    "FALLBACK": 6,
+    "HANDOFF": 2,
+    "NO_SEND": 3
+  },
+  "generationStatuses": {
+    "owner:OK": 95,
+    "verifier:OK": 42,
+    "verifier:PROVIDER_ERROR": 3,
+    "owner:PROVIDER_ERROR": 1
+  },
+  "nativeProviderRequests": {
+    "owner": 96,
+    "verifier": 45
+  },
+  "capturedWires": 158,
+  "labelLeakCount": 0,
+  "observedUsageTokens": {
+    "input": 817875,
+    "output": 73553
+  },
+  "verifierP50ms": 14484.67869999999,
+  "verifierP95ms": 30575.00199999998,
+  "errors": [
+    {
+      "id": "adc8b8d302cd0d056deb8afc9b51870b423b482844e51627602952537ddbdbf5:verifier:1",
+      "role": "verifier",
+      "status": "PROVIDER_ERROR",
+      "httpStatus": null,
+      "rawFinishReason": null
+    },
+    {
+      "id": "30c84e0edf17e61c114853511f37a11a581911f9c75dd5944a3c6d34b2542dea:verifier:1",
+      "role": "verifier",
+      "status": "PROVIDER_ERROR",
+      "httpStatus": null,
+      "rawFinishReason": null
+    },
+    {
+      "id": "d716dca9706c74307da31924faddb5eba6c9ed8eac61a7976ed1be35dd283348:verifier:1",
+      "role": "verifier",
+      "status": "PROVIDER_ERROR",
+      "httpStatus": null,
+      "rawFinishReason": null
+    },
+    {
+      "id": "a898c7cd84e7d568bc1c4736c0f43f7bd1546df517ab3bcc2651c03ee3e741d6:owner:2",
+      "role": "owner",
+      "status": "PROVIDER_ERROR",
+      "httpStatus": 200,
+      "rawFinishReason": "MALFORMED_RESPONSE"
+    }
+  ],
+  "groups": {
+    "B1": {
+      "SEND_ELIGIBLE": 20,
+      "FALLBACK": 4
+    },
+    "journey-openings": {
+      "FALLBACK": 2,
+      "SEND_ELIGIBLE": 2
+    },
+    "media-followup": {
+      "SEND_ELIGIBLE": 7
+    },
+    "negotiation": {
+      "SEND_ELIGIBLE": 3
+    },
+    "opening-quotes": {
+      "SEND_ELIGIBLE": 5
+    },
+    "stateful": {
+      "SEND_ELIGIBLE": 3,
+      "HANDOFF": 2,
+      "NO_SEND": 3
+    }
+  },
+  "maxProviderRequestsPerGeneration": 1,
+  "verificationPhaseP50ms": 17475.406799999997,
+  "verificationPhaseP95ms": 31292.241699999955,
+  "attemptP50ms": 31708.4951,
+  "attemptP95ms": 60754.2734,
+  "nativeVerifierVerdicts": {
+    "PASS": 40,
+    "FAIL": 2
+  },
+  "modelVersions": {
+    "gemini-3.5-flash-lite": 96,
+    "gpt-6.1-sol": 42,
+    "None": 3
+  },
+  "ownerImageWires": 0,
+  "publicHistoryOwnerWires": 0,
+  "publicHistoryVerifierWires": 0,
+  "nativeSlotsWithOwnerGenerations": 48,
+  "nativeSlotsWithoutOwnerGenerations": 3,
+  "databaseCleanup": {
+    "stateful": true,
+    "journey-openings": true,
+    "media-followup": true,
+    "negotiation": true,
+    "opening-quotes": true
+  },
+  "evaluatorLabelScanPattern": "\\b(?:caseId|purposeId|split|attackFamily|attack_family|qualityTags|quality_tags|expectedSafe|expectedUnsafe|expected_safe|expected_unsafe|expectedVerdict|expectedDisposition|requiredBehaviors|forbiddenBehaviors|required_behaviors|forbidden_behaviors|rubric|scoringLabels|scoring_labels)\\b",
+  "controlsSafe": 8,
+  "controlsUnsafe": 8,
+  "controlsProbe": 1
+}

@@ -1,0 +1,37 @@
+{
+  "scope": "CODE_OWNED_FINAL_REPLY_COMPLETED_TOOL_TURNS_SERIALIZATION",
+  "records": [
+    {
+      "caseId": "media-and-size:ask",
+      "generationId": "8a35cfc7-40ee-4965-a862-6f2fc68eeac5:owner:3",
+      "recommendedSizes": [
+        {
+          "componentProductId": "SV2447",
+          "componentRole": "OTHER",
+          "size": "M"
+        }
+      ],
+      "inputFitPreference": null,
+      "alternativeSizes": []
+    }
+  ],
+  "rejectedResponses": [
+    {
+      "caseId": "media-and-size:ask",
+      "generationId": "8a35cfc7-40ee-4965-a862-6f2fc68eeac5:owner:3",
+      "status": "REJECTED",
+      "reason": "MEASUREMENT_SOURCE_INVALID",
+      "fieldErrorReasons": [
+        "QUOTE_MUST_CONTAIN_ONE_VALUE",
+        "QUOTE_MUST_CONTAIN_ONE_VALUE"
+      ]
+    }
+  ],
+  "nativeFunctionResponseOccurrences": 1,
+  "validSerializedOccurrences": 1,
+  "providerCallsAdded": 0,
+  "notes": [
+    "The earlier offline check assumed every recommend_size response was valid; rejected envelopes have no co-location fields. Corrected to inspect valid recommendations only.",
+    "This is existing bounded tool continuation; not generation retry or repair/reverify after semantic rejection."
+  ]
+}

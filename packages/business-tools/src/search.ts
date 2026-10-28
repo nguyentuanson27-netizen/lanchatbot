@@ -43,10 +43,22 @@ const StableProductDocumentSchema = z
         qualityScore: z.number().nullable(),
         feedback: z.boolean(),
         observedAt: z.string().datetime().nullable().optional().default(null),
+        revalidation: z.discriminatedUnion("status",[
+          z.object({status:z.literal("VALID"),checkedAt:z.string().datetime()}).strict(),
+          z.object({status:z.literal("INVALID")}).strict(),
+        ]).optional(),
         sourceContentSha256: z.string().regex(/^[a-f0-9]{64}$/).nullable().optional().default(null),
         reviewStatus: z.literal("APPROVED").nullable().optional().default(null),
         metadataVerified: z.boolean().optional().default(false),
-      }).strict(),
+        colorBinding: z.discriminatedUnion("status",[
+          z.object({status:z.literal("VALID"),color:z.string().trim().min(1).max(64),sha256:z.string().regex(/^[a-f0-9]{64}$/)}).strict(),
+          z.object({status:z.literal("INVALID")}).strict(),z.object({status:z.literal("ABSENT")}).strict(),
+        ]).optional(),
+      }).strict().superRefine((image,ctx)=>{
+        const b=image.colorBinding;
+        if(b?.status==="VALID"&&(b.sha256!==image.sourceContentSha256||image.metadataVerified!==true||image.reviewStatus!=="APPROVED"))
+          ctx.addIssue({code:z.ZodIssueCode.custom,message:"Invalid verified image color binding"});
+      }),
     ).max(40).default([]),
     catalogVersion: z.string().min(1).max(128),
     observedAt: z.string().datetime().nullable().optional().default(null),
@@ -57,7 +69,8 @@ const ScoredStableProductSchema = z
   .object({ document: StableProductDocumentSchema, score: z.number().min(0).max(1) })
   .strict();
 
-function validateDocument(value: StableProductDocument): StableProductDocument {
+/** Canonical catalog boundary, also used by isolated replay capture. */
+export function validateStableProductDocument(value: unknown): StableProductDocument {
   return StableProductDocumentSchema.parse(value);
 }
 
@@ -84,20 +97,24 @@ export class ProductSearchService {
     if (codeLike) {
       const exact = await this.port.findByExactCode(normalized);
       if (exact !== null) {
-        return { status: "MATCHED", matchKind: "EXACT_CODE", product: validateDocument(exact), score: 1, gap: null };
+        return { status: "MATCHED", matchKind: "EXACT_CODE", product: validateStableProductDocument(exact), score: 1, gap: null };
       }
+    }
 
-      const aliases = (await this.port.findByAlias(normalized)).map(validateDocument);
-      if (aliases.length === 1 && aliases[0] !== undefined) {
-        return { status: "MATCHED", matchKind: "ALIAS", product: aliases[0], score: 1, gap: null };
-      }
-      if (aliases.length > 1) {
-        return {
-          status: "AMBIGUOUS",
-          reasonCode: "ALIAS_COLLISION",
-          candidates: aliases.slice(0, this.thresholds.maxCandidates).map((document) => ({ document, score: 1 })),
-        };
-      }
+    // Historical aliases also contain broad search keywords. For a non-code
+    // query, only the full source title identifies a product without narrowing
+    // an ordinary shopping need to one keyword-tagged item.
+    const aliases = (await this.port.findByAlias(normalized)).map(validateStableProductDocument)
+      .filter(document => codeLike || normalizeProductCode(document.title) === normalized);
+    if (aliases.length === 1 && aliases[0] !== undefined) {
+      return { status: "MATCHED", matchKind: "ALIAS", product: aliases[0], score: 1, gap: null };
+    }
+    if (aliases.length > 1) {
+      return {
+        status: "AMBIGUOUS",
+        reasonCode: "ALIAS_COLLISION",
+        candidates: aliases.slice(0, this.thresholds.maxCandidates).map((document) => ({ document, score: 1 })),
+      };
     }
 
     const candidates = validateAndSortCandidates(

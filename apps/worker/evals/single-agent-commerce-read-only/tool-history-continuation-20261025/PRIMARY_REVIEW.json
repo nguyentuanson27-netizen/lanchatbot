@@ -1,0 +1,264 @@
+{
+  "sourceSha": "e51db388c6dfa95c5e5af7b2b82c21646e1e1933",
+  "reviewed": 35,
+  "targetReviewed": 30,
+  "additionalPrerequisitesReviewed": 5,
+  "protocol": "Human-agent whole-turn reading of actual terminal text/history, task completion, usefulness/decision and Vietnamese voice. No keyword points, no claim of sales conversion or blind review; corpus expectations had been read. No rejected-draft diagnostics inspected before this lock. Factual source validation follows separately.",
+  "counts": {
+    "NEEDS_EDIT": 4,
+    "USEFUL": 11,
+    "USEFUL_WITH_POLISH": 20
+  },
+  "targetCounts": {
+    "NEEDS_EDIT": 4,
+    "USEFUL": 8,
+    "USEFUL_WITH_POLISH": 18
+  },
+  "cases": [
+    {
+      "caseId": "b1-changed-occasion",
+      "job": "b1-1-4",
+      "scope": "REMAINING_TARGET",
+      "verdict": "NEEDS_EDIT",
+      "wholeTurnReason": "Có đổi lựa chọn theo việc ngồi xe lâu, nhưng câu trả lời quá dài, nửa sau dồn mô tả và tính từ quảng cáo; lý do chọn thay bị loãng. Cần kiểm căn cứ các khẳng định ít nhăn/thoải mái sau khóa review."
+    },
+    {
+      "caseId": "b1-current-policy",
+      "job": "b1-1-4",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL",
+      "wholeTurnReason": "Trả trực tiếp mốc hiện tại 15 ngày và phí 30k, xử lý đúng câu hỏi so với lịch sử 7 ngày. Kết luận điều kiện cần đối chiếu snapshot sau review."
+    },
+    {
+      "caseId": "b1-partial-source",
+      "job": "b1-1-4",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Giữ được câu trả lời chất liệu khi POS thiếu và không bịa giá/tồn; câu vẫn giống chép mô tả, kết thúc bằng cách nói tra cứu."
+    },
+    {
+      "caseId": "b1-price",
+      "job": "b1-1-4",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Giá nguyên set rõ và ngắn; đưa thêm toàn bộ size dù khách chỉ hỏi giá."
+    },
+    {
+      "caseId": "b1-component-stock-v2",
+      "job": "b1-13-16",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL",
+      "wholeTurnReason": "Hiểu chân váy rời qua lịch sử, trả gọn đúng giá và tồn M."
+    },
+    {
+      "caseId": "b1-search-read-v2",
+      "job": "b1-13-16",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Tìm đúng tên và giá cả bộ; bổ sung giá món rời tuy có ích tùy khách nhưng lượt này chưa cần."
+    },
+    {
+      "caseId": "b1-buying-concern-v2",
+      "job": "b1-13-16",
+      "scope": "REMAINING_TARGET",
+      "verdict": "NEEDS_EDIT",
+      "wholeTurnReason": "Hiểu gu đồ trơn nhưng trả nhiều nhánh áo/váy/cả set, rồi hỏi ngược khách chọn. Không chốt giúp khách; gần 200 từ và mô tả quảng cáo làm lựa chọn khó hơn."
+    },
+    {
+      "caseId": "b1-policy-used-v2",
+      "job": "b1-13-16",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Hiểu đã mặc thử khác chỉ ướm, từ chối đúng tình huống thay vì chỉ kiểm tem; giọng quy định dài và nặng."
+    },
+    {
+      "caseId": "b1-changed-occasion-v3",
+      "job": "b1-17-20",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Đã đổi từ cả bộ dự tiệc sang áo lẻ cho gặp khách và nêu cách phối; phần so sánh lặp gọn gàng/bay rũ dài, nhiều tính từ."
+    },
+    {
+      "caseId": "b1-current-policy-v3",
+      "job": "b1-17-20",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL",
+      "wholeTurnReason": "Đáp mốc hiện tại, phí và hỏi size muốn đổi; đi tiếp được trong tư vấn, không nói đã thực hiện đổi."
+    },
+    {
+      "caseId": "b1-partial-source-v3",
+      "job": "b1-17-20",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Giữ được chất liệu có nguồn và không bịa giá/tồn; mô tả dài và ngôn ngữ hệ thống vẫn cứng."
+    },
+    {
+      "caseId": "b1-price-v3",
+      "job": "b1-17-20",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Giá cả bộ rõ; thông tin size cộng thêm không phục vụ câu hỏi chính."
+    },
+    {
+      "caseId": "b1-component-stock-v3",
+      "job": "b1-21-24",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL",
+      "wholeTurnReason": "Xác nhận bán áo riêng và trả đủ giá/tồn M tự nhiên, không kéo sang khẳng định fit."
+    },
+    {
+      "caseId": "b1-search-read-v3",
+      "job": "b1-21-24",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Tìm đúng mã, trả tồn/giá và phân biệt lựa chọn bán; bảng ba mức giá hơi nhiều nhưng khách chưa chốt offer nên có lý do dùng."
+    },
+    {
+      "caseId": "b1-buying-concern-v3",
+      "job": "b1-21-24",
+      "scope": "REMAINING_TARGET",
+      "verdict": "NEEDS_EDIT",
+      "wholeTurnReason": "Đã chọn áo riêng dựa trên váy khách có, nhưng nửa sau quảng cáo chất liệu rồi mở lại cả bộ mà không có đánh đổi mới. Lời khuyên bị loãng, chưa tập trung cách mặc lại."
+    },
+    {
+      "caseId": "b1-policy-used-v3",
+      "job": "b1-21-24",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Từ chối đúng tình trạng đã giặt/cắt tem; giải thích trong ngoặc lặp điều vừa nói và xin thông cảm dài."
+    },
+    {
+      "caseId": "b1-component-stock",
+      "job": "b1-5-8",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL",
+      "wholeTurnReason": "Đúng phạm vi áo lẻ, báo giá và tồn M ngắn gọn, không tự tư vấn vừa."
+    },
+    {
+      "caseId": "b1-search-read",
+      "job": "b1-5-8",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Tìm được mã và phân biệt áo lẻ/cả bộ; đoạn size bổ sung không cần cho câu hỏi giá."
+    },
+    {
+      "caseId": "b1-buying-concern",
+      "job": "b1-5-8",
+      "scope": "REMAINING_TARGET",
+      "verdict": "NEEDS_EDIT",
+      "wholeTurnReason": "Khách ngại nhiều ren/rườm rà, câu trả lời dùng mềm/bay/rũ để phủ định rườm rà; chưa giải thích thuyết phục về mức độ chi tiết của thiết kế, giọng quảng cáo."
+    },
+    {
+      "caseId": "b1-policy-used",
+      "job": "b1-5-8",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Từ chối thẳng theo việc đã mặc đi làm, không mở quyền đổi sai. Đoạn quy định và thông cảm dài hơn cần thiết."
+    },
+    {
+      "caseId": "b1-changed-occasion-v2",
+      "job": "b1-9-12",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Đáp đúng nỗi lo nóng và khá ngắn; vẫn nhắc dãy chất liệu rồi kết luận thoải mái/không bí. Căn cứ thực dụng phải kiểm riêng, không coi giọng tự tin là lỗi tự động."
+    },
+    {
+      "caseId": "b1-current-policy-v2",
+      "job": "b1-9-12",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Dùng mốc/phí hiện tại, không nhắc phí cũ như luật; câu nhắc 12 hôm và thêm mốc 15 ngày trong ngoặc gây dài."
+    },
+    {
+      "caseId": "b1-partial-source-v2",
+      "job": "b1-9-12",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Trả chất liệu/dáng và giới hạn giá/tồn đúng phạm vi váy; cách nói hệ thống chưa có sẵn còn mang giọng máy."
+    },
+    {
+      "caseId": "b1-price-v2",
+      "job": "b1-9-12",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Hiểu cả bộ qua lịch sử và báo giá; thêm dãy size không cần thiết."
+    },
+    {
+      "caseId": "negotiation-cart-setup",
+      "job": "negotiation",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Có xác nhận áo/biến thể và đặt trước từ trạng thái; pre-order trong ngoặc thừa."
+    },
+    {
+      "caseId": "negotiation-price-objection",
+      "job": "negotiation",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Nói giá hiện tại và hỗ trợ ship thay vì bịa giảm thêm; đoạn xin thông cảm còn sáo."
+    },
+    {
+      "caseId": "negotiation-total-control",
+      "job": "negotiation",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Tổng thanh toán rõ; giải thích ship giảm trừ trong ngoặc quá dài cho câu hỏi tổng tiền."
+    },
+    {
+      "caseId": "stateful-open",
+      "job": "stateful",
+      "scope": "ADDITIONAL_PREREQUISITE",
+      "verdict": "USEFUL",
+      "wholeTurnReason": "Xác nhận đúng áo lẻ/be/M đã thêm và báo đặt trước, không đọc lại hai số đo."
+    },
+    {
+      "caseId": "stateful-variant-quantity",
+      "job": "stateful",
+      "scope": "ADDITIONAL_PREREQUISITE",
+      "verdict": "USEFUL",
+      "wholeTurnReason": "Xác nhận gọn việc đổi L và số lượng hai áo, không kéo sang fit."
+    },
+    {
+      "caseId": "stateful-quote",
+      "job": "stateful",
+      "scope": "ADDITIONAL_PREREQUISITE",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Báo tổng code 978100 và các khoản; ưu đãi chưa hiển thị thành một khoản riêng nên khách phải tự đối chiếu 998k+30k với tổng."
+    },
+    {
+      "caseId": "stateful-correction",
+      "job": "stateful",
+      "scope": "ADDITIONAL_PREREQUISITE",
+      "verdict": "USEFUL_WITH_POLISH",
+      "wholeTurnReason": "Đã nhận sửa số đo mà không đọc lại số; giữ đúng hai áo L. Cụm em ghi nhận vẫn hơi mang giọng xử lý dữ liệu."
+    },
+    {
+      "caseId": "stateful-request-checkout",
+      "job": "stateful",
+      "scope": "ADDITIONAL_PREREQUISITE",
+      "verdict": "USEFUL",
+      "wholeTurnReason": "Code hỏi tên người nhận, không phải actual silence; raw capture bị redaction nên public text chỉ được xác nhận bằng hash/code."
+    },
+    {
+      "caseId": "stateful-private-checkout",
+      "job": "stateful",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL",
+      "wholeTurnReason": "Code nhận thông tin riêng và tạo preview đầy đủ tổng/ưu đãi/ship/đặt trước/ETA, hỏi xác nhận. Không gọi model cho PII."
+    },
+    {
+      "caseId": "stateful-confirm",
+      "job": "stateful",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL",
+      "wholeTurnReason": "Xác nhận mua dẫn tới handoff với câu ngắn có bước tiếp theo, không báo đã tạo đơn POS."
+    },
+    {
+      "caseId": "stateful-human-request",
+      "job": "stateful",
+      "scope": "REMAINING_TARGET",
+      "verdict": "USEFUL",
+      "wholeTurnReason": "Yêu cầu gặp nhân viên được chuyển với câu ngắn, không tiếp tục tư vấn vòng vo."
+    }
+  ]
+}

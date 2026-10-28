@@ -1,0 +1,82 @@
+[
+  {
+    "run": "stateful-1",
+    "id": "188e9b85-1623-444e-87a2-983ae13e5f95:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "stateful-1",
+    "id": "5a2e0903-bff4-47af-adef-95c5681da29e:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "stateful-1",
+    "id": "eee86beb-b943-4bf2-8f4e-83889d2e638f:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "stateful-1",
+    "id": "96d58852-db73-462d-bec8-03fd8008e840:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "bab72abcfb68286d715a2f8920a99564706f055ec586db8b83737f70bf2d824a:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "0ae4025b134213cbce89b1d8d72ba58f3d49e068f4d2cadf95aef87394d77bbe:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "165b03a0771de4585507dae6f1e42ade858f70519f271229209b1a5c382ca221:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "advice-1",
+    "id": "87f2c9e7-3f8e-410f-9cbe-91cafd5b3b2b:verifier:1",
+    "verdict": {
+      "verdict": "UNCERTAIN",
+      "violations": []
+    }
+  },
+  {
+    "run": "advice-1",
+    "id": "a402e92e-f706-4e2f-82d7-75da7d0e6dfe:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "advice-1",
+    "id": "277d5e5d-aed7-4e1f-9e35-84acba67c968:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  }
+]

@@ -46,9 +46,10 @@ function hmac(salt: string, ...parts: readonly string[]): string {
 const bounded = (alternatives: string): string =>
   `(?<![\\p{L}\\p{M}])(?:${alternatives})(?![\\p{L}\\p{M}])`;
 
-/** Naming one of these is itself enough to treat the whole line as an address. */
+/** Administrative components are conservative location signals. Street words
+ * also name product construction, so require an address value/frame below. */
 const ADDRESS_COMPONENT_TOKENS =
-  "xã|phường|huyện|quận|tỉnh|thành phố|đường|số nhà|ấp|thôn";
+  "xã|phường|huyện|quận|tỉnh|thành phố|số nhà|ấp|thôn";
 
 /**
  * Corroborating address content, only consulted after an explicit "địa chỉ"
@@ -57,7 +58,7 @@ const ADDRESS_COMPONENT_TOKENS =
  * the keyword they do indicate a real address.
  */
 const ADDRESS_DETAIL_TOKENS =
-  `${ADDRESS_COMPONENT_TOKENS}|phố|ngõ|ngách|hẻm|tổ|khu phố|chung cư|quốc lộ|tỉnh lộ|lô|căn hộ`;
+  `${ADDRESS_COMPONENT_TOKENS}|đường|duong|phố|ngõ|ngách|hẻm|tổ|khu phố|chung cư|quốc lộ|tỉnh lộ|lô|căn hộ`;
 
 /**
  * An administrative token names an address - unless the sentence is asking
@@ -66,11 +67,29 @@ const ADDRESS_DETAIL_TOKENS =
  * not: the exemption is bound to the token it follows, not to the line.
  */
 const ADDRESS_TOKEN_QUESTION = new RegExp(
-  `${bounded(ADDRESS_COMPONENT_TOKENS)}\\s*(?:nào|mấy|gì|đâu|bao nhiêu)(?![\\p{L}\\p{M}])`,
+  `${bounded(`${ADDRESS_COMPONENT_TOKENS}|đường|duong`)}\\s*(?:nào|mấy|gì|đâu|bao nhiêu)(?![\\p{L}\\p{M}])`,
   "giu",
 );
 
 const ADDRESS_LINE_TOKEN = new RegExp(bounded(ADDRESS_COMPONENT_TOKENS), "iu");
+const STREET_TOKEN = "(?:[Đđ]ường|[Dd]uong|[ĐđDd]\\.)";
+// House numbers, named streets, and explicit locative/delivery frames. These
+// are shared privacy rules, not exceptions for individual product phrases.
+const STREET_ADDRESS = new RegExp(
+  `(?:\\d+(?:[\\/.-]\\d+)*\\s*${STREET_TOKEN}\\s*\\p{L}|` +
+  `${STREET_TOKEN}\\s+\\p{Lu}[\\p{L}\\p{M}]*\\s+\\p{Lu}|` +
+  `(?:(?:nhà|nha)\\s+(?:chị|em|tôi|mình)\\s+)?(?:ở|tới|tại|giao|gui|gửi|o|toi|tai)\\s+${STREET_TOKEN}\\s+\\p{L})`, "u",
+);
+// A short standalone street value is ambiguous even when all lowercase. Keep
+// it private instead of relying on capitalization or a construction-word list.
+// This deliberately also hides ambiguous short fragments starting with a street
+// token; complete product sentences remain eligible for the ordinary filter.
+const BARE_STREET_ADDRESS = new RegExp(
+  `^\\s*${STREET_TOKEN}(?:\\s+|(?<=\\.))[\\p{L}\\p{M}\\p{N}]+(?:[\\s/-]+[\\p{L}\\p{M}\\p{N}]+){0,5}[.!?…]?\\s*$`, "iu",
+);
+const STREET_LOCATION_FRAME = new RegExp(
+  `(?:${bounded("ở|tới|tại|giao|gửi|o|toi|tai|gui")}\\s+${STREET_TOKEN}\\s+\\p{L}|^\\s*${STREET_TOKEN}[^\\n]{1,180}[,\\d])`, "iu",
+);
 
 /**
  * The word "địa chỉ" alone is not an address: a customer asking where the shop
@@ -153,7 +172,9 @@ export function redactAnalyticsText(value: string): string {
   return direct
     .split(/\r?\n/u)
     .map((line) => {
-      if (ADDRESS_LINE_TOKEN.test(line.replace(ADDRESS_TOKEN_QUESTION, " "))) {
+      const addressCandidate = line.replace(ADDRESS_TOKEN_QUESTION, " ");
+      if (ADDRESS_LINE_TOKEN.test(addressCandidate) || STREET_ADDRESS.test(addressCandidate) ||
+        BARE_STREET_ADDRESS.test(addressCandidate) || STREET_LOCATION_FRAME.test(addressCandidate)) {
         return "[ADDRESS]";
       }
       if (/^\s*\p{Lu}[\p{L}'-]+(?:\s+\p{Lu}[\p{L}'-]+){1,4}\s*$/u.test(line)) {

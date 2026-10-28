@@ -1,0 +1,36 @@
+[
+  {
+    "caseId": "sales-discovery-advice:need",
+    "draft": "Em gợi ý chị set quần Uyển Hoa (799.000đ ạ). Mẫu này có thiết kế lưng chun thoải mái, form suông nhẹ không lo bó bụng, chất thô đũi mềm mát và thanh lịch rất hợp mặc đi làm hay dạo phố, hiện shop đang có sẵn size S và L. \n\nChị lấy mẫu này hay cần em tư vấn thêm chi tiết nào không ạ?",
+    "originalReason": "STALE",
+    "claimScopeTypeValueAuthorizationEqualIgnoringOrder": true,
+    "policyRefTextEqual": true,
+    "productEvidenceEqualExcludingMetadataProvenance": true,
+    "receiptsEqual": true,
+    "subjectsEqual": true,
+    "claimSourceVersionsBefore": [
+      "POS_SNAPSHOT:2026-10-25T13:34:37.601Z"
+    ],
+    "claimSourceVersionsAfter": [
+      "POS_SNAPSHOT:2026-10-25T14:04:37.696Z"
+    ]
+  },
+  {
+    "caseId": "stateful-open",
+    "draft": "Em đã thêm áo lẻ Thạch Thảo màu be, size M (hàng đặt trước) vào giỏ cho chị rồi ạ. Tổng giỏ hàng hiện tại của chị là 529.000đ (gồm 499.000đ tiền sản phẩm và 30.000đ phí vận chuyển).",
+    "originalReason": "STALE",
+    "claimScopeTypeValueAuthorizationEqualIgnoringOrder": true,
+    "policyRefTextEqual": true,
+    "productEvidenceEqualExcludingMetadataProvenance": true,
+    "receiptsEqual": true,
+    "subjectsEqual": true,
+    "claimSourceVersionsBefore": [
+      "inventory:sha256:94b931f037ed1a77448e6e149270ad55c83db2097c98e7a6aef20aa5944b7bd3",
+      "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105"
+    ],
+    "claimSourceVersionsAfter": [
+      "inventory:sha256:94b931f037ed1a77448e6e149270ad55c83db2097c98e7a6aef20aa5944b7bd3",
+      "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105"
+    ]
+  }
+]

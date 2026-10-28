@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createHash } from "node:crypto";
 import {
+  canonicalJsonV1,
   canonicalCartOfferBindingsV1,
   canonicalCheckoutDraftHashPreimageV1,
   canonicalCartStateHashPreimageV1,
@@ -37,6 +38,191 @@ import {
   validateLockedSalesStateEnvelopeV1,
   type RealtimeCommitInput,
 } from "./realtime-runtime.js";
+
+describe("committed sales effect readback", () => {
+  it("writes public recovery metadata through the actual Outbox writer, strips it for transport, then reads accepted numeric history",async()=>{
+    const now=new Date(),page="page",conversation="33333333-3333-4333-8333-333333333333",customerHash="a".repeat(64),recipient="customer-1";
+    const cipher=new LocalEnvelopeCipher("00".repeat(32),"test"),hash=(v:unknown)=>createHash("sha256").update(canonicalJsonV1(v)).digest("hex");
+    const message={kind:"TEXT" as const,text:"Ưu đãi 30.000đ. Tổng 499.000đ, đã gồm phí giao hàng."},group="10000000-0000-4000-8000-000000000002";
+    const proof={kind:"C3_PUBLIC_CART_SUMMARY_V1",pageId:page,conversationId:conversation,customerHash,
+      recipientHash:createHash("sha256").update(recipient).digest("hex"),responseGroupId:group,sequence:0,messageHash:hash(message),
+      cartId:"50000000-0000-4000-8000-000000000001",cartVersion:2,discountTotalVnd:30000,grandTotalVnd:499000};
+    const inserts:readonly unknown[][]=[];
+    const client={query:async(sql:string,values:readonly unknown[]=[])=>{
+      if(sql.includes("SELECT routing_owner"))return {rowCount:1,rows:[{routing_owner:"APP",app_send_enabled:true,kill_switch:false,transaction_now:now}]};
+      if(sql.includes("SELECT conversation_owner"))return {rowCount:1,rows:[{conversation_owner:"BOT"}]};
+      if(sql.includes("INSERT INTO meta_outbox"))(inserts as unknown[][]).push([...values]);
+      return {rowCount:1,rows:[]};
+    },release(){}};
+    const store=new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost/unused",cipher);
+    const pool={connect:async()=>client,query:vi.fn(async()=>({rows:[] as unknown[]}))};
+    (store as unknown as {pool:unknown}).pool=pool;
+    const result=await store.commit({pageId:page,conversationId:conversation,customerHash,expectedStateVersion:0,
+      state:{revision:1,routingOwner:"APP",conversationOwner:"BOT"},metaPlan:{replyPlanId:"10000000-0000-4000-8000-000000000001",responseGroupId:group,
+        recipientId:recipient,messages:[message],publicCartSummary:proof}},now);
+    expect(result.metaOutboxCreated).toBe(1);expect(inserts).toHaveLength(1);
+    const v=inserts[0]!,row={outbox_id:v[0],reply_plan_id:v[2],response_group_id:v[3],conversation_id:v[4],page_id:v[5],customer_hash:v[6],
+      recipient_ciphertext:v[7],recipient_nonce:v[8],recipient_auth_tag:v[9],payload_ciphertext:v[10],payload_nonce:v[11],payload_auth_tag:v[12],
+      payload_encrypted_dek:v[13],payload_key_ref:v[14],payload_expires_at:v[15],sequence_no:v[17],attempt_count:1,lease_token:"lease",
+      status:"PENDING",meta_message_id:null as string|null,accepted_at:null as Date|null};
+    pool.query.mockResolvedValue({rows:[row]});
+    const scope={pageId:page,conversationId:conversation,customerHash,recipientHash:proof.recipientHash,before:new Date(now.getTime()+1000)};
+    expect(await store.readAcceptedCommerceCartSummaries(scope)).toEqual([]);
+    const outbound=await store.claimMetaOutbox("worker",30000);
+    expect(outbound?.message).toEqual(message);
+    expect(JSON.stringify(outbound?.message)).not.toContain("commercePublicCartSummary");
+    row.status="SENT_ACCEPTED";row.meta_message_id="meta-accepted";row.accepted_at=now;
+    const accepted=await store.readAcceptedCommerceCartSummaries(scope);
+    expect(accepted).toHaveLength(1);expect(accepted[0]).toMatchObject({type:"ACCEPTED_PUBLIC_CART_SUMMARY",cartVersion:2,discountTotalVnd:30000,grandTotalVnd:499000});
+    expect(accepted[0]!.messageHash).toBe(hash(outbound!.message));
+    expect(JSON.stringify(accepted)).not.toContain(message.text);
+  });
+  it("recovers only numeric accepted cart outcome metadata, never the over-redacted customer text",async()=>{
+    const cipher=new LocalEnvelopeCipher("00".repeat(32),"test"),page="page",id="public-summary";
+    const message={kind:"TEXT",text:"Giỏ của chị: mẫu có tên riêng. Tổng 499.000đ."};
+    const hash=(v:unknown)=>createHash("sha256").update(canonicalJsonV1(v)).digest("hex");
+    const proof={kind:"C3_PUBLIC_CART_SUMMARY_V1",pageId:page,conversationId:"conversation",customerHash:"a".repeat(64),
+      recipientHash:"b".repeat(64),responseGroupId:"group",sequence:0,messageHash:hash(message),cartId:"50000000-0000-4000-8000-000000000001",cartVersion:2,
+      discountTotalVnd:30000,grandTotalVnd:499000};
+    const payload=cipher.encryptJson({...message,commercePublicCartSummary:proof},`lana:meta-payload:v2:${page}:${id}`,new Date(Date.now()+60000));
+    const row={outbox_id:id,page_id:page,conversation_id:"conversation",response_group_id:"group",sequence_no:0,status:"SENT_ACCEPTED",
+      meta_message_id:"accepted",accepted_at:new Date(),payload_ciphertext:payload.ciphertext,payload_nonce:payload.nonce,payload_auth_tag:payload.authTag,
+      payload_encrypted_dek:payload.encryptedDek,payload_key_ref:payload.keyRef,payload_expires_at:payload.expiresAt};
+    const query=vi.fn(async()=>({rows:[row]})),store=new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost/unused",cipher);
+    (store as unknown as {pool:unknown}).pool={query};
+    const input={pageId:page,conversationId:"conversation",customerHash:"a".repeat(64),recipientHash:"b".repeat(64),before:new Date(Date.now()+1000)};
+    const events=await store.readAcceptedCommerceCartSummaries(input);
+    expect(events).toHaveLength(1);expect(events[0]).toMatchObject({type:"ACCEPTED_PUBLIC_CART_SUMMARY",cartVersion:2,grandTotalVnd:499000});
+    expect(JSON.stringify(events)).not.toContain("tên riêng");expect(JSON.stringify(events)).not.toContain("recipientHash");
+    expect(await store.readAcceptedCommerceCartSummaries({...input,recipientHash:"c".repeat(64)})).toEqual([]);
+    row.status="RETRYABLE";expect(await store.readAcceptedCommerceCartSummaries(input)).toEqual([]);
+    row.status="SENT_ACCEPTED";
+    const encrypt=(value:unknown)=>{const p=cipher.encryptJson(value,`lana:meta-payload:v2:${page}:${id}`,new Date(Date.now()+60000));
+      Object.assign(row,{payload_ciphertext:p.ciphertext,payload_nonce:p.nonce,payload_auth_tag:p.authTag,payload_encrypted_dek:p.encryptedDek,payload_key_ref:p.keyRef,payload_expires_at:p.expiresAt});};
+    encrypt({...message,text:"Tổng 1đ.",commercePublicCartSummary:proof});
+    expect(await store.readAcceptedCommerceCartSummaries(input)).toEqual([]);
+    encrypt({...message,commercePublicCartSummary:{...proof,phone:"PRIVATE"}});
+    expect(await store.readAcceptedCommerceCartSummaries(input)).toEqual([]);
+    encrypt({...message});expect(await store.readAcceptedCommerceCartSummaries(input)).toEqual([]);
+    encrypt({...message,commercePublicCartSummary:proof});row.payload_expires_at=new Date(Date.now()-1);
+    expect(await store.readAcceptedCommerceCartSummaries(input)).toEqual([]);
+    expect(query.mock.calls.length).toBe(7);
+  });
+  it.each(["SENT_ACCEPTED", "DELIVERED", "READ", "RETRYABLE", "AMBIGUOUS", "wrong-recipient", "wrong-product"])
+    ("projects only exact accepted media receipts after restart (%s)", async mode => {
+    const cipher = new LocalEnvelopeCipher("00".repeat(32), "test"), page = "page", id = "image";
+    const recipientHash = createHash("sha256").update("recipient").digest("hex"), h = "a".repeat(64);
+    const message = { kind: "IMAGE", imageUrl: "https://content.pancake.vn/detail.jpg" };
+    const hash = (v: unknown) => createHash("sha256").update(canonicalJsonV1(v)).digest("hex");
+    // Canonical keys below already match JSON lexical order for the message.
+    const binding = { kind: "C3_MEDIA_GROUP_V1", pageId: page, shopId: "shop", conversationId: "conversation",
+      customerHash: h, recipientHash: mode === "wrong-recipient" ? "b".repeat(64) : recipientHash,
+      responseGroupId: "group", generation: 1, revision: 1, stateHash: h, policyHash: h,
+      messageHashes: [h, hash(message)], images: [{ productId: "P101", url: mode === "wrong-product" ? "https://content.pancake.vn/other.jpg" : message.imageUrl,
+        sourceVersion: h, observedAt: new Date().toISOString(), expiresAt: new Date(Date.now()+60_000).toISOString() }] };
+    const payload = cipher.encryptJson({ ...message, commerceMediaBinding: binding },
+      `lana:meta-payload:v2:${page}:${id}`, new Date(Date.now()+60_000));
+    const query = vi.fn(async (_sql: string, _args?: unknown[]) => ({ rows: [{ outbox_id: id, page_id: page, conversation_id: "conversation", response_group_id: "group",
+      sequence_no: 1, status: mode.startsWith("wrong-") ? "SENT_ACCEPTED" : mode, accepted_at: new Date(), payload_ciphertext: payload.ciphertext, payload_nonce: payload.nonce,
+      payload_auth_tag: payload.authTag, payload_encrypted_dek: payload.encryptedDek, payload_key_ref: payload.keyRef, payload_expires_at: payload.expiresAt }] }));
+    const store = new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost:5432/unused", cipher);
+    (store as unknown as { pool: unknown }).pool = { query };
+    const media = await store.readAcceptedCommerceMedia({ pageId: page, conversationId: "conversation", customerHash: h,
+      recipientHash, before: new Date(Date.now()+1000) });
+    expect(media).toHaveLength(["SENT_ACCEPTED", "DELIVERED", "READ"].includes(mode) ? 1 : 0);
+    if (media.length) expect(media[0]).toMatchObject({ productId: "P101", assetRef: `asset:${hash(message.imageUrl)}`, status: mode });
+    expect(JSON.stringify(media)).not.toContain("https:");
+    expect(query.mock.calls[0]?.[0]).toContain("JOIN conversations");
+  });
+  it.each([true, false])("requires the exact committed handoff event and delivery binding (proven=%s)", async proven => {
+    const cipher = new LocalEnvelopeCipher("00".repeat(32), "test"), query = vi.fn(async () => ({ rows: [{ proven }] }));
+    const store = new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost:5432/unused", cipher);
+    (store as unknown as { pool: unknown }).pool = { query };
+    const input = { pageId: "page", conversationId: "conversation", revision: 2, reason: "DEPENDENCY_FAILURE", responseGroupId: "group", bindingHash: "a".repeat(64) };
+    expect(await store.hasCommittedHandoffDelivery(input)).toBe(proven);
+    expect(query).toHaveBeenCalledWith(expect.stringContaining("owner_before='BOT' AND owner_after='HUMAN'"),
+      ["page", "conversation", 2, "DEPENDENCY_FAILURE", JSON.stringify({ responseGroupId: "group", deliveryBindingHash: input.bindingHash })]);
+  });
+  it.each(["none", "media", "handoff", "both", "public-summary"])("keeps private bindings out of the customer message after Outbox decryption (%s)", async bound => {
+    const cipher = new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"), page = "page", id = "outbox";
+    const message = { kind: "TEXT", text: "Ảnh mẫu chị nhé." }, binding = { kind: "C3_MEDIA_GROUP_V1", customerHash: "a".repeat(64) };
+    const payload = cipher.encryptJson({ ...message, ...(["media", "both"].includes(bound) ? { commerceMediaBinding: binding } : {}),
+      ...(["handoff", "both"].includes(bound) ? { commerceHandoffBinding: binding } : {}),
+      ...(bound==="public-summary"?{commercePublicCartSummary:{kind:"C3_PUBLIC_CART_SUMMARY_V1",customerHash:"a".repeat(64)}}:{}) },
+      `lana:meta-payload:v2:${page}:${id}`, new Date(Date.now() + 60_000));
+    const recipient = cipher.encryptValue("synthetic-recipient", `lana:meta-recipient:v2:${page}:${id}`);
+    const store = new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost:5432/unused", cipher);
+    (store as unknown as { pool: unknown }).pool = { query: async () => ({ rows: [{ outbox_id: id, page_id: page,
+      conversation_id: "conversation", reply_plan_id: "reply", response_group_id: "group", sequence_no: 0, attempt_count: 1, lease_token: "lease",
+      recipient_ciphertext: recipient.ciphertext, recipient_nonce: recipient.nonce, recipient_auth_tag: recipient.authTag,
+      payload_ciphertext: payload.ciphertext, payload_nonce: payload.nonce, payload_auth_tag: payload.authTag,
+      payload_encrypted_dek: payload.encryptedDek, payload_key_ref: payload.keyRef, payload_expires_at: payload.expiresAt }] }) };
+    const claimed = await store.claimMetaOutbox("worker", 30_000);
+    expect(claimed?.message).toEqual(message);
+    expect(claimed?.mediaBinding).toEqual(["media", "both"].includes(bound) ? binding : undefined);
+    expect(claimed?.handoffBinding).toEqual(["handoff", "both"].includes(bound) ? binding : undefined);
+    expect(JSON.stringify(claimed?.message)).not.toContain("customerHash");
+  });
+  it("locks an unchanged sales readback for final Outbox authorization without inventing a new sales transition", async () => {
+    const now = new Date("2026-10-15T08:00:00Z"), cipher = new LocalEnvelopeCipher("00".repeat(32), "test"), expiry = new Date(now.getTime()+60000);
+    const state = { schemaVersion: 2, conversationKey: "conversation", routing: { pageId: "page", conversationId: "conversation" }, revision: 0,
+      stage: "DISCOVERY", cart: null, commerceContext: null, negotiation: null, checkoutDraft: null, clarification: null, preview: null, confirmation: null,
+      processedCommandIds: [], updatedAt: now.toISOString() };
+    const encrypted = cipher.encryptJson(state, "lana:sales-cycle:v1:page:conversation", expiry), calls: string[] = [];
+    const client = { async query(sql: string) {
+      calls.push(sql);
+      if (sql.includes("SELECT routing_owner")) return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: false, kill_switch: true, transaction_now: now }] };
+      if (sql.includes("SELECT generation")) return { rowCount: 1, rows: [{ generation: "1" }] };
+      if (sql.includes("AS source_message_id")) return { rowCount: 1, rows: [{ source_message_id: "current-message" }] };
+      if (sql.includes("SELECT conversation_owner")) return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
+      if (sql.includes("FROM sales_cycle_states")) return { rowCount: 1, rows: [{ state_revision: "0", conversation_id: "conversation", page_id: "page", cart_expires_at: null, expires_at: expiry,
+        state_ciphertext: encrypted.ciphertext, state_nonce: encrypted.nonce, state_auth_tag: encrypted.authTag, state_encrypted_dek: encrypted.encryptedDek, state_key_ref: encrypted.keyRef }] };
+      return { rowCount: 1, rows: [] };
+    } };
+    const store = new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost/unused", cipher), hash = rawSha256("current-message");
+    const r = await store.commitWithinTransaction(client as never, { pageId: "page", conversationId: "conversation", customerHash: "customer", expectedStateVersion: 0,
+      state: { revision: 1, routingOwner: "APP", conversationOwner: "BOT" }, inboxBatchGuard: { generation: 1, leaseToken: "lease", inboxIds: ["inbox"] },
+      salesCyclePlan: { expectedRevision: 0, state, events: [], cartExpiresAt: null, expiresAt: expiry, readinessContractVersion: "DF06_EFFECT_READINESS_V1", sourceMessageIdHash: hash,
+        canonicalBuyingIntent: { schemaVersion: 1, authorityVersion: "CANONICAL_BUYING_INTENT_V1", decision: "NONE", requestedAction: "NONE", quantity: null, productId: null,
+          contributors: [], sourceMessageIdHash: hash, evidenceHash: null, reasonCodes: [], evaluatedAt: now.toISOString(), authorization: "NONE" } } }, now);
+    expect(r.stateCommitted).toBe(true);
+    expect(calls.some(sql => sql.includes("UPDATE sales_cycle_states"))).toBe(false);
+  });
+  it("retains a current Inbox lease across intermediate commits and completes it only at turn end", async () => {
+    const now = new Date("2026-10-15T08:00:00Z"), calls: string[] = [];
+    const client = { async query(sql: string) {
+      calls.push(sql);
+      if (sql.includes("SELECT routing_owner")) return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: false, kill_switch: true, transaction_now: now }] };
+      if (sql.includes("SELECT generation")) return { rowCount: 1, rows: [{ generation: "1" }] };
+      if (sql.includes("AS source_message_id")) return { rowCount: 1, rows: [{ source_message_id: "current-message" }] };
+      if (sql.includes("SELECT conversation_owner")) return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
+      return { rowCount: 1, rows: [] };
+    } };
+    const store = new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost/unused", new LocalEnvelopeCipher("00".repeat(32), "test"));
+    const input = { pageId: "page", customerHash: "customer", conversationId: "conversation", expectedStateVersion: 0,
+      state: { revision: 1, routingOwner: "APP", conversationOwner: "BOT" },
+      inboxBatchGuard: { generation: 1, leaseToken: "lease", inboxIds: ["inbox"] }, completeInboxBatch: false };
+    const result = await store.commitWithinTransaction(client as never, input, now);
+    expect(result).toMatchObject({ stateCommitted: true, inboxBatchStatus: "RETAINED" });
+    expect(calls.some(sql => sql.includes("status = 'PROCESSED'"))).toBe(false);
+    calls.length = 0;
+    expect(await store.commitWithinTransaction(client as never, { ...input, completeInboxBatch: true, expectedStateVersion: 1, state: { ...input.state, revision: 2 } }, now))
+      .toMatchObject({ stateCommitted: true, inboxBatchStatus: "COMMITTED" });
+    expect(calls.some(sql => sql.includes("status = 'PROCESSED'"))).toBe(true);
+    const { inboxBatchGuard: _guard, ...unguarded } = input;
+    await expect(store.commitWithinTransaction(client as never, unguarded, now)).rejects.toThrow("CURRENT_SOURCE_LEASE");
+  });
+  it("reads the existing scoped ledger using the keyed operation fingerprint", async () => {
+    const cipher = new LocalEnvelopeCipher("00".repeat(32), "test-key-v1");
+    const store = new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost/unused", cipher);
+    const query = vi.fn(async (_sql: string, _values: unknown[]) => ({rows: [{command_kind:"CART_OPENED",state_revision_after:"4",cart_id:"cart",occurred_at:new Date("2026-10-14T10:00:00Z")}]}));
+    (store as unknown as {pool: unknown}).pool = {query};
+    expect(await store.readCommittedSalesCycleEvent("page","conversation","private-operation")).toMatchObject({commandKind:"CART_OPENED",stateRevisionAfter:4,cartId:"cart"});
+    expect(query.mock.calls[0]![0]).toContain("outcome = 'APPLIED'");
+    expect(query.mock.calls[0]![1]).toEqual(["page","conversation",cipher.fingerprint("private-operation","sales-cycle-command:v1")]);
+    expect(JSON.stringify(query.mock.calls)).not.toContain("private-operation");
+  });
+});
 
 function canonicalJson(value: unknown): string {
   if (value === null || typeof value !== "object") return JSON.stringify(value);
@@ -741,6 +927,10 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     await expect(store.commit(payloadOnlyInput, now)).resolves.toMatchObject({
       metaOutboxCreated: 1,
     });
+    await expect(store.commit({ ...payloadOnlyInput, metaPlan: { ...payloadOnlyInput.metaPlan!,
+      replyPlanId: "10000000-0000-4000-8000-00000000000c", responseGroupId: "10000000-0000-4000-8000-00000000000d",
+      effectReadiness: resealReadinessV1(payloadOnlyInput.metaPlan!.effectReadiness!, { productIds: [] }),
+    } }, now)).resolves.toMatchObject({ metaOutboxCreated: 1 });
     await expect(store.commit({
       ...payloadOnlyInput,
       metaPlan: {

@@ -1,0 +1,107 @@
+[
+  {
+    "caseId": "b1-buying-concern",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "BUYING_CONCERN",
+      "variant": 1,
+      "purpose": "Khách sợ thiết kế nhiều ren quá cầu kỳ cho tiệc ban ngày.",
+      "expected": "Đưa ra một lựa chọn có lý do gắn với thiết kế và ngân sách; không chỉ chép mô tả quảng cáo hoặc bịa công năng."
+    },
+    "runtime": {
+      "latest": "Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-buying-concern-v2",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "BUYING_CONCERN",
+      "variant": 2,
+      "purpose": "Khách chuộng đồ trơn và cần lời khuyên thật về một set nhiều chi tiết.",
+      "expected": "Chọn rõ nên hay không nên lấy theo gu và dịp mặc; dùng thiết kế làm lý do, không nói chắc sản phẩm hợp mọi người."
+    },
+    "runtime": {
+      "latest": "Chị hay mặc đồ trơn, ít họa tiết. Set Thạch Thảo nhìn đẹp nhưng chị sợ lên người hơi điệu quá. Chị cần một bộ để đi ăn cưới ban ngày, em tư vấn thật là có nên lấy không?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "b1-changed-occasion-v3",
+    "sourceMode": "LIVE",
+    "evaluator": {
+      "purposeId": "CHANGED_OCCASION",
+      "variant": 3,
+      "purpose": "Khách đổi từ tiệc tối sang buổi gặp khách hàng và muốn bớt điệu.",
+      "expected": "Đổi lựa chọn theo hoàn cảnh mới, có thể chọn một món hoặc tìm mẫu khác; không tiếp tục máy móc lời khuyên mặc cả set đi tiệc."
+    },
+    "runtime": {
+      "latest": "Mà lịch đổi rồi, sáng chị mặc đi gặp khách hàng. Chị muốn nhìn gọn hơn thì nên lấy cả bộ hay chỉ lấy áo thôi em?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị định lấy cả bộ Thạch Thảo đi tiệc tối."
+        },
+        {
+          "role": "shop",
+          "text": "Đi tiệc tối mặc cả bộ đẹp chị ạ."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  },
+  {
+    "caseId": "image-transfer-nha-vy",
+    "sourceMode": "LIVE",
+    "runtime": {
+      "latest": "Chị thích bộ Nhã Vy nhưng cái nơ trước áo nhìn hơi điệu. Chị mặc đi cà phê thôi, nên lấy cả bộ hay lấy áo phối quần jeans chị có em?",
+      "history": [],
+      "initialProductCodes": [
+        "SQ149"
+      ]
+    },
+    "evaluator": {
+      "purpose": "Chuyển giao tư vấn hình dáng/cách phối sang sản phẩm khác; giúp khách quyết định theo đồ và nhu cầu đã có.",
+      "review": "Đọc cả câu trả lời thực tế; cho phép lựa chọn hợp lý và upsell có ích, không ép một đáp án hoặc keyword; không dùng ảnh để chứng minh công năng."
+    }
+  },
+  {
+    "caseId": "image-transfer-bich-tra",
+    "sourceMode": "LIVE",
+    "runtime": {
+      "latest": "Bộ Bích Trà này chị mặc đi ăn cưới buổi trưa. Chị không thích đeo nhiều phụ kiện, mặc thế nào cho gọn em?",
+      "history": [],
+      "initialProductCodes": [
+        "SV463"
+      ]
+    },
+    "evaluator": {
+      "purpose": "Chuyển giao tư vấn hình dáng/cách phối sang sản phẩm khác; giúp khách quyết định theo đồ và nhu cầu đã có.",
+      "review": "Đọc cả câu trả lời thực tế; cho phép lựa chọn hợp lý và upsell có ích, không ép một đáp án hoặc keyword; không dùng ảnh để chứng minh công năng."
+    }
+  },
+  {
+    "caseId": "image-transfer-bach-lien",
+    "sourceMode": "LIVE",
+    "runtime": {
+      "latest": "Chị đang ngắm bộ Bạch Liên đi biển. Mua cả bộ hay chỉ áo thôi em? Chị có quần short màu be rồi.",
+      "history": [],
+      "initialProductCodes": [
+        "SQ784"
+      ]
+    },
+    "evaluator": {
+      "purpose": "Chuyển giao tư vấn hình dáng/cách phối sang sản phẩm khác; giúp khách quyết định theo đồ và nhu cầu đã có.",
+      "review": "Đọc cả câu trả lời thực tế; cho phép lựa chọn hợp lý và upsell có ích, không ép một đáp án hoặc keyword; không dùng ảnh để chứng minh công năng."
+    }
+  }
+]

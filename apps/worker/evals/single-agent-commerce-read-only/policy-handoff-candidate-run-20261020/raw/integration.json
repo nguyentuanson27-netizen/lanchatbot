@@ -1,0 +1,45 @@
+{
+  "sourceSha": "05be90e8ef73cb09aa82c8f6e3a6e627b0933e81",
+  "registeredSlots": 5,
+  "maximumGenerationRequests": 20,
+  "mode": "REAL_POSTGRES_TEMP_DATABASE_ISOLATED_CANDIDATE_HANDOFF_CAPTURE_TRANSPORT",
+  "sendEnabled": false,
+  "providerGenerations": 14,
+  "completedSlots": 5,
+  "testDatabaseCreated": true,
+  "testDatabaseDropped": true,
+  "outcomes": [
+    {
+      "caseId": "policy-handoff-1",
+      "disposition": "SEND_ELIGIBLE",
+      "owner": "BOT",
+      "captured": 0
+    },
+    {
+      "caseId": "policy-handoff-2",
+      "disposition": "SEND_ELIGIBLE",
+      "owner": "BOT",
+      "captured": 0
+    },
+    {
+      "caseId": "policy-handoff-3",
+      "disposition": "SEND_ELIGIBLE",
+      "owner": "BOT",
+      "captured": 0
+    },
+    {
+      "caseId": "policy-handoff-4",
+      "disposition": "SEND_ELIGIBLE",
+      "owner": "BOT",
+      "captured": 0
+    },
+    {
+      "caseId": "policy-handoff-5",
+      "disposition": "HANDOFF",
+      "owner": "HUMAN",
+      "captured": 1
+    }
+  ],
+  "testDatabase": "c3_b_test_3d8ac147848f4ff9",
+  "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW"
+}

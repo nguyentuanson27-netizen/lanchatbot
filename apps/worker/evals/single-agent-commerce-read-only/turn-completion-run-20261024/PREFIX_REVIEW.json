@@ -1,0 +1,34 @@
+{
+  "sourceSha": "235d570a90f792a096e37d4094e6feaf3c7eee95",
+  "verdict": "STOP",
+  "allowRemaining": false,
+  "registeredNative": 51,
+  "completedNative": 31,
+  "remainingNativeNotRun": 20,
+  "controls": "17/17 PASS",
+  "T1": "COD21/BANK21 deterministic PASS; native expected handoff works. No forced native POS refresh; do not infer causality from old silent turns becoming eligible.",
+  "T2": {
+    "b1-changed-occasion": {
+      "intervention": "T2_NO_INTERVENTION",
+      "observation": "OBSERVED_INCOMPLETE",
+      "terminal": "HANDOFF/STALE"
+    },
+    "sales-discovery-advice:need": {
+      "intervention": "T2_NO_INTERVENTION",
+      "observation": "OBSERVED_INCOMPLETE",
+      "terminal": "FALLBACK/OWNER_TOOL_MODE"
+    }
+  },
+  "T3": {
+    "deadline": "USABLE, no price/size/images before answer",
+    "opening-ad-repeat": "REGRESSION: same two images repeated for price-only follow-up",
+    "status": "NOT_PROMOTED"
+  },
+  "primaryReviewSha256": "a0e6fab22a337a61aaf563e51f41a6692bf10c5ea07aa92144675cd0b3165672",
+  "reasons": [
+    "Discovery not completed",
+    "Changed-occasion no eligible reply",
+    "Opening-repeat control regressed"
+  ],
+  "evidenceLimit": "Public media-detail caption was redacted in capture; retain that limit, never call marker an actual customer reply."
+}

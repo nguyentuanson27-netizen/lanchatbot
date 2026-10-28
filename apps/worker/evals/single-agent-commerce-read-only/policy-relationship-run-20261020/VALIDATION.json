@@ -1,0 +1,21 @@
+{
+  "focusedTests": 65,
+  "focusedFailures": 0,
+  "registeredSlots": 11,
+  "recordedSlots": 11,
+  "generationRequests": 22,
+  "retry": 0,
+  "providerErrors": 0,
+  "timeouts": 0,
+  "verifierPass": 11,
+  "fallback": 0,
+  "primaryUsable": 10,
+  "primaryNeedsEdit": 1,
+  "primarySha256Unchanged": true,
+  "rawBytesMatchWorktreeAndGitIndex": 17,
+  "sourceAndWireAudit": "PASS",
+  "evaluatorLabelLeaks": 0,
+  "diffCheck": "PASS",
+  "fullB123Dispatched": false,
+  "recommendation": "STOP_BEFORE_FULL_REGISTRATION"
+}

@@ -1,0 +1,16 @@
+{
+  "focusedTests": 65,
+  "focusedFailures": 0,
+  "recordedSlots": 8,
+  "requests": 16,
+  "retry": 0,
+  "sourceAndWireAudit": "PASS",
+  "reportHashesMatchManifest": true,
+  "rawFileHashesMatch": true,
+  "primaryLockUnchanged": true,
+  "diffCheck": "PASS",
+  "providerErrorCount": 0,
+  "timeoutCount": 0,
+  "providerStatus": "COMPLETE",
+  "qualityRecommendation": "STOP"
+}

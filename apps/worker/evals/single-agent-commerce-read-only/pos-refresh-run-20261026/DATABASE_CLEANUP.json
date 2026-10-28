@@ -1,0 +1,44 @@
+[
+  {
+    "cohort": "journey-openings",
+    "completedOutcomes": 4,
+    "dropped": true,
+    "sourceSha": "468d85ea6577c428cf2f6f155c9774926537364b",
+    "sourceDirty": false
+  },
+  {
+    "cohort": "media-followup",
+    "completedOutcomes": 7,
+    "dropped": true,
+    "sourceSha": "468d85ea6577c428cf2f6f155c9774926537364b",
+    "sourceDirty": false
+  },
+  {
+    "cohort": "missing-pos",
+    "completedOutcomes": 3,
+    "dropped": true,
+    "sourceSha": "468d85ea6577c428cf2f6f155c9774926537364b",
+    "sourceDirty": false
+  },
+  {
+    "cohort": "negotiation",
+    "completedOutcomes": 3,
+    "dropped": true,
+    "sourceSha": "468d85ea6577c428cf2f6f155c9774926537364b",
+    "sourceDirty": false
+  },
+  {
+    "cohort": "opening-quotes",
+    "completedOutcomes": 5,
+    "dropped": true,
+    "sourceSha": "468d85ea6577c428cf2f6f155c9774926537364b",
+    "sourceDirty": false
+  },
+  {
+    "cohort": "stateful",
+    "completedOutcomes": 8,
+    "dropped": true,
+    "sourceSha": "468d85ea6577c428cf2f6f155c9774926537364b",
+    "sourceDirty": false
+  }
+]

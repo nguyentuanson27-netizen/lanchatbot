@@ -1,0 +1,117 @@
+{
+  "runSourceSha": "35c9007b6e979e9708f3474d34307b8f66fa6d55",
+  "registeredSlots": 16,
+  "recordedSlots": 16,
+  "generationRequests": 35,
+  "retry": 0,
+  "families": {
+    "stateful": {
+      "slots": 8,
+      "terminal": {
+        "SEND_ELIGIBLE": 4,
+        "NO_SEND": 2,
+        "HANDOFF": 2
+      },
+      "reasons": {
+        "PASS": 4,
+        "CHECKOUT_DETAILS_MISSING": 1,
+        "PRIVATE_CHECKOUT_COMMITTED": 1,
+        "PURCHASE_CONFIRMED": 1,
+        "CUSTOMER_REQUESTED_HUMAN": 1
+      },
+      "providerRequests": 14,
+      "verifierLatencyMs": {
+        "n": 4,
+        "p50": 5744.427000000003,
+        "p95": 6317.109160000008
+      },
+      "addedVerificationLatencyMs": {
+        "n": 4,
+        "p50": 9270.731049999999,
+        "p95": 9912.627474999992
+      },
+      "providerErrors": 0
+    },
+    "b1": {
+      "slots": 4,
+      "terminal": {
+        "SEND_ELIGIBLE": 4
+      },
+      "reasons": {
+        "PASS": 4
+      },
+      "providerRequests": 13,
+      "verifierLatencyMs": {
+        "n": 4,
+        "p50": 6737.523949999995,
+        "p95": 8415.789864999999
+      },
+      "addedVerificationLatencyMs": {
+        "n": 4,
+        "p50": 7590.810850000002,
+        "p95": 9673.95458
+      },
+      "providerErrors": 0
+    },
+    "advice": {
+      "slots": 4,
+      "terminal": {
+        "FALLBACK": 1,
+        "SEND_ELIGIBLE": 3
+      },
+      "reasons": {
+        "FAIL": 1,
+        "PASS": 3
+      },
+      "providerRequests": 8,
+      "verifierLatencyMs": {
+        "n": 4,
+        "p50": 7188.5,
+        "p95": 10509.249999999998
+      },
+      "addedVerificationLatencyMs": {
+        "n": 4,
+        "p50": 7191.321550000002,
+        "p95": 10512.732885
+      },
+      "providerErrors": 0
+    }
+  },
+  "roles": {
+    "owner": {
+      "requests": 23,
+      "inputTokens": 84707,
+      "outputTokens": 19800,
+      "missingUsage": 0,
+      "modelVersions": [
+        "gemini-3.5-flash-lite"
+      ]
+    },
+    "verifier": {
+      "requests": 12,
+      "inputTokens": 56189,
+      "outputTokens": 1138,
+      "missingUsage": 0,
+      "modelVersions": [
+        "gpt-6.1-sol"
+      ]
+    }
+  },
+  "verdictCounts": {
+    "PASS": 11,
+    "FAIL": 1
+  },
+  "wireCapturesChecked": 55,
+  "leaks": [],
+  "cleanup": {
+    "stateful-1": {
+      "testDatabaseDropped": true,
+      "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+      "completedOutcomes": 8
+    }
+  },
+  "cost": "NOT_EXPOSED",
+  "requestCountDistribution": {
+    "1": 35
+  }
+}

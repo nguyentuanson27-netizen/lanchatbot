@@ -1,0 +1,14 @@
+{
+  "sourceSha": "af482367aa953486a27f290b658c23ef1200f993",
+  "verdict": "PASS",
+  "scope": "T1 gallery recovery + T2 actual detail image and code-backed fit; permission for registered 40 remaining only, not overall B GO.",
+  "gallery": "PARTIAL_GENERIC_ONLY, original verifier FAIL retained; two approved requested-product images captured.",
+  "mediaAndSize": "PASS: exact detail attachment and requested-product SIZE_FIT claim support actual sent M recommendation.",
+  "primaryReviewHash": "a66a327f44442b64c2d70939f39060c41d0538de8ccd72f3362ba7765fa302e3",
+  "residuals": [
+    "Discovery OWNER_TOOL_MODE fallback",
+    "Two stale-snapshot silent handoffs and one dependent human-owned no-send",
+    "Advice wording/decision quality remains open"
+  ],
+  "noRetry": true
+}

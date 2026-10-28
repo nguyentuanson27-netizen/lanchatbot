@@ -3,7 +3,6 @@ import {
   DECISION_BUYING_INTENT_EVIDENCE_CODES_V1,
   DECISION_DIALOGUE_EVIDENCE_CODES_V1,
 } from "./decision-observability.js";
-import { CartLineV1Schema } from "./customer-size-cart.js";
 import {
   CanonicalProductIdV1Schema,
   canonicalizeProductIdsV1,
@@ -12,6 +11,7 @@ import {
 import {
   canonicalJsonV1,
   EffectBindingV1Schema,
+  CanonicalCartMutationPayloadV1Schema,
 } from "./canonical-commerce-bindings.js";
 import { DETERMINISTIC_READINESS_REASON_CODES_V1 } from "./readiness-reason-codes.js";
 export { DETERMINISTIC_READINESS_REASON_CODES_V1 } from "./readiness-reason-codes.js";
@@ -84,6 +84,7 @@ function uniqueValues(
 const EvidenceContributorV1Schema = z.enum([
   "DETERMINISTIC_RUNTIME",
   "MODEL_STRUCTURED_OUTPUT",
+  "NATIVE_TOOL_PERMISSION",
 ]);
 
 export const CanonicalDialogueEvidenceV1Schema = z.object({
@@ -121,6 +122,8 @@ export const CanonicalBuyingIntentV1Schema = z.object({
     "OPEN_CART",
     "ADD_TO_CART",
     "SET_QUANTITY",
+    "SET_COMPONENT_VARIANT",
+    "REMOVE_FROM_CART",
     "PROCEED_TO_PAYMENT",
   ]),
   quantity: z.number().int().min(1).max(20).nullable(),
@@ -182,19 +185,19 @@ export type CanonicalBuyingIntentV1 = z.infer<
 
 export function canonicalBuyingIntentAuthorizesCartMutationV1(
   intent: CanonicalBuyingIntentV1,
-  action: "ADD_LINE" | "SET_QUANTITY",
+  action: "ADD_LINE" | "SET_QUANTITY" | "SET_COMPONENT_VARIANT" | "REMOVE_LINE",
   productId: string,
   quantity: number,
 ): boolean {
   const requestedActions: readonly CanonicalBuyingIntentV1["requestedAction"][] =
-    action === "ADD_LINE" ? ["ADD_TO_CART"] : ["SET_QUANTITY"];
+    action === "ADD_LINE" ? ["ADD_TO_CART"] : action === "SET_COMPONENT_VARIANT" ? ["SET_COMPONENT_VARIANT"] : action === "REMOVE_LINE" ? ["REMOVE_FROM_CART"] : ["SET_QUANTITY"];
   return intent.decision === "COMMITTED" &&
-    intent.contributors.includes("DETERMINISTIC_RUNTIME") &&
+    intent.contributors.some(c => c === "DETERMINISTIC_RUNTIME" || c === "NATIVE_TOOL_PERMISSION") &&
     intent.productId === productId &&
     requestedActions.includes(intent.requestedAction) &&
     (action === "ADD_LINE"
       ? (intent.quantity ?? 1) === quantity
-      : intent.quantity !== null && intent.quantity === quantity);
+      : action === "SET_QUANTITY" ? intent.quantity !== null && intent.quantity === quantity : intent.contributors.includes("NATIVE_TOOL_PERMISSION"));
 }
 
 export function canonicalBuyingIntentAuthorizesCartOpenV1(
@@ -203,7 +206,7 @@ export function canonicalBuyingIntentAuthorizesCartOpenV1(
   quantity: number,
 ): boolean {
   return intent.decision === "COMMITTED" &&
-    intent.contributors.includes("DETERMINISTIC_RUNTIME") &&
+    intent.contributors.some(c => c === "DETERMINISTIC_RUNTIME" || c === "NATIVE_TOOL_PERMISSION") &&
     intent.productId === productId &&
     (intent.requestedAction === "OPEN_CART" || intent.requestedAction === "ADD_TO_CART") &&
     (intent.quantity ?? 1) === quantity;
@@ -227,26 +230,17 @@ export type DeterministicConfirmationEvidenceV1 = z.infer<
   typeof DeterministicConfirmationEvidenceV1Schema
 >;
 
-const DeterministicCartMutationPayloadV1Schema = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("ADD_LINE"), line: CartLineV1Schema }).strict(),
-  z.object({ kind: z.literal("REMOVE_LINE"), lineId: z.string().uuid() }).strict(),
-  z.object({
-    kind: z.literal("SET_QUANTITY"),
-    lineId: z.string().uuid(),
-    quantity: z.number().int().positive().max(20),
-  }).strict(),
-]);
-
 export const DeterministicCartMutationEvidenceV1Schema = z.object({
   schemaVersion: z.literal(1),
   authorityVersion: z.literal("DETERMINISTIC_CART_MUTATION_EVIDENCE_V1"),
-  action: z.enum(["ADD_LINE", "REMOVE_LINE", "SET_QUANTITY"]),
+  action: z.enum(["ADD_LINE", "REMOVE_LINE", "SET_QUANTITY", "SET_COMPONENT_VARIANT"]),
   authorityKind: z.enum([
     "CANONICAL_BUYING_INTENT",
     "DETERMINISTIC_REMOVE_CLASSIFIER",
+    "NATIVE_TOOL_PERMISSION",
   ]),
   authorityEvidenceHash: Sha256Schema,
-  mutation: DeterministicCartMutationPayloadV1Schema,
+  mutation: CanonicalCartMutationPayloadV1Schema,
   mutationPayloadHash: Sha256Schema,
   sourceMessageIdHash: Sha256Schema,
   commandIdHash: Sha256Schema,
@@ -265,7 +259,7 @@ export const DeterministicCartMutationEvidenceV1Schema = z.object({
     });
   }
   if (value.action === "REMOVE_LINE" &&
-    value.authorityKind !== "DETERMINISTIC_REMOVE_CLASSIFIER") {
+    value.authorityKind !== "DETERMINISTIC_REMOVE_CLASSIFIER" && value.authorityKind !== "NATIVE_TOOL_PERMISSION") {
     context.addIssue({
       code: z.ZodIssueCode.custom,
       path: ["authorityKind"],
@@ -273,7 +267,7 @@ export const DeterministicCartMutationEvidenceV1Schema = z.object({
     });
   }
   if (value.action !== "REMOVE_LINE" &&
-    value.authorityKind !== "CANONICAL_BUYING_INTENT") {
+    value.authorityKind !== "CANONICAL_BUYING_INTENT" && value.authorityKind !== "NATIVE_TOOL_PERMISSION") {
     context.addIssue({
       code: z.ZodIssueCode.custom,
       path: ["authorityKind"],
@@ -488,11 +482,20 @@ export function validateEffectClaimSemanticsV1(input: Readonly<{
       return !input.claims.some((claim) => claim.type === type && claim.scope.kind === "CART" &&
         claim.scope.cartId === input.cartId && claim.scope.cartVersion === input.cartVersion);
     }
+    // Outbound claims already carry their individual product scopes. A reply can
+    // state one product's price and another's stock; cart effects still require
+    // every required fact for every cart product below.
+    if (input.effect === "PROTECTED_OUTBOUND") return !input.claims.some((claim) =>
+      claim.type === type && claim.scope.kind === "PRODUCT" && input.productIds.includes(claim.scope.productId)
+    );
     return input.productIds.some((productId) => !input.claims.some((claim) =>
       claim.type === type && claim.scope.kind === "PRODUCT" &&
       claim.scope.productId === productId
     ));
-  });
+  }) || (input.effect === "PROTECTED_OUTBOUND" && requiredTypes.some(type => !CART_SCOPED_PROTECTED_CLAIM_TYPES_V1.has(type)) &&
+    (input.productIds.length === 0 || input.productIds.some(productId => !input.claims.some(claim =>
+      claim.scope.kind === "PRODUCT" && claim.scope.productId === productId && requiredTypes.includes(claim.type)
+    ))));
   const contentByClaimKey = new Map<string, Set<string>>();
   for (const claim of input.claims) {
     if (claim.type === "PRODUCT_MEDIA" || claim.type === "PROMOTION_OFFER") continue;
@@ -528,9 +531,18 @@ export function validateCartEffectClaimSemanticsV1(input: Readonly<{
     input.effect,
     input.protectedClaimTypes,
   )
-    .filter((type) => !CART_SCOPED_PROTECTED_CLAIM_TYPES_V1.has(type));
-  let missing = false;
+    .filter((type) => !CART_SCOPED_PROTECTED_CLAIM_TYPES_V1.has(type) &&
+      !(input.effect === "PROTECTED_OUTBOUND" && type === "PRODUCT_MEDIA"));
+  const catalogMedia = input.effect === "PROTECTED_OUTBOUND";
+  let missing = catalogMedia && (input.protectedClaimTypes?.includes("PRODUCT_MEDIA") ?? false) &&
+    !input.claims.some(claim => claim.type === "PRODUCT_MEDIA");
   let mismatch = input.claims.some((claim) => {
+    if (input.effect === "PROTECTED_OUTBOUND" && claim.type === "PRODUCT_MEDIA" && claim.scope.kind === "PRODUCT") {
+      const scope = claim.scope;
+      // Parent catalog photos have their own outbound product/source binding.
+      // A variant-specific assertion must still match an exact cart offer.
+      return scope.variantId !== null && !input.lines.some(line => line.parentProductId === scope.productId && line.offerId === scope.variantId);
+    }
     if (claim.scope.kind !== "PRODUCT" || !requiredTypes.includes(claim.type)) {
       return false;
     }
@@ -585,8 +597,8 @@ export function validateCartEffectClaimSemanticsV1(input: Readonly<{
     cartVersion: input.cartVersion ?? null,
     ...(input.protectedClaimTypes === undefined
       ? {}
-      : { protectedClaimTypes: input.protectedClaimTypes }),
-    claims: input.claims,
+      : { protectedClaimTypes: catalogMedia ? input.protectedClaimTypes.filter(type => type !== "PRODUCT_MEDIA") : input.protectedClaimTypes }),
+    claims: catalogMedia ? input.claims.filter(claim => claim.type !== "PRODUCT_MEDIA") : input.claims,
   });
   return { missing: missing || base.missing, conflict: base.conflict, mismatch };
 }
@@ -683,9 +695,11 @@ export const DeterministicEffectReadinessV1Schema = z.object({
     const payloadOnlyProtectedOutbound = value.effect === "PROTECTED_OUTBOUND" &&
       value.protectedClaimTypes.length === 0 &&
       value.deterministicEvidenceHash !== null;
+    const productlessPayload = payloadOnlyProtectedOutbound && value.claimSetHash === null && value.cartId === null &&
+      value.binding.payloadHash === value.deterministicEvidenceHash;
     if (
       value.reasonCodes.length > 0 ||
-      value.productIds.length === 0 ||
+      (value.productIds.length === 0 && !productlessPayload) ||
       (value.claimSetHash === null && !payloadOnlyProtectedOutbound)
     ) {
       context.addIssue({

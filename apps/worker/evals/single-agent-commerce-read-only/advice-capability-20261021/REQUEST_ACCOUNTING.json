@@ -1,0 +1,249 @@
+{
+  "registeredAttempts": 8,
+  "recordedAttempts": 8,
+  "generationRequests": 24,
+  "maximumGenerationRequests": 32,
+  "automaticRetries": 0,
+  "requests": [
+    {
+      "slot": "s01",
+      "role": "owner",
+      "generationId": "a84f4d437ebc47d32dcaa19630f0b34521271a9bd576ec2b9c25aef5144a951d:owner:1",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 3024,
+      "outputTokens": 379
+    },
+    {
+      "slot": "s01",
+      "role": "owner",
+      "generationId": "a84f4d437ebc47d32dcaa19630f0b34521271a9bd576ec2b9c25aef5144a951d:owner:2",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 4284,
+      "outputTokens": 467
+    },
+    {
+      "slot": "s01",
+      "role": "verifier",
+      "generationId": "a84f4d437ebc47d32dcaa19630f0b34521271a9bd576ec2b9c25aef5144a951d:verifier:1",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 5157,
+      "outputTokens": 71
+    },
+    {
+      "slot": "s02",
+      "role": "owner",
+      "generationId": "a84f4d437ebc47d32dcaa19630f0b34521271a9bd576ec2b9c25aef5144a951d:owner:1",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 2826,
+      "outputTokens": 469
+    },
+    {
+      "slot": "s02",
+      "role": "owner",
+      "generationId": "a84f4d437ebc47d32dcaa19630f0b34521271a9bd576ec2b9c25aef5144a951d:owner:2",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 4176,
+      "outputTokens": 518
+    },
+    {
+      "slot": "s02",
+      "role": "verifier",
+      "generationId": "a84f4d437ebc47d32dcaa19630f0b34521271a9bd576ec2b9c25aef5144a951d:verifier:1",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 5150,
+      "outputTokens": 56
+    },
+    {
+      "slot": "s03",
+      "role": "owner",
+      "generationId": "5a21ab0c8769d76032ffaf557af8429fa47a00acb0d51a7a22522c4c0955aba0:owner:1",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 2834,
+      "outputTokens": 441
+    },
+    {
+      "slot": "s03",
+      "role": "owner",
+      "generationId": "5a21ab0c8769d76032ffaf557af8429fa47a00acb0d51a7a22522c4c0955aba0:owner:2",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 4156,
+      "outputTokens": 1010
+    },
+    {
+      "slot": "s03",
+      "role": "verifier",
+      "generationId": "5a21ab0c8769d76032ffaf557af8429fa47a00acb0d51a7a22522c4c0955aba0:verifier:1",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 5230,
+      "outputTokens": 66
+    },
+    {
+      "slot": "s04",
+      "role": "owner",
+      "generationId": "5a21ab0c8769d76032ffaf557af8429fa47a00acb0d51a7a22522c4c0955aba0:owner:1",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 3032,
+      "outputTokens": 453
+    },
+    {
+      "slot": "s04",
+      "role": "owner",
+      "generationId": "5a21ab0c8769d76032ffaf557af8429fa47a00acb0d51a7a22522c4c0955aba0:owner:2",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 4366,
+      "outputTokens": 1516
+    },
+    {
+      "slot": "s04",
+      "role": "verifier",
+      "generationId": "5a21ab0c8769d76032ffaf557af8429fa47a00acb0d51a7a22522c4c0955aba0:verifier:1",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 5273,
+      "outputTokens": 54
+    },
+    {
+      "slot": "s05",
+      "role": "owner",
+      "generationId": "405b4e611b40c88b2e994fd6da4a2d425485c0f3391db001d1ea5c45172ff1bf:owner:1",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 3026,
+      "outputTokens": 337
+    },
+    {
+      "slot": "s05",
+      "role": "owner",
+      "generationId": "405b4e611b40c88b2e994fd6da4a2d425485c0f3391db001d1ea5c45172ff1bf:owner:2",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 4244,
+      "outputTokens": 1666
+    },
+    {
+      "slot": "s05",
+      "role": "verifier",
+      "generationId": "405b4e611b40c88b2e994fd6da4a2d425485c0f3391db001d1ea5c45172ff1bf:verifier:1",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 5204,
+      "outputTokens": 83
+    },
+    {
+      "slot": "s06",
+      "role": "owner",
+      "generationId": "405b4e611b40c88b2e994fd6da4a2d425485c0f3391db001d1ea5c45172ff1bf:owner:1",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 2828,
+      "outputTokens": 340
+    },
+    {
+      "slot": "s06",
+      "role": "owner",
+      "generationId": "405b4e611b40c88b2e994fd6da4a2d425485c0f3391db001d1ea5c45172ff1bf:owner:2",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 4049,
+      "outputTokens": 1327
+    },
+    {
+      "slot": "s06",
+      "role": "verifier",
+      "generationId": "405b4e611b40c88b2e994fd6da4a2d425485c0f3391db001d1ea5c45172ff1bf:verifier:1",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 5198,
+      "outputTokens": 74
+    },
+    {
+      "slot": "s07",
+      "role": "owner",
+      "generationId": "dadd53b65bd6d22f5724f2d5b3e5d5bfc39a3a5a578e6a7bc425accba305b459:owner:1",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 2840,
+      "outputTokens": 746
+    },
+    {
+      "slot": "s07",
+      "role": "owner",
+      "generationId": "dadd53b65bd6d22f5724f2d5b3e5d5bfc39a3a5a578e6a7bc425accba305b459:owner:2",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 4467,
+      "outputTokens": 1893
+    },
+    {
+      "slot": "s07",
+      "role": "verifier",
+      "generationId": "dadd53b65bd6d22f5724f2d5b3e5d5bfc39a3a5a578e6a7bc425accba305b459:verifier:1",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 5171,
+      "outputTokens": 410
+    },
+    {
+      "slot": "s08",
+      "role": "owner",
+      "generationId": "dadd53b65bd6d22f5724f2d5b3e5d5bfc39a3a5a578e6a7bc425accba305b459:owner:1",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 3038,
+      "outputTokens": 495
+    },
+    {
+      "slot": "s08",
+      "role": "owner",
+      "generationId": "dadd53b65bd6d22f5724f2d5b3e5d5bfc39a3a5a578e6a7bc425accba305b459:owner:2",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 4414,
+      "outputTokens": 1161
+    },
+    {
+      "slot": "s08",
+      "role": "verifier",
+      "generationId": "dadd53b65bd6d22f5724f2d5b3e5d5bfc39a3a5a578e6a7bc425accba305b459:verifier:1",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "inputTokens": 5230,
+      "outputTokens": 90
+    }
+  ]
+}

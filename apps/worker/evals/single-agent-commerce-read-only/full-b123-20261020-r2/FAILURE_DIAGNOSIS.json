@@ -1,0 +1,64 @@
+{
+  "runSourceSha": "79bda1692667846e0a543a404812ab1daead35c7",
+  "primaryLockCommit": "fd097e1298887ece75953f9e09b44e60577d9dba",
+  "providerErrors": 0,
+  "timeouts": 0,
+  "automaticRetries": 0,
+  "verifierPass": 28,
+  "actualFallbacks": 0,
+  "policyUsedFix": {
+    "slot": "B1-16",
+    "previousActual": "STATIC_FALLBACK_AFTER_WRONG_POLICY_AGREEMENT",
+    "currentActual": "CORRECT_REFUSAL_SEND_ELIGIBLE",
+    "underlyingChange": "Current trusted policy explains HOLD_UP_ONLY plus unused requirement; observed owner applies it. Cannot isolate the contribution of context/prompt/variance from this one full run."
+  },
+  "findings": [
+    {
+      "slots": [
+        "B1-3",
+        "B1-11"
+      ],
+      "kind": "PARTIAL_SOURCE_COMMUNICATION",
+      "rootEvidence": "POS_UNAVAILABLE is a frozen source-fault fixture; owner receives unknown/unavailable price/stock. Reply talks about the system or missing separate-sale information instead of clear shop conversation. No evidence that adding yet more product facts would fix the expression."
+    },
+    {
+      "slots": [
+        "B1-7",
+        "B1-15",
+        "B1-23"
+      ],
+      "kind": "ADVICE_SELECTION_AND_VERBAL_PRIORITY",
+      "rootEvidence": "Available product/price facts exist. Owner spends the reply on broad material adjectives and both options, then asks the customer to choose again despite explicit request for shop judgement. This is not arithmetic/stock code or verifier rejection."
+    },
+    {
+      "slots": [
+        "B1-9"
+      ],
+      "kind": "COMFORT_CLAIM_CALIBRATION_OWNER_REVIEW",
+      "rootEvidence": "The source says soft/airy. The reply reassures against stuffiness outdoors for a long time. Flag strength and customer expectation separately from accepted ordinary material inference. Not adjudicated as unsafe falsePASS; do not invent a mandatory test or more source fields for every feeling."
+    },
+    {
+      "slots": [
+        "B2/B3-4"
+      ],
+      "kind": "OWNER_ACK_VOICE",
+      "rootEvidence": "Profile correction74/96 and retainedL are correct, and actual text is a model final that passed verifier. The wording sounds like a record-update notification; this is a voice issue, not an incorrect state write or forbidden use of one customer fact."
+    }
+  ],
+  "crossScopeNote": {
+    "slot": "B1-21",
+    "observation": "B1 says M ready/in stock while stateful be/M is preorder. B1 context binds sizeM,color=null and presents STOCK IN_STOCK; stateful binds be/M. No readiness guarantee or falsePASS is concluded by conflating these scopes. Exact-color/fulfillment semantics need scoped evidence before changing a contract."
+  },
+  "roles": {
+    "owner": "One conversation model; final candidate or native tools",
+    "verifier": "28exact draft/trusted binding checks, allPASS; style/decisiveness/completeness not its job",
+    "code": "Current source/price/stock/quote/state/effect/ownership/receipts and final gate"
+  },
+  "recommendation": "FULL_RUN_COMPLETE_STOP_NO_AUTOMATIC_PATCH_OR_PROMOTION",
+  "limitations": [
+    "One sample per scenario; agent review not human adjudication",
+    "No provider EXCHANGE/DEFECT scenario added to the eight stateful rows; candidate text separately verified in both deterministic payment branches",
+    "Live Meta/Pancake delivery and real staff response not measured",
+    "Do not infer zero possible semantic falsePASS or stable sales quality from28verifierPASS"
+  ]
+}

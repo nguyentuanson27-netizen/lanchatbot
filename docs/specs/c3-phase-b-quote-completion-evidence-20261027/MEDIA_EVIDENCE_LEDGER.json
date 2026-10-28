@@ -1,0 +1,367 @@
+{
+  "scope": "HISTORICAL_CONTROL_CAPTURE_NO_LIVE_READ_OR_SOURCE_WRITE",
+  "entries": [
+    {
+      "run": "R1",
+      "imageType": "SIZE_GUIDE",
+      "angle": "UNKNOWN",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+      "feedback": false,
+      "partsVisible": [
+        "UNKNOWN"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R1",
+      "imageType": "MODEL",
+      "angle": "FRONT",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "b3d828d8ce15114441c356abf66feab67652201b00f53ad77350cc6e703b96c8",
+      "feedback": false,
+      "partsVisible": [
+        "FULL_SET"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R1",
+      "imageType": "SIZE_GUIDE",
+      "angle": "FRONT",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "3a321ad8b6b888fa470bdda8b83ae24c19238ca5132a56fbeab3dabe3ef7c2fc",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R1",
+      "imageType": "DETAIL",
+      "angle": "CLOSEUP",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "e651cf09b93cc24f14b21c3539f33430df24346b96d76f580e7e4fcd7d4dd4a3",
+      "feedback": false,
+      "partsVisible": [
+        "UNKNOWN"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R1",
+      "imageType": "DETAIL",
+      "angle": "CLOSEUP",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "4faaa0ba7fea7dc2058d6e7ece47f6d422be40c96ff06ab6ea568ba9c0aa1961",
+      "feedback": false,
+      "partsVisible": [
+        "AO"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R1",
+      "imageType": "MODEL",
+      "angle": "FRONT",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "8ff6f315a32aaee37d9a6bad154579241ca6aa2116d6106c34332ba7a98cad56",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R1",
+      "imageType": "MODEL",
+      "angle": "FRONT",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "fde1e4c575c26587d753dad576701b4a51634a25ef6ac1dd5510b5db16e14f9f",
+      "feedback": false,
+      "partsVisible": [
+        "FULL_SET"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R1",
+      "imageType": "MODEL",
+      "angle": "BACK",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "7844275ffdb4d48159d8c10ab9f1fba6b920188471f7994940fda725d46d02cf",
+      "feedback": false,
+      "partsVisible": [
+        "FULL_SET"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R1",
+      "imageType": "MODEL",
+      "angle": "FRONT",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "2052d1c8bf997f04e8f4e9f80dcbc59b62797bb1865b146f41b775197b36cb6a",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R1",
+      "imageType": "MODEL",
+      "angle": "FRONT",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "6c35b67587902c75a223c1e82f13d98ef8208128e3cb95362641a2dc555a9af9",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R1",
+      "imageType": "PRODUCT_ONLY",
+      "angle": "FRONT",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "36652f18a147e6369d608be9bb1748f70c5cbad9ee57fd608f8e46864774a1c7",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R2",
+      "imageType": "SIZE_GUIDE",
+      "angle": "UNKNOWN",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+      "feedback": false,
+      "partsVisible": [
+        "UNKNOWN"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R2",
+      "imageType": "MODEL",
+      "angle": "FRONT",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "b3d828d8ce15114441c356abf66feab67652201b00f53ad77350cc6e703b96c8",
+      "feedback": false,
+      "partsVisible": [
+        "FULL_SET"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R2",
+      "imageType": "SIZE_GUIDE",
+      "angle": "FRONT",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "3a321ad8b6b888fa470bdda8b83ae24c19238ca5132a56fbeab3dabe3ef7c2fc",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R2",
+      "imageType": "DETAIL",
+      "angle": "CLOSEUP",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "e651cf09b93cc24f14b21c3539f33430df24346b96d76f580e7e4fcd7d4dd4a3",
+      "feedback": false,
+      "partsVisible": [
+        "UNKNOWN"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R2",
+      "imageType": "DETAIL",
+      "angle": "CLOSEUP",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "4faaa0ba7fea7dc2058d6e7ece47f6d422be40c96ff06ab6ea568ba9c0aa1961",
+      "feedback": false,
+      "partsVisible": [
+        "AO"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R2",
+      "imageType": "MODEL",
+      "angle": "FRONT",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "8ff6f315a32aaee37d9a6bad154579241ca6aa2116d6106c34332ba7a98cad56",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R2",
+      "imageType": "MODEL",
+      "angle": "FRONT",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "fde1e4c575c26587d753dad576701b4a51634a25ef6ac1dd5510b5db16e14f9f",
+      "feedback": false,
+      "partsVisible": [
+        "FULL_SET"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R2",
+      "imageType": "MODEL",
+      "angle": "BACK",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "7844275ffdb4d48159d8c10ab9f1fba6b920188471f7994940fda725d46d02cf",
+      "feedback": false,
+      "partsVisible": [
+        "FULL_SET"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R2",
+      "imageType": "MODEL",
+      "angle": "FRONT",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "2052d1c8bf997f04e8f4e9f80dcbc59b62797bb1865b146f41b775197b36cb6a",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R2",
+      "imageType": "MODEL",
+      "angle": "FRONT",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "6c35b67587902c75a223c1e82f13d98ef8208128e3cb95362641a2dc555a9af9",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    },
+    {
+      "run": "R2",
+      "imageType": "PRODUCT_ONLY",
+      "angle": "FRONT",
+      "colorBinding": {
+        "status": "ABSENT"
+      },
+      "imageSha256": "36652f18a147e6369d608be9bb1748f70c5cbad9ee57fd608f8e46864774a1c7",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "registryImageId": "NOT_RESOLVED_IN_CAPTURE",
+      "upstreamRegistryStatus": "NOT_AUDITED_LIVE",
+      "pipelineScope": "Existing capture -> published catalog product images -> candidate selector. Producer/adapter code support exists; upstream row population not established by capture."
+    }
+  ]
+}

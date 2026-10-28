@@ -1,0 +1,217 @@
+{
+  "mode": "SAME_SNAPSHOT_PUBLIC_SELECTION_PAIR",
+  "checkedAt": "2026-10-17T14:09:48.731Z",
+  "providerGenerations": 0,
+  "sourceWrites": 0,
+  "queries": [
+    {
+      "query": {
+        "shopAlias": "LANA",
+        "productId": "SV2447",
+        "offerType": "AO",
+        "size": "M",
+        "color": null,
+        "quantity": 1,
+        "lineId": "00000000-0000-4000-8000-000000000001"
+      },
+      "result": {
+        "status": "INVALID",
+        "reasonCode": "CART_VARIANT_AMBIGUOUS",
+        "availableSizes": [
+          "M"
+        ],
+        "availableColors": [
+          "BE"
+        ]
+      }
+    },
+    {
+      "query": {
+        "shopAlias": "LANA",
+        "productId": "SV2447",
+        "offerType": "AO",
+        "size": "M",
+        "color": "BE",
+        "quantity": 1,
+        "lineId": "00000000-0000-4000-8000-000000000001"
+      },
+      "result": {
+        "status": "READY",
+        "line": {
+          "lineId": "00000000-0000-4000-8000-000000000001",
+          "parentProductId": "SV2447",
+          "offerId": "AO",
+          "offerKind": "DIRECT",
+          "quantity": 1,
+          "components": [
+            {
+              "componentProductId": "SV2447_AO",
+              "componentSku": "SV2447_AO",
+              "componentRole": "TOP",
+              "color": "BE",
+              "size": "M",
+              "quantity": 1
+            }
+          ],
+          "allowMixedSizes": false,
+          "allowComponentSale": false,
+          "posUnitPriceVnd": 499000,
+          "priceAuthority": {
+            "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+            "shopId": "LANA",
+            "parentProductId": "SV2447",
+            "offerId": "AO",
+            "offerPriceKind": "DIRECT",
+            "componentProductId": null,
+            "metadata": {
+              "authority": "PANCAKE_POS",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-17T14:04:05.324Z",
+              "expiresAt": "2026-10-19T14:04:05.324Z",
+              "freshForSeconds": 172800,
+              "freshnessState": "FRESH"
+            }
+          },
+          "lineTotalVnd": 499000
+        },
+        "shopId": "LANA",
+        "versions": {
+          "price": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+          "inventory": "inventory:sha256:94b931f037ed1a77448e6e149270ad55c83db2097c98e7a6aef20aa5944b7bd3",
+          "size": "size:sha256:e781771de75f61f4e34b7bdc800d6309e9f6dbd7b29a7d1f5a780044af701ad7",
+          "eta": null
+        },
+        "eta": null,
+        "etaExpiresAt": null,
+        "sourceAuthority": "POS_SNAPSHOT",
+        "stockStatus": "PRE_ORDER",
+        "stockAvailableQuantity": 0,
+        "sourceObservedAt": "2026-10-17T14:04:05.324Z",
+        "sourceExpiresAt": "2026-10-19T14:04:05.324Z"
+      }
+    },
+    {
+      "query": {
+        "shopAlias": "LANA",
+        "productId": "SV2447",
+        "offerType": "AO",
+        "size": "L",
+        "color": null,
+        "quantity": 2,
+        "lineId": "00000000-0000-4000-8000-000000000001"
+      },
+      "result": {
+        "status": "INVALID",
+        "reasonCode": "CART_VARIANT_AMBIGUOUS",
+        "availableSizes": [
+          "L"
+        ],
+        "availableColors": [
+          "BE"
+        ]
+      }
+    },
+    {
+      "query": {
+        "shopAlias": "LANA",
+        "productId": "SV2447",
+        "offerType": "AO",
+        "size": "L",
+        "color": "BE",
+        "quantity": 2,
+        "lineId": "00000000-0000-4000-8000-000000000001"
+      },
+      "result": {
+        "status": "READY",
+        "line": {
+          "lineId": "00000000-0000-4000-8000-000000000001",
+          "parentProductId": "SV2447",
+          "offerId": "AO",
+          "offerKind": "DIRECT",
+          "quantity": 2,
+          "components": [
+            {
+              "componentProductId": "SV2447_AO",
+              "componentSku": "SV2447_AO",
+              "componentRole": "TOP",
+              "color": "BE",
+              "size": "L",
+              "quantity": 1
+            }
+          ],
+          "allowMixedSizes": false,
+          "allowComponentSale": false,
+          "posUnitPriceVnd": 499000,
+          "priceAuthority": {
+            "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+            "shopId": "LANA",
+            "parentProductId": "SV2447",
+            "offerId": "AO",
+            "offerPriceKind": "DIRECT",
+            "componentProductId": null,
+            "metadata": {
+              "authority": "PANCAKE_POS",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-17T14:04:05.324Z",
+              "expiresAt": "2026-10-19T14:04:05.324Z",
+              "freshForSeconds": 172800,
+              "freshnessState": "FRESH"
+            }
+          },
+          "lineTotalVnd": 998000
+        },
+        "shopId": "LANA",
+        "versions": {
+          "price": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+          "inventory": "inventory:sha256:e53263e31a2ab6538e666221dda54d60f1b57e9667f8194a512d08d2587d62ce",
+          "size": "size:sha256:1e07728f677b88d767e7b0af5f4ac2e23a827beac1872152a019c0e1b3714d78",
+          "eta": null
+        },
+        "eta": null,
+        "etaExpiresAt": null,
+        "sourceAuthority": "POS_SNAPSHOT",
+        "stockStatus": "PRE_ORDER",
+        "stockAvailableQuantity": 0,
+        "sourceObservedAt": "2026-10-17T14:04:05.324Z",
+        "sourceExpiresAt": "2026-10-19T14:04:05.324Z"
+      }
+    }
+  ],
+  "snapshotSha256": "b113064b46d84f5594966be72fff8d4810fb96e0f2b5a259648a5ded474e373b",
+  "sourceObservedAt": "2026-10-17T14:04:05.324Z",
+  "rows": [
+    {
+      "size": "M",
+      "color": "__NO_COLOR__",
+      "price_sku": "SV2447-AO",
+      "stock_quantity": 24,
+      "sale_price": 499000,
+      "components": []
+    },
+    {
+      "size": "L",
+      "color": "__NO_COLOR__",
+      "price_sku": "SV2447-AO",
+      "stock_quantity": 18,
+      "sale_price": 499000,
+      "components": []
+    },
+    {
+      "size": "M",
+      "color": "BE",
+      "price_sku": "SV2447-AO",
+      "stock_quantity": 0,
+      "sale_price": 499000,
+      "components": []
+    },
+    {
+      "size": "L",
+      "color": "BE",
+      "price_sku": "SV2447-AO",
+      "stock_quantity": 0,
+      "sale_price": 499000,
+      "components": []
+    }
+  ],
+  "status": "COMPLETE"
+}

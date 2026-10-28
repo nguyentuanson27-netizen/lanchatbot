@@ -1,0 +1,7 @@
+{
+  "sourceSha": "8d4a0ab3ff8f65823a2f0bf112658d150a05b58a",
+  "actualOwnerRequests": 87,
+  "conflictingHandoffDescriptions": 44,
+  "conflictingMediaDescriptions": 42,
+  "note": "Observed contradiction in actual prior requests; not proof that removing it improves general voice."
+}

@@ -1,0 +1,11 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/packages/contracts
+
+ ✓ src/commerce-media-delivery.test.ts (1 test) 81ms
+ ✓ src/commerce-handoff-delivery.test.ts (1 test) 35ms
+
+ Test Files  2 passed (2)
+      Tests  2 passed (2)
+   Start at  22:13:01
+   Duration  7.40s (transform 766ms, setup 0ms, collect 1.23s, tests 116ms, environment 3ms, prepare 3.31s)
+

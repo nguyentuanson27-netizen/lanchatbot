@@ -1,0 +1,16 @@
+{
+  "command": [
+    "python",
+    "apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py",
+    "node",
+    "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+    "../c3-tool-history-checks-20261025/provider-preflight",
+    "COD",
+    "--provider-run",
+    "--candidate-handoff",
+    "--journey-openings",
+    "--provider-preflight"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 15.634114980697632
+}

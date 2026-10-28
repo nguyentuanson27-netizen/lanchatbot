@@ -1,0 +1,58 @@
+{
+  "caseId": "b1-changed-occasion",
+  "runtime": {
+    "latest": "Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé.",
+    "history": [
+      {
+        "role": "customer",
+        "text": "Chị định lấy set Thạch Thảo mặc đi đám cưới."
+      },
+      {
+        "role": "shop",
+        "text": "Đi đám cưới mặc bộ này đẹp chị ạ."
+      }
+    ],
+    "initialProductCodes": [
+      "SV2447"
+    ]
+  },
+  "result": {
+    "status": "RECORDED_REPLAY",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "MALFORMED",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "verificationLatencyMs": 0.8960999999999331,
+    "draft": "Dạ, set Thạch Thảo dùng chất liệu tơ Hàn và ren tơ mềm nên khi ngồi ô tô 3 tiếng liên tục sẽ rất dễ bị hằn nếp và nhàu ở phần váy ngồi đấy ạ. \n\nNếu chị muốn tìm mẫu mặc đi đám cưới mà ít bị nhàu hơn khi di chuyển xa, chị có thể chuyển sang **Set váy Thanh Vũ** (chất ren cotton kết hợp chân váy tơ crep 2 lớp) hoặc **Váy Ngọc Trâm**. \n\nHoặc nếu chị thích sự thoải mái tối đa, đứng form và không lo nhăn, mẫu **Set quần dài be SQ675** (chất thô ướt cao cấp có lót giữ form tốt) cũng rất thanh lịch, sang trọng và lịch sự để dự tiệc. \n\nChị thích kiểu váy điệu đà hay set quần thanh lịch hơn để em tư vấn kỹ hơn cho mình nhé ạ?",
+    "generations": [
+      {
+        "role": "owner",
+        "status": "OK",
+        "telemetry": {
+          "generationId": "5f42c724-5df2-4d18-b06c-7815f803856c:owner:1",
+          "providerRequests": 1,
+          "authRequests": 1,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4169,
+          "outputTokens": 2857,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 19521,
+          "requestHash": "d215b62f686dcd6a10aa1485bf1dcb131a82f4ffbf7432a9b83facd3a869336d",
+          "functionCallingMode": "NONE",
+          "declaredToolCount": 0,
+          "thinkingTokens": 2659,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      }
+    ],
+    "elapsedMs": 9714.7364,
+    "captureHash": "23231ea2516af2537d87930096bcb8ac0f948947248b211b2c0491c47a72a0e3",
+    "replayClock": "2026-10-19T06:17:50.424Z"
+  },
+  "sendEnabled": false
+}

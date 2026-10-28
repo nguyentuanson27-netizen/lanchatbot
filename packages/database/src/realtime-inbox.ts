@@ -571,6 +571,14 @@ export class PostgresRealtimeInboxStore {
     return Number(result.rows[0]?.generation) === batch.generation;
   }
 
+  /** Current-source readback also applies after a terminal transaction has released its lease. */
+  async readGeneration(pageId: string, conversationHash: string): Promise<number | null> {
+    const result = await this.pool.query<{ generation: string }>(
+      "SELECT generation FROM conversation_ingress_heads WHERE page_id = $1 AND conversation_hash = $2", [pageId, conversationHash]);
+    const generation = Number(result.rows[0]?.generation);
+    return Number.isSafeInteger(generation) && generation > 0 ? generation : null;
+  }
+
   async retryBatch(
     batch: InboxBatchLease,
     errorCode: string,

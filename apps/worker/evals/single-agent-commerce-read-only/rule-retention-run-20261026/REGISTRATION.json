@@ -1,0 +1,149 @@
+{
+  "sourceSha": "1ebd4dcc50fce13f890085f6995b8ccb876b16fe",
+  "implementationBaseSha": "56538349eef07ff26b1a8cb8db2031192a4f4289",
+  "mode": "RULE_RETENTION_TARGETED_THEN_FULL_SAME_CAMPAIGN",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "786e4cd7338e8a21d17557e03c41314301f005b913d83b687377ac4efe106cb6",
+    "verifier": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c"
+  },
+  "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+  "nativeOutcomes": 51,
+  "controls": 17,
+  "totalRegisteredOutcomes": 68,
+  "targetedOutcomes": 20,
+  "remainingOutcomes": 31,
+  "publicModelNativeTurns": 50,
+  "privateCodeOnlyTurns": 1,
+  "maximumGenerationRequests": 217,
+  "repetitions": 1,
+  "generationRetry": 0,
+  "sendEnabled": false,
+  "cohorts": [
+    {
+      "name": "opening-quotes",
+      "flags": [
+        "--opening-quotes"
+      ],
+      "slots": 5,
+      "phase": "targeted"
+    },
+    {
+      "name": "media-followup",
+      "flags": [
+        "--media-followup"
+      ],
+      "slots": 7,
+      "phase": "targeted"
+    },
+    {
+      "name": "b1-first",
+      "flags": [
+        "--range",
+        "1:8"
+      ],
+      "slots": 8,
+      "phase": "targeted"
+    },
+    {
+      "name": "b1-rest",
+      "flags": [
+        "--range",
+        "9:24"
+      ],
+      "slots": 16,
+      "phase": "full"
+    },
+    {
+      "name": "journey-openings",
+      "flags": [
+        "--journey-openings"
+      ],
+      "slots": 4,
+      "phase": "full"
+    },
+    {
+      "name": "stateful",
+      "flags": [],
+      "slots": 8,
+      "phase": "full"
+    },
+    {
+      "name": "negotiation",
+      "flags": [
+        "--negotiation-probe"
+      ],
+      "slots": 3,
+      "phase": "full"
+    }
+  ],
+  "hashes": {
+    "manifest.json": "9e89897d4b8378dbab3f100e88a23b7f653e3c6bc9f49c7fda58bb9a19abd457",
+    "source-config.b1.json": "b4c15f1823bf16d63a1ff67eb3a11711b28ed6592ec7bc1e65e0ceb3fbbc0d59",
+    "cases.b1.json": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+    "opening-quote-cases.json": "d095fd2e7bcc4bbe82f107e0944741c4b7310d145846f6a7bda8cea70de0b8de",
+    "sales-media-followup-cases.json": "dff5c57dff681f75ac35e484c014b0c62965bde2169941aa5b488ce879bba93a",
+    "sales-journeys.candidate.json": "b2575660b7d412eb6a2d11befb04de75fd840789c7126026bb257ce60f183a93",
+    "stateful-cases.json": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+    "prompts/owner.vi.txt": "786e4cd7338e8a21d17557e03c41314301f005b913d83b687377ac4efe106cb6",
+    "prompts/verifier.vi.txt": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c",
+    "handoff-matrix.candidate.json": "c8cb700a54ea25d165fdabf04d4573ab4036637064a10784433327dc552c2a5a",
+    "isolated-integration.mjs": "53f5854c2012b7fb55377b7db9315c01108e4b649ad94108bb09c710bb277bbb",
+    "stateful-provider.mjs": "d0bf0164e14a1f5457c7a268443dd87118dfda19f80528c64eaedd50e749c68a",
+    "gemini-inference.mjs": "c80460a98c7a5f308789b0089ed69cdad00d71bd89ec5fc88fa955dfb9e48b72",
+    "protocol.mjs": "c360bcc1502c154cff7d3047fd16908d6cd4cca8cea3001bdaac5078bfb5f826",
+    "feedback-controls-20261023.mjs": "3b628313471b8fa33326e466c39c56defaea4c0d068154f6787cba7cf87ade3d",
+    "source-session.py": "94b6cac60dff03506badc1751ba4e8ea54cce278ec82ff448eeb0e8a6a44294d"
+  },
+  "driverSha256": "9cf71f44a79c5197e99138125e77635e022b0d27221636ba99c39defcf3490f0"
+}

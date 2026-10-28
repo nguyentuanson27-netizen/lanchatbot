@@ -1,0 +1,221 @@
+{
+  "scope": "OFFLINE_CAPTURE_AND_CURRENT_SOURCE_AUDIT_NO_UPSTREAM_REGISTRY_READ_OR_WRITE",
+  "upstreamStatus": "UPSTREAM_UNVERIFIED",
+  "sourceCaptureSha256": "0892c141f5ae912793bcb42b6c1e1de945c6e38ccc602255db425f551418164b",
+  "capturedAt": "2026-10-27T05:12:08.783Z",
+  "productId": "SV2447",
+  "productColors": [],
+  "observedImages": 11,
+  "imageEvidence": [
+    {
+      "assetUrlSha256": "a85148d381dd08791c45605ecf128ca3677652d025eb20d5cef3add5ed4fd952",
+      "imageContentSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+      "imageType": "SIZE_GUIDE",
+      "feedback": false,
+      "partsVisible": [
+        "UNKNOWN"
+      ],
+      "colorBinding": {
+        "status": "ABSENT"
+      }
+    },
+    {
+      "assetUrlSha256": "7958e3bba892c05c2ac6955a0126bc203678b84e51df39efd8f274b539a54315",
+      "imageContentSha256": "b3d828d8ce15114441c356abf66feab67652201b00f53ad77350cc6e703b96c8",
+      "imageType": "MODEL",
+      "feedback": false,
+      "partsVisible": [
+        "FULL_SET"
+      ],
+      "colorBinding": {
+        "status": "ABSENT"
+      }
+    },
+    {
+      "assetUrlSha256": "c810798044da7f521a898add4b728a905d5c753132314c7e8f3b4ef0114a348d",
+      "imageContentSha256": "3a321ad8b6b888fa470bdda8b83ae24c19238ca5132a56fbeab3dabe3ef7c2fc",
+      "imageType": "SIZE_GUIDE",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "colorBinding": {
+        "status": "ABSENT"
+      }
+    },
+    {
+      "assetUrlSha256": "b249420be8f7a467fe1967744eda68494f2afc93e9da2b184ceb958a9c90b59f",
+      "imageContentSha256": "e651cf09b93cc24f14b21c3539f33430df24346b96d76f580e7e4fcd7d4dd4a3",
+      "imageType": "DETAIL",
+      "feedback": false,
+      "partsVisible": [
+        "UNKNOWN"
+      ],
+      "colorBinding": {
+        "status": "ABSENT"
+      }
+    },
+    {
+      "assetUrlSha256": "849ee132c0ff632766db586ba5fc9fd6176ad016031602962975471e48137a03",
+      "imageContentSha256": "4faaa0ba7fea7dc2058d6e7ece47f6d422be40c96ff06ab6ea568ba9c0aa1961",
+      "imageType": "DETAIL",
+      "feedback": false,
+      "partsVisible": [
+        "AO"
+      ],
+      "colorBinding": {
+        "status": "ABSENT"
+      }
+    },
+    {
+      "assetUrlSha256": "80e8f6f8638ddc95425fd21d08122b66e590c1e4a4682106ce14457961be7eb3",
+      "imageContentSha256": "8ff6f315a32aaee37d9a6bad154579241ca6aa2116d6106c34332ba7a98cad56",
+      "imageType": "MODEL",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "colorBinding": {
+        "status": "ABSENT"
+      }
+    },
+    {
+      "assetUrlSha256": "9cf4257291bdb4a0f58dadbc073fb3e4b06eb270742e0d6d724105446f25b25d",
+      "imageContentSha256": "fde1e4c575c26587d753dad576701b4a51634a25ef6ac1dd5510b5db16e14f9f",
+      "imageType": "MODEL",
+      "feedback": false,
+      "partsVisible": [
+        "FULL_SET"
+      ],
+      "colorBinding": {
+        "status": "ABSENT"
+      }
+    },
+    {
+      "assetUrlSha256": "93fcd4f03ce774d34bd21b0329b4209765f21659e9b9b2aeb04d93c905b75e87",
+      "imageContentSha256": "7844275ffdb4d48159d8c10ab9f1fba6b920188471f7994940fda725d46d02cf",
+      "imageType": "MODEL",
+      "feedback": false,
+      "partsVisible": [
+        "FULL_SET"
+      ],
+      "colorBinding": {
+        "status": "ABSENT"
+      }
+    },
+    {
+      "assetUrlSha256": "1fe0770fc6ca6ef2ad18531ce5bb53060a415f59b0719eb74c1b117f319bebb4",
+      "imageContentSha256": "2052d1c8bf997f04e8f4e9f80dcbc59b62797bb1865b146f41b775197b36cb6a",
+      "imageType": "MODEL",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "colorBinding": {
+        "status": "ABSENT"
+      }
+    },
+    {
+      "assetUrlSha256": "7c929827e215be4d431af2e6ef4e4740bbeb130e346bf14cae146f268cdd8ad2",
+      "imageContentSha256": "6c35b67587902c75a223c1e82f13d98ef8208128e3cb95362641a2dc555a9af9",
+      "imageType": "MODEL",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "colorBinding": {
+        "status": "ABSENT"
+      }
+    },
+    {
+      "assetUrlSha256": "87cfb66ceea068b5f9b6baa0ee422e3a0124ec3092611b018d5610f9205319f2",
+      "imageContentSha256": "36652f18a147e6369d608be9bb1748f70c5cbad9ee57fd608f8e46864774a1c7",
+      "imageType": "PRODUCT_ONLY",
+      "feedback": false,
+      "partsVisible": [
+        "AO",
+        "CHAN_VAY"
+      ],
+      "colorBinding": {
+        "status": "ABSENT"
+      }
+    }
+  ],
+  "needs": [
+    {
+      "caseIds": [
+        "media-overview-next:ask",
+        "media-detail-next:ask",
+        "media-and-price:ask"
+      ],
+      "query": {
+        "subjectRef": "SV2447",
+        "intent": "FEEDBACK"
+      },
+      "observedGap": "All captured images feedback=false; no approved feedback matched in inspected capture.",
+      "firstConfirmedGap": "Published/catalog image metadata, not proved upstream registry absence",
+      "registryImageId": null
+    },
+    {
+      "caseIds": [
+        "sales-product-gallery:overview"
+      ],
+      "query": {
+        "subjectRef": "SV2447",
+        "intent": "GENERIC",
+        "color": "be"
+      },
+      "observedGap": "Captured per-asset color binding absent; product color context and prior scoped selector report do not prove requested-color match.",
+      "firstConfirmedGap": "Published/catalog scoped color evidence; registry state unknown",
+      "registryImageId": null
+    }
+  ],
+  "chain": [
+    {
+      "stage": "registry->payload",
+      "path": "apps/worker/src/p23c-jobs.ts",
+      "line": 281,
+      "fields": [
+        "IMAGE_ID",
+        "REVIEW_STATUS",
+        "VERIFIED",
+        "IMAGE_TYPE",
+        "IMAGE_INTENTS",
+        "IMAGE_HASH",
+        "VERIFIED_PRODUCT_COLOR",
+        "COLOR_BINDING_IMAGE_HASH"
+      ],
+      "behavior": "Publisher computes feedback_verified from verified metadata and feedback type/intent; color binding requires approved verified row and matching image hash.",
+      "sourceSha256": "f48a2bd87d52fefbcd358b02bdc063b10f2ac59f8b8fa66a180bc2f00105a563"
+    },
+    {
+      "stage": "hash/publish",
+      "path": "apps/worker/src/p23c-hash-v3.ts",
+      "line": 235,
+      "behavior": "Per-asset color binding participates in content identity; no source write in this audit.",
+      "sourceSha256": "045209d085d462eb3d1cbe4da43a7ba2f38bddd8d1dfcafe05a18d3756269d79"
+    },
+    {
+      "stage": "payload->catalog",
+      "path": "packages/business-tools/src/qdrant.ts",
+      "line": 98,
+      "behavior": "Reads feedback_verified and imageColorBindingFromPayload; retains per-asset hash/review/parts.",
+      "sourceSha256": "970e89d0674dc68b20e73def2bc0775fc4b1c0baf4121a62a800d908801878bb"
+    },
+    {
+      "stage": "selector",
+      "path": "apps/worker/src/single-agent-commerce-media-eligibility.ts",
+      "line": 8,
+      "behavior": "Checks approval/freshness/hash/parts; color checks bound asset, or existing single-product-color fallback; feedback selector uses verified metadata.",
+      "sourceSha256": "22d53c3653bf47f07a87bb1df2bf3a6a82557f3b361c461c299e1a880f935d5e"
+    }
+  ],
+  "decision": "NO_MEDIA_CODE_PATCH: no producer/consumer field-loss proven; upstream registry IMAGE_ID/approval/version remains unknown. Preserve silent handoff; do not infer tags from filenames or product colors, create assets, or publish metadata.",
+  "access": "Available lana_app tools are unrelated carousel tools, not the project ops/image registry connector; product registry-read.json from Oct16 is product attributes, not current per-image registry. Existing source captures used without credential export.",
+  "providerGenerations": 0,
+  "sourceWrites": 0
+}

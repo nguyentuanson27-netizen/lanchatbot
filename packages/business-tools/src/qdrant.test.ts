@@ -23,6 +23,12 @@ const payload = {
 };
 
 describe("Qdrant stable catalog adapter", () => {
+  it("preserves the publisher source timestamp without synthesizing registry attributes", () => {
+    const source = stableProductDocumentFromQdrantPayload({ ...payload, source_updated_at: "2026-09-28T04:31:05.725Z", source: "WEBSTORE_XML" });
+    expect(source?.observedAt).toBe("2026-09-28T04:31:05.725Z");
+    expect(source?.attributes).toBeNull();
+    expect(stableProductDocumentFromQdrantPayload(payload)?.observedAt).toBeNull();
+  });
   it("reads integrity-valid registry attributes and preserves the base product on invalid attributes", () => {
     const attributes = buildProductAttributesV1({
       productId: "SQ149",
@@ -182,4 +188,11 @@ describe("Qdrant stable catalog adapter", () => {
     ]);
     expect(fetchMock).toHaveBeenCalledOnce();
   });
+});
+
+it("preserves approved asset color and rejects corrupted binding instead of legacy fallback",()=>{
+ const p={...payload,image_verified_product_color:"be",image_color_binding_sha256:"a".repeat(64),image_color_binding_status:"VALID"};
+ expect(stableProductDocumentFromQdrantPayload(p)?.images[0]).toMatchObject({colorBinding:{status:"VALID",color:"be",sha256:"a".repeat(64)}});
+ expect(stableProductDocumentFromQdrantPayload({...p,image_color_binding_sha256:"b".repeat(64)})?.images[0]).toMatchObject({colorBinding:{status:"INVALID"}});
+ expect(stableProductDocumentFromQdrantPayload({...payload,image_visual_colors:["be"]})?.images[0]?.colorBinding).toBeUndefined();
 });

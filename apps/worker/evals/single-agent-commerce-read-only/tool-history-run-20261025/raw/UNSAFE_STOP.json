@@ -1,0 +1,1 @@
+{"status":"STOP_NEW_DISPATCH","reason":"PRIVACY_REDACTION_REGRESSION","sourceSha":"9e352f382e8915d6a1f1c080c75817065da42c63","evidence":"Offline diagnostic: bare lowercase street declaration survives redaction and isPrivateCommerceText=false; no actual customer PII used or observed in provider wires."}

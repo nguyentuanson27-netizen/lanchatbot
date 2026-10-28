@@ -1,0 +1,119 @@
+{
+  "sourceSha": "af482367aa953486a27f290b658c23ef1200f993",
+  "checks": [
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-product-groups.test.ts src/single-agent-commerce-media-delivery.test.ts src/meta-outbox-dispatcher.test.ts src/realtime-r32.2-compatibility-shield.test.ts src/single-agent-commerce-persistence.test.ts src/single-agent-commerce-handoff.test.ts src/single-agent-commerce-media.test.ts src/single-agent-commerce-state.test.ts src/single-agent-commerce-read-only.test.ts src/single-agent-commerce-read-only-tools.test.ts src/single-agent-semantic-verifier-boundary.test.ts src/size-chart-eligibility.test.ts",
+      "observedResult": "376 PASS; exact af482367"
+    },
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/delivery-capture.test.mjs apps/worker/evals/single-agent-commerce-read-only/feedback-controls.test.mjs",
+      "observedResult": "92 PASS; exact af482367"
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "observedResult": "PASS; exact af482367"
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "observedResult": "PASS; exact af482367"
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "observedResult": "PASS; exact af482367"
+    },
+    {
+      "command": "pnpm --filter @lana/contracts exec vitest run src/commerce-media-delivery.test.ts",
+      "observedResult": "1 PASS on earlier savepoint; file bytes unchanged in af482367"
+    },
+    {
+      "command": "pnpm --filter @lana/database exec vitest run src/realtime-runtime.test.ts",
+      "observedResult": "42 PASS on earlier savepoint; file bytes unchanged in af482367"
+    },
+    {
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts",
+      "observedResult": "21 PASS; protected/reply files unchanged"
+    },
+    {
+      "command": "pnpm --filter @lana/contracts typecheck",
+      "observedResult": "PASS"
+    },
+    {
+      "command": "pnpm --ignore-scripts --filter @lana/database typecheck",
+      "observedResult": "PASS (pretypecheck still ran)"
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs \"C:/Users/nguye/Documents/Sản phẩm AI/c3-acceptance-cod-complete-20261024\" COD --candidate-handoff --media-handoff-only",
+      "observedResult": "8 PASS; exact af482367; DB dropped; generation0"
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs \"C:/Users/nguye/Documents/Sản phẩm AI/c3-acceptance-bank-complete-20261024\" BANK_TRANSFER --candidate-handoff --media-handoff-only",
+      "observedResult": "8 PASS; exact af482367; DB dropped; generation0"
+    },
+    {
+      "command": "python \"C:/Users/nguye/Documents/Sản phẩm AI/c3-acceptance-dispatch-20261024.py\" prefix",
+      "observedResult": "PASS: controls17 then prefix11; exact expanded commands/exit codes in raw/COMMANDS.json"
+    },
+    {
+      "command": "python \"C:/Users/nguye/Documents/Sản phẩm AI/c3-acceptance-dispatch-20261024.py\" remaining",
+      "observedResult": "PASS: registered remaining40, no prefix duplication"
+    },
+    {
+      "command": "node \"C:/Users/nguye/Documents/Sản phẩm AI/c3-acceptance-firewall-20261024.mjs\"",
+      "observedResult": "PASS:160 actual wires; no evaluator/private/delegation leak"
+    },
+    {
+      "command": "python \"C:/Users/nguye/Documents/Sản phẩm AI/c3-acceptance-metrics-20261024.py\"",
+      "observedResult": "PASS:68outcomes/160requests; no provider generation"
+    },
+    {
+      "command": "node apps/worker/evals/single-agent-commerce-read-only/feedback-native-gates.mjs --job \"C:\\Users\\nguye\\Documents\\Sản phẩm AI/c3-acceptance-complete-20261024/journey-openings\"",
+      "observedResult": "CAPTURE_JOB_PASS"
+    },
+    {
+      "command": "node apps/worker/evals/single-agent-commerce-read-only/feedback-native-gates.mjs --job \"C:\\Users\\nguye\\Documents\\Sản phẩm AI/c3-acceptance-complete-20261024/media-followup\"",
+      "observedResult": "CAPTURE_JOB_PASS"
+    },
+    {
+      "command": "node apps/worker/evals/single-agent-commerce-read-only/feedback-native-gates.mjs --job \"C:\\Users\\nguye\\Documents\\Sản phẩm AI/c3-acceptance-complete-20261024/stateful\"",
+      "observedResult": "CAPTURE_JOB_PASS"
+    },
+    {
+      "command": "node apps/worker/evals/single-agent-commerce-read-only/feedback-native-gates.mjs --job \"C:\\Users\\nguye\\Documents\\Sản phẩm AI/c3-acceptance-complete-20261024/negotiation\"",
+      "observedResult": "CAPTURE_JOB_PASS"
+    },
+    {
+      "command": "node apps/worker/evals/single-agent-commerce-read-only/feedback-native-gates.mjs --job \"C:\\Users\\nguye\\Documents\\Sản phẩm AI/c3-acceptance-complete-20261024/opening-quotes\"",
+      "observedResult": "CAPTURE_JOB_PASS"
+    },
+    {
+      "command": "git diff --cached --check",
+      "observedResult": "PASS after preserving authentic transcript/spec whitespace via scoped evidence attributes"
+    },
+    {
+      "command": "python \"C:\\Users\\nguye\\Documents\\Sản phẩm AI/c3-acceptance-verify-archive-20261024.py\"",
+      "observedResult": "PASS: raw SHA256, Git index byte parity, review binding, strong secret-pattern scan"
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/feedback-source-capture.mjs \"C:\\Users\\nguye\\Documents\\Sản phẩm AI/c3-acceptance-model-source-complete-20261024\"",
+      "observedResult": "PASS:0generation/0embedding/0sourcewrites"
+    },
+    {
+      "command": "node apps/worker/evals/single-agent-commerce-read-only/feedback-controls-20261023.mjs \"C:\\Users\\nguye\\Documents\\Sản phẩm AI/c3-acceptance-complete-controls-dry-20261024\" --capture \"C:\\Users\\nguye\\Documents\\Sản phẩm AI/c3-acceptance-model-source-complete-20261024/capture.json\" --preflight",
+      "observedResult": "PREFLIGHT_PASS:all17frozen controls within unchanged bounds;0generation"
+    }
+  ],
+  "failedThenFixed": [
+    {
+      "sourceSha": "039c97ef",
+      "failure": "COD/BANK PostgreSQL each6PASS then meta_response_group_gate_state_ck FAIL; both DB dropped. Code BLOCKED/no tag was incorrectly inserted as a Pancake observation."
+    },
+    {
+      "sourceSha": "579917c1",
+      "failure": "Zero-generation preflight VERIFIER_INPUT_BOUND after delegated chart/mapping appended to context; no provider generation. Keep original failure/source capture."
+    },
+    {
+      "tests": "Initial module-missing RED; dispatcher SQL-contract RED; projection-leak RED; test fixture incomplete scope/readonly and invalid enum type errors fixed. Unit RED outputs observed in task tool transcript; raw SQL/preflight failures retained here."
+    }
+  ],
+  "ci": "gh pr checks391 reported no checks on branch; no remote CI PASS claimed."
+}

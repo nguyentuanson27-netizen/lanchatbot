@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "kind": "PRE_PROVIDER_FROZEN_INPUTS",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "intakeHead": "1576443ff8915405a852569e5e2b367d0dc09c0b",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "22c97bd28703d2b3079cc06f8dbb6a4e7f1d38cc66e795175d94fedc4cc239be",
+    "verifier": "e8ba5ab607518cda125600c59d3130c9b17d5fbf3e62da485945cd2ae1ec449d"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "fallback": {
+    "id": "C3_A_NONPROTECTED_V2",
+    "text": "Phần này em chưa trả lời được, chị nhé.",
+    "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+  },
+  "files": {
+    "manifest.json": {
+      "sha256": "17b4eccd51e13282f25c45411455a27e8f8ab929193a2cf523b8e67fa85b92d5",
+      "bytes": 4219
+    },
+    "source-config.b1.json": {
+      "sha256": "5ca8dc68da2a11d6a29bb9d03617686f3116a3e43b8c646da0b012212bcefb6e",
+      "bytes": 901
+    },
+    "cases.b1.json": {
+      "sha256": "790a28e0415bf4b0bdf23c44993cbe78fe76415827a080e9bb09e777775dca67",
+      "bytes": 16225
+    },
+    "stateful-cases.json": {
+      "sha256": "51d53b26a9d85ee37786a269df1700cbbe9b4b2fd16ec243bc4a2bce56f3a749",
+      "bytes": 2075
+    },
+    "prompts/owner.vi.txt": {
+      "sha256": "22c97bd28703d2b3079cc06f8dbb6a4e7f1d38cc66e795175d94fedc4cc239be",
+      "bytes": 10078
+    },
+    "prompts/verifier.vi.txt": {
+      "sha256": "e8ba5ab607518cda125600c59d3130c9b17d5fbf3e62da485945cd2ae1ec449d",
+      "bytes": 10875
+    }
+  },
+  "referenceBlobs": {
+    "docs/specs/c3-single-agent-commerce-architecture-20261004.md": "7e0265e3b6b3d556d8fb0f3c7267abccef5de86a",
+    "docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md": "4a09b55d2f3a972a65697738876cc5eab21e7a2b",
+    "docs/specs/c3-phase-b-execution-20261014.md": "c397034d68897c0ee96947dce39b1a550e940920",
+    "docs/specs/c3-phase-b-integration-audit-20261015.md": "ebabfde37d188d81028a65369a85952055079109",
+    "tasks/plan.md": "307611faf64731ca1a165190516fca8d951b55e6",
+    "tasks/todo.md": "a70cb3bf20742a92c34385d41b48be21fc769143"
+  },
+  "nativeToolSchemaHashes": {
+    "b1": "db5657ef8f48830e9ba322dbb3137d1d9be0d929fe7ca66fd26224c1c6d30b8b",
+    "stateful": "0960a6f447b031c1c65b500b3359771b46241a0e5a232acf6f1d6037c84fe319"
+  },
+  "population": {
+    "b1": 24,
+    "stateful": 7,
+    "publicStateful": 6,
+    "privateCodeOnly": 1,
+    "repetitions": 1,
+    "maximumGenerationRequests": {
+      "b1": 96,
+      "stateful": 24,
+      "total": 120
+    }
+  },
+  "retry": 0,
+  "sendEnabled": false,
+  "humanAcceptance": null
+}

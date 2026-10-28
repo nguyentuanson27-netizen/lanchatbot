@@ -1,0 +1,27 @@
+[
+  {
+    "name": "stateful-preflight",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "unused",
+      "COD",
+      "--provider-preflight"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "targeted",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/advice-diagnostic.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\sales-decision-run-20261019\\targeted-input.json",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-sales-decision-targeted-20261019\\targeted"
+    ],
+    "exitCode": 0
+  }
+]

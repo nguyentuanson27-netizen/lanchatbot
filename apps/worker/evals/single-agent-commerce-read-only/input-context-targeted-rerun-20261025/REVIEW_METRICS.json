@@ -1,0 +1,53 @@
+{
+  "sourceSha": "d4c8187134eb24c3bebf1f69a843ca7dd1945ac0",
+  "targets": 11,
+  "prerequisites": 3,
+  "total": 14,
+  "targetTerminals": {
+    "SEND_ELIGIBLE": 6,
+    "HANDOFF": 3,
+    "NO_SEND": 2
+  },
+  "prerequisiteTerminals": {
+    "SEND_ELIGIBLE": 3
+  },
+  "providerRequests": {
+    "owner": 25,
+    "verifier": 9
+  },
+  "capturedWires": 34,
+  "labelLeakCount": 0,
+  "labelScanPattern": "\\b(?:caseId|purposeId|split|attackFamily|attack_family|qualityTags|quality_tags|expectedSafe|expectedUnsafe|expected_safe|expected_unsafe|expectedVerdict|expectedDisposition|requiredBehaviors|forbiddenBehaviors|required_behaviors|forbidden_behaviors|rubric|scoringLabels|scoring_labels)\\b",
+  "maxProviderRequestsPerGeneration": 1,
+  "observedTokens": {
+    "input": 215589,
+    "output": 19741
+  },
+  "errors": [
+    {
+      "caseId": "sales-discovery-advice:need",
+      "role": "owner",
+      "status": "PROVIDER_ERROR",
+      "httpStatus": 200,
+      "error": null,
+      "errorStage": null,
+      "rawFinishReason": "STOP"
+    }
+  ],
+  "verifierP50ms": 11345.8793,
+  "verifierP95ms": 20766.268000000004,
+  "databaseCleanup": {
+    "journey-openings": true,
+    "stateful": true
+  },
+  "modelVersions": {
+    "gemini-3.5-flash-lite": 25,
+    "gpt-6.1-sol": 9
+  },
+  "contractFailures": [
+    {
+      "caseId": "sales-discovery-advice:need",
+      "reason": "OWNER_TOOL_MODE"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "C3_A_NONPROTECTED_V2": {
+    "text": "Phần này em chưa trả lời được, chị nhé.",
+    "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+  },
+  "C3_B_VERIFIED_MEDIA_V1": {
+    "text": "Em gửi chị ảnh của mẫu để mình xem trước nhé.",
+    "sha256": "619619750d4d4d0af0835963426ca87ced10359f6ba051d6b9b07ca4ae0a8182"
+  },
+  "C3_B_MEDIA_UNAVAILABLE_V1": {
+    "text": "Lúc này em chưa gửi được ảnh chị cần.",
+    "sha256": "b9e9160e4554f30c76ad4707c1f8ad54d82a17d19b08bc0a4399b8470c394c9a"
+  },
+  "C3_B_MEDIA_NEXT_STEP_V1": {
+    "text": "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?",
+    "sha256": "c1330d313ad88ccd89abb65f60f42fd29cac3e277d2cd33b0e4a0e49b44d78ee"
+  },
+  "C3_A_NONPROTECTED_V1": {
+    "text": "Em chưa thể trả lời chắc chắn nội dung này. Chị vui lòng chờ nhân viên hỗ trợ nhé.",
+    "sha256": "9addecd5d2d9b2b33c215810a4221bd592fc120c388461c5a33ff438deec03c8",
+    "usage": "LEGACY_NOT_USED_IN_THIS_RUN; do not treat text as a handoff receipt"
+  }
+}

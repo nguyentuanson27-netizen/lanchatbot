@@ -1,0 +1,194 @@
+{
+  "registered": 31,
+  "recorded": 6,
+  "notRun": 25,
+  "stoppingReason": "STOP_PRIORITY_REPLAY_HOLD_18_B1_AND_7_STATEFUL",
+  "outcomes": [
+    {
+      "caseId": "b1-changed-occasion",
+      "population": "B1",
+      "execution": "RECORDED",
+      "reason": null
+    },
+    {
+      "caseId": "b1-search-read",
+      "population": "B1",
+      "execution": "RECORDED",
+      "reason": null
+    },
+    {
+      "caseId": "b1-buying-concern",
+      "population": "B1",
+      "execution": "RECORDED",
+      "reason": null
+    },
+    {
+      "caseId": "b1-changed-occasion-v2",
+      "population": "B1",
+      "execution": "RECORDED",
+      "reason": null
+    },
+    {
+      "caseId": "b1-partial-source-v2",
+      "population": "B1",
+      "execution": "RECORDED",
+      "reason": null
+    },
+    {
+      "caseId": "b1-buying-concern-v2",
+      "population": "B1",
+      "execution": "RECORDED",
+      "reason": null
+    },
+    {
+      "caseId": "b1-current-policy",
+      "population": "B1",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "b1-partial-source",
+      "population": "B1",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "b1-price",
+      "population": "B1",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "b1-component-stock",
+      "population": "B1",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "b1-policy-used",
+      "population": "B1",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "b1-current-policy-v2",
+      "population": "B1",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "b1-price-v2",
+      "population": "B1",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "b1-component-stock-v2",
+      "population": "B1",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "b1-search-read-v2",
+      "population": "B1",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "b1-policy-used-v2",
+      "population": "B1",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "b1-changed-occasion-v3",
+      "population": "B1",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "b1-current-policy-v3",
+      "population": "B1",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "b1-partial-source-v3",
+      "population": "B1",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "b1-price-v3",
+      "population": "B1",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "b1-component-stock-v3",
+      "population": "B1",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "b1-search-read-v3",
+      "population": "B1",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "b1-buying-concern-v3",
+      "population": "B1",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "b1-policy-used-v3",
+      "population": "B1",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "stateful-open",
+      "population": "B2_B3",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "stateful-variant-quantity",
+      "population": "B2_B3",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "stateful-quote",
+      "population": "B2_B3",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "stateful-correction",
+      "population": "B2_B3",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "stateful-private-checkout",
+      "population": "B2_B3",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "stateful-confirm",
+      "population": "B2_B3",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    },
+    {
+      "caseId": "stateful-human-request",
+      "population": "B2_B3",
+      "execution": "NOT_RUN",
+      "reason": "HELD_BY_PRIORITY_REVIEW"
+    }
+  ]
+}

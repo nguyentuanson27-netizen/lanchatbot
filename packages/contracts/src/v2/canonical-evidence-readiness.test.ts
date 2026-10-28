@@ -378,6 +378,14 @@ describe("DF06 deterministic readiness contract", () => {
       ],
     }).conflict).toBe(true);
   });
+  it("uses each outbound claim's actual subject rather than requiring a product-by-type matrix", () => {
+    const input = { effect: "PROTECTED_OUTBOUND" as const, productIds: ["P-001", "P-002"], cartId: null, cartVersion: null,
+      protectedClaimTypes: ["PRICE", "STOCK"] as const, claims: [productClaim("PRICE", "P-001"), productClaim("STOCK", "P-002")] };
+    expect(validateEffectClaimSemanticsV1(input)).toEqual({ missing: false, conflict: false });
+    expect(validateEffectClaimSemanticsV1({ ...input, productIds: [...input.productIds, "P-003"] }).missing).toBe(true);
+    expect(validateEffectClaimSemanticsV1({ ...input, protectedClaimTypes: ["ETA"] }).missing).toBe(true);
+    expect(validateEffectClaimSemanticsV1({ ...input, claims: [] }).missing).toBe(true);
+  });
 
   it("requires exact offer-scoped cart claims with matching price and orderable stock", () => {
     const line = {
@@ -447,6 +455,22 @@ describe("DF06 deterministic readiness contract", () => {
       lines: [line, { ...line, quantity: 2 }],
       claims: exact,
     }).mismatch).toBe(true);
+  });
+
+  it("checks parent catalog media once for outbound without requiring it per cart offer", () => {
+    const media = ProtectedClaimV1Schema.parse({...productClaim("PRICE", "P-001"), type:"PRODUCT_MEDIA",
+      provenance:{...productClaim("PRICE", "P-001").provenance,authority:"MEDIA_SELECTOR_V2"},
+      value:{assetId:"asset-1",assetSha256:HASH}});
+    const input={effect:"PROTECTED_OUTBOUND" as const,lines:[{parentProductId:"P-001",offerId:"SET",quantity:1,posUnitPriceVnd:699000,priceFactRef:null}],
+      protectedClaimTypes:["PRODUCT_MEDIA"] as const,claims:[media]};
+    expect(validateCartEffectClaimSemanticsV1(input)).toEqual({missing:false,conflict:false,mismatch:false});
+    expect(validateCartEffectClaimSemanticsV1({...input,claims:[]}).missing).toBe(true);
+    expect(validateCartEffectClaimSemanticsV1({...input,claims:[{...media,scope:{kind:"PRODUCT",productId:"P-001",variantId:"WRONG"}}]}).mismatch).toBe(true);
+    const otherMedia={...media,scope:{kind:"PRODUCT" as const,productId:"OTHER",variantId:null}};
+    expect(validateCartEffectClaimSemanticsV1({...input,claims:[otherMedia]})).toEqual({missing:false,conflict:false,mismatch:false});
+    // Overall outbound scope still owns catalog identity; cart semantics must not substitute for it.
+    expect(validateEffectClaimSemanticsV1({effect:"PROTECTED_OUTBOUND",productIds:["P-001"],cartId:null,cartVersion:null,
+      protectedClaimTypes:["PRODUCT_MEDIA"],claims:[otherMedia]}).missing).toBe(true);
   });
 
   it("keeps purchase confirmation evidence deterministic, typed, and non-authorizing", () => {
@@ -599,7 +623,7 @@ describe("DF06 deterministic readiness contract", () => {
     }).success).toBe(false);
   });
 
-  it("supports payload-only protected outbound readiness with a deterministic hash", () => {
+  it.each([{ productIds: ["SP-001"] }, { productIds: [] }])("supports payload-only protected outbound readiness with product scope $productIds", ({ productIds }) => {
     expect(DeterministicEffectReadinessV1Schema.parse({
       schemaVersion: 1,
       rulesetVersion: "DETERMINISTIC_EFFECT_READINESS_V1",
@@ -610,7 +634,7 @@ describe("DF06 deterministic readiness contract", () => {
       sourceMessageIdHash: HASH,
       conversationRevision: 7,
       salesCycleRevision: 3,
-      productIds: ["SP-001"],
+      productIds,
       cartId: null,
       cartVersion: null,
       cartStateHash: null,
@@ -627,7 +651,7 @@ describe("DF06 deterministic readiness contract", () => {
         sourceMessageIdHash: HASH,
         conversationRevision: 7,
         salesCycleRevision: 3,
-        productIds: ["SP-001"],
+        productIds,
         cart: null,
         preview: null,
         claimSetHash: null,

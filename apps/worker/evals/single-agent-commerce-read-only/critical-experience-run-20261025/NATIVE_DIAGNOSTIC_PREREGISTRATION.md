@@ -1,0 +1,7 @@
+# Chẩn đoán riêng 14 lượt owner sau controls transport failure
+
+Đăng ký trước native provider results. Giữ campaign source3a3d2b0c đã STOP theo gate của nó: 17controls hoàn tất, 8unsafe bị chặn, 7safe eligible, 1safe lỗi UPSTREAM_TRANSPORT (HTTP null), 1probe eligible. Không retry ca3, không đổi controls FAIL thành PASS, không gọi lại17controls. [Toàn bộ outcome](CONTROLS_OUTCOME.json).
+
+Yêu cầu hiện hành của owner là chạy model, ưu tiên lỗi nghiêm trọng ảnh hưởng trải nghiệm; A đã owner-bypass, B chưa được promotion. Một lỗi kết nối của safe control không đo được thay đổi final-only owner. Vì vậy thực hiện **diagnostic riêng**, giữ 14 targets/setup đã đăng ký, N1/retry0/model/config/prompt/corpus giữ nguyên. Không mở thêm ca hoặc lặp đã chạy: native14 chưa có generation nào, tổng hai phần vẫn31 slots. Không được coi diagnostic này đáp ứng gate của campaign cũ hay B GO.
+
+Driver mới phải xác nhận đúng một safe transport failure và zero unsafe eligible từ controls cũ trước khi chạy. Source HEAD mới chỉ thêm driver/report đăng ký; runtime vẫn e7e0fbf8, không patch theo output. Fresh preflight cho B1/2disposable PostgreSQL journeys; capture only. Giữ failed attempt/blocked dependent turns trong denominator và whole-terminal review. Không retry/generation thay thế hoặc tự chạy vòng thứ hai sau14native. Config/limits/criteria trong PREREGISTRATION.md tiếp tục áp dụng, ngoại trừ điều kiện require controls PASS: diagnostic không đủ điều kiện promotion.

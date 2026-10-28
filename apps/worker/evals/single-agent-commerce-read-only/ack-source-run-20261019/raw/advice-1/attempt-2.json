@@ -1,0 +1,15 @@
+{
+  "caseId": "b1-partial-source-v2",
+  "runtime": {
+    "latest": "Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé.",
+    "history": [],
+    "initialProductCodes": [
+      "SV2447"
+    ]
+  },
+  "result": {
+    "status": "BLOCKED",
+    "terminal": null
+  },
+  "sendEnabled": false
+}

@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "caseId": "stateful-request-checkout",
+  "publicText": "Chị cho em tên người nhận nhé.",
+  "sha256": "d04585b28fb64c62250f917950ddf3293a2436ec31506184cbab99bd9f532125",
+  "captureHashes": [
+    {
+      "sequence": 0,
+      "sha256": "d04585b28fb64c62250f917950ddf3293a2436ec31506184cbab99bd9f532125"
+    }
+  ],
+  "mode": "Code-owned public text hash, not private plaintext reconstruction"
+}

@@ -1,0 +1,87 @@
+{
+  "source": "PUBLIC_CAPTURE_DERIVED_TEST_ONLY",
+  "captureSha256": "3ef4f1106f1364a53ca4cc592a34b7f6bb1586050b6ec8b5a7a49abb34cefbee",
+  "initialCaptureSha256": "0892c141f5ae912793bcb42b6c1e1de945c6e38ccc602255db425f551418164b",
+  "notes": "Public product descriptions/variant density from captured discovery. Test rebinds dates/snapshot authority; non-selected offer prices are synthetic fixture values. No customer text, case labels, evaluator rubric, private data or credentials. Initial and three search products retain actual description length.",
+  "initial": {
+    "productId": "SV2447",
+    "title": "Set váy Thạch Thảo",
+    "descriptionXml": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng."
+  },
+  "candidates": [
+    {
+      "productId": "SQ675",
+      "title": "SET QUẦN SQ675",
+      "description": "Màu sắc: Be dịu dàng và thanh lịch, mang đến vẻ đẹp nhẹ nhàng, tinh khôi nhưng vẫn đủ nổi bật nhờ những điểm nhấn nâu đất ấm áp. Thiết kế: Set gồm áo dáng suông tay lửng phối ren hoa laze nổi bật ở thân trước và tay áo, kết hợp dây buộc cổ mềm mại tạo nét nữ tính và duyên dáng. Quần dài ống rộng cạp chun nhún bèo nhẹ giúp tôn dáng tự nhiên, mang lại sự thoải mái và thanh thoát trong từng chuyển động. Chất liệu: Thô hoa laze phối thô ướt cao cấp, bề mặt mềm mại, thoáng mát và có độ rủ nhẹ tự nhiên. Lót habutai kem ngà bên trong giúp trang phục lên form đẹp, dễ chịu và kín đáo khi mặc. Điểm nhấn: Chi tiết ren thang kem được phối tinh tế tạo hiệu ứng thủ công nhẹ nhàng, kết hợp dây tua đính hạt ngọc loang tông nâu nhạt và nâu đậm mang đến nét mộc mạc nhưng sang trọng. Thiết kế phù hợp cho những chuyến du lịch, dạo phố, café cuối tuần hoặc những dịp cần sự thanh lịch và thoải mái.",
+      "variants": [
+        {
+          "color": "__NO_COLOR__",
+          "size": "S",
+          "variantId": "255a707b983977e37f759166b4704f0a"
+        },
+        {
+          "color": "__NO_COLOR__",
+          "size": "M",
+          "variantId": "f98c8fbbd0cbb1c0a6056fff6ff0effa"
+        },
+        {
+          "color": "__NO_COLOR__",
+          "size": "L",
+          "variantId": "0df17222818625d2470b95a864450cb5"
+        },
+        {
+          "color": "__NO_COLOR__",
+          "size": "XL",
+          "variantId": "7318564f1cc3ec76a1f7e58ff3ceac11"
+        }
+      ],
+      "availableOffers": [
+        "AO",
+        "QUAN",
+        "SET_QUAN"
+      ],
+      "selectedOffer": "SET_QUAN",
+      "selectedPriceVnd": 1279000
+    },
+    {
+      "productId": "SQ748",
+      "title": "SET QUẦN UYỂN HOA",
+      "description": "Màu sắc Tone kem phối họa tiết thổ cẩm hồng pastel và be nhạt, mang đến tổng thể ngọt ngào, thanh lịch và nữ tính. Set được may từ vải thô đũi cao cấp với bề mặt mềm mịn, thoáng khí và thấm hút tốt, mang lại cảm giác nhẹ nhàng, dễ chịu khi mặc Set gồm á kết hợp quần short lưng chun đồng bộ, chi tiết bèo xếp tầng ở gấu áo giúp tôn vòng eo và tạo hiệu ứng mềm mại, nữ tính. Quần short form suông, chiều dài vừa vặn giúp tôn dáng và tạo sự thoải mái khi vận động.",
+      "variants": [
+        {
+          "color": "__NO_COLOR__",
+          "size": "S",
+          "variantId": "0ad0164e90dca7a493f931d0872c2255"
+        },
+        {
+          "color": "__NO_COLOR__",
+          "size": "M",
+          "variantId": "ae88477bd0769ec0b7bc5d5506939479"
+        },
+        {
+          "color": "__NO_COLOR__",
+          "size": "L",
+          "variantId": "242c9a38f3701db696fbf4fba90964cb"
+        },
+        {
+          "color": "__NO_COLOR__",
+          "size": "XL",
+          "variantId": "7ac0eee7b133521a9f737f4856843b7e"
+        }
+      ],
+      "availableOffers": [
+        "AO",
+        "QUAN",
+        "SET_QUAN"
+      ],
+      "selectedOffer": "SET_QUAN",
+      "selectedPriceVnd": 799000
+    },
+    {
+      "productId": "V406",
+      "title": "Váy Ngọc Trâm",
+      "description": "Thiết kế nữ tính, thanh lịch với sự kết hợp giữa ren hoa nổi sang trọng và tơ ống mềm nhẹ, tạo cảm giác mềm mại, thoáng mát và bay nhẹ khi mặc. Chất liệu mịn, rũ tự nhiên giúp tôn lên vẻ dịu dàng và tinh tế cho người mặc. Phần váy yếm 2 lớp tơ ống được thiết kế form nhẹ nhàng, tạo độ rủ mềm và giúp dáng váy đứng form đẹp. Đi kèm là khăn choàng ren hoa nổi 1 lớp, tạo điểm nhấn duyên dáng, tăng thêm nét sang trọng và nữ tính cho tổng thể trang phục. Sự kết hợp giữa váy yếm và khăn ren giúp set đồ trở nên nổi bật, vừa mềm mại vừa thanh lịch.",
+      "variants": []
+    }
+  ]
+}

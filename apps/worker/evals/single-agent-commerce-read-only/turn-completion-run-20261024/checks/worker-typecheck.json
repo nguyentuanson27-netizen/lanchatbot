@@ -1,0 +1,10 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@lana/worker",
+    "typecheck"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 56.345192432403564
+}

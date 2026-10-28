@@ -4,6 +4,7 @@ import {
   buildProtectedClaimsFromCartSelectionsV1,
   evaluateDeterministicEffectReadinessV1,
   foldVietnameseForRecall,
+  normalizeCatalogToken,
   hashCanonicalBuyingIntentV1,
 } from "@lana/business-tools";
 import {
@@ -90,6 +91,17 @@ const PREVIEW_TTL_MS = 30 * 60 * 1_000;
 const MAX_CHECKOUT_CLARIFICATION_ATTEMPTS = 3;
 
 export interface RealtimeSalesCycleInput {
+  /** Candidate code-owned intake; does not change the legacy multi-field path. */
+  readonly checkoutCollection?: "SINGLE_FIELD";
+  /** Optional code-only binding for the isolated native-tool caller. All existing readiness checks still run. */
+  readonly commandIdentity?: { readonly primaryCommandId: string; readonly primarySuffix: string;
+    readonly cartIdentity?: import("@lana/business-tools").CanonicalCartIdentityV2; readonly cartExpiresAt?: string; readonly cartLineId?: string };
+  /** Only the code-authorized native adapter supplies this; the legacy text path remains unchanged. */
+  readonly nativeMutation?: { readonly command: Extract<SalesCycleCommand, { kind: "CART_MUTATED" }>; readonly mutation: CanonicalCartMutationPayloadV1 };
+  readonly nativeNegotiation?: Extract<SalesCycleCommand,{kind:"NEGOTIATION_EVENT"}>;
+  /** Exact message resolved by the native adapter, independent of the batch's commit source. */
+  readonly nativeNegotiationInbound?: VerifiedInboundMessageV1 | null;
+  readonly paymentReceiptInbound?: VerifiedInboundMessageV1;
   readonly pageId: string;
   readonly conversationId: string;
   readonly customerHash: string;
@@ -113,6 +125,8 @@ export interface RealtimeSalesCycleInput {
    * negotiation semantics and wording; it never carries a monetary request.
    */
   readonly negotiationProposal?: ModelNegotiationProposalV1 | null;
+  /** Transient catalog labels from the caller’s existing shop-scoped source; never persisted in cart state. */
+  readonly productNames?: readonly { readonly productId: string; readonly title: string }[];
   readonly shopAlias: string;
   readonly behaviorModeResolution?: RuntimeBehaviorModeResolution;
   readonly policyResolution: RuntimePolicyResolution | null;
@@ -525,10 +539,17 @@ function modelPaymentMethod(
   return field.value;
 }
 
-function checkoutDetails(
+export function checkoutDetails(
   text: string,
   salesSignals: AgentSalesSignalsV1 | null | undefined,
+  pendingField?: CheckoutFieldKey,
 ): CheckoutDetails {
+  const bare = text.normalize("NFC").trim();
+  // Field syntax only, not a general-language intent/name extractor. Ambiguous replies stay private.
+  const bareName = pendingField === "FULL_NAME" && bare.length >= 2 && bare.length <= 160 &&
+    /^\p{Lu}[\p{L}\p{M}'’-]*(?:\s+\p{Lu}[\p{L}\p{M}'’-]*){0,5}$/u.test(bare) ? bare : undefined;
+  const bareAddress = pendingField === "ADDRESS" && bare.length >= 8 && bare.length <= 1000 &&
+    /^\d[\p{L}\p{M}\p{N}\s,./’-]+$/u.test(bare) ? bare : undefined;
   const extracted = salesSignals?.checkoutExtraction;
   const phone = labeledValue(text, ["sđt", "sdt", "điện thoại", "dien thoai", "phone"]) ??
     text.match(/(?:^|[^\d])((?:\+?84|0)\d{8,10})(?:[^\d]|$)/u)?.[1] ??
@@ -540,10 +561,10 @@ function checkoutDetails(
       : modelPaymentMethod(text, extracted?.paymentMethod);
   const fullName =
     labeledValue(text, ["tên", "ten", "họ tên", "ho ten", "người nhận", "nguoi nhan"]) ??
-    modelCheckoutValue(text, extracted?.fullName, "FULL_NAME");
+    modelCheckoutValue(text, extracted?.fullName, "FULL_NAME") ?? bareName;
   const address =
     labeledValue(text, ["địa chỉ", "dia chi", "đ/c", "dc"]) ??
-    modelCheckoutValue(text, extracted?.address, "ADDRESS");
+    modelCheckoutValue(text, extracted?.address, "ADDRESS") ?? bareAddress;
   return {
     ...(fullName ? { fullName } : {}),
     ...(phone ? { phone } : {}),
@@ -625,11 +646,26 @@ function negotiationOfferText(cart: CartV1, customerState: "READY" | "HESITANT" 
     : `Em hỗ trợ ${offer} cho giỏ này.`;
 }
 
-function cartSummary(cart: CartV1): string {
+/** Render only committed choices; retain the code when there is no bound display name. */
+export function formatCartLineSelection(line: CartV1["lines"][number], product?: NonNullable<RealtimeSalesCycleInput["productNames"]>[number]): string {
+  const label = product && normalizeCatalogToken(product.productId) === line.parentProductId && product.title.trim()
+    ? `(mẫu “${product.title}”)` : line.parentProductId;
+  const roles = { TOP: "áo", SKIRT: "chân váy", PANTS: "quần", DRESS: "váy", JACKET: "áo khoác", ACCESSORY: "phụ kiện", OTHER: "sản phẩm" };
+  const component = (c: typeof line.components[number]) => (c.quantity > 1 ? `${c.quantity} ` : "") + roles[c.componentRole] +
+    (c.color ? ` màu ${c.color.toLocaleLowerCase("vi-VN")}` : "") + (c.size ? `, size ${c.size}` : "");
+  if (line.offerKind === "SET" || line.offerKind === "COMBO_3") {
+    return `${line.quantity} ${line.offerKind === "SET" ? "bộ" : "combo"} ${label} (${line.components.map(component).join("; ")})`;
+  }
+  const c = line.components[0]!, role = roles[c.componentRole];
+  return `${line.quantity} ${role} ${label}${c.color ? ` màu ${c.color.toLocaleLowerCase("vi-VN")}` : ""}${c.size ? `, size ${c.size}` : ""}`;
+}
+
+function cartSummary(cart: CartV1, includeSelections = false, productNames: RealtimeSalesCycleInput["productNames"] = []): string {
   const hasFreeShipping = cart.adjustments.some(({ kind }) => kind === "FREE_SHIPPING");
   const lines = cart.lines.map((line) => {
     const sizes = [...new Set(line.components.map(({ size }) => size).filter(Boolean))].join("/");
-    return `${line.parentProductId}${sizes ? ` size ${sizes}` : ""} ×${line.quantity}: ${money(line.lineTotalVnd ?? 0)}`;
+    const label = includeSelections ? formatCartLineSelection(line, productNames.find(p => normalizeCatalogToken(p.productId) === line.parentProductId)) : `${line.parentProductId}${sizes ? ` size ${sizes}` : ""} ×${line.quantity}`;
+    return `${label}: ${money(line.lineTotalVnd ?? 0)}`;
   });
   return [
     ...lines,
@@ -736,10 +772,15 @@ async function currentSelections(
 
 type ReadyCartSelection = Extract<CartSelectionResult, { status: "READY" }>;
 
-function selectionsMatchCartLines(
+export function selectionsMatchCartLines(
   lines: CartV1["lines"],
   selections: readonly ReadyCartSelection[],
 ): boolean {
+  // The canonical mutation engine normalizes these variant values to NFC uppercase.
+  // Compare that same identity; price, product, component role and quantity remain exact.
+  const components = (line: CartV1["lines"][number]) => line.components.map(c => ({ ...c,
+    componentSku: c.componentSku.trim().normalize("NFC").toUpperCase(),
+    size: c.size?.trim().normalize("NFC").toUpperCase() ?? null, color: c.color?.trim().normalize("NFC").toUpperCase() ?? null }));
   if (lines.length !== selections.length) return false;
   const byLineId = new Map(selections.map((selection) => [selection.line.lineId, selection.line]));
   return lines.every((line) => {
@@ -750,7 +791,7 @@ function selectionsMatchCartLines(
       selected.quantity === line.quantity &&
       selected.posUnitPriceVnd === line.posUnitPriceVnd &&
       selected.lineTotalVnd === line.lineTotalVnd &&
-      canonicalJson(selected.components) === canonicalJson(line.components);
+      canonicalJson(components(selected)) === canonicalJson(components(line));
   });
 }
 
@@ -887,7 +928,9 @@ export async function evaluateRealtimeSalesCycle(
       (references.get(canonicalJson(reference)) as ResolvedCartMutationV1 | undefined) ?? null,
     resolveShopPolicy: (reference) =>
       (references.get(canonicalJson(reference)) as ReturnType<SalesCycleTrustedPortsV1["resolveShopPolicy"]> | undefined) ?? null,
-    resolveInboundMessage: (sourceMessageId) => sourceMessageId === input.messageId ? inbound : null,
+    resolveInboundMessage: (sourceMessageId) => input.nativeNegotiation?.sourceMessageId === sourceMessageId &&
+      input.nativeNegotiationInbound?.messageId === sourceMessageId ? input.nativeNegotiationInbound
+      : input.paymentReceiptInbound?.messageId === sourceMessageId ? input.paymentReceiptInbound : sourceMessageId === input.messageId ? inbound : null,
     revalidateCheckout: () => checkoutValidation,
   };
   const bankResolver: BankTransferPolicyResolver = (reference) =>
@@ -901,6 +944,7 @@ export async function evaluateRealtimeSalesCycle(
     const readinessMutationAction = resolvedMutation?.mutation.kind === "ADD_LINE" ||
         resolvedMutation?.mutation.kind === "REMOVE_LINE" ||
         resolvedMutation?.mutation.kind === "SET_QUANTITY"
+        || resolvedMutation?.mutation.kind === "SET_COMPONENT_VARIANT"
       ? resolvedMutation.mutation.kind
       : null;
     const result = applySalesCycleCommand({
@@ -928,7 +972,7 @@ export async function evaluateRealtimeSalesCycle(
                 : null,
               intent: command.intent,
               reasonCode: command.intent === "PRICE_OBJECTION" ? command.reasonCode : null,
-              observedAt: input.occurredAt,
+              observedAt: ports.resolveInboundMessage(command.sourceMessageId)!.observedAt,
               evidenceHash: "0".repeat(64),
             };
             return NegotiationTransitionEvidenceV1Schema.parse({
@@ -1036,7 +1080,8 @@ export async function evaluateRealtimeSalesCycle(
     return result;
   };
 
-  const commandId = (suffix: string) => `sales:${input.eventKey}:${suffix}`;
+  const commandId = (suffix: string) => input.commandIdentity?.primarySuffix === suffix
+    ? input.commandIdentity.primaryCommandId : `sales:${input.eventKey}:${suffix}`;
   const setCartReplayContext = (
     customerState: "READY" | "HESITANT" | "CAUTIOUS",
   ): void => {
@@ -1097,7 +1142,7 @@ export async function evaluateRealtimeSalesCycle(
       orderPreviewId: preview?.previewId ?? null,
       orderPreviewHash: preview?.previewHash.replace(/^sha256:/u, "") ?? null,
       buyingIntent: effect === "CART_OPEN" || (
-        effect === "CART_MUTATION" && mutationAction !== "REMOVE_LINE"
+        effect === "CART_MUTATION" && (mutationAction !== "REMOVE_LINE" || input.canonicalBuyingIntent.contributors.includes("NATIVE_TOOL_PERMISSION"))
       )
         ? input.canonicalBuyingIntent
         : null,
@@ -1124,7 +1169,7 @@ export async function evaluateRealtimeSalesCycle(
     checkedAt: Date,
     mutation: CanonicalCartMutationPayloadV1,
     mutationPayloadHash: string,
-    authorityKind: "CANONICAL_BUYING_INTENT" | "DETERMINISTIC_REMOVE_CLASSIFIER",
+    authorityKind: "CANONICAL_BUYING_INTENT" | "DETERMINISTIC_REMOVE_CLASSIFIER" | "NATIVE_TOOL_PERMISSION",
     authorityEvidenceHash: string,
     customerState: "READY" | "HESITANT" | "CAUTIOUS",
   ): DeterministicEffectReadinessV1 => {
@@ -1167,7 +1212,7 @@ export async function evaluateRealtimeSalesCycle(
         ? "LINE_ADDED" as const
         : action === "REMOVE_LINE"
           ? "LINE_REMOVED" as const
-          : "QUANTITY_CHANGED" as const,
+          : action === "SET_COMPONENT_VARIANT" ? "VARIANT_CHANGED" as const : "QUANTITY_CHANGED" as const,
       authority,
       beforeCartStateHash: cartHash(beforeCart),
       afterCartStateHash: cartHash(state.cart.value),
@@ -1304,6 +1349,7 @@ export async function evaluateRealtimeSalesCycle(
       "PRICE",
       ...cartClaims.map(({ type }) => type),
       ...(options.includeEta ? ["ETA" as const] : []),
+      ...(options.includeEta && options.selections.some(s => s.stockStatus === "PRE_ORDER") ? ["STOCK" as const] : []),
     ])].sort();
     const claimTypeSet = new Set(claimTypes);
     const claims = allClaims.filter(({ type }) => claimTypeSet.has(type));
@@ -1366,15 +1412,47 @@ export async function evaluateRealtimeSalesCycle(
     };
   };
 
+  if(input.nativeNegotiation){
+    const command=input.nativeNegotiation;
+    if(!ports.resolveInboundMessage(command.sourceMessageId)||!state.cart||!state.negotiation)return failedOutput("NATIVE_NEGOTIATION_SOURCE");
+    const selections=await currentSelections(input,state.cart.value,state.checkoutDraft?.address??"",effectNow());
+    const ready=selections.filter((s):s is ReadyCartSelection=>s.status==="READY");
+    if(!selectionsMatchCartLines(state.cart.value.lines,ready))return failedOutput("NATIVE_NEGOTIATION_SNAPSHOT_CHANGED");
+    const result=apply(command);
+    if(result.status!=="APPLIED")return failedOutput(result.status==="REJECTED"?result.reasonCode:"NATIVE_NEGOTIATION_REJECTED");
+    setCartReplayContext(state.negotiation.customerState);
+    const readiness=freshReadiness("CART_READY",ready,state.cart.value);
+    if(!acceptReadiness(readiness))return failedOutput(readiness.reasonCodes[0]??"EFFECT_READINESS_BLOCKED");
+    return {handled:true,messages:[],plan:plan(),transferToHuman:false,desiredTag:null,reasonCode:null};
+  }
+  if (input.nativeMutation) {
+    const { command, mutation } = input.nativeMutation;
+    if (!state.cart || !state.negotiation || !input.canonicalBuyingIntent.contributors.includes("NATIVE_TOOL_PERMISSION") ||
+      command.mutationRef.contentHash !== computeBusinessContentHash({ mutation })) return failedOutput("NATIVE_MUTATION_SCOPE");
+    const beforeCart = state.cart.value, customerState = state.negotiation.customerState;
+    references.set(canonicalJson(command.mutationRef), { mutation });
+    const result = apply(command);
+    if (result.status !== "APPLIED" || !state.cart) return failedOutput("NATIVE_MUTATION_REJECTED");
+    const selections = await currentSelections(input, state.cart.value, state.checkoutDraft?.address ?? "", effectNow());
+    const ready = selections.filter((s): s is ReadyCartSelection => s.status === "READY");
+    if (!selectionsMatchCartLines(state.cart.value.lines, ready)) return failedOutput("NATIVE_MUTATION_SNAPSHOT_CHANGED");
+    const readiness = acceptCartMutationReadiness(mutation.kind, command.commandId, beforeCart, ready, effectNow(), mutation,
+      computeBusinessContentHash({ mutation }).replace(/^sha256:/u, ""), "NATIVE_TOOL_PERMISSION", hashCanonicalBuyingIntentV1(input.canonicalBuyingIntent), customerState);
+    if (readiness.outcome !== "READY") return failedOutput(readiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
+    return { handled: true, messages: [], plan: plan(), transferToHuman: false, desiredTag: null, reasonCode: null };
+  }
+
   const requestCheckoutClarification = (
     missing: readonly CheckoutFieldKey[],
     capturedFields: readonly CheckoutFieldKey[] = [],
+    nativeCommandId?: string,
   ): RealtimeSalesCycleOutput => {
+    const asked = input.checkoutCollection === "SINGLE_FIELD" ? missing.slice(0, 1) : missing;
     const productId = input.productId ?? state.cart?.value.lines.at(-1)?.parentProductId ?? null;
     const previous = state.clarification ?? null;
     const sameRequest = previous?.reasonCode === "CHECKOUT_DETAILS_MISSING" &&
       previous.productId === productId &&
-      sameMissingFields(previous.missingFields, missing);
+      sameMissingFields(previous.missingFields, asked);
     const attemptCount = sameRequest ? previous.attemptCount + 1 : 1;
     if (attemptCount > MAX_CHECKOUT_CLARIFICATION_ATTEMPTS) {
       return {
@@ -1391,12 +1469,14 @@ export async function evaluateRealtimeSalesCycle(
         },
       };
     }
-    const message = clarificationMessage(missing, attemptCount);
+    const message = input.checkoutCollection === "SINGLE_FIELD"
+      ? `${attemptCount === 1 ? "Chị cho em" : attemptCount === 2 ? "Chị gửi riêng" : "Em còn cần"} ${CHECKOUT_FIELD_LABELS[asked[0]!]} nhé.`
+      : clarificationMessage(missing, attemptCount);
     const requested = apply({
       kind: "CLARIFICATION_REQUESTED",
-      commandId: commandId(`clarification-${attemptCount}`),
+      commandId: nativeCommandId ?? commandId(`clarification-${attemptCount}`),
       reasonCode: "CHECKOUT_DETAILS_MISSING",
-      missingFields: missing,
+      missingFields: asked,
       productId,
       questionFingerprint: clarificationFingerprint(message),
       maxAttempts: MAX_CHECKOUT_CLARIFICATION_ATTEMPTS,
@@ -1426,15 +1506,24 @@ export async function evaluateRealtimeSalesCycle(
     };
   };
 
+  if (input.checkoutCollection === "SINGLE_FIELD" && state.clarification?.reasonCode === "CHECKOUT_DETAILS_MISSING" &&
+      ["CART_OPEN", "ORDER_PREVIEW"].includes(state.stage) && classifyConfirmationContract(input.text, null).decision === "REJECT") {
+    const resolved = apply({kind:"CLARIFICATION_RESOLVED",commandId:commandId("checkout-paused")});
+    if (resolved.status !== "APPLIED") return failedOutput("CLARIFICATION_RESOLVE_REJECTED");
+    return {handled:true,messages:[{kind:"TEXT",text:"Dạ, khi nào đặt chị nhắn em nhé."}],plan:plan(),
+      transferToHuman:false,desiredTag:null,reasonCode:"CHECKOUT_PAUSED",telemetry:{clarificationCase:true}};
+  }
+
+  const receiptInbound = input.paymentReceiptInbound ?? inbound;
   if (
     state.stage === "PURCHASE_CONFIRMED" &&
-    input.attachmentIds.length > 0
+    receiptInbound.attachments.length > 0
   ) {
     const result = apply({
       kind: "PAYMENT_RECEIPT_RECEIVED",
       commandId: commandId("payment-receipt"),
-      sourceMessageId: input.messageId,
-      attachmentId: input.attachmentIds[0]!,
+      sourceMessageId: receiptInbound.messageId,
+      attachmentId: receiptInbound.attachments[0]!.attachmentId,
     });
     return result.status === "HANDOFF"
       ? failedOutput(result.reasonCode, plan())
@@ -1549,6 +1638,17 @@ export async function evaluateRealtimeSalesCycle(
     };
   }
 
+  // Candidate confirm can start the existing private intake, but cannot confirm an unseen preview.
+  if (input.commandIdentity?.primarySuffix === "confirm" && state.cart &&
+      ["CART_OPEN", "CHECKOUT_COLLECTING"].includes(state.stage) &&
+      confirmationDecision.decision === "CONFIRM" && confirmationDecision.source === "DETERMINISTIC_CLASSIFIER") {
+    if (state.processedCommandIds.includes(input.commandIdentity.primaryCommandId)) {
+      return { handled: true, messages: [], plan: null, transferToHuman: false, desiredTag: null, reasonCode: "CHECKOUT_REQUEST_REPLAY" };
+    }
+    const missing = missingCheckout(state);
+    if (missing.length) return requestCheckoutClarification(missing, [], input.commandIdentity.primaryCommandId);
+  }
+
   if (state.stage === "ORDER_PREVIEW" && confirmationDecision.decision === "CONFIRM") {
     if (confirmationDecision.source !== "DETERMINISTIC_CLASSIFIER") {
       return {
@@ -1574,6 +1674,8 @@ export async function evaluateRealtimeSalesCycle(
     const selections = await currentSelections(
       input, state.cart.value, state.checkoutDraft.address, effectNow(),
     );
+    const unavailable = selections.find(selection => selection.status !== "READY");
+    if (unavailable) return failedOutput(unavailable.reasonCode);
     const confirmationCheckedAt = effectNow();
     checkoutValidation = revalidation(
       state.cart.value,
@@ -1659,7 +1761,7 @@ export async function evaluateRealtimeSalesCycle(
     const messages: RealtimeSalesCycleOutput["messages"] = [
       {
         kind: "TEXT",
-        text: "Em đã ghi nhận xác nhận mua hàng. Nhân viên sẽ kiểm tra và lên đơn cho chị.",
+        text: "Dạ, shop đã nhận yêu cầu đặt hàng của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé.",
       },
       ...(result.paymentInstruction
         ? [
@@ -1864,7 +1966,9 @@ export async function evaluateRealtimeSalesCycle(
         : { ...reply, wordingAuthority: "MODEL" };
     }
 
-    const details = checkoutDetails(input.text, input.salesSignals);
+    const pending = input.checkoutCollection === "SINGLE_FIELD" && state.clarification?.reasonCode === "CHECKOUT_DETAILS_MISSING" &&
+      state.clarification.missingFields.length === 1 ? state.clarification.missingFields[0] as CheckoutFieldKey : undefined;
+    const details = checkoutDetails(input.text, input.salesSignals, pending);
     const hasDetails = Object.keys(details).length > 0;
     if (hasDetails) {
       const prospectiveCheckoutDraft = { ...state.checkoutDraft, ...details };
@@ -1894,6 +1998,8 @@ export async function evaluateRealtimeSalesCycle(
       const selections = await currentSelections(
         input, state.cart.value, prospectiveCheckoutDraft.address!, preflightCheckedAt,
       );
+      const unavailable = selections.find(selection => selection.status !== "READY");
+      if (unavailable) return failedOutput(unavailable.reasonCode);
       const readySelections = selections.filter(
         (value): value is ReadyCartSelection => value.status === "READY",
       );
@@ -2005,7 +2111,13 @@ export async function evaluateRealtimeSalesCycle(
       });
       if (previewed.status !== "APPLIED" || !state.cart) return failedOutput("ORDER_PREVIEW_REJECTED");
       return protectedCartReply(
-        (cart) => `${cartSummary(cart)}\nNgười nhận: ${preview.recipient.fullName} - ${preview.recipient.phone}\nĐịa chỉ: ${preview.recipient.address}\nThanh toán: ${preview.payment.method === "COD" ? "COD" : "Chuyển khoản"}\nDự kiến nhận hàng: ${checkedEta.minDays}-${checkedEta.maxDays} ngày.\nChị xác nhận chốt đơn giúp em nhé.`,
+        (cart, currentSelections) => {
+          const preorders = currentSelections.filter(s => s.stockStatus === "PRE_ORDER").map(s =>
+            `${input.productNames?.find(p => normalizeCatalogToken(p.productId) === s.line.parentProductId && p.title.trim())?.title ?? s.line.parentProductId}: hàng đặt trước`);
+          return [cartSummary(cart, true, input.productNames), ...preorders, `Người nhận: ${preview.recipient.fullName} - ${preview.recipient.phone}`,
+            `Địa chỉ: ${preview.recipient.address}`, `Thanh toán: ${preview.payment.method === "COD" ? "COD" : "Chuyển khoản"}`,
+            `Dự kiến nhận hàng: ${checkedEta.minDays}-${checkedEta.maxDays} ngày.`, "Chị xác nhận chốt đơn nhé."].join("\n");
+        },
         { selections: readySelections, includeEta: true, telemetry: {
           checkoutCapturedFields: capturedFields,
           checkoutMissingFields: [],
@@ -2214,10 +2326,10 @@ export async function evaluateRealtimeSalesCycle(
       shopAlias: input.shopAlias,
       productId: input.productId,
       offerType: input.offerType,
-      size: explicitSize(input.text) ?? input.size,
+      size: input.canonicalBuyingIntent.contributors.includes("NATIVE_TOOL_PERMISSION") ? input.size : explicitSize(input.text) ?? input.size,
       color: input.color,
       quantity: requestedQuantity(input.canonicalBuyingIntent),
-      lineId: deterministicUuid(`${input.conversationId}:${input.productId}:${input.eventKey}`),
+      lineId: input.commandIdentity?.cartLineId ?? deterministicUuid(`${input.conversationId}:${input.productId}:${input.eventKey}`),
     }, effectNow());
     if (selected.status !== "READY") {
       if (selected.status === "SIZE_REQUIRED" || selected.status === "COLOR_REQUIRED") {
@@ -2252,7 +2364,7 @@ export async function evaluateRealtimeSalesCycle(
       return failedOutput("SALES_STAGE_NOT_READY_FOR_CART", plan());
     }
     const draft = {
-      identity: {
+      identity: input.commandIdentity?.cartIdentity ?? {
         cartId: deterministicUuid(`${input.conversationId}:${input.eventKey}:cart`),
         salesEpisodeId: deterministicUuid(`${input.conversationId}:sales-episode`),
         customerProfileId: deterministicUuid(`${input.customerHash}:customer-profile`),
@@ -2277,7 +2389,7 @@ export async function evaluateRealtimeSalesCycle(
       kind: "CART_OPENED",
       commandId: commandId("cart-open"),
       cartDraftRef: draftReference,
-      expiresAt: new Date(input.now.getTime() + CART_TTL_MS_V1).toISOString(),
+      expiresAt: input.commandIdentity?.cartExpiresAt ?? new Date(input.now.getTime() + CART_TTL_MS_V1).toISOString(),
     });
     if (opened.status !== "APPLIED" || !state.cart) return failedOutput("CART_OPEN_FAILED", plan());
     const cartOpenPlaceholder = {

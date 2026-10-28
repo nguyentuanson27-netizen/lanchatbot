@@ -1,0 +1,139 @@
+{
+  "sourceSha": "bb87949347bc8c1b3f28d41a475f57202824e83a",
+  "nativeRegistered": 51,
+  "nativeExecuted": 51,
+  "nativeNotRun": 0,
+  "controlsExecuted": 17,
+  "completeDenominator": 68,
+  "nativeTerminals": {
+    "SEND_ELIGIBLE": 36,
+    "HANDOFF": 10,
+    "NO_SEND": 5
+  },
+  "providerGenerationRequests": 138,
+  "maximumUpstreamPerGeneration": 1,
+  "retry": 0,
+  "requestsByRole": {
+    "control-verifier": 17,
+    "owner": 85,
+    "verifier": 36
+  },
+  "observedModelVersions": {
+    "gpt-6.1-sol": 53,
+    "gemini-3.5-flash-lite": 85
+  },
+  "generationErrors": [
+    {
+      "role": "owner",
+      "id": "66bdaf78-ac94-4774-a5b9-ed523e502236:owner:1",
+      "httpStatus": 200,
+      "code": "OWNER_TOOL_OUTPUT",
+      "providerRequests": 1
+    }
+  ],
+  "tokens": {
+    "input": 936062,
+    "output": 82880,
+    "thinkingIncludedInOutput": 76321
+  },
+  "tokensByRole": {
+    "owner": {
+      "input": 609109,
+      "output": 77304,
+      "thinkingIncludedInOutput": 72876
+    },
+    "verifier": {
+      "input": 201506,
+      "output": 3058,
+      "thinkingIncludedInOutput": 2198
+    },
+    "control-verifier": {
+      "input": 125447,
+      "output": 2518,
+      "thinkingIncludedInOutput": 1247
+    }
+  },
+  "cost": null,
+  "verifierProviderLatencyMs": {
+    "samples": 36,
+    "p50": 5811,
+    "p95": 9015
+  },
+  "verificationWithReadbackMs": {
+    "samples": 36,
+    "p50": 7332.658200000005,
+    "p95": 12140.331099999996
+  },
+  "driverSlotLatencyMs": {
+    "samples": 51,
+    "p50": 19018.89870000002,
+    "p95": 39356.4781
+  },
+  "reconstructedAccounting": [
+    {
+      "caseId": "b1-partial-source-v3",
+      "runtimeErrorCode": "TOOL_WORK_COUNTER",
+      "generationIds": [
+        "66bdaf78-ac94-4774-a5b9-ed523e502236:owner:1"
+      ],
+      "rawArtifactUnmodified": true,
+      "runtimeCountersRecovered": false,
+      "notes": "Only request/error/token accounting restored from actual logged telemetry; original runtime tool counters and full result envelope remain unknown."
+    }
+  ],
+  "customerInputRestoredFromActualRequest": [
+    "b1-partial-source-v3"
+  ],
+  "runtimeErrors": [
+    {
+      "caseId": "b1-partial-source-v3",
+      "code": "TOOL_WORK_COUNTER",
+      "terminal": "NO_SEND",
+      "reason": "ATTEMPT_UNAVAILABLE"
+    }
+  ],
+  "captureDisplayRestoredByHash": [
+    "opening-ad"
+  ],
+  "wireAudit": {
+    "capturedActualBodies": 138,
+    "ownerHashChecks": 85,
+    "ownerWireMatchChecks": 85,
+    "verifierWireChecks": 32,
+    "b1VerifierTelemetryChecks": 21,
+    "boundedEvaluatorOrSecretKeyMatches": 0,
+    "boundedCaseIdStringMatches": 0
+  },
+  "testDatabaseCleanup": [
+    {
+      "cohort": "opening-quotes",
+      "testDatabase": "c3_b_test_31cf172b1ec1694a",
+      "dropped": true
+    },
+    {
+      "cohort": "media-followup",
+      "testDatabase": "c3_b_test_2b417bb5d95cca22",
+      "dropped": true
+    },
+    {
+      "cohort": "missing-pos",
+      "testDatabase": "c3_b_test_6dc31e2a65f44047",
+      "dropped": true
+    },
+    {
+      "cohort": "journey-openings",
+      "testDatabase": "c3_b_test_c17a288a1af36dd3",
+      "dropped": true
+    },
+    {
+      "cohort": "stateful",
+      "testDatabase": "c3_b_test_70c6189673ba7545",
+      "dropped": true
+    },
+    {
+      "cohort": "negotiation",
+      "testDatabase": "c3_b_test_e94281697ca56c44",
+      "dropped": true
+    }
+  ]
+}

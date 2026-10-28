@@ -1,0 +1,138 @@
+{
+  "kind": "PRE_PROVIDER_REGISTRATION",
+  "candidateRunSourceSha": "a39e45affbd1a8171d8e13ffe2d741cc6624278d",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "434e5dc01326075c74b63ff705406b531ec5adc3b95214b55731bc52b8ce86f3",
+    "verifier": "0b240599a04d9a86c25ed2b3b815c152e83106c85e61940efde15b020e4c2fde"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "inputAndRunnerHashes": {
+    "manifest.json": "972438b1731b09b4d03cc4f3ed4bf2ac4a822b4a8a65d5f5a97d032ff6cd9b34",
+    "source-config.b1.json": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+    "cases.b1.json": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+    "stateful-cases.json": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+    "sales-journeys.candidate.json": "4b888f6e44f5b4e144125da38d70bf175946dc5277eabb8d0ab5a6639077fbeb",
+    "prompts/owner.vi.txt": "434e5dc01326075c74b63ff705406b531ec5adc3b95214b55731bc52b8ce86f3",
+    "prompts/verifier.vi.txt": "0b240599a04d9a86c25ed2b3b815c152e83106c85e61940efde15b020e4c2fde",
+    "run.mjs": "0321dc30c35a94e4cccc227a232c75cfdddfd48157201da4a7240cfed430ed5c",
+    "isolated-integration.mjs": "55072218fa975a3370fa08d138e4541c175bc975c81897f24fd14f2a58ae87b2",
+    "stateful-provider.mjs": "cf9b39241acf52f88306ce6953dc21736656b497a87f0f8d8451fe18c7b48b96",
+    "source-session.py": "94b6cac60dff03506badc1751ba4e8ea54cce278ec82ff448eeb0e8a6a44294d",
+    "model-code-division-run-20261019/raw/credential-launcher.py": "84a43f0c8ba5c46a48db6552f61910d2e93e198f5b6807c4afc4de8d581eeab3"
+  },
+  "registeredOutcomes": 39,
+  "populations": {
+    "b1": 24,
+    "stateful": 8,
+    "journeyOpenings": 4,
+    "negotiationCompanion": 3
+  },
+  "maximumGenerationRequests": 152,
+  "repetitions": 1,
+  "retry": 0,
+  "qualityEarlyStop": false,
+  "sendEnabled": false,
+  "unregisteredCandidateSlots": 28,
+  "registeredCaseIds": {
+    "b1": [
+      "b1-changed-occasion",
+      "b1-current-policy",
+      "b1-partial-source",
+      "b1-price",
+      "b1-component-stock",
+      "b1-search-read",
+      "b1-buying-concern",
+      "b1-policy-used",
+      "b1-changed-occasion-v2",
+      "b1-current-policy-v2",
+      "b1-partial-source-v2",
+      "b1-price-v2",
+      "b1-component-stock-v2",
+      "b1-search-read-v2",
+      "b1-buying-concern-v2",
+      "b1-policy-used-v2",
+      "b1-changed-occasion-v3",
+      "b1-current-policy-v3",
+      "b1-partial-source-v3",
+      "b1-price-v3",
+      "b1-component-stock-v3",
+      "b1-search-read-v3",
+      "b1-buying-concern-v3",
+      "b1-policy-used-v3"
+    ],
+    "stateful": [
+      "stateful-open",
+      "stateful-variant-quantity",
+      "stateful-quote",
+      "stateful-correction",
+      "stateful-request-checkout",
+      "stateful-private-checkout",
+      "stateful-confirm",
+      "stateful-human-request"
+    ],
+    "journeyOpenings": [
+      "sales-discovery-advice:need",
+      "sales-product-gallery:overview",
+      "sales-size-advice:height-weight",
+      "sales-southern-delivery:deadline"
+    ],
+    "negotiationCompanion": [
+      "negotiation-cart-setup",
+      "negotiation-price-objection",
+      "negotiation-total-control"
+    ]
+  },
+  "frozenAt": "2026-10-22T07:31:33.643Z",
+  "operationalCommandScriptHash": "357c9c60946c87e389abf4e78306fd753b224b66ad6a28f5da4f6020ea2d6d27"
+}

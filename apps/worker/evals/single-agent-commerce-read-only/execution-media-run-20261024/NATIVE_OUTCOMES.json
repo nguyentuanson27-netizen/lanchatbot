@@ -1,0 +1,303 @@
+[
+  {
+    "file": "native\\b1-11-11\\attempt-11.json",
+    "caseId": "b1-partial-source-v2",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Chân váy làm từ chất liệu ren tơ Hàn mềm, có form nhẹ và độ rũ tự nhiên. Hiện tại hệ thống chưa có sẵn thông tin giá và tình trạng size M riêng cho chân váy này nên em chưa báo giá chính xác cho mình được ạ.",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": null,
+    "actualCapturedAttachments": null
+  },
+  {
+    "file": "native\\b1-15-15\\attempt-15.json",
+    "caseId": "b1-buying-concern-v2",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, chị hoàn toàn có thể tự tin chọn set này đi ăn cưới ban ngày nha chị. \n\nDù chị quen mặc đồ trơn và sợ set có ren, thêu sẽ hơi điệu, nhưng Thạch Thảo được thiết kế form nhẹ nhàng với chất tơ Hàn và ren tơ mềm, có độ bay và rũ tự nhiên nên lên người rất thanh thoát, không bị cứng hay rườm rà quá mức. Các chi tiết thêu nổi và ren chỉ tạo điểm nhấn trang nhã, vừa đủ lịch sự, sang trọng cho không gian tiệc cưới ban ngày mà vẫn giữ được sự tinh tế, nhã nhặn cho người quen mặc đơn giản như chị. \n\nSet này có giá 799.000đ và hiện shop đang có sẵn hàng, chị cân nhắc lấy diện đi tiệc rất hợp và thoải mái ạ.",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": null,
+    "actualCapturedAttachments": null
+  },
+  {
+    "file": "native\\b1-17-17\\attempt-17.json",
+    "caseId": "b1-changed-occasion-v3",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, gặp khách hàng buổi sáng thì mình lấy áo lẻ thôi chị ạ. Áo tơ Hàn có form nhẹ và họa tiết thêu nổi tinh tế, khi phối cùng các trang phục gọn gàng sẽ giúp tổng thể trông thanh lịch và chuyên nghiệp hơn. \n\nCòn cả bộ có thêm chân váy ren tơ mềm với độ rũ tự nhiên, thiên về nét mềm mại và bay bổng hơn nên sẽ hợp với tiệc tối hơn chị nhé.",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": null,
+    "actualCapturedAttachments": null
+  },
+  {
+    "file": "native\\b1-23-23\\attempt-23.json",
+    "caseId": "b1-buying-concern-v3",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Với ngân sách 850 nghìn, chị hoàn toàn có thể chọn mua riêng áo (499 nghìn) hoặc lấy cả bộ (799 nghìn) đều vừa vặn ạ.\n\nNếu chị ưu tiên sự linh hoạt để phối đồ mặc lại nhiều lần, em gợi ý chị mua **riêng áo Thạch Thảo** (499 nghìn). Áo chất tơ Hàn thêu nổi form nhẹ rất dễ mix-match cùng chân váy đen dáng suông sẵn có của chị để đi làm hay đi chơi. \n\nCòn nếu chị thích diện nguyên set ren tơ Hàn đồng bộ, thướt tha đúng chuẩn thiết kế, lấy **cả bộ** (799 nghìn) cũng nằm trọn trong ngân sách của mình luôn chị nhé. \n\nChị thích phương án mua riêng áo để phối cùng đồ sẵn có hay lấy cả bộ ạ?",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": null,
+    "actualCapturedAttachments": null
+  },
+  {
+    "file": "native\\b1-3-3\\attempt-3.json",
+    "caseId": "b1-partial-source",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Set Thạch Thảo có áo làm từ tơ Hàn thêu họa tiết thêu nổi, chất vải mềm, thoáng và có độ bay tự nhiên; chân váy bằng ren tơ Hàn mềm, form nhẹ, rũ tự nhiên chị nhé. \n\nDạ hiện tại thông tin về giá và tình trạng còn hàng của size M chưa được cập nhật trên hệ thống ạ.",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": null,
+    "actualCapturedAttachments": null
+  },
+  {
+    "file": "native\\b1-4-4\\attempt-4.json",
+    "caseId": "b1-price",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, set váy Thạch Thảo (SV2447) có giá 799.000đ cho cả bộ ạ. Ngoài ra, sản phẩm có bán lẻ các món:\n- Áo lẻ: 499.000đ\n- Chân váy lẻ: 449.000đ",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": null,
+    "actualCapturedAttachments": null
+  },
+  {
+    "file": "native\\b1-5-5\\attempt-5.json",
+    "caseId": "b1-component-stock",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, áo của set Thạch Thảo size M hiện vẫn còn hàng chị nhé. Áo bán riêng có giá 499.000đ ạ.",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": null,
+    "actualCapturedAttachments": null
+  },
+  {
+    "file": "native\\b1-7-7\\attempt-7.json",
+    "caseId": "b1-buying-concern",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ set này mặc đi tiệc ban ngày rất hợp và không bị rườm rà đâu chị nhé. Áo làm từ chất tơ Hàn thêu form nhẹ, kết hợp cùng chân váy ren tơ mềm có độ rũ và độ bay tự nhiên, tạo tổng thể thanh thoát và sang trọng. \n\nNgân sách 900 nghìn của chị hoàn toàn thoải mái vì nguyên bộ có giá 799.000đ thôi ạ. Chị có muốn em lên đơn luôn cho mình không ạ?",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": null,
+    "actualCapturedAttachments": null
+  },
+  {
+    "file": "native\\b1-8-8\\attempt-8.json",
+    "caseId": "b1-policy-used",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, theo quy định của shop, sản phẩm đổi hàng yêu cầu chưa qua sử dụng (chỉ ướm thử bên ngoài). Do chị đã mặc đi làm rồi nên shop không hỗ trợ đổi sang màu khác được, mong chị thông cảm giúp em nhé ạ!",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": null,
+    "actualCapturedAttachments": null
+  },
+  {
+    "file": "native\\b1-9-9\\attempt-9.json",
+    "caseId": "b1-changed-occasion-v2",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Áo dùng chất tơ Hàn thêu mềm, thoáng cùng chân váy ren tơ Hàn form nhẹ và có độ bay tự nhiên. Nếu chị lo ở ngoài trời lâu dễ nóng, mình có thể chọn mua riêng áo lẻ phối với đồ khác cho nhẹ thoáng, hoặc diện cả set vì thiết kế form nhẹ nhàng ạ.",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": null,
+    "actualCapturedAttachments": null
+  },
+  {
+    "file": "native\\media\\provider-attempt-1.json",
+    "caseId": "media-overview-next:ask",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?",
+      "fallbackId": "C3_B_MEDIA_NEXT_STEP_V1"
+    },
+    "actualCapturedMessages": [
+      "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?"
+    ],
+    "actualCapturedAttachments": []
+  },
+  {
+    "file": "native\\media\\provider-attempt-2.json",
+    "caseId": "media-overview-next:continue",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ chị xem ảnh mặc lên form cả bộ Thạch Thảo nha ạ!",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": [
+      "Dạ chị xem ảnh mặc lên form cả bộ Thạch Thảo nha ạ!",
+      "[CODE_IMAGE]",
+      "[CODE_IMAGE]"
+    ],
+    "actualCapturedAttachments": [
+      {
+        "sequence": 1,
+        "type": "image",
+        "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+      },
+      {
+        "sequence": 2,
+        "type": "image",
+        "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg"
+      }
+    ]
+  },
+  {
+    "file": "native\\media\\provider-attempt-3.json",
+    "caseId": "media-detail-next:ask",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ bộ Thạch Thảo hiện chưa có ảnh khách mặc ạ. Chị có muốn xem ảnh chụp chi tiết hoa văn thêu nổi và chất tơ Hàn của mẫu này không ạ?",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": [
+      "Dạ bộ Thạch Thảo hiện chưa có ảnh khách mặc ạ. Chị có muốn xem ảnh chụp chi tiết hoa văn thêu nổi và chất tơ Hàn của mẫu này không ạ?"
+    ],
+    "actualCapturedAttachments": []
+  },
+  {
+    "file": "native\\media\\provider-attempt-4.json",
+    "caseId": "media-detail-next:continue",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ em gửi chị ảnh cận cảnh họa tiết thêu nổi trên áo ạ.",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": [
+      "Dạ em gửi chị ảnh cận cảnh họa tiết thêu nổi trên áo ạ.",
+      "[CODE_IMAGE]"
+    ],
+    "actualCapturedAttachments": [
+      {
+        "sequence": 1,
+        "type": "image",
+        "url": "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg"
+      }
+    ]
+  },
+  {
+    "file": "native\\media\\provider-attempt-5.json",
+    "caseId": "media-and-price:ask",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ hiện shop chưa có sẵn ảnh khách mặc mẫu này, em gửi chị ảnh chụp sản phẩm nha. Áo lẻ Thạch Thảo có giá 499.000đ chị nhé.",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": [
+      "Dạ hiện shop chưa có sẵn ảnh khách mặc mẫu này, em gửi chị ảnh chụp sản phẩm nha. Áo lẻ Thạch Thảo có giá 499.000đ chị nhé.",
+      "[CODE_IMAGE]"
+    ],
+    "actualCapturedAttachments": [
+      {
+        "sequence": 1,
+        "type": "image",
+        "url": "https://content.pancake.vn/1/s3000x3000/79/0c/78/d8/a10cffdc9d29de26105f87f0fc08ba1dbe4197c8a76c6843d7d3d870-w:3588-h:5382-l:1102566-t:image/jpeg.jpeg"
+      }
+    ]
+  },
+  {
+    "file": "native\\media\\provider-attempt-6.json",
+    "caseId": "media-and-size:ask",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "BUDGET",
+      "text": "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?",
+      "fallbackId": "C3_B_MEDIA_NEXT_STEP_V1"
+    },
+    "actualCapturedMessages": [
+      "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?"
+    ],
+    "actualCapturedAttachments": []
+  },
+  {
+    "file": "native\\media\\provider-attempt-7.json",
+    "caseId": "media-decision:ask",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, phần chân váy của set Thạch Thảo dùng chất ren tơ Hàn mềm và có độ rũ tự nhiên nên khi mặc lên sẽ tạo độ bay bổng, thanh nhã chứ không bị cứng hay rườm rà đâu chị ạ, rất nhẹ nhàng và lịch sự để đi ăn cưới buổi trưa. \n\nNếu chị vẫn muốn tiết chế độ ren, mẫu này có bán riêng áo lẻ (499.000đ) chất tơ Hàn thêu nổi để chị dễ phối với quần hoặc chân váy trơn khác. Còn nguyên bộ (799.000đ) thì tổng thể thiết kế hài hòa và rất ăn ảnh. Chị muốn chọn mặc cả bộ hay lấy áo lẻ phối riêng ạ?",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": [
+      "Dạ, phần chân váy của set Thạch Thảo dùng chất ren tơ Hàn mềm và có độ rũ tự nhiên nên khi mặc lên sẽ tạo độ bay bổng, thanh nhã chứ không bị cứng hay rườm rà đâu chị ạ, rất nhẹ nhàng và lịch sự để đi ăn cưới buổi trưa. \n\nNếu chị vẫn muốn tiết chế độ ren, mẫu này có bán riêng áo lẻ (499.000đ) chất tơ Hàn thêu nổi để chị dễ phối với quần hoặc chân váy trơn khác. Còn nguyên bộ (799.000đ) thì tổng thể thiết kế hài hòa và rất ăn ảnh. Chị muốn chọn mặc cả bộ hay lấy áo lẻ phối riêng ạ?"
+    ],
+    "actualCapturedAttachments": []
+  },
+  {
+    "file": "native\\openings\\provider-attempt-1.json",
+    "caseId": "sales-discovery-advice:need",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "actualCapturedMessages": [
+      "Phần này em chưa trả lời được, chị nhé."
+    ],
+    "actualCapturedAttachments": []
+  },
+  {
+    "file": "native\\openings\\provider-attempt-2.json",
+    "caseId": "sales-product-gallery:overview",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?",
+      "fallbackId": "C3_B_MEDIA_NEXT_STEP_V1"
+    },
+    "actualCapturedMessages": [
+      "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?"
+    ],
+    "actualCapturedAttachments": []
+  },
+  {
+    "file": "native\\openings\\provider-attempt-3.json",
+    "caseId": "sales-size-advice:height-weight",
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "SIZE_RULE_UNAVAILABLE",
+      "text": "Em chuyển nhân viên chọn size cho chị nhé.",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": [
+      "Em chuyển nhân viên chọn size cho chị nhé."
+    ],
+    "actualCapturedAttachments": []
+  },
+  {
+    "file": "native\\openings\\provider-attempt-4.json",
+    "caseId": "sales-southern-delivery:deadline",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ set này ship về Cần Thơ dự kiến mất từ 4 đến 8 ngày nên không kịp giao cho chị vào sáng mai được ạ.",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": [
+      "Dạ set này ship về Cần Thơ dự kiến mất từ 4 đến 8 ngày nên không kịp giao cho chị vào sáng mai được ạ."
+    ],
+    "actualCapturedAttachments": []
+  }
+]

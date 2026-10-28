@@ -1,0 +1,278 @@
+{
+  "sourceSha": "342ef0cff2888908518872f707ea33ede0f9c290",
+  "ownerRequests": 87,
+  "withHints": 43,
+  "withoutHints": 44,
+  "maxHintFieldBytes": 2161,
+  "maxProducts": 3,
+  "verifierRequests": 37,
+  "verifierTrustedHintFields": 0,
+  "toolCalls": {
+    "quote_product": 3,
+    "read_product": 16,
+    "request_handoff": 8,
+    "select_product_media": 3,
+    "recommend_size": 3,
+    "search_products": 5,
+    "read_policy": 6,
+    "apply_customer_state": 5,
+    "add_to_cart": 3,
+    "change_cart_item": 2,
+    "confirm_purchase": 2,
+    "record_negotiation": 1
+  },
+  "byCohort": {
+    "opening-quotes": {
+      "ownerRequests": 9,
+      "withHints": 8,
+      "withoutHints": 1,
+      "maxHintBytes": 719
+    },
+    "media-followup": {
+      "ownerRequests": 8,
+      "withHints": 8,
+      "withoutHints": 0,
+      "maxHintBytes": 719
+    },
+    "missing-pos": {
+      "ownerRequests": 4,
+      "withHints": 4,
+      "withoutHints": 0,
+      "maxHintBytes": 719
+    },
+    "b1-first": {
+      "ownerRequests": 15,
+      "withHints": 0,
+      "withoutHints": 15,
+      "maxHintBytes": 0
+    },
+    "b1-rest": {
+      "ownerRequests": 27,
+      "withHints": 0,
+      "withoutHints": 27,
+      "maxHintBytes": 0
+    },
+    "journey-openings": {
+      "ownerRequests": 8,
+      "withHints": 7,
+      "withoutHints": 1,
+      "maxHintBytes": 2161
+    },
+    "stateful": {
+      "ownerRequests": 10,
+      "withHints": 10,
+      "withoutHints": 0,
+      "maxHintBytes": 719
+    },
+    "negotiation": {
+      "ownerRequests": 6,
+      "withHints": 6,
+      "withoutHints": 0,
+      "maxHintBytes": 719
+    }
+  },
+  "sizeResponses": [
+    {
+      "caseId": "sales-size-advice:height-weight",
+      "generationId": "a4e8d453-ef27-49a8-b8fd-e6461eff83d5:owner:2",
+      "status": "RECOMMENDED",
+      "recommendedSizes": [
+        {
+          "componentProductId": "SV2447",
+          "componentRole": "OTHER",
+          "size": "M"
+        }
+      ],
+      "inputFitPreference": "RELAXED",
+      "alternativeSizes": []
+    }
+  ],
+  "hintTelemetry": [
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 0,
+      "bytes": 2
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 0,
+      "bytes": 2
+    },
+    {
+      "includedProducts": 3,
+      "bytes": 2161
+    },
+    {
+      "includedProducts": 3,
+      "bytes": 2161
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    },
+    {
+      "includedProducts": 1,
+      "bytes": 719
+    }
+  ],
+  "notes": [
+    "Actual-wire bounds/co-location evidence; no quality or stability inference.",
+    "Tool call totals include model proposals; do not claim that each was executed.",
+    "No-extra-read property is covered by deterministic tests, not established causally by this run.",
+    "Hints absent from verifier trusted context; selected media still uses existing claims/readback."
+  ]
+}

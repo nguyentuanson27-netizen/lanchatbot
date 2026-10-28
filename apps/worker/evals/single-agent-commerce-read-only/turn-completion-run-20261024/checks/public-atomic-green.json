@@ -1,0 +1,18 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@lana/worker",
+    "exec",
+    "vitest",
+    "run",
+    "src/single-agent-commerce-persistence.test.ts",
+    "src/single-agent-commerce-ingress.test.ts",
+    "src/single-agent-commerce-handoff.test.ts",
+    "src/single-agent-commerce-handoff-delivery.test.ts",
+    "src/meta-outbox-dispatcher.test.ts",
+    "src/single-agent-commerce-media-delivery.test.ts"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 8.010404348373413
+}

@@ -1,0 +1,31 @@
+{
+  "registered": 32,
+  "recorded": 32,
+  "runSourceSha": "89c6965c6a76ceab52380a5c8167c0b946bc06dd",
+  "primaryCounts": {
+    "b1-1": {
+      "USABLE": 20,
+      "NEEDS_EDIT": 1,
+      "UNUSABLE": 3
+    },
+    "stateful-1": {
+      "USABLE": 7,
+      "OWNERSHIP_CONTROL": 1
+    }
+  },
+  "recommendation": "STOP_AT_OWNER_REVIEW",
+  "providerRequests": 85,
+  "retry": 0,
+  "sendEnabled": false,
+  "limitations": [
+    "N1 per case",
+    "Agent review, no independent human scoring",
+    "No stability or live GO claim"
+  ],
+  "observedProtectedOverclaimReview": {
+    "count": 1,
+    "caseId": "b1-changed-occasion-v2",
+    "slot": 9,
+    "basis": "Whole-turn agent review: general breathable/light source does not establish no-stuffiness for heat-sensitive customer standing outside long. Verifier PASS, send-eligible. No human adjudication."
+  }
+}

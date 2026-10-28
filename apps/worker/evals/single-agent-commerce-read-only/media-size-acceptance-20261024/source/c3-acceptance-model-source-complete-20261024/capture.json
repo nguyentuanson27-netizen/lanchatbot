@@ -1,0 +1,505 @@
+{
+  "mode": "FRESH_WHOLE_WORLD_CAPTURE",
+  "sourceSha": "af482367aa953486a27f290b658c23ef1200f993",
+  "sourceConfigHash": "b4c15f1823bf16d63a1ff67eb3a11711b28ed6592ec7bc1e65e0ceb3fbbc0d59",
+  "capturedAt": "2026-10-24T11:25:21.304Z",
+  "product": {
+    "productId": "SV2447",
+    "parentProductId": "SV2447",
+    "canonicalCode": "SV2447",
+    "aliases": [
+      "SET VÁY THẠCH THẢO",
+      "SV2447"
+    ],
+    "title": "Set váy Thạch Thảo",
+    "descriptionXml": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+    "descriptionAuthority": "WEBSTORE_XML",
+    "descriptionSourceVersion": "catalog-v2",
+    "attributes": null,
+    "colors": [],
+    "materials": [
+      "REN",
+      "TƠ"
+    ],
+    "silhouettes": [],
+    "occasions": [],
+    "imageUrls": [
+      "https://content.pancake.vn/web-media-262/s3000x3000/6a/2d/75/b3/97a0cc14210c5ad56ebd4193b2669e7b5b4ff2c1275167a871e9626b-w:1500-h:1500-l:228804-t:image/jpeg.jpeg",
+      "https://content.pancake.vn/1/s3000x3000/d9/a1/e3/e9/02be5da5317318f897bfb1d9832209119f6bd9ce6375c86e1732fdf1-w:3689-h:4356-l:748803-t:image/jpeg.jpeg",
+      "https://content.pancake.vn/1/s3000x3000/98/2e/e9/c9/fa4ef428affd10887671ae2e0a291a5233f8b54e6415b0421300eb51-w:2363-h:2560-l:262232-t:image/jpeg.jpeg",
+      "https://content.pancake.vn/1/s3000x3000/42/0c/f9/40/34c6621718647ef30d581165b0f1f640e7ca636b9bdcaa159081513d-w:5783-h:3855-l:1697298-t:image/jpeg.jpeg",
+      "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg",
+      "https://content.pancake.vn/1/s3000x3000/33/8b/6b/7b/525c1b16d31d503968a755c5ad8e3b1bcc85755422b037b28381446e-w:3816-h:5724-l:1368979-t:image/jpeg.jpeg",
+      "https://content.pancake.vn/1/s3000x3000/03/b8/b3/49/e18d1ca313e0a94d9e5c586b6bddd7d1bece7ad48e67ff95935da1a5-w:3739-h:5705-l:1249262-t:image/jpeg.jpeg",
+      "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg",
+      "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg",
+      "https://content.pancake.vn/1/s3000x3000/af/4d/2e/c4/4bf9c44dee7e5d96280b0260373a562d3db98b2072b5975812f70879-w:4000-h:6000-l:804536-t:image/jpeg.jpeg",
+      "https://content.pancake.vn/1/s3000x3000/79/0c/78/d8/a10cffdc9d29de26105f87f0fc08ba1dbe4197c8a76c6843d7d3d870-w:3588-h:5382-l:1102566-t:image/jpeg.jpeg"
+    ],
+    "images": [
+      {
+        "url": "https://content.pancake.vn/web-media-262/s3000x3000/6a/2d/75/b3/97a0cc14210c5ad56ebd4193b2669e7b5b4ff2c1275167a871e9626b-w:1500-h:1500-l:228804-t:image/jpeg.jpeg",
+        "role": "ADDITIONAL",
+        "angle": "UNKNOWN",
+        "imageType": "SIZE_GUIDE",
+        "intents": [
+          "SIZE_GUIDE"
+        ],
+        "partsVisible": [
+          "UNKNOWN"
+        ],
+        "sortOrder": 10,
+        "qualityScore": 0.95,
+        "feedback": false,
+        "observedAt": null,
+        "sourceContentSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+        "reviewStatus": "APPROVED",
+        "metadataVerified": true
+      },
+      {
+        "url": "https://content.pancake.vn/1/s3000x3000/d9/a1/e3/e9/02be5da5317318f897bfb1d9832209119f6bd9ce6375c86e1732fdf1-w:3689-h:4356-l:748803-t:image/jpeg.jpeg",
+        "role": "ADDITIONAL",
+        "angle": "FRONT",
+        "imageType": "MODEL",
+        "intents": [
+          "LOOKBOOK",
+          "STYLE_REFERENCE"
+        ],
+        "partsVisible": [
+          "FULL_SET"
+        ],
+        "sortOrder": 9,
+        "qualityScore": 0.95,
+        "feedback": false,
+        "observedAt": null,
+        "sourceContentSha256": "b3d828d8ce15114441c356abf66feab67652201b00f53ad77350cc6e703b96c8",
+        "reviewStatus": "APPROVED",
+        "metadataVerified": true
+      },
+      {
+        "url": "https://content.pancake.vn/1/s3000x3000/98/2e/e9/c9/fa4ef428affd10887671ae2e0a291a5233f8b54e6415b0421300eb51-w:2363-h:2560-l:262232-t:image/jpeg.jpeg",
+        "role": "ADDITIONAL",
+        "angle": "FRONT",
+        "imageType": "SIZE_GUIDE",
+        "intents": [
+          "SIZE_GUIDE",
+          "PRODUCT_OVERVIEW"
+        ],
+        "partsVisible": [
+          "AO",
+          "CHAN_VAY"
+        ],
+        "sortOrder": 8,
+        "qualityScore": 0.9,
+        "feedback": false,
+        "observedAt": null,
+        "sourceContentSha256": "3a321ad8b6b888fa470bdda8b83ae24c19238ca5132a56fbeab3dabe3ef7c2fc",
+        "reviewStatus": "APPROVED",
+        "metadataVerified": true
+      },
+      {
+        "url": "https://content.pancake.vn/1/s3000x3000/42/0c/f9/40/34c6621718647ef30d581165b0f1f640e7ca636b9bdcaa159081513d-w:5783-h:3855-l:1697298-t:image/jpeg.jpeg",
+        "role": "ADDITIONAL",
+        "angle": "CLOSEUP",
+        "imageType": "DETAIL",
+        "intents": [
+          "MATERIAL_CLOSEUP",
+          "DETAIL"
+        ],
+        "partsVisible": [
+          "UNKNOWN"
+        ],
+        "sortOrder": 6,
+        "qualityScore": 0.95,
+        "feedback": false,
+        "observedAt": null,
+        "sourceContentSha256": "e651cf09b93cc24f14b21c3539f33430df24346b96d76f580e7e4fcd7d4dd4a3",
+        "reviewStatus": "APPROVED",
+        "metadataVerified": true
+      },
+      {
+        "url": "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg",
+        "role": "ADDITIONAL",
+        "angle": "CLOSEUP",
+        "imageType": "DETAIL",
+        "intents": [
+          "DETAIL",
+          "MATERIAL_CLOSEUP"
+        ],
+        "partsVisible": [
+          "AO"
+        ],
+        "sortOrder": 4,
+        "qualityScore": 0.95,
+        "feedback": false,
+        "observedAt": null,
+        "sourceContentSha256": "4faaa0ba7fea7dc2058d6e7ece47f6d422be40c96ff06ab6ea568ba9c0aa1961",
+        "reviewStatus": "APPROVED",
+        "metadataVerified": true
+      },
+      {
+        "url": "https://content.pancake.vn/1/s3000x3000/33/8b/6b/7b/525c1b16d31d503968a755c5ad8e3b1bcc85755422b037b28381446e-w:3816-h:5724-l:1368979-t:image/jpeg.jpeg",
+        "role": "ADDITIONAL",
+        "angle": "FRONT",
+        "imageType": "MODEL",
+        "intents": [
+          "LOOKBOOK",
+          "PRODUCT_OVERVIEW"
+        ],
+        "partsVisible": [
+          "AO",
+          "CHAN_VAY"
+        ],
+        "sortOrder": 5,
+        "qualityScore": 0.95,
+        "feedback": false,
+        "observedAt": null,
+        "sourceContentSha256": "8ff6f315a32aaee37d9a6bad154579241ca6aa2116d6106c34332ba7a98cad56",
+        "reviewStatus": "APPROVED",
+        "metadataVerified": true
+      },
+      {
+        "url": "https://content.pancake.vn/1/s3000x3000/03/b8/b3/49/e18d1ca313e0a94d9e5c586b6bddd7d1bece7ad48e67ff95935da1a5-w:3739-h:5705-l:1249262-t:image/jpeg.jpeg",
+        "role": "ADDITIONAL",
+        "angle": "FRONT",
+        "imageType": "MODEL",
+        "intents": [
+          "LOOKBOOK",
+          "PRODUCT_OVERVIEW"
+        ],
+        "partsVisible": [
+          "FULL_SET"
+        ],
+        "sortOrder": 1,
+        "qualityScore": 0.95,
+        "feedback": false,
+        "observedAt": null,
+        "sourceContentSha256": "fde1e4c575c26587d753dad576701b4a51634a25ef6ac1dd5510b5db16e14f9f",
+        "reviewStatus": "APPROVED",
+        "metadataVerified": true
+      },
+      {
+        "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg",
+        "role": "ADDITIONAL",
+        "angle": "BACK",
+        "imageType": "MODEL",
+        "intents": [
+          "LOOKBOOK",
+          "STYLE_REFERENCE"
+        ],
+        "partsVisible": [
+          "FULL_SET"
+        ],
+        "sortOrder": 3,
+        "qualityScore": 0.95,
+        "feedback": false,
+        "observedAt": null,
+        "sourceContentSha256": "7844275ffdb4d48159d8c10ab9f1fba6b920188471f7994940fda725d46d02cf",
+        "reviewStatus": "APPROVED",
+        "metadataVerified": true
+      },
+      {
+        "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg",
+        "role": "PRIMARY",
+        "angle": "FRONT",
+        "imageType": "MODEL",
+        "intents": [
+          "LOOKBOOK",
+          "STYLE_REFERENCE"
+        ],
+        "partsVisible": [
+          "AO",
+          "CHAN_VAY"
+        ],
+        "sortOrder": 2,
+        "qualityScore": 0.95,
+        "feedback": false,
+        "observedAt": null,
+        "sourceContentSha256": "2052d1c8bf997f04e8f4e9f80dcbc59b62797bb1865b146f41b775197b36cb6a",
+        "reviewStatus": "APPROVED",
+        "metadataVerified": true
+      },
+      {
+        "url": "https://content.pancake.vn/1/s3000x3000/af/4d/2e/c4/4bf9c44dee7e5d96280b0260373a562d3db98b2072b5975812f70879-w:4000-h:6000-l:804536-t:image/jpeg.jpeg",
+        "role": "ADDITIONAL",
+        "angle": "FRONT",
+        "imageType": "MODEL",
+        "intents": [
+          "LOOKBOOK",
+          "PRODUCT_OVERVIEW"
+        ],
+        "partsVisible": [
+          "AO",
+          "CHAN_VAY"
+        ],
+        "sortOrder": 8,
+        "qualityScore": 0.95,
+        "feedback": false,
+        "observedAt": null,
+        "sourceContentSha256": "6c35b67587902c75a223c1e82f13d98ef8208128e3cb95362641a2dc555a9af9",
+        "reviewStatus": "APPROVED",
+        "metadataVerified": true
+      },
+      {
+        "url": "https://content.pancake.vn/1/s3000x3000/79/0c/78/d8/a10cffdc9d29de26105f87f0fc08ba1dbe4197c8a76c6843d7d3d870-w:3588-h:5382-l:1102566-t:image/jpeg.jpeg",
+        "role": "ADDITIONAL",
+        "angle": "FRONT",
+        "imageType": "PRODUCT_ONLY",
+        "intents": [
+          "PRODUCT_OVERVIEW"
+        ],
+        "partsVisible": [
+          "AO",
+          "CHAN_VAY"
+        ],
+        "sortOrder": 7,
+        "qualityScore": 0.95,
+        "feedback": false,
+        "observedAt": null,
+        "sourceContentSha256": "36652f18a147e6369d608be9bb1748f70c5cbad9ee57fd608f8e46864774a1c7",
+        "reviewStatus": "APPROVED",
+        "metadataVerified": true
+      }
+    ],
+    "catalogVersion": "catalog-v2",
+    "observedAt": "2026-09-28T04:31:05.725Z"
+  },
+  "trusted": {
+    "boundSubjects": [
+      {
+        "bindingVersion": "c3-b1-source-v1",
+        "kind": "VARIANT",
+        "label": "Set váy Thạch Thảo AO __NO_COLOR__",
+        "productId": "SV2447",
+        "ref": "offer:SV2447:AO"
+      },
+      {
+        "bindingVersion": "c3-b1-source-v1",
+        "kind": "VARIANT",
+        "label": "Set váy Thạch Thảo CV __NO_COLOR__",
+        "productId": "SV2447",
+        "ref": "offer:SV2447:CV"
+      },
+      {
+        "bindingVersion": "c3-b1-source-v1",
+        "kind": "VARIANT",
+        "label": "Set váy Thạch Thảo SET_VAY",
+        "productId": "SV2447",
+        "ref": "offer:SV2447:SET_VAY"
+      },
+      {
+        "bindingVersion": "c3-b1-source-v1",
+        "kind": "PRODUCT",
+        "label": "Set váy Thạch Thảo",
+        "ref": "SV2447",
+        "variantId": null
+      }
+    ],
+    "effectReceipts": [],
+    "policyLiterals": [
+      {
+        "expiresAt": "2026-10-24T13:04:33.059Z",
+        "observedAt": "2026-10-24T11:04:33.059Z",
+        "ref": "offers:SV2447",
+        "sourceVersion": "27de0068a6db6140a36fb1ee365e29c4a8cbd9f1cd28eae19a467b3152ecfd23",
+        "text": "{\"productId\":\"SV2447\",\"availableOffers\":[\"AO\",\"CV\",\"SET_VAY\"]}"
+      },
+      {
+        "expiresAt": null,
+        "observedAt": "2026-07-23T07:42:07.382Z",
+        "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+        "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+        "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\",\"tryOnModeDescription\":\"Chỉ ướm bên ngoài, không mặc vào người. Với đổi hàng yêu cầu chưa sử dụng, mặc thử vào người không đáp ứng điều kiện này; còn tem, chưa giặt hay chưa mặc ra ngoài không thay đổi kết luận đó. Giới hạn này áp dụng cho đổi hàng theo exchange, không tự loại trừ trả hàng do lỗi theo returns.\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"payment\":{\"allowedMethods\":[\"COD\",\"BANK_TRANSFER\"]},\"shipping\":{\"defaultFeeVnd\":30000}}"
+      },
+      {
+        "expiresAt": "2026-10-24T13:04:33.059Z",
+        "observedAt": "2026-10-24T11:04:33.059Z",
+        "ref": "read:722ea7909a951e50c9cb9f18801608aa449dde534454f3d9ab0267aedc52353e",
+        "sourceVersion": "p2-default",
+        "text": "{\"productId\":\"SV2447\",\"sellingOptions\":[{\"sizeAvailability\":{\"productId\":\"SV2447\",\"offerType\":\"AO\",\"color\":null,\"requestedSize\":null,\"confirmedInStockSizes\":[\"S\",\"M\",\"L\",\"XL\"],\"unlistedSizeMeaning\":\"NOT_CONFIRMED\"}},{\"sizeAvailability\":{\"productId\":\"SV2447\",\"offerType\":\"CV\",\"color\":null,\"requestedSize\":null,\"confirmedInStockSizes\":[\"S\",\"M\",\"L\",\"XL\"],\"unlistedSizeMeaning\":\"NOT_CONFIRMED\"}},{\"sizeAvailability\":{\"productId\":\"SV2447\",\"offerType\":\"SET_VAY\",\"color\":null,\"requestedSize\":null,\"confirmedInStockSizes\":[\"S\",\"M\",\"L\",\"XL\"],\"unlistedSizeMeaning\":\"NOT_CONFIRMED\"}}]}"
+      }
+    ],
+    "protectedClaims": [
+      {
+        "authorization": "NONE",
+        "claimId": "15c176c0-fef6-5a55-88dc-fdf003661ad3",
+        "provenance": {
+          "authority": "POS_SNAPSHOT",
+          "contentHash": "ed414c4779b1cb6146952118e5d635f1f9f2b77e820e7c55be47305fbf8e956c",
+          "evidenceRef": "business-fact:stock:4af9b72268cbd3eb726350e511cba9a9864f876b915ec4fdeaff297422e3af32",
+          "expiresAt": "2026-10-24T13:04:33.059Z",
+          "observedAt": "2026-10-24T11:04:33.059Z",
+          "sourceVersion": "POS_SNAPSHOT:2026-10-24T11:04:33.059Z"
+        },
+        "schemaVersion": 1,
+        "scope": {
+          "kind": "PRODUCT",
+          "productId": "SV2447",
+          "variantId": "offer:SV2447:CV"
+        },
+        "type": "STOCK",
+        "value": {
+          "availableQuantity": 50,
+          "status": "IN_STOCK"
+        }
+      },
+      {
+        "authorization": "NONE",
+        "claimId": "2b5c875d-4531-5c7a-8b5a-26d82a3eacb9",
+        "provenance": {
+          "authority": "POS_SNAPSHOT",
+          "contentHash": "3c1e524beb7e17e2fff79455264f7b6d6bfc6fcfd02229bb233b5f0b65a7b794",
+          "evidenceRef": "business-fact:price:823a5cb220b2a140ab8dab1c49e4eae4205463774c4ea8b62199f4ab058fc0d3",
+          "expiresAt": "2026-10-24T13:04:33.059Z",
+          "observedAt": "2026-10-24T11:04:33.059Z",
+          "sourceVersion": "POS_SNAPSHOT:2026-10-24T11:04:33.059Z"
+        },
+        "schemaVersion": 1,
+        "scope": {
+          "kind": "PRODUCT",
+          "productId": "SV2447",
+          "variantId": "offer:SV2447:CV"
+        },
+        "type": "PRICE",
+        "value": {
+          "amountVnd": 449000,
+          "currency": "VND"
+        }
+      },
+      {
+        "authorization": "NONE",
+        "claimId": "7e71d088-d908-5735-821e-cea27a79f87f",
+        "provenance": {
+          "authority": "POS_SNAPSHOT",
+          "contentHash": "7e42c52dd1c713db99ce52fcc8e0f3ed45b007c603fc9d895aa42ffd2c410017",
+          "evidenceRef": "business-fact:price:2b259a76bdd3f4c6eb79a4122684902891ea0145f7f52763d0f93fc4c55fc86b",
+          "expiresAt": "2026-10-24T13:04:33.059Z",
+          "observedAt": "2026-10-24T11:04:33.059Z",
+          "sourceVersion": "POS_SNAPSHOT:2026-10-24T11:04:33.059Z"
+        },
+        "schemaVersion": 1,
+        "scope": {
+          "kind": "PRODUCT",
+          "productId": "SV2447",
+          "variantId": "offer:SV2447:AO"
+        },
+        "type": "PRICE",
+        "value": {
+          "amountVnd": 499000,
+          "currency": "VND"
+        }
+      },
+      {
+        "authorization": "NONE",
+        "claimId": "ea4ac941-73d3-5478-80d1-9d33f765b3e8",
+        "provenance": {
+          "authority": "POS_SNAPSHOT",
+          "contentHash": "c26a263dd89479eecec9deab11ad1c53b199c24480f71f6235b2834490613f2f",
+          "evidenceRef": "business-fact:stock:5ef2994c62b22d892aef53f2e1e8832c68c9b4710fc99d100811fffc97a530b1",
+          "expiresAt": "2026-10-24T13:04:33.059Z",
+          "observedAt": "2026-10-24T11:04:33.059Z",
+          "sourceVersion": "POS_SNAPSHOT:2026-10-24T11:04:33.059Z"
+        },
+        "schemaVersion": 1,
+        "scope": {
+          "kind": "PRODUCT",
+          "productId": "SV2447",
+          "variantId": "offer:SV2447:SET_VAY"
+        },
+        "type": "STOCK",
+        "value": {
+          "availableQuantity": 38,
+          "status": "IN_STOCK"
+        }
+      },
+      {
+        "authorization": "NONE",
+        "claimId": "f2096d7b-a2a1-540e-8c9f-042f9caf9bab",
+        "provenance": {
+          "authority": "POS_SNAPSHOT",
+          "contentHash": "0e63c426c5021367ada8408ef2b632a2c5f718951ad0e2faaca8f5e5ed0f19a7",
+          "evidenceRef": "business-fact:price:3712739cc287057f66b894f7529411da0844d87b05f9b66cabfba912a2773c74",
+          "expiresAt": "2026-10-24T13:04:33.059Z",
+          "observedAt": "2026-10-24T11:04:33.059Z",
+          "sourceVersion": "POS_SNAPSHOT:2026-10-24T11:04:33.059Z"
+        },
+        "schemaVersion": 1,
+        "scope": {
+          "kind": "PRODUCT",
+          "productId": "SV2447",
+          "variantId": "offer:SV2447:SET_VAY"
+        },
+        "type": "PRICE",
+        "value": {
+          "amountVnd": 799000,
+          "currency": "VND"
+        }
+      },
+      {
+        "authorization": "NONE",
+        "claimId": "fec13364-05b7-545c-85e7-ba4bb0ac218c",
+        "provenance": {
+          "authority": "POS_SNAPSHOT",
+          "contentHash": "972436099d2f2df0a8574eeaecb23c8e9351a4e486f6e684a84b856af3680b72",
+          "evidenceRef": "business-fact:stock:388615ead6e48a2946e6884042cdf7a696863c9dd4a0cd211c474430298916a4",
+          "expiresAt": "2026-10-24T13:04:33.059Z",
+          "observedAt": "2026-10-24T11:04:33.059Z",
+          "sourceVersion": "POS_SNAPSHOT:2026-10-24T11:04:33.059Z"
+        },
+        "schemaVersion": 1,
+        "scope": {
+          "kind": "PRODUCT",
+          "productId": "SV2447",
+          "variantId": "offer:SV2447:AO"
+        },
+        "type": "STOCK",
+        "value": {
+          "availableQuantity": 95,
+          "status": "IN_STOCK"
+        }
+      }
+    ],
+    "runtimeProducts": [
+      {
+        "content": {
+          "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+          "metadata": {
+            "authority": "WEBSTORE_XML",
+            "expiresAt": null,
+            "freshForSeconds": null,
+            "freshnessState": "FRESH",
+            "observedAt": "2026-09-28T04:31:05.725Z",
+            "sourceVersion": "catalog-v2"
+          },
+          "productName": "Set váy Thạch Thảo",
+          "productUrl": null
+        },
+        "ref": "product:SV2447",
+        "subjectRef": "SV2447"
+      }
+    ],
+    "state": {
+      "bindingVersion": "c3-b1-source-v1",
+      "conversationOwner": "BOT",
+      "currentProductId": null,
+      "factSnapshotVersion": "08b44bd9c34373f3265b1f508c971853bcb485818fe0857f6d494c2ece8dd9e3",
+      "permission": true,
+      "privacyAllowed": true,
+      "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+      "revision": 1
+    }
+  },
+  "turnTime": {
+    "processingAt": "2026-10-24T11:25:21.304Z",
+    "timeZone": "Asia/Ho_Chi_Minh"
+  },
+  "latest": "Có ảnh khách mặc mẫu này không em?",
+  "history": [],
+  "probe": "Dạ set Thạch Thảo hiện shop chưa có ảnh khách mặc thực tế chị ạ, nhưng áo tơ thêu nổi kết hợp chân váy ren mềm có độ bay và rũ tự nhiên mặc lên rất xinh. Chị cần xem ảnh chụp cận cảnh chất vải và form áo váy thì nhắn em gửi chị nhé ạ!",
+  "probeSourceHash": "0d50db656579526271d904b621595a4a60c218dbb1e598f431ae689877624e20",
+  "readback": {
+    "productHash": "4911036455c5e5c225223ff64fbda0d717cf8d349f11a86f5ceb2b500a56b1b8",
+    "trustedHash": "1ea824cc7f2513327ac51988ef7397235a26cd26160743252577342ac0fb7c6b"
+  },
+  "hash": "eca68c6693d08bcdba62a4f44c76e16c69502f4f42bed4ff127278d09c98e693"
+}

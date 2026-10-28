@@ -1,0 +1,112 @@
+{
+  "checkedAt": "2026-10-14T12:39:50.895Z",
+  "container": "lana-chatbot-realtime-worker",
+  "readOnly": true,
+  "generationRequests": 0,
+  "runtimeConfig": {
+    "RUNTIME_POLICY_CHANNEL": "PUBLISHED",
+    "CATALOG_DEFAULT_SHOP_ALIAS": "LANA",
+    "QDRANT_BASE_URL": "https://355c0b3c-1e7f-4fa5-9235-72559195dd72.eu-central-1-0.aws.cloud.qdrant.io",
+    "QDRANT_COLLECTION": "lana_multimodal_data_v2",
+    "VERTEX_PROJECT_ID": "project-388db62b-f5a4-4e76-a2b",
+    "VERTEX_EMBEDDING_MODEL": "multimodalembedding@001",
+    "VERTEX_EMBEDDING_LOCATION": "us-central1",
+    "VERTEX_EMBEDDING_DIMENSION": "1408",
+    "PRODUCT_SEARCH_TEXT_MIN_SCORE": "0.72",
+    "PRODUCT_SEARCH_IMAGE_MIN_SCORE": "0.78",
+    "PRODUCT_SEARCH_MIN_TOP_GAP": "0.04",
+    "PRODUCT_SEARCH_MAX_CANDIDATES": "3"
+  },
+  "postgres": {
+    "connected": true,
+    "database": "lana_chatbot",
+    "pageId": "1198992073286645",
+    "activePolicyPointers": [
+      {
+        "channel": "PUBLISHED",
+        "artifact_kind": "CLOSING_STRATEGY",
+        "active_count": 1
+      },
+      {
+        "channel": "PUBLISHED",
+        "artifact_kind": "OFFER_POLICY",
+        "active_count": 1
+      },
+      {
+        "channel": "PUBLISHED",
+        "artifact_kind": "PAYMENT_POLICY",
+        "active_count": 1
+      },
+      {
+        "channel": "PUBLISHED",
+        "artifact_kind": "SHOP_POLICY",
+        "active_count": 1
+      },
+      {
+        "channel": "PUBLISHED",
+        "artifact_kind": "SIZE_CHART",
+        "active_count": 7
+      }
+    ]
+  },
+  "redis": {
+    "connected": true,
+    "customerKeysRead": 0
+  },
+  "qdrant": {
+    "connected": true,
+    "collection": "lana_multimodal_data_v2",
+    "status": "green",
+    "vectors": {
+      "image_cutout": {
+        "size": 1408,
+        "distance": "Cosine",
+        "hnsw_config": {
+          "m": 24,
+          "ef_construct": 256
+        },
+        "on_disk": false,
+        "datatype": "float32"
+      },
+      "image_raw": {
+        "size": 1408,
+        "distance": "Cosine",
+        "hnsw_config": {
+          "m": 24,
+          "ef_construct": 256
+        },
+        "on_disk": false,
+        "datatype": "float32"
+      },
+      "product_text": {
+        "size": 1408,
+        "distance": "Cosine",
+        "hnsw_config": {
+          "m": 24,
+          "ef_construct": 256
+        },
+        "on_disk": false,
+        "datatype": "float32"
+      }
+    },
+    "pointsCount": 1055,
+    "payloadIndexFields": [
+      "image_type",
+      "image_metadata_version",
+      "image_metadata_review_status",
+      "image_parts_visible",
+      "active",
+      "image_detail_type",
+      "image_has_model",
+      "product_id",
+      "ma_sp",
+      "image_intents",
+      "image_angle",
+      "aliases",
+      "image_visual_colors",
+      "source_context",
+      "image_visual_materials",
+      "feedback_verified"
+    ]
+  }
+}

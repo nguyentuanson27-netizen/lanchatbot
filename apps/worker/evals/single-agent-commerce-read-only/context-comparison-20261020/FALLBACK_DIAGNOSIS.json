@@ -1,0 +1,41 @@
+{
+  "primaryWasLockedBeforeDiagnosis": true,
+  "cases": [
+    {
+      "slot": 5,
+      "arm": "candidate",
+      "actual": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "rejectedDraft": "Dạ, chất tơ Hàn của set Thạch Thảo ngồi ô tô 3 tiếng sẽ dễ bị hằn nếp gấp chị ạ. \n\nĐi xa thế này chị chuyển sang **Set Thanh Vũ** giúp em nhé; áo ren cotton kết hợp chân váy tơ crep ít nhăn hơn và giữ form gọn gàng suốt chuyến đi mà mặc đi đám cưới vẫn rất sang và thanh lịch.",
+      "verdict": {
+        "verdict": "FAIL",
+        "violations": [
+          {
+            "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+            "protectedRef": "product:SV165"
+          }
+        ]
+      },
+      "diagnosis": "Theo mốc T1 đã freeze, lời chọn Thanh Vũ/ít nhăn hơn/giữ form là tư vấn định tính. Câu gần nghĩa ở control slot1, cùng canonical nguồn SV165, được PASS. Reviewer coi đây là false rejection/khác biệt phạm vi với verifier, không phải protected failure đã xác nhận. Schema không cho giải thích nên không xác định được bước suy luận nội bộ hoặc chứng minh keyword matching."
+    },
+    {
+      "slot": 10,
+      "arm": "candidate",
+      "actual": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "rejectedDraft": "Dạ, Set Thạch Thảo dùng chất tơ Hàn và ren tơ nên ngồi ô tô 3 tiếng có thể hơi hằn nếp gấp nhẹ ở phần tơ, tới nơi chị treo lên một lúc là tơ tự rủ phẳng lại ạ. \n\nNếu chị muốn hạn chế tối đa độ nhăn, em gợi ý mình chuyển sang **Set Thanh Vũ**: chất tơ crep mềm kết hợp ren cotton ít giữ nếp hơn khi ngồi lâu, mặc lên vẫn rất thoáng mát, nhẹ nhàng và thanh lịch. \n\nChị thích đổi sang set Thanh Vũ hay vẫn giữ set Thạch Thảo ạ?",
+      "verdict": {
+        "verdict": "FAIL",
+        "violations": [
+          {
+            "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+            "protectedRef": "product:SV2447"
+          }
+        ]
+      },
+      "diagnosis": "Owner tự thêm cơ chế hồi nếp: treo một lúc tơ tự rủ phẳng lại. Nguồn không có kết quả này; verifier chặn SV2447 phù hợp. Draft còn mở lại nhu cầu dưới nếu, đưa tối đa và hỏi giữ hay đổi; không có cơ sở nói context đã sửa được inference hoặc giọng."
+    }
+  ]
+}

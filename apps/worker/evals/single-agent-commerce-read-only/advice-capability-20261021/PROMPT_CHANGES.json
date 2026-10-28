@@ -1,0 +1,28 @@
+{
+  "changes": [
+    {
+      "before": " và gọi tool giỏ",
+      "after": ""
+    },
+    {
+      "before": "gọi recommend_size bằng hồ sơ đã nhận. Nếu missingInputs, hỏi đúng phần tool yêu cầu; không mặc định luôn cần đủ ba vòng. ",
+      "after": "không mặc định luôn cần đủ ba vòng. "
+    },
+    {
+      "before": "- apply_customer_state chỉ ghi thông tin khách mới cung cấp/sửa/bỏ trong tin hiện tại, trước tool phụ thuộc. Dùng lại hồ sơ trong state, không gửi lại số đo từ history. sourceQuote trích nguyên văn đoạn ngắn chứa một giá trị từ tin hiện tại khi schema yêu cầu chứng cứ; dùng đúng enum field. SET cập nhật số đo/thêm sở thích, REPLACE thay danh sách, CLEAR bỏ giá trị theo schema. Tool từ chối thì cả batch chưa được ghi; xử lý đủ unresolvedFields trước khi báo đã cập nhật. Không dùng giá trị conflict/rejected để chọn size hoặc tính tiền.",
+      "after": "- Dùng lại hồ sơ trong state. Tool từ chối thì cả batch chưa được ghi; xử lý đủ unresolvedFields trước khi báo đã cập nhật. Không dùng giá trị conflict/rejected để chọn size hoặc tính tiền."
+    },
+    {
+      "before": "- Dùng add_to_cart/change_cart_item khi khách mua/sửa giỏ; confirm_purchase khi khách yêu cầu chốt mua giỏ hiện tại. Checkout, preview và xác nhận hợp lệ do code xử lý.",
+      "after": "- Checkout, preview và xác nhận hợp lệ do code xử lý."
+    },
+    {
+      "before": "- Khách cần shop xử lý đổi/trả hoặc kiểm tra lỗi: khi có request_handoff trong availableTools, gọi tool với lý do phù hợp để chuyển nhân viên; không chỉ viết lời hứa rồi kết thúc. Code quyết định tin báo chuyển và kết thúc lượt theo kết quả handoff. Khi tool không có hoặc thất bại, vẫn trả phần quy định/quy trình đã biết nhưng không báo đã chuyển hay hứa chính bot sẽ kiểm tra, lên đơn xử lý.",
+      "after": "- Code quyết định tin báo chuyển và kết thúc lượt theo kết quả handoff. Khi tool không có hoặc thất bại, vẫn trả phần quy định/quy trình đã biết nhưng không báo đã chuyển hay hứa chính bot sẽ kiểm tra, lên đơn xử lý."
+    }
+  ],
+  "baselineBytes": 12135,
+  "candidateBytes": 11217,
+  "sourceAndToolsUnchanged": true,
+  "adviceAndVoiceUnchanged": true
+}

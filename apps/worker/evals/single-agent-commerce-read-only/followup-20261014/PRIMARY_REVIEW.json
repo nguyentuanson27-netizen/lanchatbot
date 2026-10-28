@@ -1,0 +1,300 @@
+{
+  "evaluation": "PRIMARY_AGENT_SUBJECTIVE_WHOLE_TERMINAL",
+  "sourceSha": "8bbea938bd947f02910b29976c75b47e8ce00c9c",
+  "rawSavepoint": "965e3138",
+  "registered": 8,
+  "reviewed": 8,
+  "adequate": 5,
+  "notAdequate": 3,
+  "independentHumanAccepted": false,
+  "entries": [
+    {
+      "caseId": "b1-price",
+      "wholeTerminalJudgment": "PASS",
+      "reason": "Trả ngay giá799k của đúng set. Câu gọn, không biến lượt hỏi giá thành xin số đo, đọc thêm món lẻ hoặc thêm câu chốt không cần.",
+      "cause": "none observed",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "humanScores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      },
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set váy Thạch Thảo có giá 799.000đ ạ.",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "b1-changed-occasion",
+      "wholeTerminalJudgment": "FAIL",
+      "reason": "Khách đổi từ tiệc trong nhà sang sân khấu và hỏi có nên mua. Kết quả thực nhận chỉ là fallback, không có quyết định hay lý do giúp chọn. Không cấp điểm cho nội dung trung gian chưa được gửi.",
+      "cause": "owner tool budget; diagnosis follows primary",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "humanScores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      },
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "BUDGET",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "caseId": "b1-current-policy",
+      "wholeTerminalJudgment": "FAIL",
+      "reason": "Khách hỏi quyền đổi sau10ngày và phí với tình trạng hàng đã nêu. Fallback không trả phần nào, dù policy hiện tại có thể trả ít nhất thời hạn/phí.",
+      "cause": "semantic refusal; diagnosis follows primary",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "humanScores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      },
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "caseId": "b1-partial-source",
+      "wholeTerminalJudgment": "FAIL",
+      "reason": "Khi POS bị tắt, nguồn mô tả vẫn có nhưng khách chỉ nhận fallback, mất cả câu trả lời chất liệu đã có căn cứ. Không chấm draft bị từ chối thay cho kết quả này.",
+      "cause": "semantic refusal; diagnosis follows primary",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "humanScores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      },
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "caseId": "b1-component-stock",
+      "wholeTerminalJudgment": "PASS",
+      "reason": "Đọc đúng áo rời sizeM, báo còn và499k trong một tin. Không áp giá set hoặc nói sizeM mặc vừa người. Đủ nhu cầu hiện tại nên không cần câu hỏi tiếp.",
+      "cause": "none observed",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "humanScores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      },
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Áo rời set Thạch Thảo size M hiện còn hàng, giá 499.000đ ạ.",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "b1-search-read",
+      "wholeTerminalJudgment": "PASS",
+      "reason": "Tìm đúng SD375 rồi trả giá1.065.000đ. Câu ngắn và đúng điều khách cần, không thêm tư vấn sai dịp hay thao tác giả.",
+      "cause": "none observed",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "humanScores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      },
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Áo dài SD375 có giá 1.065.000đ chị nhé.",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "b1-buying-concern",
+      "wholeTerminalJudgment": "PASS",
+      "reason": "Giải tỏa băn khoăn về vẻ rườm rà, có lý do từ thiết kế/chất liệu và giá phù hợp. Vẫn đủ giúp quyết định trong lượt này. Tuy vậy tin dài hơn lượt trước, nhắc lại ngân sách, dồn nhiều tính từ và hai cách phủ định cùng một nỗi lo; giọng quảng cáo chưa cải thiện.",
+      "cause": "owner voice",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "humanScores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      },
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set này có giá 799.000đ, hoàn toàn trong ngân sách dưới 900k của chị ạ. \n\nChị yên tâm là mặc đi tiệc ban ngày không bị rườm rà đâu ạ. Sự kết hợp giữa áo tơ Hàn thêu tinh tế và chân váy ren tơ Hàn có độ rũ, bay tự nhiên mang lại tổng thể rất nhẹ nhàng, bay bổng và sang trọng, tạo cảm giác thanh thoát chứ không hề nặng nề hay phô trương.",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "b1-policy-used",
+      "wholeTerminalJudgment": "PASS",
+      "reason": "Từ chối đúng việc đã mặc đi làm ngay từ đầu; thông tin30k có nguồn, không ngầm nhận đổi tình huống bị loại. Đã bỏ mãunused. Nhưng sau khi từ chối vẫn kể nhiều điều kiện; câu hỏi bên nào trả chưa được làm rõ ngoài việc báo mức phí. Nguồn công khai được cấp cũng chưa nêu rõ payer, nên không suy thêm là khách hay shop trả. Đây là giới hạn độ đầy đủ, không phải lỗi sai policy đã xác định.",
+      "cause": "owner concision / missing source payer detail",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 1,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "humanScores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      },
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ sản phẩm mặc đi làm rồi sẽ không áp dụng đổi được ạ, vì quy định đổi hàng yêu cầu sản phẩm phải chưa qua sử dụng, chưa giặt, còn nguyên tag và chỉ thử ướm bên ngoài. \n\nVề chi phí, tổng phí vận chuyển đổi hàng hai chiều là 30.000đ chị nhé.",
+        "fallbackId": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,260 @@
+{
+  "1": {
+    "stage": "CART_OPEN",
+    "revision": 4,
+    "measurements": [
+      {
+        "kind": "WAIST_CM",
+        "value": 76,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-21T07:20:59.653Z",
+          "sourceEventHash": "56052655b7e7bca9e90d1b1510c11be6434a8f85a889163a13d24b890bc486e3"
+        }
+      },
+      {
+        "kind": "HIPS_CM",
+        "value": 98,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-21T07:20:59.653Z",
+          "sourceEventHash": "56052655b7e7bca9e90d1b1510c11be6434a8f85a889163a13d24b890bc486e3"
+        }
+      }
+    ],
+    "grandTotalVnd": 529000,
+    "lines": [
+      {
+        "quantity": 1,
+        "offerId": "AO",
+        "components": [
+          {
+            "componentProductId": "SV2447_AO",
+            "componentSku": "SV2447_AO",
+            "componentRole": "TOP",
+            "color": "BE",
+            "size": "M",
+            "quantity": 1
+          }
+        ]
+      }
+    ]
+  },
+  "2": {
+    "stage": "CART_OPEN",
+    "revision": 6,
+    "measurements": [
+      {
+        "kind": "WAIST_CM",
+        "value": 76,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-21T07:20:59.653Z",
+          "sourceEventHash": "56052655b7e7bca9e90d1b1510c11be6434a8f85a889163a13d24b890bc486e3"
+        }
+      },
+      {
+        "kind": "HIPS_CM",
+        "value": 98,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-21T07:20:59.653Z",
+          "sourceEventHash": "56052655b7e7bca9e90d1b1510c11be6434a8f85a889163a13d24b890bc486e3"
+        }
+      }
+    ],
+    "grandTotalVnd": 978100,
+    "lines": [
+      {
+        "quantity": 2,
+        "offerId": "AO",
+        "components": [
+          {
+            "componentProductId": "SV2447_AO",
+            "componentSku": "SV2447_AO",
+            "componentRole": "TOP",
+            "color": "BE",
+            "size": "L",
+            "quantity": 1
+          }
+        ]
+      }
+    ]
+  },
+  "3": {
+    "stage": "CART_OPEN",
+    "revision": 6,
+    "measurements": [
+      {
+        "kind": "WAIST_CM",
+        "value": 76,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-21T07:20:59.653Z",
+          "sourceEventHash": "56052655b7e7bca9e90d1b1510c11be6434a8f85a889163a13d24b890bc486e3"
+        }
+      },
+      {
+        "kind": "HIPS_CM",
+        "value": 98,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-21T07:20:59.653Z",
+          "sourceEventHash": "56052655b7e7bca9e90d1b1510c11be6434a8f85a889163a13d24b890bc486e3"
+        }
+      }
+    ],
+    "grandTotalVnd": 978100,
+    "lines": [
+      {
+        "quantity": 2,
+        "offerId": "AO",
+        "components": [
+          {
+            "componentProductId": "SV2447_AO",
+            "componentSku": "SV2447_AO",
+            "componentRole": "TOP",
+            "color": "BE",
+            "size": "L",
+            "quantity": 1
+          }
+        ]
+      }
+    ]
+  },
+  "4": {
+    "stage": "CART_OPEN",
+    "revision": 6,
+    "measurements": [
+      {
+        "kind": "WAIST_CM",
+        "value": 74,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-21T07:22:42.320Z",
+          "sourceEventHash": "e988e88709f8441effdbf1c566263a7e221810e78fff9484a9a89ce38162cfbe"
+        }
+      },
+      {
+        "kind": "HIPS_CM",
+        "value": 96,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-21T07:22:42.320Z",
+          "sourceEventHash": "e988e88709f8441effdbf1c566263a7e221810e78fff9484a9a89ce38162cfbe"
+        }
+      }
+    ],
+    "grandTotalVnd": 978100,
+    "lines": [
+      {
+        "quantity": 2,
+        "offerId": "AO",
+        "components": [
+          {
+            "componentProductId": "SV2447_AO",
+            "componentSku": "SV2447_AO",
+            "componentRole": "TOP",
+            "color": "BE",
+            "size": "L",
+            "quantity": 1
+          }
+        ]
+      }
+    ]
+  },
+  "6": {
+    "stage": "ORDER_PREVIEW",
+    "revision": 11,
+    "measurements": [
+      {
+        "kind": "WAIST_CM",
+        "value": 74,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-21T07:22:42.320Z",
+          "sourceEventHash": "e988e88709f8441effdbf1c566263a7e221810e78fff9484a9a89ce38162cfbe"
+        }
+      },
+      {
+        "kind": "HIPS_CM",
+        "value": 96,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-21T07:22:42.320Z",
+          "sourceEventHash": "e988e88709f8441effdbf1c566263a7e221810e78fff9484a9a89ce38162cfbe"
+        }
+      }
+    ],
+    "grandTotalVnd": 978100,
+    "lines": [
+      {
+        "quantity": 2,
+        "offerId": "AO",
+        "components": [
+          {
+            "componentProductId": "SV2447_AO",
+            "componentSku": "SV2447_AO",
+            "componentRole": "TOP",
+            "color": "BE",
+            "size": "L",
+            "quantity": 1
+          }
+        ]
+      }
+    ]
+  },
+  "7": {
+    "stage": "PURCHASE_CONFIRMED",
+    "revision": 12,
+    "measurements": [
+      {
+        "kind": "WAIST_CM",
+        "value": 74,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-21T07:22:42.320Z",
+          "sourceEventHash": "e988e88709f8441effdbf1c566263a7e221810e78fff9484a9a89ce38162cfbe"
+        }
+      },
+      {
+        "kind": "HIPS_CM",
+        "value": 96,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-21T07:22:42.320Z",
+          "sourceEventHash": "e988e88709f8441effdbf1c566263a7e221810e78fff9484a9a89ce38162cfbe"
+        }
+      }
+    ],
+    "grandTotalVnd": 978100,
+    "lines": [
+      {
+        "quantity": 2,
+        "offerId": "AO",
+        "components": [
+          {
+            "componentProductId": "SV2447_AO",
+            "componentSku": "SV2447_AO",
+            "componentRole": "TOP",
+            "color": "BE",
+            "size": "L",
+            "quantity": 1
+          }
+        ]
+      }
+    ]
+  }
+}

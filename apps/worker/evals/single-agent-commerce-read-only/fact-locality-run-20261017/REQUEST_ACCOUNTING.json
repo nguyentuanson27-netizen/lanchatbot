@@ -1,0 +1,20 @@
+{
+  "runSourceSha": "c6476301539988f134f0843a0e3f2a31fff0560e",
+  "registeredOutcomes": 7,
+  "completeOutcomes": 7,
+  "maximumGenerationInvocations": 24,
+  "invocations": 13,
+  "roles": {
+    "owner": 9,
+    "verifier": 4
+  },
+  "generationHttpRequests": 13,
+  "generationHttp200": 13,
+  "unknownAccounting": 0,
+  "automaticGenerationRetry": 0,
+  "ownerAuthRequests": 1,
+  "verifierAuthNetworkRequests": "NOT_MEASURED",
+  "generationErrors": 0,
+  "timeouts": 0,
+  "notes": "All seven outcomes retained. One measured upstream generation per ID; source-preflight embedding and credential/auth access are separate, not conversational generations."
+}

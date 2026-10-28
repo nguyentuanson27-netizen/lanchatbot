@@ -1,0 +1,148 @@
+{
+  "primaryReviewSha256": "422e765ddce28fbc845a91e97677490d28af668b53464c24d33588f5934784c0",
+  "cases": [
+    {
+      "caseId": "sales-discovery-advice:need",
+      "toolsFromLatestOwnerHistory": [
+        {
+          "name": "search_products",
+          "status": "OK",
+          "reason": null,
+          "subjectRef": null,
+          "offerType": null
+        },
+        {
+          "name": "apply_customer_state",
+          "status": "OK",
+          "reason": null,
+          "subjectRef": null,
+          "offerType": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "subjectRef": "SQ2447",
+          "offerType": "SET_QUAN"
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "subjectRef": "SQ748",
+          "offerType": "SET_QUAN"
+        }
+      ],
+      "actualToolCalls": 4,
+      "verifierReviewedDrafts": [
+        {
+          "text": "Chị tham khảo hai set quần mặc đi làm vừa xinh, vừa thoải mái và đều dưới 1 triệu nhé ạ:\n\n1. **SET quần Uyển Hoa (SQ748)** – **799.000đ**: Set thô đũi cao cấp màu kem phối họa tiết ngọt ngào, điểm cộng lớn là quần thiết kế **lưng chun** mặc rất thoải mái, không lo bị bó bụng, kết hợp áo bèo xếp tầng tôn eo dịu dàng. \n2. **Set quần Thạch Thảo (SQ2447)** – **769.000đ**: Set chất liệu tơ Hàn thêu cao cấp mềm mại, bay bổng, form dáng nhẹ nhàng dễ mặc và rất tôn dáng.\n\nChị thích mẫu thô đũi lưng chun thoải mái hay set tơ thêu bay bổng hơn ạ?",
+          "capturedExact": false
+        }
+      ],
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2",
+        "semanticDiagnostic": [
+          {
+            "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+            "protectedRef": "product:SQ748",
+            "excerpt": "không lo bị bó bụng",
+            "basis": "Nguồn xác nhận quần lưng chun nhưng không có kết quả SIZE_FIT cho khách hiện tại. Khẳng định khách không bị bó bụng vượt quá nhận xét về sự thoải mái từ thiết kế và bảo đảm độ vừa/chật khi chưa có căn cứ."
+          }
+        ]
+      },
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "FAIL"
+      }
+    },
+    {
+      "caseId": "sales-product-gallery:overview",
+      "toolsFromLatestOwnerHistory": [
+        {
+          "name": "select_product_media",
+          "status": "UNAVAILABLE",
+          "reason": "MEDIA_COLOR_BINDING_UNVERIFIED",
+          "subjectRef": "SV2447",
+          "offerType": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "subjectRef": "SV2447",
+          "offerType": "SET_VAY"
+        },
+        {
+          "name": "select_product_media",
+          "status": "REJECTED",
+          "reason": "MEDIA_ARGUMENTS_OR_REF",
+          "subjectRef": null,
+          "offerType": null
+        }
+      ],
+      "actualToolCalls": 4,
+      "verifierReviewedDrafts": [
+        {
+          "text": "Dạ set váy Thạch Thảo hiện có giá 799.000đ, gồm áo tơ Hàn thêu nổi và chân váy ren mềm mại, có độ rũ tự nhiên ạ. Mẫu này shop sẵn các size từ S đến XL, chị chọn size nào ạ?",
+          "capturedExact": true
+        }
+      ],
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ set váy Thạch Thảo hiện có giá 799.000đ, gồm áo tơ Hàn thêu nổi và chân váy ren mềm mại, có độ rũ tự nhiên ạ. Mẫu này shop sẵn các size từ S đến XL, chị chọn size nào ạ?",
+        "fallbackId": null
+      },
+      "recovery": null
+    },
+    {
+      "caseId": "stateful-variant-quantity",
+      "toolsFromLatestOwnerHistory": [
+        {
+          "name": "change_cart_item",
+          "status": "OK",
+          "reason": null,
+          "subjectRef": null,
+          "offerType": null
+        },
+        {
+          "name": "change_cart_item",
+          "status": "OK",
+          "reason": null,
+          "subjectRef": null,
+          "offerType": null
+        }
+      ],
+      "actualToolCalls": 3,
+      "verifierReviewedDrafts": [
+        {
+          "text": "Em đã đổi áo sang size L và cập nhật số lượng thành 2 chiếc cho chị rồi ạ.",
+          "capturedExact": false
+        }
+      ],
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "RECEIPT_BACKED_CART_SUMMARY",
+        "text": "Giỏ của chị: 2 áo (mẫu “Set váy Thạch Thảo”) màu be, size L. Tổng 978.100đ, đã gồm phí giao hàng. Có món đặt trước, chị nhé.",
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "HANDOFF",
+        "originalReason": "STALE",
+        "originalDiagnostic": {
+          "check": "CURRENT_SNAPSHOT",
+          "checkedAtMs": 1792872312085,
+          "expectedSnapshotId": "a3958066ea6a0af194a3257cb4c21629a8c737db1badd355455ad1a879ea0eb1",
+          "currentSnapshotId": "b01a52cb941565bc2066a83504da8b1291e9a40ab4c51f74a1f1c93b99f291ef",
+          "expectedRevision": 6,
+          "currentRevision": 6,
+          "reasonCodes": []
+        }
+      }
+    }
+  ]
+}

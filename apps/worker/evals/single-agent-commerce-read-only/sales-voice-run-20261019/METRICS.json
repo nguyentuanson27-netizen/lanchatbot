@@ -1,0 +1,132 @@
+{
+  "runSourceSha": "93db1d47c49618a119a446ba4b0c86015672ae39",
+  "registeredSlots": 48,
+  "recordedSlots": 48,
+  "generationRequests": 106,
+  "retry": 0,
+  "families": {
+    "stateful": {
+      "slots": 24,
+      "terminal": {
+        "SEND_ELIGIBLE": 11,
+        "NO_SEND": 6,
+        "HANDOFF": 6,
+        "FALLBACK": 1
+      },
+      "reasons": {
+        "PASS": 10,
+        "CHECKOUT_DETAILS_MISSING": 3,
+        "PRIVATE_CHECKOUT_COMMITTED": 3,
+        "PURCHASE_CONFIRMED": 3,
+        "CUSTOMER_REQUESTED_HUMAN": 3,
+        "FAIL": 1,
+        "RECEIPT_BACKED_CART_SUMMARY": 1
+      },
+      "providerRequests": 42,
+      "verifierLatencyMs": {
+        "n": 12,
+        "p50": 4706.6532999999945,
+        "p95": 6289.239900000002
+      },
+      "addedVerificationLatencyMs": {
+        "n": 12,
+        "p50": 7485.733900000001,
+        "p95": 10128.882034999999
+      },
+      "providerErrors": 0
+    },
+    "b1": {
+      "slots": 12,
+      "terminal": {
+        "FALLBACK": 3,
+        "SEND_ELIGIBLE": 9
+      },
+      "reasons": {
+        "FAIL": 3,
+        "PASS": 9
+      },
+      "providerRequests": 40,
+      "verifierLatencyMs": {
+        "n": 12,
+        "p50": 4944.5504,
+        "p95": 14804.219349999996
+      },
+      "addedVerificationLatencyMs": {
+        "n": 12,
+        "p50": 5943.849250000007,
+        "p95": 16296.628354999992
+      },
+      "providerErrors": 0
+    },
+    "advice": {
+      "slots": 12,
+      "terminal": {
+        "FALLBACK": 3,
+        "SEND_ELIGIBLE": 9
+      },
+      "reasons": {
+        "FAIL": 3,
+        "PASS": 9
+      },
+      "providerRequests": 24,
+      "verifierLatencyMs": {
+        "n": 12,
+        "p50": 5826.5,
+        "p95": 7298.799999999999
+      },
+      "addedVerificationLatencyMs": {
+        "n": 12,
+        "p50": 5828.3511000000035,
+        "p95": 7302.217925
+      },
+      "providerErrors": 0
+    }
+  },
+  "roles": {
+    "owner": {
+      "requests": 70,
+      "inputTokens": 323836,
+      "outputTokens": 56399,
+      "missingUsage": 0,
+      "modelVersions": [
+        "gemini-3.5-flash-lite"
+      ]
+    },
+    "verifier": {
+      "requests": 36,
+      "inputTokens": 171630,
+      "outputTokens": 4311,
+      "missingUsage": 0,
+      "modelVersions": [
+        "gpt-6.1-sol"
+      ]
+    }
+  },
+  "verdictCounts": {
+    "PASS": 29,
+    "FAIL": 7
+  },
+  "wireCapturesChecked": 166,
+  "leaks": [],
+  "cleanup": {
+    "stateful-1": {
+      "testDatabaseDropped": true,
+      "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+      "completedOutcomes": 8
+    },
+    "stateful-2": {
+      "testDatabaseDropped": true,
+      "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+      "completedOutcomes": 8
+    },
+    "stateful-3": {
+      "testDatabaseDropped": true,
+      "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+      "completedOutcomes": 8
+    }
+  },
+  "cost": "NOT_EXPOSED",
+  "requestCountDistribution": {
+    "1": 106
+  }
+}

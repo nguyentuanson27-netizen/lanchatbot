@@ -1,0 +1,205 @@
+{
+  "runSourceSha": "f2289491ccbf88ad58692060160f29aa1bf6133b",
+  "registered": 31,
+  "recorded": 31,
+  "notRun": 0,
+  "b1": {
+    "registered": 24,
+    "recorded": 24
+  },
+  "stateful": {
+    "registered": 7,
+    "recorded": 7
+  },
+  "repetitions": 1,
+  "singleSourceFull31Run": true,
+  "historicalOutcomesAdopted": 0,
+  "outcomes": [
+    {
+      "population": "B1",
+      "slot": 1,
+      "caseId": "b1-changed-occasion",
+      "terminal": "FALLBACK"
+    },
+    {
+      "population": "B1",
+      "slot": 2,
+      "caseId": "b1-search-read",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 3,
+      "caseId": "b1-buying-concern",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 4,
+      "caseId": "b1-changed-occasion-v2",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 5,
+      "caseId": "b1-partial-source-v2",
+      "terminal": "FALLBACK"
+    },
+    {
+      "population": "B1",
+      "slot": 6,
+      "caseId": "b1-buying-concern-v2",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 7,
+      "caseId": "b1-current-policy",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 8,
+      "caseId": "b1-partial-source",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 9,
+      "caseId": "b1-price",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 10,
+      "caseId": "b1-component-stock",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 11,
+      "caseId": "b1-policy-used",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 12,
+      "caseId": "b1-current-policy-v2",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 13,
+      "caseId": "b1-price-v2",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 14,
+      "caseId": "b1-component-stock-v2",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 15,
+      "caseId": "b1-search-read-v2",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 16,
+      "caseId": "b1-policy-used-v2",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 17,
+      "caseId": "b1-changed-occasion-v3",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 18,
+      "caseId": "b1-current-policy-v3",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 19,
+      "caseId": "b1-partial-source-v3",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 20,
+      "caseId": "b1-price-v3",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 21,
+      "caseId": "b1-component-stock-v3",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 22,
+      "caseId": "b1-search-read-v3",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B1",
+      "slot": 23,
+      "caseId": "b1-buying-concern-v3",
+      "terminal": "FALLBACK"
+    },
+    {
+      "population": "B1",
+      "slot": 24,
+      "caseId": "b1-policy-used-v3",
+      "terminal": "SEND_ELIGIBLE"
+    },
+    {
+      "population": "B2_B3",
+      "slot": 1,
+      "caseId": "stateful-open",
+      "terminal": "FALLBACK"
+    },
+    {
+      "population": "B2_B3",
+      "slot": 2,
+      "caseId": "stateful-variant-quantity",
+      "terminal": "FALLBACK"
+    },
+    {
+      "population": "B2_B3",
+      "slot": 3,
+      "caseId": "stateful-quote",
+      "terminal": "FALLBACK"
+    },
+    {
+      "population": "B2_B3",
+      "slot": 4,
+      "caseId": "stateful-correction",
+      "terminal": "FALLBACK"
+    },
+    {
+      "population": "B2_B3",
+      "slot": 5,
+      "caseId": "stateful-private-checkout",
+      "terminal": "HANDOFF"
+    },
+    {
+      "population": "B2_B3",
+      "slot": 6,
+      "caseId": "stateful-confirm",
+      "terminal": "NO_SEND"
+    },
+    {
+      "population": "B2_B3",
+      "slot": 7,
+      "caseId": "stateful-human-request",
+      "terminal": "HANDOFF"
+    }
+  ]
+}
