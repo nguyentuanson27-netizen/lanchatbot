@@ -70,6 +70,18 @@
     "modelRolesAdded": 0,
     "providerGenerations": 0
   },
-  "sourceRefresh": "PENDING_APPLY_AFTER_CLEAN_COMMIT",
+  "sourceRefresh": {
+    "sourceSha": "57fb9f320655f15d43af2300682b5c3923c90066",
+    "status": "COMPLETE",
+    "writesDispatched": 11,
+    "verified": 10,
+    "invalid": 1,
+    "semanticFieldsUnchanged": true,
+    "providerRequests": 0,
+    "embeddingRequests": 0,
+    "sheetsWrites": 0,
+    "vectorUpserts": 0,
+    "readback": "CONFIRMED_EACH_POINT"
+  },
   "modelRun": "NOT_STARTED"
 }

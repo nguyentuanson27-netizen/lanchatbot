@@ -33,3 +33,11 @@ Sau code/verification và bounded source refresh: commit executable, require cle
 - Bundle input hashes được seal; apply yêu cầu clean committed source và cùng bundle với preflight đã đạt. Credentials chỉ qua encrypted SSH stdin memory, không argument/file/log. Chỉ payload key image_revalidation được cập nhật trên đúng11point IDs SV2447; không sửa Sheets/approval/hash/vector/publishedAt. Rollback freshness mới bằng proof INVALID và rollback candidate code; không xoá point/vector.
 
 Tại thời điểm ghi phần này: **chưa source write hoặc provider generation**. Bản ghi kết quả apply và model run sẽ được bổ sung riêng, không đổi các run BLOCKED cũ.
+
+## Bounded apply đã hoàn tất
+
+Applyr7 chạy trên clean committed source `57fb9f320655f15d43af2300682b5c3923c90066`, cùng bundle đã preflight. Kết quả10VERIFIED và1BLOCKED/SOURCE_NOT_APPROVED có proofINVALID cho orphan. Cả11proof writes có readback, không có WRITE_UNCONFIRMED hoặc attempt retry; semanticFieldsUnchanged=true. Provider/embedding/Sheetswrites/vectorupserts đều0. Không đổi publishedAt, IMAGE_HASH hoặc approval.
+
+[Apply/readback evidence](../../apps/worker/evals/single-agent-commerce-read-only/media-revalidation-fix-20261028/OPERATOR_APPLY.json). Credential broker Ops có audit started/completed cho scopeSV2447/11point IDs; plaintext credentials không vào logs/files/arguments. Chưa deploy service hoặc bật cấu hình revalidation định kỳ; candidate code có hook scope tường minh, live adoption cần release riêng.
+
+Tiếp theo là fresh capture/preflight và campaign model mới trên clean committed source; không dùng proof mới để sửa ngược run BLOCKED cũ.
