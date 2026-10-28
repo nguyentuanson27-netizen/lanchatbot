@@ -2,7 +2,17 @@
   "version": 1,
   "status": "DRAFT_UNBOUND_NOT_SEALED",
   "origin": "TARGET_CAPABILITIES",
-  "requiredCapabilities": ["PRODUCT_SEARCH", "PRODUCT_READ", "POLICY_READ", "SIZE", "MEDIA", "STATE", "CART", "CHECKOUT", "HANDOFF"],
+  "requiredCapabilities": [
+    "PRODUCT_SEARCH",
+    "PRODUCT_READ",
+    "POLICY_READ",
+    "SIZE",
+    "MEDIA",
+    "STATE",
+    "CART",
+    "CHECKOUT",
+    "HANDOFF"
+  ],
   "provenance": {
     "candidatePromptUnchanged": true,
     "authoredFrom": "architecture §1.1/§13; capability coverage, not the recent failure list",
@@ -85,19 +95,14 @@
       "initialStateRef": "single-4",
       "turns": [
         {
-          "latest": "Mẫu em vừa gửi có màu nào nhỉ?",
-          "history": [
-            {
-              "role": "shop",
-              "text": "Chị xem áo Thạch Thảo nhé."
-            }
-          ],
+          "latest": "Áo Thạch Thảo có thêm màu khác nữa không em?",
+          "history": [],
           "initialProductCodes": []
         }
       ],
       "evaluator": {
         "requiredCustomerOutcomes": [
-          "Dùng đúng referent, màu từ tồn/nguồn hiện hành."
+          "Màu từ tồn/nguồn hiện hành; referent qua history thật được kiểm thêm trong JOURNEY."
         ],
         "allowedTerminalKinds": [
           "SEND_ELIGIBLE"
@@ -294,19 +299,14 @@
       "initialStateRef": "single-13",
       "turns": [
         {
-          "latest": "Mức giá đó đã gồm tiền ship chưa em?",
-          "history": [
-            {
-              "role": "shop",
-              "text": "Áo lẻ Thạch Thảo có giá theo báo giá hiện tại của shop chị nhé."
-            }
-          ],
+          "latest": "Chị lấy một áo Thạch Thảo, gửi về Cần Thơ thì cả ship hết bao nhiêu em?",
+          "history": [],
           "initialProductCodes": []
         }
       ],
       "evaluator": {
         "requiredCustomerOutcomes": [
-          "Phân biệt đơn giá và quote; dùng phí xác minh, không tự cộng/miễn phí."
+          "Phân biệt đơn giá và tổng; dùng phí xác minh, hỏi bổ sung thông tin khách còn thiếu."
         ],
         "allowedTerminalKinds": [
           "SEND_ELIGIBLE"

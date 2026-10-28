@@ -20,7 +20,10 @@ const exact=(value,keys,code)=>check(value&&typeof value==='object'&&!Array.isAr
  Object.keys(value).every(k=>keys.includes(k)),code);
 export const textDigest=text=>createHash('sha256').update(text,'utf8').digest('hex');
 export const MEASUREMENT_POLICY=Object.freeze({latency:'MONOTONIC_MS_EVERY_GENERATION',percentiles:'NEAREST_RANK',
- tokens:'PROVIDER_OR_EXPLICIT_UNAVAILABLE',cost:'PROVIDER_OR_EXPLICIT_UNAVAILABLE',toolCalls:'EVERY_ATTEMPT',terminalReasons:'EVERY_NON_SEND'});
+ tokens:'PROVIDER_OR_EXPLICIT_UNAVAILABLE',cost:'PROVIDER_OR_EXPLICIT_UNAVAILABLE',toolCalls:'EVERY_ATTEMPT',terminalReasons:'EVERY_NON_SEND',
+ embedding:{kind:'NATIVE_VERTEX_EMBED_TEXT_V1',maximumPredictHttpPerInvocation:2,retry:'ONE_REFRESH_AND_RETRY_ONLY_AFTER_FIRST_PREDICT_401',
+  oauth:'NATIVE_TOKEN_CACHE_SINGLE_REFRESH_NO_OAUTH_RETRY',generationRequests:0,
+  requestEvidence:'PREDICT_BODY_HASH_ONLY_OAUTH_BODY_NEVER_RETAINED',usage:'NOT_EXPOSED_BY_NATIVE_EMBED_PORT'}});
 const containsRuntime=(body,input)=>{
  if(body&&typeof body==='object')return digest(body)===digest(input)||Object.values(body).some(v=>containsRuntime(v,input));
  return typeof body==='string'&&body.includes(JSON.stringify(input));

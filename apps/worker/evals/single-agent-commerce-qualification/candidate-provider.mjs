@@ -13,6 +13,10 @@ import {digest,qualificationIdentity,readiness,assertRuntimeFirewall,validateCor
 import {assertCurrentCandidate,assertApprovedDecisions} from './source-identity.mjs';
 import {createReferenceRunner} from './c3-reference.mjs';
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
+import {createFrozenSearch,validateFrozenIndex} from './frozen-search.mjs';
+import {VertexShadowModel} from '../../dist/vertex.js';
+import {embeddingHttpAccounting,EMBEDDING_POLICY} from './embedding-accounting.mjs';
+import {MEASUREMENT_POLICY} from './qualification.mjs';
 const read=p=>JSON.parse(readFileSync(p,'utf8').replace(/^\uFEFF/,''));
 export function assertSealedInputs(sealed,world){
  assert.equal(sealed.sendEnabled,false,'C_SEALED_SEND_POLICY');
@@ -24,11 +28,10 @@ export function assertSealedInputs(sealed,world){
  assert(Number.isFinite(Date.parse(sealed.registeredAt))&&Date.parse(sealed.registeredAt)<=Date.now(),'C_REGISTRATION_TIME');
  assert.equal(readiness(sealed.config,{stage:'ABSOLUTE'}).status,'READY','C_ABSOLUTE_PROTOCOL_BLOCKED');
  assert.equal(sealed.status,'SEALED_NOT_EXECUTED');assert.equal(digest(world),sealed.worldHash,'C_WORLD_CHANGED');
- if(sealed.corpus.requiredCapabilities?.includes('PRODUCT_SEARCH'))assert.equal(world.search?.status,'FROZEN_NATIVE_INDEX','C_WORLD_SEARCH_INDEX_NOT_FROZEN');
+ if(sealed.corpus.requiredCapabilities?.includes('PRODUCT_SEARCH'))validateFrozenIndex(world.search,world.config.vertex.embeddingDimension);
  assert(sealed.config.nativeCodecs&&digest(sealed.config.nativeCodecs)===digest(NATIVE_CODECS),'C_NATIVE_CODEC_REGISTRATION');
  assert(sealed.corpus.scenarios.filter(s=>s.mode!=='SAFETY').every(s=>s.turns.every(t=>t.history.length===0)),
   'C_INITIAL_HISTORY_SEED_NOT_IMPLEMENTED');
- assert(!sealed.corpus.requiredCapabilities?.includes('PRODUCT_SEARCH'),'C_NATIVE_FROZEN_SEARCH_ADAPTER_NOT_IMPLEMENTED');
 }
 export function candidatePreflight(root,registrationPath,worldPath){
  const sealed=read(registrationPath),world=read(worldPath);
@@ -49,11 +52,27 @@ export function assertCandidateSource(preflight){
 const metrics=(telemetry,latencyMs)=>({latencyMs,inputTokens:telemetry?.inputTokens??telemetry?.usage?.input_tokens??null,outputTokens:telemetry?.outputTokens??telemetry?.usage?.output_tokens??null,
  costUSD:telemetry?.cost??null,unavailable:{inputTokens:'PROVIDER_NOT_EXPOSED',outputTokens:'PROVIDER_NOT_EXPOSED',costUSD:'PROVIDER_NOT_EXPOSED'}});
 export function createCandidateProvider({preflight,out,dependencies={}}){
- const {m,world}=preflight,facts=frozenFacts(world),catalog=frozenCatalog(world);
+ const {m,world}=preflight,facts=frozenFacts(world);
  const ownerPrompt=readFileSync(new URL('../single-agent-commerce-read-only/prompts/owner.vi.txt',import.meta.url),'utf8'),
   verifierPrompt=readFileSync(new URL('../single-agent-commerce-read-only/prompts/verifier.vi.txt',import.meta.url),'utf8');
  let active=null,inFlight=null;const generations=[],pending=new Set(),counters={owner:0,verifier:0,embedding:0,catalogReads:0,posReads:0,selectorCalls:0,readPolicyCalls:0};
  const audit=(phase,value)=>appendFileSync(resolve(out,'NATIVE_REQUESTS.jsonl'),JSON.stringify({slotId:value.slotId??active?.slotId,turnIndex:value.turnIndex??active?.turnIndex,phase,value})+'\n');
+ assert.deepEqual(EMBEDDING_POLICY,MEASUREMENT_POLICY.embedding);
+ const embeddingHttp=embeddingHttpAccounting({fetchImpl:dependencies.embeddingFetchImpl??fetch,observe:audit,
+  context:()=>({slotId:active?.slotId,turnIndex:active?.turnIndex,invocation:counters.embedding})});
+ let encoder;
+ const frozenSearch=world.search?.status==='FROZEN_NATIVE_INDEX'?createFrozenSearch(world,{embedText:async query=>{
+  assert(active,'C_ACTIVE_SLOT_REQUIRED');const ordinal=++counters.embedding,started=performance.now();audit('EMBEDDING_STARTED',{ordinal,query});
+  try{if(!encoder){const credential=JSON.parse(readFileSync(process.env.C3_VERTEX_CREDENTIAL_FILE,'utf8'));
+   assert(credential.type==='service_account'&&credential.project_id===world.config.vertex.projectId,'C_EMBEDDING_CREDENTIAL_SCOPE');
+   encoder=new VertexShadowModel({projectId:world.config.vertex.projectId,location:'global',modelName:m.models.conversation.model,
+    embeddingModel:world.config.vertex.embeddingModel,embeddingLocation:world.config.vertex.embeddingLocation,embeddingDimension:world.config.vertex.embeddingDimension,
+    serviceAccount:{email:credential.client_email,privateKey:credential.private_key},fetchImpl:embeddingHttp.fetchImpl});}
+   const vector=await embeddingHttp.run({slotId:active.slotId,turnIndex:active.turnIndex,invocation:ordinal},()=>encoder.embedText(query));
+   audit('EMBEDDING_RESULT',{ordinal,vectorHash:digest(vector),latencyMs:performance.now()-started});return vector;}
+  catch(error){audit('EMBEDDING_ERROR',{ordinal,code:error.code??error.name,latencyMs:performance.now()-started});throw error;}
+ },embedImageUrl:async()=>{throw Error('C_FROZEN_IMAGE_SEARCH_NOT_REGISTERED');}}):null;
+ const catalog=frozenSearch?.catalog??frozenCatalog(world);
  const validateActual=(row,body)=>{
   assertRuntimeFirewall(body,preflight.sealed.corpus.scenarios.map(s=>s.id));assertNativeRuntime(body,NATIVE_CODECS[row.role],row.runtimeInput);
   row.requestBody=body;row.requestHash=digest(body);
@@ -123,12 +142,12 @@ export function createCandidateProvider({preflight,out,dependencies={}}){
   },
   setSlot:value=>{assert(pending.size===0,'C_PENDING_GENERATION');assert(value?.runtimeInput&&Number.isInteger(value.turnIndex));active=structuredClone(value);},
   async awaitSettled(timeoutMs=5000){let timer;try{return await Promise.race([Promise.allSettled([...pending]).then(()=>true),new Promise(resolve=>{timer=setTimeout(()=>resolve(false),timeoutMs);})]);}finally{clearTimeout(timer);}},
-  observed:()=>structuredClone(generations),factsForMode:mode=>{assert.equal(mode,'LIVE');return facts;},
+  observed:()=>structuredClone(generations),observedAuxiliary:embeddingHttp.observed,factsForMode:mode=>{assert.equal(mode,'LIVE');return facts;},
   owner:r=>tracked('OWNER',r),verifier:r=>tracked('VERIFIER',r),
   async read(bound,policyStore,policy,initialProductCodes){
    const initialProducts=await Promise.all(initialProductCodes.map(c=>catalog.findByExactCode(c)));assert(initialProducts.every(Boolean),'C_INITIAL_PRODUCT_NOT_FROZEN');
    const sources=createCommerceReadSources({scope:bound,channel:world.config.channel,clock:()=>new Date(),initialProducts,catalog,
-    search:{searchText:catalog.searchText},policyStore,facts});
+    search:frozenSearch?.search??{searchText:catalog.searchText},policyStore,facts});
    return {catalog:sources.catalog,policy,initialProducts,maxFactAgeSeconds:world.config.maxFactAgeSeconds,productGroups:world.config.productGroups};
   }};
  return ports;

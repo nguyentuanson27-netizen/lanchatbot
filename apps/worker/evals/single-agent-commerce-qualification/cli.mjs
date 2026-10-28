@@ -7,6 +7,7 @@ import {digest,readiness,validateConfig,validateCorpus,qualificationIdentity,reg
  blindComparisonPack,absoluteReviewPack,evaluateQualification,MEASUREMENT_POLICY} from './qualification.mjs';
 import {currentCandidate,assertCurrentCandidate,assertApprovedDecisions,IMPLEMENTATION_BASE_SHA} from './source-identity.mjs';
 import {NATIVE_CODECS} from './native-wire.mjs';
+import {validateFrozenIndex} from './frozen-search.mjs';
 
 const [command,...args]=process.argv.slice(2),allowed=new Set(['--repo','--config','--corpus','--world','--development','--out','--registration','--evidence','--seed']);
 const flags={};
@@ -44,7 +45,10 @@ try{
    const corpus=json(flags['--corpus']);validateCorpus(corpus);
    if(corpus.review?.status!=='APPROVED'||!corpus.review.worldHash||JSON.stringify(corpus).includes('{{'))result.missing.push('CORPUS_BINDING_AND_REVIEW');
    if(config.nativeCodecs){
-    if(corpus.requiredCapabilities?.includes('PRODUCT_SEARCH'))result.missing.push('NATIVE_FROZEN_SEARCH_ADAPTER');
+    if(corpus.requiredCapabilities?.includes('PRODUCT_SEARCH')){
+     if(flags['--world']){const world=json(flags['--world']);validateFrozenIndex(world.search,world.config.vertex.embeddingDimension);}
+     else result.missing.push('FROZEN_SEARCH_SOURCE_BINDING');
+    }
     if(corpus.scenarios.filter(s=>s.mode!=='SAFETY').some(s=>s.turns.some(t=>t.history.length)))result.missing.push('INITIAL_HISTORY_SEED');
    }
   }else result.missing.push('CORPUS');
@@ -64,7 +68,7 @@ try{
   check(!JSON.stringify(corpus).includes('{{'),'C_UNRESOLVED_HOLDOUT_INPUT');
   if(config.nativeCodecs){
    check(corpus.scenarios.filter(s=>s.mode!=='SAFETY').every(s=>s.turns.every(t=>t.history.length===0)),'C_INITIAL_HISTORY_SEED_NOT_IMPLEMENTED');
-   check(!corpus.requiredCapabilities?.includes('PRODUCT_SEARCH'),'C_NATIVE_FROZEN_SEARCH_ADAPTER_NOT_IMPLEMENTED');
+   if(corpus.requiredCapabilities?.includes('PRODUCT_SEARCH'))validateFrozenIndex(world.search,world.config.vertex.embeddingDimension);
   }
   check(corpus.scenarios.filter(s=>s.mode!=='SAFETY').every(s=>s.judgeContext&&s.initialContext?.worldHash===digest(world)&&
    ['initialStateHash','initialHistoryHash','freshnessPolicyHash'].every(k=>/^[a-f0-9]{64}$/.test(s.initialContext[k]))),'C_CONTEXT_BINDINGS_REQUIRED');

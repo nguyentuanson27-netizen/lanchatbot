@@ -60,7 +60,9 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
     kind:payloads[index].attachment?'IMAGE':'TEXT',contentHash:textDigest(payloads[index].text??payloads[index].attachment.payload.url)}));
    a.acceptedOutbox=t.acceptedOutbox;
    if(arm==='C3'&&observed?.result?.c3Witness){t.c3Boundary=observed.result.c3Witness;a.c3Boundary=t.c3Boundary;}
-   const rawFile=`native-${slot.slotId}-turn-${i}.json`,raw={observed,errorCode,before,after,generations:gens};
+    const auxiliaryRequests=providerPorts.observedAuxiliary?.().filter(r=>r.slotId===slot.slotId&&r.turnIndex===i)??[];
+    t.auxiliaryRequests=auxiliaryRequests;
+    const rawFile=`native-${slot.slotId}-turn-${i}.json`,raw={observed,errorCode,before,after,generations:gens,auxiliaryRequests};
    writeFileSync(resolve(out,rawFile),JSON.stringify(raw,null,2),{flag:'wx'});
    (a.audit.nativeResults??=[]).push({turnIndex:i,artifact:rawFile,artifactHash:digest(JSON.parse(JSON.stringify(raw))),
     terminal:terminal??null,commitStatus:observed?.result?.commitStatus??null,egressDiagnostic:observed?.result?.egressDiagnostic??null});
@@ -95,5 +97,6 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
    outcomeHash:outcomeDigest(a),status:'NOT_GRADED'};save();
  }
  providerPorts.assertSource();
- return {attempts,providerRequests:providerPorts.observed().reduce((n,g)=>n+g.providerRequests,0)};
+ return {attempts,providerRequests:providerPorts.observed().reduce((n,g)=>n+g.providerRequests,0),
+  auxiliaryHttp:providerPorts.observedAuxiliary?.()??[]};
 }

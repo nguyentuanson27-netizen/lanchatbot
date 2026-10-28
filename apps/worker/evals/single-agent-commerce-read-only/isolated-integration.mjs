@@ -836,7 +836,8 @@ try{
   const snapshot=session=>phaseCTools.readSessionSnapshot({runtime,pool,historyStore,session});
   const collected=await phaseCTools.collectNativePopulation({preflight:providerFreeze,providerPorts,sessionFactory:statefulFixture,snapshot,historyStore,
    out:resolve(out),seedPath:phaseCArg('--phase-c-seed'),queue:attemptQueue});
-  report.phaseC={status:'COLLECTED_NOT_GRADED',candidateNativeScenarios:collected.attempts.length};report.providerGenerations=collected.providerRequests;
+  report.phaseC={status:'COLLECTED_NOT_GRADED',candidateNativeScenarios:collected.attempts.length,
+   auxiliaryHttp:collected.auxiliaryHttp};report.providerGenerations=collected.providerRequests;
  }else if(providerRun){
   const journeys=new Map(),qualifiedAttempts=[];report.outcomes=[];
   let invitationSucceeded=false;

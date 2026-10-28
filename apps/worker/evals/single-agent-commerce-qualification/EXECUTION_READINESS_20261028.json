@@ -25,8 +25,12 @@
   },
   "sourceCredentialPreflight": {
     "existingRoute": "credential-launcher.py -> existing source-session.py",
-    "attempts": 2,
-    "exitCodes": [1, 1],
+    "attempts": 3,
+    "exitCodes": [
+      1,
+      1,
+      1
+    ],
     "reason": "SSH source host port 22 connection timed out before credential retrieval",
     "configuredLocalVertexCredentialVariables": 0,
     "providerRequests": 0,
@@ -46,11 +50,24 @@
   "missing": [
     "reachable existing public-source and Vertex credential route",
     "new frozen public world and real native initial-state readback",
-    "reviewed source bindings and finalized fresh corpus, including authored-history seed handling",
+    "reviewed source bindings and finalized fresh corpus",
     "sealed clean source/input registration",
     "matched C3 information parity or explicit package-only qualification disposition",
     "actual model, independent blind grades and real-adapter evidence"
   ],
   "rolloutAuthorized": false,
-  "historicalPhaseBStatus": "B_NOT_GO_UNCHANGED"
+  "historicalPhaseBStatus": "B_NOT_GO_UNCHANGED",
+  "frozenSearch": {
+    "implementation": "BUILT_INDEPENDENT_REVIEW_APPROVED",
+    "sourceSnapshot": "NOT_CAPTURED",
+    "ranking": "EXACT_COSINE_SHARED_NATIVE_ADAPTER_V1",
+    "productionHnswParity": "NOT_CLAIMED",
+    "embeddingHttpAccounting": "ACTUAL_OAUTH_AND_PREDICT_SEPARATE_FROM_GENERATIONS",
+    "retry": "ONE_REFRESH_AND_RETRY_ONLY_AFTER_FIRST_PREDICT_401"
+  },
+  "draftHistory": {
+    "authoredInitialShopHistory": 0,
+    "nativeJourneys": 6,
+    "corpusReview": "PENDING_SOURCE_BINDINGS"
+  }
 }

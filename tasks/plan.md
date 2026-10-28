@@ -1883,13 +1883,13 @@ After owner GO or the recorded OWNER_BYPASS, write a new separately scoped plan 
 
 ### Future Phase C — qualification and replacement evidence
 
-Implementation started28/10/2026: [Phase C plan](../docs/specs/c3-phase-c-qualification-plan-20261028.md). Owner approved N1,90% separate absolute SINGLE/JOURNEY and safe usability,zero hard safety/state/effect/privacy failures,10pp netwin BOTH modes; C3 baseline main296cdcf. Foundation is under independent review; collector/matched persisted baseline bridge/fresh sealed corpus/provider and real-adapter execution remain incomplete. Tooling tests do not change B_NOT_GO or establish C_PASS.
+Implementation started28/10/2026: [Phase C plan](../docs/specs/c3-phase-c-qualification-plan-20261028.md). Owner approved N1,90% separate absolute SINGLE/JOURNEY and safe usability,zero hard safety/state/effect/privacy failures,10pp netwin BOTH modes; C3 baseline main296cdcf. Foundation and bounded native collectors/reference bridge/frozen search are independently approved after fixes. Offline blind judge is owner-approved GPT-6.1 Sol High. Actual source-bound world/corpus/seal, matched information parity, provider grades and real-adapter execution remain incomplete. Existing source/Vertex/DB SSH route timed out3times; qualification requests0. Tooling tests do not change B_NOT_GO or establish C_PASS.
 
 1. preregister complete-candidate sealed holdouts;
 2. bind verifier qualification separately from complete-candidate qualification;
 3. paired single-turn absolute target evaluation;
 4. stateful journey absolute target evaluation;
-5. matched C3 comparison only after absolute target evaluation is registered;
+5. matched C3 comparison only after actual absolute target PASS and registered matched parity;
 6. final `Candidate meets target` verdict;
 7. final `Candidate qualifies to replace C3` verdict requiring clear preregistered improvement in both comparison modes + no safety/state/effect regression + structural simplification;
 8. real-adapter send-disabled gate;
