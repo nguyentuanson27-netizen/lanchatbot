@@ -69,5 +69,38 @@
     "authoredInitialShopHistory": 0,
     "nativeJourneys": 6,
     "corpusReview": "PENDING_SOURCE_BINDINGS"
-  }
+  },
+  "boundedImplementationApproval": {
+    "sourceSha": "02fc8205a58a8244c485c65de52da94697e86efc",
+    "reviewer": "/root/phase_c_independent_review",
+    "status": "APPROVE_EXACT_CLEAN_HEAD",
+    "qualificationApproval": false
+  },
+  "verification": {
+    "phaseCFocused": {
+      "pass": 58,
+      "fail": 0,
+      "skip": 0
+    },
+    "allEvaluationSuites": {
+      "pass": 734,
+      "fail": 0,
+      "skip": 2,
+      "total": 736
+    },
+    "workerBuild": "EXIT_0",
+    "workerDirectTypecheck": "EXIT_0",
+    "workerLint": "EXIT_0"
+  },
+  "draftPreflight": {
+    "sourceSha": "02fc8205a58a8244c485c65de52da94697e86efc",
+    "status": "BLOCKED",
+    "missing": [
+      "BLINDING_REGISTRATION",
+      "CORPUS_BINDING_AND_REVIEW",
+      "FROZEN_SEARCH_SOURCE_BINDING"
+    ],
+    "providerRequests": 0
+  },
+  "pullRequest": "https://github.com/nguyentuanson27-netizen/lanchatbot/pull/392"
 }
