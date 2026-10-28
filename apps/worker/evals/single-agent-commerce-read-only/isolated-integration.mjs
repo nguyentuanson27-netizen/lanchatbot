@@ -364,7 +364,8 @@ try{
  // Product/checkout/transport inputs here remain explicitly synthetic; no Meta/Pancake socket is opened.
  historyStore=new PostgresChatHistoryStore(testUrl.toString(),{analyticsHashSalt:randomBytes(32).toString('hex')});
  if(providerRun)providerPorts=await createStatefulProvider({preflight:providerFreeze,out:resolve(out)});
- async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false}={}){
+ async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false}={}){
+  assert(!live||!revalidatedMedia,'SYNTHETIC_REVALIDATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||(dependencyHoldingReply===null&&sizeHoldingReply===null&&!missingDependencyRule),'SYNTHETIC_RULE_FORBIDDEN_IN_PROVIDER_RUN');
   const customerHash=hash(randomUUID()),at=new Date(),row=await runtime.loadOrCreate(pageId,customerHash,'APP',conversationId=>createConversationState({conversationId,routingOwner:'APP',now:at}),at);
   const bound={pageId,shopId:scope.shopId,shopAlias:'LANA',conversationId:row.conversationId,customerHash};
@@ -389,6 +390,9 @@ try{
    return {...resolved,bundle:{...resolved.bundle,artifacts:{...resolved.bundle.artifacts,handoffMatrix:matrix}}};};
   if(media)product.product.images=[{url:'https://content.pancake.vn/c3-synthetic-product-back.jpg',role:'PRIMARY',angle:'BACK',imageType:'PRODUCT_ONLY',intents:[],sortOrder:0,qualityScore:null,feedback:false,
    reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:at.toISOString()}];
+  if(revalidatedMedia){assert(media);product.product.observedAt=new Date(at.getTime()-31*86400000).toISOString();
+   product.product.images[0].observedAt=product.product.observedAt;
+   product.product.images[0].revalidation={status:'VALID',checkedAt:at.toISOString()};}
   const read=live?await providerPorts.read(bound,policyStore,policy,initialProductCodes,facts):{policy,catalog:{readProduct:async()=>mediaChanged?{...product,product:{...product.product,images:[]}}:product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
   const scopedSourceReader=createCommerceHandoffSourceReader({
    product:(id,readPos)=>read.catalog.readProduct(id,readPos),
@@ -446,6 +450,7 @@ try{
     [pageId,bound.conversationId,next.revision,encrypted.ciphertext,encrypted.nonce,encrypted.authTag,encrypted.encryptedDek,encrypted.keyRef]);assert.equal(changed.rowCount,1);
   };
   return {bound,turn,state,changeStoredCart,capture,capturePayloads,gateCalls,deliveryObservations,drain,restartDelivery:()=>{dispatcher=makeDispatcher();},changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;},changeHandoffPolicy:()=>{policyChanged=true;},disableReceiptRead:()=>{receiptAvailable=false;},
+   revokeMediaProof:()=>{assert(revalidatedMedia);product.product.images[0].revalidation={status:'INVALID'};},
    refreshPosSource:mode=>{product.snapshot.synced_at=new Date(mode==='expired'?Date.now()-3*3600000:Date.now()).toISOString();
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
@@ -609,6 +614,16 @@ try{
   // Accepted private preview is retained by the existing authorized history store; public model projection must drop it whole.
   const publicHistory=commerceHistory(history),inbound=history.filter(m=>m.direction==='INBOUND');
   for(const rows of [publicHistory,inbound]){assert(!JSON.stringify(rows).includes('Nguyễn Thị Lan'));assert(!JSON.stringify(rows).includes('0900000001'));assert(!JSON.stringify(rows).includes('12 Đường thử nghiệm'));}
+ });
+ for(const fault of ['unchanged','revoked-before-delivery'])await check('B composed revalidated media '+fault+' uses actual Outbox capture',async()=>{
+  const j=await statefulFixture({media:true,revalidatedMedia:true});
+  const r=await j.turn('Cho chị xem mặt sau SM613 nhé',[native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'BACK'}}]),say('Ảnh mặt sau đây chị nhé.')]);
+  assert.equal(r.result.enqueued,2,JSON.stringify(r.result));
+  if(fault==='revoked-before-delivery')j.revokeMediaProof();
+  j.restartDelivery();await j.drain();await j.drain();
+  assert.deepEqual(j.capture,fault==='unchanged'?['Ảnh mặt sau đây chị nhé.','[CODE_IMAGE]']:[]);
+  const rows=(await pool.query('SELECT status FROM meta_outbox WHERE conversation_id=$1 ORDER BY sequence_no',[j.bound.conversationId])).rows;
+  assert.equal(rows.length,2);assert(rows.every(row=>row.status===(fault==='unchanged'?'SENT_ACCEPTED':'MANUAL_REVIEW')),JSON.stringify(rows));
  });
  await check('B composed N4 sends exact text and selected image in one response group without replay duplicates',async()=>{
   const j=await statefulFixture({media:true});

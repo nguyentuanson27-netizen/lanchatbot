@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { MEDIA_FRESH_FOR_SECONDS, CommerceMediaDeliveryBindingV1Schema as bindingSchema,
   type CommerceMediaDeliveryImageV1 as MediaDeliveryImage, type CommerceMediaDeliveryBindingV1 as CommerceMediaDeliveryBinding } from "@lana/contracts";
 import type { RuntimePolicyBundle } from "@lana/chat-runtime";
-import type { StableProductDocument } from "@lana/business-tools";
+import {mediaObservationTime,type StableProductDocument} from "@lana/business-tools";
 import type { RealtimeMetaMessageUnit } from "@lana/database";
 import type { MetaPreSendGate } from "./meta-outbox-dispatcher.js";
 import type { CommerceScope } from "./single-agent-commerce-read-only-tools.js";
@@ -57,7 +57,7 @@ export function createCommerceMediaPreSendGate(input: {
           !asset.sourceContentSha256 || !/^[a-f0-9]{64}$/u.test(asset.sourceContentSha256) ||
           Date.parse(expected.observedAt) > now.getTime() || Date.parse(expected.expiresAt) <= now.getTime() ||
           Date.parse(expected.observedAt) + MEDIA_FRESH_FOR_SECONDS * 1000 <= now.getTime() ||
-          (asset.observedAt ?? product.observedAt) !== expected.observedAt ||
+          mediaObservationTime(asset,product.observedAt) !== Date.parse(expected.observedAt) ||
           commerceHash({ productId: product.productId, catalogVersion: product.catalogVersion, image: asset }) !== expected.sourceVersion) return blocked();
       }
       // Detect authority changing while catalog/policy reads were in flight.

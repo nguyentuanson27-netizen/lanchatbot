@@ -41,3 +41,9 @@ Applyr7 chạy trên clean committed source `57fb9f320655f15d43af2300682b5c3923c
 [Apply/readback evidence](../../apps/worker/evals/single-agent-commerce-read-only/media-revalidation-fix-20261028/OPERATOR_APPLY.json). Credential broker Ops có audit started/completed cho scopeSV2447/11point IDs; plaintext credentials không vào logs/files/arguments. Chưa deploy service hoặc bật cấu hình revalidation định kỳ; candidate code có hook scope tường minh, live adoption cần release riêng.
 
 Tiếp theo là fresh capture/preflight và campaign model mới trên clean committed source; không dùng proof mới để sửa ngược run BLOCKED cũ.
+
+## Downstream delivery diagnostic
+
+Campaign source342c1e97:17controlsPASS,12native đã chạy,39NOT_RUN. Actual capture phát hiện hai consumer cuối còn dùng publish time; dừng parent dispatch và để child cleanup xong trước khi sửa source. Không tính SEND_ELIGIBLE nhưng MANUAL_REVIEW là gửi thành công. [Full stopped-run record và follow-up verification](../../apps/worker/evals/single-agent-commerce-read-only/media-delivery-stopped-20261028/CHECKPOINT_B.md).
+
+Sửa gate durable media và ProductFacts media projection dùng cùng effective observation. RED2FAIL→GREEN28; final1128Vitest/228NodePASS, workerbuild/lintPASS. Real isolated PostgreSQL regression2PASS: exact capture sau restart khi proof còn đúng; revoke sau enqueue chặn toàn nhóm. Không ghi nguồn lần nữa, không đổi prompt/corpus/TTL. Source mới phải commit và clean seal riêng trước lượt model mới.

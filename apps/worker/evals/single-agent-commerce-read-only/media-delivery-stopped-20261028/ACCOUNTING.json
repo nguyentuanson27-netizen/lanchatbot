@@ -1,0 +1,16 @@
+{
+  "sourceSha": "342c1e97be0a7ca7462d53e151fa66cc6d435e00",
+  "registeredNative": 51,
+  "executedNative": 12,
+  "nativeNotRun": 39,
+  "controlsExecuted": 17,
+  "providerGenerationRequests": 42,
+  "maxProviderRequestsPerGeneration": 1,
+  "retry": 0,
+  "liveSends": 0,
+  "sourceStoreWritesDuringRun": 0,
+  "generationErrors": [],
+  "originalRawRoot": "c3-b-media-revalidated-model-20261028",
+  "rawEvidenceRetained": true,
+  "parentLastCommandExitUnknown": true
+}
