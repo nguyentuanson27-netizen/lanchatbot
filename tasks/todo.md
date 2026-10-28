@@ -1,4 +1,10 @@
-## Current — full Phase B model sau silent fallback, 28/10/2026
+## Current — dùng ưu đãi cụ thể khi khách xin bớt, 28/10/2026
+
+- [x] PlanR1 → independent APPROVE; thay một instruction region của owner và owner hash, giữ effects/payload/verifier/corpus/silent fallback. Không thêm ví dụ, template hoặc field runtime.
+- [x] Node25PASS +effects75PASS; self-review bytes/hash PASS; cùng reviewer độc lập chạy25NodePASS, kiểm inventory/diff và APPROVE implementation, không còn finding chặn. [Review](../docs/specs/c3-phase-b-current-offer-fix-review-20261028.md).
+- [ ] Chưa chạy model mới; chưa chứng minh chất lượng/độ ổn định. B_NOT_GO, không tự rerun hoặc live/deploy.
+
+## Previous — full Phase B model sau silent fallback, 28/10/2026
 
 - [x] Review lại đủ51 outcomes và17 controls, đối chiếu bản sửa silent fallback và campaign trước. [Post-run review](../apps/worker/evals/single-agent-commerce-read-only/silent-fallback-run-20261028/POST_RUN_REVIEW.md): không quy38eligible/0fallback thành tiến bộ bán hàng; ưu tiên gallery diagnostics, lựa chọn theo hoàn cảnh và dùng ưu đãi. Chưa sửa code hoặc chạy provider mới.
 - [x] Seal source `dc69f712fa85ef318ff3f58bf7e26c8d28368aee`, clean trước/sau; source/dist/prompt hashes giữ nguyên. [Báo cáo](../apps/worker/evals/single-agent-commerce-read-only/silent-fallback-run-20261028/CHECKPOINT_B.md).

@@ -1,4 +1,10 @@
-## Current — full Phase B model sau silent fallback, 28/10/2026
+## Current — dùng ưu đãi cụ thể khi khách xin bớt, 28/10/2026
+
+Scope theo trao đổi ngay trước: sửa dùng quyền lợi khi khách xin bớt, không mở lại toàn bộ giọng/discovery. [Plan và independent approval](../docs/specs/c3-phase-b-current-offer-fix-plan-20261028.md), [implementation record](../docs/specs/c3-phase-b-current-offer-fix-review-20261028.md).
+
+Đã sửa đúng một đoạn owner instruction và owner hash; không đổi runtime/projection vì actual request đã có tổng giảm và tổng thanh toán. Ranh giới aggregate không xác nhận loại ưu đãi hoặc giảm thêm; chỉ nêu tổng khi có ích; mức giảm0 không cấp quyền thêm hỗ trợ hoặc kết luận shop hết hỗ trợ. Root Node25/effects75PASS; reviewer độc lập Node25PASS và APPROVE source inventory. Không provider run, không coi approval là qualityPASS.
+
+## Previous — full Phase B model sau silent fallback, 28/10/2026
 
 Đã thực hiện model qualification trên exact clean source `dc69f712fa85ef318ff3f58bf7e26c8d28368aee`, sau executable approval `24a2ed1b`. [Evidence và commands](../apps/worker/evals/single-agent-commerce-read-only/silent-fallback-run-20261028/CHECKPOINT_B.md). Owner Gemini3.5FlashLite HIGH, verifier Sol6.1 HIGH, CompactV2; không thay prompt/corpus giữa run.
 
