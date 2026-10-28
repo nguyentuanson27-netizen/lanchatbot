@@ -119,7 +119,13 @@ export function createCandidateProvider({preflight,out,dependencies={}}){
    inFlight=row;const value=await(role==='OWNER'?infer(original):verify(original)),t=value.telemetry;
    row.providerRequests=t?.providerRequests??row.providerRequests;row.observedModelVersion=t?.modelVersion??null;
    row.status='OK';row.metrics=metrics(t,performance.now()-started);row.telemetry=t??null;
-   if(role==='VERIFIER')row.verdict=value.result;
+   if(role==='VERIFIER'){
+    row.rawVerdict=structuredClone(value.result);
+    try{const parsed=typeof value.result==='string'?JSON.parse(value.result):value.result;
+     row.verdict=parsed&&typeof parsed==='object'&&!Array.isArray(parsed)?structuredClone(parsed):null;
+    }catch{row.verdict=null;}
+    // This is evidence decoding only. The original result goes unchanged to the native final gate.
+   }
    audit('RESULT',{id:row.id,slotId:row.slotId,turnIndex:row.turnIndex,status:row.status,metrics:row.metrics,telemetry:row.telemetry,...(role==='VERIFIER'?{verdict:row.verdict}:{output:value})});
    return value;
   }catch(error){

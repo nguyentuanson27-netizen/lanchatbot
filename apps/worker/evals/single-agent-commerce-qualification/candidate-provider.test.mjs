@@ -83,3 +83,9 @@ test('slow aborted HTTP remains pending with counted dispatch and prevents switc
  const lines=readFileSync(resolve(f.out,'NATIVE_REQUESTS.jsonl'),'utf8').trim().split('\n').map(JSON.parse);
  assert(lines.every(line=>line.slotId==='unit-slot'));assert.equal(f.provider.observed()[0].providerRequests,1);
 });
+test('real native verifier string answer is normalized only in evidence, raw result retained for native gate',async t=>{
+ const verdict={verdict:'PASS',violations:[]},raw=JSON.stringify(verdict),f=setup(t,{runVerifierModel:async()=>({status:'OK',answer:raw,providerRequests:1,modelVersion:'gpt-6.1-sol'})});
+ const draft='Dạ chị.',binding=makeBinding('unit-native-string',draft,f.request.context),value=await f.provider.verifier({generationId:'unit-native-string',
+  instructions:f.provider.verifierPrompt,trusted:f.request.context,finalDraft:draft,latest:f.runtimeInput.latest,history:[],binding,signal:new AbortController().signal});
+ assert.equal(value.result,raw);assert.deepEqual(f.provider.observed().at(-1).verdict,verdict);assert.equal(f.provider.observed().at(-1).rawVerdict,raw);
+});

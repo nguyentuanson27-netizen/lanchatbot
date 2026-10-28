@@ -5,6 +5,7 @@ import {resolve} from 'node:path';
 import {runtimeProjection,digest,textDigest,outcomeDigest} from './qualification.mjs';
 import {commonModelConfig} from './native-wire.mjs';
 import {selectFrozenCustomerTurn} from './customer-branches.mjs';
+import {captureNativeTerminal,capturedOutputViolations} from './native-terminal.mjs';
 const silent=(reason,disposition='NO_SEND')=>({disposition,messages:[],images:[],reason});
 export async function collectNativePopulation({preflight,providerPorts,sessionFactory,snapshot,historyStore,out,seedPath,queue,branchSelector}){
  const reg=preflight.sealed,identity=reg.identity,arm=preflight.registration.arm??'CANDIDATE',seed=JSON.parse(readFileSync(seedPath,'utf8')).seed;
@@ -42,14 +43,12 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
    const messages=session.capturePayloads.slice(attachmentStart).flatMap(p=>typeof p.text==='string'?[p.text]:[]),images=session.capturePayloads.slice(attachmentStart).flatMap(p=>
     p.attachment?.type==='image'?[{url:p.attachment.payload.url}]:[]);
    const codeOnly=observed?.result?.mode==='PRIVATE_CODE_PATH'&&gens.length===0&&messages.length>0;
-   const actual=codeOnly?{disposition:'CODE_OWNED_SEND',messages,images}:
-    terminal?.disposition==='HANDOFF'?silent(terminal.reason,'HANDOFF'):
-    terminal?.disposition==='SEND_ELIGIBLE'&&messages.length?{disposition:'SEND_ELIGIBLE',messages,images}:
-     silent(errorCode??terminal?.reason??'NO_ACCEPTED_CUSTOMER_OUTPUT');
+   const actual=captureNativeTerminal({native:terminal,codeOnly,messages,images,errorCode}),outputFindings=capturedOutputViolations(actual);
+   a.safetyFindings.push(...outputFindings);
    const verifier=gens.find(g=>g.role==='VERIFIER'),b=verifier?.verifierInput,witness=observed?.result?.boundaryWitness;
    const t={customer:input.latest,customerSelection:selected.selection,terminal:actual,historyBefore:accepted,
     historyAfter:after.publicHistory.history,historyTrace:{before:before.publicHistory.trace,after:after.publicHistory.trace},
-    beforeStateHash:digest(before.publicState),afterStateHash:digest(after.publicState),safetyFindings:[],
+    beforeStateHash:digest(before.publicState),afterStateHash:digest(after.publicState),safetyFindings:outputFindings,
     elapsedMs:performance.now()-turnStart,...(b?{verification:{...b,generationId:verifier.id,verdict:verifier.verdict?.verdict},
      finalGate:{status:actual.disposition==='SEND_ELIGIBLE'&&witness?.terminal?.disposition==='SEND_ELIGIBLE'?'ALLOWED':'BLOCKED',
       requestId:witness?.expected?.requestId??b.requestId,draftHash:witness?.expected?.finalDraftHash??b.draftHash,

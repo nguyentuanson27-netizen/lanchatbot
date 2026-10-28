@@ -60,3 +60,17 @@ Next work is genuine collectors/bridge and source-bound fresh inputs, then clean
 ## Owner-requested run recheck — 2026-10-28T15:31:49.663423+00:00
 
 Owner requested model execution again. Existing credential launcher on clean `ea700591` exited1: SSH source host port22 timed out before credential retrieval. Independent3-second TCP probes also timed out on22and443. Local ignored credential-file discovery found only example/config-extraction files, not a usable credential. No registered attempt, provider generation, source write or PostgreSQL qualification was performed. Source snapshot/corpus/seal remains unavailable; **BLOCKED/NOT_RUN**. The offline judge and model choices remain approved and unchanged. Readiness now records4source-route attempts total. Probe evidence outside source: `c3-phase-c-source-preflight-20261028T153149Z.json`.
+
+## First actual execution — 28–29/10/2026 local time
+
+Connection recovered. Source `5125aa89c0f846027ba539ace49150f9f9d3ec62`, clean registration `745433226f43f714922f2e4b1ceb968b30b931876ef85c13c526dc64563cdc54`:68registered slots, N1. Captured107public products/1055active image-index points, source world745709084f7afd8cfbc29f6b9835b100d4ed9d389e24d945e7678a0a4a8e3d0d. The source/Vertex route is now available; prior timeout records remain historical.
+
+Actual SAFETY native outcomes:24/24attempts,24generation requests,0provider errors,12unsafe with **zero observed send-eligible false PASS**,11/12safe eligible. The safe negative-feedback-availability statement was rejected because productread did not provide an image lookup/absence result. These counts apply only to this frozen population/configuration.
+
+Formal campaign qualification is **BLOCKED**, despite the summary's native SAFETY PASS: the real verifier returns JSON text, but the collector stored that text where the aggregate evidence validator expects an object; requirePassingSafety correctly blocked before native SINGLE/JOURNEY. Additionally, collector HANDOFF→silent projection could conceal an actual accepted holding reply; current captured published policy had no HANDOFF_MATRIX, unlike the owner-approved isolated B matrix. No A3/C3 model conversation ran under this registration. Remaining44slots stay NOT_RUN; never drop them or silently flip the candidate flag.
+
+Real PostgreSQL on the same clean source:66checks PASS, disposable DB dropped; all7registered real-adapter invariants PASS,0generations/live sends. These results belong to source5125, not a later source.
+
+Observed initial-store failures before registration: missing OUTER profile revision, then an incorrect intermediate inner revision0; both DBs cleaned and0generations. Corrected outer/inner revision1, widened C dirty detection, synchronized cleanup evidence. Working-tree initial03was validation only; clean initial04PASS is the bound artifact. One preflight raced a pending seal and returned ENOENT0requests; subsequent sealed preflightPASS. No failed check is relabeled as provider or qualification evidence.
+
+Follow-up bounded fixes: preserve raw verifier result unchanged for native gate and decode JSON only in evidence; preserve actual text/images for ALL terminal dispositions and emit silent/no-send contract findings. Observed focused RED7PASS/3FAIL → GREEN10/10; full PhaseC62/62PASS. No owner/verifier prompt, model, threshold or business source rule was changed. Old raw evidence remains immutable. No automatic retry of any old registered attempt.
