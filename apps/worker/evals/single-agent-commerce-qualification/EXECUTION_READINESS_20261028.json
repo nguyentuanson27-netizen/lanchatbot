@@ -25,8 +25,9 @@
   },
   "sourceCredentialPreflight": {
     "existingRoute": "credential-launcher.py -> existing source-session.py",
-    "attempts": 3,
+    "attempts": 4,
     "exitCodes": [
+      1,
       1,
       1,
       1
@@ -102,5 +103,38 @@
     ],
     "providerRequests": 0
   },
-  "pullRequest": "https://github.com/nguyentuanson27-netizen/lanchatbot/pull/392"
+  "pullRequest": "https://github.com/nguyentuanson27-netizen/lanchatbot/pull/392",
+  "latestOwnerRequestedPreflight": {
+    "recordedAt": "2026-10-28T15:31:49.663423+00:00",
+    "sourceSha": "ea700591742811655740ba90c3a2f39d1842ad29",
+    "ownerInstruction": "chạy model",
+    "stage": "BEFORE_REGISTRATION_AND_GENERATION",
+    "command": [
+      "python",
+      "apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py",
+      "node",
+      "--input-type=module",
+      "-e",
+      "console.log(JSON.stringify({status:'EXISTING_SOURCE_CREDENTIAL_ROUTE_READY',credentialConfigured:!!process.env.C3_VERTEX_CREDENTIAL_FILE,sourceConfigured:!!process.env.QDRANT_BASE_URL&&!!process.env.REDIS_URL,databaseConfigured:!!process.env.C3_B_TEST_ADMIN_DATABASE_URL,providerRequests:0}))"
+    ],
+    "exitCode": 1,
+    "result": "SSH_CONNECT_TIMEOUT_BEFORE_CREDENTIAL_RETRIEVAL",
+    "networkProbes": [
+      {
+        "port": 22,
+        "reachable": false,
+        "error": "TimeoutError"
+      },
+      {
+        "port": 443,
+        "reachable": false,
+        "error": "TimeoutError"
+      }
+    ],
+    "registeredAttempts": 0,
+    "generationRequests": 0,
+    "sourceWrites": 0,
+    "status": "BLOCKED_NOT_RUN",
+    "artifact": "c3-phase-c-source-preflight-20261028T153149Z.json"
+  }
 }

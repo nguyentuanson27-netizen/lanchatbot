@@ -56,3 +56,7 @@ Spec Git blob identities at reviewed source: architecture `7e0265e3b6b3d556d8fb0
 4. **No measured evidence.** Actual human grades, generation/error/latency/token/cost data, structural trace audit and seven real-adapter invariants are still NOT_RUN.
 
 Next work is genuine collectors/bridge and source-bound fresh inputs, then clean-source registration and execution. See [collector contract and commands](README.md). Do not infer Phase C PASS or replacement authorization from foundation test/review approval.
+
+## Owner-requested run recheck — 2026-10-28T15:31:49.663423+00:00
+
+Owner requested model execution again. Existing credential launcher on clean `ea700591` exited1: SSH source host port22 timed out before credential retrieval. Independent3-second TCP probes also timed out on22and443. Local ignored credential-file discovery found only example/config-extraction files, not a usable credential. No registered attempt, provider generation, source write or PostgreSQL qualification was performed. Source snapshot/corpus/seal remains unavailable; **BLOCKED/NOT_RUN**. The offline judge and model choices remain approved and unchanged. Readiness now records4source-route attempts total. Probe evidence outside source: `c3-phase-c-source-preflight-20261028T153149Z.json`.
