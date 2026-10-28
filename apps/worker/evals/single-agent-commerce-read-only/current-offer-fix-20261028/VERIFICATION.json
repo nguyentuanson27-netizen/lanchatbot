@@ -49,5 +49,19 @@
     },
     "target": "two-file worktree inventory at base SHA; not an uncreated commit",
     "providerGenerations": 0
+  },
+  "committedHeadReview": {
+    "reviewer": "/root/current_offer_independent_review",
+    "exactHead": "db6787e58f22dcd73808f627958e09e9a9d8ac5a",
+    "worktreeCleanAtReview": true,
+    "decision": "APPROVE",
+    "blockingFindings": 0,
+    "approvedExecutableHashesMatch": true,
+    "testRerun": false,
+    "reasonNoTestRerun": "Executable bytes unchanged from independently tested and approved inventory",
+    "rootCommittedBlobHashChecks": 2,
+    "rootDiffCheck": "PASS",
+    "providerGenerations": 0,
+    "additionalSourceFixRequired": false
   }
 }
