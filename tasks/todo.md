@@ -2,7 +2,7 @@
 
 - [x] Refresh main296cdcf, preserve B_NOT_GO, branch separately from B basef160dfa4. Record owner thresholds/N1/baseline source decisions; no re-approval requested.
 - [x] Build evaluator protocol/CLI, source/runtime/verifier wire binding, denominator/state-history continuity, separate gates/blind packets and operational summaries. Focused32/32PASS; broad eval707PASS/2existingSKIP; worker build/typecheck/lintPASS. [Evidence/limits](../apps/worker/evals/single-agent-commerce-qualification/CHECKPOINT_C.md).
-- [x] Same independent reviewer inspected foundation and returned REQUEST_CHANGES; fixes and regression tests applied. Final review disposition pending.
+- [x] Same independent reviewer: REQUEST_CHANGES → fix → repeated review → APPROVE exactf644e0b1, independently32/32PASS. [Review](../apps/worker/evals/single-agent-commerce-qualification/INDEPENDENT_REVIEW.md). Existing boundary57/57PASS; actual CLI draft preflight BLOCKED on documented missing dependencies,0provider requests.
 - [ ] Genuine candidate collector + matched persisted C3 bridge, exact effective generation parity, fresh world/corpus/source/prestate review and seal.
 - [ ] Actual candidate safety/absolute qualification, human grades, matched comparison and structural/real-adapter evidence. Phase C BLOCKED/NOT_RUN; no rollout/deploy.
 

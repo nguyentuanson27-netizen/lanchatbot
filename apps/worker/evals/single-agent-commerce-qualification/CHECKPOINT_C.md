@@ -22,7 +22,11 @@ No production entrypoint/shared business code/owner or verifier prompt changed; 
 - `pnpm --filter @lana/worker test:evals`:707PASS/0FAIL/2SKIP(709total) on earlier foundation snapshot; existing installed-Codex-to-local-stub tests skipped. Final verifier-binding changes were then covered by focused32/32; unchanged A/B suites were not reinterpreted as model results.
 - `pnpm --filter @lana/worker build`, `pnpm --filter @lana/worker typecheck`, `pnpm --filter @lana/worker lint`:exit0. Normal dependency builds ran; no shared package source changed.
 - Draft-author generation and `node --check .../cli.mjs` ran. First author run rejected duplicate safety runtime contexts; dedup fingerprint now includes the registered finalDraft so a safe/unsafe draft pair is not mistaken for one identical input.
-- Same independent reviewer returned REQUEST_CHANGES, re-reviewed and found source/runtime/history/verifier-wire gaps; fixes/regressions are included. Final reviewer disposition is recorded separately after final source review.
+- `pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts`:57/57PASS.
+- On clean sourcef644e0b1, `node .../cli.mjs init --out ../c3-phase-c-draft-config-r2-20261028.json` created actual draft config with0requests. `node .../cli.mjs check --config ../c3-phase-c-draft-config-r2-20261028.json --corpus apps/worker/evals/single-agent-commerce-qualification/holdout.draft.json` correctly returned BLOCKED/missing BASELINE_IDENTITY, BASELINE_MATCHED_BRIDGE_EVIDENCE, BLINDING_REGISTRATION, CORPUS_BINDING_AND_REVIEW,0requests; nonzero exit. This is a preparation check, not a sealed registration or provider result.
+- Same independent reviewer: REQUEST_CHANGES → fixes → repeated review → **APPROVE exactf644e0b1**, independently32/32PASS. [Review scope and closed findings](INDEPENDENT_REVIEW.md). Later closure edits are documentation-only.
+
+Spec Git blob identities at reviewed source: architecture `7e0265e3b6b3d556d8fb0f3c7267abccef5de86a`; boundary amendment `4a09b55d2f3a972a65697738876cc5eab21e7a2b`. These are Git blob SHA1s, not run identities or prompt SHA256s.
 
 ## Remaining work before a Phase C run
 
