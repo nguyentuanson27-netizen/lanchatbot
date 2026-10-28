@@ -51,3 +51,7 @@ Sửa gate durable media và ProductFacts media projection dùng cùng effective
 ## Fresh source49731e77: provider control BLOCKED
 
 Clean source49731e77 chạy đủ17controls:16valid results/1PROVIDER_STREAM_ERROR HTTP200, giữ failclosed. Existing native readiness chặn CONTROL_PROVIDER_ERROR dù semantic summary tính unsafe-error là không send-eligible. Native0/51,51NOT_RUN; không hidden retry hoặc thay model.17requests/maximum1per generation,0evaluator label matches; không gộp12native của source cũ. [Full report](../../apps/worker/evals/single-agent-commerce-read-only/media-delivery-fixed-run-20261028/CHECKPOINT_B.md). B_NOT_GO/BLOCKED, chưa deploy/live send.
+
+## Independent review follow-up
+
+Review cf0a61e3 yêu cầu sửa2P1: expiry vượt qua async gate và registry revocation đã thấy nhưng own persisted proof vẫnVALID. Đã thêm regressionRED6→GREEN, conditional proof quarantine và current-clock final gate. Final1139Vitest/228NodePASS, workerbuild/lintPASS; chưa chạy model/ghi nguồn lại. Unknown write/readback không đồng nghĩa persisted proofINVALID; giới hạn cross-store và wire-only filtered-write coverage ghi rõ trong [review record](c3-phase-b-media-revalidation-independent-review-20261028.md). Re-review pending, B_NOT_GO giữ nguyên.

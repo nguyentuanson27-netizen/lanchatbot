@@ -12,6 +12,8 @@ export async function revalidatePublishedMedia(input:{
   prepare:(url:string)=>Promise<{buffer:Buffer}>;
   readCurrent:()=>Promise<MediaRevalidationSource|null>;
   writeProof:(proof:MediaRevalidationProof)=>Promise<void>;
+  /** Separate quarantine, conditional on the exact proof still being ours. Never retries a generation/write. */
+  invalidateProof:(expected:MediaRevalidationProof)=>Promise<void>;
 }):Promise<MediaRevalidationResult>{
   const initial=input.source,result=(status:MediaRevalidationResult["status"],reason:string)=>({pointId:initial.pointId,status,reason});
   const matches=(s:MediaRevalidationSource)=>!!s.approvedPayload&&s.pointId===initial.pointId&&
@@ -44,9 +46,19 @@ export async function revalidatePublishedMedia(input:{
   try{
     await input.writeProof(proof);
     const after=await input.readCurrent();
-    if(!after||!isDeepStrictEqual(after.payload.image_revalidation,proof)||
-      mediaRevalidationIdentity(after.payload)!==mediaRevalidationIdentity(current.payload)||
-      mediaRevalidationIdentity(after.approvedPayload??{})!==mediaRevalidationIdentity(current.approvedPayload??{}))return result("WRITE_UNCONFIRMED","SOURCE_OR_READBACK_CHANGED");
+    if(!after||after.pointId!==initial.pointId||!isDeepStrictEqual(after.payload.image_revalidation,proof))
+      return result("WRITE_UNCONFIRMED","SOURCE_OR_READBACK_CHANGED");
+    if(mediaRevalidationIdentity(after.payload)!==mediaRevalidationIdentity(current.payload)||
+      mediaRevalidationIdentity(after.approvedPayload??{})!==mediaRevalidationIdentity(current.approvedPayload??{})){
+      if(proof.status!=="VERIFIED")return result("WRITE_UNCONFIRMED","SOURCE_OR_READBACK_CHANGED");
+      // A positively observed revocation is distinct from an unavailable readback.
+      // Conditional invalidation cannot overwrite a newer writer's proof.
+      await input.invalidateProof(proof);
+      const quarantined=await input.readCurrent();
+      return quarantined?.pointId===initial.pointId&&isDeepStrictEqual(quarantined.payload.image_revalidation,{...proof,status:"INVALID"})
+        ?result("BLOCKED","SOURCE_CHANGED_PROOF_INVALIDATED")
+        :result("WRITE_UNCONFIRMED","PROOF_INVALIDATION_UNCONFIRMED");
+    }
     return result(proof.status==="VERIFIED"?"VERIFIED":"BLOCKED",reason);
   }catch{return result("WRITE_UNCONFIRMED","WRITE_OR_READBACK_UNAVAILABLE");}
 }

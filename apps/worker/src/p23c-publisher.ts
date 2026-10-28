@@ -7,6 +7,7 @@
  */
 import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
+import type {MediaRevalidationProof} from "@lana/business-tools";
 import {revalidatePublishedMedia,type MediaRevalidationResult} from "./p23c-media-revalidation.js";
 import {SecureRecognitionImageDownloader,readImageDimensions} from "./media-recognition-v2-image-pipeline.js";
 import type { createClient } from "redis";
@@ -69,6 +70,7 @@ export interface QdrantClient {
   scrollPointStates(): Promise<Map<string, ExistingPointState>>;
   upsertPoint(point: unknown): Promise<void>;
   setPayload(pointId: string, payload: Record<string, unknown>): Promise<void>;
+  invalidateMediaProof?(pointId:string,expected:MediaRevalidationProof):Promise<void>;
   deletePoint(pointId: string): Promise<void>;
 }
 
@@ -217,6 +219,8 @@ export class P23cPublisher {
   private async revalidateMedia(profiles:readonly XmlProfile[],run:RunContext):Promise<MediaRevalidationResult[]> {
     const ids=new Set((this.options.mediaRevalidationProductIds??[]).map(id=>id.trim().toUpperCase()).filter(Boolean));
     if(this.effectiveDryRun()||ids.size===0)return [];
+    const invalidateProof=this.options.qdrant.invalidateMediaProof?.bind(this.options.qdrant);
+    if(!invalidateProof)throw new Error("MEDIA_REVALIDATION_INVALIDATOR_REQUIRED");
     const sources=await this.options.sheets.batchGetValues(this.options.sheetId,["image_registry!A:AR"],"UNFORMATTED_VALUE");
     const jobs=buildApprovedQdrantJobs(profiles,collectImageRegistryRows(sheetRowsFromValues(sources[0]?.values)),run);
     const points=await this.options.qdrant.scrollPointStates(),results:MediaRevalidationResult[]=[];
@@ -237,6 +241,7 @@ export class P23cPublisher {
           return {pointId:point.point_id,payload:structuredClone(current.payload),approvedPayload:approved(rows,point.point_id)};
         },
         writeProof:proof=>this.options.qdrant.setPayload(point.point_id,{image_revalidation:proof}),
+        invalidateProof:proof=>invalidateProof(point.point_id,proof),
       }));
     }
     return results;
@@ -720,6 +725,16 @@ export class HttpQdrantClient implements QdrantClient {
       "POST",
       { payload, points: [pointId] },
     );
+  }
+
+  /** Point-scoped conditional quarantine; a concurrent newer proof does not match. */
+  async invalidateMediaProof(pointId:string,expected:MediaRevalidationProof):Promise<void> {
+    await this.request(`/collections/${encodeURIComponent(this.collection)}/points/payload?wait=true`,"POST",{
+      payload:{image_revalidation:{...expected,status:"INVALID"}},
+      filter:{must:[{has_id:[pointId]},...["version","status","checkedAt","metadataSha256"].map(key=>({
+        key:`image_revalidation.${key}`,match:{value:expected[key as keyof MediaRevalidationProof]},
+      }))]},
+    });
   }
 }
 

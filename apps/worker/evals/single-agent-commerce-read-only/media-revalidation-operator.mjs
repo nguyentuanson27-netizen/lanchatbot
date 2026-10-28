@@ -43,6 +43,10 @@ try{
        if(!apply)throw Error('PREFLIGHT_NO_WRITE');
        writesDispatched++;console.log(JSON.stringify({phase:'WRITE_DISPATCHED',pointId,proofStatus:proof.status}));
        await qdrant.setPayload(pointId,{image_revalidation:proof});
+     },invalidateProof:async proof=>{
+       if(!apply)throw Error('PREFLIGHT_NO_WRITE');
+       writesDispatched++;console.log(JSON.stringify({phase:'INVALIDATION_DISPATCHED',pointId}));
+       await qdrant.invalidateMediaProof(pointId,proof);
      }});
    const status=!apply&&proposedProof?(proposedProof.status==='VERIFIED'?'WOULD_VERIFY':'WOULD_INVALIDATE'):result.status;
    results.push({...result,status,proof:proposedProof});console.log(JSON.stringify({phase:'RESULT',...results.at(-1),apply}));

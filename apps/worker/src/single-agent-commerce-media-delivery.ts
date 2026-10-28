@@ -46,9 +46,13 @@ export function createCommerceMediaPreSendGate(input: {
       if (claim.sequenceNo !== 0 || b.pageId !== claim.pageId || b.conversationId !== claim.conversationId || b.responseGroupId !== claim.responseGroupId ||
         b.recipientHash !== createHash("sha256").update(claim.recipientId).digest("hex") || b.messageHashes[0] !== commerceHash(claim.message)) return blocked();
       const authority = await input.readAuthority(b);
+      const policy = await input.policy(b);
+      const validAt = (at: Date) => commerceDeliveryPolicyHash(policy, b.pageId, b.shopId, at) === b.policyHash &&
+        b.images.every(image => Date.parse(image.observedAt) <= at.getTime() &&
+          Date.parse(image.expiresAt) > at.getTime() && Date.parse(image.observedAt) + MEDIA_FRESH_FOR_SECONDS * 1000 > at.getTime());
       if (authority.stateVersion !== b.revision || authority.generation !== b.generation || !authority.appSendEnabled || authority.killSwitch ||
         authority.routingOwner !== "APP" || commerceHash(authority.state) !== b.stateHash ||
-        commerceDeliveryPolicyHash(await input.policy(b), b.pageId, b.shopId, now) !== b.policyHash) return blocked();
+        !validAt(input.clock())) return blocked();
       const products = new Map(await Promise.all([...new Set(b.images.map(a => a.productId))].map(async id => [id, await input.readProduct(id)] as const)));
       for (const expected of b.images) {
         const product = products.get(expected.productId), asset = product?.images.find(a => a.url === expected.url);
@@ -62,8 +66,10 @@ export function createCommerceMediaPreSendGate(input: {
       }
       // Detect authority changing while catalog/policy reads were in flight.
       const final = await input.readAuthority(b);
-      if (commerceHash(final) !== commerceHash(authority)) return blocked();
-      return input.base.authorize(claim);
+      if (commerceHash(final) !== commerceHash(authority) || !validAt(input.clock())) return blocked();
+      const result = await input.base.authorize(claim);
+      if (result.status === "ALLOWED" && !validAt(input.clock())) return blocked();
+      return result;
     } catch { return blocked(); }
   } };
 }

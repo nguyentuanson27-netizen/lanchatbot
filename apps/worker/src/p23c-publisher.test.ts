@@ -4,6 +4,7 @@ import type { createClient } from "redis";
 import {
   P23cPublisher,
   FfmpegImagePipeline,
+  HttpQdrantClient,
   RedisVertexRateLimiter,
   type EmbeddingClient,
   type ImagePipeline,
@@ -268,6 +269,20 @@ describe("P2.3C kiểm soát duyệt", () => {
 });
 
 describe("P2.3C unchanged-image revalidation",()=>{
+  it("quarantines only the exact point and four proof fields with one filtered HTTP request",async()=>{
+    const requests:{url:string;method:string|undefined;body:unknown}[]=[];
+    const qdrant=new HttpQdrantClient({baseUrl:"https://qdrant.example",collection:"media",apiKey:"synthetic",
+      fetchImpl:async(url,options)=>{requests.push({url:String(url),method:options?.method,body:JSON.parse(String(options?.body))});
+        return new Response(JSON.stringify({status:"ok",result:{status:"completed"}}),{status:200});}});
+    const expected={version:1 as const,status:"VERIFIED" as const,checkedAt:"2026-10-28T12:00:00.000Z",metadataSha256:"a".repeat(64)};
+    await qdrant.invalidateMediaProof("point-one",expected);
+    expect(requests).toEqual([{url:"https://qdrant.example/collections/media/points/payload?wait=true",method:"POST",body:{
+      payload:{image_revalidation:{...expected,status:"INVALID"}},filter:{must:[{has_id:["point-one"]},
+        {key:"image_revalidation.version",match:{value:1}},{key:"image_revalidation.status",match:{value:"VERIFIED"}},
+        {key:"image_revalidation.checkedAt",match:{value:expected.checkedAt}},
+        {key:"image_revalidation.metadataSha256",match:{value:expected.metadataSha256}}]},
+    }}]);
+  });
   it("rejects redirect destinations before requesting a private image",async()=>{
     const urls:string[]=[];
     const pipeline=new FfmpegImagePipeline({rembgUrl:"http://127.0.0.1:0/unused",rembgAuthHeader:"",fetchImpl:async url=>{
@@ -290,6 +305,10 @@ describe("P2.3C unchanged-image revalidation",()=>{
         provenance_hash:String(p.payload.provenance_hash??""),hash_schema_version:String(p.payload.hash_schema_version??"")} ])),
       upsertPoint:async p=>{const x=p as {id:string;payload:Record<string,unknown>;vector:unknown};points.set(x.id,structuredClone(x));upserts++;},
       setPayload:async(id,p)=>{Object.assign(points.get(id)!.payload,p);updates++;},deletePoint:async()=>{throw Error("NO_DELETE");},
+      invalidateMediaProof:async(id,proof)=>{
+        const p=points.get(id)!.payload;
+        if(JSON.stringify(p.image_revalidation)===JSON.stringify(proof))p.image_revalidation={...proof,status:"INVALID"};
+      },
     };
     const images:ImagePipeline={...okImages,prepare:async()=>{prepared++;return{buffer:Buffer.from("raw-image"),mime:"image/jpeg"};}};
     const first=publisherWith({qdrant,sheets,images,hashV3Mode:"LIVE"});expect((await first.publisher.run()).failed).toBe(0);
@@ -301,6 +320,10 @@ describe("P2.3C unchanged-image revalidation",()=>{
     expect(points.get("point-current")!.vector).toEqual(originalVector);
     expect(points.get("point-current")!.payload.image_content_sha256).toBe(hash);
     expect((await second.publisher.run()).media_revalidation?.[0]?.status).toBe("NOT_DUE");expect(updates).toBe(1);
+    const unsupported={...qdrant};delete unsupported.invalidateMediaProof;
+    const blocked=publisherWith({qdrant:unsupported,sheets,images,hashV3Mode:"LIVE",mediaRevalidationProductIds:["SV695"]});
+    expect(await blocked.publisher.run()).toMatchObject({status:"FATAL",fatal_error:"MEDIA_REVALIDATION_INVALIDATOR_REQUIRED"});
+    expect(updates).toBe(1);expect(upserts).toBe(1);
   });
 });
 
