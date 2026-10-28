@@ -1,5 +1,7 @@
 ## Current — tái xác nhận nguồn ảnh, 28/10/2026
 
+- [x] Owner yêu cầu run mới: clean0487b7bb/executableapproved3e8efa04;17controlsPASS→51/51native N1/retry0,142requests/0providererrors/0labelleaks,6DBcleanup.37eligible/10handoff/4NO_SEND/0fallback;16/16persistedeligible cócapture,0MANUAL_REVIEW. [Full report +all51](../apps/worker/evals/single-agent-commerce-read-only/media-approved-run-20261028/CHECKPOINT_B.md).
+- [ ] B_NOT_GO: discovery bịverifierchặn, gallerybe dependency/color-binding gap, comparative wrinkle claim và advicequality còn findings. Run đãcomplete; không auto sửa prompt/nguồn hoặc chạy tiếp.
 - [x] Independent review cf0a61e3:REQUEST_CHANGES2P1. Sửa current-clock gate và own-proof conditional quarantine; observedRED6→GREEN, final1139Vitest/228NodePASS, workerbuild/lintPASS; no provider/source write. [Review record](../docs/specs/c3-phase-b-media-revalidation-independent-review-20261028.md).
 - [x] Same reviewer610d1ff1 đóng2P1,139independenttestsPASS; yêu cầu sửaP2 operator unknownINVALID báoCOMPLETE. Đã tách proposed/observed và fail mọiWRITE_UNCONFIRMED,6offlinecasesPASS.
 - [x] Same reviewer APPROVE exact clean3e8efa04, không còn finding chặn; independent139Vitest(sameTSbytes)/234NodePASS. Approval implementation/evidence; PhaseB vẫnBLOCKED/native0of51. Không provider/source write/deploy trong review turn.

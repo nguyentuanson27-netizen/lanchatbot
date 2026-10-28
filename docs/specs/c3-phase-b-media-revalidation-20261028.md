@@ -59,3 +59,7 @@ Review cf0a61e3 yêu cầu sửa2P1: expiry vượt qua async gate và registry 
 Re-review610d1ff1: cùng reviewer chạy139testsPASS và đóng2P1. FindingP2 bổ sung: operator có thể báo COMPLETE khi last-point INVALID write chưa confirmed. Đã sửa unconditional unknown failure, tách proposed/observed proof và6offline table testsPASS; chưa re-execute operator hoặc sửa evidence apply cũ. Chờ same-reviewer follow-up.
 
 Final: cùng reviewer **APPROVE exact clean3e8efa047b8654103c65c8d39efb17a6279cd71d**, không còn finding chặn. Reviewer tự chạy234NodePASS và giữ139Vitest evidence trên cùngTSbytes; root1139Vitest/build/lintPASS. [Decision/limits](c3-phase-b-media-revalidation-independent-review-20261028.md). Approval chỉ implementation/evidence; campaign49731e77 vẫnBLOCKED/native0of51. Không chạy provider/ghi nguồn/deploy trong vòng review này.
+
+## Owner-authorized full model run sau approval
+
+Clean source0487b7bb (executable khớp approved3e8efa04):17controlsPASS và51/51native complete N1/retry0.142generation requests,0providererror/timeout,0labelleaks,6DBcleanup.37eligible/10handoff/4NO_SEND/0fallback;16persistedeligible đềuactualcapture/SENT_ACCEPTED, không cònMANUAL_REVIEW.9ảnh đượccapture, khônglive send/sourcewrite. Thương lượng nêu đúng30k/tổng499k; discovery/gallery và comparative wrinkling vẫn cầnreview, không dùngeligiblecount làmqualityscore. [Full report/all51](../../apps/worker/evals/single-agent-commerce-read-only/media-approved-run-20261028/CHECKPOINT_B.md). Run hoàn tất, tổng thểSTOP/B_NOT_GO; evidence2run cũ không đổi, không tự mở vòngfix/run tiếp.

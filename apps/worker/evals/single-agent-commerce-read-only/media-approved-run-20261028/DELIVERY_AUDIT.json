@@ -1,0 +1,71 @@
+{
+  "sourceSha": "0487b7bbe08f179bffafc8c0b44af9463feeb2c4",
+  "sourceCleanAfterRun": true,
+  "registeredNative": 51,
+  "persistedRegistered": 30,
+  "eligibilityOnlyRegistered": 21,
+  "persistedEligible": 16,
+  "persistedEligibleWithActualCapture": 16,
+  "eligibleWithoutCapture": [],
+  "eligibleWithUnacceptedRows": [],
+  "silentHandoffCount": 10,
+  "handoffWithUnexpectedCapture": [],
+  "imagesCaptured": 9,
+  "messagesCaptured": 27,
+  "codeOrNoSendOutcomes": [
+    {
+      "caseId": "media-overview-next:continue",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "HUMAN_OWNS_CONVERSATION",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualMessages": [],
+      "outboxStatuses": []
+    },
+    {
+      "caseId": "media-detail-next:continue",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "HUMAN_OWNS_CONVERSATION",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualMessages": [],
+      "outboxStatuses": []
+    },
+    {
+      "caseId": "stateful-request-checkout",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "CHECKOUT_DETAILS_MISSING",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualMessages": [
+        "Chị cho em [NAME]"
+      ],
+      "outboxStatuses": [
+        "SENT_ACCEPTED"
+      ]
+    },
+    {
+      "caseId": "stateful-private-checkout",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "PRIVATE_CHECKOUT_COMMITTED",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualMessages": [
+        "2 áo (mẫu “Set váy Thạch Thảo”) màu be, size L: 998.000đ\nTạm tính: 998.000đ\nƯu đãi: -49.900đ\nPhí ship: 30.000đ\nTổng: 978.100đ\nSet váy Thạch Thảo: hàng đặt trước\nNgười nhận: Khách thử nghiệm - [PHONE]\n[ADDRESS]\nThanh toán: COD\nDự kiến nhận hàng: 8-14 ngày.\nChị xác nhận chốt đơn nhé."
+      ],
+      "outboxStatuses": [
+        "SENT_ACCEPTED"
+      ]
+    }
+  ],
+  "manualReviewRows": [],
+  "scope": "ACTUAL_CAPTURE_TRANSPORT_NOT_LIVE_SEND; HANDOFF_COMMIT_NOT_HUMAN_RESPONSE; B1_ELIGIBILITY_ONLY"
+}
