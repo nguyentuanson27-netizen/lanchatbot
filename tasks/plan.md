@@ -1,4 +1,10 @@
-## Current — dùng ưu đãi cụ thể khi khách xin bớt, 28/10/2026
+## Current — model run BLOCKED vì freshness ảnh, 28/10/2026
+
+- [x] Seal sourcea7adf18 sạch, owner prompt mới9887885e; đăng ký51native+17controls, N1/retry0. [Report](../apps/worker/evals/single-agent-commerce-read-only/current-offer-run-20261028/CHECKPOINT_B.md).
+- [x] SourcecapturePASS; preflight dừng trước generation:11ảnh dùng productobservedAt28/09 đã qua freshness30ngày lúc11:31 ngày28/10. FEEDBACK_TRUE/MODEL/TOP đềuUNAVAILABLE. Không đổi clock/TTL/timestamp/kỳ vọng để cứu run.
+- [ ] Provider0;51native+17controlsNOT_RUN. Cần nguồn ảnh được tái xác nhận/snapshot hợp lệ trước run mới. Không tự publish dữ liệu hoặc đổi contract trong task chỉ chạy model; B_NOT_GO.
+
+## Previous — dùng ưu đãi cụ thể khi khách xin bớt, 28/10/2026
 
 Scope theo trao đổi ngay trước: sửa dùng quyền lợi khi khách xin bớt, không mở lại toàn bộ giọng/discovery. [Plan và independent approval](../docs/specs/c3-phase-b-current-offer-fix-plan-20261028.md), [implementation record](../docs/specs/c3-phase-b-current-offer-fix-review-20261028.md).
 
