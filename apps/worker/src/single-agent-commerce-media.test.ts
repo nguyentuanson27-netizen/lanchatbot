@@ -4,6 +4,7 @@ import {createCommerceTools} from "./single-agent-commerce.js";
 import {runCommerceTurn} from "./single-agent-commerce-read-only.js";
 import {commerceNow,commerceScope,fixtureProduct,fixturePolicy} from "./single-agent-commerce.test-support.js";
 import type {ProductImage} from "@lana/business-tools";
+import type {ProtectedClaimV1} from "@lana/contracts";
 import {createHash} from "node:crypto";
 
 const setup = async (clock:()=>Date=()=>commerceNow) => {
@@ -19,6 +20,17 @@ const setup = async (clock:()=>Date=()=>commerceNow) => {
   return {f,scope,tools,call,image,readProduct};
 };
 describe("candidate product media",()=>{
+  it("binds claims to a successful revalidation and rejects later proof changes",async()=>{
+    const s=await setup();s.f.product.images[0]!.observedAt="2026-09-01T00:00:00.000Z";
+    s.f.product.images[0]!.revalidation={status:"VALID",checkedAt:commerceNow.toISOString()};
+    expect(await s.tools.invoke(s.call)).toMatchObject({status:"OK"});
+    expect(s.tools.mediaSelection?.()[0]?.observedAt).toBe(commerceNow.toISOString());
+    expect((s.tools.snapshot().protectedClaims as ProtectedClaimV1[]).some(c=>
+      c.type==="PRODUCT_MEDIA"&&c.provenance.observedAt===commerceNow.toISOString())).toBe(true);
+    await expect(s.tools.readback()).resolves.toEqual(s.tools.snapshot());
+    s.f.product.images[0]!.revalidation={status:"INVALID"};
+    await expect(s.tools.readback()).rejects.toThrow("MEDIA_SOURCE_CHANGED");
+  });
   it("preserves approved whole-look evidence without inventing component or material evidence",async()=>{
     const s=await setup();s.f.product.images[0]!.partsVisible=["FULL_SET"];
     const selected=await s.tools.invoke(s.call);

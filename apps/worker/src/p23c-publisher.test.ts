@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
+import {createHash} from "node:crypto";
 import type { createClient } from "redis";
 import {
   P23cPublisher,
+  FfmpegImagePipeline,
   RedisVertexRateLimiter,
   type EmbeddingClient,
   type ImagePipeline,
@@ -148,6 +150,7 @@ const okEmbeddings: EmbeddingClient = {
 };
 
 const publisherWith = (overrides: {
+  mediaRevalidationProductIds?:readonly string[];
   redis?: FakeRedis;
   sheets?: SheetsReader;
   qdrant?: QdrantClient;
@@ -162,6 +165,7 @@ const publisherWith = (overrides: {
 }): { publisher: P23cPublisher; redis: FakeRedis } => {
   const redis = overrides.redis ?? new FakeRedis();
   const publisher = new P23cPublisher({
+    ...(overrides.mediaRevalidationProductIds?{mediaRevalidationProductIds:overrides.mediaRevalidationProductIds}:{}),
     redis: redis as unknown as ReturnType<typeof createClient>,
     sheets: overrides.sheets ?? sheetsWith(overrides.imageRows ?? [
       ["", "SV695", "https://www.lanadesign.vn/a.jpg", "APPROVED", "TRUE", ""],
@@ -260,6 +264,43 @@ describe("P2.3C kiểm soát duyệt", () => {
     expect(point.payload.embedding_dimension).toBe(1_408);
     expect(String(point.payload.content_hash)).toHaveLength(64);
     expect(point.payload.image_metadata_review_status).toBe("APPROVED");
+  });
+});
+
+describe("P2.3C unchanged-image revalidation",()=>{
+  it("rejects redirect destinations before requesting a private image",async()=>{
+    const urls:string[]=[];
+    const pipeline=new FfmpegImagePipeline({rembgUrl:"http://127.0.0.1:0/unused",rembgAuthHeader:"",fetchImpl:async url=>{
+      urls.push(String(url));return new Response(null,{status:302,headers:{location:"http://127.0.0.1/private"}});
+    }});
+    await expect(pipeline.prepareForRevalidation("https://content.pancake.vn/source.jpg")).rejects.toThrow();
+    expect(urls).toEqual(["https://content.pancake.vn/source.jpg"]);
+  });
+  it("refreshes scoped approved media even when semantic publisher work is NOOP",async()=>{
+    const hash=createHash("sha256").update("raw-image").digest("hex");
+    const base=sheetsWith([["point-current","SV695","https://content.pancake.vn/a.jpg","APPROVED","TRUE","",hash,"TRUE"]]);
+    const sheets:SheetsReader={...base,batchGetValues:async(id,ranges,render)=>{
+      const both=await base.batchGetValues(id,ranges,render);return ranges.length===1?[both[1]!]:both;
+    }};
+    const points=new Map<string,{id:string;payload:Record<string,unknown>;vector:unknown}>();
+    let upserts=0,updates=0,prepared=0;
+    const qdrant:QdrantClient={
+      scrollPointStates:async()=>new Map([...points].map(([id,p])=>[id,{point_id:id,payload:structuredClone(p.payload),
+        content_hash:String(p.payload.content_hash??""),embedding_hash:String(p.payload.embedding_hash??""),payload_hash:String(p.payload.payload_hash??""),
+        provenance_hash:String(p.payload.provenance_hash??""),hash_schema_version:String(p.payload.hash_schema_version??"")} ])),
+      upsertPoint:async p=>{const x=p as {id:string;payload:Record<string,unknown>;vector:unknown};points.set(x.id,structuredClone(x));upserts++;},
+      setPayload:async(id,p)=>{Object.assign(points.get(id)!.payload,p);updates++;},deletePoint:async()=>{throw Error("NO_DELETE");},
+    };
+    const images:ImagePipeline={...okImages,prepare:async()=>{prepared++;return{buffer:Buffer.from("raw-image"),mime:"image/jpeg"};}};
+    const first=publisherWith({qdrant,sheets,images,hashV3Mode:"LIVE"});expect((await first.publisher.run()).failed).toBe(0);
+    const originalVector=structuredClone(points.get("point-current")!.vector);
+    const second=publisherWith({qdrant,sheets,images,hashV3Mode:"LIVE",mediaRevalidationProductIds:["SV695"]});
+    const renewed=await second.publisher.run();expect(renewed.status).toBe("NO_PENDING_WORK");
+    expect(renewed.media_revalidation).toEqual([{pointId:"point-current",status:"VERIFIED",reason:"VERIFIED"}]);
+    expect(upserts).toBe(1);expect(updates).toBe(1);expect(prepared).toBe(2);
+    expect(points.get("point-current")!.vector).toEqual(originalVector);
+    expect(points.get("point-current")!.payload.image_content_sha256).toBe(hash);
+    expect((await second.publisher.run()).media_revalidation?.[0]?.status).toBe("NOT_DUE");expect(updates).toBe(1);
   });
 });
 

@@ -1,4 +1,5 @@
 import {imageColorBindingFromPayload} from "./image-color-binding.js";
+import {readMediaRevalidation} from "./media-revalidation.js";
 import { normalizeProductCode } from "./inventory.js";
 import type {
   MultimodalEmbeddingPort,
@@ -96,6 +97,7 @@ function productImageFromPayload(payload: Record<string, unknown>): ProductImage
   if (!url) return null;
   const quality = Number(payload.image_quality_score);
   const colorBinding=imageColorBindingFromPayload(payload);
+  const revalidation=readMediaRevalidation(payload);
   return {
     url,
     role: text(payload.image_role).toUpperCase() === "PRIMARY" ? "PRIMARY" : "ADDITIONAL",
@@ -109,6 +111,7 @@ function productImageFromPayload(payload: Record<string, unknown>): ProductImage
     qualityScore: Number.isFinite(quality) ? quality : null,
     feedback: payload.feedback_verified === true,
     observedAt: text(payload.published_at) || text(payload.ai_updated_at) || null,
+    ...(revalidation?{revalidation}:{}),
     sourceContentSha256: /^[a-f0-9]{64}$/u.test(text(payload.image_content_sha256).toLowerCase())
       ? text(payload.image_content_sha256).toLowerCase()
       : null,

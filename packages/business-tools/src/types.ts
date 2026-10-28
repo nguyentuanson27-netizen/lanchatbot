@@ -93,6 +93,8 @@ export interface ProductImage {
   observedAt?: string | null;
   /** SHA-256 of the reviewed source image from image_registry. */
   sourceContentSha256?: string | null;
+  /** Byte/metadata revalidation is distinct from publication and grants no new approval. */
+  revalidation?: {status:"VALID";checkedAt:string}|{status:"INVALID"}|undefined;
   /** Only APPROVED rows may be used as verified customer-facing media. */
   reviewStatus?: "APPROVED" | null;
   /** Human verification flag copied from image_registry. */

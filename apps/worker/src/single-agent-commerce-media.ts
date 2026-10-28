@@ -1,5 +1,5 @@
 import {eligibleCommerceMedia,type MediaQuery} from "./single-agent-commerce-media-eligibility.js";
-import {buildProtectedMediaClaimsV1,selectRequestedImages,selectPriceCardImages,normalizeCatalogToken,type CustomerImageIntent} from "@lana/business-tools";
+import {buildProtectedMediaClaimsV1,selectRequestedImages,selectPriceCardImages,normalizeCatalogToken,mediaObservationTime,type CustomerImageIntent} from "@lana/business-tools";
 import {MEDIA_FRESH_FOR_SECONDS} from "@lana/contracts";
 import {buildReadOnlyContext,commerceHash} from "./single-agent-commerce-read-only-context.js";
 import {toolArgs,type ReadOnlyCatalog,type CommerceToolCall,type CommerceToolResult} from "./single-agent-commerce-read-only-tools.js";
@@ -59,7 +59,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
     if(product.productId!==query.subjectRef) throw new Error("MEDIA_SOURCE_UNAVAILABLE");
     const at=input.clock().getTime();
     const transitions=(product.images??[]).flatMap(image=>{
-      const observed=Date.parse(image.observedAt??product.observedAt??"");
+      const observed=mediaObservationTime(image,product.observedAt);
       return [observed,observed+MEDIA_FRESH_FOR_SECONDS*1000].filter(t=>Number.isFinite(t)&&t>at);
     });
     onSource?.({sourceVersion:commerceHash({productId:product.productId,observedAt:product.observedAt,colors:product.colors,
@@ -68,7 +68,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
     const selected=eligibleCommerceMedia(product,query,input.clock().getTime(),input.allowedHostSuffixes);
     if(!selected.images.length&&onAlternatives)onAlternatives(selected.alternatives);
     return selected.images.map(image=>{
-      const observedAt=image.observedAt??product.observedAt!;
+      const observedAt=new Date(mediaObservationTime(image,product.observedAt)).toISOString();
       const sourceVersion=commerceHash({productId:product.productId,catalogVersion:product.catalogVersion,image});
       return {assetRef:`asset:${commerceHash(image.url)}`,productId:product.productId,url:image.url,sourceContentSha256:image.sourceContentSha256!,
         observedAt,expiresAt:new Date(Date.parse(observedAt)+MEDIA_FRESH_FOR_SECONDS*1000).toISOString(),sourceVersion,

@@ -20,6 +20,12 @@ const CONFIG: HashV3Config = {
 const SHA_A = "a".repeat(64);
 const SHA_B = "b".repeat(64);
 
+it("keeps check evidence out of semantic and embedding hashes",()=>{
+ const original={ma_sp:"P1",image_url:"https://content.pancake.vn/a.jpg",image_content_sha256:SHA_A};
+ expect(computePointHashes("point1",{...original,image_revalidation:{version:1,status:"VERIFIED",checkedAt:"2026-10-28T00:00:00.000Z",metadataSha256:SHA_B}},CONFIG))
+   .toEqual(computePointHashes("point1",original,CONFIG));
+});
+
 const payload = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
   ma_sp: "SD395",
   brand: "lanadesign",

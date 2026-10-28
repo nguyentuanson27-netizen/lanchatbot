@@ -43,6 +43,10 @@ const StableProductDocumentSchema = z
         qualityScore: z.number().nullable(),
         feedback: z.boolean(),
         observedAt: z.string().datetime().nullable().optional().default(null),
+        revalidation: z.discriminatedUnion("status",[
+          z.object({status:z.literal("VALID"),checkedAt:z.string().datetime()}).strict(),
+          z.object({status:z.literal("INVALID")}).strict(),
+        ]).optional(),
         sourceContentSha256: z.string().regex(/^[a-f0-9]{64}$/).nullable().optional().default(null),
         reviewStatus: z.literal("APPROVED").nullable().optional().default(null),
         metadataVerified: z.boolean().optional().default(false),

@@ -15,6 +15,7 @@ export const PROVENANCE_HASH_SCHEMA = "lana-qdrant-provenance-v1";
 
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
 const HASH_FIELDS = new Set([
+  "image_revalidation", // Check evidence is not semantic payload or embedding input.
   "content_hash",
   "source_hash",
   "published_hash",

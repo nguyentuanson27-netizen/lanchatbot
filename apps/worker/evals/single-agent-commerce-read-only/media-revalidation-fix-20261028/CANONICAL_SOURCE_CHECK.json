@@ -1,0 +1,89 @@
+{
+  "maxWidth": 800,
+  "ffmpegVersionHash": "fbd13d288bee2877bd613a6983d6f82d0c29886716ce18519a6aab3f24dcd3f0",
+  "checkedAt": "2026-10-28T06:45:21.749Z",
+  "providerRequests": 0,
+  "sourceWrites": 0,
+  "results": [
+    {
+      "pointId": "01322724-71e3-5876-ba5d-2498efb5a67d",
+      "checkedAt": "2026-10-28T06:45:19.441Z",
+      "canonicalSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+      "reviewedSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7",
+      "bytes": 73869,
+      "status": "MATCH"
+    },
+    {
+      "pointId": "09e5b6fd-8df1-5f96-8ed2-f6ef185af774",
+      "checkedAt": "2026-10-28T06:45:19.755Z",
+      "canonicalSha256": "b3d828d8ce15114441c356abf66feab67652201b00f53ad77350cc6e703b96c8",
+      "reviewedSha256": "b3d828d8ce15114441c356abf66feab67652201b00f53ad77350cc6e703b96c8",
+      "bytes": 59661,
+      "status": "MATCH"
+    },
+    {
+      "pointId": "2dbf7b1d-222e-530c-b7d7-fe7896bdbcd4",
+      "checkedAt": "2026-10-28T06:45:19.961Z",
+      "canonicalSha256": "e651cf09b93cc24f14b21c3539f33430df24346b96d76f580e7e4fcd7d4dd4a3",
+      "reviewedSha256": "e651cf09b93cc24f14b21c3539f33430df24346b96d76f580e7e4fcd7d4dd4a3",
+      "bytes": 59191,
+      "status": "MATCH"
+    },
+    {
+      "pointId": "4f82b664-91b4-532b-9879-34b53fa2e4e0",
+      "checkedAt": "2026-10-28T06:45:20.140Z",
+      "canonicalSha256": "4faaa0ba7fea7dc2058d6e7ece47f6d422be40c96ff06ab6ea568ba9c0aa1961",
+      "reviewedSha256": "4faaa0ba7fea7dc2058d6e7ece47f6d422be40c96ff06ab6ea568ba9c0aa1961",
+      "bytes": 67202,
+      "status": "MATCH"
+    },
+    {
+      "pointId": "67822a93-e439-5680-be98-b4b7d01c18b5",
+      "checkedAt": "2026-10-28T06:45:20.334Z",
+      "canonicalSha256": "8ff6f315a32aaee37d9a6bad154579241ca6aa2116d6106c34332ba7a98cad56",
+      "reviewedSha256": "8ff6f315a32aaee37d9a6bad154579241ca6aa2116d6106c34332ba7a98cad56",
+      "bytes": 168961,
+      "status": "MATCH"
+    },
+    {
+      "pointId": "99aee371-bc23-5cb6-bee7-62b28b303e66",
+      "checkedAt": "2026-10-28T06:45:20.788Z",
+      "canonicalSha256": "fde1e4c575c26587d753dad576701b4a51634a25ef6ac1dd5510b5db16e14f9f",
+      "reviewedSha256": "fde1e4c575c26587d753dad576701b4a51634a25ef6ac1dd5510b5db16e14f9f",
+      "bytes": 75102,
+      "status": "MATCH"
+    },
+    {
+      "pointId": "ab43da3b-70d7-516a-a808-2dccba185cde",
+      "checkedAt": "2026-10-28T06:45:20.975Z",
+      "canonicalSha256": "7844275ffdb4d48159d8c10ab9f1fba6b920188471f7994940fda725d46d02cf",
+      "reviewedSha256": "7844275ffdb4d48159d8c10ab9f1fba6b920188471f7994940fda725d46d02cf",
+      "bytes": 155317,
+      "status": "MATCH"
+    },
+    {
+      "pointId": "c08e1198-518e-52d6-94ac-0e9e24b7c84b",
+      "checkedAt": "2026-10-28T06:45:21.359Z",
+      "canonicalSha256": "2052d1c8bf997f04e8f4e9f80dcbc59b62797bb1865b146f41b775197b36cb6a",
+      "reviewedSha256": "2052d1c8bf997f04e8f4e9f80dcbc59b62797bb1865b146f41b775197b36cb6a",
+      "bytes": 180321,
+      "status": "MATCH"
+    },
+    {
+      "pointId": "c841808c-fa26-55da-9d25-7fdf3d5a4f1f",
+      "checkedAt": "2026-10-28T06:45:21.526Z",
+      "canonicalSha256": "6c35b67587902c75a223c1e82f13d98ef8208128e3cb95362641a2dc555a9af9",
+      "reviewedSha256": "6c35b67587902c75a223c1e82f13d98ef8208128e3cb95362641a2dc555a9af9",
+      "bytes": 86346,
+      "status": "MATCH"
+    },
+    {
+      "pointId": "ec064329-be93-54ca-b891-b8343d5010ec",
+      "checkedAt": "2026-10-28T06:45:21.694Z",
+      "canonicalSha256": "36652f18a147e6369d608be9bb1748f70c5cbad9ee57fd608f8e46864774a1c7",
+      "reviewedSha256": "36652f18a147e6369d608be9bb1748f70c5cbad9ee57fd608f8e46864774a1c7",
+      "bytes": 90155,
+      "status": "MATCH"
+    }
+  ]
+}

@@ -1,4 +1,10 @@
-## Current — model run BLOCKED vì freshness ảnh, 28/10/2026
+## Current — tái xác nhận nguồn ảnh, 28/10/2026
+
+- [x] Producer/projection/eligibility dùng bound image_revalidation thay vì gia hạn publish timestamp; scope mặc định off, NOOP có thể revalidate, source/commit/readback guards giữ failclosed. [Plan/record](../docs/specs/c3-phase-b-media-revalidation-20261028.md).
+- [x] RED2FAIL→GREEN; final1113Vitest/228NodePASS, shared build/typecheck và worker build/lintPASS. Read-only preflight11points:10đủnguồn/canonicalhash,1orphan sẽINVALID;0sourcewrites.
+- [ ] Commit executable → bounded proof refresh cóaudit/readback → fresh preflight và run mới17controls/51native. Chưa deploy/publish approval hoặc gửi khách; B_NOT_GO.
+
+## Previous — model run BLOCKED vì freshness ảnh, 28/10/2026
 
 - [x] Seal sourcea7adf18 sạch, owner prompt mới9887885e; đăng ký51native+17controls, N1/retry0. [Report](../apps/worker/evals/single-agent-commerce-read-only/current-offer-run-20261028/CHECKPOINT_B.md).
 - [x] SourcecapturePASS; preflight dừng trước generation:11ảnh dùng productobservedAt28/09 đã qua freshness30ngày lúc11:31 ngày28/10. FEEDBACK_TRUE/MODEL/TOP đềuUNAVAILABLE. Không đổi clock/TTL/timestamp/kỳ vọng để cứu run.
