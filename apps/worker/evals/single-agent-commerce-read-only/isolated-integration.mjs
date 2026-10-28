@@ -64,7 +64,7 @@ const {Pool}=createRequire(new URL('../../../../packages/database/package.json',
 const out=process.argv[2];assert(out,'NEW_EVIDENCE_DIRECTORY_REQUIRED');mkdirSync(resolve(out));
 const paymentMethod=process.argv[3]??'COD';assert(['COD','BANK_TRANSFER'].includes(paymentMethod));
 const report={sourceSha:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),
- sourceDirty:!!execFileSync('git',['status','--porcelain','--','apps/worker/src','apps/worker/evals/single-agent-commerce-read-only','packages'],{cwd:root,encoding:'utf8'}).trim(),
+ sourceDirty:!!execFileSync('git',['status','--porcelain',...(phaseC||phaseCInitial?[]:['--','apps/worker/src','apps/worker/evals/single-agent-commerce-read-only','packages'])],{cwd:root,encoding:'utf8'}).trim(),
  mode:providerRun?providerFreeze.registration.mode:'REAL_POSTGRES_SYNTHETIC_DOMAIN_INPUTS_CURRENT_POLICY_CAPTURE',paymentMethod,sendEnabled:false,providerGenerations:0,cases:[],testDatabaseDropped:false};
 const save=()=>writeFileSync(resolve(out,'integration.json'),JSON.stringify(report,null,2));
 const check=async(name,fn)=>{if((checkPrefix&&!name.startsWith(checkPrefix))||providerRun||(process.argv.includes('--composed-only')&&!name.startsWith('B composed')) ||
@@ -828,7 +828,7 @@ try{
    captured=await phaseCTools.readSessionSnapshot({runtime,pool,historyStore,session:fixture});
   assert.equal(captured.publicHistory.history.length,0);assert.equal(providerPorts.observed().length,0);
   const {digest}=await import('../single-agent-commerce-qualification/qualification.mjs');
-  report.initialStateArtifact={kind:'REAL_ADAPTER_NATIVE_INITIAL_STATE',worldHash:digest(initialWorld),sourceSha:report.sourceSha,
+  report.initialStateArtifact={kind:'REAL_ADAPTER_NATIVE_INITIAL_STATE',worldHash:digest(initialWorld),sourceSha:report.sourceSha,sourceDirty:report.sourceDirty,
    publicState:captured.publicState,providerRequests:0,testDatabaseDropped:false};
  });
  if(phaseC){
@@ -904,5 +904,6 @@ finally{
  if(created){assert(/^c3_b_test_[a-f0-9]{16}$/.test(databaseName));await admin.query('DROP DATABASE '+databaseName);report.testDatabaseDropped=true;save();}
  if(report.initialStateArtifact){report.initialStateArtifact.testDatabaseDropped=report.testDatabaseDropped;
   writeFileSync(resolve(out,'INITIAL_STATE.json'),JSON.stringify(report.initialStateArtifact,null,2),{flag:'wx'});}
+ save();
  await admin.end();
 }

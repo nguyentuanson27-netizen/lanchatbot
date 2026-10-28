@@ -13,7 +13,7 @@ export async function bindCorpus({draft,world,bindings,initialStateArtifact}){
  assert(bindings.review?.status==='APPROVED'&&bindings.review.worldHash===worldHash&&bindings.review.newProviderResultsObserved===0&&
   bindings.review.reviewer&&bindings.review.evidenceRef,'C_BINDINGS_REVIEW_REQUIRED');
  assert(initialStateArtifact.kind==='REAL_ADAPTER_NATIVE_INITIAL_STATE'&&initialStateArtifact.worldHash===worldHash&&
-  initialStateArtifact.providerRequests===0&&initialStateArtifact.testDatabaseDropped===true,'C_INITIAL_STATE_READBACK_REQUIRED');
+  initialStateArtifact.providerRequests===0&&initialStateArtifact.testDatabaseDropped===true&&initialStateArtifact.sourceDirty===false,'C_INITIAL_STATE_READBACK_REQUIRED');
  assert(Array.isArray(bindings.scenarios)&&bindings.scenarios.length===draft.scenarios.length&&
   new Set(bindings.scenarios.map(s=>s.id)).size===bindings.scenarios.length,'C_BINDINGS_DENOMINATOR');
  const corpus=structuredClone(draft),catalog=frozenCatalog(world),facts=frozenFacts(world),at=new Date(world.capturedAt);

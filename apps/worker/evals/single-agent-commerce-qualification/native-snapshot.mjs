@@ -8,7 +8,7 @@ export async function readSessionSnapshot({runtime,pool,historyStore,session}){
   sales=await runtime.loadOrCreateSalesCycle(b.pageId,b.conversationId,()=>createSalesCycleRuntimeState(b.conversationId,{pageId:b.pageId,conversationId:b.conversationId},at),at),
   profile=await runtime.loadOrCreateCustomerProfile(b.pageId,b.customerHash,()=>({profile:CustomerProfileV1Schema.parse({schemaVersion:1,
    profileId:randomUUID(),customerKey:{namespace:'meta',algorithm:'HMAC_SHA256',digest:b.customerHash},revision:1,measurements:[],fitPreference:null,
-   preferences:{colors:[],styles:[],materials:[]},sizeHistory:[],createdAt:at.toISOString(),updatedAt:at.toISOString()}),fieldEvidence:{}}),at);
+   preferences:{colors:[],styles:[],materials:[]},sizeHistory:[],createdAt:at.toISOString(),updatedAt:at.toISOString()}),fieldEvidence:{},revision:1}),at);
  return {publicState:{owner:authority.state.conversationOwner,revision:authority.stateVersion,salesRevision:sales.state.revision,stage:sales.state.stage,
    cart:sales.state.cart?.value??null,preview:sales.state.preview?.value??null,confirmation:sales.state.confirmation?.value??null,
    profile:{revision:profile.profile.revision,measurements:profile.profile.measurements,fitPreference:profile.profile.fitPreference,preferences:profile.profile.preferences},
