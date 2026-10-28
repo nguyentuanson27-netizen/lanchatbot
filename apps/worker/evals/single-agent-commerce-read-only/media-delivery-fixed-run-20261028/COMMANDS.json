@@ -1,0 +1,53 @@
+[
+  {
+    "name": "source-capture",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-session.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\feedback-source-capture.mjs",
+      "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-media-delivery-fixed-model-20261028\\source"
+    ],
+    "status": "COMPLETE",
+    "exitCode": 0
+  },
+  {
+    "name": "controls-preflight",
+    "command": [
+      "node",
+      "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\feedback-controls-20261023.mjs",
+      "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-media-delivery-fixed-model-20261028\\controls-preflight",
+      "--capture",
+      "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-media-delivery-fixed-model-20261028\\source\\capture.json",
+      "--preflight"
+    ],
+    "status": "COMPLETE",
+    "exitCode": 0
+  },
+  {
+    "name": "controls",
+    "command": [
+      "node",
+      "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\feedback-controls-20261023.mjs",
+      "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-media-delivery-fixed-model-20261028\\controls",
+      "--capture",
+      "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-media-delivery-fixed-model-20261028\\source\\capture.json",
+      "--prepared",
+      "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-media-delivery-fixed-model-20261028\\controls-preflight\\prepared.json"
+    ],
+    "status": "COMPLETE",
+    "exitCode": 0
+  },
+  {
+    "name": "native-readiness",
+    "command": [
+      "node",
+      "--input-type=module",
+      "-e",
+      "import {readFeedbackRunIdentity,assertCleanFeedbackSource} from './apps/worker/evals/single-agent-commerce-read-only/feedback-run-identity.mjs';import {requirePassingControls} from './apps/worker/evals/single-agent-commerce-read-only/feedback-native-gates.mjs';const i=readFeedbackRunIdentity();assertCleanFeedbackSource(i);console.log(JSON.stringify({controlsHash:requirePassingControls(process.argv[1],i)}));",
+      "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-media-delivery-fixed-model-20261028\\controls"
+    ],
+    "status": "COMPLETE",
+    "exitCode": 1
+  }
+]

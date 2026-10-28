@@ -5,7 +5,8 @@
 - [x] Committed57fb9f32 → apply/readback11proofs:10VERIFIED/1INVALID, semanticFieldsUnchanged=true, không đổi approval/hash/vector/publishedAt;0provider.
 - [x] Source342c1e97:17controlsPASS,12native observed/39NOT_RUN; dừng khi actual delivery MANUAL_REVIEW bộc lộ hai consumer cũ. Giữ evidence/42requests, child2DB cleanup; [record](../apps/worker/evals/single-agent-commerce-read-only/media-delivery-stopped-20261028/CHECKPOINT_B.md).
 - [x] Downstream gate+ProductFacts sửa shared observation; observedRED2→GREEN28, final1128Vitest/228NodePASS, workerbuild/lintPASS, actual PostgreSQL2PASS với revoke-after-enqueue và restart.
-- [ ] Seal source mới rồi fresh17controls/51native N1/retry0. Chưa deploy/bật scheduled refresh hoặc gửi khách; B_NOT_GO.
+- [x] Seal clean49731e77 rồi chạy17controls N1/retry0:16valid/1provider stream error; giữ17request/error accounting và0label leaks. Native readiness chặn đúng CONTROL_PROVIDER_ERROR; [report](../apps/worker/evals/single-agent-commerce-read-only/media-delivery-fixed-run-20261028/CHECKPOINT_B.md).
+- [ ] Full51native của source49731e77 chưa chạy (51NOT_RUN); BLOCKED ở control provider, không hidden retry. Chưa deploy/bật scheduled refresh hoặc gửi khách; B_NOT_GO.
 
 ## Previous — model run BLOCKED vì freshness ảnh, 28/10/2026
 

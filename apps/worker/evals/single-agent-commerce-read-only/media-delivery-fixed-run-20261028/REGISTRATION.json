@@ -1,0 +1,184 @@
+{
+  "sourceSha": "49731e77bba1b50f84185a0c06f2c1cfd9571755",
+  "implementationBaseSha": "57fb94deaf906d575f352f9b5422e1ad8c117c5a",
+  "implementationSourceSha": "49731e77bba1b50f84185a0c06f2c1cfd9571755",
+  "sourceReview": "SELF_REVIEW_AND_FOCUSED_VERIFICATION",
+  "fallbackDelivery": {
+    "mode": "SILENT_HANDOFF",
+    "unavailable": "NO_SEND",
+    "customerText": false,
+    "images": false,
+    "effectReplay": false
+  },
+  "codex": {
+    "version": "codex-cli 0.159.2",
+    "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+  },
+  "mode": "COMPACT_V2_FULL_NATIVE_ALL_REGISTERED_COHORTS",
+  "ownerContextPresentation": "VI_DATA_BLOCKS_COMPACT_V2",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "9887885e8cfa284a8a8fa45e4df28c7550684f1228a3c3e1995072ba26d8c392",
+    "verifier": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c"
+  },
+  "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+  "nativeOutcomes": 51,
+  "controls": 17,
+  "totalRegisteredOutcomes": 68,
+  "publicModelNativeTurns": 50,
+  "privateCodeOnlyTurns": 1,
+  "maximumGenerationRequests": 217,
+  "repetitions": 1,
+  "generationRetry": 0,
+  "sendEnabled": false,
+  "cohorts": [
+    {
+      "name": "opening-quotes",
+      "flags": [
+        "--opening-quotes"
+      ],
+      "slots": 5,
+      "phase": "native"
+    },
+    {
+      "name": "media-followup",
+      "flags": [
+        "--media-followup"
+      ],
+      "slots": 7,
+      "phase": "native"
+    },
+    {
+      "name": "missing-pos",
+      "flags": [
+        "--missing-pos"
+      ],
+      "slots": 3,
+      "phase": "native"
+    },
+    {
+      "name": "b1-first",
+      "flags": [
+        "--range",
+        "1:8",
+        "--live-only"
+      ],
+      "slots": 7,
+      "phase": "native"
+    },
+    {
+      "name": "b1-rest",
+      "flags": [
+        "--range",
+        "9:24",
+        "--live-only"
+      ],
+      "slots": 14,
+      "phase": "native"
+    },
+    {
+      "name": "journey-openings",
+      "flags": [
+        "--journey-openings"
+      ],
+      "slots": 4,
+      "phase": "native"
+    },
+    {
+      "name": "stateful",
+      "flags": [],
+      "slots": 8,
+      "phase": "native"
+    },
+    {
+      "name": "negotiation",
+      "flags": [
+        "--negotiation-probe"
+      ],
+      "slots": 3,
+      "phase": "native"
+    }
+  ],
+  "hashes": {
+    "manifest.json": "200c9352abd55d6dc7e2a2b0c6fd482939e4582c3959e50738f3abe4cd6d6671",
+    "source-config.b1.json": "b4c15f1823bf16d63a1ff67eb3a11711b28ed6592ec7bc1e65e0ceb3fbbc0d59",
+    "cases.b1.json": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+    "opening-quote-cases.json": "d095fd2e7bcc4bbe82f107e0944741c4b7310d145846f6a7bda8cea70de0b8de",
+    "sales-media-followup-cases.json": "dff5c57dff681f75ac35e484c014b0c62965bde2169941aa5b488ce879bba93a",
+    "sales-journeys.candidate.json": "b2575660b7d412eb6a2d11befb04de75fd840789c7126026bb257ce60f183a93",
+    "stateful-cases.json": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+    "prompts/owner.vi.txt": "9887885e8cfa284a8a8fa45e4df28c7550684f1228a3c3e1995072ba26d8c392",
+    "prompts/verifier.vi.txt": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c",
+    "handoff-matrix.candidate.json": "69ff7dadeec5acda4416e7872faaad342ea34960d32db2a630b9a0606beccc92",
+    "isolated-integration.mjs": "e5550bdc584ff6011b6d688c5ef5645877d7cb8bf6b9a77c601fbb184ebc56e1",
+    "stateful-provider.mjs": "d79c052364acae68919ecf8161242dba8c625b3e2a8fd1108f663b8bf78621c5",
+    "gemini-inference.mjs": "7d948a94c49e904d1bc61979c93115626f8bb67cd399ab9d4c12607216f10a81",
+    "protocol.mjs": "93bd246918f3c61426fc61a67b5a29109ec348bb7569da927f16b065c1232f70",
+    "feedback-controls-20261023.mjs": "3b628313471b8fa33326e466c39c56defaea4c0d068154f6787cba7cf87ade3d",
+    "source-session.py": "94b6cac60dff03506badc1751ba4e8ea54cce278ec82ff448eeb0e8a6a44294d",
+    "candidate-handoff.mjs": "b2a1778c8a8493d7eab59f743216475a814f1f3dfe1e351ed03b0341823d45ed",
+    "run.mjs": "33efa0391f6aae32bab944c08daf716e9904291f4ae75e1a557c046c5e2739ff",
+    "sales-journeys-registration.mjs": "2dff2d527a78d68bd4d290639da8ec543837af5ffbb767ac5845dad61e9ae3c4",
+    "native-presentation.mjs": "fdbbf0bc82b6b812dfefd6248a1d80339cc241b3b5c62de57e7574743e3f5168",
+    "owner-data-presentation.mjs": "a9e1a39b3189e79398750ecfd6530368c70fbde0f4da701a186eccdb65239f1d",
+    "attempt-evidence.mjs": "54614fd4fd45df477569554d2641ff70f17439b163ae7eaf8a50e6dd36e9c5a2"
+  },
+  "driverSha256": "afed52c575bf386673292e63fa77b35b859568144cc044ac8af6a2e53e2d1f70",
+  "quoteTask": {
+    "version": "EXPLICIT_QUOTE_V1",
+    "toolWorkAccounting": "PRIMITIVE_WORK_V2",
+    "normalUnits": 2,
+    "standalone": true,
+    "maxPerTurn": 1
+  }
+}

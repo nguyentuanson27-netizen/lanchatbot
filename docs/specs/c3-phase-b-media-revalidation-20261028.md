@@ -47,3 +47,7 @@ Tiếp theo là fresh capture/preflight và campaign model mới trên clean com
 Campaign source342c1e97:17controlsPASS,12native đã chạy,39NOT_RUN. Actual capture phát hiện hai consumer cuối còn dùng publish time; dừng parent dispatch và để child cleanup xong trước khi sửa source. Không tính SEND_ELIGIBLE nhưng MANUAL_REVIEW là gửi thành công. [Full stopped-run record và follow-up verification](../../apps/worker/evals/single-agent-commerce-read-only/media-delivery-stopped-20261028/CHECKPOINT_B.md).
 
 Sửa gate durable media và ProductFacts media projection dùng cùng effective observation. RED2FAIL→GREEN28; final1128Vitest/228NodePASS, workerbuild/lintPASS. Real isolated PostgreSQL regression2PASS: exact capture sau restart khi proof còn đúng; revoke sau enqueue chặn toàn nhóm. Không ghi nguồn lần nữa, không đổi prompt/corpus/TTL. Source mới phải commit và clean seal riêng trước lượt model mới.
+
+## Fresh source49731e77: provider control BLOCKED
+
+Clean source49731e77 chạy đủ17controls:16valid results/1PROVIDER_STREAM_ERROR HTTP200, giữ failclosed. Existing native readiness chặn CONTROL_PROVIDER_ERROR dù semantic summary tính unsafe-error là không send-eligible. Native0/51,51NOT_RUN; không hidden retry hoặc thay model.17requests/maximum1per generation,0evaluator label matches; không gộp12native của source cũ. [Full report](../../apps/worker/evals/single-agent-commerce-read-only/media-delivery-fixed-run-20261028/CHECKPOINT_B.md). B_NOT_GO/BLOCKED, chưa deploy/live send.
