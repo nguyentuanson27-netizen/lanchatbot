@@ -12,6 +12,13 @@
     "journeyNetWin": 0.1
   },
   "repetitions": 1,
+  "judge": {
+    "kind": "OFFLINE_MODEL",
+    "identity": "INDEPENDENT_GPT_6_1_SOL_HIGH_BLIND",
+    "model": {"provider": "OPENAI", "model": "gpt-6.1-sol", "version": "gpt-6.1-sol", "effort": "high"},
+    "evidenceRef": "owner-reply:call_bd286ceab8db4f4780bc1a76537484da:2026-10-28",
+    "ownerAnswer": "Agent độc lập GPT-6.1 Sol High chấm mù"
+  },
   "comparisonBaselineSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
   "hardFailurePolicy": "ZERO_SAFETY_STATE_EFFECT_PRIVACY_FAILURES",
   "accounting": "EVERY_REGISTERED_ATTEMPT_IN_DENOMINATOR_NO_GENERATION_RETRY",

@@ -1,5 +1,21 @@
 # Phase C foundation — 28/10/2026
 
+## Collector completion work after foundation approval
+
+Owner subsequently authorized completing Phase C and running models, and selected an independent **GPT-6.1 Sol High offline blind judge**. The following implementation is newer than the foundation approval below and requires its own independent review.
+
+Added source/frozen readers, bind-corpus and real initial-state readback; actual native safety/candidate collectors; same persisted ingress/Outbox envelope for genuine main C3; whole-main/transitive build pinning; native wire codecs without duplicate prompt context; bounded per-turn request ledger/dispatch claims; explicit actual boundary and accepted-output witnesses; source coverage/loss; judge import and complete denominator merging; real-adapter driver. Two optional evaluation-only ports expose the existing native boundary and C3 reference run inside candidate ingress. They do not change default B orchestration or production wiring.
+
+Actual checks so far in this follow-up:215 focused worker PASS (including one real main296-builder/two-pass/guard/shared ingress test with local response stubs);48 Node tests PASS before latest additional coverage/code-owned/merge regressions; direct worker typecheck and build PASS. C3 baseline offline frozen-lockfile install/build PASS,638tracked source/2044built files pinned. These are code tests, not PostgreSQL/model qualification. Final counts and independent disposition are recorded in the follow-up review report.
+
+[Collector implementation review, exact commands and remaining work](COLLECTOR_IMPLEMENTATION_REVIEW.md): same reviewer approved bounded components after fixes;52focusedPASS in that review snapshot; broad repeat728PASS/0FAIL/2existingSKIP after one transient local Round62 failure, which is retained in the report. Approval does not cover missing corpus/search/history-seed work or campaign readiness.
+
+Execution is still **BLOCKED, not complete**. Existing source/credential launcher was tried twice; SSH source host:22 timed out before credentials/public world could be read. No local Vertex credential variables are configured. Docker Desktop daemon is unavailable for local PostgreSQL fallback. The global Codex client is0.164.0, but the existing task-local0.159.2 binary/hash/ChatGPT login was recovered and validated through process-scoped APPDATA; no model change or global installation change. All qualification provider requests and new real-adapter runs remain0. [Readiness evidence](EXECUTION_READINESS_20261028.json).
+
+Fresh corpus/world/source bindings, search snapshot and authored-history seed review remain pending; no seal or runSourceSha exists. Main Context V2 cannot carry all current policy/profile/cart/history evidence; actual coverage loss blocks matched replacement unless separately resolved, even if absolute candidate qualification later passes. Do not label shared worldHash as equal model information or capability-derived wins as isolated language-quality improvement.
+
+The original foundation record follows and remains historical evidence.
+
 **Qualification: BLOCKED / NOT_RUN.** No Phase C provider requests, measured grades, matched C3 campaign or new real-adapter run. B NOT_GO remains unchanged. Approval of this tooling is separate from qualification.
 
 Implementation base `f160dfa4f7e0c8b3e29232570710d99d4f5ed012`; refreshed main / owner-selected C3 baseline `296cdcfbf5759f5bf9cbb24acf3dc63005589361`; branch `feat/c3-phase-c-qualification-20261028`. [Plan](../../../../docs/specs/c3-phase-c-qualification-plan-20261028.md) follows architecture §§13–16,21 and boundary amendment §§11–12. No C runSourceSha exists yet.

@@ -2,6 +2,7 @@
   "version": 1,
   "status": "DRAFT_UNBOUND_NOT_SEALED",
   "origin": "TARGET_CAPABILITIES",
+  "requiredCapabilities": ["PRODUCT_SEARCH", "PRODUCT_READ", "POLICY_READ", "SIZE", "MEDIA", "STATE", "CART", "CHECKOUT", "HANDOFF"],
   "provenance": {
     "candidatePromptUnchanged": true,
     "authoredFrom": "architecture §1.1/§13; capability coverage, not the recent failure list",

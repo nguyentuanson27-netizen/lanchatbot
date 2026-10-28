@@ -32,3 +32,10 @@ export function currentCandidate(repo){
 export function assertCurrentCandidate(repo,config){
  assert.deepEqual(config.candidate,currentCandidate(repo),'C_EXECUTABLE_OR_CONFIG_CHANGED');
 }
+export function assertApprovedDecisions(repo,config){
+ const d=JSON.parse(readFileSync(resolve(repo,'apps/worker/evals/single-agent-commerce-qualification/owner-decisions.json'),'utf8'));
+ assert(d.status==='APPROVED'&&config.ownerDecision?.decisionHash===digest(d)&&digest(config.thresholds)===digest(d.thresholds)&&
+  config.repetitions===d.repetitions&&config.baseline?.sourceSha===d.comparisonBaselineSha,'C_OWNER_DECISION_CHANGED');
+ if(d.judge)assert(config.judge?.kind===d.judge.kind&&config.judge.identity===d.judge.identity&&digest(config.judge.model)===digest(d.judge.model)&&
+  config.judge.promptHash===digest(readFileSync(resolve(repo,'apps/worker/evals/single-agent-commerce-qualification/prompts/judge.vi.txt'),'utf8')),'C_OWNER_JUDGE_CHANGED');
+}

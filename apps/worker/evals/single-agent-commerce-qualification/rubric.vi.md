@@ -1,6 +1,6 @@
 # Phase C — chấm kết quả toàn lượt và toàn hành trình
 
-Judge dự kiến là owner (human), xem packet đã che tên arm và thứ tự A/B được khóa trước kết quả. Không gọi nhận xét của coding agent là điểm human. Packet dùng đúng tin khách, lịch sử đã được chấp nhận, dữ liệu nguồn, reply/ảnh thực tế và các thao tác/state thật của từng arm.
+Owner đã chọn agent độc lập GPT-6.1 Sol High làm judge offline, xem packet đã che tên arm và thứ tự A/B được khóa trước kết quả. Dùng fork không mang lịch sử triển khai/findings/private assignments; không gọi điểm của agent là human grade. Prompt judge nằm trong `prompts/judge.vi.txt`, hash được khóa trước seal. Packet dùng đúng tin khách, lịch sử đã được chấp nhận, dữ liệu nguồn, reply/ảnh thực tế và các thao tác/state thật của từng arm. Judge có thể ghi UNRESOLVED; không dùng lại grade cũ để che phần chưa chấm rõ.
 
 Đọc toàn bộ lượt/hành trình trước khi chấm. Câu có đủ từ khóa, đủ tính từ hoặc có CTA không đủ để PASS. Không có đáp án văn mẫu bắt buộc. Trích dẫn chỉ dùng để định vị lý do, không cộng điểm theo số câu/điều kiện đã kể.
 

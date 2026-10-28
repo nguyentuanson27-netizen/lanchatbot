@@ -81,6 +81,8 @@ export function resultBudgetView(calls: CommerceToolCall[], results: CommerceToo
 
 /** Isolated candidate. Native continuations add world information; no retry, repair, Outbox or send capability. */
 export async function runCommerceTurn(input: {
+  /** Evaluation-only witness of the existing final gate. Does not change its decision. */
+  captureBoundaryWitness?: boolean;
   historyMetadata?: import("./single-agent-commerce-public-history.js").CommerceHistoryMetadata;
   scope: CommerceScope; latest: string; history: { role: "customer" | "shop"; text: string }[];
   ownerPrompt: string; verifierPrompt: string; tools: CommerceTools; clock: () => Date; timeoutMs?: number;
@@ -267,9 +269,13 @@ export async function runCommerceTurn(input: {
     let current: TrustedContext;
     try { current = await input.tools.readback(); }
     catch { return finish({ disposition: "HANDOFF", reason: "CURRENT_READBACK_UNAVAILABLE", text: null, fallbackId: null }); }
-    const terminal = finalGate({ expected: binding, response, current, finalDraft: draft, now: input.clock(), includeDiagnostic: true,
+    const boundaryCheckedAt = input.clock();
+    const terminal = finalGate({ expected: binding, response, current, finalDraft: draft, now: boundaryCheckedAt, includeDiagnostic: true,
       fallback: gateFallback() });
-    return { ...await finish(terminal), ...(terminal.diagnostic ? { currentPublicContext: current } : {}) };
+    return { ...await finish(terminal), ...(terminal.diagnostic ? { currentPublicContext: current } : {}),
+      ...(input.captureBoundaryWitness ? { boundaryWitness: { expected: binding,
+        currentBinding: makeBinding(binding.requestId, draft, current), checkedAt: boundaryCheckedAt.toISOString(), terminal,
+        currentPublicContext: current, responseKind: response.kind } } : {}) };
   }
   return finish(fallback("BUDGET"));
 }

@@ -34,11 +34,32 @@ import {isolatedHandoffRecords,handoffContentHash} from './candidate-handoff.mjs
 import {publicCapturedAttachments,publicCapturedTextHashes} from './delivery-capture.mjs';
 
 const root=fileURLToPath(new URL('../../../../',import.meta.url));
-const providerRun=process.argv.includes('--provider-run'),providerPreflight=process.argv.includes('--provider-preflight');
-const checkPrefixIndex=process.argv.indexOf('--check-prefix'),checkPrefix=checkPrefixIndex<0?null:process.argv[checkPrefixIndex+1];
+const phaseCArg=name=>{const i=process.argv.indexOf(name);return i<0?null:process.argv[i+1];};
+const phaseC=phaseCArg('--phase-c-registration');
+const phaseCInitial=phaseCArg('--phase-c-initial-world');
+const initialWorld=phaseCInitial?JSON.parse(readFileSync(phaseCInitial,'utf8')):null;
+const phaseCTools=phaseC||phaseCInitial?Object.assign({},...await Promise.all([
+ import('../single-agent-commerce-qualification/candidate-provider.mjs'),
+ import('../single-agent-commerce-qualification/native-population.mjs'),
+ import('../single-agent-commerce-qualification/native-history.mjs'),
+  import('../single-agent-commerce-qualification/dispatch-gates.mjs'),
+  import('../single-agent-commerce-qualification/native-snapshot.mjs')])):null;
+const providerRun=!!phaseC||process.argv.includes('--provider-run'),providerPreflight=process.argv.includes('--provider-preflight');
+const checkPrefixIndex=process.argv.indexOf('--check-prefix'),checkPrefix=phaseCInitial?'C initial state capture':checkPrefixIndex<0?null:process.argv[checkPrefixIndex+1];
 assert(checkPrefixIndex<0||(!providerRun&&!providerPreflight&&typeof checkPrefix==='string'&&checkPrefix.length>0&&checkPrefix.length<=128),'DETERMINISTIC_CHECK_PREFIX_ONLY');
-const providerFreeze=providerRun||providerPreflight?statefulPreflight(root):null;
+const providerFreeze=phaseC?phaseCTools.candidatePreflight(root,phaseC,phaseCArg('--phase-c-world')):providerRun||providerPreflight?statefulPreflight(root):null;
 if(providerPreflight){console.log(JSON.stringify({status:'PREFLIGHT_PASS',...providerFreeze.registration,providerGenerations:0}));process.exit(0);}
+if(phaseC){
+ phaseCTools.requirePassingSafety(providerFreeze.sealed,phaseCArg('--phase-c-safety'));
+ if(phaseCArg('--phase-c-arm')==='C3'){
+  const absolute=JSON.parse(readFileSync(phaseCArg('--phase-c-absolute-evidence'),'utf8'));
+  const {evaluateQualification}=await import('../single-agent-commerce-qualification/qualification.mjs');
+  assert.equal(evaluateQualification(absolute).candidateMeetsTarget,'PASS','C_ABSOLUTE_TARGET_MUST_PASS_FIRST');
+  assert.equal(JSON.stringify(absolute.config),JSON.stringify(providerFreeze.sealed.config),'C_ABSOLUTE_CONFIG_CHANGED');
+  providerFreeze.registration.arm='C3';
+ }else{assert(!phaseCArg('--phase-c-arm')||phaseCArg('--phase-c-arm')==='CANDIDATE');providerFreeze.registration.arm='CANDIDATE';}
+ phaseCTools.claimDispatch(phaseC,providerFreeze.registration.arm==='C3'?'C3':'NATIVE',providerFreeze.sealed);
+}
 const {Pool}=createRequire(new URL('../../../../packages/database/package.json',import.meta.url))('pg');
 const out=process.argv[2];assert(out,'NEW_EVIDENCE_DIRECTORY_REQUIRED');mkdirSync(resolve(out));
 const paymentMethod=process.argv[3]??'COD';assert(['COD','BANK_TRANSFER'].includes(paymentMethod));
@@ -125,7 +146,7 @@ try{
  const key=scope.conversationId;
  await runtime.loadOrCreateSalesCycle(pageId,key,()=>createSalesCycleRuntimeState(key,{pageId,conversationId:key},now),now);
  livePolicyStore=new PostgresRuntimePolicyStore(process.env.RUNTIME_POLICY_DATABASE_URL);
- const records=await livePolicyStore.loadActivePointers({pageId,channel:'PUBLISHED'});
+ const records=phaseC?providerFreeze.world.policyRecords:initialWorld?initialWorld.policyRecords:await livePolicyStore.loadActivePointers({pageId,channel:'PUBLISHED'});
  const handoffCandidate=process.argv.includes('--candidate-handoff')?isolatedHandoffRecords(records,{pageId,
   candidate:JSON.parse(readFileSync(new URL('./handoff-matrix.candidate.json',import.meta.url)))}):null;
  for(const r of handoffCandidate?.records??records){const v=r.version,p=r.pointer;
@@ -363,7 +384,11 @@ try{
  // Full candidate composition uses the actual Inbox, history, profile, sales and Outbox stores.
  // Product/checkout/transport inputs here remain explicitly synthetic; no Meta/Pancake socket is opened.
  historyStore=new PostgresChatHistoryStore(testUrl.toString(),{analyticsHashSalt:randomBytes(32).toString('hex')});
- if(providerRun)providerPorts=await createStatefulProvider({preflight:providerFreeze,out:resolve(out)});
+ if(phaseCInitial)providerPorts=phaseCTools.createCandidateProvider({preflight:{m:JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url))),world:initialWorld,
+  registration:{maximumGenerationRequests:0}},out:resolve(out)});
+ if(providerRun)providerPorts=phaseC?phaseCTools.createCandidateProvider({preflight:providerFreeze,out:resolve(out)}):await createStatefulProvider({preflight:providerFreeze,out:resolve(out)});
+ if(phaseC&&providerFreeze.registration.arm==='C3')await providerPorts.attachReference({baselineRoot:phaseCArg('--phase-c-baseline-root'),
+  baselineBuild:JSON.parse(readFileSync(phaseCArg('--phase-c-baseline-build'),'utf8'))});
  async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false}={}){
   assert(!live||!revalidatedMedia,'SYNTHETIC_REVALIDATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||(dependencyHoldingReply===null&&sizeHoldingReply===null&&!missingDependencyRule),'SYNTHETIC_RULE_FORBIDDEN_IN_PROVIDER_RUN');
@@ -431,6 +456,8 @@ try{
    assert(batch&&batch.conversationHash===customerHash,'CURRENT_BATCH');
    let owners=0,verifiers=0,faultInjected=false;const toolResponses=[];
    const result=await runPersistedCommerceIngress({batch,fence:batch.generation,scope:bound,store:runtime,inbox,history:historyStore,transaction:async fn=>{await beforeCommit();try{const value=await withTransaction(pool,async client=>{const applied=await fn(client);if(rollbackCommitReply&&!faultInjected){faultInjected=true;throw Error('CONTROLLED_ROLLBACK_REPLY_LOST');}return applied;});if(loseCommitReply&&!faultInjected){faultInjected=true;throw Error('CONTROLLED_COMMIT_REPLY_LOST');}return value;}catch(error){report.composedCommitDiagnostic=/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name;save();throw error;}},
+    ...(phaseC?{captureBoundaryWitness:true}:{}),
+    ...(phaseC&&providerPorts.evaluationTurn?{evaluationTurn:providerPorts.evaluationTurn}:{}),
     ...(live&&providerFreeze.m.quoteTask?{quoteTask:providerFreeze.m.quoteTask}:testQuoteTask?{quoteTask:testQuoteTask}:{}),read,facts,policy,resolveTagId:()=> 'synthetic-tag',clock:()=>new Date(),
     ...(live?{handoffReply:{approvedHoldingHashes:providerFreeze.m.handoffReply.approvedHoldingHashes}}:deferredHandoff?{handoffReply:{approvedHoldingHashes:[commerceHash(dependencyHoldingReply)]}}:{}),
     ownerPrompt:live?providerPorts.ownerPrompt:'Synthetic owner transport, never a provider run.',verifierPrompt:live?providerPorts.verifierPrompt:'Synthetic verifier transport.',
@@ -795,7 +822,22 @@ try{
   assert.deepEqual(first.capture,[]);assert.deepEqual(second.capture,[]);
   assert.deepEqual(summarizeAttemptQualification([invalid,blocked]),{registered:2,executed:1,notRun:1,observedTerminals:{SEND_ELIGIBLE:1},unknownTerminals:0,qualificationErrors:1});
  });
- if(providerRun){
+ if(phaseCInitial)await check('C initial state capture uses real native stores without generation',async()=>{
+  assert(initialWorld,'C_INITIAL_WORLD_REQUIRED');
+  const fixture=await statefulFixture({live:true,initialProductCodes:[initialWorld.products[0].canonicalCode]}),
+   captured=await phaseCTools.readSessionSnapshot({runtime,pool,historyStore,session:fixture});
+  assert.equal(captured.publicHistory.history.length,0);assert.equal(providerPorts.observed().length,0);
+  const {digest}=await import('../single-agent-commerce-qualification/qualification.mjs');
+  report.initialStateArtifact={kind:'REAL_ADAPTER_NATIVE_INITIAL_STATE',worldHash:digest(initialWorld),sourceSha:report.sourceSha,
+   publicState:captured.publicState,providerRequests:0,testDatabaseDropped:false};
+ });
+ if(phaseC){
+  assert(phaseCArg('--phase-c-seed'),'C_SEED_REQUIRED');
+  const snapshot=session=>phaseCTools.readSessionSnapshot({runtime,pool,historyStore,session});
+  const collected=await phaseCTools.collectNativePopulation({preflight:providerFreeze,providerPorts,sessionFactory:statefulFixture,snapshot,historyStore,
+   out:resolve(out),seedPath:phaseCArg('--phase-c-seed'),queue:attemptQueue});
+  report.phaseC={status:'COLLECTED_NOT_GRADED',candidateNativeScenarios:collected.attempts.length};report.providerGenerations=collected.providerRequests;
+ }else if(providerRun){
   const journeys=new Map(),qualifiedAttempts=[];report.outcomes=[];
   let invitationSucceeded=false;
   const selectedCases=process.argv.includes('--opening-only')?providerFreeze.cases.slice(0,1):providerFreeze.cases;
@@ -859,5 +901,7 @@ try{
 finally{
  await Promise.allSettled([runtime?.close(),inbox?.close(),policyStore?.close(),livePolicyStore?.close(),historyStore?.close(),providerPorts?.close(),pool?.end()]);
  if(created){assert(/^c3_b_test_[a-f0-9]{16}$/.test(databaseName));await admin.query('DROP DATABASE '+databaseName);report.testDatabaseDropped=true;save();}
+ if(report.initialStateArtifact){report.initialStateArtifact.testDatabaseDropped=report.testDatabaseDropped;
+  writeFileSync(resolve(out,'INITIAL_STATE.json'),JSON.stringify(report.initialStateArtifact,null,2),{flag:'wx'});}
  await admin.end();
 }

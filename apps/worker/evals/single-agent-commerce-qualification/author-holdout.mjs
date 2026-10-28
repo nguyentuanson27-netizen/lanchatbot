@@ -51,7 +51,7 @@ export function draftHoldout(){
    evaluator:{unsafe,requiredCustomerOutcomes:['Ground truth phải được kiểm với frozen world trước seal.'],
     bindingRequired:true,noExactProseRequired:true}});
  });
- return validateCorpus({version:1,status:'DRAFT_UNBOUND_NOT_SEALED',origin:'TARGET_CAPABILITIES',
+ return validateCorpus({version:1,status:'DRAFT_UNBOUND_NOT_SEALED',origin:'TARGET_CAPABILITIES',requiredCapabilities:['PRODUCT_SEARCH','PRODUCT_READ','POLICY_READ','SIZE','MEDIA','STATE','CART','CHECKOUT','HANDOFF'],
   provenance:{candidatePromptUnchanged:true,authoredFrom:'architecture §1.1/§13; capability coverage, not the recent failure list',
    previousProviderResultsUsedForTuning:false,sourceBindingsPending:true},scenarios,
   review:{status:'PENDING',worldHash:null,newProviderResultsObserved:0}});

@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "status": "BLOCKED_NOT_REGISTERED_NOT_RUN",
+  "authorization": "Owner requested complete Phase C, independent review, then run model",
+  "ownerModel": "gemini-3.5-flash-lite",
+  "ownerEffort": "high",
+  "verifierModel": "gpt-6.1-sol",
+  "verifierEffort": "high",
+  "judge": "INDEPENDENT_GPT_6_1_SOL_HIGH_BLIND",
+  "repetitions": 1,
+  "baselineSourceSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "baselineBuild": {
+    "status": "OFFLINE_LOCKFILE_INSTALL_AND_BUILD_EXIT_0",
+    "sourceFiles": 638,
+    "builtFiles": 2044,
+    "sourceHash": "b2de7a8f799d136402c14475e7b5c06489b87da91021d8e0786fb9abbe4f4424",
+    "buildHash": "329e510b1aec79f137752c53227bb1572dc836465d9434f50b421c7e841d97c3"
+  },
+  "codexTransport": {
+    "status": "PINNED_CLIENT_AND_CHATGPT_LOGIN_AVAILABLE",
+    "version": "codex-cli 0.159.2",
+    "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a",
+    "selection": "Existing c3-eval-runtime-01592, process-scoped APPDATA only; global client unchanged",
+    "providerRequests": 0
+  },
+  "sourceCredentialPreflight": {
+    "existingRoute": "credential-launcher.py -> existing source-session.py",
+    "attempts": 2,
+    "exitCodes": [1, 1],
+    "reason": "SSH source host port 22 connection timed out before credential retrieval",
+    "configuredLocalVertexCredentialVariables": 0,
+    "providerRequests": 0,
+    "sourceWrites": 0
+  },
+  "localPostgresFallback": {
+    "status": "UNAVAILABLE",
+    "evidence": "docker info failed: Docker Desktop Linux engine pipe absent",
+    "testDatabasesCreated": 0
+  },
+  "runSourceSha": null,
+  "sealedRegistration": null,
+  "registeredAttempts": 0,
+  "actualProviderRequests": 0,
+  "modelGrades": 0,
+  "realAdapterExecution": "NOT_RUN",
+  "missing": [
+    "reachable existing public-source and Vertex credential route",
+    "new frozen public world and real native initial-state readback",
+    "reviewed source bindings and finalized fresh corpus, including authored-history seed handling",
+    "sealed clean source/input registration",
+    "matched C3 information parity or explicit package-only qualification disposition",
+    "actual model, independent blind grades and real-adapter evidence"
+  ],
+  "rolloutAuthorized": false,
+  "historicalPhaseBStatus": "B_NOT_GO_UNCHANGED"
+}

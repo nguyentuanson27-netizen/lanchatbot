@@ -78,6 +78,10 @@ export function bindCommerceFacts(reader: BusinessFactsReader, scope: { shopAlia
 
 /** Explicit candidate consumer. Not imported by a production entrypoint; it can enqueue, never dispatch or send. */
 export async function runPersistedCommerceIngress(input: {
+  captureBoundaryWitness?: boolean;
+  /** Evaluation-only reference runner; production entrypoints never provide this port. */
+  evaluationTurn?: { kind: "PINNED_MAIN_C3"; run: (turn: Parameters<typeof runCommerceTurn>[0],
+    state: { sales: SalesCycleRuntimeState; conversationRevision: number; sourceMessagePk: string }) => ReturnType<typeof runCommerceTurn> };
   batch: ClaimedInboundBatch<InboundEnvelopeV1>; fence: number;
   scope: Pick<Parameters<typeof createCommerceTools>[0]["read"]["scope"], "pageId" | "shopId" | "shopAlias" | "conversationId" | "customerHash">;
   store: PostgresRealtimeRuntimeStore; inbox: Pick<PostgresRealtimeInboxStore, "isBatchCurrent" | "readGeneration" | "completeBatch">;
@@ -141,12 +145,14 @@ export async function runPersistedCommerceIngress(input: {
   };
   const pendingCheckout = await executor.privateCheckoutPending();
   const privateInput = !!mediaMessage || pendingCheckout || isPrivateCommerceText(latest);
+  let sourceMessagePk = "";
   for (const m of messages) {
     const recorded=await input.history.recordInboundCustomerMessage({ pageId: scope.pageId, conversationId: scope.conversationId,
     customerHash: scope.customerHash, providerMessageId: m.messageId ?? m.eventKey,
     text: privateInput || isPrivateCommerceText(m.text ?? "") ? null : m.text,
     attachmentCount:m.attachments.length,
     occurredAt: new Date(m.occurredAt), receivedAt: input.clock() });
+    if (m === last) sourceMessagePk = recorded.messagePk;
     if(m===mediaMessage)mediaLink={eventKey:m.eventKey,messagePk:recorded.messagePk,attachmentCount};
   }
   if(record.state.conversationOwner!=="BOT")return closeWithoutSend("HUMAN_OWNS_CONVERSATION");
@@ -228,7 +234,11 @@ export async function runPersistedCommerceIngress(input: {
         conversationOwner: a.state.conversationOwner, permission: a.permission, bindingVersion: a.bindingVersion }; } },
     handoff: { ...handoff, policy: policyBundle,...(input.handoffReply?{deferredReply:input.handoffReply}:{}) },
     media: input.media ?? {allowedHostSuffixes:(process.env.PRODUCT_SEARCH_ALLOWED_IMAGE_HOSTS ?? "lanadesign.vn,content.pancake.vn,fbcdn.net,fbsbx.com").split(",").map(s=>s.trim()).filter(Boolean)} });
-  const execution = await runCommerceTurn({ scope, tools, latest, history, historyMetadata, clock: input.clock, ownerPrompt: input.ownerPrompt, verifierPrompt: input.verifierPrompt, owner: input.owner, verifier: input.verifier });
+  const turnInput={ scope, tools, latest, history, historyMetadata, clock: input.clock, ownerPrompt: input.ownerPrompt, verifierPrompt: input.verifierPrompt, owner: input.owner, verifier: input.verifier,
+    ...(input.captureBoundaryWitness ? {captureBoundaryWitness:true} : {}) };
+  if(input.evaluationTurn&&input.evaluationTurn.kind!=="PINNED_MAIN_C3")throw Error("EVALUATION_REFERENCE_KIND");
+  const execution = input.evaluationTurn ? await input.evaluationTurn.run(turnInput,{sales:(await executor.repository.read(scope.conversationId))!,
+    conversationRevision:(await readAuthority()).stateVersion,sourceMessagePk}) : await runCommerceTurn(turnInput);
   const result={...execution,publicHistoryProjection:{...projectedHistory.dropped,unavailable:publicHistoryUnavailable}};
   // Handoff commits own Inbox completion. Never enqueue a second response or
   // mutate state again after a rejected/unknown handoff transaction.

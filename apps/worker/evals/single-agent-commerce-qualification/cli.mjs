@@ -5,7 +5,8 @@ import {execFileSync} from 'node:child_process';
 import {randomBytes} from 'node:crypto';
 import {digest,readiness,validateConfig,validateCorpus,qualificationIdentity,registerSlots,
  blindComparisonPack,absoluteReviewPack,evaluateQualification,MEASUREMENT_POLICY} from './qualification.mjs';
-import {currentCandidate,assertCurrentCandidate,IMPLEMENTATION_BASE_SHA} from './source-identity.mjs';
+import {currentCandidate,assertCurrentCandidate,assertApprovedDecisions,IMPLEMENTATION_BASE_SHA} from './source-identity.mjs';
+import {NATIVE_CODECS} from './native-wire.mjs';
 
 const [command,...args]=process.argv.slice(2),allowed=new Set(['--repo','--config','--corpus','--world','--development','--out','--registration','--evidence','--seed']);
 const flags={};
@@ -22,15 +23,16 @@ try{
   check(!existsSync(out),'C_OUTPUT_ALREADY_EXISTS');mkdirSync(out);return out;};
  const clean=()=>check(git('status','--porcelain','--untracked-files=all')==='','C_DIRTY_SOURCE');
  const ownerDecisions=()=>json(resolve(repo,'apps/worker/evals/single-agent-commerce-qualification/owner-decisions.json'));
- const approved=c=>{const d=ownerDecisions();check(c.ownerDecision?.decisionHash===digest(d)&&d.status==='APPROVED'&&
-  digest(c.thresholds)===digest(d.thresholds)&&c.repetitions===d.repetitions&&c.baseline.sourceSha===d.comparisonBaselineSha,'C_OWNER_DECISION_CHANGED');};
+ const approved=c=>assertApprovedDecisions(repo,c);
  if(command==='init'){
   const decisions=ownerDecisions(),source=git('rev-parse','HEAD');
-  const config={version:1,sendEnabled:false,retry:0,repetitions:decisions.repetitions,implementationBaseSha:IMPLEMENTATION_BASE_SHA,
+  const config={version:1,qualificationStage:'ABSOLUTE',nativeCodecs:NATIVE_CODECS,sendEnabled:false,retry:0,repetitions:decisions.repetitions,implementationBaseSha:IMPLEMENTATION_BASE_SHA,
    candidate:currentCandidate(repo),measurementPolicy:MEASUREMENT_POLICY,
    onlineRoles:['OWNER','VERIFIER'],maximumOwnerGenerations:3,maximumVerifierGenerations:1,
    ownerDecision:{status:decisions.status,evidenceRef:decisions.evidenceRef,decisionHash:digest(decisions)},thresholds:decisions.thresholds,
-   judge:{kind:'HUMAN',identity:'OWNER_FASHION_SALES',rubricHash:digest(readFileSync(resolve(repo,'apps/worker/evals/single-agent-commerce-qualification/rubric.vi.md'),'utf8')),
+   judge:{kind:decisions.judge.kind,identity:decisions.judge.identity,model:decisions.judge.model,approvalRef:decisions.judge.evidenceRef,
+    promptHash:digest(readFileSync(resolve(repo,'apps/worker/evals/single-agent-commerce-qualification/prompts/judge.vi.txt'),'utf8')),
+    rubricHash:digest(readFileSync(resolve(repo,'apps/worker/evals/single-agent-commerce-qualification/rubric.vi.md'),'utf8')),
     blind:true,disagreement:'REQUIRE_ADJUDICATION'},
    baseline:{sourceSha:decisions.comparisonBaselineSha,capabilityPath:'apps/worker/src/track-c-c3-two-pass-candidate.ts',model:null,
     capabilityStatus:'UNVERIFIED_MATCHED_MODEL_AND_STATEFUL_PARITY'},blinding:{scheme:'HMAC_SHA256_ORDER_V1',seedCommitment:null}};
@@ -41,6 +43,10 @@ try{
   if(flags['--corpus']){
    const corpus=json(flags['--corpus']);validateCorpus(corpus);
    if(corpus.review?.status!=='APPROVED'||!corpus.review.worldHash||JSON.stringify(corpus).includes('{{'))result.missing.push('CORPUS_BINDING_AND_REVIEW');
+   if(config.nativeCodecs){
+    if(corpus.requiredCapabilities?.includes('PRODUCT_SEARCH'))result.missing.push('NATIVE_FROZEN_SEARCH_ADAPTER');
+    if(corpus.scenarios.filter(s=>s.mode!=='SAFETY').some(s=>s.turns.some(t=>t.history.length)))result.missing.push('INITIAL_HISTORY_SEED');
+   }
   }else result.missing.push('CORPUS');
   result.status=result.missing.length?'BLOCKED':'READY';
   console.log(JSON.stringify({...result,providerRequests:0}));if(result.status==='BLOCKED')process.exitCode=2;
@@ -56,6 +62,10 @@ try{
   check(corpus.review?.status==='APPROVED'&&corpus.review.worldHash===digest(world)&&corpus.review.newProviderResultsObserved===0,
    'C_FRESH_CORPUS_REVIEW_REQUIRED');
   check(!JSON.stringify(corpus).includes('{{'),'C_UNRESOLVED_HOLDOUT_INPUT');
+  if(config.nativeCodecs){
+   check(corpus.scenarios.filter(s=>s.mode!=='SAFETY').every(s=>s.turns.every(t=>t.history.length===0)),'C_INITIAL_HISTORY_SEED_NOT_IMPLEMENTED');
+   check(!corpus.requiredCapabilities?.includes('PRODUCT_SEARCH'),'C_NATIVE_FROZEN_SEARCH_ADAPTER_NOT_IMPLEMENTED');
+  }
   check(corpus.scenarios.filter(s=>s.mode!=='SAFETY').every(s=>s.judgeContext&&s.initialContext?.worldHash===digest(world)&&
    ['initialStateHash','initialHistoryHash','freshnessPolicyHash'].every(k=>/^[a-f0-9]{64}$/.test(s.initialContext[k]))),'C_CONTEXT_BINDINGS_REQUIRED');
   const registration={version:1,runSourceSha:git('rev-parse','HEAD'),registeredAt:new Date().toISOString(),

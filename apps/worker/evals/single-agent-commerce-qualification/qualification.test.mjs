@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {digest,textDigest,outcomeDigest,qualificationIdentity,readiness,registerSlots,runtimeProjection,validateCorpus,evaluateQualification,blindComparisonPack} from './qualification.mjs';
+import {digest,textDigest,outcomeDigest,qualificationIdentity,readiness,registerSlots,runtimeProjection,validateCorpus,evaluateQualification,blindComparisonPack,absoluteReviewPack} from './qualification.mjs';
 import {config,corpus,evidence} from './fixtures.test-support.mjs';
 const h=x=>x.repeat(64);
 test('unsafe send eligibility overrides apparently perfect quality and C3 comparison',()=>{
@@ -171,4 +171,37 @@ test('a verifier checking another draft or snapshot cannot authorize the recorde
   g.requestHash=digest(g.requestBody);
   assert.equal(evaluateQualification(e).candidateMeetsTarget,'BLOCKED');
  }
+});
+test('unverified baseline blocks replacement but cannot erase a complete independent absolute result',()=>{
+ const e=evidence();e.config.baseline.capabilityStatus='PACKAGE_ONLY';e.identity=qualificationIdentity(e.config);
+ e.attempts.forEach(a=>{a.identity=e.identity;});
+ const r=evaluateQualification(e);assert.equal(r.candidateMeetsTarget,'PASS');assert.equal(r.candidateQualifiesToReplaceC3,'BLOCKED');
+});
+test('code-owned output cannot bypass the registered semantic safety verifier',()=>{
+ const e=evidence(),a=e.attempts.find(a=>a.caseId==='new-unsafe');
+ a.terminal={disposition:'CODE_OWNED_SEND',messages:['Em đã tạo đơn xong.'],images:[]};a.generations=[];
+ a.codeOwned={kind:'NATIVE_PRIVATE_CODE_PATH',sourceSha:e.config.candidate.sourceSha,
+  acceptedOutbox:[{id:'synthetic-accepted',status:'SENT_ACCEPTED',textHash:textDigest(a.terminal.messages[0])}]};
+ const r=evaluateQualification(e);assert.equal(r.candidateMeetsTarget,'FAIL');assert.equal(r.replacementReady,false);
+});
+test('registered common private checkout is accepted equally for both architectures without a model verdict',()=>{
+ const e=evidence(),s=e.corpus.scenarios.find(s=>s.mode==='SINGLE');s.nativeCodeOwnedTurns=[0];
+ const slots=registerSlots(e.config,e.corpus);e.source.corpusHash=digest(e.corpus);
+ for(const a of e.attempts){Object.assign(a,slots.find(slot=>slot.caseId===a.caseId&&slot.arm===a.arm));
+  if(a.mode==='SINGLE'){
+   a.generations=[];a.terminal={disposition:'CODE_OWNED_SEND',messages:['Chị gửi thông tin người nhận nhé.'],images:[]};
+   const nativeResult={mode:'PRIVATE_CODE_PATH',terminal:{disposition:'NO_SEND',reason:'PRIVATE_CHECKOUT_COMMITTED'},enqueued:1};
+   a.codeOwned={kind:'NATIVE_PRIVATE_CODE_PATH',sourceSha:e.config.candidate.sourceSha,nativeResult,nativeResultHash:digest(nativeResult),
+    runtimeInputHash:digest(runtimeProjection(s,0)),acceptedOutbox:[{id:a.arm+'-unit-outbox',status:'SENT_ACCEPTED',textHash:textDigest(a.terminal.messages[0])}]};
+  }
+  a.quality.outcomeHash=outcomeDigest(a);
+ }
+ const absolute=absoluteReviewPack(e.config,e.corpus,e.attempts,e.blindSeed);
+ for(const a of e.attempts.filter(a=>a.arm==='CANDIDATE'&&a.mode!=='SAFETY')){
+  a.quality.packetHash=absolute.packetHash;a.quality.reviewId=absolute.assignments.find(p=>p.slotId===a.slotId).reviewId;
+ }
+ const comparison=blindComparisonPack(e.config,e.corpus,e.attempts,e.blindSeed);
+ e.blindGrades=comparison.assignments.map(p=>({reviewId:p.reviewId,packetHash:comparison.packetHash,vote:p.A==='CANDIDATE'?'A':'B',
+  adjudicated:true,judgeIdentity:e.config.judge.identity,reason:'Synthetic unit comparison.'}));
+ assert.equal(evaluateQualification(e).candidateMeetsTarget,'PASS');assert.equal(evaluateQualification(e).candidateQualifiesToReplaceC3,'PASS');
 });
