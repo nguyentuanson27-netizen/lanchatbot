@@ -1,5 +1,6 @@
 ## Current — full Phase B model sau silent fallback, 28/10/2026
 
+- [x] Review lại đủ51 outcomes và17 controls, đối chiếu bản sửa silent fallback và campaign trước. [Post-run review](../apps/worker/evals/single-agent-commerce-read-only/silent-fallback-run-20261028/POST_RUN_REVIEW.md): không quy38eligible/0fallback thành tiến bộ bán hàng; ưu tiên gallery diagnostics, lựa chọn theo hoàn cảnh và dùng ưu đãi. Chưa sửa code hoặc chạy provider mới.
 - [x] Seal source `dc69f712fa85ef318ff3f58bf7e26c8d28368aee`, clean trước/sau; source/dist/prompt hashes giữ nguyên. [Báo cáo](../apps/worker/evals/single-agent-commerce-read-only/silent-fallback-run-20261028/CHECKPOINT_B.md).
 - [x] Campaign đầu: 17 controls HTTP401, giữ accounting và51 native NOT_RUN. Sau khi login được làm mới, mở campaign mới cùng source/config; không retry attempt cũ. Tổng157 generation requests qua hai campaign.
 - [x] Campaign hoàn tất:17 controls PASS →51/51 native N1/retry0;38 eligible/9 handoff/4 NO_SEND;140 requests,0 provider/qualification errors,30 VALID persisted outcomes,6 DB DROP,6 CAPTURE_JOB_PASS.
