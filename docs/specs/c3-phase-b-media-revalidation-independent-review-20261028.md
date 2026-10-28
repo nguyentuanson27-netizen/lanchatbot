@@ -46,4 +46,10 @@ The operator now labels proposedProof and final observedProof separately and der
 
 Six offline table tests pass: unknownVERIFIED/unknownINVALID at the last point, confirmed mixed verification/invalidation, absent/changed final proof, incomplete/changed source, and preflight failure. Operator/helper syntax checks pass. The affected TS implementation did not change after the1139Vitest/build/lint checks above. Full Node suite234/234PASS after the follow-up (same Node command above); no provider or source write was performed for this reporting fix.
 
-Pending same-reviewer re-review of this follow-up. Approval, if granted, will apply only to implementation/evidence in this scope, not the unrun native campaign or production readiness.
+## Final same-reviewer decision — APPROVE
+
+Reviewer `/root/media_revalidation_independent_review` approved exact clean HEAD **`3e8efa047b8654103c65c8d39efb17a6279cd71d`**, with no remaining blocking finding in this implementation/evidence scope. R1, R2 and P2 are closed.
+
+Independent verification:139/139Vitest across8files at610d1ff1 (the same TS bytes remain unchanged at the final revision);234/234Node tests at exactHEAD3e8efa04; operator/helper syntax and diff checkPASS. Reviewer confirmed the clean worktree, actual operator wiring and conditional proof filter. They did not run provider, write the source store or deploy.
+
+This approval is not PhaseBGO. Campaign49731e77 remainsBLOCKED/native0of51; there is no new model evidence for the final source. Unknown write/readback limits and lack of live-server conditional-write concurrency testing remain explicit above. This final documentation update records the decision without changing executable/config bytes or original run/apply evidence; the exact approved source remains3e8efa04.
