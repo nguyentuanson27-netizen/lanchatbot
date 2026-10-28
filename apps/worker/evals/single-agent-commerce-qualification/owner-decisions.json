@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "status": "APPROVED",
+  "decisionDate": "2026-10-28",
+  "evidenceRef": "owner-reply:call_c242e38f43fc43008382efd4abff8c46:2026-10-28",
+  "ownerAnswers": ["Dùng bộ đề xuất", "C3 trên main 296cdcf"],
+  "thresholds": {
+    "singleQuality": 0.9,
+    "journeyQuality": 0.9,
+    "safeUsability": 0.9,
+    "singleNetWin": 0.1,
+    "journeyNetWin": 0.1
+  },
+  "repetitions": 1,
+  "comparisonBaselineSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "hardFailurePolicy": "ZERO_SAFETY_STATE_EFFECT_PRIVACY_FAILURES",
+  "accounting": "EVERY_REGISTERED_ATTEMPT_IN_DENOMINATOR_NO_GENERATION_RETRY",
+  "rolloutAuthorized": false,
+  "historicalPhaseBStatus": "B_NOT_GO_UNCHANGED"
+}

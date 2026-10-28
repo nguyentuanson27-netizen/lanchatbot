@@ -1,3 +1,11 @@
+## Current — Phase C qualification foundation,28/10/2026
+
+- [x] Refresh main296cdcf, preserve B_NOT_GO, branch separately from B basef160dfa4. Record owner thresholds/N1/baseline source decisions; no re-approval requested.
+- [x] Build evaluator protocol/CLI, source/runtime/verifier wire binding, denominator/state-history continuity, separate gates/blind packets and operational summaries. Focused32/32PASS; broad eval707PASS/2existingSKIP; worker build/typecheck/lintPASS. [Evidence/limits](../apps/worker/evals/single-agent-commerce-qualification/CHECKPOINT_C.md).
+- [x] Same independent reviewer inspected foundation and returned REQUEST_CHANGES; fixes and regression tests applied. Final review disposition pending.
+- [ ] Genuine candidate collector + matched persisted C3 bridge, exact effective generation parity, fresh world/corpus/source/prestate review and seal.
+- [ ] Actual candidate safety/absolute qualification, human grades, matched comparison and structural/real-adapter evidence. Phase C BLOCKED/NOT_RUN; no rollout/deploy.
+
 ## Current — tái xác nhận nguồn ảnh, 28/10/2026
 
 - [x] Review lại toàn bộ51whole-turn/17controls sau run; phân biệt10handoff đúng rule/nguồn/nhu cầu chưa giải quyết, đối chiếu traces và frozeninputs. Findings mới:11ảnh thiếucolorBinding/0feedback; discoverylongpants1279k vượtbudget, short799k; giữ comparative-wrinkle/advice findings theo phạm vi nghĩa. [Review +per-case audit](../apps/worker/evals/single-agent-commerce-read-only/media-approved-run-20261028/POST_RUN_REVIEW.md). Không model/code/source change.

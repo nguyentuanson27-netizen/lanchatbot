@@ -1883,6 +1883,8 @@ After owner GO or the recorded OWNER_BYPASS, write a new separately scoped plan 
 
 ### Future Phase C — qualification and replacement evidence
 
+Implementation started28/10/2026: [Phase C plan](../docs/specs/c3-phase-c-qualification-plan-20261028.md). Owner approved N1,90% separate absolute SINGLE/JOURNEY and safe usability,zero hard safety/state/effect/privacy failures,10pp netwin BOTH modes; C3 baseline main296cdcf. Foundation is under independent review; collector/matched persisted baseline bridge/fresh sealed corpus/provider and real-adapter execution remain incomplete. Tooling tests do not change B_NOT_GO or establish C_PASS.
+
 1. preregister complete-candidate sealed holdouts;
 2. bind verifier qualification separately from complete-candidate qualification;
 3. paired single-turn absolute target evaluation;
