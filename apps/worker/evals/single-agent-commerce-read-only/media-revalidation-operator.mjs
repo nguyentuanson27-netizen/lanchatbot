@@ -6,6 +6,7 @@ import {revalidatePublishedMedia} from '../../dist/p23c-media-revalidation.js';
 import {HttpQdrantClient,FfmpegImagePipeline} from '../../dist/p23c-publisher.js';
 import {GoogleSheetsClient} from '/app/apps/worker/dist/google-sheets-client.js';
 import {buildApprovedQdrantJobs,collectImageRegistryRows} from '/app/apps/worker/dist/p23c-jobs.js';
+import {mediaRevalidationOperatorOutcome} from './media-revalidation-operator-outcome.mjs';
 
 let stage='INPUT';
 try{
@@ -49,7 +50,7 @@ try{
        await qdrant.invalidateMediaProof(pointId,proof);
      }});
    const status=!apply&&proposedProof?(proposedProof.status==='VERIFIED'?'WOULD_VERIFY':'WOULD_INVALIDATE'):result.status;
-   results.push({...result,status,proof:proposedProof});console.log(JSON.stringify({phase:'RESULT',...results.at(-1),apply}));
+   results.push({...result,status,proposedProof});console.log(JSON.stringify({phase:'RESULT',...results.at(-1),apply}));
    if(apply&&result.status==='WRITE_UNCONFIRMED')break;
  }
  stage='FINAL_READBACK';const after=await qdrant.scrollPointStates();
@@ -57,10 +58,13 @@ try{
    const before={...all.get(id).payload},current={...after.get(id).payload};delete before.image_revalidation;delete current.image_revalidation;
    return isDeepStrictEqual(before,current);
  });
- const report={status:semanticFieldsUnchanged?'COMPLETE':'SOURCE_CHANGED_RETAIN_EVIDENCE',apply,productId:target.productId,results,
-   writesDispatched,semanticFieldsUnchanged,notRun:target.pointIds.filter(id=>!results.some(r=>r.pointId===id)),providerRequests:0,embeddingRequests:0,sheetsWrites:0,vectorUpserts:0};
+ const observedResults=results.map(result=>({...result,observedProof:after.get(result.pointId)?.payload.image_revalidation??null}));
+ const notRun=target.pointIds.filter(id=>!results.some(r=>r.pointId===id));
+ const outcome=mediaRevalidationOperatorOutcome({apply,results:observedResults,notRun,semanticFieldsUnchanged});
+ const report={status:outcome.status,apply,productId:target.productId,results:observedResults,
+   writesDispatched,semanticFieldsUnchanged,notRun,providerRequests:0,embeddingRequests:0,sheetsWrites:0,vectorUpserts:0};
  console.log(JSON.stringify({phase:'SUMMARY',...report}));
- if(!semanticFieldsUnchanged||report.notRun.length||results.some(r=>['WRITE_UNCONFIRMED','BLOCKED'].includes(r.status)&&r.proof?.status!=='INVALID'))process.exitCode=1;
+ process.exitCode=outcome.exitCode;
 }catch(error){
  const code=error?.code??error?.message;
  console.log(JSON.stringify({phase:'ERROR',status:'STOP_RETAIN_EVIDENCE',stage,errorName:error?.name??null,

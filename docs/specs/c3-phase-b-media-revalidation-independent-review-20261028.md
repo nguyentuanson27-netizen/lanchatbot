@@ -40,4 +40,10 @@ No shared package executable changes this review turn. Earlier real PostgreSQL2P
 
 ## Re-review
 
-Pending exact-source re-review by the same reviewer. Approval, if granted, will apply only to implementation/evidence in this scope, not the unrun native campaign or production readiness.
+Same reviewer inspected clean source `610d1ff12356f6c2df1990c7f605260db01d2f70`, independently ran139tests/8files (allPASS), and **closed R1/R2**. They requested one additional P2 fix: at the final operator point, WRITE_UNCONFIRMED combined with a proposed INVALID proof could incorrectly yield COMPLETE/exit0. A proposed proof is not write confirmation.
+
+The operator now labels proposedProof and final observedProof separately and derives status/exit from a narrow pure outcome function. Every WRITE_UNCONFIRMED is a failure regardless of proposed or observed proof. Completion additionally requires confirmed matching proof fields for each applied result; a concurrent change remains unconfirmed. Preflight still reports WOULD outcomes only. Earlier apply artifacts remain untouched; this source was not executed against the source store.
+
+Six offline table tests pass: unknownVERIFIED/unknownINVALID at the last point, confirmed mixed verification/invalidation, absent/changed final proof, incomplete/changed source, and preflight failure. Operator/helper syntax checks pass. The affected TS implementation did not change after the1139Vitest/build/lint checks above. Full Node suite234/234PASS after the follow-up (same Node command above); no provider or source write was performed for this reporting fix.
+
+Pending same-reviewer re-review of this follow-up. Approval, if granted, will apply only to implementation/evidence in this scope, not the unrun native campaign or production readiness.

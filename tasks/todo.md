@@ -1,7 +1,8 @@
 ## Current — tái xác nhận nguồn ảnh, 28/10/2026
 
 - [x] Independent review cf0a61e3:REQUEST_CHANGES2P1. Sửa current-clock gate và own-proof conditional quarantine; observedRED6→GREEN, final1139Vitest/228NodePASS, workerbuild/lintPASS; no provider/source write. [Review record](../docs/specs/c3-phase-b-media-revalidation-independent-review-20261028.md).
-- [ ] Same reviewer exact-source re-review pending; không đồng nhất approval implementation với PhaseB acceptance.
+- [x] Same reviewer610d1ff1 đóng2P1,139independenttestsPASS; yêu cầu sửaP2 operator unknownINVALID báoCOMPLETE. Đã tách proposed/observed và fail mọiWRITE_UNCONFIRMED,6offlinecasesPASS.
+- [ ] Same reviewer re-review reporting follow-up pending; không đồng nhất approval implementation với PhaseB acceptance.
 - [x] Producer/projection/eligibility dùng bound image_revalidation thay vì gia hạn publish timestamp; scope mặc định off, NOOP có thể revalidate, source/commit/readback guards giữ failclosed. [Plan/record](../docs/specs/c3-phase-b-media-revalidation-20261028.md).
 - [x] RED2FAIL→GREEN; final1113Vitest/228NodePASS, shared build/typecheck và worker build/lintPASS. Read-only preflight11points:10đủnguồn/canonicalhash,1orphan sẽINVALID;0sourcewrites.
 - [x] Committed57fb9f32 → apply/readback11proofs:10VERIFIED/1INVALID, semanticFieldsUnchanged=true, không đổi approval/hash/vector/publishedAt;0provider.

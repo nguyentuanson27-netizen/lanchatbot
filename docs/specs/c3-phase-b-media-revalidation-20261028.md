@@ -55,3 +55,5 @@ Clean source49731e77 chạy đủ17controls:16valid results/1PROVIDER_STREAM_ERR
 ## Independent review follow-up
 
 Review cf0a61e3 yêu cầu sửa2P1: expiry vượt qua async gate và registry revocation đã thấy nhưng own persisted proof vẫnVALID. Đã thêm regressionRED6→GREEN, conditional proof quarantine và current-clock final gate. Final1139Vitest/228NodePASS, workerbuild/lintPASS; chưa chạy model/ghi nguồn lại. Unknown write/readback không đồng nghĩa persisted proofINVALID; giới hạn cross-store và wire-only filtered-write coverage ghi rõ trong [review record](c3-phase-b-media-revalidation-independent-review-20261028.md). Re-review pending, B_NOT_GO giữ nguyên.
+
+Re-review610d1ff1: cùng reviewer chạy139testsPASS và đóng2P1. FindingP2 bổ sung: operator có thể báo COMPLETE khi last-point INVALID write chưa confirmed. Đã sửa unconditional unknown failure, tách proposed/observed proof và6offline table testsPASS; chưa re-execute operator hoặc sửa evidence apply cũ. Chờ same-reviewer follow-up.
