@@ -108,28 +108,40 @@ export async function createCommerceTools(input: {
     try {
       const outcome=await composed.invoke({name:"request_handoff",args:{reason}});
       missingInformationUnproved=outcome.status!=="OK";
+      diagnostics.emit("FINAL_GATE",outcome.status==="OK"?"HANDOFF":"NO_SEND",{tool:"request_handoff"},reason);
     } catch { missingInformationUnproved=true; }
   }
-  const guarded:CommerceTools = { ...composed,diagnostic:(stage,status,reason=null,resultBytes=null)=>diagnostics.emit(stage,status,{requestId:scope.requestId},reason,resultBytes), ...(input.quoteTask?{primitiveToolInvocations:()=>primitiveDispatches}:{}), ...(hints?{mediaCapabilities:()=>hints.get(composed.snapshot()),mediaCapabilityDiagnostics:()=>hints.takeDiagnostics()}:{}), prepare: admit => readTools.prepare(()=>{
-    const context=composed.snapshot();return context.boundSubjects.length<=8&&context.protectedClaims.length<=32&&(context.runtimeProducts?.length??0)<=4&&!!admit?.(context);
-  }), availableTools, invoke: call => missingInformationUnproved
-    ? Promise.resolve({status:"REJECTED",reason:"SHOP_INFORMATION_HANDOFF_UNPROVED"}) : availableTools.includes(call.name) ? (countDispatch([call]),composed.invoke(call))
-    .then(async result=>{diagnostics.emit("RESULT_PROJECTION",result.status,{tool:call.name,args:call.args},null,Buffer.byteLength(JSON.stringify(result)));await handoffRequiredRead([call],[result]);return result;})
-    : Promise.resolve({ status: "REJECTED", reason: "CAPABILITY_UNAVAILABLE" }),
-    ...(input.handoff?{async terminalOutcome(){
-      return await composed.terminalOutcome?.() ?? (missingInformationUnproved
-        ? {disposition:"NO_SEND" as const,reason:"SHOP_INFORMATION_HANDOFF_UNPROVED",text:null,fallbackId:null} : null);
-    }}:{}),
-    async invokeBatch(calls) {
-      if(missingInformationUnproved)return calls.map(()=>({status:"REJECTED",reason:"SHOP_INFORMATION_HANDOFF_UNPROVED"}));
-      diagnostics.emit("ARGUMENT_VALIDATION","STARTED",calls);
-      const allowed = calls.filter(c => availableTools.includes(c.name));countDispatch(allowed);
-      const results = await composed.invokeBatch(allowed);
-      allowed.forEach((call,i)=>diagnostics.emit("RESULT_PROJECTION",results[i]?.status??"UNKNOWN",{tool:call.name,args:call.args},null,results[i]?Buffer.byteLength(JSON.stringify(results[i])):null));
-      await handoffRequiredRead(allowed,results);
-      return calls.map(c => availableTools.includes(c.name) ? results[allowed.indexOf(c)]!
-        : { status: "REJECTED", reason: "CAPABILITY_UNAVAILABLE" });
-    } };
+  const starts=new WeakMap<CommerceToolCall,number|null>();
+  const start=(call:CommerceToolCall)=>starts.set(call,diagnostics.emit("ARGUMENT_VALIDATION","STARTED",{tool:call.name,args:call.args}));
+  const observedResult=(call:CommerceToolCall,result:CommerceToolResult)=>{
+    const selector={tool:call.name,args:call.args},parent=starts.get(call)??null;
+    diagnostics.emit("ARGUMENT_VALIDATION",result.reason==="TOOL_ARGUMENTS_OR_REF"||result.reason==="CAPABILITY_UNAVAILABLE"?"REJECTED":"OK",selector,result.reason??null,null,parent);
+    diagnostics.emit("RESULT_PROJECTION",result.status,selector,result.reason??null,Buffer.byteLength(JSON.stringify(result)),parent);
+    return result;
+  };
+  const guarded:CommerceTools = { ...composed,diagnostic:(stage,status,reason=null,resultBytes=null)=>diagnostics.emit(stage,status,{requestId:scope.requestId},reason,resultBytes),
+    ...(input.quoteTask?{primitiveToolInvocations:()=>primitiveDispatches}:{}),
+    ...(hints?{mediaCapabilities:()=>hints.get(composed.snapshot()),mediaCapabilityDiagnostics:()=>hints.takeDiagnostics()}:{}),
+    prepare:admit=>readTools.prepare(()=>{const context=composed.snapshot();return context.boundSubjects.length<=8&&context.protectedClaims.length<=32&&(context.runtimeProducts?.length??0)<=4&&!!admit?.(context);}),availableTools,
+    async invoke(call){
+      start(call);
+      if(missingInformationUnproved)return observedResult(call,{status:"REJECTED",reason:"SHOP_INFORMATION_HANDOFF_UNPROVED"});
+      if(!availableTools.includes(call.name))return observedResult(call,{status:"REJECTED",reason:"CAPABILITY_UNAVAILABLE"});
+      countDispatch([call]);
+      try{const result=observedResult(call,await composed.invoke(call));await handoffRequiredRead([call],[result]);return result;}
+      catch(error){diagnostics.emit("ARGUMENT_VALIDATION","UNKNOWN",{tool:call.name,args:call.args},"UNKNOWN_INTERNAL",null,starts.get(call)??null);diagnostics.emit("RESULT_PROJECTION","ERROR",{tool:call.name,args:call.args},"UNKNOWN_INTERNAL");throw error;}
+    },
+    ...(input.handoff?{async terminalOutcome(){return await composed.terminalOutcome?.()??(missingInformationUnproved?{disposition:"NO_SEND" as const,reason:"SHOP_INFORMATION_HANDOFF_UNPROVED",text:null,fallbackId:null}:null);}}:{}),
+    async invokeBatch(calls){
+      calls.forEach(start);
+      if(missingInformationUnproved)return calls.map(c=>observedResult(c,{status:"REJECTED",reason:"SHOP_INFORMATION_HANDOFF_UNPROVED"}));
+      const allowed=calls.filter(c=>availableTools.includes(c.name));countDispatch(allowed);
+      let results:CommerceToolResult[];
+      try{results=await composed.invokeBatch(allowed);}catch(error){for(const call of allowed){diagnostics.emit("ARGUMENT_VALIDATION","UNKNOWN",{tool:call.name},"UNKNOWN_INTERNAL",null,starts.get(call)??null);diagnostics.emit("RESULT_PROJECTION","ERROR",{tool:call.name},"UNKNOWN_INTERNAL");}throw error;}
+      const projected=calls.map(c=>observedResult(c,availableTools.includes(c.name)?results[allowed.indexOf(c)]!:{status:"REJECTED",reason:"CAPABILITY_UNAVAILABLE"}));
+      await handoffRequiredRead(allowed,results);return projected;
+    }
+  };
   if(input.quoteTask!==undefined){validateQuoteTask(input.quoteTask);return withExplicitQuoteTask(guarded,scope,input.read.entry?.firstContact??null);}
   return guarded;
 }

@@ -125,6 +125,7 @@ export async function runCommerceTurn(input: {
       try { terminal = await input.tools.completeHandoff(terminal, () => input.tools.readback()); }
       catch { terminal = {disposition:"NO_SEND",reason:"HANDOFF_FINALIZE_UNAVAILABLE",text:null,fallbackId:null}; }
     }
+    input.tools.diagnostic?.("FINAL_GATE",terminal.disposition,terminal.reason);
     const handoff = input.tools.handoffStatus?.();
     terminalHandoffCalls = Math.max(terminalHandoffCalls, handoff?.attempts ?? 0);
     const quoteTaskWork=input.tools.quoteTaskWork?.()??[];

@@ -24,3 +24,22 @@ it("publishes the exact owner tuple view in the verifier snapshot with read-path
  expect(hardPrecheck(forged,"Dạ chị.",commerceNow)).not.toBeNull();
  expect(hardPrecheck(before,"Dạ chị.",new Date(commerceNow.getTime()+120001))).not.toBeNull();
 });
+it("retains both source-bound selections across a second selector and readback",async()=>{
+ const f=fixtureProduct();f.snapshot.offers.DIRECT!.rows.push({...structuredClone(f.snapshot.offers.DIRECT!.rows[0]!),size:"L",parent_variation_id:"SM613-NAVY-L"});
+ const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,candidateEvidence:true,initialProducts:[f.product],
+  catalog:{readProduct:async()=>structuredClone(f),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+ for(const size of["M","L"])expect((await tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT",size}})).status).toBe("OK");
+ const before=tools.snapshot();expect(before.runtimeProducts?.[0]?.selectionEvidence).toHaveLength(2);
+ await tools.invoke({name:"read_product",args:{subjectRef:"SM613",detailsOnly:true}});
+ expect(tools.snapshot().runtimeProducts?.[0]?.selectionEvidence).toEqual(before.runtimeProducts?.[0]?.selectionEvidence);
+ const withDetails=tools.snapshot();await expect(tools.readback()).resolves.toEqual(withDetails);
+});
+it("rejects a fourth selection atomically instead of dropping a prior admitted query",async()=>{
+ const f=fixtureProduct(),row=f.snapshot.offers.DIRECT!.rows[0]!;
+ f.snapshot.offers.DIRECT!.rows=["S","M","L","XL"].map(size=>({...structuredClone(row),size,parent_variation_id:`SM613-${size}`}));
+ const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,candidateEvidence:true,initialProducts:[f.product],
+  catalog:{readProduct:async()=>structuredClone(f),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+ for(const size of["S","M","L"])expect((await tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT",size}})).status).toBe("OK");
+ const before=tools.snapshot();expect((await tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT",size:"XL"}})).status).toBe("REJECTED");
+ expect(tools.snapshot()).toEqual(before);
+});

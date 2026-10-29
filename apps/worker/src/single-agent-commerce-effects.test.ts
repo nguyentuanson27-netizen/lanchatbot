@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { applySalesCycleCommand, computeBankTransferPolicyHash, computeOrderPreviewHash, createSalesCycleRuntimeState, type SalesCycleRuntimeState, type SalesCycleStateRepositoryV1 } from "@lana/chat-runtime";
 import { createCommerceEffectTools } from "./single-agent-commerce-effects.js";
+import {commerceHash} from "./single-agent-commerce-read-only-context.js";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
 import { runCommerceTurn, type OwnerGeneration } from "./single-agent-commerce-read-only.js";
 import { hardPrecheck, makeBinding, terminalFallback } from "./single-agent-semantic-verifier-boundary.js";
@@ -73,6 +74,34 @@ it("binds a validated ambiguous selection to both models and invalidates it when
  expect(s.tools.snapshot().runtimeProducts?.find(p=>p.subjectRef==="SM613")?.selectionEvidence).toEqual([proof]);
  await expect(s.tools.readback()).resolves.toMatchObject({runtimeProducts:expect.arrayContaining([expect.objectContaining({selectionEvidence:[proof]})])});
  f.snapshot.offers.DIRECT!.rows[0]!.stock_quantity=0;
+ await expect(s.tools.readback()).rejects.toThrow("SELECTION_EVIDENCE_CHANGED");
+});
+it("does not accept a different replay envelope merely because its source hash is unchanged",async()=>{
+ const s=await setup(),f=fixtureProduct(),row=f.snapshot.offers.DIRECT!.rows[0]!;
+ f.snapshot.offers.DIRECT!.rows.push({...structuredClone(row),color:"white"});
+ s.select.mockImplementation(async query=>cartSelectionFromSnapshot(f.snapshot,{...query!,selectionMode:"CANDIDATE_TUPLES"},commerceNow) as never);
+ expect((await s.tools.invoke({...s.add,args:{...s.add.args,color:null}})).status).toBe("UNAVAILABLE");
+ const first=s.select.mock.calls.at(-1)![0]!;
+ const changed=cartSelectionFromSnapshot(f.snapshot,{...first,selectionMode:"CANDIDATE_TUPLES"},commerceNow);
+ if(changed.status==="READY"||!changed.selectionEvidence)throw Error("EXPECTED_AMBIGUOUS_PROOF");
+ changed.selectionEvidence.options[0]!.status=changed.selectionEvidence.options[0]!.status==="OUT_OF_STOCK"?"UNKNOWN":"OUT_OF_STOCK";
+ const {contentHash:_old,...body}=changed.selectionEvidence;
+ changed.selectionEvidence.contentHash=commerceHash(body);
+ s.select.mockResolvedValue(changed as never);
+ await expect(s.tools.readback()).rejects.toThrow("SELECTION_EVIDENCE_CHANGED");
+});
+it.each(["quantity","selector","invalid","policy","heartbeat"])("revalidates selection replay %s without renewing the first observation",async mode=>{
+ let now=commerceNow;const s=await setup(()=>now),f=fixtureProduct(),row=f.snapshot.offers.DIRECT!.rows[0]!;
+ f.snapshot.offers.DIRECT!.rows.push({...structuredClone(row),color:"white"});
+ s.select.mockImplementation(async query=>cartSelectionFromSnapshot(f.snapshot,{...query!,selectionMode:"CANDIDATE_TUPLES"},now) as never);
+ expect((await s.tools.invoke({...s.add,args:{...s.add.args,color:null}})).status).toBe("UNAVAILABLE");const before=s.tools.snapshot();
+ const q=s.select.mock.calls.at(-1)![0]!,replay=cartSelectionFromSnapshot(f.snapshot,{...q,selectionMode:"CANDIDATE_TUPLES"},now);
+ if(replay.status==="READY"||!replay.selectionEvidence)throw Error("PROOF_REQUIRED");
+ if(mode==="heartbeat"){now=new Date(commerceNow.getTime()+2000);f.snapshot.synced_at=new Date(commerceNow.getTime()+1000).toISOString();await expect(s.tools.readback()).resolves.toEqual(before);return;}
+ if(mode==="policy")s.readPolicy.mockResolvedValue({...s.policy,policy:{...s.policy.policy,effectiveUntil:new Date(now.getTime()+60000).toISOString()}});
+ else{if(mode==="quantity"){replay.selectionEvidence.quantity=2;for(const o of replay.selectionEvidence.options)o.quantity=2;}
+  if(mode==="selector"){replay.selectionEvidence.size="L";for(const o of replay.selectionEvidence.options)o.size="L";}
+  const {contentHash:_hash,...body}=replay.selectionEvidence;replay.selectionEvidence.contentHash=mode==="invalid"?"0".repeat(64):commerceHash(body);s.select.mockResolvedValue(replay as never);}
  await expect(s.tools.readback()).rejects.toThrow("SELECTION_EVIDENCE_CHANGED");
 });
 describe("code-owned commerce effects and recovery", () => {

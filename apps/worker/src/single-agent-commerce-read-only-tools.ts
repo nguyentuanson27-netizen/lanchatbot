@@ -9,7 +9,7 @@ import { buildRealtimeProductFactsV2 } from "./realtime-product-facts-v2.js";
 import { resolveCatalogDeliveryRegion, verifiedVariantFromSnapshot,candidateCartOptions } from "./realtime-sales-catalog.js";
 import type { CommerceProductGroup } from "./single-agent-commerce-product-groups.js";
 import type {CommerceDiagnostics} from "./single-agent-commerce-diagnostics.js";
-import {selectionEvidenceFromOptions,selectionSourceHash,selectionPresentation} from "./single-agent-commerce-selection-evidence.js";
+import {selectionEvidenceFromOptions,selectionSourceHash,mergeSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
 
 export interface CommerceScope {
   pageId: string; shopId: string; shopAlias: string; conversationId: string; customerHash: string;
@@ -194,7 +194,9 @@ export function createReadOnlyTools(input: {
         input.diagnostics?.emit("RESULT_BOUND","NOT_ADMITTED",{productId:id},"OPTIONAL_PREPARATION_UNAVAILABLE");
       }
     }
-    if(input.prepareCurrentOffers&&products.has(id))products.get(id)!.offerReadCoverage=(offers??[]).slice(0,8).map(offerType=>({offerType,price:"NOT_READ",stock:"NOT_READ"}));
+    const hasFullRead=[...reads.values()].some(a=>a.subjectRef===id);
+    if(hasFullRead)preparationContexts.delete(id);
+    if(input.prepareCurrentOffers&&!hasFullRead&&products.has(id))products.get(id)!.offerReadCoverage=(offers??[]).slice(0,8).map(offerType=>({offerType,price:"NOT_READ",stock:"NOT_READ"}));
   }
   async function prepare(admit?:(context:TrustedContext)=>boolean): Promise<number> {
     if (!scope.permission || !scope.privacyAllowed || scope.conversationOwner !== "BOT") return 0;
@@ -286,7 +288,7 @@ export function createReadOnlyTools(input: {
     const full = raw ? buildRealtimeProductFactsV2({ snapshot: raw, product: p, policy, now }) : null;
     const presentation = p.observedAt && full ? buildProductPresentationEvidenceV1(full, now) : null;
     if (presentation) evidence.presentation = presentation;
-    const tupleEvidence=raw&&input.candidateEvidence&&!args.preparationOnly?retained.flatMap(o=>{
+    const queriedTupleEvidence=raw&&input.candidateEvidence&&!args.preparationOnly?retained.flatMap(o=>{
       if(!o.offer)return [];
       const options=candidateCartOptions(raw,{shopAlias:scope.shopAlias,productId:id,offerType:o.offer,size:query.size,color:query.color,quantity:1,
         lineId:"00000000-0000-4000-8000-000000000001"},now);
@@ -295,7 +297,10 @@ export function createReadOnlyTools(input: {
         sourceHash:selectionSourceHash(raw),observedAt:raw.synced_at,expiresAt:new Date(until).toISOString()},options,now);
       return v?[v]:[];
     }):[];
-    if(tupleEvidence.length){evidence.selectionEvidence=tupleEvidence;for(const e of tupleEvidence)if(evidence.presentation)evidence.presentation=selectionPresentation(evidence.presentation,e);}
+    const prior=products.get(id)?.selectionEvidence;
+    if(prior?.length)evidence.selectionEvidence=structuredClone(prior);
+    try{for(const e of queriedTupleEvidence)Object.assign(evidence,mergeSelectionEvidence(evidence,e,now));}
+    catch{return {status:"REJECTED",reason:"SOURCE_EVIDENCE_CONFLICT"};}
     const charts = Object.values(policy?.bundle?.artifacts.sizeCharts ?? {}).filter(a =>
       a.chart.reference.verificationStatus === "VERIFIED" &&
       (a.scope?.parentProductIds.includes(id) || a.scope?.level === "GLOBAL")).map(a => a.chart);
@@ -342,9 +347,9 @@ export function createReadOnlyTools(input: {
             silhouettes:wholeProduct ? evidence.attributes?.silhouettes ?? [] : []}).blocks.map(b=>b.text).join("\n")}
       } : {}),
       availableOffers,
-      selectionOptions:tupleEvidence[0]?.options??(!input.candidateEvidence&&raw?candidateCartOptions(raw,{shopAlias:scope.shopAlias,productId:id,offerType:selected.offer,
+      selectionOptions:queriedTupleEvidence[0]?.options??(!input.candidateEvidence&&raw?candidateCartOptions(raw,{shopAlias:scope.shopAlias,productId:id,offerType:selected.offer,
         size:query.size,color:query.color,quantity:1,lineId:"00000000-0000-4000-8000-000000000001"},now).slice(0,8):[]),
-      ...(tupleEvidence[0]?{selectionEvidence:tupleEvidence[0]}:{}),
+      ...(queriedTupleEvidence[0]?{selectionEvidence:queriedTupleEvidence[0]}:{}),
       selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",
       sizeAvailability: selected.sizeAvailability,
       sellingOptions: availableOffers === null ? null : options.map(o => ({ offerType: o.offerType, variantId: o.variantId,

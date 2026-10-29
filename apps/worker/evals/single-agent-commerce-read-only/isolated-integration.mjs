@@ -33,6 +33,7 @@ import {statefulPreflight,createStatefulProvider} from './stateful-provider.mjs'
 import {isolatedHandoffRecords,handoffContentHash} from './candidate-handoff.mjs';
 import {publicCapturedAttachments,publicCapturedTextHashes} from './delivery-capture.mjs';
 import {assertDiagnosticFlags,diagnosticPreflight,claimDiagnostic} from '../single-agent-commerce-qualification/diagnostic.mjs';
+import {admitPreparedCommerceContext} from './preparation-admission.mjs';
 import {collectSafety} from '../single-agent-commerce-qualification/collect-safety.mjs';
 import {cartSelectionFromSnapshot} from '../../dist/realtime-sales-catalog.js';
 
@@ -395,7 +396,8 @@ try{
  if(providerRun)providerPorts=phaseC?phaseCTools.createCandidateProvider({preflight:providerFreeze,out:resolve(out)}):await createStatefulProvider({preflight:providerFreeze,out:resolve(out)});
  if(phaseC&&providerFreeze.registration.arm==='C3')await providerPorts.attachReference({baselineRoot:phaseCArg('--phase-c-baseline-root'),
   baselineBuild:JSON.parse(readFileSync(phaseCArg('--phase-c-baseline-build'),'utf8'))});
- async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false,candidateTuples=false}={}){
+ async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false,candidateTuples=false,preparedOffers=false,preorderChoices=false}={}){
+  assert(!live||(!preparedOffers&&!preorderChoices),'SYNTHETIC_PREPARATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||!revalidatedMedia,'SYNTHETIC_REVALIDATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||(dependencyHoldingReply===null&&sizeHoldingReply===null&&!missingDependencyRule),'SYNTHETIC_RULE_FORBIDDEN_IN_PROVIDER_RUN');
   const customerHash=hash(randomUUID()),at=new Date(),row=await runtime.loadOrCreate(pageId,customerHash,'APP',conversationId=>createConversationState({conversationId,routingOwner:'APP',now:at}),at);
@@ -404,7 +406,7 @@ try{
   let sourceVariantChanged=false;
   const product=fixtureProduct('SM613',at);let mediaChanged=false;
   if(candidateTuples){assert(!live);const row=product.snapshot.offers.DIRECT.rows[0];
-   product.snapshot.fulfillment_policy={tinh_trang:'READY_STOCK',can_order_when_zero:false,prep_min_days:1,prep_max_days:2,
+   product.snapshot.fulfillment_policy={tinh_trang:'READY_STOCK',can_order_when_zero:preorderChoices,prep_min_days:1,prep_max_days:2,
     zero_stock_policy:'',zero_stock_prep_min_days:null,zero_stock_prep_max_days:null,eta_valid_until:'',eta_updated_at:''};
    product.snapshot.offers.DIRECT.rows=['M','L'].flatMap(size=>[
     {...structuredClone(row),size,color:'__NO_COLOR__',parent_variation_id:`SM613-UNLABELLED-${size}`,stock_quantity:9,components:[{product_sku:'SM613',size,color:'__NO_COLOR__',quantity:1}]},
@@ -478,7 +480,7 @@ try{
    let owners=0,verifiers=0,faultInjected=false;const toolResponses=[],diagnostics=[];
    const result=await runPersistedCommerceIngress({batch,fence:batch.generation,scope:bound,store:runtime,inbox,history:historyStore,transaction:async fn=>{await beforeCommit();try{const value=await withTransaction(pool,async client=>{const applied=await fn(client);if(rollbackCommitReply&&!faultInjected){faultInjected=true;throw Error('CONTROLLED_ROLLBACK_REPLY_LOST');}return applied;});if(loseCommitReply&&!faultInjected){faultInjected=true;throw Error('CONTROLLED_COMMIT_REPLY_LOST');}return value;}catch(error){report.composedCommitDiagnostic=/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name;save();throw error;}},
     ...(phaseC?{captureBoundaryWitness:true}:{}),observeDiagnostics:event=>diagnostics.push(event),
-    ...(live&&providerPorts.admitPreparedContext?{admitPreparedContext:providerPorts.admitPreparedContext}:{}),
+    ...(preparedOffers?{admitPreparedContext:request=>admitPreparedCommerceContext(JSON.parse(readFileSync(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/manifest.json'),'utf8')),'Synthetic verifier transport.',request)}:live&&providerPorts.admitPreparedContext?{admitPreparedContext:providerPorts.admitPreparedContext}:{}),
     ...(phaseC&&providerPorts.evaluationTurn?{evaluationTurn:providerPorts.evaluationTurn}:{}),
     ...(live&&providerFreeze.m.quoteTask?{quoteTask:providerFreeze.m.quoteTask}:testQuoteTask?{quoteTask:testQuoteTask}:{}),read,facts,policy,resolveTagId:()=> 'synthetic-tag',clock:()=>new Date(),
     ...(live?{handoffReply:{approvedHoldingHashes:providerFreeze.m.handoffReply.approvedHoldingHashes}}:deferredHandoff?{handoffReply:{approvedHoldingHashes:[commerceHash(dependencyHoldingReply)]}}:{}),
@@ -506,6 +508,26 @@ try{
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+ await check('B composed evidence read prepares current facts with one charged work unit and actual accepted Outbox',async()=>{
+  const j=await statefulFixture({preparedOffers:true});
+  const r=await j.turn('Áo này bao nhiêu em?',[request=>{assert.equal(request.toolBudget.callsRemaining,5);assert(request.context.protectedClaims.some(c=>c.type==='PRICE'));return say('Áo giá 499.000đ chị nhé.');}]);
+  assert.equal(r.result.terminal.disposition,'SEND_ELIGIBLE');assert.equal(r.result.normalToolCalls,1);await j.drain();assert.equal(j.capture.length,1);
+  assert(r.diagnostics.some(e=>e.stage==='FINAL_GATE'&&e.status==='SEND_ELIGIBLE'));
+ });
+ await check('B composed evidence read source change after verifier cannot enqueue prepared evidence',async()=>{
+  const j=await statefulFixture({preparedOffers:true});
+  const r=await j.turn('Áo này bao nhiêu em?',[say('Áo giá 499.000đ chị nhé.')],{afterVerify:async()=>j.refreshPosSource('stock-change')});
+  assert.notEqual(r.result.terminal.disposition,'SEND_ELIGIBLE');await j.drain();assert.equal(j.capture.length,0);
+  assert(r.diagnostics.some(e=>e.stage==='CURRENT_READBACK'&&e.status==='ERROR'));
+ });
+ await check('B composed evidence read ambiguous tuple shares owner and verifier evidence without a cart mutation',async()=>{
+  const j=await statefulFixture({candidateTuples:true,preorderChoices:true});
+  const r=await j.turn('Chị lấy áo size L nhé.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'L',color:null}}]),request=>{
+   const proof=request.context.runtimeProducts.find(p=>p.subjectRef==='SM613').selectionEvidence[0];
+   assert(proof.options.some(o=>o.color==='BE'&&o.status==='PRE_ORDER'));assert(proof.options.some(o=>o.color==='__NO_COLOR__'&&o.status==='IN_STOCK'));
+   return say('Chị chọn màu nào ạ?');}]);
+  assert.equal(r.result.terminal.disposition,'SEND_ELIGIBLE');assert.equal((await j.state()).cart,null);await j.drain();assert.equal(j.capture.length,1);
+ });
  await check('B composed selection checkout tuple identity supports M plus L without zero-stock color substitution',async()=>{
   const j=await statefulFixture({candidateTuples:true});
   report.selectionCheckoutTrace=[];

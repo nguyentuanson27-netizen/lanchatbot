@@ -25,3 +25,12 @@ it("diagnostics observer failure cannot change a successful tool outcome",async(
   readProduct:async()=>structuredClone(f),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}},observeDiagnostics:()=>{throw Error("OBSERVER");}});
  expect((await tools.invoke({name:"read_product",args:{subjectRef:f.product.productId,offerType:"DIRECT"}})).status).toBe("OK");
 });
+it("retains a known media absence reason and paired argument result before any later owner call",async()=>{
+ const events:import("./single-agent-commerce-diagnostics.js").CommerceDiagnostic[]=[],f=fixtureProduct();
+ const tools=await createCommerceTools({read:{scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[f.product],catalog:{
+  readProduct:async()=>structuredClone(f),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}},media:{allowedHostSuffixes:["content.pancake.vn"]},observeDiagnostics:e=>events.push(e)});
+ expect(await tools.invoke({name:"select_product_media",args:{subjectRef:f.product.productId,intent:"FEEDBACK"}})).toMatchObject({status:"UNAVAILABLE",reason:"NO_VERIFIED_MATCHING_MEDIA"});
+ const start=events.find(e=>e.stage==="ARGUMENT_VALIDATION"&&e.status==="STARTED")!;
+ expect(events).toContainEqual(expect.objectContaining({stage:"ARGUMENT_VALIDATION",status:"OK",parentOrdinal:start.ordinal,operation:"select_product_media"}));
+ expect(events).toContainEqual(expect.objectContaining({stage:"RESULT_PROJECTION",status:"UNAVAILABLE",reason:"NO_VERIFIED_MATCHING_MEDIA",parentOrdinal:start.ordinal,operation:"select_product_media"}));
+});

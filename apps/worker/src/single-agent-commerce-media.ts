@@ -121,6 +121,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
         stage="IMAGE_FETCH_OR_PREPARE";
         const images:CommerceCatalogImage[]=[];
         for(const asset of assets){
+          validating=false;
           let bytes:Buffer=Buffer.from(await (input.diagnostics?input.diagnostics.run("MEDIA_FETCH",{assetRef:asset.assetRef},()=>downloader.download(asset.url,new AbortController().signal)):downloader.download(asset.url,new AbortController().signal)));
           validating=true;input.diagnostics?.emit("MEDIA_VALIDATE","STARTED",{assetRef:asset.assetRef});
           // Existing registry IMAGE_HASH is reconciliation metadata; the publisher permits CDN re-encoding.
@@ -141,10 +142,10 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
             assertCanonicalGeometry(dimensions,output,COMMERCE_VISION_BOUNDS.maxDimension);
           }
           if(bytes.length>COMMERCE_VISION_BOUNDS.maxBytes)throw new Error("MEDIA_PREPARED_BYTE_BOUND");
+          validating=false;input.diagnostics?.emit("MEDIA_VALIDATE","OK",{assetRef:asset.assetRef});
           images.push({subjectRef:asset.productId,assetRef:asset.assetRef,sha256:createHash("sha256").update(bytes).digest("hex"),
             downloadSha256,registrySha256:asset.sourceContentSha256,mimeType,data:bytes.toString("base64")});
         }
-        validating=false;input.diagnostics?.emit("MEDIA_VALIDATE","OK",{query});
         observations.delete(observationKey);
         viewed.set(key,{query,assets,images});
         return {status:"OK",data:{subjectRef:query.subjectRef,assets:images.map(({data:_data,...metadata})=>metadata),use:"APPEARANCE_ONLY"}};

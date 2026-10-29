@@ -10,12 +10,16 @@ export interface CandidateSelectionEvidence {
 }
 export const selectionEvidenceHash=(v:unknown)=>createHash("sha256").update(canonicalJsonV1(v)).digest("hex");
 export const selectionSourceHash=(v:Record<string,unknown>)=>{const{synced_at:_heartbeat,...content}=v;return selectionEvidenceHash(content);};
+export const selectionQueryKey=(e:Pick<CandidateSelectionEvidence,"productId"|"offerType"|"size"|"color"|"quantity">)=>selectionEvidenceHash({productId:normalizeCatalogToken(e.productId),offerType:normalizeCatalogToken(e.offerType),size:e.size===null?null:normalizeCatalogToken(e.size),color:e.color===null?null:normalizeCatalogToken(e.color),quantity:e.quantity});
+export const selectionMeaningHash=(e:CandidateSelectionEvidence)=>selectionEvidenceHash({...e,queryKey:selectionQueryKey(e),size:null,color:null,
+ observedAt:null,expiresAt:null,contentHash:null,options:e.options.map(o=>({...o,observedAt:null,expiresAt:null}))});
 const object=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==="object"&&!Array.isArray(v);
 const str=(v:unknown,max=128):v is string=>typeof v==="string"&&v.trim().length>0&&Buffer.byteLength(v)<=max;
 const sha=(v:unknown)=>typeof v==="string"&&/^[a-f0-9]{64}$/.test(v);
 const nullable=(v:unknown,max:number)=>v===null||str(v,max);
 /** Validates a code-produced observation's complete envelope; hashes provide integrity, not independent source authority. */
 export function validSelectionEvidence(v:unknown,productId:string,now:Date):v is CandidateSelectionEvidence {
+ if(!Number.isFinite(now.getTime()))return false;
  if(!object(v)||Object.keys(v).sort().join(',')!=="color,colorSemantics,completeness,contentHash,expiresAt,kind,observedAt,offerType,options,productId,quantity,size,sourceHash,sourceVersion"||
   v.kind!=="CANDIDATE_SELECTION_V1"||v.productId!==productId||!str(v.productId)||!str(v.offerType,64)||!str(v.sourceVersion)||!sha(v.sourceHash)||!sha(v.contentHash)||
   !nullable(v.size,32)||!nullable(v.color,64)||!Number.isSafeInteger(v.quantity)||(v.quantity as number)<1||(v.quantity as number)>20||
@@ -43,4 +47,16 @@ export function selectionPresentation(p:ProductPresentationEvidenceV1,e:Candidat
  const sources={identity:p.provenance.identity,content:p.provenance.content,inventory:p.provenance.inventory};
  const value={productId:p.productId,displayName:p.displayName,variants};
  return {...p,...value,provenance:{...p.provenance,contentHash:hashProductPresentationEvidenceV1({value,sources})}};
+}
+export function mergeSelectionEvidence<T extends {subjectRef:string;selectionEvidence?:CandidateSelectionEvidence[];presentation?:ProductPresentationEvidenceV1}>(p:T,e:CandidateSelectionEvidence,now:Date):T {
+ if(!validSelectionEvidence(e,p.subjectRef,now))throw Error("SELECTION_EVIDENCE_STALE");
+ const values=[...(p.selectionEvidence??[])],key=selectionQueryKey(e),index=values.findIndex(old=>selectionQueryKey(old)===key);
+ if(values.some(old=>!validSelectionEvidence(old,p.subjectRef,now)||old.sourceHash!==e.sourceHash))throw Error("SOURCE_EVIDENCE_CONFLICT");
+ if(index>=0){if(selectionMeaningHash(values[index]!)!==selectionMeaningHash(e))throw Error("SOURCE_EVIDENCE_CONFLICT");
+  if(Date.parse(e.expiresAt)<Date.parse(values[index]!.expiresAt))values[index]=e;
+ }else values.push(e);
+ if(values.length>3)throw Error("PRODUCT_EVIDENCE_BOUND");
+ let presentation=p.presentation;for(const value of values)if(presentation)presentation=selectionPresentation(presentation,value);
+ const next={...p,selectionEvidence:values,...(presentation?{presentation}:{})};
+ if(Buffer.byteLength(canonicalJsonV1(next))>8192)throw Error("PRODUCT_EVIDENCE_BOUND");return next;
 }

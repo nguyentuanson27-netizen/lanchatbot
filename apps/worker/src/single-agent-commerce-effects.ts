@@ -10,7 +10,7 @@ import type { CommerceTools } from "./single-agent-commerce-read-only.js";
 import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-catalog.js";
 import type { TerminalOutcome, TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import { formatCartLineSelection, selectionsMatchCartLines } from "./realtime-sales-cycle.js";
-import {validSelectionEvidence,selectionEvidenceFromOptions,selectionPresentation,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
+import {validSelectionEvidence,selectionEvidenceFromOptions,mergeSelectionEvidence,selectionMeaningHash,selectionQueryKey,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
 
 const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase", "record_negotiation"]);
 export type CommerceCommandResult =
@@ -119,9 +119,9 @@ export async function createCommerceEffectTools(input: {
         const products=new Map((base.runtimeProducts??[]).map(p=>[p.subjectRef,structuredClone(p)]));
         for(const {evidence}of selectionObservations.values()){
           const p=products.get(evidence.productId)??{ref:`product:${evidence.productId}`,subjectRef:evidence.productId};
-          const values=(p.selectionEvidence??[]).filter(e=>!(e.offerType===evidence.offerType&&e.size===evidence.size&&e.color===evidence.color&&e.quantity===evidence.quantity));
-          p.selectionEvidence=[...values,evidence];if(p.selectionEvidence.length>3||products.size>4)throw Error("PRODUCT_EVIDENCE_BOUND");
-          if(p.presentation)p.presentation=selectionPresentation(p.presentation,evidence);products.set(p.subjectRef,p);
+          const next=mergeSelectionEvidence(p,evidence,input.clock());
+          if(!products.has(p.subjectRef)&&products.size>=4)throw Error("PRODUCT_EVIDENCE_BOUND");
+          products.set(p.subjectRef,next);
         }return [...products.values()];
       })(), claims: [...base.protectedClaims.filter(c => {
         const claim = c as { type: string; scope: { kind: string; productId?: string; variantId?: string } };
@@ -154,10 +154,14 @@ export async function createCommerceEffectTools(input: {
       const clipped=selectionEvidenceFromOptions({productId:e.productId,offerType:e.offerType,size:e.size,color:e.color,quantity:e.quantity,sourceVersion:e.sourceVersion,
         sourceHash:e.sourceHash,observedAt:e.observedAt,expiresAt},e.options,now);
       if(!clipped)throw Error("SELECTION_EVIDENCE_STALE");
-      const key=commerceHash(query),previous=selectionObservations.get(key);
-      if(previous&&commerceHash(previous.evidence)!==commerceHash(clipped))throw Error("SOURCE_EVIDENCE_CONFLICT");
-      selectionObservations.set(key,{query,evidence:clipped});
-      return {...result,selectionOptions:clipped.options,selectionEvidence:clipped,selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",selectionStatus:result.status};
+      const key=selectionQueryKey(clipped),previous=selectionObservations.get(key);
+      if(previous&&(selectionMeaningHash(previous.evidence)!==selectionMeaningHash(clipped)||Date.parse(clipped.observedAt)<Date.parse(previous.evidence.observedAt)))throw Error("SOURCE_EVIDENCE_CONFLICT");
+      const bound=previous&&Date.parse(previous.evidence.expiresAt)<=Date.parse(clipped.expiresAt)?previous.evidence:clipped;
+      const proposed=input.base.snapshot().runtimeProducts?.find(p=>p.subjectRef===productId)??{ref:`product:${productId}`,subjectRef:productId};
+      let checked=proposed;for(const old of selectionObservations.values())if(old.evidence.productId===productId)checked=mergeSelectionEvidence(checked,old.evidence,now);
+      mergeSelectionEvidence(checked,bound,now);
+      selectionObservations.set(key,{query:previous?.query??query,evidence:bound});
+      return {...result,selectionOptions:bound.options,selectionEvidence:bound,selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",selectionStatus:result.status};
     }
     if (result.status !== "READY") return { status: result.status, reasonCode: result.reasonCode,
       selectionOptions:(result.selectionOptions??[]).slice(0,8),selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",selectionStatus:result.status };
@@ -366,8 +370,11 @@ export async function createCommerceEffectTools(input: {
   }, async readback() { await input.base.readback(); current = await read(); await refreshAuthority(); if (policy) policy = await input.policy();
     for(const {query,evidence}of [...selectionObservations.values()]){
       const replay=await input.select(query);
-      if(replay.status==="READY"||!replay.selectionEvidence||replay.selectionEvidence.sourceHash!==evidence.sourceHash||
-        !validSelectionEvidence(evidence,evidence.productId,input.clock()))throw Error("SELECTION_EVIDENCE_CHANGED");
+      const next=replay.status!=="READY"?replay.selectionEvidence:undefined;
+      if(!next||!validSelectionEvidence(next,evidence.productId,input.clock())||!validSelectionEvidence(evidence,evidence.productId,input.clock())||
+        Date.parse(next.observedAt)<Date.parse(evidence.observedAt)||Date.parse(next.expiresAt)<Date.parse(evidence.expiresAt)||
+        selectionMeaningHash(next)!==selectionMeaningHash(evidence)||
+        (policy?.policy.effectiveUntil&&Date.parse(policy.policy.effectiveUntil)<Date.parse(evidence.expiresAt)))throw Error("SELECTION_EVIDENCE_CHANGED");
     }
     await refreshSelections();
     return snapshot(); },
