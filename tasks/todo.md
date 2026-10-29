@@ -2,6 +2,7 @@
 
 - [x] Owner yêu cầu chạy model: code diagnostic→same independent review→fix→APPROVE6c5023ab; input/source/actualinitial03/preflight reviewed riêng trước dispatch. [Report +all conversations](../apps/worker/evals/single-agent-commerce-qualification/diagnostic-20261029/REPORT.md).
 - [x] Một batch6/6cases,9native turns+1probe,N1;20generationHTTP(15owner/5verifier),0retry/error,1OAuth riêng; sourceclean/DBdrop/live0. Independent audit20request hashes/9raw/0label leaks. Native3eligible/2code-owned/2handoff/2NO_SEND, probePASS chỉ verifier-only.
+- [x] Append17diagnosticartifacts và rebuild inventory6426/missing0,2378needmapping/PENDING; không approve fresh corpus từ exact hashes.
 - [ ] STOP diagnostic/replan residuals: read/selection availability hintBE lệchstock0 làm j1vẫnFAIL; j6lời trả khi nhận chưapersistCOD; s06dài. Không tựfix/rerun. Fresh qualification inventory/mappings/holdout vẫnPENDING; Phase C BLOCKED/C3NOT_RUN, primarygradesunchanged.
 
 ## Previous — Phase C remediation implementation,29/10/2026
