@@ -1,11 +1,12 @@
-## Next — Phase C remediation plan,29/10/2026
+## Current — Phase C remediation implementation,29/10/2026
 
-- [x] Sửa kế hoạch→cùng independent reviewer→sửa thêm cap semantics→APPROVE PLAN revision2 tạiabe8c798. [Review/closures](../docs/specs/c3-phase-c-remediation-independent-review-20261029.md). Approval chỉ cho kế hoạch; S4 implementation review vẫn chưa thực hiện.
+- [x] Sửa kế hoạch→cùng independent reviewer→sửa thêm cap semantics→APPROVE PLAN revision2 tạiabe8c798. [Plan review](../docs/specs/c3-phase-c-remediation-independent-review-20261029.md).
 - [x] Đối chiếu campaign03/raw findings với consumer/resolver, packet/capture/history và native wire; [kế hoạch sửa chi tiết, đã self-review](../docs/specs/c3-phase-c-remediation-plan-20261029.md).
-- [ ] S0 audit đủ22ca, phân loại từng handoff bằng nguồn/tool/gate thực; không đổi primary grades.
-- [ ] S1 policy current-pointer/pin contract +selection/color; S2 evaluator source completeness/code-owned registration/privacy-safe history; S3 bounded input/argument diagnostics và operational measurements.
-- [ ] S4 independent exact-source review→fix→approve; S5 chỉ seal/run mới sau readiness. Cases cũ là development; fresh holdout giữ24SAFETY/16SINGLE/6JOURNEY, N1; không tự tăng benchmark hoặc retry.
-- [ ] Chưa implementation/provider run theo kế hoạch này. Qualification03 vẫnBLOCKED, C3NOT_RUN; không merge/deploy/live send.
+- [x] S0 audit đủ22ca bằng raw/source/tool/terminal; không đổi primary grades. [Diagnosis](../apps/worker/evals/single-agent-commerce-qualification/remediation-20261029/DIAGNOSIS.md).
+- [x] S1 active-policy/durable-pin +selection/color; S2 source completeness/code-owned capture/public intake; S3 image/text bounds, numeric diagnostics và actual latency. Không viết lại prompt giọng.
+- [x] S4 build→independent review→fix→review:4findings evidence/seal đóng; code APPROVE430ee4fa. Final750NodePASS/2existingSKIP,346workerPASS,21protected/assemblyPASS; typecheck/build/lintPASS; realPG68checks/7invariantsPASS,DBdrop,provider0. [Implementation/review/evidence](../apps/worker/evals/single-agent-commerce-qualification/remediation-20261029/IMPLEMENTATION.md).
+- [ ] S5 diagnostic/campaignNOT_RUN: inventory1125artifacts cần mapping/review, full history/near-duplicate approval và fresh source-bound holdout trước seal. Diagnostic giữ6cases/max37generation; qualification24SAFETY/16SINGLE/6JOURNEY,N1. Không tự retry/tăng benchmark.
+- [ ] Qualification03 vẫnBLOCKED, C3NOT_RUN; B_NOT_GO/AOWNER_BYPASS unchanged. Không merge/deploy/live send; model behavior sau sửa chưa verified.
 
 ## Current — Phase C actual execution,29/10/2026
 

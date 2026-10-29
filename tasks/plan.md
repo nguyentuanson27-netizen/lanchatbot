@@ -1,11 +1,11 @@
-## Next — Phase C remediation plan,29/10/2026
+## Current — Phase C remediation implementation,29/10/2026
 
-- [x] Sửa kế hoạch→cùng independent reviewer→sửa thêm cap semantics→APPROVE PLAN revision2 tạiabe8c798. [Review/closures](../docs/specs/c3-phase-c-remediation-independent-review-20261029.md). Approval chỉ cho kế hoạch; S4 implementation review vẫn chưa thực hiện.
+- [x] Kế hoạch revision2 APPROVEabe8c798; implementation S0–S3 hoàn thành tại430ee4fa sau review→fix→review. [Evidence/review](../apps/worker/evals/single-agent-commerce-qualification/remediation-20261029/IMPLEMENTATION.md).
 - [x] Đối chiếu campaign03/raw findings với consumer/resolver, packet/capture/history và native wire; [kế hoạch sửa chi tiết, đã self-review](../docs/specs/c3-phase-c-remediation-plan-20261029.md).
-- [ ] S0 audit đủ22ca, phân loại từng handoff bằng nguồn/tool/gate thực; không đổi primary grades.
-- [ ] S1 policy current-pointer/pin contract +selection/color; S2 evaluator source completeness/code-owned registration/privacy-safe history; S3 bounded input/argument diagnostics và operational measurements.
-- [ ] S4 independent exact-source review→fix→approve; S5 chỉ seal/run mới sau readiness. Cases cũ là development; fresh holdout giữ24SAFETY/16SINGLE/6JOURNEY, N1; không tự tăng benchmark hoặc retry.
-- [ ] Chưa implementation/provider run theo kế hoạch này. Qualification03 vẫnBLOCKED, C3NOT_RUN; không merge/deploy/live send.
+- [x] S0 audit22raw; S1 active vs transaction policy/color; S2 evaluator coverage/code-owned capture/public intake; S3 bounded request/diagnostics. Không đổi primary grades/prompt giọng hay production entrypoints.
+- [x] S4 code APPROVE430ee4fa,4reviewfindings closed. Final750NodePASS/2existingSKIP,346workerPASS,21protected/assemblyPASS; typecheck/build/lintPASS; actual PostgreSQL68checks/7invariantsPASS,DBdrop,0provider.
+- [ ] S5 chỉ seal/run sau approved inventory/mappings/full history+near-duplicate review và fresh source-bound holdout; cases cũ là development. Diagnostic6cases/max37generation; qualification24SAFETY/16SINGLE/6JOURNEY,N1. Không retry/benchmark growth.
+- [ ] Provider diagnostic/campaignNOT_RUN; Phase C vẫnBLOCKED, C3NOT_RUN, B_NOT_GO/AOWNER_BYPASS unchanged; no merge/deploy/live send.
 
 ## Current — Phase C actual execution,29/10/2026
 

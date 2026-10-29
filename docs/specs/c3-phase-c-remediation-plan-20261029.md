@@ -1,6 +1,6 @@
 # Phase C — kế hoạch sửa sau campaign 29/10/2026
 
-Trạng thái revision2: **PLAN APPROVED độc lập tại `abe8c798512605fd8ad636f9e0acfa65fd7c7c20`; chưa implementation/chạy model theo kế hoạch này**. Owner yêu cầu sửa kế hoạch → review độc lập → sửa đến approve. Không sửa kết quả campaign cũ, không gọi model trong bước lập kế hoạch. [Review và lịch sử xử lý](c3-phase-c-remediation-independent-review-20261029.md). Approval chỉ áp dụng kế hoạch, không thay implementation/readiness/qualification; Phase C vẫn BLOCKED.
+Trạng thái revision2: **đã implementation S0–S3; code APPROVE độc lập tại `430ee4fa0b42c0003267f7dd4e681d3da3418f06`**, sau build→review→fix→review. Final checks:750NodePASS/2existingSKIP,346workerPASS,21protected/assemblyPASS; typecheck/build/lintPASS; actual PostgreSQL68/68checks và7/7invariantsPASS,DBdrop. [Implementation/evidence](../../apps/worker/evals/single-agent-commerce-qualification/remediation-20261029/IMPLEMENTATION.md), [implementation review](../../apps/worker/evals/single-agent-commerce-qualification/remediation-20261029/REVIEW.md). S5 diagnostic/campaign NOT_RUN; fresh inventory/mapping/holdout approval và source còn hạn vẫn cần trước seal. Phase C vẫn BLOCKED, không đổi primary grades hoặc C3 comparison. [Plan approval/history](c3-phase-c-remediation-independent-review-20261029.md) tạiabe8c798 giữ nguyên lịch sử.
 
 Planning base: `f5622d485624dfc95e6e15190a5e31a082398807`; campaign được phân tích chạy tại `36e45015c381ebe91a2591a288b112e3dd8caa0e`. [Báo cáo](../../apps/worker/evals/single-agent-commerce-qualification/run-20261029/REPORT.md), [22 hội thoại /34 lượt](../../apps/worker/evals/single-agent-commerce-qualification/run-20261029/CONVERSATIONS.md), [kế hoạch qualification gốc](c3-phase-c-qualification-plan-20261028.md). Baseline C3 vẫn main `296cdcfbf5759f5bf9cbb24acf3dc63005589361`, không đổi theo implementation HEAD mới.
 
@@ -116,7 +116,7 @@ Test bounds dưới/bằng/trên ngưỡng với multi-part tool results, Vietna
 | S4 independent review | Cùng reviewer có đủ spec/run findings/diff/tests | REQUEST_CHANGES→fix→review đến APPROVE exact source; approval code khác qualification |
 | S5 campaign | Source/inputs/review mới, clean commit seal | Preflight PASS, corpus fresh/reviewed, denominator freeze trước provider |
 
-Các commands dưới đây **dự kiến**, chưa được chạy cho bản sửa này:
+Các commands dưới đây là bộ verification của kế hoạch. Kết quả/commands thực sự chạy cho source430ee4fa, kể cả các run FAIL trước đó, được ghi riêng trong [VERIFICATION.json](../../apps/worker/evals/single-agent-commerce-qualification/remediation-20261029/VERIFICATION.json):
 
 ```powershell
 pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-read-only-context.test.ts src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-public-history.test.ts src/single-agent-semantic-verifier-boundary.test.ts
