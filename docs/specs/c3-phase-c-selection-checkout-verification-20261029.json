@@ -504,7 +504,9 @@
     "e46IndependentTests": 181,
     "finalCodeDisposition": "APPROVE",
     "finalIndependentTests": 100,
-    "finalVerification": "PENDING_REVIEW_OF_RECORD"
+    "finalVerification": "APPROVE",
+    "finalVerificationReportSha": "ad6e8dd62d05e9c21fed7ab0c867d0fa287bc141",
+    "independentlyVerifiedArtifactHashes": 54
   },
   "modelGenerationRequests": 0,
   "modelDiagnostic": "NOT_RUN",
