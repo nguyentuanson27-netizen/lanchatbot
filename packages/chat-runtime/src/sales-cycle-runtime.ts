@@ -521,11 +521,15 @@ function applySalesCycleCommandUnchecked(input: ApplySalesCycleCommandInput): Sa
       stage: "CART_OPEN",
       checkoutDraft: transition.draft,
       preview: null,
+      ...(state.clarification?.reasonCode==="CHECKOUT_DETAILS_MISSING"&&state.clarification.missingFields.length===1&&
+        state.clarification.missingFields[0]==="PAYMENT_METHOD"&&command.details.paymentMethod?{clarification:null}:{}),
     });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
 
   if (command.kind === "CLARIFICATION_REQUESTED") {
+    if(state.clarification?.missingFields.length===1&&state.clarification.missingFields[0]==="PAYMENT_METHOD"&&
+      (command.reasonCode!=="CHECKOUT_DETAILS_MISSING"||command.missingFields.length!==1||command.missingFields[0]!=="PAYMENT_METHOD"))return {status:"REJECTED",state,reasonCode:"PAYMENT_CHOICE_UNRESOLVED"};
     if (state.stage !== "CART_OPEN" && state.stage !== "ORDER_PREVIEW") {
       return { status: "REJECTED", state, reasonCode: "SALES_STAGE_TRANSITION_INVALID" };
     }
@@ -551,6 +555,7 @@ function applySalesCycleCommandUnchecked(input: ApplySalesCycleCommandInput): Sa
   }
 
   if (command.kind === "CLARIFICATION_RESOLVED") {
+    if(state.clarification?.missingFields.length===1&&state.clarification.missingFields[0]==="PAYMENT_METHOD")return {status:"REJECTED",state,reasonCode:"PAYMENT_CHOICE_UNRESOLVED"};
     const transition = applySalesClarificationTransitionV1({
       current: state.clarification,
       transition: { kind: "RESOLVED" },
@@ -629,6 +634,7 @@ function applySalesCycleCommandUnchecked(input: ApplySalesCycleCommandInput): Sa
   }
 
   if (command.kind === "PREVIEW_CREATED") {
+    if(state.clarification?.missingFields.length===1&&state.clarification.missingFields[0]==="PAYMENT_METHOD")return {status:"REJECTED",state,reasonCode:"PAYMENT_CHOICE_UNRESOLVED"};
     const transition = validateOrderPreviewTransitionV1({
       stage: state.stage,
       cart: state.cart?.value ?? null,
@@ -663,6 +669,7 @@ function applySalesCycleCommandUnchecked(input: ApplySalesCycleCommandInput): Sa
     return { status: "HANDOFF", state: next, reasonCode: "PAYMENT_RECEIPT_REVIEW_REQUIRED", silent: true, desiredPancakeTag: "NHAN_VIEN", handoffDecision: checkoutHandoff("PAYMENT_RECEIPT_REVIEW_REQUIRED", command.commandId, now) };
   }
 
+  if(state.clarification?.missingFields.length===1&&state.clarification.missingFields[0]==="PAYMENT_METHOD")return {status:"REJECTED",state,reasonCode:"PAYMENT_CHOICE_UNRESOLVED"};
   const intent = SalesIntentV1Schema.safeParse(command.intent);
   if (!intent.success || intent.data.intent !== "PURCHASE_CONFIRMATION") {
     return { status: "REJECTED", state, reasonCode: "NOT_A_PURCHASE_CONFIRMATION" };

@@ -1234,6 +1234,7 @@ function validateLockedProtectedSalesArtifactsV1(
       }
       checkoutDraft = transition.draft;
       preview = null;
+      if(clarification?.reasonCode==="CHECKOUT_DETAILS_MISSING"&&clarification.missingFields.length===1&&clarification.missingFields[0]==="PAYMENT_METHOD"&&evidence.details.paymentMethod)clarification=null;
       break;
     }
     case "CART_OPENED":
@@ -1270,6 +1271,8 @@ function validateLockedProtectedSalesArtifactsV1(
         transition: evidence.transition,
         appliedAt: event.occurredAt,
       });
+      if(clarification?.reasonCode==="CHECKOUT_DETAILS_MISSING"&&clarification.missingFields.length===1&&clarification.missingFields[0]==="PAYMENT_METHOD"&&
+        (evidence.transition.kind==="RESOLVED"||evidence.transition.reasonCode!=="CHECKOUT_DETAILS_MISSING"||evidence.transition.missingFields.length!==1||evidence.transition.missingFields[0]!=="PAYMENT_METHOD"))throw new Error("PAYMENT_CHOICE_UNRESOLVED");
       if (transition.status !== "APPLIED" ||
         evidence.afterClarificationHash !== sha256TextV1(
           canonicalClarificationStateHashPreimageV1(transition.clarification),
@@ -1286,6 +1289,7 @@ function validateLockedProtectedSalesArtifactsV1(
       preview = null;
       break;
     case "PREVIEW_CREATED": {
+      if(clarification?.missingFields.length===1&&clarification.missingFields[0]==="PAYMENT_METHOD")throw new Error("PAYMENT_CHOICE_UNRESOLVED");
       if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
       if (finalCart === null) throw new Error("PREVIEW_TRANSITION_CART_REQUIRED");
       const candidate = OrderPreviewV1Schema.parse(event.previewArtifact);
@@ -1305,6 +1309,7 @@ function validateLockedProtectedSalesArtifactsV1(
       break;
     }
     case "CONFIRM_PURCHASE": {
+      if(clarification?.missingFields.length===1&&clarification.missingFields[0]==="PAYMENT_METHOD")throw new Error("PAYMENT_CHOICE_UNRESOLVED");
       if (event.outcome === "HANDOFF") {
         preview = null;
         break;

@@ -6,7 +6,7 @@ import { buildVerifiedFactBlocks, buildProtectedClaimsFromVerifiedFactsV1, build
 import { buildReadOnlyContext, commerceHash, commerceUuid, publicPolicyLiteral } from "./single-agent-commerce-read-only-context.js";
 import { MAX_RUNTIME_PRODUCTS, type RuntimeProductEvidence, type TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import { buildRealtimeProductFactsV2 } from "./realtime-product-facts-v2.js";
-import { resolveCatalogDeliveryRegion, verifiedVariantFromSnapshot } from "./realtime-sales-catalog.js";
+import { resolveCatalogDeliveryRegion, verifiedVariantFromSnapshot,candidateCartOptions } from "./realtime-sales-catalog.js";
 import type { CommerceProductGroup } from "./single-agent-commerce-product-groups.js";
 
 export interface CommerceScope {
@@ -303,6 +303,9 @@ export function createReadOnlyTools(input: {
             silhouettes:wholeProduct ? evidence.attributes?.silhouettes ?? [] : []}).blocks.map(b=>b.text).join("\n")}
       } : {}),
       availableOffers,
+      selectionOptions:raw?candidateCartOptions(raw,{shopAlias:scope.shopAlias,productId:id,offerType:selected.offer,
+        size:query.size,color:query.color,quantity:1,lineId:"00000000-0000-4000-8000-000000000001"},now).slice(0,8):[],
+      selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",
       sizeAvailability: selected.sizeAvailability,
       sellingOptions: availableOffers === null ? null : options.map(o => ({ offerType: o.offerType, variantId: o.variantId,
         sourceVersion: raw!.release_id, observedAt: raw!.synced_at,

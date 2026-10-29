@@ -66,7 +66,7 @@ export function bindCommerceFacts(reader: BusinessFactsReader, scope: { shopAlia
     ...(reader.readCatalogSnapshot ? { readCatalogSnapshot: reader.readCatalogSnapshot.bind(reader) } : {}),
     async resolveCartSelection(query, now) {
       if (normalizeCatalogToken(query.shopAlias) !== alias || !reader.resolveCartSelection) return invalid();
-      const selected = await reader.resolveCartSelection(query, now); if (selected.status !== "READY") return selected;
+      const selected = await reader.resolveCartSelection({...query,selectionMode:"CANDIDATE_TUPLES"}, now); if (selected.status !== "READY") return selected;
       const authority = selected.line.priceAuthority;
       if (!authority || authority.shopId !== selected.shopId) return invalid();
       if (selected.shopId === shopId) return selected;

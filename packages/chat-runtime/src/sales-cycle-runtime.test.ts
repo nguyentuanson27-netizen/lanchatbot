@@ -188,6 +188,21 @@ function addPreview(state: SalesCycleRuntimeState, payment: "COD" | "BANK_TRANSF
 const confirmationIntent = { source: "MODEL_STRUCTURED_OUTPUT" as const, intent: "PURCHASE_CONFIRMATION" as const, sourceMessageId: "mid-ok-1" };
 
 describe("Phase 3 sales-cycle runtime", () => {
+ it("payment clarification blocks direct preview/confirm and cannot be resolved by other intake fields",()=>{
+  let state=addPreview(addCart());
+  const run=(command:Parameters<typeof applySalesCycleCommand>[0]["command"])=>applySalesCycleCommand({state,expectedRevision:state.revision,command,now,trustedPorts:trustedPorts()});
+  const pending=run({kind:"CLARIFICATION_REQUESTED",commandId:"payment-unclear",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["PAYMENT_METHOD"],productId:null,questionFingerprint:"a".repeat(64),maxAttempts:3});
+  expect(pending.status).toBe("APPLIED");state=pending.state;
+  expect(run({kind:"PREVIEW_CREATED",commandId:"preview-stale-method",preview:preview()}).status).toBe("REJECTED");
+  expect(run({kind:"CLARIFICATION_RESOLVED",commandId:"fake-resolve"}).status).toBe("REJECTED");
+  expect(run({kind:"CLARIFICATION_REQUESTED",commandId:"fake-replace",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["FULL_NAME"],productId:null,questionFingerprint:"b".repeat(64),maxAttempts:3}).status).toBe("REJECTED");
+  expect(run({kind:"CLARIFICATION_REQUESTED",commandId:"fake-widen",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["FULL_NAME","PAYMENT_METHOD"],productId:null,questionFingerprint:"b".repeat(64),maxAttempts:3}).status).toBe("REJECTED");
+  state=run({kind:"CHECKOUT_DETAILS_CAPTURED",commandId:"other-field",details:{fullName:"Other Name"}}).state;
+  expect(state.clarification?.missingFields).toEqual(["PAYMENT_METHOD"]);
+  expect(run({kind:"CONFIRM_PURCHASE",commandId:"confirm-stale-method",intent:{source:"DETERMINISTIC_CLASSIFIER",intent:"PURCHASE_CONFIRMATION",sourceMessageId:"new-source"}})).toMatchObject({status:"REJECTED",reasonCode:"PAYMENT_CHOICE_UNRESOLVED"});
+  state=run({kind:"CHECKOUT_DETAILS_CAPTURED",commandId:"payment-chosen",details:{paymentMethod:"COD"}}).state;
+  expect(state.clarification).toBeNull();
+ });
   it("rejects caller-supplied commerce data when trusted resolvers are absent or content is tampered", () => {
     let state = createSalesCycleRuntimeState("conversation-hash", routing, now);
     for (const [kind, commandId] of [["FACTS_PRESENTED", "facts"], ["MEASUREMENTS_REQUIRED", "measure"], ["SIZE_RECOMMENDED", "size"]] as const) {

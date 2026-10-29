@@ -187,7 +187,7 @@ describe("code-owned commerce effects and recovery", () => {
     source.offers.SET_VAY!.rows = source.offers.SET_VAY!.rows.map(row => ({ ...row, color: "black" }));
     s.select.mockImplementation(async q => fixtureSelection(source, q!) as never);
     const rejected = await s.tools.invoke({ ...s.add, args: { ...s.add.args, offerType: "SET_VAY" } });
-    expect(rejected).toMatchObject({ status: "UNAVAILABLE", data: { reasonCode: "CART_COLOR_NOT_FOUND", availableColors: ["BLACK"] } });
+    expect(rejected).toMatchObject({ status: "UNAVAILABLE", data: { reasonCode: "CART_COLOR_NOT_FOUND", selectionOptions: [] } });
     expect(s.commits).toHaveLength(0);
     expect((await s.tools.invoke({ ...s.add, args: { ...s.add.args, offerType: "AO" } })).status).toBe("OK");
     expect(s.current().cart!.value.lines[0]!.offerId).toBe("AO");
@@ -320,7 +320,7 @@ describe("code-owned commerce effects and recovery", () => {
     const s = await setup();
     const failure = { status, reasonCode: "CART_VARIANT_AMBIGUOUS", availableSizes: ["L"], availableColors: ["BE"] };
     s.select.mockResolvedValue({ ...failure, evaluator: "PRIVATE_EVALUATOR_LABEL" } as never);
-    expect(await s.tools.invoke(s.add)).toEqual({ status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE", data: failure });
+    expect(await s.tools.invoke(s.add)).toEqual({ status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE", data: {status:failure.status,reasonCode:failure.reasonCode,selectionStatus:failure.status,selectionOptions:[],selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY"} });
     expect(s.commits).toHaveLength(0); expect(s.current().cart).toBeNull();
     expect(s.tools.snapshot().effectReceipts).toHaveLength(0);
     expect(s.tools.snapshot().protectedClaims).not.toEqual(expect.arrayContaining([expect.objectContaining({ type: "SIZE_FIT" })]));
@@ -331,7 +331,7 @@ describe("code-owned commerce effects and recovery", () => {
     const failure = { status: "VARIANT_UNAVAILABLE", reasonCode: "CART_SIZE_NOT_FOUND", availableSizes: ["M"], availableColors: ["NAVY"] };
     s.select.mockResolvedValue(failure as never);
     expect(await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: line.lineId, action: "SET_COMPONENT_VARIANT", componentRole: line.components[0]!.componentRole, size: "L" } }))
-      .toEqual({ status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE", data: failure });
+      .toEqual({ status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE", data: {status:failure.status,reasonCode:failure.reasonCode,selectionStatus:failure.status,selectionOptions:[],selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY"} });
     expect(s.current()).toEqual(before); expect(s.commits).toHaveLength(1);
     expect(s.tools.snapshot().effectReceipts.some(r => r.effect === "CART_MUTATED")).toBe(false);
   });

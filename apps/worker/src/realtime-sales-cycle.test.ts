@@ -32,6 +32,25 @@ import {
 const now = new Date("2026-07-23T03:00:00.000Z");
 
 describe("customer-visible cart choices", () => {
+ it("retains unresolved payment across private fields and only fresh payment capture restores preview readiness",async()=>{
+  const opened=await evaluateRealtimeSalesCycle(input(createRealtimeSalesState(conversationId,pageId,now),"chốt CB182 size M","payment-start"));
+  const complete=await evaluateRealtimeSalesCycle(input(opened.plan!.state,"Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh\nCOD","payment-complete"));
+  expect(complete.plan?.state.preview).not.toBeNull();
+  let tick=1;
+  const run=(state:NonNullable<typeof complete.plan>["state"],text:string)=>{const request=input(state,text,"payment-source-"+tick);
+   request.policyResolution!.bundle!.artifacts.shopPolicy.allowedPaymentMethods=["COD","BANK_TRANSFER"];
+   return evaluateRealtimeSalesCycle({...request,checkoutCollection:"SINGLE_FIELD",now:new Date(now.getTime()+tick++*1000)});};
+  const disputed=await run(complete.plan!.state,"không COD");
+  expect(disputed.plan?.state.clarification?.missingFields).toEqual(["PAYMENT_METHOD"]);
+  expect(disputed.plan?.state.checkoutDraft?.paymentMethod).toBe("COD");
+  const named=await run(disputed.plan!.state,"Tên: Nguyễn Thị Lan");
+  expect(named.plan?.state.preview).toBeNull();
+  expect(named.plan?.state.clarification?.missingFields).toEqual(["PAYMENT_METHOD"]);
+  const chosen=await run(named.plan!.state,"Chị chọn COD nhé");
+  expect(chosen.plan?.state.checkoutDraft?.paymentMethod).toBe("COD");
+  expect(chosen.plan?.state.clarification).toBeNull();
+  expect(chosen.plan?.state.stage).toBe("ORDER_PREVIEW");
+ });
   it("uses a scoped product name without presenting a separate component as the whole set", () => {
     const selected = line(2);
     selected.offerKind = "COMPONENT"; selected.offerId = "AO";

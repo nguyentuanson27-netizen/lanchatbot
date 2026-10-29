@@ -34,6 +34,7 @@ import {isolatedHandoffRecords,handoffContentHash} from './candidate-handoff.mjs
 import {publicCapturedAttachments,publicCapturedTextHashes} from './delivery-capture.mjs';
 import {assertDiagnosticFlags,diagnosticPreflight,claimDiagnostic} from '../single-agent-commerce-qualification/diagnostic.mjs';
 import {collectSafety} from '../single-agent-commerce-qualification/collect-safety.mjs';
+import {cartSelectionFromSnapshot} from '../../dist/realtime-sales-catalog.js';
 
 const root=fileURLToPath(new URL('../../../../',import.meta.url));
 const phaseCArg=name=>{const i=process.argv.indexOf(name);return i<0?null:process.argv[i+1];};
@@ -394,7 +395,7 @@ try{
  if(providerRun)providerPorts=phaseC?phaseCTools.createCandidateProvider({preflight:providerFreeze,out:resolve(out)}):await createStatefulProvider({preflight:providerFreeze,out:resolve(out)});
  if(phaseC&&providerFreeze.registration.arm==='C3')await providerPorts.attachReference({baselineRoot:phaseCArg('--phase-c-baseline-root'),
   baselineBuild:JSON.parse(readFileSync(phaseCArg('--phase-c-baseline-build'),'utf8'))});
- async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false}={}){
+ async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false,candidateTuples=false}={}){
   assert(!live||!revalidatedMedia,'SYNTHETIC_REVALIDATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||(dependencyHoldingReply===null&&sizeHoldingReply===null&&!missingDependencyRule),'SYNTHETIC_RULE_FORBIDDEN_IN_PROVIDER_RUN');
   const customerHash=hash(randomUUID()),at=new Date(),row=await runtime.loadOrCreate(pageId,customerHash,'APP',conversationId=>createConversationState({conversationId,routingOwner:'APP',now:at}),at);
@@ -402,7 +403,14 @@ try{
   await runtime.linkProviderConversation(pageId,row.conversationId,'PANCAKE','synthetic-'+randomUUID(),at,new Date(at.getTime()+3600000));
   let sourceVariantChanged=false;
   const product=fixtureProduct('SM613',at);let mediaChanged=false;
+  if(candidateTuples){assert(!live);const row=product.snapshot.offers.DIRECT.rows[0];
+   product.snapshot.fulfillment_policy.can_order_when_zero=false;
+   product.snapshot.offers.DIRECT.rows=['M','L'].flatMap(size=>[
+    {...structuredClone(row),size,color:'__NO_COLOR__',stock_quantity:9,components:row.components.map(c=>({...c,size,color:'__NO_COLOR__'}))},
+    {...structuredClone(row),size,color:'BE',stock_quantity:0,components:row.components.map(c=>({...c,size,color:'BE'}))}]);}
   const selected=q=>{if(missingEta&&q.deliveryAddress)return {status:'ETA_UNAVAILABLE',reasonCode:'CONTROLLED_MISSING_REGION',availableSizes:[],availableColors:[]};
+   if(candidateTuples){const raw=structuredClone(product.snapshot);if(sourceVariantChanged)raw.offers.DIRECT.rows[0].components[0].variation_sku='CHANGED-SKU';
+    return cartSelectionFromSnapshot(raw,q,new Date());}
    const s=fixtureCartLine();s.lineId=q.lineId;s.quantity=q.quantity;s.lineTotalVnd=s.posUnitPriceVnd*s.quantity;
    s.priceAuthority={...s.priceAuthority,shopId:'LANA',priceFactRef:'synthetic-pos-v1',metadata:{...s.priceAuthority.metadata,sourceVersion:'synthetic-pos-v1',observedAt:at.toISOString(),expiresAt:new Date(at.getTime()+172800000).toISOString()}};
    s.components[0]={...s.components[0],size:q.size??'M',color:q.color??'navy',componentSku:'SM613-'+(q.color??'navy').toUpperCase()+'-'+(q.size??'M')};
@@ -496,6 +504,27 @@ try{
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+ await check('B composed selection checkout tuple identity supports M plus L without zero-stock color substitution',async()=>{
+  const j=await statefulFixture({candidateTuples:true});
+  for(const size of ['L','M']){const r=await j.turn(`Chị lấy size ${size}`,[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size}}]),say('Em đã thêm áo vào giỏ.')]);
+   assert.equal(r.result.terminal.disposition,'SEND_ELIGIBLE',JSON.stringify(r.result));await j.drain();}
+  const state=await j.state();assert.equal(state.cart.value.lines.length,2);
+  assert.deepEqual(state.cart.value.lines.map(l=>l.components[0].size).sort(),['L','M']);
+  assert(state.cart.value.lines.every(l=>l.quantity===1&&l.components[0].color==='__NO_COLOR__'));
+ });
+ await check('B composed selection checkout natural COD persists privately without consuming the name retry',async()=>{
+  const j=await statefulFixture();await j.turn('Chị lấy áo navy M',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);await j.drain();
+  await j.turn('Chốt đơn cho chị',[native([{name:'confirm_purchase',args:{}}])]);await j.drain();
+  const r=await j.turn('Chị muốn trả khi nhận hàng.',[]);await j.drain();
+  assert.equal(r.owners,0);assert.equal(r.verifiers,0);const state=await j.state();assert.equal(state.checkoutDraft.paymentMethod,'COD');
+  assert.equal(state.checkoutDraft.fullName,null);assert.equal(state.clarification.attemptCount,1);assert.deepEqual(state.clarification.missingFields,['FULL_NAME']);
+  const blocked=await j.turn('Không COD',[]);await j.drain();assert.equal(blocked.owners,0);
+  assert.deepEqual((await j.state()).clarification.missingFields,['PAYMENT_METHOD']);
+  await j.turn('Tên: Khách thử nghiệm',[]);await j.drain();
+  assert.deepEqual((await j.state()).clarification.missingFields,['PAYMENT_METHOD']);assert.equal((await j.state()).preview,null);
+  await j.turn('Chị chọn COD nhé',[]);await j.drain();assert.equal((await j.state()).checkoutDraft.paymentMethod,'COD');
+  assert.deepEqual((await j.state()).clarification.missingFields,['PHONE']);
+ });
  await check('B composed C remediation active reads do not consume the durable transaction pin',async()=>{
   const j=await statefulFixture();assert.deepEqual(await j.readPolicyStatuses(),{transaction:'PINNED',active:'RESOLVED'});
  });

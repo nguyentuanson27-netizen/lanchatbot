@@ -134,7 +134,7 @@ export async function createCommerceEffectTools(input: {
       size: typeof a.size === "string" ? a.size : null, color: typeof a.color === "string" ? a.color : null,
       quantity: typeof a.quantity === "number" ? a.quantity : 1, lineId });
     if (result.status !== "READY") return { status: result.status, reasonCode: result.reasonCode,
-      availableSizes: result.availableSizes, availableColors: result.availableColors };
+      selectionOptions:(result.selectionOptions??[]).slice(0,8),selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",selectionStatus:result.status };
     if (result.shopId !== input.scope.shopId || result.line.parentProductId !== productId ||
       Date.parse(result.sourceObservedAt) > input.clock().getTime() || Date.parse(result.sourceExpiresAt) <= input.clock().getTime()) throw new Error("SELECTION_UNAVAILABLE");
     const line = { ...result.line, lineId }; selections.set(lineId, { ...result, line }); return { ...result, line };

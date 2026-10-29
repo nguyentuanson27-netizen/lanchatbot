@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import {paymentChoice} from "./checkout-payment-choice.js";
 import {
   buildProtectedCartPolicyClaimsV1,
   buildProtectedClaimsFromCartSelectionsV1,
@@ -543,10 +544,12 @@ export function checkoutDetails(
   text: string,
   salesSignals: AgentSalesSignalsV1 | null | undefined,
   pendingField?: CheckoutFieldKey,
+  collection?: "SINGLE_FIELD",
 ): CheckoutDetails {
   const bare = text.normalize("NFC").trim();
   // Field syntax only, not a general-language intent/name extractor. Ambiguous replies stay private.
-  const bareName = pendingField === "FULL_NAME" && bare.length >= 2 && bare.length <= 160 &&
+  const choice=collection==="SINGLE_FIELD"?paymentChoice(text):null;
+  const bareName = (!choice||choice.kind==="NO_SIGNAL") && pendingField === "FULL_NAME" && bare.length >= 2 && bare.length <= 160 &&
     /^\p{Lu}[\p{L}\p{M}'’-]*(?:\s+\p{Lu}[\p{L}\p{M}'’-]*){0,5}$/u.test(bare) ? bare : undefined;
   const bareAddress = pendingField === "ADDRESS" && bare.length >= 8 && bare.length <= 1000 &&
     /^\d[\p{L}\p{M}\p{N}\s,./’-]+$/u.test(bare) ? bare : undefined;
@@ -554,7 +557,7 @@ export function checkoutDetails(
   const phone = labeledValue(text, ["sđt", "sdt", "điện thoại", "dien thoai", "phone"]) ??
     text.match(/(?:^|[^\d])((?:\+?84|0)\d{8,10})(?:[^\d]|$)/u)?.[1] ??
     modelCheckoutValue(text, extracted?.phone, "PHONE");
-  const paymentMethod = /(chuyển khoản|chuyen khoan|\bck\b|bank)/iu.test(text)
+  const paymentMethod = choice?(choice.kind==="RESOLVED"?choice.method:undefined):/(chuyển khoản|chuyen khoan|\bck\b|bank)/iu.test(text)
     ? "BANK_TRANSFER" as const
     : /(?:^|\s)(?:cod|tiền mặt|tien mat|nhận hàng trả|nhan hang tra)(?:\s|$)/iu.test(text)
       ? "COD" as const
@@ -1447,6 +1450,14 @@ export async function evaluateRealtimeSalesCycle(
     capturedFields: readonly CheckoutFieldKey[] = [],
     nativeCommandId?: string,
   ): RealtimeSalesCycleOutput => {
+    const progress=input.checkoutCollection==="SINGLE_FIELD"&&capturedFields.some(field=>{
+      const key=({FULL_NAME:"fullName",PHONE:"phone",ADDRESS:"address",PAYMENT_METHOD:"paymentMethod"} as const)[field];
+      return !initial.checkoutDraft?.[key]&&!!state.checkoutDraft?.[key];
+    });
+    if(progress&&state.clarification&&!state.clarification.missingFields.includes("PAYMENT_METHOD")){
+      const reset=apply({kind:"CLARIFICATION_RESOLVED",commandId:commandId("clarification-progress")});
+      if(reset.status!=="APPLIED")return failedOutput("CLARIFICATION_RESOLVE_REJECTED",plan());
+    }
     const asked = input.checkoutCollection === "SINGLE_FIELD" ? missing.slice(0, 1) : missing;
     const productId = input.productId ?? state.cart?.value.lines.at(-1)?.parentProductId ?? null;
     const previous = state.clarification ?? null;
@@ -1469,8 +1480,11 @@ export async function evaluateRealtimeSalesCycle(
         },
       };
     }
+    const paymentMethods=bundle.artifacts.shopPolicy.allowedPaymentMethods;
+    if(input.checkoutCollection==="SINGLE_FIELD"&&asked[0]==="PAYMENT_METHOD"&&(!paymentMethods?.length))return failedOutput("PAYMENT_POLICY_UNAVAILABLE",plan());
+    const fieldLabel=asked[0]==="PAYMENT_METHOD"?paymentMethods.map(m=>m==="COD"?"COD":"chuyển khoản").join(" hoặc "):CHECKOUT_FIELD_LABELS[asked[0]!];
     const message = input.checkoutCollection === "SINGLE_FIELD"
-      ? `${attemptCount === 1 ? "Chị cho em" : attemptCount === 2 ? "Chị gửi riêng" : "Em còn cần"} ${CHECKOUT_FIELD_LABELS[asked[0]!]} nhé.`
+      ? `${attemptCount === 1 ? "Chị cho em" : attemptCount === 2 ? "Chị gửi riêng" : "Em còn cần"} ${fieldLabel} nhé.`
       : clarificationMessage(missing, attemptCount);
     const requested = apply({
       kind: "CLARIFICATION_REQUESTED",
@@ -1505,6 +1519,16 @@ export async function evaluateRealtimeSalesCycle(
       },
     };
   };
+
+  const candidatePayment=input.checkoutCollection==="SINGLE_FIELD"?paymentChoice(input.text):null;
+  const paymentPending=()=>state.clarification?.reasonCode==="CHECKOUT_DETAILS_MISSING"&&state.clarification.missingFields.length===1&&state.clarification.missingFields[0]==="PAYMENT_METHOD";
+  const paymentAllowed=candidatePayment?.kind==="RESOLVED"&&bundle.artifacts.shopPolicy.allowedPaymentMethods?.includes(candidatePayment.method);
+  if(candidatePayment&&["CART_OPEN","ORDER_PREVIEW"].includes(state.stage)&&
+    (["AMBIGUOUS","UNSUPPORTED"].includes(candidatePayment.kind)||candidatePayment.kind==="RESOLVED"&&!paymentAllowed)){
+    const {paymentMethod:_ignored,...fields}=checkoutDetails(input.text,undefined,undefined,"SINGLE_FIELD");
+    if(Object.keys(fields).length){const c=apply({kind:"CHECKOUT_DETAILS_CAPTURED",commandId:commandId("checkout-details"),details:fields});if(c.status!=="APPLIED")return failedOutput("CHECKOUT_DETAILS_REJECTED",plan());}
+    return requestCheckoutClarification(["PAYMENT_METHOD"]);
+  }
 
   if (input.checkoutCollection === "SINGLE_FIELD" && state.clarification?.reasonCode === "CHECKOUT_DETAILS_MISSING" &&
       ["CART_OPEN", "ORDER_PREVIEW"].includes(state.stage) && classifyConfirmationContract(input.text, null).decision === "REJECT") {
@@ -1968,7 +1992,7 @@ export async function evaluateRealtimeSalesCycle(
 
     const pending = input.checkoutCollection === "SINGLE_FIELD" && state.clarification?.reasonCode === "CHECKOUT_DETAILS_MISSING" &&
       state.clarification.missingFields.length === 1 ? state.clarification.missingFields[0] as CheckoutFieldKey : undefined;
-    const details = checkoutDetails(input.text, input.salesSignals, pending);
+    const details = checkoutDetails(input.text, input.salesSignals, pending,input.checkoutCollection);
     const hasDetails = Object.keys(details).length > 0;
     if (hasDetails) {
       const prospectiveCheckoutDraft = { ...state.checkoutDraft, ...details };
@@ -1977,7 +2001,7 @@ export async function evaluateRealtimeSalesCycle(
         ...(prospectiveCheckoutDraft.fullName ? [] : ["FULL_NAME" as const]),
         ...(prospectiveCheckoutDraft.phone ? [] : ["PHONE" as const]),
         ...(prospectiveCheckoutDraft.address ? [] : ["ADDRESS" as const]),
-        ...(prospectiveCheckoutDraft.paymentMethod ? [] : ["PAYMENT_METHOD" as const]),
+        ...(prospectiveCheckoutDraft.paymentMethod&&(!paymentPending()||details.paymentMethod) ? [] : ["PAYMENT_METHOD" as const]),
       ];
       if (prospectiveMissing.length > 0) {
         const captured = apply({
@@ -1988,7 +2012,7 @@ export async function evaluateRealtimeSalesCycle(
         if (captured.status !== "APPLIED") {
           return failedOutput("CHECKOUT_DETAILS_REJECTED", plan());
         }
-        return requestCheckoutClarification(prospectiveMissing, capturedFields);
+        return requestCheckoutClarification(paymentPending()?["PAYMENT_METHOD"]:prospectiveMissing, capturedFields);
       }
       if (prospectiveCheckoutDraft.paymentMethod === "BANK_TRANSFER" && !bank) {
         return failedOutput("BANK_TRANSFER_POLICY_UNAVAILABLE");
@@ -2303,6 +2327,7 @@ export async function evaluateRealtimeSalesCycle(
     }
 
     if (state.clarification?.reasonCode === "CHECKOUT_DETAILS_MISSING") {
+      if(input.checkoutCollection==="SINGLE_FIELD"&&paymentPending())return requestCheckoutClarification(["PAYMENT_METHOD"]);
       const missing = missingCheckout(state);
       if (missing.length === 0) {
         const resolved = apply({

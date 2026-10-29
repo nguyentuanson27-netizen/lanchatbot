@@ -5,8 +5,8 @@ const bytes=(v:unknown)=>Buffer.byteLength(JSON.stringify(v));
 /** State provenance only. Never raw intake text/PII or proof of customer delivery. */
 export function publicCheckoutState(state:{checkoutDraft?:{paymentMethod?:string|null}|null;
   clarification?:{reasonCode:string;missingFields:readonly string[];attemptCount:number;askedQuestionFingerprints:readonly string[]}|null}) {
-  const paymentMethod=["COD","BANK_TRANSFER"].includes(state.checkoutDraft?.paymentMethod??"")?state.checkoutDraft!.paymentMethod:null;
   const q=state.clarification;
+  const paymentMethod=!q?.missingFields.includes("PAYMENT_METHOD")&&["COD","BANK_TRANSFER"].includes(state.checkoutDraft?.paymentMethod??"")?state.checkoutDraft!.paymentMethod:null;
   const questionFingerprint=q?.askedQuestionFingerprints.at(-1)??"";
   const lastQuestion=q?.reasonCode==="CHECKOUT_DETAILS_MISSING"&&q.missingFields.length>0&&q.missingFields.length<=4&&
     q.missingFields.every(f=>["FULL_NAME","PHONE","ADDRESS","PAYMENT_METHOD"].includes(f))&&Number.isSafeInteger(q.attemptCount)&&

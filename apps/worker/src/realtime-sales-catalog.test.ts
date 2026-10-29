@@ -2,10 +2,43 @@ import { describe, expect, it } from "vitest";
 import {
   cartSelectionFromSnapshot,
   verifiedVariantFromSnapshot,
+  candidateCartOptions,
 } from "./realtime-sales-catalog.js";
 
 const observedAt = "2026-07-23T02:00:00.000Z";
 const now = new Date("2026-07-23T03:00:00.000Z");
+
+describe("candidate tuple selection",()=>{
+ it("does not call a zero-stock color available or merge it into an unlabelled POS row",()=>{
+  const s=snapshot(9),row=s.offers.SET.rows[0]!;row.color="__NO_COLOR__";
+  for(const c of row.components)c.color="__NO_COLOR__";
+  s.offers.SET.rows.push({...structuredClone(row),color:"BE",stock_quantity:0});
+  const q={shopAlias:"LANA",productId:"CB182",offerType:"SET",size:"M",color:null,quantity:1,lineId:"50000000-0000-4000-8000-000000000001",selectionMode:"CANDIDATE_TUPLES" as const};
+  const picked=cartSelectionFromSnapshot(s,q,now);expect(picked.status).toBe("READY");
+  if(picked.status==="READY")expect(picked.line.components.every(c=>c.color==="__NO_COLOR__")).toBe(true);
+  const explicit=cartSelectionFromSnapshot(s,{...q,color:"BE"},now);expect(explicit.status).toBe("OUT_OF_STOCK");
+  if(explicit.status!=="READY"){expect(explicit.availableColors).toEqual([]);expect(explicit.selectionOptions?.find(o=>o.color==="BE")?.status).toBe("OUT_OF_STOCK");}
+  expect(candidateCartOptions(s,{...q,quantity:10},now).some(o=>o.status==="IN_STOCK")).toBe(false);
+  // Legacy matching remains unchanged and still reports ambiguity.
+  expect(cartSelectionFromSnapshot(s,{...q,selectionMode:undefined},now).status).toBe("INVALID");
+ });
+ it("does not collapse conflicting identities/prices or invent a cross-product of size/color",()=>{
+  const s=snapshot(3),row=s.offers.SET.rows[0]!;
+  s.offers.SET.rows.push({...structuredClone(row),sale_price:row.sale_price+1});
+  expect(cartSelectionFromSnapshot(s,{shopAlias:"LANA",productId:"CB182",offerType:"SET",size:"M",color:"BE",quantity:1,lineId:"50000000-0000-4000-8000-000000000001",selectionMode:"CANDIDATE_TUPLES"},now).status).toBe("INVALID");
+ });
+ it("keeps zero-stock preorder distinct and does not silently prefer an unlabelled tuple",()=>{
+  const s=snapshot(9),row=s.offers.SET.rows[0]!;row.color="__NO_COLOR__";for(const c of row.components)c.color="__NO_COLOR__";
+  s.offers.SET.rows.push({...structuredClone(row),color:"BE",stock_quantity:0});s.fulfillment_policy.can_order_when_zero=true;
+  const q={shopAlias:"LANA",productId:"CB182",offerType:"SET",size:"M",color:null,quantity:1,lineId:"50000000-0000-4000-8000-000000000001",selectionMode:"CANDIDATE_TUPLES" as const};
+  const r=cartSelectionFromSnapshot(s,q,now);expect(r.status).toBe("COLOR_REQUIRED");
+  if(r.status!=="READY")expect(r.selectionOptions?.find(o=>o.color==="BE")?.status).toBe("PRE_ORDER");
+  const explicit=cartSelectionFromSnapshot(s,{...q,color:"BE"},now);expect(explicit).toMatchObject({status:"READY",stockStatus:"PRE_ORDER",stockAvailableQuantity:0});
+  expect(candidateCartOptions(s,q,new Date("2026-07-26T00:00:00Z")).every(o=>o.status==="UNKNOWN")).toBe(true);
+  row.stock_quantity=null as never;row.stock_status="QUANTITY_HIDDEN";s.fulfillment_policy.can_order_when_zero=false;
+  expect(cartSelectionFromSnapshot(s,q,now).status).not.toBe("READY");
+ });
+});
 
 function snapshot(stockQuantity = 3) {
   return {
