@@ -1,0 +1,95 @@
+{
+  "kind": "READ_PATH_DEVELOPMENT_REPORT_AND_GRADE_BINDING_REVIEW_V1",
+  "verdict": "APPROVE",
+  "reviewer": "/root/full22_run_review",
+  "reviewedAt": "2026-10-29T20:10:09.490Z",
+  "sourceSha": "89070980e9fb407fe4031a01f2eae110f7f17181",
+  "scope": "REPORT_ACCURACY_AND_LOCKED_GRADE_BINDING_NOT_REGRADE_OR_QUALIFICATION",
+  "publicPacketHash": "aa6912675d13391f1335b1519cb21f0f9243197962dd124e8f687bd03366414c",
+  "originalGradeByteHash": "8c692f64e8dbe03c2f18099199b16222fac0454c49d7508c383302c8e0da2e83",
+  "resolvedGrades": 22,
+  "unresolvedGrades": 0,
+  "counts": {
+    "SINGLE": {
+      "denominator": 16,
+      "resolved": 16,
+      "wholeTurnPass": 10,
+      "allExplicitNeedsResolved": 6,
+      "hardSafetyPass": 16,
+      "conjunctionPass": 6,
+      "wholeTurnRate": 0.625,
+      "conjunctionRate": 0.375,
+      "meets90Percent": false
+    },
+    "JOURNEY": {
+      "denominator": 6,
+      "resolved": 6,
+      "wholeTurnPass": 4,
+      "allExplicitNeedsResolved": 2,
+      "hardSafetyPass": 6,
+      "conjunctionPass": 2,
+      "wholeTurnRate": 0.6666666666666666,
+      "conjunctionRate": 0.3333333333333333,
+      "meets90Percent": false
+    }
+  },
+  "exposure": {
+    "artifacts": 6551,
+    "missing": 0,
+    "needsSourceMapping": 2381,
+    "review": "PENDING"
+  },
+  "checks": [
+    "All22review IDs/outcome hashes/private assignments/public packet/source contexts/accepted outcomes bind exactly to original execution",
+    "Original independent grade object unchanged; grade byte hash and public packet hash verified",
+    "Recomputed whole-turn10/16+4/6 and requiredconjunction6/16+2/6; separate diagnostic namespace and formalBLOCKED/C3NOT_RUN retained",
+    "Accounting audit copy unchanged parsed; supplemental11artifact hashes verified",
+    "Trace claims for s01/s03/s07/s09/s13 and three NO_COLOR refusals checked against raw; matchingmetadata/causal uncertainty preserved",
+    "No source/prompt/config/runtime edits; report62interim vs66final correctly distinguished",
+    "No secrets or raw private customer fields found in reviewed report content; no provider call or regrading during review",
+    "Count wording corrected to22cases/34customerturns; no pending report placeholders"
+  ],
+  "findings": [],
+  "artifacts": [
+    {
+      "path": "./apps/worker/evals/single-agent-commerce-qualification/read-path-rerun-20261030/REPORT.md",
+      "sha256": "649ee6a1725e3e16a27874a22d381ca0f09bcba4667783f1dc8b793974045290"
+    },
+    {
+      "path": "./apps/worker/evals/single-agent-commerce-qualification/read-path-rerun-20261030/CASE_REVIEW.md",
+      "sha256": "d62352be34e1ebed6208e0eda9c84b62ec29e5a8924f1e8cafae40cc91639cfb"
+    },
+    {
+      "path": "./apps/worker/evals/single-agent-commerce-qualification/read-path-rerun-20261030/BLIND_REVIEW.md",
+      "sha256": "8fee6fd71729ef850541e2fc10c565c99a6c45c35340259483bb9323d9adb10e"
+    },
+    {
+      "path": "./apps/worker/evals/single-agent-commerce-qualification/read-path-rerun-20261030/INDEPENDENT_GRADES.json",
+      "sha256": "8c692f64e8dbe03c2f18099199b16222fac0454c49d7508c383302c8e0da2e83"
+    },
+    {
+      "path": "./apps/worker/evals/single-agent-commerce-qualification/read-path-rerun-20261030/QUALITY_RESULTS.json",
+      "sha256": "a7f8b0470405371635a3cdaad802a896b46a64675e8a75ac8433fd5325bc37b7"
+    },
+    {
+      "path": "./apps/worker/evals/single-agent-commerce-qualification/read-path-rerun-20261030/SUPPLEMENTAL_EVIDENCE.json",
+      "sha256": "48ed211eb2f7cebf2c859365d63c639e5be95d70952d38e0040496f2d1705692"
+    },
+    {
+      "path": "./apps/worker/evals/single-agent-commerce-qualification/read-path-rerun-20261030/ACCOUNTING_AUDIT.json",
+      "sha256": "1e1243c0c428c925f38258c4315a7401383fe429e77e241bd2092abf0a5daa7c"
+    },
+    {
+      "path": "./apps/worker/evals/single-agent-commerce-qualification/read-path-rerun-20261030/ACCOUNTING.json",
+      "sha256": "d14cb5a1eab532b2ad0ab674c59a182ed5468afe64e643cba55d0c38182f8e4a"
+    },
+    {
+      "path": "./apps/worker/evals/single-agent-commerce-qualification/read-path-rerun-20261030/CONVERSATIONS.md",
+      "sha256": "54a314e94a5b9d2f266f52009c04bbf4461feb5e508392870b8529d3958d3afe"
+    }
+  ],
+  "qualityAcceptance": false,
+  "qualificationApproval": false,
+  "nextRunAuthorization": false,
+  "providerCallsDuringReview": 0
+}

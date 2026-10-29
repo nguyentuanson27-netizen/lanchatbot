@@ -2770,3 +2770,12 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Finalclean executable97c6ce86: currentbuild/typecheck/lintPASS, Node761PASS/2SKIP, actualPG73/73PASS+7invariantsPASS, DBdropped/gen0/sendfalse. Priorworker510+37additional uniquecoverage/protected21PASS, overlapping reruns disclosed.
 - [x] Unconditional independent **APPROVE IMPLEMENTATION** exact97c6ce86; reviewer verified51artifact hashes/currentidentity/PGcleanup. [Report/review/evidence](../docs/specs/c3-phase-c-evidence-read-path-implementation-20261030.md).
 - [ ] Newmodelquality/blindgrades/stability/qualification and C3parity/comparison remain unverified. Originalfull22results immutable; PhaseCqualificationBLOCKED/C3NOT_RUN/B_NOT_GO. No automatic nextmodelrun, merge, deploy or live send.
+
+
+## Phase C — post read-path model diagnostic, 2026-10-30
+
+- [x] Freeze source89070980, original22scripts/34turns/N1/retry0, unchanged models/prompts; fresh107product capture, currentinitialPG/drop, independent source-check compatibility/input/preflight/dispatch APPROVE.
+- [x] Complete22/22cases+34/34turns,66generationHTTP/0error/0retry,11eligible/14silentHANDOFF/7NO_SEND/2CODE-owned;13texts+2images/15Outbox; sourceclean/DBdropped/live0.
+- [x] Independent accounting auditPASS: all66wire/model/firewall checks and34raw/40artifacthashes, receipts/capture; finaljournal=attempts=raw=66, earlier62interim only.
+- [x] FreshindependentSolHighblindjudge22RESOLVED/0UNRESOLVED, whole-turn10/16+4/6; frozen conjunctive quality6/16+2/6, both below90%; hardSafety22/22 on observed outcomes only. [Reports/findings/grades](../apps/worker/evals/single-agent-commerce-qualification/read-path-rerun-20261030/REPORT.md). Priorblindgrades still incomplete; no fabricated pairedcomparison.
+- [ ] Qualification remainsBLOCKED: unmetquality, separateSAFETY/freshholdout/exposuremapping/parity/C3comparison. Source/toolplanning/sentinel/media matching findings remain. Stop authorizedbatch; no automatic fix, modelrerun, merge or deploy.
