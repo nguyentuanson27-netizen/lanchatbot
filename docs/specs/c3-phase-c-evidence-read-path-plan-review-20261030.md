@@ -26,4 +26,12 @@ Self-review đã kiểm filenames của verification commands và sửa hai tên
 
 Reviewer xác nhận P0 UNKNOWN handling, s11 compliance residual và P4 source-based chart audit là phù hợp. Reviewer không chạy tests/providers và không sửa file trong vòng review kế hoạch.
 
-Revision2: **REVIEW_PENDING**, chưa gán approve trước khi cùng reviewer trả verdict mới.
+## Revision 2 — APPROVE PLAN
+
+Exact clean reviewed HEAD: **`f9b6e0843382e1c2be192137c5148a9d3f8e0c96`**. Cùng reviewer đã gửi verdict **APPROVE PLAN**, xác nhận F1–F4 được đóng và không còn blocking plan finding.
+
+Reviewer đối chiếu predicate prepare với singleton j3, work1/tổng6 và source I/O, atomic admission bounds, optional acquisition giữ independent evidence, published evidence không được prune sauPASS, minimum TTL/no renewal, informational quantity/UNKNOWN/completeness và canonical source conflict. Build order, provider-free driver và7named invariants khớp source thực. Không suy root cause của dependency khi trace thiếu; s11 vẫn có thể là model compliance residual; P4 expected dựa trên chart thật. History/raw/grades cũ giữ nguyên, không tạo blind grades mới.
+
+**Giới hạn approval:** chỉ kế hoạch. Implementation, đo byte/work bounds, neutral regression controls, actual provider readiness và semantic quality đều chưa verified. P3 không được ship nếu không đạt one-observation/bounds/controls; cần replan thay vì mở budget. Reviewer không chạy tests/providers, không sửa files hoặc thực hiện mutation trong hai vòng review.
+
+Sau approval chỉ cập nhật status, record, tasks và PR; không đổi phương án kỹ thuật. Không claim independent final delivery-head code review vì task này không sửa executable source.

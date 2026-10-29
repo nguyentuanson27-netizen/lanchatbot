@@ -1,6 +1,6 @@
 # Phase C — kế hoạch sửa căn cứ và đường đọc dữ liệu
 
-Revision: **2 — đã sửa F1–F4, chờ cùng reviewer review lại**. Planning base: `cda76805ed939049f1fe0f8f987bff2226d07feb`. Branch hiện có: `feat/c3-phase-c-qualification-20261028`. Task này chỉ lập/sửa/review kế hoạch; không sửa runtime, gọi provider hoặc triển khai.
+Revision: **2 — APPROVE PLAN** bởi cùng reviewer `/root/full22_run_review`, exact reviewed HEAD `f9b6e0843382e1c2be192137c5148a9d3f8e0c96`. Planning base: `cda76805ed939049f1fe0f8f987bff2226d07feb`. Branch hiện có: `feat/c3-phase-c-qualification-20261028`. [Review record](c3-phase-c-evidence-read-path-plan-review-20261030.md). Task này chỉ lập/sửa/review kế hoạch; không sửa runtime, gọi provider hoặc triển khai. Dòng status này cập nhật sau verdict; nội dung kế hoạch không đổi từ exact reviewed HEAD.
 
 ## 1. Mục tiêu và bằng chứng
 

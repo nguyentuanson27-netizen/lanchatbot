@@ -2750,3 +2750,11 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Primary qualitative review of22 whole conversations; [results/evidence](../apps/worker/evals/single-agent-commerce-qualification/full22-rerun-20261029/REPORT.md). Do not treat rejection drafts as customer replies or all handoffs as quality failure.
 - [ ] Complete offline blind grades: separateSolHighjudge hit workspace credit limit before writingGRADES.json; statusBLIND_GRADING_INCOMPLETE_QUOTA. No invented grades/model substitution or automatic rerun.
 - [ ] PhaseC qualification/C3parity/comparison remainBLOCKED/NOT_RUN. Development exposure inventory6483/missing0/reviewPENDING. STOP after authorized batch, no auto next fix/run/deploy.
+
+
+## Phase C — evidence/read-path plan, 2026-10-30
+
+- [x] Draft concrete plan from full22raw/history and prior implementation; preserve unknown dependency causes and source-based size expected.
+- [x] Independent same-reviewer REQUEST_CHANGES exact43560762: four findings.
+- [x] Revise F1–F4; independent same-reviewer **APPROVE PLAN revision2 exactf9b6e0843382e1c2be192137c5148a9d3f8e0c96**, no remaining blocking plan findings. [Plan/review](../docs/specs/c3-phase-c-evidence-read-path-fix-plan-20261030.md).
+- [ ] Implementation and focused RED→GREEN/current builds/realPG/provider remain NOT_RUN for this plan. This task stops at planapproval; no automatic execution, deployment or live send. P3 cannot ship without measured bounds and neutral controls.
