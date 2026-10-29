@@ -1,0 +1,1176 @@
+{
+  "kind": "BC_CONTROLLED_DIAGNOSIS_POST_RUN_ACCOUNTING",
+  "runSourceSha": "3731e05ba6775d162eae241d4e82522d4847ce38",
+  "bSourceSha": "4efbea67356f1e3e4f7fa886dec48d58c4ab1474",
+  "cRuntimeSourceSha": "ec46829325378e4a2d5fc126a0cd4224e6febbcf",
+  "inputHash": "5702bcdd3bcea7563eb020869b33437485e37d6c5dc250f66160950abf7ca924",
+  "worldHash": "66b6cb062e64de64d7d37b93d05dbe5d31fde25de26466300ed97314669def26",
+  "registered": 18,
+  "completed": 18,
+  "generationRequests": 18,
+  "errors": 0,
+  "retry": 0,
+  "toolsExecuted": 0,
+  "effects": 0,
+  "sendEnabled": false,
+  "evaluatorLabelFirewall": "ALL_18_CAPTURED_BODIES_CHECKED",
+  "model": {
+    "provider": "VERTEX_AI",
+    "model": "gemini-3.5-flash-lite",
+    "version": "gemini-3.5-flash-lite",
+    "effort": "high",
+    "location": "global",
+    "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+    "generationConfig": {
+      "candidateCount": 1,
+      "responseMimeType": "text/plain",
+      "maxOutputTokens": 8192,
+      "thinkingConfig": {
+        "thinkingLevel": "HIGH",
+        "includeThoughts": false
+      },
+      "temperature": "OMITTED_PROVIDER_DEFAULT",
+      "topP": "OMITTED_PROVIDER_DEFAULT",
+      "retry": 0,
+      "timeoutMs": 90000
+    }
+  },
+  "usage": {
+    "inputTokens": 112926,
+    "outputIncludingThinkingTokens": 16939,
+    "missingTokenUsage": 0,
+    "cost": null,
+    "generationAndAuthLatencySumMs": 61503.8821
+  },
+  "pairedHistorical": [
+    {
+      "caseId": "b1-price",
+      "sameInputHash": true,
+      "clockProvenance": "DERIVED_LOWER_BOUND_NOT_CAPTURED_FINAL_GATE_TIME",
+      "b": null,
+      "c": null
+    },
+    {
+      "caseId": "b1-search-read-v2",
+      "sameInputHash": true,
+      "clockProvenance": "DERIVED_LOWER_BOUND_NOT_CAPTURED_FINAL_GATE_TIME",
+      "b": null,
+      "c": null
+    },
+    {
+      "caseId": "b1-current-policy",
+      "sameInputHash": true,
+      "clockProvenance": "DERIVED_LOWER_BOUND_NOT_CAPTURED_FINAL_GATE_TIME",
+      "b": null,
+      "c": null
+    },
+    {
+      "caseId": "sales-size-advice:height-weight",
+      "sameInputHash": true,
+      "clockProvenance": "DERIVED_LOWER_BOUND_NOT_CAPTURED_FINAL_GATE_TIME",
+      "b": null,
+      "c": null
+    },
+    {
+      "caseId": "media-and-size:ask",
+      "sameInputHash": true,
+      "clockProvenance": "DERIVED_LOWER_BOUND_NOT_CAPTURED_FINAL_GATE_TIME",
+      "b": null,
+      "c": null
+    },
+    {
+      "caseId": "stateful-quote",
+      "sameInputHash": true,
+      "clockProvenance": "DERIVED_LOWER_BOUND_NOT_CAPTURED_FINAL_GATE_TIME",
+      "b": null,
+      "c": null
+    }
+  ],
+  "pairedReads": [
+    {
+      "query": {
+        "subjectRef": "SV2447"
+      },
+      "sameSourceInputHash": true,
+      "b": {
+        "status": "OK",
+        "reason": null
+      },
+      "c": {
+        "status": "REJECTED",
+        "reason": "SOURCE_EVIDENCE_CONFLICT"
+      }
+    },
+    {
+      "query": {
+        "subjectRef": "SV2447",
+        "offerType": "AO"
+      },
+      "sameSourceInputHash": true,
+      "b": {
+        "status": "OK",
+        "reason": null
+      },
+      "c": {
+        "status": "OK",
+        "reason": null
+      }
+    },
+    {
+      "query": {
+        "subjectRef": "SV2447",
+        "offerType": "SET_VAY"
+      },
+      "sameSourceInputHash": true,
+      "b": {
+        "status": "OK",
+        "reason": null
+      },
+      "c": {
+        "status": "OK",
+        "reason": null
+      }
+    },
+    {
+      "query": {
+        "subjectRef": "SV1561"
+      },
+      "sameSourceInputHash": true,
+      "b": {
+        "status": "OK",
+        "reason": null
+      },
+      "c": {
+        "status": "OK",
+        "reason": null
+      }
+    },
+    {
+      "query": {
+        "subjectRef": "SV1561",
+        "offerType": "SET_VAY"
+      },
+      "sameSourceInputHash": true,
+      "b": {
+        "status": "OK",
+        "reason": null
+      },
+      "c": {
+        "status": "OK",
+        "reason": null
+      }
+    }
+  ],
+  "sameSizeEngineInputHash": "6ad7d28151c2af31531ec0de0453e4c519e0dea466de18fab7128ff8c22fe7fb",
+  "bSize": [
+    {
+      "componentProductId": "SV2447",
+      "componentRole": "OTHER",
+      "size": "M"
+    }
+  ],
+  "cSize": [
+    {
+      "componentProductId": "SV2447",
+      "componentRole": "OTHER",
+      "size": "M"
+    }
+  ],
+  "contexts": {
+    "b": [
+      {
+        "initialProductCodes": [
+          "SV2447"
+        ],
+        "readPolicy": false,
+        "worldHash": "66b6cb062e64de64d7d37b93d05dbe5d31fde25de26466300ed97314669def26",
+        "snapshotHash": "30aebef5f9126d1d3d383cafa3580345c481d15f5e4f712f89722dafcfd4d5c7",
+        "currentProductId": null,
+        "subjectRefs": [
+          "SV2447"
+        ],
+        "productRefs": [
+          "SV2447"
+        ],
+        "policyRefs": [
+          "offers:SV2447",
+          "preparation:SV2447"
+        ],
+        "claimTypes": []
+      },
+      {
+        "initialProductCodes": [
+          "SV2447"
+        ],
+        "readPolicy": true,
+        "worldHash": "66b6cb062e64de64d7d37b93d05dbe5d31fde25de26466300ed97314669def26",
+        "snapshotHash": "444280eb2d600fe7bbac1ccfb768da08c17de86e019bcd237154e4799cf1811d",
+        "currentProductId": null,
+        "subjectRefs": [
+          "SV2447"
+        ],
+        "productRefs": [
+          "SV2447"
+        ],
+        "policyRefs": [
+          "offers:SV2447",
+          "policy:d9dd0c9fc5d01f4f53986e3b54357cd213df1c16211020637a07f775d607970f",
+          "preparation:SV2447"
+        ],
+        "claimTypes": []
+      },
+      {
+        "initialProductCodes": [
+          "SV2447",
+          "SQ2447"
+        ],
+        "readPolicy": false,
+        "worldHash": "66b6cb062e64de64d7d37b93d05dbe5d31fde25de26466300ed97314669def26",
+        "snapshotHash": "28526969e2ea2d65a8538aa2288aa9aeb4f9bd54ef4909613db3602402ca4a34",
+        "currentProductId": null,
+        "subjectRefs": [
+          "SQ2447",
+          "SV2447"
+        ],
+        "productRefs": [],
+        "policyRefs": [],
+        "claimTypes": []
+      },
+      {
+        "initialProductCodes": [
+          "SV2447",
+          "SQ2447"
+        ],
+        "readPolicy": true,
+        "worldHash": "66b6cb062e64de64d7d37b93d05dbe5d31fde25de26466300ed97314669def26",
+        "snapshotHash": "26bb42ee3db93790617cedac1b915fc5a79b3ae91c336979220c259d465a4c89",
+        "currentProductId": null,
+        "subjectRefs": [
+          "SQ2447",
+          "SV2447"
+        ],
+        "productRefs": [],
+        "policyRefs": [
+          "policy:d9dd0c9fc5d01f4f53986e3b54357cd213df1c16211020637a07f775d607970f"
+        ],
+        "claimTypes": []
+      }
+    ],
+    "c": [
+      {
+        "initialProductCodes": [
+          "SV2447"
+        ],
+        "readPolicy": false,
+        "worldHash": "66b6cb062e64de64d7d37b93d05dbe5d31fde25de26466300ed97314669def26",
+        "snapshotHash": "8a669a06d4d3108b14da1d927945682b349ba34912eb4851e9cbae73e8edad7e",
+        "currentProductId": null,
+        "subjectRefs": [
+          "SV2447"
+        ],
+        "productRefs": [
+          "SV2447"
+        ],
+        "policyRefs": [
+          "offers:SV2447",
+          "preparation:SV2447"
+        ],
+        "claimTypes": []
+      },
+      {
+        "initialProductCodes": [
+          "SV2447"
+        ],
+        "readPolicy": true,
+        "worldHash": "66b6cb062e64de64d7d37b93d05dbe5d31fde25de26466300ed97314669def26",
+        "snapshotHash": "9213dbe7f5d28d4baed0055f6c0de8f5c7f876ec1422829f54fd774641a88042",
+        "currentProductId": null,
+        "subjectRefs": [
+          "SV2447"
+        ],
+        "productRefs": [
+          "SV2447"
+        ],
+        "policyRefs": [
+          "offers:SV2447",
+          "policy:d9dd0c9fc5d01f4f53986e3b54357cd213df1c16211020637a07f775d607970f",
+          "preparation:SV2447"
+        ],
+        "claimTypes": []
+      },
+      {
+        "initialProductCodes": [
+          "SV2447",
+          "SQ2447"
+        ],
+        "readPolicy": false,
+        "worldHash": "66b6cb062e64de64d7d37b93d05dbe5d31fde25de26466300ed97314669def26",
+        "snapshotHash": "28526969e2ea2d65a8538aa2288aa9aeb4f9bd54ef4909613db3602402ca4a34",
+        "currentProductId": null,
+        "subjectRefs": [
+          "SQ2447",
+          "SV2447"
+        ],
+        "productRefs": [],
+        "policyRefs": [],
+        "claimTypes": []
+      },
+      {
+        "initialProductCodes": [
+          "SV2447",
+          "SQ2447"
+        ],
+        "readPolicy": true,
+        "worldHash": "66b6cb062e64de64d7d37b93d05dbe5d31fde25de26466300ed97314669def26",
+        "snapshotHash": "26bb42ee3db93790617cedac1b915fc5a79b3ae91c336979220c259d465a4c89",
+        "currentProductId": null,
+        "subjectRefs": [
+          "SQ2447",
+          "SV2447"
+        ],
+        "productRefs": [],
+        "policyRefs": [
+          "policy:d9dd0c9fc5d01f4f53986e3b54357cd213df1c16211020637a07f775d607970f"
+        ],
+        "claimTypes": []
+      }
+    ]
+  },
+  "freshness": {
+    "b": [
+      {
+        "productId": "SV1561",
+        "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+        "at": "2026-10-28T04:31:05.724Z",
+        "query": {
+          "subjectRef": "SV1561",
+          "intent": "GENERIC"
+        },
+        "selected": 2,
+        "alternatives": []
+      },
+      {
+        "productId": "SV1561",
+        "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+        "at": "2026-10-28T04:31:05.724Z",
+        "query": {
+          "subjectRef": "SV1561",
+          "intent": "DETAIL"
+        },
+        "selected": 1,
+        "alternatives": []
+      },
+      {
+        "productId": "SV1561",
+        "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+        "at": "2026-10-28T04:31:05.724Z",
+        "query": {
+          "subjectRef": "SV1561",
+          "intent": "DETAIL",
+          "componentRole": "TOP"
+        },
+        "selected": 1,
+        "alternatives": []
+      },
+      {
+        "productId": "SV1561",
+        "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+        "at": "2026-10-28T04:31:05.726Z",
+        "query": {
+          "subjectRef": "SV1561",
+          "intent": "GENERIC"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV1561",
+        "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+        "at": "2026-10-28T04:31:05.726Z",
+        "query": {
+          "subjectRef": "SV1561",
+          "intent": "DETAIL"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV1561",
+        "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+        "at": "2026-10-28T04:31:05.726Z",
+        "query": {
+          "subjectRef": "SV1561",
+          "intent": "DETAIL",
+          "componentRole": "TOP"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV1561",
+        "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+        "at": "2026-10-29T19:20:19.998Z",
+        "query": {
+          "subjectRef": "SV1561",
+          "intent": "GENERIC"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV1561",
+        "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+        "at": "2026-10-29T19:20:19.998Z",
+        "query": {
+          "subjectRef": "SV1561",
+          "intent": "DETAIL"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV1561",
+        "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+        "at": "2026-10-29T19:20:19.998Z",
+        "query": {
+          "subjectRef": "SV1561",
+          "intent": "DETAIL",
+          "componentRole": "TOP"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "V406",
+        "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+        "at": "2026-10-05T10:07:31.040Z",
+        "query": {
+          "subjectRef": "V406",
+          "intent": "GENERIC"
+        },
+        "selected": 2,
+        "alternatives": []
+      },
+      {
+        "productId": "V406",
+        "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+        "at": "2026-10-05T10:07:31.040Z",
+        "query": {
+          "subjectRef": "V406",
+          "intent": "DETAIL"
+        },
+        "selected": 1,
+        "alternatives": []
+      },
+      {
+        "productId": "V406",
+        "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+        "at": "2026-10-05T10:07:31.040Z",
+        "query": {
+          "subjectRef": "V406",
+          "intent": "DETAIL",
+          "componentRole": "TOP"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "V406",
+        "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+        "at": "2026-10-05T10:07:31.042Z",
+        "query": {
+          "subjectRef": "V406",
+          "intent": "GENERIC"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "V406",
+        "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+        "at": "2026-10-05T10:07:31.042Z",
+        "query": {
+          "subjectRef": "V406",
+          "intent": "DETAIL"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "V406",
+        "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+        "at": "2026-10-05T10:07:31.042Z",
+        "query": {
+          "subjectRef": "V406",
+          "intent": "DETAIL",
+          "componentRole": "TOP"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "V406",
+        "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+        "at": "2026-10-29T19:20:19.998Z",
+        "query": {
+          "subjectRef": "V406",
+          "intent": "GENERIC"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "V406",
+        "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+        "at": "2026-10-29T19:20:19.998Z",
+        "query": {
+          "subjectRef": "V406",
+          "intent": "DETAIL"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "V406",
+        "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+        "at": "2026-10-29T19:20:19.998Z",
+        "query": {
+          "subjectRef": "V406",
+          "intent": "DETAIL",
+          "componentRole": "TOP"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV2447",
+        "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+        "at": "2026-10-28T04:31:05.724Z",
+        "query": {
+          "subjectRef": "SV2447",
+          "intent": "GENERIC"
+        },
+        "selected": 2,
+        "alternatives": []
+      },
+      {
+        "productId": "SV2447",
+        "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+        "at": "2026-10-28T04:31:05.724Z",
+        "query": {
+          "subjectRef": "SV2447",
+          "intent": "DETAIL"
+        },
+        "selected": 2,
+        "alternatives": []
+      },
+      {
+        "productId": "SV2447",
+        "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+        "at": "2026-10-28T04:31:05.724Z",
+        "query": {
+          "subjectRef": "SV2447",
+          "intent": "DETAIL",
+          "componentRole": "TOP"
+        },
+        "selected": 1,
+        "alternatives": []
+      },
+      {
+        "productId": "SV2447",
+        "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+        "at": "2026-10-28T04:31:05.726Z",
+        "query": {
+          "subjectRef": "SV2447",
+          "intent": "GENERIC"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV2447",
+        "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+        "at": "2026-10-28T04:31:05.726Z",
+        "query": {
+          "subjectRef": "SV2447",
+          "intent": "DETAIL"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV2447",
+        "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+        "at": "2026-10-28T04:31:05.726Z",
+        "query": {
+          "subjectRef": "SV2447",
+          "intent": "DETAIL",
+          "componentRole": "TOP"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV2447",
+        "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+        "at": "2026-10-29T19:20:19.998Z",
+        "query": {
+          "subjectRef": "SV2447",
+          "intent": "GENERIC"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV2447",
+        "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+        "at": "2026-10-29T19:20:19.998Z",
+        "query": {
+          "subjectRef": "SV2447",
+          "intent": "DETAIL"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV2447",
+        "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+        "at": "2026-10-29T19:20:19.998Z",
+        "query": {
+          "subjectRef": "SV2447",
+          "intent": "DETAIL",
+          "componentRole": "TOP"
+        },
+        "selected": 0,
+        "alternatives": []
+      }
+    ],
+    "c": [
+      {
+        "productId": "SV1561",
+        "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+        "at": "2026-10-28T04:31:05.724Z",
+        "query": {
+          "subjectRef": "SV1561",
+          "intent": "GENERIC"
+        },
+        "selected": 2,
+        "alternatives": []
+      },
+      {
+        "productId": "SV1561",
+        "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+        "at": "2026-10-28T04:31:05.724Z",
+        "query": {
+          "subjectRef": "SV1561",
+          "intent": "DETAIL"
+        },
+        "selected": 1,
+        "alternatives": []
+      },
+      {
+        "productId": "SV1561",
+        "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+        "at": "2026-10-28T04:31:05.724Z",
+        "query": {
+          "subjectRef": "SV1561",
+          "intent": "DETAIL",
+          "componentRole": "TOP"
+        },
+        "selected": 1,
+        "alternatives": []
+      },
+      {
+        "productId": "SV1561",
+        "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+        "at": "2026-10-28T04:31:05.726Z",
+        "query": {
+          "subjectRef": "SV1561",
+          "intent": "GENERIC"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV1561",
+        "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+        "at": "2026-10-28T04:31:05.726Z",
+        "query": {
+          "subjectRef": "SV1561",
+          "intent": "DETAIL"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV1561",
+        "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+        "at": "2026-10-28T04:31:05.726Z",
+        "query": {
+          "subjectRef": "SV1561",
+          "intent": "DETAIL",
+          "componentRole": "TOP"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV1561",
+        "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+        "at": "2026-10-29T19:20:19.998Z",
+        "query": {
+          "subjectRef": "SV1561",
+          "intent": "GENERIC"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV1561",
+        "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+        "at": "2026-10-29T19:20:19.998Z",
+        "query": {
+          "subjectRef": "SV1561",
+          "intent": "DETAIL"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV1561",
+        "productHash": "fd155802d80cdf3428fae750990330116312a08c941f146dfdaa4b702a36884b",
+        "at": "2026-10-29T19:20:19.998Z",
+        "query": {
+          "subjectRef": "SV1561",
+          "intent": "DETAIL",
+          "componentRole": "TOP"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "V406",
+        "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+        "at": "2026-10-05T10:07:31.040Z",
+        "query": {
+          "subjectRef": "V406",
+          "intent": "GENERIC"
+        },
+        "selected": 2,
+        "alternatives": []
+      },
+      {
+        "productId": "V406",
+        "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+        "at": "2026-10-05T10:07:31.040Z",
+        "query": {
+          "subjectRef": "V406",
+          "intent": "DETAIL"
+        },
+        "selected": 1,
+        "alternatives": []
+      },
+      {
+        "productId": "V406",
+        "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+        "at": "2026-10-05T10:07:31.040Z",
+        "query": {
+          "subjectRef": "V406",
+          "intent": "DETAIL",
+          "componentRole": "TOP"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "V406",
+        "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+        "at": "2026-10-05T10:07:31.042Z",
+        "query": {
+          "subjectRef": "V406",
+          "intent": "GENERIC"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "V406",
+        "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+        "at": "2026-10-05T10:07:31.042Z",
+        "query": {
+          "subjectRef": "V406",
+          "intent": "DETAIL"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "V406",
+        "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+        "at": "2026-10-05T10:07:31.042Z",
+        "query": {
+          "subjectRef": "V406",
+          "intent": "DETAIL",
+          "componentRole": "TOP"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "V406",
+        "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+        "at": "2026-10-29T19:20:19.998Z",
+        "query": {
+          "subjectRef": "V406",
+          "intent": "GENERIC"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "V406",
+        "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+        "at": "2026-10-29T19:20:19.998Z",
+        "query": {
+          "subjectRef": "V406",
+          "intent": "DETAIL"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "V406",
+        "productHash": "790e92ab193e1e297e7021e8db2c69072db7cfe7a3a90cb8faf35f3f348e9324",
+        "at": "2026-10-29T19:20:19.998Z",
+        "query": {
+          "subjectRef": "V406",
+          "intent": "DETAIL",
+          "componentRole": "TOP"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV2447",
+        "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+        "at": "2026-10-28T04:31:05.724Z",
+        "query": {
+          "subjectRef": "SV2447",
+          "intent": "GENERIC"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV2447",
+        "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+        "at": "2026-10-28T04:31:05.724Z",
+        "query": {
+          "subjectRef": "SV2447",
+          "intent": "DETAIL"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV2447",
+        "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+        "at": "2026-10-28T04:31:05.724Z",
+        "query": {
+          "subjectRef": "SV2447",
+          "intent": "DETAIL",
+          "componentRole": "TOP"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV2447",
+        "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+        "at": "2026-10-28T04:31:05.726Z",
+        "query": {
+          "subjectRef": "SV2447",
+          "intent": "GENERIC"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV2447",
+        "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+        "at": "2026-10-28T04:31:05.726Z",
+        "query": {
+          "subjectRef": "SV2447",
+          "intent": "DETAIL"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV2447",
+        "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+        "at": "2026-10-28T04:31:05.726Z",
+        "query": {
+          "subjectRef": "SV2447",
+          "intent": "DETAIL",
+          "componentRole": "TOP"
+        },
+        "selected": 0,
+        "alternatives": []
+      },
+      {
+        "productId": "SV2447",
+        "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+        "at": "2026-10-29T19:20:19.998Z",
+        "query": {
+          "subjectRef": "SV2447",
+          "intent": "GENERIC"
+        },
+        "selected": 2,
+        "alternatives": []
+      },
+      {
+        "productId": "SV2447",
+        "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+        "at": "2026-10-29T19:20:19.998Z",
+        "query": {
+          "subjectRef": "SV2447",
+          "intent": "DETAIL"
+        },
+        "selected": 2,
+        "alternatives": []
+      },
+      {
+        "productId": "SV2447",
+        "productHash": "54d7505ad70df5ea603f895ff6919a1568f970a8fdb251139307ee8142612d38",
+        "at": "2026-10-29T19:20:19.998Z",
+        "query": {
+          "subjectRef": "SV2447",
+          "intent": "DETAIL",
+          "componentRole": "TOP"
+        },
+        "selected": 1,
+        "alternatives": []
+      }
+    ]
+  },
+  "cases": [
+    {
+      "caseId": "b1-price",
+      "priorDisposition": "SEND_ELIGIBLE",
+      "bodyHash": "615c8b1e5fd0f26c58f1914ae714314dea02904f425ea1ef30ce63a2c388a28e",
+      "historicalFirstDecision": {
+        "kind": "TOOLS",
+        "calls": [
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "SV2447",
+              "offerTypes": [
+                "SET_VAY",
+                "AO",
+                "CV"
+              ]
+            }
+          }
+        ]
+      },
+      "samples": 3,
+      "errors": 0,
+      "uniqueNormalizedOutputs": 2,
+      "uniqueActionSequences": [
+        "[\"read_product\"]"
+      ],
+      "note": "Variation is measured only at the captured decision point. Same output in three samples is not general stability."
+    },
+    {
+      "caseId": "b1-search-read-v2",
+      "priorDisposition": "SEND_ELIGIBLE",
+      "bodyHash": "00886e407d2ba18b2943780ab2f59e889d950312310e0bc1cef135d5c4eb548e",
+      "historicalFirstDecision": {
+        "kind": "TOOLS",
+        "calls": [
+          {
+            "name": "search_products",
+            "args": {
+              "query": "set váy Khánh Trang"
+            }
+          }
+        ]
+      },
+      "samples": 3,
+      "errors": 0,
+      "uniqueNormalizedOutputs": 1,
+      "uniqueActionSequences": [
+        "[\"search_products\"]"
+      ],
+      "note": "Variation is measured only at the captured decision point. Same output in three samples is not general stability."
+    },
+    {
+      "caseId": "b1-current-policy",
+      "priorDisposition": "SEND_ELIGIBLE",
+      "bodyHash": "ff81566001271c0ff892ddf38e0a8cb48ed1e53e19d5b727d0d46bc3193267ee",
+      "historicalFirstDecision": {
+        "kind": "TOOLS",
+        "calls": [
+          {
+            "name": "read_policy",
+            "args": {}
+          }
+        ]
+      },
+      "samples": 3,
+      "errors": 0,
+      "uniqueNormalizedOutputs": 1,
+      "uniqueActionSequences": [
+        "[\"read_policy\"]"
+      ],
+      "note": "Variation is measured only at the captured decision point. Same output in three samples is not general stability."
+    },
+    {
+      "caseId": "sales-size-advice:height-weight",
+      "priorDisposition": "SEND_ELIGIBLE",
+      "bodyHash": "b303ac1de3a3952fa0e00eb6652a9f3656a39832f96d2c21ad4fa858b3288bca",
+      "historicalFirstDecision": {
+        "kind": "TOOLS",
+        "calls": [
+          {
+            "name": "recommend_size",
+            "args": {
+              "customerStateOps": [
+                {
+                  "sourceQuote": "Chị cao 1m58",
+                  "op": "SET",
+                  "value": 158,
+                  "field": "measurements.HEIGHT_CM"
+                },
+                {
+                  "sourceQuote": "nặng 52kg",
+                  "value": 52,
+                  "field": "measurements.WEIGHT_KG",
+                  "op": "SET"
+                },
+                {
+                  "value": "RELAXED",
+                  "field": "fitPreference",
+                  "op": "SET",
+                  "sourceQuote": "Chị thích rộng một chút"
+                }
+              ],
+              "subjectRef": "SV2447"
+            }
+          }
+        ]
+      },
+      "samples": 3,
+      "errors": 0,
+      "uniqueNormalizedOutputs": 2,
+      "uniqueActionSequences": [
+        "[\"recommend_size\"]"
+      ],
+      "note": "Variation is measured only at the captured decision point. Same output in three samples is not general stability."
+    },
+    {
+      "caseId": "media-and-size:ask",
+      "priorDisposition": "SEND_ELIGIBLE",
+      "bodyHash": "2fd20dc2b2f22bebe2ff9b607b62f019650cd2b742b9e0654d90257b1cec5e79",
+      "historicalFirstDecision": {
+        "kind": "TOOLS",
+        "calls": [
+          {
+            "name": "select_product_media",
+            "args": {
+              "intent": "DETAIL",
+              "componentRole": "TOP",
+              "subjectRef": "SV2447"
+            }
+          },
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "SV2447",
+              "offerType": "SET_VAY"
+            }
+          },
+          {
+            "name": "recommend_size",
+            "args": {
+              "subjectRef": "SV2447",
+              "customerStateOps": [
+                {
+                  "sourceQuote": "Chị cao 1m58, nặng 52kg thì lấy size nào?",
+                  "field": "measurements.HEIGHT_CM",
+                  "value": 158,
+                  "op": "SET"
+                },
+                {
+                  "sourceQuote": "Chị cao 1m58, nặng 52kg thì lấy size nào?",
+                  "value": 52,
+                  "op": "SET",
+                  "field": "measurements.WEIGHT_KG"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "samples": 3,
+      "errors": 0,
+      "uniqueNormalizedOutputs": 3,
+      "uniqueActionSequences": [
+        "[\"select_product_media\",\"recommend_size\",\"read_product\"]",
+        "[\"recommend_size\",\"select_product_media\"]"
+      ],
+      "note": "Variation is measured only at the captured decision point. Same output in three samples is not general stability."
+    },
+    {
+      "caseId": "stateful-quote",
+      "priorDisposition": "SEND_ELIGIBLE",
+      "bodyHash": "3cdd593b5d42a1102654d0fccb51fdf289dec637c66ebc39a1b6305ed76a0a6e",
+      "historicalFirstDecision": {
+        "kind": "FINAL",
+        "text": "Dạ, hai áo giá 998.000đ, phí ship 30.000đ và được giảm 49.900đ ưu đãi nên tổng thanh toán của mình là 978.100đ ạ."
+      },
+      "samples": 3,
+      "errors": 0,
+      "uniqueNormalizedOutputs": 3,
+      "uniqueActionSequences": [
+        "[\"FINAL\"]"
+      ],
+      "note": "Variation is measured only at the captured decision point. Same output in three samples is not general stability."
+    }
+  ],
+  "artifacts": [
+    {
+      "file": "INPUTS.json",
+      "sha256": "9b889b645fff8c6899bfc36444cd3c2390d9620ce85fa009e8f47d30e64e82ed"
+    },
+    {
+      "file": "SEAL.json",
+      "sha256": "519e23e953014dca6d2bf57175dc8b0968c5a86f7f19fef163de1726f28834ee"
+    },
+    {
+      "file": "B_CODE_2.json",
+      "sha256": "ba7b641235cb6491711f871ae008fcff16ee76329cd68fb83e7ee8cd947376b7"
+    },
+    {
+      "file": "C_CODE_2.json",
+      "sha256": "f9c5aeb3851cdaabe9702120fe62cb846ca1caae85acbf3b992b175a52150bba"
+    },
+    {
+      "file": "OWNER_RESULTS.json",
+      "sha256": "fcce5bc76d618938f5f887dac0a78b8e5094cc6393c7ac90b5a72af954497f3e"
+    },
+    {
+      "file": "OWNER_REQUESTS.jsonl",
+      "sha256": "29d6a2b9953efd1a5a6127f5004509a907421dbc0a9abf8183db46b0856a1fda"
+    }
+  ],
+  "limitations": [
+    "Component replay is not paired B/C end-to-end qualification",
+    "Historical final gate clock is unavailable; lower-bound clock is derived",
+    "One-step owner samples do not execute tools or measure whole-turn quality",
+    "Historical full database and live Qdrant index/vector parity unavailable",
+    "Normalized differences can be wording/sourceQuote differences, not changed business decisions"
+  ]
+}

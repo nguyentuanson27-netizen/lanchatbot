@@ -2779,3 +2779,11 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Independent accounting auditPASS: all66wire/model/firewall checks and34raw/40artifacthashes, receipts/capture; finaljournal=attempts=raw=66, earlier62interim only.
 - [x] FreshindependentSolHighblindjudge22RESOLVED/0UNRESOLVED, whole-turn10/16+4/6; frozen conjunctive quality6/16+2/6, both below90%; hardSafety22/22 on observed outcomes only. [Reports/findings/grades](../apps/worker/evals/single-agent-commerce-qualification/read-path-rerun-20261030/REPORT.md). Priorblindgrades still incomplete; no fabricated pairedcomparison.
 - [ ] Qualification remainsBLOCKED: unmetquality, separateSAFETY/freshholdout/exposuremapping/parity/C3comparison. Source/toolplanning/sentinel/media matching findings remain. Stop authorizedbatch; no automatic fix, modelrerun, merge or deploy.
+
+## Controlled B–C diagnosis — 2026-10-30
+
+- [x] Freeze six historical B SEND_ELIGIBLE cases and exact captured owner bodies/trusted drafts; B source4efbea67 vs C runtime ec468293; common107product world retained without claiming full historical B DB.
+- [x] Build exact B detached worktree; focused6/6 + qualification86/86 PASS. Commit/seal diagnostic source3731e05b, 1287 artifact hashes, input5702bcdd; production source/packages/prompts unchanged.
+- [x] Offline same-input controls: all-offer SV2447 B OK/C REJECTED; single offers both OK; size same input gives M both arms; six hard prechecks accepted at explicitly derived lower-bound clock, not captured final gate time. Media expiry reproduced both arms, C explicit revalidation difference retained. Ambiguous metadata/policy-read controls same B/C; native prepare callback not measured.
+- [x] Owner18/18 registered samples, one HTTP each/0error/0retry, identical per-case wire hashes/firewall18PASS; no tool execution/effect/send. Two cases change read scope/tool sequence; size sourceQuote and total wording differences kept separate from decision instability. Post-run analysis asserts original artifacts and denominator.
+- [ ] Historical live Qdrant/index/vector parity and paired full E2E quality remain unmeasured. No candidate runtime fix, new qualification result or GO claim. [Report/evidence](../apps/worker/evals/single-agent-commerce-qualification/bc-controlled-20261030/REPORT.md).
