@@ -42,8 +42,10 @@ test('native read policy uses active sources without consuming the transaction p
 const response=()=>new Response(JSON.stringify({modelVersion:'gemini-3.5-flash-lite',usageMetadata:{promptTokenCount:7,candidatesTokenCount:3},
  candidates:[{finishReason:'STOP',content:{role:'model',parts:[{text:'Áo 499k chị nhé.'}]}}]}));
 test('dispatch preflight rejects changed registration corpus, slots, world, codec or review before clients are constructed',()=>{
- const c=config();c.nativeCodecs=NATIVE_CODECS;const pop=corpus(),world={kind:'FROZEN_PUBLIC_BUSINESS_WORLD'};
- for(const s of pop.scenarios.filter(s=>s.mode!=='SAFETY'))s.judgeContext.sourceInventory=judgeSourceInventory(world,[],{noProductLookupRequired:true});
+ const c=config();c.nativeCodecs=NATIVE_CODECS;const pop=corpus(),world={kind:'FROZEN_PUBLIC_BUSINESS_WORLD',products:[{productId:'P1',canonicalCode:'P1',images:[]}],snapshots:{P1:null}};
+ for(const s of pop.scenarios.filter(s=>s.mode!=='SAFETY')){
+  s.judgeContext.sourceInventory=judgeSourceInventory(world,['P1']);s.judgeContext.sourceRequirements={kind:'INITIAL_PRODUCTS',productCodes:['P1']};
+ }
  pop.review={status:'APPROVED',worldHash:digest(world),newProviderResultsObserved:0};
  const sealed={config:c,corpus:pop,corpusHash:digest(pop),identity:qualificationIdentity(c),worldHash:digest(world),
   slots:registerSlots(c,pop),sendEnabled:false,status:'SEALED_NOT_EXECUTED',registeredAt:'2026-10-28T00:00:00.000Z'};

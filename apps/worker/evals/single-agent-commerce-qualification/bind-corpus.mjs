@@ -7,7 +7,7 @@ import {createCommerceTools} from '../../dist/single-agent-commerce.js';
 import {hardPrecheck} from '../../dist/single-agent-semantic-verifier-boundary.js';
 import {frozenCatalog,frozenFacts} from './frozen-world.mjs';
 import {digest,validateCorpus,runtimeProjection} from './qualification.mjs';
-import {judgeSourceInventory} from './evaluator-source.mjs';
+import {judgeSourceInventory,assertJudgeSourceInventory} from './evaluator-source.mjs';
 export async function bindCorpus({draft,world,bindings,initialStateArtifact}){
  const worldHash=digest(world);
  assert(world.sourceWrites===0&&world.providerRequests===0,'C_WORLD_SOURCE_READS_ONLY');
@@ -51,9 +51,14 @@ export async function bindCorpus({draft,world,bindings,initialStateArtifact}){
    assert(s.turns.every(t=>t.history.length===0),'C_INITIAL_HISTORY_SEED_NOT_IMPLEMENTED');
    s.initialContext={worldHash,initialStateHash:digest(initialStateArtifact.publicState),initialHistoryHash:digest([]),
     freshnessPolicyHash:digest({policy:'ACTUAL_WALL_CLOCK_CURRENT_SOURCE_READBACK',maxFactAgeSeconds:world.config.maxFactAgeSeconds})};
-   s.judgeContext={sourceInventory:judgeSourceInventory(world,b.judgeProductCodes??b.initialProductCodes,
+   const judgeCodes=[...new Set([...b.initialProductCodes,...(b.judgeProductCodes??[])])];
+   assert(!b.noProductLookupRequired||judgeCodes.length===0,'C_JUDGE_SOURCE_SUBJECT_COVERAGE');
+   const kind=b.judgeSourceKind??(b.initialProductCodes.length?'INITIAL_PRODUCTS':judgeCodes.length?'DISCOVERY_POOL':null);
+   assert(kind,'C_JUDGE_SOURCE_REQUIREMENTS');
+   s.judgeContext={sourceRequirements:{kind,productCodes:judgeCodes},sourceInventory:judgeSourceInventory(world,judgeCodes,
     {noProductLookupRequired:b.noProductLookupRequired===true}),facts:trusted.protectedClaims,policy:trusted.policyLiterals,products:trusted.runtimeProducts??[],
     initialState:initialStateArtifact.publicState,capabilities:bindings.capabilities};
+   assertJudgeSourceInventory(s.judgeContext.sourceInventory,worldHash,world,s);
    if(b.nativeCodeOwnedTurns)s.nativeCodeOwnedTurns=b.nativeCodeOwnedTurns;
   }
   runtimeProjection(s,0);

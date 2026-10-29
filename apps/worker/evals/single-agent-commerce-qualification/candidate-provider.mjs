@@ -31,7 +31,7 @@ export function assertSealedInputs(sealed,world){
  assert.equal(readiness(sealed.config,{stage:'ABSOLUTE'}).status,'READY','C_ABSOLUTE_PROTOCOL_BLOCKED');
  assert.equal(sealed.status,'SEALED_NOT_EXECUTED');assert.equal(digest(world),sealed.worldHash,'C_WORLD_CHANGED');
  if(sealed.corpus.requiredCapabilities?.includes('PRODUCT_SEARCH'))validateFrozenIndex(world.search,world.config.vertex.embeddingDimension);
- for(const s of sealed.corpus.scenarios.filter(s=>s.mode!=='SAFETY'))assertJudgeSourceInventory(s.judgeContext?.sourceInventory,digest(world),world);
+ for(const s of sealed.corpus.scenarios.filter(s=>s.mode!=='SAFETY'))assertJudgeSourceInventory(s.judgeContext?.sourceInventory,digest(world),world,s);
  assert(sealed.config.nativeCodecs&&digest(sealed.config.nativeCodecs)===digest(NATIVE_CODECS),'C_NATIVE_CODEC_REGISTRATION');
  assert(sealed.corpus.scenarios.filter(s=>s.mode!=='SAFETY').every(s=>s.turns.every(t=>t.history.length===0)),
   'C_INITIAL_HISTORY_SEED_NOT_IMPLEMENTED');

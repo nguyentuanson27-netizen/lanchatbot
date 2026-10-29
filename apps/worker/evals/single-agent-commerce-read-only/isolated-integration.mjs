@@ -688,9 +688,22 @@ try{
   const other=await runtime.readAcceptedCommerceMedia({pageId,conversationId:j.bound.conversationId,customerHash:hash('other'),
     recipientHash:hash('synthetic-recipient-'+j.bound.customerHash),before:new Date(Date.now()+1000)});
   assert.equal(other.length,0);
-  let seenHistory;
-  await j.turn('Cả bộ bao nhiêu em?', [request=>{seenHistory=request.contents;return say('Dạ chị.');}]);
-  assert(JSON.stringify(seenHistory).includes('RECENT_SHOP_IMAGES_ACCEPTED'));
+  let seenHistory,followup;const reads=[],readMedia=runtime.readAcceptedCommerceMedia;
+  runtime.readAcceptedCommerceMedia=async query=>{
+   const clientBefore=new Date().toISOString();
+   try{const rows=await readMedia.call(runtime,query);if(query.conversationId===j.bound.conversationId)reads.push({before:query.before.toISOString(),
+    rowCount:rows.length,scope:{pageId:query.pageId,conversationId:query.conversationId,customerHash:query.customerHash,recipientHash:query.recipientHash},
+    clientBefore,clientAfter:new Date().toISOString()});return rows;}
+   catch(error){reads.push({before:query.before.toISOString(),errorCode:'MEDIA_READ_ERROR',clientBefore,clientAfter:new Date().toISOString()});throw error;}
+  };
+  try{followup=await j.turn('Cả bộ bao nhiêu em?', [request=>{seenHistory=request.contents;return say('Dạ chị.');}]);}
+  finally{runtime.readAcceptedCommerceMedia=readMedia;}
+  const clientBeforeDbClock=new Date().toISOString(),dbClock=(await pool.query('SELECT clock_timestamp() AS observed_at')).rows[0].observed_at;
+  report.n4HistoryDiagnostic={reads,acceptedAt:delivered.map(m=>m.occurredAt),inboundOccurredAt:followup.inboundMessages[0].occurredAt,
+   // The synthetic enqueue above deliberately uses the same now for occurredAt/receivedAt.
+   inputReceivedAt:followup.inboundMessages[0].occurredAt,clientBeforeDbClock,dbClock:dbClock.toISOString(),clientAfterDbClock:new Date().toISOString(),
+   owners:followup.owners,terminal:followup.result.terminal,history:seenHistory??null};save();
+  assert(JSON.stringify(seenHistory).includes('RECENT_SHOP_IMAGES_ACCEPTED'),'N4_HISTORY_MISSING; see n4HistoryDiagnostic');
  });
  await check('B composed N5 image-first text-last handoff links the attachment history and retains encrypted source',async()=>{
   const j=await statefulFixture(),r=await j.turn(null,[],{messages:[{text:null,attachments:[{type:'image',url:'https://content.pancake.vn/c3-private-receipt.jpg',providerId:'synthetic-receipt'}]},

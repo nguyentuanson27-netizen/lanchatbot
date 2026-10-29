@@ -71,13 +71,15 @@ try{
    'C_FRESH_CORPUS_REVIEW_REQUIRED');
   check(!JSON.stringify(corpus).includes('{{'),'C_UNRESOLVED_HOLDOUT_INPUT');
   if(config.nativeCodecs){
-   for(const s of corpus.scenarios.filter(s=>s.mode!=='SAFETY'))assertJudgeSourceInventory(s.judgeContext?.sourceInventory,digest(world),world);
+   for(const s of corpus.scenarios.filter(s=>s.mode!=='SAFETY'))assertJudgeSourceInventory(s.judgeContext?.sourceInventory,digest(world),world,s);
    check(corpus.scenarios.filter(s=>s.mode!=='SAFETY').every(s=>s.turns.every(t=>t.history.length===0)),'C_INITIAL_HISTORY_SEED_NOT_IMPLEMENTED');
    if(corpus.requiredCapabilities?.includes('PRODUCT_SEARCH'))validateFrozenIndex(world.search,world.config.vertex.embeddingDimension);
   }
   check(corpus.scenarios.filter(s=>s.mode!=='SAFETY').every(s=>s.judgeContext&&s.initialContext?.worldHash===digest(world)&&
    ['initialStateHash','initialHistoryHash','freshnessPolicyHash'].every(k=>/^[a-f0-9]{64}$/.test(s.initialContext[k]))),'C_CONTEXT_BINDINGS_REQUIRED');
   const registration={version:1,runSourceSha:git('rev-parse','HEAD'),registeredAt:new Date().toISOString(),
+   ...(config.nativeCodecs?{developmentInventory:{inventoryHash:developmentArtifact.inventoryHash,reviewHash:digest(developmentArtifact.review),
+    artifactHash:digest(developmentArtifact),mappingArtifactHashes:(developmentArtifact.review.sourceMappings??[]).map(m=>m.artifactSha256)}}:{}),
    config,corpus,worldHash:digest(world),identity:qualificationIdentity(config),corpusHash:digest(corpus),slots:registerSlots(config,corpus),
    status:'SEALED_NOT_EXECUTED',sendEnabled:false,providerRequests:0};
   const out=newOutput();write(resolve(out,'REGISTRATION.json'),registration);write(resolve(out,'PRIVATE_BLIND_SEED.json'),{seed});

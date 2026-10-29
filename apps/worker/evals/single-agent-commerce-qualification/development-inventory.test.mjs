@@ -1,9 +1,10 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {runtimeFingerprints,approvedDevelopmentInventory,developmentInventory} from './development-inventory.mjs';
-import {mkdtempSync,writeFileSync,rmSync} from 'node:fs';
+import {mkdtempSync,writeFileSync,rmSync,readFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {resolve,dirname,basename} from 'node:path';
+import {createHash} from 'node:crypto';
 import {digest} from './qualification.mjs';
 test('SKU metadata changes do not hide exact reused dialogue; incomplete history remains blocked',()=>{
  const t={latest:'Áo này giá bao nhiêu em?',history:[],initialProductCodes:['P1']},other={...t,initialProductCodes:['P2']};
@@ -27,9 +28,22 @@ test('existing approved fingerprint lists are retained, not silently dropped by 
  const manifest=developmentInventory(paths),corpus={scenarios:[{turns:[{latest:'new unit input',history:[],initialProductCodes:[]}]}]};
  manifest.review={status:'APPROVED',inventoryHash:manifest.inventoryHash,corpusHash:digest(corpus),reviewer:'UNIT_ONLY',nearDuplicateReviewHash:'a'.repeat(64),historyCoverageComplete:true};
  assert.deepEqual(approvedDevelopmentInventory(manifest,corpus),['f'.repeat(64)]);
+ const stripped=structuredClone(manifest);stripped.fingerprints=[];stripped.withoutProducts=[];
+ const {review,inventoryHash,...body}=stripped;stripped.inventoryHash=digest(body);stripped.review.inventoryHash=stripped.inventoryHash;
+ assert.throws(()=>approvedDevelopmentInventory(stripped,corpus),/FINGERPRINT_DERIVATION/);
  writeFileSync(paths[0].path,'[]');assert.throws(()=>approvedDevelopmentInventory(manifest,corpus),/SOURCE_CHANGED/);
  const partial=resolve(root,'partial.json');writeFileSync(partial,JSON.stringify({runtimeInput:{latest:'known',history:[],initialProductCodes:[]},
   requestBody:{unknownWire:true},role:'OWNER'}));
  const flagged=developmentInventory([{path:partial,population:'C'}]);assert.equal(flagged.artifacts[0].runtimeCount,1);
  assert.equal(flagged.artifacts[0].needsSourceMapping,true);
+ // Concrete mapping rows, not a bare source hash, must participate in the reuse check.
+ const runtime={latest:'mapped unit input',history:[],initialProductCodes:[]},target={scenarios:[{turns:[runtime]}]};
+ const full=developmentInventory([...paths,{path:partial,population:'C'}]);
+ full.review={status:'APPROVED',inventoryHash:full.inventoryHash,corpusHash:digest(target),reviewer:'UNIT_ONLY',nearDuplicateReviewHash:'a'.repeat(64),
+  historyCoverageComplete:true,mappedSourceHashes:[full.artifacts.at(-1).sha256]};
+ assert.throws(()=>approvedDevelopmentInventory(full,target),/MAPPING_REQUIRED/);
+ const mapping=resolve(root,'mapping.json'),sourceHash=full.artifacts.at(-1).sha256;
+ writeFileSync(mapping,JSON.stringify({kind:'EXPOSURE_RUNTIME_MAPPING_V1',sourceHash,runtimes:[runtime]}));
+ full.review.sourceMappings=[{sourceHash,artifactPath:mapping,artifactSha256:createHash('sha256').update(readFileSync(mapping)).digest('hex')}];
+ assert.throws(()=>approvedDevelopmentInventory(full,target),/REUSE_WITHOUT_PRODUCT/);
 });
