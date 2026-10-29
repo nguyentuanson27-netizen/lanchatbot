@@ -8,7 +8,7 @@ import {validateCorpus,digest} from './qualification.mjs';
 import {corpus,config} from './fixtures.test-support.mjs';
 import {collectNativePopulation} from './native-population.mjs';
 import {createAttemptQueue} from '../single-agent-commerce-read-only/attempt-evidence.mjs';
-const cases=[['c-20261028-s09',1],['c-20261028-j1',3],['c-20261028-j6',3],['c-20261028-s06',1],['c-20261028-s11',1],['SCOPED_MEDIA_OBSERVATION_VERIFIER_ONLY',1]];
+const cases=[['c-20261028-j1',3],['c-20261028-j6',3],['c-20261028-s09',1],['c-20261028-s06',1],['c-20261028-s11',1],['SCOPED_MEDIA_OBSERVATION_VERIFIER_ONLY',1]];
 const reg=()=>({kind:'PHASE_C_DEVELOPMENT_DIAGNOSTIC_V1',corpus:{scenarios:cases.map(([id,n],i)=>({id,mode:i===5?'SAFETY':n===3?'JOURNEY':'SINGLE',turns:Array.from({length:n},()=>({latest:'unit',history:[],initialProductCodes:[]}))}))},sourceChecks:[]});
 test('diagnostic cap includes failed zero-HTTP generations, permits owner3/verifier1 and all37;38 stops',()=>{
  const r=reg();r.slots=diagnosticSlots(r.corpus);const c=diagnosticControl(r,{checkSource:()=>{}});

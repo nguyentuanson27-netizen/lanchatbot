@@ -10,9 +10,9 @@
   "maximumVerifierGenerationsPerTurn": 1,
   "generationRetry": 0,
   "cases": [
-    {"sourceCase": "c-20261028-s09", "turns": 1, "maximumGenerationRequests": 4},
     {"sourceCase": "c-20261028-j1", "turns": 3, "maximumGenerationRequests": 12},
     {"sourceCase": "c-20261028-j6", "turns": 3, "maximumGenerationRequests": 12},
+    {"sourceCase": "c-20261028-s09", "turns": 1, "maximumGenerationRequests": 4},
     {"sourceCase": "c-20261028-s06", "turns": 1, "maximumGenerationRequests": 4},
     {"sourceCase": "c-20261028-s11", "turns": 1, "maximumGenerationRequests": 4},
     {"sourceCase": "SCOPED_MEDIA_OBSERVATION_VERIFIER_ONLY", "turns": 1, "maximumGenerationRequests": 1}
