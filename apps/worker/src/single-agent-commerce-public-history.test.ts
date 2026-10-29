@@ -3,6 +3,14 @@ import {projectCommerceHistoryMetadata,publicCheckoutState} from "./single-agent
 import {commerceHistory} from "./single-agent-commerce-ingress.js";
 const event={type:"ACCEPTED_PUBLIC_CART_SUMMARY" as const,eventId:"a".repeat(64),messageHash:"b".repeat(64),acceptedAt:"2026-10-25T01:00:00Z",
   cartId:"50000000-0000-4000-8000-000000000001",cartVersion:2,discountTotalVnd:30000,grandTotalVnd:499000};
+it("does not expose internal payment/preview readiness markers as questions asked or sent",()=>{
+ for(const field of ["PAYMENT_METHOD","ORDER_PREVIEW"]){
+  const state=publicCheckoutState({checkoutDraft:{paymentMethod:"COD"},clarification:{reasonCode:"CHECKOUT_DETAILS_MISSING",
+   missingFields:[field],attemptCount:field==="PAYMENT_METHOD"?0:2,askedQuestionFingerprints:field==="PAYMENT_METHOD"?[]:["a".repeat(64),"b".repeat(64)]}});
+  expect(state?.lastQuestion??null).toBeNull();
+  expect(JSON.stringify(state)).not.toContain("ORDER_PREVIEW");
+ }
+});
 it("preserves persisted COD and clarification meaning without private values or a delivery claim",()=>{
  const state={checkoutDraft:{paymentMethod:"COD",fullName:"PRIVATE_NAME",phone:"0900000000",address:"PRIVATE_ADDRESS"},
   clarification:{reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["FULL_NAME"],attemptCount:1,askedQuestionFingerprints:["a".repeat(64)]}};

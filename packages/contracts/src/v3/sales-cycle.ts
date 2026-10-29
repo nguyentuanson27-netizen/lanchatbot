@@ -97,12 +97,13 @@ export const SalesCycleClarificationStateV1Schema = z.object({
   reasonCode: SalesCycleClarificationReasonV1Schema,
   missingFields: z.array(z.string().min(1).max(80)).min(1).max(10),
   productId: CanonicalProductIdV1Schema.nullable(),
-  attemptCount: z.number().int().min(1).max(10),
+  attemptCount: z.number().int().min(0).max(10),
   maxAttempts: z.number().int().min(1).max(10),
-  askedQuestionFingerprints: z.array(BareSha256Schema).min(1).max(10),
+  askedQuestionFingerprints: z.array(BareSha256Schema).min(0).max(10),
   lastRequestedAt: DateTimeSchema,
 }).strict().superRefine((value, context) => {
-  if (value.attemptCount > value.maxAttempts ||
+  if ((value.attemptCount === 0 && (value.missingFields.length !== 1 || value.missingFields[0] !== "PAYMENT_METHOD")) ||
+    value.attemptCount > value.maxAttempts ||
     value.askedQuestionFingerprints.length !== value.attemptCount ||
     new Set(value.askedQuestionFingerprints).size !== value.askedQuestionFingerprints.length ||
     [...value.missingFields].sort().some((field, index) => field !== value.missingFields[index]) ||

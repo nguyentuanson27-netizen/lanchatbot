@@ -654,13 +654,14 @@ export function formatCartLineSelection(line: CartV1["lines"][number], product?:
   const label = product && normalizeCatalogToken(product.productId) === line.parentProductId && product.title.trim()
     ? `(mẫu “${product.title}”)` : line.parentProductId;
   const roles = { TOP: "áo", SKIRT: "chân váy", PANTS: "quần", DRESS: "váy", JACKET: "áo khoác", ACCESSORY: "phụ kiện", OTHER: "sản phẩm" };
+  const color = (value: string | null) => value && value !== "__NO_COLOR__" ? ` màu ${value.toLocaleLowerCase("vi-VN")}` : "";
   const component = (c: typeof line.components[number]) => (c.quantity > 1 ? `${c.quantity} ` : "") + roles[c.componentRole] +
-    (c.color ? ` màu ${c.color.toLocaleLowerCase("vi-VN")}` : "") + (c.size ? `, size ${c.size}` : "");
+    color(c.color) + (c.size ? `, size ${c.size}` : "");
   if (line.offerKind === "SET" || line.offerKind === "COMBO_3") {
     return `${line.quantity} ${line.offerKind === "SET" ? "bộ" : "combo"} ${label} (${line.components.map(component).join("; ")})`;
   }
   const c = line.components[0]!, role = roles[c.componentRole];
-  return `${line.quantity} ${role} ${label}${c.color ? ` màu ${c.color.toLocaleLowerCase("vi-VN")}` : ""}${c.size ? `, size ${c.size}` : ""}`;
+  return `${line.quantity} ${role} ${label}${color(c.color)}${c.size ? `, size ${c.size}` : ""}`;
 }
 
 function cartSummary(cart: CartV1, includeSelections = false, productNames: RealtimeSalesCycleInput["productNames"] = []): string {
@@ -1135,7 +1136,7 @@ export async function evaluateRealtimeSalesCycle(
       sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
       conversationRevision: input.conversationRevision,
       salesCycleRevision: initial.revision,
-      productIds: selections.map(({ line }) => line.parentProductId),
+      productIds: [...new Set(selections.map(({ line }) => line.parentProductId))].sort(),
       cartId: cart?.cartId ?? null,
       cartVersion: cart?.revision ?? null,
       cartStateHash: cart === null
@@ -1385,7 +1386,7 @@ export async function evaluateRealtimeSalesCycle(
       sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
       conversationRevision: input.conversationRevision,
       salesCycleRevision: initial.revision,
-      productIds: state.cart.value.lines.map(({ parentProductId }) => parentProductId),
+      productIds: [...new Set(state.cart.value.lines.map(({ parentProductId }) => parentProductId))].sort(),
       cartId: state.cart.value.cartId,
       cartVersion: state.cart.value.revision,
       cartStateHash: cartHash(state.cart.value),
@@ -1464,7 +1465,11 @@ export async function evaluateRealtimeSalesCycle(
     const sameRequest = previous?.reasonCode === "CHECKOUT_DETAILS_MISSING" &&
       previous.productId === productId &&
       sameMissingFields(previous.missingFields, asked);
-    const attemptCount = sameRequest ? previous.attemptCount + 1 : 1;
+    const paymentQuestion = (fields: readonly string[]) => fields.length === 1 &&
+      (fields[0] === "PAYMENT_METHOD" || fields[0] === "ORDER_PREVIEW");
+    const sameBudget = sameRequest || previous?.reasonCode === "CHECKOUT_DETAILS_MISSING" &&
+      (paymentQuestion(previous.missingFields) || paymentQuestion(asked));
+    const attemptCount = sameBudget ? previous!.attemptCount + 1 : 1;
     if (attemptCount > MAX_CHECKOUT_CLARIFICATION_ATTEMPTS) {
       return {
         ...failedOutput("CLARIFICATION_RETRY_EXHAUSTED", plan()),
@@ -1527,7 +1532,7 @@ export async function evaluateRealtimeSalesCycle(
     (["AMBIGUOUS","UNSUPPORTED"].includes(candidatePayment.kind)||candidatePayment.kind==="RESOLVED"&&!paymentAllowed)){
     const {paymentMethod:_ignored,...fields}=checkoutDetails(input.text,undefined,undefined,"SINGLE_FIELD");
     if(Object.keys(fields).length){const c=apply({kind:"CHECKOUT_DETAILS_CAPTURED",commandId:commandId("checkout-details"),details:fields});if(c.status!=="APPLIED")return failedOutput("CHECKOUT_DETAILS_REJECTED",plan());}
-    return requestCheckoutClarification(["PAYMENT_METHOD"]);
+    return requestCheckoutClarification(["PAYMENT_METHOD"], checkoutCapturedFields(fields));
   }
 
   if (input.checkoutCollection === "SINGLE_FIELD" && state.clarification?.reasonCode === "CHECKOUT_DETAILS_MISSING" &&
@@ -1808,7 +1813,7 @@ export async function evaluateRealtimeSalesCycle(
       sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
       conversationRevision: input.conversationRevision,
       salesCycleRevision: input.stateRevision,
-      productIds: state.cart?.value.lines.map(({ parentProductId }) => parentProductId) ?? [],
+      productIds: [...new Set(state.cart?.value.lines.map(({ parentProductId }) => parentProductId) ?? [])].sort(),
       cartId: state.cart?.value.cartId ?? null,
       cartVersion: state.cart?.value.revision ?? null,
       cartStateHash: state.cart ? cartHash(state.cart.value) : null,
@@ -2052,7 +2057,7 @@ export async function evaluateRealtimeSalesCycle(
         details,
       });
       if (captured.status !== "APPLIED") return failedOutput("CHECKOUT_DETAILS_REJECTED");
-      if (state.clarification) {
+      if (state.clarification && !(state.clarification.missingFields.length === 1 && state.clarification.missingFields[0] === "ORDER_PREVIEW")) {
         const resolved = apply({
           kind: "CLARIFICATION_RESOLVED",
           commandId: commandId("clarification-resolved"),

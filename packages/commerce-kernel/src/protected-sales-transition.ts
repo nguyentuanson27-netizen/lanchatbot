@@ -68,12 +68,17 @@ export function applySalesClarificationTransitionV1(input: Readonly<{
     previous.productId === transition.data.productId &&
     previous.missingFields.length === missingFields.length &&
     previous.missingFields.every((field, index) => field === missingFields[index]);
-  const attemptCount = sameQuestion ? previous.attemptCount + 1 : 1;
-  const askedQuestionFingerprints = sameQuestion
-    ? [...previous.askedQuestionFingerprints, transition.data.questionFingerprint]
+  // A payment dispute must not replenish the budget of an unfinished intake.
+  const paymentQuestion = (fields: readonly string[]) => fields.length === 1 &&
+    (fields[0] === "PAYMENT_METHOD" || fields[0] === "ORDER_PREVIEW");
+  const sameBudget = sameQuestion || (previous?.reasonCode === transition.data.reasonCode &&
+    (paymentQuestion(previous.missingFields) || paymentQuestion(missingFields)));
+  const attemptCount = sameBudget ? previous!.attemptCount + 1 : 1;
+  const askedQuestionFingerprints = sameBudget
+    ? [...previous!.askedQuestionFingerprints, transition.data.questionFingerprint]
     : [transition.data.questionFingerprint];
   if (attemptCount > transition.data.maxAttempts ||
-    (sameQuestion && previous.askedQuestionFingerprints.includes(
+    (sameBudget && previous!.askedQuestionFingerprints.includes(
       transition.data.questionFingerprint,
     ))) {
     return { status: "BLOCKED", reasonCode: "CLARIFICATION_RETRY_INVALID" };
@@ -90,6 +95,27 @@ export function applySalesClarificationTransitionV1(input: Readonly<{
   return clarification.success
     ? { status: "APPLIED", clarification: clarification.data }
     : { status: "BLOCKED", reasonCode: "CLARIFICATION_REQUEST_INVALID" };
+}
+
+/** Resolve a captured payment choice without erasing an unfinished intake's budget.
+ * Automatic field advance is not a new question, so its count/history is unchanged.
+ */
+export function clarificationAfterCheckoutCaptureV1(
+  clarification: SalesCycleClarificationStateV1 | null | undefined,
+  before: CheckoutDraftV1 | null,
+  after: CheckoutDraftV1,
+  details: CheckoutDetailsPatchV1,
+): SalesCycleClarificationStateV1 | null {
+  if (clarification?.reasonCode !== "CHECKOUT_DETAILS_MISSING" ||
+    clarification.missingFields.length !== 1 || clarification.missingFields[0] !== "PAYMENT_METHOD") return clarification ?? null;
+  const fields = [["FULL_NAME", "fullName"], ["PHONE", "phone"], ["ADDRESS", "address"],
+    ["PAYMENT_METHOD", "paymentMethod"]] as const;
+  const progress = fields.some(([, key]) => !before?.[key] && !!after[key]);
+  if (!details.paymentMethod) return progress
+    ? { ...clarification, attemptCount: 0, askedQuestionFingerprints: [] } : clarification;
+  if (progress) return null;
+  const missing = fields.find(([, key]) => !after[key]);
+  return { ...clarification, missingFields: [missing?.[0] ?? "ORDER_PREVIEW"] };
 }
 
 export type CheckoutDetailsTransitionResultV1 =

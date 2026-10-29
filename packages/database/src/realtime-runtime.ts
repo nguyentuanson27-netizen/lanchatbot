@@ -55,6 +55,7 @@ import {
   applyCanonicalCartDecisionV2,
   applyCheckoutDetailsTransitionV1,
   applySalesClarificationTransitionV1,
+  clarificationAfterCheckoutCaptureV1,
   canonicalCartPolicyLinesV2,
   canonicalNegotiationEventFingerprintV1,
   createCanonicalCartV2,
@@ -1132,7 +1133,7 @@ function validateLockedProtectedSalesStateTransitionV1(
         break;
       case "CHECKOUT_DETAILS_CAPTURED":
         if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
-        ["checkoutDraft", "preview"].forEach((key) => ownedFields.add(key));
+        ["checkoutDraft", "preview", "clarification"].forEach((key) => ownedFields.add(key));
         break;
       case "CLARIFICATION_REQUESTED":
       case "CLARIFICATION_RESOLVED":
@@ -1142,6 +1143,7 @@ function validateLockedProtectedSalesStateTransitionV1(
       case "PREVIEW_CREATED":
         if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
         ownedFields.add("preview");
+        ownedFields.add("clarification");
         break;
       case "CONFIRM_PURCHASE":
         ownedFields.add(event.outcome === "HANDOFF" ? "preview" : "confirmation");
@@ -1232,9 +1234,9 @@ function validateLockedProtectedSalesArtifactsV1(
         )) {
         throw new Error("CHECKOUT_DETAILS_TRANSITION_REPLAY_MISMATCH");
       }
+      clarification = clarificationAfterCheckoutCaptureV1(clarification, checkoutDraft, transition.draft, evidence.details);
       checkoutDraft = transition.draft;
       preview = null;
-      if(clarification?.reasonCode==="CHECKOUT_DETAILS_MISSING"&&clarification.missingFields.length===1&&clarification.missingFields[0]==="PAYMENT_METHOD"&&evidence.details.paymentMethod)clarification=null;
       break;
     }
     case "CART_OPENED":
@@ -1249,6 +1251,8 @@ function validateLockedProtectedSalesArtifactsV1(
       const evidence = ClarificationTransitionEvidenceV1Schema.parse(
         event.clarificationTransitionEvidence,
       );
+      if (clarification?.missingFields.length === 1 && clarification.missingFields[0] === "ORDER_PREVIEW" &&
+        evidence.transition.kind === "RESOLVED") throw new Error("PAYMENT_RECAPTURE_PREVIEW_REQUIRED");
       const beforeHash = sha256TextV1(
         canonicalClarificationStateHashPreimageV1(clarification),
       );
@@ -1271,6 +1275,8 @@ function validateLockedProtectedSalesArtifactsV1(
         transition: evidence.transition,
         appliedAt: event.occurredAt,
       });
+      if(clarification?.missingFields.length===1&&clarification.missingFields[0]==="ORDER_PREVIEW"&&
+        (evidence.transition.kind!=="REQUESTED"||evidence.transition.missingFields.length!==1||evidence.transition.missingFields[0]!=="PAYMENT_METHOD"))throw new Error("PAYMENT_RECAPTURE_PREVIEW_REQUIRED");
       if(clarification?.reasonCode==="CHECKOUT_DETAILS_MISSING"&&clarification.missingFields.length===1&&clarification.missingFields[0]==="PAYMENT_METHOD"&&
         (evidence.transition.kind==="RESOLVED"||evidence.transition.reasonCode!=="CHECKOUT_DETAILS_MISSING"||evidence.transition.missingFields.length!==1||evidence.transition.missingFields[0]!=="PAYMENT_METHOD"))throw new Error("PAYMENT_CHOICE_UNRESOLVED");
       if (transition.status !== "APPLIED" ||
@@ -1306,9 +1312,11 @@ function validateLockedProtectedSalesArtifactsV1(
         throw new Error("ORDER_PREVIEW_TRANSITION_REPLAY_MISMATCH");
       }
       preview = transition.preview;
+      if (clarification?.missingFields.length === 1 && clarification.missingFields[0] === "ORDER_PREVIEW") clarification = null;
       break;
     }
     case "CONFIRM_PURCHASE": {
+      if(clarification?.missingFields.length===1&&clarification.missingFields[0]==="ORDER_PREVIEW")throw new Error("PAYMENT_RECAPTURE_PREVIEW_REQUIRED");
       if(clarification?.missingFields.length===1&&clarification.missingFields[0]==="PAYMENT_METHOD")throw new Error("PAYMENT_CHOICE_UNRESOLVED");
       if (event.outcome === "HANDOFF") {
         preview = null;
