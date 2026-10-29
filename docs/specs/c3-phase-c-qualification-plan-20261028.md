@@ -1,3 +1,5 @@
+> Next planned correction: [kế hoạch remediation29/10/2026](c3-phase-c-remediation-plan-20261029.md), đã self-review, chưa implementation. Kết quả source36 giữ nguyên; không sửa lại registration/grades cũ.
+
 > Execution update29/10/2026: source36e45015 completed24SAFETY +22native scenarios/34turns and real-PG66controls. Primary independent grades12PASS/2FAIL/8UNRESOLVED; formal **BLOCKED**, C3 NOT_RUN. [Actual report and next scope](../../apps/worker/evals/single-agent-commerce-qualification/run-20261029/REPORT.md). Pre-run source-unavailable/zero-model paragraphs below are historical; thresholds and architecture remain unchanged.
 
 # Phase C — kế hoạch triển khai qualification

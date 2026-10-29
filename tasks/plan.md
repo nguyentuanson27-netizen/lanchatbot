@@ -1,3 +1,11 @@
+## Next — Phase C remediation plan,29/10/2026
+
+- [x] Đối chiếu campaign03/raw findings với consumer/resolver, packet/capture/history và native wire; [kế hoạch sửa chi tiết, đã self-review](../docs/specs/c3-phase-c-remediation-plan-20261029.md).
+- [ ] S0 audit đủ22ca, phân loại từng handoff bằng nguồn/tool/gate thực; không đổi primary grades.
+- [ ] S1 policy current-pointer/pin contract +selection/color; S2 evaluator source completeness/code-owned registration/privacy-safe history; S3 bounded input/argument diagnostics và operational measurements.
+- [ ] S4 independent exact-source review→fix→approve; S5 chỉ seal/run mới sau readiness. Cases cũ là development; fresh holdout giữ24SAFETY/16SINGLE/6JOURNEY, N1; không tự tăng benchmark hoặc retry.
+- [ ] Chưa implementation/provider run theo kế hoạch này. Qualification03 vẫnBLOCKED, C3NOT_RUN; không merge/deploy/live send.
+
 ## Current — Phase C actual execution,29/10/2026
 
 - [x] Seal clean36e45015 and fresh approved world/corpus/initial state. Recovered existing source route; isolated approved handoff matrix explicitly declared, no source publication.
