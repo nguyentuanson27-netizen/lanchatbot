@@ -64,10 +64,10 @@ export function diagnosticControl(reg,{checkSource}){
     assert(reg.slots.some(s=>s.slotId===active?.slotId&&(s.mode!=='SAFETY'||role==='VERIFIER')),'D_UNREGISTERED_DISPATCH');
    }catch(e){stop(e.message);throw e;}
   },
-  afterTurn({errorCode,reason,safetyFindings=[],accounting,commitStatus}={}){
+  afterTurn({errorCode,reason,recoveryReason,safetyFindings=[],accounting,commitStatus,handoffStatus}={}){
    if(safetyFindings.length||accounting==='UNKNOWN'||['UNKNOWN_PROVIDER_COMPLETION','C_ACCEPTED_CAPTURE_COUNT','C_CODE_CAPTURE_COUNT'].includes(errorCode)||
-    ['UNKNOWN','UNKNOWN_COMMIT','PARTIAL_EFFECT'].includes(commitStatus)||
-    ['STALE','FACT_EXPIRED','SNAPSHOT_MISMATCH','PRIVACY','RECIPIENT','PERMISSION','PERMISSION_OR_PRIVACY','PRIVACY_VIOLATION','EFFECT_RECEIPT_MISMATCH','UNKNOWN_COMMIT','PARTIAL_EFFECT','CURRENT_READBACK_UNAVAILABLE'].includes(reason))stop(errorCode??reason??commitStatus??'D_HARD_INVARIANT');
+    [commitStatus,handoffStatus].some(s=>['UNKNOWN','UNKNOWN_COMMIT','PARTIAL_EFFECT'].includes(s))||
+    [reason,recoveryReason].some(r=>['STALE','FACT_EXPIRED','SNAPSHOT_MISMATCH','PRIVACY','RECIPIENT','PERMISSION','PERMISSION_OR_PRIVACY','PRIVACY_VIOLATION','EFFECT_RECEIPT_MISMATCH','UNKNOWN_COMMIT','PARTIAL_EFFECT','CURRENT_READBACK_UNAVAILABLE'].includes(r)))stop(errorCode??reason??recoveryReason??commitStatus??handoffStatus??'D_HARD_INVARIANT');
   }};
 }
 export function claimDiagnostic(path,reg){

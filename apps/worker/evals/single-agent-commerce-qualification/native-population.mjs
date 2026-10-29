@@ -47,8 +47,8 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
     authority:after.authority,state:after.publicState});
    const codeOnly=!!clarification||observed?.result?.mode==='PRIVATE_CODE_PATH'&&gens.length===0&&messages.length>0;
    const actual=captureNativeTerminal({native:terminal,codeOnly,messages,images,errorCode}),outputFindings=capturedOutputViolations(actual);
-   preflight.diagnosticControl?.afterTurn({errorCode,reason:observed?.result?.recovery?.originalReason??terminal?.reason,safetyFindings:outputFindings,
-    commitStatus:observed?.result?.commitStatus});
+   preflight.diagnosticControl?.afterTurn({errorCode,reason:terminal?.reason,recoveryReason:observed?.result?.recovery?.originalReason,safetyFindings:outputFindings,
+    commitStatus:observed?.result?.commitStatus,handoffStatus:observed?.result?.handoff?.status??observed?.result?.recovery?.handoff?.status});
    if(preflight.diagnosticControl?.blocked())queue.latch(slot.slotId,preflight.diagnosticControl.reason());
    a.safetyFindings.push(...outputFindings);
    const verifier=gens.find(g=>g.role==='VERIFIER'),b=verifier?.verifierInput,witness=observed?.result?.boundaryWitness;

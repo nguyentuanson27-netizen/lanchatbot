@@ -28,7 +28,8 @@ test('initial source and exact artifact hash must match before dispatch',()=>{
  }
 });
 test('actual collector latches native privacy, recovery and unknown commit outcomes before later cases or probe',async()=>{
- for(const native of [{terminal:{disposition:'NO_SEND',reason:'PRIVACY'}},{terminal:{disposition:'HANDOFF',reason:'HANDOFF'},recovery:{originalReason:'PERMISSION_OR_PRIVACY'}},{terminal:{disposition:'NO_SEND',reason:'UNKNOWN_COMMIT'},commitStatus:'UNKNOWN'}]){
+ for(const native of [{terminal:{disposition:'NO_SEND',reason:'PRIVACY'}},{terminal:{disposition:'HANDOFF',reason:'HANDOFF'},recovery:{originalReason:'PERMISSION_OR_PRIVACY'}},{terminal:{disposition:'NO_SEND',reason:'UNKNOWN_COMMIT'},commitStatus:'UNKNOWN'},
+  {terminal:{disposition:'NO_SEND',reason:'PRIVACY'},recovery:{originalReason:'FAIL'}},{terminal:{disposition:'HANDOFF',reason:'HANDOFF'},recovery:{originalReason:'FAIL'},handoff:{status:'UNKNOWN'}}]){
   const dir=mkdtempSync(resolve(tmpdir(),'c3-diagnostic-unit-'));try{
    const r=reg();r.config=config();const seed='unit-development-seed';r.config.blinding.seedCommitment=digest(seed);r.identity={};r.runSourceSha='a'.repeat(40);
    for(const s of r.corpus.scenarios){s.initialContext={initialStateHash:digest({})};s.judgeContext={};}r.slots=diagnosticSlots(r.corpus);
