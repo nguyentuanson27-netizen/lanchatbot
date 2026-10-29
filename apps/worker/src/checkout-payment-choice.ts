@@ -2,7 +2,7 @@
 export type PaymentChoice={kind:"RESOLVED";method:"COD"|"BANK_TRANSFER"}|{kind:"AMBIGUOUS"|"UNSUPPORTED"|"NO_SIGNAL"};
 const cod="(?:cod|tiền mặt|tien mat|nhận hàng trả|nhan hang tra|trả (?:tiền )?khi nhận hàng|tra (?:tien )?khi nhan hang|thanh toán khi nhận hàng)";
 const transfer="(?:ck|chuyển khoản|chuyen khoan|bank|thanh toán chuyển khoản)";
-const affirmative=new RegExp(`^(?:(?:chị|em|tôi|mình) )?(?:(?:muốn |chọn |lấy |thanh toán |trả bằng ))?(${cod}|${transfer})(?: (?:nhé|nha|ạ))?$`,"iu");
+const affirmative=new RegExp(`^(?:(?:chị|em|tôi|mình) )?(?:(?:muốn |chọn |lấy |thanh toán |trả (?:bằng )?))?(${cod}|${transfer})(?: (?:nhé|nha|ạ))?$`,"iu");
 const signal=/(?:\bcod\b|\bck\b|chuyển khoản|chuyen khoan|tiền mặt|tien mat|nhận hàng|nhan hang|thanh toán|thanh toan|chưa chọn|chua chon|\bbank\b)/iu;
 export function paymentChoice(text:string):PaymentChoice{
  const lines=text.normalize("NFC").trim().split(/\r?\n/),label=/^(?:thanh toán|thanh toan|payment)\s*:\s*/iu;
