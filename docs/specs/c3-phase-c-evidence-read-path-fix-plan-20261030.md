@@ -1,6 +1,6 @@
 # Phase C — kế hoạch sửa căn cứ và đường đọc dữ liệu
 
-Revision: **1 — chờ review độc lập**. Planning base: `cda76805ed939049f1fe0f8f987bff2226d07feb`. Branch hiện có: `feat/c3-phase-c-qualification-20261028`. Task này chỉ lập/sửa/review kế hoạch; không sửa runtime, gọi provider hoặc triển khai.
+Revision: **2 — đã sửa F1–F4, chờ cùng reviewer review lại**. Planning base: `cda76805ed939049f1fe0f8f987bff2226d07feb`. Branch hiện có: `feat/c3-phase-c-qualification-20261028`. Task này chỉ lập/sửa/review kế hoạch; không sửa runtime, gọi provider hoặc triển khai.
 
 ## 1. Mục tiêu và bằng chứng
 
@@ -42,7 +42,13 @@ Files dự kiến: realtime-sales-catalog, read-only-tools/context, effects, sem
 
 Read_product và add_to_cart selection failure chỉ thêm evidence khi resolver đã kiểm đủ identity/scope/freshness/quantity/policy. Tool error hint không tự trở thành fact. Unavailable/rejected/ambiguous hint chưa có validation → không cấp protected evidence. Nếu cần mở RuntimeProductEvidence, schema đóng/bounded và hardPrecheck phải kiểm field mới, product binding, snapshot hash và freshness; không nhét JSON vào policy literal để né type checks. Verifier prompt/schema verdict giữ nguyên, chỉ serialization của trusted data thay đổi và phải có hash/run identity mới.
 
-Final readback replay đúng selector/quantity/source path đã cấp tuple evidence; thay stock/fulfillment policy/BOM/recipient/permission/revision/expiry thì oldPASS không gửi được. Chuẩn quantity1 của read không authorize cart quantity2. Giữ max scan64/first8 tuples và incomplete marker; không Cartesian product, không lấy first8 làm toàn inventory, không fallback explicitBE sangNO_COLOR.
+Freshness tuple dùng hạn sớm nhất giữa: expiry resolver, observedAt + maxFactAgeSeconds của read path, expiry policy có liên quan và các source/claim bounds áp dụng. `candidateCartOptions` có thể trả 48 giờ nhưng không được kéo read evidence từ 2 giờ thành 48 giờ. Hydrate/readback identical source không gia hạn TTL. Sau expiry phải đọc source thật và có observation hợp lệ mới; không thay timestamp trong snapshot để cứu run.
+
+Informational option có quantity scope rõ ràng, không authorize action. Read quantity1 chỉ chứng minh lựa chọn cho1; cart quantity2 phải resolver lại exact query, có receipt và final effect gate. UNKNOWN nghĩa chưa xác minh khả năng đáp ứng, không phải hết hàng; IN_STOCK/PRE_ORDER phân biệt; first8/incomplete không chứng minh tuple ngoài danh sách không tồn tại.
+
+Canonical projection: cùng validated source observation + exact product/offer selector tạo cả tuple view và presentation view. Không gửi hai views mâu thuẫn rồi yêu cầu verifier ưu tiên view nào. Legacy presentation thiếu tuple được bổ sung/rebuild từ source đã validate theo đúng scope; không lấy việc thiếu dòng làm phủ định. Nếu hai validated views khác nhau trên **cùng exact tuple/source/quantity và field so sánh được**, publication thất bại SOURCE_EVIDENCE_CONFLICT và giữ fail-closed; không drop view bất lợi để qua gate. Khác offer hoặc quantity không được so như mâu thuẫn. Test cả missing row, actual contradiction, cross-offer và incomplete source.
+
+Final readback replay đúng selector/quantity/source path đã cấp evidence. Stock, fulfillment policy, BOM, recipient, permission, revision hoặc expiry thay → oldPASS không gửi. Giữ scan64/first8, không Cartesian product và không fallback explicitBE sangNO_COLOR. Việc cấp evidence mới phải atomic: validate toàn bộ trước khi thay context maps, không để partial claims sau reject.
 
 NO_COLOR là “nguồn không ghi màu”, không phải màu gốc/bản tiêu chuẩn. Không tạo customer-facing label thay cho physical attribute. Khi hai tuple không đủ nhãn để khách quyết: vẫn ambiguity/handoff; không force select. Thử case neutral khác sản phẩm/màu/size và negative controls để tránh fit riêng j1/j4.
 
@@ -62,13 +68,31 @@ Với s11: kiểm actual generated request declaration và validator có cùng e
 
 P3 trước hết audit existing currentProductId/cart/accepted history metadata. Không parse prose để suy offer, không coi “shop từng nói S–XL” là stockproof và không thêm persisted semantic memory.
 
-Đề xuất cơ chế cơ học: ở prepare của **product đã resolve/bound bằng code**, nạp current source summary của các offer được source liệt kê, tối đa3offer/product và trong bound hiện hành. Summary chỉ gồm offer identity, current price/stock/status và confirmed size availability; cả owner và verifier dùng cùng source snapshot. Không thêm NL router, không chọn offer thay khách, không thêm model/tool turn; không mở ảnh/policy/các sản phẩm khác vì history nhắc tới. Đây là read-ahead có giới hạn, không phải selection/action authority.
+### 6.1 Admission và work accounting đóng
 
-Nếu >3offers hoặc payload vượt bound: chỉ đưa offer identities+NOT_READ, để owner gọi SINGLE/COMPARE đúng selection; không chọn first3 rồi gọi là đủ, không tự thêm calls. Product không chứng minh bound thì không read-ahead. Current source đọc không được thì thể hiện UNAVAILABLE; không phục hồi fact từ message cũ. Cart effects/receipt vẫn dùng exact selected offer, không từ offer summary.
+Giữ chính xác predicate `prepare()` hiện có: scope còn permission/privacy và BOT ownership; chưa prepared/full-read product; product ID là `currentProductId` hợp lệ và nằm trong bound PRODUCT refs, hoặc `currentProductId` null và **đúng một** bound PRODUCT. Nếu nhiều bound products mà không có current hợp lệ: không read-ahead. j3 hiện currentProductId=null nhưng singleton SV2447, nên singleton fallback bắt buộc được giữ. Không suy từ prose/history, không mặc định mọi initialProducts đều eligible.
 
-Current read-ahead phải đăng ký trong readback ledger và kiểm lại trước gate; source/version/freshness thay → block. Không coi source đã capture trong run là còn hiệu lực vĩnh viễn. Unit/PG kiểm source change giữa turns và giữa verifier/send; ref productA không kéo fact productB. Bound products/calls/claims/bytes không tăng. Không có thêm state field/migration trong đề xuất này.
+Chỉ lấy summary từ source observation mà prepareProduct đang đọc; cùng source/product một lần, không loop đọc lại từng offer, không thêm search/ảnh/policy/producer call. Local extraction tối đa3offers của snapshot đã có. Catalog-only fallback read hiện có khi POS lỗi được giữ đúng cơ chế cũ, phải quan sát và đếm riêng actual source I/O; không gọi đây là một source read nếu thực tế đã đọc hai lần. Không thêm retry generation hoặc retry source khác ngoài hành vi fallback cũ đã được test.
 
-Decision cần reviewer soi: summary nhiều offer có làm owner khó chọn hoặc phình input không? Chỉ triển khai nếu đo bound/duplicate projection và neutral controls cho thấy phù hợp. Nếu cần persisted read-intent metadata hoặc nhiều source fetch hơn budget, tách ra replan, không ngầm mở scope. Không claim cơ chế này bảo đảm model sẽ chọn tool đúng; diagnostic vẫn đo actual whole outcome.
+Preparation work vẫn trả1 và bị trừ khỏi tổng6normal tool work của turn; owner nhận callsRemaining5. Revalidation cuối giữ accounting readback hiện hành, ghi source reads riêng, không tạo model/tool lượt mới. Effect work/accounting và terminal handoff budget không đổi.
+
+### 6.2 Candidate summary và admission bounds
+
+Summary chỉ có offer identity, current price/stock/status và confirmed size availability từ cùng adapter P1. Không chọn offer thay khách, không tự mua, không cấp SIZE_FIT từ stock sizes. Owner và verifier cùng snapshot. Candidate-only, không đổi default legacy preparation.
+
+Staging trước publication phải thỏa: một eligible product; tối đa3offers; total bound subjects≤8, runtime products≤4, unique claims≤32; tuple scan64/first8 theo P1 nếu có tuple query; tool response budget8192 bytes; owner/verifier text wire≤65536 bytes (media path riêng giữ bounds hiện hành, không đổi). Latest≤2048/history≤8 và history bytes≤4096 giữ nguyên; không đẩy correction/history ra ngoài để nhét summary. Không tạo extra bound variant subjects hoặc claims từ offer không validate.
+
+Nếu >3offers, subject/claim/product bound hoặc predicted wire/projection vượt trần: **không publish một phần numeric summary**. Giữ source offer identities và NOT_READ/coverage code đúng giới hạn cũ, để owner chọn SINGLE/COMPARE. Không chọn first3, không cắt field nhạy nghĩa. Đo actual serialization trước provider; nếu input nền đã vượt bound thì giữ failure cũ. Numeric admission là điều kiện bổ sung, không nới validator cũ.
+
+### 6.3 Optional acquisition không được làm mất independent evidence
+
+Catalog content và giá/tồn là hai đóng góp độc lập. Khi acquisition hoặc validation của optional price/stock thất bại ngay lúc prepare: giữ fresh catalog/details hợp lệ; không chèn stale/invalid numeric claim vào snapshot; coverage báo NOT_READ/UNAVAILABLE kèm safe reason theo thực tế. Đây không phải fact âm “không có hàng/không có giá”. Không tự handoff chỉ vì read-ahead không sẵn; owner có thể trả styling/care/ACK nếu căn cứ tương ứng đủ. Nếu khách cần price/stock, owner vẫn dùng tool/handoff hiện hành, không được bịa fact.
+
+Nếu summary đã usable và publish/bind vào snapshot: không được rút nó sau khi verifier PASS chỉ để vượt final gate. Readback phải replay/pin cùng selectors; changed/expired source vẫn block toàn exact reply theo boundary hiện hành. Không thêm classifier “câu này không dùng fact đó” để bỏ revalidation. Tránh poison bằng admission đúng từ đầu, không bằng selective semantic pruning sau kết quả.
+
+Tests bắt buộc: multi-bound ambiguity không auto-read; singleton fallback j3 được prepare; work1/remaining5; source I/O bằng baseline và không fanout từng offer; >3/overflow không partial publish; optional acquisition fail vẫn giữ catalog để thanks/styling/care; fake price/stock không xuất hiện; đã publish rồi thay source/expiry giữa verifier–send vẫn block. Nếu current source product không bound hoặc source/correction thay sang product khác: không kéo fact cũ sang.
+
+Không thêm persisted field/migration/read-intent memory. Nếu one-observation extraction không làm được hoặc measured request bounds/neutral controls không đạt: P3 dừng tại không ship, báo limitation và replan; không tự tăng budget hoặc mở scope.
 
 ## 7. P4 — audit size correction và giữ các phần đã tốt
 
@@ -91,19 +115,35 @@ Regression giữ: care FAQ s09; ảnh j3T1; phối đồ s06; code COD j6; expli
 | Size | Latest correction đúngchart/range hoặc legitimateOUT_OF_RANGE; đủinput không bịMISSINGINPUT; chartexpired/wrongproduct/unsupportedsharing khôngchoose |
 | Legacy/privacy | Default callers unchanged, pendingprivatecheckout/rawPII nevermodel/trace; historyOutbox/receipt/handoffguard/recipient giữ nguyên |
 
-Focused commands (repo root):
+Final verification order (repo root; lệnh dự kiến, chưa chạy):
 
 ```text
+# Build shared dependencies hiện hành trước TS tests dùng workspace dist.
+pnpm -r --filter "@lana/worker^..." build
 pnpm --filter @lana/worker exec vitest run src/realtime-sales-catalog.test.ts src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-read-only-context.test.ts src/single-agent-commerce.test.ts src/single-agent-commerce-read-only.test.ts src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-effects.test.ts src/single-agent-semantic-verifier-boundary.test.ts src/track-b-protected-claim-boundary.test.ts
 pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts
-node --test "apps/worker/evals/single-agent-commerce-qualification/*.test.mjs"
-pnpm --filter @lana/worker test:evals
 pnpm --filter @lana/worker typecheck
 pnpm --filter @lana/worker build
+# Chỉ sau current worker build: Node evals/PG import worker dist.
+node --test "apps/worker/evals/single-agent-commerce-qualification/*.test.mjs"
+pnpm --filter @lana/worker test:evals
 pnpm --filter @lana/worker lint
 ```
 
-Các filenames trong lệnh trên đã đối chiếu bằng rg --files khi lập kế hoạch. Bổ sung focused media/source/schema suites theo files thực chạm. Actual PostgreSQL qua existing isolated-integration: targeted cases trước, full composed checks và 7 named real-adapter invariants sau; DB dropped, source clean, 0 provider trước diagnostic. Nếu chạm shared contracts/business-tools/database, thêm focused tests/typecheck/build tương ứng. Worker compile không thay shared tests. Known SKIP/FAIL được báo rõ.
+Các filenames đã đối chiếu bằng rg --files. TDD focused RED/GREEN chạy theo nhóm code đang sửa; final sequence phía trên bắt buộc dựng current shared/worker trước khi chạy bất kỳ Node eval hay PG nào consume dist. Bổ sung focused media/source/schema suites theo files thực chạm. Nếu chạm shared contracts/business-tools/database, thêm focused tests/typecheck/build của package đó; build dependency không thay shared tests. Không gộp overlapping counts, báo SKIP/FAIL rõ ràng.
+
+Actual PostgreSQL provider-free, sau commit sạch và config current source:
+
+```text
+node apps/worker/evals/single-agent-commerce-qualification/cli.mjs init --out ../c3-evidence-read-config-<run>.json
+# Tạo local registration chỉ cho real-adapter driver: runSourceSha=currentHEAD,
+# config=init output, identity=qualificationIdentity(config); không SEALED provider run.
+node apps/worker/evals/single-agent-commerce-qualification/real-adapter-driver.mjs ../c3-evidence-read-adapter-registration-<run>.json ../c3-evidence-read-pg-<run>
+# Actual child do driver ghi trong COMMAND.json:
+python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs <out>/postgres COD
+```
+
+Không truyền --provider-run/--phase-c-registration; synthetic domain inputs với actual disposable DB/capture, không generation. Tests mới thêm vào harness phải replay tuple/current-read/correction/permission/changed-source thật trước full driver. `--check-prefix <exact prefix>` dùng targeted reproduction khi cần, output mới mỗi lần; không đánh targeted subset là full verification. Driver toàn bộ giữ các check cũ và validate đúng7invariants: stale_revision, duplicate_source, crash_after_commit, ambiguous_reconciliation, operation_idempotency, history_outbox_recovery, no_duplicate_effect. Driver yêu cầu current clean source, DB dropped, providerGenerations0 và sendEnabledfalse. Source/capacity fail ghi BLOCKED, không giả actual PG bằng mock.
 
 ## 9. Savepoints, review và vòng model tương lai
 
