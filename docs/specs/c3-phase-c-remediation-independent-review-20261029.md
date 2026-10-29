@@ -1,8 +1,12 @@
 # Independent review — Phase C remediation plan
 
-## Revision1 — đang chờ review lại
+## Revision2 — đang chờ review lại
 
-Tác giả đã sửa kế hoạch theo3finding: tách active read và durable transaction binding, reuse scoped runtime media observation với handoff giữ nguyên, khóa diagnostic6case/37generation requests và inventory toàn bộA/B/C/near-duplicate review. Chưa implementation/provider run. Verdict REQUEST_CHANGES bên dưới là lịch sử revision0; revision1 chưa được tính APPROVE cho đến khi cùng reviewer xác nhận.
+Sửa thêm finding P2 của revision1: chỉ chặn request sẽ vượt cap theo đúng role/turn/case/batch; đủ3owner vẫn được1verifier, case dùng đủ budget hợp lệ vẫn sang case tiếp. Vượt-cap request bị chặn tại case với frozen silent terminal; whole-batch STOP chỉ khi hết batch budget hoặc điều kiện nghiêm trọng/accounting như đã định. Không thêm retry/transfer budget. Chờ cùng reviewer xác nhận, chưa implementation/provider run.
+
+## Revision1 — REQUEST_CHANGES tại d183adaf
+
+Reviewer đã đóng3finding gốc và xác nhận9native turns+1probe=37generation requests. Còn1P2: cách viết “chạm bất kỳ cap→dừng dispatch” có thể dừng cả batch hoặc chặn verifier sau owner generation3 hợp lệ. Yêu cầu phân biệt dùng hết budget hợp lệ với request vượt cap. Chưa implementation/provider run.
 
 ## Revision0 — review gốc
 
