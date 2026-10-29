@@ -2757,4 +2757,16 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Draft concrete plan from full22raw/history and prior implementation; preserve unknown dependency causes and source-based size expected.
 - [x] Independent same-reviewer REQUEST_CHANGES exact43560762: four findings.
 - [x] Revise F1–F4; independent same-reviewer **APPROVE PLAN revision2 exactf9b6e0843382e1c2be192137c5148a9d3f8e0c96**, no remaining blocking plan findings. [Plan/review](../docs/specs/c3-phase-c-evidence-read-path-fix-plan-20261030.md).
-- [ ] Implementation and focused RED→GREEN/current builds/realPG/provider remain NOT_RUN for this plan. This task stops at planapproval; no automatic execution, deployment or live send. P3 cannot ship without measured bounds and neutral controls.
+- [x] Subsequent owner-authorized implementation completed and independently APPROVED; current evidence and limits are in the implementation section below. The plan-only task above did not run code/provider.
+- [ ] Provider/model requalification remains NOT_RUN after this implementation; no automatic run/deploy/live send.
+
+
+## Phase C — evidence/read-path implementation, 2026-10-30
+
+- [x] P0 bounded safe diagnostics + P1 canonical tuple proof to owner/verifier/finalgate; retain queries, full replay/expiry/policy/conflict validation; no heartbeat renewal.
+- [x] P2 exact duplicate projection shared by budget/wire; P3candidate-only one-observation current offers, work1of6, actualowner/verifierwire admission, atomic no-partial publication and independent catalog preservation. Legacy defaults/bounds unchanged.
+- [x] P4 replay correct chart/profile: firstM, correctedOUT_OF_RANGE/missingInputs0; retain source limitation/handoff, no fabricated chart tolerance.
+- [x] Same reviewer REQUEST_CHANGES→fix R1–R5; fullPG exposed R6deliveryquery whitelist mismatch. MeaningfulRED3→GREEN12 +handoffdelivery/effects/ingress236PASS; oldfailedPG33PASS/1FAIL retained/DBdropped.
+- [x] Finalclean executable97c6ce86: currentbuild/typecheck/lintPASS, Node761PASS/2SKIP, actualPG73/73PASS+7invariantsPASS, DBdropped/gen0/sendfalse. Priorworker510+37additional uniquecoverage/protected21PASS, overlapping reruns disclosed.
+- [x] Unconditional independent **APPROVE IMPLEMENTATION** exact97c6ce86; reviewer verified51artifact hashes/currentidentity/PGcleanup. [Report/review/evidence](../docs/specs/c3-phase-c-evidence-read-path-implementation-20261030.md).
+- [ ] Newmodelquality/blindgrades/stability/qualification and C3parity/comparison remain unverified. Originalfull22results immutable; PhaseCqualificationBLOCKED/C3NOT_RUN/B_NOT_GO. No automatic nextmodelrun, merge, deploy or live send.
