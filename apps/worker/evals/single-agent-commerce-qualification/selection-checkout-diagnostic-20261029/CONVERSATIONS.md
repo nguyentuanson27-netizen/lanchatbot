@@ -107,4 +107,3 @@ Kết quả: **HANDOFF** — STOCK_UNAVAILABLE
 Không phải hội thoại được gửi khách.
 
 Kết quả: SEND_ELIGIBLE
-

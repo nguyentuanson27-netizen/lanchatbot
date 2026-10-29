@@ -80,4 +80,3 @@ Focused78NodePASS (6diagnostic tests included); first reordered stop fixture fai
 ```powershell
 node apps/worker/evals/single-agent-commerce-qualification/development-inventory.mjs ../c3-c-selection-development-sources-20261029-03.json ../c3-c-selection-development-inventory-20261029-03.json
 ```
-

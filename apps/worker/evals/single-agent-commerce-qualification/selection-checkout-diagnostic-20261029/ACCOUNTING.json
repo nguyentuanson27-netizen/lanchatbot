@@ -2620,7 +2620,8 @@
     "recursiveEvaluatorLabelLeaksObserved": 0,
     "registrationUnchanged": true,
     "recommendation": "STOP_DEVELOPMENT_BATCH_QUALIFICATION_BLOCKED",
-    "evidenceRef": "REVIEW.md"
+    "evidenceRef": "REVIEW.md",
+    "finalReportApprovalSha": "6cdbf8556f366c006b88ef6706bc0826184f3920"
   },
   "developmentExposure": {
     "manifestPath": "../c3-c-selection-development-sources-20261029-03.json",
