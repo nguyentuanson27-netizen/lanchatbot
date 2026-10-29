@@ -1,4 +1,10 @@
-## Current — Phase C development diagnostic,29/10/2026
+## Next — selection/private-checkout fix plan approved,29/10/2026
+
+- [x] [Plan revision1](../docs/specs/c3-phase-c-selection-checkout-fix-plan-20261029.md) → same independent reviewer → fix2findings → APPROVE exacta5e6270a. [Review](../docs/specs/c3-phase-c-selection-checkout-plan-review-20261029.md). Planning baseb79fd3da; no runtime/provider change.
+- [ ] Implementation task sau: F0producer/NO_COLOR audit; F1unifycandidate tuple/availability; F2closedprivate payment recognition +persistent unresolved/readiness +progress budget; preservelegacy/privacy, focused+realPG+implementationreview trước run. Chưa build/run theo planmới.
+- [ ] Later development batch6purposes/9turns+probe,N1,max37 chỉ sau source/input/readiness review; qualification freshinventory/mappings/parity cònBLOCKED. Không tựmerge/deploy/live send.
+
+## Previous — Phase C development diagnostic,29/10/2026
 
 - [x] Diagnostic source6c5023ab: same reviewer APPROVE code/frozen inputs/preflight, one batch6cases/9native turns+1probe;20requests/0retry/errors/DBdrop. [Outcomes, full conversations, accounting](../apps/worker/evals/single-agent-commerce-qualification/diagnostic-20261029/REPORT.md).
 - [ ] STOP batch. Cần phương án mới cho selection/error availability vs verified stock và intake COD; không sửa giọng/regex để che state/contract. Diagnostic cases là exposure, không fresh qualification. Phase C BLOCKED/C3NOT_RUN; không live/merge/deploy.

@@ -1,4 +1,10 @@
-## Current — Phase C development diagnostic,29/10/2026
+## Next — selection/private-checkout fix plan approved,29/10/2026
+
+- [x] Lập [plan revision1](../docs/specs/c3-phase-c-selection-checkout-fix-plan-20261029.md), review độc lập→fix→review APPROVE exacta5e6270a. [Closures](../docs/specs/c3-phase-c-selection-checkout-plan-review-20261029.md): oldpayment unresolved chặnreadiness xuyên lượt; candidate/legacy/privacy caller modes rõ. Không sửa code/model.
+- [ ] F0/F1producer +candidate variant tuple/hints/stock; F2existingcode-only payment field nhận dạng đóng, typed domain capture/readiness/progress; preservebare-namePII/legacy/preorder/currentpolicy/pin/receipt/finalgate. Implementation vàverification NOT_RUN.
+- [ ] Implementation review→fix→APPROVE trước model; lateronebatch6cases,N1,max37; qualification/C3 vẫnBLOCKED/NOT_RUN. Không auto implementation/run trong tasklậpplan.
+
+## Previous — Phase C development diagnostic,29/10/2026
 
 - [x] Owner yêu cầu chạy model: code diagnostic→same independent review→fix→APPROVE6c5023ab; input/source/actualinitial03/preflight reviewed riêng trước dispatch. [Report +all conversations](../apps/worker/evals/single-agent-commerce-qualification/diagnostic-20261029/REPORT.md).
 - [x] Một batch6/6cases,9native turns+1probe,N1;20generationHTTP(15owner/5verifier),0retry/error,1OAuth riêng; sourceclean/DBdrop/live0. Independent audit20request hashes/9raw/0label leaks. Native3eligible/2code-owned/2handoff/2NO_SEND, probePASS chỉ verifier-only.
