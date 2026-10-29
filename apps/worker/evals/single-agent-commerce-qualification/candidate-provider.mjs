@@ -105,6 +105,7 @@ export function createCandidateProvider({preflight,out,dependencies={}}){
   row.providerRequests=value.provider.providerRequests;row.authRequests=value.provider.authRequests??0;audit('VERIFIER_'+value.phase,{...row,checkpoint:value.provider});
  });
  async function generate(role,request){
+  preflight.diagnosticControl?.beforeGeneration({generations,active,role});
   if(!dependencies.unitFixture)assertCandidateSource(preflight);
   assert(active,'C_ACTIVE_SLOT_REQUIRED');assert(generations.length<preflight.registration.maximumGenerationRequests,'C_GENERATION_BUDGET');
   assert(inFlight===null,'C_PENDING_GENERATION');assert(!generations.some(g=>g.id===request.generationId),'C_DUPLICATE_GENERATION_ID');

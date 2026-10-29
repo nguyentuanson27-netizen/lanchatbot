@@ -32,10 +32,14 @@ import {createAttemptQueue,retainObservedAttempt,unobservedAttempt,summarizeAtte
 import {statefulPreflight,createStatefulProvider} from './stateful-provider.mjs';
 import {isolatedHandoffRecords,handoffContentHash} from './candidate-handoff.mjs';
 import {publicCapturedAttachments,publicCapturedTextHashes} from './delivery-capture.mjs';
+import {assertDiagnosticFlags,diagnosticPreflight,claimDiagnostic} from '../single-agent-commerce-qualification/diagnostic.mjs';
+import {collectSafety} from '../single-agent-commerce-qualification/collect-safety.mjs';
 
 const root=fileURLToPath(new URL('../../../../',import.meta.url));
 const phaseCArg=name=>{const i=process.argv.indexOf(name);return i<0?null:process.argv[i+1];};
-const phaseC=phaseCArg('--phase-c-registration');
+assertDiagnosticFlags(process.argv);
+const phaseCDiagnostic=phaseCArg('--phase-c-diagnostic-registration');
+const phaseC=phaseCArg('--phase-c-registration')??phaseCDiagnostic;
 const phaseCInitial=phaseCArg('--phase-c-initial-world');
 const initialWorld=phaseCInitial?JSON.parse(readFileSync(phaseCInitial,'utf8')):null;
 const phaseCTools=phaseC||phaseCInitial?Object.assign({},...await Promise.all([
@@ -47,10 +51,10 @@ const phaseCTools=phaseC||phaseCInitial?Object.assign({},...await Promise.all([
 const providerRun=!!phaseC||process.argv.includes('--provider-run'),providerPreflight=process.argv.includes('--provider-preflight');
 const checkPrefixIndex=process.argv.indexOf('--check-prefix'),checkPrefix=phaseCInitial?'C initial state capture':checkPrefixIndex<0?null:process.argv[checkPrefixIndex+1];
 assert(checkPrefixIndex<0||(!providerRun&&!providerPreflight&&typeof checkPrefix==='string'&&checkPrefix.length>0&&checkPrefix.length<=128),'DETERMINISTIC_CHECK_PREFIX_ONLY');
-const providerFreeze=phaseC?phaseCTools.candidatePreflight(root,phaseC,phaseCArg('--phase-c-world')):providerRun||providerPreflight?statefulPreflight(root):null;
+const providerFreeze=phaseCDiagnostic?diagnosticPreflight(root,phaseC,phaseCArg('--phase-c-world')):phaseC?phaseCTools.candidatePreflight(root,phaseC,phaseCArg('--phase-c-world')):providerRun||providerPreflight?statefulPreflight(root):null;
 if(providerPreflight){console.log(JSON.stringify({status:'PREFLIGHT_PASS',...providerFreeze.registration,providerGenerations:0}));process.exit(0);}
 if(phaseC){
- phaseCTools.requirePassingSafety(providerFreeze.sealed,phaseCArg('--phase-c-safety'));
+ if(!phaseCDiagnostic)phaseCTools.requirePassingSafety(providerFreeze.sealed,phaseCArg('--phase-c-safety'));
  if(phaseCArg('--phase-c-arm')==='C3'){
   const absolute=JSON.parse(readFileSync(phaseCArg('--phase-c-absolute-evidence'),'utf8'));
   const {evaluateQualification}=await import('../single-agent-commerce-qualification/qualification.mjs');
@@ -58,7 +62,8 @@ if(phaseC){
   assert.equal(JSON.stringify(absolute.config),JSON.stringify(providerFreeze.sealed.config),'C_ABSOLUTE_CONFIG_CHANGED');
   providerFreeze.registration.arm='C3';
  }else{assert(!phaseCArg('--phase-c-arm')||phaseCArg('--phase-c-arm')==='CANDIDATE');providerFreeze.registration.arm='CANDIDATE';}
- phaseCTools.claimDispatch(phaseC,providerFreeze.registration.arm==='C3'?'C3':'NATIVE',providerFreeze.sealed);
+ if(phaseCDiagnostic)claimDiagnostic(phaseC,providerFreeze.sealed);
+ else phaseCTools.claimDispatch(phaseC,providerFreeze.registration.arm==='C3'?'C3':'NATIVE',providerFreeze.sealed);
 }
 const {Pool}=createRequire(new URL('../../../../packages/database/package.json',import.meta.url))('pg');
 const out=process.argv[2];assert(out,'NEW_EVIDENCE_DIRECTORY_REQUIRED');mkdirSync(resolve(out));
@@ -882,6 +887,18 @@ try{
    out:resolve(out),seedPath:phaseCArg('--phase-c-seed'),queue:attemptQueue});
   report.phaseC={status:'COLLECTED_NOT_GRADED',candidateNativeScenarios:collected.attempts.length,
    auxiliaryHttp:collected.auxiliaryHttp};report.providerGenerations=collected.providerRequests;
+  if(phaseCDiagnostic){
+   report.kind='DEVELOPMENT_ONLY_NOT_QUALIFICATION';
+   const probeDir=resolve(out,'diagnostic-probe');mkdirSync(probeDir);
+   if(!attemptQueue.blocked()&&!providerFreeze.diagnosticControl.blocked()){
+    report.diagnosticProbe=await collectSafety({preflight:providerFreeze,provider:providerPorts,out:probeDir});
+    // A singleton diagnostic probe must never be mistaken for the qualification SAFETY gate.
+    report.diagnosticProbe.kind='DEVELOPMENT_ONLY_NOT_SAFETY_GATE';
+    writeFileSync(resolve(probeDir,'DIAGNOSTIC_PROBE_SUMMARY.json'),JSON.stringify(report.diagnosticProbe,null,2));
+   }else report.diagnosticProbe={kind:'DEVELOPMENT_ONLY_NOT_SAFETY_GATE',status:'NOT_RUN',reason:'BATCH_STOPPED'};
+   report.providerGenerations=providerPorts.observed().reduce((n,g)=>n+g.providerRequests,0);
+   report.diagnosticStop=providerFreeze.diagnosticControl.reason();
+  }
  }else if(providerRun){
   const journeys=new Map(),qualifiedAttempts=[];report.outcomes=[];
   let invitationSucceeded=false;

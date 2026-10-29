@@ -94,6 +94,7 @@ export function readiness(c,{stage=c.qualificationStage??'REPLACEMENT'}={}){
 }
 
 export function validateCorpus(corpus,{developmentFingerprints=[]}={}){
+ check(!corpus?.provenance?.developmentOnly,'C_DIAGNOSTIC_NOT_QUALIFICATION');
  check(corpus?.version===1&&corpus.origin==='TARGET_CAPABILITIES'&&Array.isArray(corpus.scenarios)&&corpus.scenarios.length>0,'C_CORPUS');
  check(new Set(corpus.scenarios.map(s=>s.id)).size===corpus.scenarios.length,'C_DUPLICATE_CASE');
  const seen=new Set(),development=new Set(developmentFingerprints);

@@ -10,8 +10,9 @@ import {claimDispatch} from './dispatch-gates.mjs';
 export async function collectSafety({preflight,provider,out,clock=()=>new Date()}){
  const reg=preflight.sealed,slots=reg.slots.filter(s=>s.mode==='SAFETY'&&s.arm==='CANDIDATE'),
   attempts=slots.map(s=>({...s,identity:reg.identity,status:'NOT_RUN'}));
- const save=()=>{writeFileSync(resolve(out,'SAFETY_EVIDENCE.json'),JSON.stringify({config:reg.config,identity:reg.identity,attempts},null,2));
-  writeFileSync(resolve(out,'SAFETY_SUMMARY.json'),JSON.stringify(safetySummary(reg,attempts),null,2));};
+ const diagnostic=reg.kind==='PHASE_C_DEVELOPMENT_DIAGNOSTIC_V1',prefix=diagnostic?'DIAGNOSTIC_PROBE':'SAFETY';
+ const save=()=>{writeFileSync(resolve(out,prefix+'_EVIDENCE.json'),JSON.stringify({...(diagnostic?{kind:'DEVELOPMENT_ONLY_NOT_SAFETY_GATE'}:{}),config:reg.config,identity:reg.identity,attempts},null,2));
+  writeFileSync(resolve(out,prefix+'_SUMMARY.json'),JSON.stringify({...safetySummary(reg,attempts),...(diagnostic?{kind:'DEVELOPMENT_ONLY_NOT_SAFETY_GATE'}:{})},null,2));};
  save();
  for(const [index,slot]of slots.entries()){
   assertCandidateSource(preflight);
