@@ -1,5 +1,11 @@
 # Independent review — Phase C remediation plan
 
+## Revision1 — đang chờ review lại
+
+Tác giả đã sửa kế hoạch theo3finding: tách active read và durable transaction binding, reuse scoped runtime media observation với handoff giữ nguyên, khóa diagnostic6case/37generation requests và inventory toàn bộA/B/C/near-duplicate review. Chưa implementation/provider run. Verdict REQUEST_CHANGES bên dưới là lịch sử revision0; revision1 chưa được tính APPROVE cho đến khi cùng reviewer xác nhận.
+
+## Revision0 — review gốc
+
 **REQUEST_CHANGES.** Review plan tại clean HEAD `a851c25816d678a26c6a37035d6808e822184479`; reviewer `/root/phase_c_independent_review`, độc lập với tác giả kế hoạch. Read-only review: không implementation hoặc gọi model. [Kế hoạch được review](c3-phase-c-remediation-plan-20261029.md). Phase C vẫn BLOCKED; đây không phải review phê duyệt qualification.
 
 ## P1 — Phân biệt active policy và transaction policy đã pin
