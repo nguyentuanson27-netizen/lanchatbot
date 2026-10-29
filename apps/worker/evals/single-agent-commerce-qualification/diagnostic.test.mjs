@@ -32,7 +32,7 @@ test('actual collector latches native privacy, recovery and unknown commit outco
   {terminal:{disposition:'NO_SEND',reason:'PRIVACY'},recovery:{originalReason:'FAIL'}},{terminal:{disposition:'HANDOFF',reason:'HANDOFF'},recovery:{originalReason:'FAIL'},handoff:{status:'UNKNOWN'}}]){
   const dir=mkdtempSync(resolve(tmpdir(),'c3-diagnostic-unit-'));try{
    const r=reg();r.config=config();const seed='unit-development-seed';r.config.blinding.seedCommitment=digest(seed);r.identity={};r.runSourceSha='a'.repeat(40);
-   for(const s of r.corpus.scenarios){s.initialContext={initialStateHash:digest({})};s.judgeContext={};}r.slots=diagnosticSlots(r.corpus);
+   for(const s of r.corpus.scenarios){s.initialContext={initialStateHash:digest({})};s.judgeContext={};if(s.mode==='JOURNEY')s.customerPolicy={kind:'FROZEN_SCRIPTED_BRANCHES',branches:[],hash:digest([])};}r.slots=diagnosticSlots(r.corpus);
    const q=createAttemptQueue(),control=diagnosticControl(r,{checkSource:()=>{}});let sessions=0;
    const ports={observed:()=>[],observedSources:()=>[],setSlot:()=>{},awaitSettled:async()=>true,assertSource:()=>{}};
    const sessionFactory=async()=>{sessions++;return{capture:[],capturePayloads:[],turn:async()=>({result:native,qualification:{status:'VALID'}}),drain:async()=>{}};};
