@@ -507,7 +507,9 @@ try{
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
  await check('B composed selection checkout tuple identity supports M plus L without zero-stock color substitution',async()=>{
   const j=await statefulFixture({candidateTuples:true});
+  report.selectionCheckoutTrace=[];
   for(const size of ['L','M']){const r=await j.turn(`Chị lấy size ${size}`,[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size}}]),say('Em đã thêm áo vào giỏ.')]);
+   report.selectionCheckoutTrace.push({size,owners:r.owners,terminal:r.result.terminal,toolResponses:r.toolResponses,cart:(await j.state()).cart?.value});save();
    assert.equal(r.result.terminal.disposition,'SEND_ELIGIBLE',JSON.stringify(r.result));await j.drain();}
   const state=await j.state();assert.equal(state.cart.value.lines.length,2);
   assert.deepEqual(state.cart.value.lines.map(l=>l.components[0].size).sort(),['L','M']);
