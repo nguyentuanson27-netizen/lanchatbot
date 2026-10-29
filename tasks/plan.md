@@ -1,11 +1,17 @@
-## Current — Phase C remediation implementation,29/10/2026
+## Current — Phase C development diagnostic,29/10/2026
+
+- [x] Diagnostic source6c5023ab: same reviewer APPROVE code/frozen inputs/preflight, one batch6cases/9native turns+1probe;20requests/0retry/errors/DBdrop. [Outcomes, full conversations, accounting](../apps/worker/evals/single-agent-commerce-qualification/diagnostic-20261029/REPORT.md).
+- [ ] STOP batch. Cần phương án mới cho selection/error availability vs verified stock và intake COD; không sửa giọng/regex để che state/contract. Diagnostic cases là exposure, không fresh qualification. Phase C BLOCKED/C3NOT_RUN; không live/merge/deploy.
+
+## Previous — Phase C remediation implementation,29/10/2026
 
 - [x] Kế hoạch revision2 APPROVEabe8c798; implementation S0–S3 hoàn thành tại430ee4fa sau review→fix→review. [Evidence/review](../apps/worker/evals/single-agent-commerce-qualification/remediation-20261029/IMPLEMENTATION.md).
 - [x] Đối chiếu campaign03/raw findings với consumer/resolver, packet/capture/history và native wire; [kế hoạch sửa chi tiết, đã self-review](../docs/specs/c3-phase-c-remediation-plan-20261029.md).
 - [x] S0 audit22raw; S1 active vs transaction policy/color; S2 evaluator coverage/code-owned capture/public intake; S3 bounded request/diagnostics. Không đổi primary grades/prompt giọng hay production entrypoints.
 - [x] S4 code APPROVE430ee4fa,4reviewfindings closed. Final750NodePASS/2existingSKIP,346workerPASS,21protected/assemblyPASS; typecheck/build/lintPASS; actual PostgreSQL68checks/7invariantsPASS,DBdrop,0provider.
 - [ ] S5 chỉ seal/run sau approved inventory/mappings/full history+near-duplicate review và fresh source-bound holdout; cases cũ là development. Diagnostic6cases/max37generation; qualification24SAFETY/16SINGLE/6JOURNEY,N1. Không retry/benchmark growth.
-- [ ] Provider diagnostic/campaignNOT_RUN; Phase C vẫnBLOCKED, C3NOT_RUN, B_NOT_GO/AOWNER_BYPASS unchanged; no merge/deploy/live send.
+- [x] Development diagnostic6cases đã chạy riêng,20requests; không import làm qualification. [Report](../apps/worker/evals/single-agent-commerce-qualification/diagnostic-20261029/REPORT.md).
+- [ ] Fresh qualification/campaignNOT_RUN; Phase C vẫnBLOCKED, C3NOT_RUN, B_NOT_GO/AOWNER_BYPASS unchanged; no merge/deploy/live send.
 
 ## Current — Phase C actual execution,29/10/2026
 

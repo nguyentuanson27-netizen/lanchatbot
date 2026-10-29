@@ -1,4 +1,4 @@
-> Current29/10/2026: candidate campaign executed, **qualification BLOCKED**. [Report/all conversations](run-20261029/REPORT.md).93actual generation requests; real-PG66PASS; independent12PASS/2FAIL/8UNRESOLVED. C3 NOT_RUN. The readiness dependencies and NOT_RUN statements in the foundation workflow below describe its original pre-run state, not current execution.
+> Current29/10/2026: one post-remediation development diagnostic completed6cases/9native turns+1probe,20generationHTTP; [report/all conversations](diagnostic-20261029/REPORT.md). Qualification remains BLOCKED/C3NOT_RUN. Original candidate campaign [report](run-20261029/REPORT.md) and12PASS/2FAIL/8UNRESOLVED grades remain unchanged. Foundation NOT_RUN statements below describe their original pre-run state.
 
 # Phase C qualification foundation
 
