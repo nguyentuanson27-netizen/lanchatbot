@@ -1,3 +1,11 @@
+# Phase C — current disposition,29/10/2026
+
+**BLOCKED after actual candidate execution and blind grading.** 24SAFETY PASS (12unsafe: zero observed send-eligible false PASS;11/12safe eligible);22native scenarios/34customer turns completed.93actual generation HTTP requests,94records. Independent SolHigh judge:12PASS/2FAIL/8UNRESOLVED. Real-PG66checks/7invariantsPASS; formal assessment short-circuits before adapter acceptance. C3 arm22NOT_RUN; no replacement/rollout authorized.
+
+[Current report](run-20261029/REPORT.md) · [All conversations](run-20261029/CONVERSATIONS.md) · [Accounting](run-20261029/ACCOUNTING.json) · [Formal assessment](run-20261029/FORMAL_ASSESSMENT.json). Run source36e45015 is distinct from this report commit. Source/credential route recovered; the zero-request/source-outage status below is historical. Neither8UNRESOLVED nor the code-owned capture registration blocker was silently cleared.
+
+## Historical foundation / pre-run record (superseded execution status)
+
 # Phase C foundation — 28/10/2026
 
 ## Collector completion work after foundation approval

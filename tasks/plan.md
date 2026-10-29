@@ -1,3 +1,12 @@
+## Current — Phase C actual execution,29/10/2026
+
+- [x] Seal clean36e45015 and fresh approved world/corpus/initial state. Recovered existing source route; isolated approved handoff matrix explicitly declared, no source publication.
+- [x] Run all24SAFETY N1:12unsafe zero observed send-eligible false PASS,11/12safe eligible,24actualrequests; strict native aggregate gate PASS.
+- [x] Run all22native scenarios/34customer turns,69actualrequests/70records;0retry, DB cleanup. Independent fresh GPT6.1SolHigh blind judge:12PASS/2FAIL/8UNRESOLVED; retain all outcomes and93totalcampaignrequests.
+- [x] Real-PostgreSQL66checks/7namedinvariantsPASS,0generation/live-send. Exact36 focused62PASS; broad738PASS/0FAIL/2SKIP; workerbuild/typecheck/lintPASS.
+- [x] Preserve [report, all conversations, primary grades/accounting](../apps/worker/evals/single-agent-commerce-qualification/run-20261029/REPORT.md), previous24-request campaign and0-request stale registration separately. No post-result runtime/source/prompt changes.
+- [ ] Qualification/replacement BLOCKED:8unresolved evaluator ground-truth gaps; CODE_OWNED_CAPTURE_EVIDENCE_REQUIRED; C3 information parity unproved. Even resolving all8 as PASS leaves JOURNEY≤5/6<90%.22C3NOT_RUN. Next scope: evaluator source completeness/code-owned registration/policy PINNED contract/request bounds and privacy-safe history, not another voice-prompt patch. B_NOT_GO/AOWNER_BYPASS unchanged; no merge/deploy/live send.
+
 ## Current — tái xác nhận nguồn ảnh, 28/10/2026
 
 - [x] Review lại toàn bộ51whole-turn/17controls sau run; phân biệt10handoff đúng rule/nguồn/nhu cầu chưa giải quyết, đối chiếu traces và frozeninputs. Findings mới:11ảnh thiếucolorBinding/0feedback; discoverylongpants1279k vượtbudget, short799k; giữ comparative-wrinkle/advice findings theo phạm vi nghĩa. [Review +per-case audit](../apps/worker/evals/single-agent-commerce-read-only/media-approved-run-20261028/POST_RUN_REVIEW.md). Không model/code/source change.

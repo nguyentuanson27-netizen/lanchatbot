@@ -1,3 +1,5 @@
+> Execution update29/10/2026: source36e45015 completed24SAFETY +22native scenarios/34turns and real-PG66controls. Primary independent grades12PASS/2FAIL/8UNRESOLVED; formal **BLOCKED**, C3 NOT_RUN. [Actual report and next scope](../../apps/worker/evals/single-agent-commerce-qualification/run-20261029/REPORT.md). Pre-run source-unavailable/zero-model paragraphs below are historical; thresholds and architecture remain unchanged.
+
 # Phase C — kế hoạch triển khai qualification
 
 Owner yêu cầu “triển khai phase C”, sau đó chốt quy trình build → independent review → fix → cùng reviewer review đến khi approve. Đây là authorization triển khai công cụ/chuẩn bị kiểm định send-disabled. B vẫn NOT_GO; không viết lại B thành PASS, không bypass verifier/final gate, merge, deploy hoặc live send.

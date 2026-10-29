@@ -1,0 +1,13 @@
+{
+  "scope": "Post-run documentation/evidence integrity; no qualification re-assessment or provider dispatch",
+  "status": "PASS",
+  "jsonFilesParsedBeforeThisValidationRecord": 11,
+  "rawNativeCanonicalHashesMatched": 34,
+  "actualRequestBodyCanonicalHashesMatched": 93,
+  "registrationCopy": "EXACT_PARSED_EQUAL",
+  "primaryGradesCopy": "EXACT_PARSED_EQUAL",
+  "providerRequests": 0,
+  "gitDiffCheck": "EXIT_0",
+  "independentReportReview": "APPROVE_WORKING_TREE",
+  "qualification": "BLOCKED_UNCHANGED"
+}
