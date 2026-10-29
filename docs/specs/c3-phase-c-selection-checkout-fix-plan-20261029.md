@@ -1,6 +1,6 @@
 # Phase C — kế hoạch sửa selection và private checkout sau diagnostic
 
-Revision0 — **PENDING INDEPENDENT REVIEW**. Planning base `b79fd3da2c3af2ad6a0d10f619593b4ee5906f8f`. Yêu cầu lượt này: lập kế hoạch→review độc lập→sửa đến APPROVE; chưa implementation hoặc chạy model. [Diagnostic source6c5023ab, đủ6ca/20requests](../../apps/worker/evals/single-agent-commerce-qualification/diagnostic-20261029/REPORT.md), [toàn bộ hội thoại](../../apps/worker/evals/single-agent-commerce-qualification/diagnostic-20261029/CONVERSATIONS.md), [kế hoạch remediation trước](c3-phase-c-remediation-plan-20261029.md), [qualification](c3-phase-c-qualification-plan-20261028.md). Main/C3 reference giữ296cdcf; primary grades source36 và diagnostic cũ bất biến. Phase C BLOCKED/B_NOT_GO/AOWNER_BYPASS/C3NOT_RUN unchanged.
+Revision1 — **PENDING INDEPENDENT RE-REVIEW** sau2findings tạibd5031a0. Planning base `b79fd3da2c3af2ad6a0d10f619593b4ee5906f8f`. Yêu cầu lượt này: lập kế hoạch→review độc lập→sửa đến APPROVE; chưa implementation hoặc chạy model. [Review record](c3-phase-c-selection-checkout-plan-review-20261029.md). [Diagnostic source6c5023ab, đủ6ca/20requests](../../apps/worker/evals/single-agent-commerce-qualification/diagnostic-20261029/REPORT.md), [toàn bộ hội thoại](../../apps/worker/evals/single-agent-commerce-qualification/diagnostic-20261029/CONVERSATIONS.md), [kế hoạch remediation trước](c3-phase-c-remediation-plan-20261029.md), [qualification](c3-phase-c-qualification-plan-20261028.md). Main/C3 reference giữ296cdcf; primary grades source36 và diagnostic cũ bất biến. Phase C BLOCKED/B_NOT_GO/AOWNER_BYPASS/C3NOT_RUN unchanged.
 
 ## 1. Mục tiêu và ranh giới
 
@@ -49,6 +49,17 @@ Không bỏ `pendingCheckout` khỏi private routing. Bare name hoặc text khô
 
 Chọn hướng nhỏ nhất: **sửa bộ nhận dạng phương thức của existing checkoutDetails**, giữ code-only private intake, reuse CHECKOUT_DETAILS_CAPTURED/clarification/preview/commit hiện có. Không thêm tool/model call hoặc nâng literal extractor thành semantic classifier. Đây là recognizer đóng cho1field/2enum, không module hiểu câu tiếng Việt tổng quát.
 
+Consumer/mode phải được khóa trước sửa, không đổi default của helper dùng chung:
+
+| Consumer | Payment behavior trong vòng này |
+|---|---|
+| Candidate executor/evaluateRealtimeSalesCycle có code-owned checkoutCollection:SINGLE_FIELD | Dùng closed recognizer. AMBIGUOUS/UNSUPPORTED/NO_SIGNAL không được modelPaymentMethod/salesSignals nâng thành RESOLVED; chỉ code xác định theo grammar và policy |
+| Realtime legacy không có candidate collection mode | Giữ nguyên matching/fallback modelPaymentMethod và các guard source evidence đang có; không bị opt-in vào recognizer mới chỉ vì gọi chung checkoutDetails |
+| isPrivateCommerceText/privacy routing | Giữ nguyên name/phone/address/whole-message guards; payment recognition không được cấp quyền vượt pendingCheckout/private route |
+| Public checkout projection, preview và confirm | Chỉ đọc committed domain state; tôn trọng pending PAYMENT_METHOD xuyên lượt như mục4.4, không tự parse hay suy method |
+
+Tái dùng candidate mode code-owned hiện có, không cho model chọn mode và không thêm generic framework. Nếu helper cần options nội bộ, mặc định phải là legacy; thêm differential tests với legacy salesSignals thật/giả và field parser name/phone/address. Payment-only segment đã được nhận dạng không đồng thời được coi là bare name/address; mixed labeled fields vẫn được capture private theo field tương ứng.
+
 ### 4.2 Contract nhận dạng đóng, có giới hạn rõ
 
 Refactor cặp regex paymentMethod hiện tại thành một hàm field-level có kết quả RESOLVED(method)/AMBIGUOUS/UNSUPPORTED/NO_SIGNAL. Không có confidence threshold hoặc state do model đặt. Runtime chỉ áp dụng method thuộc allowedPaymentMethods của policy đúng scope/version.
@@ -57,7 +68,7 @@ Refactor cặp regex paymentMethod hiện tại thành một hàm field-level c�
 - Hỗ trợ một **biểu thức khẳng định lựa chọn phương thức** hoặc một dòng thanh toán được gắn nhãn, sau chuẩn hóa Unicode/case/whitespace/punctuation. Dạng phổ biến “Chị muốn trả khi nhận hàng” phải được nhận, cùng các biến thể độc lập về cách xưng hô và trật tự nói trong cùng grammar đã freeze.
 - Chỉ RESOLVED khi toàn bộ payment segment khớp một lựa chọn xác định. Không tìm keyword giữa câu rồi mặc định là lựa chọn. Phủ định, câu hỏi, giả định/điều kiện, hai phương thức chưa chọn, mâu thuẫn hoặc phần dư ngoài grammar→không tự ghi method. Không dựng parser suy luận negation/condition tự do để cứu các dạng chưa hỗ trợ.
 - Với message nhiều dòng, chỉ dùng field thanh toán được tách theo cấu trúc intake hiện có; PII của những field khác vẫn xử lý private. Không strip tên/địa chỉ rồi gửi phần còn lại cho model. Message không phân tách được giữ private và hỏi bổ sung theo nhánh hiện có.
-- AMBIGUOUS/UNSUPPORTED khi có payment segment chưa quyết được→hỏi chọn trong các phương thức policy cho phép, không ghi đè method đã có. NO_SIGNAL→tiếp tục xử lý các field khác/pending field hiện hành. Nếu policy chỉ cho một method vẫn không tự suy khách đã đồng ý chọn nó.
+- AMBIGUOUS/UNSUPPORTED khi có payment segment chưa quyết được→hỏi chọn trong các phương thức policy cho phép, không chọn method đối lập và **chặn dùng method cũ** theo4.4. NO_SIGNAL thật sự không có payment segment→tiếp tục xử lý các field khác, giữ trạng thái unresolved trước đó nếu có. Nếu policy chỉ cho một method vẫn không tự suy khách đã đồng ý chọn nó.
 - Không đưa text mẫu diagnostic vào prompt. Future phrase ngoài grammar không được mở thêm rule tự động; giữ unknown/clarification và báo coverage gap để quyết định có cần thay intake flow trong plan mới. Không tuyên bố hiểu mọi cách nói COD.
 
 ### 4.3 Commit, correction và tiến bộ hội thoại
@@ -65,9 +76,20 @@ Refactor cặp regex paymentMethod hiện tại thành một hàm field-level c�
 RESOLVED đi vào CHECKOUT_DETAILS_CAPTURED của domain hiện tại, chỉ update checkoutDraft.paymentMethod; source/inbox/revision/policy/recipient/owner guards và atomic commit/readback giữ nguyên. Draft không phải đã thanh toán hoặc đơn đã xác nhận. Customer còn phải thấy method trong preview và xác nhận qua flow cũ trước effect cuối.
 
 - j6: null→COD phải có persisted event/receipt; missing field thanh toán biến mất, FULL_NAME/PHONE/ADDRESS vẫn thiếu. Tiếp tục hỏi tên, không báo đã lên đơn hay đã thu tiền. Public checkout projection chỉ expose enum đã commit cùng provenance, không raw payment quote.
-- Correction chỉ áp dụng explicit, unambiguous RESOLVED theo policy và state hiện hành. Phủ định phương thức cũ mà chưa chọn cách khác không tự chọn method đối lập. Không diễn giải silence thành xác nhận hoặc clear.
+- Correction chỉ áp dụng explicit, unambiguous RESOLVED theo policy và state hiện hành. Phản đối/withdrawal/chưa chọn hoặc mâu thuẫn payment segment chưa RESOLVED phải invalidate readiness của lựa chọn cũ, không tự chọn method đối lập. Không diễn giải silence thành xác nhận; invalidation readiness không phải xác nhận đã xóa/đổi phương thức.
 - Không tiêu hao retry “khách chưa trả lời tên” khi message vừa điền thành công một required field đang thiếu. Chỉ tính progress sau commit+readback khi tập required missing giảm thực sự. Duplicate/replay/giá trị giống cũ hoặc correction không điền field còn thiếu không reset ngân sách. Không tăng cap3 hoặc thêm vòng hỏi không giới hạn.
 - Lỗi commit/conflict/unknown giữ state cũ/uncertainty đúng flow, không báo đã ghi, không replay mutation để cứu lời trả lời. Code-owned question vẫn cần producer/source/receipt/accepted Outbox proof, không tạo ngoại lệ cho model text hoặc claim thanh toán thành công.
+
+### 4.4 Unresolved payment là trạng thái nghiệp vụ phải tồn tại qua lượt sau
+
+Tái dùng clarification PAYMENT_METHOD của domain đã persist, ưu tiên làm rõ phương thức trước khi tiếp tục hỏi field khác khi payment segment mới ambiguous/unsupported. Không chỉ có local boolean rồi mất ở turn sau; không cần thêm semantic memory hoặc writable profile field.
+
+- Persist CLARIFICATION_REQUESTED với PAYMENT_METHOD và source/revision hiện tại. Old method nếu còn trong draft chỉ là giá trị trước đó, **không đủ readiness**. Public checkout view không trình bày nó như lựa chọn đã giải quyết; expose pending PAYMENT_METHOD/enum null trong view tương ứng, audit vẫn giữ sự thật lịch sử.
+- Candidate planner, native confirm bridge và domain PREVIEW_CREATED/CONFIRM_PURCHASE phải block khi PAYMENT_METHOD clarification chưa resolve, kể cả draft đã đủ name/phone/address và còn COD cũ. Guard phải bảo vệ cả direct domain call, không chỉ một early return của private handler.
+- Lượt gửi field khác có thể capture field đó private, nhưng không được dùng missingCheckout()==0 để tự CLARIFICATION_RESOLVED hoặc tạo preview bằng method cũ. Duplicate/replay và source superseded không bỏ pending blocker.
+- Chỉ một RESOLVED payment selection mới, thuộc source/revision/policy hợp lệ và có CHECKOUT_DETAILS_CAPTURED commit/readback tương ứng, mới được resolve PAYMENT_METHOD rồi tính lại missing fields. Tying resolve với actual captured payment evidence là bắt buộc; không dùng timestamp của update tên/địa chỉ làm proof đã chọn lại phương thức. Nếu adapter/guard hiện tại chưa mang được proof này, bổ sung tối thiểu domain contract của clarification resolution và test contracts/runtime; không dựng một parser/semantic state machine khác.
+- Khi preview cũ đã tồn tại: payment unresolved làm preview/confirmation không còn đủ eligibility; không send/confirm preview cũ. Không giả rollback order/payment effect đã commit; nếu PURCHASE_CONFIRMED thì giữ xử lý after-sale/handoff cũ thay vì sửa payment bằng intake. Transaction pin/current policy/effect receipts giữ binding hiện có.
+- Câu hỏi payment không rõ có thể cần xác nhận lại dù method trước đã tồn tại; đây là giới hạn usability được khai báo của recognizer đóng. Không tự phân loại mọi câu có từ COD là withdrawal; NO_SIGNAL không chặn thêm. Full payment segment có ý chưa quyết được thì fail-closed theo nhánh này, không hứa hiểu ngôn ngữ tự do.
 
 ## 5. TDD và regression bắt buộc cho task implementation sau
 
@@ -80,9 +102,10 @@ RED phải tái hiện đúng error/source path trước fix; GREEN minimum. Uni
 | Tuples và fulfillment | Nhiều tuple đủ hàng→clarify; không Cartesian product; preorder giữ nghĩa riêng; BOM/price identity mâu thuẫn không collapse |
 | Binding/receipt | Stock/permission/recipient/revision thay trước commit hoặc trước send→block; duplicate và unknown commit không replay; giữ transaction pin/current policy contract |
 | Intake grammar | COD/CK cũ và ≥3paraphrases/2methods mới trong grammar; Unicode/case/punctuation; private mixed labeled fields; source/revision bindings |
-| False-positive intake | “không COD”, “chưa chọn”, hỏi phương thức, “COD hay chuyển khoản”, điều kiện, negated correction, contradictory batch→không wrong method/effect; unresolved cần hỏi đúng field |
+| False-positive intake | “không COD”, “chưa chọn”, hỏi phương thức, “COD hay chuyển khoản”, điều kiện, negated correction, contradictory batch→không wrong method/effect; unresolved cần hỏi đúng field; candidate salesSignals đề xuấtCOD không override kết quả chưa xác định |
+| Old method xuyên lượt | COD cũ→phản đối/ambiguous→gửi tên/địa chỉ hoặc source replay: persistPAYMENT_METHODpending và direct PREVIEW_CREATED/CONFIRM_PURCHASE đều bị chặn; explicit fresh selection+capture receipt mới resolve. Preview cũ cũng mất eligibility |
 | Progress | j6 persistedCOD và NAMEquestion vẫn đúng; count1 không tăng vì accepted new missing payment field; replay/same value không tạo giả progress; cap3/no-progress vẫn hoạt động |
-| Privacy | Bare tên, phone/address, mixed PII/payment, ảnh và người khác gửi→0raw PII tới model/verifier/log/public history; private handlers/attachment handoff không yếu đi |
+| Privacy/legacy | Bare tên, phone/address, mixed PII/payment, ảnh và người khác gửi→0raw PII tới model/verifier/log/public history; payment-only không thành tên; candidate closed vs default legacy/model fallback có differential tests; private handlers/attachment handoff không yếu đi |
 | Khả năng cũ | CareFAQ, code-owned receipt/capture, public history, image/text bounds, silent handoff và whole-reply verifier/gate vẫn PASS |
 
 Trước provider: focused tests cho catalog/read/effects/session/intake/ingress/public-history/boundary và existing protected-claims/reply-assembler; protocol/provider/diagnostic focused Node; worker typecheck/build/lint. Nếu shared package thực sự đổi, chạy tests/typecheck/build tương ứng. Actual disposable-PG phải có j1 selection/commit/replay/changed-source, j6 naturalCOD/private progression/duplicate/unknown, accepted outbox witness; giữ7named real-adapter invariants. Exact clean source, DBdrop,0provider trước readiness; không thay bằng mock rồi claim real-PG PASS.
