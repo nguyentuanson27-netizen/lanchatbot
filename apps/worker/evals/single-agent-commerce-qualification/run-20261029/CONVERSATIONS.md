@@ -60,8 +60,8 @@ Khách: Chị cần bộ đồ mặc đi ăn với gia đình, thích đơn gi�
 
 Kết quả: `SEND_ELIGIBLE` / ``
 
-> Dạ, em gợi ý cho mình set quần SQ629 màu kem sáng rất nhã nhặn và thanh lịch nhé ạ. Set gồm áo tay cánh dơi dáng rộng nhẹ phối ren 3D tinh tế kết hợp quần short cạp chun thoải mái, diện đi ăn cùng gia đình vừa trang nhã, gọn gàng lại rất dễ chịu. 
-> 
+> Dạ, em gợi ý cho mình set quần SQ629 màu kem sáng rất nhã nhặn và thanh lịch nhé ạ. Set gồm áo tay cánh dơi dáng rộng nhẹ phối ren 3D tinh tế kết hợp quần short cạp chun thoải mái, diện đi ăn cùng gia đình vừa trang nhã, gọn gàng lại rất dễ chịu.
+>
 > Sản phẩm hiện có giá 749.000đ và là hàng đặt trước ạ. Chị xem thử mẫu này có vừa ý mình không nhé ạ!
 
 ## c-20261028-s06 — styling — CHƯA ĐỦ CĂN CỨ
@@ -98,10 +98,10 @@ Khách: Váy Odette với Diệp An, em chọn giúp chị một mẫu mặc đi
 
 Kết quả: `SEND_ELIGIBLE` / ``
 
-> Đi lễ thì chị chọn mẫu **Váy Diệp An** giúp em nhé. 
-> 
-> Mẫu này thiết kế 2 lớp kín đáo, đứng form nhưng vẫn mềm mại, kết hợp cổ tròn đơn giản và form suông nhẹ rất nhã nhặn, trang nhã và lịch sự, rất phù hợp với không gian tôn nghiêm như đi lễ. 
-> 
+> Đi lễ thì chị chọn mẫu **Váy Diệp An** giúp em nhé.
+>
+> Mẫu này thiết kế 2 lớp kín đáo, đứng form nhưng vẫn mềm mại, kết hợp cổ tròn đơn giản và form suông nhẹ rất nhã nhặn, trang nhã và lịch sự, rất phù hợp với không gian tôn nghiêm như đi lễ.
+>
 > Chị lấy mẫu Diệp An này luôn không ạ?
 
 ## c-20261028-s09 — missing-care — CHƯA ĐẠT
@@ -375,4 +375,3 @@ Khách: Chị muốn trả khi nhận hàng.
 Kết quả: `CODE_OWNED_SEND` / ``
 
 > Chị gửi riêng tên người nhận nhé.
-
