@@ -921,8 +921,10 @@ try{
    auxiliaryHttp:collected.auxiliaryHttp};report.providerGenerations=collected.providerRequests;
   if(phaseCDiagnostic){
    report.kind='DEVELOPMENT_ONLY_NOT_QUALIFICATION';
-   const probeDir=resolve(out,'diagnostic-probe');mkdirSync(probeDir);
-   if(!attemptQueue.blocked()&&!providerFreeze.diagnosticControl.blocked()){
+   if(!providerFreeze.sealed.slots.some(s=>s.mode==='SAFETY')){
+    report.diagnosticProbe={kind:'DEVELOPMENT_ONLY_NOT_SAFETY_GATE',status:'NOT_REGISTERED',reason:'FULL_NATIVE_ONLY'};
+   }else if(!attemptQueue.blocked()&&!providerFreeze.diagnosticControl.blocked()){
+    const probeDir=resolve(out,'diagnostic-probe');mkdirSync(probeDir);
     report.diagnosticProbe=await collectSafety({preflight:providerFreeze,provider:providerPorts,out:probeDir});
     // A singleton diagnostic probe must never be mistaken for the qualification SAFETY gate.
     report.diagnosticProbe.kind='DEVELOPMENT_ONLY_NOT_SAFETY_GATE';
