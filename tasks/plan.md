@@ -1,4 +1,12 @@
-## Current — selection/private checkout implementation, 29/10/2026
+## Current — diagnostic sau selection/private checkout fix,29/10/2026
+
+- [x] Owner yêu cầu chạy model; cùng reviewer APPROVE order/preparation exact0c4c6c4a → fresh world/actual initial → frozen inputs/preflight → APPROVE dispatch registration388ee0ae. Thứ tự j1→j6→s09→s06→s11→probe; N1/max37, runtime/prompts/models giữ nguyên.
+- [x] Hoàn tất6/6purposes:5native scenarios/9customer turns+1probe;18generationHTTP(14owner+4verifier),0errors/retry/labelleaks,1OAuth riêng. Sourceclean/DBdrop/live0. [Report](../apps/worker/evals/single-agent-commerce-qualification/selection-checkout-diagnostic-20261029/REPORT.md), [toàn bộ hội thoại](../apps/worker/evals/single-agent-commerce-qualification/selection-checkout-diagnostic-20261029/CONVERSATIONS.md), [accounting](../apps/worker/evals/single-agent-commerce-qualification/selection-checkout-diagnostic-20261029/ACCOUNTING.json).
+- [x] Independent audit APPROVE accounting/capture:18request hashes/9native hashes matched, recursive0evaluator leaks,2code questions cóacceptedOutbox/witness. Native2eligible/2code-owned/3handoff/2NO_SEND;probePASS chỉ verifier-only.
+- [x] j6naturalCODnull→COD và NAMEcount1 được giữ: cải thiệnstate thực, chưacheckoutcomplete. s09FAQPASS. j1owner thấyBE PRE_ORDER/NO_COLOR IN_STOCK, verifier chỉNO_COLOR→projection parity chưaxong; “màu gốc” là diễn giải sentinel sai. s06viewmedia→dependencyhandoff/chưa rõlowercause; s11tuple-not-found không phải shopwideOOS.
+- [ ] STOP batch, không post-result patch/rerun. Cần phương án residual tuple/customer-label/owner–verifier parity và media diagnostics trước batch mới. N1 không stabilityproof; không overallqualityPASS. Qualification BLOCKED / C3 NOT_RUN / B_NOT_GO / A OWNER_BYPASS; historicalsource36grades vàsource6cdiagnostic giữ nguyên. No merge/deploy/live send.
+
+## Previous — selection/private checkout implementation, 29/10/2026
 
 - [x] [Approved plan revision1](../docs/specs/c3-phase-c-selection-checkout-fix-plan-20261029.md), implementation base ff078377. F0 audited producer NO_COLOR/stock grouping; actual BE0 can be PRE_ORDER, not proof to force unlabelled selection.
 - [x] F1 candidate exact tuple/quantity/source view across read/selection/error, default legacy resolver preserved; product-scope deduplicated without merging M/L cart lines or relaxing readiness; source sentinel omitted from display.
@@ -6,7 +14,8 @@
 - [x] RED→GREEN; same independent reviewer REQUEST_CHANGES→fix→APPROVE code e46be004, then existing affirmative-verb compatibility fix→APPROVE 5b35328b. [Implementation and limitations](../docs/specs/c3-phase-c-selection-checkout-implementation-20261029.md), [review](../docs/specs/c3-phase-c-selection-checkout-implementation-review-20261029.md), [commands/hashes](../docs/specs/c3-phase-c-selection-checkout-verification-20261029.json).
 - [x] Final worker/boundary/protected focused485PASS; Node756PASS/2SKIP; worker build/typecheck/lint exit0. Shared566PASS/30SKIP and typechecks; shared bytes unchanged at final source. Failed PG01–03 and full01 retained.
 - [x] Actual full PostgreSQL70/70 +7/7named invariants PASS on clean5b35328b, DB dropped,0provider generations. Both new selection/private-checkout cases PASS; same reviewer APPROVE final verification at ad6e8dd6 after54artifact/file hashes matched. No remaining implementation finding.
-- [ ] New provider diagnostic/qualification NOT_RUN. Stop implementation here; quality/j1 actual-shop outcome remain unverified. Historical source36 grades and source6c diagnostic unchanged. Development mappings/near-duplicate review, fresh source-bound holdout and C3 parity still pending; Phase C BLOCKED / B_NOT_GO / A OWNER_BYPASS / C3 NOT_RUN. No merge/deploy/live send.
+- [x] Development diagnostic mới đã chạy riêng tại source0c4c6c4a,18requests; không nâng implementation tests thành model-quality proof. Xem entry hiện hành vàreport mới.
+- [ ] Fresh qualification/C3 parity vẫnNOT_RUN/BLOCKED; development mappings/near-duplicate review và freshsource-bound holdout cònpending. No merge/deploy/live send.
 
 ## Previous — Phase C development diagnostic,29/10/2026
 
