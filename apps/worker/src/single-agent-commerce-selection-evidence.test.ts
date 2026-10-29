@@ -34,12 +34,21 @@ it("retains both source-bound selections across a second selector and readback",
  expect(tools.snapshot().runtimeProducts?.[0]?.selectionEvidence).toEqual(before.runtimeProducts?.[0]?.selectionEvidence);
  const withDetails=tools.snapshot();await expect(tools.readback()).resolves.toEqual(withDetails);
 });
-it("rejects a fourth selection atomically instead of dropping a prior admitted query",async()=>{
+it("allows compare-three then refining one offer within the same existing tool budget",async()=>{
+ const f=fixtureProduct(),template=f.snapshot.offers.DIRECT!;
+ f.snapshot.offers=Object.fromEntries(["AO","CV","SET"].map(offer=>[offer,{...structuredClone(template),rows:template.rows.map(r=>({...r,offer_type:offer}))}]));
+ const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,candidateEvidence:true,initialProducts:[f.product],catalog:{readProduct:async()=>structuredClone(f),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+ expect((await tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerTypes:["AO","CV","SET"]}})).status).toBe("OK");
+ expect((await tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"AO",size:"M",color:"navy"}})).status).toBe("OK");
+ expect(tools.snapshot().runtimeProducts?.[0]?.selectionEvidence).toHaveLength(4);
+ const before=tools.snapshot();await expect(tools.readback()).resolves.toEqual(before);
+});
+it("rejects actual product-byte overflow atomically without forgetting previously admitted selections",async()=>{
  const f=fixtureProduct(),row=f.snapshot.offers.DIRECT!.rows[0]!;
- f.snapshot.offers.DIRECT!.rows=["S","M","L","XL"].map(size=>({...structuredClone(row),size,parent_variation_id:`SM613-${size}`}));
- const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,candidateEvidence:true,initialProducts:[f.product],
-  catalog:{readProduct:async()=>structuredClone(f),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
- for(const size of["S","M","L"])expect((await tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT",size}})).status).toBe("OK");
- const before=tools.snapshot();expect((await tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT",size:"XL"}})).status).toBe("REJECTED");
- expect(tools.snapshot()).toEqual(before);
+ f.snapshot.offers.DIRECT!.rows=["S","M","L"].flatMap(size=>["be","navy","white","black","red","blue","green","brown"].map(color=>({...structuredClone(row),size,color,parent_variation_id:`SM613-${size}-${color}`})));
+ const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,candidateEvidence:true,initialProducts:[f.product],catalog:{readProduct:async()=>structuredClone(f),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+ let admitted=0,rejected=false;
+ for(const size of["S","M","L"]){const before=tools.snapshot(),r=await tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT",size}});
+  if(r.status==="REJECTED"){expect(tools.snapshot()).toEqual(before);rejected=true;break;}admitted++;}
+ expect(admitted).toBeGreaterThan(0);expect(rejected).toBe(true);
 });

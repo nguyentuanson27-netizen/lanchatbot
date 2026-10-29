@@ -115,7 +115,7 @@ export async function createCommerceTools(input: {
   const start=(call:CommerceToolCall)=>starts.set(call,diagnostics.emit("ARGUMENT_VALIDATION","STARTED",{tool:call.name,args:call.args}));
   const observedResult=(call:CommerceToolCall,result:CommerceToolResult)=>{
     const selector={tool:call.name,args:call.args},parent=starts.get(call)??null;
-    diagnostics.emit("ARGUMENT_VALIDATION",result.reason==="TOOL_ARGUMENTS_OR_REF"||result.reason==="CAPABILITY_UNAVAILABLE"?"REJECTED":"OK",selector,result.reason??null,null,parent);
+    diagnostics.emit("ARGUMENT_VALIDATION",["TOOL_ARGUMENTS_OR_REF","CAPABILITY_UNAVAILABLE","MEDIA_ARGUMENTS_OR_REF","TOOL_ARGUMENTS","STATE_ARGUMENTS","STATE_OR_REF"].includes(result.reason??"")?"REJECTED":result.status==="REJECTED"?"UNKNOWN":"OK",selector,result.reason??null,null,parent);
     diagnostics.emit("RESULT_PROJECTION",result.status,selector,result.reason??null,Buffer.byteLength(JSON.stringify(result)),parent);
     return result;
   };

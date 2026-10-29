@@ -112,7 +112,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
           nextSelectionMeaning:"Optional color-free lookup, not yet executed. Keep the requested image type/component; availability is unknown until selection succeeds. These would be general product images, not confirmed requested-color images.",
         }:{} )}};
     };
-    let validating=false;
+    let validating=false,validatingAsset:string|null=null;
     try{
       const view=call.name==="view_product_media",assets=(await (input.diagnostics?input.diagnostics.run("MEDIA_SELECT",query,()=>select(query,value=>{source=value;},value=>{availableAlternatives=value;})):select(query,value=>{source=value;},value=>{availableAlternatives=value;}))).slice(0,view?COMMERCE_VISION_BOUNDS.count:4);
       if(!assets.length)return unavailable("NO_VERIFIED_MATCHING_MEDIA");
@@ -121,7 +121,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
         stage="IMAGE_FETCH_OR_PREPARE";
         const images:CommerceCatalogImage[]=[];
         for(const asset of assets){
-          validating=false;
+          validating=false;validatingAsset=asset.assetRef;
           let bytes:Buffer=Buffer.from(await (input.diagnostics?input.diagnostics.run("MEDIA_FETCH",{assetRef:asset.assetRef},()=>downloader.download(asset.url,new AbortController().signal)):downloader.download(asset.url,new AbortController().signal)));
           validating=true;input.diagnostics?.emit("MEDIA_VALIDATE","STARTED",{assetRef:asset.assetRef});
           // Existing registry IMAGE_HASH is reconciliation metadata; the publisher permits CDN re-encoding.
@@ -154,7 +154,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
       observations.delete(observationKey);
       selections.set(key,{query,assets});
       return {status:"OK",data:{subjectRef:query.subjectRef,intent:query.intent,descriptionEvidence:descriptionEvidence(query,assets),assets:assets.map(({assetRef,angle,imageType,feedback,partsVisible})=>({assetRef,angle,imageType,feedback,partsVisible})),scope:query.color?"COLOR_BOUND":"GENERIC_PRODUCT",colorMatched:!!query.color,delivery:"PENDING_FINAL_GATE"}};
-    }catch(error){if(validating)input.diagnostics?.emit("MEDIA_VALIDATE","ERROR",query,"UNKNOWN_INTERNAL");return unavailable(error instanceof Error&&error.message==="MEDIA_COLOR_BINDING_UNVERIFIED"?error.message:"MEDIA_SOURCE_UNAVAILABLE");}
+    }catch(error){if(validating)input.diagnostics?.emit("MEDIA_VALIDATE","ERROR",{assetRef:validatingAsset},error instanceof Error?error.message:"UNKNOWN_INTERNAL");return unavailable(error instanceof Error&&error.message==="MEDIA_COLOR_BINDING_UNVERIFIED"?error.message:"MEDIA_SOURCE_UNAVAILABLE");}
   }
   return {...input.base,mediaSelection,catalogImages,
     fallbackId:()=>input.base.sizeOutcome?.()?"C3_A_NONPROTECTED_V2": [...observations.values()].some(o=>o.outcome!=="OK")

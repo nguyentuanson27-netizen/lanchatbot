@@ -2,6 +2,8 @@ import {createHash} from "node:crypto";
 import {canonicalJsonV1,type ProductPresentationEvidenceV1} from "@lana/contracts";
 import {hashProductPresentationEvidenceV1,normalizeCatalogToken} from "@lana/business-tools";
 import type {CandidateCartOption} from "./realtime-sales-catalog.js";
+// At most six normal calls, each comparing at most three offers. Byte bounds remain stricter.
+export const MAX_SELECTION_OBSERVATIONS=18;
 export interface CandidateSelectionEvidence {
  kind:"CANDIDATE_SELECTION_V1";productId:string;offerType:string;size:string|null;color:string|null;quantity:number;
  sourceVersion:string;sourceHash:string;observedAt:string;expiresAt:string;
@@ -55,7 +57,7 @@ export function mergeSelectionEvidence<T extends {subjectRef:string;selectionEvi
  if(index>=0){if(selectionMeaningHash(values[index]!)!==selectionMeaningHash(e))throw Error("SOURCE_EVIDENCE_CONFLICT");
   if(Date.parse(e.expiresAt)<Date.parse(values[index]!.expiresAt))values[index]=e;
  }else values.push(e);
- if(values.length>3)throw Error("PRODUCT_EVIDENCE_BOUND");
+ if(values.length>MAX_SELECTION_OBSERVATIONS)throw Error("PRODUCT_EVIDENCE_BOUND");
  let presentation=p.presentation;for(const value of values)if(presentation)presentation=selectionPresentation(presentation,value);
  const next={...p,selectionEvidence:values,...(presentation?{presentation}:{})};
  if(Buffer.byteLength(canonicalJsonV1(next))>8192)throw Error("PRODUCT_EVIDENCE_BOUND");return next;

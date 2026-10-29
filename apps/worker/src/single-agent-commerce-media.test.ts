@@ -22,7 +22,7 @@ const setup = async (clock:()=>Date=()=>commerceNow) => {
 
 it("does not mislabel a second asset fetch failure as validation of that asset",async()=>{
  const s=await setup(),events:import("./single-agent-commerce-diagnostics.js").CommerceDiagnostic[]=[];
- s.f.product.images[0]!.angle="FRONT";s.f.product.images.push({...s.f.product.images[0]!,angle:"BACK",url:"https://content.pancake.vn/second-back.jpg",sortOrder:1});
+ s.f.product.images[0]!.angle="FRONT";s.f.product.images=[...s.f.product.images,{...s.f.product.images[0]!,angle:"BACK",url:"https://content.pancake.vn/second-back.jpg",sortOrder:1}];
  const png=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jY90AAAAASUVORK5CYII=","base64");let fetched=0;
  const mock=vi.spyOn(globalThis,"fetch").mockImplementation(async()=>{if(fetched++>0)throw Error("secret fetch failure");return new Response(png,{headers:{"content-type":"image/png"}});});
  try{const tools=await createCommerceTools({read:{scope:s.scope,clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[s.f.product],catalog:{readProduct:async()=>structuredClone(s.f),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}},

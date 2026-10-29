@@ -34,3 +34,10 @@ it("retains a known media absence reason and paired argument result before any l
  expect(events).toContainEqual(expect.objectContaining({stage:"ARGUMENT_VALIDATION",status:"OK",parentOrdinal:start.ordinal,operation:"select_product_media"}));
  expect(events).toContainEqual(expect.objectContaining({stage:"RESULT_PROJECTION",status:"UNAVAILABLE",reason:"NO_VERIFIED_MATCHING_MEDIA",parentOrdinal:start.ordinal,operation:"select_product_media"}));
 });
+
+it("marks invalid media arguments as rejected rather than validated OK",async()=>{
+ const events:import("./single-agent-commerce-diagnostics.js").CommerceDiagnostic[]=[],f=fixtureProduct();
+ const tools=await createCommerceTools({read:{scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[f.product],catalog:{readProduct:async()=>f,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}},media:{allowedHostSuffixes:["content.pancake.vn"]},observeDiagnostics:e=>events.push(e)});
+ await tools.invoke({name:"select_product_media",args:{subjectRef:f.product.productId,intent:"NOT_A_REAL_INTENT"}});
+ expect(events).toContainEqual(expect.objectContaining({stage:"ARGUMENT_VALIDATION",status:"REJECTED",reason:"MEDIA_ARGUMENTS_OR_REF"}));
+});

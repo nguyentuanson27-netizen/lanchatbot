@@ -4,7 +4,7 @@ import { ProtectedClaimV1Schema, ProductContentV1Schema, SizeChartV1Schema, type
 import { verifyProductAttributesV1, verifyProductPresentationEvidenceV1 } from "@lana/business-tools";
 import { hasResidualPii } from "@lana/dataset-review";
 import { authorizeRealtimeProtectedClaimProposal } from "./realtime-protected-claim-boundary.js";
-import {validSelectionEvidence,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
+import {validSelectionEvidence,MAX_SELECTION_OBSERVATIONS,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
 
 // Shared isolated egress mechanics. No provider, tool, mutation or send interface.
 interface ProductProfile {
@@ -152,7 +152,7 @@ export function hardPrecheck(trusted: TrustedContext, draft: string, now: Date, 
         Object.keys(p).some(key => !["ref", "subjectRef", "attributes", "presentation", "sizeCharts", "content","selectionEvidence","offerReadCoverage"].includes(key)) ||
         (!p.attributes && !p.presentation && !p.sizeCharts?.length && !p.content&&!p.selectionEvidence?.length)) return "MALFORMED";
       if (!trusted.boundSubjects.some(subject => subject.kind === "PRODUCT" && subject.ref === p.subjectRef)) return stale("PRODUCT_BINDING");
-      if(p.selectionEvidence&&(!Array.isArray(p.selectionEvidence)||p.selectionEvidence.length>3||p.selectionEvidence.some(e=>!validSelectionEvidence(e,p.subjectRef,now))))return stale("SELECTION_EVIDENCE");
+      if(p.selectionEvidence&&(!Array.isArray(p.selectionEvidence)||p.selectionEvidence.length>MAX_SELECTION_OBSERVATIONS||p.selectionEvidence.some(e=>!validSelectionEvidence(e,p.subjectRef,now))))return stale("SELECTION_EVIDENCE");
       if(p.offerReadCoverage&&(!Array.isArray(p.offerReadCoverage)||p.offerReadCoverage.length>8||p.offerReadCoverage.some(o=>!record(o)||Object.keys(o).sort().join(',')!=="offerType,price,stock"||!boundedText(o.offerType,64)||!["AVAILABLE","UNAVAILABLE","NOT_READ"].includes(o.price)||!["AVAILABLE","UNAVAILABLE","NOT_READ"].includes(o.stock))))return "MALFORMED";
       const metadataFresh = (m: { observedAt: string; expiresAt: string | null; freshnessState: string }) =>
         m.freshnessState === "FRESH" && Number.isFinite(Date.parse(m.observedAt)) && Date.parse(m.observedAt) <= now.getTime() &&
