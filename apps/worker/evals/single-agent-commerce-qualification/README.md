@@ -1,3 +1,5 @@
+> Latest29/10/2026: owner-requested full22 development rerun completed22/22conversations and34/34turns,62generationrequests; [report/all histories](full22-rerun-20261029/REPORT.md). Independent accounting/capture audit PASS. Offline blind grades incomplete due workspace credit limit; no qualification PASS/C3 run or automatic retry. Prior results below remain historical and unchanged.
+
 > Current29/10/2026: one post-remediation development diagnostic completed6cases/9native turns+1probe,20generationHTTP; [report/all conversations](diagnostic-20261029/REPORT.md). Qualification remains BLOCKED/C3NOT_RUN. Original candidate campaign [report](run-20261029/REPORT.md) and12PASS/2FAIL/8UNRESOLVED grades remain unchanged. Foundation NOT_RUN statements below describe their original pre-run state.
 
 # Phase C qualification foundation

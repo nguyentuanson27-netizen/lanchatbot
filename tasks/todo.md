@@ -2740,3 +2740,13 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Owner-authorized sealed source `33d83f68`: 17/17 controls PASS, all51 native once, source unchanged; 42eligible/0fallback/7handoff/2codecheckout. 165 captured provider wires, 0 label matches, 1 request/generation max; 5 isolated DBs dropped. [Full report and all terminals](../apps/worker/evals/single-agent-commerce-read-only/recovery-priority-full-20261025/CHECKPOINT_B.md).
 - [x] Review all51: camera closeup delivered; 5 failed attempts durably handed off, 2 business handoffs; existing receipt recovery kept a verified quote after rejected embroidery claim. Preserve six original failed drafts/completions, not six successful advice results. Code/plaintext capture hash explains over-redacted negotiation display.
 - [ ] B readiness: null/unproven media referent, final-only tool call, malformed provider completion, and prior-discount receipt absent on a later quote turn remain unresolved. Generic fact recovery/mixed-intent routing/style tuning are not silently opened. STOP/BnotGO; no automatic next run or deploy.
+
+
+## Phase C — full22 development rerun, 2026-10-29
+
+- [x] Freeze exact original22 customer scripts/branches and 34turns, N1/max136/retry0; preserve old diagnostic scope; RED2→GREEN8, fullfocused80PASS, independent patch/input/preflight APPROVE.
+- [x] Clean run source68d5c33b; fresh107product public capture/read-only + approved isolated matrix; current-source actualPG initial/DBdrop/generation0; pinnedCodex0.159.2preflightPASS.
+- [x] Execute22/22cases and34/34turns,62generationHTTP/0retry/0timeout,1malformed owner result.12texts+2images;10eligible/2code-owned/15handoff/7no-send. All raw retained; independent62wire/34raw/40manifesthash accounting auditPASS; DBdropped/live0.
+- [x] Primary qualitative review of22 whole conversations; [results/evidence](../apps/worker/evals/single-agent-commerce-qualification/full22-rerun-20261029/REPORT.md). Do not treat rejection drafts as customer replies or all handoffs as quality failure.
+- [ ] Complete offline blind grades: separateSolHighjudge hit workspace credit limit before writingGRADES.json; statusBLIND_GRADING_INCOMPLETE_QUOTA. No invented grades/model substitution or automatic rerun.
+- [ ] PhaseC qualification/C3parity/comparison remainBLOCKED/NOT_RUN. Development exposure inventory6483/missing0/reviewPENDING. STOP after authorized batch, no auto next fix/run/deploy.

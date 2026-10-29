@@ -271,6 +271,8 @@ Kết quả: **NO_SEND** — HUMAN_OWNS_CONVERSATION
 Trạng thái: EXECUTED
 
 ### Lượt 1
+Ảnh thực được capture: 2 (URL và Outbox hashes trong ACCOUNTING.json).
+
 Khách: Chị có quần nâu ở nhà rồi, đang muốn mua áo của bộ váy Thạch Thảo.
 
 Kết quả: **SEND_ELIGIBLE**
