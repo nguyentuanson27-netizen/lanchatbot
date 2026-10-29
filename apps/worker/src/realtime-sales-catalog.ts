@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { southernDestination } from "./southern-delivery-region.js";
+import {selectionEvidenceFromOptions,selectionSourceHash,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
 import {
   CartLineV1Schema,
   type CartLineV1,
@@ -44,6 +45,7 @@ interface RawOfferRow {
 export interface CartSelectionQuery {
   /** Code-owned candidate adapter mode. Legacy callers retain their matching contract. */
   readonly selectionMode?: "CANDIDATE_TUPLES" | undefined;
+  readonly selectionMaxAgeSeconds?:number;
   readonly shopAlias: string;
   readonly productId: string;
   readonly offerType: string | null;
@@ -88,6 +90,7 @@ export type CartSelectionResult =
       readonly availableSizes: readonly string[];
       readonly availableColors: readonly string[];
       readonly selectionOptions?: readonly CandidateCartOption[];
+      readonly selectionEvidence?:CandidateSelectionEvidence;
     };
 
 export interface CandidateCartOption {
@@ -405,8 +408,12 @@ export function cartSelectionFromSnapshot(
   const rows = offer.rows as readonly RawOfferRow[];
   const candidate=query.selectionMode==="CANDIDATE_TUPLES";
   const options=candidate?candidateCartOptions(snapshot,query,now):[];
+  const evidenceExpiry=Math.min(expiresAt.getTime(),observedAt+(query.selectionMaxAgeSeconds??PRICE_FRESH_SECONDS)*1000,
+    snapshot.fulfillment_policy?.eta_valid_until.trim()?Date.parse(snapshot.fulfillment_policy.eta_valid_until):Infinity);
+  const selectionEvidence=candidate?selectionEvidenceFromOptions({productId:snapshot.product_id,offerType:offerName,size:query.size,color:query.color,quantity:query.quantity,
+    sourceVersion:snapshot.release_id,sourceHash:selectionSourceHash(snapshot),observedAt:snapshot.synced_at,expiresAt:new Date(evidenceExpiry).toISOString()},options,now):null;
   const rejected=(status:Exclude<CartSelectionResult["status"],"READY">,reason:string,scopeRows:readonly RawOfferRow[]=rows):CartSelectionResult=>
-    candidate?{status,reasonCode:reason,availableSizes:[],availableColors:[],selectionOptions:options}:failed(status,reason,scopeRows);
+    candidate?{status,reasonCode:reason,availableSizes:[],availableColors:[],selectionOptions:selectionEvidence?.options??[],...(selectionEvidence?{selectionEvidence}:{})}:failed(status,reason,scopeRows);
   if (normalizeCatalogToken(offer.price_status) !== "OK") {
     return rejected("PRICE_UNAVAILABLE", `CART_${normalizeCatalogToken(offer.price_status)}`, rows);
   }

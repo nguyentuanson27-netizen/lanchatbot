@@ -10,6 +10,7 @@ import type { HandoffReasonV2 } from "@lana/contracts";
 import type { CommerceToolCall, CommerceToolResult } from "./single-agent-commerce-read-only-tools.js";
 import { commerceHash } from "./single-agent-commerce-read-only-context.js";
 import { canonicalJsonV1, type CommerceHandoffSourceCheckV1 } from "@lana/contracts";
+import {commerceDiagnostics,type CommerceDiagnosticObserver} from "./single-agent-commerce-diagnostics.js";
 
 /** Required shop reads only. Never parse prose or turn absent optional fields into blockers. */
 function requiredReadHandoffReason(call: CommerceToolCall, result: CommerceToolResult): HandoffReasonV2 | null {
@@ -32,6 +33,7 @@ function requiredReadHandoffReason(call: CommerceToolCall, result: CommerceToolR
 
 /** Candidate composition only. The caller supplies existing scoped ports; no live entrypoint or writer is created here. */
 export async function createCommerceTools(input: {
+  observeDiagnostics?:CommerceDiagnosticObserver;
   quoteTask?: ExplicitQuoteTask;
   read: Parameters<typeof createReadOnlyTools>[0];
   state?: Omit<Parameters<typeof createCustomerStateTools>[0], "base" | "scope" | "clock">;
@@ -42,11 +44,13 @@ export async function createCommerceTools(input: {
 }): Promise<CommerceTools> {
   if (input.effects && !input.state) throw new Error("EFFECTS_REQUIRE_CUSTOMER_STATE");
   const { scope, clock } = input.read;
+  const diagnostics=commerceDiagnostics(input.observeDiagnostics);
   const evidence=new Map<string,CommerceHandoffSourceCheckV1>();
   let evidenceComplete=true;
   const observed=async<T>(kind:CommerceHandoffSourceCheckV1["kind"],query:unknown,work:()=>Promise<T>)=>{
     const queryJson=canonicalJsonV1(query),key=`${kind}:${queryJson}`;
-    const result=await work();
+    const stage=kind==="PRODUCT"?"CATALOG_READ":"RESULT_PROJECTION";
+    const result=await diagnostics.run(stage,{kind,query},work);
     if(Buffer.byteLength(queryJson)>4096||(!evidence.has(key)&&evidence.size>=16)){evidenceComplete=false;return result;}
     evidence.set(key,{kind,queryJson,sourceHash:commerceHash(result)});return result;
   };
@@ -56,10 +60,10 @@ export async function createCommerceTools(input: {
   const catalog={searchText:(query:string)=>originalCatalog.searchText(query),
     ...(originalCatalog.resolveProductCode?{resolveProductCode:(code:string)=>originalCatalog.resolveProductCode!(code)}:{}),
     readProduct:(id:string,readPos=true)=>observed("PRODUCT",{productId:id,readPos},async()=>{
-      try{const source=await originalCatalog.readProduct(id,readPos);try{hints?.observe(id,source.product);}catch{}return source;}
+      try{const source=await originalCatalog.readProduct(id,readPos,diagnostics);try{hints?.observe(id,source.product);}catch{}return source;}
       catch(error){hints?.clear(id,"SOURCE_ERROR");throw error;}
     })};
-  const readTools = createReadOnlyTools({...input.read,catalog,...(hints?{onMediaColor:(id:string,color:string)=>hints.addColor(id,color)}:{})});
+  const readTools = createReadOnlyTools({...input.read,catalog,diagnostics,prepareCurrentOffers:true,candidateEvidence:true,...(hints?{onMediaColor:(id:string,color:string)=>hints.addColor(id,color)}:{})});
   let tools: CommerceTools = readTools;
   tools={...tools,handoffSources};
   const availableTools = ["search_products", "read_product", "read_policy"];
@@ -73,7 +77,7 @@ export async function createCommerceTools(input: {
   }
   if (input.effects) {
     const effects=input.effects;
-    tools = await createCommerceEffectTools({ ...effects,
+    tools = await createCommerceEffectTools({ ...effects,selectionMaxAgeSeconds:input.read.maxFactAgeSeconds??1200,
       repository:{read:key=>observed("SALES_STATE",{},()=>effects.repository.read(key)),
         compareAndSwap:update=>effects.repository.compareAndSwap(update)},
       select:q=>observed("CART_SELECTION",q,()=>effects.select(q)),
@@ -89,7 +93,7 @@ export async function createCommerceTools(input: {
     availableTools.push("request_handoff");
   }
   if(input.media){
-    tools=createCommerceMediaTools({...input.media,base:tools,catalog,clock});
+    tools=createCommerceMediaTools({...input.media,base:tools,catalog,clock,diagnostics});
     availableTools.push("select_product_media","view_product_media");
   }
   const composed = tools;
@@ -106,9 +110,11 @@ export async function createCommerceTools(input: {
       missingInformationUnproved=outcome.status!=="OK";
     } catch { missingInformationUnproved=true; }
   }
-  const guarded:CommerceTools = { ...composed, ...(input.quoteTask?{primitiveToolInvocations:()=>primitiveDispatches}:{}), ...(hints?{mediaCapabilities:()=>hints.get(composed.snapshot()),mediaCapabilityDiagnostics:()=>hints.takeDiagnostics()}:{}), prepare: () => readTools.prepare(), availableTools, invoke: call => missingInformationUnproved
+  const guarded:CommerceTools = { ...composed,diagnostic:(stage,status,reason=null,resultBytes=null)=>diagnostics.emit(stage,status,{requestId:scope.requestId},reason,resultBytes), ...(input.quoteTask?{primitiveToolInvocations:()=>primitiveDispatches}:{}), ...(hints?{mediaCapabilities:()=>hints.get(composed.snapshot()),mediaCapabilityDiagnostics:()=>hints.takeDiagnostics()}:{}), prepare: admit => readTools.prepare(()=>{
+    const context=composed.snapshot();return context.boundSubjects.length<=8&&context.protectedClaims.length<=32&&(context.runtimeProducts?.length??0)<=4&&!!admit?.(context);
+  }), availableTools, invoke: call => missingInformationUnproved
     ? Promise.resolve({status:"REJECTED",reason:"SHOP_INFORMATION_HANDOFF_UNPROVED"}) : availableTools.includes(call.name) ? (countDispatch([call]),composed.invoke(call))
-    .then(async result=>{await handoffRequiredRead([call],[result]);return result;})
+    .then(async result=>{diagnostics.emit("RESULT_PROJECTION",result.status,{tool:call.name,args:call.args},null,Buffer.byteLength(JSON.stringify(result)));await handoffRequiredRead([call],[result]);return result;})
     : Promise.resolve({ status: "REJECTED", reason: "CAPABILITY_UNAVAILABLE" }),
     ...(input.handoff?{async terminalOutcome(){
       return await composed.terminalOutcome?.() ?? (missingInformationUnproved
@@ -116,8 +122,10 @@ export async function createCommerceTools(input: {
     }}:{}),
     async invokeBatch(calls) {
       if(missingInformationUnproved)return calls.map(()=>({status:"REJECTED",reason:"SHOP_INFORMATION_HANDOFF_UNPROVED"}));
+      diagnostics.emit("ARGUMENT_VALIDATION","STARTED",calls);
       const allowed = calls.filter(c => availableTools.includes(c.name));countDispatch(allowed);
       const results = await composed.invokeBatch(allowed);
+      allowed.forEach((call,i)=>diagnostics.emit("RESULT_PROJECTION",results[i]?.status??"UNKNOWN",{tool:call.name,args:call.args},null,results[i]?Buffer.byteLength(JSON.stringify(results[i])):null));
       await handoffRequiredRead(allowed,results);
       return calls.map(c => availableTools.includes(c.name) ? results[allowed.indexOf(c)]!
         : { status: "REJECTED", reason: "CAPABILITY_UNAVAILABLE" });

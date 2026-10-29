@@ -20,6 +20,7 @@ import {createFrozenSearch,validateFrozenIndex} from './frozen-search.mjs';
 import {VertexShadowModel} from '../../dist/vertex.js';
 import {embeddingHttpAccounting,EMBEDDING_POLICY} from './embedding-accounting.mjs';
 import {MEASUREMENT_POLICY} from './qualification.mjs';
+import {admitPreparedCommerceContext} from '../single-agent-commerce-read-only/preparation-admission.mjs';
 const read=p=>JSON.parse(readFileSync(p,'utf8').replace(/^\uFEFF/,''));
 export function assertSealedInputs(sealed,world,{registrationRoot}={}){
  assert.equal(sealed.sendEnabled,false,'C_SEALED_SEND_POLICY');
@@ -154,6 +155,7 @@ export function createCandidateProvider({preflight,out,dependencies={}}){
  }
  const tracked=(role,request)=>{const work=generate(role,request);pending.add(work);work.then(()=>pending.delete(work),()=>pending.delete(work));return work;};
  const ports={ownerPrompt,verifierPrompt,counters,facts,close:()=>facts.close(),assertSource:()=>assertCandidateSource(preflight),
+  admitPreparedContext:request=>admitPreparedCommerceContext(m,verifierPrompt,request),
   async attachReference({baselineRoot,baselineBuild}){
    assert(generations.length===0&&pending.size===0,'C_REFERENCE_BEFORE_DISPATCH');
    ports.evaluationTurn=await createReferenceRunner({preflight,baselineRoot,baselineBuild,active:()=>active,
@@ -172,8 +174,8 @@ export function createCandidateProvider({preflight,out,dependencies={}}){
     search:frozenSearch?.search??{searchText:catalog.searchText},policyStore,facts});
    // Read tools require current active pointers; the separate ingress policy port
    // owns durable transaction pins. Never pass that pinned port to read_policy.
-   return {catalog:{...sources.catalog,async readProduct(id,readPos=true){
-    try{const result=await sources.catalog.readProduct(id,readPos);
+   return {catalog:{...sources.catalog,async readProduct(id,readPos=true,diagnostics){
+    try{const result=await sources.catalog.readProduct(id,readPos,diagnostics);
      sourceObserved({observation:{operation:'CATALOG_READ',subjectRef:id,readPos,status:'OK',source:inventoryFor(id)}});return result;
     }catch(error){sourceObserved({observation:{operation:'CATALOG_READ',subjectRef:id,readPos,status:'ERROR'}});throw error;}
    }},policy:async()=>{try{const result=await sources.policy();

@@ -61,6 +61,20 @@ async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi c
   return { tools, base, scope, policy, readPolicy, authorize, select, repository, commits, add, setFault: (v: typeof fault) => { fault = v; }, current: () => current,
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; }, setActiveFee:(v:number)=>{activeFee=v;} };
 }
+
+it("binds a validated ambiguous selection to both models and invalidates it when source changes",async()=>{
+ const s=await setup(),f=fixtureProduct(),row=f.snapshot.offers.DIRECT!.rows[0]!;
+ f.snapshot.fulfillment_policy={tinh_trang:"READY_STOCK",can_order_when_zero:true,prep_min_days:1,prep_max_days:2,zero_stock_policy:"ALLOW",zero_stock_prep_min_days:3,zero_stock_prep_max_days:5,eta_valid_until:""};
+ f.snapshot.offers.DIRECT!.rows.push({...structuredClone(row),color:"be",stock_quantity:0});
+ s.select.mockImplementation(async query=>cartSelectionFromSnapshot(f.snapshot,{...query!,selectionMode:"CANDIDATE_TUPLES"},commerceNow) as never);
+ const result=await s.tools.invoke({...s.add,args:{...s.add.args,color:null}});
+ expect(result).toMatchObject({status:"UNAVAILABLE",data:{selectionEvidence:{quantity:1,options:expect.arrayContaining([expect.objectContaining({color:"be",status:"PRE_ORDER"})])}}});
+ const proof=(result.data as {selectionEvidence:unknown}).selectionEvidence;
+ expect(s.tools.snapshot().runtimeProducts?.find(p=>p.subjectRef==="SM613")?.selectionEvidence).toEqual([proof]);
+ await expect(s.tools.readback()).resolves.toMatchObject({runtimeProducts:expect.arrayContaining([expect.objectContaining({selectionEvidence:[proof]})])});
+ f.snapshot.offers.DIRECT!.rows[0]!.stock_quantity=0;
+ await expect(s.tools.readback()).rejects.toThrow("SELECTION_EVIDENCE_CHANGED");
+});
 describe("code-owned commerce effects and recovery", () => {
   it("rejects a different transaction policy without rewriting the committed cart",async()=>{
     const s=await setup();expect((await s.tools.invoke(s.add)).status).toBe("OK");const before=structuredClone(s.current());

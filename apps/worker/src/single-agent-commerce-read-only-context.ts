@@ -16,6 +16,10 @@ export function omitCurrentProductDuplicates(value: Record<string, unknown>, cur
     if (projected[key] !== undefined && current?.[key] !== undefined &&
       canonicalJsonV1(projected[key]) === canonicalJsonV1(current[key])) delete projected[key];
   }
+  if(projected.selectionEvidence&&current?.selectionEvidence?.some(e=>canonicalJsonV1(e)===canonicalJsonV1(projected.selectionEvidence))){
+    const e=projected.selectionEvidence as {options:unknown};delete projected.selectionEvidence;
+    if(canonicalJsonV1(projected.selectionOptions)===canonicalJsonV1(e.options))delete projected.selectionOptions;
+  }
   return projected;
 }
 const stateFields = ["conversationOwner", "revision", "currentProductId", "consideredSize", "salesStage",

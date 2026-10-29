@@ -8,6 +8,8 @@ import { MAX_RUNTIME_PRODUCTS, type RuntimeProductEvidence, type TrustedContext 
 import { buildRealtimeProductFactsV2 } from "./realtime-product-facts-v2.js";
 import { resolveCatalogDeliveryRegion, verifiedVariantFromSnapshot,candidateCartOptions } from "./realtime-sales-catalog.js";
 import type { CommerceProductGroup } from "./single-agent-commerce-product-groups.js";
+import type {CommerceDiagnostics} from "./single-agent-commerce-diagnostics.js";
+import {selectionEvidenceFromOptions,selectionSourceHash,selectionPresentation} from "./single-agent-commerce-selection-evidence.js";
 
 export interface CommerceScope {
   pageId: string; shopId: string; shopAlias: string; conversationId: string; customerHash: string;
@@ -18,7 +20,7 @@ export interface ReadOnlyCatalog {
   searchText(query: string): Promise<ProductSearchResult>;
   /** Ingress-only resolution of a code supplied by the customer/ad; never a callable model tool. */
   resolveProductCode?(code: string): Promise<StableProductDocument | null>;
-  readProduct(productId: string, readPos?: boolean): Promise<{ product: StableProductDocument; snapshot: CatalogSnapshotV3 | null }>;
+  readProduct(productId: string, readPos?: boolean,diagnostics?:CommerceDiagnostics): Promise<{ product: StableProductDocument; snapshot: CatalogSnapshotV3 | null }>;
 }
 export interface CommerceToolCall { name: string; args: unknown; id?: string }
 export interface CommerceToolResult { status: "OK" | "REJECTED" | "UNAVAILABLE" | "STALE"; data?: unknown; reason?: string }
@@ -35,6 +37,10 @@ export function createReadOnlyTools(input: {
   entry?: { firstContact: boolean | null; fromAd: boolean };
   productGroups?: readonly CommerceProductGroup[];
   onMediaColor?(id:string,color:string):void;
+  diagnostics?:CommerceDiagnostics;
+  /** Candidate-only; admission must measure the actual native wire before publication. */
+  prepareCurrentOffers?:boolean;
+  candidateEvidence?:boolean;
 }) {
   const { scope } = input;
   const maxAge = input.maxFactAgeSeconds ?? 1200;
@@ -128,7 +134,7 @@ export function createReadOnlyTools(input: {
     return evidence;
   };
   async function readPolicy(): Promise<CommerceToolResult> {
-    policy = await input.policy();
+    policy = await (input.diagnostics?input.diagnostics.run("POLICY_READ",{},()=>input.policy()):input.policy());
     // This candidate reads active pointers; an old cached bundle cannot prove their current identity.
     if (!policy.bundle || policy.status !== "RESOLVED") return { status: "UNAVAILABLE", reason: "POLICY_UNAVAILABLE" };
     policyLiteral = [publicPolicyLiteral(policy.bundle, scope.pageId, scope.shopId, input.clock())];
@@ -136,7 +142,7 @@ export function createReadOnlyTools(input: {
     return { status: "OK", data: { scope: "SHOP_RULES", orderEligibility: null,
       policy: JSON.parse(policyLiteral[0]!.text), sourceVersion: policyLiteral[0]!.sourceVersion } };
   }
-  async function prepareProduct(id: string, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>) {
+  async function prepareProduct(id: string, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>,admit?:(context:TrustedContext)=>boolean) {
     const now = input.clock();
     let source: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>> | null;
     try { source = loaded ?? await input.catalog.readProduct(id); }
@@ -171,14 +177,32 @@ export function createReadOnlyTools(input: {
     const text = JSON.stringify({ subjectRef: id, availability, notRead: ["PRICE", "STOCK", "ETA", "SIZE_FIT"] });
     preparationContexts.set(id, { ref: `preparation:${id}`, text, sourceVersion: commerceHash(text),
       observedAt: scope.sourceObservedAt, expiresAt: null });
+    if(input.prepareCurrentOffers&&source&&offers&&offers.length>0&&offers.length<=3&&admit){
+      // Roll back only optional staging. The independent catalog preparation above remains admitted.
+      const maps=[subjects,products,claims,deliveryContexts,offerContexts,preparationContexts,reads,priceReads,posPins] as Map<unknown,unknown>[];
+      const saved=maps.map(m=>structuredClone([...m.entries()])),oldAmbiguous=ambiguousPriceRead,oldInvalid=posInvalidated;
+      try{
+        const result=await readProduct({subjectRef:id,...(offers.length===1?{offerType:offers[0]}:{offerTypes:offers}),preparationOnly:true},source);
+        const data=result.data as {sellingOptions?:{availability:{price:{status:string};stock:{status:string}}}[]}|undefined;
+        const staged=snapshot();
+        if(result.status!=="OK"||!data?.sellingOptions?.length||data.sellingOptions.some(o=>o.availability.price.status!=="OK"||o.availability.stock.status!=="OK")||
+          staged.boundSubjects.length>8||(staged.runtimeProducts?.length??0)>4||staged.protectedClaims.length>32||
+          Buffer.byteLength(JSON.stringify(result))>8192||!admit(staged))throw Error("PREPARATION_ADMISSION");
+        return;
+      }catch{
+        maps.forEach((m,i)=>{m.clear();for(const[k,v]of saved[i]!)m.set(k,v);});ambiguousPriceRead=oldAmbiguous;posInvalidated=oldInvalid;
+        input.diagnostics?.emit("RESULT_BOUND","NOT_ADMITTED",{productId:id},"OPTIONAL_PREPARATION_UNAVAILABLE");
+      }
+    }
+    if(input.prepareCurrentOffers&&products.has(id))products.get(id)!.offerReadCoverage=(offers??[]).slice(0,8).map(offerType=>({offerType,price:"NOT_READ",stock:"NOT_READ"}));
   }
-  async function prepare(): Promise<number> {
+  async function prepare(admit?:(context:TrustedContext)=>boolean): Promise<number> {
     if (!scope.permission || !scope.privacyAllowed || scope.conversationOwner !== "BOT") return 0;
     const current = snapshot(), bound = current.boundSubjects.filter(s => s.kind === "PRODUCT");
     const id = current.state.currentProductId ?? (bound.length === 1 ? bound[0]!.ref : null);
     if (!id || !bound.some(s => s.ref === id) || prepared.has(id) || [...reads.values()].some(a => a.subjectRef === id)) return 0;
     prepared.add(id);
-    await prepareProduct(id);
+    await prepareProduct(id,undefined,admit);
     return 1;
   }
   async function readProduct(args: Record<string, unknown>, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>): Promise<CommerceToolResult> {
@@ -255,17 +279,32 @@ export function createReadOnlyTools(input: {
     const nextClaims = retained.flatMap(o => o.claims);
     const nextSubjects = new Set([...subjects.keys(), ...retained.flatMap(o => o.variantId ? [o.variantId] : [])]);
     if (nextSubjects.size > 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
-    const readKey = commerceHash({ id, offerType: query.offerType, ...(selectedOffers?{offerTypes:selectedOffers}:{}), color: query.color, size: query.size, deliveryRegion: query.deliveryRegion });
+    const readKey = commerceHash({ id, offerType: query.offerType, ...(selectedOffers?{offerTypes:selectedOffers}:{}), color: query.color, size: query.size, deliveryRegion: query.deliveryRegion,...(args.preparationOnly?{preparationOnly:true}:{}) });
     const allClaims = [...claims.entries()].filter(([key]) => key !== readKey).flatMap(([, values]) => values).concat(nextClaims);
     if (new Set(allClaims.map(commerceHash)).size > 32) return { status: "REJECTED", reason: "CLAIM_BOUND" };
     const evidence = staticEvidence(p, now);
     const full = raw ? buildRealtimeProductFactsV2({ snapshot: raw, product: p, policy, now }) : null;
     const presentation = p.observedAt && full ? buildProductPresentationEvidenceV1(full, now) : null;
     if (presentation) evidence.presentation = presentation;
+    const tupleEvidence=raw&&input.candidateEvidence&&!args.preparationOnly?retained.flatMap(o=>{
+      if(!o.offer)return [];
+      const options=candidateCartOptions(raw,{shopAlias:scope.shopAlias,productId:id,offerType:o.offer,size:query.size,color:query.color,quantity:1,
+        lineId:"00000000-0000-4000-8000-000000000001"},now);
+      const until=Math.min(expires,...o.claims.map(c=>Date.parse(c.provenance.expiresAt)),raw.fulfillment_policy?.eta_valid_until.trim()?Date.parse(raw.fulfillment_policy.eta_valid_until):Infinity);
+      const v=selectionEvidenceFromOptions({productId:id,offerType:o.offer,size:query.size,color:query.color,quantity:1,sourceVersion:raw.release_id,
+        sourceHash:selectionSourceHash(raw),observedAt:raw.synced_at,expiresAt:new Date(until).toISOString()},options,now);
+      return v?[v]:[];
+    }):[];
+    if(tupleEvidence.length){evidence.selectionEvidence=tupleEvidence;for(const e of tupleEvidence)if(evidence.presentation)evidence.presentation=selectionPresentation(evidence.presentation,e);}
     const charts = Object.values(policy?.bundle?.artifacts.sizeCharts ?? {}).filter(a =>
       a.chart.reference.verificationStatus === "VERIFIED" &&
       (a.scope?.parentProductIds.includes(id) || a.scope?.level === "GLOBAL")).map(a => a.chart);
     if (charts.length) evidence.sizeCharts = charts;
+    if(input.prepareCurrentOffers)evidence.offerReadCoverage=(availableOffers??[]).slice(0,8).map(offerType=>{
+      const o=retained.find(o=>o.offerType===offerType);
+      return {offerType,price:o?(o.availability.price.status==="OK"?"AVAILABLE":"UNAVAILABLE"):"NOT_READ",stock:o?(o.availability.stock.status==="OK"?"AVAILABLE":"UNAVAILABLE"):"NOT_READ"};
+    });
+    if(Buffer.byteLength(JSON.stringify(evidence))>8192)return {status:"REJECTED",reason:"PRODUCT_EVIDENCE_BOUND"};
     if (!products.has(id) && products.size >= MAX_RUNTIME_PRODUCTS) return { status: "REJECTED", reason: "PRODUCT_BOUND" };
     offerContexts.delete(id);
     const offerEvidence = availableOffers !== null ? offerLiteral(id,source) : null;
@@ -303,8 +342,9 @@ export function createReadOnlyTools(input: {
             silhouettes:wholeProduct ? evidence.attributes?.silhouettes ?? [] : []}).blocks.map(b=>b.text).join("\n")}
       } : {}),
       availableOffers,
-      selectionOptions:raw?candidateCartOptions(raw,{shopAlias:scope.shopAlias,productId:id,offerType:selected.offer,
-        size:query.size,color:query.color,quantity:1,lineId:"00000000-0000-4000-8000-000000000001"},now).slice(0,8):[],
+      selectionOptions:tupleEvidence[0]?.options??(!input.candidateEvidence&&raw?candidateCartOptions(raw,{shopAlias:scope.shopAlias,productId:id,offerType:selected.offer,
+        size:query.size,color:query.color,quantity:1,lineId:"00000000-0000-4000-8000-000000000001"},now).slice(0,8):[]),
+      ...(tupleEvidence[0]?{selectionEvidence:tupleEvidence[0]}:{}),
       selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",
       sizeAvailability: selected.sizeAvailability,
       sellingOptions: availableOffers === null ? null : options.map(o => ({ offerType: o.offerType, variantId: o.variantId,

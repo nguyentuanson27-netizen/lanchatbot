@@ -94,6 +94,8 @@ export async function runPersistedCommerceIngress(input: {
   clock: () => Date; ownerPrompt: string; verifierPrompt: string;
   media?: Parameters<typeof createCommerceTools>[0]["media"];
   quoteTask?: Parameters<typeof createCommerceTools>[0]["quoteTask"];
+  observeDiagnostics?:Parameters<typeof createCommerceTools>[0]["observeDiagnostics"];
+  admitPreparedContext?:Parameters<typeof runCommerceTurn>[0]["admitPreparedContext"];
   handoffReply?: { approvedHoldingHashes: readonly string[] };
   owner: Parameters<typeof runCommerceTurn>[0]["owner"]; verifier: Parameters<typeof runCommerceTurn>[0]["verifier"];
 }) {
@@ -219,7 +221,7 @@ export async function runPersistedCommerceIngress(input: {
   const projectedHistory=projectCommerceHistoryMetadata(commerceHistory(rows),recentCartEvents);
   const historyMetadata=projectedHistory.metadata;
   const history=commerceHistory(rows,recentMedia,historyMetadata.publicCartEvents.length?Buffer.byteLength(JSON.stringify(historyMetadata)):0);
-  const tools: CommerceTools = await createCommerceTools({ ...(input.quoteTask?{quoteTask:input.quoteTask}:{}), read: { ...scopedRead, scope, clock: input.clock,
+  const tools: CommerceTools = await createCommerceTools({ ...(input.quoteTask?{quoteTask:input.quoteTask}:{}),...(input.observeDiagnostics?{observeDiagnostics:input.observeDiagnostics}:{}), read: { ...scopedRead, scope, clock: input.clock,
     entry: {firstContact: rows.length > 0 || recentMedia.length > 0 || recentCartEvents.length > 0 ? false : mediaHistoryUnavailable || publicHistoryUnavailable ? null : true, fromAd: ads.length > 0} }, state: { store: profilePort,
     sourceMessages,
     sizeInput: async ref => { const { product } = await input.read.catalog.readProduct(ref, false);
@@ -236,6 +238,7 @@ export async function runPersistedCommerceIngress(input: {
     handoff: { ...handoff, policy: policyBundle,...(input.handoffReply?{deferredReply:input.handoffReply}:{}) },
     media: input.media ?? {allowedHostSuffixes:(process.env.PRODUCT_SEARCH_ALLOWED_IMAGE_HOSTS ?? "lanadesign.vn,content.pancake.vn,fbcdn.net,fbsbx.com").split(",").map(s=>s.trim()).filter(Boolean)} });
   const turnInput={ scope, tools, latest, history, historyMetadata, clock: input.clock, ownerPrompt: input.ownerPrompt, verifierPrompt: input.verifierPrompt, owner: input.owner, verifier: input.verifier,
+    ...(input.admitPreparedContext?{admitPreparedContext:input.admitPreparedContext}:{}),
     ...(input.captureBoundaryWitness ? {captureBoundaryWitness:true} : {}) };
   if(input.evaluationTurn&&input.evaluationTurn.kind!=="PINNED_MAIN_C3")throw Error("EVALUATION_REFERENCE_KIND");
   const execution = input.evaluationTurn ? await input.evaluationTurn.run(turnInput,{sales:(await executor.repository.read(scope.conversationId))!,

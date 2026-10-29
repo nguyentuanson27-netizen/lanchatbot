@@ -197,6 +197,8 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
    ...(p.presentation?.variants?.length?{colorEvidence:{
     sourceColorLabels:[...new Set(p.presentation.variants.map(v=>v.color).filter(color=>typeof color==='string'&&color!=='__NO_COLOR__'))],
     unrecordedColorInSource:p.presentation.variants.some(v=>v.color==='__NO_COLOR__'),meaning:'VARIANT_LABELS_NOT_CUSTOMER_SELECTION_OR_STOCK'}}:{}),
+   ...(p.selectionEvidence?{selectionEvidence:p.selectionEvidence}:{}),
+   ...(p.offerReadCoverage?{offerReadCoverage:p.offerReadCoverage}:{}),
    sizeCharts:p.sizeCharts??[]})),facts,
    policy:c.policyLiterals.filter(p=>!offerRefs.has(p.ref)&&!preparationRefs.has(p.ref)).map(p=>{
     if(!p.ref.startsWith('media:'))return {ref:p.ref,text:p.text};

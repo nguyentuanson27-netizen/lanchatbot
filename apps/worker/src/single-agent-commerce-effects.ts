@@ -10,6 +10,7 @@ import type { CommerceTools } from "./single-agent-commerce-read-only.js";
 import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-catalog.js";
 import type { TerminalOutcome, TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import { formatCartLineSelection, selectionsMatchCartLines } from "./realtime-sales-cycle.js";
+import {validSelectionEvidence,selectionEvidenceFromOptions,selectionPresentation,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
 
 const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase", "record_negotiation"]);
 export type CommerceCommandResult =
@@ -26,6 +27,7 @@ export async function createCommerceEffectTools(input: {
   authorize: (effect: "CART_OPEN" | "CART_MUTATION" | "PURCHASE_CONFIRMATION", current: SalesCycleRuntimeState) => Promise<boolean>;
   policy: () => Promise<RuntimePolicyBundle>;
   select: (query: CartSelectionQuery) => Promise<CartSelectionResult>;
+  selectionMaxAgeSeconds?:number;
   /** Current public batch messages; code resolves the exact quote's evidence identity. */
   negotiationSources?: readonly { text: string; sourceMessageId: string; observedAt: string }[];
   trustedPorts?: SalesCycleTrustedPortsV1;
@@ -44,6 +46,7 @@ export async function createCommerceEffectTools(input: {
   }
   let current = await read(), policy: RuntimePolicyBundle | null = null, uncertain = false, failedEffect = false;
   const selections = new Map<string, Extract<CartSelectionResult, { status: "READY" }>>();
+  const selectionObservations=new Map<string,{query:CartSelectionQuery;evidence:CandidateSelectionEvidence}>();
   let authority = await input.readAuthority?.();
   if (authority && (authority.bindingVersion !== input.scope.bindingVersion || authority.recipient !== input.scope.recipient)) throw new Error("COMMERCE_SCOPE");
   const turnBinding = authority?.bindingVersion ?? input.scope.bindingVersion;
@@ -112,7 +115,15 @@ export async function createCommerceEffectTools(input: {
         missingFields: [!current.checkoutDraft?.fullName && "FULL_NAME", !current.checkoutDraft?.phone && "PHONE", !current.checkoutDraft?.address && "ADDRESS", !current.checkoutDraft?.paymentMethod && "PAYMENT_METHOD"].filter(Boolean) },
       ...(current.stage === "HANDED_OFF" ? { permission: false, conversationOwner: "HUMAN" } : {}),
       ...(cart ? { cartQuote: cartQuote() } : {}) },
-      subjects, products: base.runtimeProducts ?? [], claims: [...base.protectedClaims.filter(c => {
+      subjects, products: (()=>{
+        const products=new Map((base.runtimeProducts??[]).map(p=>[p.subjectRef,structuredClone(p)]));
+        for(const {evidence}of selectionObservations.values()){
+          const p=products.get(evidence.productId)??{ref:`product:${evidence.productId}`,subjectRef:evidence.productId};
+          const values=(p.selectionEvidence??[]).filter(e=>!(e.offerType===evidence.offerType&&e.size===evidence.size&&e.color===evidence.color&&e.quantity===evidence.quantity));
+          p.selectionEvidence=[...values,evidence];if(p.selectionEvidence.length>3||products.size>4)throw Error("PRODUCT_EVIDENCE_BOUND");
+          if(p.presentation)p.presentation=selectionPresentation(p.presentation,evidence);products.set(p.subjectRef,p);
+        }return [...products.values()];
+      })(), claims: [...base.protectedClaims.filter(c => {
         const claim = c as { type: string; scope: { kind: string; productId?: string; variantId?: string } };
         return !["PRICE", "STOCK"].includes(claim.type) || !active.some(s => claim.scope.kind === "PRODUCT" && claim.scope.productId === s.line.parentProductId &&
           [s.line.offerId, `offer:${s.line.parentProductId}:${s.line.offerId}`].includes(claim.scope.variantId ?? ""));
@@ -130,9 +141,24 @@ export async function createCommerceEffectTools(input: {
       receipts: [...stateReceipts, ...(receipt && active.length === selections.size ? [receipt] : [])], ...(cart ? { cartBinding: { cartId: cart.cartId, cartVersion: cart.revision } } : {}) });
   };
   async function selection(productId: string, a: Record<string, unknown>, lineId: string, offerType: string | null = null) {
-    const result = await input.select({ shopAlias: input.scope.shopAlias, productId, offerType,
+    const query:CartSelectionQuery={ shopAlias: input.scope.shopAlias, productId, offerType,
       size: typeof a.size === "string" ? a.size : null, color: typeof a.color === "string" ? a.color : null,
-      quantity: typeof a.quantity === "number" ? a.quantity : 1, lineId });
+      quantity: typeof a.quantity === "number" ? a.quantity : 1, lineId,selectionMaxAgeSeconds:input.selectionMaxAgeSeconds??1200};
+    const result = await input.select(query);
+    if(result.status!=="READY"&&result.selectionEvidence){
+      const e=result.selectionEvidence,now=input.clock();
+      if(!validSelectionEvidence(e,productId,now)||normalizeCatalogToken(e.offerType)!==normalizeCatalogToken(offerType??"")||e.quantity!==query.quantity||
+        normalizeCatalogToken(e.size??"")!==normalizeCatalogToken(query.size??"")||normalizeCatalogToken(e.color??"")!==normalizeCatalogToken(query.color??""))throw Error("SELECTION_EVIDENCE_SCOPE");
+      const expiresAt=new Date(Math.min(Date.parse(e.expiresAt),Date.parse(e.observedAt)+(input.selectionMaxAgeSeconds??1200)*1000,
+        policy?.policy.effectiveUntil?Date.parse(policy.policy.effectiveUntil):Infinity)).toISOString();
+      const clipped=selectionEvidenceFromOptions({productId:e.productId,offerType:e.offerType,size:e.size,color:e.color,quantity:e.quantity,sourceVersion:e.sourceVersion,
+        sourceHash:e.sourceHash,observedAt:e.observedAt,expiresAt},e.options,now);
+      if(!clipped)throw Error("SELECTION_EVIDENCE_STALE");
+      const key=commerceHash(query),previous=selectionObservations.get(key);
+      if(previous&&commerceHash(previous.evidence)!==commerceHash(clipped))throw Error("SOURCE_EVIDENCE_CONFLICT");
+      selectionObservations.set(key,{query,evidence:clipped});
+      return {...result,selectionOptions:clipped.options,selectionEvidence:clipped,selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",selectionStatus:result.status};
+    }
     if (result.status !== "READY") return { status: result.status, reasonCode: result.reasonCode,
       selectionOptions:(result.selectionOptions??[]).slice(0,8),selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",selectionStatus:result.status };
     if (result.shopId !== input.scope.shopId || result.line.parentProductId !== productId ||
@@ -338,6 +364,11 @@ export async function createCommerceEffectTools(input: {
     for (const c of calls.filter(c => c.name === "quote_cart")) results.set(c, effectRejected ? { status: "REJECTED", reason: "DEPENDENT_EFFECT_REJECTED" } : await input.base.invoke(c));
     return calls.map(c => results.get(c)!);
   }, async readback() { await input.base.readback(); current = await read(); await refreshAuthority(); if (policy) policy = await input.policy();
+    for(const {query,evidence}of [...selectionObservations.values()]){
+      const replay=await input.select(query);
+      if(replay.status==="READY"||!replay.selectionEvidence||replay.selectionEvidence.sourceHash!==evidence.sourceHash||
+        !validSelectionEvidence(evidence,evidence.productId,input.clock()))throw Error("SELECTION_EVIDENCE_CHANGED");
+    }
     await refreshSelections();
     return snapshot(); },
   publicCartSummary:()=>publicSummary,
