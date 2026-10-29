@@ -1,5 +1,6 @@
 // Phase C evaluation only. No provider, runtime authorization, mutation or send port.
 import assert from 'node:assert/strict';
+import {clarificationCapture} from './native-terminal.mjs';
 import {createHash,createHmac} from 'node:crypto';
 import {assertNoEvaluatorLabels} from '../single-agent-commerce-read-only/feedback-control-inputs.mjs';
 import {assertNativeRuntime,decodeVerifierWire,NATIVE_CODECS,commonModelConfig} from './native-wire.mjs';
@@ -194,11 +195,14 @@ function actualHistoryMatches(t){
   return digest(t.historyAfter)===digest([...t.historyBefore,{role:'customer',text:t.customer},...t.terminal.messages.map(text=>({role:'shop',text}))]);
  }catch{return false;}
 }
-function validCodeOwned(outcome,generations,sourceSha){
+export function validCodeOwned(outcome,generations,sourceSha){
  const c=outcome.codeOwned,rows=c?.acceptedOutbox;
- return c?.kind==='NATIVE_PRIVATE_CODE_PATH'&&c.sourceSha===sourceSha&&generations.length===0&&
-  c.nativeResult?.mode==='PRIVATE_CODE_PATH'&&c.nativeResult.terminal?.disposition==='NO_SEND'&&
-  c.nativeResult.terminal.reason==='PRIVATE_CHECKOUT_COMMITTED'&&c.nativeResult.enqueued===outcome.terminal.messages.length&&
+ const nativeAllowed=c?.kind==='NATIVE_PRIVATE_CODE_PATH'?generations.length===0&&
+  c.nativeResult?.mode==='PRIVATE_CODE_PATH'&&c.nativeResult.terminal?.disposition==='NO_SEND'&&c.nativeResult.terminal.reason==='PRIVATE_CHECKOUT_COMMITTED':
+  c?.kind==='NATIVE_CHECKOUT_CLARIFICATION'&&generations.every(g=>g.id?.startsWith(c.nativeResult?.codeOwnedOutput?.requestId+':owner:'))&&
+   clarificationCapture({result:c.nativeResult,generations,messages:outcome.terminal.messages,images:outcome.terminal.images,
+    receipts:c.committedReceipts,authority:c.authority,state:c.state})!==null;
+ return nativeAllowed&&c.sourceSha===sourceSha&&c.nativeResult.enqueued===outcome.terminal.messages.length&&
   c.nativeResultHash===digest(c.nativeResult)&&hash(c.runtimeInputHash)&&
   outcome.terminal.images.length===0&&outcome.terminal.messages.length>0&&Array.isArray(rows)&&rows.length===outcome.terminal.messages.length&&
   new Set(rows.map(r=>r.id)).size===rows.length&&rows.every((r,i)=>typeof r.id==='string'&&r.id&&

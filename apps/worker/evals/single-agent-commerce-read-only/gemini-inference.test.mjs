@@ -1,4 +1,25 @@
 import test from 'node:test';
+test('unrecorded source color is explicit and never becomes a customer selection',()=>{
+ const r=request();r.context.runtimeProducts=[{ref:'product:P1',subjectRef:'P1',presentation:{variants:[{variantId:'P1-M',color:'__NO_COLOR__',size:'M'}]}}];
+ const before=structuredClone(r.context);
+ const view=JSON.parse(buildGeminiCommerceRequest(r).contents[0].parts[0].text).trusted;
+ assert.deepEqual(view.products[0].colorEvidence,{sourceColorLabels:[],unrecordedColorInSource:true,meaning:'VARIANT_LABELS_NOT_CUSTOMER_SELECTION_OR_STOCK'});
+ assert.deepEqual(r.context,before);
+});
+test('CompactV2 applies the existing image frame cap separately from the unchanged text cap',()=>{
+ const r=request();r.ownerContextPresentation='VI_DATA_BLOCKS_COMPACT_V2';r.availableTools=[];
+ r.context.boundSubjects=[{ref:'P1',kind:'PRODUCT',label:'Áo',bindingVersion:'v1'}];
+ const data=Buffer.alloc(60000,1).toString('base64'),sha256=createHash('sha256').update(Buffer.from(data,'base64')).digest('hex');
+ r.catalogImages=[{subjectRef:'P1',assetRef:'asset:unit',sha256,mimeType:'image/jpeg',data}];
+ r.context.policyLiterals.push({ref:'vision:unit',text:JSON.stringify({subjectRef:'P1',assets:[{assetRef:'asset:unit',sha256,mimeType:'image/jpeg'}]})});
+ let budget;const result=buildGeminiCommerceRequest(r,undefined,undefined,value=>{budget=value;});
+ assert(Buffer.byteLength(JSON.stringify(result))>65536);assert(Buffer.byteLength(JSON.stringify(result))<=1507328);
+ assert.equal(result.contents[1].parts[1].inlineData.data,data);
+ assert.equal(budget.inlineImageBytes,60000);assert.equal(budget.textLimitBytes,65536);assert(Object.values(budget).every(v=>typeof v==='number'));
+ assert(budget.presentedTextFrameBytes<=65536);
+ const oversized=request();oversized.ownerContextPresentation='VI_DATA_BLOCKS_COMPACT_V2';oversized.instructions='x'.repeat(65536);
+ assert.throws(()=>buildGeminiCommerceRequest(oversized),/OWNER_REQUEST_BOUND/);
+});
 test('Gemini 3.8 Flash uses its exact endpoint without unsupported candidateCount',async()=>{
  let url,wire;
  const cfg={...config,model:'gemini-3.8-flash'};

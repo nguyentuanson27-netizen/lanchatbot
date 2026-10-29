@@ -7,6 +7,7 @@ import {createCommerceTools} from '../../dist/single-agent-commerce.js';
 import {hardPrecheck} from '../../dist/single-agent-semantic-verifier-boundary.js';
 import {frozenCatalog,frozenFacts} from './frozen-world.mjs';
 import {digest,validateCorpus,runtimeProjection} from './qualification.mjs';
+import {judgeSourceInventory} from './evaluator-source.mjs';
 export async function bindCorpus({draft,world,bindings,initialStateArtifact}){
  const worldHash=digest(world);
  assert(world.sourceWrites===0&&world.providerRequests===0,'C_WORLD_SOURCE_READS_ONLY');
@@ -24,11 +25,15 @@ export async function bindCorpus({draft,world,bindings,initialStateArtifact}){
    conversationOwner:'BOT',permission:true,privacyAllowed:true};
   const sources=createCommerceReadSources({scope,channel:world.config.channel,clock:()=>at,initialProducts:products,catalog,
    search:{searchText:catalog.searchText},facts,policyStore:{loadActivePointers:async()=>structuredClone(world.policyRecords)}});
+  const mediaRead=(b.sourceReads??[]).some(c=>c.name==='select_product_media');
+  if(mediaRead)assert(Array.isArray(b.mediaAllowedHostSuffixes)&&b.mediaAllowedHostSuffixes.length>0&&b.mediaAllowedHostSuffixes.every(h=>
+   ['content.pancake.vn','lanadesign.vn','fbcdn.net','fbsbx.com'].includes(h)),'C_MEDIA_BINDING_HOST_SCOPE');
   const tools=await createCommerceTools({read:{scope,clock:()=>at,...sources,initialProducts:products,maxFactAgeSeconds:world.config.maxFactAgeSeconds,
-   productGroups:world.config.productGroups}});
+   productGroups:world.config.productGroups},...(mediaRead?{media:{allowedHostSuffixes:b.mediaAllowedHostSuffixes}}:{})});
   await tools.prepare?.();
-  for(const call of b.sourceReads??[]){assert(['read_product','read_policy'].includes(call.name),'C_BINDING_READ_ONLY');
-   const result=await tools.invoke(call);assert.equal(result.status,'OK','C_CASE_SOURCE_UNAVAILABLE');}
+  for(const call of b.sourceReads??[]){assert(['read_product','read_policy','select_product_media'].includes(call.name),'C_BINDING_READ_ONLY');
+   const result=await tools.invoke(call);assert(result.status==='OK'||call.name==='select_product_media'&&
+    result.status==='UNAVAILABLE'&&result.reason==='NO_VERIFIED_MATCHING_MEDIA','C_CASE_SOURCE_UNAVAILABLE');}
   const trusted=tools.snapshot();assert.deepEqual(await tools.readback(),trusted,'C_WORLD_CHANGED_DURING_BINDING');
   for(const t of s.turns)t.initialProductCodes=[...b.initialProductCodes];
   if(s.mode==='SAFETY'){
@@ -46,7 +51,8 @@ export async function bindCorpus({draft,world,bindings,initialStateArtifact}){
    assert(s.turns.every(t=>t.history.length===0),'C_INITIAL_HISTORY_SEED_NOT_IMPLEMENTED');
    s.initialContext={worldHash,initialStateHash:digest(initialStateArtifact.publicState),initialHistoryHash:digest([]),
     freshnessPolicyHash:digest({policy:'ACTUAL_WALL_CLOCK_CURRENT_SOURCE_READBACK',maxFactAgeSeconds:world.config.maxFactAgeSeconds})};
-   s.judgeContext={facts:trusted.protectedClaims,policy:trusted.policyLiterals,products:trusted.runtimeProducts??[],
+   s.judgeContext={sourceInventory:judgeSourceInventory(world,b.judgeProductCodes??b.initialProductCodes,
+    {noProductLookupRequired:b.noProductLookupRequired===true}),facts:trusted.protectedClaims,policy:trusted.policyLiterals,products:trusted.runtimeProducts??[],
     initialState:initialStateArtifact.publicState,capabilities:bindings.capabilities};
    if(b.nativeCodeOwnedTurns)s.nativeCodeOwnedTurns=b.nativeCodeOwnedTurns;
   }

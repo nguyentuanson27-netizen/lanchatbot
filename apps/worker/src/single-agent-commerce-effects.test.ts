@@ -35,7 +35,8 @@ async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi c
     current = structuredClone(c.nextState); commits.push(structuredClone(current));
     if (fault === "AFTER") throw new Error("response lost"); return true;
   }) };
-  const base = createReadOnlyTools({ scope, clock: () => commerceNow, policy: () => fixturePolicy(), initialProducts: [f.product],
+  let activeFee = 25_000;
+  const base = createReadOnlyTools({ scope, clock: () => commerceNow, policy: () => fixturePolicy(activeFee), initialProducts: [f.product],
     catalog: { readProduct: async () => f, searchText: async () => ({ status: "MATCHED", matchKind: "EXACT_CODE", product: f.product, score: 1, gap: null }) } });
   const authorize = vi.fn(async () => true), select = vi.fn(async (query?: CartSelectionQuery): Promise<Extract<CartSelectionResult, { status: "READY" }>> => {
     const line = fixtureCartLine(); line.quantity = query?.quantity ?? 1; line.lineTotalVnd = line.posUnitPriceVnd! * line.quantity;
@@ -58,9 +59,27 @@ async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi c
   });
   const add = { name: "add_to_cart", args: { subjectRef: "SM613", offerType: "DIRECT", size: "M", color: "navy", quantity: 1 } };
   return { tools, base, scope, policy, readPolicy, authorize, select, repository, commits, add, setFault: (v: typeof fault) => { fault = v; }, current: () => current,
-    setCurrent: (value: SalesCycleRuntimeState) => { current = value; } };
+    setCurrent: (value: SalesCycleRuntimeState) => { current = value; }, setActiveFee:(v:number)=>{activeFee=v;} };
 }
 describe("code-owned commerce effects and recovery", () => {
+  it("rejects a different transaction policy without rewriting the committed cart",async()=>{
+    const s=await setup();expect((await s.tools.invoke(s.add)).status).toBe("OK");const before=structuredClone(s.current());
+    s.readPolicy.mockResolvedValue((await fixturePolicy(30_000)).bundle!);
+    await expect(s.tools.readback()).rejects.toThrow("TRANSACTION_POLICY_BINDING_CHANGED");
+    expect(s.current()).toEqual(before);
+  });
+  it("keeps current advice policy distinct from a committed transaction binding",async()=>{
+    const s=await setup();expect((await s.tools.invoke(s.add)).status).toBe("OK");
+    const committed=structuredClone(s.current());s.setActiveFee(30_000);
+    expect((await s.base.invoke({name:"read_policy",args:{}})).status).toBe("OK");
+    const world=await s.tools.readback();
+    const active=world.policyLiterals.filter(p=>p.ref.startsWith("policy:"));
+    const transaction=world.policyLiterals.filter(p=>p.ref.startsWith("transaction-policy:"));
+    expect(active).toHaveLength(1);expect(JSON.parse(active[0]!.text).shipping.defaultFeeVnd).toBe(30_000);
+    expect(transaction).toHaveLength(1);expect(JSON.parse(transaction[0]!.text).shipping.defaultFeeVnd).toBe(25_000);
+    expect(JSON.parse(transaction[0]!.text).policyBinding.purpose).toBe("COMMITTED_TRANSACTION");
+    expect(s.current()).toEqual(committed);
+  });
   it.each([true,false])("uses ledger readback after a successful persisted mutation (receipt=%s)",async available=>{
     const s=await setup();let operationId="";
     const readReceipt=vi.fn(async()=>available?{ref:`receipt:${operationId}`,operationId,subjectRef:s.current().cart!.value.cartId,effect:"CART_OPENED",status:"SUCCESS",stateRevision:s.current().revision,

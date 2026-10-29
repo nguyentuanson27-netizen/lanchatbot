@@ -162,7 +162,8 @@ export async function runPersistedCommerceIngress(input: {
     // Only the existing payment-receipt state can consume attachment identity; other media goes to staff.
     const receiptPending=mediaMessage&&(await executor.repository.read(scope.conversationId))?.stage==="PURCHASE_CONFIRMED";
     const privateResult = !mediaMessage||receiptPending ? await executor.advancePrivateCheckout() : {committed:false,messages:0};
-    if (privateResult.committed) return { ...noSend("PRIVATE_CHECKOUT_COMMITTED"), mode: "PRIVATE_CODE_PATH", enqueued: privateResult.messages };
+    if (privateResult.committed) return { ...noSend("PRIVATE_CHECKOUT_COMMITTED"), mode: "PRIVATE_CODE_PATH", enqueued: privateResult.messages,
+      codeOwnedOutput:executor.codeOwnedOutput() };
     const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction,
       read: readAuthority, inboxBatchGuard: guard, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId,
       ...(mediaLink?{triggerSource:mediaLink}:{}) });
@@ -245,6 +246,7 @@ export async function runPersistedCommerceIngress(input: {
   if (result.terminal.disposition !== "SEND_ELIGIBLE") return {
     ...result, ...(result.terminal.disposition === "FALLBACK" ? noSend("FALLBACK_OUTPUT_FORBIDDEN") : {}),
     inboxCompletion: await completeUnsent(tools.handoffStatus?.()?.status),
+    codeOwnedOutput:executor.codeOwnedOutput(),
     enqueued: handoff.outboxCount()+executor.outboxCount() };
   // Holding replies (with or without independent media) belong to the atomic
   // handoff group with Inbox completion. Do not enqueue another BOT reply.

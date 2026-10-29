@@ -407,7 +407,8 @@ try{
     sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:10,sourceObservedAt:at.toISOString(),sourceExpiresAt:new Date(at.getTime()+172800000).toISOString()};};
   const facts=live?providerPorts.factsForMode(sourceMode):{ready:async()=>true,close:async()=>{},resolve:async()=>{throw new Error('UNUSED');},resolveCartSelection:async q=>selected(q)};
   let policyChanged=false,receiptAvailable=true;
-  const policy=async()=>{resolver.invalidate(pageId,'PUBLISHED');const resolved=await resolver.resolve({pageId,channel:'PUBLISHED',pin:{scopeType:'SALES_EPISODE',scopeId:bound.conversationId},now:new Date()});
+  const policy=async(active=false)=>{resolver.invalidate(pageId,'PUBLISHED');const resolved=await resolver.resolve({pageId,channel:'PUBLISHED',
+   ...(active?{}:{pin:{scopeType:'SALES_EPISODE',scopeId:bound.conversationId}}),now:new Date()});
    if(!dependencyHoldingReply&&!sizeHoldingReply&&!policyChanged&&!missingDependencyRule)return resolved;
    // Controlled domain input only: never publish/replace the real shop policy.
    const matrix=HandoffMatrixAdminContentV1Schema.parse({schemaVersion:1,kind:'HANDOFF_MATRIX',
@@ -418,7 +419,7 @@ try{
   if(revalidatedMedia){assert(media);product.product.observedAt=new Date(at.getTime()-31*86400000).toISOString();
    product.product.images[0].observedAt=product.product.observedAt;
    product.product.images[0].revalidation={status:'VALID',checkedAt:at.toISOString()};}
-  const read=live?await providerPorts.read(bound,policyStore,policy,initialProductCodes,facts):{policy,catalog:{readProduct:async()=>mediaChanged?{...product,product:{...product.product,images:[]}}:product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
+  const read=live?await providerPorts.read(bound,policyStore,policy,initialProductCodes,facts):{policy:()=>policy(true),catalog:{readProduct:async()=>mediaChanged?{...product,product:{...product.product,images:[]}}:product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
   const scopedSourceReader=createCommerceHandoffSourceReader({
    product:(id,readPos)=>read.catalog.readProduct(id,readPos),
    profile:async b=>{const r=await runtime.loadOrCreateCustomerProfile(b.pageId,b.customerHash,()=>{throw Error('EXISTING_PROFILE_REQUIRED');},new Date());return {profile:r.profile,fieldEvidence:r.fieldEvidence};},
@@ -476,12 +477,33 @@ try{
    const changed=await pool.query('UPDATE sales_cycle_states SET state_revision=$3,state_ciphertext=$4,state_nonce=$5,state_auth_tag=$6,state_encrypted_dek=$7,state_key_ref=$8 WHERE page_id=$1 AND conversation_id=$2',
     [pageId,bound.conversationId,next.revision,encrypted.ciphertext,encrypted.nonce,encrypted.authTag,encrypted.encryptedDek,encrypted.keyRef]);assert.equal(changed.rowCount,1);
   };
-  return {bound,turn,state,changeStoredCart,capture,capturePayloads,gateCalls,deliveryObservations,drain,restartDelivery:()=>{dispatcher=makeDispatcher();},changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;},changeHandoffPolicy:()=>{policyChanged=true;},disableReceiptRead:()=>{receiptAvailable=false;},
+  return {bound,turn,state,changeStoredCart,capture,capturePayloads,gateCalls,deliveryObservations,drain,
+   readPolicyStatuses:async()=>({transaction:(await policy()).status,active:(await read.policy()).status}),
+   restartDelivery:()=>{dispatcher=makeDispatcher();},changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;},changeHandoffPolicy:()=>{policyChanged=true;},disableReceiptRead:()=>{receiptAvailable=false;},
    revokeMediaProof:()=>{assert(revalidatedMedia);product.product.images[0].revalidation={status:'INVALID'};},
    refreshPosSource:mode=>{product.snapshot.synced_at=new Date(mode==='expired'?Date.now()-3*3600000:Date.now()).toISOString();
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+ await check('B composed C remediation active reads do not consume the durable transaction pin',async()=>{
+  const j=await statefulFixture();assert.deepEqual(await j.readPolicyStatuses(),{transaction:'PINNED',active:'RESOLVED'});
+ });
+ await check('B composed C remediation code clarification has a committed receipt and accepted capture after owner',async()=>{
+  const {readSessionSnapshot}=await import('../single-agent-commerce-qualification/native-snapshot.mjs');
+  const {clarificationCapture}=await import('../single-agent-commerce-qualification/native-terminal.mjs');
+  const {publicCheckoutState}=await import('../../dist/single-agent-commerce-public-history.js');
+  const j=await statefulFixture();
+  await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);await j.drain();
+  const before=await readSessionSnapshot({runtime,pool,historyStore,session:j}),captureStart=j.capture.length;
+  const invitation=await j.turn('Chốt đơn cho chị nhé',[native([{name:'confirm_purchase',args:{}}])]);await j.drain();
+  const after=await readSessionSnapshot({runtime,pool,historyStore,session:j});
+  assert.equal(invitation.owners,1);assert.equal(invitation.verifiers,0);
+  assert(clarificationCapture({result:invitation.result,generations:[{role:'OWNER',status:'OK'}],messages:j.capture.slice(captureStart),images:[],
+   receipts:after.receipts.filter(r=>!before.receipts.some(old=>old.operation_id===r.operation_id)),authority:after.authority,state:after.publicState}));
+  const cod=await j.turn('Chị trả COD nhé.',[]);await j.drain();assert.equal(cod.owners,0);assert.equal(cod.verifiers,0);
+  const intake=publicCheckoutState(await j.state());assert.equal(intake.paymentMethod,'COD');assert(intake.lastQuestion.missingFields.includes('FULL_NAME'));
+  assert.equal(intake.lastQuestion.delivery,'UNKNOWN');
+ });
  for(const mode of ['committed','conflict','commit-response-lost','rollback-response-lost'])await check('B composed recovery accounting '+mode,async()=>{
   const holding='Bên em kiểm tra rồi báo lại chị nhé.',j=await statefulFixture({dependencyHoldingReply:holding});
   const r=await j.turn('Áo này bao nhiêu em?',[],{loseCommitReply:mode==='commit-response-lost',rollbackCommitReply:mode==='rollback-response-lost',

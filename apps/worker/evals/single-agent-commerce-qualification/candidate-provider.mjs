@@ -4,6 +4,8 @@ import {readFileSync,appendFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createCommerceReadSources} from '../../dist/single-agent-commerce-read-only-sources.js';
+import {publicPolicyLiteral} from '../../dist/single-agent-commerce-read-only-context.js';
+import {judgeSourceInventory,assertJudgeSourceInventory} from './evaluator-source.mjs';
 import {createGeminiCommerceInference,buildGeminiCommerceRequest} from '../single-agent-commerce-read-only/gemini-inference.mjs';
 import {createCommerceVerifier,buildVerifierRequest,validateProtocol} from '../single-agent-commerce-read-only/protocol.mjs';
 import {withNativePresentation} from '../single-agent-commerce-read-only/native-presentation.mjs';
@@ -29,6 +31,7 @@ export function assertSealedInputs(sealed,world){
  assert.equal(readiness(sealed.config,{stage:'ABSOLUTE'}).status,'READY','C_ABSOLUTE_PROTOCOL_BLOCKED');
  assert.equal(sealed.status,'SEALED_NOT_EXECUTED');assert.equal(digest(world),sealed.worldHash,'C_WORLD_CHANGED');
  if(sealed.corpus.requiredCapabilities?.includes('PRODUCT_SEARCH'))validateFrozenIndex(world.search,world.config.vertex.embeddingDimension);
+ for(const s of sealed.corpus.scenarios.filter(s=>s.mode!=='SAFETY'))assertJudgeSourceInventory(s.judgeContext?.sourceInventory,digest(world),world);
  assert(sealed.config.nativeCodecs&&digest(sealed.config.nativeCodecs)===digest(NATIVE_CODECS),'C_NATIVE_CODEC_REGISTRATION');
  assert(sealed.corpus.scenarios.filter(s=>s.mode!=='SAFETY').every(s=>s.turns.every(t=>t.history.length===0)),
   'C_INITIAL_HISTORY_SEED_NOT_IMPLEMENTED');
@@ -49,13 +52,20 @@ export function assertCandidateSource(preflight){
  assert.equal(execFileSync('git',['rev-parse','HEAD'],{cwd:preflight.root,encoding:'utf8'}).trim(),preflight.sealed.runSourceSha,'C_RUN_SOURCE_CHANGED');
  assert.equal(execFileSync('git',['status','--porcelain'],{cwd:preflight.root,encoding:'utf8'}).trim(),'','C_DIRTY_SOURCE');
 }
-const metrics=(telemetry,latencyMs)=>({latencyMs,inputTokens:telemetry?.inputTokens??telemetry?.usage?.input_tokens??null,outputTokens:telemetry?.outputTokens??telemetry?.usage?.output_tokens??null,
- costUSD:telemetry?.cost??null,unavailable:{inputTokens:'PROVIDER_NOT_EXPOSED',outputTokens:'PROVIDER_NOT_EXPOSED',costUSD:'PROVIDER_NOT_EXPOSED'}});
+const metrics=(t,latencyMs)=>{const v={latencyMs,inputTokens:t?.inputTokens??t?.usage?.input_tokens??null,
+ outputTokens:t?.outputTokens??t?.usage?.output_tokens??null,costUSD:t?.cost??null};
+ return {...v,unavailable:Object.fromEntries(['inputTokens','outputTokens','costUSD'].filter(k=>v[k]===null).map(k=>[k,'PROVIDER_NOT_EXPOSED']))};};
 export function createCandidateProvider({preflight,out,dependencies={}}){
  const {m,world}=preflight,facts=frozenFacts(world);
  const ownerPrompt=readFileSync(new URL('../single-agent-commerce-read-only/prompts/owner.vi.txt',import.meta.url),'utf8'),
   verifierPrompt=readFileSync(new URL('../single-agent-commerce-read-only/prompts/verifier.vi.txt',import.meta.url),'utf8');
  let active=null,inFlight=null;const generations=[],pending=new Set(),counters={owner:0,verifier:0,embedding:0,catalogReads:0,posReads:0,selectorCalls:0,readPolicyCalls:0};
+ const sourceReads=[];
+ const judgeInventories=new Map();
+ const inventoryFor=id=>{if(!judgeInventories.has(id))judgeInventories.set(id,judgeSourceInventory(world,[id]));return judgeInventories.get(id);};
+ const sourceObserved=value=>{const row={...structuredClone(active),...value};delete row.runtimeInput;
+  const old=sourceReads.find(r=>r.slotId===row.slotId&&r.turnIndex===row.turnIndex&&digest(r.observation)===digest(row.observation));
+  if(old)old.readCount++;else sourceReads.push({...row,readCount:1});};
  const audit=(phase,value)=>appendFileSync(resolve(out,'NATIVE_REQUESTS.jsonl'),JSON.stringify({slotId:value.slotId??active?.slotId,turnIndex:value.turnIndex??active?.turnIndex,phase,value})+'\n');
  assert.deepEqual(EMBEDDING_POLICY,MEASUREMENT_POLICY.embedding);
  const embeddingHttp=embeddingHttpAccounting({fetchImpl:dependencies.embeddingFetchImpl??fetch,observe:audit,
@@ -100,6 +110,8 @@ export function createCandidateProvider({preflight,out,dependencies={}}){
   assert(slot.mode!=='SAFETY'||role==='VERIFIER','C_SAFETY_ROLE');
   const same=generations.filter(g=>g.slotId===active.slotId&&g.turnIndex===active.turnIndex);
   assert(same.filter(g=>g.role===role).length<(role==='OWNER'?3:1)&&!same.some(g=>g.status!=='OK'),'C_REGISTERED_ROLE_CAP_OR_PRIOR_FAILURE');
+  assert(generations.filter(g=>g.slotId===slot.slotId).length<(slot.maximumGenerations??scenario.turns.length*(slot.mode==='SAFETY'?1:4)),
+   'C_CASE_GENERATION_BUDGET');
   const model=role==='OWNER'?m.models.conversation:m.models.verifier;
   const row={id:request.generationId,role,turnIndex:active.turnIndex,slotId:active.slotId,runtimeInput:structuredClone(active.runtimeInput),
    boundRuntimeHash:digest(active.runtimeInput),wireCodec:NATIVE_CODECS[role],requestBody:null,requestHash:null,modelConfigHash:digest(model),
@@ -148,13 +160,23 @@ export function createCandidateProvider({preflight,out,dependencies={}}){
   },
   setSlot:value=>{assert(pending.size===0,'C_PENDING_GENERATION');assert(value?.runtimeInput&&Number.isInteger(value.turnIndex));active=structuredClone(value);},
   async awaitSettled(timeoutMs=5000){let timer;try{return await Promise.race([Promise.allSettled([...pending]).then(()=>true),new Promise(resolve=>{timer=setTimeout(()=>resolve(false),timeoutMs);})]);}finally{clearTimeout(timer);}},
-  observed:()=>structuredClone(generations),observedAuxiliary:embeddingHttp.observed,factsForMode:mode=>{assert.equal(mode,'LIVE');return facts;},
+  observed:()=>structuredClone(generations),observedSources:()=>structuredClone(sourceReads),observedAuxiliary:embeddingHttp.observed,factsForMode:mode=>{assert.equal(mode,'LIVE');return facts;},
   owner:r=>tracked('OWNER',r),verifier:r=>tracked('VERIFIER',r),
   async read(bound,policyStore,policy,initialProductCodes){
    const initialProducts=await Promise.all(initialProductCodes.map(c=>catalog.findByExactCode(c)));assert(initialProducts.every(Boolean),'C_INITIAL_PRODUCT_NOT_FROZEN');
    const sources=createCommerceReadSources({scope:bound,channel:world.config.channel,clock:()=>new Date(),initialProducts,catalog,
     search:frozenSearch?.search??{searchText:catalog.searchText},policyStore,facts});
-   return {catalog:sources.catalog,policy,initialProducts,maxFactAgeSeconds:world.config.maxFactAgeSeconds,productGroups:world.config.productGroups};
+   // Read tools require current active pointers; the separate ingress policy port
+   // owns durable transaction pins. Never pass that pinned port to read_policy.
+   return {catalog:{...sources.catalog,async readProduct(id,readPos=true){
+    try{const result=await sources.catalog.readProduct(id,readPos);
+     sourceObserved({observation:{operation:'CATALOG_READ',subjectRef:id,readPos,status:'OK',source:inventoryFor(id)}});return result;
+    }catch(error){sourceObserved({observation:{operation:'CATALOG_READ',subjectRef:id,readPos,status:'ERROR'}});throw error;}
+   }},policy:async()=>{try{const result=await sources.policy();
+    sourceObserved({observation:{operation:'ACTIVE_POLICY_READ',status:result.status,
+     policy:result.status==='RESOLVED'&&result.bundle?publicPolicyLiteral(result.bundle,bound.pageId,bound.shopId,new Date()):null}});return result;
+   }catch(error){sourceObserved({observation:{operation:'ACTIVE_POLICY_READ',status:'ERROR'}});throw error;}},
+    initialProducts,maxFactAgeSeconds:world.config.maxFactAgeSeconds,productGroups:world.config.productGroups};
   }};
  return ports;
 }

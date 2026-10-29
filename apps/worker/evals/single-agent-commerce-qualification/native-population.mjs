@@ -5,7 +5,7 @@ import {resolve} from 'node:path';
 import {runtimeProjection,digest,textDigest,outcomeDigest} from './qualification.mjs';
 import {commonModelConfig} from './native-wire.mjs';
 import {selectFrozenCustomerTurn} from './customer-branches.mjs';
-import {captureNativeTerminal,capturedOutputViolations} from './native-terminal.mjs';
+import {captureNativeTerminal,capturedOutputViolations,clarificationCapture} from './native-terminal.mjs';
 const silent=(reason,disposition='NO_SEND')=>({disposition,messages:[],images:[],reason});
 export async function collectNativePopulation({preflight,providerPorts,sessionFactory,snapshot,historyStore,out,seedPath,queue,branchSelector}){
  const reg=preflight.sealed,identity=reg.identity,arm=preflight.registration.arm??'CANDIDATE',seed=JSON.parse(readFileSync(seedPath,'utf8')).seed;
@@ -42,7 +42,10 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
    const after=await snapshot(session),gens=providerPorts.observed().slice(generationStart),terminal=observed?.result?.terminal;
    const messages=session.capturePayloads.slice(attachmentStart).flatMap(p=>typeof p.text==='string'?[p.text]:[]),images=session.capturePayloads.slice(attachmentStart).flatMap(p=>
     p.attachment?.type==='image'?[{url:p.attachment.payload.url}]:[]);
-   const codeOnly=observed?.result?.mode==='PRIVATE_CODE_PATH'&&gens.length===0&&messages.length>0;
+   const committedReceipts=after.receipts.filter(r=>!before.receipts.some(old=>old.operation_id===r.operation_id));
+   const clarification=clarificationCapture({result:observed?.result,generations:gens,messages,images,receipts:committedReceipts,
+    authority:after.authority,state:after.publicState});
+   const codeOnly=!!clarification||observed?.result?.mode==='PRIVATE_CODE_PATH'&&gens.length===0&&messages.length>0;
    const actual=captureNativeTerminal({native:terminal,codeOnly,messages,images,errorCode}),outputFindings=capturedOutputViolations(actual);
    a.safetyFindings.push(...outputFindings);
    const verifier=gens.find(g=>g.role==='VERIFIER'),b=verifier?.verifierInput,witness=observed?.result?.boundaryWitness;
@@ -60,8 +63,10 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
    a.acceptedOutbox=t.acceptedOutbox;
    if(arm==='C3'&&observed?.result?.c3Witness){t.c3Boundary=observed.result.c3Witness;a.c3Boundary=t.c3Boundary;}
     const auxiliaryRequests=providerPorts.observedAuxiliary?.().filter(r=>r.slotId===slot.slotId&&r.turnIndex===i)??[];
+    const sourceReads=providerPorts.observedSources?.().filter(r=>r.slotId===slot.slotId&&r.turnIndex===i)??[];
+    (a.audit.sourceReads??=[]).push(...sourceReads);
     t.auxiliaryRequests=auxiliaryRequests;
-    const rawFile=`native-${slot.slotId}-turn-${i}.json`,raw={observed,errorCode,before,after,generations:gens,auxiliaryRequests};
+    const rawFile=`native-${slot.slotId}-turn-${i}.json`,raw={observed,errorCode,before,after,generations:gens,auxiliaryRequests,sourceReads};
    writeFileSync(resolve(out,rawFile),JSON.stringify(raw,null,2),{flag:'wx'});
    (a.audit.nativeResults??=[]).push({turnIndex:i,artifact:rawFile,artifactHash:digest(JSON.parse(JSON.stringify(raw))),
     terminal:terminal??null,commitStatus:observed?.result?.commitStatus??null,egressDiagnostic:observed?.result?.egressDiagnostic??null});
@@ -70,7 +75,8 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
    if(codeOnly){
     const newRows=after.outbox.filter(r=>!before.outbox.some(old=>old.outbox_id===r.outbox_id));
     assert.equal(newRows.length,messages.length,'C_CODE_CAPTURE_COUNT');
-    t.codeOwned={kind:'NATIVE_PRIVATE_CODE_PATH',sourceSha:reg.config.candidate.sourceSha,runtimeInputHash:digest(input),
+    t.codeOwned={kind:clarification?'NATIVE_CHECKOUT_CLARIFICATION':'NATIVE_PRIVATE_CODE_PATH',sourceSha:reg.config.candidate.sourceSha,runtimeInputHash:digest(input),
+     ...(clarification?{committedReceipts,authority:after.authority,state:{revision:after.publicState.revision,salesRevision:after.publicState.salesRevision}}:{}),
      nativeResult:observed.result,nativeResultHash:digest(observed.result),
      acceptedOutbox:newRows.map((r,index)=>({id:r.outbox_id,status:r.status,textHash:textDigest(messages[index])}))};
     a.codeOwned=t.codeOwned;
@@ -87,7 +93,8 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
    a.metrics={elapsedMs:performance.now()-start,verificationAddedMs:a.turns.reduce((n,t)=>n+(t.verificationAddedMs??0),0),
     evaluationAttestationMs:(a.metrics?.evaluationAttestationMs??0)+(observed?.result?.evaluationTiming?.attestationMs??0),
     toolCalls:observed?.result?.toolCalls===undefined&&!(gens.length===0&&observed?.result)?null:(a.metrics?.toolCalls??0)+(observed?.result?.toolCalls??0)};
-   if(verifier){t.verificationAddedMs=performance.now()-verifier.startedMonotonicMs;a.metrics.verificationAddedMs+=t.verificationAddedMs;}
+   if(verifier){t.verificationAddedMs=verifier.metrics?.latencyMs??null;
+    t.verificationAndPostprocessingMs=performance.now()-verifier.startedMonotonicMs;a.metrics.verificationAddedMs+=t.verificationAddedMs??0;}
    if(errorCode||observed?.qualification?.status!=='VALID'){a.status='ERROR';save();break;}
    save();
   }

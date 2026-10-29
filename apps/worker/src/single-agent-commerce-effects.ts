@@ -1,3 +1,4 @@
+import {publicCheckoutState} from "./single-agent-commerce-public-history.js";
 import { computeBusinessContentHash, executePersistedSalesCycleCommand, type RuntimePolicyBundle,
   type SalesCycleCommand, type SalesCycleRuntimeState, type SalesCycleStateRepositoryV1,
   type SalesCycleTrustedPortsV1, type ResolvedCartDraftV1 } from "@lana/chat-runtime";
@@ -85,6 +86,11 @@ export async function createCommerceEffectTools(input: {
     return { disposition: committedTerminal.disposition ?? "HANDOFF", reason: committedTerminal.reason, text: null, fallbackId: null };
   }
   const snapshot = (): TrustedContext => {
+    if(policy&&current.cart){
+      const ref=current.commerceContext?.policyRef;
+      if(!ref||ref.id!==policy.policy.policyBundleId||ref.version!==policy.policy.policyVersion||
+        ref.contentHash!==computeBusinessContentHash(policy.policy))throw new Error("TRANSACTION_POLICY_BINDING_CHANGED");
+    }
     const base = input.base.snapshot(), subjects = [...base.boundSubjects];
     const active = activeSelections();
     if (current.cart) {
@@ -102,7 +108,7 @@ export async function createCommerceEffectTools(input: {
       base.boundSubjects.some(s => s.kind === "CUSTOMER_PROFILE" && s.ref === r.subjectRef)).map(r => ({ ...r, stateRevision: current.revision }));
     return buildReadOnlyContext({ state: { ...base.state, ...authority, conversationRevision: authority?.revision ?? base.state.revision, revision: current.revision,
       salesStage: current.stage, cartItems: cartItems(active),
-      checkoutStatus: { previewAvailable: current.stage === "ORDER_PREVIEW" && current.preview !== null, purchaseConfirmed: current.confirmation !== null,
+      checkoutStatus: { publicIntake:publicCheckoutState(current),previewAvailable: current.stage === "ORDER_PREVIEW" && current.preview !== null, purchaseConfirmed: current.confirmation !== null,
         missingFields: [!current.checkoutDraft?.fullName && "FULL_NAME", !current.checkoutDraft?.phone && "PHONE", !current.checkoutDraft?.address && "ADDRESS", !current.checkoutDraft?.paymentMethod && "PAYMENT_METHOD"].filter(Boolean) },
       ...(current.stage === "HANDED_OFF" ? { permission: false, conversationOwner: "HUMAN" } : {}),
       ...(cart ? { cartQuote: cartQuote() } : {}) },
@@ -111,8 +117,14 @@ export async function createCommerceEffectTools(input: {
         return !["PRICE", "STOCK"].includes(claim.type) || !active.some(s => claim.scope.kind === "PRODUCT" && claim.scope.productId === s.line.parentProductId &&
           [s.line.offerId, `offer:${s.line.parentProductId}:${s.line.offerId}`].includes(claim.scope.variantId ?? ""));
       }), ...selectionClaims],
-      policies: policy ? [...base.policyLiterals.filter(p => !p.ref.startsWith("policy:")),
-        publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock())] : base.policyLiterals,
+      // Active shop rules and durable transaction terms have different authority.
+      // Never replace a current active-pointer observation with a historical pin.
+      policies: policy ? [...base.policyLiterals, (() => {
+        const literal=publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock());
+        return {...literal,ref:literal.ref.replace("policy:","transaction-policy:"),text:JSON.stringify({
+          ...JSON.parse(literal.text),policyBinding:{purpose:current.cart?"COMMITTED_TRANSACTION":"TRANSACTION_PREPARATION",
+            policyRef:current.commerceContext?.policyRef??null}})};
+      })()] : base.policyLiterals,
       // Reuse the selection readback: a known contradiction invalidates this
       // receipt's current scope; unavailable source data adds no new assertion.
       receipts: [...stateReceipts, ...(receipt && active.length === selections.size ? [receipt] : [])], ...(cart ? { cartBinding: { cartId: cart.cartId, cartVersion: cart.revision } } : {}) });

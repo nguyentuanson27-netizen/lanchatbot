@@ -4,13 +4,14 @@ import assert from 'node:assert/strict';
 import {readFileSync,mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {resolve,dirname,basename} from 'node:path';
-import {fixtureProduct} from '../../dist/single-agent-commerce.test-support.js';
+import {fixtureProduct,fixturePolicyPointers,commerceScope} from '../../dist/single-agent-commerce.test-support.js';
 import {makeBinding} from '../../dist/single-agent-semantic-verifier-boundary.js';
 import {buildQuoteRequest} from '../single-agent-commerce-read-only/quote-presentation-diagnostic.mjs';
 import {createCandidateProvider,assertSealedInputs} from './candidate-provider.mjs';
 import {digest,qualificationIdentity,registerSlots} from './qualification.mjs';
 import {config,corpus} from './fixtures.test-support.mjs';
 import {NATIVE_CODECS} from './native-wire.mjs';
+import {judgeSourceInventory} from './evaluator-source.mjs';
 function setup(t,dependencies={}){
  const out=mkdtempSync(resolve(tmpdir(),'c3-c-provider-unit-'));
  t.after(()=>{assert.equal(dirname(out),resolve(tmpdir()));assert(basename(out).startsWith('c3-c-provider-unit-'));rmSync(out,{recursive:true,force:true});});
@@ -25,12 +26,24 @@ function setup(t,dependencies={}){
  provider.setSlot({slotId:'unit-slot',turnIndex:0,runtimeInput});
  const row=JSON.parse(readFileSync(new URL('../single-agent-commerce-read-only/quote-presentation-run-20261026/frozen-inputs.json',import.meta.url))).records[0];
  const request=buildQuoteRequest(row,'A','unit-request',provider.ownerPrompt);request.contents=[{role:'user',parts:[{text:runtimeInput.latest}]}];
- return {provider,request,m,runtimeInput,out};
+ return {provider,request,m,runtimeInput,out,world};
 }
+
+test('native read policy uses active sources without consuming the transaction pin',async t=>{
+ const f=setup(t);f.world.config.channel='CANARY_SHADOW';
+ let pinnedReads=0,activeReads=0;
+ const sources=await f.provider.read(commerceScope(),{loadActivePointers:async()=>{activeReads++;return fixturePolicyPointers();}},
+  async()=>{pinnedReads++;return {status:'PINNED',bundle:null};},['SV2447']);
+ const result=await sources.policy();
+ assert.equal(result.status,'RESOLVED');assert.equal(result.bundle.policy.shopId,commerceScope().shopId);
+ assert.equal(pinnedReads,0);assert.equal(activeReads,1);assert.equal(f.provider.observed().length,0);
+ assert.equal(f.provider.observedSources()[0].observation.operation,'ACTIVE_POLICY_READ');
+});
 const response=()=>new Response(JSON.stringify({modelVersion:'gemini-3.5-flash-lite',usageMetadata:{promptTokenCount:7,candidatesTokenCount:3},
  candidates:[{finishReason:'STOP',content:{role:'model',parts:[{text:'Áo 499k chị nhé.'}]}}]}));
 test('dispatch preflight rejects changed registration corpus, slots, world, codec or review before clients are constructed',()=>{
  const c=config();c.nativeCodecs=NATIVE_CODECS;const pop=corpus(),world={kind:'FROZEN_PUBLIC_BUSINESS_WORLD'};
+ for(const s of pop.scenarios.filter(s=>s.mode!=='SAFETY'))s.judgeContext.sourceInventory=judgeSourceInventory(world,[],{noProductLookupRequired:true});
  pop.review={status:'APPROVED',worldHash:digest(world),newProviderResultsObserved:0};
  const sealed={config:c,corpus:pop,corpusHash:digest(pop),identity:qualificationIdentity(c),worldHash:digest(world),
   slots:registerSlots(c,pop),sendEnabled:false,status:'SEALED_NOT_EXECUTED',registeredAt:'2026-10-28T00:00:00.000Z'};

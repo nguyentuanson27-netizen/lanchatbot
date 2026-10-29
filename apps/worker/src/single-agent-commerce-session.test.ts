@@ -40,6 +40,9 @@ describe("persisted native commerce session", () => {
     expect(await start.executeCommand(call)).toMatchObject({status:"CHECKOUT_REQUESTED"});
     expect(messages[0]).toContain("tên người nhận"); expect(messages[0]).not.toContain("địa chỉ");
     expect(state.clarification?.missingFields).toEqual(["FULL_NAME"]);
+    expect(start.codeOwnedOutput()).toMatchObject({kind:"NATIVE_CHECKOUT_CLARIFICATION",requestId:scope.requestId,
+      recipient:scope.recipient,missingFields:["FULL_NAME"]});
+    expect(start.codeOwnedOutput()!.messageHashes).toHaveLength(1);
     expect(state.confirmation).toBeNull(); expect(state.preview).toBeNull();
     expect(state.cart!.value.lines).toEqual(draft.lines);
     await start.executeCommand({...call,expectedRevision:state.revision,conversationRevision:conversation.revision});

@@ -3,6 +3,8 @@ import {readFileSync,writeFileSync,mkdirSync,existsSync} from 'node:fs';
 import {resolve,relative,sep,isAbsolute} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {randomBytes} from 'node:crypto';
+import {assertJudgeSourceInventory} from './evaluator-source.mjs';
+import {approvedDevelopmentInventory} from './development-inventory.mjs';
 import {digest,readiness,validateConfig,validateCorpus,qualificationIdentity,registerSlots,
  blindComparisonPack,absoluteReviewPack,evaluateQualification,MEASUREMENT_POLICY} from './qualification.mjs';
 import {currentCandidate,assertCurrentCandidate,assertApprovedDecisions,IMPLEMENTATION_BASE_SHA} from './source-identity.mjs';
@@ -61,12 +63,15 @@ try{
   const ready=readiness(config);check(ready.status==='READY','C_OWNER_OR_PROTOCOL_NOT_READY');
   check(world.kind==='FROZEN_PUBLIC_BUSINESS_WORLD'&&Array.isArray(world.sourceEvidenceHashes)&&world.sourceEvidenceHashes.length&&
    world.sourceEvidenceHashes.every(h=>/^[a-f0-9]{64}$/.test(h)),'C_WORLD_PROVENANCE');
-  const development=json(need('--development'));check(Array.isArray(development),'C_DEVELOPMENT_INVENTORY');
+  const developmentArtifact=json(need('--development'));
+  const development=config.nativeCodecs?approvedDevelopmentInventory(developmentArtifact,corpus):developmentArtifact;
+  check(Array.isArray(development),'C_DEVELOPMENT_INVENTORY');
   validateCorpus(corpus,{developmentFingerprints:development});
   check(corpus.review?.status==='APPROVED'&&corpus.review.worldHash===digest(world)&&corpus.review.newProviderResultsObserved===0,
    'C_FRESH_CORPUS_REVIEW_REQUIRED');
   check(!JSON.stringify(corpus).includes('{{'),'C_UNRESOLVED_HOLDOUT_INPUT');
   if(config.nativeCodecs){
+   for(const s of corpus.scenarios.filter(s=>s.mode!=='SAFETY'))assertJudgeSourceInventory(s.judgeContext?.sourceInventory,digest(world),world);
    check(corpus.scenarios.filter(s=>s.mode!=='SAFETY').every(s=>s.turns.every(t=>t.history.length===0)),'C_INITIAL_HISTORY_SEED_NOT_IMPLEMENTED');
    if(corpus.requiredCapabilities?.includes('PRODUCT_SEARCH'))validateFrozenIndex(world.search,world.config.vertex.embeddingDimension);
   }
