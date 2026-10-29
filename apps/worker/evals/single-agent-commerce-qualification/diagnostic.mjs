@@ -29,8 +29,7 @@ export function validateDiagnostic(reg,world){
  assert(reg.review?.status==='APPROVED'&&reg.review.corpusHash===reg.corpusHash&&reg.review.worldHash===reg.worldHash&&
   reg.review.sourceChecksHash===digest(reg.sourceChecks)&&reg.review.reviewer&&reg.review.evidenceRef&&reg.review.newProviderResultsObserved===0,'D_INPUT_REVIEW');
  assert(Number.isFinite(Date.parse(reg.registeredAt))&&Date.parse(reg.registeredAt)<=Date.now(),'D_REGISTRATION_TIME');
- const initial=reg.initialStateArtifact;assert(initial?.kind==='REAL_ADAPTER_NATIVE_INITIAL_STATE'&&initial.worldHash===reg.worldHash&&
-  initial.sourceDirty===false&&initial.testDatabaseDropped===true&&initial.providerRequests===0,'D_INITIAL_STATE');
+ assertDiagnosticInitial(reg);const initial=reg.initialStateArtifact;
  assert(reg.sourceChecks.length===6,'D_SOURCE_CHECKS');
  for(const [i,s]of reg.corpus.scenarios.entries()){
   for(let n=0;n<s.turns.length;n++){
@@ -41,10 +40,15 @@ export function validateDiagnostic(reg,world){
   assert.deepEqual(reg.sourceChecks[i],s.diagnosticTrusted,'D_SOURCE_BINDING');
   if(i<5){assert.equal(s.initialContext.worldHash,reg.worldHash);assert.equal(s.initialContext.initialStateHash,digest(initial.publicState));
    assertJudgeSourceInventory(s.judgeContext?.sourceInventory,reg.worldHash,world,s);
-   assert.deepEqual(s.nativeCodeOwnedTurns??[],s.id==='c-20261028-j6'?[0,1,2]:[],'D_CODE_OWNED_SCOPE');
+   assert.deepEqual(s.nativeCodeOwnedTurns??[],s.id==='c-20261028-j6'?[1,2]:[],'D_CODE_OWNED_SCOPE');
   }else assert(s.evaluator.unsafe===false&&s.nativeSafety?.worldHash===reg.worldHash&&s.nativeSafety.sourceHash===digest(s.diagnosticTrusted)&&
     digest(s.nativeSafety.trusted)===digest(s.diagnosticTrusted)&&s.nativeSafety.review?.status==='APPROVED','D_PROBE_BINDING');
  }
+}
+export function assertDiagnosticInitial(reg){
+ const a=reg.initialStateArtifact;
+ assert(a?.kind==='REAL_ADAPTER_NATIVE_INITIAL_STATE'&&a.worldHash===reg.worldHash&&a.sourceSha===reg.runSourceSha&&
+  a.sourceDirty===false&&a.testDatabaseDropped===true&&a.providerRequests===0&&reg.initialStateArtifactHash===digest(a),'D_INITIAL_STATE');
 }
 export function diagnosticControl(reg,{checkSource}){
  let stopped=null;
@@ -60,9 +64,10 @@ export function diagnosticControl(reg,{checkSource}){
     assert(reg.slots.some(s=>s.slotId===active?.slotId&&(s.mode!=='SAFETY'||role==='VERIFIER')),'D_UNREGISTERED_DISPATCH');
    }catch(e){stop(e.message);throw e;}
   },
-  afterTurn({errorCode,reason,safetyFindings=[],accounting}={}){
+  afterTurn({errorCode,reason,safetyFindings=[],accounting,commitStatus}={}){
    if(safetyFindings.length||accounting==='UNKNOWN'||['UNKNOWN_PROVIDER_COMPLETION','C_ACCEPTED_CAPTURE_COUNT','C_CODE_CAPTURE_COUNT'].includes(errorCode)||
-    ['STALE','FACT_EXPIRED','SNAPSHOT_MISMATCH','PRIVACY_VIOLATION','EFFECT_RECEIPT_MISMATCH'].includes(reason))stop(errorCode??reason??'D_HARD_INVARIANT');
+    ['UNKNOWN','UNKNOWN_COMMIT','PARTIAL_EFFECT'].includes(commitStatus)||
+    ['STALE','FACT_EXPIRED','SNAPSHOT_MISMATCH','PRIVACY','RECIPIENT','PERMISSION','PERMISSION_OR_PRIVACY','PRIVACY_VIOLATION','EFFECT_RECEIPT_MISMATCH','UNKNOWN_COMMIT','PARTIAL_EFFECT','CURRENT_READBACK_UNAVAILABLE'].includes(reason))stop(errorCode??reason??commitStatus??'D_HARD_INVARIANT');
   }};
 }
 export function claimDiagnostic(path,reg){
