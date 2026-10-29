@@ -404,10 +404,11 @@ try{
   let sourceVariantChanged=false;
   const product=fixtureProduct('SM613',at);let mediaChanged=false;
   if(candidateTuples){assert(!live);const row=product.snapshot.offers.DIRECT.rows[0];
-   product.snapshot.fulfillment_policy.can_order_when_zero=false;
+   product.snapshot.fulfillment_policy={tinh_trang:'READY_STOCK',can_order_when_zero:false,prep_min_days:1,prep_max_days:2,
+    zero_stock_policy:'',zero_stock_prep_min_days:null,zero_stock_prep_max_days:null,eta_valid_until:'',eta_updated_at:''};
    product.snapshot.offers.DIRECT.rows=['M','L'].flatMap(size=>[
-    {...structuredClone(row),size,color:'__NO_COLOR__',stock_quantity:9,components:row.components.map(c=>({...c,size,color:'__NO_COLOR__'}))},
-    {...structuredClone(row),size,color:'BE',stock_quantity:0,components:row.components.map(c=>({...c,size,color:'BE'}))}]);}
+    {...structuredClone(row),size,color:'__NO_COLOR__',parent_variation_id:`SM613-UNLABELLED-${size}`,stock_quantity:9,components:[{product_sku:'SM613',size,color:'__NO_COLOR__',quantity:1}]},
+    {...structuredClone(row),size,color:'BE',parent_variation_id:`SM613-BE-${size}`,stock_quantity:0,components:[{product_sku:'SM613',size,color:'BE',quantity:1}]}]);}
   const selected=q=>{if(missingEta&&q.deliveryAddress)return {status:'ETA_UNAVAILABLE',reasonCode:'CONTROLLED_MISSING_REGION',availableSizes:[],availableColors:[]};
    if(candidateTuples){const raw=structuredClone(product.snapshot);if(sourceVariantChanged)raw.offers.DIRECT.rows[0].components[0].variation_sku='CHANGED-SKU';
     return cartSelectionFromSnapshot(raw,q,new Date());}
