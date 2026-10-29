@@ -1,0 +1,522 @@
+{
+  "schemaVersion": 1,
+  "kind": "SELECTION_CHECKOUT_DETERMINISTIC_IMPLEMENTATION_ONLY",
+  "implementationBaseSha": "ff0783771ef558c2136aef440e02f4a0a7c18b21",
+  "approvedPlanSha": "a5e6270ae7ac5b3195e6d0da03e6841a7fe41e81",
+  "reviewedExecutableSourceSha": "5b35328bb743ab646dbe1c58a2910be779ff24e8",
+  "mainReference": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "status": "IMPLEMENTATION_APPROVE_QUALIFICATION_BLOCKED",
+  "commands": [
+    {
+      "command": "git fetch origin main",
+      "exitCode": 0,
+      "observedMainSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361"
+    },
+    {
+      "command": "pnpm exec vitest run apps/worker/src/realtime-sales-catalog.test.ts apps/worker/src/realtime-sales-cycle.test.ts apps/worker/src/single-agent-commerce-session.test.ts apps/worker/src/single-agent-commerce-effects.test.ts apps/worker/src/single-agent-commerce-read-only-tools.test.ts apps/worker/src/checkout-payment-choice.test.ts apps/worker/src/single-agent-commerce-ingress.test.ts apps/worker/src/single-agent-semantic-verifier-boundary.test.ts apps/worker/src/single-agent-commerce-public-history.test.ts apps/worker/src/single-agent-commerce-read-only-context.test.ts packages/business-tools/src/protected-claims.test.ts packages/business-tools/src/reply-assembler.test.ts",
+      "exitCode": 0,
+      "sourceSha": "5b35328bb743ab646dbe1c58a2910be779ff24e8",
+      "pass": 485,
+      "files": 12,
+      "artifact": {
+        "path": "../c3-selection-worker-focused-final-02.log",
+        "sha256": "d5642d0868caf1b40d2c12b7520906a2ffea82d74a508b9f96007363e92669b4"
+      }
+    },
+    {
+      "command": "pnpm exec vitest run packages/contracts/src packages/commerce-kernel/src packages/chat-runtime/src packages/database/src",
+      "exitCode": 0,
+      "sourceSha": "e46be00432600e9a8ecec07649404596d88cc8c6",
+      "pass": 566,
+      "skipped": 30,
+      "passedFiles": 62,
+      "skippedFiles": 4,
+      "sharedSourceByteIdenticalAtFinal": true,
+      "artifact": {
+        "path": "../c3-selection-shared-tests-final.log",
+        "sha256": "68929e29325b72f7d2ad93ec830a6bc889cb58a2dd03148c3570f90083d490be"
+      }
+    },
+    {
+      "command": "pnpm --filter @lana/worker test:evals",
+      "exitCode": 0,
+      "sourceSha": "5b35328bb743ab646dbe1c58a2910be779ff24e8",
+      "pass": 756,
+      "skipped": 2,
+      "artifact": {
+        "path": "../c3-selection-evals-final-02.log",
+        "sha256": "5145c032cc9b1adb8df20406c9f4180da6b21cba22f56a1caa99d914ac126a8d"
+      }
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "exitCode": 0,
+      "sourceSha": "5b35328bb743ab646dbe1c58a2910be779ff24e8",
+      "artifact": {
+        "path": "../c3-selection-worker-build-final-03.log",
+        "sha256": "40191cdd767253f0a6cbd27478b129721e54f56554459ac55347da5bb9900798"
+      }
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "exitCode": 0,
+      "sourceSha": "5b35328bb743ab646dbe1c58a2910be779ff24e8",
+      "artifact": {
+        "path": "../c3-selection-worker-typecheck-final-02.log",
+        "sha256": "bff0858556ade4ec6f35caed5d97f20db2c1131b1f6ccea70e2963b67e778397"
+      }
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0,
+      "sourceSha": "5b35328bb743ab646dbe1c58a2910be779ff24e8",
+      "artifact": {
+        "path": "../c3-selection-worker-lint-final-02.log",
+        "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415"
+      }
+    },
+    {
+      "command": "pnpm exec tsc -p packages/contracts/tsconfig.json --noEmit",
+      "exitCode": 0,
+      "sourceSha": "e46be00432600e9a8ecec07649404596d88cc8c6",
+      "sharedSourceByteIdenticalAtFinal": true,
+      "artifact": {
+        "path": "../c3-selection-contracts-typecheck-final.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "pnpm exec tsc -p packages/commerce-kernel/tsconfig.json --noEmit",
+      "exitCode": 0,
+      "sourceSha": "e46be00432600e9a8ecec07649404596d88cc8c6",
+      "sharedSourceByteIdenticalAtFinal": true,
+      "artifact": {
+        "path": "../c3-selection-commerce-kernel-typecheck-final.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "pnpm exec tsc -p packages/chat-runtime/tsconfig.json --noEmit",
+      "exitCode": 0,
+      "sourceSha": "e46be00432600e9a8ecec07649404596d88cc8c6",
+      "sharedSourceByteIdenticalAtFinal": true,
+      "artifact": {
+        "path": "../c3-selection-chat-runtime-typecheck-final.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "pnpm exec tsc -p packages/database/tsconfig.json --noEmit",
+      "exitCode": 0,
+      "sourceSha": "e46be00432600e9a8ecec07649404596d88cc8c6",
+      "sharedSourceByteIdenticalAtFinal": true,
+      "artifact": {
+        "path": "../c3-selection-database-typecheck-final.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "node ../c3-selection-validate-full.mjs",
+      "exitCode": 0,
+      "sourceSha": "5b35328bb743ab646dbe1c58a2910be779ff24e8",
+      "artifact": {
+        "path": "../c3-selection-real-adapter-final.json",
+        "sha256": "2bf50fd6f58591ae09d136bf3c8e7dbac23614fde6c9d6a81cc0fbaa5976048d"
+      },
+      "script": {
+        "path": "../c3-selection-validate-full.mjs",
+        "sha256": "6bc66f95091802e8555b868237df7d2327cabe07f28965cb6861a2b81bd467ee"
+      }
+    }
+  ],
+  "realPostgresRuns": [
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-selection-checkout-pg-01 COD --check-prefix 'B composed selection checkout'",
+      "sourceSha": "cb723e9b1675f983faf1b8d38fe30d3ab4d781cb",
+      "sourceDirty": false,
+      "status": "FAIL",
+      "pass": 0,
+      "fail": 1,
+      "failures": [
+        {
+          "name": "B composed selection checkout tuple identity supports M plus L without zero-stock color substitution",
+          "status": "FAIL",
+          "error": "Cannot set properties of null (setting 'can_order_when_zero')"
+        }
+      ],
+      "testDatabaseDropped": true,
+      "providerGenerations": 0,
+      "artifact": {
+        "path": "../c3-selection-checkout-pg-01/integration.json",
+        "sha256": "2d04275c65c7a75a258dd1b8e24032c4ed7f99bae82bd2fa145b1e257dad6d2b"
+      },
+      "log": {
+        "path": "../c3-selection-checkout-pg-01.log",
+        "sha256": "06fbc6e00d99aed8fcfc7e60cc518920747c89385d8de2289ab9ebcaa6f11415"
+      }
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-selection-checkout-pg-02 COD --check-prefix 'B composed selection checkout'",
+      "sourceSha": "27033e2a06d7cd0f9c8ab4217962444f5799e6a3",
+      "sourceDirty": false,
+      "status": "FAIL",
+      "pass": 0,
+      "fail": 1,
+      "failures": [
+        {
+          "name": "B composed selection checkout tuple identity supports M plus L without zero-stock color substitution",
+          "status": "FAIL",
+          "error": "Expected values to be strictly equal:\n\n1 !== 2\n"
+        }
+      ],
+      "testDatabaseDropped": true,
+      "providerGenerations": 0,
+      "artifact": {
+        "path": "../c3-selection-checkout-pg-02/integration.json",
+        "sha256": "09cf158b908d3b6de8f53fe48b6f637868ce9f4f82f0f24a48483310723b0a1b"
+      },
+      "log": {
+        "path": "../c3-selection-checkout-pg-02.log",
+        "sha256": "7fb113724a13049e20f031e8e950f0f4330e1338c81be03eaf352ee7fe69ae6a"
+      }
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-selection-checkout-pg-03 COD --check-prefix 'B composed selection checkout'",
+      "sourceSha": "98632a1767be338a53692597d693b38476501668",
+      "sourceDirty": false,
+      "status": "FAIL",
+      "pass": 0,
+      "fail": 1,
+      "failures": [
+        {
+          "name": "B composed selection checkout tuple identity supports M plus L without zero-stock color substitution",
+          "status": "FAIL",
+          "error": "Expected values to be strictly equal:\n\n1 !== 2\n"
+        }
+      ],
+      "testDatabaseDropped": true,
+      "providerGenerations": 0,
+      "artifact": {
+        "path": "../c3-selection-checkout-pg-03/integration.json",
+        "sha256": "8882cbd2e2904721ce78fccf6b7f561942967abf4d9b9922d5f97ef1d9df949f"
+      },
+      "log": {
+        "path": "../c3-selection-checkout-pg-03.log",
+        "sha256": "cf4801e0064fe0826a2d1a415c925ef9fb1386d6e28633572889c59892bf9eb7"
+      }
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-selection-checkout-pg-04 COD --check-prefix 'B composed selection checkout'",
+      "sourceSha": "e46be00432600e9a8ecec07649404596d88cc8c6",
+      "sourceDirty": false,
+      "status": "PASS",
+      "pass": 2,
+      "fail": 0,
+      "failures": [],
+      "testDatabaseDropped": true,
+      "providerGenerations": 0,
+      "artifact": {
+        "path": "../c3-selection-checkout-pg-04/integration.json",
+        "sha256": "d7ba1db896ab7b81e6b84f47d0857e8e94a651474be4d337e89462af214e6a95"
+      },
+      "log": {
+        "path": "../c3-selection-checkout-pg-04.log",
+        "sha256": "1ece6977fe7ccf1e241d8157fbf851ada228f2856319abb2c0a4d87d08b9ee15"
+      }
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-selection-checkout-pg-full-01 COD",
+      "sourceSha": "e46be00432600e9a8ecec07649404596d88cc8c6",
+      "sourceDirty": false,
+      "status": "FAIL",
+      "pass": 18,
+      "fail": 1,
+      "failures": [
+        {
+          "name": "B composed C remediation code clarification has a committed receipt and accepted capture after owner",
+          "status": "FAIL",
+          "error": "Expected values to be strictly equal:\n\nnull !== 'COD'\n"
+        }
+      ],
+      "testDatabaseDropped": true,
+      "providerGenerations": 0,
+      "artifact": {
+        "path": "../c3-selection-checkout-pg-full-01/integration.json",
+        "sha256": "56633fad078a54e3cc0659f96ff123f2ead9261958a168b17807b499a99ca68b"
+      },
+      "log": {
+        "path": "../c3-selection-checkout-pg-full-01.log",
+        "sha256": "3981b04435e71b5df3c5385985bfd9d90acd82f63a31f2f2d1ba28587e819e8d"
+      }
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-selection-checkout-pg-full-02 COD",
+      "sourceSha": "5b35328bb743ab646dbe1c58a2910be779ff24e8",
+      "sourceDirty": false,
+      "status": "PASS",
+      "pass": 70,
+      "fail": 0,
+      "failures": [],
+      "testDatabaseDropped": true,
+      "providerGenerations": 0,
+      "artifact": {
+        "path": "../c3-selection-checkout-pg-full-02/integration.json",
+        "sha256": "a2383436b64fa282ca0b786c2d9156893acb9c0022b07084f28621f5aabe4357"
+      },
+      "log": {
+        "path": "../c3-selection-checkout-pg-full-02.log",
+        "sha256": "cf652034df98ab7555234d7a9d88b3e23ce3940c95247883283aa70202d37360"
+      }
+    }
+  ],
+  "realAdapter": {
+    "status": "PASS",
+    "kind": "REAL_ADAPTER_SEND_DISABLED",
+    "sourceSha": "5b35328bb743ab646dbe1c58a2910be779ff24e8",
+    "checks": [
+      {
+        "name": "stale_revision",
+        "status": "PASS",
+        "artifactHash": "fcb43ff95379853c119a0f9d8ae40b2e48f10f8608b640dab9cc6595d8cb4961",
+        "caseName": "B composed newer inbound between final readback and commit cancels eligibility without an Outbox"
+      },
+      {
+        "name": "duplicate_source",
+        "status": "PASS",
+        "artifactHash": "fcb43ff95379853c119a0f9d8ae40b2e48f10f8608b640dab9cc6595d8cb4961",
+        "caseName": "B3 native cart commits once; duplicate does not repeat database transaction"
+      },
+      {
+        "name": "crash_after_commit",
+        "status": "PASS",
+        "artifactHash": "fcb43ff95379853c119a0f9d8ae40b2e48f10f8608b640dab9cc6595d8cb4961",
+        "caseName": "B composed recovery accounting commit-response-lost"
+      },
+      {
+        "name": "ambiguous_reconciliation",
+        "status": "PASS",
+        "artifactHash": "fcb43ff95379853c119a0f9d8ae40b2e48f10f8608b640dab9cc6595d8cb4961",
+        "caseName": "B3 native quantity change persists, unknown commit reconciles without replay"
+      },
+      {
+        "name": "operation_idempotency",
+        "status": "PASS",
+        "artifactHash": "fcb43ff95379853c119a0f9d8ae40b2e48f10f8608b640dab9cc6595d8cb4961",
+        "caseName": "B composed ingress commits an open cart, authorizes the exact reply and captures delivery once"
+      },
+      {
+        "name": "history_outbox_recovery",
+        "status": "PASS",
+        "artifactHash": "fcb43ff95379853c119a0f9d8ae40b2e48f10f8608b640dab9cc6595d8cb4961",
+        "caseName": "B composed two native mutations retain one source and next owner receives accepted history and current cart"
+      },
+      {
+        "name": "no_duplicate_effect",
+        "status": "PASS",
+        "artifactHash": "fcb43ff95379853c119a0f9d8ae40b2e48f10f8608b640dab9cc6595d8cb4961",
+        "caseName": "B composed N4 sends exact text and selected image in one response group without replay duplicates"
+      }
+    ],
+    "providerRequests": 0,
+    "actualPostgresChecks": 70,
+    "testDatabaseDropped": true,
+    "domainInputs": "SYNTHETIC_ACTUAL_PERSISTENCE_AND_CAPTURE",
+    "modelQualification": false
+  },
+  "redObservedLogs": [
+    {
+      "path": "../c3-selection-red.log",
+      "sha256": "2799a1ab59bf8b78f8262d32c1e0c4596a16b23d376db74336bda92e811b8b1a"
+    },
+    {
+      "path": "../c3-checkout-red.log",
+      "sha256": "a5b72f501f2342fa3ca776ae98119921db4260b3f057bd57aa00d1345326b725"
+    },
+    {
+      "path": "../c3-payment-domain-red.log",
+      "sha256": "506b673f89f0cc75504a69b6250ba32d03ac19196ae4f8f906ac27840cc118a2"
+    },
+    {
+      "path": "../c3-payment-contradiction-red.log",
+      "sha256": "e4efe97af2de325b0c18e166e68209a4ccd573af606d0606f61b08039f585696"
+    },
+    {
+      "path": "../c3-domain-widen-red.log",
+      "sha256": "52c457e50ffdac388d22b86f4ca623c6a27bec9f21941cbd9966db058f203529"
+    },
+    {
+      "path": "../c3-sentinel-red.log",
+      "sha256": "8fe8a7fac7ea2ba29450a0af6708c12a900ab8153e1dc8ace97b78aa0cc7b12e"
+    },
+    {
+      "path": "../c3-budget-cycle-red.log",
+      "sha256": "fc39b2990140f77e93d2c8f0de62396eb9a88ae71c6c80023b71c52bfaa7f219"
+    },
+    {
+      "path": "../c3-existing-payment-verb-red.log",
+      "sha256": "3466b9189f8112ee18bdbca2b564cac3486e37c9673ae5bf92d1bf3755ec6740"
+    }
+  ],
+  "structuralDelta": {
+    "files": 22,
+    "added": 530,
+    "deleted": 46,
+    "changedFiles": [
+      {
+        "path": "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "added": 33,
+        "deleted": 1,
+        "sha256": "5f8f936822e661904635f5dd65c8313eaaac02773c93cacebb7f2bb6bb8c343b"
+      },
+      {
+        "path": "apps/worker/src/checkout-payment-choice.test.ts",
+        "added": 16,
+        "deleted": 0,
+        "sha256": "8a57e2db8c768b8139945170357bc27df4f7cb3be5ff7a21228a398c9c1bbc9d"
+      },
+      {
+        "path": "apps/worker/src/checkout-payment-choice.ts",
+        "added": 20,
+        "deleted": 0,
+        "sha256": "12b1b808fd851fd84fd1541f6a2160bd91df301a0e1e559edf3758600d423659"
+      },
+      {
+        "path": "apps/worker/src/realtime-sales-catalog.test.ts",
+        "added": 33,
+        "deleted": 0,
+        "sha256": "1d3d4f65b5e6935e1594e4b56542dd5348d6eddd9d757f979f9963cd7244f1dc"
+      },
+      {
+        "path": "apps/worker/src/realtime-sales-catalog.ts",
+        "added": 56,
+        "deleted": 15,
+        "sha256": "e6007125ef2ff9ed54e8afe8fda80042a7b214eb135da2fbd99749523b13ad8c"
+      },
+      {
+        "path": "apps/worker/src/realtime-sales-cycle.test.ts",
+        "added": 46,
+        "deleted": 0,
+        "sha256": "e9e994895eb0ed121bb8a07239108f1c476fa2945ef7f40d56c8cb8b2da06175"
+      },
+      {
+        "path": "apps/worker/src/realtime-sales-cycle.ts",
+        "added": 43,
+        "deleted": 13,
+        "sha256": "052fe9f86fbe9f2d7f7d1b978a36fb794cc11f39edc7071a025901996ffd5820"
+      },
+      {
+        "path": "apps/worker/src/single-agent-commerce-effects.test.ts",
+        "added": 3,
+        "deleted": 3,
+        "sha256": "51024f1f451edeba60b1dfe6a3cec61a192d772c5bd472de91abdfce423b2b6f"
+      },
+      {
+        "path": "apps/worker/src/single-agent-commerce-effects.ts",
+        "added": 1,
+        "deleted": 1,
+        "sha256": "26ebf105cbf3e7ab11c697f0f84e48982a3b587770a42ea2fb400c081512220f"
+      },
+      {
+        "path": "apps/worker/src/single-agent-commerce-ingress.ts",
+        "added": 1,
+        "deleted": 1,
+        "sha256": "61cb9e2e9eaf5c8455b2ecb502335e1c2f1daba2f2f63e4b93b4298712cd1d7a"
+      },
+      {
+        "path": "apps/worker/src/single-agent-commerce-public-history.test.ts",
+        "added": 8,
+        "deleted": 0,
+        "sha256": "28ca88759848b7f00154ccb80a4fb11927e6de734e71d48819f28d4005c1594c"
+      },
+      {
+        "path": "apps/worker/src/single-agent-commerce-public-history.ts",
+        "added": 1,
+        "deleted": 1,
+        "sha256": "e581e0925ad0d1b3773b8d80350c72e415e57bf1ec7270fdfd60faa7de7990d9"
+      },
+      {
+        "path": "apps/worker/src/single-agent-commerce-read-only-tools.ts",
+        "added": 4,
+        "deleted": 1,
+        "sha256": "f84e88401de9cdce257fae0d1ade9546a5884f1d5bda33a3a44784f2b2e9ae2a"
+      },
+      {
+        "path": "apps/worker/src/single-agent-commerce-session.test.ts",
+        "added": 7,
+        "deleted": 2,
+        "sha256": "7a923d7b9b61b83a2fa0ff300a265672c32c55a56d714b47b81663cf24765d04"
+      },
+      {
+        "path": "packages/chat-runtime/src/sales-cycle-runtime.test.ts",
+        "added": 42,
+        "deleted": 0,
+        "sha256": "9a1369fdaa8d81950b9db0c71e47d8f6cb7144f04ce160059d3552bfc97785a8"
+      },
+      {
+        "path": "packages/chat-runtime/src/sales-cycle-runtime.ts",
+        "added": 12,
+        "deleted": 0,
+        "sha256": "37feb406f6766d8d16ccd0316b37ed45d483e9662216242e874f23741b68e198"
+      },
+      {
+        "path": "packages/commerce-kernel/src/protected-sales-transition.test.ts",
+        "added": 19,
+        "deleted": 0,
+        "sha256": "7237c540de7b9856b62d8fcf8b50b239a5598c868971d00881f26379c08735a8"
+      },
+      {
+        "path": "packages/commerce-kernel/src/protected-sales-transition.ts",
+        "added": 30,
+        "deleted": 4,
+        "sha256": "952d462411488d3df2d240472f5a32fe10c806dbe0d8dee6d04fc0f9f0f34fe2"
+      },
+      {
+        "path": "packages/contracts/src/v3/sales-cycle.test.ts",
+        "added": 13,
+        "deleted": 0,
+        "sha256": "e5ce9e72a7a9e61f9219870fd3b49b7abf305619a6d3a0a2a05eef1f90ea082a"
+      },
+      {
+        "path": "packages/contracts/src/v3/sales-cycle.ts",
+        "added": 4,
+        "deleted": 3,
+        "sha256": "4c84fa53c53723e361e7bf919221b6177bba5372fe006711a7a1348ffde70a12"
+      },
+      {
+        "path": "packages/database/src/realtime-runtime.test.ts",
+        "added": 124,
+        "deleted": 0,
+        "sha256": "307e9f4a11e6cccb8c69346824a555d304cfed4bb17ded5b78978da43ebe15bf"
+      },
+      {
+        "path": "packages/database/src/realtime-runtime.ts",
+        "added": 14,
+        "deleted": 1,
+        "sha256": "03b84b3da44a3db8f62b68dc8c357dc97a4451fb9cbd9eac33f62292d3778795"
+      }
+    ],
+    "onlineSemanticRolesAdded": 0,
+    "onlineSemanticLayersAdded": 0
+  },
+  "reviewer": {
+    "agent": "/root/phase_c_independent_review",
+    "e46CodeDisposition": "APPROVE",
+    "e46IndependentTests": 181,
+    "finalCodeDisposition": "APPROVE",
+    "finalIndependentTests": 100,
+    "finalVerification": "PENDING_REVIEW_OF_RECORD"
+  },
+  "modelGenerationRequests": 0,
+  "modelDiagnostic": "NOT_RUN",
+  "qualification": "BLOCKED",
+  "c3Baseline": "NOT_RUN",
+  "productionEntrypointWiring": false,
+  "liveSends": 0,
+  "merge": false,
+  "deploy": false,
+  "limits": [
+    "Real PostgreSQL uses synthetic domain inputs and capture delivery, not model or live customer outcomes.",
+    "Thirty shared tests and two Node tests remain SKIP.",
+    "Historical model grades/exposure remain unchanged; fresh holdout and C3 parity still pending."
+  ]
+}

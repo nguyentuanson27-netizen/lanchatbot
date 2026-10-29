@@ -1,8 +1,12 @@
-## Next — selection/private-checkout fix plan approved,29/10/2026
+## Current — selection/private checkout implementation, 29/10/2026
 
-- [x] Lập [plan revision1](../docs/specs/c3-phase-c-selection-checkout-fix-plan-20261029.md), review độc lập→fix→review APPROVE exacta5e6270a. [Closures](../docs/specs/c3-phase-c-selection-checkout-plan-review-20261029.md): oldpayment unresolved chặnreadiness xuyên lượt; candidate/legacy/privacy caller modes rõ. Không sửa code/model.
-- [ ] F0/F1producer +candidate variant tuple/hints/stock; F2existingcode-only payment field nhận dạng đóng, typed domain capture/readiness/progress; preservebare-namePII/legacy/preorder/currentpolicy/pin/receipt/finalgate. Implementation vàverification NOT_RUN.
-- [ ] Implementation review→fix→APPROVE trước model; lateronebatch6cases,N1,max37; qualification/C3 vẫnBLOCKED/NOT_RUN. Không auto implementation/run trong tasklậpplan.
+- [x] [Approved plan revision1](../docs/specs/c3-phase-c-selection-checkout-fix-plan-20261029.md), implementation base ff078377. F0 audited producer NO_COLOR/stock grouping; actual BE0 can be PRE_ORDER, not proof to force unlabelled selection.
+- [x] F1 candidate exact tuple/quantity/source view across read/selection/error, default legacy resolver preserved; product-scope deduplicated without merging M/L cart lines or relaxing readiness; source sentinel omitted from display.
+- [x] F2 closed private payment intake and persisted unresolved-payment guards; shared domain/DB replay derives real required-field progress, bounded retry budget and preview readiness. No raw private input to model, no model fallback in candidate intake.
+- [x] RED→GREEN; same independent reviewer REQUEST_CHANGES→fix→APPROVE code e46be004, then existing affirmative-verb compatibility fix→APPROVE 5b35328b. [Implementation and limitations](../docs/specs/c3-phase-c-selection-checkout-implementation-20261029.md), [review](../docs/specs/c3-phase-c-selection-checkout-implementation-review-20261029.md), [commands/hashes](../docs/specs/c3-phase-c-selection-checkout-verification-20261029.json).
+- [x] Final worker/boundary/protected focused485PASS; Node756PASS/2SKIP; worker build/typecheck/lint exit0. Shared566PASS/30SKIP and typechecks; shared bytes unchanged at final source. Failed PG01–03 and full01 retained.
+- [x] Actual full PostgreSQL70/70 +7/7named invariants PASS on clean5b35328b, DB dropped,0provider generations. Both new selection/private-checkout cases PASS; code independently APPROVE, final verification-record audit pending.
+- [ ] New provider diagnostic/qualification NOT_RUN. Stop implementation here; quality/j1 actual-shop outcome remain unverified. Historical source36 grades and source6c diagnostic unchanged. Development mappings/near-duplicate review, fresh source-bound holdout and C3 parity still pending; Phase C BLOCKED / B_NOT_GO / A OWNER_BYPASS / C3 NOT_RUN. No merge/deploy/live send.
 
 ## Previous — Phase C development diagnostic,29/10/2026
 
