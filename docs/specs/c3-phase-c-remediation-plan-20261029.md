@@ -1,6 +1,6 @@
 # Phase C — kế hoạch sửa sau campaign 29/10/2026
 
-Trạng thái revision2: **PLANNED, đã sửa theo review, chờ independent re-review; chưa implementation/chạy model theo kế hoạch này**. Owner yêu cầu sửa kế hoạch → review độc lập → sửa đến approve. Không sửa kết quả campaign cũ, không gọi model trong bước lập kế hoạch. [Review và lịch sử xử lý](c3-phase-c-remediation-independent-review-20261029.md).
+Trạng thái revision2: **PLAN APPROVED độc lập tại `abe8c798512605fd8ad636f9e0acfa65fd7c7c20`; chưa implementation/chạy model theo kế hoạch này**. Owner yêu cầu sửa kế hoạch → review độc lập → sửa đến approve. Không sửa kết quả campaign cũ, không gọi model trong bước lập kế hoạch. [Review và lịch sử xử lý](c3-phase-c-remediation-independent-review-20261029.md). Approval chỉ áp dụng kế hoạch, không thay implementation/readiness/qualification; Phase C vẫn BLOCKED.
 
 Planning base: `f5622d485624dfc95e6e15190a5e31a082398807`; campaign được phân tích chạy tại `36e45015c381ebe91a2591a288b112e3dd8caa0e`. [Báo cáo](../../apps/worker/evals/single-agent-commerce-qualification/run-20261029/REPORT.md), [22 hội thoại /34 lượt](../../apps/worker/evals/single-agent-commerce-qualification/run-20261029/CONVERSATIONS.md), [kế hoạch qualification gốc](c3-phase-c-qualification-plan-20261028.md). Baseline C3 vẫn main `296cdcfbf5759f5bf9cbb24acf3dc63005589361`, không đổi theo implementation HEAD mới.
 

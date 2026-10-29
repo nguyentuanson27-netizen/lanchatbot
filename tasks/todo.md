@@ -1,5 +1,6 @@
 ## Next — Phase C remediation plan,29/10/2026
 
+- [x] Sửa kế hoạch→cùng independent reviewer→sửa thêm cap semantics→APPROVE PLAN revision2 tạiabe8c798. [Review/closures](../docs/specs/c3-phase-c-remediation-independent-review-20261029.md). Approval chỉ cho kế hoạch; S4 implementation review vẫn chưa thực hiện.
 - [x] Đối chiếu campaign03/raw findings với consumer/resolver, packet/capture/history và native wire; [kế hoạch sửa chi tiết, đã self-review](../docs/specs/c3-phase-c-remediation-plan-20261029.md).
 - [ ] S0 audit đủ22ca, phân loại từng handoff bằng nguồn/tool/gate thực; không đổi primary grades.
 - [ ] S1 policy current-pointer/pin contract +selection/color; S2 evaluator source completeness/code-owned registration/privacy-safe history; S3 bounded input/argument diagnostics và operational measurements.

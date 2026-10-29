@@ -1,8 +1,10 @@
 # Independent review — Phase C remediation plan
 
-## Revision2 — đang chờ review lại
+## Revision2 — APPROVE tại abe8c798
 
-Sửa thêm finding P2 của revision1: chỉ chặn request sẽ vượt cap theo đúng role/turn/case/batch; đủ3owner vẫn được1verifier, case dùng đủ budget hợp lệ vẫn sang case tiếp. Vượt-cap request bị chặn tại case với frozen silent terminal; whole-batch STOP chỉ khi hết batch budget hoặc điều kiện nghiêm trọng/accounting như đã định. Không thêm retry/transfer budget. Chờ cùng reviewer xác nhận, chưa implementation/provider run.
+**APPROVE PLAN** tại exact clean HEAD `abe8c798512605fd8ad636f9e0acfa65fd7c7c20`, cùng reviewer `/root/phase_c_independent_review`. Không còn finding cần sửa trong phạm vi kế hoạch; git diff --check đạt. Chỉ thay tài liệu, chưa implementation/provider run. Approval này không thay implementation review, readiness hay qualification; Phase C vẫn BLOCKED.
+
+Đã đóng finding P2 của revision1: chỉ chặn request sẽ vượt cap theo đúng role/turn/case/batch; đủ3owner vẫn được1verifier, case dùng đủ budget hợp lệ vẫn sang case tiếp. Vượt-cap request bị chặn tại case với frozen silent terminal; whole-batch STOP chỉ khi hết batch budget hoặc điều kiện nghiêm trọng/accounting như đã định. Không thêm retry/transfer budget. Ba findings gốc về policy, media và contamination/budget cũng đã được reviewer xác nhận đóng.
 
 ## Revision1 — REQUEST_CHANGES tại d183adaf
 
