@@ -2,6 +2,8 @@
 
 Source: `68d5c33b608aacc67fb454030673e507df072ab1`. Owner Gemini3.5FlashLite HIGH; verifier GPT6.1Sol HIGH. N1, không retry. Đây là development diagnostic; không qualification.
 
+Phần hiển thị bỏ khoảng trắng cuối dòng; exact text/hashes giữ nguyên trong ACCOUNTING.json và raw capture.
+
 ## c-20261028-s01
 Trạng thái: EXECUTED
 
@@ -59,7 +61,7 @@ Khách: Chị cần bộ đồ mặc đi ăn với gia đình, thích đơn gi�
 Kết quả: **SEND_ELIGIBLE**
 
 ```text
-Em gợi ý cho chị set quần be thanh lịch (SQ675 - 1.279.000đ). Thiết kế áo dáng suông tay lửng phối ren nhẹ nhàng kết hợp quần dài ống rộng, mặc đi ăn với gia đình vừa nhã nhặn, thoải mái lại lịch sự. Mẫu này hiện là hàng đặt trước chị nhé. 
+Em gợi ý cho chị set quần be thanh lịch (SQ675 - 1.279.000đ). Thiết kế áo dáng suông tay lửng phối ren nhẹ nhàng kết hợp quần dài ống rộng, mặc đi ăn với gia đình vừa nhã nhặn, thoải mái lại lịch sự. Mẫu này hiện là hàng đặt trước chị nhé.
 
 Chị xem mình ưng mẫu này không để em tư vấn size cụ thể cho mình nha!
 ```
@@ -73,7 +75,7 @@ Khách: Áo Thạch Thảo phối với quần nâu sẫm chị đang có đư�
 Kết quả: **SEND_ELIGIBLE**
 
 ```text
-Dạ áo Thạch Thảo làm từ tơ Hàn thêu cao cấp, mềm mại và bay bổng nên phối với quần nâu sẫm rất hợp chị nha. Sắc nâu trầm ấm kết hợp cùng chi tiết thêu tinh tế trên áo sẽ tạo nên tổng thể trang phục thanh lịch, sang trọng và rất nhã nhặn. 
+Dạ áo Thạch Thảo làm từ tơ Hàn thêu cao cấp, mềm mại và bay bổng nên phối với quần nâu sẫm rất hợp chị nha. Sắc nâu trầm ấm kết hợp cùng chi tiết thêu tinh tế trên áo sẽ tạo nên tổng thể trang phục thanh lịch, sang trọng và rất nhã nhặn.
 
 Mẫu này shop có bán lẻ áo riêng, nếu chị muốn lấy áo để phối với đồ sẵn có trong tủ thì cứ nhắn em hỗ trợ mình nhé ạ!
 ```
@@ -99,9 +101,9 @@ Khách: Váy Odette với Diệp An, em chọn giúp chị một mẫu mặc đi
 Kết quả: **SEND_ELIGIBLE**
 
 ```text
-Dạ chị chọn mẫu **Váy Diệp An** mặc đi lễ rất hợp chị nha. Mẫu này có thiết kế cổ tròn nhã nhặn, form suông nhẹ cùng kết cấu 2 lớp kín đáo, đứng form, mang lại sự trang trọng, lịch sự và thoải mái rất phù hợp với không gian đi lễ. 
+Dạ chị chọn mẫu **Váy Diệp An** mặc đi lễ rất hợp chị nha. Mẫu này có thiết kế cổ tròn nhã nhặn, form suông nhẹ cùng kết cấu 2 lớp kín đáo, đứng form, mang lại sự trang trọng, lịch sự và thoải mái rất phù hợp với không gian đi lễ.
 
-Váy Odette chất ren phối tơ cũng rất xinh và bay bổng, nhưng Diệp An sẽ ghi điểm tuyệt đối ở độ kín đáo và phom dáng gọn gàng, thanh lịch đó ạ. 
+Váy Odette chất ren phối tơ cũng rất xinh và bay bổng, nhưng Diệp An sẽ ghi điểm tuyệt đối ở độ kín đáo và phom dáng gọn gàng, thanh lịch đó ạ.
 
 Chị lấy mẫu Diệp An này hay cần em tư vấn thêm size phù hợp không ạ?
 ```
@@ -278,7 +280,7 @@ Khách: Chị có quần nâu ở nhà rồi, đang muốn mua áo của bộ v�
 Kết quả: **SEND_ELIGIBLE**
 
 ```text
-Áo thêu chất tơ Hàn mềm mại, form nhẹ và có độ bay tự nhiên, phối cùng quần nâu ở nhà của chị sẽ rất xinh ạ. 
+Áo thêu chất tơ Hàn mềm mại, form nhẹ và có độ bay tự nhiên, phối cùng quần nâu ở nhà của chị sẽ rất xinh ạ.
 
 Áo lẻ có giá 499.000đ, sẵn các size S, M, L, XL. Chị lấy size nào để em chuẩn bị cho mình ạ?
 ```
@@ -289,7 +291,7 @@ Khách: Nếu lấy cả bộ thì phần váy có dễ mặc lại không em?
 Kết quả: **SEND_ELIGIBLE**
 
 ```text
-Chân váy ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên nên rất dễ phối với các kiểu áo blouse hoặc áo trơn khác ạ. 
+Chân váy ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên nên rất dễ phối với các kiểu áo blouse hoặc áo trơn khác ạ.
 
 Nếu chị lấy cả bộ, giá set là 799.000đ, tiết kiệm hơn so với mua lẻ áo (499.000đ) và chân váy (449.000đ). Chị lấy cả bộ hay mua riêng áo lẻ ạ?
 ```
@@ -382,7 +384,7 @@ Khách: Chị lấy set váy Thạch Thảo size M nhé.
 Kết quả: **SEND_ELIGIBLE**
 
 ```text
-Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. 
+Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ.
 
 Tổng đơn hàng của chị là 829.000đ (gồm 799.000đ tiền sản phẩm và 30.000đ phí vận chuyển). Chị có muốn chốt đơn luôn không ạ?
 ```
@@ -404,4 +406,3 @@ Kết quả: **CODE_OWNED_SEND**
 ```text
 Chị cho em tên người nhận nhé.
 ```
-
