@@ -443,10 +443,16 @@ try{
    }),async()=>{const r=await policy();assert(r.bundle);return r.bundle;},()=>receiptAvailable,readReplySource,r=>deliveryObservations.push(r)),{workerId:'c3-b-capture'},undefined,historyStore);
   let dispatcher=makeDispatcher();
   const drain=async()=>{for(let i=0;i<20&&await attemptQueue.dispatch(()=>dispatcher.processOne());i++);};
+  // Synthetic customer turns must follow earlier accepted delivery on the same clock.
+  // accepted_at is DB-owned; mixing it with the client clock can invert the causal order.
+  // This changes fixture inputs only, never production history cutoffs or freshness gates.
+  const syntheticNow=async()=>{const r=await pool.query(`SELECT GREATEST(clock_timestamp(),
+    COALESCE(MAX(accepted_at)+interval '1 millisecond',clock_timestamp())) AS observed_at
+    FROM meta_outbox WHERE page_id=$1 AND conversation_id=$2`,[pageId,bound.conversationId]);return r.rows[0].observed_at;};
   async function turn(text,outputs,{verdict='PASS',inspect=()=>{},beforeCommit=async()=>{},afterVerify=async()=>{},messages=null,loseCommitReply=false,rollbackCommitReply=false,slot='DETERMINISTIC_TURN',testQuoteTask,testQualificationValidator}={}){
    if(attemptQueue.blocked())return attemptQueue.run(slot,()=>{throw Error('BLOCKED_WORK_MUST_NOT_RUN');});
    assert(!live||(!testQuoteTask&&!testQualificationValidator),'TEST_HOOK_FORBIDDEN_IN_PROVIDER_RUN');
-   const now=new Date(),id='stateful-'+randomUUID(),envelope={schemaVersion:1,customerSendEnabled:false,routing:{owner:'APP'},message:{schemaVersion:1,traceId:randomUUID(),eventKey:id,pageId,messageId:id,
+   const now=await syntheticNow(),id='stateful-'+randomUUID(),envelope={schemaVersion:1,customerSendEnabled:false,routing:{owner:'APP'},message:{schemaVersion:1,traceId:randomUUID(),eventKey:id,pageId,messageId:id,
     senderId:'synthetic-recipient-'+customerHash,conversationId:'synthetic-meta-conversation',occurredAt:now.toISOString(),isEcho:false,appId:null,text,attachments:[]}};
    const inboundMessages=(messages??[{text,attachments:[]}]).map((m,index)=>({...envelope.message,...m,messageId:id+':'+index,eventKey:id+':'+index}));
    for(const message of inboundMessages)await inbox.enqueue({pageId,metaAppId:'synthetic',eventKey:message.eventKey,providerMessageId:message.messageId,conversationHash:customerHash,occurredAt:now,receivedAt:now,signatureKeyVersion:'synthetic',envelope:{...envelope,message}});
@@ -477,7 +483,7 @@ try{
    const changed=await pool.query('UPDATE sales_cycle_states SET state_revision=$3,state_ciphertext=$4,state_nonce=$5,state_auth_tag=$6,state_encrypted_dek=$7,state_key_ref=$8 WHERE page_id=$1 AND conversation_id=$2',
     [pageId,bound.conversationId,next.revision,encrypted.ciphertext,encrypted.nonce,encrypted.authTag,encrypted.encryptedDek,encrypted.keyRef]);assert.equal(changed.rowCount,1);
   };
-  return {bound,turn,state,changeStoredCart,capture,capturePayloads,gateCalls,deliveryObservations,drain,
+  return {bound,turn,state,changeStoredCart,capture,capturePayloads,gateCalls,deliveryObservations,drain,syntheticNow,
    readPolicyStatuses:async()=>({transaction:(await policy()).status,active:(await read.policy()).status}),
    restartDelivery:()=>{dispatcher=makeDispatcher();},changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;},changeHandoffPolicy:()=>{policyChanged=true;},disableReceiptRead:()=>{receiptAvailable=false;},
    revokeMediaProof:()=>{assert(revalidatedMedia);product.product.images[0].revalidation={status:'INVALID'};},
@@ -680,13 +686,14 @@ try{
   assert.equal(r.result.enqueued,2,JSON.stringify(r.result));await j.drain();await j.drain();
   assert.deepEqual(j.capture,['Ảnh mặt sau đây chị nhé.','[CODE_IMAGE]']);
   assert.equal(new Set(j.gateCalls).size,1);assert(j.capturePayloads[1].attachment.payload.url.endsWith('c3-synthetic-product-back.jpg'));
+  const mediaCutoff=await j.syntheticNow();
   const delivered=await runtime.readAcceptedCommerceMedia({pageId,conversationId:j.bound.conversationId,customerHash:j.bound.customerHash,
-    recipientHash:hash('synthetic-recipient-'+j.bound.customerHash),before:new Date(Date.now()+1000)});
+    recipientHash:hash('synthetic-recipient-'+j.bound.customerHash),before:mediaCutoff});
   assert.equal(delivered.length,1);assert.equal(delivered[0].productId,'SM613');
   assert.equal(delivered[0].assetRef,'asset:'+hash(JSON.stringify(j.capturePayloads[1].attachment.payload.url)));
   assert(!JSON.stringify(delivered).includes('https:'));
   const other=await runtime.readAcceptedCommerceMedia({pageId,conversationId:j.bound.conversationId,customerHash:hash('other'),
-    recipientHash:hash('synthetic-recipient-'+j.bound.customerHash),before:new Date(Date.now()+1000)});
+    recipientHash:hash('synthetic-recipient-'+j.bound.customerHash),before:mediaCutoff});
   assert.equal(other.length,0);
   let seenHistory,followup;const reads=[],readMedia=runtime.readAcceptedCommerceMedia;
   runtime.readAcceptedCommerceMedia=async query=>{
@@ -700,10 +707,12 @@ try{
   finally{runtime.readAcceptedCommerceMedia=readMedia;}
   const clientBeforeDbClock=new Date().toISOString(),dbClock=(await pool.query('SELECT clock_timestamp() AS observed_at')).rows[0].observed_at;
   report.n4HistoryDiagnostic={reads,acceptedAt:delivered.map(m=>m.occurredAt),inboundOccurredAt:followup.inboundMessages[0].occurredAt,
+   syntheticClockPolicy:'DB_CLOCK_STRICTLY_AFTER_PRIOR_ACCEPTED_DELIVERY',
    // The synthetic enqueue above deliberately uses the same now for occurredAt/receivedAt.
    inputReceivedAt:followup.inboundMessages[0].occurredAt,clientBeforeDbClock,dbClock:dbClock.toISOString(),clientAfterDbClock:new Date().toISOString(),
    owners:followup.owners,terminal:followup.result.terminal,history:seenHistory??null};save();
   assert(JSON.stringify(seenHistory).includes('RECENT_SHOP_IMAGES_ACCEPTED'),'N4_HISTORY_MISSING; see n4HistoryDiagnostic');
+  assert(delivered.every(m=>Date.parse(m.occurredAt)<Date.parse(followup.inboundMessages[0].occurredAt)),'N4_SYNTHETIC_CAUSAL_ORDER');
  });
  await check('B composed N5 image-first text-last handoff links the attachment history and retains encrypted source',async()=>{
   const j=await statefulFixture(),r=await j.turn(null,[],{messages:[{text:null,attachments:[{type:'image',url:'https://content.pancake.vn/c3-private-receipt.jpg',providerId:'synthetic-receipt'}]},

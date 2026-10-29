@@ -4,7 +4,7 @@ import {resolve,relative,sep,isAbsolute} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {randomBytes} from 'node:crypto';
 import {assertJudgeSourceInventory} from './evaluator-source.mjs';
-import {approvedDevelopmentInventory} from './development-inventory.mjs';
+import {approvedDevelopmentInventory,sealDevelopmentInventory} from './development-inventory.mjs';
 import {digest,readiness,validateConfig,validateCorpus,qualificationIdentity,registerSlots,
  blindComparisonPack,absoluteReviewPack,evaluateQualification,MEASUREMENT_POLICY} from './qualification.mjs';
 import {currentCandidate,assertCurrentCandidate,assertApprovedDecisions,IMPLEMENTATION_BASE_SHA} from './source-identity.mjs';
@@ -78,11 +78,10 @@ try{
   check(corpus.scenarios.filter(s=>s.mode!=='SAFETY').every(s=>s.judgeContext&&s.initialContext?.worldHash===digest(world)&&
    ['initialStateHash','initialHistoryHash','freshnessPolicyHash'].every(k=>/^[a-f0-9]{64}$/.test(s.initialContext[k]))),'C_CONTEXT_BINDINGS_REQUIRED');
   const registration={version:1,runSourceSha:git('rev-parse','HEAD'),registeredAt:new Date().toISOString(),
-   ...(config.nativeCodecs?{developmentInventory:{inventoryHash:developmentArtifact.inventoryHash,reviewHash:digest(developmentArtifact.review),
-    artifactHash:digest(developmentArtifact),mappingArtifactHashes:(developmentArtifact.review.sourceMappings??[]).map(m=>m.artifactSha256)}}:{}),
    config,corpus,worldHash:digest(world),identity:qualificationIdentity(config),corpusHash:digest(corpus),slots:registerSlots(config,corpus),
    status:'SEALED_NOT_EXECUTED',sendEnabled:false,providerRequests:0};
-  const out=newOutput();write(resolve(out,'REGISTRATION.json'),registration);write(resolve(out,'PRIVATE_BLIND_SEED.json'),{seed});
+  const out=newOutput();if(config.nativeCodecs)registration.developmentInventory=sealDevelopmentInventory(developmentArtifact,corpus,out);
+  write(resolve(out,'REGISTRATION.json'),registration);write(resolve(out,'PRIVATE_BLIND_SEED.json'),{seed});
   console.log(JSON.stringify({status:registration.status,slots:registration.slots.length,providerRequests:0}));
  }else if(['assess','blind','absolute'].includes(command)){
   clean();const reg=json(need('--registration')),e=json(need('--evidence'));

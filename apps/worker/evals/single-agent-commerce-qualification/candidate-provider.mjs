@@ -1,11 +1,12 @@
 // Reuses the approved native B inference/serialization. No prompt changes, retry or new model role.
 import assert from 'node:assert/strict';
 import {readFileSync,appendFileSync} from 'node:fs';
-import {resolve} from 'node:path';
+import {resolve,dirname} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createCommerceReadSources} from '../../dist/single-agent-commerce-read-only-sources.js';
 import {publicPolicyLiteral} from '../../dist/single-agent-commerce-read-only-context.js';
 import {judgeSourceInventory,assertJudgeSourceInventory} from './evaluator-source.mjs';
+import {loadSealedDevelopment,approvedDevelopmentInventory} from './development-inventory.mjs';
 import {createGeminiCommerceInference,buildGeminiCommerceRequest} from '../single-agent-commerce-read-only/gemini-inference.mjs';
 import {createCommerceVerifier,buildVerifierRequest,validateProtocol} from '../single-agent-commerce-read-only/protocol.mjs';
 import {withNativePresentation} from '../single-agent-commerce-read-only/native-presentation.mjs';
@@ -20,7 +21,7 @@ import {VertexShadowModel} from '../../dist/vertex.js';
 import {embeddingHttpAccounting,EMBEDDING_POLICY} from './embedding-accounting.mjs';
 import {MEASUREMENT_POLICY} from './qualification.mjs';
 const read=p=>JSON.parse(readFileSync(p,'utf8').replace(/^\uFEFF/,''));
-export function assertSealedInputs(sealed,world){
+export function assertSealedInputs(sealed,world,{registrationRoot}={}){
  assert.equal(sealed.sendEnabled,false,'C_SEALED_SEND_POLICY');
  assert.deepEqual(sealed.identity,qualificationIdentity(sealed.config));validateCorpus(sealed.corpus);
  assert.equal(digest(sealed.corpus),sealed.corpusHash,'C_SEALED_CORPUS_CHANGED');
@@ -33,6 +34,8 @@ export function assertSealedInputs(sealed,world){
  if(sealed.corpus.requiredCapabilities?.includes('PRODUCT_SEARCH'))validateFrozenIndex(world.search,world.config.vertex.embeddingDimension);
  for(const s of sealed.corpus.scenarios.filter(s=>s.mode!=='SAFETY'))assertJudgeSourceInventory(s.judgeContext?.sourceInventory,digest(world),world,s);
  assert(sealed.config.nativeCodecs&&digest(sealed.config.nativeCodecs)===digest(NATIVE_CODECS),'C_NATIVE_CODEC_REGISTRATION');
+ const exposure=loadSealedDevelopment(sealed.developmentInventory,registrationRoot);
+ approvedDevelopmentInventory(exposure.inventory,sealed.corpus,{readMapping:exposure.readMapping});
  assert(sealed.corpus.scenarios.filter(s=>s.mode!=='SAFETY').every(s=>s.turns.every(t=>t.history.length===0)),
   'C_INITIAL_HISTORY_SEED_NOT_IMPLEMENTED');
 }
@@ -40,7 +43,7 @@ export function candidatePreflight(root,registrationPath,worldPath){
  const sealed=read(registrationPath),world=read(worldPath);
  assert.equal(execFileSync('git',['status','--porcelain'],{cwd:root,encoding:'utf8'}).trim(),'','C_DIRTY_SOURCE');
  assert.equal(execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),sealed.runSourceSha,'C_RUN_SOURCE_CHANGED');
- assertCurrentCandidate(root,sealed.config);assertApprovedDecisions(root,sealed.config);assertSealedInputs(sealed,world);
+ assertCurrentCandidate(root,sealed.config);assertApprovedDecisions(root,sealed.config);assertSealedInputs(sealed,world,{registrationRoot:dirname(resolve(registrationPath))});
  const m=validateProtocol(read(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/manifest.json')));
  const codex=inspectCodex();assert.equal(codex.version,'codex-cli '+m.models.verifier.generationConfig.cliVersion,'C_PINNED_VERIFIER_CLIENT');
  assert.deepEqual(m.models.conversation,sealed.config.candidate.model);assert.deepEqual(m.models.verifier,sealed.config.candidate.verifier.model);

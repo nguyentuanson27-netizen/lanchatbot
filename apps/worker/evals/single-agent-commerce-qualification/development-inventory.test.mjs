@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {runtimeFingerprints,approvedDevelopmentInventory,developmentInventory} from './development-inventory.mjs';
-import {mkdtempSync,writeFileSync,rmSync,readFileSync} from 'node:fs';
+import {runtimeFingerprints,approvedDevelopmentInventory,developmentInventory,sealDevelopmentInventory,loadSealedDevelopment} from './development-inventory.mjs';
+import {mkdtempSync,mkdirSync,writeFileSync,rmSync,readFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {resolve,dirname,basename} from 'node:path';
 import {createHash} from 'node:crypto';
@@ -16,6 +16,24 @@ test('SKU metadata changes do not hide exact reused dialogue; incomplete history
  assert.throws(()=>approvedDevelopmentInventory(v,corpus),/REUSE_WITHOUT_PRODUCT/);
  const changed=structuredClone(v);changed.review.historyCoverageComplete=false;
  assert.throws(()=>approvedDevelopmentInventory(changed,corpus),/REVIEW_REQUIRED/);
+});
+
+test('sealed mappings are copied and hash checked even when original mapping paths disappear',t=>{
+ const root=mkdtempSync(resolve(tmpdir(),'c3-exposure-seal-unit-'));
+ t.after(()=>{assert.equal(dirname(root),resolve(tmpdir()));assert(basename(root).startsWith('c3-exposure-seal-unit-'));rmSync(root,{recursive:true,force:true});});
+ const sources=['A','B','C'].map(population=>{const path=resolve(root,population+'.json');writeFileSync(path,JSON.stringify({requestBody:{unknown:true}}));return {path,population};});
+ const inventory=developmentInventory(sources),corpus={scenarios:[{turns:[{latest:'new input',history:[],initialProductCodes:[]}]}]};
+ const sourceHash=inventory.artifacts[0].sha256,mapping=resolve(root,'mapping.json');
+ writeFileSync(mapping,JSON.stringify({kind:'EXPOSURE_RUNTIME_MAPPING_V1',sourceHash,runtimes:[{latest:'old input',history:[],initialProductCodes:[]}]}));
+ inventory.review={status:'APPROVED',inventoryHash:inventory.inventoryHash,corpusHash:digest(corpus),reviewer:'UNIT_ONLY',nearDuplicateReviewHash:'a'.repeat(64),historyCoverageComplete:true,
+  sourceMappings:[{sourceHash,artifactPath:mapping,artifactSha256:createHash('sha256').update(readFileSync(mapping)).digest('hex')}]};
+ const out=resolve(root,'seal');mkdirSync(out);const record=sealDevelopmentInventory(inventory,corpus,out);rmSync(mapping);
+ const loaded=loadSealedDevelopment(record,out);assert(approvedDevelopmentInventory(loaded.inventory,corpus,{readMapping:loaded.readMapping}).length>0);
+ assert.throws(()=>approvedDevelopmentInventory(loaded.inventory,{scenarios:[]},{readMapping:loaded.readMapping}),/REVIEW_REQUIRED/);
+ const artifact=resolve(out,record.mappings[0].artifactFile),bytes=readFileSync(artifact);writeFileSync(artifact,'{}');
+ assert.throws(()=>loadSealedDevelopment(record,out),/MAPPING_HASH/);writeFileSync(artifact,bytes);rmSync(artifact);
+ assert.throws(()=>loadSealedDevelopment(record,out));
+ const removed=structuredClone(record);removed.mappings=[];assert.throws(()=>loadSealedDevelopment(removed,out),/SEAL_MAPPING/);
 });
 test('existing approved fingerprint lists are retained, not silently dropped by structured extraction',t=>{
  const root=mkdtempSync(resolve(tmpdir(),'c3-exposure-unit-'));

@@ -1,7 +1,7 @@
 // Local stubbed HTTP only; these responses are never campaign/model evidence.
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync,mkdtempSync,rmSync} from 'node:fs';
+import {readFileSync,writeFileSync,mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {resolve,dirname,basename} from 'node:path';
 import {fixtureProduct,fixturePolicyPointers,commerceScope} from '../../dist/single-agent-commerce.test-support.js';
@@ -12,6 +12,7 @@ import {digest,qualificationIdentity,registerSlots} from './qualification.mjs';
 import {config,corpus} from './fixtures.test-support.mjs';
 import {NATIVE_CODECS} from './native-wire.mjs';
 import {judgeSourceInventory} from './evaluator-source.mjs';
+import {developmentInventory,sealDevelopmentInventory} from './development-inventory.mjs';
 function setup(t,dependencies={}){
  const out=mkdtempSync(resolve(tmpdir(),'c3-c-provider-unit-'));
  t.after(()=>{assert.equal(dirname(out),resolve(tmpdir()));assert(basename(out).startsWith('c3-c-provider-unit-'));rmSync(out,{recursive:true,force:true});});
@@ -41,7 +42,7 @@ test('native read policy uses active sources without consuming the transaction p
 });
 const response=()=>new Response(JSON.stringify({modelVersion:'gemini-3.5-flash-lite',usageMetadata:{promptTokenCount:7,candidatesTokenCount:3},
  candidates:[{finishReason:'STOP',content:{role:'model',parts:[{text:'Áo 499k chị nhé.'}]}}]}));
-test('dispatch preflight rejects changed registration corpus, slots, world, codec or review before clients are constructed',()=>{
+test('dispatch preflight rejects changed registration corpus, slots, world, codec or exposure seal before clients are constructed',t=>{
  const c=config();c.nativeCodecs=NATIVE_CODECS;const pop=corpus(),world={kind:'FROZEN_PUBLIC_BUSINESS_WORLD',products:[{productId:'P1',canonicalCode:'P1',images:[]}],snapshots:{P1:null}};
  for(const s of pop.scenarios.filter(s=>s.mode!=='SAFETY')){
   s.judgeContext.sourceInventory=judgeSourceInventory(world,['P1']);s.judgeContext.sourceRequirements={kind:'INITIAL_PRODUCTS',productCodes:['P1']};
@@ -49,11 +50,22 @@ test('dispatch preflight rejects changed registration corpus, slots, world, code
  pop.review={status:'APPROVED',worldHash:digest(world),newProviderResultsObserved:0};
  const sealed={config:c,corpus:pop,corpusHash:digest(pop),identity:qualificationIdentity(c),worldHash:digest(world),
   slots:registerSlots(c,pop),sendEnabled:false,status:'SEALED_NOT_EXECUTED',registeredAt:'2026-10-28T00:00:00.000Z'};
- assertSealedInputs(sealed,world);
+ const root=mkdtempSync(resolve(tmpdir(),'c3-exposure-seal-unit-'));
+ t.after(()=>{assert.equal(dirname(root),resolve(tmpdir()));assert(basename(root).startsWith('c3-exposure-seal-unit-'));rmSync(root,{recursive:true,force:true});});
+ const sources=['A','B','C'].map(population=>{const path=resolve(root,population+'.json');writeFileSync(path,JSON.stringify(['f'.repeat(64)]));return {path,population};});
+ const inventory=developmentInventory(sources);
+ inventory.review={status:'APPROVED',inventoryHash:inventory.inventoryHash,corpusHash:digest(pop),reviewer:'UNIT_ONLY',nearDuplicateReviewHash:'a'.repeat(64),historyCoverageComplete:true};
+ sealed.developmentInventory=sealDevelopmentInventory(inventory,pop,root);
+ assertSealedInputs(sealed,world,{registrationRoot:root});
  for(const mutate of [s=>{s.corpus.scenarios[0].turns[0].latest='Another question';},s=>{s.slots.pop();},s=>{s.worldHash='f'.repeat(64);},
-  s=>{s.sendEnabled=true;},s=>{s.corpus.review.status='PENDING';},s=>{s.config.nativeCodecs.OWNER='UNREGISTERED';}]){
-  const bad=structuredClone(sealed);mutate(bad);assert.throws(()=>assertSealedInputs(bad,world));
+  s=>{s.sendEnabled=true;},s=>{s.corpus.review.status='PENDING';},s=>{s.config.nativeCodecs.OWNER='UNREGISTERED';},
+  s=>{delete s.developmentInventory;},s=>{s.developmentInventory.reviewHash='0'.repeat(64);}]){
+  const bad=structuredClone(sealed);mutate(bad);assert.throws(()=>assertSealedInputs(bad,world,{registrationRoot:root}));
  }
+ const artifact=resolve(root,'DEVELOPMENT_INVENTORY.json');writeFileSync(artifact,JSON.stringify({...inventory,review:{...inventory.review,status:'PENDING'}}));
+ assert.throws(()=>assertSealedInputs(sealed,world,{registrationRoot:root}),/EXPOSURE_SEAL_HASH/);
+ writeFileSync(artifact,JSON.stringify(inventory));rmSync(artifact);
+ assert.throws(()=>assertSealedInputs(sealed,world,{registrationRoot:root}));
 });
 test('actual native client ledger captures one HTTP body, CompactV2 and exposed usage',async t=>{
  let posts=0;const f=setup(t,{fetchImpl:async()=>{posts++;return response();}});

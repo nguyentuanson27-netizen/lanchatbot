@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
+import {resolve} from 'node:path';
 import {digest} from './qualification.mjs';
 import {assertNativeRuntime,NATIVE_CODECS} from './native-wire.mjs';
 export function runtimeFingerprints(t){
@@ -41,7 +42,7 @@ export function developmentInventory(sources){
  const body={kind:'DEVELOPMENT_EXPOSURE_INVENTORY_V1',artifacts,missing,fingerprints:[...exact].sort(),withoutProducts:[...withoutProducts].sort()};
  return {...body,inventoryHash:digest(body),review:{status:'PENDING'}};
 }
-export function approvedDevelopmentInventory(v,corpus){
+export function approvedDevelopmentInventory(v,corpus,{readMapping=m=>readFileSync(m.artifactPath)}={}){
  const {review,inventoryHash,...body}=v??{};
  assert(body.kind==='DEVELOPMENT_EXPOSURE_INVENTORY_V1'&&digest(body)===inventoryHash&&body.missing.length===0,'C_EXPOSURE_INVENTORY');
  assert(['A','B','C'].every(p=>body.artifacts.some(a=>a.population===p)),'C_EXPOSURE_HISTORY_COVERAGE');
@@ -56,7 +57,7 @@ export function approvedDevelopmentInventory(v,corpus){
  const exact=new Set(derived.fingerprints);
  for(const a of derived.artifacts.filter(a=>a.needsSourceMapping)){
   const mappings=(review.sourceMappings??[]).filter(m=>m.sourceHash===a.sha256);assert(mappings.length===1,'C_EXPOSURE_MAPPING_REQUIRED');
-  const m=mappings[0],bytes=readFileSync(m.artifactPath);assert(createHash('sha256').update(bytes).digest('hex')===m.artifactSha256,'C_EXPOSURE_MAPPING_HASH');
+  const m=mappings[0],bytes=readMapping(m);assert(createHash('sha256').update(bytes).digest('hex')===m.artifactSha256,'C_EXPOSURE_MAPPING_HASH');
   const data=JSON.parse(bytes.toString('utf8'));assert(data.kind==='EXPOSURE_RUNTIME_MAPPING_V1'&&data.sourceHash===a.sha256&&
    Array.isArray(data.runtimes)&&data.runtimes.length>0&&data.runtimes.length<=10000,'C_EXPOSURE_MAPPING_ROWS');
   for(const t of data.runtimes){
@@ -68,6 +69,32 @@ export function approvedDevelopmentInventory(v,corpus){
  }
  for(const s of corpus.scenarios)for(const t of s.turns)assert(!known.has(runtimeFingerprints(t).withoutProducts),'C_DEVELOPMENT_REUSE_WITHOUT_PRODUCT_CODES');
  return [...exact].sort();
+}
+export function sealDevelopmentInventory(v,corpus,out){
+ approvedDevelopmentInventory(v,corpus);
+ const mappings=(v.review.sourceMappings??[]).map(m=>{
+  const bytes=readFileSync(m.artifactPath);assert(createHash('sha256').update(bytes).digest('hex')===m.artifactSha256,'C_EXPOSURE_MAPPING_HASH');
+  const artifactFile='DEVELOPMENT_MAPPING_'+m.artifactSha256+'.json';writeFileSync(resolve(out,artifactFile),bytes,{flag:'wx'});
+  return {sourceHash:m.sourceHash,artifactSha256:m.artifactSha256,artifactFile};
+ });
+ writeFileSync(resolve(out,'DEVELOPMENT_INVENTORY.json'),JSON.stringify(v,null,2)+'\n',{flag:'wx'});
+ return {artifactFile:'DEVELOPMENT_INVENTORY.json',inventoryHash:v.inventoryHash,reviewHash:digest(v.review),artifactHash:digest(v),mappings};
+}
+export function loadSealedDevelopment(record,root){
+ assert(record?.artifactFile==='DEVELOPMENT_INVENTORY.json'&&typeof root==='string','C_EXPOSURE_SEAL_REQUIRED');
+ const inventory=JSON.parse(readFileSync(resolve(root,record.artifactFile),'utf8'));
+ assert(digest(inventory)===record.artifactHash&&inventory.inventoryHash===record.inventoryHash&&digest(inventory.review)===record.reviewHash,
+  'C_EXPOSURE_SEAL_HASH');
+ const mappings=inventory.review.sourceMappings??[];
+ assert(Array.isArray(record.mappings)&&record.mappings.length===mappings.length,'C_EXPOSURE_SEAL_MAPPING');
+ const readMapping=m=>{
+  const refs=record.mappings.filter(r=>r.sourceHash===m.sourceHash&&r.artifactSha256===m.artifactSha256);
+  assert(refs.length===1&&refs[0].artifactFile==='DEVELOPMENT_MAPPING_'+m.artifactSha256+'.json','C_EXPOSURE_SEAL_MAPPING');
+  const bytes=readFileSync(resolve(root,refs[0].artifactFile));
+  assert(createHash('sha256').update(bytes).digest('hex')===m.artifactSha256,'C_EXPOSURE_SEAL_MAPPING_HASH');return bytes;
+ };
+ for(const m of mappings)readMapping(m);
+ return {inventory,readMapping};
 }
 if(process.argv[1]?.endsWith('development-inventory.mjs')){
  const [sources,out]=process.argv.slice(2);assert(out,'C_EXPOSURE_ARGS');
