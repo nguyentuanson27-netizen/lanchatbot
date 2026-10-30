@@ -207,12 +207,12 @@ try{
  });
  const sourceAt=new Date(Date.now()-60000).toISOString(),sourceExpiresAt=new Date(Date.parse(sourceAt)+172800000).toISOString();
  const selected=query=>{const line=fixtureCartLine();line.priceAuthority.shopId=scope.shopId;line.priceAuthority.priceFactRef='synthetic-pos-v1';line.priceAuthority.metadata.sourceVersion='synthetic-pos-v1';line.priceAuthority.metadata.observedAt=sourceAt;line.priceAuthority.metadata.expiresAt=sourceExpiresAt;
-  line.lineId=query.lineId??line.lineId;line.quantity=query.quantity;line.lineTotalVnd=line.posUnitPriceVnd*line.quantity;
+  line.lineId=query.lineId??line.lineId;line.components=line.components.map(c=>({...c,size:query.size??c.size,color:query.color??c.color,componentSku:'SM613-'+(query.color??c.color)+'-'+(query.size??c.size)}));line.quantity=query.quantity;line.lineTotalVnd=line.posUnitPriceVnd*line.quantity;
   return {status:'READY',line,shopId:scope.shopId,versions:{price:'synthetic-pos-v1',inventory:'synthetic-stock-v1',size:'synthetic-size-v1',eta:query.deliveryAddress?'synthetic-eta-v1':null},
    eta:query.deliveryAddress?{minDays:3,maxDays:6}:null,etaExpiresAt:query.deliveryAddress?new Date(Date.now()+1200000).toISOString():null,
-   sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:10,sourceObservedAt:sourceAt,sourceExpiresAt};};
+   sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:query.size==='L'?8:14,stockCounter:{source:'PANCAKE_DIRECT',unit:'ITEM',identity:aliasStockCounter?'shared-counter':JSON.stringify(['SM613',query.color??'navy',query.size??'M'])},sourceObservedAt:sourceAt,sourceExpiresAt};};
  const identities={cartId:randomUUID(),salesEpisodeId:randomUUID(),customerProfileId:randomUUID()};
- let lastResult,failAfterCommit=false,activePaymentMessageCount=0;
+ let lastResult,failAfterCommit=false,activePaymentMessageCount=0,tamperVariant=false,aliasStockCounter=false;
  async function persistOutput(output,before,current,effects){
   if(effects.paymentMessageIntent)activePaymentMessageCount=output.messages.length;
   const transfer=output.transferToHuman;
@@ -242,6 +242,7 @@ try{
   if(!output.plan){const diagnostic=applySalesCycleCommand({state:before,expectedRevision:before.revision,command,now:new Date(),trustedPorts:commandInput.trustedPorts});
    report.domainDiagnostic={planner:output.reasonCode,directStatus:diagnostic.status,directReason:diagnostic.reasonCode};save();
    return {status:'REJECTED',state:before,reasonCode:output.reasonCode??'PLAN_UNAVAILABLE'};}
+  if(tamperVariant)output.plan.state.cart.value.lines.at(-1).components[0].size='XL';
   await persistOutput(output,before,current,output.transferToHuman?{
    pancakeTagCommand:buildPurchaseConfirmedTagCommand({pageId,conversationId:key,confirmation:output.plan.state.confirmation}),transferToHuman:true,
    confirmation:output.plan.state.confirmation,handoffDecision:null,paymentMessageIntent:paymentMethod==='BANK_TRANSFER'?{idempotencyKey:'synthetic-payment-intent'}:null}:noEffects);
@@ -264,6 +265,29 @@ try{
   const fresh=await effects();assert.equal((await fresh.invoke(call)).status,'OK');assert.equal(fresh.snapshot().effectReceipts[0].effect,'CART_OPENED');
   assert.equal((await repository.read(key)).revision,revision);
   report.cartReceipt={operationId:t.snapshot().effectReceipts[0].operationId,stateRevision:revision};
+ });
+ await check('B variant M14 L8 commits distinct lines and receipt-backed removal restores the original cart',async()=>{
+  await message('Chị lấy thêm một áo size L');let t=await effects();
+  const added=await t.invoke({name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'L',color:'navy',quantity:1}});
+  assert.equal(added.status,'OK',JSON.stringify(added));
+  let state=await repository.read(key);assert.equal(state.cart.value.lines.length,2);
+  assert.deepEqual(state.cart.value.lines.map(l=>l.components[0].size).sort(),['L','M']);
+  const l=state.cart.value.lines.find(l=>l.components[0].size==='L');
+  await message('Bỏ áo L, giữ áo M');t=await effects();
+  assert.equal((await t.invoke({name:'change_cart_item',args:{subjectRef:l.lineId,action:'REMOVE_LINE'}})).status,'OK');
+  state=await repository.read(key);assert.equal(state.cart.value.lines.length,1);assert.equal(state.cart.value.lines[0].components[0].size,'M');
+ });
+ await check('B variant tamper after readiness is rejected atomically by actual PostgreSQL guard',async()=>{
+  await message('Chị lấy thêm một áo size L');const before=await repository.read(key),t=await effects();tamperVariant=true;
+  try{assert.notEqual((await t.invoke({name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'L',color:'navy',quantity:1}})).status,'OK');}
+  finally{tamperVariant=false;}
+  assert.deepEqual(await repository.read(key),before);
+ });
+ await check('B variant shared raw counter cannot authorize distinct component sizes',async()=>{
+  await message('Chị lấy thêm một áo size L');const before=await repository.read(key),t=await effects();aliasStockCounter=true;
+  try{assert.notEqual((await t.invoke({name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'L',color:'navy',quantity:1}})).status,'OK');}
+  finally{aliasStockCounter=false;}
+  assert.deepEqual(await repository.read(key),before);
  });
  await check('B3 native quantity change persists, unknown commit reconciles without replay',async()=>{
   await message('Chị lấy 2 bộ SM613 nhé');const t=await effects(),line=(await repository.read(key)).cart.value.lines[0];failAfterCommit=true;

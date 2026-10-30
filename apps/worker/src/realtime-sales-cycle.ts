@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { cartSelectionsHaveIndependentStockV2 } from "./realtime-sales-catalog.js";
 import {paymentChoice} from "./checkout-payment-choice.js";
 import {
   buildProtectedCartPolicyClaimsV1,
@@ -11,6 +12,7 @@ import {
 import {
   CheckoutRevalidationV1Schema,
   canonicalJsonV1,
+  canonicalCartVariantScopeV2,
   canonicalCartStateHashPreimageV1,
   canonicalCartStateV1,
   canonicalBuyingIntentAuthorizesCartMutationV1,
@@ -1113,9 +1115,9 @@ export async function evaluateRealtimeSalesCycle(
     payloadHash: string | null = null,
     mutationQuantity: number | null = null,
   ): DeterministicEffectReadinessV1 => {
-    const claims = buildProtectedClaimsFromCartSelectionsV1(selections.map((selection) => ({
+    const claims = buildProtectedClaimsFromCartSelectionsV1((cartSelectionsHaveIndependentStockV2(selections) ? selections : []).map((selection) => ({
       productId: selection.line.parentProductId,
-      variantId: selection.line.offerId,
+      variantId: input.commandIdentity ? canonicalCartVariantScopeV2(selection.line, text => createHash("sha256").update(text, "utf8").digest("hex")) : selection.line.offerId,
       priceVnd: selection.line.posUnitPriceVnd!,
       priceVersion: selection.versions.price,
       inventoryVersion: selection.versions.inventory,
@@ -1319,6 +1321,7 @@ export async function evaluateRealtimeSalesCycle(
       return failedOutput("PROTECTED_OUTBOUND_CART_SNAPSHOT_CHANGED");
     }
     const checkedAt = effectNow();
+    if (!cartSelectionsHaveIndependentStockV2(options.selections)) return failedOutput("CART_INVENTORY_SOURCE_UNRESOLVED");
     const cartClaimExpiry = new Date(Math.min(
       Date.parse(state.cart.expiresAt),
       bundle.policy.effectiveUntil === null
@@ -1334,7 +1337,7 @@ export async function evaluateRealtimeSalesCycle(
     const allClaims = [
       ...buildProtectedClaimsFromCartSelectionsV1(options.selections.map((selection) => ({
         productId: selection.line.parentProductId,
-        variantId: selection.line.offerId,
+        variantId: input.commandIdentity ? canonicalCartVariantScopeV2(selection.line, text => createHash("sha256").update(text, "utf8").digest("hex")) : selection.line.offerId,
         priceVnd: selection.line.posUnitPriceVnd!,
         priceVersion: selection.versions.price,
         inventoryVersion: selection.versions.inventory,

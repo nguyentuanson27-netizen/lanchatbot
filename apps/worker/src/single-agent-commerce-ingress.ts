@@ -1,3 +1,5 @@
+import { canonicalCartVariantScopeV2 } from "@lana/contracts";
+import { cartSelectionsHaveIndependentStockV2 } from "./realtime-sales-catalog.js";
 import { createHash, randomUUID } from "node:crypto";
 import { CustomerProfileV1Schema, InboundMessageV1Schema, canonicalCartStateV1, canonicalCartStateHashPreimageV1, CommercePublicCartSummaryV1Schema, type ProtectedClaimV1 } from "@lana/contracts";
 import {projectCommerceHistoryMetadata} from "./single-agent-commerce-public-history.js";
@@ -304,7 +306,8 @@ export async function runPersistedCommerceIngress(input: {
       size: l.components[0]?.size ?? null, color: l.components[0]?.color ?? null, quantity: l.quantity, lineId: l.lineId }, now)));
     const ready = selections.flatMap(s => s.status === "READY" ? [s] : []);
     if (!selectionsMatchCartLines(cart.lines, ready)) return { ...result, ...await closeWithoutSend("EGRESS_CART_SOURCE_CHANGED") };
-    const cartClaims = buildProtectedClaimsFromCartSelectionsV1(ready.map(s => ({ productId: s.line.parentProductId, variantId: s.line.offerId, priceVnd: s.line.posUnitPriceVnd!,
+    if (!cartSelectionsHaveIndependentStockV2(ready)) return { ...result, ...await closeWithoutSend("CART_INVENTORY_SOURCE_UNRESOLVED") };
+    const cartClaims = buildProtectedClaimsFromCartSelectionsV1(ready.map(s => ({ productId: s.line.parentProductId, variantId: canonicalCartVariantScopeV2(s.line, text => createHash("sha256").update(text, "utf8").digest("hex")), priceVnd: s.line.posUnitPriceVnd!,
       priceVersion: s.versions.price, inventoryVersion: s.versions.inventory, etaVersion: s.versions.eta, eta: s.eta, etaExpiresAt: s.etaExpiresAt,
       sourceAuthority: s.sourceAuthority, stockStatus: s.stockStatus, stockAvailableQuantity: s.stockAvailableQuantity, observedAt: s.sourceObservedAt, expiresAt: s.sourceExpiresAt })));
     parent = evaluateDeterministicEffectReadinessV1({ ...common, effect: "CART_READY", claims: cartClaims });

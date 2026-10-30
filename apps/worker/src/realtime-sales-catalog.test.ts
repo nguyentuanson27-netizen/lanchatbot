@@ -3,6 +3,7 @@ import {
   cartSelectionFromSnapshot,
   verifiedVariantFromSnapshot,
   candidateCartOptions,
+  cartSelectionsHaveIndependentStockV2,
 } from "./realtime-sales-catalog.js";
 
 const observedAt = "2026-07-23T02:00:00.000Z";
@@ -108,6 +109,26 @@ function snapshot(stockQuantity = 3) {
 }
 
 describe("realtime sales catalog", () => {
+  it("binds parent stock units, rejects malformed source identity and keeps stock out of logical variant identity", () => {
+    const s=snapshot(14),offer=s.offers.SET,row=offer.rows[0]!;
+    Object.assign(offer,{inventory_source:"PANCAKE_BOM"});
+    Object.assign(row,{inventory_source:"PANCAKE_BOM",parent_variation_id:"pool-M"});
+    const q={shopAlias:"LANA",productId:"CB182",offerType:"SET",size:"M",color:"BE",quantity:1,lineId:"50000000-0000-4000-8000-000000000001",selectionMode:"CANDIDATE_TUPLES" as const};
+    const a=cartSelectionFromSnapshot(s,q,now);
+    expect(a).toMatchObject({status:"READY",stockCounter:{unit:"PARENT_OFFER",identity:"pool-M"}});
+    Object.assign(row,{parent_variation_id:"pool-new"});
+    const changed=cartSelectionFromSnapshot(s,q,now);
+    if(a.status!=="READY"||changed.status!=="READY")throw Error("READY_REQUIRED");
+    expect(changed.versions.inventory).not.toBe(a.versions.inventory);
+    Object.assign(row,{parent_variation_id:"pool-M|pool-other"});
+    expect(cartSelectionFromSnapshot(s,q,now)).toMatchObject({status:"INVALID",reasonCode:"CART_INVENTORY_SOURCE_UNRESOLVED"});
+    Object.assign(row,{parent_variation_id:"pool-M",inventory_source:"PANCAKE_DIRECT"});
+    expect(cartSelectionFromSnapshot(s,q,now).status).toBe("INVALID");
+    const b=structuredClone(a);b.line.parentProductId="OTHER";b.line.components=b.line.components.map(c=>({...c,componentProductId:"OTHER_"+c.componentProductId,componentSku:"OTHER_"+c.componentSku}));
+    expect(cartSelectionsHaveIndependentStockV2([a,b])).toBe(false);
+    expect(cartSelectionsHaveIndependentStockV2([a,{...b,stockCounter:{source:"PANCAKE_BOM",unit:"PARENT_OFFER",identity:"other-pool"}}])).toBe(true);
+    expect(cartSelectionsHaveIndependentStockV2([a,{...b,stockCounter:null}])).toBe(false);
+  });
 
   it("maps southern destination components, not street names, to current shared transit", () => {
     const regional = { ...snapshot(), shipping_eta: { "MIEN-NAM": { transit_min_days: 3, transit_max_days: 6 } } };

@@ -952,6 +952,7 @@ describe("realtime Phase 3 sales cycle", () => {
           sourceAuthority: "POS_SNAPSHOT",
           stockStatus: "IN_STOCK",
           stockAvailableQuantity: 3,
+          stockCounter: { source: "PANCAKE_BOM", unit: "PARENT_OFFER", identity: query.productId },
           sourceObservedAt: "2026-07-23T02:00:00.000Z",
           sourceExpiresAt: "2026-07-25T02:00:00.000Z",
         };

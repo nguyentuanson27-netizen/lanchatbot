@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { canonicalCartVariantScopeV2, cartComponentsMayShareStockV2 } from "@lana/contracts";
 import { southernDestination } from "./southern-delivery-region.js";
 import {selectionEvidenceFromOptions,selectionSourceHash,expandSelectionOptions,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
 import {
@@ -28,6 +29,7 @@ interface RawBomComponent {
 }
 
 interface RawOfferRow {
+  readonly inventory_source?: unknown;
   readonly price_sku?: unknown;
   readonly component_1_sku?: unknown;
   readonly component_2_sku?: unknown;
@@ -72,6 +74,8 @@ export type CartSelectionResult =
       readonly sourceAuthority: "POS_SNAPSHOT";
       readonly stockStatus: "IN_STOCK" | "PRE_ORDER";
       readonly stockAvailableQuantity: number;
+      /** Internal source counter identity, never an inferred child-stock capacity. */
+      readonly stockCounter?: { readonly source: string; readonly unit: "ITEM" | "PARENT_OFFER" | "DERIVED_MIN"; readonly identity: string } | null;
       readonly sourceObservedAt: string;
       readonly sourceExpiresAt: string;
     }
@@ -534,6 +538,9 @@ export function cartSelectionFromSnapshot(
   const parentProductId = normalizeCatalogToken(snapshot.product_id);
   const offerId = normalizeCatalogToken(offerName);
   const priceVersion = version("price", { parentProductId, offerId, unitPrice });
+  const stockCounter = stockCounterFromRowV2(row, offer as unknown as Record<string, unknown>);
+  if (candidate && (text(row.inventory_source) || text((offer as unknown as Record<string, unknown>).inventory_source)) && !stockCounter)
+    return rejected("INVALID", "CART_INVENTORY_SOURCE_UNRESOLVED", matching);
   const inventoryVersion = version("inventory", {
     parentProductId,
     offerId,
@@ -541,6 +548,7 @@ export function cartSelectionFromSnapshot(
     size: text(row.size),
     stockQuantity,
     components,
+    ...(candidate ? {stockCounter} : {}),
   });
   const sizeVersion = version("size", {
     parentProductId,
@@ -591,7 +599,42 @@ export function cartSelectionFromSnapshot(
     sourceAuthority: "POS_SNAPSHOT",
     stockStatus: stockQuantity < query.quantity ? "PRE_ORDER" : "IN_STOCK",
     stockAvailableQuantity: stockQuantity,
+    stockCounter,
     sourceObservedAt: snapshot.synced_at,
     sourceExpiresAt: expiresAt.toISOString(),
   };
+}
+
+function stockCounterFromRowV2(row: RawOfferRow, offer: Record<string, unknown>):
+  NonNullable<Extract<CartSelectionResult, { status: "READY" }>["stockCounter"]> | null {
+  const source = text(row.inventory_source) || text(offer.inventory_source);
+  if (text(row.inventory_source) && text(offer.inventory_source) && row.inventory_source !== offer.inventory_source) return null;
+  const size=text(row.size), color=text(row.color);
+  if (!size || !color) return null;
+  if (source === "PANCAKE_DIRECT") {
+    const sku=text(row.component_1_sku);
+    if (!sku || text(row.component_2_sku)) return null;
+    return {source,unit:"ITEM",identity:JSON.stringify([normalizeCatalogToken(sku),normalizeCatalogToken(size),normalizeCatalogToken(color)])};
+  }
+  if (source === "PANCAKE_BOM") {
+    const id=text(row.parent_variation_id);
+    if (!id || id.includes("|")) return null;
+    return {source,unit:"PARENT_OFFER",identity:id};
+  }
+  if (source === "FALLBACK_SKU_RULE") return {source,unit:"DERIVED_MIN",identity:JSON.stringify([
+    text(row.component_1_sku),text(row.component_2_sku),size,color])};
+  return null;
+}
+
+/** Source independence is checked here; DB replay derives logical keys/overlap from full cart lines. */
+export function cartSelectionsHaveIndependentStockV2(selections: readonly Extract<CartSelectionResult, {status:"READY"}>[]): boolean {
+  const key=(s:Extract<CartSelectionResult,{status:"READY"}>)=>canonicalCartVariantScopeV2(s.line,t=>createHash("sha256").update(t,"utf8").digest("hex"));
+  for(let i=0;i<selections.length;i++)for(let j=i+1;j<selections.length;j++){
+    const a=selections[i]!,b=selections[j]!;
+    if(key(a)===key(b))continue;
+    if(cartComponentsMayShareStockV2(a.line,b.line))return false;
+    if(!a.stockCounter||!b.stockCounter||a.stockCounter.unit==="DERIVED_MIN"||b.stockCounter.unit==="DERIVED_MIN")return false;
+    if(a.stockCounter.source===b.stockCounter.source&&a.stockCounter.unit===b.stockCounter.unit&&a.stockCounter.identity===b.stockCounter.identity)return false;
+  }
+  return true;
 }

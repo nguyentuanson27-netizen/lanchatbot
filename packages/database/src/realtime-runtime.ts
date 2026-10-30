@@ -600,12 +600,13 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     if (cart !== undefined && (
       readiness.effect !== "PROTECTED_OUTBOUND" || readiness.cartId !== null
     )) {
-      const lines = (cart.lines ?? []).map((line) => ({
+      const lines = CartV1Schema.parse(cart).lines.map((line) => ({
         parentProductId: line.parentProductId,
         offerId: line.offerId,
         quantity: line.quantity,
         posUnitPriceVnd: line.posUnitPriceVnd,
         priceFactRef: line.priceAuthority?.priceFactRef ?? null,
+        components: line.components,
       }));
       if (lines.some((line) =>
         typeof line.parentProductId !== "string" ||
@@ -614,6 +615,7 @@ function validateSalesEffectReadiness<TState, TSalesState>(
         (typeof line.posUnitPriceVnd !== "number" && line.posUnitPriceVnd !== null)
       )) throw new Error("EFFECT_READINESS_CART_LINE_INVALID");
       const cartClaimSemantics = validateCartEffectClaimSemanticsV1({
+        variantHash: sha256TextV1,
         effect: readiness.effect,
         lines: lines as readonly {
           parentProductId: string;
@@ -621,6 +623,7 @@ function validateSalesEffectReadiness<TState, TSalesState>(
           quantity: number;
           posUnitPriceVnd: number | null;
           priceFactRef: string | null;
+          components: import("@lana/contracts").CartLineV1["components"];
         }[],
         claims,
         cartId: readiness.cartId,
@@ -1791,6 +1794,7 @@ function validateMetaEffectReadiness<TState, TSalesState>(
     const cartEnvelope = state?.cart as { value?: unknown } | null | undefined;
     const cart = CartV1Schema.parse(cartEnvelope?.value);
     const cartSemantics = validateCartEffectClaimSemanticsV1({
+      variantHash: sha256TextV1,
       effect: "PROTECTED_OUTBOUND",
       lines: cart.lines.map((line) => ({
         parentProductId: line.parentProductId,
@@ -1798,6 +1802,7 @@ function validateMetaEffectReadiness<TState, TSalesState>(
         quantity: line.quantity,
         posUnitPriceVnd: line.posUnitPriceVnd,
         priceFactRef: line.priceAuthority?.priceFactRef ?? null,
+        components: line.components,
       })),
       claims,
       cartId: readiness.cartId,
