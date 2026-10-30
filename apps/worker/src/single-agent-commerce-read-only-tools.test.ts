@@ -29,6 +29,16 @@ const sellingFixture = (prices: Record<string, number>) => {
   return { f, readProduct, tools };
 };
 describe("read-only domain tools", () => {
+  it.each(["details","full","mismatched-source"])("preserves admitted evidence when later preparation has %s failure",async mode=>{
+    const f=fixtureProduct(),other=fixtureProduct("OTHER");let failed=false;
+    const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[f.product],catalog:{
+      readProduct:async()=>{if(failed){if(mode==="mismatched-source")return other;throw Error("catalog unavailable");}return f;},
+      searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+    expect((await tools.invoke({name:"read_product",args:{subjectRef:f.product.productId,...(mode==="full"?{offerType:"DIRECT"}:{detailsOnly:true})}})).status).toBe("OK");
+    const before=tools.snapshot();failed=true;
+    expect(await tools.invoke({name:"read_product",args:{subjectRef:f.product.productId,detailsOnly:true}})).toEqual({status:"UNAVAILABLE",reason:"SOURCE_ERROR"});
+    expect(tools.snapshot()).toEqual(before);await expect(tools.readback()).rejects.toThrow();
+  });
   it("cannot overwrite a full read with older deferred search metadata",async()=>{
     const old=fixtureProduct(),fresh=structuredClone(old);fresh.snapshot.release_id="new-pos-release";
     fresh.snapshot.offers.NEW=structuredClone(fresh.snapshot.offers.DIRECT!);

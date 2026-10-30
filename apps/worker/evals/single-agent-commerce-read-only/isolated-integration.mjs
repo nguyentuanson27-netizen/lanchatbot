@@ -439,9 +439,11 @@ try{
   if(candidateTuples){assert(!live);const row=product.snapshot.offers.DIRECT.rows[0];
    product.snapshot.fulfillment_policy={tinh_trang:'READY_STOCK',can_order_when_zero:preorderChoices,prep_min_days:1,prep_max_days:2,
     zero_stock_policy:'',zero_stock_prep_min_days:null,zero_stock_prep_max_days:null,eta_valid_until:'',eta_updated_at:''};
+   product.snapshot.offers.DIRECT.inventory_source='PANCAKE_DIRECT';
    product.snapshot.offers.DIRECT.rows=['M','L'].flatMap(size=>[
     {...structuredClone(row),size,color:'__NO_COLOR__',parent_variation_id:`SM613-UNLABELLED-${size}`,stock_quantity:9,components:[{product_sku:'SM613',size,color:'__NO_COLOR__',quantity:1}]},
-    {...structuredClone(row),size,color:'BE',parent_variation_id:`SM613-BE-${size}`,stock_quantity:0,components:[{product_sku:'SM613',size,color:'BE',quantity:1}]}]);}
+    {...structuredClone(row),size,color:'BE',parent_variation_id:`SM613-BE-${size}`,stock_quantity:0,components:[{product_sku:'SM613',size,color:'BE',quantity:1}]}]);
+   for(const r of product.snapshot.offers.DIRECT.rows)Object.assign(r,{inventory_source:'PANCAKE_DIRECT',component_1_sku:'SM613',component_2_sku:''});}
   const selected=q=>{if(missingEta&&q.deliveryAddress)return {status:'ETA_UNAVAILABLE',reasonCode:'CONTROLLED_MISSING_REGION',availableSizes:[],availableColors:[]};
    if(candidateTuples){const raw=structuredClone(product.snapshot);if(sourceVariantChanged)raw.offers.DIRECT.rows[0].components[0].variation_sku='CHANGED-SKU';
     return cartSelectionFromSnapshot(raw,q,new Date());}
@@ -451,7 +453,7 @@ try{
    if(sourceVariantChanged)s.components[0].componentSku='CHANGED-SOURCE-SKU';
    return {status:'READY',line:s,shopId:'LANA',versions:{price:'synthetic-pos-v1',inventory:'synthetic-stock-v1',size:'synthetic-size-v1',eta:q.deliveryAddress?'synthetic-eta-v1':null},
     eta:q.deliveryAddress?{minDays:3,maxDays:6}:null,etaExpiresAt:q.deliveryAddress?new Date(Date.now()+1200000).toISOString():null,
-    sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:10,sourceObservedAt:at.toISOString(),sourceExpiresAt:new Date(at.getTime()+172800000).toISOString()};};
+    sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:10,stockCounter:{source:'PANCAKE_DIRECT',unit:'ITEM',identity:JSON.stringify(['SM613',q.color??'navy',q.size??'M'])},sourceObservedAt:at.toISOString(),sourceExpiresAt:new Date(at.getTime()+172800000).toISOString()};};
   const facts=live?providerPorts.factsForMode(sourceMode):{ready:async()=>true,close:async()=>{},resolve:async()=>{throw new Error('UNUSED');},resolveCartSelection:async q=>selected(q)};
   let policyChanged=false,receiptAvailable=true;
   const policy=async(active=false)=>{resolver.invalidate(pageId,'PUBLISHED');const resolved=await resolver.resolve({pageId,channel:'PUBLISHED',

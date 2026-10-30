@@ -154,6 +154,7 @@ export function createReadOnlyTools(input: {
       try { source = await input.catalog.readProduct(id, false); }
       catch { source = null; }
     }
+    if (!source || source.product.productId !== id) throw new Error("SOURCE_ERROR");
     const p = source?.product;
     if (!permitted()) throw new Error("PERMISSION");
     if (productBound([id])) throw new Error("PRODUCT_BOUND");
