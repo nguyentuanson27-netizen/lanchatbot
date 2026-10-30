@@ -631,7 +631,10 @@ export function cartSelectionsHaveIndependentStockV2(selections: readonly Extrac
   const key=(s:Extract<CartSelectionResult,{status:"READY"}>)=>canonicalCartVariantScopeV2(s.line,t=>createHash("sha256").update(t,"utf8").digest("hex"));
   for(let i=0;i<selections.length;i++)for(let j=i+1;j<selections.length;j++){
     const a=selections[i]!,b=selections[j]!;
-    if(key(a)===key(b))continue;
+    if(key(a)===key(b)){
+      if(a.versions.inventory!==b.versions.inventory||JSON.stringify(a.stockCounter??null)!==JSON.stringify(b.stockCounter??null))return false;
+      continue;
+    }
     if(cartComponentsMayShareStockV2(a.line,b.line))return false;
     if(!a.stockCounter||!b.stockCounter||a.stockCounter.unit==="DERIVED_MIN"||b.stockCounter.unit==="DERIVED_MIN")return false;
     if(a.stockCounter.source===b.stockCounter.source&&a.stockCounter.unit===b.stockCounter.unit&&a.stockCounter.identity===b.stockCounter.identity)return false;

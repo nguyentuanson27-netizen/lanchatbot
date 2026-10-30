@@ -29,6 +29,20 @@ const sellingFixture = (prices: Record<string, number>) => {
   return { f, readProduct, tools };
 };
 describe("read-only domain tools", () => {
+  it("cannot overwrite a full read with older deferred search metadata",async()=>{
+    const old=fixtureProduct(),fresh=structuredClone(old);fresh.snapshot.release_id="new-pos-release";
+    fresh.snapshot.offers.NEW=structuredClone(fresh.snapshot.offers.DIRECT!);
+    let release!:(f:typeof old)=>void,started!:()=>void;
+    const waiting=new Promise<void>(r=>{started=r;});let calls=0;
+    const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[old.product],catalog:{
+      readProduct:async()=>++calls===1?new Promise<typeof old>(r=>{release=r;started();}):fresh,
+      searchText:async()=>({status:"MATCHED",matchKind:"EXACT_CODE",product:old.product,score:1,gap:null})}});
+    const pending=tools.invoke({name:"search_products",args:{query:"áo"}});await waiting;
+    expect((await tools.invoke({name:"read_product",args:{subjectRef:old.product.productId,offerType:"DIRECT"}})).status).toBe("OK");
+    const before=tools.snapshot();release(old);
+    expect(await pending).toEqual({status:"REJECTED",reason:"SOURCE_EVIDENCE_CONFLICT"});
+    expect(tools.snapshot()).toEqual(before);
+  });
   it("admits one concurrent search atomically and preserves initial target capacity", async () => {
     const records=["SQ2447","SV2447","A101","B202","C303"].map(id=>fixtureProduct(id));
     const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:records.slice(0,2).map(f=>f.product),catalog:{
@@ -41,13 +55,14 @@ describe("read-only domain tools", () => {
     for(const id of ["SQ2447","SV2447"])expect(await tools.invoke({name:"read_product",args:{subjectRef:id,detailsOnly:true}})).toMatchObject({status:"OK"});
     expect(tools.snapshot().runtimeProducts).toHaveLength(4);
   });
-  it("does not publish search evidence or offer pins when its wire result is too large",async()=>{
-    const records=["A101","B202","C303"].map(id=>fixtureProduct(id));for(const f of records)f.product.descriptionXml="x".repeat(2800);
-    const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,catalog:{readProduct:async id=>records.find(f=>f.product.productId===id)!,
-      searchText:async()=>({status:"AMBIGUOUS",candidates:records.map(f=>({document:f.product,score:1}))} as never)}});
-    const before=tools.snapshot();expect(await tools.invoke({name:"search_products",args:{query:"áo"}})).toMatchObject({status:"REJECTED",reason:"RESULT_BOUND"});
+  it("does not publish malformed catalog evidence or its offer pins",async()=>{
+    const f=fixtureProduct();f.product.descriptionXml="x".repeat(8200);
+    const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,catalog:{readProduct:async()=>f,
+      searchText:async()=>({status:"MATCHED",matchKind:"EXACT_CODE",product:f.product,score:1,gap:null})}});
+    const before=tools.snapshot();expect(await tools.invoke({name:"search_products",args:{query:"áo"}})).toMatchObject({status:"UNAVAILABLE",reason:"SOURCE_ERROR"});
     expect(tools.snapshot()).toEqual(before);
   });
+
   it("reserves unhydrated initial targets before admitting unrelated search evidence", async () => {
     const records = ["SQ2447", "SV2447", "V406", "SQ748", "V168"].map(id => fixtureProduct(id));
     const tools = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: fixturePolicy,

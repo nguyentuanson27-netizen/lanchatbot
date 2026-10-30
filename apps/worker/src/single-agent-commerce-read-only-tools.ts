@@ -3,7 +3,7 @@ import { ProductContentV1Schema, type ProtectedClaimV1 } from "@lana/contracts";
 import { buildVerifiedFactBlocks, buildProtectedClaimsFromVerifiedFactsV1, buildProductPresentationEvidenceV1, CatalogSnapshotV3Schema,
   resolveCatalogFacts, verifyProductAttributesV1, normalizeCatalogToken, normalizeProductCode,
   type ProductSearchResult, type StableProductDocument, type CatalogSnapshotV3 } from "@lana/business-tools";
-import { buildReadOnlyContext, commerceHash, commerceUuid, publicPolicyLiteral } from "./single-agent-commerce-read-only-context.js";
+import { buildReadOnlyContext, commerceHash, commerceUuid, publicPolicyLiteral, omitCurrentProductDuplicates } from "./single-agent-commerce-read-only-context.js";
 import { MAX_RUNTIME_PRODUCTS, type RuntimeProductEvidence, type TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import { buildRealtimeProductFactsV2 } from "./realtime-product-facts-v2.js";
 import { resolveCatalogDeliveryRegion, verifiedVariantFromSnapshot,candidateCartOptions } from "./realtime-sales-catalog.js";
@@ -412,7 +412,7 @@ export function createReadOnlyTools(input: {
           return { status: "REJECTED", reason: "PRODUCT_BOUND" };
         // Bounded catalog reads (one per returned candidate), accounted by the catalog port.
         // No facts are resolved and no selling option is selected on the customer's behalf.
-        const pendingOfferPins = new Map(offerPins);
+        const originalOfferPins = new Map(offerPins), pendingOfferPins = new Map(offerPins);
         const metadata = await Promise.all(candidates.map(async p => {
           try { return offerLiteral(p.productId, await input.catalog.readProduct(p.productId), pendingOfferPins); }
           catch { return null; }
@@ -423,12 +423,23 @@ export function createReadOnlyTools(input: {
         if (productBound(evidence.filter(p => p.attributes || p.content).map(p => p.subjectRef)))
           return { status: "REJECTED", reason: "PRODUCT_BOUND" };
         if (!permitted()) return {status:"REJECTED",reason:"PERMISSION"};
+        // A concurrent full read/search may have admitted a newer source while metadata was in flight.
+        for(let i=0;i<candidates.length;i++){
+          const id=candidates[i]!.productId,current=offerPins.get(id);
+          if(current===originalOfferPins.get(id))continue;
+          if(!current||!metadata[i]||current.identity!==pendingOfferPins.get(id)?.identity)
+            return {status:"REJECTED",reason:"SOURCE_EVIDENCE_CONFLICT"};
+          pendingOfferPins.set(id,current);metadata[i]=current.literal;
+        }
         const result: CommerceToolResult = { status: "OK", data: { status: found.status,
           subjects: candidates.map(p => subjects.get(p.productId) ?? {ref:p.productId,kind:"PRODUCT",label:p.title,bindingVersion:scope.bindingVersion}),
           products: evidence.map(p => products.get(p.subjectRef) ?? p),
           availableOffersByProduct: candidates.map((p, i) => ({ productId: p.productId,
             availableOffers: metadata[i] ? (JSON.parse(metadata[i]!.text) as { availableOffers: string[] }).availableOffers : null })) } };
-        if (Buffer.byteLength(JSON.stringify(result)) > 8192) return {status:"REJECTED",reason:"RESULT_BOUND"};
+        // Use the existing native budget: identical product fields live in the snapshot once.
+        const data=result.data as {products:RuntimeProductEvidence[]};
+        const budget={...result,data:{...data,products:data.products.map(p=>omitCurrentProductDuplicates(p as unknown as Record<string,unknown>,p))}};
+        if (Buffer.byteLength(JSON.stringify([budget])) > 8192) return {status:"REJECTED",reason:"RESULT_BOUND"};
         if (evidence.some(p=>Buffer.byteLength(JSON.stringify(p))>8192)) return {status:"REJECTED",reason:"PRODUCT_EVIDENCE_BOUND"};
         candidates.forEach(bind);
         candidates.forEach((p, i) => {

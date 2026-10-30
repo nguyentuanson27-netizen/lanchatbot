@@ -531,7 +531,7 @@ export function canonicalCartVariantPreimageV2(line: Pick<CartEffectClaimLineV1,
   const parsed = variantLineSchema.parse(line);
   const components = parsed.components.map(c => ({ ...c, componentSku: variantToken(c.componentSku),
     color: c.color === null ? null : variantToken(c.color), size: c.size === null ? null : variantToken(c.size) }))
-    .sort((a,b) => canonicalJsonV1(a).localeCompare(canonicalJsonV1(b)));
+    .sort((a,b) => { const x=canonicalJsonV1(a),y=canonicalJsonV1(b);return x<y?-1:x>y?1:0; });
   return canonicalJsonV1({ version: "CART_VARIANT_SCOPE_V2",
     parentProductId: parsed.parentProductId, offerId: parsed.offerId, components });
 }
@@ -578,6 +578,16 @@ export function validateCartEffectClaimSemanticsV1(input: Readonly<{
     !input.claims.some(claim => claim.type === "PRODUCT_MEDIA");
   const variantClaims = input.claims.filter(c => c.scope.kind === "PRODUCT" && requiredTypes.includes(c.type));
   const exact = variantClaims.some(c => c.scope.kind === "PRODUCT" && c.scope.variantId?.startsWith("cv2:"));
+  const provenanceByScope = new Map<string,string>();
+  let provenanceConflict=false;
+  if(exact)for(const claim of variantClaims){
+    const scope=claim.scope;
+    if(scope.kind!=="PRODUCT")continue;
+    const key=canonicalJsonV1([claim.type,scope.productId,scope.variantId]);
+    const signature=canonicalJsonV1([claim.value,claim.provenance.contentHash,claim.provenance.authority,claim.provenance.sourceVersion,claim.provenance.evidenceRef]);
+    if(provenanceByScope.has(key)&&provenanceByScope.get(key)!==signature)provenanceConflict=true;
+    provenanceByScope.set(key,signature);
+  }
   const keys = new Map<CartEffectClaimLineV1, string>();
   let identityMismatch = false;
   for (const line of input.lines) {
@@ -658,7 +668,7 @@ export function validateCartEffectClaimSemanticsV1(input: Readonly<{
       : { protectedClaimTypes: catalogMedia ? input.protectedClaimTypes.filter(type => type !== "PRODUCT_MEDIA") : input.protectedClaimTypes }),
     claims: catalogMedia ? input.claims.filter(claim => claim.type !== "PRODUCT_MEDIA") : input.claims,
   });
-  return { missing: missing || base.missing, conflict: base.conflict, mismatch: mismatch || identityMismatch };
+  return { missing: missing || base.missing, conflict: base.conflict || provenanceConflict, mismatch: mismatch || identityMismatch };
 }
 
 export const DeterministicEffectReadinessV1Schema = z.object({

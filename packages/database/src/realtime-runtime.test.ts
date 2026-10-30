@@ -6,6 +6,7 @@ import {
   canonicalCheckoutDraftHashPreimageV1,
   canonicalCartStateHashPreimageV1,
   canonicalCartStateV1,
+  canonicalCartVariantScopeV2,
   cartMutationAuthorityBindingHashPreimageV1,
   cartMutationBatchEvidenceHashPreimageV1,
   cartMutationReceiptHashPreimageV1,
@@ -3787,6 +3788,17 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     }, now)).rejects.toThrow("CART_MUTATION_BATCH_REQUIRED");
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
 
+    const variantScope=canonicalCartVariantScopeV2(exactCart.lines[0]!,rawSha256);
+    const exactClaims=claims.map(claim=>({...claim,scope:{...claim.scope,variantId:variantScope}}));
+    const stockClaim=exactClaims.find(claim=>claim.type==="STOCK")!;
+    const conflictingProvenance=[...exactClaims,{...stockClaim,claimId:"ffffffff-ffff-4fff-8fff-ffffffffffff",
+      provenance:{...stockClaim.provenance,sourceVersion:"different-counter-with-same-stock"}}].sort((a,b)=>a.claimId.localeCompare(b.claimId));
+    await expect(store.commit({...exactMutation,salesCyclePlan:{...exactMutation.salesCyclePlan,
+      effectClaimSets:[{effect:"CART_MUTATION",claims:conflictingProvenance}],
+      effectReadiness:exactMutation.salesCyclePlan.effectReadiness.map(r=>resealReadinessV1(r,{claimSetHash:sha256(conflictingProvenance)})),
+    }},now)).rejects.toThrow("EFFECT_READINESS_CLAIM_CONFLICT");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
     const claimsForWrongOffer = claims.map((claim) => ({
       ...claim,
       scope: { ...claim.scope, variantId: "WRONG-OFFER" },
@@ -3977,6 +3989,11 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       ...commerceCommit,
       metaPlan: unmarkedMetaPlan,
     }, now)).rejects.toThrow("PROTECTED_OUTBOUND_READINESS_REQUIRED");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    await expect(store.commit({...commerceCommit,metaPlan:{...commerceCommit.metaPlan,
+      protectedClaims:conflictingProvenance,effectReadiness:resealReadinessV1(metaReadiness,{claimSetHash:sha256(conflictingProvenance)}),
+    }},now)).rejects.toThrow("PROTECTED_OUTBOUND_CLAIM_CONFLICT");
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
 
     const wrongMetaOfferClaims = claims.map((claim) => ({

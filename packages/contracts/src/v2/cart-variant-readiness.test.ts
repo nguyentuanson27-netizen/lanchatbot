@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { describe, it, expect } from "vitest";
 import { canonicalJsonV1 } from "./canonical-commerce-bindings.js";
-import { canonicalCartVariantScopeV2, validateCartEffectClaimSemanticsV1, type ProtectedClaimV1 } from "./canonical-evidence-readiness.js";
+import { canonicalCartVariantPreimageV2, canonicalCartVariantScopeV2, validateCartEffectClaimSemanticsV1, type ProtectedClaimV1 } from "./canonical-evidence-readiness.js";
 
 const hash = (text: string) => createHash("sha256").update(text).digest("hex");
 const line = (size: string, quantity = 1, offerId = "AO", parentProductId = "SV2447") => ({
@@ -36,6 +36,15 @@ describe("cart variant claim readiness", () => {
     const m=line("M");
     expect(validateCartEffectClaimSemanticsV1({effect:"CART_MUTATION",lines:[m],claims:claims(m,14)}).mismatch).toBe(true);
     expect(validateCartEffectClaimSemanticsV1({effect:"CART_MUTATION",lines:[m],claims:claims(m,14),variantHash:()=>"fake"}).mismatch).toBe(true);
+  });
+  it("uses codepoint ordering for Unicode components independently of ICU collation",()=>{
+    const m=line("M"),components=["Å","Z","A"].map(componentProductId=>({...m.components[0]!,componentProductId}));
+    expect(JSON.parse(canonicalCartVariantPreimageV2({...m,components})).components.map((c:{componentProductId:string})=>c.componentProductId)).toEqual(["A","Z","Å"]);
+  });
+  it.each(["sourceVersion","evidenceRef","authority"])("blocks same-value stock with disagreeing %s",field=>{
+    const m=line("M"),base=claims(m,14),stock=base[1]!;
+    const other={...stock,provenance:{...stock.provenance,[field]:field==="authority"?"POS_LIVE":"another-source"}} as ProtectedClaimV1;
+    expect(check([m,{...m}], [...base,other]).conflict).toBe(true);
   });
   it("accepts independent M14/L8 scopes without an offer-wide stock conflict", () => {
     expect(check([line("M"), line("L")])).toEqual({ missing: false, conflict: false, mismatch: false });
