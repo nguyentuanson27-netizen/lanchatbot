@@ -1,3 +1,11 @@
+## Current — variant stock scope / search admission, 2026-10-30
+
+- [x] Rà source và deterministic replay đã lưu: M14/L8 bị cùng offer scope; search3candidates làm mất slot target thứ2. Không chạy replay/provider mới trong task plan này.
+- [x] Lập [plan revision1](../docs/specs/c3-variant-stock-search-admission-fix-plan-20261030.md), self-review → independent review → sửa alias/source-unit/async staging và acceptance → APPROVE PLAN. [Review record](../docs/specs/c3-variant-stock-search-admission-independent-20261030.md).
+- [ ] Implementation F1: exact variant claims, aggregate quantity, conservative overlap/source-unit authority, worker/shared/2DB guards; quan sát RED→GREEN trước broad checks.
+- [ ] Implementation F2: reservation initial targets, all-or-nothing admission và atomic publication cả pins/hints; không tăng cap/evict evidence.
+- [ ] Focused/shared/worker checks, actual isolated PG +7 existing invariants và new cases; independent implementation review. Model/campaign mới NOT_RUN; không rollout/GO hoặc sửa historical grades.
+
 ## Current — diagnostic sau selection/private checkout fix,29/10/2026
 
 - [x] Owner yêu cầu chạy model; cùng reviewer APPROVE order/preparation exact0c4c6c4a → fresh world/actual initial → frozen inputs/preflight → APPROVE dispatch registration388ee0ae. Thứ tự j1→j6→s09→s06→s11→probe; N1/max37, runtime/prompts/models giữ nguyên.

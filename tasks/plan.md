@@ -1,3 +1,7 @@
+## Current — variant stock scope / search admission plan, 2026-10-30
+
+Owner yêu cầu phương án fix → independent review → sửa → review đến approve. [Plan revision1](../docs/specs/c3-variant-stock-search-admission-fix-plan-20261030.md) trên base3f383c3d tập trung hai root cause đã deterministic replay: cart M/L bị gộp offer scope và search chiếm slot của initial targets. Exact cart variant helper + same-variant quantity aggregation, conservative alias/source-unit checks, full cart projection qua worker/shared/2DB guards; search all-or-nothing admission dành slot target, local staging và publication nguyên tử. Self-review và cùng independent reviewer đã APPROVE PLAN; [review record](../docs/specs/c3-variant-stock-search-admission-independent-20261030.md). Đây là plan-only: implementation/RED→GREEN/actualPG/model mới NOT_RUN, không đổi prompt/corpus/threshold/source. PhaseC BLOCKED/C3 NOT_RUN/B_NOT_GO giữ nguyên.
+
 ## Current — diagnostic sau selection/private checkout fix,29/10/2026
 
 - [x] Owner yêu cầu chạy model; cùng reviewer APPROVE order/preparation exact0c4c6c4a → fresh world/actual initial → frozen inputs/preflight → APPROVE dispatch registration388ee0ae. Thứ tự j1→j6→s09→s06→s11→probe; N1/max37, runtime/prompts/models giữ nguyên.
