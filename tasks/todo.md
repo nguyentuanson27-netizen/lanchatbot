@@ -2796,3 +2796,11 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Exact implementation e6880a70: canonical worker build/typecheck/lintPASS, focused340/protected21, Node768PASS2SKIP0FAIL, realPG73/73+7invariantsPASS/DBdropped/provider0/sendfalse. Same world/query/clock: finalB6OK, Cbefore2reject, Cafter6OK; all6protectedclaims match B, readback unchanged, SV2447all6965B.
 - [x] Same reviewer APPROVE IMPLEMENTATION e688 and test-only3ace47b3 (native full24tuple parity, production byte-identical); reviewer independent10unit/1wire and all20artifact hashes checked. [Report/review/verification](../docs/specs/c3-bc-review-repair-implementation-20261030.md).
 - [ ] Remaining source expiry/metadata/chart and NO_COLOR/tool-planning/model-quality/search-parity limitations not repaired by compaction. PhaseCqualificationBLOCKED/C3NOT_RUN/B_NOT_GO unchanged; no model generation, automatic newcampaign, merge/deploy/live send.
+
+## Phase C — model batch after B–C admission repair, 2026-10-30
+
+- [x] Fresh clean run sourcefe4b8293, unchanged22scripts/34turns/N1/max136/retry0 and models/prompts; protocol86PASS, fresh107publiccapture/read-only, current-source initialPG/drop/gen0, same independenthelper/input/preflight/dispatch approval.
+- [x] Complete22/22+34/34,71generationHTTP(56OWNER/15VERIFIER),0providererror/retry;15eligible/13silenthandoff/4HUMANno-send/2code;17texts+2images/19acceptedOutbox, DBdropped/live0. Independentactual accounting/firewall/model/binding/captureauditPASS.
+- [x] Fresh independentGPT6.1SolHIGH judge22RESOLVED beforeunmask: whole10/16SINGLE+5/6JOURNEY; requiredconjunction6/16+1/6, below90%; observedhardSafety22/22 only. [Report/wholehistories/grades](../apps/worker/evals/single-agent-commerce-qualification/bc-repair-rerun-20261030/REPORT.md).
+- [x] Preserve3failedpreregistrationnativeinventoryattempts: SQ2447all-offer+policychart bound; reviewedlegacyadapterONLY evaluatorinventory, currentV2native/runtime/world/boundsunchanged. Developmentinventory6621/missing0/reviewPENDING; notfreshholdout.
+- [ ] Remaining: s02/s07/s13search→detailed-readSOURCE_ERROR; j1MaddCLAIM_CONFLICT despiteatomicpreservation; sourceimages/ambiguity and modelplanning residuals. BatchSTOP/PhaseCqualificationBLOCKED/C3NOT_RUN/B_NOT_GO; no automaticnextfix/rerun/merge/deploy.
