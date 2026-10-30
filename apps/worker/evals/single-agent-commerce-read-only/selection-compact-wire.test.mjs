@@ -8,6 +8,7 @@ import {resultBudgetView} from '../../dist/single-agent-commerce-read-only.js';
 import {buildGeminiCommerceRequest} from './gemini-inference.mjs';
 import {buildVerifierRequest} from './protocol.mjs';
 import {withNativePresentation} from './native-presentation.mjs';
+import {readCompactSections} from './owner-data-presentation.mjs';
 import {makeBinding,finalGate} from '../../dist/single-agent-semantic-verifier-boundary.js';
 const manifest=JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url))),owner=readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8'),verifier=readFileSync(new URL('./prompts/verifier.vi.txt',import.meta.url),'utf8');
 test('all three offers keep every exact tuple in both native wires and fit unchanged product/result/wire bounds',async()=>{
@@ -19,6 +20,10 @@ test('all three offers keep every exact tuple in both native wires and fit uncha
  const request={generationId:'opaque',instructions:owner,context,contents:[{role:'user',parts:[{functionResponse:{name:call.name,response:result}}]}],toolsAllowed:true,toolBudget:{roundsRemaining:2,callsRemaining:5},availableTools:['read_product','read_policy'],signal:new AbortController().signal};
  const body=buildGeminiCommerceRequest(withNativePresentation(request,'VI_DATA_BLOCKS_COMPACT_V2'));
  const draft='Chị xem các lựa chọn nhé.',binding=makeBinding('opaque',draft,context),verifierBody=buildVerifierRequest(manifest,{instructions:verifier,finalDraft:draft,trusted:context,latest:'Các món này giá bao nhiêu em?',history:[],binding});
+ const ownerProducts=readCompactSections(body.contents[0]).find(s=>Array.isArray(s.value)&&s.value.some(p=>p?.subjectRef===f.product.productId&&p.selectionEvidence))?.value;
+ assert.deepEqual(ownerProducts.find(p=>p.subjectRef===f.product.productId).selectionEvidence,product.selectionEvidence);
+ assert.deepEqual(JSON.parse(verifierBody.input[0].content[0].text).trusted.runtimeProducts[0].selectionEvidence,product.selectionEvidence);
+ assert.equal(product.selectionEvidence.flatMap(e=>e.options).length,24);
  for(const e of product.selectionEvidence){assert.equal(e.kind,'CANDIDATE_SELECTION_V2');assert.equal(e.options.length,8);assert(Buffer.byteLength(JSON.stringify(e))<=4096);
   assert(JSON.stringify(body).includes(e.contentHash));assert(JSON.stringify(verifierBody).includes(e.contentHash));
  }
