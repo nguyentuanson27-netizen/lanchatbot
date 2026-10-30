@@ -2787,3 +2787,12 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Offline same-input controls: all-offer SV2447 B OK/C REJECTED; single offers both OK; size same input gives M both arms; six hard prechecks accepted at explicitly derived lower-bound clock, not captured final gate time. Media expiry reproduced both arms, C explicit revalidation difference retained. Ambiguous metadata/policy-read controls same B/C; native prepare callback not measured.
 - [x] Owner18/18 registered samples, one HTTP each/0error/0retry, identical per-case wire hashes/firewall18PASS; no tool execution/effect/send. Two cases change read scope/tool sequence; size sourceQuote and total wording differences kept separate from decision instability. Post-run analysis asserts original artifacts and denominator.
 - [ ] Historical live Qdrant/index/vector parity and paired full E2E quality remain unmeasured. No candidate runtime fix, new qualification result or GO claim. [Report/evidence](../apps/worker/evals/single-agent-commerce-qualification/bc-controlled-20261030/REPORT.md).
+
+## B–C review and bounded repair — 2026-10-30
+
+- [x] Audit exact finalBf160→C38files, B51 and C22cases/34turns; keep C tuple/state safeguards, no broad rollback. Full case mapping/source/model/ownership unknowns in approved plan.
+- [x] Same independent reviewer REQUEST_CHANGES→revision2APPROVE PLAN f57518e8 (TTL compatibility, exact errors, full mapping).
+- [x] TDD RED5→GREEN9, then10compact/selection unit coverage; lossless strict V2/shared expander across4consumers, failclosed proof construction, closed bound/conflict/unknown attribution. No prompt/shared runtime/source shop change.
+- [x] Exact implementation e6880a70: canonical worker build/typecheck/lintPASS, focused340/protected21, Node768PASS2SKIP0FAIL, realPG73/73+7invariantsPASS/DBdropped/provider0/sendfalse. Same world/query/clock: finalB6OK, Cbefore2reject, Cafter6OK; all6protectedclaims match B, readback unchanged, SV2447all6965B.
+- [x] Same reviewer APPROVE IMPLEMENTATION e688 and test-only3ace47b3 (native full24tuple parity, production byte-identical); reviewer independent10unit/1wire and all20artifact hashes checked. [Report/review/verification](../docs/specs/c3-bc-review-repair-implementation-20261030.md).
+- [ ] Remaining source expiry/metadata/chart and NO_COLOR/tool-planning/model-quality/search-parity limitations not repaired by compaction. PhaseCqualificationBLOCKED/C3NOT_RUN/B_NOT_GO unchanged; no model generation, automatic newcampaign, merge/deploy/live send.
