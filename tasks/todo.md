@@ -1,10 +1,18 @@
+## Current — variant stock scope / search admission implementation, 2026-10-30
+
+- [x] Thực hiện plan trên base3c793f6c, giữ observed RED contracts/search/source-error/reverse-race logs trước sửa. F1 exact variant/demand/fullcart shared+2DBguards, raw source units và conflict provenance; F2 reserved targets, staged admission và source reconciliation trước publication, giữ existing discovery duplicate budget.
+- [x] Same reviewer REQUEST_CHANGES→fix→review; thêm regressions same-value/different-source, Unicode order, deferred search/read hai chiều, prepare failure, batch baseline; **APPROVE IMPLEMENTATION exact3a06936f**. [Implementation/review/evidence](../docs/specs/c3-variant-stock-search-admission-implementation-20261030.md).
+- [x] Final507workerPASS,768NodePASS/2existingSKIP,71contracts/55business/56DBPASS; typechecks/builds/workerlintPASS. ActualPG04 76/76+7invariantsPASS,clean/droptrue/provider0/sendfalse; independently56artifact hashes/PG validatorPASS. FailedPG01/02 vàPG03priorPASS giữ nguyên.
+- [x] Sameworld/clock finalreplay L8/M14 independentclaimsOK, repeatedM15blocked; with/withoutpriorsearch đọcSQ2447/SV2447OK. Không provider/source mutation hoặc sửa historical grades.
+- [ ] Chất lượng model sau sửaNOT_RUN; nguồn ảnh/chart/ambiguity/ownerplanning residuals còn. PhaseCqualificationBLOCKED/C3NOT_RUN/B_NOT_GO; không tự campaign/GO/merge/deploy/live send.
+
 ## Current — variant stock scope / search admission, 2026-10-30
 
 - [x] Rà source và deterministic replay đã lưu: M14/L8 bị cùng offer scope; search3candidates làm mất slot target thứ2. Không chạy replay/provider mới trong task plan này.
 - [x] Lập [plan revision1](../docs/specs/c3-variant-stock-search-admission-fix-plan-20261030.md), self-review → independent review → sửa alias/source-unit/async staging và acceptance → APPROVE PLAN. [Review record](../docs/specs/c3-variant-stock-search-admission-independent-20261030.md).
-- [ ] Implementation F1: exact variant claims, aggregate quantity, conservative overlap/source-unit authority, worker/shared/2DB guards; quan sát RED→GREEN trước broad checks.
-- [ ] Implementation F2: reservation initial targets, all-or-nothing admission và atomic publication cả pins/hints; không tăng cap/evict evidence.
-- [ ] Focused/shared/worker checks, actual isolated PG +7 existing invariants và new cases; independent implementation review. Model/campaign mới NOT_RUN; không rollout/GO hoặc sửa historical grades.
+- [x] Implementation F1: exact variant claims, aggregate quantity, conservative overlap/source-unit authority, worker/shared/2DB guards; RED→GREEN đã quan sát, xem current implementation ở trên.
+- [x] Implementation F2: reservation initial targets, all-or-nothing admission và atomic publication cả pins/hints; không tăng cap/evict evidence.
+- [x] Focused/shared/worker checks, actual isolated PG +7 existing invariants và new cases; independent implementation APPROVE3a06936f. Model/campaign mới NOT_RUN; không rollout/GO hoặc sửa historical grades.
 
 ## Current — diagnostic sau selection/private checkout fix,29/10/2026
 
