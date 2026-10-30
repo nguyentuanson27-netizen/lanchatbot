@@ -99,7 +99,7 @@ it.each(["quantity","selector","invalid","policy","heartbeat"])("revalidates sel
  if(replay.status==="READY"||!replay.selectionEvidence)throw Error("PROOF_REQUIRED");
  if(mode==="heartbeat"){now=new Date(commerceNow.getTime()+2000);f.snapshot.synced_at=new Date(commerceNow.getTime()+1000).toISOString();await expect(s.tools.readback()).resolves.toEqual(before);return;}
  if(mode==="policy")s.readPolicy.mockResolvedValue({...s.policy,policy:{...s.policy.policy,effectiveUntil:new Date(now.getTime()+60000).toISOString()}});
- else{if(mode==="quantity"){replay.selectionEvidence.quantity=2;for(const o of replay.selectionEvidence.options)o.quantity=2;}
+ else{if(mode==="quantity")replay.selectionEvidence.quantity=2;
   if(mode==="selector"){replay.selectionEvidence.size="L";for(const o of replay.selectionEvidence.options)o.size="L";}
   const {contentHash:_hash,...body}=replay.selectionEvidence;replay.selectionEvidence.contentHash=mode==="invalid"?"0".repeat(64):commerceHash(body);s.select.mockResolvedValue(replay as never);}
  await expect(s.tools.readback()).rejects.toThrow("SELECTION_EVIDENCE_CHANGED");

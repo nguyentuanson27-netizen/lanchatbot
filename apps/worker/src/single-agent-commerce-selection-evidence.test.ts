@@ -2,6 +2,7 @@ import {it,expect} from "vitest";
 import {createReadOnlyTools} from "./single-agent-commerce-read-only-tools.js";
 import {fixtureProduct,fixturePolicy,commerceScope,commerceNow} from "./single-agent-commerce.test-support.js";
 import {hardPrecheck} from "./single-agent-semantic-verifier-boundary.js";
+import {expandSelectionOptions,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
 
 it("publishes the exact owner tuple view in the verifier snapshot with read-path expiry and immutable readback",async()=>{
  const f=fixtureProduct(),row=f.snapshot.offers.DIRECT!.rows[0]!;
@@ -14,8 +15,8 @@ it("publishes the exact owner tuple view in the verifier snapshot with read-path
  const data=r.data as {selectionEvidence:unknown;selectionOptions:unknown[]};
  expect(data.selectionEvidence).toBeDefined();
  expect(tools.snapshot().runtimeProducts?.[0]).toHaveProperty("selectionEvidence",[data.selectionEvidence]);
- const evidence=data.selectionEvidence as {expiresAt:string;options:unknown[]};
- expect(evidence.options).toEqual(data.selectionOptions);
+ const evidence=data.selectionEvidence as CandidateSelectionEvidence;
+ expect(expandSelectionOptions(evidence)).toEqual(data.selectionOptions);
  expect(Date.parse(evidence.expiresAt)).toBe(commerceNow.getTime()+120000);
  expect(evidence.options).toEqual(expect.arrayContaining([expect.objectContaining({color:"be",status:"PRE_ORDER"})]));
  const before=tools.snapshot();expect(hardPrecheck(before,"Chị xem các lựa chọn nhé.",commerceNow)).toBeNull();
@@ -45,10 +46,10 @@ it("allows compare-three then refining one offer within the same existing tool b
 });
 it("rejects actual product-byte overflow atomically without forgetting previously admitted selections",async()=>{
  const f=fixtureProduct(),row=f.snapshot.offers.DIRECT!.rows[0]!;
- f.snapshot.offers.DIRECT!.rows=["S","M","L"].flatMap(size=>["be","navy","white","black","red","blue","green","brown"].map(color=>({...structuredClone(row),size,color,parent_variation_id:`SM613-${size}-${color}`})));
+ f.snapshot.offers.DIRECT!.rows=["S","M","L","XL","XXL"].flatMap(size=>["be","navy","white","black","red","blue","green","brown"].map(color=>({...structuredClone(row),size,color,parent_variation_id:`SM613-${size}-${color}`})));
  const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,candidateEvidence:true,initialProducts:[f.product],catalog:{readProduct:async()=>structuredClone(f),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
  let admitted=0,rejected=false;
- for(const size of["S","M","L"]){const before=tools.snapshot(),r=await tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT",size}});
+ for(const size of["S","M","L","XL","XXL"]){const before=tools.snapshot(),r=await tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT",size}});
   if(r.status==="REJECTED"){expect(tools.snapshot()).toEqual(before);rejected=true;break;}admitted++;}
  expect(admitted).toBeGreaterThan(0);expect(rejected).toBe(true);
 });

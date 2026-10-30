@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { southernDestination } from "./southern-delivery-region.js";
-import {selectionEvidenceFromOptions,selectionSourceHash,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
+import {selectionEvidenceFromOptions,selectionSourceHash,expandSelectionOptions,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
 import {
   CartLineV1Schema,
   type CartLineV1,
@@ -413,7 +413,7 @@ export function cartSelectionFromSnapshot(
   const selectionEvidence=candidate?selectionEvidenceFromOptions({productId:snapshot.product_id,offerType:offerName,size:query.size,color:query.color,quantity:query.quantity,
     sourceVersion:snapshot.release_id,sourceHash:selectionSourceHash(snapshot),observedAt:snapshot.synced_at,expiresAt:new Date(evidenceExpiry).toISOString()},options,now):null;
   const rejected=(status:Exclude<CartSelectionResult["status"],"READY">,reason:string,scopeRows:readonly RawOfferRow[]=rows):CartSelectionResult=>
-    candidate?{status,reasonCode:reason,availableSizes:[],availableColors:[],selectionOptions:selectionEvidence?.options??[],...(selectionEvidence?{selectionEvidence}:{})}:failed(status,reason,scopeRows);
+    candidate?{status,reasonCode:reason,availableSizes:[],availableColors:[],selectionOptions:selectionEvidence?expandSelectionOptions(selectionEvidence):[],...(selectionEvidence?{selectionEvidence}:{})}:failed(status,reason,scopeRows);
   if (normalizeCatalogToken(offer.price_status) !== "OK") {
     return rejected("PRICE_UNAVAILABLE", `CART_${normalizeCatalogToken(offer.price_status)}`, rows);
   }

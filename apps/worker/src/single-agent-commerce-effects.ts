@@ -10,7 +10,7 @@ import type { CommerceTools } from "./single-agent-commerce-read-only.js";
 import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-catalog.js";
 import type { TerminalOutcome, TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import { formatCartLineSelection, selectionsMatchCartLines } from "./realtime-sales-cycle.js";
-import {validSelectionEvidence,selectionEvidenceFromOptions,mergeSelectionEvidence,selectionMeaningHash,selectionQueryKey,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
+import {validSelectionEvidence,selectionEvidenceFromOptions,mergeSelectionEvidence,selectionMeaningHash,selectionQueryKey,expandSelectionOptions,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
 
 const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase", "record_negotiation"]);
 export type CommerceCommandResult =
@@ -152,7 +152,7 @@ export async function createCommerceEffectTools(input: {
       const expiresAt=new Date(Math.min(Date.parse(e.expiresAt),Date.parse(e.observedAt)+(input.selectionMaxAgeSeconds??1200)*1000,
         policy?.policy.effectiveUntil?Date.parse(policy.policy.effectiveUntil):Infinity)).toISOString();
       const clipped=selectionEvidenceFromOptions({productId:e.productId,offerType:e.offerType,size:e.size,color:e.color,quantity:e.quantity,sourceVersion:e.sourceVersion,
-        sourceHash:e.sourceHash,observedAt:e.observedAt,expiresAt},e.options,now);
+        sourceHash:e.sourceHash,observedAt:e.observedAt,expiresAt},expandSelectionOptions(e),now);
       if(!clipped)throw Error("SELECTION_EVIDENCE_STALE");
       const key=selectionQueryKey(clipped),previous=selectionObservations.get(key);
       if(previous&&(selectionMeaningHash(previous.evidence)!==selectionMeaningHash(clipped)||Date.parse(clipped.observedAt)<Date.parse(previous.evidence.observedAt)))throw Error("SOURCE_EVIDENCE_CONFLICT");
@@ -161,7 +161,7 @@ export async function createCommerceEffectTools(input: {
       let checked=proposed;for(const old of selectionObservations.values())if(old.evidence.productId===productId)checked=mergeSelectionEvidence(checked,old.evidence,now);
       mergeSelectionEvidence(checked,bound,now);
       selectionObservations.set(key,{query:previous?.query??query,evidence:bound});
-      return {...result,selectionOptions:bound.options,selectionEvidence:bound,selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",selectionStatus:result.status};
+      return {...result,selectionOptions:expandSelectionOptions(bound),selectionEvidence:bound,selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",selectionStatus:result.status};
     }
     if (result.status !== "READY") return { status: result.status, reasonCode: result.reasonCode,
       selectionOptions:(result.selectionOptions??[]).slice(0,8),selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",selectionStatus:result.status };

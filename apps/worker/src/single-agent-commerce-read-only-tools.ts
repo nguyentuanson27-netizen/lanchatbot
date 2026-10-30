@@ -9,7 +9,7 @@ import { buildRealtimeProductFactsV2 } from "./realtime-product-facts-v2.js";
 import { resolveCatalogDeliveryRegion, verifiedVariantFromSnapshot,candidateCartOptions } from "./realtime-sales-catalog.js";
 import type { CommerceProductGroup } from "./single-agent-commerce-product-groups.js";
 import type {CommerceDiagnostics} from "./single-agent-commerce-diagnostics.js";
-import {selectionEvidenceFromOptions,selectionSourceHash,mergeSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
+import {selectionEvidenceFromOptions,selectionSourceHash,mergeSelectionEvidence,expandSelectionOptions} from "./single-agent-commerce-selection-evidence.js";
 
 export interface CommerceScope {
   pageId: string; shopId: string; shopAlias: string; conversationId: string; customerHash: string;
@@ -295,12 +295,12 @@ export function createReadOnlyTools(input: {
       const until=Math.min(expires,...o.claims.map(c=>Date.parse(c.provenance.expiresAt)),raw.fulfillment_policy?.eta_valid_until.trim()?Date.parse(raw.fulfillment_policy.eta_valid_until):Infinity);
       const v=selectionEvidenceFromOptions({productId:id,offerType:o.offer,size:query.size,color:query.color,quantity:1,sourceVersion:raw.release_id,
         sourceHash:selectionSourceHash(raw),observedAt:raw.synced_at,expiresAt:new Date(until).toISOString()},options,now);
-      return v?[v]:[];
+      if(!v)throw Error("SELECTION_EVIDENCE_STALE");return [v];
     }):[];
     const prior=products.get(id)?.selectionEvidence;
     if(prior?.length)evidence.selectionEvidence=structuredClone(prior);
     try{for(const e of queriedTupleEvidence)Object.assign(evidence,mergeSelectionEvidence(evidence,e,now));}
-    catch{return {status:"REJECTED",reason:"SOURCE_EVIDENCE_CONFLICT"};}
+    catch(error){if(error instanceof Error&&["PRODUCT_EVIDENCE_BOUND","SOURCE_EVIDENCE_CONFLICT","SELECTION_EVIDENCE_STALE"].includes(error.message))return {status:"REJECTED",reason:error.message};throw error;}
     const charts = Object.values(policy?.bundle?.artifacts.sizeCharts ?? {}).filter(a =>
       a.chart.reference.verificationStatus === "VERIFIED" &&
       (a.scope?.parentProductIds.includes(id) || a.scope?.level === "GLOBAL")).map(a => a.chart);
@@ -347,7 +347,7 @@ export function createReadOnlyTools(input: {
             silhouettes:wholeProduct ? evidence.attributes?.silhouettes ?? [] : []}).blocks.map(b=>b.text).join("\n")}
       } : {}),
       availableOffers,
-      selectionOptions:queriedTupleEvidence[0]?.options??(!input.candidateEvidence&&raw?candidateCartOptions(raw,{shopAlias:scope.shopAlias,productId:id,offerType:selected.offer,
+      selectionOptions:queriedTupleEvidence[0]?expandSelectionOptions(queriedTupleEvidence[0]):(!input.candidateEvidence&&raw?candidateCartOptions(raw,{shopAlias:scope.shopAlias,productId:id,offerType:selected.offer,
         size:query.size,color:query.color,quantity:1,lineId:"00000000-0000-4000-8000-000000000001"},now).slice(0,8):[]),
       ...(queriedTupleEvidence[0]?{selectionEvidence:queriedTupleEvidence[0]}:{}),
       selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",
