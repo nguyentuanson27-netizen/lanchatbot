@@ -109,11 +109,11 @@ function snapshot(stockQuantity = 3) {
 }
 
 describe("realtime sales catalog", () => {
-  it("binds parent stock units, rejects malformed source identity and keeps stock out of logical variant identity", () => {
+  it.each([true,false])("binds parent stock units and rejects malformed source identity (candidate=%s)", candidate => {
     const s=snapshot(14),offer=s.offers.SET,row=offer.rows[0]!;
     Object.assign(offer,{inventory_source:"PANCAKE_BOM"});
     Object.assign(row,{inventory_source:"PANCAKE_BOM",parent_variation_id:"pool-M"});
-    const q={shopAlias:"LANA",productId:"CB182",offerType:"SET",size:"M",color:"BE",quantity:1,lineId:"50000000-0000-4000-8000-000000000001",selectionMode:"CANDIDATE_TUPLES" as const};
+    const q={shopAlias:"LANA",productId:"CB182",offerType:"SET",size:"M",color:"BE",quantity:1,lineId:"50000000-0000-4000-8000-000000000001",...(candidate?{selectionMode:"CANDIDATE_TUPLES" as const}:{})};
     const a=cartSelectionFromSnapshot(s,q,now);
     expect(a).toMatchObject({status:"READY",stockCounter:{unit:"PARENT_OFFER",identity:"pool-M"}});
     Object.assign(row,{parent_variation_id:"pool-new"});

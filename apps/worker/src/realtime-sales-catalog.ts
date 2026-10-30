@@ -539,8 +539,12 @@ export function cartSelectionFromSnapshot(
   const offerId = normalizeCatalogToken(offerName);
   const priceVersion = version("price", { parentProductId, offerId, unitPrice });
   const stockCounter = stockCounterFromRowV2(row, offer as unknown as Record<string, unknown>);
-  if (candidate && (text(row.inventory_source) || text((offer as unknown as Record<string, unknown>).inventory_source)) && !stockCounter)
+  if ((text(row.inventory_source) || text((offer as unknown as Record<string, unknown>).inventory_source)) && !stockCounter)
     return rejected("INVALID", "CART_INVENTORY_SOURCE_UNRESOLVED", matching);
+  if(stockCounter?.unit==="ITEM"&&(components.length!==1||components[0]!.quantity!==1||
+    normalizeCatalogToken(components[0]!.size??"")!==normalizeCatalogToken(text(row.size))||
+    normalizeCatalogToken(components[0]!.color??"")!==normalizeCatalogToken(text(row.color))))
+    return rejected("INVALID","CART_INVENTORY_UNIT_MISMATCH",matching);
   const inventoryVersion = version("inventory", {
     parentProductId,
     offerId,
@@ -548,7 +552,7 @@ export function cartSelectionFromSnapshot(
     size: text(row.size),
     stockQuantity,
     components,
-    ...(candidate ? {stockCounter} : {}),
+    stockCounter,
   });
   const sizeVersion = version("size", {
     parentProductId,
