@@ -282,12 +282,19 @@ try{
   try{assert.notEqual((await t.invoke({name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'L',color:'navy',quantity:1}})).status,'OK');}
   finally{tamperVariant=false;}
   assert.deepEqual(await repository.read(key),before);
+  assert.match(report.transactionDiagnostic?.error??'',/^EFFECT_READINESS_/);
+  const current=await runtime.loadOrCreate(pageId,scope.customerHash,'APP',()=>null);
+  assert.equal((await runtime.commit({pageId,conversationId:key,customerHash:scope.customerHash,expectedStateVersion:current.stateVersion,
+   state:{...current.state,revision:current.stateVersion+1},inboxBatchGuard:lease})).stateCommitted,true);
  });
  await check('B variant shared raw counter cannot authorize distinct component sizes',async()=>{
   await message('Chị lấy thêm một áo size L');const before=await repository.read(key),t=await effects();aliasStockCounter=true;
   try{assert.notEqual((await t.invoke({name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'L',color:'navy',quantity:1}})).status,'OK');}
   finally{aliasStockCounter=false;}
   assert.deepEqual(await repository.read(key),before);
+  const current=await runtime.loadOrCreate(pageId,scope.customerHash,'APP',()=>null);
+  assert.equal((await runtime.commit({pageId,conversationId:key,customerHash:scope.customerHash,expectedStateVersion:current.stateVersion,
+   state:{...current.state,revision:current.stateVersion+1},inboxBatchGuard:lease})).stateCommitted,true);
  });
  await check('B3 native quantity change persists, unknown commit reconciles without replay',async()=>{
   await message('Chị lấy 2 bộ SM613 nhé');const t=await effects(),line=(await repository.read(key)).cart.value.lines[0];failAfterCommit=true;
