@@ -109,6 +109,13 @@ export function createReadOnlyTools(input: {
     pins.set(id,{identity,literal});
     return literal;
   };
+  const offerBaseline = (id: string) => ({ pin: offerPins.get(id) });
+  const stageOffer = (id: string, source: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>, baseline: ReturnType<typeof offerBaseline>) => {
+    const current=offerPins.get(id), pins=new Map(offerPins), literal=offerLiteral(id,source,pins);
+    if(current!==baseline.pin&&(!current||!literal||pins.get(id)?.identity!==current.identity))
+      throw new Error("SOURCE_EVIDENCE_CONFLICT");
+    return {literal,pin:pins.get(id)};
+  };
   const bind = (p: StableProductDocument) => {
     if (!subjects.has(p.productId)) subjects.set(p.productId, { ref: p.productId, kind: "PRODUCT", label: p.title, bindingVersion: scope.bindingVersion });
   };
@@ -144,7 +151,7 @@ export function createReadOnlyTools(input: {
     return { status: "OK", data: { scope: "SHOP_RULES", orderEligibility: null,
       policy: JSON.parse(policyLiteral[0]!.text), sourceVersion: policyLiteral[0]!.sourceVersion } };
   }
-  async function prepareProduct(id: string, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>,admit?:(context:TrustedContext)=>boolean) {
+  async function prepareProduct(id: string, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>,admit?:(context:TrustedContext)=>boolean,baseline=offerBaseline(id)) {
     if (productBound([id])) throw new Error("PRODUCT_BOUND");
     const now = input.clock();
     let source: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>> | null;
@@ -159,6 +166,7 @@ export function createReadOnlyTools(input: {
     if (!permitted()) throw new Error("PERMISSION");
     if (productBound([id])) throw new Error("PRODUCT_BOUND");
     let content = false;
+    const stagedOffer=stageOffer(id,source,baseline);
     const stagedEvidence = p?.productId === id ? staticEvidence(p, now) : null;
     const previous = { ...products.get(id) };
     delete previous.content; delete previous.attributes;
@@ -175,7 +183,8 @@ export function createReadOnlyTools(input: {
     const status = raw ? normalizeCatalogToken(raw.data_status) : null;
     const offers = raw && ["OK", "FULFILLMENT_POLICY_NOT_FOUND"].includes(status ?? "") &&
       observed <= now.getTime() && expires > now.getTime() ? Object.keys(raw.offers).sort() : null;
-    const metadata = source && offers !== null && offers.length <= 8 ? offerLiteral(id,source) : null;
+    const metadata = source && offers !== null && offers.length <= 8 ? stagedOffer.literal : null;
+    if(stagedOffer.pin)offerPins.set(id,stagedOffer.pin);
     if (metadata) offerContexts.set(id, metadata);
     else offerContexts.delete(id);
     const availability = { content: { status: content ? "OK" : "UNAVAILABLE", reason: content ? null : "SOURCE_UNAVAILABLE" },
@@ -213,17 +222,18 @@ export function createReadOnlyTools(input: {
     prepared.add(id);
     return 1;
   }
-  async function readProduct(args: Record<string, unknown>, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>): Promise<CommerceToolResult> {
+  async function readProduct(args: Record<string, unknown>, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>,baseline=offerBaseline(args.subjectRef as string)): Promise<CommerceToolResult> {
     const id = args.subjectRef as string, now = input.clock();
     let fetched: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>;
     try { fetched = loaded ?? await input.catalog.readProduct(id); }
     catch (error) { if (posPins.has(id)) posInvalidated = true; throw error; }
-    return admitProductRead(args, fetched);
+    return admitProductRead(args, fetched,baseline);
   }
-  function admitProductRead(args: Record<string, unknown>, fetched: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>): CommerceToolResult {
+  function admitProductRead(args: Record<string, unknown>, fetched: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>,baseline=offerBaseline(args.subjectRef as string)): CommerceToolResult {
     const id=args.subjectRef as string, now=input.clock();
     if (!permitted()) return {status:"REJECTED",reason:"PERMISSION"};
     if (productBound([id])) return {status:"REJECTED",reason:"PRODUCT_BOUND"};
+    const stagedOffer=stageOffer(id,fetched,baseline);
     const pendingPins = new Map(posPins);
     const source = pinPos(id, fetched, pendingPins), p = source.product;
     const parsed = CatalogSnapshotV3Schema.safeParse(source.snapshot);
@@ -326,7 +336,8 @@ export function createReadOnlyTools(input: {
     if (pendingPins.has(id)) posPins.set(id,pendingPins.get(id)!);
     if(typeof args.color==="string")input.onMediaColor?.(id,args.color);
     offerContexts.delete(id);
-    const offerEvidence = availableOffers !== null ? offerLiteral(id,source) : null;
+    const offerEvidence = availableOffers !== null ? stagedOffer.literal : null;
+    if(stagedOffer.pin)offerPins.set(id,stagedOffer.pin);
     if (offerEvidence) offerContexts.set(id,offerEvidence);
     products.delete(id);
     if (evidence.attributes || evidence.presentation || evidence.content || evidence.sizeCharts?.length) products.set(id, evidence);
@@ -388,7 +399,7 @@ export function createReadOnlyTools(input: {
       (a.detailsOnly!==undefined&&(a.detailsOnly!==true||a.offerType!==undefined||a.offerTypes!==undefined)))return null;
     return a;
   }
-  async function invoke(call: CommerceToolCall, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>): Promise<CommerceToolResult> {
+  async function invoke(call: CommerceToolCall, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>,baseline?:ReturnType<typeof offerBaseline>): Promise<CommerceToolResult> {
     if (!scope.permission || !scope.privacyAllowed || scope.conversationOwner !== "BOT") return { status: "REJECTED", reason: "PERMISSION" };
     try {
       if (call.name === "read_policy") {
@@ -459,15 +470,15 @@ export function createReadOnlyTools(input: {
         const a=readArgs(call.args);
         if(!a)return {status:"REJECTED",reason:"TOOL_ARGUMENTS_OR_REF"};
         const id=a.subjectRef as string;
-        if(a.detailsOnly===true){await prepareProduct(id,loaded);prepared.add(id);
+        if(a.detailsOnly===true){await prepareProduct(id,loaded,undefined,baseline);prepared.add(id);
           return {status:"OK",data:{subjectRef:id,content:products.get(id)?.content??null,attributes:products.get(id)?.attributes??null,
             availableOffers:offerContexts.has(id)?JSON.parse(offerContexts.get(id)!.text).availableOffers:null,
             notRead:["PRICE","STOCK","ETA","SIZE_FIT"]}};}
-        return await readProduct(a, loaded);
+        return await readProduct(a, loaded,baseline);
       }
       return { status: "REJECTED", reason: "UNKNOWN_TOOL" };
     } catch (error) {
-      if (error instanceof Error && ["PRODUCT_BOUND","SUBJECT_BOUND","PERMISSION"].includes(error.message))
+      if (error instanceof Error && ["PRODUCT_BOUND","SUBJECT_BOUND","PERMISSION","SOURCE_EVIDENCE_CONFLICT"].includes(error.message))
         return {status:"REJECTED",reason:error.message};
       return { status: "UNAVAILABLE", reason: "SOURCE_ERROR" };
     }
@@ -484,10 +495,13 @@ export function createReadOnlyTools(input: {
     // Fetch one immutable source per product. Admission/commit follows request order,
     // never the network completion order. Effects are handled by outer ports.
     const sources=new Map<string,Promise<Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>> | null>>();
+    const sourceBaselines=new Map<string,ReturnType<typeof offerBaseline>>();
     for(const c of calls)if(c.name==="read_product"){
       const args=readArgs(c.args),id=args?.subjectRef;
-      if(typeof id==="string"&&!sources.has(id))
+      if(typeof id==="string"&&!sources.has(id)){
+        sourceBaselines.set(id,offerBaseline(id));
         sources.set(id,Promise.resolve().then(()=>permitted()?input.catalog.readProduct(id):null).then(s=>s?structuredClone(s):null).catch(()=>null));
+      }
     }
     const results:CommerceToolResult[]=[];
     for(const call of calls){
@@ -497,7 +511,7 @@ export function createReadOnlyTools(input: {
       // Revalidate before consuming staged sources; malformed calls never inherit
       // a valid sibling's fetch, and revoked permission never authorizes a read.
       results.push(!permitted()?{status:"REJECTED",reason:"PERMISSION"}:call.name==="read_product"&&!readArgs(call.args)?{status:"REJECTED",reason:"TOOL_ARGUMENTS_OR_REF"}:
-        source===null?{status:"UNAVAILABLE",reason:"SOURCE_ERROR"}:await invoke(call,source));
+        source===null?{status:"UNAVAILABLE",reason:"SOURCE_ERROR"}:await invoke(call,source,typeof id==="string"?sourceBaselines.get(id):undefined));
     }
     return results;
   }, async readback() {

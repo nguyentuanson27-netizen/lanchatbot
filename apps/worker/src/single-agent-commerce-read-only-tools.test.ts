@@ -29,6 +29,34 @@ const sellingFixture = (prices: Record<string, number>) => {
   return { f, readProduct, tools };
 };
 describe("read-only domain tools", () => {
+  it.each(["full","details","batch","prepare"])("rejects older deferred %s when search has admitted a different source",async mode=>{
+    const old=fixtureProduct(),fresh=structuredClone(old);fresh.snapshot.release_id="new-pos-release";
+    fresh.snapshot.offers.NEW=structuredClone(fresh.snapshot.offers.DIRECT!);
+    let release!:(f:typeof old)=>void,started!:()=>void;
+    const waiting=new Promise<void>(r=>{started=r;});let calls=0;
+    const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[old.product],catalog:{
+      readProduct:async()=>++calls===1?new Promise<typeof old>(r=>{release=r;started();}):fresh,
+      searchText:async()=>({status:"MATCHED",matchKind:"EXACT_CODE",product:fresh.product,score:1,gap:null})}});
+    const call={name:"read_product",args:{subjectRef:old.product.productId,...(mode==="details"?{detailsOnly:true}:{offerType:"DIRECT"})}};
+    const pending=mode==="prepare"?tools.prepare():mode==="batch"?tools.invokeBatch([call]):tools.invoke(call);
+    await waiting;expect((await tools.invoke({name:"search_products",args:{query:"áo"}})).status).toBe("OK");
+    const before=tools.snapshot();release(old);
+    if(mode==="prepare")await expect(pending).rejects.toThrow("SOURCE_EVIDENCE_CONFLICT");
+    else expect(mode==="batch"?(await pending as unknown[])[0]:await pending).toEqual({status:"REJECTED",reason:"SOURCE_EVIDENCE_CONFLICT"});
+    expect(tools.snapshot()).toEqual(before);await expect(tools.readback()).resolves.toEqual(before);
+  });
+  it("preserves current offer expiry on a same-identity concurrent full read",async()=>{
+    const old=fixtureProduct(),fresh=structuredClone(old);old.snapshot.synced_at=new Date(commerceNow.getTime()-1000).toISOString();
+    let release!:(f:typeof old)=>void,started!:()=>void;
+    const waiting=new Promise<void>(r=>{started=r;});let calls=0;
+    const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[old.product],catalog:{
+      readProduct:async()=>++calls===1?new Promise<typeof old>(r=>{release=r;started();}):fresh,
+      searchText:async()=>({status:"MATCHED",matchKind:"EXACT_CODE",product:fresh.product,score:1,gap:null})}});
+    const pending=tools.invoke({name:"read_product",args:{subjectRef:old.product.productId,offerType:"DIRECT"}});await waiting;
+    expect((await tools.invoke({name:"search_products",args:{query:"áo"}})).status).toBe("OK");
+    const before=tools.snapshot().policyLiterals.find(p=>p.ref===`offers:${old.product.productId}`);release(old);
+    expect((await pending).status).toBe("OK");expect(tools.snapshot().policyLiterals.find(p=>p.ref===before!.ref)).toEqual(before);
+  });
   it.each(["details","full","mismatched-source"])("preserves admitted evidence when later preparation has %s failure",async mode=>{
     const f=fixtureProduct(),other=fixtureProduct("OTHER");let failed=false;
     const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[f.product],catalog:{
