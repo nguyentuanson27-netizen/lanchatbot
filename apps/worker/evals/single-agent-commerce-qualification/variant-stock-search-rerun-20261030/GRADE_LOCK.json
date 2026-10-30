@@ -1,0 +1,10 @@
+{
+  "status": "LOCKED_BEFORE_UNMASK",
+  "packetHash": "d94ddc6ed325778e3b3a1ee2e1b89a957b0c08efee91d3644c492ee22847586c",
+  "gradeByteSha256": "6a74209bdff9912174b28d82f0f41a4b21afd4faef99948e3c3247783ef1d80a",
+  "gradeCanonicalHash": "fdb41ed38f1bc33398ab5dca233979c4b118839ea93638e3c5cfe25dce9d3c58",
+  "grades": 22,
+  "unresolved": 1,
+  "lockedAt": "2026-10-30T16:27:22.927Z",
+  "privateAssignmentsReadBeforeLock": false
+}
