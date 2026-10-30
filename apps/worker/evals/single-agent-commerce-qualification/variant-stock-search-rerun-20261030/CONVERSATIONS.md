@@ -1,5 +1,7 @@
 # Chạy lại toàn bộ 22 hội thoại Phase C
 
+Bản hiển thị Markdown chuẩn hóa khoảng trắng cuối dòng. Payload chính xác và hash/binding giữ nguyên trong ACCOUNTING.json và raw artifacts.
+
 Source: `e43e1b75c6ba3da2b3f77243e17bd6045131731a`. Owner Gemini3.5FlashLite HIGH; verifier GPT6.1Sol HIGH. N1, không retry. Đây là development diagnostic; không qualification.
 
 ## c-20261028-s01
@@ -59,7 +61,7 @@ Khách: Chị cần bộ đồ mặc đi ăn với gia đình, thích đơn gi�
 Kết quả: **SEND_ELIGIBLE**
 
 ```text
-Chị mặc Set quần Uyển Hoa (mã SQ748) nhé ạ. Set này có tone kem phối họa tiết nhẹ nhàng, chất vải thô đũi mềm mịn và thoáng mát, thiết kế áo kết hợp quần short form suông thanh lịch, rất hợp để mặc đi ăn thoải mái cùng gia đình. 
+Chị mặc Set quần Uyển Hoa (mã SQ748) nhé ạ. Set này có tone kem phối họa tiết nhẹ nhàng, chất vải thô đũi mềm mịn và thoáng mát, thiết kế áo kết hợp quần short form suông thanh lịch, rất hợp để mặc đi ăn thoải mái cùng gia đình.
 
 Set có giá 799.000đ và hiện shop có sẵn size S và L ạ. Chị lấy size nào để em chuẩn bị cho mình nhé?
 ```
@@ -97,7 +99,7 @@ Khách: Váy Odette với Diệp An, em chọn giúp chị một mẫu mặc đi
 Kết quả: **SEND_ELIGIBLE**
 
 ```text
-Đi lễ thì chị chọn mẫu **Váy Diệp An** giúp em nhé. Mẫu này có thiết kế 2 lớp kín đáo, cổ tròn nhã nhặn cùng form suông nhẹ thanh lịch, vừa thoải mái lại rất phù hợp với không gian trang nghiêm. 
+Đi lễ thì chị chọn mẫu **Váy Diệp An** giúp em nhé. Mẫu này có thiết kế 2 lớp kín đáo, cổ tròn nhã nhặn cùng form suông nhẹ thanh lịch, vừa thoải mái lại rất phù hợp với không gian trang nghiêm.
 
 Chị có muốn em kiểm tra giá hoặc tư vấn size cho mẫu này không ạ?
 ```
@@ -272,7 +274,7 @@ Khách: Chị có quần nâu ở nhà rồi, đang muốn mua áo của bộ v�
 Kết quả: **SEND_ELIGIBLE**
 
 ```text
-Dạ, áo lẻ trong set Thạch Thảo có giá 499.000đ ạ. 
+Dạ, áo lẻ trong set Thạch Thảo có giá 499.000đ ạ.
 
 Mẫu này làm từ chất liệu tơ Hàn thêu nổi cao cấp, form nhẹ nhàng, mềm mại và có độ bay tự nhiên rất sang. Chị phối chiếc áo này với quần nâu ở nhà sẽ tạo nên một tổng thể vừa nhã nhặn, thanh lịch lại rất đỗi nhẹ nhàng đấy ạ.
 
@@ -393,4 +395,3 @@ Kết quả: **CODE_OWNED_SEND**
 ```text
 Chị cho em tên người nhận nhé.
 ```
-
