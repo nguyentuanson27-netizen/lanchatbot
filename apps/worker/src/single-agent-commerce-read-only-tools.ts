@@ -66,9 +66,9 @@ export function createReadOnlyTools(input: {
   const posPins = new Map<string, { identity: string; snapshot: CatalogSnapshotV3; latest: number }>();
   let posInvalidated = false;
   const invalidatePos = (): never => { posInvalidated = true; throw new Error("POS_OBSERVATION_CHANGED"); };
-  const pinPos = (id: string, source: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>) => {
+  const pinPos = (id: string, source: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>, pins = posPins) => {
     if (posInvalidated) return invalidatePos();
-    const parsed = CatalogSnapshotV3Schema.safeParse(source.snapshot), pinned = posPins.get(id);
+    const parsed = CatalogSnapshotV3Schema.safeParse(source.snapshot), pinned = pins.get(id);
     const raw = parsed.success ? parsed.data : null, at = input.clock().getTime();
     const observed = raw ? Date.parse(raw.synced_at) : NaN;
     if (!raw || source.product.productId !== id || raw.product_id !== id || raw.shop_alias !== scope.shopAlias ||
@@ -82,15 +82,15 @@ export function createReadOnlyTools(input: {
     if (pinned) {
       if (identity !== pinned.identity || observed < pinned.latest ||
         Date.parse(pinned.snapshot.synced_at) + maxAge * 1000 <= at) return invalidatePos();
-      pinned.latest = observed;
+      pins.set(id, { ...pinned, latest: observed });
       return { ...source, snapshot: structuredClone(pinned.snapshot) };
     }
     const snapshot = structuredClone(raw);
-    posPins.set(id, { identity, snapshot, latest: observed });
+    pins.set(id, { identity, snapshot, latest: observed });
     return { ...source, snapshot: structuredClone(snapshot) };
   };
   // Offer identities are source metadata, not price/stock facts or variant bindings.
-  const offerLiteral = (id: string, source: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>) => {
+  const offerLiteral = (id: string, source: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>, pins = offerPins) => {
     const parsed = CatalogSnapshotV3Schema.safeParse(source.snapshot), now = input.clock().getTime();
     if (source.product.productId !== id || !parsed.success || parsed.data.product_id !== id ||
       parsed.data.shop_alias !== scope.shopAlias) return null;
@@ -100,19 +100,21 @@ export function createReadOnlyTools(input: {
       observed > now || expires <= now || availableOffers.length > 8) return null;
     const identity = commerceHash({ shopAlias:raw.shop_alias, productId:id, releaseId:raw.release_id,
       status:normalizeCatalogToken(raw.data_status), availableOffers });
-    const pinned = offerPins.get(id);
+    const pinned = pins.get(id);
     // Re-observing identical offer identity does not renew the verifier's evidence.
     // Keep its original expiry; hardPrecheck still rejects it if it expires in this turn.
     if (pinned?.identity === identity) return pinned.literal;
     const literal = { ref: `offers:${id}`, sourceVersion: commerceHash({ releaseId: raw.release_id, observed, availableOffers }),
       observedAt: raw.synced_at, expiresAt: new Date(expires).toISOString(), text: JSON.stringify({ productId: id, availableOffers }) };
-    offerPins.set(id,{identity,literal});
+    pins.set(id,{identity,literal});
     return literal;
   };
   const bind = (p: StableProductDocument) => {
     if (!subjects.has(p.productId)) subjects.set(p.productId, { ref: p.productId, kind: "PRODUCT", label: p.title, bindingVersion: scope.bindingVersion });
   };
   for (const p of input.initialProducts ?? []) bind(p);
+  const reservedProducts = new Set([...subjects.values()].filter(s => s.kind === "PRODUCT").map(s => s.ref));
+  const productBound = (ids: readonly string[]) => new Set([...reservedProducts, ...products.keys(), ...ids]).size > MAX_RUNTIME_PRODUCTS;
   const snapshot = () => buildReadOnlyContext({ state: input.state?.() ?? { ...scope, currentProductId: null,
     factSnapshotVersion: "", conversationOwner: scope.conversationOwner }, subjects: [...subjects.values()],
     products: [...products.values()], claims: [...claims.values()].flat(), policies: [...(input.entry ? [{ref:"conversation-entry",text:JSON.stringify(input.entry),sourceVersion:scope.bindingVersion,observedAt:scope.sourceObservedAt,expiresAt:null}] : []),
@@ -143,6 +145,7 @@ export function createReadOnlyTools(input: {
       policy: JSON.parse(policyLiteral[0]!.text), sourceVersion: policyLiteral[0]!.sourceVersion } };
   }
   async function prepareProduct(id: string, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>,admit?:(context:TrustedContext)=>boolean) {
+    if (productBound([id])) throw new Error("PRODUCT_BOUND");
     const now = input.clock();
     let source: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>> | null;
     try { source = loaded ?? await input.catalog.readProduct(id); }
@@ -152,13 +155,15 @@ export function createReadOnlyTools(input: {
       catch { source = null; }
     }
     const p = source?.product;
-    if (!products.has(id) && products.size >= MAX_RUNTIME_PRODUCTS) throw new Error("PRODUCT_BOUND");
+    if (!permitted()) throw new Error("PERMISSION");
+    if (productBound([id])) throw new Error("PRODUCT_BOUND");
     let content = false;
+    const stagedEvidence = p?.productId === id ? staticEvidence(p, now) : null;
     const previous = { ...products.get(id) };
     delete previous.content; delete previous.attributes;
     products.delete(id);
     if (p?.productId === id) {
-      const evidence = staticEvidence(p, now);
+      const evidence = stagedEvidence!;
       if (evidence.content || evidence.attributes) {
         products.set(id, { ...previous, ...evidence }); content = true;
       }
@@ -182,7 +187,7 @@ export function createReadOnlyTools(input: {
       const maps=[subjects,products,claims,deliveryContexts,offerContexts,preparationContexts,reads,priceReads,posPins] as Map<unknown,unknown>[];
       const saved=maps.map(m=>structuredClone([...m.entries()])),oldAmbiguous=ambiguousPriceRead,oldInvalid=posInvalidated;
       try{
-        const result=await readProduct({subjectRef:id,...(offers.length===1?{offerType:offers[0]}:{offerTypes:offers}),preparationOnly:true},source);
+        const result=admitProductRead({subjectRef:id,...(offers.length===1?{offerType:offers[0]}:{offerTypes:offers}),preparationOnly:true},source);
         const data=result.data as {sellingOptions?:{availability:{price:{status:string};stock:{status:string}}}[]}|undefined;
         const staged=snapshot();
         if(result.status!=="OK"||!data?.sellingOptions?.length||data.sellingOptions.some(o=>o.availability.price.status!=="OK"||o.availability.stock.status!=="OK")||
@@ -203,8 +208,8 @@ export function createReadOnlyTools(input: {
     const current = snapshot(), bound = current.boundSubjects.filter(s => s.kind === "PRODUCT");
     const id = current.state.currentProductId ?? (bound.length === 1 ? bound[0]!.ref : null);
     if (!id || !bound.some(s => s.ref === id) || prepared.has(id) || [...reads.values()].some(a => a.subjectRef === id)) return 0;
-    prepared.add(id);
     await prepareProduct(id,undefined,admit);
+    prepared.add(id);
     return 1;
   }
   async function readProduct(args: Record<string, unknown>, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>): Promise<CommerceToolResult> {
@@ -212,8 +217,14 @@ export function createReadOnlyTools(input: {
     let fetched: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>;
     try { fetched = loaded ?? await input.catalog.readProduct(id); }
     catch (error) { if (posPins.has(id)) posInvalidated = true; throw error; }
-    if(typeof args.color==="string")input.onMediaColor?.(id,args.color);
-    const source = pinPos(id, fetched), p = source.product;
+    return admitProductRead(args, fetched);
+  }
+  function admitProductRead(args: Record<string, unknown>, fetched: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>): CommerceToolResult {
+    const id=args.subjectRef as string, now=input.clock();
+    if (!permitted()) return {status:"REJECTED",reason:"PERMISSION"};
+    if (productBound([id])) return {status:"REJECTED",reason:"PRODUCT_BOUND"};
+    const pendingPins = new Map(posPins);
+    const source = pinPos(id, fetched, pendingPins), p = source.product;
     const parsed = CatalogSnapshotV3Schema.safeParse(source.snapshot);
     if (p.productId !== id || (p.observedAt && (!Number.isFinite(Date.parse(p.observedAt)) ||
       Date.parse(p.observedAt) > now.getTime())) || (source.snapshot !== null && (!parsed.success || parsed.data.product_id !== id ||
@@ -310,7 +321,9 @@ export function createReadOnlyTools(input: {
       return {offerType,price:o?(o.availability.price.status==="OK"?"AVAILABLE":"UNAVAILABLE"):"NOT_READ",stock:o?(o.availability.stock.status==="OK"?"AVAILABLE":"UNAVAILABLE"):"NOT_READ"};
     });
     if(Buffer.byteLength(JSON.stringify(evidence))>8192)return {status:"REJECTED",reason:"PRODUCT_EVIDENCE_BOUND"};
-    if (!products.has(id) && products.size >= MAX_RUNTIME_PRODUCTS) return { status: "REJECTED", reason: "PRODUCT_BOUND" };
+    if (productBound([id])) return { status: "REJECTED", reason: "PRODUCT_BOUND" };
+    if (pendingPins.has(id)) posPins.set(id,pendingPins.get(id)!);
+    if(typeof args.color==="string")input.onMediaColor?.(id,args.color);
     offerContexts.delete(id);
     const offerEvidence = availableOffers !== null ? offerLiteral(id,source) : null;
     if (offerEvidence) offerContexts.set(id,offerEvidence);
@@ -395,21 +408,31 @@ export function createReadOnlyTools(input: {
         const candidates = found.status === "MATCHED" ? [found.product] : found.status === "AMBIGUOUS" ? found.candidates.map(c => c.document) : [];
         if (new Set([...subjects.keys(), ...candidates.map(p => p.productId)]).size > 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
         const evidence = candidates.map(p => staticEvidence(p, input.clock()));
-        if (new Set([...products.keys(), ...evidence.filter(p => p.attributes || p.content).map(p => p.subjectRef)]).size > MAX_RUNTIME_PRODUCTS)
+        if (productBound(evidence.filter(p => p.attributes || p.content).map(p => p.subjectRef)))
           return { status: "REJECTED", reason: "PRODUCT_BOUND" };
         // Bounded catalog reads (one per returned candidate), accounted by the catalog port.
         // No facts are resolved and no selling option is selected on the customer's behalf.
+        const pendingOfferPins = new Map(offerPins);
         const metadata = await Promise.all(candidates.map(async p => {
-          try { return offerLiteral(p.productId, await input.catalog.readProduct(p.productId)); }
+          try { return offerLiteral(p.productId, await input.catalog.readProduct(p.productId), pendingOfferPins); }
           catch { return null; }
         }));
         // Other independent searches may have completed while source reads were in flight.
         if (new Set([...subjects.keys(), ...candidates.map(p => p.productId)]).size > 8)
           return { status: "REJECTED", reason: "SUBJECT_BOUND" };
-        if (new Set([...products.keys(), ...evidence.filter(p => p.attributes || p.content).map(p => p.subjectRef)]).size > MAX_RUNTIME_PRODUCTS)
+        if (productBound(evidence.filter(p => p.attributes || p.content).map(p => p.subjectRef)))
           return { status: "REJECTED", reason: "PRODUCT_BOUND" };
+        if (!permitted()) return {status:"REJECTED",reason:"PERMISSION"};
+        const result: CommerceToolResult = { status: "OK", data: { status: found.status,
+          subjects: candidates.map(p => subjects.get(p.productId) ?? {ref:p.productId,kind:"PRODUCT",label:p.title,bindingVersion:scope.bindingVersion}),
+          products: evidence.map(p => products.get(p.subjectRef) ?? p),
+          availableOffersByProduct: candidates.map((p, i) => ({ productId: p.productId,
+            availableOffers: metadata[i] ? (JSON.parse(metadata[i]!.text) as { availableOffers: string[] }).availableOffers : null })) } };
+        if (Buffer.byteLength(JSON.stringify(result)) > 8192) return {status:"REJECTED",reason:"RESULT_BOUND"};
+        if (evidence.some(p=>Buffer.byteLength(JSON.stringify(p))>8192)) return {status:"REJECTED",reason:"PRODUCT_EVIDENCE_BOUND"};
         candidates.forEach(bind);
         candidates.forEach((p, i) => {
+          if (pendingOfferPins.has(p.productId)) offerPins.set(p.productId,pendingOfferPins.get(p.productId)!);
           if (metadata[i]) offerContexts.set(p.productId, metadata[i]!);
           else offerContexts.delete(p.productId);
         });
@@ -418,12 +441,7 @@ export function createReadOnlyTools(input: {
           // Search must not replace a fuller, already verified product read.
           if (!products.has(p.subjectRef) && (p.attributes || p.content)) products.set(p.subjectRef, p);
         }
-        return { status: "OK", data: { status: found.status, subjects: candidates.map(p => subjects.get(p.productId)),
-          products: evidence.map(p => products.get(p.subjectRef) ?? p),
-          // Search already read and bound this offer identity. Expose the codes beside
-          // each candidate so a targeted read need not expand every selling option.
-          availableOffersByProduct: candidates.map((p, i) => ({ productId: p.productId,
-            availableOffers: metadata[i] ? (JSON.parse(metadata[i]!.text) as { availableOffers: string[] }).availableOffers : null })) } };
+        return result;
       }
       if (call.name === "read_product") {
         const a=readArgs(call.args);
@@ -436,7 +454,11 @@ export function createReadOnlyTools(input: {
         return await readProduct(a, loaded);
       }
       return { status: "REJECTED", reason: "UNKNOWN_TOOL" };
-    } catch { return { status: "UNAVAILABLE", reason: "SOURCE_ERROR" }; }
+    } catch (error) {
+      if (error instanceof Error && ["PRODUCT_BOUND","SUBJECT_BOUND","PERMISSION"].includes(error.message))
+        return {status:"REJECTED",reason:error.message};
+      return { status: "UNAVAILABLE", reason: "SOURCE_ERROR" };
+    }
   }
   return { invoke, snapshot, prepare,
     boundedPrice(){
@@ -475,7 +497,7 @@ export function createReadOnlyTools(input: {
       const source = await input.catalog.readProduct(id), {product} = source;
       if (product.productId !== id) throw new Error("PRODUCT_SOURCE_CHANGED");
       const evidence = staticEvidence(product, input.clock());
-      if (!products.has(id) && (evidence.attributes || evidence.content) && products.size >= MAX_RUNTIME_PRODUCTS)
+      if ((evidence.attributes || evidence.content) && productBound([id]))
         throw new Error("PRODUCT_BOUND");
       products.delete(id);
       if (evidence.attributes || evidence.content) products.set(id, evidence);
