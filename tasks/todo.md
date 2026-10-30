@@ -1,3 +1,10 @@
+## Current — post-run causal review, 2026-10-31
+
+- [x] Review22cases/34turns, prompts/tooldeclarations/exactrequestbudgets +generationRESULT journal vàold/newsource. [Root cause và bằng chứng](../apps/worker/evals/single-agent-commerce-qualification/variant-stock-search-rerun-20261030/ROOT_CAUSE.md).
+- [x] Offline replay gen0/network0/effect0: haiAOprice499k; source-approvedsharedchart160/55/RELAXED→M; nullcolor→COLOR_REQUIRED cả2worlds; oldactualsentinel/newactualnull; actual media11/11/10assetsstale trong3queryscopes,feedback0. Requestactuals07/s13phase terminal sau2rounds dùcòn3calls.
+- [x] Tách ownerplanning vs source thiếu vs verifierFAILđúng vs evaluatorgap. Giữ raw/grades/rubric, không thayhistoricalscore; sửa attribution media theoactualjournal s03DETAILnoTOP/s16SQFEEDBACKTOP, không nhận initialdiagnosticassumption làactualtrace.
+- [ ] Chưa triển khai fix hoặcchạyprovider/PG trongreviewtask. Hướng tiếp: sourcecolorbinding; shortreadpath/budget+observedcause; source mediaeligibility; judgeapplicabilitycontext. Không tăngrounds/caps/nớiverifier/parser/templategrowth hoặcrollbacktoànC. PhaseC BLOCKED/C3NOT_RUN/B_NOT_GO.
+
 ## Current — model run after variant/search implementation, 2026-10-30
 
 - [x] Freshsourcee43clean, unchanged22scripts/34turns/N1/retry0/models/prompts/rubric. Protocol86PASS; directcapturefailures01/02retained; reviewedcapture03TLSroutefresh107publicproducts/sourcewrites0, actualinitialPGclean/drop/gen0. Same reviewer inputs/preflight/dispatchAPPROVE trướcprovider.
