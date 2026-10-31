@@ -1,0 +1,338 @@
+{
+  "kind": "PURCHASE_OPTIONS_IMPLEMENTATION_VERIFICATION_V1",
+  "implementationBaseSha": "bd7140480267c3f1fbc63ded694cb5c794c3c8a8",
+  "runtimeTsSourceSha": "5666f172fd74560d6e6309ca2ca7a37ab9a3d911",
+  "executableSourceSha": "b23681093f3fd6f4bb5f8462921016b6c5d51c8d",
+  "actualPostgres": {
+    "path": "../c3-purchase-options-pg-20261031-02/integration.json",
+    "sourceSha": "1f2a004e8e0380b0a95ea295c1b731f214145c65",
+    "sourceDirty": false,
+    "status": "PASS",
+    "cases": 76,
+    "testDatabaseDropped": true,
+    "providerGenerations": 0,
+    "sendEnabled": false,
+    "checks": [
+      {
+        "name": "stale_revision",
+        "status": "PASS",
+        "artifactHash": "dc4b3be6e85e5363b6bf6ba5a0c3fe140116e18ba8f0947927a8b32797e1b947",
+        "caseName": "B composed newer inbound between final readback and commit cancels eligibility without an Outbox"
+      },
+      {
+        "name": "duplicate_source",
+        "status": "PASS",
+        "artifactHash": "dc4b3be6e85e5363b6bf6ba5a0c3fe140116e18ba8f0947927a8b32797e1b947",
+        "caseName": "B3 native cart commits once; duplicate does not repeat database transaction"
+      },
+      {
+        "name": "crash_after_commit",
+        "status": "PASS",
+        "artifactHash": "dc4b3be6e85e5363b6bf6ba5a0c3fe140116e18ba8f0947927a8b32797e1b947",
+        "caseName": "B composed recovery accounting commit-response-lost"
+      },
+      {
+        "name": "ambiguous_reconciliation",
+        "status": "PASS",
+        "artifactHash": "dc4b3be6e85e5363b6bf6ba5a0c3fe140116e18ba8f0947927a8b32797e1b947",
+        "caseName": "B3 native quantity change persists, unknown commit reconciles without replay"
+      },
+      {
+        "name": "operation_idempotency",
+        "status": "PASS",
+        "artifactHash": "dc4b3be6e85e5363b6bf6ba5a0c3fe140116e18ba8f0947927a8b32797e1b947",
+        "caseName": "B composed ingress commits an open cart, authorizes the exact reply and captures delivery once"
+      },
+      {
+        "name": "history_outbox_recovery",
+        "status": "PASS",
+        "artifactHash": "dc4b3be6e85e5363b6bf6ba5a0c3fe140116e18ba8f0947927a8b32797e1b947",
+        "caseName": "B composed two native mutations retain one source and next owner receives accepted history and current cart"
+      },
+      {
+        "name": "no_duplicate_effect",
+        "status": "PASS",
+        "artifactHash": "dc4b3be6e85e5363b6bf6ba5a0c3fe140116e18ba8f0947927a8b32797e1b947",
+        "caseName": "B composed N4 sends exact text and selected image in one response group without replay duplicates"
+      }
+    ]
+  },
+  "sourceEquivalence": {
+    "runtimeTsAndPackagesIdenticalFrom": "5666f172fd74560d6e6309ca2ca7a37ab9a3d911",
+    "through": "b23681093f3fd6f4bb5f8462921016b6c5d51c8d",
+    "actualPgUsedSameRuntimeTs": true,
+    "laterChanges": "1f2a test harness adaptation; b236 evaluator-only selection/BOM readiness"
+  },
+  "commands": [
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-preparation.test.ts",
+      "stage": "RED",
+      "exitCode": 1,
+      "passed": 8,
+      "failed": 4,
+      "log": "TOOL_TRANSCRIPT"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-diagnostics.test.ts",
+      "stage": "RED",
+      "exitCode": 1,
+      "passed": 5,
+      "failed": 1,
+      "log": "TOOL_TRANSCRIPT"
+    },
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-qualification/evaluator-source.test.mjs",
+      "stage": "RED",
+      "exitCode": 1,
+      "passed": 4,
+      "failed": 1,
+      "log": "TOOL_TRANSCRIPT"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-selection-compact.test.ts",
+      "stage": "RED",
+      "exitCode": 1,
+      "passed": 6,
+      "failed": 1,
+      "log": "TOOL_TRANSCRIPT"
+    },
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-qualification/source-readiness.test.mjs",
+      "stage": "RED",
+      "exitCode": 1,
+      "failure": "MODULE_NOT_FOUND_BEFORE_IMPLEMENTATION",
+      "log": "TOOL_TRANSCRIPT"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-preparation.test.ts src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-read-only-context.test.ts src/single-agent-commerce-product-groups.test.ts src/single-agent-commerce-selection-compact.test.ts src/single-agent-commerce-effects.test.ts src/single-agent-commerce-read-only.test.ts src/single-agent-commerce-quote.test.ts src/single-agent-commerce-handoff.test.ts src/single-agent-semantic-verifier-boundary.test.ts src/single-agent-commerce-diagnostics.test.ts src/single-agent-commerce-selection-evidence.test.ts src/single-agent-commerce-missing-information.test.ts src/single-agent-commerce-media.test.ts src/single-agent-commerce-media-revalidation.test.ts src/single-agent-commerce-handoff-delivery.test.ts src/single-agent-commerce-state.test.ts",
+      "stage": "FINAL",
+      "exitCode": 0,
+      "passed": 511,
+      "files": 17,
+      "log": "../c3-purchase-options-focused-20261031-03.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker test:evals",
+      "stage": "FINAL",
+      "exitCode": 0,
+      "passed": 776,
+      "skipped": 2,
+      "failed": 0,
+      "total": 778,
+      "sourceSha": "b23681093f3fd6f4bb5f8462921016b6c5d51c8d",
+      "endSourceSha": "b23681093f3fd6f4bb5f8462921016b6c5d51c8d",
+      "log": "../c3-purchase-options-node-20261031-03.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "stage": "FINAL",
+      "exitCode": 0,
+      "sourceSha": "1f2a004e8e0380b0a95ea295c1b731f214145c65",
+      "log": "../c3-purchase-options-build-20261031-04.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "stage": "FINAL",
+      "exitCode": 0,
+      "log": "../c3-purchase-options-typecheck-20261031-01.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "stage": "FINAL",
+      "exitCode": 0,
+      "log": "../c3-purchase-options-lint-20261031-01.log"
+    },
+    {
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/effect-readiness.test.ts src/protected-claims.test.ts src/reply-assembler.test.ts",
+      "stage": "FINAL",
+      "exitCode": 0,
+      "passed": 55,
+      "log": "../c3-purchase-options-business-20261031-01.log"
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-purchase-options-pg-20261031-02 COD",
+      "stage": "FINAL",
+      "exitCode": 0,
+      "passed": 76,
+      "providerGenerations": 0,
+      "testDatabaseDropped": true,
+      "log": "../c3-purchase-options-pg-20261031-02.log"
+    },
+    {
+      "command": "node ../c3-purchase-options-source-audit-20261031.mjs",
+      "stage": "SOURCE_AUDIT",
+      "exitCode": 0,
+      "source": "HISTORICAL_FROZEN_WORLD_NOT_FRESH_CAPTURE",
+      "providerRequests": 0,
+      "networkReads": 0,
+      "sourceWrites": 0
+    },
+    {
+      "command": "node ../c3-purchase-options-byte-probe-20261031.mjs",
+      "stage": "STATIC_WIRE_PROBE",
+      "exitCode": 0,
+      "providerRequests": 0,
+      "sourceWrites": 0
+    },
+    {
+      "command": "git diff --check",
+      "stage": "DIFF",
+      "exitCode": 0
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "../c3-purchase-options-focused-20261031-01.log",
+      "sha256": "ea4cb778b556fe92d6932365a3b5da92fcee0a82807b9b1d1feef5e6aebb042e",
+      "bytes": 8215
+    },
+    {
+      "path": "../c3-purchase-options-focused-20261031-02.log",
+      "sha256": "751e0bb7f20ec776491e900027d1de206750c1822900a822a18889eeec50ea39",
+      "bytes": 1804
+    },
+    {
+      "path": "../c3-purchase-options-focused-20261031-03.log",
+      "sha256": "0a146cc6b17638e38b3d34418fa5e845796df547ed4543472632dd50d786d0cf",
+      "bytes": 3099
+    },
+    {
+      "path": "../c3-purchase-options-node-20261031-01.log",
+      "sha256": "0a8242d4dd8f9eb041c889f9662d41de6d2ef08d0b382a53ef3741c9af045259",
+      "bytes": 90842
+    },
+    {
+      "path": "../c3-purchase-options-node-20261031-02.log",
+      "sha256": "0bdbcbcb3aa011b8609c273314aa547b10001c33178350d0ece56c3d5a41dee8",
+      "bytes": 85995
+    },
+    {
+      "path": "../c3-purchase-options-node-20261031-03.log",
+      "sha256": "cf3ce517fecf51977a3bd32d3242ac74499008692e8fa12eef4d52d1c9ee8cca",
+      "bytes": 86084
+    },
+    {
+      "path": "../c3-purchase-options-build-20261031-01.log",
+      "sha256": "2af5471e46ca951e6631293f49bc953538838ef825b3cec910fd94235c4a0c61",
+      "bytes": 5249
+    },
+    {
+      "path": "../c3-purchase-options-build-20261031-02.log",
+      "sha256": "e8ee9d7878577e476a0f61538223fd62bbe70590cc640350c0cce031781cb210",
+      "bytes": 5249
+    },
+    {
+      "path": "../c3-purchase-options-build-20261031-03.log",
+      "sha256": "75d8bdcee1b0ea7ba2c5c47896f3d94c55d15321306b08132eccf932e988d417",
+      "bytes": 5249
+    },
+    {
+      "path": "../c3-purchase-options-build-20261031-04.log",
+      "sha256": "eb5025eb30a726ca8a6d6cea46a7c2a3012af88121e6b638300fd6a3a5f4d6e5",
+      "bytes": 5249
+    },
+    {
+      "path": "../c3-purchase-options-typecheck-20261031-01.log",
+      "sha256": "cc85fde55a98f7849dc416aeb05c1ed0c11ec91dc5e43f0ab1faf2919cf9bf87",
+      "bytes": 5266
+    },
+    {
+      "path": "../c3-purchase-options-lint-20261031-01.log",
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "bytes": 171
+    },
+    {
+      "path": "../c3-purchase-options-business-20261031-01.log",
+      "sha256": "af8905a50e24dda533067e074c80d2aa40df48c3177a9f3519d1d009115a6e42",
+      "bytes": 481
+    },
+    {
+      "path": "../c3-purchase-options-pg-20261031-01.log",
+      "sha256": "f22f7d4d04382366793e72f8d68202a67af558b0e651f0ab3eadfef00e8a2e1c",
+      "bytes": 2550
+    },
+    {
+      "path": "../c3-purchase-options-pg-20261031-02.log",
+      "sha256": "4aece7139aa8e87ba52bf5c387c6c1e83c85ed57372d3d7978251dcd53a0d593",
+      "bytes": 6650
+    },
+    {
+      "path": "../c3-purchase-options-pg-20261031-01/integration.json",
+      "sha256": "6f9b5c278cb157ec1e2c13fa12c064df0271b82a18e13861906c10eec57225a9",
+      "bytes": 9682
+    },
+    {
+      "path": "../c3-purchase-options-pg-20261031-02/integration.json",
+      "sha256": "f7eceb1531a92a21bcc828fb71984bde8de85826a1f83b7a93c51f57f6ba2dde",
+      "bytes": 35977
+    },
+    {
+      "path": "../c3-purchase-options-build-20261031-04.result.json",
+      "sha256": "12b36a45f0a5e48489c357d57bac07c170f1d39af3d13dda925e063c12819a9a",
+      "bytes": 133
+    },
+    {
+      "path": "../c3-purchase-options-node-20261031-03.result.json",
+      "sha256": "be949b6cd15769f26770e20f674961d2476d1d7e34bfdd3819d09e1b295b6a1c",
+      "bytes": 201
+    },
+    {
+      "path": "../c3-purchase-options-source-audit-20261031.mjs",
+      "sha256": "65dc18b31382fb0d525405286f5299f49e390fb61bad03d8671de01bf64841c6",
+      "bytes": 1713
+    },
+    {
+      "path": "../c3-purchase-options-byte-probe-20261031.mjs",
+      "sha256": "22d4b4de4f5df8237d28ba2097e2ee925c2dcf4eaa051484dd388859e92c3d09",
+      "bytes": 2894
+    },
+    {
+      "path": "../c3-purchase-options-byte-probe-20261031.json",
+      "sha256": "f17a8c2e7f470b6d9356c3ebe1afa22bbc5d6ffc6cdbe449793efbc6f2043129",
+      "bytes": 290
+    }
+  ],
+  "byteProbe": {
+    "kind": "SIX_OFFER_NATIVE_WIRE_PROBE_V1",
+    "syntheticFixtureOnly": true,
+    "charged": 1,
+    "sourceReads": 1,
+    "protectedClaims": 0,
+    "ownerBytes": 28442,
+    "verifierBytes": 24164,
+    "contextBytes": 5759,
+    "providerRequests": 0,
+    "sourceWrites": 0,
+    "semanticVerdict": "NOT_RUN"
+  },
+  "priorFailures": {
+    "workerFocused01": {
+      "passed": 463,
+      "failed": 3
+    },
+    "node01": {
+      "passed": 768,
+      "failed": 5,
+      "skipped": 2
+    },
+    "pg01": {
+      "status": "FAIL",
+      "cases": 21,
+      "testDatabaseDropped": true,
+      "providerGenerations": 0
+    },
+    "historicalLocalWireFailures": "round56/57/58 reran PASS unchanged; exact transient cause UNKNOWN"
+  },
+  "limitations": [
+    "No new provider/model run, quality result or C3 comparison.",
+    "No shop data/media publication or fresh world capture.",
+    "Component sizing is unsupported by current product-target API; no fit inferred.",
+    "New corpus/denominator not frozen until source prerequisites reviewed."
+  ],
+  "onlineRolesAdded": 0,
+  "semanticLayersAdded": 0,
+  "providerGenerationRequests": 0,
+  "shopSourceWrites": 0,
+  "liveSends": 0,
+  "status": "VERIFIED_PENDING_INDEPENDENT_FINAL_ACCEPTANCE"
+}

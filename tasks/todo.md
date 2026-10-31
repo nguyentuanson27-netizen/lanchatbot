@@ -1,4 +1,16 @@
-## Current — purchase-option read path, owner direction 2026-10-31
+## Current — purchase-option implementation, 2026-10-31
+
+- [x] RED observed before preparation/coverage/delegation/selection/readiness implementation. Runtime TS5666f172; evaluator source b2368109; no model generation or shop-source writes.
+- [x] Prepare exact bounded offer/read refs, actual debit/admission and atomic staging; preserve admitted numeric facts. Source BOM malformed/oversize/fallback parity covered. Product-level size lookup remains separate; component sizing explicitly unsupported, no invented chart.
+- [x] Required shop-source gap → code-owned silent handoff under holding policies; denied/unknown/repeat blocked. Keep explicit-owner business handoff and delivery-source/receipt compatibility separately tested.
+- [x] F04/F05 code: bounded prep/tool/engine coverage, frozen delegation/evaluator isolation; readiness exact price/usable stock/colour/media/product-size/policy/selector-BOM, recheck before provider dispatch. New corpus still needs reviewed requirements and actual native history.
+- [x] Final local verification511worker focused,776NodePASS/2existingSKIP,55business, canonical workerbuild/typecheck/lintPASS. Actual isolatedPG76/76+7existing invariantsPASS/DBdropped/provider0/sendfalse; PG01 and earlier test failures retained in [evidence](../docs/specs/c3-phase-c-purchase-options-verification-20261031.json).
+- [x] Same independent reviewer closed6findings plus1BOMfinding; APPROVE CODE REVIEW5666/b236. [Review record](../docs/specs/c3-phase-c-purchase-options-implementation-review-20261031.md).
+- [ ] Final independent evidence/delivery acceptance; not yet a quality/model/source-readiness GO.
+- [ ] SOURCE_BLOCKED: confirm missing physical-colour bindings and eligible media through real source process; no silent TTL renewal or source approval in code task. Historical four-product inventory is not a fresh capture.
+- [ ] Freeze/deduplicate source-ready vs handoff provider corpus, readiness requirements, genuine history/registered branches and denominator before any requested model run. F01/F06 sales improvement MODEL_NOT_RUN; F09 minor voice remains ACCEPTED_LIMITATION. PhaseC BLOCKED/C3NOT_RUN/B_NOT_GO.
+
+## Historical — purchase-option read path, owner direction 2026-10-31
 
 - [x] Cập nhật [kế hoạch](../docs/specs/c3-phase-c-purchase-options-read-path-plan-20261031.md): một mã/multi-offer là luồng chính; hai mã trùng tên nhánh phụ. Code chuẩn bị source references/coverage, owner chọn offer; không gộp nguồn theo tên, không tăng budget.
 - [x] Đối chiếu B–C REPORT §3: thiếu preparation hai bound refs tồn tại cả B/C. Giữ attribution riêng của hồi quy admission đã xác nhận/sửa; không sửa grades/raw lịch sử.
