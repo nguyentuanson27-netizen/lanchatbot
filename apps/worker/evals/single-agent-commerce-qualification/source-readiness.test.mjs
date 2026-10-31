@@ -49,3 +49,10 @@ test('checkout readiness requires the existing exact selection/BOM resolver, not
  w.snapshots.SM613.offers.COMBO_3=structuredClone(w.snapshots.SM613.offers.DIRECT);w.snapshots.SM613.offers.COMBO_3.rows[0].offer_type='COMBO_3';
  await assert.rejects(sourceReadiness(w,{cohort:'SALES_READY',checks:[{...checks[0],offerType:'COMBO_3'}]},commerceNow),/SOURCE_READINESS_BLOCKED/);
 });
+
+test('PUBLISHED readiness consumes the same approved channel as runtime policy reads',async()=>{
+ const w=world();w.config.channel='PUBLISHED';
+ for(const r of w.policyRecords){r.pointer.channel='PUBLISHED';r.version.lifecycle='PUBLISHED';}
+ const m=await sourceReadiness(w,{cohort:'SALES_READY',checks:[{facet:'POLICY'}]},commerceNow);
+ assert.equal(m.results[0].status,'AVAILABLE');
+});

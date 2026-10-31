@@ -13,7 +13,7 @@ import {digest} from './qualification.mjs';
 export async function sourceReadiness(world,spec,at=new Date()){
  assert(Number.isFinite(at.getTime())&&['SALES_READY','SOURCE_UNAVAILABLE'].includes(spec?.cohort)&&Array.isArray(spec.checks)&&spec.checks.length<=32,'C_READINESS_SPEC');
  assert(spec.checks.length||spec.noProductFactsRequired===true,'C_READINESS_EMPTY_REQUIREMENTS');
- const policy=world.config?.scope?.pageId&&world.config?.channel?await new RuntimePolicyResolver({loadActivePointers:async()=>structuredClone(world.policyRecords??[])},{enabled:true})
+ const policy=world.config?.scope?.pageId&&world.config?.channel?await new RuntimePolicyResolver({loadActivePointers:async()=>structuredClone(world.policyRecords??[])},{enabled:true,publishedEnabled:world.config.channel==='PUBLISHED'})
   .resolve({pageId:world.config.scope.pageId,channel:world.config.channel,now:at}):{status:'UNAVAILABLE',bundle:null};
  const results=[];
  for(const q of spec.checks){
