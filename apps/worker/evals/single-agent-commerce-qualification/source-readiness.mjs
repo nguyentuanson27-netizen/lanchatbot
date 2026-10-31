@@ -7,7 +7,7 @@ import {resolveCatalogFacts} from '@lana/business-tools';
 import {RuntimePolicyResolver} from '@lana/chat-runtime';
 import {candidateCartOptions} from '../../dist/realtime-sales-catalog.js';
 import {commerceSizeSource} from '../../dist/single-agent-commerce-product-groups.js';
-import {eligibleCommerceMedia} from '../../dist/single-agent-commerce-media-eligibility.js';
+import {eligibleCommerceMedia,commerceMediaIntents} from '../../dist/single-agent-commerce-media-eligibility.js';
 import {digest} from './qualification.mjs';
 
 export async function sourceReadiness(world,spec,at=new Date()){
@@ -24,7 +24,7 @@ export async function sourceReadiness(world,spec,at=new Date()){
   if(q.facet==='POLICY'){available=policy.status==='RESOLVED'&&!!policy.bundle;reason=available?null:'POLICY_UNAVAILABLE';}
   else if(!p||!snapshot&&!['MEDIA','SIZE_SOURCE'].includes(q.facet)){reason='PRODUCT_SOURCE_UNAVAILABLE';}
   else if(q.facet==='MEDIA'){
-   assert(['GENERIC','DETAIL','FEEDBACK','ANGLE','ON_BODY','SIZE_CHART'].includes(q.intent),'C_READINESS_MEDIA_INTENT');
+   assert(commerceMediaIntents.includes(q.intent),'C_READINESS_MEDIA_INTENT');
    assert(Array.isArray(q.allowedHostSuffixes)&&q.allowedHostSuffixes.length>0&&q.allowedHostSuffixes.every(h=>['content.pancake.vn','lanadesign.vn','fbcdn.net','fbsbx.com'].includes(h)),'C_READINESS_HOSTS');
    try{available=eligibleCommerceMedia(p,{subjectRef:q.productId,intent:q.intent,...(q.componentRole?{componentRole:q.componentRole}:{}),...(q.color?{color:q.color}:{})},at.getTime(),q.allowedHostSuffixes).images.length>0;
     reason=available?null:'NO_VERIFIED_MATCHING_MEDIA';}catch{reason='MEDIA_INELIGIBLE';}
@@ -44,7 +44,7 @@ export async function sourceReadiness(world,spec,at=new Date()){
    }else{
     const facts=resolveCatalogFacts(snapshot,{shopAlias:world.config.scope.shopAlias,productId:q.productId,intent:q.facet,
      offerType:q.offerType,color:q.color??null,size:q.size??null,deliveryRegion:null},at,world.config.maxFactAgeSeconds??1200);
-    available=facts.status==='OK';reason=available?null:facts.reasonCode??'SOURCE_UNAVAILABLE';
+    available=facts.status==='OK'&&(q.facet!=='STOCK'||facts.facts?.stockStatus!=='UNKNOWN'&&facts.facts?.stockQuantity!==null);reason=available?null:facts.reasonCode??'SOURCE_UNAVAILABLE';
    }
   }
   results.push({requirement:structuredClone(q),status:available?'AVAILABLE':'FAILED',reason});

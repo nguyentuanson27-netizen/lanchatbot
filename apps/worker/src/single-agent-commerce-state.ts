@@ -251,6 +251,7 @@ export async function createCustomerStateTools(input: {
         sizes.set(a.subjectRef, { claims: buildProtectedClaimsFromVerifiedFactsV1({ facts: null, sizeClaim: claim, expectedProductId: a.subjectRef }).claims,
           fingerprint: claim?.measurementFingerprint, profileHash: profileHash(), sourceHash: commerceHash({ target: source.target, charts: source.charts }) });
         return { status: "OK", data: { status: decision.recommendation.status, action: decision.action,
+          sizeSourceHash:commerceHash({target:source.target,charts:source.charts}),
           missingInputs: decision.missingInputs, recommendedSizes: claim ? decision.recommendation.recommendedSizes : [],
           inputFitPreference:effective.profile.fitPreference, alternativeSizes:claim?.value.alternativeSizes??null } };
       }

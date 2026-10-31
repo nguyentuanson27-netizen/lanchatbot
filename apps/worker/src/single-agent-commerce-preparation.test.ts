@@ -86,3 +86,13 @@ it("does not debit cached preparation or already admitted full reads again",asyn
  const before=s.tools.snapshot();expect(await s.tools.prepare(()=>true,{maxCalls:5,onDispatch:dispatch})).toBe(0);
  expect(dispatch).toHaveBeenCalledTimes(1);expect(s.tools.snapshot()).toEqual(before);
 });
+
+it("retains option-specific BOM roles without claiming component size applicability from a product chart",async()=>{
+ const s=setup("many");s.f.snapshot.offers.AO!.rows[0]!.components=[{product_sku:"DESIGN_AO",quantity:1}];
+ s.f.snapshot.offers.QUAN!.rows[0]!.components=[{product_sku:"DESIGN_QUAN",quantity:1}];
+ await s.tools.prepare();const data=JSON.parse(s.tools.snapshot().policyLiterals.find(p=>p.ref===`offers:${s.f.product.productId}`)!.text);
+ expect(data.purchaseOptions.find((o:{offerType:string})=>o.offerType==="AO").componentSource.components).toEqual([{componentRef:"DESIGN_AO",role:"TOP"}]);
+ expect(data.purchaseOptions.find((o:{offerType:string})=>o.offerType==="QUAN").componentSource.components).toEqual([{componentRef:"DESIGN_QUAN",role:"PANTS"}]);
+ for(const o of data.purchaseOptions){expect(o).not.toHaveProperty("sizeRead");expect(o.sizeApplicability).toMatchObject({status:"NOT_READ",componentSizing:"UNSUPPORTED_BY_PRODUCT_TARGET_API",chartRef:null});}
+ expect(data.productSizeRead.scope).toBe("PRODUCT_ONLY");
+});

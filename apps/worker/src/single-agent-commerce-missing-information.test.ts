@@ -114,3 +114,13 @@ describe("missing shop information uses real handoff; missing customer input sta
   expect(await tools.terminalOutcome!()).toMatchObject({disposition:"HANDOFF",reason:"SIZE_RULE_UNAVAILABLE"});expect(s.commit).toHaveBeenCalledOnce();
  });
 });
+
+it.each(["ok","denied","unknown"] as const)("required source handoff stays silent under a holding-message policy (%s)",async mode=>{
+ const s=await setup("missing-pos",mode);s.read.catalog.readProduct=async()=>{throw Error("SOURCE_OFFLINE");};
+ const tools=await createCommerceTools({read:s.read,handoff:s.handoff});
+ await tools.invoke({name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT"}});
+ const terminal=await tools.terminalOutcome!();expect(terminal?.text).toBeNull();
+ expect(terminal?.disposition).toBe(mode==="ok"?"HANDOFF":"NO_SEND");expect(s.commit).toHaveBeenCalledOnce();
+ expect(s.commit.mock.calls[0]![0]).toMatchObject({decision:{customerMessages:[],customerMessagePolicy:"SILENT_HANDOFF"}});
+ await tools.invoke({name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT"}});expect(s.commit).toHaveBeenCalledOnce();
+});

@@ -6,7 +6,7 @@ import { buildVerifiedFactBlocks, buildProtectedClaimsFromVerifiedFactsV1, build
 import { buildReadOnlyContext, commerceHash, commerceUuid, publicPolicyLiteral, omitCurrentProductDuplicates } from "./single-agent-commerce-read-only-context.js";
 import { MAX_RUNTIME_PRODUCTS, type RuntimeProductEvidence, type TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import { buildRealtimeProductFactsV2 } from "./realtime-product-facts-v2.js";
-import { resolveCatalogDeliveryRegion, verifiedVariantFromSnapshot,candidateCartOptions } from "./realtime-sales-catalog.js";
+import { resolveCatalogDeliveryRegion, verifiedVariantFromSnapshot,candidateCartOptions,catalogComponentRole } from "./realtime-sales-catalog.js";
 import type { CommerceProductGroup } from "./single-agent-commerce-product-groups.js";
 import type {CommerceDiagnostics} from "./single-agent-commerce-diagnostics.js";
 import {selectionEvidenceFromOptions,selectionSourceHash,mergeSelectionEvidence,expandSelectionOptions} from "./single-agent-commerce-selection-evidence.js";
@@ -101,18 +101,32 @@ export function createReadOnlyTools(input: {
     const availableOffers = Object.keys(raw.offers).sort();
     if (!["OK", "FULFILLMENT_POLICY_NOT_FOUND"].includes(normalizeCatalogToken(raw.data_status)) ||
       observed > now || expires <= now || availableOffers.length > 8) return null;
+    const purchaseOptions=availableOffers.map(offerType=>{
+      const rows=raw.offers[offerType]!.rows, structures=rows.slice(0,64).map(row=>{
+        const rawComponents=Array.isArray(row.components)?row.components:
+          [row.component_1_sku,row.component_2_sku].filter(v=>typeof v==='string'&&v.trim()).map(product_sku=>({product_sku}));
+        return rawComponents.slice(0,3).flatMap(c=>{
+          if(!c||typeof c!=="object")return [];
+          const v=c as Record<string,unknown>,ref=[v.product_sku,v.variation_sku,v.component_id].find(v=>typeof v==='string'&&v.trim());
+          return typeof ref==='string'&&Buffer.byteLength(ref)<=128?[{componentRef:ref,role:catalogComponentRole(ref)}]:[];
+        });
+      });
+      const structure=structures[0]??[],bounded=rows.length<=64&&rows.every(r=>!Array.isArray(r.components)||r.components.length<=3),consistent=bounded&&structures.every(v=>commerceHash(v)===commerceHash(structure));
+      return {offerType,priceRead:{subjectRef:id,offerType},stockRead:{subjectRef:id,offerType},
+        componentSource:{status:!bounded?'BOUND_EXCEEDED':!structures.some(v=>v.length)?'NOT_RECORDED':consistent?'AVAILABLE':'VARIANT_DEPENDENT',
+          completeness:rows.length<=64?'INSPECTED_ROWS':'FIRST_64_ROWS_ONLY',
+          sourceRef:'pos:'+commerceHash({releaseId:raw.release_id,productId:id,offerType}),
+          components:consistent?structure:[]},
+        sizeApplicability:{status:'NOT_READ',componentSizing:'UNSUPPORTED_BY_PRODUCT_TARGET_API',chartRef:null},
+        colorSemantics:'UNRECORDED_IS_NOT_A_PHYSICAL_COLOR'};
+    });
     const identity = commerceHash({ shopAlias:raw.shop_alias, productId:id, releaseId:raw.release_id,
-      status:normalizeCatalogToken(raw.data_status), availableOffers });
+      status:normalizeCatalogToken(raw.data_status), availableOffers,purchaseOptions });
     const pinned = pins.get(id);
-    // Re-observing identical offer identity does not renew the verifier's evidence.
-    // Keep its original expiry; hardPrecheck still rejects it if it expires in this turn.
+    // Re-observation never renews unchanged source metadata.
     if (pinned?.identity === identity) return pinned.literal;
-    const purchaseOptions = availableOffers.map(offerType => ({ offerType,
-      priceRead: { subjectRef:id, offerType }, stockRead: { subjectRef:id, offerType },
-      sizeRead: { subjectRef:id, applicability:"RECHECK_VERIFIED_TARGET_ON_CALL" },
-      componentScope:"EXACT_VARIANT_BOM_REQUIRES_READ", colorSemantics:"UNRECORDED_IS_NOT_A_PHYSICAL_COLOR" }));
     const literal = { ref: `offers:${id}`, sourceVersion: commerceHash({ releaseId: raw.release_id, observed, availableOffers }),
-      observedAt: raw.synced_at, expiresAt: new Date(expires).toISOString(), text: JSON.stringify({ productId: id, availableOffers, purchaseOptions }) };
+      observedAt: raw.synced_at, expiresAt: new Date(expires).toISOString(), text: JSON.stringify({ productId: id, availableOffers, purchaseOptions,productSizeRead:{subjectRef:id,scope:"PRODUCT_ONLY",status:"NOT_READ",chartRef:null} }) };
     pins.set(id,{identity,literal});
     return literal;
   };

@@ -1,4 +1,4 @@
-import {HandoffReasonV2Schema} from "@lana/contracts";
+import {HandoffReasonV2Schema,SizeRecommendationStatusSchema} from "@lana/contracts";
 import {createHash} from "node:crypto";
 export type CommerceDiagnosticStage="ARGUMENT_VALIDATION"|"CATALOG_READ"|"POS_READ"|"POLICY_READ"|"MEDIA_SELECT"|"MEDIA_FETCH"|"MEDIA_VALIDATE"|"RESULT_PROJECTION"|"RESULT_BOUND"|"CURRENT_READBACK"|"FINAL_GATE";
 export interface CommerceDiagnostic {ordinal:number;parentOrdinal:number|null;stage:CommerceDiagnosticStage;operation:string|null;status:string;selectorHash:string;reason:string|null;resultBytes:number|null;resultHash:string|null}
@@ -28,7 +28,7 @@ export type CommerceDiagnostics=ReturnType<typeof commerceDiagnostics>;
 /** Evaluator-only coverage. Never infer customer intent or change a handoff outcome. */
 export interface CommerceReadCoverage {
  complete:boolean; declaredHandoffReason:string|null;
- records:{ordinal:number;operation:string;facet:string;selectorHash:string;status:"AVAILABLE"|"FAILED";reason:string|null;resultHash:string}[];
+ records:{ordinal:number;operation:string;facet:string;selectorHash:string;status:"AVAILABLE"|"FAILED";reason:string|null;resultHash:string;engineOutcome?:string;sizeSourceHash?:string}[];
 }
 export function commerceReadCoverage(){
  const value:CommerceReadCoverage={complete:true,declaredHandoffReason:null,records:[]};
@@ -54,8 +54,26 @@ export function commerceReadCoverage(){
      const availability=o.availability as Record<string,{status:string}>|undefined;
      for(const facet of ['PRICE','STOCK'])add(facet,{subjectRef:a.subjectRef,offerType:o.offerType,color:a.color??null,size:a.size??null,deliveryRegion:a.deliveryRegion??null},result.status==='OK'&&availability?.[facet.toLowerCase()]?.status==='OK');
     }
-   }else add(call.name==='recommend_size'?'SIZE_ENGINE':call.name==='read_policy'?'POLICY':call.name==='search_products'?'DISCOVERY':'MEDIA',a,result.status==='OK');
+    }else {
+    add(call.name==='recommend_size'?'SIZE_ENGINE':call.name==='read_policy'?'POLICY':call.name==='search_products'?'DISCOVERY':'MEDIA',a,result.status==='OK');
+    if(call.name==='recommend_size'&&value.complete){
+     const last=value.records.at(-1)!,parsed=SizeRecommendationStatusSchema.safeParse(data.status);
+     if(parsed.success)last.engineOutcome=parsed.data;
+     if(typeof data.sizeSourceHash==='string'&&/^[a-f0-9]{64}$/.test(data.sizeSourceHash))last.sizeSourceHash=data.sizeSourceHash;
+    }
+   }
   }catch{value.complete=false;}
  };
- return {observe,snapshot:():CommerceReadCoverage=>structuredClone(value)};
+ return {observe,observePrepared(context:{protectedClaims:unknown[];metadata?:{ref:string;text:string}[]}){
+   for(const literal of context.metadata??[]){
+    if(value.records.length>=192){value.complete=false;break;}
+    try{const data=JSON.parse(literal.text);value.records.push({ordinal:value.records.length+1,operation:'prepare',facet:'METADATA',selectorHash:hash({subjectRef:data.productId}),status:'AVAILABLE',reason:null,resultHash:hash(literal)});}catch{value.complete=false;}
+   }
+   for(const item of context.protectedClaims){
+    if(!item||typeof item!=='object')continue;const c=item as {type?:string;scope?:unknown};
+    if(c.type!=='PRICE'&&c.type!=='STOCK')continue;
+    if(value.records.length>=192){value.complete=false;break;}
+    value.records.push({ordinal:value.records.length+1,operation:'prepare',facet:c.type,selectorHash:hash(c.scope),status:'AVAILABLE',reason:null,resultHash:hash(item)});
+   }
+  },snapshot:():CommerceReadCoverage=>structuredClone(value)};
 }

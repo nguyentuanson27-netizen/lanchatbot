@@ -27,7 +27,7 @@ function setup(t,dependencies={}){
  provider.setSlot({slotId:'unit-slot',turnIndex:0,runtimeInput});
  const row=JSON.parse(readFileSync(new URL('../single-agent-commerce-read-only/quote-presentation-run-20261026/frozen-inputs.json',import.meta.url))).records[0];
  const request=buildQuoteRequest(row,'A','unit-request',provider.ownerPrompt);request.contents=[{role:'user',parts:[{text:runtimeInput.latest}]}];
- return {provider,request,m,runtimeInput,out,world};
+ return {provider,request,m,runtimeInput,out,world,preflight};
 }
 
 test('native read policy uses active sources without consuming the transaction pin',async t=>{
@@ -115,4 +115,16 @@ test('real native verifier string answer is normalized only in evidence, raw res
  const draft='Dạ chị.',binding=makeBinding('unit-native-string',draft,f.request.context),value=await f.provider.verifier({generationId:'unit-native-string',
   instructions:f.provider.verifierPrompt,trusted:f.request.context,finalDraft:draft,latest:f.runtimeInput.latest,history:[],binding,signal:new AbortController().signal});
  assert.equal(value.result,raw);assert.deepEqual(f.provider.observed().at(-1).verdict,verdict);assert.equal(f.provider.observed().at(-1).rawVerdict,raw);
+});
+
+test('registered readiness expiry between preflight and generation stays counted with zero provider dispatch',async t=>{
+ const {sourceReadiness}=await import('./source-readiness.mjs');let posts=0,at;
+ const f=setup(t,{fetchImpl:async()=>{posts++;return response();},readinessClock:()=>at});
+ f.world.config.maxFactAgeSeconds=60;
+ const observed=new Date(f.world.snapshots.SV2447.synced_at);
+ const manifest=await sourceReadiness(f.world,{cohort:'SALES_READY',checks:[{facet:'PRICE',productId:'SV2447',offerType:'DIRECT'}]},observed);
+ f.preflight.sealed.corpus.scenarios[0].judgeContext={sourceReadiness:manifest};at=new Date(observed.getTime()+60000);
+ await assert.rejects(f.provider.owner(f.request),/SOURCE_READINESS_BLOCKED/);assert.equal(posts,0);
+ assert.equal(f.provider.observed().length,1);assert.equal(f.provider.observed()[0].providerRequests,0);
+ assert.equal(f.provider.observed()[0].failureLayer,'PRE_DISPATCH');
 });

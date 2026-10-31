@@ -1,7 +1,7 @@
 import {it,expect} from "vitest";
 import {createCommerceTools} from "./single-agent-commerce.js";
 import {fixtureProduct,fixturePolicy,commerceScope,commerceNow} from "./single-agent-commerce.test-support.js";
-import {commerceDiagnostics} from "./single-agent-commerce-diagnostics.js";
+import {commerceDiagnostics,commerceReadCoverage} from "./single-agent-commerce-diagnostics.js";
 
 it("retains a bounded source failure observation before the early tool result without raw errors",async()=>{
  const events:unknown[]=[],f=fixtureProduct();
@@ -52,4 +52,14 @@ it("records metadata separately from price reads and retains declared handoff re
  await tools.invoke({name:"read_product",args:{subjectRef:f.product.productId,offerType:"DIRECT"}});
  expect(tools.readCoverage!().records).toContainEqual(expect.objectContaining({facet:"PRICE",status:"AVAILABLE"}));
  expect(JSON.stringify(tools.readCoverage!())).not.toContain(f.product.productId);
+});
+
+it("preparation-only authoritative facts and engine outcome survive into evaluator coverage",async()=>{
+ const f=fixtureProduct(),tools=await createCommerceTools({read:{scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[f.product],catalog:{
+ readProduct:async()=>f,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}}});
+ await tools.prepare!(()=>true);expect(tools.readCoverage!().records).toContainEqual(expect.objectContaining({operation:"prepare",facet:"PRICE",status:"AVAILABLE"}));
+ const d=commerceReadCoverage();d.observe({name:"recommend_size",args:{subjectRef:"PRIVATE"}},{status:"OK",data:{status:"OUT_OF_RANGE",sizeSourceHash:"b".repeat(64)}});
+ expect(d.snapshot().records[0]).toMatchObject({facet:"SIZE_ENGINE",engineOutcome:"OUT_OF_RANGE",sizeSourceHash:"b".repeat(64)});
+ for(let i=0;i<200;i++)d.observe({name:"read_policy",args:{}},{status:"UNAVAILABLE",reason:"SOURCE_ERROR"});expect(d.snapshot().complete).toBe(false);
+ expect(JSON.stringify(d.snapshot())).not.toContain("PRIVATE");
 });

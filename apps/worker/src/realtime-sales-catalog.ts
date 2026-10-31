@@ -172,7 +172,7 @@ function positiveQuantity(value: unknown): number {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : 1;
 }
 
-function componentRole(value: string): ProductComponentRole {
+export function catalogComponentRole(value: string): ProductComponentRole {
   const sku = normalizeCatalogToken(value);
   if (/(?:^|_)AO$/u.test(sku)) return "TOP";
   if (/(?:^|_)(?:CV|CHAN_VAY)$/u.test(sku)) return "SKIRT";
@@ -486,7 +486,7 @@ export function cartSelectionFromSnapshot(
     return {
       componentProductId: productId,
       componentSku,
-      componentRole: componentRole(productId),
+      componentRole: catalogComponentRole(productId),
       color: text(component.color) || text(row.color) || null,
       size: text(component.size) || text(row.size) || null,
       quantity: positiveQuantity(component.quantity),

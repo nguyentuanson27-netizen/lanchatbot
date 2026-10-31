@@ -108,7 +108,7 @@ export async function createCommerceTools(input: {
     if (!reason || await composed.terminalOutcome?.()) return;
     missingInformationAttempted=true;
     try {
-      const outcome=await composed.invoke({name:"request_handoff",args:{reason}});
+      const outcome=await composed.requestSilentHandoff?.(reason)??{status:"UNAVAILABLE",reason:"CAPABILITY_UNAVAILABLE"};
       missingInformationUnproved=outcome.status!=="OK";
       diagnostics.emit("FINAL_GATE",outcome.status==="OK"?"HANDOFF":"NO_SEND",{tool:"request_handoff"},reason);
     } catch { missingInformationUnproved=true; }
@@ -129,7 +129,13 @@ export async function createCommerceTools(input: {
     }}:{}),diagnostic:(stage,status,reason=null,resultBytes=null)=>diagnostics.emit(stage,status,{requestId:scope.requestId},reason,resultBytes),
     ...(input.quoteTask?{primitiveToolInvocations:()=>primitiveDispatches}:{}),
     ...(hints?{mediaCapabilities:()=>hints.get(composed.snapshot()),mediaCapabilityDiagnostics:()=>hints.takeDiagnostics()}:{}),
-    prepare:(admit,control)=>readTools.prepare((_context,work)=>{const context=composed.snapshot();return context.boundSubjects.length<=8&&context.protectedClaims.length<=32&&(context.runtimeProducts?.length??0)<=4&&(!admit||admit(context,work));},control),availableTools,
+    async prepare(admit,control){
+      const previous=composed.snapshot(),before=new Set(previous.protectedClaims.map(c=>commerceHash(c))),beforeMetadata=new Set(previous.policyLiterals.map(p=>commerceHash(p)));
+      const charged=await readTools.prepare((_context,work)=>{const context=composed.snapshot();return context.boundSubjects.length<=8&&context.protectedClaims.length<=32&&(context.runtimeProducts?.length??0)<=4&&(!admit||admit(context,work));},control);
+      const after=composed.snapshot();
+      coverage.observePrepared({protectedClaims:after.protectedClaims.filter(c=>!before.has(commerceHash(c))),metadata:after.policyLiterals.filter(p=>p.ref.startsWith("offers:")&&!beforeMetadata.has(commerceHash(p)))});
+      return charged;
+    },availableTools,
     async invoke(call){
       start(call);
       if(missingInformationUnproved)return observedResult(call,{status:"REJECTED",reason:"SHOP_INFORMATION_HANDOFF_UNPROVED"});

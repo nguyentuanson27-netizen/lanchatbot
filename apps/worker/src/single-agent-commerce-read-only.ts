@@ -27,6 +27,7 @@ export interface VerifierRequest { generationId: string; instructions: string; f
   latest: string; history: { role: "customer" | "shop"; text: string }[]; binding: VerifierBinding; signal: AbortSignal }
 export interface VerifierGeneration { result: unknown; telemetry?: unknown }
 export interface CommerceTools {
+  requestSilentHandoff?(reason:import("@lana/contracts").HandoffReasonV2):Promise<CommerceToolResult>;
   readCoverage?():import("./single-agent-commerce-diagnostics.js").CommerceReadCoverage;
   diagnostic?(stage:import("./single-agent-commerce-diagnostics.js").CommerceDiagnosticStage,status:string,reason?:string|null,resultBytes?:number|null):void;
   /** Admitted primitive dispatches, excluding preparation and terminal handoff. */

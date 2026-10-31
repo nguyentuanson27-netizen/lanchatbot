@@ -31,3 +31,14 @@ test('changed manifest or world cannot inherit a previous readiness decision',as
  const bad=structuredClone(m);bad.results[0].status='FAILED';await assert.rejects(assertSourceReadiness(w,bad,commerceNow),/MANIFEST_HASH/);
  w.snapshots.SM613.release_id='changed';await assert.rejects(assertSourceReadiness(w,m,commerceNow),/WORLD_CHANGED/);
 });
+
+test('unknown stock quantity is not usable STOCK evidence and runtime media intents stay in parity',async()=>{
+ const w=world();w.snapshots.SM613.offers.DIRECT.rows[0].stock_quantity=null;
+ await assert.rejects(sourceReadiness(w,{cohort:'SALES_READY',checks:[{facet:'STOCK',productId:'SM613',offerType:'DIRECT'}]},commerceNow),/SOURCE_READINESS_BLOCKED/);
+ const {commerceMediaIntents}=await import('../../dist/single-agent-commerce-media-eligibility.js');
+ for(const intent of commerceMediaIntents){
+  const m=await sourceReadiness(w,{cohort:'SOURCE_UNAVAILABLE',checks:[{facet:'MEDIA',productId:'SM613',intent,allowedHostSuffixes:['content.pancake.vn']}]},commerceNow);
+  assert.equal(m.results[0].status,'FAILED');
+ }
+ await assert.rejects(sourceReadiness(w,{cohort:'SOURCE_UNAVAILABLE',checks:[{facet:'MEDIA',productId:'SM613',intent:'ON_BODY',allowedHostSuffixes:['content.pancake.vn']}]},commerceNow),/MEDIA_INTENT/);
+});

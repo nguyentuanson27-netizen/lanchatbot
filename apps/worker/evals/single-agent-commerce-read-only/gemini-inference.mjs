@@ -167,12 +167,12 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  if(state.checkoutStatus&&typeof state.checkoutStatus==='object')state.checkoutStatus=Object.fromEntries(
   ['previewAvailable','purchaseConfirmed','publicIntake'].filter(k=>Object.hasOwn(state.checkoutStatus,k)).map(k=>[k,state.checkoutStatus[k]]));
  // Move only code-owned offer literals. Read/filter and verifier evidence remain intact.
- const products=new Map((c.runtimeProducts??[]).map(p=>[p.subjectRef,structuredClone(p)])),offers=new Map(),purchaseOptions=new Map(),offerRefs=new Set();
+ const products=new Map((c.runtimeProducts??[]).map(p=>[p.subjectRef,structuredClone(p)])),offers=new Map(),purchaseOptions=new Map(),productSizeReads=new Map(),offerRefs=new Set();
  for(const s of c.boundSubjects.filter(s=>s.kind==='PRODUCT')){
   const literal=c.policyLiterals.find(p=>p.ref===`offers:${s.ref}`);if(!literal)continue;
   const data=JSON.parse(literal.text);
   if(data.productId!==s.ref||!Array.isArray(data.availableOffers))continue;
-  offers.set(s.ref,data.availableOffers);if(Array.isArray(data.purchaseOptions))purchaseOptions.set(s.ref,data.purchaseOptions);offerRefs.add(literal.ref);
+  offers.set(s.ref,data.availableOffers);if(data.productSizeRead)productSizeReads.set(s.ref,data.productSizeRead);if(Array.isArray(data.purchaseOptions))purchaseOptions.set(s.ref,data.purchaseOptions);offerRefs.add(literal.ref);
   if(!products.has(s.ref))products.set(s.ref,{subjectRef:s.ref});
  }
  const preparationRefs=new Set();
@@ -189,7 +189,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
    d.parameters.properties.offerType={type:'STRING',enum:[...new Set(productRefs.flatMap(ref=>offers.get(ref)))]};
  const ownerView={subjects:c.boundSubjects.map(subject),products:[...products.values()].map(p=>({subjectRef:p.subjectRef,
    availableOffers:offers.get(p.subjectRef)??null,
-   ...(purchaseOptions.has(p.subjectRef)?{purchaseOptions:purchaseOptions.get(p.subjectRef)}:{}),
+   ...(purchaseOptions.has(p.subjectRef)?{purchaseOptions:purchaseOptions.get(p.subjectRef),productSizeRead:productSizeReads.get(p.subjectRef)}:{}),
    offerLabels:offers.has(p.subjectRef)?Object.fromEntries(offers.get(p.subjectRef).map(code=>[code,Object.hasOwn(offerLabels,code)?offerLabels[code]:null])):null,
    ...(p.preparation?{preparation:p.preparation}:{}),
    attributes:p.attributes?Object.fromEntries(Object.entries(p.attributes).filter(([k])=>!['schemaVersion','productId','metadata'].includes(k))):null,

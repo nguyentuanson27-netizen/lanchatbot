@@ -16,12 +16,12 @@ const request=context=>({generationId:'opaque',instructions:owner,context,conten
 test('admits current summary against actual native owner and reserved verifier wire with no provider',async()=>{
  const tools=setup();let calls=0;
  assert.equal(await tools.prepare(context=>{calls++;return admitPreparedCommerceContext(manifest,verifier,request(context));}),1);
- assert.equal(calls,1);assert(tools.snapshot().protectedClaims.some(c=>c.type==='PRICE'));
+ assert.equal(calls,2);assert(tools.snapshot().protectedClaims.some(c=>c.type==='PRICE'));
  await assert.doesNotReject(()=>tools.readback());
 });
-test('oversized actual native serialization rejects optional data without dropping catalog or making generation',async()=>{
- const tools=setup();await tools.prepare(context=>admitPreparedCommerceContext(manifest,verifier,{...request(context),instructions:'x'.repeat(65536)}));
- assert.deepEqual(tools.snapshot().protectedClaims,[]);assert(tools.snapshot().runtimeProducts[0].content);
+test('oversized actual native serialization rejects the whole unadmitted staged set without replacing previously admitted data or making generation',async()=>{
+ const tools=setup(),before=tools.snapshot();await assert.rejects(tools.prepare(context=>admitPreparedCommerceContext(manifest,verifier,{...request(context),instructions:'x'.repeat(65536)})),/PREPARATION_ADMISSION/);
+ assert.deepEqual(tools.snapshot(),before);
 });
 test('exact selected tuple proof reaches both owner and verifier native requests',async()=>{
  const tools=setup();const result=await tools.invoke({name:'read_product',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M'}});

@@ -56,6 +56,7 @@ export async function bindCorpus({draft,world,bindings,initialStateArtifact}){
    assert(!b.noProductLookupRequired||judgeCodes.length===0,'C_JUDGE_SOURCE_SUBJECT_COVERAGE');
    const kind=b.judgeSourceKind??(b.initialProductCodes.length?'INITIAL_PRODUCTS':judgeCodes.length?'DISCOVERY_POOL':null);
    assert(kind,'C_JUDGE_SOURCE_REQUIREMENTS');
+   assert(b.readiness?.checks?.every(q=>q.facet==='POLICY'||judgeCodes.includes(q.productId)),'C_READINESS_SUBJECT_COVERAGE');
    s.judgeContext={sourceReadiness:await sourceReadiness(world,b.readiness,at),sourceRequirements:{kind,productCodes:judgeCodes},sourceInventory:judgeSourceInventory(world,judgeCodes,
     {noProductLookupRequired:b.noProductLookupRequired===true}),facts:trusted.protectedClaims,policy:trusted.policyLiterals,products:trusted.runtimeProducts??[],
     initialState:initialStateArtifact.publicState,capabilities:bindings.capabilities};

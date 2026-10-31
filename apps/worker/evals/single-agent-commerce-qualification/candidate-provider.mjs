@@ -1,5 +1,6 @@
 // Reuses the approved native B inference/serialization. No prompt changes, retry or new model role.
 import assert from 'node:assert/strict';
+import {assertSourceReadiness} from './source-readiness.mjs';
 import {readFileSync,appendFileSync} from 'node:fs';
 import {resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -126,6 +127,7 @@ export function createCandidateProvider({preflight,out,dependencies={}}){
   const started=performance.now();row.startedMonotonicMs=started;row.startedAt=new Date().toISOString();
   generations.push(row);counters[role.toLowerCase()]++;audit('STARTED',row);
   try{
+   if(scenario.mode!=='SAFETY'&&(!dependencies.unitFixture||scenario.judgeContext?.sourceReadiness))await assertSourceReadiness(world,scenario.judgeContext?.sourceReadiness,dependencies.unitFixture&&dependencies.readinessClock?dependencies.readinessClock():new Date());
    const original=role==='OWNER'?withNativePresentation(request,'VI_DATA_BLOCKS_COMPACT_V2'):request;
    const body=role==='OWNER'?buildGeminiCommerceRequest(original):buildVerifierRequest(m,original);
    row.requestBody=body;row.requestHash=digest(body);
