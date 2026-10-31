@@ -1,6 +1,6 @@
 # Phase C — chuẩn bị lựa chọn mua và rút đường đọc dữ liệu
 
-Ngày 31/10/2026. Revision 2: bổ sung xử lý từng finding, source binding màu, nguyên nhân handoff và judge packet. Planning base: `ec0632b0e2062eaa4339db4f7ad7cf1bb867fe1e`; revision-1 delivery `c5dbbe6d1cfe74f3c8e4c89b90ec9b8c6d3debe5`. Trạng thái: đã cập nhật theo quyết định owner; **chưa triển khai, chưa independent review, chưa chạy model**. Phase C vẫn BLOCKED; C3 NOT_RUN; B_NOT_GO. Tài liệu này thay thứ tự ưu tiên của đề xuất sau variant/search run, không hủy các fix đã được kiểm chứng hoặc sửa điểm lịch sử.
+Ngày 31/10/2026. Revision 3: bổ sung contract accounting/admission cho preparation và seed/history/branches sau independent review revision 2. Planning base: `ec0632b0e2062eaa4339db4f7ad7cf1bb867fe1e`; revision-1 delivery `c5dbbe6d1cfe74f3c8e4c89b90ec9b8c6d3debe5`; revision-2 review base `bc0293eb46c3e243bb604c2ae00248323d690d66`. Trạng thái: **đang independent review kế hoạch; chưa triển khai, chưa chạy model**. Phase C vẫn BLOCKED; C3 NOT_RUN; B_NOT_GO. Tài liệu này thay thứ tự ưu tiên của đề xuất sau variant/search run, không hủy các fix đã được kiểm chứng hoặc sửa điểm lịch sử.
 
 ## 1. Mục tiêu và căn cứ
 
@@ -31,6 +31,18 @@ Mỗi lựa chọn mua cần có:
 Chuẩn bị metadata tối thiểu cho mã đang focus trước owner generation đầu. Nếu có nhiều bound refs, chuẩn bị metadata identity/offers tối thiểu trong caps, không âm thầm chọn một mã. Nếu cùng mã có nhiều offer thì đó không phải PRODUCT_AMBIGUOUS. Search giữ cho discovery khi chưa bound đúng sản phẩm; owner không phải search lại mã đã biết chỉ để biết có thể mua áo hay set.
 
 Admission dùng cùng projection/budget check như provider wire, publication nguyên tử và bảo toàn facts/media độc lập đã có. Không đổi expiry khi tái quan sát cùng nguồn. Nếu metadata không vừa bounds thì ghi nguyên nhân có thể audit và xử lý theo khả năng hiện có; không truncate identity/provenance hoặc tăng trần để giấu lỗi.
+
+### Contract preparation: bảo toàn facts và debit trước admission
+
+Code hiện tại có optional numeric preparation cho tối đa ba offers khi `prepareCurrentOffers` bật và admission cho phép. Patch mới **không xóa/ẩn claims, selection evidence hoặc read coverage AVAILABLE đã cấp hợp lệ** để ép owner đọc lại. Source refs mới bổ sung đường đọc khi cần; không hạ facts đã đọc thành NOT_READ, không cấp numeric facts chỉ từ metadata. Giữ rollback chỉ cho staging optional chưa được admit; không khôi phục global maps qua await làm mất kết quả đọc độc lập/concurrent đã publish.
+
+Hiện loop cộng số prepare invocations vào sáu call units, nhưng callback dựng admission request giả định một preparation nên đặt `callsRemaining:5`. Nếu prepare nhiều mã, phải sửa contract giữa `prepare`, `createCommerceTools` wrapper, read-only loop và provider admission: callback nhận đủ prospective debit/context để dựng **đúng request sẽ gửi sau prepare**, không còn số5 hardcode. Không chỉ sửa `prepare()` trả N mà để admission kiểm wire/budget sai.
+
+Số units của các primitive hiện có không đổi. Mỗi product preparation thực sự chạy được tính theo accounting hiện hành vào sáu calls, kể cả metadata-only hoặc source failure; cached/already-read không tạo invocation mới, underlying source I/O vẫn được đo riêng. Ghi debit ở dispatch boundary và chuyển vào terminal accounting ngay cả khi prepare throw/partial failure; không chỉ dựa số trả về sau thành công khiến failed work biến mất. Chọn tập bounded targets và kiểm remaining budget trước dispatch; không chuẩn bị mọi sản phẩm bằng một đơn vị giả hoặc tăng số read rounds. Request sau N preparations có `callsRemaining=6-totalChargedUnits` đúng cả legacy/native primitive accounting đang hỗ trợ; nếu không đủ thì không dispatch thêm. Callback admission phải dùng budget của toàn bộ staged set sẽ publish; nếu actual debit/context khác dự kiến thì revalidate trước owner dispatch, không gọi provider với request chưa được admit.
+
+Chuẩn bị nhiều mã phải giữ current focus nếu có; metadata bổ sung không tự focus mã khác. Staging/admission không publish phần bị reject, không làm mới literal expiry và không ghi đè source pin mới bằng pin cũ. Với một mã có sáu lựa chọn mua, chỉ chuẩn bị danh mục bounded; optional numeric preparation hiện có không được mở thành đọc toàn bộ sáu offers ngầm.
+
+Tests bổ sung: một product giữ nguyên admitted numeric facts/selection evidence; hai preparations debit2 và request/admission cùng còn4; ba bounded targets debit3 và cùng còn3 nếu context admission hợp lệ; already-read không debit kép; failure được debit dù không có fact; chạm remaining budget không có I/O thừa; actual wire/admission budget+bytes bằng nhau; admission rejected không publish partial set hoặc xóa metadata/facts độc lập; concurrent prepare/read giữ pins, focus và original expiry. Kiểm cả accounting modes hiện hành, không gọi batch hay cache một cách làm thay denominator công việc.
 
 ### Owner đọc theo nhu cầu khách
 
@@ -73,6 +85,16 @@ Giữ **sáu request B nguyên bản** trong đối chứng đã có: b1-price, 
 - **Cùng upstream input:** chạy old/new code với cùng customer/history/world/clock/scope/config; cho phép context projection khác đúng phần patch, ghi diff/hash. Phép đo này kiểm tác dụng code mới. Khi B adapter không hỗ trợ surface thì ghi NOT_COMPARABLE, không mô phỏng runtime B.
 
 Clock frozen dùng cho offline attribution; model sales-ready run dùng nguồn còn hiệu lực ở thời gian thực, không lấy clock cũ để cấp quyền gửi. Tách report control lịch sử khỏi fresh-source run; không gọi hai input khác nhau là matched comparison.
+
+### Lịch sử thật và lời khách tiếp theo
+
+Các drafts P04/P07/P08/P09 chỉ dùng thông tin trong history khi đã có genuine native history/initial-state evidence. Binder hiện từ chối authored shop history (`C_INITIAL_HISTORY_SEED_NOT_IMPLEMENTED`); không gỡ guard, không chèn lời shop tự viết vào accepted outbox. Ưu tiên tạo JOURNEY bắt đầu từ dữ liệu khách cung cấp tự nhiên trong turn đầu, để native runner thực hiện và ghi nhận reply/state thật. Nếu cần seed lịch sử đã tồn tại, dùng accepted rows/media/cart events từ isolated adapter và cơ chế seed đã được kiểm; source/hash, public history projection và initial profile/cart/revision phải cùng binding. Chưa có seed route hợp lệ thì case đó BLOCKED, không mock lời shop để đi tiếp.
+
+Mọi turn tiền đề và generation dùng để tạo history trong campaign phải đăng ký/accounting, không hidden warm-up. Khi cả hai arm dùng seed đối chứng, seed customer/shop bytes, accepted status, initial state và projection giống nhau ở đúng ranh giới so sánh; nếu không tái tạo được parity thì NOT_COMPARABLE.
+
+Mũi tên “khi được hỏi” trong bảng dưới là nhánh hội thoại dự kiến, không tự append bất chấp reply thực tế. Freeze default customer turns và alternate branches theo `customerPolicy` hiện có trước inference; default giữ nhãn REGISTERED_DEFAULT, không nhận là mô phỏng thích ứng. Chọn alternate dùng human selection cùng prior terminal hash/policy hash và lý do theo runner hiện có, không thêm model khách hoặc semantic router. Nếu chưa có nhánh hợp lý cho actual outcome, giữ record và đánh coherence/coverage chưa đạt hoặc dừng case theo protocol đã đăng ký; không viết lại lời khách sau khi thấy lỗi để cứu điểm.
+
+Tests: seed không có accepted receipt bị reject; source/initial-history/state mismatch bị reject; native history từ accepted rows và correction/profile đúng; cả prerequisite turns nằm trong denominator; alternate chưa freeze hoặc sai prior outcome bị reject; default không bị báo là adaptive. Thêm native-history/customer-branches/bind-corpus focused checks tương ứng trong `test:evals` khi đổi consumer.
 
 Draft bổ sung dưới đây chưa phải frozen provider corpus. Mỗi ca phải được gắn sản phẩm/offer/source thật trước khi đăng ký; tên/ref nằm trong lịch sử tự nhiên hoặc runtime binding, không nhồi mã vào lời khách. Những điều kiện trong cột setup/chấm là evaluator-only.
 
