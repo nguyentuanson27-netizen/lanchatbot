@@ -2,7 +2,7 @@
 
 Ngày 31/10/2026. Implementation base `bd7140480267c3f1fbc63ded694cb5c794c3c8a8`; [approved plan revision 3](c3-phase-c-purchase-options-read-path-plan-20261031.md). Runtime TypeScript cuối `5666f172fd74560d6e6309ca2ca7a37ab9a3d911`; evaluator/readiness executable cuối `b23681093f3fd6f4bb5f8462921016b6c5d51c8d`. [Independent review](c3-phase-c-purchase-options-implementation-review-20261031.md), [commands/artifact evidence](c3-phase-c-purchase-options-verification-20261031.json).
 
-Trạng thái tại lúc lập record: code review APPROVE; verification đã hoàn tất, final implementation acceptance chờ cùng reviewer đối chiếu evidence. Không có model run hoặc quality GO trong task này. Phase C BLOCKED; C3 NOT_RUN; B_NOT_GO. Stacked B base vẫn `f160dfa4f7e0c8b3e29232570710d99d4f5ed012`, pinned C3 reference vẫn `296cdcfbf5759f5bf9cbb24acf3dc63005589361`; không tuyên bố đây là current main mới được refresh.
+**APPROVE IMPLEMENTATION + verification evidence** trên clean `2f0f8d1eaeea95553631adbc71d37792f8e2a2fa` từ cùng independent reviewer sau các vòng fix. Không có model run hoặc quality GO trong task này. Phase C BLOCKED; C3 NOT_RUN; B_NOT_GO. Stacked B base vẫn `f160dfa4f7e0c8b3e29232570710d99d4f5ed012`, pinned C3 reference vẫn `296cdcfbf5759f5bf9cbb24acf3dc63005589361`; không tuyên bố đây là current main mới được refresh.
 
 ## Thay đổi và giới hạn
 
