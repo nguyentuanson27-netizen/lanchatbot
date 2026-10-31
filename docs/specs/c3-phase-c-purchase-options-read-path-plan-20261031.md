@@ -1,6 +1,6 @@
 # Phase C — chuẩn bị lựa chọn mua và rút đường đọc dữ liệu
 
-Ngày 31/10/2026. Revision 3: bổ sung contract accounting/admission cho preparation và seed/history/branches sau independent review revision 2. Planning base: `ec0632b0e2062eaa4339db4f7ad7cf1bb867fe1e`; revision-1 delivery `c5dbbe6d1cfe74f3c8e4c89b90ec9b8c6d3debe5`; revision-2 review base `bc0293eb46c3e243bb604c2ae00248323d690d66`. Trạng thái: **đang independent review kế hoạch; chưa triển khai, chưa chạy model**. Phase C vẫn BLOCKED; C3 NOT_RUN; B_NOT_GO. Tài liệu này thay thứ tự ưu tiên của đề xuất sau variant/search run, không hủy các fix đã được kiểm chứng hoặc sửa điểm lịch sử.
+Ngày 31/10/2026. Revision 3: bổ sung contract accounting/admission cho preparation và seed/history/branches sau independent review revision 2. Planning base: `ec0632b0e2062eaa4339db4f7ad7cf1bb867fe1e`; revision-1 delivery `c5dbbe6d1cfe74f3c8e4c89b90ec9b8c6d3debe5`; revision-2 review base `bc0293eb46c3e243bb604c2ae00248323d690d66`. Trạng thái: **APPROVE PLAN revision 3; chưa triển khai, chưa chạy model** ([review record](c3-phase-c-purchase-options-read-path-plan-review-20261031.md)). Phase C vẫn BLOCKED; C3 NOT_RUN; B_NOT_GO. Tài liệu này thay thứ tự ưu tiên của đề xuất sau variant/search run, không hủy các fix đã được kiểm chứng hoặc sửa điểm lịch sử.
 
 ## 1. Mục tiêu và căn cứ
 
