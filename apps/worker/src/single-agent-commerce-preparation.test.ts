@@ -96,3 +96,14 @@ it("retains option-specific BOM roles without claiming component size applicabil
  for(const o of data.purchaseOptions){expect(o).not.toHaveProperty("sizeRead");expect(o.sizeApplicability).toMatchObject({status:"NOT_READ",componentSizing:"UNSUPPORTED_BY_PRODUCT_TARGET_API",chartRef:null});}
  expect(data.productSizeRead.scope).toBe("PRODUCT_ONLY");
 });
+
+it.each([null,{product_sku:"x".repeat(129)},{}])("does not publish a partial BOM as complete after rejecting %j",async bad=>{
+ const s=setup("many");s.f.snapshot.offers.AO!.rows[0]!.components=[{product_sku:"DESIGN_AO"},bad];
+ await s.tools.prepare();const options=JSON.parse(s.tools.snapshot().policyLiterals.find(p=>p.ref===`offers:${s.f.product.productId}`)!.text).purchaseOptions;
+ const o=options.find((o:{offerType:string})=>o.offerType==="AO");expect(o.componentSource.status).toBe("INCOMPLETE_SOURCE");expect(o.componentSource.components).toEqual([]);
+});
+it("empty BOM array uses the same legacy source components as the cart resolver",async()=>{
+ const s=setup("many"),row=s.f.snapshot.offers.AO!.rows[0]!;row.components=[];row.component_1_sku="DESIGN_AO";row.component_2_sku="DESIGN_QUAN";
+ await s.tools.prepare();const options=JSON.parse(s.tools.snapshot().policyLiterals.find(p=>p.ref===`offers:${s.f.product.productId}`)!.text).purchaseOptions;
+ expect(options.find((o:{offerType:string})=>o.offerType==="AO").componentSource).toMatchObject({status:"AVAILABLE",components:[{componentRef:"DESIGN_AO",role:"TOP"},{componentRef:"DESIGN_QUAN",role:"PANTS"}]});
+});

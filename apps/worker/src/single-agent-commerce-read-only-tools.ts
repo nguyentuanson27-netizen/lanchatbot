@@ -102,18 +102,21 @@ export function createReadOnlyTools(input: {
     if (!["OK", "FULFILLMENT_POLICY_NOT_FOUND"].includes(normalizeCatalogToken(raw.data_status)) ||
       observed > now || expires <= now || availableOffers.length > 8) return null;
     const purchaseOptions=availableOffers.map(offerType=>{
+      let incomplete=false;
       const rows=raw.offers[offerType]!.rows, structures=rows.slice(0,64).map(row=>{
-        const rawComponents=Array.isArray(row.components)?row.components:
+        const rawComponents=Array.isArray(row.components)&&row.components.length?row.components:
           [row.component_1_sku,row.component_2_sku].filter(v=>typeof v==='string'&&v.trim()).map(product_sku=>({product_sku}));
+        if(rawComponents.length>3)incomplete=true;
         return rawComponents.slice(0,3).flatMap(c=>{
-          if(!c||typeof c!=="object")return [];
+          if(!c||typeof c!=="object"){incomplete=true;return [];}
           const v=c as Record<string,unknown>,ref=[v.product_sku,v.variation_sku,v.component_id].find(v=>typeof v==='string'&&v.trim());
-          return typeof ref==='string'&&Buffer.byteLength(ref)<=128?[{componentRef:ref,role:catalogComponentRole(ref)}]:[];
+          if(typeof ref!=='string'||Buffer.byteLength(ref)>128){incomplete=true;return [];}
+          return [{componentRef:ref,role:catalogComponentRole(ref)}];
         });
       });
-      const structure=structures[0]??[],bounded=rows.length<=64&&rows.every(r=>!Array.isArray(r.components)||r.components.length<=3),consistent=bounded&&structures.every(v=>commerceHash(v)===commerceHash(structure));
+      const structure=structures[0]??[],bounded=rows.length<=64&&rows.every(r=>!Array.isArray(r.components)||r.components.length<=3),consistent=bounded&&!incomplete&&structures.every(v=>commerceHash(v)===commerceHash(structure));
       return {offerType,priceRead:{subjectRef:id,offerType},stockRead:{subjectRef:id,offerType},
-        componentSource:{status:!bounded?'BOUND_EXCEEDED':!structures.some(v=>v.length)?'NOT_RECORDED':consistent?'AVAILABLE':'VARIANT_DEPENDENT',
+        componentSource:{status:!bounded?'BOUND_EXCEEDED':incomplete?'INCOMPLETE_SOURCE':!structures.some(v=>v.length)?'NOT_RECORDED':consistent?'AVAILABLE':'VARIANT_DEPENDENT',
           completeness:rows.length<=64?'INSPECTED_ROWS':'FIRST_64_ROWS_ONLY',
           sourceRef:'pos:'+commerceHash({releaseId:raw.release_id,productId:id,offerType}),
           components:consistent?structure:[]},
