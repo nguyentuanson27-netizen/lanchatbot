@@ -1,4 +1,12 @@
-## Current — post-run causal review, 2026-10-31
+## Current — purchase-option read path, owner direction 2026-10-31
+
+- [x] Cập nhật [kế hoạch](../docs/specs/c3-phase-c-purchase-options-read-path-plan-20261031.md): một mã/multi-offer là luồng chính; hai mã trùng tên nhánh phụ. Code chuẩn bị source references/coverage, owner chọn offer; không gộp nguồn theo tên, không tăng budget.
+- [x] Đối chiếu B–C REPORT §3: thiếu preparation hai bound refs tồn tại cả B/C. Giữ attribution riêng của hồi quy admission đã xác nhận/sửa; không sửa grades/raw lịch sử.
+- [x] Thêm draft ca mua riêng/combo/component size/đổi lựa chọn/tên chưa rõ; kế hoạch giữ B controls cùng input và tách sales-ready khỏi source-unavailable handoff trước seal. Draft chưa phải frozen corpus/provider registration.
+- [ ] Implementation RED→GREEN, focused regression/build/typecheck/lint và scoped integration khi cần; chưa thực hiện trong task cập nhật hướng fix.
+- [ ] Map/deduplicate corpus + audit data/media prerequisites + source applicability cho judge trước model run. Không retry/hạ standards/gia hạn TTL để đạt readiness; không gọi plan delivery là Phase C GO.
+
+## Historical — post-run causal review, 2026-10-31
 
 - [x] Review22cases/34turns, prompts/tooldeclarations/exactrequestbudgets +generationRESULT journal vàold/newsource. [Root cause và bằng chứng](../apps/worker/evals/single-agent-commerce-qualification/variant-stock-search-rerun-20261030/ROOT_CAUSE.md).
 - [x] Offline replay gen0/network0/effect0: haiAOprice499k; source-approvedsharedchart160/55/RELAXED→M; nullcolor→COLOR_REQUIRED cả2worlds; oldactualsentinel/newactualnull; actual media11/11/10assetsstale trong3queryscopes,feedback0. Requestactuals07/s13phase terminal sau2rounds dùcòn3calls.

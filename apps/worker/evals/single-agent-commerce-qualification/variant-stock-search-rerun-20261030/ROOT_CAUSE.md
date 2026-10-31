@@ -4,6 +4,8 @@ Review base `5a011a55dcea7755ea41d2f3db0b9834c3fcef59`; model run source `e43e1b
 
 ## Kết luận
 
+**Owner điều chỉnh hướng fix,31/10:** [kế hoạch tiếp theo](../../../../../docs/specs/c3-phase-c-purchase-options-read-path-plan-20261031.md) ưu tiên một mã có nhiều lựa chọn mua; hai mã trùng tên là nhánh phụ. Đối chứng B–C §3 đã thấy thiếu preparation khi hai refs bound ở **cả B lẫn C**, không quy toàn bộ finding context này thành hồi quy C. Các traces hai mã dưới đây vẫn là evidence thực tế của lượt đã chạy, không phải phân bố ưu tiên nghiệp vụ hoặc lý do chỉ sửa nhánh hai mã. Historical grades/raw giữ nguyên.
+
 Không có một nguyên nhân chung là verifier quá chặt hoặc model không hiểu tiếng Việt. Các điểm nghẽn lớn nằm ở **chuỗi lấy dữ liệu chưa tới fact khách cần, dữ liệu màu thiếu nghĩa có thể dùng để bán, media hết eligibility, và context chấm thiếu quyết định owner**. Giọng còn dài là hạn chế riêng; sửa giọng không làm các luồng này hoàn tất.
 
 Code hai lỗi trước đã được sửa đúng boundary, nhưng toàn hành trình vẫn có thể dừng ở một blocker khác trước khi chạm phần đã sửa. Không dùng507unit/76PG làm bằng chứng bán hàng tốt hơn; cũng không dùng whole-turn giảm để kết luận cần rollback toàn bộ.
