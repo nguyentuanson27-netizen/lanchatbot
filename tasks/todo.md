@@ -1,4 +1,13 @@
-## Current — purchase-option implementation, 2026-10-31
+## Current — purchase-options model run, 2026-11-01
+
+- [x] Preregister 21 ca / 28 lượt, N=1, max 112 generations trên source sạch `c31a3089`; prompts/models/runtime TypeScript giữ nguyên. P05 bị chặn trước đăng ký vì không có một mã chứa cả hai loại set. Capture mới 107 sản phẩm bằng route read-only; lấy initial PostgreSQL thực và drop DB riêng. 15 SALES_READY / 6 SOURCE_UNAVAILABLE; reviewer APPROVE inputs và dispatch; preflight PASS; 97 Phase C tests PASS.
+- [x] Batch chạy 15 ca / 18 lượt rồi hard stop. 37 generation records / 36 HTTP; 1 owner HTTP200 malformed, 1 OWNER_REQUEST_BOUND trước HTTP. 10 verifier PASS, nhưng 1 bị snapshot gate chặn; 9 eligible / 8 silent HANDOFF / 1 NO_SEND; 9 text / 0 ảnh. DB đã drop, live send=0; giữ đủ 6 ca / 10 lượt NOT_RUN.
+- [x] Root cause s09: offline replay cùng world/clock tái hiện prepare→policy→snapshot→readback bổ sung chart SQ2447. Diff chỉ gồm sizeCharts và factSnapshotVersion; không phải nguồn hết hạn. Không patch runtime hoặc retry model sau stop. [Báo cáo/raw mapping](../apps/worker/evals/single-agent-commerce-qualification/purchase-options-run-20261101/REPORT.md).
+- [x] Primary audit đối chiếu 18 raw hashes / 36 request bodies / 9 final-gate và accepted-text bindings. Sửa accounting V2 do bản đầu đọc sai capture field, giữ artifact cũ. Ghi rõ P07 source control gửi reply và P08 T0 gửi / T1 handoff; không tuyên bố 6/6 controls PASS.
+- [ ] Final independent audit và blind grades chưa hoàn tất: cả hai agents OUT_OF_CREDITS; chưa có INDEPENDENT_GRADES/GRADE_LOCK. Không tự tạo điểm, quality pass rate hoặc final APPROVE.
+- [ ] Cần kế hoạch trước run mới: ổn định trusted context trước verifier, request bound sau selected read/khi có hai targets, applicability và hành vi khi thiếu size từng phần. Màu/media vẫn cần nguồn có thẩm quyền. Không bypass caps/verifier/hard latch. Phase C BLOCKED / C3 NOT_RUN / B_NOT_GO.
+
+## Historical — purchase-option implementation, 2026-10-31
 
 - [x] RED observed before preparation/coverage/delegation/selection/readiness implementation. Runtime TS5666f172; evaluator source b2368109; no model generation or shop-source writes.
 - [x] Prepare exact bounded offer/read refs, actual debit/admission and atomic staging; preserve admitted numeric facts. Source BOM malformed/oversize/fallback parity covered. Product-level size lookup remains separate; component sizing explicitly unsupported, no invented chart.
