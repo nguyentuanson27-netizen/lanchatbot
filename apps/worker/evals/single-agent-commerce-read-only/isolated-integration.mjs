@@ -553,13 +553,13 @@ try{
   assert.notEqual(r.result.terminal.disposition,'SEND_ELIGIBLE');await j.drain();assert.equal(j.capture.length,0);
   assert(r.diagnostics.some(e=>e.stage==='CURRENT_READBACK'&&e.status==='ERROR'));
  });
- await check('B composed evidence read ambiguous tuple shares owner and verifier evidence without a cart mutation',async()=>{
-  const j=await statefulFixture({candidateTuples:true,preorderChoices:true});
-  const r=await j.turn('Chị lấy áo size L nhé.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'L',color:null}}]),request=>{
-   const proof=request.context.runtimeProducts.find(p=>p.subjectRef==='SM613').selectionEvidence[0];
-   assert(proof.options.some(o=>o.color==='BE'&&o.status==='PRE_ORDER'));assert(proof.options.some(o=>o.color==='__NO_COLOR__'&&o.status==='IN_STOCK'));
-   return say('Chị chọn màu nào ạ?');}]);
-  assert.equal(r.result.terminal.disposition,'SEND_ELIGIBLE');assert.equal((await j.state()).cart,null);await j.drain();assert.equal(j.capture.length,1);
+ await check('B composed evidence read unrecorded colour transfers silently without a cart or customer Outbox',async()=>{
+  const j=await statefulFixture({candidateTuples:true,preorderChoices:true,dependencyHoldingReply:'Bên em kiểm tra rồi báo chị nhé.'});
+  const r=await j.turn('Chị lấy áo size L nhé.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'L',color:null}}])]);
+  assert.equal(r.result.terminal.disposition,'HANDOFF');assert.equal(r.result.terminal.text,null);assert.equal(r.owners,1);assert.equal(r.verifiers,0);
+  assert.equal((await j.state()).cart,null);await j.drain();await j.drain();assert.deepEqual(j.capture,[]);
+  const counts=(await pool.query('SELECT (SELECT count(*)::int FROM handoff_events WHERE conversation_id=$1) AS events, (SELECT count(*)::int FROM meta_outbox WHERE conversation_id=$1) AS messages',[j.bound.conversationId])).rows[0];
+  assert.deepEqual(counts,{events:1,messages:0});
  });
  await check('B composed selection checkout tuple identity supports M plus L without zero-stock color substitution',async()=>{
   const j=await statefulFixture({candidateTuples:true});
@@ -631,10 +631,11 @@ try{
   assert.equal((await pool.query('SELECT count(*)::int AS n FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,0);
   await j.drain();assert.deepEqual(j.capture,[]);
  });
+ // Explicit owner handoff compatibility: required source-gap tests above use the silent code-only path.
  for(const mode of ['verified','owner-error','source-changed-before-delivery','commit-response-lost','rollback-response-lost','cart-receipt','cart-source-changed'])await check('B composed prepared handoff partial '+mode,async()=>{
   const holding='Bên em sẽ kiểm tra ảnh rồi báo chị nhé.',j=await statefulFixture({deferredHandoff:true,dependencyHoldingReply:holding});
   const cart=mode.startsWith('cart-'),outputs=[native([cart?{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',color:'navy',size:'M',quantity:1}}:
-   {name:'read_product',args:{subjectRef:'SM613',offerType:'DIRECT'}},{name:'select_product_media',args:{subjectRef:'SM613',intent:'FEEDBACK'}}])];
+   {name:'read_product',args:{subjectRef:'SM613',offerType:'DIRECT'}}]),native([{name:'request_handoff',args:{reason:'DEPENDENCY_FAILURE'}}])];
   if(mode!=='owner-error')outputs.push(say(cart?'Em đã thêm áo navy size M vào giỏ chị nhé.':'Áo 499.000đ chị nhé.'));
   const r=await j.turn(cart?'Chị lấy áo SM613 navy size M, cho chị xem thêm ảnh khách mặc nhé.':'Áo này bao nhiêu, cho chị xem ảnh khách mặc nhé.',outputs,
    {loseCommitReply:mode==='commit-response-lost',rollbackCommitReply:mode==='rollback-response-lost'});
@@ -651,7 +652,7 @@ try{
   await j.turn('Chị lấy áo SM613 navy size M.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',color:'navy',size:'M',quantity:1}}]),say('Em đã thêm áo navy size M vào giỏ chị nhé.')]);
   await j.drain();j.capture.length=0;
   const r=await j.turn('Áo trong giỏ bao nhiêu, có ảnh khách mặc không em?',[
-   native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'FEEDBACK'}}]),say('Áo navy size M trong giỏ 499.000đ chị nhé.')],
+   native([{name:'request_handoff',args:{reason:'DEPENDENCY_FAILURE'}}]),say('Áo navy size M trong giỏ 499.000đ chị nhé.')],
    {inspect:request=>{assert.equal(request.context.effectReceipts.length,0,'NO_MUTATION_IN_THIS_TURN');assert(request.context.cartBinding);}});
   assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));assert.equal(r.verifiers,1);
   if(mode==='cart-changed')await j.changeStoredCart();
