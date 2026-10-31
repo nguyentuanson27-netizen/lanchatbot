@@ -1,0 +1,127 @@
+{
+  "kind": "PURCHASE_OPTION_SOURCE_GAPS_V1",
+  "source": "HISTORICAL_FROZEN_WORLD_NOT_FRESH_CAPTURE",
+  "worldFileSha256": "0983fedaf3ee5919f423aa4948b9f67fffeccb0f9d67ceda579f195f16a0cbf6",
+  "worldCapturedAt": "2026-10-30T16:00:58.400Z",
+  "auditedAt": "2026-10-31T14:56:00.138Z",
+  "providerRequests": 0,
+  "networkReads": 0,
+  "sourceWrites": 0,
+  "products": [
+    {
+      "productId": "SQ2447",
+      "title": "Set quần Thạch Thảo",
+      "observedAt": "2026-10-30T15:58:41.917Z",
+      "offers": [
+        {
+          "offerType": "SET_QUAN",
+          "rowCount": 4,
+          "namedColors": [],
+          "unrecordedRows": 4
+        },
+        {
+          "offerType": "AO",
+          "rowCount": 8,
+          "namedColors": [
+            "BE"
+          ],
+          "unrecordedRows": 4
+        },
+        {
+          "offerType": "QUAN",
+          "rowCount": 4,
+          "namedColors": [],
+          "unrecordedRows": 4
+        }
+      ],
+      "media": {
+        "count": 10,
+        "feedback": 0
+      }
+    },
+    {
+      "productId": "SV2447",
+      "title": "Set váy Thạch Thảo",
+      "observedAt": "2026-10-30T15:58:41.917Z",
+      "offers": [
+        {
+          "offerType": "SET_VAY",
+          "rowCount": 4,
+          "namedColors": [],
+          "unrecordedRows": 4
+        },
+        {
+          "offerType": "AO",
+          "rowCount": 8,
+          "namedColors": [
+            "BE"
+          ],
+          "unrecordedRows": 4
+        },
+        {
+          "offerType": "CV",
+          "rowCount": 8,
+          "namedColors": [
+            "BE"
+          ],
+          "unrecordedRows": 4
+        }
+      ],
+      "media": {
+        "count": 11,
+        "feedback": 0
+      }
+    },
+    {
+      "productId": "SV1561",
+      "title": "Set váy Khánh Trang",
+      "observedAt": "2026-10-30T15:58:41.917Z",
+      "offers": [
+        {
+          "offerType": "SET_VAY",
+          "rowCount": 4,
+          "namedColors": [],
+          "unrecordedRows": 4
+        },
+        {
+          "offerType": "AO",
+          "rowCount": 4,
+          "namedColors": [],
+          "unrecordedRows": 4
+        },
+        {
+          "offerType": "CV",
+          "rowCount": 4,
+          "namedColors": [],
+          "unrecordedRows": 4
+        }
+      ],
+      "media": {
+        "count": 11,
+        "feedback": 0
+      }
+    },
+    {
+      "productId": "V406",
+      "title": "Váy Ngọc Trâm",
+      "observedAt": "2026-10-30T15:58:41.917Z",
+      "offers": [
+        {
+          "offerType": "DIRECT",
+          "rowCount": 4,
+          "namedColors": [],
+          "unrecordedRows": 4
+        }
+      ],
+      "media": {
+        "count": 11,
+        "feedback": 0
+      }
+    }
+  ],
+  "limitations": [
+    "Historical source inventory only; source freshness must be rechecked before a new run.",
+    "No physical colour inferred from sentinel, title or images.",
+    "Media file presence is not eligibility."
+  ]
+}

@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync,appendFileSync} from 'node:fs';
 import {resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {createCommerceReadSources} from '../../dist/single-agent-commerce-read-only-sources.js';
 import {publicPolicyLiteral} from '../../dist/single-agent-commerce-read-only-context.js';
@@ -45,6 +46,7 @@ export function candidatePreflight(root,registrationPath,worldPath){
  assert.equal(execFileSync('git',['status','--porcelain'],{cwd:root,encoding:'utf8'}).trim(),'','C_DIRTY_SOURCE');
  assert.equal(execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),sealed.runSourceSha,'C_RUN_SOURCE_CHANGED');
  assertCurrentCandidate(root,sealed.config);assertApprovedDecisions(root,sealed.config);assertSealedInputs(sealed,world,{registrationRoot:dirname(resolve(registrationPath))});
+ execFileSync(process.execPath,[fileURLToPath(new URL('./source-readiness.mjs',import.meta.url)),'--assert',worldPath,registrationPath],{stdio:['ignore','pipe','pipe']});
  const m=validateProtocol(read(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/manifest.json')));
  const codex=inspectCodex();assert.equal(codex.version,'codex-cli '+m.models.verifier.generationConfig.cliVersion,'C_PINNED_VERIFIER_CLIENT');
  assert.deepEqual(m.models.conversation,sealed.config.candidate.model);assert.deepEqual(m.models.verifier,sealed.config.candidate.verifier.model);

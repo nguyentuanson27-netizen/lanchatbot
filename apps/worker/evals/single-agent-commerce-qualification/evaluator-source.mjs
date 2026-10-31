@@ -16,7 +16,19 @@ export function judgeSourceInventory(world,codes,{noProductLookupRequired=false}
     'partsVisible','feedback','observedAt','revalidation','sourceContentSha256','reviewStatus','metadataVerified']),
     ...(image.colorBinding?{colorBinding:pick(image.colorBinding,['status','color','sha256'])}:{})}))}};
  });
- const v={kind:'EVALUATOR_SOURCE_INVENTORY_V1',worldHash:digest(world),noProductLookupRequired,products};
+ const groups=world.config?.productGroups??[];
+ const sizeDelegations=groups.filter(g=>g&&typeof g.approvalRef==='string'&&g.approvalRef.trim()&&g.sharedSize&&
+  Object.hasOwn(g.productTitles??{},g.sharedSize.sourceProductId)&&codes.some(code=>Object.hasOwn(g.productTitles??{},code)&&
+   world.products.some(p=>p.productId===code&&p.title===g.productTitles[code]))).map(g=>{
+    const records=(world.policyRecords??[]).filter(r=>r.pointer?.artifactKey===g.sharedSize.artifactKey&&r.version?.artifactKey===g.sharedSize.artifactKey);
+    return {scope:'SIZE_APPLICABILITY_ONLY',approvalRef:'approval:'+digest(g.approvalRef),
+     productTitles:structuredClone(g.productTitles),sharedSize:structuredClone(g.sharedSize),
+     artifactStatus:records.length===1?'FROZEN_RECORD_NOT_RUNTIME_ELIGIBILITY':'NOT_PRESENT',
+     artifacts:records.map(r=>({pointer:pick(r.pointer,['artifactKey','versionId','revision']),
+      version:pick(r.version,['versionId','contentHash','lifecycle','revision','content'])}))};
+   });
+ const v={kind:'EVALUATOR_SOURCE_INVENTORY_V1',worldHash:digest(world),sourceConfigHash:digest(world.config??null),
+  noProductLookupRequired,products,sizeDelegations};
  assert(Buffer.byteLength(JSON.stringify(v))<=262144,'C_JUDGE_SOURCE_BOUND');
  return {...v,contentHash:digest(v)};
 }

@@ -47,3 +47,15 @@ test('media ground truth preserves VALID INVALID ABSENT bindings and actual hash
   else assert.throws(()=>eligibleCommerceMedia(p,query,at,['content.pancake.vn']),/MEDIA_COLOR_BINDING_UNVERIFIED/);
  }
 });
+
+test('frozen configured chart sharing is evaluator evidence only, never inferred from names',()=>{
+ const w=world();w.config={productGroups:[{approvalRef:'owner-chart-use',name:'Shared',customerNames:['Shared'],
+ productTitles:{SM613:w.products[0].title,SOURCE:'Source design'},sharedSize:{artifactKey:'chart-source',sourceProductId:'SOURCE',brand:'LANA',category:'SET',componentRole:'OTHER'}}]};
+ const v=judgeSourceInventory(w,['SM613']);assert.equal(v.sizeDelegations.length,1);
+ assert.equal(v.sizeDelegations[0].scope,'SIZE_APPLICABILITY_ONLY');assert.equal(v.sizeDelegations[0].artifactStatus,'NOT_PRESENT');
+ assert.equal(v.sourceConfigHash,digest(w.config));assert(!JSON.stringify(v).includes('owner-chart-use'));
+ const changed=structuredClone(v);changed.sizeDelegations[0].sharedSize.sourceProductId='OTHER';
+ const {contentHash,...body}=changed;changed.contentHash=digest(body);
+ assert.throws(()=>assertJudgeSourceInventory(changed,digest(w),w),/NOT_DERIVED/);
+ delete w.config.productGroups;assert.deepEqual(judgeSourceInventory(w,['SM613']).sizeDelegations,[]);
+});

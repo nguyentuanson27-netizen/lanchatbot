@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {digest,qualificationIdentity,runtimeProjection,validateConfig} from './qualification.mjs';
 import {assertCurrentCandidate,assertApprovedDecisions} from './source-identity.mjs';
@@ -92,6 +93,7 @@ export function diagnosticPreflight(root,registrationPath,worldPath){
  const sealed=read(registrationPath),world=read(worldPath);validateDiagnostic(sealed,world);
  assert.equal(execFileSync('git',['status','--porcelain'],{cwd:root,encoding:'utf8'}).trim(),'','C_DIRTY_SOURCE');
  assertCurrentCandidate(root,sealed.config);assertApprovedDecisions(root,sealed.config);
+ execFileSync(process.execPath,[fileURLToPath(new URL('./source-readiness.mjs',import.meta.url)),'--assert',worldPath,registrationPath],{stdio:['ignore','pipe','pipe']});
  const m=validateProtocol(read(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/manifest.json'))),codex=inspectCodex();
  assert.equal(codex.version,'codex-cli '+m.models.verifier.generationConfig.cliVersion);
  assert.deepEqual(m.models.conversation,sealed.config.candidate.model);assert.deepEqual(m.models.verifier,sealed.config.candidate.verifier.model);

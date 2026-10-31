@@ -36,7 +36,7 @@ const offerLabels={AO:'áo lẻ',CV:'chân váy lẻ',QUAN:'quần lẻ',VAY:'v�
  SET_VAY:'bộ có váy',SET_CV:'bộ có chân váy',SET_QUAN:'bộ có quần',COMBO_3:'combo 3 món',DIRECT:'sản phẩm'};
 export const readOnlyDeclarations=[
  {name:'search_products',description:'Tìm sản phẩm: có mã thì truyền riêng productCode; tìm theo tên hoặc nhu cầu thì dùng query. Cần ít nhất một trường; có cả hai thì ưu tiên mã. products.subjectRef dùng để đọc tiếp. MATCHED là tìm được mẫu; AMBIGUOUS chỉ là các gợi ý chưa xác định đúng mẫu khách hỏi. Khi tìm theo nhu cầu, dùng description loại món sai loại/hoàn cảnh; ứng viên chưa xác nhận giá hay phù hợp. Còn một tool round và cần kiểm dữ liệu để chọn thì batch read_product cho tối đa hai ứng viên hợp lý, đúng phần bán và budget còn lại; sau kết quả mới chọn. Không mở mọi offers của mọi kết quả. PRODUCT_BOUND nghĩa là đã đầy context, dùng các sản phẩm đã có.',parameters:{type:'OBJECT',properties:{productCode:string,query:string}}},
- {name:'read_product',description:'Đọc PRODUCT theo selection bắt buộc: SINGLE đọc một offerType từ availableOffers/offerLabels; COMPARE chỉ đọc 2–3 offerTypes được chọn để so sánh; DETAILS_ONLY chỉ đọc mô tả/metadata, không cấp giá/tồn. Không truyền null hoặc mở toàn bộ offers ngầm. Mua cả bộ chọn đúng mã cả bộ; mua lẻ chọn đúng phần. Có màu/size/khu vực thì truyền ngay. Size chỉ xem tồn, không chứng minh mặc vừa.',parameters:{type:'OBJECT',properties:{subjectRef:string,selection:{type:'STRING',enum:['SINGLE','COMPARE','DETAILS_ONLY']},offerType:string,offerTypes:{type:'ARRAY',items:string,minItems:2,maxItems:3},color:string,size:string,deliveryRegion:string},required:['subjectRef','selection']}},
+ {name:'read_product',description:'Sản phẩm đã có purchaseOptions thì dùng đúng subjectRef/offerType và đường đọc code cấp, không search lại hoặc đọc mô tả để biết lựa chọn mua. Đọc PRODUCT theo selection bắt buộc: SINGLE đọc một offerType từ availableOffers/offerLabels; COMPARE chỉ đọc 2–3 offerTypes được chọn để so sánh; DETAILS_ONLY chỉ đọc mô tả/metadata, không cấp giá/tồn. Không truyền null hoặc mở toàn bộ offers ngầm. Mua cả bộ chọn đúng mã cả bộ; mua lẻ chọn đúng phần. Có màu/size/khu vực thì truyền ngay. Size chỉ xem tồn, không chứng minh mặc vừa.',parameters:{type:'OBJECT',properties:{subjectRef:string,selection:{type:'STRING',enum:['SINGLE','COMPARE','DETAILS_ONLY']},offerType:string,offerTypes:{type:'ARRAY',items:string,minItems:2,maxItems:3},color:string,size:string,deliveryRegion:string},required:['subjectRef','selection']}},
  {name:'read_policy',description:'Đọc quy định hiện hành của shop. Không đọc lịch sử đơn hoặc duyệt điều kiện đổi của riêng khách; orderEligibility=null nghĩa là chưa xét đơn.',parameters:{type:'OBJECT',properties:{}}},
 ];
 const stateFieldPaths=Object.freeze({HEIGHT_CM:'measurements.HEIGHT_CM',WEIGHT_KG:'measurements.WEIGHT_KG',BUST_CM:'measurements.BUST_CM',WAIST_CM:'measurements.WAIST_CM',HIPS_CM:'measurements.HIPS_CM',fitPreference:'fitPreference','preferences.colors':'preferences.colors','preferences.styles':'preferences.styles','preferences.materials':'preferences.materials'});
@@ -167,12 +167,12 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  if(state.checkoutStatus&&typeof state.checkoutStatus==='object')state.checkoutStatus=Object.fromEntries(
   ['previewAvailable','purchaseConfirmed','publicIntake'].filter(k=>Object.hasOwn(state.checkoutStatus,k)).map(k=>[k,state.checkoutStatus[k]]));
  // Move only code-owned offer literals. Read/filter and verifier evidence remain intact.
- const products=new Map((c.runtimeProducts??[]).map(p=>[p.subjectRef,structuredClone(p)])),offers=new Map(),offerRefs=new Set();
+ const products=new Map((c.runtimeProducts??[]).map(p=>[p.subjectRef,structuredClone(p)])),offers=new Map(),purchaseOptions=new Map(),offerRefs=new Set();
  for(const s of c.boundSubjects.filter(s=>s.kind==='PRODUCT')){
   const literal=c.policyLiterals.find(p=>p.ref===`offers:${s.ref}`);if(!literal)continue;
   const data=JSON.parse(literal.text);
   if(data.productId!==s.ref||!Array.isArray(data.availableOffers))continue;
-  offers.set(s.ref,data.availableOffers);offerRefs.add(literal.ref);
+  offers.set(s.ref,data.availableOffers);if(Array.isArray(data.purchaseOptions))purchaseOptions.set(s.ref,data.purchaseOptions);offerRefs.add(literal.ref);
   if(!products.has(s.ref))products.set(s.ref,{subjectRef:s.ref});
  }
  const preparationRefs=new Set();
@@ -189,6 +189,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
    d.parameters.properties.offerType={type:'STRING',enum:[...new Set(productRefs.flatMap(ref=>offers.get(ref)))]};
  const ownerView={subjects:c.boundSubjects.map(subject),products:[...products.values()].map(p=>({subjectRef:p.subjectRef,
    availableOffers:offers.get(p.subjectRef)??null,
+   ...(purchaseOptions.has(p.subjectRef)?{purchaseOptions:purchaseOptions.get(p.subjectRef)}:{}),
    offerLabels:offers.has(p.subjectRef)?Object.fromEntries(offers.get(p.subjectRef).map(code=>[code,Object.hasOwn(offerLabels,code)?offerLabels[code]:null])):null,
    ...(p.preparation?{preparation:p.preparation}:{}),
    attributes:p.attributes?Object.fromEntries(Object.entries(p.attributes).filter(([k])=>!['schemaVersion','productId','metadata'].includes(k))):null,

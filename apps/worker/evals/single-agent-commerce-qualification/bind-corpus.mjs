@@ -7,6 +7,7 @@ import {createCommerceTools} from '../../dist/single-agent-commerce.js';
 import {hardPrecheck} from '../../dist/single-agent-semantic-verifier-boundary.js';
 import {frozenCatalog,frozenFacts} from './frozen-world.mjs';
 import {digest,validateCorpus,runtimeProjection} from './qualification.mjs';
+import {sourceReadiness} from './source-readiness.mjs';
 import {judgeSourceInventory,assertJudgeSourceInventory} from './evaluator-source.mjs';
 export async function bindCorpus({draft,world,bindings,initialStateArtifact}){
  const worldHash=digest(world);
@@ -55,7 +56,7 @@ export async function bindCorpus({draft,world,bindings,initialStateArtifact}){
    assert(!b.noProductLookupRequired||judgeCodes.length===0,'C_JUDGE_SOURCE_SUBJECT_COVERAGE');
    const kind=b.judgeSourceKind??(b.initialProductCodes.length?'INITIAL_PRODUCTS':judgeCodes.length?'DISCOVERY_POOL':null);
    assert(kind,'C_JUDGE_SOURCE_REQUIREMENTS');
-   s.judgeContext={sourceRequirements:{kind,productCodes:judgeCodes},sourceInventory:judgeSourceInventory(world,judgeCodes,
+   s.judgeContext={sourceReadiness:await sourceReadiness(world,b.readiness,at),sourceRequirements:{kind,productCodes:judgeCodes},sourceInventory:judgeSourceInventory(world,judgeCodes,
     {noProductLookupRequired:b.noProductLookupRequired===true}),facts:trusted.protectedClaims,policy:trusted.policyLiterals,products:trusted.runtimeProducts??[],
     initialState:initialStateArtifact.publicState,capabilities:bindings.capabilities};
    assertJudgeSourceInventory(s.judgeContext.sourceInventory,worldHash,world,s);

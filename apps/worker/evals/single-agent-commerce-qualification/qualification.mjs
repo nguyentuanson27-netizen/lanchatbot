@@ -157,6 +157,7 @@ export function blindComparisonPack(config,corpus,attempts,seed){
   const key=s.id+':'+repetition,token=createHmac('sha256',seed).update(key).digest('hex');
   const order=parseInt(token.slice(0,2),16)%2?['C3','CANDIDATE']:['CANDIDATE','C3'];
   const observations=order.map(arm=>arms[arm==='CANDIDATE'?0:1][0]);
+  // Keep candidate-only coverage in absolute review; its presence would reveal the arm in a paired packet.
   const outcome=a=>({terminal:a.terminal,audit:publicAudit(a.audit),turns:(a.turns??[]).map(t=>({customer:t.customer,terminal:t.terminal}))});
   items.push({reviewId:token,mode:s.mode,sourceContext:s.judgeContext,customerTurns:s.turns.map(t=>({latest:t.latest,history:t.history})),A:outcome(observations[0]),B:outcome(observations[1])});
   assignments.push({reviewId:token,caseId:s.id,repetition,A:order[0],B:order[1]});
@@ -176,7 +177,7 @@ export function absoluteReviewPack(config,corpus,attempts,seed){
   const a=rows[0],s=corpus.scenarios.find(s=>s.id===slot.caseId);
   const reviewId=createHmac('sha256',seed).update('absolute:'+slot.slotId).digest('hex');
   items.push({reviewId,mode:s.mode,sourceContext:s.judgeContext,customerTurns:s.turns.map(t=>({latest:t.latest,history:t.history})),
-   outcome:{terminal:a.terminal,audit:publicAudit(a.audit),turns:(a.turns??[]).map(t=>({customer:t.customer,terminal:t.terminal}))}});
+   outcome:{terminal:a.terminal,audit:publicAudit(a.audit),turns:(a.turns??[]).map(t=>({customer:t.customer,terminal:t.terminal,...(t.readCoverage?{readCoverage:t.readCoverage}:{})}))}});
   assignments.push({reviewId,slotId:slot.slotId});
  }
  items.sort((a,b)=>a.reviewId.localeCompare(b.reviewId));

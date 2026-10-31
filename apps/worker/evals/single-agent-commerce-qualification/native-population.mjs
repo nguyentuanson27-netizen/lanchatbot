@@ -52,7 +52,8 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
    if(preflight.diagnosticControl?.blocked())queue.latch(slot.slotId,preflight.diagnosticControl.reason());
    a.safetyFindings.push(...outputFindings);
    const verifier=gens.find(g=>g.role==='VERIFIER'),b=verifier?.verifierInput,witness=observed?.result?.boundaryWitness;
-   const t={customer:input.latest,customerSelection:selected.selection,terminal:actual,historyBefore:accepted,
+   const t={customer:input.latest,customerSelection:selected.selection,terminal:actual,
+    ...(observed?.result?.readCoverage?{readCoverage:observed.result.readCoverage}:{}),historyBefore:accepted,
     historyAfter:after.publicHistory.history,historyTrace:{before:before.publicHistory.trace,after:after.publicHistory.trace},
     beforeStateHash:digest(before.publicState),afterStateHash:digest(after.publicState),safetyFindings:outputFindings,
     elapsedMs:performance.now()-turnStart,...(b?{verification:{...b,generationId:verifier.id,verdict:verifier.verdict?.verdict},

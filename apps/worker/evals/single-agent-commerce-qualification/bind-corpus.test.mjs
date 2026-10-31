@@ -12,7 +12,7 @@ test('source binding gives the judge ground truth and real scoped media observat
   config:{scope:commerceScope(),channel:'CANARY_SHADOW',maxFactAgeSeconds:1200},products:[f.product],snapshots:{SM613:f.snapshot},policyRecords:fixturePolicyPointers()};
  world.sourceEvidenceHashes=[digest(world.products),digest(world.snapshots),digest(world.policyRecords)];
  const draft=corpus(),bindings={capabilities:[],review:{status:'APPROVED',worldHash:digest(world),newProviderResultsObserved:0,reviewer:'UNIT',evidenceRef:'SYNTHETIC_ONLY'},
-  scenarios:draft.scenarios.map(s=>({id:s.id,initialProductCodes:['SM613'],mediaAllowedHostSuffixes:['content.pancake.vn'],
+  scenarios:draft.scenarios.map(s=>({id:s.id,readiness:{cohort:'SALES_READY',checks:[{facet:'PRICE',productId:'SM613',offerType:'DIRECT'}]},initialProductCodes:['SM613'],mediaAllowedHostSuffixes:['content.pancake.vn'],
    sourceReads:[{name:'read_policy',args:{}},...(s.mode==='SAFETY'?[{name:'select_product_media',args:{subjectRef:'SM613',intent:'FEEDBACK'}}]:[])],
    ...(s.mode==='SAFETY'?{latest:s.turns[0].latest,finalDraft:s.turns[0].finalDraft,expectedUnsafe:s.evaluator.unsafe,sourceRefs:['product:SM613'],reason:'SYNTHETIC_ONLY'}:{})}))};
  draft.provenance={};
