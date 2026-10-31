@@ -3,6 +3,10 @@
 - [x] Cập nhật [kế hoạch](../docs/specs/c3-phase-c-purchase-options-read-path-plan-20261031.md): một mã/multi-offer là luồng chính; hai mã trùng tên nhánh phụ. Code chuẩn bị source references/coverage, owner chọn offer; không gộp nguồn theo tên, không tăng budget.
 - [x] Đối chiếu B–C REPORT §3: thiếu preparation hai bound refs tồn tại cả B/C. Giữ attribution riêng của hồi quy admission đã xác nhận/sửa; không sửa grades/raw lịch sử.
 - [x] Thêm draft ca mua riêng/combo/component size/đổi lựa chọn/tên chưa rõ; kế hoạch giữ B controls cùng input và tách sales-ready khỏi source-unavailable handoff trước seal. Draft chưa phải frozen corpus/provider registration.
+- [x] Revision 2 §7–9: map F01–F09 tới các ca đã review, thay đổi cần làm, nghiệm thu/BLOCKED và thứ tự thực hiện; ghi rõ giọng nhẹ là ACCEPTED_LIMITATION, không coi đã sửa.
+- [ ] F02: audit canonical colour binding tại nguồn; projection phân biệt customer chưa chọn/shop chưa ghi nhận/variant không có; kiểm source changes và silent handoff. Chưa xác nhận nguồn thì sales path liên quan SOURCE_BLOCKED.
+- [ ] F04: observed read coverage theo scope, metadata vs fact/engine, budget/trace completeness; reason owner riêng; instrumentation bounded không đổi terminal hoặc thêm I/O.
+- [ ] F05: evaluator frozen delegation/applicability + actual read/engine coverage, blinding và actual-wire firewall; giữ historical grades, không tự bù source approval.
 - [ ] Implementation RED→GREEN, focused regression/build/typecheck/lint và scoped integration khi cần; chưa thực hiện trong task cập nhật hướng fix.
 - [ ] Map/deduplicate corpus + audit data/media prerequisites + source applicability cho judge trước model run. Không retry/hạ standards/gia hạn TTL để đạt readiness; không gọi plan delivery là Phase C GO.
 

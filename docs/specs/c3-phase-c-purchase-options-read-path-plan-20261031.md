@@ -1,6 +1,6 @@
 # Phase C — chuẩn bị lựa chọn mua và rút đường đọc dữ liệu
 
-Ngày 31/10/2026. Planning base: `ec0632b0e2062eaa4339db4f7ad7cf1bb867fe1e`. Trạng thái: đã cập nhật theo quyết định owner; **chưa triển khai, chưa independent review, chưa chạy model**. Phase C vẫn BLOCKED; C3 NOT_RUN; B_NOT_GO. Tài liệu này thay thứ tự ưu tiên của đề xuất sau variant/search run, không hủy các fix đã được kiểm chứng hoặc sửa điểm lịch sử.
+Ngày 31/10/2026. Revision 2: bổ sung xử lý từng finding, source binding màu, nguyên nhân handoff và judge packet. Planning base: `ec0632b0e2062eaa4339db4f7ad7cf1bb867fe1e`; revision-1 delivery `c5dbbe6d1cfe74f3c8e4c89b90ec9b8c6d3debe5`. Trạng thái: đã cập nhật theo quyết định owner; **chưa triển khai, chưa independent review, chưa chạy model**. Phase C vẫn BLOCKED; C3 NOT_RUN; B_NOT_GO. Tài liệu này thay thứ tự ưu tiên của đề xuất sau variant/search run, không hủy các fix đã được kiểm chứng hoặc sửa điểm lịch sử.
 
 ## 1. Mục tiêu và căn cứ
 
@@ -118,3 +118,69 @@ pnpm --filter @lana/worker test:evals
 Nếu chạm shared package, bổ sung focused tests/typecheck/build đúng package; nếu đổi state/effect guards phải chạy actual isolated PostgreSQL và giữ cleanup/accounting. Không nhận unit mock thay actual PG. Gate không được PASS khi command chưa chạy hoặc không reach boundary cần kiểm.
 
 Ngoài scope: tăng tool/generation/token caps, nới verifier, parser/router/third role, repair/reverify loop, prompt ví dụ theo ca, source publication ngầm, sửa điểm sau unmask, broad rollback, merge/deploy/live send. Model quality/Phase C qualification vẫn chưa được chứng minh bằng việc hoàn tất kế hoạch hoặc unit tests.
+
+## 7. Bảng xử lý các finding đã quan sát
+
+Phạm vi bảng là findings của 22 ca/34 turns vừa review và các boundary liên quan đã được sửa, không phải tuyên bố đã audit hết mọi chức năng của repo. Các ID chỉ dùng để truy evidence, không đưa vào prompt. Trạng thái dưới đây là **kế hoạch**, không phải kết quả test mới.
+
+| ID / mức ưu tiên | Finding và phạm vi | Thay đổi cần làm | Bằng chứng nghiệm thu / khi còn BLOCKED |
+|---|---|---|---|
+| F01 / P0 trải nghiệm | s02/s07/s13: bound sản phẩm nhưng search→details, chưa tới giá/size; s04 early exit dù còn round | Prepare danh mục offer/read references theo §2; coverage tách metadata khỏi facts; đo owner chọn đường đọc sau khi context đủ | RED→GREEN context, exact selected-offer reads, engine thật và captured requests trong budget. Model vẫn bỏ giá/size dù nguồn đủ thì ghi owner decision FAIL, không đóng bằng unit PASS |
+| F02 / P0 correctness | s04/j1/j4: màu chưa ghi nhận bị diễn giải thành màu tiêu chuẩn; cart chưa tới mixed M/L | Binding màu tại nguồn + projection trạng thái theo §8.1; giữ null khác sentinel và không tạo customer-facing default | Named-colour success + unknown-colour silent handoff + source-change final gate. Thiếu physical identity được xác nhận thì sales path tương ứng vẫn BLOCKED, dù negative control PASS |
+| F03 / P0 trải nghiệm | s01/s03/s16: media không eligible; s16 thiếu verified feedback | Readiness manifest theo exact product/intent/component/clock; xử lý source qua quy trình hiện có theo §4 | Actual eligible image/required quote group ở ca sales-ready; stale/missing→handoff thật. Không có ảnh/feedback đúng scope thì chỉ hoàn tất handoff control, chưa khôi phục năng lực bán của ca đó |
+| F04 / P1 chẩn đoán | s07/s13: owner chọn reason nguồn thiếu khi chưa thực hiện lookup cần thiết | Observed read coverage + declared handoff reason riêng theo §8.2 | Test NOT_READ/FAILED/BUDGET_EXHAUSTED/UNKNOWN đúng scope và ledger không đổi terminal. Không dùng receipt handoff làm proof nguồn thiếu |
+| F05 / P0 đo lường | j2 UNRESOLVED, s07 grading có giả định thiếu chart: judge không thấy approved delegation | Bổ sung source applicability/delegation và lookup coverage vào evaluator packet theo §8.3 | Positive/negative applicability tests + captured request firewall; packet cùng input phản ánh đúng engine/source. Historical grades giữ nguyên; packet mới chưa kiểm thì grading readiness BLOCKED |
+| F06 / P1 quyết định | s11 hỏi tồn biến thể nhưng owner handoff PRODUCT_AMBIGUOUS, chưa làm rõ lựa chọn; s02 hỏi phân biệt trước phần giá có thể trả | Tách thiếu lựa chọn khách với thiếu dữ liệu shop trong context/schema; owner quyết định câu hỏi, không thêm code parser | Source-ready ambiguity case hỏi đúng phần còn thiếu; exact explicit-offer case không hỏi lại; variant không tồn tại không bị hiểu là hết toàn shop. Model run chấm toàn lượt, không dò keyword |
+| F07 / P0 chống hồi quy | j1 mixed M/L chưa reach; fixes cart scope/admission đã kiểm trước đó | Giữ helper/guards đã approved, bổ sung reach evidence sau khi colour prerequisites thỏa | Test isolated PG cho mixed size/quantity/alias/source tamper khi chạm guards; model trace phải tới actual add/change-cart tương ứng mới nhận đã kiểm journey. Không thay source thật bằng synthetic success |
+| F08 / P1 bảo toàn | j2 correction OUT_OF_RANGE, j6 thiếu tên, s10/s12/j5 aftersales/order, các no-send sau HUMAN | Giữ correction→engine mới, hỏi thông tin khách, handoff phạm vi chưa hỗ trợ và ownership suppression; không sửa thành sales reply cho mọi ca | Regression không dùng fit cũ/không giả đơn; correction out-of-range handoff; thiếu tên hỏi tên; aftersales handoff thật, không tin nhắn khách; no-send sau HUMAN không sinh effect/outbox mới |
+| F09 / P2 tạm chấp nhận | s05/s06/s08/s15/j3: catalog tone, conditional advice thiếu cụ thể, CTA thừa hoặc mở lại sau cảm ơn | Không mở patch giọng diện rộng; giữ sales goal, đánh chất lượng độc lập và ghi residual từng ca | Chưa coi đã fix. Nếu reply tạo sai thuộc tính/receipt/quyền lợi thì chuyển thành lỗi correctness, không miễn bằng nhãn giọng. Không hạ rubric để đóng finding |
+
+s09 chăm sóc sản phẩm và s14 defer là controls bảo toàn, không có finding correctness mới cần sửa. j3 tôn trọng chỉ mua áo, j6 nhận COD và hỏi tên còn thiếu cũng là hành vi phải giữ. Các reason hợp lệ/handoff đúng vẫn có thể không hoàn tất nhu cầu khách; report tách đúng safety/state với sales completion.
+
+## 8. Ba phần cần implementation cụ thể
+
+### 8.1. Binding màu: nguồn trước, projection sau
+
+1. Audit read-only snapshot/catalog/POS mapping hiện có theo product→offer→component/SKU/variant; xác định row có màu vật lý được ghi rõ, row chỉ có sentinel, source version/hash, đơn vị tồn và selector. Không dùng ảnh hoặc tên mẫu để tự suy màu. Xuất danh sách gap không có PII/secret.
+2. Nếu nguồn có mapping được xác nhận: dùng đúng canonical colour identity + label nguồn; alias/default chỉ áp dụng theo phạm vi approval thật. Không ghi giá trị màu vào prompt hoặc hardcode theo sản phẩm. Nếu nguồn chưa đủ: lập source correction/revalidation request theo quy trình sẵn có, chưa ghi nguồn chỉ vì task sửa code.
+3. Projection tách rõ màu đã biết, khách chưa chọn màu, màu nguồn chưa biết, và variant không có trong nguồn. Đây là trạng thái dữ liệu, không phải classifier câu khách. Không đưa row không rõ màu thành “màu tiêu chuẩn/có sẵn” cho khách chọn. Row unknown không làm mất facts độc lập của row named còn hợp lệ; handoff khi gap thực sự ảnh hưởng lựa chọn/claim/effect cần thực hiện.
+4. Resolver/guards giữ exact selection và source provenance. `color=null` không tự biến thành `__NO_COLOR__`; sentinel không tự mang nghĩa physical/default. Source binding thay đổi sau verifier phải làm old PASS không authorize draft/effect theo nguồn cũ.
+5. Tests bắt buộc: explicit named colour; null khi nguồn chỉ có một lựa chọn đã xác định theo policy hiện hành; nhiều named colours cần khách chọn; named + unrecorded; sentinel không cấp nhãn; cross-offer/components; source change/expiry; giữ price/stock facts độc lập. Không tự nới rule chọn mặc định để làm positive test PASS.
+
+Đóng F02 phải ghi riêng **source readiness**, **code correctness**, **model outcome**. Nếu source chưa xác nhận màu, phần mua tương ứng BLOCKED và handoff control có thể PASS; không lấy control PASS làm bằng chứng mua được.
+
+### 8.2. Nguyên nhân handoff: quan sát, không phỏng đoán
+
+Mở rộng diagnostics/coverage hiện có ở boundary thực hiện tool và kết thúc lượt; không thêm model hoặc runtime semantic router. Lưu hai phần riêng:
+
+- Owner-declared reason: giá trị owner đã yêu cầu, không đổi lịch sử.
+- Observed coverage: operation + scope/selector hash + attempt ordinal + source/result status và read budget. Metadata-only khác protected fact read; size source khác kết quả recommend_size cho input khách hiện tại.
+
+Trạng thái quan sát dự kiến: NOT_READ (không có lookup đúng scope), AVAILABLE (lookup thành công), FAILED (lookup đã chạy và có failure cụ thể), BUDGET_EXHAUSTED (budget hết và read cần xét chưa hoàn thành), UNKNOWN (thiếu trace/diagnostic bị giới hạn). Đây là schema **đề xuất**, chưa phải enum code đã có. Mỗi record giữ cả read status và budget status: hết budget không xóa failure đã xảy ra; một failure ở offer A không giải thích offer B. STALE/missing/conflict/bound/provider failures phải giữ loại gốc thay vì ép thành “nguồn không có”.
+
+Code không suy mọi nhu cầu tiếng Việt để quyết định “tool bắt buộc”. Coverage ghi theo các scope/operations quan sát được; evaluator đối chiếu yêu cầu ca offline. Không có cơ sở liên kết thì UNKNOWN. Một request_handoff SIZE_RULE_UNAVAILABLE sau DETAILS_ONLY không tạo failure size engine giả. Không cấm handoff an toàn chỉ vì chưa gọi một tool.
+
+Diagnostic observer phải bounded và không đổi outcome, tool count hoặc I/O. Không ghi raw số đo/địa chỉ, exception text, credentials hoặc full selectors; dùng hash/allowlisted status theo boundary hiện có. Nếu trace rơi do bound thì ghi coverage incomplete, không suy NOT_READ từ absence không đầy đủ.
+
+Tests: metadata OK nhưng chưa đọc price; đọc đúng offer thành công rồi early handoff; failed/stale read; wrong-offer lookup; hết rounds nhưng còn calls; diagnostic overflow; human ownership; observer lỗi. Assert cùng terminal/receipt/outbox khi bật/tắt instrumentation và không generation/I/O bổ sung. Findings đóng phần attribution không đồng nghĩa đã sửa owner early exit: F01/F06 vẫn cần measured model outcome.
+
+### 8.3. Judge packet: applicability có căn cứ và actual read coverage
+
+1. Dùng source config/delegation đã đóng băng của chính run, không đọc latest config sau khi có kết quả. Mỗi mapping thể hiện approvalRef, source chart/artifact identity/hash, source product, target scope/components và phạm vi được chia sẻ. Nếu nguồn không cung cấp expiry riêng thì ghi rõ; không tự tạo approval mới.
+2. `sourceInventory` cho biết nguồn tồn tại; actual read coverage cho biết runtime đã đọc/gọi engine gì. Packet giữ hai phần riêng, kèm engine status/fit provenance và customer correction đã dùng. Có chart không đồng nghĩa đã chạy engine; metadata read không cấp price/fit.
+3. Raw approval identifiers/product mappings chỉ nằm ở evaluator data cần thiết. Blind projection phải không lộ arm/source variant hoặc expected verdict: áp dụng mapping mù nhất quán cho approval refs/implementation identifiers nếu chúng tiết lộ arm, giữ provenance bindings có thể audit trong private mapping. Source evidence vốn cần để judge không bị xóa chỉ để làm packet đối xứng giả; khác biệt còn lộ phải ghi blinding limitation.
+4. Runtime context được giữ source delegation cần thiết để sử dụng facts; tuyệt đối không nhận caseId/split/expected/rubric/scoring hoặc lý do chấm. Public judge packet và owner/verifier projection được test riêng, kiểm actual captured wire qua continuation/history chứ không chỉ object trước serialize.
+5. Positive tests: approved shared chart dùng đúng scope; chart cùng tên nhưng không có delegation bị từ chối; sharing size không chia sẻ price/stock/media; wrong component/artifact/hash bị reject/UNKNOWN theo dữ liệu; missing approval không được packet tự bù. Test source-present-but-NOT_READ được phân biệt với successful recommendation và actual OUT_OF_RANGE.
+
+Tương lai chấm packet mới trước unmask bằng protocol đã freeze. Không mở grade cũ để sửa j2 thành PASS hoặc thay điểm s07; score cũ vẫn giữ UNRESOLVED/giới hạn đã công bố. Chưa có packet verified thì không claim quality comparison hợp lệ.
+
+## 9. Thứ tự đóng finding và bàn giao
+
+1. **Source audit và readiness gaps:** inventory offers/colours/chart delegation/media đúng các scope cần kiểm; phân biệt việc sửa code được phép làm ngay với việc cần nguồn được xác nhận. Không chặn mọi code task khi một nguồn thiếu, nhưng không seal sales-ready cho scope chưa đủ.
+2. **Read path + instrumentation:** RED→GREEN F01/F04/F06 trong budgets; map F02 vào source/resolver/projection mà không suy màu; giữ F07/F08 và các B controls.
+3. **Evaluator và readiness:** implementation/test F05; hoàn tất source/media audit F02/F03; keep/replace/add corpus và readiness manifest trước freeze. Không tự tăng số ca provider do thêm ma trận deterministic.
+4. **Verification:** commands §6; thêm `single-agent-commerce-diagnostics.test.ts`, `single-agent-commerce-selection-evidence.test.ts`, `single-agent-commerce-missing-information.test.ts`, `single-agent-commerce-media.test.ts`, `single-agent-commerce-media-revalidation.test.ts`, `single-agent-commerce-handoff-delivery.test.ts` vào worker focused run khi chạm tương ứng. Chạy evaluator-source/native-wire/context-coverage tests trong `test:evals`; bổ sung test mới đúng module nếu semantics mới chưa có coverage. Các commands này đều chưa chạy cho revision 2.
+5. **Review và run:** nếu có independent review, bind exact source/docs hash; APPROVE PLAN/CODE không phải quality GO. Khi được yêu cầu model run: seal clean executable/config cùng manifest/denominator, mọi generation thuộc accounting, không hidden retry; đánh actual terminal outcomes và nguyên nhân riêng. Không dispatch sales-ready ca biết thiếu prerequisite.
+6. **Bàn giao:** mỗi F01–F09 có code/source references, commands thực chạy, failed attempts, boundary đã reach, status OPEN / VERIFIED_CODE / SOURCE_BLOCKED / MODEL_FAILED / ACCEPTED_LIMITATION và next action. Các status là trục theo dõi, có thể đồng thời: VERIFIED_CODE không che SOURCE_BLOCKED hoặc MODEL_FAILED. Finding chỉ được gọi resolved khi các điều kiện nghiệm thu tương ứng đủ evidence. F09 giữ ACCEPTED_LIMITATION theo phạm vi owner đã chốt, không “hết lỗi”.
+
+Không có provider, PG hoặc source mutation trong lần bổ sung kế hoạch này. Đã xác định cách xử lý các nhóm lỗi quan sát được; implementation, source readiness và chất lượng thực tế vẫn là công việc chưa hoàn tất.
