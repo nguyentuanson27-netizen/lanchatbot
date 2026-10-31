@@ -1,0 +1,147 @@
+{
+  "kind": "READ_PATH_DEVELOPMENT_ACCOUNTING_CAPTURE_AUDIT_V1",
+  "verdict": "PASS",
+  "reviewer": "/root/full22_run_review",
+  "reviewedAt": "2026-10-29T19:46:01.822Z",
+  "sourceSha": "89070980e9fb407fe4031a01f2eae110f7f17181",
+  "registrationHash": "796fdc4241a2b53088d3651dbde255655337490b3cf16b252958cccd478d5843",
+  "evidenceHash": "f815b12bd32877d811b8fb2946e496a5c007d068a63dbdada3c5c46525a0bacd",
+  "integrationHash": "00ef9b35ad6788c12bf0230ff2bec05a39b935d24fa83806f614d78d10a4db93",
+  "accountingHash": "0f3946ed5a0074af4f283549629a5d838aef076d63dabf68f5013d1ed6b5f729",
+  "generationReconciliation": {
+    "journalUnique": 66,
+    "attemptSum": 66,
+    "rawTurnSum": 66,
+    "httpDispatches": 66,
+    "unexplainedExtra": [],
+    "missing": [],
+    "note": "Finalized attempts/raw/journal each contain66 generations. Earlier reported62 is not present in finalized artifacts; no4extra rows exist."
+  },
+  "counts": {
+    "cases": 22,
+    "turns": 34,
+    "generations": 66,
+    "owner": 52,
+    "verifier": 14,
+    "retries": 0,
+    "errors": 0,
+    "maximum": 136,
+    "messages": 13,
+    "images": 2,
+    "acceptedOutboxRows": 15,
+    "fallbackOutput": 0
+  },
+  "terminals": {
+    "HANDOFF": 14,
+    "SEND_ELIGIBLE": 11,
+    "NO_SEND": 7,
+    "CODE_OWNED_SEND": 2
+  },
+  "reasons": {
+    "DEPENDENCY_FAILURE": 3,
+    "RESPONSE_UNAVAILABLE": 4,
+    "SIZE_RULE_UNAVAILABLE": 2,
+    "EXCHANGE": 1,
+    "STOCK_UNAVAILABLE": 1,
+    "DEFECT": 1,
+    "ETA_UNAVAILABLE": 1,
+    "HUMAN_OWNS_CONVERSATION": 7,
+    "ORDER_STATUS": 1
+  },
+  "recoveries": {
+    "FAIL": 3
+  },
+  "verdicts": {
+    "PASS": 11,
+    "FAIL": 3
+  },
+  "codeOwnedWitnesses": [
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 1,
+      "owner": 1,
+      "verifier": 0,
+      "kind": "NATIVE_CHECKOUT_CLARIFICATION",
+      "paymentMethod": null,
+      "missingFields": [
+        "FULL_NAME"
+      ],
+      "confirmation": null
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 2,
+      "owner": 0,
+      "verifier": 0,
+      "kind": "NATIVE_CHECKOUT_CLARIFICATION",
+      "paymentMethod": "COD",
+      "missingFields": [
+        "FULL_NAME"
+      ],
+      "confirmation": null
+    }
+  ],
+  "diagnostics": {
+    "events": 1062,
+    "stages": {
+      "RESULT_PROJECTION": 307,
+      "CATALOG_READ": 368,
+      "POS_READ": 170,
+      "ARGUMENT_VALIDATION": 106,
+      "MEDIA_SELECT": 10,
+      "FINAL_GATE": 43,
+      "RESULT_BOUND": 26,
+      "CURRENT_READBACK": 28,
+      "POLICY_READ": 4
+    },
+    "reasons": {
+      "NO_VERIFIED_MATCHING_MEDIA": 8,
+      "DEPENDENCY_FAILURE": 6,
+      "UNKNOWN_INTERNAL": 12,
+      "RESPONSE_UNAVAILABLE": 4,
+      "SIZE_RULE_UNAVAILABLE": 2,
+      "EXCHANGE": 1,
+      "STOCK_UNAVAILABLE": 1,
+      "DEFECT": 1,
+      "ETA_UNAVAILABLE": 1,
+      "SELECTION_UNAVAILABLE": 4,
+      "ORDER_STATUS": 1
+    }
+  },
+  "auxiliaryHttp": [
+    {
+      "kind": "OAUTH",
+      "status": 200
+    },
+    {
+      "kind": "EMBEDDING",
+      "status": 200
+    },
+    {
+      "kind": "EMBEDDING",
+      "status": 200
+    },
+    {
+      "kind": "EMBEDDING",
+      "status": 200
+    }
+  ],
+  "verified": {
+    "rawCanonicalHashes": 34,
+    "artifactByteHashes": 40,
+    "requestFirewallAndNativeWire": 66,
+    "modelAndConfigBindings": 66,
+    "perTurnRoleCaps": true,
+    "receiptsAndOutboxCapture": true,
+    "sourceCleanAtExecution": true,
+    "testDatabaseDropped": true,
+    "sendEnabled": false,
+    "diagnosticStop": null,
+    "probeExecuted": 0,
+    "c3Executed": 0
+  },
+  "findings": [],
+  "qualityApproval": false,
+  "qualificationApproval": false,
+  "providerCallsDuringAudit": 0
+}

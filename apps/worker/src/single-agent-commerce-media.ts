@@ -28,7 +28,7 @@ function descriptionEvidence(query:MediaQuery,assets:readonly CommerceMediaAsset
 }
 
 /** Selection only. Existing exact snapshot and group gate own authorization and delivery. */
-export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadOnlyCatalog;clock:()=>Date;allowedHostSuffixes:readonly string[]}):CommerceTools {
+export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadOnlyCatalog;clock:()=>Date;allowedHostSuffixes:readonly string[];diagnostics?:import("./single-agent-commerce-diagnostics.js").CommerceDiagnostics}):CommerceTools {
   const selections=new Map<string,{query:MediaQuery;assets:CommerceMediaAsset[]}>();
   type SourceCheck={sourceVersion:string;expiresAt:string};
   type Observation={query:MediaQuery;operation:string;stage:string;outcome:string;source:SourceCheck|null;literal:TrustedContext["policyLiterals"][number]};
@@ -112,15 +112,18 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
           nextSelectionMeaning:"Optional color-free lookup, not yet executed. Keep the requested image type/component; availability is unknown until selection succeeds. These would be general product images, not confirmed requested-color images.",
         }:{} )}};
     };
+    let validating=false,validatingAsset:string|null=null;
     try{
-      const view=call.name==="view_product_media",assets=(await select(query,value=>{source=value;},value=>{availableAlternatives=value;})).slice(0,view?COMMERCE_VISION_BOUNDS.count:4);
+      const view=call.name==="view_product_media",assets=(await (input.diagnostics?input.diagnostics.run("MEDIA_SELECT",query,()=>select(query,value=>{source=value;},value=>{availableAlternatives=value;})):select(query,value=>{source=value;},value=>{availableAlternatives=value;}))).slice(0,view?COMMERCE_VISION_BOUNDS.count:4);
       if(!assets.length)return unavailable("NO_VERIFIED_MATCHING_MEDIA");
       if(view){
         if(catalogImages().length-(viewed.get(key)?.images.length??0)+assets.length>COMMERCE_VISION_BOUNDS.count)return {status:"REJECTED",reason:"VISION_BOUND"};
         stage="IMAGE_FETCH_OR_PREPARE";
         const images:CommerceCatalogImage[]=[];
         for(const asset of assets){
-          let bytes:Buffer=Buffer.from(await downloader.download(asset.url,new AbortController().signal));
+          validating=false;validatingAsset=asset.assetRef;
+          let bytes:Buffer=Buffer.from(await (input.diagnostics?input.diagnostics.run("MEDIA_FETCH",{assetRef:asset.assetRef},()=>downloader.download(asset.url,new AbortController().signal)):downloader.download(asset.url,new AbortController().signal)));
+          validating=true;input.diagnostics?.emit("MEDIA_VALIDATE","STARTED",{assetRef:asset.assetRef});
           // Existing registry IMAGE_HASH is reconciliation metadata; the publisher permits CDN re-encoding.
           const downloadSha256=createHash("sha256").update(bytes).digest("hex");
           const dimensions=readImageDimensions(bytes);
@@ -139,6 +142,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
             assertCanonicalGeometry(dimensions,output,COMMERCE_VISION_BOUNDS.maxDimension);
           }
           if(bytes.length>COMMERCE_VISION_BOUNDS.maxBytes)throw new Error("MEDIA_PREPARED_BYTE_BOUND");
+          validating=false;input.diagnostics?.emit("MEDIA_VALIDATE","OK",{assetRef:asset.assetRef});
           images.push({subjectRef:asset.productId,assetRef:asset.assetRef,sha256:createHash("sha256").update(bytes).digest("hex"),
             downloadSha256,registrySha256:asset.sourceContentSha256,mimeType,data:bytes.toString("base64")});
         }
@@ -150,7 +154,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
       observations.delete(observationKey);
       selections.set(key,{query,assets});
       return {status:"OK",data:{subjectRef:query.subjectRef,intent:query.intent,descriptionEvidence:descriptionEvidence(query,assets),assets:assets.map(({assetRef,angle,imageType,feedback,partsVisible})=>({assetRef,angle,imageType,feedback,partsVisible})),scope:query.color?"COLOR_BOUND":"GENERIC_PRODUCT",colorMatched:!!query.color,delivery:"PENDING_FINAL_GATE"}};
-    }catch(error){return unavailable(error instanceof Error&&error.message==="MEDIA_COLOR_BINDING_UNVERIFIED"?error.message:"MEDIA_SOURCE_UNAVAILABLE");}
+    }catch(error){if(validating)input.diagnostics?.emit("MEDIA_VALIDATE","ERROR",{assetRef:validatingAsset},error instanceof Error?error.message:"UNKNOWN_INTERNAL");return unavailable(error instanceof Error&&error.message==="MEDIA_COLOR_BINDING_UNVERIFIED"?error.message:"MEDIA_SOURCE_UNAVAILABLE");}
   }
   return {...input.base,mediaSelection,catalogImages,
     fallbackId:()=>input.base.sizeOutcome?.()?"C3_A_NONPROTECTED_V2": [...observations.values()].some(o=>o.outcome!=="OK")

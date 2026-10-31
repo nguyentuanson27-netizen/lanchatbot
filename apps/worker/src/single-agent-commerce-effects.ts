@@ -1,3 +1,4 @@
+import {publicCheckoutState} from "./single-agent-commerce-public-history.js";
 import { computeBusinessContentHash, executePersistedSalesCycleCommand, type RuntimePolicyBundle,
   type SalesCycleCommand, type SalesCycleRuntimeState, type SalesCycleStateRepositoryV1,
   type SalesCycleTrustedPortsV1, type ResolvedCartDraftV1 } from "@lana/chat-runtime";
@@ -9,6 +10,7 @@ import type { CommerceTools } from "./single-agent-commerce-read-only.js";
 import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-catalog.js";
 import type { TerminalOutcome, TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import { formatCartLineSelection, selectionsMatchCartLines } from "./realtime-sales-cycle.js";
+import {validSelectionEvidence,selectionEvidenceFromOptions,mergeSelectionEvidence,selectionMeaningHash,selectionQueryKey,expandSelectionOptions,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
 
 const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase", "record_negotiation"]);
 export type CommerceCommandResult =
@@ -25,6 +27,7 @@ export async function createCommerceEffectTools(input: {
   authorize: (effect: "CART_OPEN" | "CART_MUTATION" | "PURCHASE_CONFIRMATION", current: SalesCycleRuntimeState) => Promise<boolean>;
   policy: () => Promise<RuntimePolicyBundle>;
   select: (query: CartSelectionQuery) => Promise<CartSelectionResult>;
+  selectionMaxAgeSeconds?:number;
   /** Current public batch messages; code resolves the exact quote's evidence identity. */
   negotiationSources?: readonly { text: string; sourceMessageId: string; observedAt: string }[];
   trustedPorts?: SalesCycleTrustedPortsV1;
@@ -43,6 +46,7 @@ export async function createCommerceEffectTools(input: {
   }
   let current = await read(), policy: RuntimePolicyBundle | null = null, uncertain = false, failedEffect = false;
   const selections = new Map<string, Extract<CartSelectionResult, { status: "READY" }>>();
+  const selectionObservations=new Map<string,{query:CartSelectionQuery;evidence:CandidateSelectionEvidence}>();
   let authority = await input.readAuthority?.();
   if (authority && (authority.bindingVersion !== input.scope.bindingVersion || authority.recipient !== input.scope.recipient)) throw new Error("COMMERCE_SCOPE");
   const turnBinding = authority?.bindingVersion ?? input.scope.bindingVersion;
@@ -85,6 +89,11 @@ export async function createCommerceEffectTools(input: {
     return { disposition: committedTerminal.disposition ?? "HANDOFF", reason: committedTerminal.reason, text: null, fallbackId: null };
   }
   const snapshot = (): TrustedContext => {
+    if(policy&&current.cart){
+      const ref=current.commerceContext?.policyRef;
+      if(!ref||ref.id!==policy.policy.policyBundleId||ref.version!==policy.policy.policyVersion||
+        ref.contentHash!==computeBusinessContentHash(policy.policy))throw new Error("TRANSACTION_POLICY_BINDING_CHANGED");
+    }
     const base = input.base.snapshot(), subjects = [...base.boundSubjects];
     const active = activeSelections();
     if (current.cart) {
@@ -102,27 +111,60 @@ export async function createCommerceEffectTools(input: {
       base.boundSubjects.some(s => s.kind === "CUSTOMER_PROFILE" && s.ref === r.subjectRef)).map(r => ({ ...r, stateRevision: current.revision }));
     return buildReadOnlyContext({ state: { ...base.state, ...authority, conversationRevision: authority?.revision ?? base.state.revision, revision: current.revision,
       salesStage: current.stage, cartItems: cartItems(active),
-      checkoutStatus: { previewAvailable: current.stage === "ORDER_PREVIEW" && current.preview !== null, purchaseConfirmed: current.confirmation !== null,
+      checkoutStatus: { publicIntake:publicCheckoutState(current),previewAvailable: current.stage === "ORDER_PREVIEW" && current.preview !== null, purchaseConfirmed: current.confirmation !== null,
         missingFields: [!current.checkoutDraft?.fullName && "FULL_NAME", !current.checkoutDraft?.phone && "PHONE", !current.checkoutDraft?.address && "ADDRESS", !current.checkoutDraft?.paymentMethod && "PAYMENT_METHOD"].filter(Boolean) },
       ...(current.stage === "HANDED_OFF" ? { permission: false, conversationOwner: "HUMAN" } : {}),
       ...(cart ? { cartQuote: cartQuote() } : {}) },
-      subjects, products: base.runtimeProducts ?? [], claims: [...base.protectedClaims.filter(c => {
+      subjects, products: (()=>{
+        const products=new Map((base.runtimeProducts??[]).map(p=>[p.subjectRef,structuredClone(p)]));
+        for(const {evidence}of selectionObservations.values()){
+          const p=products.get(evidence.productId)??{ref:`product:${evidence.productId}`,subjectRef:evidence.productId};
+          const next=mergeSelectionEvidence(p,evidence,input.clock());
+          if(!products.has(p.subjectRef)&&products.size>=4)throw Error("PRODUCT_EVIDENCE_BOUND");
+          products.set(p.subjectRef,next);
+        }return [...products.values()];
+      })(), claims: [...base.protectedClaims.filter(c => {
         const claim = c as { type: string; scope: { kind: string; productId?: string; variantId?: string } };
         return !["PRICE", "STOCK"].includes(claim.type) || !active.some(s => claim.scope.kind === "PRODUCT" && claim.scope.productId === s.line.parentProductId &&
           [s.line.offerId, `offer:${s.line.parentProductId}:${s.line.offerId}`].includes(claim.scope.variantId ?? ""));
       }), ...selectionClaims],
-      policies: policy ? [...base.policyLiterals.filter(p => !p.ref.startsWith("policy:")),
-        publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock())] : base.policyLiterals,
+      // Active shop rules and durable transaction terms have different authority.
+      // Never replace a current active-pointer observation with a historical pin.
+      policies: policy ? [...base.policyLiterals, (() => {
+        const literal=publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock());
+        return {...literal,ref:literal.ref.replace("policy:","transaction-policy:"),text:JSON.stringify({
+          ...JSON.parse(literal.text),policyBinding:{purpose:current.cart?"COMMITTED_TRANSACTION":"TRANSACTION_PREPARATION",
+            policyRef:current.commerceContext?.policyRef??null}})};
+      })()] : base.policyLiterals,
       // Reuse the selection readback: a known contradiction invalidates this
       // receipt's current scope; unavailable source data adds no new assertion.
       receipts: [...stateReceipts, ...(receipt && active.length === selections.size ? [receipt] : [])], ...(cart ? { cartBinding: { cartId: cart.cartId, cartVersion: cart.revision } } : {}) });
   };
   async function selection(productId: string, a: Record<string, unknown>, lineId: string, offerType: string | null = null) {
-    const result = await input.select({ shopAlias: input.scope.shopAlias, productId, offerType,
+    const query:CartSelectionQuery={ shopAlias: input.scope.shopAlias, productId, offerType,
       size: typeof a.size === "string" ? a.size : null, color: typeof a.color === "string" ? a.color : null,
-      quantity: typeof a.quantity === "number" ? a.quantity : 1, lineId });
+      quantity: typeof a.quantity === "number" ? a.quantity : 1, lineId,selectionMaxAgeSeconds:input.selectionMaxAgeSeconds??1200};
+    const result = await input.select(query);
+    if(result.status!=="READY"&&result.selectionEvidence){
+      const e=result.selectionEvidence,now=input.clock();
+      if(!validSelectionEvidence(e,productId,now)||normalizeCatalogToken(e.offerType)!==normalizeCatalogToken(offerType??"")||e.quantity!==query.quantity||
+        normalizeCatalogToken(e.size??"")!==normalizeCatalogToken(query.size??"")||normalizeCatalogToken(e.color??"")!==normalizeCatalogToken(query.color??""))throw Error("SELECTION_EVIDENCE_SCOPE");
+      const expiresAt=new Date(Math.min(Date.parse(e.expiresAt),Date.parse(e.observedAt)+(input.selectionMaxAgeSeconds??1200)*1000,
+        policy?.policy.effectiveUntil?Date.parse(policy.policy.effectiveUntil):Infinity)).toISOString();
+      const clipped=selectionEvidenceFromOptions({productId:e.productId,offerType:e.offerType,size:e.size,color:e.color,quantity:e.quantity,sourceVersion:e.sourceVersion,
+        sourceHash:e.sourceHash,observedAt:e.observedAt,expiresAt},expandSelectionOptions(e),now);
+      if(!clipped)throw Error("SELECTION_EVIDENCE_STALE");
+      const key=selectionQueryKey(clipped),previous=selectionObservations.get(key);
+      if(previous&&(selectionMeaningHash(previous.evidence)!==selectionMeaningHash(clipped)||Date.parse(clipped.observedAt)<Date.parse(previous.evidence.observedAt)))throw Error("SOURCE_EVIDENCE_CONFLICT");
+      const bound=previous&&Date.parse(previous.evidence.expiresAt)<=Date.parse(clipped.expiresAt)?previous.evidence:clipped;
+      const proposed=input.base.snapshot().runtimeProducts?.find(p=>p.subjectRef===productId)??{ref:`product:${productId}`,subjectRef:productId};
+      let checked=proposed;for(const old of selectionObservations.values())if(old.evidence.productId===productId)checked=mergeSelectionEvidence(checked,old.evidence,now);
+      mergeSelectionEvidence(checked,bound,now);
+      selectionObservations.set(key,{query:previous?.query??query,evidence:bound});
+      return {...result,selectionOptions:expandSelectionOptions(bound),selectionEvidence:bound,selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",selectionStatus:result.status};
+    }
     if (result.status !== "READY") return { status: result.status, reasonCode: result.reasonCode,
-      availableSizes: result.availableSizes, availableColors: result.availableColors };
+      selectionOptions:(result.selectionOptions??[]).slice(0,8),selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",selectionStatus:result.status };
     if (result.shopId !== input.scope.shopId || result.line.parentProductId !== productId ||
       Date.parse(result.sourceObservedAt) > input.clock().getTime() || Date.parse(result.sourceExpiresAt) <= input.clock().getTime()) throw new Error("SELECTION_UNAVAILABLE");
     const line = { ...result.line, lineId }; selections.set(lineId, { ...result, line }); return { ...result, line };
@@ -326,6 +368,14 @@ export async function createCommerceEffectTools(input: {
     for (const c of calls.filter(c => c.name === "quote_cart")) results.set(c, effectRejected ? { status: "REJECTED", reason: "DEPENDENT_EFFECT_REJECTED" } : await input.base.invoke(c));
     return calls.map(c => results.get(c)!);
   }, async readback() { await input.base.readback(); current = await read(); await refreshAuthority(); if (policy) policy = await input.policy();
+    for(const {query,evidence}of [...selectionObservations.values()]){
+      const replay=await input.select(query);
+      const next=replay.status!=="READY"?replay.selectionEvidence:undefined;
+      if(!next||!validSelectionEvidence(next,evidence.productId,input.clock())||!validSelectionEvidence(evidence,evidence.productId,input.clock())||
+        Date.parse(next.observedAt)<Date.parse(evidence.observedAt)||Date.parse(next.expiresAt)<Date.parse(evidence.expiresAt)||
+        selectionMeaningHash(next)!==selectionMeaningHash(evidence)||
+        (policy?.policy.effectiveUntil&&Date.parse(policy.policy.effectiveUntil)<Date.parse(evidence.expiresAt)))throw Error("SELECTION_EVIDENCE_CHANGED");
+    }
     await refreshSelections();
     return snapshot(); },
   publicCartSummary:()=>publicSummary,

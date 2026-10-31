@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { canonicalJsonV1 } from "@lana/contracts";
 import type { RuntimePolicyBundle } from "@lana/chat-runtime";
 import type { RuntimeProductEvidence, TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
+import {expandSelectionOptions,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
 
 export const commerceHash = (value: unknown): string =>
   createHash("sha256").update(canonicalJsonV1(value), "utf8").digest("hex");
@@ -15,6 +16,10 @@ export function omitCurrentProductDuplicates(value: Record<string, unknown>, cur
   for (const key of ["content", "attributes", "presentation", "sizeCharts"] as const) {
     if (projected[key] !== undefined && current?.[key] !== undefined &&
       canonicalJsonV1(projected[key]) === canonicalJsonV1(current[key])) delete projected[key];
+  }
+  if(projected.selectionEvidence&&current?.selectionEvidence?.some(e=>canonicalJsonV1(e)===canonicalJsonV1(projected.selectionEvidence))){
+    const e=projected.selectionEvidence as CandidateSelectionEvidence;delete projected.selectionEvidence;
+    if(canonicalJsonV1(projected.selectionOptions)===canonicalJsonV1(expandSelectionOptions(e)))delete projected.selectionOptions;
   }
   return projected;
 }

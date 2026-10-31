@@ -1,0 +1,16 @@
+{
+  "candidateMeetsTarget": "BLOCKED",
+  "candidateQualifiesToReplaceC3": "BLOCKED",
+  "realAdapterSendDisabled": "BLOCKED",
+  "replacementReady": false,
+  "reasons": [
+    "CODE_OWNED_CAPTURE_EVIDENCE_REQUIRED"
+  ],
+  "metrics": {},
+  "rolloutAuthorized": false,
+  "runSourceSha": "36e45015c381ebe91a2591a288b112e3dd8caa0e",
+  "evidenceHash": "5d15b0111028865bbd3cc001aa2291fbb7cced1bed4e13c220f76ed131face4a",
+  "registrationHash": "c8bc31502f1c5bdb7b040430ed423240e58f2d57230bda65da256514c380e3c7",
+  "wholePopulation": 68,
+  "providerRequestsFromThisCommand": 0
+}

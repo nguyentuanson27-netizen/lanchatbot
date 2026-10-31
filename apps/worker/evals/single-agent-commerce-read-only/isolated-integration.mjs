@@ -32,18 +32,46 @@ import {createAttemptQueue,retainObservedAttempt,unobservedAttempt,summarizeAtte
 import {statefulPreflight,createStatefulProvider} from './stateful-provider.mjs';
 import {isolatedHandoffRecords,handoffContentHash} from './candidate-handoff.mjs';
 import {publicCapturedAttachments,publicCapturedTextHashes} from './delivery-capture.mjs';
+import {assertDiagnosticFlags,diagnosticPreflight,claimDiagnostic} from '../single-agent-commerce-qualification/diagnostic.mjs';
+import {admitPreparedCommerceContext} from './preparation-admission.mjs';
+import {collectSafety} from '../single-agent-commerce-qualification/collect-safety.mjs';
+import {cartSelectionFromSnapshot} from '../../dist/realtime-sales-catalog.js';
 
 const root=fileURLToPath(new URL('../../../../',import.meta.url));
-const providerRun=process.argv.includes('--provider-run'),providerPreflight=process.argv.includes('--provider-preflight');
-const checkPrefixIndex=process.argv.indexOf('--check-prefix'),checkPrefix=checkPrefixIndex<0?null:process.argv[checkPrefixIndex+1];
+const phaseCArg=name=>{const i=process.argv.indexOf(name);return i<0?null:process.argv[i+1];};
+assertDiagnosticFlags(process.argv);
+const phaseCDiagnostic=phaseCArg('--phase-c-diagnostic-registration');
+const phaseC=phaseCArg('--phase-c-registration')??phaseCDiagnostic;
+const phaseCInitial=phaseCArg('--phase-c-initial-world');
+const initialWorld=phaseCInitial?JSON.parse(readFileSync(phaseCInitial,'utf8')):null;
+const phaseCTools=phaseC||phaseCInitial?Object.assign({},...await Promise.all([
+ import('../single-agent-commerce-qualification/candidate-provider.mjs'),
+ import('../single-agent-commerce-qualification/native-population.mjs'),
+ import('../single-agent-commerce-qualification/native-history.mjs'),
+  import('../single-agent-commerce-qualification/dispatch-gates.mjs'),
+  import('../single-agent-commerce-qualification/native-snapshot.mjs')])):null;
+const providerRun=!!phaseC||process.argv.includes('--provider-run'),providerPreflight=process.argv.includes('--provider-preflight');
+const checkPrefixIndex=process.argv.indexOf('--check-prefix'),checkPrefix=phaseCInitial?'C initial state capture':checkPrefixIndex<0?null:process.argv[checkPrefixIndex+1];
 assert(checkPrefixIndex<0||(!providerRun&&!providerPreflight&&typeof checkPrefix==='string'&&checkPrefix.length>0&&checkPrefix.length<=128),'DETERMINISTIC_CHECK_PREFIX_ONLY');
-const providerFreeze=providerRun||providerPreflight?statefulPreflight(root):null;
+const providerFreeze=phaseCDiagnostic?diagnosticPreflight(root,phaseC,phaseCArg('--phase-c-world')):phaseC?phaseCTools.candidatePreflight(root,phaseC,phaseCArg('--phase-c-world')):providerRun||providerPreflight?statefulPreflight(root):null;
 if(providerPreflight){console.log(JSON.stringify({status:'PREFLIGHT_PASS',...providerFreeze.registration,providerGenerations:0}));process.exit(0);}
+if(phaseC){
+ if(!phaseCDiagnostic)phaseCTools.requirePassingSafety(providerFreeze.sealed,phaseCArg('--phase-c-safety'));
+ if(phaseCArg('--phase-c-arm')==='C3'){
+  const absolute=JSON.parse(readFileSync(phaseCArg('--phase-c-absolute-evidence'),'utf8'));
+  const {evaluateQualification}=await import('../single-agent-commerce-qualification/qualification.mjs');
+  assert.equal(evaluateQualification(absolute).candidateMeetsTarget,'PASS','C_ABSOLUTE_TARGET_MUST_PASS_FIRST');
+  assert.equal(JSON.stringify(absolute.config),JSON.stringify(providerFreeze.sealed.config),'C_ABSOLUTE_CONFIG_CHANGED');
+  providerFreeze.registration.arm='C3';
+ }else{assert(!phaseCArg('--phase-c-arm')||phaseCArg('--phase-c-arm')==='CANDIDATE');providerFreeze.registration.arm='CANDIDATE';}
+ if(phaseCDiagnostic)claimDiagnostic(phaseC,providerFreeze.sealed);
+ else phaseCTools.claimDispatch(phaseC,providerFreeze.registration.arm==='C3'?'C3':'NATIVE',providerFreeze.sealed);
+}
 const {Pool}=createRequire(new URL('../../../../packages/database/package.json',import.meta.url))('pg');
 const out=process.argv[2];assert(out,'NEW_EVIDENCE_DIRECTORY_REQUIRED');mkdirSync(resolve(out));
 const paymentMethod=process.argv[3]??'COD';assert(['COD','BANK_TRANSFER'].includes(paymentMethod));
 const report={sourceSha:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),
- sourceDirty:!!execFileSync('git',['status','--porcelain','--','apps/worker/src','apps/worker/evals/single-agent-commerce-read-only','packages'],{cwd:root,encoding:'utf8'}).trim(),
+ sourceDirty:!!execFileSync('git',['status','--porcelain',...(phaseC||phaseCInitial?[]:['--','apps/worker/src','apps/worker/evals/single-agent-commerce-read-only','packages'])],{cwd:root,encoding:'utf8'}).trim(),
  mode:providerRun?providerFreeze.registration.mode:'REAL_POSTGRES_SYNTHETIC_DOMAIN_INPUTS_CURRENT_POLICY_CAPTURE',paymentMethod,sendEnabled:false,providerGenerations:0,cases:[],testDatabaseDropped:false};
 const save=()=>writeFileSync(resolve(out,'integration.json'),JSON.stringify(report,null,2));
 const check=async(name,fn)=>{if((checkPrefix&&!name.startsWith(checkPrefix))||providerRun||(process.argv.includes('--composed-only')&&!name.startsWith('B composed')) ||
@@ -125,7 +153,7 @@ try{
  const key=scope.conversationId;
  await runtime.loadOrCreateSalesCycle(pageId,key,()=>createSalesCycleRuntimeState(key,{pageId,conversationId:key},now),now);
  livePolicyStore=new PostgresRuntimePolicyStore(process.env.RUNTIME_POLICY_DATABASE_URL);
- const records=await livePolicyStore.loadActivePointers({pageId,channel:'PUBLISHED'});
+ const records=phaseC?providerFreeze.world.policyRecords:initialWorld?initialWorld.policyRecords:await livePolicyStore.loadActivePointers({pageId,channel:'PUBLISHED'});
  const handoffCandidate=process.argv.includes('--candidate-handoff')?isolatedHandoffRecords(records,{pageId,
   candidate:JSON.parse(readFileSync(new URL('./handoff-matrix.candidate.json',import.meta.url)))}):null;
  for(const r of handoffCandidate?.records??records){const v=r.version,p=r.pointer;
@@ -179,12 +207,12 @@ try{
  });
  const sourceAt=new Date(Date.now()-60000).toISOString(),sourceExpiresAt=new Date(Date.parse(sourceAt)+172800000).toISOString();
  const selected=query=>{const line=fixtureCartLine();line.priceAuthority.shopId=scope.shopId;line.priceAuthority.priceFactRef='synthetic-pos-v1';line.priceAuthority.metadata.sourceVersion='synthetic-pos-v1';line.priceAuthority.metadata.observedAt=sourceAt;line.priceAuthority.metadata.expiresAt=sourceExpiresAt;
-  line.lineId=query.lineId??line.lineId;line.quantity=query.quantity;line.lineTotalVnd=line.posUnitPriceVnd*line.quantity;
+  line.lineId=query.lineId??line.lineId;line.components=line.components.map(c=>({...c,size:query.size??c.size,color:query.color??c.color,componentSku:'SM613-'+(query.color??c.color)+'-'+(query.size??c.size)}));line.quantity=query.quantity;line.lineTotalVnd=line.posUnitPriceVnd*line.quantity;
   return {status:'READY',line,shopId:scope.shopId,versions:{price:'synthetic-pos-v1',inventory:'synthetic-stock-v1',size:'synthetic-size-v1',eta:query.deliveryAddress?'synthetic-eta-v1':null},
    eta:query.deliveryAddress?{minDays:3,maxDays:6}:null,etaExpiresAt:query.deliveryAddress?new Date(Date.now()+1200000).toISOString():null,
-   sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:10,sourceObservedAt:sourceAt,sourceExpiresAt};};
+   sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:query.size==='L'?8:14,stockCounter:{source:'PANCAKE_DIRECT',unit:'ITEM',identity:aliasStockCounter?'shared-counter':JSON.stringify(['SM613',query.color??'navy',query.size??'M'])},sourceObservedAt:sourceAt,sourceExpiresAt};};
  const identities={cartId:randomUUID(),salesEpisodeId:randomUUID(),customerProfileId:randomUUID()};
- let lastResult,failAfterCommit=false,activePaymentMessageCount=0;
+ let lastResult,failAfterCommit=false,activePaymentMessageCount=0,tamperVariant=false,aliasStockCounter=false;
  async function persistOutput(output,before,current,effects){
   if(effects.paymentMessageIntent)activePaymentMessageCount=output.messages.length;
   const transfer=output.transferToHuman;
@@ -214,6 +242,7 @@ try{
   if(!output.plan){const diagnostic=applySalesCycleCommand({state:before,expectedRevision:before.revision,command,now:new Date(),trustedPorts:commandInput.trustedPorts});
    report.domainDiagnostic={planner:output.reasonCode,directStatus:diagnostic.status,directReason:diagnostic.reasonCode};save();
    return {status:'REJECTED',state:before,reasonCode:output.reasonCode??'PLAN_UNAVAILABLE'};}
+  if(tamperVariant)output.plan.state.cart.value.lines.at(-1).components[0].size='XL';
   await persistOutput(output,before,current,output.transferToHuman?{
    pancakeTagCommand:buildPurchaseConfirmedTagCommand({pageId,conversationId:key,confirmation:output.plan.state.confirmation}),transferToHuman:true,
    confirmation:output.plan.state.confirmation,handoffDecision:null,paymentMessageIntent:paymentMethod==='BANK_TRANSFER'?{idempotencyKey:'synthetic-payment-intent'}:null}:noEffects);
@@ -236,6 +265,36 @@ try{
   const fresh=await effects();assert.equal((await fresh.invoke(call)).status,'OK');assert.equal(fresh.snapshot().effectReceipts[0].effect,'CART_OPENED');
   assert.equal((await repository.read(key)).revision,revision);
   report.cartReceipt={operationId:t.snapshot().effectReceipts[0].operationId,stateRevision:revision};
+ });
+ await check('B variant M14 L8 commits distinct lines and receipt-backed removal restores the original cart',async()=>{
+  await message('Chị lấy thêm một áo size L');let t=await effects();
+  const added=await t.invoke({name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'L',color:'navy',quantity:1}});
+  assert.equal(added.status,'OK',JSON.stringify(added));
+  let state=await repository.read(key);assert.equal(state.cart.value.lines.length,2);
+  assert.deepEqual(state.cart.value.lines.map(l=>l.components[0].size).sort(),['L','M']);
+  const l=state.cart.value.lines.find(l=>l.components[0].size==='L');
+  await message('Bỏ áo L, giữ áo M');t=await effects();
+  assert.equal((await t.invoke({name:'change_cart_item',args:{subjectRef:l.lineId,action:'REMOVE_LINE'}})).status,'OK');
+  state=await repository.read(key);assert.equal(state.cart.value.lines.length,1);assert.equal(state.cart.value.lines[0].components[0].size,'M');
+ });
+ await check('B variant tamper after readiness is rejected atomically by actual PostgreSQL guard',async()=>{
+  await message('Chị lấy thêm một áo size L');const before=await repository.read(key),t=await effects();tamperVariant=true;
+  try{assert.notEqual((await t.invoke({name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'L',color:'navy',quantity:1}})).status,'OK');}
+  finally{tamperVariant=false;}
+  assert.deepEqual(await repository.read(key),before);
+  assert.match(report.transactionDiagnostic?.error??'',/^EFFECT_READINESS_/);
+  const current=await runtime.loadOrCreate(pageId,scope.customerHash,'APP',()=>null);
+  assert.equal((await runtime.commit({pageId,conversationId:key,customerHash:scope.customerHash,expectedStateVersion:current.stateVersion,
+   state:{...current.state,revision:current.stateVersion+1},inboxBatchGuard:lease})).stateCommitted,true);
+ });
+ await check('B variant shared raw counter cannot authorize distinct component sizes',async()=>{
+  await message('Chị lấy thêm một áo size L');const before=await repository.read(key),t=await effects();aliasStockCounter=true;
+  try{assert.notEqual((await t.invoke({name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'L',color:'navy',quantity:1}})).status,'OK');}
+  finally{aliasStockCounter=false;}
+  assert.deepEqual(await repository.read(key),before);
+  const current=await runtime.loadOrCreate(pageId,scope.customerHash,'APP',()=>null);
+  assert.equal((await runtime.commit({pageId,conversationId:key,customerHash:scope.customerHash,expectedStateVersion:current.stateVersion,
+   state:{...current.state,revision:current.stateVersion+1},inboxBatchGuard:lease})).stateCommitted,true);
  });
  await check('B3 native quantity change persists, unknown commit reconciles without replay',async()=>{
   await message('Chị lấy 2 bộ SM613 nhé');const t=await effects(),line=(await repository.read(key)).cart.value.lines[0];failAfterCommit=true;
@@ -363,8 +422,13 @@ try{
  // Full candidate composition uses the actual Inbox, history, profile, sales and Outbox stores.
  // Product/checkout/transport inputs here remain explicitly synthetic; no Meta/Pancake socket is opened.
  historyStore=new PostgresChatHistoryStore(testUrl.toString(),{analyticsHashSalt:randomBytes(32).toString('hex')});
- if(providerRun)providerPorts=await createStatefulProvider({preflight:providerFreeze,out:resolve(out)});
- async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false}={}){
+ if(phaseCInitial)providerPorts=phaseCTools.createCandidateProvider({preflight:{m:JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url))),world:initialWorld,
+  registration:{maximumGenerationRequests:0}},out:resolve(out)});
+ if(providerRun)providerPorts=phaseC?phaseCTools.createCandidateProvider({preflight:providerFreeze,out:resolve(out)}):await createStatefulProvider({preflight:providerFreeze,out:resolve(out)});
+ if(phaseC&&providerFreeze.registration.arm==='C3')await providerPorts.attachReference({baselineRoot:phaseCArg('--phase-c-baseline-root'),
+  baselineBuild:JSON.parse(readFileSync(phaseCArg('--phase-c-baseline-build'),'utf8'))});
+ async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false,candidateTuples=false,preparedOffers=false,preorderChoices=false}={}){
+  assert(!live||(!preparedOffers&&!preorderChoices),'SYNTHETIC_PREPARATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||!revalidatedMedia,'SYNTHETIC_REVALIDATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||(dependencyHoldingReply===null&&sizeHoldingReply===null&&!missingDependencyRule),'SYNTHETIC_RULE_FORBIDDEN_IN_PROVIDER_RUN');
   const customerHash=hash(randomUUID()),at=new Date(),row=await runtime.loadOrCreate(pageId,customerHash,'APP',conversationId=>createConversationState({conversationId,routingOwner:'APP',now:at}),at);
@@ -372,17 +436,28 @@ try{
   await runtime.linkProviderConversation(pageId,row.conversationId,'PANCAKE','synthetic-'+randomUUID(),at,new Date(at.getTime()+3600000));
   let sourceVariantChanged=false;
   const product=fixtureProduct('SM613',at);let mediaChanged=false;
+  if(candidateTuples){assert(!live);const row=product.snapshot.offers.DIRECT.rows[0];
+   product.snapshot.fulfillment_policy={tinh_trang:'READY_STOCK',can_order_when_zero:preorderChoices,prep_min_days:1,prep_max_days:2,
+    zero_stock_policy:'',zero_stock_prep_min_days:null,zero_stock_prep_max_days:null,eta_valid_until:'',eta_updated_at:''};
+   product.snapshot.offers.DIRECT.inventory_source='PANCAKE_DIRECT';
+   product.snapshot.offers.DIRECT.rows=['M','L'].flatMap(size=>[
+    {...structuredClone(row),size,color:'__NO_COLOR__',parent_variation_id:`SM613-UNLABELLED-${size}`,stock_quantity:9,components:[{product_sku:'SM613',size,color:'__NO_COLOR__',quantity:1}]},
+    {...structuredClone(row),size,color:'BE',parent_variation_id:`SM613-BE-${size}`,stock_quantity:0,components:[{product_sku:'SM613',size,color:'BE',quantity:1}]}]);
+   for(const r of product.snapshot.offers.DIRECT.rows)Object.assign(r,{inventory_source:'PANCAKE_DIRECT',component_1_sku:'SM613',component_2_sku:''});}
   const selected=q=>{if(missingEta&&q.deliveryAddress)return {status:'ETA_UNAVAILABLE',reasonCode:'CONTROLLED_MISSING_REGION',availableSizes:[],availableColors:[]};
+   if(candidateTuples){const raw=structuredClone(product.snapshot);if(sourceVariantChanged)raw.offers.DIRECT.rows[0].components[0].variation_sku='CHANGED-SKU';
+    return cartSelectionFromSnapshot(raw,q,new Date());}
    const s=fixtureCartLine();s.lineId=q.lineId;s.quantity=q.quantity;s.lineTotalVnd=s.posUnitPriceVnd*s.quantity;
    s.priceAuthority={...s.priceAuthority,shopId:'LANA',priceFactRef:'synthetic-pos-v1',metadata:{...s.priceAuthority.metadata,sourceVersion:'synthetic-pos-v1',observedAt:at.toISOString(),expiresAt:new Date(at.getTime()+172800000).toISOString()}};
    s.components[0]={...s.components[0],size:q.size??'M',color:q.color??'navy',componentSku:'SM613-'+(q.color??'navy').toUpperCase()+'-'+(q.size??'M')};
    if(sourceVariantChanged)s.components[0].componentSku='CHANGED-SOURCE-SKU';
    return {status:'READY',line:s,shopId:'LANA',versions:{price:'synthetic-pos-v1',inventory:'synthetic-stock-v1',size:'synthetic-size-v1',eta:q.deliveryAddress?'synthetic-eta-v1':null},
     eta:q.deliveryAddress?{minDays:3,maxDays:6}:null,etaExpiresAt:q.deliveryAddress?new Date(Date.now()+1200000).toISOString():null,
-    sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:10,sourceObservedAt:at.toISOString(),sourceExpiresAt:new Date(at.getTime()+172800000).toISOString()};};
+    sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:10,stockCounter:{source:'PANCAKE_DIRECT',unit:'ITEM',identity:JSON.stringify(['SM613',q.color??'navy',q.size??'M'])},sourceObservedAt:at.toISOString(),sourceExpiresAt:new Date(at.getTime()+172800000).toISOString()};};
   const facts=live?providerPorts.factsForMode(sourceMode):{ready:async()=>true,close:async()=>{},resolve:async()=>{throw new Error('UNUSED');},resolveCartSelection:async q=>selected(q)};
   let policyChanged=false,receiptAvailable=true;
-  const policy=async()=>{resolver.invalidate(pageId,'PUBLISHED');const resolved=await resolver.resolve({pageId,channel:'PUBLISHED',pin:{scopeType:'SALES_EPISODE',scopeId:bound.conversationId},now:new Date()});
+  const policy=async(active=false)=>{resolver.invalidate(pageId,'PUBLISHED');const resolved=await resolver.resolve({pageId,channel:'PUBLISHED',
+   ...(active?{}:{pin:{scopeType:'SALES_EPISODE',scopeId:bound.conversationId}}),now:new Date()});
    if(!dependencyHoldingReply&&!sizeHoldingReply&&!policyChanged&&!missingDependencyRule)return resolved;
    // Controlled domain input only: never publish/replace the real shop policy.
    const matrix=HandoffMatrixAdminContentV1Schema.parse({schemaVersion:1,kind:'HANDOFF_MATRIX',
@@ -393,7 +468,7 @@ try{
   if(revalidatedMedia){assert(media);product.product.observedAt=new Date(at.getTime()-31*86400000).toISOString();
    product.product.images[0].observedAt=product.product.observedAt;
    product.product.images[0].revalidation={status:'VALID',checkedAt:at.toISOString()};}
-  const read=live?await providerPorts.read(bound,policyStore,policy,initialProductCodes,facts):{policy,catalog:{readProduct:async()=>mediaChanged?{...product,product:{...product.product,images:[]}}:product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
+  const read=live?await providerPorts.read(bound,policyStore,policy,initialProductCodes,facts):{policy:()=>policy(true),catalog:{readProduct:async()=>mediaChanged?{...product,product:{...product.product,images:[]}}:product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
   const scopedSourceReader=createCommerceHandoffSourceReader({
    product:(id,readPos)=>read.catalog.readProduct(id,readPos),
    profile:async b=>{const r=await runtime.loadOrCreateCustomerProfile(b.pageId,b.customerHash,()=>{throw Error('EXISTING_PROFILE_REQUIRED');},new Date());return {profile:r.profile,fieldEvidence:r.fieldEvidence};},
@@ -417,10 +492,16 @@ try{
    }),async()=>{const r=await policy();assert(r.bundle);return r.bundle;},()=>receiptAvailable,readReplySource,r=>deliveryObservations.push(r)),{workerId:'c3-b-capture'},undefined,historyStore);
   let dispatcher=makeDispatcher();
   const drain=async()=>{for(let i=0;i<20&&await attemptQueue.dispatch(()=>dispatcher.processOne());i++);};
+  // Synthetic customer turns must follow earlier accepted delivery on the same clock.
+  // accepted_at is DB-owned; mixing it with the client clock can invert the causal order.
+  // This changes fixture inputs only, never production history cutoffs or freshness gates.
+  const syntheticNow=async()=>{const r=await pool.query(`SELECT GREATEST(clock_timestamp(),
+    COALESCE(MAX(accepted_at)+interval '1 millisecond',clock_timestamp())) AS observed_at
+    FROM meta_outbox WHERE page_id=$1 AND conversation_id=$2`,[pageId,bound.conversationId]);return r.rows[0].observed_at;};
   async function turn(text,outputs,{verdict='PASS',inspect=()=>{},beforeCommit=async()=>{},afterVerify=async()=>{},messages=null,loseCommitReply=false,rollbackCommitReply=false,slot='DETERMINISTIC_TURN',testQuoteTask,testQualificationValidator}={}){
    if(attemptQueue.blocked())return attemptQueue.run(slot,()=>{throw Error('BLOCKED_WORK_MUST_NOT_RUN');});
    assert(!live||(!testQuoteTask&&!testQualificationValidator),'TEST_HOOK_FORBIDDEN_IN_PROVIDER_RUN');
-   const now=new Date(),id='stateful-'+randomUUID(),envelope={schemaVersion:1,customerSendEnabled:false,routing:{owner:'APP'},message:{schemaVersion:1,traceId:randomUUID(),eventKey:id,pageId,messageId:id,
+   const now=await syntheticNow(),id='stateful-'+randomUUID(),envelope={schemaVersion:1,customerSendEnabled:false,routing:{owner:'APP'},message:{schemaVersion:1,traceId:randomUUID(),eventKey:id,pageId,messageId:id,
     senderId:'synthetic-recipient-'+customerHash,conversationId:'synthetic-meta-conversation',occurredAt:now.toISOString(),isEcho:false,appId:null,text,attachments:[]}};
    const inboundMessages=(messages??[{text,attachments:[]}]).map((m,index)=>({...envelope.message,...m,messageId:id+':'+index,eventKey:id+':'+index}));
    for(const message of inboundMessages)await inbox.enqueue({pageId,metaAppId:'synthetic',eventKey:message.eventKey,providerMessageId:message.messageId,conversationHash:customerHash,occurredAt:now,receivedAt:now,signatureKeyVersion:'synthetic',envelope:{...envelope,message}});
@@ -429,15 +510,18 @@ try{
    let batch;
    for(let n=0;n<20;n++){batch=await inbox.claimNextBatch('c3-b-stateful',300000);if(!batch||batch.conversationHash===customerHash)break;await inbox.completeBatch(batch);}
    assert(batch&&batch.conversationHash===customerHash,'CURRENT_BATCH');
-   let owners=0,verifiers=0,faultInjected=false;const toolResponses=[];
+   let owners=0,verifiers=0,faultInjected=false;const toolResponses=[],diagnostics=[];
    const result=await runPersistedCommerceIngress({batch,fence:batch.generation,scope:bound,store:runtime,inbox,history:historyStore,transaction:async fn=>{await beforeCommit();try{const value=await withTransaction(pool,async client=>{const applied=await fn(client);if(rollbackCommitReply&&!faultInjected){faultInjected=true;throw Error('CONTROLLED_ROLLBACK_REPLY_LOST');}return applied;});if(loseCommitReply&&!faultInjected){faultInjected=true;throw Error('CONTROLLED_COMMIT_REPLY_LOST');}return value;}catch(error){report.composedCommitDiagnostic=/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name;save();throw error;}},
+    ...(phaseC?{captureBoundaryWitness:true}:{}),observeDiagnostics:event=>diagnostics.push(event),
+    ...(preparedOffers?{admitPreparedContext:request=>admitPreparedCommerceContext(JSON.parse(readFileSync(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/manifest.json'),'utf8')),'Synthetic verifier transport.',request)}:live&&providerPorts.admitPreparedContext?{admitPreparedContext:providerPorts.admitPreparedContext}:{}),
+    ...(phaseC&&providerPorts.evaluationTurn?{evaluationTurn:providerPorts.evaluationTurn}:{}),
     ...(live&&providerFreeze.m.quoteTask?{quoteTask:providerFreeze.m.quoteTask}:testQuoteTask?{quoteTask:testQuoteTask}:{}),read,facts,policy,resolveTagId:()=> 'synthetic-tag',clock:()=>new Date(),
     ...(live?{handoffReply:{approvedHoldingHashes:providerFreeze.m.handoffReply.approvedHoldingHashes}}:deferredHandoff?{handoffReply:{approvedHoldingHashes:[commerceHash(dependencyHoldingReply)]}}:{}),
     ownerPrompt:live?providerPorts.ownerPrompt:'Synthetic owner transport, never a provider run.',verifierPrompt:live?providerPorts.verifierPrompt:'Synthetic verifier transport.',
     owner:async request=>{owners++;inspect(request);toolResponses.push(...request.contents.flatMap(c=>c.parts.flatMap(p=>p.functionResponse?[p.functionResponse]:[])));if(live)return providerPorts.owner(request);
       const next=outputs.shift();if(!next)throw new Error('CONTROLLED_GENERATION_FAILURE');return typeof next==='function'?next(request):next;},
     verifier:async request=>{verifiers++;const v=live?await providerPorts.verifier(request):{result:{verdict,violations:[]}};await afterVerify();return v;}});
-   return retainObservedAttempt({result,owners,verifiers,batch,toolResponses,inboundMessages},
+   return retainObservedAttempt({result,owners,verifiers,batch,toolResponses,inboundMessages,diagnostics},
     {queue:attemptQueue,slot,validate:testQualificationValidator??validateToolWorkAccounting});
   }
   const state=async()=>(await runtime.loadOrCreateSalesCycle(pageId,bound.conversationId,()=>{throw new Error('STATE_REQUIRED');})).state;
@@ -449,12 +533,76 @@ try{
    const changed=await pool.query('UPDATE sales_cycle_states SET state_revision=$3,state_ciphertext=$4,state_nonce=$5,state_auth_tag=$6,state_encrypted_dek=$7,state_key_ref=$8 WHERE page_id=$1 AND conversation_id=$2',
     [pageId,bound.conversationId,next.revision,encrypted.ciphertext,encrypted.nonce,encrypted.authTag,encrypted.encryptedDek,encrypted.keyRef]);assert.equal(changed.rowCount,1);
   };
-  return {bound,turn,state,changeStoredCart,capture,capturePayloads,gateCalls,deliveryObservations,drain,restartDelivery:()=>{dispatcher=makeDispatcher();},changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;},changeHandoffPolicy:()=>{policyChanged=true;},disableReceiptRead:()=>{receiptAvailable=false;},
+  return {bound,turn,state,changeStoredCart,capture,capturePayloads,gateCalls,deliveryObservations,drain,syntheticNow,
+   readPolicyStatuses:async()=>({transaction:(await policy()).status,active:(await read.policy()).status}),
+   restartDelivery:()=>{dispatcher=makeDispatcher();},changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;},changeHandoffPolicy:()=>{policyChanged=true;},disableReceiptRead:()=>{receiptAvailable=false;},
    revokeMediaProof:()=>{assert(revalidatedMedia);product.product.images[0].revalidation={status:'INVALID'};},
    refreshPosSource:mode=>{product.snapshot.synced_at=new Date(mode==='expired'?Date.now()-3*3600000:Date.now()).toISOString();
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+ await check('B composed evidence read prepares current facts with one charged work unit and actual accepted Outbox',async()=>{
+  const j=await statefulFixture({preparedOffers:true});
+  const r=await j.turn('Áo này bao nhiêu em?',[request=>{assert.equal(request.toolBudget.callsRemaining,5);assert(request.context.protectedClaims.some(c=>c.type==='PRICE'));return say('Áo giá 499.000đ chị nhé.');}]);
+  assert.equal(r.result.terminal.disposition,'SEND_ELIGIBLE');assert.equal(r.result.normalToolCalls,1);await j.drain();assert.equal(j.capture.length,1);
+  assert(r.diagnostics.some(e=>e.stage==='FINAL_GATE'&&e.status==='SEND_ELIGIBLE'));
+ });
+ await check('B composed evidence read source change after verifier cannot enqueue prepared evidence',async()=>{
+  const j=await statefulFixture({preparedOffers:true});
+  const r=await j.turn('Áo này bao nhiêu em?',[say('Áo giá 499.000đ chị nhé.')],{afterVerify:async()=>j.refreshPosSource('stock-change')});
+  assert.notEqual(r.result.terminal.disposition,'SEND_ELIGIBLE');await j.drain();assert.equal(j.capture.length,0);
+  assert(r.diagnostics.some(e=>e.stage==='CURRENT_READBACK'&&e.status==='ERROR'));
+ });
+ await check('B composed evidence read ambiguous tuple shares owner and verifier evidence without a cart mutation',async()=>{
+  const j=await statefulFixture({candidateTuples:true,preorderChoices:true});
+  const r=await j.turn('Chị lấy áo size L nhé.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'L',color:null}}]),request=>{
+   const proof=request.context.runtimeProducts.find(p=>p.subjectRef==='SM613').selectionEvidence[0];
+   assert(proof.options.some(o=>o.color==='BE'&&o.status==='PRE_ORDER'));assert(proof.options.some(o=>o.color==='__NO_COLOR__'&&o.status==='IN_STOCK'));
+   return say('Chị chọn màu nào ạ?');}]);
+  assert.equal(r.result.terminal.disposition,'SEND_ELIGIBLE');assert.equal((await j.state()).cart,null);await j.drain();assert.equal(j.capture.length,1);
+ });
+ await check('B composed selection checkout tuple identity supports M plus L without zero-stock color substitution',async()=>{
+  const j=await statefulFixture({candidateTuples:true});
+  report.selectionCheckoutTrace=[];
+  for(const size of ['L','M']){const r=await j.turn(`Chị lấy size ${size}`,[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size}}]),say('Em đã thêm áo vào giỏ.')]);
+   report.selectionCheckoutTrace.push({size,owners:r.owners,terminal:r.result.terminal,toolResponses:r.toolResponses,cart:(await j.state()).cart?.value});save();
+   assert.equal(r.result.terminal.disposition,'SEND_ELIGIBLE',JSON.stringify(r.result));await j.drain();}
+  const state=await j.state();assert.equal(state.cart.value.lines.length,2);
+  assert.deepEqual(state.cart.value.lines.map(l=>l.components[0].size).sort(),['L','M']);
+  assert(state.cart.value.lines.every(l=>l.quantity===1&&l.components[0].color==='__NO_COLOR__'));
+ });
+ await check('B composed selection checkout natural COD persists privately without consuming the name retry',async()=>{
+  const j=await statefulFixture();await j.turn('Chị lấy áo navy M',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);await j.drain();
+  await j.turn('Chốt đơn cho chị',[native([{name:'confirm_purchase',args:{}}])]);await j.drain();
+  const r=await j.turn('Chị muốn trả khi nhận hàng.',[]);await j.drain();
+  assert.equal(r.owners,0);assert.equal(r.verifiers,0);const state=await j.state();assert.equal(state.checkoutDraft.paymentMethod,'COD');
+  assert.equal(state.checkoutDraft.fullName,null);assert.equal(state.clarification.attemptCount,1);assert.deepEqual(state.clarification.missingFields,['FULL_NAME']);
+  const blocked=await j.turn('Không COD',[]);await j.drain();assert.equal(blocked.owners,0);
+  assert.deepEqual((await j.state()).clarification.missingFields,['PAYMENT_METHOD']);
+  await j.turn('Tên: Khách thử nghiệm',[]);await j.drain();
+  assert.deepEqual((await j.state()).clarification.missingFields,['PAYMENT_METHOD']);assert.equal((await j.state()).preview,null);
+  await j.turn('Chị chọn COD nhé',[]);await j.drain();assert.equal((await j.state()).checkoutDraft.paymentMethod,'COD');
+  assert.deepEqual((await j.state()).clarification.missingFields,['PHONE']);
+ });
+ await check('B composed C remediation active reads do not consume the durable transaction pin',async()=>{
+  const j=await statefulFixture();assert.deepEqual(await j.readPolicyStatuses(),{transaction:'PINNED',active:'RESOLVED'});
+ });
+ await check('B composed C remediation code clarification has a committed receipt and accepted capture after owner',async()=>{
+  const {readSessionSnapshot}=await import('../single-agent-commerce-qualification/native-snapshot.mjs');
+  const {clarificationCapture}=await import('../single-agent-commerce-qualification/native-terminal.mjs');
+  const {publicCheckoutState}=await import('../../dist/single-agent-commerce-public-history.js');
+  const j=await statefulFixture();
+  await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);await j.drain();
+  const before=await readSessionSnapshot({runtime,pool,historyStore,session:j}),captureStart=j.capture.length;
+  const invitation=await j.turn('Chốt đơn cho chị nhé',[native([{name:'confirm_purchase',args:{}}])]);await j.drain();
+  const after=await readSessionSnapshot({runtime,pool,historyStore,session:j});
+  assert.equal(invitation.owners,1);assert.equal(invitation.verifiers,0);
+  assert(clarificationCapture({result:invitation.result,generations:[{role:'OWNER',status:'OK'}],messages:j.capture.slice(captureStart),images:[],
+   receipts:after.receipts.filter(r=>!before.receipts.some(old=>old.operation_id===r.operation_id)),authority:after.authority,state:after.publicState}));
+  const cod=await j.turn('Chị trả COD nhé.',[]);await j.drain();assert.equal(cod.owners,0);assert.equal(cod.verifiers,0);
+  const intake=publicCheckoutState(await j.state());assert.equal(intake.paymentMethod,'COD');assert(intake.lastQuestion.missingFields.includes('FULL_NAME'));
+  assert.equal(intake.lastQuestion.delivery,'UNKNOWN');
+ });
  for(const mode of ['committed','conflict','commit-response-lost','rollback-response-lost'])await check('B composed recovery accounting '+mode,async()=>{
   const holding='Bên em kiểm tra rồi báo lại chị nhé.',j=await statefulFixture({dependencyHoldingReply:holding});
   const r=await j.turn('Áo này bao nhiêu em?',[],{loseCommitReply:mode==='commit-response-lost',rollbackCommitReply:mode==='rollback-response-lost',
@@ -631,17 +779,33 @@ try{
   assert.equal(r.result.enqueued,2,JSON.stringify(r.result));await j.drain();await j.drain();
   assert.deepEqual(j.capture,['Ảnh mặt sau đây chị nhé.','[CODE_IMAGE]']);
   assert.equal(new Set(j.gateCalls).size,1);assert(j.capturePayloads[1].attachment.payload.url.endsWith('c3-synthetic-product-back.jpg'));
+  const mediaCutoff=await j.syntheticNow();
   const delivered=await runtime.readAcceptedCommerceMedia({pageId,conversationId:j.bound.conversationId,customerHash:j.bound.customerHash,
-    recipientHash:hash('synthetic-recipient-'+j.bound.customerHash),before:new Date(Date.now()+1000)});
+    recipientHash:hash('synthetic-recipient-'+j.bound.customerHash),before:mediaCutoff});
   assert.equal(delivered.length,1);assert.equal(delivered[0].productId,'SM613');
   assert.equal(delivered[0].assetRef,'asset:'+hash(JSON.stringify(j.capturePayloads[1].attachment.payload.url)));
   assert(!JSON.stringify(delivered).includes('https:'));
   const other=await runtime.readAcceptedCommerceMedia({pageId,conversationId:j.bound.conversationId,customerHash:hash('other'),
-    recipientHash:hash('synthetic-recipient-'+j.bound.customerHash),before:new Date(Date.now()+1000)});
+    recipientHash:hash('synthetic-recipient-'+j.bound.customerHash),before:mediaCutoff});
   assert.equal(other.length,0);
-  let seenHistory;
-  await j.turn('Cả bộ bao nhiêu em?', [request=>{seenHistory=request.contents;return say('Dạ chị.');}]);
-  assert(JSON.stringify(seenHistory).includes('RECENT_SHOP_IMAGES_ACCEPTED'));
+  let seenHistory,followup;const reads=[],readMedia=runtime.readAcceptedCommerceMedia;
+  runtime.readAcceptedCommerceMedia=async query=>{
+   const clientBefore=new Date().toISOString();
+   try{const rows=await readMedia.call(runtime,query);if(query.conversationId===j.bound.conversationId)reads.push({before:query.before.toISOString(),
+    rowCount:rows.length,scope:{pageId:query.pageId,conversationId:query.conversationId,customerHash:query.customerHash,recipientHash:query.recipientHash},
+    clientBefore,clientAfter:new Date().toISOString()});return rows;}
+   catch(error){reads.push({before:query.before.toISOString(),errorCode:'MEDIA_READ_ERROR',clientBefore,clientAfter:new Date().toISOString()});throw error;}
+  };
+  try{followup=await j.turn('Cả bộ bao nhiêu em?', [request=>{seenHistory=request.contents;return say('Dạ chị.');}]);}
+  finally{runtime.readAcceptedCommerceMedia=readMedia;}
+  const clientBeforeDbClock=new Date().toISOString(),dbClock=(await pool.query('SELECT clock_timestamp() AS observed_at')).rows[0].observed_at;
+  report.n4HistoryDiagnostic={reads,acceptedAt:delivered.map(m=>m.occurredAt),inboundOccurredAt:followup.inboundMessages[0].occurredAt,
+   syntheticClockPolicy:'DB_CLOCK_STRICTLY_AFTER_PRIOR_ACCEPTED_DELIVERY',
+   // The synthetic enqueue above deliberately uses the same now for occurredAt/receivedAt.
+   inputReceivedAt:followup.inboundMessages[0].occurredAt,clientBeforeDbClock,dbClock:dbClock.toISOString(),clientAfterDbClock:new Date().toISOString(),
+   owners:followup.owners,terminal:followup.result.terminal,history:seenHistory??null};save();
+  assert(JSON.stringify(seenHistory).includes('RECENT_SHOP_IMAGES_ACCEPTED'),'N4_HISTORY_MISSING; see n4HistoryDiagnostic');
+  assert(delivered.every(m=>Date.parse(m.occurredAt)<Date.parse(followup.inboundMessages[0].occurredAt)),'N4_SYNTHETIC_CAUSAL_ORDER');
  });
  await check('B composed N5 image-first text-last handoff links the attachment history and retains encrypted source',async()=>{
   const j=await statefulFixture(),r=await j.turn(null,[],{messages:[{text:null,attachments:[{type:'image',url:'https://content.pancake.vn/c3-private-receipt.jpg',providerId:'synthetic-receipt'}]},
@@ -795,7 +959,37 @@ try{
   assert.deepEqual(first.capture,[]);assert.deepEqual(second.capture,[]);
   assert.deepEqual(summarizeAttemptQualification([invalid,blocked]),{registered:2,executed:1,notRun:1,observedTerminals:{SEND_ELIGIBLE:1},unknownTerminals:0,qualificationErrors:1});
  });
- if(providerRun){
+ if(phaseCInitial)await check('C initial state capture uses real native stores without generation',async()=>{
+  assert(initialWorld,'C_INITIAL_WORLD_REQUIRED');
+  const fixture=await statefulFixture({live:true,initialProductCodes:[initialWorld.products[0].canonicalCode]}),
+   captured=await phaseCTools.readSessionSnapshot({runtime,pool,historyStore,session:fixture});
+  assert.equal(captured.publicHistory.history.length,0);assert.equal(providerPorts.observed().length,0);
+  const {digest}=await import('../single-agent-commerce-qualification/qualification.mjs');
+  report.initialStateArtifact={kind:'REAL_ADAPTER_NATIVE_INITIAL_STATE',worldHash:digest(initialWorld),sourceSha:report.sourceSha,sourceDirty:report.sourceDirty,
+   publicState:captured.publicState,providerRequests:0,testDatabaseDropped:false};
+ });
+ if(phaseC){
+  assert(phaseCArg('--phase-c-seed'),'C_SEED_REQUIRED');
+  const snapshot=session=>phaseCTools.readSessionSnapshot({runtime,pool,historyStore,session});
+  const collected=await phaseCTools.collectNativePopulation({preflight:providerFreeze,providerPorts,sessionFactory:statefulFixture,snapshot,historyStore,
+   out:resolve(out),seedPath:phaseCArg('--phase-c-seed'),queue:attemptQueue});
+  report.phaseC={status:'COLLECTED_NOT_GRADED',candidateNativeScenarios:collected.attempts.length,
+   auxiliaryHttp:collected.auxiliaryHttp};report.providerGenerations=collected.providerRequests;
+  if(phaseCDiagnostic){
+   report.kind='DEVELOPMENT_ONLY_NOT_QUALIFICATION';
+   if(!providerFreeze.sealed.slots.some(s=>s.mode==='SAFETY')){
+    report.diagnosticProbe={kind:'DEVELOPMENT_ONLY_NOT_SAFETY_GATE',status:'NOT_REGISTERED',reason:'FULL_NATIVE_ONLY'};
+   }else if(!attemptQueue.blocked()&&!providerFreeze.diagnosticControl.blocked()){
+    const probeDir=resolve(out,'diagnostic-probe');mkdirSync(probeDir);
+    report.diagnosticProbe=await collectSafety({preflight:providerFreeze,provider:providerPorts,out:probeDir});
+    // A singleton diagnostic probe must never be mistaken for the qualification SAFETY gate.
+    report.diagnosticProbe.kind='DEVELOPMENT_ONLY_NOT_SAFETY_GATE';
+    writeFileSync(resolve(probeDir,'DIAGNOSTIC_PROBE_SUMMARY.json'),JSON.stringify(report.diagnosticProbe,null,2));
+   }else report.diagnosticProbe={kind:'DEVELOPMENT_ONLY_NOT_SAFETY_GATE',status:'NOT_RUN',reason:'BATCH_STOPPED'};
+   report.providerGenerations=providerPorts.observed().reduce((n,g)=>n+g.providerRequests,0);
+   report.diagnosticStop=providerFreeze.diagnosticControl.reason();
+  }
+ }else if(providerRun){
   const journeys=new Map(),qualifiedAttempts=[];report.outcomes=[];
   let invitationSucceeded=false;
   const selectedCases=process.argv.includes('--opening-only')?providerFreeze.cases.slice(0,1):providerFreeze.cases;
@@ -859,5 +1053,8 @@ try{
 finally{
  await Promise.allSettled([runtime?.close(),inbox?.close(),policyStore?.close(),livePolicyStore?.close(),historyStore?.close(),providerPorts?.close(),pool?.end()]);
  if(created){assert(/^c3_b_test_[a-f0-9]{16}$/.test(databaseName));await admin.query('DROP DATABASE '+databaseName);report.testDatabaseDropped=true;save();}
+ if(report.initialStateArtifact){report.initialStateArtifact.testDatabaseDropped=report.testDatabaseDropped;
+  writeFileSync(resolve(out,'INITIAL_STATE.json'),JSON.stringify(report.initialStateArtifact,null,2),{flag:'wx'});}
+ save();
  await admin.end();
 }

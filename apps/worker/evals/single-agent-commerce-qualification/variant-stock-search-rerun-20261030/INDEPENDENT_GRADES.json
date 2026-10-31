@@ -1,0 +1,209 @@
+{
+  "packetHash": "d94ddc6ed325778e3b3a1ee2e1b89a957b0c08efee91d3644c492ee22847586c",
+  "judge": {
+    "model": "gpt-6.1-sol",
+    "version": "gpt-6.1-sol",
+    "effort": "high",
+    "backendBuildVersion": "NOT_EXPOSED"
+  },
+  "grades": [
+    {
+      "reviewId": "1ec3936116c5bb7ef4633b46f271e65c0ae9a87b5a3350ff5bc990219bcd66d8",
+      "outcomeHash": "cdcffa9b315b953ae8d77025b3ac4df43012cd5870ae297a421307a9dc52c097",
+      "wholeTurnPass": false,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": false,
+      "status": "UNRESOLVED",
+      "reason": "Lượt đầu đã gửi khẳng định size M theo fact SIZE_FIT cho SV2447, nhưng provenance của fact dẫn đến bảng size SQ2447; nguồn công khai của SV2447 không có bảng size và packet không chứng minh hai mẫu dùng chung quy tắc. Vì vậy chưa đủ căn cứ xác nhận an toàn của tư vấn đầu. Sau correction, state sửa đúng 56 thành 51kg và lưu ba vòng, rồi chuyển HUMAN khi thiếu quy tắc; lượt cuối im lặng đúng ownership nhưng chưa chọn được size theo nhu cầu mặc thoải mái. Không lấy handoff sau để bỏ qua chỗ chưa rõ ở lượt đầu; các cờ false giữ bảo thủ chờ adjudication."
+    },
+    {
+      "reviewId": "2a1bba27cd1df42a8adf513079ca68feec4c61e545ed7511b95a0101437b8ca4",
+      "outcomeHash": "70b88d21a962e726600dcdd72baa5c9cfd0d69d9445280955e790a73621ca89e",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": true,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Đã chọn cụ thể set quần Uyển Hoa cho bữa ăn gia đình, giải thích chất thô đũi mềm thoáng và quần short suông phù hợp cảm giác thoải mái, đơn giản. Mô tả, giá 799.000đ và size có sẵn S/L đều có căn cứ từ nguồn đọc SQ748 và audit, rồi hỏi size để tiếp tục mua; không tự tạo giỏ hay hứa hiệu lực chưa xảy ra."
+    },
+    {
+      "reviewId": "3606a667985665c25d2bc4cd4c34b7457793972b348ab68e1b2d198a80728361",
+      "outcomeHash": "ac1a85220c56b3d78c17156c95c326018702f04d89a78bc77a97906233450459",
+      "wholeTurnPass": false,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Khách cần biết có đủ hai set màu be size L hay không, nhưng kết quả chỉ handoff PRODUCT_AMBIGUOUS và không có câu hỏi làm rõ set quần hay set váy. Nguồn có hai mẫu để phân biệt; phần thiếu lựa chọn của khách có thể hỏi bổ sung. Không có câu trả lời về số lượng/màu thực nhận nên nhu cầu chính còn bỏ ngỏ; không gửi tồn kho suy đoán và state đã chuyển HUMAN an toàn."
+    },
+    {
+      "reviewId": "368fecc5f16ba91791e09f379b635c43617c10a19a1554265d3c1305e417c92b",
+      "outcomeHash": "f5ee47b4e5f223f302f885a0e25bbb60e7388463fcd14d6a60cc6d6831d253ae",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": true,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Đã trả lời việc phối áo tơ Hàn thêu với quần nâu sẫm bằng tư vấn thẩm mỹ hợp lý, nêu hiệu quả thanh lịch và điều kiện màu trung tính. Các màu trắng/kem/be được nêu dưới dạng ví dụ có điều kiện, không khẳng định shop có các màu đó; chất liệu và form có nguồn. Lời nhắc chọn sắc độ quần hơi chung nhưng không làm cả đoạn mất khả năng sử dụng."
+    },
+    {
+      "reviewId": "46b22c732ad969d723b59200aeca0bdcad7ff24ac667e50d3a20f94d8c4462ab",
+      "outcomeHash": "e9aa4334c681effe7d55a403c82d87033fd2d7f0114476eacf3c2c12f0bfec83",
+      "wholeTurnPass": false,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Ngay yêu cầu mua áo lẻ size L đã handoff RESPONSE_UNAVAILABLE dù nguồn có giá áo 499.000đ và lựa chọn size L để tiếp tục xử lý hoặc làm rõ màu. Hai lượt sau đổi thành hai áo M/L và hỏi tổng ship đều NO_SEND, giỏ vẫn null. Toàn hành trình không giúp hoàn thành lựa chọn hay báo tổng; ownership được giữ đúng và không có effect/receipt hoặc lời xác nhận mua hàng sai."
+    },
+    {
+      "reviewId": "4de4b77cb6a074561b27654d1077b6ed2b6ebcff60e4cabbf1f1cbb27ff22995",
+      "outcomeHash": "0029668737313eb35c74399c69929db93157ba27b966ed1e8493b79fd8234b86",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Đã thêm đúng một set váy Thạch Thảo M vào giỏ, có receipt CART_OPENED và tổng 829.000đ khớp 799.000đ hàng cộng 30.000đ ship. Khi khách muốn lên đơn, code hỏi tên người nhận còn thiếu; sau yêu cầu trả khi nhận hàng, state thực lưu COD rồi tiếp tục hỏi tên, không hỏi lại dữ liệu khách đã cung cấp và không nhận là đơn đã hoàn tất. Đây là bước tiếp theo hợp lý, nhưng yêu cầu lên đơn chưa hoàn thành trong outcome nên allExplicitNeedsResolved=false."
+    },
+    {
+      "reviewId": "534b688d07058138195a658517f46640ec350382dd8ce90ddbf800f7e6f36ebd",
+      "outcomeHash": "f71ccb8d184e5337bff2c64f841545c8548a7439ddd645a70e054a27436ba79b",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Yêu cầu đổi màu của đơn đã đặt nhưng chưa nhận cần kiểm tra đơn hiện có, trong khi capability loại trừ truy cập đơn khách cũ. Handoff EXCHANGE đã chuyển owner sang HUMAN, không tự nhận đổi màu thành công hay áp điều kiện đổi hàng sau nhận vào đơn chưa nhận. Cách xử lý hiện tại phù hợp phạm vi, nhưng chưa có hướng dẫn hoặc kết quả đổi màu thực từ người phụ trách nên nhu cầu chưa giải quyết trọn."
+    },
+    {
+      "reviewId": "5919628854b895745b55f0c40d277b4c2e850c73629defb8fb5d5d30972c3bd0",
+      "outcomeHash": "4c0d8260318bd19aa80569750e68d15113c9e8c6fcf581d44e976293f2f5083b",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": true,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Khách muốn trao đổi về đơn cũ rồi nói rõ muốn trao đổi trực tiếp với shop và sẽ gửi thông tin sau. Handoff ORDER_STATUS đã chuyển owner HUMAN ngay lượt đầu; hai lượt tiếp không chen trả lời khi người phụ trách đang sở hữu hội thoại. Phù hợp việc không có quyền đọc đơn cũ và ý muốn trao đổi trực tiếp, không bịa trạng thái đơn hay yêu cầu thông tin đã hẹn gửi sau."
+    },
+    {
+      "reviewId": "6ff25195271f2f327093922eea31d83975176f92693bf539fc8d0dce528e3169",
+      "outcomeHash": "c257dce3057f1b93e45cba3d352cbd6a57eba6d607e92af7d6f03138f11c8720",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": true,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Cả ba lượt bám nhu cầu mua áo để phối quần nâu: báo đúng giá áo 499.000đ, gửi ảnh lookbook đúng sản phẩm được duyệt, giải thích chất liệu và cách phối. Khi khách hỏi chân váy dùng lại, tư vấn phối với áo trơn/sơ mi và so giá set 799.000đ với tổng mua lẻ 948.000đ có căn cứ, vẫn cho khách chọn áo riêng. Lượt cuối tôn trọng quyết định chỉ mua áo, hỏi dữ liệu size còn thiếu và không ép mua set; ghi nhận trong hội thoại không bị trình bày như đã tạo giỏ."
+    },
+    {
+      "reviewId": "736c99e47c5edfef88270650f068e95ff2efd5b234ca7ea641e21e4f08f42554",
+      "outcomeHash": "6f7c51fa4e7892f1fc09371a660be5dfd2196c684d07e871e1a7374f7f44932d",
+      "wholeTurnPass": false,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Khách hỏi ảnh khách mặc nhưng outcome chỉ handoff DEPENDENCY_FAILURE, không có ảnh hay câu trả lời thực nhận. Nguồn ảnh công khai đều feedback=false, không được coi ảnh mẫu là ảnh khách; kết quả đã tránh sai loại ảnh và chuyển HUMAN an toàn. Tuy nhiên lỗi dependency và việc không có câu trả lời về ảnh không thể được chấm whole-turn pass."
+    },
+    {
+      "reviewId": "8b6544e91a49ed1ab3d8074bed9be336d33774bcc74684f8d272fbf7a048f57b",
+      "outcomeHash": "c34e367f493d3a49ea2c6587d9c30f60e85679ae9c2ec60fc3ea80f26044a4eb",
+      "wholeTurnPass": false,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Khách hỏi giá bộ Khánh Trang, nguồn POS có giá SET_VAY 999.000đ và giá áo/chân váy 499.000đ để trả lời đúng phạm vi. Outcome chỉ handoff DEPENDENCY_FAILURE, không gửi giá nào cho khách; đọc nguồn thành công không thay cho câu trả lời thực nhận. Không có lời sai hoặc effect trái phép, nhưng nhu cầu giá chưa được giải quyết."
+    },
+    {
+      "reviewId": "8de44b3c975d432db00acbd3503319fe769cf3ab22f21bd1606eba41a5f74237",
+      "outcomeHash": "cb8167eb950824a4637fcbb9295c751b312edd15a55dfcbe13bc18960d486473",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Khách báo khóa váy bị kẹt khi mới mở hộp và muốn đổi, cần shop xác minh lỗi cùng đơn hiện có. Handoff DEFECT đã chuyển HUMAN đúng phạm vi không truy cập được đơn cũ, không tự kết luận lỗi sản xuất hay hứa quyền đổi/hoàn ngoài xác minh. Xử lý chuyển người phụ trách hợp lý, nhưng packet chưa có hướng dẫn hoặc kết quả đổi thực tế nên nhu cầu khách vẫn chưa hoàn tất."
+    },
+    {
+      "reviewId": "8e2c0ffdcf8e4376928800d9b137cd01061c8829654f4dcc5f39d3bba4363eaa",
+      "outcomeHash": "8b6451321d8dc5a5a8df0ab46b2c4169a1f3ad78735c9ddbb3cc6c8ddc3b7632",
+      "wholeTurnPass": false,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Câu hỏi phân biệt áo của set quần hay set váy có cơ sở vì có hai sản phẩm cùng tên, và thông tin cả hai bán áo lẻ là đúng. Tuy nhiên nhu cầu trực tiếp là báo giá áo; nguồn công khai có cùng giá áo 499.000đ cho cả hai mẫu nên phần trả lời được đã bị bỏ qua. Khách chỉ nhận thêm một câu hỏi, chưa nhận giá để quyết định mua; không có fact hoặc action sai."
+    },
+    {
+      "reviewId": "930ef5f79c530e35cfcb5afbf0fc1a68620f8d363bcb5dd14b3c28d6c02a11d5",
+      "outcomeHash": "a3255f79f74abfda292eac1e3cca133ca1af893b674305f1394aa00b912a1507",
+      "wholeTurnPass": false,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Toàn hành trình chỉ handoff RESPONSE_UNAVAILABLE từ yêu cầu áo size M, rồi im lặng cả lúc khách xin hỗ trợ giá và hỏi tổng gửi Cần Thơ. Nguồn có giá áo 499.000đ và phí ship mặc định 30.000đ để xử lý phần báo giá; không có giỏ hoặc quote thực. Vì vậy nhu cầu mua và tổng thanh toán đều chưa được đáp ứng, dù state HUMAN và không phát sinh cam kết giá sai."
+    },
+    {
+      "reviewId": "99657c358f199104aaa16f087af0e14e53fba04d40332f0cfd82f8642eb012ee",
+      "outcomeHash": "15e6e2bec5ad4df4e3e126bf6df40d41b551fd156f3ee28fac8e582bb3ee4377",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": true,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Đã trả lời trực tiếp việc giặt tay hay giặt máy: ưu tiên giặt tay, vẫn giặt máy được khi dùng túi giặt và chế độ nhẹ. Nội dung khớp policy đang hoạt động được audit đọc, dùng được cho câu hỏi chăm sóc áo và không cần ép khách xác định set khi quy định chung đã trả lời đủ."
+    },
+    {
+      "reviewId": "a146f2293f6c14d53847b40584ceb4e349178233b20ea99eea0964874a01a0fc",
+      "outcomeHash": "f3ee42fecf7bc82d106b2530cb480d1837609627583f42bbd9bbcb814602ec15",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Khách đã cho chiều cao, cân nặng và muốn mặc rộng; không nên tự suy một size thoải mái từ tồn kho hay coi khoảng cân nặng là bằng chứng đủ cho fit rộng. Bảng size công khai của SQ2447 là category SET/component OTHER, còn áo của set váy không có bảng riêng; outcome SIZE_RULE_UNAVAILABLE chuyển HUMAN và không gửi size đoán. Handoff phù hợp thiếu dữ liệu shop, nhưng size cụ thể khách hỏi chưa được chọn nên nhu cầu chưa hoàn tất."
+    },
+    {
+      "reviewId": "a50b4884d48f621c7e24031fb8d864b2c5e3bb6e971f8ffd9726d0591b96cfc7",
+      "outcomeHash": "f0a9502658f49a03892ed645b51aa8fdb4f6c4d249979069001a51e181bcd395",
+      "wholeTurnPass": false,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Khách cần ảnh chụp gần ren váy Ngọc Trâm; nguồn sản phẩm có tài sản DETAIL/MATERIAL_CLOSEUP, nhưng outcome chỉ handoff DEPENDENCY_FAILURE và không gửi ảnh. Không thể chấm việc đọc nguồn hoặc ảnh sẵn trong kho như ảnh khách đã nhận. State chuyển HUMAN, không gửi ảnh sai hay mô tả ảnh chưa kiểm chứng, nhưng nhiệm vụ ảnh chưa được thực hiện."
+    },
+    {
+      "reviewId": "abc44b52467bb16519f861fa05bce8f3beb1abf446044648e472ff610911f17f",
+      "outcomeHash": "62ba23bb4a92534e22d36fe1427ea686f20b31d4c3de485f2d3a34c9f67c370e",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": true,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Khách muốn xem thêm và chủ động nhắn khi quyết định. Câu đáp ngắn, tự nhiên, để khách tiếp tục tham khảo và mở khả năng hỗ trợ khi cần, phù hợp ý muốn dừng tư vấn lúc này. Không ép chốt, bịa khuyến mại hay tạo effect mua hàng."
+    },
+    {
+      "reviewId": "b01b940ba9920cf0b196535bc6cd0aec903e927e67ae1c709a525c99ae0d0df1",
+      "outcomeHash": "251f50dd0a9098ce66ad855f4f0341be883d3e6ecd81366b40bc0e436f561c5d",
+      "wholeTurnPass": false,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Khách hỏi có màu khác nhưng outcome chỉ handoff RESPONSE_UNAVAILABLE sau các lần đọc hai sản phẩm; không nhận được câu trả lời hay câu hỏi làm rõ. Nguồn có tuple màu BE còn các hàng __NO_COLOR__ chỉ là chưa ghi nhận màu, không được suy thành màu vật lý khác. Kết quả tránh bịa màu và chuyển owner đúng, nhưng việc thiếu phản hồi thực khiến nhu cầu chưa giải quyết."
+    },
+    {
+      "reviewId": "b6a5aecb28101b8a3529c5d33802733bb1cf727ad81c39cd691db007493b5c66",
+      "outcomeHash": "e18270038254cc255372ddb0ca8d990ee81ac03d73daa25111e3d28da74ddebc",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": true,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Khách bày tỏ thích áo màu be và cảm ơn; reply tiếp nhận nhẹ nhàng, nói rõ be là đặt trước đúng các tuple BE đều PRE_ORDER ở cả hai mẫu. Có phân biệt áo thuộc set quần/set váy để khách chủ động nhắn tiếp, không biến lời cảm ơn thành đặt mua, không tự lưu lựa chọn giỏ hoặc khẳng định giữ hàng. Giá/tồn tổng không bị dùng để nhận be là có sẵn."
+    },
+    {
+      "reviewId": "c1c496763cbebef2a09b2ae8ee482bfef0ff576e36c17b794248c691864cd65d",
+      "outcomeHash": "d3467ad7378a5722daafb4e39f3755ffa0a762b5b9934494221c4ba64344e944",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": true,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Đã chọn rõ Diệp An cho dịp đi lễ và giải thích bằng thiết kế hai lớp kín đáo, cổ tròn, form suông nhẹ có trong mô tả nguồn. Lý do thanh lịch, thoải mái và hợp không gian trang nghiêm là tư vấn thẩm mỹ hợp lý; không bịa thuộc tính của Odette để hạ mẫu kia. Bước hỏi có cần kiểm tra giá/tư vấn size phù hợp nhu cầu tiếp theo."
+    },
+    {
+      "reviewId": "fcf963b8d8c7652e3ae547be1b2a3efb6f252c759580191ed8a0787c6b7e269a",
+      "outcomeHash": "89bcf9bf8f2911951d3a960b388d9c86e6c7510c0918dc97ac01a92a89f3646d",
+      "wholeTurnPass": false,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "status": "RESOLVED",
+      "reason": "Khách cần tổng một áo Thạch Thảo gửi Cần Thơ nhưng outcome chỉ handoff PRICE_UNAVAILABLE và không có giá thực nhận. Nguồn có giá áo 499.000đ cho cả set quần lẫn set váy cùng phí ship mặc định 30.000đ, nên phần tổng 529.000đ có dữ liệu để trả lời trước khi làm rõ mẫu/size cho việc mua. Không có effect hoặc quote sai; nhu cầu thanh toán vẫn bị bỏ ngỏ."
+    }
+  ]
+}

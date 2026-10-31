@@ -6,6 +6,7 @@ import {
   canonicalCheckoutDraftHashPreimageV1,
   canonicalCartStateHashPreimageV1,
   canonicalCartStateV1,
+  canonicalCartVariantScopeV2,
   cartMutationAuthorityBindingHashPreimageV1,
   cartMutationBatchEvidenceHashPreimageV1,
   cartMutationReceiptHashPreimageV1,
@@ -2885,6 +2886,95 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     }, now)).rejects.toThrow();
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
 
+    // Exercise the locked writer, with correctly hashed evidence, rather than
+    // relying on a malformed envelope to reject a payment-bypass attempt.
+    const paymentClarification = { ...clarificationResult.clarification!, missingFields: ["PAYMENT_METHOD"] };
+    const paymentLockedState = { ...clarificationState, checkoutDraft: { ...checkoutTransition.draft,
+      fullName: checkoutTransition.draft.fullName as string | null, updatedAt: new Date(now.getTime() - 1000).toISOString() }, clarification: paymentClarification };
+    const lockPaymentState = (state: typeof paymentLockedState) => {
+      const encrypted = cipher.encryptJson(state, `lana:sales-cycle:v1:page-1:${commitInput.conversationId}`, salesExpiresAt);
+      lockedSalesRow = { ...mutationLockedSalesRow, state_revision: "4", state_ciphertext: encrypted.ciphertext,
+        state_nonce: encrypted.nonce, state_auth_tag: encrypted.authTag, state_encrypted_dek: encrypted.encryptedDek, state_key_ref: encrypted.keyRef };
+    };
+    lockPaymentState(paymentLockedState);
+    for (const transition of [
+      { kind: "RESOLVED" as const },
+      { ...clarificationTransition, missingFields: ["FULL_NAME"], questionFingerprint: "b".repeat(64) },
+      { ...clarificationTransition, missingFields: ["FULL_NAME", "PAYMENT_METHOD"], questionFingerprint: "b".repeat(64) },
+    ]) {
+      const replay = applySalesClarificationTransitionV1({ current: paymentClarification, transition, appliedAt: now });
+      if (replay.status !== "APPLIED") throw new Error("TEST_PAYMENT_BYPASS_FIXTURE_INVALID");
+      const placeholder = { ...resolveEvidencePlaceholder, transition,
+        beforeClarificationHash: rawSha256(canonicalClarificationStateHashPreimageV1(paymentClarification)),
+        afterClarificationHash: rawSha256(canonicalClarificationStateHashPreimageV1(replay.clarification)) };
+      const evidence = { ...placeholder, evidenceHash: rawSha256(clarificationTransitionEvidenceHashPreimageV1(placeholder)) };
+      await expect(store.commit({ ...resolvePlan, salesCyclePlan: { ...resolvePlan.salesCyclePlan,
+        state: { ...resolvePlan.salesCyclePlan.state, checkoutDraft: paymentLockedState.checkoutDraft, clarification: replay.clarification },
+        events: [{ ...resolvePlan.salesCyclePlan.events[0]!,
+          commandKind: transition.kind === "RESOLVED" ? "CLARIFICATION_RESOLVED" : "CLARIFICATION_REQUESTED",
+          clarificationTransitionEvidence: evidence }] } }, now)).rejects.toThrow("PAYMENT_CHOICE_UNRESOLVED");
+      expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+    }
+    const paymentCaptureCommand = "sales:event-3:payment-capture";
+    const paymentCapturePlan = (details: Parameters<typeof applyCheckoutDetailsTransitionV1>[0]["details"],
+      before: typeof paymentLockedState = paymentLockedState) => {
+      const replay = applyCheckoutDetailsTransitionV1({ current: before.checkoutDraft, details, appliedAt: now });
+      if (replay.status !== "APPLIED") throw new Error("TEST_PAYMENT_CAPTURE_FIXTURE_INVALID");
+      const placeholder = { ...checkoutEvidenceDraft, commandIdHash: rawSha256(paymentCaptureCommand), details,
+        beforeCheckoutDraftHash: rawSha256(canonicalCheckoutDraftHashPreimageV1(before.checkoutDraft)),
+        afterCheckoutDraftHash: rawSha256(canonicalCheckoutDraftHashPreimageV1(replay.draft)) };
+      return { ...resolvePlan, salesCyclePlan: { ...resolvePlan.salesCyclePlan,
+        state: { ...before, ...salesEnvelope(5, "CART_OPEN", [...before.processedCommandIds, paymentCaptureCommand]),
+          checkoutDraft: replay.draft, preview: null },
+        events: [{ ...checkoutPlan.salesCyclePlan.events[0]!, commandId: paymentCaptureCommand,
+          stateRevisionBefore: 4, stateRevisionAfter: 5, cartId: openCart.cartId, cartVersion: openCart.revision,
+          checkoutDetailsTransitionEvidence: { ...placeholder, evidenceHash: rawSha256(checkoutDetailsTransitionEvidenceHashPreimageV1(placeholder)) } }] } };
+    };
+    const namedPaymentPlan = paymentCapturePlan({ fullName: "Ten moi" });
+    await expect(store.commit(namedPaymentPlan, now)).resolves.toMatchObject({ stateCommitted: true });
+    await expect(store.commit({ ...namedPaymentPlan, salesCyclePlan: { ...namedPaymentPlan.salesCyclePlan,
+      state: { ...namedPaymentPlan.salesCyclePlan.state, clarification: null } } }, now))
+      .rejects.toThrow("PROTECTED_SALES_ARTIFACT_REPLAY_MISMATCH");
+    const chosenPaymentPlan = paymentCapturePlan({ paymentMethod: "COD" });
+    const previewPending = { ...paymentClarification, missingFields: ["ORDER_PREVIEW"] };
+    await expect(store.commit({ ...chosenPaymentPlan, salesCyclePlan: { ...chosenPaymentPlan.salesCyclePlan,
+      state: { ...chosenPaymentPlan.salesCyclePlan.state, clarification: previewPending } } }, now))
+      .resolves.toMatchObject({ stateCommitted: true });
+    await expect(store.commit({ ...chosenPaymentPlan, salesCyclePlan: { ...chosenPaymentPlan.salesCyclePlan,
+      state: { ...chosenPaymentPlan.salesCyclePlan.state, clarification: null } } }, now))
+      .rejects.toThrow("PROTECTED_SALES_ARTIFACT_REPLAY_MISMATCH");
+    for (const sourceMessageIdHash of ["e".repeat(64), "f".repeat(64)]) {
+      const event = chosenPaymentPlan.salesCyclePlan.events[0]!;
+      const placeholder = { ...event.checkoutDetailsTransitionEvidence, sourceMessageIdHash };
+      await expect(store.commit({ ...chosenPaymentPlan, salesCyclePlan: { ...chosenPaymentPlan.salesCyclePlan,
+        state: { ...chosenPaymentPlan.salesCyclePlan.state, clarification: previewPending },
+        events: [{ ...event, checkoutDetailsTransitionEvidence: { ...placeholder,
+          evidenceHash: rawSha256(checkoutDetailsTransitionEvidenceHashPreimageV1(placeholder)) } }] } }, now))
+        .rejects.toThrow("CHECKOUT_DETAILS_TRANSITION_EVIDENCE_MISMATCH");
+    }
+    const missingNameClarification = { ...paymentClarification, attemptCount: 3,
+      askedQuestionFingerprints: ["a".repeat(64), "b".repeat(64), "c".repeat(64)] };
+    const missingNameState = { ...paymentLockedState, checkoutDraft: { ...paymentLockedState.checkoutDraft, fullName: null }, clarification: missingNameClarification };
+    lockPaymentState(missingNameState);
+    const sameChoice = paymentCapturePlan({ paymentMethod: "COD" }, missingNameState);
+    const nameProgress = paymentCapturePlan({ fullName: "Ten moi" }, missingNameState);
+    await expect(store.commit({ ...nameProgress, salesCyclePlan: { ...nameProgress.salesCyclePlan,
+      state: { ...nameProgress.salesCyclePlan.state, clarification: { ...missingNameClarification, attemptCount: 0, askedQuestionFingerprints: [] } } } }, now))
+      .resolves.toMatchObject({ stateCommitted: true });
+    await expect(store.commit({ ...sameChoice, salesCyclePlan: { ...sameChoice.salesCyclePlan,
+      state: { ...sameChoice.salesCyclePlan.state, clarification: { ...missingNameClarification, attemptCount: 0, askedQuestionFingerprints: [] } } } }, now))
+      .rejects.toThrow("PROTECTED_SALES_ARTIFACT_REPLAY_MISMATCH");
+    await expect(store.commit({ ...sameChoice, salesCyclePlan: { ...sameChoice.salesCyclePlan,
+      state: { ...sameChoice.salesCyclePlan.state, clarification: { ...missingNameClarification, missingFields: ["FULL_NAME"] } } } }, now))
+      .resolves.toMatchObject({ stateCommitted: true });
+    await expect(store.commit({ ...sameChoice, salesCyclePlan: { ...sameChoice.salesCyclePlan,
+      state: { ...sameChoice.salesCyclePlan.state, clarification: { ...paymentClarification, missingFields: ["FULL_NAME"] } } } }, now))
+      .rejects.toThrow("PROTECTED_SALES_ARTIFACT_REPLAY_MISMATCH");
+    await expect(store.commit({ ...sameChoice, salesCyclePlan: { ...sameChoice.salesCyclePlan,
+      state: { ...sameChoice.salesCyclePlan.state, clarification: null } } }, now))
+      .rejects.toThrow("PROTECTED_SALES_ARTIFACT_REPLAY_MISMATCH");
+    lockedSalesRow = mutationLockedSalesRow;
+
     const negotiationQuote = (
       cart: CartV1,
       customerState: "HESITANT" | "CAUTIOUS",
@@ -3303,6 +3393,41 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       .resolves.toMatchObject({ stateCommitted: true });
     expect(calls.at(-1)?.trim()).toBe("COMMIT");
 
+    const savedBeforePaymentPreview = lockedSalesRow;
+    const pendingPreviewBase = { ...exactPreviewPlan.salesCyclePlan.state,
+      ...salesEnvelope(2, "CART_OPEN", priorProcessedCommandIds), preview: null, clarification: paymentClarification };
+    const lockPreview = (state: Omit<typeof pendingPreviewBase, "preview"> & { preview: typeof exactPreview | null }) => {
+      const encrypted = cipher.encryptJson(state, `lana:sales-cycle:v1:page-1:${commitInput.conversationId}`, salesExpiresAt);
+      lockedSalesRow = { ...mutationLockedSalesRow, state_revision: "2", state_ciphertext: encrypted.ciphertext,
+        state_nonce: encrypted.nonce, state_auth_tag: encrypted.authTag, state_encrypted_dek: encrypted.encryptedDek, state_key_ref: encrypted.keyRef };
+    };
+    const paymentPreviewPlan = { ...exactPreviewPlan, salesCyclePlan: { ...exactPreviewPlan.salesCyclePlan,
+      state: { ...pendingPreviewBase, ...salesEnvelope(3, "ORDER_PREVIEW", [...priorProcessedCommandIds, "payment-preview"]),
+        preview: exactPreview, clarification: null },
+      events: [{ ...exactPreviewPlan.salesCyclePlan.events.at(-1)!, commandId: "payment-preview",
+        commandKind: "PREVIEW_CREATED" as const, stateRevisionBefore: 2, stateRevisionAfter: 3 }] } };
+    lockPreview(pendingPreviewBase);
+    await expect(store.commit(paymentPreviewPlan, now)).rejects.toThrow("PAYMENT_CHOICE_UNRESOLVED");
+    const pendingConfirmationPlan = { ...resolvePlan, salesCyclePlan: { ...resolvePlan.salesCyclePlan,
+      expectedRevision: 2,
+      state: { ...pendingPreviewBase, ...salesEnvelope(3, "HANDED_OFF", [...priorProcessedCommandIds, "payment-confirm"]), preview: null },
+      events: [{ commandId: "payment-confirm", commandKind: "CONFIRM_PURCHASE" as const,
+        outcome: "HANDOFF" as const, stageBefore: "ORDER_PREVIEW", stageAfter: "HANDED_OFF", stateRevisionBefore: 2, stateRevisionAfter: 3,
+        cartId, cartVersion: readyCart.revision, reasonCode: "STOCK_CHANGED_BEFORE_CONFIRMATION", occurredAt: now }] } };
+    lockPreview({ ...pendingPreviewBase, stage: "ORDER_PREVIEW", preview: exactPreview });
+    await expect(store.commit(pendingConfirmationPlan, now)).rejects.toThrow("PAYMENT_CHOICE_UNRESOLVED");
+    const recapturedPreviewBase = { ...pendingPreviewBase, clarification: previewPending };
+    lockPreview({ ...recapturedPreviewBase, stage: "ORDER_PREVIEW", preview: exactPreview });
+    await expect(store.commit({ ...pendingConfirmationPlan, salesCyclePlan: { ...pendingConfirmationPlan.salesCyclePlan,
+      state: { ...pendingConfirmationPlan.salesCyclePlan.state, clarification: previewPending } } }, now))
+      .rejects.toThrow("PAYMENT_RECAPTURE_PREVIEW_REQUIRED");
+    lockPreview(recapturedPreviewBase);
+    await expect(store.commit(paymentPreviewPlan, now)).resolves.toMatchObject({ stateCommitted: true });
+    await expect(store.commit({ ...paymentPreviewPlan, salesCyclePlan: { ...paymentPreviewPlan.salesCyclePlan,
+      state: { ...paymentPreviewPlan.salesCyclePlan.state, clarification: previewPending } } }, now))
+      .rejects.toThrow("PROTECTED_SALES_ARTIFACT_REPLAY_MISMATCH");
+    lockedSalesRow = savedBeforePaymentPreview;
+
     const forgedPreviewArtifact = {
       ...previewArtifact,
       recipient: { ...previewArtifact.recipient, phone: "0911111111" },
@@ -3663,6 +3788,17 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     }, now)).rejects.toThrow("CART_MUTATION_BATCH_REQUIRED");
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
 
+    const variantScope=canonicalCartVariantScopeV2(exactCart.lines[0]!,rawSha256);
+    const exactClaims=claims.map(claim=>({...claim,scope:{...claim.scope,variantId:variantScope}}));
+    const stockClaim=exactClaims.find(claim=>claim.type==="STOCK")!;
+    const conflictingProvenance=[...exactClaims,{...stockClaim,claimId:"ffffffff-ffff-4fff-8fff-ffffffffffff",
+      provenance:{...stockClaim.provenance,sourceVersion:"different-counter-with-same-stock"}}].sort((a,b)=>a.claimId.localeCompare(b.claimId));
+    await expect(store.commit({...exactMutation,salesCyclePlan:{...exactMutation.salesCyclePlan,
+      effectClaimSets:[{effect:"CART_MUTATION",claims:conflictingProvenance}],
+      effectReadiness:exactMutation.salesCyclePlan.effectReadiness.map(r=>resealReadinessV1(r,{claimSetHash:sha256(conflictingProvenance)})),
+    }},now)).rejects.toThrow("EFFECT_READINESS_CLAIM_CONFLICT");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
     const claimsForWrongOffer = claims.map((claim) => ({
       ...claim,
       scope: { ...claim.scope, variantId: "WRONG-OFFER" },
@@ -3853,6 +3989,11 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       ...commerceCommit,
       metaPlan: unmarkedMetaPlan,
     }, now)).rejects.toThrow("PROTECTED_OUTBOUND_READINESS_REQUIRED");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    await expect(store.commit({...commerceCommit,metaPlan:{...commerceCommit.metaPlan,
+      protectedClaims:conflictingProvenance,effectReadiness:resealReadinessV1(metaReadiness,{claimSetHash:sha256(conflictingProvenance)}),
+    }},now)).rejects.toThrow("PROTECTED_OUTBOUND_CLAIM_CONFLICT");
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
 
     const wrongMetaOfferClaims = claims.map((claim) => ({

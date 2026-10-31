@@ -1,0 +1,164 @@
+{
+  "kind": "POST_RUN_OFFLINE_COMPONENT_CAUSAL_REVIEW_NOT_PROVIDER_OR_END_TO_END",
+  "reviewedRunSource": "fe4b82932137df01fea85e974c4a562e00e7204f",
+  "currentHead": "5240fffe9a4d08c398f147499b329345d360cc9a",
+  "worldHash": "a46067d9e203eff5c5f77f6447b3b9b3efe04df813fae43091d71dbb605a4f0e",
+  "worldByteHash": "1bf9e5225b0e29f186b6267f77c09e1939c304e3487e8653d9957d0dde16f961",
+  "providerGenerations": 0,
+  "networkReads": 0,
+  "effects": 0,
+  "sendEnabled": false,
+  "productCapacity": {
+    "limit": 4,
+    "clock": "2026-10-30T08:36:14.659Z",
+    "capturedSearchCandidates": [
+      "V406",
+      "SQ748",
+      "V168"
+    ],
+    "probes": [
+      {
+        "searchFirst": false,
+        "sourceWorldHash": "a46067d9e203eff5c5f77f6447b3b9b3efe04df813fae43091d71dbb605a4f0e",
+        "before": [],
+        "reads": [
+          "SQ2447",
+          "SV2447"
+        ],
+        "results": [
+          {
+            "status": "OK",
+            "reason": null
+          },
+          {
+            "status": "OK",
+            "reason": null
+          }
+        ],
+        "after": [
+          "SQ2447",
+          "SV2447"
+        ]
+      },
+      {
+        "searchFirst": true,
+        "sourceWorldHash": "a46067d9e203eff5c5f77f6447b3b9b3efe04df813fae43091d71dbb605a4f0e",
+        "before": [
+          "SQ748",
+          "V168",
+          "V406"
+        ],
+        "reads": [
+          "V406",
+          "SQ748",
+          "V168",
+          "SQ2447",
+          "SV2447"
+        ],
+        "results": [
+          {
+            "status": "OK",
+            "reason": null
+          },
+          {
+            "status": "UNAVAILABLE",
+            "reason": "SOURCE_ERROR"
+          }
+        ],
+        "after": [
+          "SQ2447",
+          "SQ748",
+          "V168",
+          "V406"
+        ]
+      }
+    ]
+  },
+  "stockClaimScope": {
+    "clock": "2026-10-30T08:43:12.997Z",
+    "selections": [
+      {
+        "productId": "SV2447",
+        "offerId": "AO",
+        "components": [
+          {
+            "size": "L",
+            "color": "__NO_COLOR__"
+          }
+        ],
+        "quantity": 1,
+        "stock": 8,
+        "price": 499000
+      },
+      {
+        "productId": "SV2447",
+        "offerId": "AO",
+        "components": [
+          {
+            "size": "M",
+            "color": "__NO_COLOR__"
+          }
+        ],
+        "quantity": 1,
+        "stock": 14,
+        "price": 499000
+      }
+    ],
+    "stockClaims": [
+      {
+        "scope": {
+          "kind": "PRODUCT",
+          "productId": "SV2447",
+          "variantId": "AO"
+        },
+        "value": {
+          "status": "IN_STOCK",
+          "availableQuantity": 14
+        },
+        "contentHash": "39cd12a6880a8f7af99fc72b737283c9144d84da4ad56830c3376713607d7ebe"
+      },
+      {
+        "scope": {
+          "kind": "PRODUCT",
+          "productId": "SV2447",
+          "variantId": "AO"
+        },
+        "value": {
+          "status": "IN_STOCK",
+          "availableQuantity": 8
+        },
+        "contentHash": "564c8fd1e6e3ec281226ccdf3a1c2e441ce13dc36edde4b2155c1f69dc253ef1"
+      }
+    ],
+    "singleValidation": [
+      {
+        "missing": false,
+        "conflict": false,
+        "mismatch": false
+      },
+      {
+        "missing": false,
+        "conflict": false,
+        "mismatch": false
+      }
+    ],
+    "combinedValidation": {
+      "missing": false,
+      "conflict": true,
+      "mismatch": false
+    }
+  },
+  "limits": [
+    "Captured search candidates replayed through local read-only ports; no new embedding or search-provider result",
+    "No PostgreSQL mutation or E2E rerun",
+    "Original raw/grades unchanged; source code remains unchanged"
+  ],
+  "reproductionScript": {
+    "path": "../c3-post-run-review-replay-20261030.mjs",
+    "sha256": "dcd4e9aa6597621da7ce46ffcecd7119260f9150c686ae3d8f3831552c236742"
+  },
+  "commandLog": {
+    "path": "../c3-post-run-review-replay-20261030.log",
+    "sha256": "5c38a4ffcb6d9581b0095a780dc7ef234a071ba7b0e1d71d1cc3a793feb44fd6"
+  }
+}

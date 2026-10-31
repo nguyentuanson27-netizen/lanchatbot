@@ -127,12 +127,14 @@ export function evaluateDeterministicEffectReadinessV1(
       })
     : validateCartEffectClaimSemanticsV1({
         effect: input.effect,
+        variantHash: text => createHash("sha256").update(text, "utf8").digest("hex"),
         lines: input.cartLines.map((line) => ({
           parentProductId: line.parentProductId,
           offerId: line.offerId,
           quantity: line.quantity,
           posUnitPriceVnd: line.posUnitPriceVnd,
           priceFactRef: line.priceAuthority?.priceFactRef ?? null,
+          components: line.components,
         })),
         cartId: input.cartId,
         cartVersion: input.cartVersion,

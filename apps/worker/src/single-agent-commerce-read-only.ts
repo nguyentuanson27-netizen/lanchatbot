@@ -27,6 +27,7 @@ export interface VerifierRequest { generationId: string; instructions: string; f
   latest: string; history: { role: "customer" | "shop"; text: string }[]; binding: VerifierBinding; signal: AbortSignal }
 export interface VerifierGeneration { result: unknown; telemetry?: unknown }
 export interface CommerceTools {
+  diagnostic?(stage:import("./single-agent-commerce-diagnostics.js").CommerceDiagnosticStage,status:string,reason?:string|null,resultBytes?:number|null):void;
   /** Admitted primitive dispatches, excluding preparation and terminal handoff. */
   primitiveToolInvocations?():number;
   toolWorkAccounting?: "PRIMITIVE_WORK_V2";
@@ -46,7 +47,7 @@ export interface CommerceTools {
   mediaCapabilities?(): readonly import("./single-agent-commerce-media-capabilities.js").MediaCapability[];
   catalogImages?(): readonly import("./single-agent-commerce-media.js").CommerceCatalogImage[];
   mediaSelection?(): readonly import("./single-agent-commerce-media.js").CommerceMediaAsset[];
-  prepare?(): Promise<number>;
+  prepare?(admit?:(context:TrustedContext)=>boolean): Promise<number>;
   availableTools?: readonly string[];
   invoke(call: CommerceToolCall): Promise<CommerceToolResult>;
   invokeBatch(calls: CommerceToolCall[]): Promise<CommerceToolResult[]>;
@@ -81,6 +82,10 @@ export function resultBudgetView(calls: CommerceToolCall[], results: CommerceToo
 
 /** Isolated candidate. Native continuations add world information; no retry, repair, Outbox or send capability. */
 export async function runCommerceTurn(input: {
+  /** Pure native-serializer admission. Must never call a provider or mutate state. */
+  admitPreparedContext?:(request:OwnerRequest)=>boolean;
+  /** Evaluation-only witness of the existing final gate. Does not change its decision. */
+  captureBoundaryWitness?: boolean;
   historyMetadata?: import("./single-agent-commerce-public-history.js").CommerceHistoryMetadata;
   scope: CommerceScope; latest: string; history: { role: "customer" | "shop"; text: string }[];
   ownerPrompt: string; verifierPrompt: string; tools: CommerceTools; clock: () => Date; timeoutMs?: number;
@@ -120,6 +125,7 @@ export async function runCommerceTurn(input: {
       try { terminal = await input.tools.completeHandoff(terminal, () => input.tools.readback()); }
       catch { terminal = {disposition:"NO_SEND",reason:"HANDOFF_FINALIZE_UNAVAILABLE",text:null,fallbackId:null}; }
     }
+    input.tools.diagnostic?.("FINAL_GATE",terminal.disposition,terminal.reason);
     const handoff = input.tools.handoffStatus?.();
     terminalHandoffCalls = Math.max(terminalHandoffCalls, handoff?.attempts ?? 0);
     const quoteTaskWork=input.tools.quoteTaskWork?.()??[];
@@ -167,7 +173,17 @@ export async function runCommerceTurn(input: {
   }
   const preparationStarted = performance.now();
   if(primitiveAccounting&&!input.tools.primitiveToolInvocations)return finish({disposition:"NO_SEND",reason:"TOOL_ACCOUNTING_UNAVAILABLE",text:null,fallbackId:null});
-  try { toolCalls += await input.tools.prepare?.() ?? 0; }
+  try { toolCalls += await input.tools.prepare?.(context=>{
+    if(!input.admitPreparedContext||hardPrecheck(context,"Dạ.",input.clock())!==null)return false;
+    return input.admitPreparedContext({generationId:`${input.scope.requestId}:owner:1`,instructions:input.ownerPrompt,contents:structuredClone(contents),context,turnTime,
+      ...(primitiveAccounting?{toolWorkAccounting:"PRIMITIVE_WORK_V2" as const}:{}),
+      ...(input.historyMetadata?.publicCartEvents.length?{historyMetadata:structuredClone(input.historyMetadata)}:{}),
+      ...(input.tools.availableTools?{availableTools:input.tools.availableTools}:{}),
+      ...(input.tools.catalogImages?{catalogImages:input.tools.catalogImages()}:{}),
+      ...(input.tools.mediaCapabilities?{mediaCapabilities:input.tools.mediaCapabilities(),mediaCapabilitiesAt:input.clock().getTime()}:{}),
+      terminalHandoffAllowed:input.tools.availableTools?.includes("request_handoff")===true,
+      toolsAllowed:true,toolBudget:{roundsRemaining:2,callsRemaining:5},signal:new AbortController().signal});
+  }) ?? 0; }
   catch { return finish(fallback("PREPARATION_UNAVAILABLE")); }
   toolLatencyMs += performance.now() - preparationStarted;
   executedNormalToolInvocations=toolCalls;
@@ -229,7 +245,9 @@ export async function runCommerceTurn(input: {
       if(terminalCall&&(results.length!==1||results[0]?.status!=="OK"))
         return finish({disposition:"NO_SEND",reason:"HANDOFF_REQUEST_REJECTED",text:null,fallbackId:null});
       if (input.tools.sizeOutcome?.()?.status === "NO_VERIFIED_CHART") return finish(fallback("SIZE_RULE_UNAVAILABLE"));
-      if (results.length !== output.calls.length || bytes(resultBudgetView(output.calls, results, input.tools.snapshot())) > 8192)
+      const resultBytes=bytes(resultBudgetView(output.calls, results, input.tools.snapshot()));
+      input.tools.diagnostic?.("RESULT_BOUND",results.length!==output.calls.length||resultBytes>8192?"REJECTED":"OK",null,resultBytes);
+      if (results.length !== output.calls.length || resultBytes > 8192)
         return finish(fallback("TOOL_RESULT_BOUND"));
       contents.push(structuredClone(output.content), { role: "user", parts: results.map((result, i) => ({
         functionResponse: { name: output.calls[i]!.name, response: result,
@@ -265,11 +283,17 @@ export async function runCommerceTurn(input: {
       response = { kind: "VERDICT" as const, binding, result: result.result };
     } catch { response = { kind: generations.at(-1)!.status === "TIMEOUT" ? "TIMEOUT" as const : "PROVIDER_ERROR" as const }; }
     let current: TrustedContext;
-    try { current = await input.tools.readback(); }
-    catch { return finish({ disposition: "HANDOFF", reason: "CURRENT_READBACK_UNAVAILABLE", text: null, fallbackId: null }); }
-    const terminal = finalGate({ expected: binding, response, current, finalDraft: draft, now: input.clock(), includeDiagnostic: true,
+    input.tools.diagnostic?.("CURRENT_READBACK","STARTED");
+    try { current = await input.tools.readback();input.tools.diagnostic?.("CURRENT_READBACK","OK"); }
+    catch { input.tools.diagnostic?.("CURRENT_READBACK","ERROR","UNKNOWN_INTERNAL");return finish({ disposition: "HANDOFF", reason: "CURRENT_READBACK_UNAVAILABLE", text: null, fallbackId: null }); }
+    const boundaryCheckedAt = input.clock();
+    const terminal = finalGate({ expected: binding, response, current, finalDraft: draft, now: boundaryCheckedAt, includeDiagnostic: true,
       fallback: gateFallback() });
-    return { ...await finish(terminal), ...(terminal.diagnostic ? { currentPublicContext: current } : {}) };
+    input.tools.diagnostic?.("FINAL_GATE",terminal.disposition);
+    return { ...await finish(terminal), ...(terminal.diagnostic ? { currentPublicContext: current } : {}),
+      ...(input.captureBoundaryWitness ? { boundaryWitness: { expected: binding,
+        currentBinding: makeBinding(binding.requestId, draft, current), checkedAt: boundaryCheckedAt.toISOString(), terminal,
+        currentPublicContext: current, responseKind: response.kind } } : {}) };
   }
   return finish(fallback("BUDGET"));
 }

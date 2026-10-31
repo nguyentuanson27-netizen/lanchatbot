@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomUUID,createHash } from "node:crypto";
 import { createSalesCycleRuntimeState, type RuntimePolicyResolution, type SalesCycleRuntimeState, type SalesCycleStateRepositoryV1, type VerifiedInboundMessageV1 } from "@lana/chat-runtime";
 import { applySilentHandoff } from "@lana/conversation-engine";
 import { HandoffMatrixAdminContentV1Schema, HandoffReasonV2Schema } from "@lana/contracts";
@@ -31,6 +31,8 @@ export function createPersistedCommerceExecutor(input: {
   const { scope } = input;
   let outboxMessages = 0;
   let terminalCommitted = false;
+  let codeOwnedOutput: {kind:"NATIVE_CHECKOUT_CLARIFICATION";requestId:string;recipient:string;conversationRevision:number;
+    salesRevision:number;sourceMessageIdHash:string;operationIds:string[];payloadHash:string;messageHashes:string[];missingFields:readonly string[]} | null = null;
   const repository: SalesCycleStateRepositoryV1 = {
     async read(key) {
       if (key !== scope.conversationId) throw new Error("COMMERCE_SCOPE");
@@ -98,9 +100,19 @@ export function createPersistedCommerceExecutor(input: {
       return r;
     });
     if (terminal && committed.stateCommitted) terminalCommitted = true;
+    if (committed.stateCommitted && clarification && messages.length && output.plan.state.clarification &&
+      !output.protectedOutbound && messages.every(m=>m.kind==="TEXT") && output.plan.events.some(e=>e.commandKind==="CLARIFICATION_REQUESTED")) {
+      const texts=messages.flatMap(m=>m.kind==="TEXT"?[m.text]:[]);
+      codeOwnedOutput={kind:"NATIVE_CHECKOUT_CLARIFICATION",requestId:scope.requestId,recipient:scope.recipient,
+        conversationRevision:next.revision,salesRevision:output.plan.state.revision,sourceMessageIdHash:output.plan.sourceMessageIdHash!,
+        operationIds:output.plan.events.filter(e=>e.commandKind==="CLARIFICATION_REQUESTED").map(e=>e.commandId),
+        payloadHash:commerceHash(texts),messageHashes:texts.map(text=>createHash("sha256").update(text).digest("hex")),
+        missingFields:[...output.plan.state.clarification.missingFields]};
+    }
     return committed;
   }
   return { repository, outboxCount: () => outboxMessages, terminalCommitted: () => terminalCommitted,
+    codeOwnedOutput:()=>codeOwnedOutput?structuredClone(codeOwnedOutput):null,
     readReceipt: createPersistedCommerceReceiptReader({ store: input.store, repository, scope, conversationKey: scope.conversationId }),
     async privateCheckoutPending() {
       const current = await repository.read(scope.conversationId);

@@ -1,0 +1,283 @@
+{
+  "sourceSha": "e6880a70cbbb2eb0745c2b008b0a4617005a71d5",
+  "sourceDirty": false,
+  "files": [
+    {
+      "path": "../c3-bc-fix-red-20261030.log",
+      "sha256": "e6e6c06f899bc5254b4bf379ee6c010c630abcab0df6c71a32b3fda586003c50",
+      "bytes": 5635
+    },
+    {
+      "path": "../c3-bc-fix-green-20261030-01.log",
+      "sha256": "cd5db3b9b38b925daaa6a81cf57118179942a8cc78fadc574a8b95d302f2ebf1",
+      "bytes": 464
+    },
+    {
+      "path": "../c3-bc-fix-worker-focused-20261030-01.log",
+      "sha256": "13e6cff8c6bad82e13562b6ba7833620e8b98c57413c19621ca66847cec4aed3",
+      "bytes": 1068
+    },
+    {
+      "path": "../c3-bc-fix-worker-focused-20261030-02.log",
+      "sha256": "046b8d547bbde2a0b433e784899294268fcd89c42b731ab8f7af0d3b4eef2ea3",
+      "bytes": 1237
+    },
+    {
+      "path": "../c3-bc-fix-build-20261030-01.log",
+      "sha256": "07d8f1dcc41c861117cdd5bee23c0c1b1a900d290c9268c5cb5f4375e459696c",
+      "bytes": 6423
+    },
+    {
+      "path": "../c3-bc-fix-build-20261030-02.log",
+      "sha256": "1a78d775ed5b13e0ecbda869b338e738935707e4e2399d80d521dc3265f97d00",
+      "bytes": 5249
+    },
+    {
+      "path": "../c3-bc-fix-typecheck-20261030.log",
+      "sha256": "c314a98cac38f8345504a8d86ff80bc48d209e884cee95a832b5828bdab217eb",
+      "bytes": 5266
+    },
+    {
+      "path": "../c3-bc-fix-lint-20261030.log",
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "bytes": 171
+    },
+    {
+      "path": "../c3-bc-fix-protected-20261030.log",
+      "sha256": "4c2079a017bc8d292b8d76e7df5e4c836f3c5d54b365b4325afe8b57b9f4e82a",
+      "bytes": 429
+    },
+    {
+      "path": "../c3-final-b-read-20261030.json",
+      "sha256": "a181664256ac62f9bd43201f1c42797b0fe874c6a744fb647c5d510b78eac0ad",
+      "bytes": 10038
+    },
+    {
+      "path": "../c3-current-before-read-20261030.json",
+      "sha256": "92a6460e56f760c214dd5c5521804ad75c8d55bbdbe3b651c41f2e4c4e955de7",
+      "bytes": 32598
+    },
+    {
+      "path": "../c3-current-after-read-20261030.json",
+      "sha256": "c6bffbbf80c8b7c0dc043a0ad6677f61de927d2ec82b186c56c707de441a297b",
+      "bytes": 66036
+    },
+    {
+      "path": "../c3-bc-fix-paired-checks-20261030.json",
+      "sha256": "934cb2f1039bdb8e574b0c3b9007bb0c94318ccb0a4feb99dc6d8de4b9eb8ff3",
+      "bytes": 1793
+    },
+    {
+      "path": "../c3-bc-fix-all-evals-20261030.log",
+      "sha256": "3aa2fdfc1387e99aaf24480de004f74d7c6f85bb165f98598825f55da43e41dc",
+      "bytes": 85159
+    },
+    {
+      "path": "../c3-bc-fix-pg-e6880a70-20261030.log",
+      "sha256": "92b8106c5b912db95295b0119bfff1ad558e7f89780d3264f68473fe7928912c",
+      "bytes": 6385
+    },
+    {
+      "path": "../c3-bc-fix-pg-e6880a70-20261030/integration.json",
+      "sha256": "d1fedceaffbf7eee06ff3c3519319d6b63dea44870d9a453df1a9ff179598c31",
+      "bytes": 35396
+    },
+    {
+      "path": "../c3-bc-fix-paired-checks-20261030-02.json",
+      "sha256": "ec3dd3b5e9867a34abdc0da07d77441e4acaa072e8a69f000b458d6ce6c33792",
+      "bytes": 1952
+    },
+    {
+      "path": "../c3-end-b-install-20261030.log",
+      "sha256": "692384a8f7f7871c8572e4d7b96e897b3e957f869dc163c3766408c8f09511bc",
+      "bytes": 127
+    },
+    {
+      "path": "../c3-end-b-install-20261030-02.log",
+      "sha256": "15ab80aa9592e68abbdaea399e8615fd76fcaf74b4840783d95a75fe6d9c3153",
+      "bytes": 860
+    },
+    {
+      "path": "../c3-end-b-build-20261030-02.log",
+      "sha256": "b849cc3369f32c5562cad233ea05d5cb8772e5de4862510b2b26d5051fc79f14",
+      "bytes": 4999
+    }
+  ],
+  "paired": {
+    "kind": "FINAL_B_C_READ_COMPONENT_CHECKS",
+    "bSource": "f160dfa4f7e0c8b3e29232570710d99d4f5ed012",
+    "cSource": "e6880a70cbbb2eb0745c2b008b0a4617005a71d5",
+    "checks": [
+      {
+        "query": {
+          "subjectRef": "SV2447"
+        },
+        "sameInput": true,
+        "claimsEqual": true,
+        "before": "REJECTED",
+        "after": "OK",
+        "b": "OK",
+        "bytes": 6965,
+        "readback": "UNCHANGED"
+      },
+      {
+        "query": {
+          "subjectRef": "SV2447",
+          "offerTypes": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ]
+        },
+        "sameInput": true,
+        "claimsEqual": true,
+        "before": "REJECTED",
+        "after": "OK",
+        "b": "OK",
+        "bytes": 6965,
+        "readback": "UNCHANGED"
+      },
+      {
+        "query": {
+          "subjectRef": "SV2447",
+          "offerType": "AO"
+        },
+        "sameInput": true,
+        "claimsEqual": true,
+        "before": "OK",
+        "after": "OK",
+        "b": "OK",
+        "bytes": 4105,
+        "readback": "UNCHANGED"
+      },
+      {
+        "query": {
+          "subjectRef": "SV2447",
+          "offerType": "SET_VAY"
+        },
+        "sameInput": true,
+        "claimsEqual": true,
+        "before": "OK",
+        "after": "OK",
+        "b": "OK",
+        "bytes": 3224,
+        "readback": "UNCHANGED"
+      },
+      {
+        "query": {
+          "subjectRef": "SV1561"
+        },
+        "sameInput": true,
+        "claimsEqual": true,
+        "before": "OK",
+        "after": "OK",
+        "b": "OK",
+        "bytes": 5935,
+        "readback": "UNCHANGED"
+      },
+      {
+        "query": {
+          "subjectRef": "SV1561",
+          "offerType": "SET_VAY"
+        },
+        "sameInput": true,
+        "claimsEqual": true,
+        "before": "OK",
+        "after": "OK",
+        "b": "OK",
+        "bytes": 3666,
+        "readback": "UNCHANGED"
+      }
+    ],
+    "providerRequests": 0,
+    "fullWorldHash": "66b6cb062e64de64d7d37b93d05dbe5d31fde25de26466300ed97314669def26",
+    "fullWorldPolicyParity": true,
+    "clock": "2026-10-29T19:20:19.998Z"
+  },
+  "providerGenerations": 0,
+  "kind": "B_C_REPAIR_VERIFICATION",
+  "recordedAt": "2026-10-30T02:06:18.497Z",
+  "actualPostgres": {
+    "sourceSha": "e6880a70cbbb2eb0745c2b008b0a4617005a71d5",
+    "sourceDirty": false,
+    "status": "PASS",
+    "mode": "REAL_POSTGRES_SYNTHETIC_DOMAIN_INPUTS_CURRENT_POLICY_CAPTURE",
+    "passed": 73,
+    "testDatabaseDropped": true,
+    "providerGenerations": 0,
+    "sendEnabled": false,
+    "invariants": [
+      {
+        "name": "stale_revision",
+        "status": "PASS",
+        "artifactHash": "21738152f2af69d61a2670a48d058ef17d37954c967e7321b2d4fd1a135ed19c",
+        "caseName": "B composed newer inbound between final readback and commit cancels eligibility without an Outbox"
+      },
+      {
+        "name": "duplicate_source",
+        "status": "PASS",
+        "artifactHash": "21738152f2af69d61a2670a48d058ef17d37954c967e7321b2d4fd1a135ed19c",
+        "caseName": "B3 native cart commits once; duplicate does not repeat database transaction"
+      },
+      {
+        "name": "crash_after_commit",
+        "status": "PASS",
+        "artifactHash": "21738152f2af69d61a2670a48d058ef17d37954c967e7321b2d4fd1a135ed19c",
+        "caseName": "B composed recovery accounting commit-response-lost"
+      },
+      {
+        "name": "ambiguous_reconciliation",
+        "status": "PASS",
+        "artifactHash": "21738152f2af69d61a2670a48d058ef17d37954c967e7321b2d4fd1a135ed19c",
+        "caseName": "B3 native quantity change persists, unknown commit reconciles without replay"
+      },
+      {
+        "name": "operation_idempotency",
+        "status": "PASS",
+        "artifactHash": "21738152f2af69d61a2670a48d058ef17d37954c967e7321b2d4fd1a135ed19c",
+        "caseName": "B composed ingress commits an open cart, authorizes the exact reply and captures delivery once"
+      },
+      {
+        "name": "history_outbox_recovery",
+        "status": "PASS",
+        "artifactHash": "21738152f2af69d61a2670a48d058ef17d37954c967e7321b2d4fd1a135ed19c",
+        "caseName": "B composed two native mutations retain one source and next owner receives accepted history and current cart"
+      },
+      {
+        "name": "no_duplicate_effect",
+        "status": "PASS",
+        "artifactHash": "21738152f2af69d61a2670a48d058ef17d37954c967e7321b2d4fd1a135ed19c",
+        "caseName": "B composed N4 sends exact text and selected image in one response group without replay duplicates"
+      }
+    ]
+  },
+  "summary": {
+    "focusedWorkerPassed": 340,
+    "protectedPassed": 21,
+    "nodePassed": 768,
+    "nodeSkipped": 2,
+    "nodeFailed": 0,
+    "buildExit": 0,
+    "typecheckExit": 0,
+    "lintExit": 0,
+    "observedRedFailed": 5,
+    "coreGreenPassed": 9
+  },
+  "testOnlyCommit": "3ace47b3c9858ffd44212b705a006998daf44de9",
+  "testOnlyChangedProduction": false,
+  "finalNativeWire": {
+    "command": "node --test apps/worker/evals/single-agent-commerce-read-only/selection-compact-wire.test.mjs",
+    "passed": 1,
+    "artifact": {
+      "path": "../c3-bc-fix-native-wire-20261030-02.log",
+      "sha256": "128cc0531341fd67abd86df2ff166e31f1f47e90f469755672319dc665e2e96a"
+    }
+  },
+  "review": {
+    "plan": "APPROVE f57518e83d78b870d6830625dfd78df6178c733e",
+    "implementation": "APPROVE e6880a70cbbb2eb0745c2b008b0a4617005a71d5",
+    "testOnlyDelta": "APPROVE 3ace47b3c9858ffd44212b705a006998daf44de9",
+    "reviewer": "/root/bc_fix_review",
+    "modelIdentity": "NOT_EXPOSED_BY_AGENT_METADATA"
+  }
+}

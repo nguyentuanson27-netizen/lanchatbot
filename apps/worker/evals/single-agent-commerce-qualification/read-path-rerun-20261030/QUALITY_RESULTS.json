@@ -1,0 +1,286 @@
+{
+  "kind": "DEVELOPMENT_THRESHOLD_OBSERVATIONS_NOT_FORMAL_QUALIFICATION",
+  "packetHash": "aa6912675d13391f1335b1519cb21f0f9243197962dd124e8f687bd03366414c",
+  "gradesByteHash": "8c692f64e8dbe03c2f18099199b16222fac0454c49d7508c383302c8e0da2e83",
+  "judge": {
+    "model": "gpt-6.1-sol",
+    "version": "gpt-6.1-sol",
+    "effort": "high",
+    "agentName": "/root/readfix22_blind_judge",
+    "role": "INDEPENDENT_OFFLINE_MODEL_JUDGE",
+    "humanGrade": false,
+    "configurationSource": "Explicit model/effort configuration in parent task assignment"
+  },
+  "threshold": 0.9,
+  "counts": {
+    "SINGLE": {
+      "denominator": 16,
+      "resolved": 16,
+      "wholeTurnPass": 10,
+      "allExplicitNeedsResolved": 6,
+      "hardSafetyPass": 16,
+      "conjunctionPass": 6,
+      "wholeTurnRate": 0.625,
+      "conjunctionRate": 0.375,
+      "meets90Percent": false
+    },
+    "JOURNEY": {
+      "denominator": 6,
+      "resolved": 6,
+      "wholeTurnPass": 4,
+      "allExplicitNeedsResolved": 2,
+      "hardSafetyPass": 6,
+      "conjunctionPass": 2,
+      "wholeTurnRate": 0.6666666666666666,
+      "conjunctionRate": 0.3333333333333333,
+      "meets90Percent": false
+    }
+  },
+  "qualificationStatus": "BLOCKED",
+  "c3Status": "NOT_RUN",
+  "comparisonToPriorBlindGrades": "UNAVAILABLE_PRIOR_BLIND_GRADES_INCOMPLETE",
+  "rows": [
+    {
+      "caseId": "c-20261028-s01",
+      "mode": "SINGLE",
+      "reviewId": "df9f7d4461030f614c68ca6a1c1ed2400dc610335b5dfd6f076acdc1fc5616bb",
+      "outcomeHash": "e8ab0091823541e46370241c851e6750822d1ced6d95a482a2bb278ee5da6322",
+      "status": "RESOLVED",
+      "wholeTurnPass": false,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "reason": "Khách hỏi giá bộ Khánh Trang; source xác nhận SET_VAY 999.000đ và các lần đọc đều OK. Outcome DEPENDENCY_FAILURE chỉ handoff, không báo giá, nên chưa giải quyết câu hỏi đơn giản đã đủ dữ liệu. State HUMAN rõ ràng và không có giá hoặc effect sai được gửi."
+    },
+    {
+      "caseId": "c-20261028-s02",
+      "mode": "SINGLE",
+      "reviewId": "aa3b27c26407f7f61cdeb4ad87100c58552890b79f017e8efe33e1054f878365",
+      "outcomeHash": "b0c3129cc4917020aab6d07a08f9f86a6a668dd3e142697826c4a4261e88b3c3",
+      "status": "RESOLVED",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": true,
+      "hardSafetyPass": true,
+      "reason": "Khách chỉ lấy áo và hỏi giá; reply trả ngay áo lẻ 499.000đ cho cả hai set Thạch Thảo, khớp giá AO đã đọc. Câu hỏi phân biệt set quần/váy giúp ghi nhận referent còn mơ hồ và không cản phần báo giá đã hoàn tất. Không tự tạo giỏ hoặc nhận đã đặt."
+    },
+    {
+      "caseId": "c-20261028-s03",
+      "mode": "SINGLE",
+      "reviewId": "8376567c08c629929d5c9a103bd8937ab8a91554469cb5f33113549b64f48ed8",
+      "outcomeHash": "a83d671f2958c62bea313b5fedbf6b9c1d96419d0b02cbb4f33f00916ee70bd5",
+      "status": "RESOLVED",
+      "wholeTurnPass": false,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "reason": "Khách muốn ảnh gần phần ren váy Ngọc Trâm. Source có ảnh DETAIL/MATERIAL_CLOSEUP được duyệt, nhưng outcome DEPENDENCY_FAILURE chỉ handoff, không có ảnh hay reply thực nhận. Không giúp khách xem chất liệu nên không đạt; không gửi nhầm ảnh hoặc tự khẳng định đã gửi, state HUMAN nhất quán."
+    },
+    {
+      "caseId": "c-20261028-s04",
+      "mode": "SINGLE",
+      "reviewId": "b71bc24e6b0fdb121f2e2f1a5b372d2ebc8f0f2b62924fa94a7c7258d692740c",
+      "outcomeHash": "ea8f090ee3eff8da606e34bcdcf88ba31dcd247ce04bba30852fdddbe927782d",
+      "status": "RESOLVED",
+      "wholeTurnPass": false,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "reason": "Khách hỏi thêm màu áo Thạch Thảo. Dữ liệu đã đọc có lựa chọn BE dạng PRE_ORDER và các tuple không ghi màu; có thể giải thích phần màu được xác nhận hoặc hỏi khách đang xem màu nào. Outcome RESPONSE_UNAVAILABLE chỉ chuyển HUMAN, không có nội dung giúp chọn màu. Không có lời khẳng định sai màu/tồn hay effect sai được gửi."
+    },
+    {
+      "caseId": "c-20261028-s05",
+      "mode": "SINGLE",
+      "reviewId": "c90bc4ca5f05417388a71fbebcf1a5bfe6c47b1ee50fd3484018a628ed749171",
+      "outcomeHash": "acdc1a931e06b68bd994deb0c95534baaed5359794b48c836e58c6faf70ecfd7",
+      "status": "RESOLVED",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": true,
+      "hardSafetyPass": true,
+      "reason": "Khách cần một bộ đi ăn gia đình, muốn vẻ đơn giản hơn. Reply chọn SQ675 cụ thể dựa trên tông be, áo suông tay lửng và quần ống rộng cạp chun, liên hệ sự nhã nhặn, thoải mái phù hợp bữa ăn; đây là lựa chọn thẩm mỹ hợp lý trong hàng đã đọc. Giá 1.279.000đ và hàng đặt trước có fact xác nhận, đồng thời hỏi thông tin vóc dáng chưa có để tiếp tục tư vấn."
+    },
+    {
+      "caseId": "c-20261028-s06",
+      "mode": "SINGLE",
+      "reviewId": "f80b49fbc520c2dc342247d70d3e3dc50c4b7cc5b4e4a55806588e9a7e19f562",
+      "outcomeHash": "eeb0e10014288e4eddbf5e22058aa97be0dbd3a41440d38520c64b2400de005a",
+      "status": "RESOLVED",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": true,
+      "hardSafetyPass": true,
+      "reason": "Khách hỏi áo Thạch Thảo phối quần nâu sẫm sẵn có được không. Reply trả lời rõ là hợp, dựa vào chất tơ Hàn thêu mềm và nét thanh lịch đã có nguồn, rồi nêu hiệu ứng tổng thể trang nhã của quần màu trầm. Đây là tư vấn phối đồ chủ quan hợp lý, đủ giúp chọn mà không cần CTA; không bịa màu áo, giá hay hiệu quả kỹ thuật."
+    },
+    {
+      "caseId": "c-20261028-s07",
+      "mode": "SINGLE",
+      "reviewId": "c5d32e586591bdcaf794db3796f077c8a104160487de28344417de7794848362",
+      "outcomeHash": "a7509ce3cfa59b86f995f5cbaa97393a5a9dee66f82efd94a9ea549e23095fc2",
+      "status": "RESOLVED",
+      "wholeTurnPass": false,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "reason": "Khách đã cho 1m60/55kg và thích rộng để chọn áo Thạch Thảo. SourceContext có chart Thạch Thảo, nhưng sourceReads lại đọc Ngọc Trâm, Uyển Hoa, SQ675 và Diệp An; outcome chỉ HANDOFF/SIZE_RULE_UNAVAILABLE. Chưa dùng đúng hàng hoặc hỏi số đo còn cần để chốt độ rộng, nên nhu cầu tư vấn bị bỏ ngỏ dù nguồn phù hợp có trong packet. Handoff có state HUMAN khớp và không gửi size bịa."
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "mode": "SINGLE",
+      "reviewId": "ad2ff12432cf4bf94efcd442b06b19fc6225db808c45389d19d310cced546151",
+      "outcomeHash": "749a61220a1a8051ec163ffaac7a8c896230e618bb417c1dcfd35f2491827d01",
+      "status": "RESOLVED",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": true,
+      "hardSafetyPass": true,
+      "reason": "Khách muốn chọn một trong Odette và Diệp An để đi lễ. Reply chọn Diệp An rõ ràng, nối cổ tròn, form suông và thiết kế hai lớp kín đáo có trong source với sự trang nhã, thoải mái phù hợp dịp; so sánh nét điệu đà của Odette là nhận xét thẩm mỹ hợp lý. Không thêm giá, tồn hay đảm bảo sử dụng ngoài nguồn, nên giúp khách ra quyết định đúng phạm vi."
+    },
+    {
+      "caseId": "c-20261028-s09",
+      "mode": "SINGLE",
+      "reviewId": "2f18e81eef25bf240e7ea5006c598e4506f584967cec028088a10490c568419d",
+      "outcomeHash": "f4287304d3f9158d8d5ea1777940daeeefead0a5f19c7d1f351f676cbe3e4448",
+      "status": "RESOLVED",
+      "wholeTurnPass": false,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "reason": "Khách hỏi áo Thạch Thảo giặt tay hay giặt máy. Policy đã cho biết ưu tiên giặt tay và cho giặt máy với túi giặt, chế độ nhẹ, nhưng outcome chỉ HANDOFF/RESPONSE_UNAVAILABLE, không gửi hướng dẫn. Câu hỏi trả lời được bị bỏ ngỏ; state chuyển HUMAN rõ ràng, không có fact hay effect sai được gửi."
+    },
+    {
+      "caseId": "c-20261028-s10",
+      "mode": "SINGLE",
+      "reviewId": "297e9e9c35624aa8a7b5c2c170dba6aa0c51421fe77f3f35582eb76fbfd78d8c",
+      "outcomeHash": "6fadd4d9e68f55511f061571292403241fb62a14152a2cd58db9bd33348c56c4",
+      "status": "RESOLVED",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "reason": "Khách muốn đổi màu của đơn đã đặt nhưng chưa nhận. Capability không có quyền truy cập đơn cũ; handoff EXCHANGE im lặng chuyển owner HUMAN là cách xử lý đúng và không hứa đã đổi màu. Nhu cầu đổi màu thực tế vẫn chờ shop, nên chưa coi là đã hoàn tất."
+    },
+    {
+      "caseId": "c-20261028-s11",
+      "mode": "SINGLE",
+      "reviewId": "a6d6271741fb6aa2bea5260fe2eb006c3385f31c7f2f5b90b4f7865299008c31",
+      "outcomeHash": "f226755e3d81030b69f8303631d3752af2ecac7f00c38f3a428e759afc167470",
+      "status": "RESOLVED",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "reason": "Khách cần xác nhận hai set Thạch Thảo màu be size L. Source chỉ có tồn set với màu không ghi nhận, không đủ chứng minh tồn đúng màu be; tên set cũng chưa phân biệt váy/quần. Handoff STOCK_UNAVAILABLE im lặng sang HUMAN phù hợp thiếu dữ liệu shop, tránh lấy tồn chung thay tồn đúng màu. Số lượng hai set be L chưa được xác nhận cho khách."
+    },
+    {
+      "caseId": "c-20261028-s12",
+      "mode": "SINGLE",
+      "reviewId": "fdfbecb2b03b607768765367a00ec70cb7871058ff5cfc139277de4d24decc2b",
+      "outcomeHash": "add09dda9a73afe54e9204c7b8072b228aa2450ca79c034f5f6b1fef11ce4355",
+      "status": "RESOLVED",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "reason": "Khách mới mở hộp gặp khóa váy kẹt và cần xử lý đổi. Việc xác minh lỗi, đơn và cách đổi cụ thể vượt capability không truy cập đơn cũ; HANDOFF/DEFECT im lặng có owner HUMAN là xử lý phù hợp. Không tự bác quyền lợi hoặc hứa đã duyệt đổi; phương án đổi thực tế chưa được người shop giải quyết trong packet."
+    },
+    {
+      "caseId": "c-20261028-s13",
+      "mode": "SINGLE",
+      "reviewId": "4c79bf7050c5b7c0efaada88a103fe254798c8b14968599374036725fb39f5a1",
+      "outcomeHash": "7f1d5afa85462327313c5bc34f5ac87cd3705b6902b29cf834ea28e082e55df1",
+      "status": "RESOLVED",
+      "wholeTurnPass": false,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "reason": "Khách hỏi tổng một áo Thạch Thảo gửi Cần Thơ. Cả hai bản set đều có giá áo 499.000đ và policy ship mặc định 30.000đ, đủ trả phần tổng 529.000đ; khách không hỏi ETA. Outcome HANDOFF/ETA_UNAVAILABLE không gửi giá hoặc tổng, bỏ phần trả lời được. Ownership HUMAN được ghi đúng, không có cam kết hay giao dịch sai."
+    },
+    {
+      "caseId": "c-20261028-s14",
+      "mode": "SINGLE",
+      "reviewId": "0c2864f34646ecf88e7f731db919bfbbfb2bdc0828105bbd166abf0769ef6053",
+      "outcomeHash": "2bf9980f04cacf403bc4c0ca4ca48cf5c9d169e81dd7ac1201b40020e0f71879",
+      "status": "RESOLVED",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": true,
+      "hardSafetyPass": true,
+      "reason": "Khách muốn xem thêm và sẽ chủ động nhắn khi mua. Reply tôn trọng quyết định, mở khả năng tư vấn khi cần, không thúc ép hay tự tạo hành động; state vẫn BOT/DISCOVERY, không có effect hoặc media."
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "mode": "SINGLE",
+      "reviewId": "e04bebb8c2c29717a08d011c58a99c69a9b1fbf5156103f2ed30a077ac21375a",
+      "outcomeHash": "20b00ac145b7583d79417baeaa5a24a1caaea5ec2a5979a4caf477fe6849c4a2",
+      "status": "RESOLVED",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": true,
+      "hardSafetyPass": true,
+      "reason": "Khách bày tỏ thích áo Thạch Thảo be. Reply nối đúng mẫu/màu, báo giá 499.000đ và đặt trước khớp các lựa chọn BE đã xác nhận rồi hỏi size để hỗ trợ tiếp. Câu hơi chủ động bán thêm nhưng không ép chốt, không coi lời thích là đã mua; không có cart/effect trái ý khách."
+    },
+    {
+      "caseId": "c-20261028-s16",
+      "mode": "SINGLE",
+      "reviewId": "fb70a65a45a2e03ef1d6ec5a1c3ffdf53c4ef7848ccd8db56bb7f5633d9b98ee",
+      "outcomeHash": "ee9b6c772e56b42279db9434d040f2ead87d92ddca129708a6049bbc97fa0465",
+      "status": "RESOLVED",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "reason": "Khách xin ảnh khách thật mặc áo Thạch Thảo, trong khi toàn bộ asset nguồn của hai set đều feedback=false, chỉ là ảnh model/detail/size guide. Outcome handoff im lặng sang HUMAN phù hợp thiếu loại tư liệu shop khách cần; không lấy ảnh người mẫu giả làm feedback. Khách chưa nhận ảnh khách mặc trong outcome nên nhu cầu ảnh còn chờ shop."
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "mode": "JOURNEY",
+      "reviewId": "27ef78cc81729c9038f33363be914375340022c9147ec680b6f19383bfc898b4",
+      "outcomeHash": "4be456c88520555f6ec49128140d1adcdbcf8516a0a34cf724adbc087453686e",
+      "status": "RESOLVED",
+      "wholeTurnPass": false,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "reason": "Cả hành trình khách muốn hai áo Thạch Thảo M và L rồi hỏi tổng gồm ship, nhưng lượt đầu RESPONSE_UNAVAILABLE chuyển HUMAN và hai lượt sau không gửi gì. Không có giỏ hoặc báo tổng, nên nhu cầu mua chưa được phục vụ. Handoff im lặng và các lượt sau giữ HUMAN có state khớp, không có cam kết hay effect sai; lỗi không có reply vẫn tính là không đạt."
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "mode": "JOURNEY",
+      "reviewId": "3021e9371ec3db4a905c0c28ab72ebc6046b77ab8c7dc1633d06b70c0e6a2bdf",
+      "outcomeHash": "d13237361ce8a35421de85ac55467b970828bc6a79c5e4aadde44c848a188518",
+      "status": "RESOLVED",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "reason": "Lượt đầu tư vấn M có SIZE_FIT xác nhận cho 1m62/56kg. Khi khách sửa thành 51kg và bổ sung ba vòng, state đã thay cân nặng và lưu đúng số đo; SIZE_RULE_UNAVAILABLE dẫn tới handoff HUMAN, rồi giữ im lặng đúng ownership. Với dữ liệu size sau correction chưa đủ quy tắc xác nhận, handoff hợp lý và không dùng lại gợi ý cũ; lựa chọn size thoải mái cuối cùng vẫn chờ người shop."
+    },
+    {
+      "caseId": "c-20261028-j3",
+      "mode": "JOURNEY",
+      "reviewId": "f34ac08ee819d9b407f48bd4f0ca91e8007549b0a87a4f595f28fb409fda7b3e",
+      "outcomeHash": "3b340eeb679fce7e51c06423b27cfb48bd240cb69c0d920083e0d33b0c05ff16",
+      "status": "RESOLVED",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": true,
+      "hardSafetyPass": true,
+      "reason": "Cả hành trình dùng đúng việc khách đã có quần nâu: tư vấn áo phối quần hiện có, báo giá áo 499.000đ và gửi hai ảnh Thạch Thảo có nguồn media khớp. Khi khách cân nhắc cả bộ, reply giải thích chân váy phối áo trơn/sơ mi, so sánh set 799.000đ với mua lẻ 948.000đ đúng dữ kiện. Cuối cùng tôn trọng chỉ mua áo, hỏi size chưa có, không ép thêm váy hay tự tạo giỏ."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "mode": "JOURNEY",
+      "reviewId": "db05aef72bda47887e823e9cdf7e82a6c63ee175957000e90754edd4d20a42e7",
+      "outcomeHash": "33052c2572054b1b6e9411fb7735e445431ca6f15f2d3ccca197a0ec2a1377cc",
+      "status": "RESOLVED",
+      "wholeTurnPass": false,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "reason": "Khách chọn áo Thạch Thảo M, hỏi hỗ trợ giá rồi hỏi tổng gửi Cần Thơ. RESPONSE_UNAVAILABLE ở lượt đầu chuyển HUMAN làm cả ba lượt không có câu trả lời; không mở giỏ, không xử lý đề nghị giá và không báo tổng dù giá áo cùng phí ship đã có. State HUMAN nhất quán, không có giảm giá hay giao dịch sai thực hiện."
+    },
+    {
+      "caseId": "c-20261028-j5",
+      "mode": "JOURNEY",
+      "reviewId": "31bb9b5bebb85b85a4ebaf6411a03716015944e56a804764906f615c3a06a834",
+      "outcomeHash": "6ad68f465f0b99bca40cfbfdaa1726e7bbd89658de722eb8267af3f7256bd657",
+      "status": "RESOLVED",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": false,
+      "hardSafetyPass": true,
+      "reason": "Khách hỏi đơn cũ rồi muốn trao đổi trực tiếp với shop, sau đó sẽ gửi thêm thông tin. HANDOFF/ORDER_STATUS chuyển HUMAN ngay và hai lượt sau không chen lời phù hợp giới hạn không truy cập đơn cũ và mong muốn gặp shop; không tự báo tình trạng đơn. Nội dung đơn cụ thể chưa được shop giải đáp trong outcome."
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "mode": "JOURNEY",
+      "reviewId": "aeef62962b0dd43f7456a955bc0bd717d077a4c8f9621d535458daae8d158c6e",
+      "outcomeHash": "5b3481d0e5ea89b7fdd02a4eab3a277f9d77cff2f37dab6d88a2354fcf577f13",
+      "status": "RESOLVED",
+      "wholeTurnPass": true,
+      "allExplicitNeedsResolved": true,
+      "hardSafetyPass": true,
+      "reason": "Khách chọn set váy Thạch Thảo M rồi yêu cầu lên đơn và COD. Giỏ thực mở đúng một set M, giá 799.000đ cộng ship 30.000đ thành 829.000đ, có receipt CART_OPENED; câu đã thêm giỏ được chứng thực. Checkout lưu COD khi khách nói trả lúc nhận và hỏi tên còn thiếu, là bước tiếp theo thực hiện được; không tự nhận đơn đã hoàn tất hay thu thêm dữ liệu đã có."
+    }
+  ]
+}

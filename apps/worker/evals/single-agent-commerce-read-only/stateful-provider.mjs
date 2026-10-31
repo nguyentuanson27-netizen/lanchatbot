@@ -92,7 +92,7 @@ export async function createStatefulProvider(input){
  return {counters,ownerPrompt,verifierPrompt,facts,factsForMode:mode=>scopedProviderFacts(facts,mode,counters),setSlot:id=>{activeSlot=id;},
   async read(bound,policyStore,policy,initialProductCodes=['SV2447'],sourceFacts=facts){const products=await Promise.all(initialProductCodes.map(code=>catalog.findByExactCode(code)));assert(products.every(Boolean),'INITIAL_SOURCE_UNAVAILABLE');
    const sources=createCommerceReadSources({scope:bound,channel:config.channel,clock:()=>new Date(),initialProducts:products,search,catalog,policyStore,facts:sourceFacts});
-   return {catalog:sources.catalog,policy:async()=>{counters.readPolicyCalls++;return policy();},initialProducts:products,maxFactAgeSeconds:config.maxFactAgeSeconds,
+   return {catalog:sources.catalog,policy:async()=>{counters.readPolicyCalls++;return sources.policy();},initialProducts:products,maxFactAgeSeconds:config.maxFactAgeSeconds,
     ...(config.productGroups?{productGroups:config.productGroups}:{})};},
   async owner(original){const request=withNativePresentation(original,registration.ownerContextPresentation);assert(counters.owner+counters.verifier<registration.maximumGenerationRequests,'GENERATION_BUDGET');counters.owner++;
    let completedTelemetry;

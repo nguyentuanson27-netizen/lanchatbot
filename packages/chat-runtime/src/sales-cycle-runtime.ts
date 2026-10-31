@@ -29,6 +29,7 @@ import {
 import {
   applyCheckoutDetailsTransitionV1,
   applySalesClarificationTransitionV1,
+  clarificationAfterCheckoutCaptureV1,
   computeCanonicalOrderPreviewHashV1,
   deriveCanonicalPurchaseConfirmationV1,
   replayCanonicalCartRepriceNegotiationV1,
@@ -521,11 +522,16 @@ function applySalesCycleCommandUnchecked(input: ApplySalesCycleCommandInput): Sa
       stage: "CART_OPEN",
       checkoutDraft: transition.draft,
       preview: null,
+      clarification: clarificationAfterCheckoutCaptureV1(state.clarification, state.checkoutDraft, transition.draft, command.details),
     });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
 
   if (command.kind === "CLARIFICATION_REQUESTED") {
+    if(state.clarification?.missingFields.length===1&&state.clarification.missingFields[0]==="ORDER_PREVIEW"&&
+      (command.missingFields.length!==1||command.missingFields[0]!=="PAYMENT_METHOD"))return {status:"REJECTED",state,reasonCode:"PAYMENT_RECAPTURE_PREVIEW_REQUIRED"};
+    if(state.clarification?.missingFields.length===1&&state.clarification.missingFields[0]==="PAYMENT_METHOD"&&
+      (command.reasonCode!=="CHECKOUT_DETAILS_MISSING"||command.missingFields.length!==1||command.missingFields[0]!=="PAYMENT_METHOD"))return {status:"REJECTED",state,reasonCode:"PAYMENT_CHOICE_UNRESOLVED"};
     if (state.stage !== "CART_OPEN" && state.stage !== "ORDER_PREVIEW") {
       return { status: "REJECTED", state, reasonCode: "SALES_STAGE_TRANSITION_INVALID" };
     }
@@ -551,6 +557,8 @@ function applySalesCycleCommandUnchecked(input: ApplySalesCycleCommandInput): Sa
   }
 
   if (command.kind === "CLARIFICATION_RESOLVED") {
+    if(state.clarification?.missingFields.length===1&&state.clarification.missingFields[0]==="PAYMENT_METHOD")return {status:"REJECTED",state,reasonCode:"PAYMENT_CHOICE_UNRESOLVED"};
+    if(state.clarification?.missingFields.length===1&&state.clarification.missingFields[0]==="ORDER_PREVIEW")return {status:"REJECTED",state,reasonCode:"PAYMENT_RECAPTURE_PREVIEW_REQUIRED"};
     const transition = applySalesClarificationTransitionV1({
       current: state.clarification,
       transition: { kind: "RESOLVED" },
@@ -629,6 +637,7 @@ function applySalesCycleCommandUnchecked(input: ApplySalesCycleCommandInput): Sa
   }
 
   if (command.kind === "PREVIEW_CREATED") {
+    if(state.clarification?.missingFields.length===1&&state.clarification.missingFields[0]==="PAYMENT_METHOD")return {status:"REJECTED",state,reasonCode:"PAYMENT_CHOICE_UNRESOLVED"};
     const transition = validateOrderPreviewTransitionV1({
       stage: state.stage,
       cart: state.cart?.value ?? null,
@@ -649,6 +658,7 @@ function applySalesCycleCommandUnchecked(input: ApplySalesCycleCommandInput): Sa
     const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, {
       stage: "ORDER_PREVIEW",
       preview: transition.preview,
+      ...(state.clarification?.missingFields.length === 1 && state.clarification.missingFields[0] === "ORDER_PREVIEW" ? { clarification: null } : {}),
     });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
@@ -663,6 +673,8 @@ function applySalesCycleCommandUnchecked(input: ApplySalesCycleCommandInput): Sa
     return { status: "HANDOFF", state: next, reasonCode: "PAYMENT_RECEIPT_REVIEW_REQUIRED", silent: true, desiredPancakeTag: "NHAN_VIEN", handoffDecision: checkoutHandoff("PAYMENT_RECEIPT_REVIEW_REQUIRED", command.commandId, now) };
   }
 
+  if(state.clarification?.missingFields.length===1&&state.clarification.missingFields[0]==="ORDER_PREVIEW")return {status:"REJECTED",state,reasonCode:"PAYMENT_RECAPTURE_PREVIEW_REQUIRED"};
+  if(state.clarification?.missingFields.length===1&&state.clarification.missingFields[0]==="PAYMENT_METHOD")return {status:"REJECTED",state,reasonCode:"PAYMENT_CHOICE_UNRESOLVED"};
   const intent = SalesIntentV1Schema.safeParse(command.intent);
   if (!intent.success || intent.data.intent !== "PURCHASE_CONFIRMATION") {
     return { status: "REJECTED", state, reasonCode: "NOT_A_PURCHASE_CONFIRMATION" };

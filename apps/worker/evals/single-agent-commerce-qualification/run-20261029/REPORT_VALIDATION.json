@@ -1,0 +1,14 @@
+{
+  "scope": "Post-run documentation/evidence integrity; no qualification re-assessment or provider dispatch",
+  "status": "PASS",
+  "jsonFilesParsedBeforeThisValidationRecord": 11,
+  "rawNativeCanonicalHashesMatched": 34,
+  "actualRequestBodyCanonicalHashesMatched": 93,
+  "registrationCopy": "EXACT_PARSED_EQUAL",
+  "primaryGradesCopy": "EXACT_PARSED_EQUAL",
+  "providerRequests": 0,
+  "gitDiffCheck": "STAGED_NEW_MARKDOWN_WHITESPACE_FOUND_THEN_NORMALIZED; FINAL_FULL_REPORT_DIFF_EXIT_0",
+  "independentReportReview": "APPROVE_WORKING_TREE",
+  "qualification": "BLOCKED_UNCHANGED",
+  "presentationNormalization": "Markdown line-end whitespace only; raw provider artifacts untouched"
+}

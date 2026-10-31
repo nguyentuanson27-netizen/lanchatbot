@@ -55,6 +55,7 @@ import {
   applyCanonicalCartDecisionV2,
   applyCheckoutDetailsTransitionV1,
   applySalesClarificationTransitionV1,
+  clarificationAfterCheckoutCaptureV1,
   canonicalCartPolicyLinesV2,
   canonicalNegotiationEventFingerprintV1,
   createCanonicalCartV2,
@@ -599,12 +600,13 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     if (cart !== undefined && (
       readiness.effect !== "PROTECTED_OUTBOUND" || readiness.cartId !== null
     )) {
-      const lines = (cart.lines ?? []).map((line) => ({
+      const lines = CartV1Schema.parse(cart).lines.map((line) => ({
         parentProductId: line.parentProductId,
         offerId: line.offerId,
         quantity: line.quantity,
         posUnitPriceVnd: line.posUnitPriceVnd,
         priceFactRef: line.priceAuthority?.priceFactRef ?? null,
+        components: line.components,
       }));
       if (lines.some((line) =>
         typeof line.parentProductId !== "string" ||
@@ -613,6 +615,7 @@ function validateSalesEffectReadiness<TState, TSalesState>(
         (typeof line.posUnitPriceVnd !== "number" && line.posUnitPriceVnd !== null)
       )) throw new Error("EFFECT_READINESS_CART_LINE_INVALID");
       const cartClaimSemantics = validateCartEffectClaimSemanticsV1({
+        variantHash: sha256TextV1,
         effect: readiness.effect,
         lines: lines as readonly {
           parentProductId: string;
@@ -620,6 +623,7 @@ function validateSalesEffectReadiness<TState, TSalesState>(
           quantity: number;
           posUnitPriceVnd: number | null;
           priceFactRef: string | null;
+          components: import("@lana/contracts").CartLineV1["components"];
         }[],
         claims,
         cartId: readiness.cartId,
@@ -1132,7 +1136,7 @@ function validateLockedProtectedSalesStateTransitionV1(
         break;
       case "CHECKOUT_DETAILS_CAPTURED":
         if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
-        ["checkoutDraft", "preview"].forEach((key) => ownedFields.add(key));
+        ["checkoutDraft", "preview", "clarification"].forEach((key) => ownedFields.add(key));
         break;
       case "CLARIFICATION_REQUESTED":
       case "CLARIFICATION_RESOLVED":
@@ -1142,6 +1146,7 @@ function validateLockedProtectedSalesStateTransitionV1(
       case "PREVIEW_CREATED":
         if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
         ownedFields.add("preview");
+        ownedFields.add("clarification");
         break;
       case "CONFIRM_PURCHASE":
         ownedFields.add(event.outcome === "HANDOFF" ? "preview" : "confirmation");
@@ -1232,6 +1237,7 @@ function validateLockedProtectedSalesArtifactsV1(
         )) {
         throw new Error("CHECKOUT_DETAILS_TRANSITION_REPLAY_MISMATCH");
       }
+      clarification = clarificationAfterCheckoutCaptureV1(clarification, checkoutDraft, transition.draft, evidence.details);
       checkoutDraft = transition.draft;
       preview = null;
       break;
@@ -1248,6 +1254,8 @@ function validateLockedProtectedSalesArtifactsV1(
       const evidence = ClarificationTransitionEvidenceV1Schema.parse(
         event.clarificationTransitionEvidence,
       );
+      if (clarification?.missingFields.length === 1 && clarification.missingFields[0] === "ORDER_PREVIEW" &&
+        evidence.transition.kind === "RESOLVED") throw new Error("PAYMENT_RECAPTURE_PREVIEW_REQUIRED");
       const beforeHash = sha256TextV1(
         canonicalClarificationStateHashPreimageV1(clarification),
       );
@@ -1270,6 +1278,10 @@ function validateLockedProtectedSalesArtifactsV1(
         transition: evidence.transition,
         appliedAt: event.occurredAt,
       });
+      if(clarification?.missingFields.length===1&&clarification.missingFields[0]==="ORDER_PREVIEW"&&
+        (evidence.transition.kind!=="REQUESTED"||evidence.transition.missingFields.length!==1||evidence.transition.missingFields[0]!=="PAYMENT_METHOD"))throw new Error("PAYMENT_RECAPTURE_PREVIEW_REQUIRED");
+      if(clarification?.reasonCode==="CHECKOUT_DETAILS_MISSING"&&clarification.missingFields.length===1&&clarification.missingFields[0]==="PAYMENT_METHOD"&&
+        (evidence.transition.kind==="RESOLVED"||evidence.transition.reasonCode!=="CHECKOUT_DETAILS_MISSING"||evidence.transition.missingFields.length!==1||evidence.transition.missingFields[0]!=="PAYMENT_METHOD"))throw new Error("PAYMENT_CHOICE_UNRESOLVED");
       if (transition.status !== "APPLIED" ||
         evidence.afterClarificationHash !== sha256TextV1(
           canonicalClarificationStateHashPreimageV1(transition.clarification),
@@ -1286,6 +1298,7 @@ function validateLockedProtectedSalesArtifactsV1(
       preview = null;
       break;
     case "PREVIEW_CREATED": {
+      if(clarification?.missingFields.length===1&&clarification.missingFields[0]==="PAYMENT_METHOD")throw new Error("PAYMENT_CHOICE_UNRESOLVED");
       if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
       if (finalCart === null) throw new Error("PREVIEW_TRANSITION_CART_REQUIRED");
       const candidate = OrderPreviewV1Schema.parse(event.previewArtifact);
@@ -1302,9 +1315,12 @@ function validateLockedProtectedSalesArtifactsV1(
         throw new Error("ORDER_PREVIEW_TRANSITION_REPLAY_MISMATCH");
       }
       preview = transition.preview;
+      if (clarification?.missingFields.length === 1 && clarification.missingFields[0] === "ORDER_PREVIEW") clarification = null;
       break;
     }
     case "CONFIRM_PURCHASE": {
+      if(clarification?.missingFields.length===1&&clarification.missingFields[0]==="ORDER_PREVIEW")throw new Error("PAYMENT_RECAPTURE_PREVIEW_REQUIRED");
+      if(clarification?.missingFields.length===1&&clarification.missingFields[0]==="PAYMENT_METHOD")throw new Error("PAYMENT_CHOICE_UNRESOLVED");
       if (event.outcome === "HANDOFF") {
         preview = null;
         break;
@@ -1778,6 +1794,7 @@ function validateMetaEffectReadiness<TState, TSalesState>(
     const cartEnvelope = state?.cart as { value?: unknown } | null | undefined;
     const cart = CartV1Schema.parse(cartEnvelope?.value);
     const cartSemantics = validateCartEffectClaimSemanticsV1({
+      variantHash: sha256TextV1,
       effect: "PROTECTED_OUTBOUND",
       lines: cart.lines.map((line) => ({
         parentProductId: line.parentProductId,
@@ -1785,6 +1802,7 @@ function validateMetaEffectReadiness<TState, TSalesState>(
         quantity: line.quantity,
         posUnitPriceVnd: line.posUnitPriceVnd,
         priceFactRef: line.priceAuthority?.priceFactRef ?? null,
+        components: line.components,
       })),
       claims,
       cartId: readiness.cartId,

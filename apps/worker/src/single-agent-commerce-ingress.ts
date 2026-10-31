@@ -1,3 +1,5 @@
+import { canonicalCartVariantScopeV2 } from "@lana/contracts";
+import { cartSelectionsHaveIndependentStockV2 } from "./realtime-sales-catalog.js";
 import { createHash, randomUUID } from "node:crypto";
 import { CustomerProfileV1Schema, InboundMessageV1Schema, canonicalCartStateV1, canonicalCartStateHashPreimageV1, CommercePublicCartSummaryV1Schema, type ProtectedClaimV1 } from "@lana/contracts";
 import {projectCommerceHistoryMetadata} from "./single-agent-commerce-public-history.js";
@@ -66,7 +68,7 @@ export function bindCommerceFacts(reader: BusinessFactsReader, scope: { shopAlia
     ...(reader.readCatalogSnapshot ? { readCatalogSnapshot: reader.readCatalogSnapshot.bind(reader) } : {}),
     async resolveCartSelection(query, now) {
       if (normalizeCatalogToken(query.shopAlias) !== alias || !reader.resolveCartSelection) return invalid();
-      const selected = await reader.resolveCartSelection(query, now); if (selected.status !== "READY") return selected;
+      const selected = await reader.resolveCartSelection({...query,selectionMode:"CANDIDATE_TUPLES"}, now); if (selected.status !== "READY") return selected;
       const authority = selected.line.priceAuthority;
       if (!authority || authority.shopId !== selected.shopId) return invalid();
       if (selected.shopId === shopId) return selected;
@@ -78,6 +80,10 @@ export function bindCommerceFacts(reader: BusinessFactsReader, scope: { shopAlia
 
 /** Explicit candidate consumer. Not imported by a production entrypoint; it can enqueue, never dispatch or send. */
 export async function runPersistedCommerceIngress(input: {
+  captureBoundaryWitness?: boolean;
+  /** Evaluation-only reference runner; production entrypoints never provide this port. */
+  evaluationTurn?: { kind: "PINNED_MAIN_C3"; run: (turn: Parameters<typeof runCommerceTurn>[0],
+    state: { sales: SalesCycleRuntimeState; conversationRevision: number; sourceMessagePk: string }) => ReturnType<typeof runCommerceTurn> };
   batch: ClaimedInboundBatch<InboundEnvelopeV1>; fence: number;
   scope: Pick<Parameters<typeof createCommerceTools>[0]["read"]["scope"], "pageId" | "shopId" | "shopAlias" | "conversationId" | "customerHash">;
   store: PostgresRealtimeRuntimeStore; inbox: Pick<PostgresRealtimeInboxStore, "isBatchCurrent" | "readGeneration" | "completeBatch">;
@@ -90,6 +96,8 @@ export async function runPersistedCommerceIngress(input: {
   clock: () => Date; ownerPrompt: string; verifierPrompt: string;
   media?: Parameters<typeof createCommerceTools>[0]["media"];
   quoteTask?: Parameters<typeof createCommerceTools>[0]["quoteTask"];
+  observeDiagnostics?:Parameters<typeof createCommerceTools>[0]["observeDiagnostics"];
+  admitPreparedContext?:Parameters<typeof runCommerceTurn>[0]["admitPreparedContext"];
   handoffReply?: { approvedHoldingHashes: readonly string[] };
   owner: Parameters<typeof runCommerceTurn>[0]["owner"]; verifier: Parameters<typeof runCommerceTurn>[0]["verifier"];
 }) {
@@ -141,12 +149,14 @@ export async function runPersistedCommerceIngress(input: {
   };
   const pendingCheckout = await executor.privateCheckoutPending();
   const privateInput = !!mediaMessage || pendingCheckout || isPrivateCommerceText(latest);
+  let sourceMessagePk = "";
   for (const m of messages) {
     const recorded=await input.history.recordInboundCustomerMessage({ pageId: scope.pageId, conversationId: scope.conversationId,
     customerHash: scope.customerHash, providerMessageId: m.messageId ?? m.eventKey,
     text: privateInput || isPrivateCommerceText(m.text ?? "") ? null : m.text,
     attachmentCount:m.attachments.length,
     occurredAt: new Date(m.occurredAt), receivedAt: input.clock() });
+    if (m === last) sourceMessagePk = recorded.messagePk;
     if(m===mediaMessage)mediaLink={eventKey:m.eventKey,messagePk:recorded.messagePk,attachmentCount};
   }
   if(record.state.conversationOwner!=="BOT")return closeWithoutSend("HUMAN_OWNS_CONVERSATION");
@@ -156,7 +166,8 @@ export async function runPersistedCommerceIngress(input: {
     // Only the existing payment-receipt state can consume attachment identity; other media goes to staff.
     const receiptPending=mediaMessage&&(await executor.repository.read(scope.conversationId))?.stage==="PURCHASE_CONFIRMED";
     const privateResult = !mediaMessage||receiptPending ? await executor.advancePrivateCheckout() : {committed:false,messages:0};
-    if (privateResult.committed) return { ...noSend("PRIVATE_CHECKOUT_COMMITTED"), mode: "PRIVATE_CODE_PATH", enqueued: privateResult.messages };
+    if (privateResult.committed) return { ...noSend("PRIVATE_CHECKOUT_COMMITTED"), mode: "PRIVATE_CODE_PATH", enqueued: privateResult.messages,
+      codeOwnedOutput:executor.codeOwnedOutput() };
     const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction,
       read: readAuthority, inboxBatchGuard: guard, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId,
       ...(mediaLink?{triggerSource:mediaLink}:{}) });
@@ -212,7 +223,7 @@ export async function runPersistedCommerceIngress(input: {
   const projectedHistory=projectCommerceHistoryMetadata(commerceHistory(rows),recentCartEvents);
   const historyMetadata=projectedHistory.metadata;
   const history=commerceHistory(rows,recentMedia,historyMetadata.publicCartEvents.length?Buffer.byteLength(JSON.stringify(historyMetadata)):0);
-  const tools: CommerceTools = await createCommerceTools({ ...(input.quoteTask?{quoteTask:input.quoteTask}:{}), read: { ...scopedRead, scope, clock: input.clock,
+  const tools: CommerceTools = await createCommerceTools({ ...(input.quoteTask?{quoteTask:input.quoteTask}:{}),...(input.observeDiagnostics?{observeDiagnostics:input.observeDiagnostics}:{}), read: { ...scopedRead, scope, clock: input.clock,
     entry: {firstContact: rows.length > 0 || recentMedia.length > 0 || recentCartEvents.length > 0 ? false : mediaHistoryUnavailable || publicHistoryUnavailable ? null : true, fromAd: ads.length > 0} }, state: { store: profilePort,
     sourceMessages,
     sizeInput: async ref => { const { product } = await input.read.catalog.readProduct(ref, false);
@@ -228,13 +239,19 @@ export async function runPersistedCommerceIngress(input: {
         conversationOwner: a.state.conversationOwner, permission: a.permission, bindingVersion: a.bindingVersion }; } },
     handoff: { ...handoff, policy: policyBundle,...(input.handoffReply?{deferredReply:input.handoffReply}:{}) },
     media: input.media ?? {allowedHostSuffixes:(process.env.PRODUCT_SEARCH_ALLOWED_IMAGE_HOSTS ?? "lanadesign.vn,content.pancake.vn,fbcdn.net,fbsbx.com").split(",").map(s=>s.trim()).filter(Boolean)} });
-  const execution = await runCommerceTurn({ scope, tools, latest, history, historyMetadata, clock: input.clock, ownerPrompt: input.ownerPrompt, verifierPrompt: input.verifierPrompt, owner: input.owner, verifier: input.verifier });
+  const turnInput={ scope, tools, latest, history, historyMetadata, clock: input.clock, ownerPrompt: input.ownerPrompt, verifierPrompt: input.verifierPrompt, owner: input.owner, verifier: input.verifier,
+    ...(input.admitPreparedContext?{admitPreparedContext:input.admitPreparedContext}:{}),
+    ...(input.captureBoundaryWitness ? {captureBoundaryWitness:true} : {}) };
+  if(input.evaluationTurn&&input.evaluationTurn.kind!=="PINNED_MAIN_C3")throw Error("EVALUATION_REFERENCE_KIND");
+  const execution = input.evaluationTurn ? await input.evaluationTurn.run(turnInput,{sales:(await executor.repository.read(scope.conversationId))!,
+    conversationRevision:(await readAuthority()).stateVersion,sourceMessagePk}) : await runCommerceTurn(turnInput);
   const result={...execution,publicHistoryProjection:{...projectedHistory.dropped,unavailable:publicHistoryUnavailable}};
   // Handoff commits own Inbox completion. Never enqueue a second response or
   // mutate state again after a rejected/unknown handoff transaction.
   if (result.terminal.disposition !== "SEND_ELIGIBLE") return {
     ...result, ...(result.terminal.disposition === "FALLBACK" ? noSend("FALLBACK_OUTPUT_FORBIDDEN") : {}),
     inboxCompletion: await completeUnsent(tools.handoffStatus?.()?.status),
+    codeOwnedOutput:executor.codeOwnedOutput(),
     enqueued: handoff.outboxCount()+executor.outboxCount() };
   // Holding replies (with or without independent media) belong to the atomic
   // handoff group with Inbox completion. Do not enqueue another BOT reply.
@@ -289,7 +306,8 @@ export async function runPersistedCommerceIngress(input: {
       size: l.components[0]?.size ?? null, color: l.components[0]?.color ?? null, quantity: l.quantity, lineId: l.lineId }, now)));
     const ready = selections.flatMap(s => s.status === "READY" ? [s] : []);
     if (!selectionsMatchCartLines(cart.lines, ready)) return { ...result, ...await closeWithoutSend("EGRESS_CART_SOURCE_CHANGED") };
-    const cartClaims = buildProtectedClaimsFromCartSelectionsV1(ready.map(s => ({ productId: s.line.parentProductId, variantId: s.line.offerId, priceVnd: s.line.posUnitPriceVnd!,
+    if (!cartSelectionsHaveIndependentStockV2(ready)) return { ...result, ...await closeWithoutSend("CART_INVENTORY_SOURCE_UNRESOLVED") };
+    const cartClaims = buildProtectedClaimsFromCartSelectionsV1(ready.map(s => ({ productId: s.line.parentProductId, variantId: canonicalCartVariantScopeV2(s.line, text => createHash("sha256").update(text, "utf8").digest("hex")), priceVnd: s.line.posUnitPriceVnd!,
       priceVersion: s.versions.price, inventoryVersion: s.versions.inventory, etaVersion: s.versions.eta, eta: s.eta, etaExpiresAt: s.etaExpiresAt,
       sourceAuthority: s.sourceAuthority, stockStatus: s.stockStatus, stockAvailableQuantity: s.stockAvailableQuantity, observedAt: s.sourceObservedAt, expiresAt: s.sourceExpiresAt })));
     parent = evaluateDeterministicEffectReadinessV1({ ...common, effect: "CART_READY", claims: cartClaims });

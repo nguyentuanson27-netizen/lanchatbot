@@ -1,4 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { existsSync,readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { createConversationState } from "@lana/conversation-engine";
 import { applySalesCycleCommand, computeBusinessContentHash, createSalesCycleRuntimeState } from "@lana/chat-runtime";
 import { LocalEnvelopeCipher, PostgresRealtimeRuntimeStore, type RealtimeCommitInput } from "@lana/database";
@@ -47,7 +49,8 @@ function fixture(productIds = ["SM613"]) {
   const history = {recordInboundCustomerMessage: vi.fn(async (_input:unknown) => ({messagePk:"90000000-0000-4000-8000-000000000001"})), listConversationHistory: vi.fn(async () => [] as unknown[])};
   let readOverride: Parameters<typeof runPersistedCommerceIngress>[0]["read"] | undefined;
   const run = (owner: Parameters<typeof runPersistedCommerceIngress>[0]["owner"] = async () => ({ kind: "FINAL", text: "Dạ chị." }),
-    handoffReply?: Parameters<typeof runPersistedCommerceIngress>[0]["handoffReply"],quoteTask?:Parameters<typeof runPersistedCommerceIngress>[0]["quoteTask"]) => runPersistedCommerceIngress({
+    handoffReply?: Parameters<typeof runPersistedCommerceIngress>[0]["handoffReply"],quoteTask?:Parameters<typeof runPersistedCommerceIngress>[0]["quoteTask"],
+    evaluationTurn?:Parameters<typeof runPersistedCommerceIngress>[0]["evaluationTurn"]) => runPersistedCommerceIngress({
     batch, fence: 1, scope, store, inbox,
     history, transaction: async (work: (client: never) => Promise<unknown>) => { await beforeTransaction(); return work({} as never); },
     facts: { ready: async () => true, resolve: async () => {}, close: async () => {}, resolveCartSelection: select }, policy,
@@ -56,6 +59,7 @@ function fixture(productIds = ["SM613"]) {
     resolveTagId: () => tagId, clock: () => commerceNow, ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm tra.", owner, verifier,
     ...(handoffReply?{handoffReply}:{}),
     ...(quoteTask?{quoteTask}:{}),
+    ...(evaluationTurn?{evaluationTurn}:{}),
   } as unknown as Parameters<typeof runPersistedCommerceIngress>[0]);
   return { run, store, inbox, commit, verifier, select, profileWrite, policy, message, products, catalogRead, history, setRead: (read: typeof readOverride) => { readOverride = read; }, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
     setCycle: (state: typeof cycle) => { cycle = state; }, cycle: () => cycle, batch,
@@ -69,6 +73,50 @@ function fixture(productIds = ["SM613"]) {
 
 afterEach(() => vi.restoreAllMocks());
 
+it("runs explicit main-C3 evaluation through the persisted egress without OWNER or verifier",async()=>{
+ const f=fixture(),owner=vi.fn();
+ const reference:NonNullable<Parameters<typeof runPersistedCommerceIngress>[0]["evaluationTurn"]>["run"]=async(turn,state)=>{
+  expect(state.sourceMessagePk).toBe("90000000-0000-4000-8000-000000000001");expect(state.sales.revision).toBe(0);
+  await turn.tools.prepare?.();
+  return {terminal:{disposition:"SEND_ELIGIBLE",reason:"PASS",text:"Dạ chị.",fallbackId:null},recovery:null,
+   sendEnabled:false,ownerGenerations:2,verifierGenerations:0,toolRounds:0,normalToolCalls:1,terminalHandoffCalls:0,toolCalls:1,
+   proposedToolCalls:0,rejectedToolCalls:0,handoff:null,generations:[],toolLatencyMs:0,verificationLatencyMs:null};
+ };
+ const observed=vi.fn(reference),r=await f.run(owner,undefined,undefined,{kind:"PINNED_MAIN_C3",run:observed});
+ expect(observed).toHaveBeenCalledTimes(1);expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+ expect(r).toMatchObject({enqueued:1,terminal:{disposition:"SEND_ELIGIBLE",text:"Dạ chị."}});
+ expect(f.commit.mock.calls.some(c=>c[1].metaPlan?.messages.some(m=>m.kind==="TEXT"&&m.text==="Dạ chị."))).toBe(true);
+});
+const mainReferenceRoot=fileURLToPath(new URL("../../../../lanchatbot-c3-phase-c-main-296cdcf/",import.meta.url));
+it.skipIf(!existsSync(mainReferenceRoot+"/apps/worker/dist/track-c-c3-v5-benchmark-runner.js"))("runs pinned-main C3 builders, two passes and guard through shared ingress commit with local HTTP payloads",async()=>{
+ const helper=new URL("../evals/single-agent-commerce-qualification/",import.meta.url);
+ const {baselineInventory}=await import(new URL("baseline-source.mjs",helper).href);
+ const {createReferenceRunner}=await import(new URL("c3-reference.mjs",helper).href);
+ const {digest}=await import(new URL("qualification.mjs",helper).href);
+ const f=fixture(),manifest=JSON.parse(readFileSync(new URL("../evals/single-agent-commerce-read-only/manifest.json",import.meta.url),"utf8")),
+  model={...manifest.models.conversation,generationConfig:{...manifest.models.conversation.generationConfig,responseMimeType:"application/json"}},
+  build=baselineInventory(mainReferenceRoot),runtimeInput={latest:f.message.text,history:[],initialProductCodes:["SM613"]},observations:unknown[]=[];
+ const reg={runSourceSha:"a".repeat(40),worldHash:"b".repeat(64),config:{baseline:{sourceSha:build.sourceSha,model,
+  capabilityStatus:"VERIFIED_MATCHED_SEND_DISABLED",captureBuilderHash:"c".repeat(64)}},slots:[{slotId:"unit-c3-slot",arm:"C3",scenarioHash:"d".repeat(64)}],
+  corpus:{scenarios:[{id:"not-in-wire-unit-case"}]}};
+ let calls=0;
+ const runner=await createReferenceRunner({preflight:{sealed:reg,world:{config:{vertex:{projectId:"unit-project"}}}},baselineRoot:mainReferenceRoot,baselineBuild:build,
+  observe:(row:unknown)=>observations.push(row),active:()=>({slotId:"unit-c3-slot",turnIndex:0,runtimeInput}),assertCurrent:()=>{},
+  unitTransport:{fixtureOnly:true,send:async(request:{body:string})=>{
+   calls++;const frame=JSON.parse(JSON.parse(request.body).contents[0].parts[0].text);
+   const value=calls===1?{currentNeed:"Acknowledge the customer.",mustResolve:"No unsupported claim.",conversationRead:"Customer greeted the shop.",nextMove:"NONE",avoid:"No effect."}:
+    {segments:[{kind:"GENERAL",text:"Dạ chị."}],strategy:"ANSWER_VERIFIED_FACTS",cta:"NONE"};
+   return {payload:{candidates:[{content:{parts:[{text:JSON.stringify(value)}]}}]},providerModelVersion:model.version,
+    telemetry:{providerRequests:1,modelVersion:model.version,inputTokens:1,outputTokens:1}};
+  }}});
+ const owner=vi.fn(),r=await f.run(owner,undefined,undefined,runner);
+ expect(calls).toBe(2);expect(observations.length).toBe(4);expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+ const c3Diagnostic=(r as unknown as {c3Witness?:{guarded:{errorCode?:string}}}).c3Witness?.guarded.errorCode;
+ expect(c3Diagnostic).toBeUndefined();expect(r.terminal.reason).toBe("PASS");
+ expect(r).toMatchObject({enqueued:1,terminal:{disposition:"SEND_ELIGIBLE",text:"Dạ chị."}});
+ expect(f.commit.mock.calls.some(c=>c[1].metaPlan?.messages.some(m=>m.kind==="TEXT"&&m.text==="Dạ chị."))).toBe(true);
+ expect(digest(build)).toHaveLength(64);
+},60000);
 async function enableRecoveryHandoff(f: ReturnType<typeof fixture>, mode: "holding" | "silent" = "holding") {
   f.enableHandoff();
   const resolved=await fixturePolicy();

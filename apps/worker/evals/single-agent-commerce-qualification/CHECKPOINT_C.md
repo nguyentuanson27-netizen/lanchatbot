@@ -1,0 +1,84 @@
+# Phase C — current disposition,29/10/2026
+
+**BLOCKED after actual candidate execution and blind grading.** 24SAFETY PASS (12unsafe: zero observed send-eligible false PASS;11/12safe eligible);22native scenarios/34customer turns completed.93actual generation HTTP requests,94records. Independent SolHigh judge:12PASS/2FAIL/8UNRESOLVED. Real-PG66checks/7invariantsPASS; formal assessment short-circuits before adapter acceptance. C3 arm22NOT_RUN; no replacement/rollout authorized.
+
+[Current report](run-20261029/REPORT.md) · [All conversations](run-20261029/CONVERSATIONS.md) · [Accounting](run-20261029/ACCOUNTING.json) · [Formal assessment](run-20261029/FORMAL_ASSESSMENT.json). Run source36e45015 is distinct from this report commit. Source/credential route recovered; the zero-request/source-outage status below is historical. Neither8UNRESOLVED nor the code-owned capture registration blocker was silently cleared.
+
+## Historical foundation / pre-run record (superseded execution status)
+
+# Phase C foundation — 28/10/2026
+
+## Collector completion work after foundation approval
+
+Owner subsequently authorized completing Phase C and running models, and selected an independent **GPT-6.1 Sol High offline blind judge**. The following implementation is newer than the foundation approval below; it has separate bounded independent approvals recorded in the collector review.
+
+Added source/frozen readers, bind-corpus and real initial-state readback; actual native safety/candidate collectors; same persisted ingress/Outbox envelope for genuine main C3; whole-main/transitive build pinning; native wire codecs without duplicate prompt context; bounded per-turn request ledger/dispatch claims; explicit actual boundary and accepted-output witnesses; source coverage/loss; judge import and complete denominator merging; real-adapter driver. Two optional evaluation-only ports expose the existing native boundary and C3 reference run inside candidate ingress. They do not change default B orchestration or production wiring.
+
+Actual checks so far in this follow-up:215 focused worker PASS (including one real main296-builder/two-pass/guard/shared ingress test with local response stubs);48 Node tests PASS before latest additional coverage/code-owned/merge regressions; direct worker typecheck and build PASS. C3 baseline offline frozen-lockfile install/build PASS,638tracked source/2044built files pinned. These are code tests, not PostgreSQL/model qualification. Final counts and independent disposition are recorded in the follow-up review report.
+
+[Collector implementation review, exact commands and remaining work](COLLECTOR_IMPLEMENTATION_REVIEW.md): same reviewer approved bounded components after fixes;52focusedPASS in that review snapshot; broad repeat728PASS/0FAIL/2existingSKIP after one transient local Round62 failure, which is retained in the report. Approval does not cover final source/corpus review or campaign readiness.
+
+Execution is still **BLOCKED, not complete**. Existing source/credential launcher was tried three times; SSH source host:22 timed out before credentials/public world could be read. No local Vertex credential variables are configured. Docker Desktop daemon is unavailable for local PostgreSQL fallback. The global Codex client is0.164.0, but the existing task-local0.159.2 binary/hash/ChatGPT login was recovered and validated through process-scoped APPDATA; no model change or global installation change. All qualification provider requests and new real-adapter runs remain0. [Readiness evidence](EXECUTION_READINESS_20261028.json).
+
+Fresh corpus/world/source bindings and actual search snapshot review remain pending; no seal or runSourceSha exists. Main Context V2 cannot carry all current policy/profile/cart/history evidence; actual coverage loss blocks matched replacement unless separately resolved, even if absolute candidate qualification later passes. Do not label shared worldHash as equal model information or capability-derived wins as isolated language-quality improvement.
+
+Exact bounded-code approval: `02fc8205a58a8244c485c65de52da94697e86efc`, same independent reviewer, clean HEAD. Final broad734PASS/0FAIL/2existingSKIP;58focusedC PASS; workerbuild/typecheck/lint PASS. Draft [PR392](https://github.com/nguyentuanson27-netizen/lanchatbot/pull/392). No model qualification claim follows from these checks.
+
+Latest addition: native frozen search capture/adapter and separate actual embedding/OAuth HTTP accounting are built and independently approved after two findings were fixed. Final focused58/58PASS; no real model/source capture occurred. The unsealed draft now has no authored initial shop history; actual JOURNEY history still comes from persisted outcomes. Main information parity remains unproved.
+
+The original foundation record follows and remains historical evidence.
+
+**Qualification: BLOCKED / NOT_RUN.** No Phase C provider requests, measured grades, matched C3 campaign or new real-adapter run. B NOT_GO remains unchanged. Approval of this tooling is separate from qualification.
+
+Implementation base `f160dfa4f7e0c8b3e29232570710d99d4f5ed012`; refreshed main / owner-selected C3 baseline `296cdcfbf5759f5bf9cbb24acf3dc63005589361`; branch `feat/c3-phase-c-qualification-20261028`. [Plan](../../../../docs/specs/c3-phase-c-qualification-plan-20261028.md) follows architecture §§13–16,21 and boundary amendment §§11–12. No C runSourceSha exists yet.
+
+[Owner decisions](owner-decisions.json): N1, absolute SINGLE/JOURNEY ≥90% separately, safe usability ≥90%, no hard safety/state/effect/privacy failure, net wins ≥10pp in BOTH modes for replacement. Planned candidate model identities remain Gemini3.5FlashLite HIGH + GPT6.1Sol HIGH from the B manifest. C3 matched effective model/config remains unverified; baseline source approval alone does not establish model or persisted state parity.
+
+## Built scope
+
+CLI init/check/seal/absolute/blind/assess; actual source/config/prompt inventory and owner-decision binding; clean source and exact registered input guards; complete denominator/error accounting; both-arm runtime wire binding; exact verifier draft/request/trusted-snapshot wire binding; state/history continuity; role paths; separate target/replacement/real-adapter decisions; absolute/comparative blind whole-outcome packets with facts/state/effects/receipts/media; explicit operational metrics by arm/mode, unavailable usage accounting and p50/p95. Rollout is always unauthorized.
+
+Draft corpus has16SINGLE +6three-turnJOURNEY +24SAFETY(12safe/12unsafe) outlines. At N1 that would register68arm/scenario slots if bound/approved; this is a planning count, not executed attempts or an observed false-PASS denominator. No source facts or grades are fabricated to make these outlines executable.
+
+No production entrypoint/shared business code/owner or verifier prompt changed; zero online semantic roles added. These modules validate imported evidence. They do not authenticate hand-authored JSON as a provider response or execute the collector/real-adapter drivers.
+
+## Actual verification
+
+- Initial evaluator RED3fail/5pass → GREEN8/8; nested-label regression RED1fail/12pass → GREEN13/13.
+- Observed RED17pass/3fail for baseline safety/reset, empty/silent terminal and trajectory bugs → GREEN20/20. Bridge/initial-world regression RED20pass/2fail → GREEN22/22.
+- Latest `node --test "apps/worker/evals/single-agent-commerce-qualification/*.test.mjs"`:32/32PASS,0skip, including disposable-git seal/assess/absolute/blind, source/threshold/unresolved-input/preregistration-time/output-path rejection. All model responses/grades in these tests are synthetic.
+- `pnpm --filter @lana/worker test:evals`:707PASS/0FAIL/2SKIP(709total) on earlier foundation snapshot; existing installed-Codex-to-local-stub tests skipped. Final verifier-binding changes were then covered by focused32/32; unchanged A/B suites were not reinterpreted as model results.
+- `pnpm --filter @lana/worker build`, `pnpm --filter @lana/worker typecheck`, `pnpm --filter @lana/worker lint`:exit0. Normal dependency builds ran; no shared package source changed.
+- Draft-author generation and `node --check .../cli.mjs` ran. First author run rejected duplicate safety runtime contexts; dedup fingerprint now includes the registered finalDraft so a safe/unsafe draft pair is not mistaken for one identical input.
+- `pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts`:57/57PASS.
+- On clean sourcef644e0b1, `node .../cli.mjs init --out ../c3-phase-c-draft-config-r2-20261028.json` created actual draft config with0requests. `node .../cli.mjs check --config ../c3-phase-c-draft-config-r2-20261028.json --corpus apps/worker/evals/single-agent-commerce-qualification/holdout.draft.json` correctly returned BLOCKED/missing BASELINE_IDENTITY, BASELINE_MATCHED_BRIDGE_EVIDENCE, BLINDING_REGISTRATION, CORPUS_BINDING_AND_REVIEW,0requests; nonzero exit. This is a preparation check, not a sealed registration or provider result.
+- Same independent reviewer: REQUEST_CHANGES → fixes → repeated review → **APPROVE exactf644e0b1**, independently32/32PASS. [Review scope and closed findings](INDEPENDENT_REVIEW.md). Later closure edits are documentation-only.
+
+Spec Git blob identities at reviewed source: architecture `7e0265e3b6b3d556d8fb0f3c7267abccef5de86a`; boundary amendment `4a09b55d2f3a972a65697738876cc5eab21e7a2b`. These are Git blob SHA1s, not run identities or prompt SHA256s.
+
+## Remaining work before a Phase C run
+
+1. **Collector and matched C3 bridge not built.** Inspected main `track-c-c3-journey-adapter.ts` requires BEHAVIOR_SIMULATION; `track-c-c3-v5-benchmark-runner.ts` exposes no persistence/effect port. `track-c-c3-two-pass-candidate.ts` references C1 fixture IDs. These existing paths cannot simply be relabeled as the required new persisted stateful comparison.
+2. **Effective generation parity unresolved.** Inspected main defaults use JSON/max1024 without establishing the candidate's explicit HIGH/8192/plain-text settings. The bridge must freeze matched effective model/config while preserving genuine C3 orchestration/output contracts.
+3. **World/corpus unbound.** SAFETY draft placeholders, source facts, pre-state bindings, naturalness/coverage/source review and development separation inventory are pending. No seal issued.
+4. **No measured evidence.** Actual human grades, generation/error/latency/token/cost data, structural trace audit and seven real-adapter invariants are still NOT_RUN.
+
+Next work is genuine collectors/bridge and source-bound fresh inputs, then clean-source registration and execution. See [collector contract and commands](README.md). Do not infer Phase C PASS or replacement authorization from foundation test/review approval.
+
+## Owner-requested run recheck — 2026-10-28T15:31:49.663423+00:00
+
+Owner requested model execution again. Existing credential launcher on clean `ea700591` exited1: SSH source host port22 timed out before credential retrieval. Independent3-second TCP probes also timed out on22and443. Local ignored credential-file discovery found only example/config-extraction files, not a usable credential. No registered attempt, provider generation, source write or PostgreSQL qualification was performed. Source snapshot/corpus/seal remains unavailable; **BLOCKED/NOT_RUN**. The offline judge and model choices remain approved and unchanged. Readiness now records4source-route attempts total. Probe evidence outside source: `c3-phase-c-source-preflight-20261028T153149Z.json`.
+
+## First actual execution — 28–29/10/2026 local time
+
+Connection recovered. Source `5125aa89c0f846027ba539ace49150f9f9d3ec62`, clean registration `745433226f43f714922f2e4b1ceb968b30b931876ef85c13c526dc64563cdc54`:68registered slots, N1. Captured107public products/1055active image-index points, source world745709084f7afd8cfbc29f6b9835b100d4ed9d389e24d945e7678a0a4a8e3d0d. The source/Vertex route is now available; prior timeout records remain historical.
+
+Actual SAFETY native outcomes:24/24attempts,24generation requests,0provider errors,12unsafe with **zero observed send-eligible false PASS**,11/12safe eligible. The safe negative-feedback-availability statement was rejected because productread did not provide an image lookup/absence result. These counts apply only to this frozen population/configuration.
+
+Formal campaign qualification is **BLOCKED**, despite the summary's native SAFETY PASS: the real verifier returns JSON text, but the collector stored that text where the aggregate evidence validator expects an object; requirePassingSafety correctly blocked before native SINGLE/JOURNEY. Additionally, collector HANDOFF→silent projection could conceal an actual accepted holding reply; current captured published policy had no HANDOFF_MATRIX, unlike the owner-approved isolated B matrix. No A3/C3 model conversation ran under this registration. Remaining44slots stay NOT_RUN; never drop them or silently flip the candidate flag.
+
+Real PostgreSQL on the same clean source:66checks PASS, disposable DB dropped; all7registered real-adapter invariants PASS,0generations/live sends. These results belong to source5125, not a later source.
+
+Observed initial-store failures before registration: missing OUTER profile revision, then an incorrect intermediate inner revision0; both DBs cleaned and0generations. Corrected outer/inner revision1, widened C dirty detection, synchronized cleanup evidence. Working-tree initial03was validation only; clean initial04PASS is the bound artifact. One preflight raced a pending seal and returned ENOENT0requests; subsequent sealed preflightPASS. No failed check is relabeled as provider or qualification evidence.
+
+Follow-up bounded fixes: preserve raw verifier result unchanged for native gate and decode JSON only in evidence; preserve actual text/images for ALL terminal dispositions and emit silent/no-send contract findings. Observed focused RED7PASS/3FAIL → GREEN10/10; full PhaseC62/62PASS. No owner/verifier prompt, model, threshold or business source rule was changed. Old raw evidence remains immutable. No automatic retry of any old registered attempt.
