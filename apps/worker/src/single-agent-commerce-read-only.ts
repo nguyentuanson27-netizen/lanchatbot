@@ -27,6 +27,7 @@ export interface VerifierRequest { generationId: string; instructions: string; f
   latest: string; history: { role: "customer" | "shop"; text: string }[]; binding: VerifierBinding; signal: AbortSignal }
 export interface VerifierGeneration { result: unknown; telemetry?: unknown }
 export interface CommerceTools {
+  readCoverage?():import("./single-agent-commerce-diagnostics.js").CommerceReadCoverage;
   diagnostic?(stage:import("./single-agent-commerce-diagnostics.js").CommerceDiagnosticStage,status:string,reason?:string|null,resultBytes?:number|null):void;
   /** Admitted primitive dispatches, excluding preparation and terminal handoff. */
   primitiveToolInvocations?():number;
@@ -47,7 +48,7 @@ export interface CommerceTools {
   mediaCapabilities?(): readonly import("./single-agent-commerce-media-capabilities.js").MediaCapability[];
   catalogImages?(): readonly import("./single-agent-commerce-media.js").CommerceCatalogImage[];
   mediaSelection?(): readonly import("./single-agent-commerce-media.js").CommerceMediaAsset[];
-  prepare?(admit?:(context:TrustedContext)=>boolean): Promise<number>;
+  prepare?(admit?:import("./single-agent-commerce-read-only-tools.js").PreparationAdmission, control?:import("./single-agent-commerce-read-only-tools.js").PreparationControl): Promise<number>;
   availableTools?: readonly string[];
   invoke(call: CommerceToolCall): Promise<CommerceToolResult>;
   invokeBatch(calls: CommerceToolCall[]): Promise<CommerceToolResult[]>;
@@ -134,6 +135,7 @@ export async function runCommerceTurn(input: {
         executedToolInvocations:executedNormalToolInvocations+(input.tools.primitiveToolInvocations?.()??0)+terminalHandoffCalls}:{}),
       normalToolCalls: toolCalls, terminalHandoffCalls, toolCalls: toolCalls + terminalHandoffCalls,
       proposedToolCalls, rejectedToolCalls, handoff: handoff ?? null, generations,
+      ...(input.tools.readCoverage?{readCoverage:{...input.tools.readCoverage(),budget:{roundsRemaining:2-toolRounds,callsRemaining:6-toolCalls}}}:{}),
       toolLatencyMs, verificationLatencyMs: verificationStarted === undefined ? null : performance.now()-verificationStarted };
   };
   const effectTerminal = async () => {
@@ -173,7 +175,9 @@ export async function runCommerceTurn(input: {
   }
   const preparationStarted = performance.now();
   if(primitiveAccounting&&!input.tools.primitiveToolInvocations)return finish({disposition:"NO_SEND",reason:"TOOL_ACCOUNTING_UNAVAILABLE",text:null,fallbackId:null});
-  try { toolCalls += await input.tools.prepare?.(context=>{
+  const beforePreparation=toolCalls;
+  try { const charged=await input.tools.prepare?.((context,work)=>{
+    if(work?.kind==="FINAL"&&!input.admitPreparedContext)return true;
     if(!input.admitPreparedContext||hardPrecheck(context,"Dạ.",input.clock())!==null)return false;
     return input.admitPreparedContext({generationId:`${input.scope.requestId}:owner:1`,instructions:input.ownerPrompt,contents:structuredClone(contents),context,turnTime,
       ...(primitiveAccounting?{toolWorkAccounting:"PRIMITIVE_WORK_V2" as const}:{}),
@@ -182,8 +186,12 @@ export async function runCommerceTurn(input: {
       ...(input.tools.catalogImages?{catalogImages:input.tools.catalogImages()}:{}),
       ...(input.tools.mediaCapabilities?{mediaCapabilities:input.tools.mediaCapabilities(),mediaCapabilitiesAt:input.clock().getTime()}:{}),
       terminalHandoffAllowed:input.tools.availableTools?.includes("request_handoff")===true,
-      toolsAllowed:true,toolBudget:{roundsRemaining:2,callsRemaining:5},signal:new AbortController().signal});
-  }) ?? 0; }
+      toolsAllowed:true,toolBudget:{roundsRemaining:2,callsRemaining:6-beforePreparation-(work?.chargedUnits??1)},signal:new AbortController().signal});
+  },{maxCalls:6-toolCalls,onDispatch:()=>{toolCalls++;executedNormalToolInvocations=toolCalls;}})??0;
+    // Legacy adapters may report their debit by return value; current adapters debit before I/O.
+    toolCalls+=Math.max(0,charged-(toolCalls-beforePreparation));
+    executedNormalToolInvocations=toolCalls;
+  }
   catch { return finish(fallback("PREPARATION_UNAVAILABLE")); }
   toolLatencyMs += performance.now() - preparationStarted;
   executedNormalToolInvocations=toolCalls;

@@ -17,7 +17,7 @@ it("prepares current numeric evidence from exactly the existing singleton source
  s.f.snapshot.offers.DIRECT!.rows[0]!.stock_quantity=0;await expect(s.tools.readback()).rejects.toThrow("POS_OBSERVATION_CHANGED");
 });
 it.each(["many","reject"])("does not partially publish optional numeric preparation when %s admission fails",async mode=>{
- const s=setup(mode);expect(await s.tools.prepare(()=>mode!=="reject")).toBe(1);
+ const s=setup(mode);expect(await s.tools.prepare((_c,work)=>work?.kind==="FINAL"||mode!=="reject")).toBe(1);
  expect(s.tools.snapshot().protectedClaims).toEqual([]);expect(s.tools.snapshot().runtimeProducts?.[0]?.content).toBeDefined();
  expect(s.readProduct).toHaveBeenCalledTimes(1);
 });
@@ -29,11 +29,19 @@ it("keeps catalog evidence on optional POS acquisition failure, without insertin
 it("does not admit optional data without a native-wire admission callback",async()=>{
  const s=setup();await s.tools.prepare();expect(s.tools.snapshot().protectedClaims).toEqual([]);expect(s.readProduct).toHaveBeenCalledTimes(1);
 });
-it("does not prepare two bound products without a current product",async()=>{
- const records=[fixtureProduct("A101"),fixtureProduct("B202")],readProduct=vi.fn();
- const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:records.map(f=>f.product),prepareCurrentOffers:true,
-  catalog:{readProduct,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
- expect(await tools.prepare(()=>true)).toBe(0);expect(readProduct).not.toHaveBeenCalled();
+it.each([2,3])("prepares %i bound targets without choosing a product and charges actual first-owner budget",async count=>{
+ const records=Array.from({length:count},(_,i)=>fixtureProduct(`A${i+101}`)),scope=commerceScope();
+ const readProduct=vi.fn(async(id:string)=>structuredClone(records.find(f=>f.product.productId===id)!));
+ const tools=await createCommerceTools({read:{scope,clock:()=>commerceNow,policy:fixturePolicy,initialProducts:records.map(f=>f.product),
+  catalog:{readProduct,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}}});
+ const admissions:number[]=[];
+ const result=await runCommerceTurn({scope,tools,clock:()=>commerceNow,latest:"Chị hỏi áo nhé.",history:[],ownerPrompt:"owner",verifierPrompt:"verifier",
+  admitPreparedContext:r=>{admissions.push(r.toolBudget.callsRemaining);return true;},
+  owner:async r=>{expect(r.context.state.currentProductId).toBeNull();expect(r.toolBudget.callsRemaining).toBe(6-count);
+   for(const f of records)expect(r.context.policyLiterals.some(p=>p.ref===`offers:${f.product.productId}`)).toBe(true);
+   expect(admissions.at(-1)).toBe(r.toolBudget.callsRemaining);return{kind:"FINAL",text:"Dạ chị."};},
+  verifier:async()=>({result:{verdict:"PASS",violations:[]}})});
+ expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(result.normalToolCalls).toBe(count);
 });
 it.each(["Cảm ơn em nhé.","Áo này phối quần nâu được không?","Giặt máy được không?"])("optional POS failure preserves the independent answer path for %s",async latest=>{
  const f=fixtureProduct(),scope=commerceScope(),readProduct=vi.fn(async(_id:string,readPos=true)=>{if(readPos)throw Error("POS_OFFLINE");return{product:f.product,snapshot:null};});
@@ -44,4 +52,37 @@ it.each(["Cảm ơn em nhé.","Áo này phối quần nâu được không?","Gi
  expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(remaining).toBe(5);
  // Existing catalog-only fallback and final readback each make a failed POS read plus one catalog-only read.
  expect(readProduct.mock.calls.filter(([,pos])=>pos===false)).toHaveLength(2);
+});
+
+it("exposes six source offers as read references without numeric fanout",async()=>{
+ const s=setup("many"),base=s.f.snapshot.offers.AO!;
+ s.f.snapshot.offers=Object.fromEntries(["AO","QUAN","CV","SET_QUAN","SET_VAY","COMBO_3"].map(offer=>[offer,{...structuredClone(base),rows:base.rows.map(r=>({...r,offer_type:offer}))}]));
+ await s.tools.prepare(()=>true);
+ const literal=s.tools.snapshot().policyLiterals.find(p=>p.ref===`offers:${s.f.product.productId}`)!;
+ const data=JSON.parse(literal.text);expect(data.purchaseOptions).toHaveLength(6);
+ for(const o of data.purchaseOptions){expect(o.priceRead).toMatchObject({subjectRef:s.f.product.productId,offerType:o.offerType});expect(o.stockRead).toEqual(o.priceRead);}
+ expect(s.tools.snapshot().protectedClaims).toEqual([]);expect(s.readProduct).toHaveBeenCalledTimes(1);
+});
+it("charges failed preparation before terminal recovery",async()=>{
+ const scope=commerceScope(),f=fixtureProduct();
+ const tools=await createCommerceTools({read:{scope,clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[f.product],
+ catalog:{readProduct:async()=>{throw Error("SOURCE_OFFLINE");},searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}}});
+ const result=await runCommerceTurn({scope,tools,clock:()=>commerceNow,latest:"Giá áo?",history:[],ownerPrompt:"owner",verifierPrompt:"verifier",
+ owner:async()=>{throw Error("must not call");},verifier:async()=>{throw Error("must not call");}});
+ expect(result.normalToolCalls).toBe(1);expect(result.ownerGenerations).toBe(0);
+});
+
+it("rejects exhausted preparation before I/O and publishes no partial set after admission rejects",async()=>{
+ const records=[fixtureProduct("A101"),fixtureProduct("B202")],readProduct=vi.fn(async(id:string)=>structuredClone(records.find(f=>f.product.productId===id)!));
+ const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:records.map(f=>f.product),prepareCurrentOffers:true,
+ catalog:{readProduct,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+ const before=tools.snapshot(),onDispatch=vi.fn();
+ await expect(tools.prepare(()=>true,{maxCalls:1,onDispatch})).rejects.toThrow("PREPARATION_BUDGET");expect(readProduct).not.toHaveBeenCalled();
+ await expect(tools.prepare((_c,w)=>w?.kind!=="FINAL",{maxCalls:6,onDispatch})).rejects.toThrow("PREPARATION_ADMISSION");
+ expect(tools.snapshot()).toEqual(before);expect(onDispatch).toHaveBeenCalledTimes(2);
+});
+it("does not debit cached preparation or already admitted full reads again",async()=>{
+ const s=setup(),dispatch=vi.fn();await s.tools.prepare(()=>true,{maxCalls:6,onDispatch:dispatch});
+ const before=s.tools.snapshot();expect(await s.tools.prepare(()=>true,{maxCalls:5,onDispatch:dispatch})).toBe(0);
+ expect(dispatch).toHaveBeenCalledTimes(1);expect(s.tools.snapshot()).toEqual(before);
 });

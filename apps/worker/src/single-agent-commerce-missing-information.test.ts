@@ -28,9 +28,9 @@ describe("missing shop information uses real handoff; missing customer input sta
   const tools=await createCommerceTools({read:s.read,handoff:s.handoff});
   const owner=vi.fn(async()=>native("read_product",{subjectRef:"QU714",offerType:"DIRECT"})),verifier=vi.fn();
   const result=await runCommerceTurn({scope:s.scope,tools,owner,verifier,clock:s.read.clock,latest:"Quần size M còn không, bao nhiêu em?",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm"});
-  expect(result.terminal).toMatchObject({disposition:"HANDOFF",reason:"DEPENDENCY_FAILURE",text:"Bên em sẽ kiểm tra lại rồi báo chị nhé."});
+  expect(result.terminal).toMatchObject({disposition:"HANDOFF",reason:"DEPENDENCY_FAILURE",text:null});
   expect(s.current().state.conversationOwner).toBe("HUMAN");expect(s.commit).toHaveBeenCalledOnce();
-  expect(owner).toHaveBeenCalledOnce();expect(verifier).not.toHaveBeenCalled();
+  expect(owner).not.toHaveBeenCalled();expect(verifier).not.toHaveBeenCalled();
   await tools.invokeBatch([{name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT"}}]);expect(s.commit).toHaveBeenCalledOnce();
  });
  it.each(["denied","unknown"] as const)("does not claim a transfer or resume model advice after an unproved %s handoff",async mode=>{
@@ -39,7 +39,7 @@ describe("missing shop information uses real handoff; missing customer input sta
   const owner=vi.fn(async()=>native("read_product",{subjectRef:"QU714",offerType:"DIRECT"})),verifier=vi.fn();
   const result=await runCommerceTurn({scope:s.scope,tools,owner,verifier,clock:s.read.clock,latest:"Quần bao nhiêu em?",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm"});
   expect(result.terminal).toMatchObject({disposition:"NO_SEND",text:null});expect(s.commit).toHaveBeenCalledOnce();
-  expect(owner).toHaveBeenCalledOnce();expect(verifier).not.toHaveBeenCalled();
+  expect(owner).not.toHaveBeenCalled();expect(verifier).not.toHaveBeenCalled();
   expect(await tools.invokeBatch([{name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT"}}])).toMatchObject([{status:"REJECTED"}]);
   expect(s.commit).toHaveBeenCalledOnce();
  });

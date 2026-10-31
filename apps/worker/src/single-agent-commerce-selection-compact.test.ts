@@ -72,3 +72,11 @@ it("merge rejection reports known bound/conflict separately; unknown errors do n
   }finally{spy.mockRestore();}
  }
 });
+
+it("distinguishes missing shop colour from an unnamed customer choice without inventing a default",()=>{
+ const {options,input}=optionsFixture();options[0]!.color="__NO_COLOR__";
+ const e=selection.selectionEvidenceFromOptions(input,options,commerceNow)!;
+ expect(selection.selectionShopDataGap(e,commerceNow)).toBe("SHOP_COLOR_UNRECORDED");
+ const named=optionsFixture();expect(selection.selectionShopDataGap(selection.selectionEvidenceFromOptions(named.input,named.options,commerceNow)!,commerceNow)).toBeNull();
+ expect(selection.selectionShopDataGap({...e,contentHash:"a".repeat(64)},commerceNow)).toBeNull();
+});

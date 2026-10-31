@@ -227,7 +227,7 @@ describe("read-only domain tools", () => {
     expect(discovered.boundSubjects).toHaveLength(3);
     expect(discovered.protectedClaims).toHaveLength(0);
     for (const f of records) expect(discovered.policyLiterals.map(p => JSON.parse(p.text)))
-      .toContainEqual({ productId: f.product.productId, availableOffers: ["AO", "QUAN", "SET_QUAN"] });
+      .toContainEqual(expect.objectContaining({ productId: f.product.productId, availableOffers: ["AO", "QUAN", "SET_QUAN"] }));
     expect(readProduct).toHaveBeenCalledTimes(3);
     const reads = await tools.invokeBatch(records.slice(0, 2).map(f => ({ name: "read_product",
       args: { subjectRef: f.product.productId, offerType: "SET_QUAN" } })));
@@ -473,7 +473,7 @@ describe("read-only domain tools", () => {
       initialProducts: [f.product], catalog: { ...catalog, readProduct: async () => structuredClone(f) } });
     const first = await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", offerType: "DIRECT" } });
     expect(first.data).toMatchObject({ availableOffers: ["DIRECT"] });
-    expect(tools.snapshot().policyLiterals.map(p => JSON.parse(p.text))).toContainEqual({ productId: "SM613", availableOffers: ["DIRECT"] });
+    expect(tools.snapshot().policyLiterals.map(p => JSON.parse(p.text))).toContainEqual(expect.objectContaining({ productId: "SM613", availableOffers: ["DIRECT"] }));
     const before = makeBinding("turn", "Có bán riêng áo.", tools.snapshot());
     expect(makeBinding("turn", "Có bán riêng áo.", await tools.readback())).toEqual(before);
     f.snapshot.offers.AO = { ...structuredClone(f.snapshot.offers.DIRECT!),

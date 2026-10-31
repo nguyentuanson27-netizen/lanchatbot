@@ -10,10 +10,12 @@ import type { HandoffReasonV2 } from "@lana/contracts";
 import type { CommerceToolCall, CommerceToolResult } from "./single-agent-commerce-read-only-tools.js";
 import { commerceHash } from "./single-agent-commerce-read-only-context.js";
 import { canonicalJsonV1, type CommerceHandoffSourceCheckV1 } from "@lana/contracts";
-import {commerceDiagnostics,type CommerceDiagnosticObserver} from "./single-agent-commerce-diagnostics.js";
+import {commerceDiagnostics,commerceReadCoverage,type CommerceDiagnosticObserver} from "./single-agent-commerce-diagnostics.js";
 
 /** Required shop reads only. Never parse prose or turn absent optional fields into blockers. */
 function requiredReadHandoffReason(call: CommerceToolCall, result: CommerceToolResult): HandoffReasonV2 | null {
+  if (["add_to_cart","change_cart_item"].includes(call.name)&&result.status==="UNAVAILABLE"&&
+    (result.data as {shopDataGap?:string}|undefined)?.shopDataGap==="SHOP_COLOR_UNRECORDED") return "DEPENDENCY_FAILURE";
   if (call.name==="recommend_size"&&result.status==="UNAVAILABLE"&&result.reason==="SIZE_SOURCE_UNAVAILABLE") return "SIZE_RULE_UNAVAILABLE";
   if (["select_product_media","view_product_media"].includes(call.name))
     return result.status==="UNAVAILABLE"&&["MEDIA_SOURCE_UNAVAILABLE","MEDIA_COLOR_BINDING_UNVERIFIED","NO_VERIFIED_MATCHING_MEDIA"].includes(result.reason??"")
@@ -44,7 +46,7 @@ export async function createCommerceTools(input: {
 }): Promise<CommerceTools> {
   if (input.effects && !input.state) throw new Error("EFFECTS_REQUIRE_CUSTOMER_STATE");
   const { scope, clock } = input.read;
-  const diagnostics=commerceDiagnostics(input.observeDiagnostics);
+  const diagnostics=commerceDiagnostics(input.observeDiagnostics),coverage=commerceReadCoverage();
   const evidence=new Map<string,CommerceHandoffSourceCheckV1>();
   let evidenceComplete=true;
   const observed=async<T>(kind:CommerceHandoffSourceCheckV1["kind"],query:unknown,work:()=>Promise<T>)=>{
@@ -114,22 +116,27 @@ export async function createCommerceTools(input: {
   const starts=new WeakMap<CommerceToolCall,number|null>();
   const start=(call:CommerceToolCall)=>starts.set(call,diagnostics.emit("ARGUMENT_VALIDATION","STARTED",{tool:call.name,args:call.args}));
   const observedResult=(call:CommerceToolCall,result:CommerceToolResult)=>{
+    coverage.observe(call,result);
     const selector={tool:call.name,args:call.args},parent=starts.get(call)??null;
     diagnostics.emit("ARGUMENT_VALIDATION",["TOOL_ARGUMENTS_OR_REF","CAPABILITY_UNAVAILABLE","MEDIA_ARGUMENTS_OR_REF","TOOL_ARGUMENTS","STATE_ARGUMENTS","STATE_OR_REF"].includes(result.reason??"")?"REJECTED":result.status==="REJECTED"?"UNKNOWN":"OK",selector,result.reason??null,null,parent);
     diagnostics.emit("RESULT_PROJECTION",result.status,selector,result.reason??null,Buffer.byteLength(JSON.stringify(result)),parent);
     return result;
   };
-  const guarded:CommerceTools = { ...composed,diagnostic:(stage,status,reason=null,resultBytes=null)=>diagnostics.emit(stage,status,{requestId:scope.requestId},reason,resultBytes),
+  const guarded:CommerceTools = { ...composed,readCoverage:coverage.snapshot,
+    ...(composed.recoverFallback?{async recoverFallback(outcome:import("./single-agent-semantic-verifier-boundary.js").TerminalOutcome){
+      try{const result=await composed.recoverFallback!(outcome);if(result.disposition!=="HANDOFF")missingInformationUnproved=true;return result;}
+      catch(error){missingInformationUnproved=true;throw error;}
+    }}:{}),diagnostic:(stage,status,reason=null,resultBytes=null)=>diagnostics.emit(stage,status,{requestId:scope.requestId},reason,resultBytes),
     ...(input.quoteTask?{primitiveToolInvocations:()=>primitiveDispatches}:{}),
     ...(hints?{mediaCapabilities:()=>hints.get(composed.snapshot()),mediaCapabilityDiagnostics:()=>hints.takeDiagnostics()}:{}),
-    prepare:admit=>readTools.prepare(()=>{const context=composed.snapshot();return context.boundSubjects.length<=8&&context.protectedClaims.length<=32&&(context.runtimeProducts?.length??0)<=4&&!!admit?.(context);}),availableTools,
+    prepare:(admit,control)=>readTools.prepare((_context,work)=>{const context=composed.snapshot();return context.boundSubjects.length<=8&&context.protectedClaims.length<=32&&(context.runtimeProducts?.length??0)<=4&&(!admit||admit(context,work));},control),availableTools,
     async invoke(call){
       start(call);
       if(missingInformationUnproved)return observedResult(call,{status:"REJECTED",reason:"SHOP_INFORMATION_HANDOFF_UNPROVED"});
       if(!availableTools.includes(call.name))return observedResult(call,{status:"REJECTED",reason:"CAPABILITY_UNAVAILABLE"});
       countDispatch([call]);
       try{const result=observedResult(call,await composed.invoke(call));await handoffRequiredRead([call],[result]);return result;}
-      catch(error){diagnostics.emit("ARGUMENT_VALIDATION","UNKNOWN",{tool:call.name,args:call.args},"UNKNOWN_INTERNAL",null,starts.get(call)??null);diagnostics.emit("RESULT_PROJECTION","ERROR",{tool:call.name,args:call.args},"UNKNOWN_INTERNAL");throw error;}
+      catch(error){coverage.observe(call,{status:"UNAVAILABLE",reason:"UNKNOWN_INTERNAL"});diagnostics.emit("ARGUMENT_VALIDATION","UNKNOWN",{tool:call.name,args:call.args},"UNKNOWN_INTERNAL",null,starts.get(call)??null);diagnostics.emit("RESULT_PROJECTION","ERROR",{tool:call.name,args:call.args},"UNKNOWN_INTERNAL");throw error;}
     },
     ...(input.handoff?{async terminalOutcome(){return await composed.terminalOutcome?.()??(missingInformationUnproved?{disposition:"NO_SEND" as const,reason:"SHOP_INFORMATION_HANDOFF_UNPROVED",text:null,fallbackId:null}:null);}}:{}),
     async invokeBatch(calls){
@@ -137,7 +144,7 @@ export async function createCommerceTools(input: {
       if(missingInformationUnproved)return calls.map(c=>observedResult(c,{status:"REJECTED",reason:"SHOP_INFORMATION_HANDOFF_UNPROVED"}));
       const allowed=calls.filter(c=>availableTools.includes(c.name));countDispatch(allowed);
       let results:CommerceToolResult[];
-      try{results=await composed.invokeBatch(allowed);}catch(error){for(const call of allowed){diagnostics.emit("ARGUMENT_VALIDATION","UNKNOWN",{tool:call.name},"UNKNOWN_INTERNAL",null,starts.get(call)??null);diagnostics.emit("RESULT_PROJECTION","ERROR",{tool:call.name},"UNKNOWN_INTERNAL");}throw error;}
+      try{results=await composed.invokeBatch(allowed);}catch(error){for(const call of allowed){coverage.observe(call,{status:"UNAVAILABLE",reason:"UNKNOWN_INTERNAL"});diagnostics.emit("ARGUMENT_VALIDATION","UNKNOWN",{tool:call.name},"UNKNOWN_INTERNAL",null,starts.get(call)??null);diagnostics.emit("RESULT_PROJECTION","ERROR",{tool:call.name},"UNKNOWN_INTERNAL");}throw error;}
       const projected=calls.map(c=>observedResult(c,availableTools.includes(c.name)?results[allowed.indexOf(c)]!:{status:"REJECTED",reason:"CAPABILITY_UNAVAILABLE"}));
       await handoffRequiredRead(allowed,results);return projected;
     }

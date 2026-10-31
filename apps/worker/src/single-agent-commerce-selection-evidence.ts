@@ -73,3 +73,9 @@ export function mergeSelectionEvidence<T extends {subjectRef:string;selectionEvi
  const next={...p,selectionEvidence:values,...(presentation?{presentation}:{})};
  if(Buffer.byteLength(canonicalJsonV1(next))>8192)throw Error("PRODUCT_EVIDENCE_BOUND");return next;
 }
+
+/** Only a validated exact source observation can establish a shop-data gap. */
+export function selectionShopDataGap(e:CandidateSelectionEvidence,now:Date):"SHOP_COLOR_UNRECORDED"|null {
+ return validSelectionEvidence(e,e.productId,now)&&e.color===null&&e.options.some(o=>o.color===null||o.color==='__NO_COLOR__')
+  ?"SHOP_COLOR_UNRECORDED":null;
+}

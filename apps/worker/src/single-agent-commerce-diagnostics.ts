@@ -24,3 +24,38 @@ export function commerceDiagnostics(observe?:CommerceDiagnosticObserver){
  }};
 }
 export type CommerceDiagnostics=ReturnType<typeof commerceDiagnostics>;
+
+/** Evaluator-only coverage. Never infer customer intent or change a handoff outcome. */
+export interface CommerceReadCoverage {
+ complete:boolean; declaredHandoffReason:string|null;
+ records:{ordinal:number;operation:string;facet:string;selectorHash:string;status:"AVAILABLE"|"FAILED";reason:string|null;resultHash:string}[];
+}
+export function commerceReadCoverage(){
+ const value:CommerceReadCoverage={complete:true,declaredHandoffReason:null,records:[]};
+ const hash=(v:unknown)=>createHash("sha256").update(JSON.stringify(v??null)).digest("hex");
+ const observe=(call:{name:string;args:unknown},result:{status:string;reason?:string;data?:unknown})=>{
+  try{
+   const a=call.args&&typeof call.args==='object'?call.args as Record<string,unknown>:{};
+   if(call.name==='request_handoff'){
+    const parsed=HandoffReasonV2Schema.safeParse(a.reason);value.declaredHandoffReason=parsed.success?parsed.data:null;return;
+   }
+   if(!['read_product','read_policy','recommend_size','select_product_media','view_product_media','search_products'].includes(call.name))return;
+   const data=result.data&&typeof result.data==='object'?result.data as Record<string,unknown>:{};
+   const add=(facet:string,selector:unknown,available:boolean,reason=result.reason??null)=>{
+    if(value.records.length>=192){value.complete=false;return;}
+    value.records.push({ordinal:value.records.length+1,operation:call.name,facet,selectorHash:hash(selector),
+     status:available?'AVAILABLE':'FAILED',reason:reason!==null&&(reasons.has(reason)||HandoffReasonV2Schema.safeParse(reason).success)?reason:reason===null?null:'UNKNOWN_INTERNAL',resultHash:hash(result)});
+   };
+   if(call.name==='read_product'){
+    if(a.detailsOnly===true){add('METADATA',a,result.status==='OK');return;}
+    const options=Array.isArray(data.sellingOptions)?data.sellingOptions as Record<string,unknown>[]:[];
+    if(!options.length){for(const facet of ['PRICE','STOCK'])add(facet,a,false);return;}
+    for(const o of options){
+     const availability=o.availability as Record<string,{status:string}>|undefined;
+     for(const facet of ['PRICE','STOCK'])add(facet,{subjectRef:a.subjectRef,offerType:o.offerType,color:a.color??null,size:a.size??null,deliveryRegion:a.deliveryRegion??null},result.status==='OK'&&availability?.[facet.toLowerCase()]?.status==='OK');
+    }
+   }else add(call.name==='recommend_size'?'SIZE_ENGINE':call.name==='read_policy'?'POLICY':call.name==='search_products'?'DISCOVERY':'MEDIA',a,result.status==='OK');
+  }catch{value.complete=false;}
+ };
+ return {observe,snapshot:():CommerceReadCoverage=>structuredClone(value)};
+}

@@ -41,3 +41,15 @@ it("marks invalid media arguments as rejected rather than validated OK",async()=
  await tools.invoke({name:"select_product_media",args:{subjectRef:f.product.productId,intent:"NOT_A_REAL_INTENT"}});
  expect(events).toContainEqual(expect.objectContaining({stage:"ARGUMENT_VALIDATION",status:"REJECTED",reason:"MEDIA_ARGUMENTS_OR_REF"}));
 });
+
+it("records metadata separately from price reads and retains declared handoff reason without raw selectors",async()=>{
+ const f=fixtureProduct(),tools=await createCommerceTools({read:{scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[f.product],catalog:{
+  readProduct:async()=>f,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}}});
+ await tools.invoke({name:"read_product",args:{subjectRef:f.product.productId,detailsOnly:true}});
+ const coverage=tools.readCoverage!();expect(coverage.complete).toBe(true);
+ expect(coverage.records).toContainEqual(expect.objectContaining({operation:"read_product",facet:"METADATA",status:"AVAILABLE"}));
+ expect(coverage.records.some(r=>r.facet==="PRICE")).toBe(false);
+ await tools.invoke({name:"read_product",args:{subjectRef:f.product.productId,offerType:"DIRECT"}});
+ expect(tools.readCoverage!().records).toContainEqual(expect.objectContaining({facet:"PRICE",status:"AVAILABLE"}));
+ expect(JSON.stringify(tools.readCoverage!())).not.toContain(f.product.productId);
+});

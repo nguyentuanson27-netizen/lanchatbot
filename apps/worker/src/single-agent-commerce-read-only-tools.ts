@@ -22,6 +22,9 @@ export interface ReadOnlyCatalog {
   resolveProductCode?(code: string): Promise<StableProductDocument | null>;
   readProduct(productId: string, readPos?: boolean,diagnostics?:CommerceDiagnostics): Promise<{ product: StableProductDocument; snapshot: CatalogSnapshotV3 | null }>;
 }
+export interface PreparationWork { chargedUnits: number; kind: "NUMERIC" | "FINAL" }
+export interface PreparationControl { maxCalls: number; onDispatch(): void }
+export type PreparationAdmission = (context: TrustedContext, work?: PreparationWork) => boolean;
 export interface CommerceToolCall { name: string; args: unknown; id?: string }
 export interface CommerceToolResult { status: "OK" | "REJECTED" | "UNAVAILABLE" | "STALE"; data?: unknown; reason?: string }
 export function toolArgs(value: unknown, fields: readonly string[]): Record<string, unknown> | null {
@@ -104,8 +107,12 @@ export function createReadOnlyTools(input: {
     // Re-observing identical offer identity does not renew the verifier's evidence.
     // Keep its original expiry; hardPrecheck still rejects it if it expires in this turn.
     if (pinned?.identity === identity) return pinned.literal;
+    const purchaseOptions = availableOffers.map(offerType => ({ offerType,
+      priceRead: { subjectRef:id, offerType }, stockRead: { subjectRef:id, offerType },
+      sizeRead: { subjectRef:id, applicability:"RECHECK_VERIFIED_TARGET_ON_CALL" },
+      componentScope:"EXACT_VARIANT_BOM_REQUIRES_READ", colorSemantics:"UNRECORDED_IS_NOT_A_PHYSICAL_COLOR" }));
     const literal = { ref: `offers:${id}`, sourceVersion: commerceHash({ releaseId: raw.release_id, observed, availableOffers }),
-      observedAt: raw.synced_at, expiresAt: new Date(expires).toISOString(), text: JSON.stringify({ productId: id, availableOffers }) };
+      observedAt: raw.synced_at, expiresAt: new Date(expires).toISOString(), text: JSON.stringify({ productId: id, availableOffers, purchaseOptions }) };
     pins.set(id,{identity,literal});
     return literal;
   };
@@ -162,7 +169,11 @@ export function createReadOnlyTools(input: {
       catch { source = null; }
     }
     if (!source || source.product.productId !== id) throw new Error("SOURCE_ERROR");
-    const p = source?.product;
+    admitPreparation(id,source,admit,baseline);
+  }
+  // All publication below is synchronous: no restore can clobber a concurrent awaited read.
+  function admitPreparation(id:string, source:Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>,admit?: (context:TrustedContext)=>boolean,baseline=offerBaseline(id)) {
+    const now=input.clock(), p = source.product;
     if (!permitted()) throw new Error("PERMISSION");
     if (productBound([id])) throw new Error("PRODUCT_BOUND");
     let content = false;
@@ -213,14 +224,38 @@ export function createReadOnlyTools(input: {
     if(hasFullRead)preparationContexts.delete(id);
     if(input.prepareCurrentOffers&&!hasFullRead&&products.has(id))products.get(id)!.offerReadCoverage=(offers??[]).slice(0,8).map(offerType=>({offerType,price:"NOT_READ",stock:"NOT_READ"}));
   }
-  async function prepare(admit?:(context:TrustedContext)=>boolean): Promise<number> {
+  async function prepare(admit?:PreparationAdmission,control?:PreparationControl): Promise<number> {
     if (!scope.permission || !scope.privacyAllowed || scope.conversationOwner !== "BOT") return 0;
     const current = snapshot(), bound = current.boundSubjects.filter(s => s.kind === "PRODUCT");
-    const id = current.state.currentProductId ?? (bound.length === 1 ? bound[0]!.ref : null);
-    if (!id || !bound.some(s => s.ref === id) || prepared.has(id) || [...reads.values()].some(a => a.subjectRef === id)) return 0;
-    await prepareProduct(id,undefined,admit);
-    prepared.add(id);
-    return 1;
+    const focus=current.state.currentProductId;
+    const targets=(focus?bound.filter(s=>s.ref===focus):bound).filter(s=>!prepared.has(s.ref)&&![...reads.values()].some(a=>a.subjectRef===s.ref));
+    const max=control?.maxCalls??6;
+    if(!Number.isSafeInteger(max)||max<0||max>6)throw Error("PREPARATION_BUDGET");
+    if(targets.length>max||targets.length>MAX_RUNTIME_PRODUCTS)throw Error("PREPARATION_BUDGET");
+    if(!targets.length)return 0;
+    const loaded: {id:string;source:Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>;baseline:ReturnType<typeof offerBaseline>}[]=[];
+    for(const target of targets){
+      if(!permitted())throw Error("PERMISSION");
+      const baseline=offerBaseline(target.ref);
+      control?.onDispatch();
+      let source:Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>;
+      try{source=await input.catalog.readProduct(target.ref);}
+      catch{source=await input.catalog.readProduct(target.ref,false);}
+      if(source.product.productId!==target.ref)throw Error("SOURCE_ERROR");
+      loaded.push({id:target.ref,source,baseline});
+    }
+    const maps=[subjects,products,claims,deliveryContexts,offerContexts,preparationContexts,reads,priceReads,posPins,offerPins] as Map<unknown,unknown>[];
+    const saved=maps.map(m=>structuredClone([...m.entries()])),oldAmbiguous=ambiguousPriceRead;
+    try{
+      for(const {id,source,baseline} of loaded)admitPreparation(id,source,
+        admit?c=>admit(c,{chargedUnits:loaded.length,kind:"NUMERIC"}):undefined,baseline);
+      if(admit&&!admit(snapshot(),{chargedUnits:loaded.length,kind:"FINAL"}))throw Error("PREPARATION_ADMISSION");
+      for(const {id} of loaded)prepared.add(id);
+      return loaded.length;
+    }catch(error){
+      maps.forEach((m,i)=>{m.clear();for(const [k,v]of saved[i]!)m.set(k,v);});
+      ambiguousPriceRead=oldAmbiguous;throw error;
+    }
   }
   async function readProduct(args: Record<string, unknown>, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>,baseline=offerBaseline(args.subjectRef as string)): Promise<CommerceToolResult> {
     const id = args.subjectRef as string, now = input.clock();
