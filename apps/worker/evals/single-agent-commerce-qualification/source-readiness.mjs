@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {resolve} from 'node:path';
 import {resolveCatalogFacts} from '@lana/business-tools';
 import {RuntimePolicyResolver} from '@lana/chat-runtime';
-import {candidateCartOptions} from '../../dist/realtime-sales-catalog.js';
+import {candidateCartOptions,cartSelectionFromSnapshot} from '../../dist/realtime-sales-catalog.js';
 import {commerceSizeSource} from '../../dist/single-agent-commerce-product-groups.js';
 import {eligibleCommerceMedia,commerceMediaIntents} from '../../dist/single-agent-commerce-media-eligibility.js';
 import {digest} from './qualification.mjs';
@@ -17,7 +17,7 @@ export async function sourceReadiness(world,spec,at=new Date()){
   .resolve({pageId:world.config.scope.pageId,channel:world.config.channel,now:at}):{status:'UNAVAILABLE',bundle:null};
  const results=[];
  for(const q of spec.checks){
-  assert(q&&['PRICE','STOCK','COLOR','SIZE_SOURCE','MEDIA','POLICY'].includes(q.facet),'C_READINESS_FACET');
+  assert(q&&['PRICE','STOCK','COLOR','SELECTION','SIZE_SOURCE','MEDIA','POLICY'].includes(q.facet),'C_READINESS_FACET');
   assert(Object.keys(q).every(k=>['facet','productId','offerType','color','size','intent','componentRole','allowedHostSuffixes'].includes(k)),'C_READINESS_FIELDS');
   const p=world.products.find(p=>p.productId===q.productId),snapshot=world.snapshots[q.productId];
   let available=false,reason='SOURCE_UNAVAILABLE';
@@ -36,7 +36,10 @@ export async function sourceReadiness(world,spec,at=new Date()){
    assert(typeof q.offerType==='string'&&q.offerType.trim(),'C_READINESS_EXACT_OFFER');
    const observed=Date.parse(snapshot.synced_at),expires=observed+(world.config.maxFactAgeSeconds??1200)*1000;
    if(!Number.isFinite(observed)||observed>at.getTime()||expires<=at.getTime()){reason='SOURCE_STALE';}
-   else if(q.facet==='COLOR'){
+   else if(q.facet==='SELECTION'){
+    const selected=cartSelectionFromSnapshot(snapshot,{selectionMode:'CANDIDATE_TUPLES',shopAlias:world.config.scope.shopAlias,productId:q.productId,offerType:q.offerType,size:q.size??null,color:q.color??null,quantity:1,lineId:'00000000-0000-4000-8000-000000000001',selectionMaxAgeSeconds:world.config.maxFactAgeSeconds??1200},at);
+    available=selected.status==='READY';reason=available?null:selected.reasonCode??selected.status;
+   }else if(q.facet==='COLOR'){
     const options=candidateCartOptions(snapshot,{shopAlias:world.config.scope.shopAlias,productId:q.productId,offerType:q.offerType,
      size:q.size??null,color:q.color??null,quantity:1,lineId:'00000000-0000-4000-8000-000000000001'},at);
     available=options.length>0&&options.every(o=>o.color!==null&&o.color!=='__NO_COLOR__');

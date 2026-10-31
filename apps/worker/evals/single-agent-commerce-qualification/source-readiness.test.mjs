@@ -42,3 +42,10 @@ test('unknown stock quantity is not usable STOCK evidence and runtime media inte
  }
  await assert.rejects(sourceReadiness(w,{cohort:'SOURCE_UNAVAILABLE',checks:[{facet:'MEDIA',productId:'SM613',intent:'ON_BODY',allowedHostSuffixes:['content.pancake.vn']}]},commerceNow),/MEDIA_INTENT/);
 });
+
+test('checkout readiness requires the existing exact selection/BOM resolver, not price presence',async()=>{
+ const w=world();const checks=[{facet:'SELECTION',productId:'SM613',offerType:'DIRECT',color:'navy',size:'M'}];
+ await sourceReadiness(w,{cohort:'SALES_READY',checks},commerceNow);
+ w.snapshots.SM613.offers.COMBO_3=structuredClone(w.snapshots.SM613.offers.DIRECT);w.snapshots.SM613.offers.COMBO_3.rows[0].offer_type='COMBO_3';
+ await assert.rejects(sourceReadiness(w,{cohort:'SALES_READY',checks:[{...checks[0],offerType:'COMBO_3'}]},commerceNow),/SOURCE_READINESS_BLOCKED/);
+});
