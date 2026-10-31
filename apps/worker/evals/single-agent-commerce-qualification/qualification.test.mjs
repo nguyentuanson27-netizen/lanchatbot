@@ -205,3 +205,12 @@ test('registered common private checkout is accepted equally for both architectu
   adjudicated:true,judgeIdentity:e.config.judge.identity,reason:'Synthetic unit comparison.'}));
  assert.equal(evaluateQualification(e).candidateMeetsTarget,'PASS');assert.equal(evaluateQualification(e).candidateQualifiesToReplaceC3,'PASS');
 });
+
+test('absolute SINGLE packet retains preparation coverage without identifying arms in paired packets',()=>{
+ const e=evidence(),a=e.attempts.find(a=>a.mode==='SINGLE'&&a.arm==='CANDIDATE');
+ a.audit.readCoverage=[{turnIndex:0,complete:true,records:[{operation:'prepare',facet:'PRICE',status:'AVAILABLE'}]}];
+ const absolute=absoluteReviewPack(e.config,e.corpus,e.attempts,e.blindSeed);
+ assert(absolute.publicPacket.items.some(i=>i.mode==='SINGLE'&&i.outcome.audit.readCoverage.length===1));
+ const paired=blindComparisonPack(e.config,e.corpus,e.attempts,e.blindSeed);
+ assert(!JSON.stringify(paired.publicPacket).includes('readCoverage'));
+});

@@ -102,6 +102,8 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
    if(errorCode||observed?.qualification?.status!=='VALID'){a.status='ERROR';save();break;}
    save();
   }
+  // Keep evaluator coverage when SINGLE deliberately omits its redundant turn list.
+  a.audit.readCoverage=a.turns.filter(t=>t.readCoverage).map((t,turnIndex)=>({turnIndex,...t.readCoverage}));
   if(scenario.mode==='SINGLE')a.turns=[];
   a.quality={judgeIdentity:reg.config.judge.identity,rubricHash:reg.config.judge.rubricHash,sourceContextHash:digest(scenario.judgeContext),
    outcomeHash:outcomeDigest(a),status:'NOT_GRADED'};save();

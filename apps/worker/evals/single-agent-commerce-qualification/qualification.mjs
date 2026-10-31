@@ -177,7 +177,7 @@ export function absoluteReviewPack(config,corpus,attempts,seed){
   const a=rows[0],s=corpus.scenarios.find(s=>s.id===slot.caseId);
   const reviewId=createHmac('sha256',seed).update('absolute:'+slot.slotId).digest('hex');
   items.push({reviewId,mode:s.mode,sourceContext:s.judgeContext,customerTurns:s.turns.map(t=>({latest:t.latest,history:t.history})),
-   outcome:{terminal:a.terminal,audit:publicAudit(a.audit),turns:(a.turns??[]).map(t=>({customer:t.customer,terminal:t.terminal,...(t.readCoverage?{readCoverage:t.readCoverage}:{})}))}});
+   outcome:{terminal:a.terminal,audit:{...publicAudit(a.audit),readCoverage:a.audit?.readCoverage??[]},turns:(a.turns??[]).map(t=>({customer:t.customer,terminal:t.terminal,...(t.readCoverage?{readCoverage:t.readCoverage}:{})}))}});
   assignments.push({reviewId,slotId:slot.slotId});
  }
  items.sort((a,b)=>a.reviewId.localeCompare(b.reviewId));
