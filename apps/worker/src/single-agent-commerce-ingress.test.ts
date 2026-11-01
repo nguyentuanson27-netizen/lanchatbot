@@ -621,20 +621,21 @@ it.each(["PASS","UNCERTAIN"])("keeps a mixed price/media reply only after whole-
 });
 
 
-it("hands off missing requested feedback even when the price in the same batch is available",async()=>{
+it("hands off missing requested feedback silently even when the price in the same batch is available",async()=>{
   const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);await enableRecoveryHandoff(f);
   f.message.text="Cho chị xem ảnh khách mặc, áo này bao nhiêu em?";
   const calls=[{name:"select_product_media",args:{subjectRef:p.productId,intent:"FEEDBACK"}},
     {name:"read_product",args:{subjectRef:p.productId,offerType:"DIRECT"}}];
   const owner=vi.fn(async():Promise<OwnerGeneration>=>({kind:"TOOLS",calls,content:{role:"model",parts:calls.map(c=>({functionCall:c}))}}));
   const result=await f.run(owner);
-  expect(result).toMatchObject({enqueued:1,terminal:{disposition:"HANDOFF",reason:"DEPENDENCY_FAILURE"}});
+  expect(result).toMatchObject({enqueued:0,terminal:{disposition:"HANDOFF",reason:"DEPENDENCY_FAILURE",text:null}});
   expect(owner).toHaveBeenCalledOnce();expect(f.verifier).not.toHaveBeenCalled();
   const handoff=f.commit.mock.calls.filter(c=>c[1].handoffEventPlan);expect(handoff).toHaveLength(1);
-  expect(handoff[0]![1]).toMatchObject({state:{conversationOwner:"HUMAN"},metaPlan:{messages:[{kind:"TEXT",text:result.terminal.text}]}});
+  expect(handoff[0]![1]).toMatchObject({state:{conversationOwner:"HUMAN"}});
+  expect(handoff[0]![1].metaPlan).toBeUndefined();
 });
 
-it("keeps exact verified price and durable product/profile proofs through all adapters before atomic handoff",async()=>{
+it("retains internal price coverage but a holding allowlist cannot send a partial reply on missing-shop-data handoff",async()=>{
  const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);await enableRecoveryHandoff(f);
  f.message.text="Áo này bao nhiêu, cho chị xem ảnh khách mặc nhé.";
  const {commerceHash}=await import("./single-agent-commerce-read-only-context.js");
@@ -643,12 +644,12 @@ it("keeps exact verified price and durable product/profile proofs through all ad
  let owners=0;
  const r=await f.run(async()=>++owners===1?{kind:"TOOLS",calls,content:{role:"model",parts:calls.map(functionCall=>({functionCall}))}}:
   {kind:"FINAL",text:"Áo 499.000đ chị nhé."},{approvedHoldingHashes:[commerceHash(holding)]});
- expect(r).toMatchObject({enqueued:1,terminal:{disposition:"HANDOFF",text:`Áo 499.000đ chị nhé.\n\n${holding}`}});
- expect(owners).toBe(2);expect(f.verifier).toHaveBeenCalledOnce();
- const group=f.commit.mock.calls.find(c=>c[1].handoffEventPlan)![1].metaPlan!;
- expect(group.protectedClaims).toEqual(expect.arrayContaining([expect.objectContaining({type:"PRICE"})]));
- const proof=(group.handoffBinding as {reply:{sources:{kind:string}[]}}).reply;
- expect(proof.sources.map(s=>s.kind)).toEqual(expect.arrayContaining(["PRODUCT","PROFILE","SALES_STATE"]));
+ expect(r).toMatchObject({enqueued:0,terminal:{disposition:"HANDOFF",text:null}});
+ expect(owners).toBe(1);expect(f.verifier).not.toHaveBeenCalled();
+ const committed=f.commit.mock.calls.find(c=>c[1].handoffEventPlan)![1];
+ expect(committed.state).toMatchObject({conversationOwner:"HUMAN"});expect(committed.metaPlan).toBeUndefined();
+ if(!("readCoverage" in r))throw new Error("EXPECTED_COMMERCE_READ_COVERAGE");
+ expect(r.readCoverage?.records).toContainEqual(expect.objectContaining({operation:"read_product",facet:"PRICE",status:"AVAILABLE"}));
 });
 
 async function seedCart(f: ReturnType<typeof fixture>) {

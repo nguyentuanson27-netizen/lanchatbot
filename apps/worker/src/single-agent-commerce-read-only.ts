@@ -226,9 +226,6 @@ export async function runCommerceTurn(input: {
     if (output.kind === "TOOLS") {
       if(!Array.isArray(output.calls)||output.calls.some(c=>!c||typeof c.name!=="string"))return finish(fallback("MALFORMED"));
       proposedToolCalls += output.calls.length;
-      if(request.callableTools&&output.calls.some(c=>!request.callableTools!.includes(c.name))){
-        rejectedToolCalls+=output.calls.length;return finish(fallback("OWNER_TOOL_MODE"));
-      }
       const quoteCalls=output.calls.filter(c=>c.name==="quote_product");
       if(quoteCalls.length&&(output.calls.length!==1||quoteAttempted)){
         rejectedToolCalls+=output.calls.length;return finish(fallback("OWNER_TOOL_MODE"));
@@ -252,6 +249,11 @@ export async function runCommerceTurn(input: {
       }
       if(quoteCalls.length)quoteAttempted=true;
       if (terminalCall) terminalHandoffCalls++; else {toolRounds++; toolCalls += units;}
+      // Account the proposed work and preserve budget rejection attribution,
+      // then reject a non-callable name before any tool I/O.
+      if(request.callableTools&&output.calls.some(c=>!request.callableTools!.includes(c.name))){
+        rejectedToolCalls+=output.calls.length;return finish(fallback("OWNER_TOOL_MODE"));
+      }
       const toolStarted = performance.now();
       const results = await input.tools.invokeBatch(output.calls).catch(() => output.calls.map(() => ({ status: "UNAVAILABLE" as const, reason: "TOOL_ERROR" })));
       rejectedToolCalls += results.filter(result=>result.status==="REJECTED").length;
