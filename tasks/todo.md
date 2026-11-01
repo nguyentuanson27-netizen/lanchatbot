@@ -1,4 +1,12 @@
-## Current — context publication repair and full development run, 2026-11-01
+## Current — task completion repair plan, 2026-11-01
+
+- [x] Đọc approved root-cause review của5batch/102ca/148lượt, inspect native mutation/shared contracts, quote path, callable wire và readiness.
+- [x] Viết/self-review [kế hoạch](../docs/specs/c3-phase-c-task-completion-fix-plan-20261101.md); chỉ docs, không runtime/prompt/model/grade/source shop change.
+- [x] Independent REQUEST_CHANGES R1/R2 → revision2 full shared replacement/dual binding/DB replay và legal same-batch callable closure → cùng reviewer **APPROVE PLAN exact hash3fcfb9e4** sau clarification combined-source byte acceptance. [Review record](../docs/specs/c3-phase-c-task-completion-plan-review-20261101.md). Chưa approval implementation hoặc quality; P2a quote-producer proof gate chưa chứng minh.
+- [ ] Sau owner yêu cầu build: native RED→GREEN/replacement atomicity và trusted-quote producer proof gates, schema headroom, readiness/judge contract, focused/shared/build/typecheck/lint/actualPG → independent implementation review.
+- [ ] Provider/qualification/C3 comparison mới NOT_RUN; không deploy/live send hoặc tự mở run trong task kế hoạch.
+
+## Historical — context publication repair and full development run, 2026-11-01
 
 - [x] Independent plan review → revision → APPROVE. Code review bắt lỗi policy read race; test RED→GREEN rồi thêm generation guard. Reviewer duyệt implementation tại exact source `1427d2f1`. [Implementation/review](../docs/specs/c3-phase-c-context-publication-implementation-20261101.md).
 - [x] Worker 512 PASS / 15 matching files; Node 781 PASS / 2 existing SKIP; native 85 PASS. Worker build/typecheck/lint PASS. Actual isolated PostgreSQL 76/76 + validator 7/7 PASS, source sạch1427, DB đã drop, generation=0. Giữ bằng chứng RED và lỗi typecheck/initial-state preparation đã sửa.
