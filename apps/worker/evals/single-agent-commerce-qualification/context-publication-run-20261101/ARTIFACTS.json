@@ -1,0 +1,297 @@
+{
+  "kind": "RAW_ARTIFACT_BINDINGS",
+  "runSourceSha": "1427d2f17028e007df442c73a8d555990a3dc6ee",
+  "artifacts": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-continuation-replay-20261101.json",
+      "sha256": "fbbc0c4e80e48877d1f1f7140b1c245e6a0bb08074b70361a8902e24ced3ddcd",
+      "bytes": 2162
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-continuation-replay-20261101.mjs",
+      "sha256": "f57a6cad988f8d3eefdddef6258f366edd371ea26a959d449a8b4ffbf1cb3f55",
+      "bytes": 7157
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-policy-replay-20261101.json",
+      "sha256": "8f838c3160ddae73b0900805c2b469c379c1af274e4c1b90f471d79c03f4068c",
+      "bytes": 1040
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-accounting-20261101-01.json",
+      "sha256": "51245b5b3052f7dac8c7be785b8d35e4d675530e5b649974f94cdb6c136457f2",
+      "bytes": 113749
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-accounting-20261101-01.mjs",
+      "sha256": "54126c6d44a43be22bf4ec81cc1108d9f038dda9cc18fb44540b79f80e40018d",
+      "bytes": 3503
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-blind-20261101-01\\GRADE_LOCK.json",
+      "sha256": "68749275ec277380a496cb06f0b0acab3d66c6ea2563176e47ecba3c42acdb92",
+      "bytes": 445
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-blind-20261101-01\\INDEPENDENT_GRADES.json",
+      "sha256": "250f569a63829f8fdb0b553255c7f86d0c1932b4b8793e2f7266c4d5328b9519",
+      "bytes": 16287
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-blind-20261101-01\\JUDGE_PROMPT.vi.txt",
+      "sha256": "5cbabe275cd9d26fba77c33e5aef2688b3ca2fbee0280ab6935727aecada3191",
+      "bytes": 4000
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-blind-20261101-01\\PUBLIC_INDEX.json",
+      "sha256": "108cee9e315494ee3482f37afb256dacea9ecf2e4163432fa4f721ec39bcb16d",
+      "bytes": 4653
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-blind-20261101-01\\PUBLIC_PACKET.json",
+      "sha256": "29b8797c28a0837cf3e49a0290c39749e04ab1e7a19a2f416f8026f4f979f553",
+      "bytes": 3069482
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-blind-20261101-01\\RUBRIC.vi.md",
+      "sha256": "0139b5902f48d123f3e3bcee193f02ec9e217db35f4bea714cc680a25fa63238",
+      "bytes": 3958
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-command-20261101-01.json",
+      "sha256": "b381ca1014cf45c134fca1f0a21de39834ceb75cdf80796f68aa99effcad14b3",
+      "bytes": 1101
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-helper-seal-20261101-01.json",
+      "sha256": "7947705c143981dbc0d74ee9b36fec5005b2858fba1b93d2d68bf3c28d82d293",
+      "bytes": 1861
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-implementation-verification-20261101.json",
+      "sha256": "d9be3d1ad0004eedc58e071718925e26576419b2673790a8eb9b6a359d5640fd",
+      "bytes": 6092
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-initial-20261101-02\\INITIAL_STATE.json",
+      "sha256": "47e194ab54544af908b44faa22c89d4b27c4f6701d81bb7b3cc0ef3ca4ac7d72",
+      "bytes": 700
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-packet-20261101-01.mjs",
+      "sha256": "629d28379eab87f50a667d841685242dd3cbe511cc3459eaca7ca5f1337429e2",
+      "bytes": 2715
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\CANDIDATE_EVIDENCE.partial.json",
+      "sha256": "8ad2dcddc7e445df318a6009f7957697b6c44244fb5ecf1e3cb6f7005c1c7209",
+      "bytes": 8180785
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\NATIVE_REQUESTS.jsonl",
+      "sha256": "806ea4b746d36f5f94e854e0276bbcd87c2e7fa0da36b41970996ac45333d1bb",
+      "bytes": 7602138
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\integration.json",
+      "sha256": "6a4c18a4988dda6409a607e81d8d85a78a48be2cda22f40d81ea653af5b29be9",
+      "bytes": 8285
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-0e320240f5a432d2e29a4934e624c2908276c27c6ebf816824fe4f3546f120a5-turn-0.json",
+      "sha256": "4368e02a77264dde4c4d5b0adddd8b3d9affbcb76094a3555a3f04ba1f345ce5",
+      "bytes": 138513
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-0e320240f5a432d2e29a4934e624c2908276c27c6ebf816824fe4f3546f120a5-turn-1.json",
+      "sha256": "344e597edb32e40378c01e865ace3f71540753c7c975dcf2fbcf2c1c386a4b2c",
+      "bytes": 6845
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-0e320240f5a432d2e29a4934e624c2908276c27c6ebf816824fe4f3546f120a5-turn-2.json",
+      "sha256": "405d25ecdeeef788c793555fb78f7087fbd9861850ccee3afb84192f552ac115",
+      "bytes": 8099
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-1673e7c4f81bbd411bd1e743f1899b69fe98b71596f3be71ea831001f0fa1013-turn-0.json",
+      "sha256": "7d4574cd237d526be9750047e6d84457651746f122488a5248fd9d919cb7b015",
+      "bytes": 487783
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-1673e7c4f81bbd411bd1e743f1899b69fe98b71596f3be71ea831001f0fa1013-turn-1.json",
+      "sha256": "a711b2d5d65467451ffbcddc4aaba80e95b0fbd316cb0c2d64e02faac033fbc8",
+      "bytes": 439820
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-1a961fad5192d851a25b0e307aacdfd4d78ab018e3a11a26c912f5a46bccd602-turn-0.json",
+      "sha256": "36529f809d0071a9042fe857df2d2a7131f53c45ece1aa6d0a4fde53e6479eb9",
+      "bytes": 78051
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-273e1ad72614bcdd39584202a864a0cd9c2caaff77216879cb9797c1545aa304-turn-0.json",
+      "sha256": "0fe1d671fe613f8853c48009742474d57934f3b3f85f1ec6b573e77982b0d348",
+      "bytes": 389736
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-280d11b60fdc21e34ce0041464a6cb5550de04e19db83eb9ebdd3514c8c1e0d0-turn-0.json",
+      "sha256": "c2e54cbb2720289c46ff16df1d863a9e5d90e6e63daee236edcd21536a47da95",
+      "bytes": 263193
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-43614e4e4512f8956bcb9e52b56999961972e5eef66b1f71e08fecae29be7500-turn-0.json",
+      "sha256": "05ca00c81634d8e6c959fc6a0dd45de530ac054629a31bb0e97b5b2ce9577883",
+      "bytes": 401983
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-43614e4e4512f8956bcb9e52b56999961972e5eef66b1f71e08fecae29be7500-turn-1.json",
+      "sha256": "93bf15a37475f308e8c1f2d1560deb26e7c5058627dad6491efdb4581720c1c4",
+      "bytes": 488858
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-44c64aa58fd97dacdacc5edb6ed7e3052c0814d6531853441cedb5957e5e31bf-turn-0.json",
+      "sha256": "5d6c5ff4a1317a2f506595aeebcf9cab82cf1152e20061f4721ce1db19cd1fe7",
+      "bytes": 156914
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-505e9494136b22d20756502dfcea199c3671e82f44fc7f1846b6a9a07b1a917b-turn-0.json",
+      "sha256": "d1fa03094724ad28f3d9b510b8dbe93a2bd169865e3aa1a8f2f2461f373e6fc8",
+      "bytes": 274533
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-57004b8ee7153e886adcb4cebe2870e3cd396266b92eefd116e02a5deaf684d6-turn-0.json",
+      "sha256": "91e655d5a1f69b71e616ccb9ebc70b7cb2e4cae49e1b80ed8db9cfa5f7240df8",
+      "bytes": 78077
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-5c2f34ae8f3cd752cf93926d9bce7f12eafb94877523e0a3507d6d5f874ed179-turn-0.json",
+      "sha256": "ef412b5a4ee9b5601010abc6118a12c682f21d0a039238f3568e5afdb9b4cffd",
+      "bytes": 139267
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-6ae16e3db4746d261b7a7c7274cbce6f4c6820305c2d50188d577b8c0adaf3ea-turn-0.json",
+      "sha256": "ae389239621da61f830169a690a4e084a68f22613d103f62e422d3d7191e5f43",
+      "bytes": 535367
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-6b2153ef42c04fd87fec47a087cce988d0818bf184ab64e9f9660011260d47e9-turn-0.json",
+      "sha256": "867c1819aff47238fdb73ce6075aa4ed724c1f0641e540cf7698d78e84202a62",
+      "bytes": 395906
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-6b2153ef42c04fd87fec47a087cce988d0818bf184ab64e9f9660011260d47e9-turn-1.json",
+      "sha256": "03da77a89199b6b676bda0a2e9f5c4fb37f417415ae76c9d7bae71c9e5648c54",
+      "bytes": 17911
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-6b2153ef42c04fd87fec47a087cce988d0818bf184ab64e9f9660011260d47e9-turn-2.json",
+      "sha256": "19fd5411c6f64db13332b0e8106ad9d1865f722fda04107accd8a1ce4223f81a",
+      "bytes": 19001
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-99d742cd283689b6b5b5606afc766630a1858e49186dd56d02cfe506d6174c2d-turn-0.json",
+      "sha256": "93eda91e9aa59276e542dfbd4fa2465b9c0938d6c5d893502fb132c54ba8ca70",
+      "bytes": 181715
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-a140b459d321d7026db97c5ba300304c70abb26ecb634156c1d7564735f94f9d-turn-0.json",
+      "sha256": "f2f3b99952dccb74586c9597ba3d886424f9cd73ff01e6ca4f046ac06d3ceed9",
+      "bytes": 155170
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-a6a40277d0fded0476b73ab6298d439e9bc4fca91cc9a585bb45505e16a6497f-turn-0.json",
+      "sha256": "783ada53eb47e8c92f773aac4f291b52e3966836cba639bb9288577609196e29",
+      "bytes": 236574
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-c180a64b4d975b25e23eb49928463ed8aebe5cd886b4ce2fab2815a3d765cf52-turn-0.json",
+      "sha256": "d3e7397af2362bc5b851724a990482c0301f571a6f31af5e4852754e44aaf624",
+      "bytes": 134035
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-cdcc94aaeedef0ce8fe95a5f82472ee2a6b68b3e80e777427903bfc41bc55473-turn-0.json",
+      "sha256": "fc410076bdad5d6eddfdf678f9bd0e5c46a3c9d4f380d5a465e27b2f56af78f9",
+      "bytes": 275474
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-cfd94ef810d3c6845d2928509042501659c2e30090678824f308fe5ad9d1fcdf-turn-0.json",
+      "sha256": "6506688d21fbe8c220447727fb1db99d36b2ab6b9e874ad0d4fa4997171ef918",
+      "bytes": 429979
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-cfd94ef810d3c6845d2928509042501659c2e30090678824f308fe5ad9d1fcdf-turn-1.json",
+      "sha256": "19cc64ec25aa89c3ae6687753f057ee0c4b3a07f7bdaada3043992ae71d63205",
+      "bytes": 280877
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-d639f23c337eb0f53e32ba1736f8c4145fc7980f425e0dbd9381e6d9e44094fe-turn-0.json",
+      "sha256": "327f9ee0cc4607ca9b51ad88f4365456bfca689b243d9727002e70d05cd0f722",
+      "bytes": 481129
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-dc2ee0c69a41c17b4b5bd1644f6aa793f895eec2bd950e5bad5266362c5d4880-turn-0.json",
+      "sha256": "e957fd7e2382b30db2898f4aafd92c215bd968a46249649484a29f062e4778c5",
+      "bytes": 154867
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-run-20261101-01\\native-e8e505d6c139ccbabf22f1bc378b203c793080af8a5de44183f44a6bad15107f-turn-0.json",
+      "sha256": "dc158f2ff68207b9726eefbff1f2e34f096c0d40844cae6bb7c7e579989c663c",
+      "bytes": 315312
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-sealed-20261101-01\\DIAGNOSTIC_DISPATCH.json",
+      "sha256": "c5a5425a4002cf153dc0ef66ca5c914750e370c5bde7e968e033037c930ac6f5",
+      "bytes": 162
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-sealed-20261101-01\\DISPATCH_APPROVAL.json",
+      "sha256": "665e3a16bad4f4eac8b741821ec7a75dabf867ebd883836ea28b2f2cb78e973d",
+      "bytes": 771
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-sealed-20261101-01\\INPUT_APPROVAL.json",
+      "sha256": "1021ea8f84bb7804db768457876007fc4fc0ea559337457a0fbad01f2dc0df23",
+      "bytes": 739
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-sealed-20261101-01\\PREFLIGHT.json",
+      "sha256": "3f5dcd4f9df1ccbfb6b3df781de79b78fb1faa6aa31552c9b169a16fb7cb4dcc",
+      "bytes": 853
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-sealed-20261101-01\\REGISTRATION.json",
+      "sha256": "299819cbfe2aaf567ecda2e68b31b460f78e23757d7dcaffaffe5c5e52a772c1",
+      "bytes": 1528620
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-sealed-20261101-01\\REGISTRATION.pending.json",
+      "sha256": "490d584a0d6e753d513a68c48cf4e7caa7faa5c0df7a52c8cd3d74c95489c9d6",
+      "bytes": 1528216
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-sealed-20261101-01\\SOURCE_READINESS_REVIEW.json",
+      "sha256": "ee6256dd214280d9651773d888c282eb418fb787ccb2810e5013ac7d650d1f82",
+      "bytes": 14409
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-world-20261101-01\\SUMMARY.json",
+      "sha256": "f9567e0803e9da62e0e614351e8b674de70e1d7bd7e9dc515ac684d3ac038e12",
+      "bytes": 208
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-world-20261101-01\\WORLD.json",
+      "sha256": "ce285965776fd6a3493e360e14910f2f45f8aabd54fb77e846174d875890e267",
+      "bytes": 42770570
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-context-publication-world-resolved-20261101-01.json",
+      "sha256": "bb089c0cda7ccd52dac1d5110d3be82138b755bb38b455e762c01cf12b7158f8",
+      "bytes": 42778423
+    }
+  ],
+  "limits": "Raw/helper files remain outside checkout. Private seeds/assignments are excluded; grade mapping is published only after lock."
+}

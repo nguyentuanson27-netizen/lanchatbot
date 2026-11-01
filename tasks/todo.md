@@ -1,4 +1,14 @@
-## Current — purchase-options model run, 2026-11-01
+## Current — context publication repair and full development run, 2026-11-01
+
+- [x] Independent plan review → revision → APPROVE. Code review bắt lỗi policy read race; test RED→GREEN rồi thêm generation guard. Reviewer duyệt implementation tại exact source `1427d2f1`. [Implementation/review](../docs/specs/c3-phase-c-context-publication-implementation-20261101.md).
+- [x] Worker 512 PASS / 15 matching files; Node 781 PASS / 2 existing SKIP; native 85 PASS. Worker build/typecheck/lint PASS. Actual isolated PostgreSQL 76/76 + validator 7/7 PASS, source sạch1427, DB đã drop, generation=0. Giữ bằng chứng RED và lỗi typecheck/initial-state preparation đã sửa.
+- [x] Policy replay cùng world/clock cũ ổn định. Continuation đủ envelope: current prompt 64399 byte, giữ signature9900 ký tự, optional hints bị bỏ theo cap hiện có; không provider/network/effects.
+- [x] Capture mới107 sản phẩm, actual native initial state và drop; reviewer APPROVE inputs/preflight/dispatch cho batch mới21 ca/28 lượt, N=1/retry=0/max112. Full execution52 records/51HTTP; 13 eligible,11 silent handoff,4 no-send;13text/2image; DB đã drop, live=0. Giữ6 NOT_RUN trong batch cũ.
+- [x] Independent accounting kiểm28 raw hashes,51 wire/firewall/model identities,35 source inventories,13 eligible bindings và15 Outbox rows. Chấm mù khóa21 grades trước unmask:13 wholeTurnPass,7 FAIL,1 UNRESOLVED;8 ca đủ cả3 flags. Không import như official qualification, regrade, đổi cohort hoặc chạy so C3. [Report/conversations](../apps/worker/evals/single-agent-commerce-qualification/context-publication-run-20261101/REPORT.md).
+- [x] Reviewer APPROVE REPORT ACCURACY sau kiểm58 artifact hashes, locked grades, hội thoại và accounting; lưu delivery trong branch/PR. Phase C vẫn BLOCKED; C3 NOT_RUN / B_NOT_GO; không deploy/live send.
+- [ ] Trước run mới: ưu tiên cart replacement bị reject và bước hướng dẫn khách không thực hiện được, callable-tool/wire budget, owner tool selection malformed, ACK tạo phụ thuộc ảnh thừa. Sửa prerequisites của evaluator về component fit, ảnh báo giá và referent combo. Provider failure giữ cart đã commit; không replay effects hoặc tự mở thêm vòng fix/run.
+
+## Historical — purchase-options model run, 2026-11-01
 
 - [x] Preregister 21 ca / 28 lượt, N=1, max 112 generations trên source sạch `c31a3089`; prompts/models/runtime TypeScript giữ nguyên. P05 bị chặn trước đăng ký vì không có một mã chứa cả hai loại set. Capture mới 107 sản phẩm bằng route read-only; lấy initial PostgreSQL thực và drop DB riêng. 15 SALES_READY / 6 SOURCE_UNAVAILABLE; reviewer APPROVE inputs và dispatch; preflight PASS; 97 Phase C tests PASS.
 - [x] Batch chạy 15 ca / 18 lượt rồi hard stop. 37 generation records / 36 HTTP; 1 owner HTTP200 malformed, 1 OWNER_REQUEST_BOUND trước HTTP. 10 verifier PASS, nhưng 1 bị snapshot gate chặn; 9 eligible / 8 silent HANDOFF / 1 NO_SEND; 9 text / 0 ảnh. DB đã drop, live send=0; giữ đủ 6 ca / 10 lượt NOT_RUN.
