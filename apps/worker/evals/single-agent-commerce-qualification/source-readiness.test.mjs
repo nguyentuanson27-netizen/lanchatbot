@@ -2,7 +2,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {fixtureProduct,fixturePolicyPointers,commerceScope,commerceNow} from '../../dist/single-agent-commerce.test-support.js';
-import {sourceReadiness,assertSourceReadiness} from './source-readiness.mjs';
+import {sourceReadiness,assertSourceReadiness,assertTaskReadinessSpec} from './source-readiness.mjs';
 const world=()=>{const f=fixtureProduct();return {config:{scope:commerceScope(),channel:'CANARY_SHADOW',maxFactAgeSeconds:1200},
  products:[f.product],snapshots:{SM613:f.snapshot},policyRecords:fixturePolicyPointers()};};
 test('sales-ready price is exact-offer and expires at the real boundary without renewing source',async()=>{
@@ -55,4 +55,25 @@ test('PUBLISHED readiness consumes the same approved channel as runtime policy r
  for(const r of w.policyRecords){r.pointer.channel='PUBLISHED';r.version.lifecycle='PUBLISHED';}
  const m=await sourceReadiness(w,{cohort:'SALES_READY',checks:[{facet:'POLICY'}]},commerceNow);
  assert.equal(m.results[0].status,'AVAILABLE');
+});
+
+test('a component-fit capability gap cannot be registered as a source-ready product fit',async()=>{
+ const w=world(),checks=[{facet:'SIZE_SOURCE',productId:'SM613',fitScope:'COMPONENT',componentRole:'TOP'}];
+ const m=await sourceReadiness(w,{cohort:'SOURCE_UNAVAILABLE',checks},commerceNow);
+ assert.equal(m.results[0].reason,'COMPONENT_FIT_UNSUPPORTED');
+ await assert.rejects(sourceReadiness(w,{cohort:'SALES_READY',checks},commerceNow),/SOURCE_READINESS_BLOCKED/);
+});
+test('task declarations require the matching scope and media prerequisites before corpus binding',()=>{
+ const spec={version:2,task:{purpose:'SALE',productId:'SM613',fitScope:'COMPONENT',componentRole:'TOP'},cohort:'SALES_READY',checks:[{facet:'SIZE_SOURCE',productId:'SM613'}]};
+ assert.throws(()=>assertTaskReadinessSpec(spec),/SIZE_SCOPE_COVERAGE/);
+ spec.checks[0]={...spec.checks[0],fitScope:'COMPONENT',componentRole:'TOP'};assertTaskReadinessSpec(spec);
+ spec.task={purpose:'SALE',productId:'SM613',openingQuote:true};spec.checks=[{facet:'PRICE',productId:'SM613',offerType:'DIRECT'}];
+ assert.throws(()=>assertTaskReadinessSpec(spec),/QUOTE_MEDIA_COVERAGE/);
+ spec.checks.push({facet:'MEDIA',productId:'SM613',intent:'GENERIC',allowedHostSuffixes:['content.pancake.vn']});assertTaskReadinessSpec(spec);
+ assert.throws(()=>assertTaskReadinessSpec({checks:[]},{required:true}),/TASK_SCOPE_REGISTRATION_REQUIRED/);
+});
+test('three variant refs do not prove a three-garment composition',async()=>{
+ const w=world(),checks=[{facet:'SELECTION',productId:'SM613',offerType:'DIRECT',size:'M',color:'navy',requiredComponentRoles:['TOP','PANTS','SKIRT']}];
+ const m=await sourceReadiness(w,{cohort:'SOURCE_UNAVAILABLE',checks},commerceNow);assert.equal(m.results[0].reason,'COMPOSITION_SCOPE_UNAVAILABLE');
+ await assert.rejects(sourceReadiness(w,{cohort:'SALES_READY',checks},commerceNow),/SOURCE_READINESS_BLOCKED/);
 });

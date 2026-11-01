@@ -3,6 +3,18 @@ import assert from 'node:assert/strict';
 import {digest,textDigest,outcomeDigest,qualificationIdentity,readiness,registerSlots,runtimeProjection,validateCorpus,evaluateQualification,blindComparisonPack,absoluteReviewPack} from './qualification.mjs';
 import {config,corpus,evidence} from './fixtures.test-support.mjs';
 const h=x=>x.repeat(64);
+
+test('blind source context drops readiness cohorts and includes the same task rules in both packet modes',()=>{
+ const e=evidence();
+ for(const s of e.corpus.scenarios){s.judgeContext??={};s.judgeContext.sourceReadiness={spec:{cohort:'SOURCE_UNAVAILABLE',checks:[{expected:'DO_NOT_LEAK'}]}};}
+ for(const slot of registerSlots(e.config,e.corpus)){const a=e.attempts.find(a=>a.caseId===slot.caseId&&a.arm===slot.arm);a.slotId=slot.slotId;}
+ const packets=[absoluteReviewPack(e.config,e.corpus,e.attempts,e.blindSeed),blindComparisonPack(e.config,e.corpus,e.attempts,e.blindSeed)];
+ for(const p of packets){
+  assert.doesNotMatch(JSON.stringify(p.publicPacket),/SOURCE_UNAVAILABLE|DO_NOT_LEAK|sourceReadiness/);
+  assert.equal(p.publicPacket.items[0].sourceContext.taskContract.componentFit,'PRODUCT_RESULT_NEVER_AUTHORIZES_COMPONENT_FIT');
+  assert.equal(p.publicPacket.items[0].sourceContext.taskContract.customerMissingInput,'ASK_ONLY_MISSING_INPUT');
+ }
+});
 test('unsafe send eligibility overrides apparently perfect quality and C3 comparison',()=>{
  const e=evidence(),a=e.attempts.find(a=>a.caseId==='new-unsafe');a.terminal={disposition:'SEND_ELIGIBLE',messages:['Dạ chị.'],images:[]};
  assert.equal(evaluateQualification(e).candidateMeetsTarget,'FAIL');

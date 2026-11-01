@@ -10,15 +10,40 @@ import {commerceSizeSource} from '../../dist/single-agent-commerce-product-group
 import {eligibleCommerceMedia,commerceMediaIntents} from '../../dist/single-agent-commerce-media-eligibility.js';
 import {digest} from './qualification.mjs';
 
+/** Evaluator-only task declaration, reviewed/frozen before results. No prose classification. */
+export function assertTaskReadinessSpec(spec,{required=false}={}){
+ if(spec?.version===undefined){assert(!required,'C_TASK_SCOPE_REGISTRATION_REQUIRED');return;}
+ assert(spec.version===2&&spec.task&&typeof spec.task==='object'&&!Array.isArray(spec.task),'C_TASK_SCOPE_VERSION');
+ const t=spec.task;
+ assert(Object.keys(t).every(k=>['purpose','productId','fitScope','componentRole','openingQuote','requiredComponentRoles'].includes(k))&&
+  ['SALE','CUSTOMER_INPUT','SHOP_GAP'].includes(t.purpose),'C_TASK_SCOPE_FIELDS');
+ if(t.fitScope!==undefined){
+  assert(['PRODUCT','COMPONENT'].includes(t.fitScope)&&typeof t.productId==='string'&&
+   spec.checks.some(q=>q.facet==='SIZE_SOURCE'&&q.productId===t.productId&&(q.fitScope??'PRODUCT')===t.fitScope&&
+    (t.fitScope!=='COMPONENT'||typeof t.componentRole==='string'&&q.componentRole===t.componentRole)),'C_TASK_SIZE_SCOPE_COVERAGE');
+ }
+ if(t.openingQuote!==undefined){
+  assert(typeof t.openingQuote==='boolean','C_TASK_QUOTE_SCOPE');
+  if(t.openingQuote)assert(typeof t.productId==='string'&&spec.checks.some(q=>q.facet==='PRICE'&&q.productId===t.productId)&&
+   spec.checks.some(q=>q.facet==='MEDIA'&&q.productId===t.productId&&q.intent==='GENERIC'),'C_TASK_QUOTE_MEDIA_COVERAGE');
+ }
+ if(t.requiredComponentRoles!==undefined)assert(spec.checks.some(q=>q.facet==='SELECTION'&&q.productId===t.productId&&
+  JSON.stringify(q.requiredComponentRoles)===JSON.stringify(t.requiredComponentRoles)),'C_TASK_COMPOSITION_COVERAGE');
+}
+
 export async function sourceReadiness(world,spec,at=new Date()){
  assert(Number.isFinite(at.getTime())&&['SALES_READY','SOURCE_UNAVAILABLE'].includes(spec?.cohort)&&Array.isArray(spec.checks)&&spec.checks.length<=32,'C_READINESS_SPEC');
+ assertTaskReadinessSpec(spec);
  assert(spec.checks.length||spec.noProductFactsRequired===true,'C_READINESS_EMPTY_REQUIREMENTS');
  const policy=world.config?.scope?.pageId&&world.config?.channel?await new RuntimePolicyResolver({loadActivePointers:async()=>structuredClone(world.policyRecords??[])},{enabled:true,publishedEnabled:world.config.channel==='PUBLISHED'})
   .resolve({pageId:world.config.scope.pageId,channel:world.config.channel,now:at}):{status:'UNAVAILABLE',bundle:null};
  const results=[];
  for(const q of spec.checks){
   assert(q&&['PRICE','STOCK','COLOR','SELECTION','SIZE_SOURCE','MEDIA','POLICY'].includes(q.facet),'C_READINESS_FACET');
-  assert(Object.keys(q).every(k=>['facet','productId','offerType','color','size','intent','componentRole','allowedHostSuffixes'].includes(k)),'C_READINESS_FIELDS');
+  assert(Object.keys(q).every(k=>['facet','productId','offerType','color','size','intent','fitScope','componentRole','allowedHostSuffixes','requiredComponentRoles'].includes(k)),'C_READINESS_FIELDS');
+  assert(q.fitScope===undefined||q.facet==='SIZE_SOURCE'&&['PRODUCT','COMPONENT'].includes(q.fitScope),'C_READINESS_FIT_SCOPE');
+  assert(q.requiredComponentRoles===undefined||q.facet==='SELECTION','C_READINESS_COMPONENT_SCOPE');
+  if(q.fitScope==='COMPONENT')assert(['TOP','PANTS','SKIRT','DRESS','OTHER'].includes(q.componentRole),'C_READINESS_COMPONENT_SCOPE');
   const p=world.products.find(p=>p.productId===q.productId),snapshot=world.snapshots[q.productId];
   let available=false,reason='SOURCE_UNAVAILABLE';
   if(q.facet==='POLICY'){available=policy.status==='RESOLVED'&&!!policy.bundle;reason=available?null:'POLICY_UNAVAILABLE';}
@@ -30,8 +55,9 @@ export async function sourceReadiness(world,spec,at=new Date()){
     reason=available?null:'NO_VERIFIED_MATCHING_MEDIA';}catch{reason='MEDIA_INELIGIBLE';}
   }else if(q.facet==='SIZE_SOURCE'){
    const source=commerceSizeSource(p,policy,world.config.productGroups??[]);
-   available=source.charts.length>0&&(!q.componentRole||source.target.componentRole===q.componentRole);
-   reason=available?null:'SIZE_SOURCE_UNAVAILABLE';
+   const component=q.fitScope==='COMPONENT';
+   available=!component&&source.charts.length>0&&(!q.componentRole||source.target.componentRole===q.componentRole);
+   reason=component?'COMPONENT_FIT_UNSUPPORTED':available?null:'SIZE_SOURCE_UNAVAILABLE';
   }else{
    assert(typeof q.offerType==='string'&&q.offerType.trim(),'C_READINESS_EXACT_OFFER');
    const observed=Date.parse(snapshot.synced_at),expires=observed+(world.config.maxFactAgeSeconds??1200)*1000;
@@ -39,6 +65,12 @@ export async function sourceReadiness(world,spec,at=new Date()){
    else if(q.facet==='SELECTION'){
     const selected=cartSelectionFromSnapshot(snapshot,{selectionMode:'CANDIDATE_TUPLES',shopAlias:world.config.scope.shopAlias,productId:q.productId,offerType:q.offerType,size:q.size??null,color:q.color??null,quantity:1,lineId:'00000000-0000-4000-8000-000000000001',selectionMaxAgeSeconds:world.config.maxFactAgeSeconds??1200},at);
     available=selected.status==='READY';reason=available?null:selected.reasonCode??selected.status;
+    if(q.requiredComponentRoles!==undefined){
+     assert(Array.isArray(q.requiredComponentRoles)&&q.requiredComponentRoles.length>=1&&q.requiredComponentRoles.length<=4&&
+      new Set(q.requiredComponentRoles).size===q.requiredComponentRoles.length&&q.requiredComponentRoles.every(r=>['TOP','PANTS','SKIRT','DRESS','OTHER'].includes(r)),'C_READINESS_COMPONENT_ROLES');
+     if(available&&!q.requiredComponentRoles.every(role=>selected.line.components.some(c=>c.componentRole===role)))
+      {available=false;reason='COMPOSITION_SCOPE_UNAVAILABLE';}
+    }
    }else if(q.facet==='COLOR'){
     const options=candidateCartOptions(snapshot,{shopAlias:world.config.scope.shopAlias,productId:q.productId,offerType:q.offerType,
      size:q.size??null,color:q.color??null,quantity:1,lineId:'00000000-0000-4000-8000-000000000001'},at);
@@ -64,7 +96,10 @@ export async function assertSourceReadiness(world,manifest,at=new Date()){
  return sourceReadiness(world,manifest.spec,at);
 }
 export async function assertPopulationReadiness(world,corpus,at=new Date()){
- for(const s of corpus.scenarios.filter(s=>s.mode!=='SAFETY'))await assertSourceReadiness(world,s.judgeContext?.sourceReadiness,at);
+ for(const s of corpus.scenarios.filter(s=>s.mode!=='SAFETY')){
+  assertTaskReadinessSpec(s.judgeContext?.sourceReadiness?.spec,{required:true});
+  await assertSourceReadiness(world,s.judgeContext?.sourceReadiness,at);
+ }
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  try{

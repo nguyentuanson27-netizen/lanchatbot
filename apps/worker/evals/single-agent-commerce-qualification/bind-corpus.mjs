@@ -7,7 +7,7 @@ import {createCommerceTools} from '../../dist/single-agent-commerce.js';
 import {hardPrecheck} from '../../dist/single-agent-semantic-verifier-boundary.js';
 import {frozenCatalog,frozenFacts} from './frozen-world.mjs';
 import {digest,validateCorpus,runtimeProjection} from './qualification.mjs';
-import {sourceReadiness} from './source-readiness.mjs';
+import {sourceReadiness,assertTaskReadinessSpec} from './source-readiness.mjs';
 import {judgeSourceInventory,assertJudgeSourceInventory} from './evaluator-source.mjs';
 export async function bindCorpus({draft,world,bindings,initialStateArtifact}){
  const worldHash=digest(world);
@@ -48,6 +48,7 @@ export async function bindCorpus({draft,world,bindings,initialStateArtifact}){
    s.nativeSafety={trusted,worldHash,review:{status:'APPROVED',reviewer:bindings.review.reviewer,evidenceRef:bindings.review.evidenceRef,
     sourceRefs:b.sourceRefs,reason:b.reason},sourceHash:digest(trusted)};
   }else{
+   assertTaskReadinessSpec(b.readiness,{required:true});
    // Native ingress needs genuine accepted history. Initial cases with authored shop history require separate seed evidence.
    assert(s.turns.every(t=>t.history.length===0),'C_INITIAL_HISTORY_SEED_NOT_IMPLEMENTED');
    s.initialContext={worldHash,initialStateHash:digest(initialStateArtifact.publicState),initialHistoryHash:digest([]),

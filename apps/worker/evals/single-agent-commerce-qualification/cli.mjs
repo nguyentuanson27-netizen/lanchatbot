@@ -4,6 +4,7 @@ import {resolve,relative,sep,isAbsolute} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {randomBytes} from 'node:crypto';
 import {assertPopulationReadiness} from './source-readiness.mjs';
+import {taskOutcomeSummary} from './task-outcomes.mjs';
 import {assertJudgeSourceInventory} from './evaluator-source.mjs';
 import {approvedDevelopmentInventory,sealDevelopmentInventory} from './development-inventory.mjs';
 import {digest,readiness,validateConfig,validateCorpus,qualificationIdentity,registerSlots,
@@ -109,7 +110,7 @@ try{
    write(resolve(out,'PRIVATE_ASSIGNMENTS.json'),{assignments:packet.assignments,packetHash:packet.packetHash,assignmentHash:packet.assignmentHash});
    console.log(JSON.stringify({status:'BLIND_PACKET_WRITTEN',packetHash:packet.packetHash,providerRequests:0}));
   }else{
-   const verdict=evaluateQualification(e),out=newOutput();write(resolve(out,'CHECKPOINT_C.json'),{...verdict,runSourceSha:reg.runSourceSha,evidenceHash:digest(e),
+   const verdict=evaluateQualification(e),out=newOutput();write(resolve(out,'CHECKPOINT_C.json'),{...verdict,taskOutcomes:taskOutcomeSummary(reg.config,reg.corpus,e.attempts),runSourceSha:reg.runSourceSha,evidenceHash:digest(e),
     registrationHash:digest(reg),wholePopulation:reg.slots.length,providerRequestsFromThisCommand:0});
    console.log(JSON.stringify(verdict));if(!verdict.replacementReady)process.exitCode=2;
   }

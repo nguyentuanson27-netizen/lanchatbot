@@ -1,3 +1,4 @@
+import {publicJudgeContext} from './judge-task-contract.mjs';
 // Phase C evaluation only. No provider, runtime authorization, mutation or send port.
 import assert from 'node:assert/strict';
 import {clarificationCapture} from './native-terminal.mjs';
@@ -159,7 +160,7 @@ export function blindComparisonPack(config,corpus,attempts,seed){
   const observations=order.map(arm=>arms[arm==='CANDIDATE'?0:1][0]);
   // Keep candidate-only coverage in absolute review; its presence would reveal the arm in a paired packet.
   const outcome=a=>({terminal:a.terminal,audit:publicAudit(a.audit),turns:(a.turns??[]).map(t=>({customer:t.customer,terminal:t.terminal}))});
-  items.push({reviewId:token,mode:s.mode,sourceContext:s.judgeContext,customerTurns:s.turns.map(t=>({latest:t.latest,history:t.history})),A:outcome(observations[0]),B:outcome(observations[1])});
+  items.push({reviewId:token,mode:s.mode,sourceContext:publicJudgeContext(s.judgeContext),customerTurns:s.turns.map(t=>({latest:t.latest,history:t.history})),A:outcome(observations[0]),B:outcome(observations[1])});
   assignments.push({reviewId:token,caseId:s.id,repetition,A:order[0],B:order[1]});
  }
  items.sort((a,b)=>a.reviewId.localeCompare(b.reviewId));
@@ -176,7 +177,7 @@ export function absoluteReviewPack(config,corpus,attempts,seed){
   check(rows.length===1&&rows[0].status!=='NOT_RUN','C_ABSOLUTE_PACKET_INCOMPLETE');
   const a=rows[0],s=corpus.scenarios.find(s=>s.id===slot.caseId);
   const reviewId=createHmac('sha256',seed).update('absolute:'+slot.slotId).digest('hex');
-  items.push({reviewId,mode:s.mode,sourceContext:s.judgeContext,customerTurns:s.turns.map(t=>({latest:t.latest,history:t.history})),
+  items.push({reviewId,mode:s.mode,sourceContext:publicJudgeContext(s.judgeContext),customerTurns:s.turns.map(t=>({latest:t.latest,history:t.history})),
    outcome:{terminal:a.terminal,audit:{...publicAudit(a.audit),readCoverage:a.audit?.readCoverage??[]},turns:(a.turns??[]).map(t=>({customer:t.customer,terminal:t.terminal,...(t.readCoverage?{readCoverage:t.readCoverage}:{})}))}});
   assignments.push({reviewId,slotId:slot.slotId});
  }
