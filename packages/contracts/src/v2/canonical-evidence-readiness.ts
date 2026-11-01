@@ -124,6 +124,7 @@ export const CanonicalBuyingIntentV1Schema = z.object({
     "ADD_TO_CART",
     "SET_QUANTITY",
     "SET_COMPONENT_VARIANT",
+    "REPLACE_LINE",
     "REMOVE_FROM_CART",
     "PROCEED_TO_PAYMENT",
   ]),
@@ -186,17 +187,18 @@ export type CanonicalBuyingIntentV1 = z.infer<
 
 export function canonicalBuyingIntentAuthorizesCartMutationV1(
   intent: CanonicalBuyingIntentV1,
-  action: "ADD_LINE" | "SET_QUANTITY" | "SET_COMPONENT_VARIANT" | "REMOVE_LINE",
+  action: "ADD_LINE" | "SET_QUANTITY" | "SET_COMPONENT_VARIANT" | "REMOVE_LINE" | "REPLACE_LINE",
   productId: string,
   quantity: number,
 ): boolean {
+  if (action === "REPLACE_LINE" && !intent.contributors.includes("NATIVE_TOOL_PERMISSION")) return false;
   const requestedActions: readonly CanonicalBuyingIntentV1["requestedAction"][] =
-    action === "ADD_LINE" ? ["ADD_TO_CART"] : action === "SET_COMPONENT_VARIANT" ? ["SET_COMPONENT_VARIANT"] : action === "REMOVE_LINE" ? ["REMOVE_FROM_CART"] : ["SET_QUANTITY"];
+    action === "ADD_LINE" ? ["ADD_TO_CART"] : action === "REPLACE_LINE" ? ["REPLACE_LINE"] : action === "SET_COMPONENT_VARIANT" ? ["SET_COMPONENT_VARIANT"] : action === "REMOVE_LINE" ? ["REMOVE_FROM_CART"] : ["SET_QUANTITY"];
   return intent.decision === "COMMITTED" &&
     intent.contributors.some(c => c === "DETERMINISTIC_RUNTIME" || c === "NATIVE_TOOL_PERMISSION") &&
     intent.productId === productId &&
     requestedActions.includes(intent.requestedAction) &&
-    (action === "ADD_LINE"
+    (action === "ADD_LINE" || action === "REPLACE_LINE"
       ? (intent.quantity ?? 1) === quantity
       : action === "SET_QUANTITY" ? intent.quantity !== null && intent.quantity === quantity : intent.contributors.includes("NATIVE_TOOL_PERMISSION"));
 }
@@ -234,7 +236,7 @@ export type DeterministicConfirmationEvidenceV1 = z.infer<
 export const DeterministicCartMutationEvidenceV1Schema = z.object({
   schemaVersion: z.literal(1),
   authorityVersion: z.literal("DETERMINISTIC_CART_MUTATION_EVIDENCE_V1"),
-  action: z.enum(["ADD_LINE", "REMOVE_LINE", "SET_QUANTITY", "SET_COMPONENT_VARIANT"]),
+  action: z.enum(["ADD_LINE", "REMOVE_LINE", "SET_QUANTITY", "SET_COMPONENT_VARIANT", "REPLACE_LINE"]),
   authorityKind: z.enum([
     "CANONICAL_BUYING_INTENT",
     "DETERMINISTIC_REMOVE_CLASSIFIER",

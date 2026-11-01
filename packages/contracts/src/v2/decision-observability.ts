@@ -352,6 +352,7 @@ export const BuyingIntentRequestedActionV1Schema = z.enum([
   "ADD_TO_CART",
   "SET_QUANTITY",
   "SET_COMPONENT_VARIANT",
+  "REPLACE_LINE",
   "REMOVE_FROM_CART",
   "PROCEED_TO_PAYMENT",
 ]);

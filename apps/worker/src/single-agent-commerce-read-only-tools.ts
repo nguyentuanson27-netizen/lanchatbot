@@ -26,7 +26,8 @@ export interface PreparationWork { chargedUnits: number; kind: "NUMERIC" | "FINA
 export interface PreparationControl { maxCalls: number; onDispatch(): void }
 export type PreparationAdmission = (context: TrustedContext, work?: PreparationWork) => boolean;
 export interface CommerceToolCall { name: string; args: unknown; id?: string }
-export interface CommerceToolResult { status: "OK" | "REJECTED" | "UNAVAILABLE" | "STALE"; data?: unknown; reason?: string }
+export interface CommerceToolResult { status: "OK" | "REJECTED" | "UNAVAILABLE" | "STALE"; data?: unknown; reason?: string;
+  failureStage?: import("./single-agent-commerce-effect-failure.js").CommerceEffectFailureStage }
 export function toolArgs(value: unknown, fields: readonly string[]): Record<string, unknown> | null {
   return value !== null && typeof value === "object" && !Array.isArray(value) &&
     Object.keys(value).every(k => fields.includes(k)) ? value as Record<string, unknown> : null;

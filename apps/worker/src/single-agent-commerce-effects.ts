@@ -11,6 +11,7 @@ import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-c
 import type { TerminalOutcome, TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import { formatCartLineSelection, selectionsMatchCartLines } from "./realtime-sales-cycle.js";
 import {selectionShopDataGap,validSelectionEvidence,selectionEvidenceFromOptions,mergeSelectionEvidence,selectionMeaningHash,selectionQueryKey,expandSelectionOptions,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
+import { CommerceEffectCommitError, type CommerceEffectFailureStage } from "./single-agent-commerce-effect-failure.js";
 
 const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase", "record_negotiation"]);
 export type CommerceCommandResult =
@@ -18,7 +19,7 @@ export type CommerceCommandResult =
   | { status: "DUPLICATE"; state: SalesCycleRuntimeState }
   | { status: "CHECKOUT_REQUESTED"; state: SalesCycleRuntimeState }
   | { status: "HANDOFF"; state: SalesCycleRuntimeState; reasonCode: string }
-  | { status: "REJECTED" | "CONFLICT"; reasonCode: string };
+  | { status: "REJECTED" | "CONFLICT"; reasonCode: string; failureStage?: CommerceEffectFailureStage };
 
 /** Native tools bridge to existing atomic sales-cycle repository. No external order/send implementation. */
 export async function createCommerceEffectTools(input: {
@@ -201,6 +202,8 @@ export async function createCommerceEffectTools(input: {
   }
   async function invokeEffect(call: CommerceToolCall): Promise<CommerceToolResult> {
     if (!names.has(call.name)) return input.base.invoke(call);
+    let phase:CommerceEffectFailureStage="AUTHORITY";
+    const execute = async():Promise<CommerceToolResult> => {
     try { await refreshAuthority(); } catch { return { status: "UNAVAILABLE", reason: "CURRENT_AUTHORITY_UNAVAILABLE" }; }
     const state = snapshot().state;
     if (state.customerStateUpdatePending === true) return { status: "REJECTED", reason: "DEPENDENT_STATE_REJECTED" };
@@ -210,8 +213,9 @@ export async function createCommerceEffectTools(input: {
     try {
       current = await read();
       const authorizedRevision = current.revision;
+      phase="VALIDATION";
       const a = toolArgs(call.args, call.name === "add_to_cart" ? ["subjectRef", "offerType", "size", "color", "quantity"] :
-        call.name === "change_cart_item" ? ["subjectRef", "action", "quantity", "size", "color", "componentRole"] : call.name === "record_negotiation" ? ["intent","sourceQuote"] : []);
+        call.name === "change_cart_item" ? ["subjectRef", "action", "quantity", "size", "color", "componentRole", "targetSubjectRef", "offerType"] : call.name === "record_negotiation" ? ["intent","sourceQuote"] : []);
       if (!a) return { status: "REJECTED", reason: "TOOL_ARGUMENTS" };
       let negotiationSource: NonNullable<typeof input.negotiationSources>[number] | undefined;
       if(call.name==="record_negotiation"){
@@ -228,6 +232,7 @@ export async function createCommerceEffectTools(input: {
       }
       if (call.name === "change_cart_item") {
         const fields = a.action === "REMOVE_LINE" ? ["subjectRef", "action"] :
+          a.action === "REPLACE_LINE" ? ["subjectRef", "action", "targetSubjectRef", "offerType", "quantity", "size", "color"] :
           a.action === "SET_QUANTITY" ? ["subjectRef", "action", "quantity"] :
           a.action === "SET_COMPONENT_VARIANT" ? ["subjectRef", "action", "componentRole", "size", "color"] : null;
         if (!fields || !toolArgs(a, fields)) return { status: "REJECTED", reason: "TOOL_ARGUMENTS" };
@@ -241,6 +246,7 @@ export async function createCommerceEffectTools(input: {
       const line = current.cart?.value.lines.find(l => l.lineId === a.subjectRef);
       if ((call.name === "add_to_cart" && !product) || (call.name === "change_cart_item" && !line)) return { status: "REJECTED", reason: "SUBJECT_REF" };
       const effect = call.name === "confirm_purchase" ? "PURCHASE_CONFIRMATION" : current.cart ? "CART_MUTATION" : "CART_OPEN";
+      phase="AUTHORITY";
       if (!await input.authorize(effect, current)) return { status: "REJECTED", reason: "EFFECT_PERMISSION" };
       const operationId = commerceHash({ pageId: input.scope.pageId, conversationId: input.scope.conversationId,
         sourceMessageId: negotiationSource?.sourceMessageId ?? input.scope.sourceMessageId, tool: call.name, ...(call.name==="record_negotiation"?{}:{args:a}) });
@@ -252,7 +258,7 @@ export async function createCommerceEffectTools(input: {
         await refreshSelections();
         return { status: "OK", data: { operationId, duplicate: true, cart: current.cart?.value, cartItems: cartItems(), cartQuote: cartQuote() } };
       }
-      policy = await input.policy();
+      phase="SOURCE";policy = await input.policy();
       publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock());
       const policyRef = { id: policy.policy.policyBundleId, version: policy.policy.policyVersion, contentHash: computeBusinessContentHash(policy.policy) };
       let draft: ResolvedCartDraftV1 | null = null, mutation: CanonicalCartMutationV2 | null = null;
@@ -267,7 +273,21 @@ export async function createCommerceEffectTools(input: {
           command = { kind: "CART_OPENED", commandId: operationId, cartDraftRef: { id: operationId, version: "1", contentHash: computeBusinessContentHash(draft) }, expiresAt: new Date(input.clock().getTime()+1_800_000).toISOString() };
         } else mutation = { kind: "ADD_LINE", line: selected };
       } else if (call.name === "change_cart_item") {
-        if (a.action === "REMOVE_LINE") mutation = { kind: "REMOVE_LINE", lineId: line!.lineId };
+        if (a.action === "REPLACE_LINE") {
+          const target = input.base.snapshot().boundSubjects.find(s => s.kind === "PRODUCT" && s.ref === a.targetSubjectRef);
+          if (!target || typeof a.offerType !== "string" || !a.offerType.trim() || !Object.hasOwn(a,"color") ||
+            (a.quantity !== undefined && (!Number.isInteger(a.quantity) || (a.quantity as number) < 1 || (a.quantity as number) > 20)))
+            return {status:"REJECTED",reason:"REPLACEMENT_ARGUMENTS"};
+          const selected = await selection(target.ref,{...a,quantity:a.quantity??line!.quantity},line!.lineId,a.offerType);
+          if (selected.status !== "READY") return {status:"UNAVAILABLE",reason:"SELECTION_UNAVAILABLE",data:selected};
+          if (normalizeCatalogToken(selected.line.offerId) !== normalizeCatalogToken(a.offerType) ||
+            selected.line.quantity !== (a.quantity??line!.quantity) ||
+            (typeof a.size==="string"&&selected.line.components.some(c=>normalizeCatalogToken(c.size??"")!==normalizeCatalogToken(a.size as string))) ||
+            (typeof a.color==="string"&&selected.line.components.some(c=>normalizeCatalogToken(c.color??"")!==normalizeCatalogToken(a.color as string))))
+            return {status:"REJECTED",reason:"REPLACEMENT_SELECTION_SCOPE"};
+          mutation = {kind:"REPLACE_LINE",lineId:line!.lineId,line:selected.line};
+        }
+        else if (a.action === "REMOVE_LINE") mutation = { kind: "REMOVE_LINE", lineId: line!.lineId };
         else if (a.action === "SET_QUANTITY" && Number.isInteger(a.quantity) && (a.quantity as number) > 0 && (a.quantity as number) <= 20) mutation = { kind: "SET_QUANTITY", lineId: line!.lineId, quantity: a.quantity as number };
         else if (a.action === "SET_COMPONENT_VARIANT" && (typeof a.size === "string" || typeof a.color === "string")) {
           const component = line!.components.find(c => c.componentRole === a.componentRole);
@@ -283,7 +303,7 @@ export async function createCommerceEffectTools(input: {
         } else return { status: "REJECTED", reason: "MUTATION_ARGUMENTS" };
       }
       if (mutation) command = { kind: "CART_MUTATED", commandId: operationId, expectedCartVersion: current.cart!.value.revision,
-        mutationRef: { id: operationId, version: "1", contentHash: computeBusinessContentHash({ mutation }) }, mutationReasonCode: mutation.kind === "ADD_LINE" ? "LINE_ADDED" : mutation.kind === "REMOVE_LINE" ? "LINE_REMOVED" : mutation.kind === "SET_COMPONENT_VARIANT" ? "VARIANT_CHANGED" : "QUANTITY_CHANGED" };
+        mutationRef: { id: operationId, version: "1", contentHash: computeBusinessContentHash({ mutation }) }, mutationReasonCode: mutation.kind === "REPLACE_LINE" ? "LINE_REPLACED" : mutation.kind === "ADD_LINE" ? "LINE_ADDED" : mutation.kind === "REMOVE_LINE" ? "LINE_REMOVED" : mutation.kind === "SET_COMPONENT_VARIANT" ? "VARIANT_CHANGED" : "QUANTITY_CHANGED" };
       else if (call.name === "confirm_purchase") command = { kind: "CONFIRM_PURCHASE", commandId: operationId,
         intent: { source: "MODEL_STRUCTURED_OUTPUT", intent: "PURCHASE_CONFIRMATION", sourceMessageId: input.scope.sourceMessageId } };
       else if(call.name==="record_negotiation")command={kind:"NEGOTIATION_EVENT",commandId:operationId,expectedNegotiationVersion:current.negotiation!.stateVersion,
@@ -301,6 +321,17 @@ export async function createCommerceEffectTools(input: {
       const repository: SalesCycleStateRepositoryV1 = { read: key => input.repository.read(key),
         compareAndSwap: update => update.expectedRevision === authorizedRevision
           ? input.repository.compareAndSwap(update) : Promise.resolve(false) };
+      phase="AUTHORITY";await refreshAuthority();
+      const permission=snapshot().state;
+      if(!permission.permission||!permission.privacyAllowed||permission.conversationOwner!=="BOT"||
+        permission.recipient!==turnRecipient||permission.bindingVersion!==turnBinding||!await input.authorize(effect,current))
+        return {status:"REJECTED",reason:"EFFECT_PERMISSION"};
+      phase="SOURCE";
+      if(mutation?.kind==="REPLACE_LINE"){
+        const target=selections.get(mutation.lineId);
+        if(!target||Date.parse(target.sourceExpiresAt)<=input.clock().getTime())return {status:"UNAVAILABLE",reason:"SELECTION_UNAVAILABLE"};
+      }
+      phase="COMMIT_UNKNOWN";
       try { commitAttempted = true; result = input.executeCommand
         ? await input.executeCommand({ command: command!, expectedRevision: authorizedRevision,
           conversationRevision: authority?.revision ?? input.scope.revision,
@@ -308,7 +339,8 @@ export async function createCommerceEffectTools(input: {
         : await executePersistedSalesCycleCommand({ repository, conversationKey: input.conversationKey,
         command: command!, now: input.clock(), trustedPorts: ports,
         ...(input.resolveBankTransferPolicy ? { resolveBankTransferPolicy: input.resolveBankTransferPolicy } : {}) }); }
-      catch { current = await read(); await refreshAuthority();
+      catch (error) { if(error instanceof CommerceEffectCommitError)phase=error.stage;
+        current = await read(); await refreshAuthority();
         const proved = input.executeCommand && input.readReceipt ? acceptReceipt(await input.readReceipt(operationId), operationId, [effectName]) : recordReceipt(operationId, effectName, authorizedRevision+1);
         if (!proved) { uncertain = true; return { status: "UNAVAILABLE", reason: "UNKNOWN_COMMIT" }; }
         reconciledRevision = current.revision;
@@ -337,7 +369,9 @@ export async function createCommerceEffectTools(input: {
         receipt = undefined;
         return { status: "OK", data: { handoffAccepted: true } };
       }
-      if (result && !["APPLIED", "DUPLICATE"].includes(result.status)) return { status: "REJECTED", reason: "reasonCode" in result ? result.reasonCode : result.status };
+      if (result && !["APPLIED", "DUPLICATE"].includes(result.status)) return { status: "REJECTED", reason: "reasonCode" in result ? result.reasonCode : result.status,
+        failureStage:result.status==="CONFLICT"?"CAS":"failureStage" in result?result.failureStage??"DOMAIN":"DOMAIN" };
+      phase="READBACK";
       current = await read();
       await refreshAuthority();
       const expectedReceiptRevision=result?.status==="APPLIED"&&input.executeCommand?result.state.revision:authorizedRevision+1;
@@ -351,6 +385,9 @@ export async function createCommerceEffectTools(input: {
       return { status: "OK", data: { operationId, effect: effectName, cart: current.cart?.value, cartItems: cartItems(), cartQuote: cartQuote(),
         purchaseConfirmed: current.confirmation !== null, externalOrderCreated: false } };
     } catch { if (commitAttempted) uncertain = true; return { status: "UNAVAILABLE", reason: "COMMERCE_UNAVAILABLE" }; }
+    };
+    const result=await execute();
+    return result.status==="OK"?result:{...result,failureStage:result.failureStage??phase};
   }
   async function invoke(call: CommerceToolCall): Promise<CommerceToolResult> {
     const result = await invokeEffect(call);

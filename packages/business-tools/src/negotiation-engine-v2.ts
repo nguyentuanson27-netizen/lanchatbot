@@ -43,6 +43,7 @@ export type NegotiationEvidenceV2 =
       readonly evidenceId: string;
       readonly mutationReasonCode:
         | "LINE_ADDED"
+        | "LINE_REPLACED"
         | "LINE_REMOVED"
         | "QUANTITY_CHANGED"
         | "VARIANT_CHANGED"

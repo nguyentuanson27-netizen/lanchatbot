@@ -3,6 +3,7 @@ import { createPersistedCommerceRepository, createPersistedCommerceHandoffPort, 
 import { createSalesCycleRuntimeState, applySalesCycleCommand, computeBusinessContentHash } from "@lana/chat-runtime";
 import { createConversationState, applySilentHandoff } from "@lana/conversation-engine";
 import type { RealtimeCommitInput } from "@lana/database";
+import type { CanonicalCartMutationV2 } from "@lana/business-tools";
 import { selectCommerceHandoff } from "./single-agent-commerce-handoff.js";
 import { commerceHash } from "./single-agent-commerce-read-only-context.js";
 import { buildProtectedMediaClaimsV1 } from "@lana/business-tools";
@@ -55,27 +56,41 @@ describe("existing transaction owner for candidate commerce", () => {
     expect(f.completed).toHaveBeenCalledOnce();
   });
 
-  it.each(["open", "variant", "negotiation"])("prepares native %s with fresh facts and exact replay evidence, independent of text classifiers", async mode => {
+  it.each(["open", "variant", "negotiation", "replace", "last-remove"])("prepares native %s with fresh facts and exact replay evidence, independent of text classifiers", async mode => {
     const scope = commerceScope(), fixture = await fixturePolicy();
     const resolution = { ...fixture, mayAffectOutbound: true, audit: { ...fixture.audit, channel: "PUBLISHED" as const, pinScopeType: "SALES_EPISODE" as const, pinScopeId: "key", bundleHash: fixture.bundle!.bundleHash }, bundle: { ...fixture.bundle!, channel: "PUBLISHED" as const, sideEffects: "LIVE_OUTBOUND" as const } }, policy = resolution.bundle.policy;
     let state = createSalesCycleRuntimeState("key", { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
     for (const kind of ["FACTS_PRESENTED", "MEASUREMENTS_REQUIRED", "SIZE_RECOMMENDED"] as const) state = applySalesCycleCommand({ state, expectedRevision: state.revision, command: { kind, commandId: kind }, now: commerceNow }).state;
     const draft = { identity: { cartId: "50000000-0000-4000-8000-000000000001", salesEpisodeId: "60000000-0000-4000-8000-000000000001", customerProfileId: fixtureProfile().profile.profileId },
       lines: [fixtureCartLine()], shopId: scope.shopId, policyRef: { id: policy.policyBundleId, version: policy.policyVersion, contentHash: computeBusinessContentHash(policy) } };
-    const mutation = { kind: "SET_COMPONENT_VARIANT" as const, lineId: draft.lines[0]!.lineId, componentProductId: "SM613", componentSku: "SM613-NAVY-L", size: "L", color: "navy" };
+    const variant = { kind: "SET_COMPONENT_VARIANT" as const, lineId: draft.lines[0]!.lineId, componentProductId: "SM613", componentSku: "SM613-NAVY-L", size: "L", color: "navy" };
+    const target = structuredClone(draft.lines[0]!);
+    target.offerId = "AO"; target.offerKind = "COMPONENT";
+    target.allowComponentSale = true;
+    target.priceAuthority = { ...target.priceAuthority!, offerId: "AO", offerPriceKind:"COMPONENT", componentProductId:target.components[0]!.componentProductId };
+    const mutation: CanonicalCartMutationV2 = mode === "replace" ? { kind: "REPLACE_LINE", lineId: target.lineId, line: target } :
+      mode === "last-remove" ? { kind: "REMOVE_LINE", lineId: target.lineId } : variant;
     const ports = { resolveCartDraft: () => draft, resolveCartMutation: () => ({ mutation }), resolveShopPolicy: () => policy, resolveInboundMessage: () => null, revalidateCheckout: () => null };
     state = applySalesCycleCommand({ state, expectedRevision: state.revision, command: { kind: "CART_OPENED", commandId: "open", cartDraftRef: { id: "draft", version: "1", contentHash: computeBusinessContentHash(draft) }, expiresAt: new Date(commerceNow.getTime()+1_800_000).toISOString() }, now: commerceNow, trustedPorts: ports }).state;
     if (mode === "open") state = createSalesCycleRuntimeState("key", { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
-    const selection = { status: "READY" as const, line: mode !== "variant" ? draft.lines[0]! : { ...draft.lines[0]!, components: [{ ...draft.lines[0]!.components[0]!, size: "L", componentSku: mutation.componentSku }] }, shopId: scope.shopId,
+    const selection = { status: "READY" as const, line: mode === "replace" ? target : mode !== "variant" ? draft.lines[0]! : { ...draft.lines[0]!, components: [{ ...draft.lines[0]!.components[0]!, size: "L", componentSku: variant.componentSku }] }, shopId: scope.shopId,
       versions: { price: "pos:SM613", inventory: "stock-v1", size: "size-v1", eta: null }, eta: null, etaExpiresAt: null, sourceAuthority: "POS_SNAPSHOT" as const,
       stockStatus: "IN_STOCK" as const, stockAvailableQuantity: 4, sourceObservedAt: commerceNow.toISOString(), sourceExpiresAt: new Date(commerceNow.getTime()+1_200_000).toISOString() };
     const output = await prepareNativeCommerceTransition({ command: mode === "negotiation" ? {kind:"NEGOTIATION_EVENT",commandId:"objection",expectedNegotiationVersion:state.negotiation!.stateVersion,sourceMessageId:scope.sourceMessageId,intent:"PRICE_OBJECTION",reasonCode:"PRICE_OBJECTION"} : mode === "open" ? { kind: "CART_OPENED", commandId: "open", cartDraftRef: { id: "draft", version: "1", contentHash: computeBusinessContentHash(draft) }, expiresAt: new Date(commerceNow.getTime()+1_800_000).toISOString() } : { kind: "CART_MUTATED", commandId: "change-L", expectedCartVersion: state.cart!.value.revision,
-      mutationRef: { id: "change", version: "1", contentHash: computeBusinessContentHash({ mutation }) }, mutationReasonCode: "VARIANT_CHANGED" }, trustedPorts: ports,
+      mutationRef: { id: "change", version: "1", contentHash: computeBusinessContentHash({ mutation }) }, mutationReasonCode: mode === "replace" ? "LINE_REPLACED" : mode === "last-remove" ? "LINE_REMOVED" : "VARIANT_CHANGED" }, trustedPorts: ports,
       source: { pageId: scope.pageId, conversationId: scope.conversationId, customerHash: scope.customerHash, state, stateRevision: state.revision, conversationRevision: scope.revision,
         text: "À thôi cho chị đổi sang L nhé", messageId: scope.sourceMessageId, eventKey: scope.sourceMessageId, senderId: "synthetic", occurredAt: commerceNow.toISOString(), attachmentIds: [],
         productId: "SM613", offerType: "DIRECT", size: "M", color: "navy", shopAlias: "LANA", policyResolution: resolution,
         facts: { resolveCartSelection: async () => selection } as never, now: commerceNow } });
+    if (mode === "last-remove") { expect(output.plan).toBeNull(); expect(output.reasonCode).toBe("CART_EMPTY"); return; }
     expect(output.plan, JSON.stringify(output)).not.toBeNull();
+    if (mode === "replace") {
+      expect(output.plan?.state.cart?.value.lines).toEqual([target]);
+      expect(output.plan?.state.cart?.value.revision).toBe(state.cart!.value.revision + 1);
+      expect(output.plan?.cartMutationBatchEvidence?.receipts).toHaveLength(1);
+      expect(output.plan?.cartMutationBatchEvidence?.receipts[0]).toMatchObject({mutation:{kind:"REPLACE_LINE"},mutationReasonCode:"LINE_REPLACED",
+        authority:{productId:target.parentProductId,offerId:"AO",replacedLine:{lineId:target.lineId,productId:draft.lines[0]!.parentProductId,offerId:draft.lines[0]!.offerId}}});
+    }
     expect(output.plan?.state.cart?.value.lines[0]?.components[0]?.size).toBe(mode !== "variant" ? "M" : "L");
     if (mode === "variant") expect(output.plan?.cartMutationBatchEvidence?.receipts[0]).toMatchObject({ mutation, mutationReasonCode: "VARIANT_CHANGED", authority: { authorityKind: "NATIVE_TOOL_PERMISSION" } });
     if(mode==="negotiation"){

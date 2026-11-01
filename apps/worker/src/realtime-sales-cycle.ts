@@ -196,6 +196,7 @@ export interface RealtimeSalesCycleOutput {
   readonly transferToHuman: boolean;
   readonly desiredTag: "NHAN_VIEN" | "DA_CHOT_DON" | null;
   readonly reasonCode: string | null;
+  readonly failureStage?: import("./single-agent-commerce-effect-failure.js").CommerceEffectFailureStage;
   readonly readinessAttempt?: DeterministicEffectReadinessV1;
   readonly protectedOutbound?: Readonly<{
     claims: readonly ProtectedClaimV1[];
@@ -951,6 +952,7 @@ export async function evaluateRealtimeSalesCycle(
         resolvedMutation?.mutation.kind === "REMOVE_LINE" ||
         resolvedMutation?.mutation.kind === "SET_QUANTITY"
         || resolvedMutation?.mutation.kind === "SET_COMPONENT_VARIANT"
+        || resolvedMutation?.mutation.kind === "REPLACE_LINE"
       ? resolvedMutation.mutation.kind
       : null;
     const result = applySalesCycleCommand({
@@ -1182,8 +1184,8 @@ export async function evaluateRealtimeSalesCycle(
     if (!state.cart) {
       return freshReadiness("CART_MUTATION", selections, null, null, null, checkedAt);
     }
-    const authorityLine = action === "ADD_LINE"
-      ? mutation.kind === "ADD_LINE" ? mutation.line : null
+    const authorityLine = action === "ADD_LINE" || action === "REPLACE_LINE"
+      ? mutation.kind === "ADD_LINE" || mutation.kind === "REPLACE_LINE" ? mutation.line : null
       : mutation.kind === "ADD_LINE"
         ? null
         : beforeCart.lines.find(({ lineId }) => lineId === mutation.lineId) ?? null;
@@ -1199,6 +1201,12 @@ export async function evaluateRealtimeSalesCycle(
       offerId: authorityLine.offerId,
       authorityKind,
       authorityEvidenceHash,
+      ...(mutation.kind === "REPLACE_LINE" ? {replacedLine:(() => {
+        const old = beforeCart.lines.find(l => l.lineId === mutation.lineId);
+        if (!old) throw new Error("NATIVE_REPLACEMENT_OLD_LINE");
+        return {lineId:old.lineId,productId:old.parentProductId,offerId:old.offerId,
+          beforeLineHash:createHash("sha256").update(canonicalJson(old),"utf8").digest("hex")};
+      })()} : {}),
       bindingHash: "0".repeat(64),
     };
     const authority = CartMutationAuthorityBindingV1Schema.parse({
@@ -1216,6 +1224,7 @@ export async function evaluateRealtimeSalesCycle(
       mutationPayloadHash,
       mutationReasonCode: action === "ADD_LINE"
         ? "LINE_ADDED" as const
+        : action === "REPLACE_LINE" ? "LINE_REPLACED" as const
         : action === "REMOVE_LINE"
           ? "LINE_REMOVED" as const
           : action === "SET_COMPONENT_VARIANT" ? "VARIANT_CHANGED" as const : "QUANTITY_CHANGED" as const,
@@ -1245,7 +1254,7 @@ export async function evaluateRealtimeSalesCycle(
       action,
       null,
       null,
-      mutation.kind === "ADD_LINE"
+      mutation.kind === "ADD_LINE" || mutation.kind === "REPLACE_LINE"
         ? mutation.line.quantity
         : mutation.kind === "SET_QUANTITY"
           ? mutation.quantity
@@ -1439,10 +1448,15 @@ export async function evaluateRealtimeSalesCycle(
     const beforeCart = state.cart.value, customerState = state.negotiation.customerState;
     references.set(canonicalJson(command.mutationRef), { mutation });
     const result = apply(command);
-    if (result.status !== "APPLIED" || !state.cart) return failedOutput("NATIVE_MUTATION_REJECTED");
+    if (result.status !== "APPLIED" || !state.cart) {
+      const safeReasons = new Set(["CART_EMPTY","CART_VERSION_CONFLICT","CART_TERMINAL","CART_MUTATION_INVALID","POLICY_BLOCKED","PRICE_FACT_INVALID",
+        "SALES_STAGE_TRANSITION_INVALID","CART_EXPIRED_OR_MISSING","SHOP_POLICY_UNTRUSTED","CART_MUTATION_UNTRUSTED","NEGOTIATION_REPRICE_BLOCKED"]);
+      return {...failedOutput((result.status === "REJECTED" || result.status === "CONFLICT") && safeReasons.has(result.reasonCode) ? result.reasonCode : "NATIVE_MUTATION_REJECTED"),
+        failureStage:result.status==="CONFLICT"?"CAS":"DOMAIN"};
+    }
     const selections = await currentSelections(input, state.cart.value, state.checkoutDraft?.address ?? "", effectNow());
     const ready = selections.filter((s): s is ReadyCartSelection => s.status === "READY");
-    if (!selectionsMatchCartLines(state.cart.value.lines, ready)) return failedOutput("NATIVE_MUTATION_SNAPSHOT_CHANGED");
+    if (!selectionsMatchCartLines(state.cart.value.lines, ready)) return {...failedOutput("NATIVE_MUTATION_SNAPSHOT_CHANGED"),failureStage:"SOURCE"};
     const readiness = acceptCartMutationReadiness(mutation.kind, command.commandId, beforeCart, ready, effectNow(), mutation,
       computeBusinessContentHash({ mutation }).replace(/^sha256:/u, ""), "NATIVE_TOOL_PERMISSION", hashCanonicalBuyingIntentV1(input.canonicalBuyingIntent), customerState);
     if (readiness.outcome !== "READY") return failedOutput(readiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");

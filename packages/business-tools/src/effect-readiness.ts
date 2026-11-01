@@ -39,7 +39,7 @@ export interface EvaluateDeterministicEffectReadinessV1Input {
   readonly deterministicEvidenceHash?: string | null;
   readonly parentReadinessHash?: string | null;
   readonly payloadHash?: string | null;
-  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | "SET_COMPONENT_VARIANT" | null;
+  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | "SET_COMPONENT_VARIANT" | "REPLACE_LINE" | null;
   readonly mutationQuantity?: number | null;
   readonly checkedAt: Date;
 }

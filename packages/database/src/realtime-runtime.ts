@@ -174,7 +174,7 @@ export interface RealtimeSalesCycleEventPlan {
   readonly cartId: string | null;
   readonly cartVersion: number | null;
   readonly reasonCode: string | null;
-  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | "SET_COMPONENT_VARIANT" | null;
+  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | "SET_COMPONENT_VARIANT" | "REPLACE_LINE" | null;
   readonly mutationPayloadHash?: string | null;
   readonly negotiationTransitionEvidence?: import("@lana/contracts").NegotiationTransitionEvidenceV1;
   readonly checkoutDetailsTransitionEvidence?: import("@lana/contracts").CheckoutDetailsTransitionEvidenceV1;
@@ -727,7 +727,7 @@ function validateSalesEffectReadiness<TState, TSalesState>(
       Date.parse(receipt.evaluatedAt) > now.getTime() + MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1) {
       throw new Error("CART_MUTATION_RECEIPT_MISMATCH");
     }
-    if (receipt.mutation.kind === "ADD_LINE" && (
+    if ((receipt.mutation.kind === "ADD_LINE" || receipt.mutation.kind === "REPLACE_LINE") && (
       receipt.authority.productId !== receipt.mutation.line.parentProductId ||
       receipt.authority.offerId !== receipt.mutation.line.offerId
     )) throw new Error("CART_MUTATION_AUTHORITY_SCOPE_MISMATCH");
@@ -750,7 +750,7 @@ function validateSalesEffectReadiness<TState, TSalesState>(
         buyingIntent,
         receipt.authority.action,
         receipt.authority.productId,
-        receipt.mutation.kind === "ADD_LINE"
+        receipt.mutation.kind === "ADD_LINE" || receipt.mutation.kind === "REPLACE_LINE"
           ? receipt.mutation.line.quantity
           : receipt.mutation.kind === "SET_QUANTITY"
             ? receipt.mutation.quantity
@@ -854,7 +854,16 @@ function validateLockedCartMutationTransitionV1(
       throw new Error("CART_MUTATION_BEFORE_STATE_MISMATCH");
     }
     let authorityLine: CartV1["lines"][number] | undefined;
-    if (receipt.mutation.kind === "ADD_LINE") {
+    if (receipt.mutation.kind === "REPLACE_LINE") {
+      const lineId = receipt.mutation.lineId;
+      const old = replayedCart.lines.find(l => l.lineId === lineId);
+      const bound = receipt.authority.replacedLine;
+      if (!old || !bound || bound.lineId !== old.lineId || bound.productId !== old.parentProductId ||
+        bound.offerId !== old.offerId || bound.beforeLineHash !== sha256CanonicalV1(old)) {
+        throw new Error("CART_MUTATION_OLD_LINE_MISMATCH");
+      }
+      authorityLine = receipt.mutation.line;
+    } else if (receipt.mutation.kind === "ADD_LINE") {
       authorityLine = receipt.mutation.line;
     } else {
       const mutationLineId = receipt.mutation.lineId;

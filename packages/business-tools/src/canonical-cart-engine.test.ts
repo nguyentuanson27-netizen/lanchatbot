@@ -29,6 +29,23 @@ function created(lines: readonly CartLineV1[]) {
 }
 
 describe("canonical cart engine", () => {
+  it.each([1,2])("replaces one line in a %s-line cart as one revision without an empty intermediate cart", count => {
+    const first=line("13000000-0000-4000-8000-000000000001","OLD");
+    const other=line("13000000-0000-4000-8000-000000000002","KEEP");
+    const cart=created(count===1?[first]:[first,other]),target=line(first.lineId,"NEW",499_000);
+    const result=applyCanonicalCartDecisionV2({cart,expectedCartVersion:1,mutation:{kind:"REPLACE_LINE",lineId:first.lineId,line:target},shopId:"LANA_DESIGN",policy,customerState:"READY",now});
+    expect(result).toMatchObject({status:"APPLIED",previousVersion:1,nextVersion:2,cart:{cartId:cart.cartId,revision:2,lines:count===1?[target]:[target,other]}});
+    expect(cart.lines[0]).toEqual(first);
+    if(result.status==="APPLIED")expect(result.cart.subtotalVnd).toBe(count===1?499_000:1_199_000);
+  });
+  it.each(["wrong-ref","wrong-target-id","stale-price","invalid-bom","revision"])("rejects replacement %s and keeps the old cart",mode=>{
+    const old=line("13000000-0000-4000-8000-000000000001","OLD"),cart=created([old]),target=line(old.lineId,"NEW");
+    if(mode==="wrong-target-id")target.lineId="13000000-0000-4000-8000-000000000009";
+    if(mode==="stale-price")target.priceAuthority!.metadata.expiresAt="2026-07-21T00:00:00.000Z";
+    if(mode==="invalid-bom")target.components=[];
+    const result=applyCanonicalCartDecisionV2({cart,expectedCartVersion:mode==="revision"?0:1,mutation:{kind:"REPLACE_LINE",lineId:mode==="wrong-ref"?"13000000-0000-4000-8000-000000000009":old.lineId,line:target},shopId:"LANA_DESIGN",policy,customerState:"READY",now});
+    expect(result).toMatchObject({status:"BLOCKED",cart});
+  });
   it("derives totals and 5% multi-item offer instead of accepting caller totals", () => {
     const cart = created([line("13000000-0000-4000-8000-000000000001", "CB182"), line("13000000-0000-4000-8000-000000000002", "SV695", 500_000)]);
     expect(cart).toMatchObject({ revision: 1, subtotalVnd: 1_200_000, discountTotalVnd: 60_000, shippingFeeVnd: 30_000, grandTotalVnd: 1_170_000 });

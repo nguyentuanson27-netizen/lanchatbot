@@ -11,6 +11,7 @@ import { commerceHash } from "./single-agent-commerce-read-only-context.js";
 import { createPersistedCommerceReceiptReader, prepareNativeCommerceTransition } from "./single-agent-commerce-persistence.js";
 import { evaluateRealtimeSalesCycle, type RealtimeSalesCycleOutput, type RealtimeSalesCycleInput } from "./realtime-sales-cycle.js";
 import type { createCommerceEffectTools, CommerceCommandResult } from "./single-agent-commerce-effects.js";
+import { CommerceEffectCommitError, type CommerceEffectFailureStage } from "./single-agent-commerce-effect-failure.js";
 
 type CommandInput = Parameters<NonNullable<Parameters<typeof createCommerceEffectTools>[0]["executeCommand"]>>[0];
 
@@ -120,25 +121,37 @@ export function createPersistedCommerceExecutor(input: {
         current.clarification?.reasonCode === "CHECKOUT_DETAILS_MISSING";
     },
     async executeCommand(call: CommandInput): Promise<CommerceCommandResult> {
+      let phase:CommerceEffectFailureStage="AUTHORITY";
+      let commitStarted=false;
+      try {
       const authority = await input.readAuthority();
-      if (!matches(authority) || authority.stateVersion !== call.conversationRevision || call.bindingVersion !== scope.bindingVersion) return { status: "REJECTED", reasonCode: "CURRENT_AUTHORITY_CHANGED" };
+      if (!matches(authority) || authority.stateVersion !== call.conversationRevision || call.bindingVersion !== scope.bindingVersion) return { status: "REJECTED", reasonCode: "CURRENT_AUTHORITY_CHANGED",failureStage:"AUTHORITY" };
+      phase="READBACK";
       const state = (await repository.read(scope.conversationId))!;
-      if (state.revision !== call.expectedRevision) return { status: "CONFLICT", reasonCode: "STATE_VERSION_CONFLICT" };
+      if (state.revision !== call.expectedRevision) return { status: "CONFLICT", reasonCode: "STATE_VERSION_CONFLICT",failureStage:"CAS" };
+      phase="SOURCE";
       const resolution = await input.policy();
-      if (!resolution.bundle || commerceHash(resolution.bundle.policy) !== commerceHash(call.policy.policy)) return { status: "REJECTED", reasonCode: "POLICY_CHANGED" };
+      if (!resolution.bundle || commerceHash(resolution.bundle.policy) !== commerceHash(call.policy.policy)) return { status: "REJECTED", reasonCode: "POLICY_CHANGED",failureStage:"SOURCE" };
       const draft = call.command.kind === "CART_OPENED" ? call.trustedPorts.resolveCartDraft(call.command.cartDraftRef) : null;
       const selected = draft?.lines[0], component = selected?.components[0];
       const output = await prepareNativeCommerceTransition({ command: call.command, trustedPorts: call.trustedPorts,
         source: { ...source(state, authority, resolution), ...(selected ? { productId: selected.parentProductId, offerType: selected.offerId, size: component?.size ?? null, color: component?.color ?? null } : {}) } });
-      if (!output.plan) return { status: "REJECTED", reasonCode: output.reasonCode ?? "TRANSITION_UNAVAILABLE" };
+      if (!output.plan) return { status: "REJECTED", reasonCode: output.reasonCode ?? "TRANSITION_UNAVAILABLE",failureStage:output.failureStage??"DOMAIN" };
       const terminal = call.command.kind === "CONFIRM_PURCHASE" || output.transferToHuman;
-      if (!(await commit(output, authority, terminal, resolution))?.stateCommitted) return { status: "CONFLICT", reasonCode: "STATE_VERSION_CONFLICT" };
+      phase="COMMIT_UNKNOWN";
+      commitStarted=true;
+      if (!(await commit(output, authority, terminal, resolution))?.stateCommitted) return { status: "CONFLICT", reasonCode: "STATE_VERSION_CONFLICT",failureStage:"CAS" };
+      phase="READBACK";
       const actual = (await repository.read(scope.conversationId))!;
       if (commerceHash(actual) !== commerceHash(output.plan.state)) throw new Error("COMMITTED_STATE_CHANGED");
       if (call.command.kind === "CONFIRM_PURCHASE" && output.reasonCode === "CHECKOUT_DETAILS_MISSING" &&
           output.telemetry?.clarificationCase === true) return { status: "CHECKOUT_REQUESTED", state: actual };
       return actual.stage === "HANDED_OFF" ? { status: "HANDOFF", state: actual, reasonCode: output.reasonCode ?? "DEPENDENCY_FAILURE" }
         : { status: "APPLIED", state: actual, transferToHuman: output.transferToHuman };
+      } catch {
+        if(commitStarted&&(phase==="COMMIT_UNKNOWN"||phase==="READBACK"))throw new CommerceEffectCommitError(phase);
+        return {status:"REJECTED",reasonCode:"TRANSITION_PREPARATION_UNAVAILABLE",failureStage:phase};
+      }
     },
     /** The existing private checkout parser/preview runs in code; no raw private input goes to a model. */
     async advancePrivateCheckout() {

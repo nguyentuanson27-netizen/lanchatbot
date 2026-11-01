@@ -8,6 +8,7 @@ import { hardPrecheck, makeBinding, terminalFallback } from "./single-agent-sema
 import { commerceNow, commerceScope, fixturePolicy, fixtureProduct, fixtureProfile, fixtureCartLine } from "./single-agent-commerce.test-support.js";
 import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-catalog.js";
 import { cartSelectionFromSnapshot } from "./realtime-sales-catalog.js";
+import { CommerceEffectCommitError } from "./single-agent-commerce-effect-failure.js";
 
 const bankPolicy = { policyId: "synthetic-bank", version: "1", bankName: "Synthetic bank", accountNumber: "118619000",
   accountHolder: "SYNTHETIC TEST", qrImageUrl: "https://example.invalid/qr.png", customerInstruction: "Thông tin thanh toán từ code.",
@@ -105,6 +106,47 @@ it.each(["quantity","selector","invalid","policy","heartbeat"])("revalidates sel
  await expect(s.tools.readback()).rejects.toThrow("SELECTION_EVIDENCE_CHANGED");
 });
 describe("code-owned commerce effects and recovery", () => {
+  it("replaces the only line with a verified offer and does not reapply its receipt",async()=>{
+    const s=await setup();await s.tools.invoke(s.add);
+    const before=structuredClone(s.current()),line=before.cart!.value.lines[0]!;
+    const selected=await s.select();selected.line.offerId="AO";selected.line.priceAuthority!.offerId="AO";
+    selected.line.posUnitPriceVnd=400_000;selected.line.lineTotalVnd=400_000;
+    s.select.mockResolvedValue(selected);
+    const call={name:"change_cart_item",args:{subjectRef:line.lineId,action:"REPLACE_LINE",targetSubjectRef:"SM613",offerType:"AO",size:"M",color:"navy"}};
+    expect(await s.tools.invoke(call)).toMatchObject({status:"OK",data:{effect:"CART_MUTATED",cartItems:[{subjectRef:line.lineId,offerType:"AO"}]}});
+    expect(s.current().cart!.value.revision).toBe(before.cart!.value.revision+1);
+    expect(s.current().cart!.value.lines).toHaveLength(1);
+    expect(s.commits).toHaveLength(2);
+    expect(await s.tools.invoke(call)).toMatchObject({status:"OK",data:{duplicate:true}});
+    expect(s.commits).toHaveLength(2);
+  });
+  it.each(["source","wrong-offer","wrong-size","wrong-color","permission","before","after"])("contains replacement failure %s without a half-applied cart",async mode=>{
+    const s=await setup();await s.tools.invoke(s.add);const before=structuredClone(s.current()),selected=await s.select();
+    selected.line.offerId="AO";selected.line.priceAuthority!.offerId="AO";
+    s.select.mockResolvedValue(selected);
+    if(mode==="source")s.select.mockRejectedValue(new Error("SOURCE_UNAVAILABLE"));
+    if(mode==="wrong-offer")selected.line.offerId="OTHER";
+    if(mode==="wrong-size")selected.line.components[0]!.size="L";
+    if(mode==="wrong-color")selected.line.components[0]!.color="red";
+    if(mode==="permission")s.authorize.mockResolvedValue(false);
+    if(mode==="before")s.setFault("BEFORE");if(mode==="after")s.setFault("AFTER");
+    const result=await s.tools.invoke({name:"change_cart_item",args:{subjectRef:before.cart!.value.lines[0]!.lineId,action:"REPLACE_LINE",targetSubjectRef:"SM613",offerType:"AO",size:"M",color:"navy"}});
+    if(mode==="after"){
+      expect(result.status).toBe("OK");expect(s.current().cart!.value.lines[0]!.offerId).toBe("AO");expect(s.commits).toHaveLength(2);
+    }else{expect(result.status).not.toBe("OK");expect(s.current()).toEqual(before);expect(s.commits).toHaveLength(1);
+      expect(result.failureStage).toBe(mode==="permission"?"AUTHORITY":mode==="before"?"COMMIT_UNKNOWN":"SOURCE");}
+  });
+  it.each(["CAS","DOMAIN","SOURCE","READBACK"] as const)("retains bounded %s failure stage without raw exception content",async stage=>{
+    const s=await setup();await s.tools.invoke(s.add);const before=structuredClone(s.current());
+    const tools=await createCommerceEffectTools({base:s.base,scope:s.scope,clock:()=>commerceNow,conversationKey:"test-cycle",repository:s.repository,
+      identity:{cartId:before.cart!.value.cartId,salesEpisodeId:before.cart!.value.salesEpisodeId,customerProfileId:before.cart!.value.customerProfileId},
+      authorize:s.authorize,policy:async()=>s.policy,select:s.select,
+      executeCommand:async()=>{if(stage==="READBACK")throw new CommerceEffectCommitError("READBACK");
+        return {status:stage==="CAS"?"CONFLICT":"REJECTED",reasonCode:"CONTROLLED_TEST_FAILURE",failureStage:stage};}});
+    const result=await tools.invoke({name:"change_cart_item",args:{subjectRef:before.cart!.value.lines[0]!.lineId,action:"SET_QUANTITY",quantity:2}});
+    expect(result.status).not.toBe("OK");expect(result.failureStage).toBe(stage);expect(s.current()).toEqual(before);
+    expect(JSON.stringify(result)).not.toContain("COMMERCE_COMMIT_UNCONFIRMED");
+  });
   it("rejects a different transaction policy without rewriting the committed cart",async()=>{
     const s=await setup();expect((await s.tools.invoke(s.add)).status).toBe("OK");const before=structuredClone(s.current());
     s.readPolicy.mockResolvedValue((await fixturePolicy(30_000)).bundle!);
@@ -206,7 +248,7 @@ describe("code-owned commerce effects and recovery", () => {
   });
   it("rejects a missing offer before selection or commit instead of reporting a default offer color", async () => {
     const s = await setup(), { offerType: _offer, ...args } = s.add.args;
-    expect(await s.tools.invoke({ ...s.add, args })).toEqual({ status: "REJECTED", reason: "OFFER_REQUIRED" });
+    expect(await s.tools.invoke({ ...s.add, args })).toEqual({ status: "REJECTED", reason: "OFFER_REQUIRED",failureStage:"VALIDATION" });
     expect(s.select).not.toHaveBeenCalled();
     expect(s.readPolicy).not.toHaveBeenCalled();
     expect(s.repository.compareAndSwap).not.toHaveBeenCalled();
@@ -314,7 +356,7 @@ describe("code-owned commerce effects and recovery", () => {
     const s = await setup(); await s.tools.invoke(s.add);
     const before = structuredClone(s.current()); s.authorize.mockClear(); s.select.mockClear();
     expect(await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: before.cart!.value.lines[0]!.lineId, ...args } }))
-      .toEqual({ status: "REJECTED", reason: "TOOL_ARGUMENTS" });
+      .toMatchObject({ status: "REJECTED", reason: "TOOL_ARGUMENTS",failureStage:"VALIDATION" });
     expect(s.current()).toEqual(before); expect(s.commits).toHaveLength(1);
     expect(s.authorize).not.toHaveBeenCalled(); expect(s.select).not.toHaveBeenCalled();
     expect(s.tools.snapshot().effectReceipts.some(r => r.effect === "CART_MUTATED")).toBe(false);
@@ -363,7 +405,7 @@ describe("code-owned commerce effects and recovery", () => {
     const s = await setup();
     const failure = { status, reasonCode: "CART_VARIANT_AMBIGUOUS", availableSizes: ["L"], availableColors: ["BE"] };
     s.select.mockResolvedValue({ ...failure, evaluator: "PRIVATE_EVALUATOR_LABEL" } as never);
-    expect(await s.tools.invoke(s.add)).toEqual({ status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE", data: {status:failure.status,reasonCode:failure.reasonCode,selectionStatus:failure.status,selectionOptions:[],selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY"} });
+    expect(await s.tools.invoke(s.add)).toEqual({ status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE",failureStage:"SOURCE", data: {status:failure.status,reasonCode:failure.reasonCode,selectionStatus:failure.status,selectionOptions:[],selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY"} });
     expect(s.commits).toHaveLength(0); expect(s.current().cart).toBeNull();
     expect(s.tools.snapshot().effectReceipts).toHaveLength(0);
     expect(s.tools.snapshot().protectedClaims).not.toEqual(expect.arrayContaining([expect.objectContaining({ type: "SIZE_FIT" })]));
@@ -374,7 +416,7 @@ describe("code-owned commerce effects and recovery", () => {
     const failure = { status: "VARIANT_UNAVAILABLE", reasonCode: "CART_SIZE_NOT_FOUND", availableSizes: ["M"], availableColors: ["NAVY"] };
     s.select.mockResolvedValue(failure as never);
     expect(await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: line.lineId, action: "SET_COMPONENT_VARIANT", componentRole: line.components[0]!.componentRole, size: "L" } }))
-      .toEqual({ status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE", data: {status:failure.status,reasonCode:failure.reasonCode,selectionStatus:failure.status,selectionOptions:[],selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY"} });
+      .toEqual({ status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE",failureStage:"SOURCE", data: {status:failure.status,reasonCode:failure.reasonCode,selectionStatus:failure.status,selectionOptions:[],selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY"} });
     expect(s.current()).toEqual(before); expect(s.commits).toHaveLength(1);
     expect(s.tools.snapshot().effectReceipts.some(r => r.effect === "CART_MUTATED")).toBe(false);
   });
