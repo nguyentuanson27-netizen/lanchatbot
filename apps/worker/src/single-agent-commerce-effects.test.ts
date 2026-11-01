@@ -120,9 +120,10 @@ describe("code-owned commerce effects and recovery", () => {
         return {kind:"FINAL",text:"Dạ chị."};},verifier:async()=>({result:{verdict:"PASS",violations:[]}})});
     expect(invoke).toHaveBeenCalledOnce();const results=await invoke.mock.results[0]!.value;
     expect(results[0]!.status).toBe("OK");expect(results).toHaveLength(2);
-    // The existing domain cannot confirm without customer checkout fields; it
-    // reaches that validation with a real cart instead of losing the tool.
-    expect(results[1]!.reason).not.toBe("SUBJECT_REF");expect(s.current().cart).not.toBeNull();
+    // Callable/admission continuity reaches the domain preview guard with a
+    // real cart. This does not prove checkout initiation or detail collection.
+    expect(results[1]).toMatchObject({status:"REJECTED",reason:"CONFIRMATION_OUTSIDE_ORDER_PREVIEW",failureStage:"DOMAIN"});
+    expect(s.current().cart).not.toBeNull();
   });
   it.each(["REPLACE_QUOTE","MULTI_EFFECT"])("retains native runtime batch continuity %s",async mode=>{
     const s=await setup();await s.tools.invoke(s.add);const before=structuredClone(s.current()),lineId=before.cart!.value.lines[0]!.lineId;
