@@ -147,6 +147,14 @@ describe("code-owned commerce effects and recovery", () => {
     expect(result.status).not.toBe("OK");expect(result.failureStage).toBe(stage);expect(s.current()).toEqual(before);
     expect(JSON.stringify(result)).not.toContain("COMMERCE_COMMIT_UNCONFIRMED");
   });
+  it.each([{quantity:null},{color:undefined},{targetSubjectRef:null},{targetSubjectRef:"UNKNOWN"},{color:{untrusted:"value"}}])("rejects malformed replacement before source or authorization work %j",async invalid=>{
+    const s=await setup();await s.tools.invoke(s.add);const before=structuredClone(s.current());
+    s.select.mockClear();s.authorize.mockClear();s.readPolicy.mockClear();
+    const args={subjectRef:before.cart!.value.lines[0]!.lineId,action:"REPLACE_LINE",targetSubjectRef:"SM613",offerType:"AO",size:"M",color:"navy",...invalid};
+    if(invalid.color===undefined&&Object.hasOwn(invalid,"color"))delete (args as Record<string,unknown>).color;
+    expect(await s.tools.invoke({name:"change_cart_item",args})).toMatchObject({status:"REJECTED",failureStage:"VALIDATION"});
+    expect(s.select).not.toHaveBeenCalled();expect(s.authorize).not.toHaveBeenCalled();expect(s.readPolicy).not.toHaveBeenCalled();expect(s.current()).toEqual(before);
+  });
   it("rejects a different transaction policy without rewriting the committed cart",async()=>{
     const s=await setup();expect((await s.tools.invoke(s.add)).status).toBe("OK");const before=structuredClone(s.current());
     s.readPolicy.mockResolvedValue((await fixturePolicy(30_000)).bundle!);

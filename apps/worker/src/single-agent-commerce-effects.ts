@@ -236,6 +236,10 @@ export async function createCommerceEffectTools(input: {
           a.action === "SET_QUANTITY" ? ["subjectRef", "action", "quantity"] :
           a.action === "SET_COMPONENT_VARIANT" ? ["subjectRef", "action", "componentRole", "size", "color"] : null;
         if (!fields || !toolArgs(a, fields)) return { status: "REJECTED", reason: "TOOL_ARGUMENTS" };
+        if(a.action==="REPLACE_LINE"&&(typeof a.targetSubjectRef!=="string"||!a.targetSubjectRef.trim()||
+          typeof a.offerType!=="string"||!a.offerType.trim()||!Object.hasOwn(a,"color")||
+          (a.quantity!==undefined&&(!Number.isInteger(a.quantity)||(a.quantity as number)<1||(a.quantity as number)>20))))
+          return {status:"REJECTED",reason:"REPLACEMENT_ARGUMENTS"};
       }
       for (const [field, max] of [["size", 16], ["color", 64], ["offerType", 64]] as const) {
         const value = a[field];
@@ -245,6 +249,9 @@ export async function createCommerceEffectTools(input: {
       const product = call.name === "add_to_cart" ? state && input.base.snapshot().boundSubjects.find(s => s.kind === "PRODUCT" && s.ref === a.subjectRef) : undefined;
       const line = current.cart?.value.lines.find(l => l.lineId === a.subjectRef);
       if ((call.name === "add_to_cart" && !product) || (call.name === "change_cart_item" && !line)) return { status: "REJECTED", reason: "SUBJECT_REF" };
+      const target=call.name==="change_cart_item"&&a.action==="REPLACE_LINE"?
+        input.base.snapshot().boundSubjects.find(s=>s.kind==="PRODUCT"&&s.ref===a.targetSubjectRef):undefined;
+      if(call.name==="change_cart_item"&&a.action==="REPLACE_LINE"&&!target)return {status:"REJECTED",reason:"SUBJECT_REF"};
       const effect = call.name === "confirm_purchase" ? "PURCHASE_CONFIRMATION" : current.cart ? "CART_MUTATION" : "CART_OPEN";
       phase="AUTHORITY";
       if (!await input.authorize(effect, current)) return { status: "REJECTED", reason: "EFFECT_PERMISSION" };
@@ -274,13 +281,9 @@ export async function createCommerceEffectTools(input: {
         } else mutation = { kind: "ADD_LINE", line: selected };
       } else if (call.name === "change_cart_item") {
         if (a.action === "REPLACE_LINE") {
-          const target = input.base.snapshot().boundSubjects.find(s => s.kind === "PRODUCT" && s.ref === a.targetSubjectRef);
-          if (!target || typeof a.offerType !== "string" || !a.offerType.trim() || !Object.hasOwn(a,"color") ||
-            (a.quantity !== undefined && (!Number.isInteger(a.quantity) || (a.quantity as number) < 1 || (a.quantity as number) > 20)))
-            return {status:"REJECTED",reason:"REPLACEMENT_ARGUMENTS"};
-          const selected = await selection(target.ref,{...a,quantity:a.quantity??line!.quantity},line!.lineId,a.offerType);
+          const selected = await selection(target!.ref,{...a,quantity:a.quantity??line!.quantity},line!.lineId,a.offerType as string);
           if (selected.status !== "READY") return {status:"UNAVAILABLE",reason:"SELECTION_UNAVAILABLE",data:selected};
-          if (normalizeCatalogToken(selected.line.offerId) !== normalizeCatalogToken(a.offerType) ||
+          if (normalizeCatalogToken(selected.line.offerId) !== normalizeCatalogToken(a.offerType as string) ||
             selected.line.quantity !== (a.quantity??line!.quantity) ||
             (typeof a.size==="string"&&selected.line.components.some(c=>normalizeCatalogToken(c.size??"")!==normalizeCatalogToken(a.size as string))) ||
             (typeof a.color==="string"&&selected.line.components.some(c=>normalizeCatalogToken(c.color??"")!==normalizeCatalogToken(a.color as string))))
