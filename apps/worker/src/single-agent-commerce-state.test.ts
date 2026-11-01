@@ -18,6 +18,18 @@ async function setup(sourceText = "Eo 74. Eo 85, mông 105.") {
   return { tools, store, sizeInput, getStored: () => stored, setStored: (s: CustomerProfileMergeState) => { stored = s; } };
 }
 describe("accepted effective state before dependent tools", () => {
+  it("keeps correction→size through actual runtime and native declarations",async()=>{
+    const s=await setup(),tools={...s.tools,availableTools:["apply_customer_state","recommend_size"]};let n=0;
+    const {buildGeminiCommerceRequest}=await import(new URL("../evals/single-agent-commerce-read-only/gemini-inference.mjs",import.meta.url).href);
+    const calls=[{name:"recommend_size",args:{subjectRef:"QU714"}},{name:"apply_customer_state",args:{ops:[
+      {op:"SET",field:"measurements.WAIST_CM",value:85,sourceQuote:"85"},{op:"SET",field:"measurements.HIPS_CM",value:105,sourceQuote:"105"}]}}];
+    const result=await runCommerceTurn({scope:commerceScope(),tools,clock:()=>commerceNow,latest:"Eo 85, mông 105.",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",
+      owner:async r=>{const wire=buildGeminiCommerceRequest(r);expect(wire.tools.flatMap((t:{functionDeclarations:{name:string}[]})=>t.functionDeclarations.map(d=>d.name))).toEqual(r.callableTools);
+        return n++===0?{kind:"TOOLS",calls,content:{role:"model",parts:calls.map(functionCall=>({functionCall}))}}:{kind:"FINAL",text:"Mình chọn L chị nhé."};},
+      verifier:async r=>{expect(r.trusted.protectedClaims).toContainEqual(expect.objectContaining({type:"SIZE_FIT",value:expect.objectContaining({recommendedSizes:[{size:"L"}]})}));return {result:{verdict:"PASS",violations:[]}};}});
+    expect(result.rejectedToolCalls).toBe(0);expect(s.getStored().profile.measurements).toContainEqual(expect.objectContaining({kind:"WAIST_CM",value:85}));
+    expect(result.verifierGenerations).toBe(1);
+  });
   it("does not substitute product fit for a component request or write its inline state", async () => {
     const s=await setup("Eo 74.");
     const result=await s.tools.invoke({name:"recommend_size",args:{subjectRef:"QU714",fitScope:"COMPONENT",componentRole:"PANTS",

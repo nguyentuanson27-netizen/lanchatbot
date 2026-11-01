@@ -9,6 +9,8 @@ import { commerceNow, commerceScope, fixturePolicy, fixtureProduct, fixtureProfi
 import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-catalog.js";
 import { cartSelectionFromSnapshot } from "./realtime-sales-catalog.js";
 import { CommerceEffectCommitError } from "./single-agent-commerce-effect-failure.js";
+import { createCustomerStateTools } from "./single-agent-commerce-state.js";
+import { canonicalCartPolicyLinesV2 } from "@lana/business-tools";
 
 const bankPolicy = { policyId: "synthetic-bank", version: "1", bankName: "Synthetic bank", accountNumber: "118619000",
   accountHolder: "SYNTHETIC TEST", qrImageUrl: "https://example.invalid/qr.png", customerInstruction: "Thông tin thanh toán từ code.",
@@ -106,6 +108,46 @@ it.each(["quantity","selector","invalid","policy","heartbeat"])("revalidates sel
  await expect(s.tools.readback()).rejects.toThrow("SELECTION_EVIDENCE_CHANGED");
 });
 describe("code-owned commerce effects and recovery", () => {
+  it("retains add→confirm in the actual runtime/native wire before a cart exists",async()=>{
+    const s=await setup(),tools={...s.tools,availableTools:["add_to_cart","confirm_purchase"]};
+    const invoke=vi.spyOn(tools,"invokeBatch");let n=0;
+    const {buildGeminiCommerceRequest}=await import(new URL("../evals/single-agent-commerce-read-only/gemini-inference.mjs",import.meta.url).href);
+    const calls=[s.add,{name:"confirm_purchase",args:{}}];
+    await runCommerceTurn({scope:s.scope,tools,clock:()=>commerceNow,latest:"Chị lấy áo M navy, chốt cho chị.",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",
+      owner:async r=>{const wire=buildGeminiCommerceRequest(r);expect(wire.tools.flatMap((t:{functionDeclarations:{name:string}[]})=>t.functionDeclarations.map(d=>d.name))).toEqual(r.callableTools);
+        if(n++===0){expect(r.context.state.cartItems).toEqual([]);expect(r.callableTools).toContain("confirm_purchase");
+          return {kind:"TOOLS",calls,content:{role:"model",parts:calls.map(functionCall=>({functionCall}))}};}
+        return {kind:"FINAL",text:"Dạ chị."};},verifier:async()=>({result:{verdict:"PASS",violations:[]}})});
+    expect(invoke).toHaveBeenCalledOnce();const results=await invoke.mock.results[0]!.value;
+    expect(results[0]!.status).toBe("OK");expect(results).toHaveLength(2);
+    // The existing domain cannot confirm without customer checkout fields; it
+    // reaches that validation with a real cart instead of losing the tool.
+    expect(results[1]!.reason).not.toBe("SUBJECT_REF");expect(s.current().cart).not.toBeNull();
+  });
+  it.each(["REPLACE_QUOTE","MULTI_EFFECT"])("retains native runtime batch continuity %s",async mode=>{
+    const s=await setup();await s.tools.invoke(s.add);const before=structuredClone(s.current()),lineId=before.cart!.value.lines[0]!.lineId;
+    const base=await createCustomerStateTools({base:s.base,scope:s.scope,clock:()=>commerceNow,
+      store:{read:async()=>fixtureProfile(),compareAndSwap:async()=>false},sourceMessages:[],sizeInput:async()=>{throw Error("NOT_USED");},
+      quoteInput:async()=>({policy:s.policy.policy,lines:canonicalCartPolicyLinesV2(s.current().cart!.value.lines,s.scope.shopId)!,now:commerceNow,
+        closingEvidence:{previousState:null,purchaseReady:true,priceObjectionCount:0,secondConcessionAlreadyApplied:false}})});
+    const selected=await s.select();s.select.mockImplementation(async q=>{
+      const next=structuredClone(selected);next.line.quantity=q?.quantity??1;next.line.lineTotalVnd=next.line.posUnitPriceVnd!*next.line.quantity;
+      if(q?.offerType==="AO"){next.line.offerId="AO";next.line.priceAuthority!.offerId="AO";}
+      next.line.components[0]!.size=q?.size??"M";return next;
+    });
+    const effects=await createCommerceEffectTools({base,scope:s.scope,clock:()=>commerceNow,conversationKey:"test-cycle",repository:s.repository,
+      identity:before.cart!.value,authorize:s.authorize,policy:async()=>s.policy,select:s.select});
+    const tools={...effects,availableTools:["change_cart_item","quote_cart"]},seen=vi.spyOn(tools,"invokeBatch");let n=0;
+    const calls=mode==="REPLACE_QUOTE"?[{name:"change_cart_item",args:{subjectRef:lineId,action:"REPLACE_LINE",targetSubjectRef:"SM613",offerType:"AO",size:"M",color:"navy"}},{name:"quote_cart",args:{}}]:
+      [{name:"change_cart_item",args:{subjectRef:lineId,action:"SET_QUANTITY",quantity:2}},{name:"change_cart_item",args:{subjectRef:lineId,action:"SET_QUANTITY",quantity:3}}];
+    const {buildGeminiCommerceRequest}=await import(new URL("../evals/single-agent-commerce-read-only/gemini-inference.mjs",import.meta.url).href);
+    await runCommerceTurn({scope:s.scope,tools,clock:()=>commerceNow,latest:"Đổi lựa chọn cho chị.",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",
+      owner:async r=>{const wire=buildGeminiCommerceRequest(r);expect(wire.tools.flatMap((t:{functionDeclarations:{name:string}[]})=>t.functionDeclarations.map(d=>d.name))).toEqual(r.callableTools);
+        return n++===0?{kind:"TOOLS",calls,content:{role:"model",parts:calls.map(functionCall=>({functionCall}))}}:{kind:"FINAL",text:"Dạ chị."};},verifier:async()=>({result:{verdict:"PASS",violations:[]}})});
+    expect(seen).toHaveBeenCalledOnce();expect((await seen.mock.results[0]!.value).map((r:{status:string})=>r.status)).toEqual(["OK","OK"]);
+    expect(s.current().cart!.value.lines[0]!.offerId).toBe(mode==="REPLACE_QUOTE"?"AO":before.cart!.value.lines[0]!.offerId);
+    expect(s.commits).toHaveLength(mode==="REPLACE_QUOTE"?2:3);
+  });
   it("replaces the only line with a verified offer and does not reapply its receipt",async()=>{
     const s=await setup();await s.tools.invoke(s.add);
     const before=structuredClone(s.current()),line=before.cart!.value.lines[0]!;
@@ -154,6 +196,24 @@ describe("code-owned commerce effects and recovery", () => {
     if(invalid.color===undefined&&Object.hasOwn(invalid,"color"))delete (args as Record<string,unknown>).color;
     expect(await s.tools.invoke({name:"change_cart_item",args})).toMatchObject({status:"REJECTED",failureStage:"VALIDATION"});
     expect(s.select).not.toHaveBeenCalled();expect(s.authorize).not.toHaveBeenCalled();expect(s.readPolicy).not.toHaveBeenCalled();expect(s.current()).toEqual(before);
+  });
+  it.each(["permission","privacy","recipient","binding","revision","expiry"])("rechecks replacement %s after target preflight and before commit",async mode=>{
+    let now=commerceNow;const s=await setup(()=>now);await s.tools.invoke(s.add);const before=structuredClone(s.current());
+    const old=await s.select(),target={...structuredClone(old),sourceExpiresAt:new Date(commerceNow.getTime()+10).toISOString()};target.line.offerId="AO";target.line.priceAuthority!.offerId="AO";
+    const authority={...s.scope};let selected=false;
+    const tools=await createCommerceEffectTools({base:s.base,scope:s.scope,clock:()=>now,conversationKey:"test-cycle",repository:s.repository,identity:before.cart!.value,
+      authorize:async()=>{if(selected&&mode==="expiry")now=new Date(commerceNow.getTime()+20);return true;},policy:async()=>s.policy,readAuthority:async()=>({...authority}),
+      select:async q=>{
+        if(q.offerType!=="AO")return old;
+        selected=true;
+        if(mode==="permission")authority.permission=false;if(mode==="privacy")authority.privacyAllowed=false;
+        if(mode==="recipient")authority.recipient="different-recipient";if(mode==="binding")authority.bindingVersion="new-binding";
+        if(mode==="revision")s.setCurrent({...before,revision:before.revision+1});
+        return target;
+      }});
+    const r=await tools.invoke({name:"change_cart_item",args:{subjectRef:before.cart!.value.lines[0]!.lineId,action:"REPLACE_LINE",targetSubjectRef:"SM613",offerType:"AO",size:"M",color:"navy"}});
+    expect(r.status).not.toBe("OK");expect(r.failureStage).toBe(mode==="expiry"?"SOURCE":mode==="revision"?"CAS":"AUTHORITY");
+    expect(s.current().cart).toEqual(before.cart);expect(s.commits).toHaveLength(1);
   });
   it("rejects a different transaction policy without rewriting the committed cart",async()=>{
     const s=await setup();expect((await s.tools.invoke(s.add)).status).toBe("OK");const before=structuredClone(s.current());

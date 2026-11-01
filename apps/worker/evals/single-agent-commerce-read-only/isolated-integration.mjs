@@ -208,7 +208,9 @@ try{
   }
  });
  const sourceAt=new Date(Date.now()-60000).toISOString(),sourceExpiresAt=new Date(Date.parse(sourceAt)+172800000).toISOString();
- const selected=query=>{const line=fixtureCartLine();line.priceAuthority.shopId=scope.shopId;line.priceAuthority.priceFactRef='synthetic-pos-v1';line.priceAuthority.metadata.sourceVersion='synthetic-pos-v1';line.priceAuthority.metadata.observedAt=sourceAt;line.priceAuthority.metadata.expiresAt=sourceExpiresAt;
+ const selected=query=>{
+  if(replacementFault==='SOURCE_UNAVAILABLE'&&query.offerType==='AO')return {status:'NOT_FOUND',reasonCode:'CATALOG_SNAPSHOT_NOT_FOUND',availableSizes:[],availableColors:[]};
+  const line=fixtureCartLine();line.priceAuthority.shopId=scope.shopId;line.priceAuthority.priceFactRef='synthetic-pos-v1';line.priceAuthority.metadata.sourceVersion='synthetic-pos-v1';line.priceAuthority.metadata.observedAt=sourceAt;line.priceAuthority.metadata.expiresAt=sourceExpiresAt;
   line.lineId=query.lineId??line.lineId;line.components=line.components.map(c=>({...c,size:query.size??c.size,color:query.color??c.color,componentSku:'SM613-'+(query.color??c.color)+'-'+(query.size??c.size)}));line.quantity=query.quantity;line.lineTotalVnd=line.posUnitPriceVnd*line.quantity;
   if(['SET_VAY','AO'].includes(query.offerType)){
    line.offerId=query.offerType;line.offerKind=query.offerType==='AO'?'COMPONENT':'SET';line.allowComponentSale=true;
@@ -220,7 +222,10 @@ try{
   }
   return {status:'READY',line,shopId:scope.shopId,versions:{price:'synthetic-pos-v1',inventory:'synthetic-stock-v1',size:'synthetic-size-v1',eta:query.deliveryAddress?'synthetic-eta-v1':null},
    eta:query.deliveryAddress?{minDays:3,maxDays:6}:null,etaExpiresAt:query.deliveryAddress?new Date(Date.now()+1200000).toISOString():null,
-   sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:query.size==='L'?8:14,stockCounter:{source:'PANCAKE_DIRECT',unit:'ITEM',identity:aliasStockCounter?'shared-counter':JSON.stringify(['SM613',query.color??'navy',query.size??'M'])},sourceObservedAt:sourceAt,sourceExpiresAt};};
+   sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:query.size==='L'?8:14,
+   stockCounter:query.offerType==='SET_VAY'?{source:'PANCAKE_PARENT',unit:'PARENT_OFFER',identity:JSON.stringify(['SM613','SET_VAY',query.color??'navy',query.size??'M'])}:
+    {source:'PANCAKE_DIRECT',unit:'ITEM',identity:aliasStockCounter?'shared-counter':JSON.stringify(['SM613',query.color??'navy',query.size??'M'])},
+   sourceObservedAt:sourceAt,sourceExpiresAt:replacementFault==='SOURCE_EXPIRED'&&query.offerType==='AO'?new Date(Date.now()-1000).toISOString():sourceExpiresAt};};
  const identities={cartId:randomUUID(),salesEpisodeId:randomUUID(),customerProfileId:randomUUID()};
  let lastResult,failAfterCommit=false,activePaymentMessageCount=0,tamperVariant=false,aliasStockCounter=false;
  async function persistOutput(output,before,current,effects){
@@ -237,13 +242,17 @@ try{
   try{
    const batch=activePrepared.salesCyclePlan?.cartMutationBatchEvidence;
    const receipt=batch?.receipts.find(r=>r.mutation.kind==='REPLACE_LINE');
-   if(receipt&&['OLD_BINDING','TARGET_SCOPE','PAYLOAD','RECEIPT'].includes(replacementFault)){
+   if(receipt&&['OLD_BINDING','OLD_PRODUCT','OLD_OFFER','OLD_LINE','TARGET_SCOPE','TARGET_OFFER','PAYLOAD','RECEIPT','BEFORE_CART'].includes(replacementFault)){
     if(replacementFault==='OLD_BINDING')receipt.authority.replacedLine.beforeLineHash='f'.repeat(64);
+    if(replacementFault==='OLD_PRODUCT')receipt.authority.replacedLine.productId='OTHER';
+    if(replacementFault==='OLD_OFFER')receipt.authority.replacedLine.offerId='OTHER';
+    if(replacementFault==='OLD_LINE')receipt.authority.replacedLine.lineId=randomUUID();
     if(replacementFault==='TARGET_SCOPE')receipt.authority.productId='OTHER';
+    if(replacementFault==='TARGET_OFFER')receipt.authority.offerId='OTHER';
     if(replacementFault==='PAYLOAD')receipt.mutation.line.quantity++;
     if(replacementFault==='RECEIPT')receipt.commandIdHash='e'.repeat(64);
     const contracts=await import('@lana/contracts');
-    if(replacementFault==='OLD_BINDING'){
+    if(['OLD_BINDING','OLD_PRODUCT','OLD_OFFER'].includes(replacementFault)){
      receipt.authority.bindingHash=hash(contracts.cartMutationAuthorityBindingHashPreimageV1(receipt.authority));
      receipt.evidenceHash=hash(contracts.cartMutationReceiptHashPreimageV1(receipt));
      batch.evidenceHash=hash(contracts.cartMutationBatchEvidenceHashPreimageV1(batch));
@@ -251,6 +260,7 @@ try{
      readiness.deterministicEvidenceHash=receipt.evidenceHash;
      readiness.readinessHash=hash(contracts.deterministicEffectReadinessHashPreimageV1(readiness));
     }
+    if(replacementFault==='BEFORE_CART'){batch.initialCartStateHash='0'.repeat(64);batch.evidenceHash=hash(contracts.cartMutationBatchEvidenceHashPreimageV1(batch));}
    }
    if(receipt&&replacementFault==='CAPTURE'){capturedReplacementPlans.push(structuredClone(activePrepared));throw Error('CONTROLLED_CAPTURE_ONLY');}
    assert(await repository.compareAndSwap({conversationKey:key,expectedRevision:before.revision,nextState:output.plan.state,effects}));
@@ -273,6 +283,7 @@ try{
    report.domainDiagnostic={planner:output.reasonCode,directStatus:diagnostic.status,directReason:diagnostic.reasonCode};save();
    return {status:'REJECTED',state:before,reasonCode:output.reasonCode??'PLAN_UNAVAILABLE'};}
   if(tamperVariant)output.plan.state.cart.value.lines.at(-1).components[0].size='XL';
+  if(replacementFault==='TARGET_SOURCE')output.plan.state.cart.value.lines.at(-1).priceAuthority.metadata.sourceVersion='tampered';
   await persistOutput(output,before,current,output.transferToHuman?{
    pancakeTagCommand:buildPurchaseConfirmedTagCommand({pageId,conversationId:key,confirmation:output.plan.state.confirmation}),transferToHuman:true,
    confirmation:output.plan.state.confirmation,handoffDecision:null,paymentMessageIntent:paymentMethod==='BANK_TRANSFER'?{idempotencyKey:'synthetic-payment-intent'}:null}:noEffects);
@@ -314,17 +325,31 @@ try{
    assert.equal((await t.invoke(replacement(lineId,offer))).status,'OK');assert.deepEqual(await repository.read(key),after);
   }
  });
- for(const fault of ['WRONG_SIZE','WRONG_COLOR','OLD_BINDING','TARGET_SCOPE','PAYLOAD','RECEIPT','ROLLBACK']){
+ for(const fault of ['WRONG_SIZE','WRONG_COLOR','SOURCE_UNAVAILABLE','SOURCE_EXPIRED','OLD_BINDING','OLD_PRODUCT','OLD_OFFER','OLD_LINE','TARGET_SCOPE','TARGET_OFFER','TARGET_SOURCE','PAYLOAD','RECEIPT','BEFORE_CART','ROLLBACK']){
   await check('C replacement atomic rejection '+fault,async()=>{
    await message('Đổi sang áo M navy.');const before=await repository.read(key),t=await effects();replacementFault=fault;
    let result;try{result=await t.invoke(replacement(before.cart.value.lines[0].lineId,'AO'));assert.notEqual(result.status,'OK');}
    finally{replacementFault=null;}
    assert.deepEqual(await repository.read(key),before);assert(!t.snapshot().effectReceipts.some(r=>r.effect==='CART_MUTATED'));
-   if(['WRONG_SIZE','WRONG_COLOR'].includes(fault))assert.equal(result.failureStage,'SOURCE');
-   if(fault==='OLD_BINDING')assert.equal(report.transactionDiagnostic.error,'CART_MUTATION_OLD_LINE_MISMATCH');
+   if(['WRONG_SIZE','WRONG_COLOR','SOURCE_UNAVAILABLE','SOURCE_EXPIRED'].includes(fault))assert.equal(result.failureStage,'SOURCE');
+   if(['OLD_BINDING','OLD_PRODUCT','OLD_OFFER'].includes(fault))assert.equal(report.transactionDiagnostic.error,'CART_MUTATION_OLD_LINE_MISMATCH');
    await completeRejectedSource();
   });
  }
+ await check('C replacement preserves another line and rejects combined demand above verified stock',async()=>{
+  await message('Lấy thêm áo L navy.');let t=await effects();
+  assert.equal((await t.invoke({name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'L',color:'navy',quantity:1}})).status,'OK');
+  let before=await repository.read(key);const kept=before.cart.value.lines.find(l=>l.components[0].size==='M'),changed=before.cart.value.lines.find(l=>l.components[0].size==='L');
+  assert(kept&&changed);await message('Đổi dòng L sang set L.');t=await effects();
+  assert.equal((await t.invoke({...replacement(changed.lineId,'SET_VAY'),args:{...replacement(changed.lineId,'SET_VAY').args,size:'L'}})).status,'OK');
+  let after=await repository.read(key);assert.deepEqual(after.cart.value.lines.find(l=>l.lineId===kept.lineId),kept);
+  assert.equal(after.cart.value.lines.find(l=>l.lineId===changed.lineId).components.length,2);
+  await message('Đổi dòng set sang 14 áo M.');before=await repository.read(key);t=await effects();
+  assert.notEqual((await t.invoke({...replacement(changed.lineId,'DIRECT'),args:{...replacement(changed.lineId,'DIRECT').args,quantity:14}})).status,'OK');
+  assert.deepEqual(await repository.read(key),before);await completeRejectedSource();
+  await message('Bỏ dòng set L, giữ áo M.');t=await effects();assert.equal((await t.invoke({name:'change_cart_item',args:{subjectRef:changed.lineId,action:'REMOVE_LINE'}})).status,'OK');
+  after=await repository.read(key);assert.deepEqual(after.cart.value.lines,[kept]);
+ });
  await check('C replacement concurrent transaction plans permit exactly one writer',async()=>{
   await message('Đổi lựa chọn mua.');const before=await repository.read(key),lineId=before.cart.value.lines[0].lineId;
   capturedReplacementPlans.length=0;replacementFault='CAPTURE';
