@@ -18,6 +18,22 @@ async function setup(sourceText = "Eo 74. Eo 85, mông 105.") {
   return { tools, store, sizeInput, getStored: () => stored, setStored: (s: CustomerProfileMergeState) => { stored = s; } };
 }
 describe("accepted effective state before dependent tools", () => {
+  it("does not substitute product fit for a component request or write its inline state", async () => {
+    const s=await setup("Eo 74.");
+    const result=await s.tools.invoke({name:"recommend_size",args:{subjectRef:"QU714",fitScope:"COMPONENT",componentRole:"PANTS",
+      customerStateOps:[{op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"74"}]}});
+    expect(result).toMatchObject({status:"UNAVAILABLE",reason:"SIZE_SOURCE_UNAVAILABLE"});
+    expect(s.sizeInput).not.toHaveBeenCalled();expect(s.store.compareAndSwap).not.toHaveBeenCalled();
+    expect(s.tools.snapshot().protectedClaims).not.toEqual(expect.arrayContaining([expect.objectContaining({type:"SIZE_FIT"})]));
+  });
+  it("marks legacy product fit as product-only without blocking a valid size request",async()=>{
+    const s=await setup();const result=await s.tools.invoke({name:"recommend_size",args:{subjectRef:"QU714"}});
+    expect(result).toMatchObject({status:"OK",data:{status:"RECOMMENDED",fitScope:{kind:"PRODUCT",productId:"QU714"},unsupportedScopes:["COMPONENT"]}});
+  });
+  it.each([{fitScope:null},{fitScope:"OTHER"},{fitScope:"COMPONENT"},{componentRole:"TOP"},{fitScope:"PRODUCT",componentRole:"TOP"},{fitScope:"COMPONENT",componentRole:"BOGUS"}])("rejects invalid sizing scope before state or engine: %j",async args=>{
+    const s=await setup();expect((await s.tools.invoke({name:"recommend_size",args:{subjectRef:"QU714",...args}})).status).toBe("REJECTED");
+    expect(s.sizeInput).not.toHaveBeenCalled();expect(s.store.compareAndSwap).not.toHaveBeenCalled();
+  });
   it("commits inline size inputs before calculation without a second tool call", async () => {
     const s = await setup("Eo 74, mông 96.");
     const result = await s.tools.invoke({name:"recommend_size",args:{subjectRef:"QU714",customerStateOps:[

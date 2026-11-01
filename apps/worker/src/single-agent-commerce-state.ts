@@ -47,6 +47,12 @@ const measurementReasons: Record<string, string> = {
   MEASUREMENT_VALUE: "VALUE_DOES_NOT_MATCH_QUOTE",
 };
 export interface CustomerStateSourceMessage { text: string; sourceMessageId: string; observedAt: string }
+/** Structured argument validation only; never interprets a customer's wording. */
+export function sizeRequestScope(a:{fitScope?:unknown;componentRole?:unknown}):"PRODUCT"|"COMPONENT"|null {
+  const scope=a.fitScope===undefined?"PRODUCT":a.fitScope;
+  if(scope==="PRODUCT")return a.componentRole===undefined?"PRODUCT":null;
+  return scope==="COMPONENT"&&["TOP","PANTS","SKIRT","DRESS","OTHER"].includes(a.componentRole as string)?"COMPONENT":null;
+}
 /** Numeric copy check only; the owner still interprets field, referent and correction meaning. */
 function measurementSource(sources: readonly CustomerStateSourceMessage[], quote: unknown, kind: MeasurementKind,
   value: unknown, scope: CommerceScope, now: Date) {
@@ -232,8 +238,14 @@ export async function createCustomerStateTools(input: {
         return result.status === "OK" ? result : { ...result, data: { ...result.data as Record<string, unknown>, ...(!commitUnconfirmed ? { applied: false } : {}), unresolvedFields: [...pendingFields] } };
       }
       if (call.name === "recommend_size") {
-        const a = toolArgs(call.args, ["subjectRef", "customerStateOps"]);
+        const a = toolArgs(call.args, ["subjectRef", "customerStateOps", "fitScope", "componentRole"]);
         if (!a || typeof a.subjectRef !== "string" || !snapshot().boundSubjects.some(s => s.kind === "PRODUCT" && s.ref === a.subjectRef)) return { status: "REJECTED", reason: "STATE_OR_REF" };
+        const fitScope=sizeRequestScope(a);
+        if (!fitScope) return {status:"REJECTED",reason:"STATE_OR_REF"};
+        // The existing port targets a product. Never turn an unsupported component request
+        // into a product calculation, nor commit inline inputs as a side effect of that request.
+        if (fitScope==="COMPONENT") {blockedDependencies=true;sizes.clear();sizeOutcome={status:"NO_VERIFIED_CHART"};
+          return {status:"UNAVAILABLE",reason:"SIZE_SOURCE_UNAVAILABLE"};}
         // A single explicit size request may carry new customer inputs. Reuse the
         // exact writer (validation, CAS, readback, receipt), never calculate on a rejected patch.
         if (a.customerStateOps !== undefined) {
@@ -251,6 +263,7 @@ export async function createCustomerStateTools(input: {
         sizes.set(a.subjectRef, { claims: buildProtectedClaimsFromVerifiedFactsV1({ facts: null, sizeClaim: claim, expectedProductId: a.subjectRef }).claims,
           fingerprint: claim?.measurementFingerprint, profileHash: profileHash(), sourceHash: commerceHash({ target: source.target, charts: source.charts }) });
         return { status: "OK", data: { status: decision.recommendation.status, action: decision.action,
+          fitScope:{kind:"PRODUCT",productId:a.subjectRef},unsupportedScopes:["COMPONENT"],
           sizeSourceHash:commerceHash({target:source.target,charts:source.charts}),
           missingInputs: decision.missingInputs, recommendedSizes: claim ? decision.recommendation.recommendedSizes : [],
           inputFitPreference:effective.profile.fitPreference, alternativeSizes:claim?.value.alternativeSizes??null } };

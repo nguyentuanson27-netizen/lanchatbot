@@ -3,6 +3,7 @@ import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {createServiceAccountAssertion,vertexGenerateEndpoint} from '../../dist/vertex.js';
 import {omitCurrentProductDuplicates} from '../../dist/single-agent-commerce-read-only-context.js';
+import {sizeRequestScope} from '../../dist/single-agent-commerce-state.js';
 import {HandoffReasonV2Schema,canonicalJsonV1,CustomerProfileV1Schema,CommerceHistoryMetadataV1Schema} from '@lana/contracts';
 import {presentOwnerData,presentCompactOwnerData} from './owner-data-presentation.mjs';
 
@@ -58,10 +59,11 @@ export const stateDeclarations=[
 ];
 // Reuse the same input contract for an explicit update-and-recommend operation.
 const sizeDeclaration=stateDeclarations.find(d=>d.name==='recommend_size');
-sizeDeclaration.description='Chọn size bằng hồ sơ và bảng size đúng sản phẩm. Khách vừa cho/sửa thông tin thì truyền customerStateOps theo cùng schema ghi hồ sơ; code kiểm chứng, ghi và đọc lại trước khi chọn size. Không gọi apply_customer_state riêng cho cùng thông tin trong batch này. Không có thông tin mới thì bỏ customerStateOps. Kết quả lỗi không cấp size; thiếu đầu vào thì hỏi đúng phần tool yêu cầu.';
+sizeDeclaration.description='Chọn size bằng hồ sơ và bảng size đúng sản phẩm. PRODUCT là fit cấp sản phẩm, không cấp fit riêng áo/quần/chân váy. Khách nhờ chọn size từng phần thì truyền fitScope COMPONENT và componentRole; thiếu nguồn đúng phần code sẽ handoff, không dùng PRODUCT thay thế. Khách vừa cho/sửa thông tin thì truyền customerStateOps theo cùng schema ghi hồ sơ; code kiểm chứng, ghi và đọc lại trước khi chọn size. Không gọi apply_customer_state riêng cho cùng thông tin trong batch này. Không có thông tin mới thì bỏ customerStateOps. Kết quả lỗi không cấp size; thiếu đầu vào thì hỏi đúng phần tool yêu cầu.';
 delete sizeDeclaration.parameters;
 sizeDeclaration.parametersJsonSchema={type:'object',additionalProperties:false,required:['subjectRef'],properties:{
- subjectRef:{type:'string'},customerStateOps:structuredClone(stateDeclarations[0].parametersJsonSchema.properties.ops)}};
+ subjectRef:{type:'string'},fitScope:{type:'string',enum:['PRODUCT','COMPONENT']},componentRole:{type:'string',enum:['TOP','PANTS','SKIRT','DRESS','OTHER']},
+ customerStateOps:structuredClone(stateDeclarations[0].parametersJsonSchema.properties.ops)}};
 export const quoteDeclarations=[{name:'quote_product',description:'Báo giá mở đầu kèm ảnh cho khách mới hỏi giá mẫu đã xác định. Gọi riêng một mình trong batch, chọn đúng 1–2 offerTypes từ nguồn. Code đọc giá và chọn ảnh GENERIC cùng mẫu/màu trước khi trả kết quả. Không dùng khi hỏi lại giá, deadline, chọn size, tồn size cụ thể, sửa giỏ hoặc yêu cầu ảnh feedback/detail; dùng công cụ tương ứng. Không gọi lại trong lượt. Kết quả chỉ chuẩn bị, chưa gửi; thiếu nguồn cần thiết thì code handoff im lặng.',parametersJsonSchema:{type:'object',additionalProperties:false,required:['subjectRef','offerTypes'],properties:{subjectRef:{type:'string'},offerTypes:{type:'array',items:{type:'string',minLength:1,maxLength:64},minItems:1,maxItems:2,uniqueItems:true},color:{type:'string',minLength:1,maxLength:64}}}}];
 export const effectDeclarations=[
  {name:'record_negotiation',description:'Khách phản đối giá hoặc nói sẵn sàng mua giỏ hiện tại thì báo ý nghĩa tin đó bằng PRICE_OBJECTION/PURCHASE_READY. sourceQuote trích nguyên văn từ tin hiện tại; không lấy history. Hỏi giá/tổng tiền thông thường hoặc chê kiểu dáng không phải phản đối giá. Code kiểm nguồn, tự quyết ưu đãi và trả current cartQuote. Dùng quyền lợi vừa được xác nhận để đáp phản đối giá trước khi mời mua thêm; không nói không có hỗ trợ khi quote có ưu đãi và không gọi tổng ưu đãi đang có là giảm thêm. Không truyền tiền, tier hay policy; không hứa giảm trước kết quả.',parameters:{type:'OBJECT',properties:{intent:{type:'STRING',enum:['PRICE_OBJECTION','PURCHASE_READY']},sourceQuote:{type:'STRING',maxLength:512}},required:['intent','sourceQuote']}},
@@ -317,6 +319,7 @@ export function parseGeminiGeneration(body){
     check(selection==='DETAILS_ONLY'&&!Object.hasOwn(args,'offerType')&&!Object.hasOwn(args,'offerTypes'),'selection');
     return {...c,args:{...args,detailsOnly:true}};
    }
+   if(c.name==='recommend_size')check(Object.keys(c.args).every(k=>['subjectRef','customerStateOps','fitScope','componentRole'].includes(k))&&sizeRequestScope(c.args)!==null,'fitScope');
    const opsKey=c.name==='apply_customer_state'?'ops':c.name==='recommend_size'&&Object.hasOwn(c.args,'customerStateOps')?'customerStateOps':null;
    if(!opsKey)return c;
    check(Array.isArray(c.args[opsKey])&&c.args[opsKey].every(op=>op&&Object.hasOwn(stateFieldPaths,op.field)),opsKey);

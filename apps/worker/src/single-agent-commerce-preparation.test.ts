@@ -1,6 +1,7 @@
 import {it,expect,vi} from "vitest";
 import {createReadOnlyTools} from "./single-agent-commerce-read-only-tools.js";
-import {fixtureProduct,fixturePolicy,commerceScope,commerceNow} from "./single-agent-commerce.test-support.js";
+import {fixtureProduct,fixturePolicy,fixtureSizeInput,commerceScope,commerceNow} from "./single-agent-commerce.test-support.js";
+import {finalGate,makeBinding} from "./single-agent-semantic-verifier-boundary.js";
 import {createCommerceTools} from "./single-agent-commerce.js";
 import {runCommerceTurn} from "./single-agent-commerce-read-only.js";
 const setup=(mode="normal")=>{
@@ -10,6 +11,57 @@ const setup=(mode="normal")=>{
   catalog:{readProduct,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
  return {f,readProduct,tools};
 };
+it.each([true,false])("publishes late policy charts before verification, numeric preparation=%s",async numeric=>{
+ const f=fixtureProduct(),policy=await fixturePolicy();
+ Object.assign(policy.bundle!.artifacts,{sizeCharts:{chart:fixtureSizeInput(f.product.productId).charts[0]}});
+ const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:async()=>structuredClone(policy),initialProducts:[f.product],prepareCurrentOffers:numeric,
+  catalog:{readProduct:async()=>structuredClone(f),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+ await tools.prepare(()=>true);expect((await tools.invoke({name:"read_policy",args:{}})).status).toBe("OK");
+ const trusted=tools.snapshot();expect(trusted.runtimeProducts?.[0]?.sizeCharts).toHaveLength(1);
+ const draft="Dạ chị.",binding=makeBinding("turn",draft,trusted),current=await tools.readback();expect(current).toEqual(trusted);
+ expect(finalGate({expected:binding,response:{kind:"VERDICT",binding,result:{verdict:"PASS",violations:[]}},current,finalDraft:draft,now:commerceNow}).disposition).toBe("SEND_ELIGIBLE");
+ Object.assign(policy.bundle!.artifacts,{sizeCharts:{}});
+ const revoked=await tools.readback();expect(revoked.runtimeProducts?.[0]?.sizeCharts??[]).toEqual([]);
+ expect(finalGate({expected:binding,response:{kind:"VERDICT",binding,result:{verdict:"PASS",violations:[]}},current:revoked,finalDraft:draft,now:commerceNow}).disposition).not.toBe("SEND_ELIGIBLE");
+});
+it("rejects failed chart publication atomically and revokes old charts without erasing independent facts",async()=>{
+ const f=fixtureProduct(),policy=await fixturePolicy(),chart=fixtureSizeInput(f.product.productId).charts[0]!;
+ Object.assign(policy.bundle!.artifacts,{sizeCharts:{chart}});
+ const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:async()=>structuredClone(policy),initialProducts:[f.product],prepareCurrentOffers:true,
+  catalog:{readProduct:async()=>structuredClone(f),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+ await tools.prepare(()=>true);await tools.invoke({name:"read_policy",args:{}});const before=tools.snapshot();
+ Object.assign(policy.bundle!.artifacts,{sizeCharts:Object.fromEntries(Array.from({length:5},(_,i)=>[String(i),chart]))});
+ expect(await tools.invoke({name:"read_policy",args:{}})).toMatchObject({status:"UNAVAILABLE",reason:"POLICY_UNAVAILABLE"});
+ const failed=tools.snapshot();expect(failed.protectedClaims).toEqual(before.protectedClaims);expect(failed.runtimeProducts?.[0]?.sizeCharts).toBeUndefined();
+ expect(failed.policyLiterals.some(p=>p.ref.startsWith("policy:"))).toBe(false);
+ await expect(tools.readback()).rejects.toThrow("POLICY_READBACK_UNAVAILABLE");
+});
+it("uses the current policy after a pending catalog read, with no cross-product chart inheritance",async()=>{
+ const f=fixtureProduct(),policy=await fixturePolicy();
+ Object.assign(policy.bundle!.artifacts,{sizeCharts:{wrong:fixtureSizeInput("OTHER").charts[0]}});
+ let resolve!:(v:typeof f)=>void;const pending=new Promise<typeof f>(r=>{resolve=r;});
+ const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:async()=>structuredClone(policy),initialProducts:[f.product],
+  catalog:{readProduct:async()=>pending,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+ const read=tools.invoke({name:"read_product",args:{subjectRef:f.product.productId,offerType:"DIRECT"}});
+ await tools.invoke({name:"read_policy",args:{}});resolve(f);expect((await read).status).toBe("OK");
+ expect(tools.snapshot().runtimeProducts?.[0]?.sizeCharts).toBeUndefined();
+ Object.assign(policy.bundle!.artifacts,{sizeCharts:{right:fixtureSizeInput(f.product.productId).charts[0]}});
+ await tools.invoke({name:"read_policy",args:{}});const current=tools.snapshot();
+ expect(current.runtimeProducts?.[0]?.sizeCharts).toHaveLength(1);expect(await tools.readback()).toEqual(current);
+});
+it.each(["success","failure"])("does not let a superseded policy %s replace newer revocation",async mode=>{
+ const f=fixtureProduct(),old=await fixturePolicy(),next=await fixturePolicy(30_000);
+ Object.assign(old.bundle!.artifacts,{sizeCharts:{old:fixtureSizeInput(f.product.productId).charts[0]}});
+ let finish!:(v:typeof old)=>void,fail!:(v:Error)=>void;const pending=new Promise<typeof old>((yes,no)=>{finish=yes;fail=no;});let count=0;
+ const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,initialProducts:[f.product],prepareCurrentOffers:true,
+  policy:async()=>++count===1?old:count===2?pending:next,
+  catalog:{readProduct:async()=>structuredClone(f),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+ await tools.prepare(()=>true);await tools.invoke({name:"read_policy",args:{}});
+ const late=tools.invoke({name:"read_policy",args:{}});await tools.invoke({name:"read_policy",args:{}});const newer=tools.snapshot();
+ if(mode==="success")finish(old);else fail(Error("OLD_READ_FAILED"));
+ expect(await late).toMatchObject({status:"REJECTED",reason:"SOURCE_EVIDENCE_CONFLICT"});
+ expect(tools.snapshot()).toEqual(newer);expect(newer.runtimeProducts?.[0]?.sizeCharts).toBeUndefined();expect(await tools.readback()).toEqual(newer);
+});
 it("prepares current numeric evidence from exactly the existing singleton source observation, without hydration renewing it",async()=>{
  const s=setup();expect(await s.tools.prepare(()=>true)).toBe(1);expect(s.readProduct).toHaveBeenCalledTimes(1);
  expect(s.tools.snapshot().protectedClaims).toEqual(expect.arrayContaining([expect.objectContaining({type:"PRICE"}),expect.objectContaining({type:"STOCK"})]));
@@ -39,9 +91,18 @@ it.each([2,3])("prepares %i bound targets without choosing a product and charges
   admitPreparedContext:r=>{admissions.push(r.toolBudget.callsRemaining);return true;},
   owner:async r=>{expect(r.context.state.currentProductId).toBeNull();expect(r.toolBudget.callsRemaining).toBe(6-count);
    for(const f of records)expect(r.context.policyLiterals.some(p=>p.ref===`offers:${f.product.productId}`)).toBe(true);
+   expect(r.context.protectedClaims).toEqual([]);
    expect(admissions.at(-1)).toBe(r.toolBudget.callsRemaining);return{kind:"FINAL",text:"Dạ chị."};},
   verifier:async()=>({result:{verdict:"PASS",violations:[]}})});
  expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(result.normalToolCalls).toBe(count);
+});
+it("keeps previously admitted numeric facts while preparing another ambiguous target as metadata",async()=>{
+ const records=[fixtureProduct("A101"),fixtureProduct("B202")];
+ const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:records.map(f=>f.product),prepareCurrentOffers:true,
+  catalog:{readProduct:async id=>structuredClone(records.find(f=>f.product.productId===id)!),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+ await tools.invoke({name:"read_product",args:{subjectRef:"A101",offerType:"DIRECT"}});const before=tools.snapshot();
+ expect(await tools.prepare(()=>true)).toBe(1);const after=tools.snapshot();expect(after.protectedClaims).toEqual(before.protectedClaims);
+ expect(after.policyLiterals.some(p=>p.ref==="offers:B202")).toBe(true);expect(after.protectedClaims).not.toEqual([]);
 });
 it.each(["Cảm ơn em nhé.","Áo này phối quần nâu được không?","Giặt máy được không?"])("optional POS failure preserves the independent answer path for %s",async latest=>{
  const f=fixtureProduct(),scope=commerceScope(),readProduct=vi.fn(async(_id:string,readPos=true)=>{if(readPos)throw Error("POS_OFFLINE");return{product:f.product,snapshot:null};});

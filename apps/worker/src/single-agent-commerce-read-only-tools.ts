@@ -1,5 +1,5 @@
 import type { RuntimePolicyResolution } from "@lana/chat-runtime";
-import { ProductContentV1Schema, type ProtectedClaimV1 } from "@lana/contracts";
+import { ProductContentV1Schema, SizeChartV1Schema, type ProtectedClaimV1 } from "@lana/contracts";
 import { buildVerifiedFactBlocks, buildProtectedClaimsFromVerifiedFactsV1, buildProductPresentationEvidenceV1, CatalogSnapshotV3Schema,
   resolveCatalogFacts, verifyProductAttributesV1, normalizeCatalogToken, normalizeProductCode,
   type ProductSearchResult, type StableProductDocument, type CatalogSnapshotV3 } from "@lana/business-tools";
@@ -54,6 +54,8 @@ export function createReadOnlyTools(input: {
   let policy: RuntimePolicyResolution | null = null;
   let policyLiteral: TrustedContext["policyLiterals"] = [];
   let policyRead = false;
+  let policyInvalidated = false;
+  let policyReadGeneration = 0;
   const deliveryContexts = new Map<string, TrustedContext["policyLiterals"][number]>();
   const offerContexts = new Map<string, TrustedContext["policyLiterals"][number]>();
   const offerPins = new Map<string, { identity: string; literal: TrustedContext["policyLiterals"][number] }>();
@@ -150,6 +152,16 @@ export function createReadOnlyTools(input: {
     factSnapshotVersion: "", conversationOwner: scope.conversationOwner }, subjects: [...subjects.values()],
     products: [...products.values()], claims: [...claims.values()].flat(), policies: [...(input.entry ? [{ref:"conversation-entry",text:JSON.stringify(input.entry),sourceVersion:scope.bindingVersion,observedAt:scope.sourceObservedAt,expiresAt:null}] : []),
       ...policyLiteral, ...deliveryContexts.values(), ...offerContexts.values(), ...preparationContexts.values()] });
+  const withPolicyCharts = (evidence: RuntimeProductEvidence, resolution = policy): RuntimeProductEvidence => {
+    const next = {...evidence}; delete next.sizeCharts;
+    const charts = Object.values(resolution?.bundle?.artifacts.sizeCharts ?? {}).filter(a =>
+      a.chart.reference.verificationStatus === "VERIFIED" &&
+      (a.scope?.parentProductIds.includes(evidence.subjectRef) || a.scope?.level === "GLOBAL")).map(a => SizeChartV1Schema.parse(a.chart));
+    if (charts.length > 4) throw Error("PRODUCT_EVIDENCE_BOUND");
+    if (charts.length) next.sizeCharts = charts;
+    if (Buffer.byteLength(JSON.stringify(next)) > 8192) throw Error("PRODUCT_EVIDENCE_BOUND");
+    return next;
+  };
   const staticEvidence = (p: StableProductDocument, now: Date): RuntimeProductEvidence => {
     if (p.observedAt && (!Number.isFinite(Date.parse(p.observedAt)) || Date.parse(p.observedAt) > now.getTime())) {
       throw new Error("PRODUCT_SOURCE_FRESHNESS");
@@ -164,16 +176,34 @@ export function createReadOnlyTools(input: {
         authority: p.descriptionAuthority ?? "WEBSTORE_XML", sourceVersion: p.descriptionSourceVersion ?? p.catalogVersion,
         observedAt: p.observedAt, expiresAt: null, freshForSeconds: null, freshnessState: "FRESH",
       } });
-    return evidence;
+    return withPolicyCharts(evidence);
   };
   async function readPolicy(): Promise<CommerceToolResult> {
-    policy = await (input.diagnostics?input.diagnostics.run("POLICY_READ",{},()=>input.policy()):input.policy());
+    if (policyInvalidated) return {status:"UNAVAILABLE",reason:"POLICY_UNAVAILABLE"};
+    const generation=++policyReadGeneration;
     // This candidate reads active pointers; an old cached bundle cannot prove their current identity.
-    if (!policy.bundle || policy.status !== "RESOLVED") return { status: "UNAVAILABLE", reason: "POLICY_UNAVAILABLE" };
-    policyLiteral = [publicPolicyLiteral(policy.bundle, scope.pageId, scope.shopId, input.clock())];
-    policyRead = true;
-    return { status: "OK", data: { scope: "SHOP_RULES", orderEligibility: null,
-      policy: JSON.parse(policyLiteral[0]!.text), sourceVersion: policyLiteral[0]!.sourceVersion } };
+    try {
+      const next = await (input.diagnostics?input.diagnostics.run("POLICY_READ",{},()=>input.policy()):input.policy());
+      if (generation!==policyReadGeneration) return {status:"REJECTED",reason:"SOURCE_EVIDENCE_CONFLICT"};
+      if (policyInvalidated || !permitted() || !next.bundle || next.status !== "RESOLVED") throw Error("POLICY_UNAVAILABLE");
+      const literal = [publicPolicyLiteral(next.bundle, scope.pageId, scope.shopId, input.clock())];
+      // Stage after the await, against the current products (including concurrent catalog reads).
+      // Revocation removes old charts. Publication has no awaits or partial product updates.
+      const projected = [...products.entries()].map(([id,p]) => [id,withPolicyCharts(p,next)] as const);
+      const current=snapshot(), candidate=buildReadOnlyContext({state:current.state, subjects:current.boundSubjects,
+        claims:current.protectedClaims,receipts:current.effectReceipts,cartBinding:current.cartBinding,products:projected.map(([,p])=>p),
+        policies:[...current.policyLiterals.filter(p=>!policyLiteral.some(old=>old.ref===p.ref)),...literal]});
+      if (Buffer.byteLength(JSON.stringify(candidate))>32768) throw Error("CONTEXT_BOUND");
+      policy=next; policyLiteral=literal; policyRead=true;
+      products.clear(); for(const [id,p] of projected) products.set(id,p);
+      return { status: "OK", data: { scope: "SHOP_RULES", orderEligibility: null,
+        policy: JSON.parse(literal[0]!.text), sourceVersion: literal[0]!.sourceVersion } };
+    } catch {
+      if (generation!==policyReadGeneration) return {status:"REJECTED",reason:"SOURCE_EVIDENCE_CONFLICT"};
+      policyInvalidated=true;policy=null;policyLiteral=[];
+      for(const [id,p] of products){const next={...p};delete next.sizeCharts;products.set(id,next);}
+      return {status:"UNAVAILABLE",reason:"POLICY_UNAVAILABLE"};
+    }
   }
   async function prepareProduct(id: string, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>,admit?:(context:TrustedContext)=>boolean,baseline=offerBaseline(id)) {
     if (productBound([id])) throw new Error("PRODUCT_BOUND");
@@ -189,7 +219,7 @@ export function createReadOnlyTools(input: {
     admitPreparation(id,source,admit,baseline);
   }
   // All publication below is synchronous: no restore can clobber a concurrent awaited read.
-  function admitPreparation(id:string, source:Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>,admit?: (context:TrustedContext)=>boolean,baseline=offerBaseline(id)) {
+  function admitPreparation(id:string, source:Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>,admit?: (context:TrustedContext)=>boolean,baseline=offerBaseline(id),numericPreparation=true) {
     const now=input.clock(), p = source.product;
     if (!permitted()) throw new Error("PERMISSION");
     if (productBound([id])) throw new Error("PRODUCT_BOUND");
@@ -220,7 +250,7 @@ export function createReadOnlyTools(input: {
     const text = JSON.stringify({ subjectRef: id, availability, notRead: ["PRICE", "STOCK", "ETA", "SIZE_FIT"] });
     preparationContexts.set(id, { ref: `preparation:${id}`, text, sourceVersion: commerceHash(text),
       observedAt: scope.sourceObservedAt, expiresAt: null });
-    if(input.prepareCurrentOffers&&source&&offers&&offers.length>0&&offers.length<=3&&admit){
+    if(input.prepareCurrentOffers&&numericPreparation&&source&&offers&&offers.length>0&&offers.length<=3&&admit){
       // Roll back only optional staging. The independent catalog preparation above remains admitted.
       const maps=[subjects,products,claims,deliveryContexts,offerContexts,preparationContexts,reads,priceReads,posPins] as Map<unknown,unknown>[];
       const saved=maps.map(m=>structuredClone([...m.entries()])),oldAmbiguous=ambiguousPriceRead,oldInvalid=posInvalidated;
@@ -265,7 +295,7 @@ export function createReadOnlyTools(input: {
     const saved=maps.map(m=>structuredClone([...m.entries()])),oldAmbiguous=ambiguousPriceRead;
     try{
       for(const {id,source,baseline} of loaded)admitPreparation(id,source,
-        admit?c=>admit(c,{chargedUnits:loaded.length,kind:"NUMERIC"}):undefined,baseline);
+        admit?c=>admit(c,{chargedUnits:loaded.length,kind:"NUMERIC"}):undefined,baseline,bound.length===1||!!focus);
       if(admit&&!admit(snapshot(),{chargedUnits:loaded.length,kind:"FINAL"}))throw Error("PREPARATION_ADMISSION");
       for(const {id} of loaded)prepared.add(id);
       return loaded.length;
@@ -375,10 +405,7 @@ export function createReadOnlyTools(input: {
     if(prior?.length)evidence.selectionEvidence=structuredClone(prior);
     try{for(const e of queriedTupleEvidence)Object.assign(evidence,mergeSelectionEvidence(evidence,e,now));}
     catch(error){if(error instanceof Error&&["PRODUCT_EVIDENCE_BOUND","SOURCE_EVIDENCE_CONFLICT","SELECTION_EVIDENCE_STALE"].includes(error.message))return {status:"REJECTED",reason:error.message};throw error;}
-    const charts = Object.values(policy?.bundle?.artifacts.sizeCharts ?? {}).filter(a =>
-      a.chart.reference.verificationStatus === "VERIFIED" &&
-      (a.scope?.parentProductIds.includes(id) || a.scope?.level === "GLOBAL")).map(a => a.chart);
-    if (charts.length) evidence.sizeCharts = charts;
+    const charts = evidence.sizeCharts ?? [];
     if(input.prepareCurrentOffers)evidence.offerReadCoverage=(availableOffers??[]).slice(0,8).map(offerType=>{
       const o=retained.find(o=>o.offerType===offerType);
       return {offerType,price:o?(o.availability.price.status==="OK"?"AVAILABLE":"UNAVAILABLE"):"NOT_READ",stock:o?(o.availability.stock.status==="OK"?"AVAILABLE":"UNAVAILABLE"):"NOT_READ"};
@@ -440,7 +467,7 @@ export function createReadOnlyTools(input: {
       missing: [...(selected.availability.price.status === "OK" ? [] : ["PRICE"]), ...(selected.availability.stock.status === "OK" ? [] : ["STOCK"]),
         ...(evidence.attributes ? [] : ["ATTRIBUTES"])] } };
   }
-  const permitted=()=>scope.permission && scope.privacyAllowed && scope.conversationOwner === "BOT";
+  const permitted=()=>!policyInvalidated && scope.permission && scope.privacyAllowed && scope.conversationOwner === "BOT";
   function readArgs(value:unknown):Record<string,unknown>|null {
     const a=toolArgs(value,["subjectRef","offerType","offerTypes","detailsOnly","color","size","deliveryRegion"]);
     if(!a||!text(a.subjectRef,128)||subjects.get(a.subjectRef)?.kind!=="PRODUCT"||
@@ -567,6 +594,7 @@ export function createReadOnlyTools(input: {
     }
     return results;
   }, async readback() {
+    if (policyInvalidated) throw Error("POLICY_READBACK_UNAVAILABLE");
     if (posInvalidated) invalidatePos();
     if (policyRead && (await readPolicy()).status !== "OK") throw new Error("POLICY_READBACK_UNAVAILABLE");
     const fullReads = new Set([...reads.values()].map(a => a.subjectRef));

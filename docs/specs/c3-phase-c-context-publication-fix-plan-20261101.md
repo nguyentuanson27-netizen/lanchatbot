@@ -16,6 +16,8 @@ Run cũ chỉ giữ actual body của request đầu; request thứ hai bị ch�
 
 Chỉ bỏ dữ liệu lặp khi có kiểm tra bằng canonical equality và giữ rõ tham chiếu tới evidence hiện tại. Không xóa response lỗi, source khác, filter khác, hoặc receipt. Giữ nguyên raw transcript, audit và verifier context. Test continuation với hai sản phẩm, thay đổi nguồn, partial result, đủ thông tin phân biệt và stock/size. Oversized request thật vẫn fail trước auth/HTTP; không tăng cap hoặc truncate thông tin tùy ý. Nếu chưa tái hiện/giảm được nguyên nhân, báo residual thay vì nhận đã fix.
 
+Journal RESULT giữ output native của lượt đầu: opaque thoughtSignature dài 9.900 ký tự. Giữ nguyên toàn bộ phần này. Với nhiều sản phẩm bound nhưng chưa có focus, chỉ prepare metadata/read references cho tất cả; không tự hydrate numeric offers cho thiết kế chưa được chọn. Lệnh read_product của owner vẫn cấp đúng facts sau khi xác định mẫu/lựa chọn. Các facts đã được đọc/admit trước đó giữ nguyên, không xóa để lấy chỗ. Test exact captured signature + actual read args/result trong offline world cũ, đo lại cả hai generation bodies. Đây là replay của source/tool continuation, không phải replay nguyên body thứ hai vốn không được capture.
+
 ## 3. Size sản phẩm không cấp size từng phần
 
 P07 chạy engine cấp sản phẩm rồi reply nhận áo M/quần L từ size khách thường mặc. Tách rõ câu khách tự đặt size với câu khách hỏi shop chọn size; chưa có quyết định chọn thì không dùng câu xác nhận để thay tư vấn.

@@ -125,11 +125,12 @@ export function createCandidateProvider({preflight,out,dependencies={}}){
    boundRuntimeHash:digest(active.runtimeInput),wireCodec:NATIVE_CODECS[role],requestBody:null,requestHash:null,modelConfigHash:digest(model),
    observedModelVersion:null,status:'PENDING',providerRequests:0,authRequests:0,metrics:null};
   const started=performance.now();row.startedMonotonicMs=started;row.startedAt=new Date().toISOString();
+  let preDispatchBudget;
   generations.push(row);counters[role.toLowerCase()]++;audit('STARTED',row);
   try{
    if(scenario.mode!=='SAFETY'&&(!dependencies.unitFixture||scenario.judgeContext?.sourceReadiness))await assertSourceReadiness(world,scenario.judgeContext?.sourceReadiness,dependencies.unitFixture&&dependencies.readinessClock?dependencies.readinessClock():new Date());
    const original=role==='OWNER'?withNativePresentation(request,'VI_DATA_BLOCKS_COMPACT_V2'):request;
-   const body=role==='OWNER'?buildGeminiCommerceRequest(original):buildVerifierRequest(m,original);
+   const body=role==='OWNER'?buildGeminiCommerceRequest(original,undefined,undefined,value=>{preDispatchBudget=value;}):buildVerifierRequest(m,original);
    row.requestBody=body;row.requestHash=digest(body);
    assertRuntimeFirewall(body,preflight.sealed.corpus.scenarios.map(s=>s.id));
    assertNativeRuntime(body,NATIVE_CODECS[role],active.runtimeInput);
@@ -150,7 +151,11 @@ export function createCandidateProvider({preflight,out,dependencies={}}){
    audit('RESULT',{id:row.id,slotId:row.slotId,turnIndex:row.turnIndex,status:row.status,metrics:row.metrics,telemetry:row.telemetry,...(role==='VERIFIER'?{verdict:row.verdict}:{output:value})});
    return value;
   }catch(error){
-   const t=error.telemetry;row.providerRequests=t?.providerRequests??row.providerRequests;row.observedModelVersion=t?.modelVersion??null;
+   const t=error.telemetry??(role==='OWNER'&&error.message==='OWNER_REQUEST_BOUND'?{
+    providerRequests:0,authRequests:0,failureStage:'BUILD',failureCode:'OWNER_REQUEST_BOUND',
+    ...(preDispatchBudget?{requestBudget:preDispatchBudget}:{}),...(Number.isSafeInteger(error.requestBytes)?{requestBytes:error.requestBytes}:{})}:undefined);
+   if(t&&!error.telemetry)error.telemetry=t;
+   row.providerRequests=t?.providerRequests??row.providerRequests;row.observedModelVersion=t?.modelVersion??null;
    row.status=/TIMEOUT/.test(error.message)?'TIMEOUT':t?.httpStatus===200?'MALFORMED':'PROVIDER_ERROR';row.metrics=metrics(t,performance.now()-started);
    row.failureLayer=row.providerRequests>0?t?.httpStatus===200?'MODEL_OUTPUT':'PROVIDER':'PRE_DISPATCH';
    row.errorCode=/^[A-Z0-9_]+$/.test(error.message)?error.message:'PROVIDER_ERROR';row.telemetry=t??null;

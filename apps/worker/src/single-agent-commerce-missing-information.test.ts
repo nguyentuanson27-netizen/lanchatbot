@@ -23,6 +23,14 @@ async function setup(mode:"missing-pos"|"complete"|"policy-error"="missing-pos",
 const native=(name:string,args:unknown):OwnerGeneration=>({kind:"TOOLS",calls:[{name,args}],content:{role:"model",parts:[{functionCall:{name,args}}]}});
 
 describe("missing shop information uses real handoff; missing customer input stays conversational",()=>{
+ it.each(["ok","denied","unknown"] as const)("unsupported component sizing uses silent handoff with %s authority",async mode=>{
+  const s=await setup("complete",mode),profile=fixtureProfile(),sizeInput=vi.fn(async()=>fixtureSizeInput());
+  const tools=await createCommerceTools({read:s.read,handoff:s.handoff,state:{store:{read:async()=>structuredClone(profile),compareAndSwap:vi.fn()},sourceMessages:[],sizeInput}});
+  const result=await tools.invoke({name:"recommend_size",args:{subjectRef:"QU714",fitScope:"COMPONENT",componentRole:"PANTS"}});
+  expect(result).toMatchObject({status:"UNAVAILABLE",reason:"SIZE_SOURCE_UNAVAILABLE"});expect(sizeInput).not.toHaveBeenCalled();
+  expect(await tools.terminalOutcome!()).toMatchObject({disposition:mode==="ok"?"HANDOFF":"NO_SEND",text:null});expect(s.commit).toHaveBeenCalledOnce();
+  expect(tools.snapshot().protectedClaims.filter(c=>(c as {type:string}).type==="SIZE_FIT")).toEqual([]);
+ });
  it("hands off a failed product source read before another owner or verifier",async()=>{
   const s=await setup();s.read.catalog.readProduct=async()=>{throw Error("SOURCE_OFFLINE");};
   const tools=await createCommerceTools({read:s.read,handoff:s.handoff});

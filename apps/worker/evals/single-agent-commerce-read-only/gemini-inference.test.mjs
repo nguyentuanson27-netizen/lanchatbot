@@ -1,4 +1,14 @@
 import test from 'node:test';
+test('component size scope remains explicit in decoded args and signed native content',()=>{
+ const args={subjectRef:'P1',fitScope:'COMPONENT',componentRole:'TOP'};
+ const raw=body([{functionCall:{name:'recommend_size',args},thoughtSignature:'signed-component'}]);
+ const parsed=parseGeminiGeneration(raw);assert.deepEqual(parsed.calls[0].args,args);
+ assert.deepEqual(parsed.content,raw.candidates[0].content);
+ for(const scope of [{fitScope:null},{fitScope:'COMPONENT'},{fitScope:'PRODUCT',componentRole:'TOP'},{fitScope:'COMPONENT',componentRole:'BAD'}])
+  assert.throws(()=>parseGeminiGeneration(body([{functionCall:{name:'recommend_size',args:{subjectRef:'P1',...scope}}}])),/OWNER_TOOL_OUTPUT/);
+ const r=request();r.availableTools=['recommend_size'];const d=buildGeminiCommerceRequest(r).tools[0].functionDeclarations[0];
+ assert.deepEqual(d.parametersJsonSchema.properties.fitScope.enum,['PRODUCT','COMPONENT']);
+});
 test('unrecorded source color is explicit and never becomes a customer selection',()=>{
  const r=request();r.context.runtimeProducts=[{ref:'product:P1',subjectRef:'P1',presentation:{variants:[{variantId:'P1-M',color:'__NO_COLOR__',size:'M'}]}}];
  const before=structuredClone(r.context);
