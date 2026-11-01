@@ -66,6 +66,25 @@ import {readFileSync} from 'node:fs';
 import {createCommerceVerifier} from './protocol.mjs';
 import {createGeminiCommerceInference,parseGeminiGeneration,buildGeminiCommerceRequest,stateDeclarations,effectDeclarations} from './gemini-inference.mjs';
 
+test('runtime callable manifest prunes declarations while preserving the configured capability list',()=>{
+ const r=request();r.availableTools=['recommend_size','change_cart_item','confirm_purchase','request_handoff'];r.callableTools=['request_handoff'];
+ r.toolsAllowed=true;r.toolBudget={roundsRemaining:2,callsRemaining:6};
+ const before=structuredClone(r),wire=buildGeminiCommerceRequest(r);
+ assert.deepEqual(wire.tools[0].functionDeclarations.map(d=>d.name),['request_handoff']);
+ const execution=JSON.parse(wire.contents[0].parts[0].text).trusted.execution;
+ assert.deepEqual(execution.availableTools,r.availableTools);assert.deepEqual(execution.callableTools,['request_handoff']);
+ assert.deepEqual(r.context,before.context);
+});
+test('native product-read schema requires a subject as well as a closed selection branch',()=>{
+ assert.throws(()=>parseGeminiGeneration(body([{functionCall:{name:'read_product',args:{selection:'SINGLE',offerType:'AO'}}}])),/OWNER_TOOL_OUTPUT/);
+});
+test('replacement color supports the same null value as the runtime selection contract',()=>{
+ const r=request(),d=buildGeminiCommerceRequest(r,effectDeclarations).tools[0].functionDeclarations.find(d=>d.name==='change_cart_item');
+ assert.equal(d.parameters.properties.color.nullable,true);assert(d.parameters.properties.action.enum.includes('REPLACE_LINE'));
+ const raw=body([{functionCall:{name:'change_cart_item',args:{subjectRef:'line',action:'REPLACE_LINE',targetSubjectRef:'P1',offerType:'AO',color:null}}}]);
+ const decoded=parseGeminiGeneration(raw);assert.equal(decoded.calls[0].args.color,null);assert.deepEqual(decoded.content,raw.candidates[0].content);
+});
+
 test('actual owner wire describes silent handoff consistently without changing receipts, history or tool authority',()=>{
  const r=request();r.availableTools=['request_handoff','select_product_media'];
  const original=structuredClone(r),wire=buildGeminiCommerceRequest(r);

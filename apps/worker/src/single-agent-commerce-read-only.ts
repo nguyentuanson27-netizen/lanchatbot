@@ -4,6 +4,7 @@ import { finalGate, hardPrecheck, makeBinding, terminalFallback, type TerminalOu
   type TrustedContext, type VerifierBinding } from "./single-agent-semantic-verifier-boundary.js";
 import type { CommerceScope, CommerceToolCall, CommerceToolResult } from "./single-agent-commerce-read-only-tools.js";
 import { omitCurrentProductDuplicates } from "./single-agent-commerce-read-only-context.js";
+import { commerceCallableTools } from "./single-agent-commerce-callable.js";
 
 export interface NativeContent { role: "user" | "model"; parts: Record<string, unknown>[] }
 /** Request metadata, never part of the mutable world/fact snapshot. */
@@ -11,6 +12,7 @@ export interface CommerceTurnTime { processingAt: string; timeZone: "Asia/Ho_Chi
 export type OwnerGeneration = { kind: "FINAL"; text: string; telemetry?: unknown } |
   { kind: "TOOLS"; calls: CommerceToolCall[]; content: NativeContent; telemetry?: unknown };
 export interface OwnerRequest { generationId: string; instructions: string; contents: NativeContent[]; context: TrustedContext; toolsAllowed: boolean;
+  callableTools?: readonly string[];
   toolWorkAccounting?: "PRIMITIVE_WORK_V2";
   terminalHandoffAllowed?: boolean;
   pendingHandoff?: { reason: string };
@@ -204,7 +206,7 @@ export async function runCommerceTurn(input: {
     const id = `${input.scope.requestId}:owner:${index + 1}`;
     const handoff = input.tools.handoffStatus?.(), pendingHandoff = handoff?.status === "PREPARED" ? {reason:handoff.reason} : undefined;
     const terminalHandoffAllowed = !handoff && terminalHandoffCalls === 0 && input.tools.availableTools?.includes("request_handoff") === true;
-    const request = { generationId: id, instructions: input.ownerPrompt, contents: structuredClone(contents), context, turnTime,
+    const baseRequest = { generationId: id, instructions: input.ownerPrompt, contents: structuredClone(contents), context, turnTime,
       ...(primitiveAccounting?{toolWorkAccounting:"PRIMITIVE_WORK_V2" as const}:{}),
       terminalHandoffAllowed, ...(pendingHandoff ? {pendingHandoff} : {}),
       ...(input.historyMetadata?.publicCartEvents.length?{historyMetadata:structuredClone(input.historyMetadata)}:{}),
@@ -213,6 +215,8 @@ export async function runCommerceTurn(input: {
       ...(input.tools.mediaCapabilityDiagnostics?{mediaCapabilityDiagnostics:input.tools.mediaCapabilityDiagnostics()}:{}),
       ...(input.tools.availableTools ? { availableTools: input.tools.availableTools } : {}),
       toolsAllowed: !handoff && toolRounds < 2 && toolCalls < 6, toolBudget: { roundsRemaining: 2-toolRounds, callsRemaining: 6-toolCalls } };
+    const callableTools=commerceCallableTools(baseRequest);
+    const request = {...baseRequest,...(callableTools?{callableTools}:{})};
     // The native transport owns its serialized wire bound after projection.
     let output: OwnerGeneration;
     ownerGenerations++;
@@ -222,6 +226,9 @@ export async function runCommerceTurn(input: {
     if (output.kind === "TOOLS") {
       if(!Array.isArray(output.calls)||output.calls.some(c=>!c||typeof c.name!=="string"))return finish(fallback("MALFORMED"));
       proposedToolCalls += output.calls.length;
+      if(request.callableTools&&output.calls.some(c=>!request.callableTools!.includes(c.name))){
+        rejectedToolCalls+=output.calls.length;return finish(fallback("OWNER_TOOL_MODE"));
+      }
       const quoteCalls=output.calls.filter(c=>c.name==="quote_product");
       if(quoteCalls.length&&(output.calls.length!==1||quoteAttempted)){
         rejectedToolCalls+=output.calls.length;return finish(fallback("OWNER_TOOL_MODE"));

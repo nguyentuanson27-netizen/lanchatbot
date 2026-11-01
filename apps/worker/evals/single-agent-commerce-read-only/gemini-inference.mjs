@@ -1,4 +1,6 @@
 import {projectMediaCapabilities} from "./media-capabilities.mjs";
+import {productReadSelections,decodeProductRead} from './product-read-selection.mjs';
+import {commerceCallableTools} from '../../dist/single-agent-commerce-callable.js';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {createServiceAccountAssertion,vertexGenerateEndpoint} from '../../dist/vertex.js';
@@ -37,7 +39,7 @@ const offerLabels={AO:'áo lẻ',CV:'chân váy lẻ',QUAN:'quần lẻ',VAY:'v�
  SET_VAY:'bộ có váy',SET_CV:'bộ có chân váy',SET_QUAN:'bộ có quần',COMBO_3:'combo 3 món',DIRECT:'sản phẩm'};
 export const readOnlyDeclarations=[
  {name:'search_products',description:'Tìm sản phẩm: có mã thì truyền riêng productCode; tìm theo tên hoặc nhu cầu thì dùng query. Cần ít nhất một trường; có cả hai thì ưu tiên mã. products.subjectRef dùng để đọc tiếp. MATCHED là tìm được mẫu; AMBIGUOUS chỉ là các gợi ý chưa xác định đúng mẫu khách hỏi. Khi tìm theo nhu cầu, dùng description loại món sai loại/hoàn cảnh; ứng viên chưa xác nhận giá hay phù hợp. Còn một tool round và cần kiểm dữ liệu để chọn thì batch read_product cho tối đa hai ứng viên hợp lý, đúng phần bán và budget còn lại; sau kết quả mới chọn. Không mở mọi offers của mọi kết quả. PRODUCT_BOUND nghĩa là đã đầy context, dùng các sản phẩm đã có.',parameters:{type:'OBJECT',properties:{productCode:string,query:string}}},
- {name:'read_product',description:'Sản phẩm đã có purchaseOptions thì dùng đúng subjectRef/offerType và đường đọc code cấp, không search lại hoặc đọc mô tả để biết lựa chọn mua. Đọc PRODUCT theo selection bắt buộc: SINGLE đọc một offerType từ availableOffers/offerLabels; COMPARE chỉ đọc 2–3 offerTypes được chọn để so sánh; DETAILS_ONLY chỉ đọc mô tả/metadata, không cấp giá/tồn. Không truyền null hoặc mở toàn bộ offers ngầm. Mua cả bộ chọn đúng mã cả bộ; mua lẻ chọn đúng phần. Có màu/size/khu vực thì truyền ngay. Size chỉ xem tồn, không chứng minh mặc vừa.',parameters:{type:'OBJECT',properties:{subjectRef:string,selection:{type:'STRING',enum:['SINGLE','COMPARE','DETAILS_ONLY']},offerType:string,offerTypes:{type:'ARRAY',items:string,minItems:2,maxItems:3},color:string,size:string,deliveryRegion:string},required:['subjectRef','selection']}},
+ {name:'read_product',description:'Sản phẩm đã có purchaseOptions thì dùng đúng subjectRef/offerType và đường đọc code cấp, không search lại hoặc đọc mô tả để biết lựa chọn mua. Đọc PRODUCT theo selection bắt buộc: SINGLE đọc một offerType từ availableOffers/offerLabels; COMPARE chỉ đọc 2–3 offerTypes được chọn để so sánh; DETAILS_ONLY chỉ đọc mô tả/metadata, không cấp giá/tồn. Không truyền null hoặc mở toàn bộ offers ngầm. Mua cả bộ chọn đúng mã cả bộ; mua lẻ chọn đúng phần. Có màu/size/khu vực thì truyền ngay. Size chỉ xem tồn, không chứng minh mặc vừa.',parameters:{type:'OBJECT',properties:{subjectRef:string,selection:{type:'STRING',enum:productReadSelections},offerType:string,offerTypes:{type:'ARRAY',items:string,minItems:2,maxItems:3},color:string,size:string,deliveryRegion:string},required:['subjectRef','selection']}},
  {name:'read_policy',description:'Đọc quy định hiện hành của shop. Không đọc lịch sử đơn hoặc duyệt điều kiện đổi của riêng khách; orderEligibility=null nghĩa là chưa xét đơn.',parameters:{type:'OBJECT',properties:{}}},
 ];
 const stateFieldPaths=Object.freeze({HEIGHT_CM:'measurements.HEIGHT_CM',WEIGHT_KG:'measurements.WEIGHT_KG',BUST_CM:'measurements.BUST_CM',WAIST_CM:'measurements.WAIST_CM',HIPS_CM:'measurements.HIPS_CM',fitPreference:'fitPreference','preferences.colors':'preferences.colors','preferences.styles':'preferences.styles','preferences.materials':'preferences.materials'});
@@ -68,7 +70,7 @@ export const quoteDeclarations=[{name:'quote_product',description:'Báo giá m�
 export const effectDeclarations=[
  {name:'record_negotiation',description:'Khách phản đối giá hoặc nói sẵn sàng mua giỏ hiện tại thì báo ý nghĩa tin đó bằng PRICE_OBJECTION/PURCHASE_READY. sourceQuote trích nguyên văn từ tin hiện tại; không lấy history. Hỏi giá/tổng tiền thông thường hoặc chê kiểu dáng không phải phản đối giá. Code kiểm nguồn, tự quyết ưu đãi và trả current cartQuote. Dùng quyền lợi vừa được xác nhận để đáp phản đối giá trước khi mời mua thêm; không nói không có hỗ trợ khi quote có ưu đãi và không gọi tổng ưu đãi đang có là giảm thêm. Không truyền tiền, tier hay policy; không hứa giảm trước kết quả.',parameters:{type:'OBJECT',properties:{intent:{type:'STRING',enum:['PRICE_OBJECTION','PURCHASE_READY']},sourceQuote:{type:'STRING',maxLength:512}},required:['intent','sourceQuote']}},
  {name:'add_to_cart',description:'Thêm món khách yêu cầu mua bằng PRODUCT subjectRef. Bắt buộc truyền offerType đúng lựa chọn bán từ nguồn; chưa biết thì đọc bằng tool hiện có, không đoán. Lấy size, color, quantity từ lựa chọn hiện tại của khách; phần không đổi giữ theo hội thoại/giỏ đã có. color chỉ là null khi khách thực sự chưa chọn màu, không bỏ màu đã nói hoặc tự chọn thay. Đã biết offer và khách tự chọn size thì gọi trực tiếp, không cần recommend_size hay đọc lại sản phẩm; code tự kiểm cấu hình, giá và tồn. Kết quả OK xác nhận thao tác, cartItems cho biết lựa chọn hiện tại và trạng thái hàng.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,size:string,color:{type:'STRING',nullable:true},quantity:{type:'INTEGER',minimum:1,maximum:20}},required:['subjectRef','offerType','color']}},
- {name:'change_cart_item',description:'Sửa dòng giỏ bằng CART_LINE ref code cấp. Phần khách không đổi giữ từ cartItems/hội thoại; đổi size hoặc số lượng không bỏ màu đã chọn. SET_COMPONENT_VARIANT nhận componentRole và size/color; SET_QUANTITY chỉ nhận quantity; REMOVE_LINE không nhận field sửa. Đổi size/màu và số lượng thì gọi hai action trong cùng batch, mỗi action commit riêng. Không cần read_product trước vì code kiểm biến thể, giá/tồn, quyền và commit. Field lẫn action bị từ chối trước commit.',parameters:{type:'OBJECT',properties:{subjectRef:string,action:{type:'STRING',enum:['SET_QUANTITY','REMOVE_LINE','SET_COMPONENT_VARIANT']},quantity:{type:'INTEGER',minimum:1,maximum:20},size:string,color:string,componentRole:string},required:['subjectRef','action']}},
+ {name:'change_cart_item',description:'Sửa dòng giỏ bằng CART_LINE ref code cấp. Phần khách không đổi giữ từ cartItems/hội thoại; đổi size hoặc số lượng không bỏ màu đã chọn. REPLACE_LINE thay toàn bộ lựa chọn bán trên một dòng: truyền targetSubjectRef PRODUCT và offerType đích, size/color khách chọn; quantity vắng giữ số lượng. Code kiểm target và đổi nguyên tử, không xóa rồi thêm. SET_COMPONENT_VARIANT nhận componentRole và size/color; SET_QUANTITY chỉ nhận quantity; REMOVE_LINE không nhận field sửa. Đổi size/màu và số lượng thì gọi hai action trong cùng batch, mỗi action commit riêng. Không cần read_product trước vì code kiểm biến thể, giá/tồn, quyền và commit. Field lẫn action bị từ chối trước commit.',parameters:{type:'OBJECT',properties:{subjectRef:string,action:{type:'STRING',enum:['SET_QUANTITY','REMOVE_LINE','SET_COMPONENT_VARIANT','REPLACE_LINE']},targetSubjectRef:string,offerType:string,quantity:{type:'INTEGER',minimum:1,maximum:20},size:string,color:{type:'STRING',nullable:true},componentRole:string},required:['subjectRef','action']}},
  {name:'confirm_purchase',description:'Khi khách yêu cầu chốt mua giỏ hiện tại, gọi tool này. Chưa đủ thông tin nhận hàng thì code hỏi phần còn thiếu và kết thúc lượt; không tự xin thông tin riêng tư. Chỉ xác nhận mua sau preview và revalidation hợp lệ từ code. Không gọi chỉ vì khách thêm/đổi một món; không tự tạo đơn POS.',parameters:{type:'OBJECT',properties:{}}},
 ];
 export const handoffDeclarations=[
@@ -85,10 +87,12 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  }
  const c=request.context;
  declarations=structuredClone(declarations);
+ const canBindProductInBatch=request.callableTools?.includes('search_products')&&request.toolBudget?.callsRemaining>=2;
+ const canCreateLineInBatch=request.callableTools?.includes('add_to_cart')&&request.toolBudget?.callsRemaining>=2;
  for(const declaration of declarations){
   const kind=['read_product','quote_product','recommend_size','add_to_cart','select_product_media','view_product_media'].includes(declaration.name)?'PRODUCT':declaration.name==='change_cart_item'?'CART_LINE':null;
   const refs=c.boundSubjects.filter(s=>s.kind===kind).map(s=>s.ref);
-  if(refs.length){
+  if(refs.length&&!(kind==='PRODUCT'&&canBindProductInBatch)&&!(kind==='CART_LINE'&&canCreateLineInBatch)){
    const schema=declaration.parametersJsonSchema??declaration.parameters;
    schema.properties.subjectRef={type:declaration.parametersJsonSchema?'string':'STRING',enum:[...new Set(refs)]};
   }
@@ -186,7 +190,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  }
  const productRefs=c.boundSubjects.filter(s=>s.kind==='PRODUCT').map(s=>s.ref);
  // An enum is only an argument hint; the selector still validates the chosen product/offer.
- if(productRefs.length&&productRefs.every(ref=>offers.get(ref)?.length&&offers.get(ref).every(v=>typeof v==='string'&&v.trim()&&bytes(v)<=64)))
+ if(!canBindProductInBatch&&productRefs.length&&productRefs.every(ref=>offers.get(ref)?.length&&offers.get(ref).every(v=>typeof v==='string'&&v.trim()&&bytes(v)<=64)))
   for(const d of declarations.filter(d=>['read_product','add_to_cart'].includes(d.name)))
    d.parameters.properties.offerType={type:'STRING',enum:[...new Set(productRefs.flatMap(ref=>offers.get(ref)))]};
  const ownerView={subjects:c.boundSubjects.map(subject),products:[...products.values()].map(p=>({subjectRef:p.subjectRef,
@@ -214,7 +218,9 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  // Native toolConfig and runtime checks still enforce whether tools can be called.
  if(request.toolBudget)for(const [field,max] of [['roundsRemaining',2],['callsRemaining',6]])
   requireThat(Number.isInteger(request.toolBudget[field])&&request.toolBudget[field]>=0&&request.toolBudget[field]<=max,'OWNER_EXECUTION_BOUND');
- const callable=declarations.filter(d=>(request.toolsAllowed!==false||d.name==='request_handoff'&&request.terminalHandoffAllowed===true)&&(d.name!=='quote_product'||!request.toolBudget||request.toolBudget.callsRemaining>=2));
+ if(request.callableTools!==undefined)requireThat(JSON.stringify(request.callableTools)===JSON.stringify(commerceCallableTools(request)),'OWNER_EXECUTION_BOUND');
+ const callable=declarations.filter(d=>(request.callableTools===undefined||request.callableTools.includes(d.name))&&
+  (request.toolsAllowed!==false||d.name==='request_handoff'&&request.terminalHandoffAllowed===true)&&(d.name!=='quote_product'||!request.toolBudget||request.toolBudget.callsRemaining>=2));
  if(request.pendingHandoff!==undefined){
   requireThat(request.pendingHandoff&&Object.keys(request.pendingHandoff).length===1&&HandoffReasonV2Schema.options.includes(request.pendingHandoff.reason),'OWNER_EXECUTION_BOUND');
   ownerView.pendingHandoff={reason:request.pendingHandoff.reason,status:'PREPARED_NOT_COMMITTED'};
@@ -306,18 +312,9 @@ export function parseGeminiGeneration(body){
     check(Object.keys(a).every(k=>['subjectRef','offerTypes','color'].includes(k))&&typeof a.subjectRef==='string'&&Array.isArray(a.offerTypes)&&a.offerTypes.length>=1&&a.offerTypes.length<=2&&a.offerTypes.every(x=>typeof x==='string'&&x.trim()&&bytes(x)<=64)&&new Set(a.offerTypes).size===a.offerTypes.length&&(a.color===undefined||typeof a.color==='string'&&a.color.trim()&&bytes(a.color)<=64));return c;
    }
    if(c.name==='read_product'){
-    const {selection,...args}=c.args;
-    check(Object.keys(args).every(k=>['subjectRef','offerType','offerTypes','color','size','deliveryRegion'].includes(k)),'UNKNOWN_FIELD');
-    const validOffer=v=>typeof v==='string'&&v.trim().length>0&&bytes(v)<=64;
-    if(selection==='SINGLE'){
-     check(validOffer(args.offerType)&&!Object.hasOwn(args,'offerTypes'),'offerType');return {...c,args};
-    }
-    if(selection==='COMPARE'){
-     check(!Object.hasOwn(args,'offerType')&&Array.isArray(args.offerTypes)&&args.offerTypes.length>=2&&args.offerTypes.length<=3&&
-      args.offerTypes.every(validOffer)&&new Set(args.offerTypes).size===args.offerTypes.length,'offerTypes');return {...c,args};
-    }
-    check(selection==='DETAILS_ONLY'&&!Object.hasOwn(args,'offerType')&&!Object.hasOwn(args,'offerTypes'),'selection');
-    return {...c,args:{...args,detailsOnly:true}};
+    const decoded=decodeProductRead(c.args);
+    if(!decoded.ok)throw Object.assign(new Error('OWNER_TOOL_OUTPUT'),{toolOutputDiagnostic:{schemaCode:'OWNER_TOOL_OUTPUT',tool:c.name,valueType:'OBJECT',...decoded.diagnostic}});
+    return {...c,args:decoded.args};
    }
    if(c.name==='recommend_size')check(Object.keys(c.args).every(k=>['subjectRef','customerStateOps','fitScope','componentRole'].includes(k))&&sizeRequestScope(c.args)!==null,'fitScope');
    const opsKey=c.name==='apply_customer_state'?'ops':c.name==='recommend_size'&&Object.hasOwn(c.args,'customerStateOps')?'customerStateOps':null;
@@ -393,7 +390,9 @@ export function createGeminiCommerceInference(config,dependencies={}){
    if(error?.message==='OWNER_TOOL_OUTPUT'&&error.toolOutputDiagnostic){
     const d=error.toolOutputDiagnostic,known=[...readOnlyDeclarations,...quoteDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations,...mediaDeclarations];
     telemetry.toolOutputDiagnostic={schemaCode:'OWNER_TOOL_OUTPUT',tool:known.some(t=>t.name===d.tool)?d.tool:'UNKNOWN_TOOL',
-     field:['ARGS','UNKNOWN_FIELD','offerType','offerTypes','selection','ops','customerStateOps'].includes(d.field)?d.field:'UNKNOWN_FIELD',
+     field:['ARGS','UNKNOWN_FIELD','subjectRef','offerType','offerTypes','selection','size','color','deliveryRegion','ops','customerStateOps'].includes(d.field)?d.field:'UNKNOWN_FIELD',
+     ...(productReadSelections.includes(d.selection)||d.selection==='INVALID'?{selection:d.selection,fieldPresent:d.fieldPresent===true,
+       fieldType:['MISSING','NULL','ARRAY','STRING','OTHER'].includes(d.fieldType)?d.fieldType:'OTHER'}:{}),
      valueType:['ARRAY','NULL','OBJECT','OTHER'].includes(d.valueType)?d.valueType:'OTHER'};
    }
    telemetry.failureCode=timedOut?'TIMEOUT':safeFailureCodes.has(error?.message)?error.message:
