@@ -3,13 +3,21 @@ import assert from 'node:assert/strict';
 import {mkdtempSync,rmSync,writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {resolve} from 'node:path';
-import {diagnosticControl,claimDiagnostic,diagnosticSlots,assertDiagnosticFlags,assertDiagnosticInitial} from './diagnostic.mjs';
+import {diagnosticControl,claimDiagnostic,diagnosticSlots,assertDiagnosticFlags,assertDiagnosticInitial,diagnosticProviderRegistration} from './diagnostic.mjs';
 import {validateCorpus,digest} from './qualification.mjs';
 import {corpus,config} from './fixtures.test-support.mjs';
 import {collectNativePopulation} from './native-population.mjs';
 import {createAttemptQueue} from '../single-agent-commerce-read-only/attempt-evidence.mjs';
 const cases=[['c-20261028-j1',3],['c-20261028-j6',3],['c-20261028-s09',1],['c-20261028-s06',1],['c-20261028-s11',1],['SCOPED_MEDIA_OBSERVATION_VERIFIER_ONLY',1]];
 const reg=()=>({kind:'PHASE_C_DEVELOPMENT_DIAGNOSTIC_V1',corpus:{scenarios:cases.map(([id,n],i)=>({id,mode:i===5?'SAFETY':n===3?'JOURNEY':'SINGLE',turns:Array.from({length:n},()=>({latest:'unit',history:[],initialProductCodes:[]}))}))},sourceChecks:[]});
+test('development dispatch preserves sealed opening-media rule and existing cap without a provider request',()=>{
+ const sealed=reg();sealed.runSourceSha='a'.repeat(40);sealed.config={candidate:{openingMediaRule:{version:'FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1'}}};
+ const actual=diagnosticProviderRegistration(sealed);
+ assert.equal(actual.sourceSha,sealed.runSourceSha);assert.deepEqual(actual.openingMediaRule,sealed.config.candidate.openingMediaRule);
+ assert.equal(actual.maximumGenerationRequests,37);assert.equal(actual.ownerContextPresentation,'VI_DATA_BLOCKS_COMPACT_V2');assert.equal(actual.arm,'CANDIDATE');
+ const full=structuredClone(sealed);full.corpus.provenance={diagnosticScope:'PURCHASE_OPTIONS_21_20261031'};assert.equal(diagnosticProviderRegistration(full).maximumGenerationRequests,112);
+ for(const rule of [undefined,{version:'UNKNOWN'}]){const invalid=structuredClone(sealed);invalid.config.candidate.openingMediaRule=rule;assert.throws(()=>diagnosticProviderRegistration(invalid));}
+});
 test('diagnostic cap includes failed zero-HTTP generations, permits owner3/verifier1 and all37;38 stops',()=>{
  const r=reg();r.slots=diagnosticSlots(r.corpus);const c=diagnosticControl(r,{checkSource:()=>{}});
  const rows=[];for(const s of r.slots)for(let turnIndex=0;turnIndex<(s.mode==='SAFETY'?1:s.maximumGenerations/4);turnIndex++){

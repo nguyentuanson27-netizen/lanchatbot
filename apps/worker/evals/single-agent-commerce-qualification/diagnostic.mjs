@@ -12,6 +12,7 @@ import {assertJudgeSourceInventory} from './evaluator-source.mjs';
 import {hardPrecheck} from '../../dist/single-agent-semantic-verifier-boundary.js';
 import {validateProtocol} from '../single-agent-commerce-read-only/protocol.mjs';
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
+import {assertOpeningProductMediaRule} from '../../dist/single-agent-commerce-opening-media.js';
 const read=p=>JSON.parse(readFileSync(p,'utf8').replace(/^\uFEFF/,''));
 export const DIAGNOSTIC_SCOPE=read(new URL('./remediation-20261029/DIAGNOSTIC_SCOPE.json',import.meta.url));
 export const FULL_NATIVE_DIAGNOSTIC_SCOPE=read(new URL('./FULL_NATIVE_DIAGNOSTIC_SCOPE_20261029.json',import.meta.url));
@@ -90,6 +91,11 @@ export function claimDiagnostic(path,reg){
 export function assertDiagnosticFlags(argv){
  if(argv.includes('--phase-c-diagnostic-registration'))assert(!['--phase-c-registration','--phase-c-initial-world','--phase-c-arm','--provider-run','--provider-preflight','--phase-c-safety'].some(f=>argv.includes(f)),'D_FLAGS_CONFLICT');
 }
+export function diagnosticProviderRegistration(sealed){
+ const openingMediaRule=sealed.config?.candidate?.openingMediaRule;assertOpeningProductMediaRule(openingMediaRule);
+ return {sourceSha:sealed.runSourceSha,mode:'PHASE_C_DEVELOPMENT_DIAGNOSTIC_ONLY',arm:'CANDIDATE',openingMediaRule,
+  maximumGenerationRequests:diagnosticScope(sealed.corpus).maximumGenerationRequests,ownerContextPresentation:'VI_DATA_BLOCKS_COMPACT_V2'};
+}
 export function diagnosticPreflight(root,registrationPath,worldPath){
  const sealed=read(registrationPath),world=read(worldPath);validateDiagnostic(sealed,world);
  assert.equal(execFileSync('git',['status','--porcelain'],{cwd:root,encoding:'utf8'}).trim(),'','C_DIRTY_SOURCE');
@@ -98,7 +104,7 @@ export function diagnosticPreflight(root,registrationPath,worldPath){
  const m=validateProtocol(read(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/manifest.json'))),codex=inspectCodex();
  assert.equal(codex.version,'codex-cli '+m.models.verifier.generationConfig.cliVersion);
  assert.deepEqual(m.models.conversation,sealed.config.candidate.model);assert.deepEqual(m.models.verifier,sealed.config.candidate.verifier.model);
- const p={root,sealed,world,m,codex,config:world.config,registration:{mode:'PHASE_C_DEVELOPMENT_DIAGNOSTIC_ONLY',maximumGenerationRequests:diagnosticScope(sealed.corpus).maximumGenerationRequests,arm:'CANDIDATE'}};
+ const p={root,sealed,world,m,codex,config:world.config,registration:diagnosticProviderRegistration(sealed)};
  p.diagnosticControl=diagnosticControl(sealed,{checkSource:()=>{assertCandidateSource(p);for(const snapshot of sealed.sourceChecks)assert.equal(hardPrecheck(snapshot,'Dạ.',new Date()),null,'D_SOURCE_INVALIDATED');}});
  p.diagnosticControl.beforeGeneration({generations:[],active:{slotId:sealed.slots[0].slotId,turnIndex:0},role:'OWNER'});
  return p;
