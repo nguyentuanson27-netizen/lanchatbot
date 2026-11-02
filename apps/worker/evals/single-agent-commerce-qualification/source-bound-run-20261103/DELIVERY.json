@@ -177,5 +177,6 @@
       "externalByteSha256": "a1963875910b0b745458365b2283195024e66e10e9096811243165152e01fc4a",
       "gitLfByteSha256": "d11cc32eba52e579dce33453792ace09c3e5119bdb5351d89e5631c9f4989512"
     }
-  ]
+  ],
+  "capturedWhitespace": "Transcript and draft code blocks preserve exact captured text, including trailing spaces. git diff --check flags these source spaces and generated final blank lines; they are not trimmed because capture hashes/wording must remain exact. Runtime and source configuration are unchanged."
 }
