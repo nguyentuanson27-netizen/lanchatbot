@@ -1,4 +1,14 @@
-## Current — opening product photos, 2026-11-02
+## Current — first-contact checkout with photos, 2026-11-02
+
+- [x] Implement opening add→confirm/existing-cart confirm and private native clarification/preview with approved photos in one atomic group; no unnecessary first-contact fence when persisted capability is present.
+- [x] Shared six-unit debit, exact variant/source replay, pre-dispatch authority/readiness, durable capture proof, private-data exclusion and restart whole-group gate; R1–R3 independent findings fixed.
+- [x] Observed RED2→GREEN; final worker893, Node819/2existingSKIP, protected21, build/typecheck/lintPASS. Clean dd88 actual PostgreSQL118/118 +7invariantsPASS, database dropped/provider0/livefalse. Earlier failures preserved; counts overlap.
+- [x] Same independent reviewer **APPROVE IMPLEMENTATION** atdd88;15 source hashes and47 artifact hashes independently matched, full118PG/7invariants/cleanup and commands verified. Add→confirm evidence query withdrawn after exact retained-case check. No remaining implementation blocker; no model campaign or new quality/qualification claim.
+- [ ] Conflicting component colours deferred by owner; existing silent handoff retained. Model quality/PhaseC qualification/C3 parity remain NOT_RUN/BLOCKED.
+
+[Implementation](../docs/specs/c3-phase-c-opening-checkout-media-implementation-20261102.md) · [Review](../docs/specs/c3-phase-c-opening-checkout-media-review-20261102.md) · [Commands/hashes](../docs/specs/c3-phase-c-opening-checkout-media-verification-20261102.json).
+
+## Historical — opening product photos, 2026-11-02
 
 - [x] Owner choice: every opening identified-product reply includes an image, including ETA/ACK; no verifier schema/prompt change.
 - [x] Implement durable scoped prior-output proof; all-admitted-product, exact nested component-colour, count1 pre-verifier preparation and independent atomic egress coverage. First private/confirm checkout hands off; returning paths supported.

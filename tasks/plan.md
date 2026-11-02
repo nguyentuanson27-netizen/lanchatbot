@@ -1,4 +1,12 @@
-## Current — opening product photos implemented, 2026-11-02
+## Current — first-contact checkout with photos implemented, 2026-11-02
+
+Owner requested resolving first-contact checkout and deferring conflicting component colours. Base84b3989e; runtime603c391b; final clean test/PG sourcedd88d383. Native public confirm and private clarification/preview prepare exact approved photos before transaction, retain six primitive units/four images/six messages, and commit native text, media, state, receipts and Inbox together. Source/authority and complete variant selection are rechecked; durable output proof is independently captured. Private customer input reaches no model. Conflicting colours and missing/expired data retain silent handoff.
+
+Observed RED2→GREEN; final worker893PASS, Node819PASS/2existingSKIP, protected21PASS, workerbuild/typecheck/lintPASS. Actual disposable PostgreSQL118/118 +7invariantsPASS at clean dd88, provider0/sendfalse/database dropped. R1–R3 fixed; same independent reviewer **APPROVE IMPLEMENTATION** atdd88 after exact add→confirm control and all15 source/47 artifact hashes verified. No remaining implementation/evidence blocker. Earlier failures retained. No model quality run, Phase C GO, C3 matched parity, deploy or live send.
+
+[Plan](../docs/specs/c3-phase-c-opening-checkout-media-plan-20261102.md) · [Implementation](../docs/specs/c3-phase-c-opening-checkout-media-implementation-20261102.md) · [Review](../docs/specs/c3-phase-c-opening-checkout-media-review-20261102.md) · [Commands/hashes](../docs/specs/c3-phase-c-opening-checkout-media-verification-20261102.json).
+
+## Historical — opening product photos implemented, 2026-11-02
 
 Owner selected a photo for every opening identified-product reply, including ETA/ACK. This supersedes the previous pending quote-contract decision. Fixed code-owned rule is bound to the current Phase C candidate/driver; no verifier prompt/schema change or production wiring. Base9b6fec45; implementation58d06b49; fixture-only41ad8e2f preserves worker/packages bytes.
 
