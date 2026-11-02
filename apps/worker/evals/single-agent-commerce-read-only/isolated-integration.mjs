@@ -717,7 +717,15 @@ try{
  });
 
  async function pendingCart(media=true){
-  const j=await statefulFixture({media});await j.turn('Chị lấy áo navy M.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);return j;
+  const j=await statefulFixture({media});await j.turn('Chị lấy áo navy M.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);
+  // Disposable fixture: cart was saved but the first shop ACK never reached the customer.
+  // Preserve its row and use the existing audited cancellation, not delivery or deletion.
+  const rows=(await pool.query('SELECT response_group_id,status FROM meta_outbox WHERE page_id=$1 AND conversation_id=$2',[pageId,j.bound.conversationId])).rows;
+  assert.equal(rows.length,1);assert(rows.every(r=>!['SENT_ACCEPTED','DELIVERED','READ'].includes(r.status)));
+  await pool.query("UPDATE meta_outbox SET status='MANUAL_REVIEW',last_error_code='CONTROLLED_UNDELIVERED_SETUP' WHERE page_id=$1 AND conversation_id=$2 AND status NOT IN ('SENT_ACCEPTED','DELIVERED','READ')",[pageId,j.bound.conversationId]);
+  for(const group of new Set(rows.map(r=>r.response_group_id)))await runtime.cancelMetaResponseGroup(group,'synthetic-checkout-fixture','CONTROLLED_UNDELIVERED_SETUP');
+  assert.equal(await historyStore.hasPriorAcceptedShopOutput({...j.bound,before:await j.syntheticNow()}),false);
+  await j.drain();assert.equal(j.capture.length,0);return j;
  }
  async function assertCheckoutCapture(j,r,before,preview=false){
   const {readSessionSnapshot}=await import('../single-agent-commerce-qualification/native-snapshot.mjs'),{clarificationCapture,previewMediaCapture}=await import('../single-agent-commerce-qualification/native-terminal.mjs'),{validCodeOwned,digest}=await import('../single-agent-commerce-qualification/qualification.mjs');
