@@ -1,0 +1,9 @@
+# Independent review — media budget and context
+
+Reviewer: `/root/phase_c_task_completion_implementation_review`, the existing reviewer. Review scope is source repair and evidence, not model quality or Phase C qualification.
+
+1. Initial plan REQUEST_CHANGES: bind owner scope/version, clarify budget/image-slot ledger and legal same-batch continuity; narrowly prune current dependencies; require reversible wire representation and real continuation measurements.
+2. Revised direction APPROVE: eager V2 preparation instead of reservation/credit subsystem, actual work debit, narrow known-target feasibility before effects, FINAL coverage only, source/colour/atomicity retained, V1 historical behavior explicit.
+3. Implementation REQUEST_CHANGES: unresolved mutation colour could borrow an old photo; matching prepaid media was double-counted; duplicate initial identities could evade readiness. Fixed with explicit conservative colour feasibility, valid same-batch selection recognition and distinct resolved identity/execution coverage. W2 reviewed as narrow dependency cleanup; no need to introduce a history parser.
+4. Further REQUEST_CHANGES at `7d8e6a9f`: blanket cart precedence let source-unlabelled carts erase retained physical-colour constraints, including legacy V1; feasibility accepted malformed selector args. Fixed at `0da6073` with V1 strict union, V2 physical-only cart precedence and shared closed media argument decoder. Four RED controls observed before GREEN; final focused opening/media/ingress 225 PASS.
+5. Reviewer confirmed the last source fixes are present and targeted at `0da6073`, and correctly noted stale dist during a probe. The canonical final build must finish before compiled probes/PG runs are attributed to that source. No approval of unbuilt source/evidence is inferred. The reviewer reported a quota interruption during the prior turn, then resumed; final approval remains pending until explicitly recorded.
