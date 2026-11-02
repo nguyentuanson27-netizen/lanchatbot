@@ -1,4 +1,16 @@
-## Current — continuation repair; quote contract pending, 2026-11-02
+## Current — opening product photos, 2026-11-02
+
+- [x] Owner choice: every opening identified-product reply includes an image, including ETA/ACK; no verifier schema/prompt change.
+- [x] Implement durable scoped prior-output proof; all-admitted-product, exact nested component-colour, count1 pre-verifier preparation and independent atomic egress coverage. First private/confirm checkout hands off; returning paths supported.
+- [x] Bind current candidate/driver/config and normal seal/per-dispatch readiness, including discovery; machine-block unproved C3 information/timing parity.
+- [x] Retain RED/intermediate/PG01 failures; full worker883, database267/30SKIP, protected21, finalNode817/2SKIP, build/typecheck/lintPASS. Current clean41adPG110/110+7invariantsPASS; DBdropped/provider0/livefalse. Counts overlap.
+- [x] Same independent reviewer closedR1-R4;25source hashes/Gitblobs matched;58→41runtime byte parity proved. Only exact-offer fixture argument changed in41.
+- [x] Same reviewer **APPROVE IMPLEMENTATION P2** at41ad;45artifact hashes,25source entries,PG110/110+7invariants and all final checks verified. No remaining implementation blocker.
+- [ ] New source-bound model quality/qualification and C3 information parity/comparison NOT_RUN/BLOCKED. No automatic provider run, merge, deploy or live send.
+
+[Implementation](../docs/specs/c3-phase-c-opening-product-media-implementation-20261102.md) · [Review](../docs/specs/c3-phase-c-opening-product-media-review-20261102.md) · [Commands/hashes](../docs/specs/c3-phase-c-opening-product-media-verification-20261102.json).
+
+## Historical — continuation repair before opening-photo decision, 2026-11-02
 
 - P1 implemented and same independent reviewer **APPROVE IMPLEMENTATION P1** at `8eb074ef98e6a125ce7985ca992d26b50699f60e`. Constructed s08 raw64966/presented65143 within unchanged65536;393byte headroom,14tools/signature11024 preserved, exact round-trip after bounded reference expansion. Only known CompactV2 structures changed, legacy schemas/defaults remain.
 - Observed RED10PASS/3FAIL→GREEN15, AJV4810 equivalence comparisons; final focused98PASS, worker348PASS, Node808PASS/0FAIL/2existingSKIP, build/direct TypeScript/lintPASS. First broad805PASS/3FAIL retained and fixed; overlapping counts. Reviewer verified39 artifact hashes and5 source entries.

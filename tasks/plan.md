@@ -1,4 +1,14 @@
-## Current — continuation repair; quote contract pending, 2026-11-02
+## Current — opening product photos implemented, 2026-11-02
+
+Owner selected a photo for every opening identified-product reply, including ETA/ACK. This supersedes the previous pending quote-contract decision. Fixed code-owned rule is bound to the current Phase C candidate/driver; no verifier prompt/schema change or production wiring. Base9b6fec45; implementation58d06b49; fixture-only41ad8e2f preserves worker/packages bytes.
+
+Code uses durable scoped prior accepted shop output, prepares count1 photos for all admitted products before verifier, retains exact component colour and six-call/four-image bounds, independently gates actual response-group media, and silently hands off when proof is missing. First direct private/confirm checkout hands off; returning checkout stays available. SALES_READY checks initial/discovery/task media at normal seal and each dispatch. C3 preparation timing is unproved equivalent; replacement remains machine-blocked even with a forged structural witness.
+
+Observed worker883PASS; database267PASS/30existingSKIP; protected/assembly21PASS; final Node817PASS/2existingSKIP; build/typecheck/lintPASS. Actual clean41ad PostgreSQL110/110 (94retained+16opening),7invariantsPASS, DBdropped/provider0/livefalse. PG01 12PASS/1FAIL retained, exact-offer fixture corrected only. Same reviewer closedR1-R4 and matched25source hashes/blobs; **APPROVE IMPLEMENTATION P2** at `41ad8e2f57d7a2b9f6200ed3efb8c6633a8c8318`, same independent reviewer. All45 artifact byte hashes and25 source SHA256/Git blobs matched; actualPG110/110+7invariants/cleanup/provider0/livefalse and final checks independently verified. R1-R4 closed; no remaining blocking implementation finding. Approval excludes model quality, qualification GO, matched comparison, deployment and live send..
+
+[Implementation](../docs/specs/c3-phase-c-opening-product-media-implementation-20261102.md) · [Review](../docs/specs/c3-phase-c-opening-product-media-review-20261102.md) · [Commands/hashes](../docs/specs/c3-phase-c-opening-product-media-verification-20261102.json). P1 remains approved (constructed65143/65536 only). No new model evaluation or PhaseC GO; qualificationBLOCKED/C3comparisonNOT_RUN/B_NOT_GO. No automatic campaign, merge, deploy or live send.
+
+## Historical — continuation repair before opening-photo decision, 2026-11-02
 
 - P1 implemented and same independent reviewer **APPROVE IMPLEMENTATION P1** at `8eb074ef98e6a125ce7985ca992d26b50699f60e`. Constructed s08 raw64966/presented65143 within unchanged65536;393byte headroom,14tools/signature11024 preserved, exact round-trip after bounded reference expansion. Only known CompactV2 structures changed, legacy schemas/defaults remain.
 - Observed RED10PASS/3FAIL→GREEN15, AJV4810 equivalence comparisons; final focused98PASS, worker348PASS, Node808PASS/0FAIL/2existingSKIP, build/direct TypeScript/lintPASS. First broad805PASS/3FAIL retained and fixed; overlapping counts. Reviewer verified39 artifact hashes and5 source entries.
