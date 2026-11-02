@@ -1,0 +1,12 @@
+{
+  "implementation": "APPROVED",
+  "inputReview": "APPROVED",
+  "postRunAudit": "APPROVED",
+  "quality": "NOT_GRADED",
+  "qualification": "BLOCKED",
+  "C3": "NOT_RUN",
+  "liveSend": false,
+  "reportAccuracy": "APPROVED",
+  "reviewer": "/root/phase_c_task_completion_implementation_review",
+  "reviewedRunSourceSha": "2628987aae6c62958db4484ba5f152907f833d83"
+}

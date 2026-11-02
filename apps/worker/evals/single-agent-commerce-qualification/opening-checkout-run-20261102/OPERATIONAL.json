@@ -1,0 +1,97 @@
+{
+  "runSourceSha": "2628987aae6c62958db4484ba5f152907f833d83",
+  "startedAt": "2026-11-02T09:47:16.267542+00:00",
+  "completedAt": "2026-11-02T09:58:51.588858+00:00",
+  "generationRecords": 36,
+  "generationHttp": 36,
+  "requestsPerGenerationMaximum": 1,
+  "generationStatus": {
+    "OK": 35,
+    "MALFORMED": 1
+  },
+  "verifierVerdicts": {
+    "PASS": 5
+  },
+  "ownerLatencyMs": {
+    "n": 31,
+    "p50": 4726.385500000004,
+    "p95": 8475.131399999955
+  },
+  "verifierLatencyMs": {
+    "n": 5,
+    "p50": 6896.470299999994,
+    "p95": 8056.019899999985
+  },
+  "nativeVerificationAndReadbackMs": {
+    "n": 5,
+    "p50": 8462.979200000009,
+    "p95": 10248.986600000004
+  },
+  "providerTransportErrors": 0,
+  "verifierTimeoutOrError": 0,
+  "malformedOwner": 1,
+  "tokenUsage": {
+    "inputObserved": 356155,
+    "outputObserved": 35200,
+    "usageRows": 36,
+    "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+  },
+  "observedModelVersions": {
+    "gemini-3.5-flash-lite": 31,
+    "gpt-6.1-sol": 5
+  },
+  "auxiliaryHttp": [
+    {
+      "slotId": "1d34f3fff47d52247851974f94b3aae53eecadae402304cb7dd653d829ce63b6",
+      "turnIndex": 0,
+      "invocation": 1,
+      "kind": "OAUTH",
+      "ordinal": 1,
+      "status": 200,
+      "error": null,
+      "latencyMs": 200.4016999999876,
+      "requestHash": null,
+      "usage": null,
+      "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+    },
+    {
+      "slotId": "1d34f3fff47d52247851974f94b3aae53eecadae402304cb7dd653d829ce63b6",
+      "turnIndex": 0,
+      "invocation": 1,
+      "kind": "EMBEDDING",
+      "ordinal": 2,
+      "status": 200,
+      "error": null,
+      "latencyMs": 1837.3202000000165,
+      "requestHash": "06fd1ec68a142b1426023ec062599711a5cf4886715903364747068b2b46ba5e",
+      "usage": null,
+      "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+    },
+    {
+      "slotId": "0cc8e2792314d2c7bdcfcffa397820b7cb20232db82df8402a6b0df29087ba4e",
+      "turnIndex": 0,
+      "invocation": 2,
+      "kind": "EMBEDDING",
+      "ordinal": 3,
+      "status": 200,
+      "error": null,
+      "latencyMs": 1679.1141000000061,
+      "requestHash": "15ec559b871aabb75bd3ad0189611e77b6fc11c3f97236ca13fe1637854505c3",
+      "usage": null,
+      "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+    }
+  ],
+  "acceptedText": 5,
+  "acceptedImages": 4,
+  "terminalCounts": {
+    "SEND_ELIGIBLE": 5,
+    "HANDOFF": 17,
+    "NO_SEND": 6
+  },
+  "handoffNoSendRate": 0.8214285714285714,
+  "fallbackMessages": 0,
+  "liveSend": false,
+  "sourceWrites": 0,
+  "databaseDropped": true,
+  "note": "Monotonic observed harness latency, not a production SLO or a causal counterfactual benchmark."
+}

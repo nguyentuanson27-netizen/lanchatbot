@@ -1,4 +1,12 @@
-## Current — first-contact checkout with photos implemented, 2026-11-02
+## Current — opening-checkout development batch completed, 2026-11-02
+
+Owner requested one model round after implementation approval. Clean source2628987a adds only evaluation diagnostic forwarding of the frozen opening-media rule (RED→GREEN34, same-reviewer APPROVE); worker runtime/packages/prompts unchanged. Fresh107product capture, actual initial PostgreSQL/dropped/provider0 and exact existing isolated handoff matrix; failed initial01 policy aggregate hash is preserved separately before generation. Input/source/readiness and final pinned-client preflight approved.
+
+Completed21/21cases and28/28turns, N1/max112/retry0, frozen8SALES_READY/13SOURCE_UNAVAILABLE.36HTTP/36records =31OWNER+5VERIFIER;35OK/1MALFORMED HTTP200,0transporterror/timeout. Actual5eligible/17silentHANDOFF/6HUMAN-ownedNO_SEND;5texts4images. All5verifierPASS;0verifierrejections. No remaining registered case/turn, DB dropped/live0. Native path verification+readback p50~8.463s/p95~10.249s; harness measurements only. Same independent reviewer APPROVE post-run accounting/capture and report accuracy after94artifact hashes/28raw/36wires/accepted outputs. No independent locked quality score or PhaseC GO.
+
+New [report](../apps/worker/evals/single-agent-commerce-qualification/opening-checkout-run-20261102/REPORT.md) includes every actual outcome and whole-turn primary findings. p08/j6 preserve committed cart/receipt but MEDIA_SELECT UNKNOWN_INTERNAL prevents reaching confirm/preview; sole underlying media cause remains unknown. p10 was preregistered ready then search-admitted missing media blocks clarification. No relabeling of cohorts or reuse as fresh holdout. PhaseCqualificationBLOCKED/C3NOT_RUN/B_NOT_GO; no automatic next campaign/fix/merge/deploy.
+
+## Implemented — first-contact checkout with photos, 2026-11-02
 
 Owner requested resolving first-contact checkout and deferring conflicting component colours. Base84b3989e; runtime603c391b; final clean test/PG sourcedd88d383. Native public confirm and private clarification/preview prepare exact approved photos before transaction, retain six primitive units/four images/six messages, and commit native text, media, state, receipts and Inbox together. Source/authority and complete variant selection are rechecked; durable output proof is independently captured. Private customer input reaches no model. Conflicting colours and missing/expired data retain silent handoff.
 

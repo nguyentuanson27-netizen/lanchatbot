@@ -1,4 +1,15 @@
-## Current — first-contact checkout with photos, 2026-11-02
+## Current — opening-checkout model development run, 2026-11-02
+
+- [x] Owner requested one new model round. Evaluation-only diagnostic opening-media forwarding fix: observed RED→GREEN34, independent7PASS and APPROVE; clean run source2628987a, worker runtime/prompts unchanged.
+- [x] Fresh107-product read-only capture + exact existing approved isolated handoff matrix; actual initial PostgreSQL/dropped/provider0, same-reviewer inputs and final preflight PASS. Preserve failed initial01 aggregate-hash preparation, generation0.
+- [x] Complete21/21cases and28/28turns, N1/max112/retry0:36actualrequests (31OWNER/5VERIFIER),35OK/1MALFORMED ownerHTTP200; no timeout/transporterror. Frozen8ready/13source gaps unchanged.
+- [x] Actual5eligible/17silentHANDOFF/6HUMAN-ownedNO_SEND,5texts4images; verifier5PASS/0reject. No registered NOT_RUN or missing turns. DB dropped/live0.
+- [x] Same independent reviewer APPROVE ACCOUNTING/CAPTURE and REPORT ACCURACY after94artifact/28raw/36wire hashes and exact accepted outputs. Primary findings and all conversations retained; locked independent quality grades NOT_GRADED.
+- [ ] p08/j6 cartcommitted then MEDIA_SELECT UNKNOWN_INTERNAL before confirm: native checkout completion still unproved by model run. p10 post-search media prerequisite, source image/colour/component-fit gaps and1malformed owner remain; no automatic fixes/reruns or post-result cohort changes. PhaseCqualificationBLOCKED/C3NOT_RUN/B_NOT_GO.
+
+[Report](../apps/worker/evals/single-agent-commerce-qualification/opening-checkout-run-20261102/REPORT.md) · [All conversations](../apps/worker/evals/single-agent-commerce-qualification/opening-checkout-run-20261102/CONVERSATIONS.md) · [Independent audit](../apps/worker/evals/single-agent-commerce-qualification/opening-checkout-run-20261102/POST_RUN_AUDIT.json).
+
+## Implemented — first-contact checkout with photos, 2026-11-02
 
 - [x] Implement opening add→confirm/existing-cart confirm and private native clarification/preview with approved photos in one atomic group; no unnecessary first-contact fence when persisted capability is present.
 - [x] Shared six-unit debit, exact variant/source replay, pre-dispatch authority/readiness, durable capture proof, private-data exclusion and restart whole-group gate; R1–R3 independent findings fixed.
