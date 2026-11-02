@@ -10,11 +10,17 @@ import {candidateCartOptions,cartSelectionFromSnapshot} from '../../dist/realtim
 import {commerceSizeSource} from '../../dist/single-agent-commerce-product-groups.js';
 import {eligibleCommerceMedia,commerceMediaIntents} from '../../dist/single-agent-commerce-media-eligibility.js';
 import {digest} from './qualification.mjs';
+import {openingExecutionReadiness} from './opening-execution-readiness.mjs';
 
 /** Evaluator-only task declaration, reviewed/frozen before results. No prose classification. */
 export function assertTaskReadinessSpec(spec,{required=false}={}){
  if(spec?.version===undefined){assert(!required,'C_TASK_SCOPE_REGISTRATION_REQUIRED');return;}
- assert(spec.version===2&&spec.task&&typeof spec.task==='object'&&!Array.isArray(spec.task),'C_TASK_SCOPE_VERSION');
+ assert([2,3].includes(spec.version)&&spec.task&&typeof spec.task==='object'&&!Array.isArray(spec.task),'C_TASK_SCOPE_VERSION');
+ if(spec.version===3){
+  assert(Array.isArray(spec.executionPaths)&&(spec.executionPaths.length>0||spec.noProductFactsRequired===true),'C_EXECUTION_PATHS');
+  if(spec.executionPaths.length===0)assert(spec.noProductFactsRequired===true&&!spec.task.productId&&spec.checks.every(q=>q.facet==='POLICY'),'C_EXECUTION_EMPTY_PRODUCT_SCOPE');
+  for(const q of spec.checks.filter(q=>q.facet==='SELECTION'))assert(spec.executionPaths.some(p=>p.kind==='POST_CART'&&p.selections?.some(s=>digest(s)===digest(q))),'C_EXECUTION_SELECTION_COVERAGE');
+ }
  const t=spec.task;
  assert(Object.keys(t).every(k=>['purpose','productId','fitScope','componentRole','openingQuote','requiredComponentRoles'].includes(k))&&
   ['SALE','CUSTOMER_INPUT','SHOP_GAP'].includes(t.purpose),'C_TASK_SCOPE_FIELDS');
@@ -30,6 +36,12 @@ export function assertTaskReadinessSpec(spec,{required=false}={}){
  }
  if(t.requiredComponentRoles!==undefined)assert(spec.checks.some(q=>q.facet==='SELECTION'&&q.productId===t.productId&&
   JSON.stringify(q.requiredComponentRoles)===JSON.stringify(t.requiredComponentRoles)),'C_TASK_COMPOSITION_COVERAGE');
+}
+
+/** New seals only. Historical v2 manifests remain byte-replayable, never upgraded in place. */
+export function assertProspectiveOpeningReadiness(corpus,rule){
+ if(!rule)return;assertOpeningProductMediaRule(rule);
+ assert(corpus.scenarios.filter(s=>s.mode!=='SAFETY').every(s=>s.judgeContext?.sourceReadiness?.spec?.version===3),'C_EXECUTION_READINESS_V3_REQUIRED');
 }
 
 export async function sourceReadiness(world,spec,at=new Date()){
@@ -85,9 +97,11 @@ export async function sourceReadiness(world,spec,at=new Date()){
   }
   results.push({requirement:structuredClone(q),status:available?'AVAILABLE':'FAILED',reason});
  }
- assert(spec.cohort==='SALES_READY'?results.every(r=>r.status==='AVAILABLE'):results.some(r=>r.status==='FAILED'),
+ const executionPaths=spec.version===3?(spec.executionPaths.length?await openingExecutionReadiness(world,spec.executionPaths,at):[]):undefined;
+ const all=[...results,...(executionPaths??[])];
+ assert(spec.cohort==='SALES_READY'?all.every(r=>r.status==='AVAILABLE'):all.some(r=>r.status==='FAILED'),
   spec.cohort==='SALES_READY'?'C_SOURCE_READINESS_BLOCKED':'C_CONTROL_HAS_NO_SOURCE_FAILURE');
- const body={kind:'C_SOURCE_READINESS_V1',worldHash:digest(world),checkedAt:at.toISOString(),spec:structuredClone(spec),results};
+ const body={kind:'C_SOURCE_READINESS_V1',worldHash:digest(world),checkedAt:at.toISOString(),spec:structuredClone(spec),results,...(executionPaths?{executionPaths}:{})};
  return {...body,contentHash:digest(body)};
 }
 export async function assertSourceReadiness(world,manifest,at=new Date()){
@@ -102,9 +116,15 @@ export async function assertScenarioReadiness(world,s,at=new Date(),openingMedia
   assertTaskReadinessSpec(s.judgeContext?.sourceReadiness?.spec,{required:true});
   const spec=s.judgeContext.sourceReadiness.spec;
   const openingProducts=[...new Set([...s.turns.flatMap(t=>t.initialProductCodes),...(s.judgeContext?.sourceRequirements?.productCodes??[]),...(spec.task?.productId?[spec.task.productId]:[])])];
+  if(spec.version===3&&spec.executionPaths.length===0)assert(openingProducts.length===0&&['ORDER_ONLY','NO_PRODUCT_FACTS'].includes(s.judgeContext?.sourceRequirements?.kind),'C_EXECUTION_EMPTY_PRODUCT_SCOPE');
   if(openingMediaRule&&spec.cohort==='SALES_READY')for(const code of openingProducts){
    const p=world.products.find(p=>[p.productId,p.canonicalCode,...(p.aliases??[])].some(v=>normalizeProductCode(v)===normalizeProductCode(code)));
    assert(p&&spec.checks.some(q=>q.facet==='MEDIA'&&q.productId===p.productId&&q.intent==='GENERIC'),'C_OPENING_MEDIA_READINESS_REQUIRED');
+   if(spec.version===3)assert(spec.executionPaths.some(path=>path.kind==='DISCOVERY'&&path.productIds?.includes(p.productId)),'C_EXECUTION_DISCOVERY_COVERAGE');
+  }
+  if(openingMediaRule&&spec.version===3&&spec.cohort==='SALES_READY'&&openingProducts.length){
+   const ids=openingProducts.map(code=>world.products.find(p=>[p.productId,p.canonicalCode,...(p.aliases??[])].some(v=>normalizeProductCode(v)===normalizeProductCode(code)))?.productId);
+   assert(spec.executionPaths.some(path=>path.kind==='DISCOVERY'&&ids.every(id=>id&&path.productIds?.includes(id))),'C_EXECUTION_COMBINED_SCOPE');
   }
   await assertSourceReadiness(world,s.judgeContext?.sourceReadiness,at);
  }

@@ -12,6 +12,9 @@ const cases=[['c-20261028-j1',3],['c-20261028-j6',3],['c-20261028-s09',1],['c-20
 const reg=()=>({kind:'PHASE_C_DEVELOPMENT_DIAGNOSTIC_V1',corpus:{scenarios:cases.map(([id,n],i)=>({id,mode:i===5?'SAFETY':n===3?'JOURNEY':'SINGLE',turns:Array.from({length:n},()=>({latest:'unit',history:[],initialProductCodes:[]}))}))},sourceChecks:[]});
 test('development dispatch preserves sealed opening-media rule and existing cap without a provider request',()=>{
  const sealed=reg();sealed.runSourceSha='a'.repeat(40);sealed.config={candidate:{openingMediaRule:{version:'FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1'}}};
+ for(const s of sealed.corpus.scenarios.filter(s=>s.mode!=='SAFETY'))s.judgeContext={sourceReadiness:{spec:{version:3}}};
+ const legacy=structuredClone(sealed);legacy.corpus.scenarios[0].judgeContext.sourceReadiness.spec.version=2;
+ assert.throws(()=>diagnosticProviderRegistration(legacy),/EXECUTION_READINESS_V3_REQUIRED/);
  const actual=diagnosticProviderRegistration(sealed);
  assert.equal(actual.sourceSha,sealed.runSourceSha);assert.deepEqual(actual.openingMediaRule,sealed.config.candidate.openingMediaRule);
  assert.equal(actual.maximumGenerationRequests,37);assert.equal(actual.ownerContextPresentation,'VI_DATA_BLOCKS_COMPACT_V2');assert.equal(actual.arm,'CANDIDATE');

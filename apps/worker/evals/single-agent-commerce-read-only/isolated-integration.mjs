@@ -716,8 +716,8 @@ try{
   const rows=(await pool.query('SELECT status FROM meta_outbox WHERE conversation_id=$1',[j.bound.conversationId])).rows;assert.equal(rows.length,2);assert(rows.every(r=>!['SENT_ACCEPTED','DELIVERED','READ'].includes(r.status)));
  });
 
- async function pendingCart(media=true){
-  const j=await statefulFixture({media});await j.turn('Chị lấy áo navy M.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);
+ async function pendingCart(media=true,unlabelled=false){
+  const j=await statefulFixture({media,candidateTuples:unlabelled});await j.turn(unlabelled?'Chị lấy áo M.':'Chị lấy áo navy M.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',...(unlabelled?{}:{color:'navy'})}}]),say('Dạ chị.')]);
   // Disposable fixture: cart was saved but the first shop ACK never reached the customer.
   // Preserve its row and use the existing audited cancellation, not delivery or deletion.
   const rows=(await pool.query('SELECT response_group_id,status FROM meta_outbox WHERE page_id=$1 AND conversation_id=$2',[pageId,j.bound.conversationId])).rows;
@@ -740,6 +740,18 @@ try{
   const tampered=structuredClone(input);tampered.result.checkoutMediaOutput.mediaBindingHash='f'.repeat(64);assert.equal(preview?previewMediaCapture(tampered):clarificationCapture(tampered),null);
   assert(!JSON.stringify(after.publicHistory.history).includes('Khách thử nghiệm'));assert(!JSON.stringify(after.publicHistory.history).includes('0900000000'));
  }
+ for(const mode of ['public','partial','preview'])await check('C unlabelled checkout exact source tuple and atomic opening media '+mode,async()=>{
+  const j=await pendingCart(true,true),{readSessionSnapshot}=await import('../single-agent-commerce-qualification/native-snapshot.mjs'),before=await readSessionSnapshot({runtime,pool,historyStore,session:j}),cart=structuredClone((await j.state()).cart.value);
+  assert(cart.lines.every(l=>l.components.every(c=>c.color==='__NO_COLOR__')));
+  const text=mode==='public'?'Chốt đơn cho chị nhé.':mode==='partial'?'Tên: Khách thử nghiệm':'Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD';
+  const r=await j.turn(text,mode==='public'?[native([{name:'confirm_purchase',args:{}}])]:[],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  assert.equal(r.result.enqueued,2,JSON.stringify(r.result));assert.equal(r.verifiers,0);assert.equal(r.owners,mode==='public'?1:0);
+  assert.deepEqual((await j.state()).cart.value.lines,cart.lines);await j.drain();await assertCheckoutCapture(j,r,before,mode==='preview');
+ });
+ await check('C unlabelled checkout revoked media remains zero-send after dispatcher restart',async()=>{
+  const j=await pendingCart(true,true),r=await j.turn('Tên: Khách thử nghiệm',[],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  assert.equal(r.result.enqueued,2);j.changeMediaSource();j.restartDelivery();await j.drain();assert.equal(j.capture.length,0);
+ });
  await check('C checkout opening existing-cart confirm has exact accepted native media proof',async()=>{
   const j=await pendingCart(),{readSessionSnapshot}=await import('../single-agent-commerce-qualification/native-snapshot.mjs'),before=await readSessionSnapshot({runtime,pool,historyStore,session:j});
   const r=await j.turn('Chốt đơn cho chị nhé.',[native([{name:'confirm_purchase',args:{}}])],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});

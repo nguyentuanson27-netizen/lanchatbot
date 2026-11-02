@@ -115,5 +115,5 @@ for(const discovery of [false,true])test('normal native seal rejects absent open
  const sources=['A','B','C'].map(population=>{const path=resolve(f.root,population+'.json');writeFileSync(path,JSON.stringify(['f'.repeat(64)]));return {path,population};});
  const inv=developmentInventory(sources);inv.review={status:'APPROVED',inventoryHash:inv.inventoryHash,corpusHash:digest(f.pop),reviewer:'UNIT_ONLY',nearDuplicateReviewHash:'a'.repeat(64),historyCoverageComplete:true};
  f.write('config',f.c);f.write('world',f.world);f.write('corpus',f.pop);f.write('development',inv);
- const out=resolve(f.root,'no-photo');const result=f.seal(out);assert.equal(result.status,2,result.stdout);assert.match(result.stderr,/C_OPENING_MEDIA_READINESS_REQUIRED/);assert(!existsSync(out));
+ const out=resolve(f.root,'no-photo');const result=f.seal(out);assert.equal(result.status,2,result.stdout);assert.match(result.stderr,/C_EXECUTION_READINESS_V3_REQUIRED/);assert(!existsSync(out));
 });

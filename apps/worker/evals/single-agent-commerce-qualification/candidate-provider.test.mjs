@@ -131,8 +131,10 @@ test('registered readiness expiry between preflight and generation stays counted
  const {sourceReadiness}=await import('./source-readiness.mjs');let posts=0,at;
  const f=setup(t,{fetchImpl:async()=>{posts++;return response();},readinessClock:()=>at});
  f.world.config.maxFactAgeSeconds=60;
+ f.world.config.scope=commerceScope();
+ f.world.products[0].images=[{url:'https://content.pancake.vn/expiry-control.jpg',role:'PRIMARY',angle:'FRONT',imageType:'MODEL',intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:f.world.products[0].observedAt}];
  const observed=new Date(f.world.snapshots.SV2447.synced_at);
- const manifest=await sourceReadiness(f.world,{version:2,task:{purpose:'SALE',productId:'SV2447'},cohort:'SALES_READY',checks:[{facet:'PRICE',productId:'SV2447',offerType:'DIRECT'}]},observed);
+ const manifest=await sourceReadiness(f.world,{version:3,task:{purpose:'SALE',productId:'SV2447'},cohort:'SALES_READY',checks:[{facet:'PRICE',productId:'SV2447',offerType:'DIRECT'}],executionPaths:[{kind:'DISCOVERY',productIds:['SV2447']}]},observed);
  f.preflight.sealed.corpus.scenarios[0].turns[0].initialProductCodes=[];delete manifest.spec.task.productId;
  const {contentHash,...body}=manifest;manifest.contentHash=digest(body); // Explicit no-product control isolates expiry.
  f.preflight.sealed.corpus.scenarios[0].judgeContext={sourceReadiness:manifest};at=new Date(observed.getTime()+60000);
@@ -153,7 +155,7 @@ test('dispatch rejects a ready price-only opening product before HTTP',async t=>
  const f=setup(t,{fetchImpl:async()=>{posts++;return response();}});
  const spec={version:2,task:{purpose:'SALE',productId:'SV2447'},cohort:'SALES_READY',checks:[{facet:'PRICE',productId:'SV2447',offerType:'DIRECT'}]};
  f.preflight.sealed.corpus.scenarios[0].judgeContext={sourceReadiness:await sourceReadiness(f.world,spec,new Date())};
- await assert.rejects(f.provider.owner(f.request),/OPENING_MEDIA_READINESS_REQUIRED/);assert.equal(posts,0);
+ await assert.rejects(f.provider.owner(f.request),/EXECUTION_READINESS_V3_REQUIRED/);assert.equal(posts,0);
  assert.equal(f.provider.observed()[0].providerRequests,0);
 });
 
@@ -162,5 +164,5 @@ test('discovery product scope fails before HTTP when opening media is not regist
  const f=setup(t,{fetchImpl:async()=>{posts++;return response();}}),scenario=f.preflight.sealed.corpus.scenarios[0];
  scenario.turns[0].initialProductCodes=[];
  scenario.judgeContext={sourceRequirements:{kind:'DISCOVERY_POOL',productCodes:['SV2447']},sourceReadiness:await sourceReadiness(f.world,{version:2,task:{purpose:'SALE'},cohort:'SALES_READY',checks:[{facet:'PRICE',productId:'SV2447',offerType:'DIRECT'}]},new Date())};
- await assert.rejects(f.provider.owner(f.request),/OPENING_MEDIA_READINESS_REQUIRED/);assert.equal(posts,0);assert.equal(f.provider.observed()[0].providerRequests,0);
+ await assert.rejects(f.provider.owner(f.request),/EXECUTION_READINESS_V3_REQUIRED/);assert.equal(posts,0);assert.equal(f.provider.observed()[0].providerRequests,0);
 });

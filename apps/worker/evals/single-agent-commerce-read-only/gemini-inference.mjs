@@ -25,6 +25,14 @@ export function publicCommunicationHistoryMetadata(value){
  return parsed;
 }
 export const OWNER_REQUEST_MAX_BYTES=65536;
+/** Test/audit expansion of the same-body CompactV2 policy reference; never a retrieval. */
+export function expandCurrentPolicyData(data,literals){
+ if(!Object.hasOwn(data,'policyFromTrustedRef'))return structuredClone(data);
+ const matches=literals.filter(p=>p.ref===data.policyFromTrustedRef);
+ requireThat(!Object.hasOwn(data,'policy')&&!Object.hasOwn(data,'sourceVersion')&&matches.length===1&&/^policy:[a-f0-9]{64}$/.test(data.policyFromTrustedRef),'OWNER_POLICY_REFERENCE');
+ const {policyFromTrustedRef,...rest}=data;
+ return {...structuredClone(rest),policy:JSON.parse(matches[0].text),sourceVersion:policyFromTrustedRef.slice(7)};
+}
 export const OWNER_IMAGE_BOUNDS={count:2,maxBytes:512*1024,maxRequestBytes:1507328};
 const safeFailureCodes=new Set(['CAPABILITY_UNAVAILABLE','OWNER_REQUEST_BOUND','CREDENTIAL_SCOPE','AUTH_HTTP','AUTH_INVALID','GENERATION_HTTP',
  'EMPTY_BODY','RESPONSE_BOUND','OWNER_MODEL_VERSION','OWNER_CANDIDATE_COUNT','OWNER_FINISH_REASON','OWNER_CONTENT_ROLE','OWNER_CONTENT_PARTS',
@@ -39,7 +47,7 @@ const offerLabels={AO:'áo lẻ',CV:'chân váy lẻ',QUAN:'quần lẻ',VAY:'v�
  SET_VAY:'bộ có váy',SET_CV:'bộ có chân váy',SET_QUAN:'bộ có quần',COMBO_3:'combo 3 món',DIRECT:'sản phẩm'};
 export const readOnlyDeclarations=[
  {name:'search_products',description:'Tìm sản phẩm: có mã thì truyền riêng productCode; tìm theo tên hoặc nhu cầu thì dùng query. Cần ít nhất một trường; có cả hai thì ưu tiên mã. products.subjectRef dùng để đọc tiếp. MATCHED là tìm được mẫu; AMBIGUOUS chỉ là các gợi ý chưa xác định đúng mẫu khách hỏi. Khi tìm theo nhu cầu, dùng description loại món sai loại/hoàn cảnh; ứng viên chưa xác nhận giá hay phù hợp. Còn một tool round và cần kiểm dữ liệu để chọn thì batch read_product cho tối đa hai ứng viên hợp lý, đúng phần bán và budget còn lại; sau kết quả mới chọn. Không mở mọi offers của mọi kết quả. PRODUCT_BOUND nghĩa là đã đầy context, dùng các sản phẩm đã có.',parameters:{type:'OBJECT',properties:{productCode:string,query:string}}},
- {name:'read_product',description:'Sản phẩm đã có purchaseOptions thì dùng đúng subjectRef/offerType và đường đọc code cấp, không search lại hoặc đọc mô tả để biết lựa chọn mua. Đọc PRODUCT theo selection bắt buộc: SINGLE đọc một offerType từ availableOffers/offerLabels; COMPARE chỉ đọc 2–3 offerTypes được chọn để so sánh; DETAILS_ONLY chỉ đọc mô tả/metadata, không cấp giá/tồn. Không truyền null hoặc mở toàn bộ offers ngầm. Mua cả bộ chọn đúng mã cả bộ; mua lẻ chọn đúng phần. Có màu/size/khu vực thì truyền ngay. Size chỉ xem tồn, không chứng minh mặc vừa.',parameters:{type:'OBJECT',properties:{subjectRef:string,selection:{type:'STRING',enum:productReadSelections},offerType:string,offerTypes:{type:'ARRAY',items:string,minItems:2,maxItems:3},color:string,size:string,deliveryRegion:string},required:['subjectRef','selection']}},
+ {name:'read_product',description:'Sản phẩm đã có purchaseOptions thì dùng đúng subjectRef/offerType và đường đọc code cấp, không search lại hoặc đọc mô tả để biết lựa chọn mua. Đọc PRODUCT theo selection bắt buộc: SINGLE đọc một offerType từ availableOffers/offerLabels; COMPARE chỉ đọc 2–3 offerTypes được chọn để so sánh; DETAILS_ONLY chỉ đọc mô tả/metadata, không cấp giá/tồn. color/size/deliveryRegion: null nghĩa là bỏ lọc. Không mở toàn bộ offers ngầm. Mua cả bộ chọn đúng mã cả bộ; mua lẻ chọn đúng phần. Có màu/size/khu vực thì truyền ngay. Size chỉ xem tồn, không chứng minh mặc vừa.',parameters:{type:'OBJECT',properties:{subjectRef:string,selection:{type:'STRING',enum:productReadSelections},offerType:string,offerTypes:{type:'ARRAY',items:string,minItems:2,maxItems:3},color:{...string,nullable:true},size:{...string,nullable:true},deliveryRegion:{...string,nullable:true}},required:['subjectRef','selection']}},
  {name:'read_policy',description:'Đọc quy định hiện hành của shop. Không đọc lịch sử đơn hoặc duyệt điều kiện đổi của riêng khách; orderEligibility=null nghĩa là chưa xét đơn.',parameters:{type:'OBJECT',properties:{}}},
 ];
 const stateFieldPaths=Object.freeze({HEIGHT_CM:'measurements.HEIGHT_CM',WEIGHT_KG:'measurements.WEIGHT_KG',BUST_CM:'measurements.BUST_CM',WAIST_CM:'measurements.WAIST_CM',HIPS_CM:'measurements.HIPS_CM',fitPreference:'fitPreference','preferences.colors':'preferences.colors','preferences.styles':'preferences.styles','preferences.materials':'preferences.materials'});
@@ -154,6 +162,12 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  for(const message of contents)for(const part of message.parts??[]){
   const response=part.functionResponse;
   const data=response?.response?.data;if(!data)continue;
+  // Reference only the identical policy already present in this same request.
+  // Older/different policies keep their full result; scope/eligibility/version remain local.
+  if(compactV2&&response.name==='read_policy'&&response.response.status==='OK'&&data.scope==='SHOP_RULES'&&data.policy&&typeof data.sourceVersion==='string'&&!Object.hasOwn(data,'policyFromTrustedRef')){
+   const current=c.policyLiterals.filter(p=>p.ref===`policy:${data.sourceVersion}`&&p.sourceVersion===data.sourceVersion&&canonicalJsonV1(JSON.parse(p.text))===canonicalJsonV1(data.policy));
+   if(current.length===1){response.response.data={...data,policyFromTrustedRef:current[0].ref};delete response.response.data.policy;delete response.response.data.sourceVersion;}
+  }
   if(response.name==='select_product_media'&&Array.isArray(data.assets))
    data.assets=data.assets.map(({assetRef:_internal,...visible})=>visible);
   if(response.name==='search_products'){

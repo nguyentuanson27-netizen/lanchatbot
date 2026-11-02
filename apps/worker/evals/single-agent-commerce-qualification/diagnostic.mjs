@@ -13,6 +13,7 @@ import {hardPrecheck} from '../../dist/single-agent-semantic-verifier-boundary.j
 import {validateProtocol} from '../single-agent-commerce-read-only/protocol.mjs';
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
 import {assertOpeningProductMediaRule} from '../../dist/single-agent-commerce-opening-media.js';
+import {assertProspectiveOpeningReadiness} from './source-readiness.mjs';
 const read=p=>JSON.parse(readFileSync(p,'utf8').replace(/^\uFEFF/,''));
 export const DIAGNOSTIC_SCOPE=read(new URL('./remediation-20261029/DIAGNOSTIC_SCOPE.json',import.meta.url));
 export const FULL_NATIVE_DIAGNOSTIC_SCOPE=read(new URL('./FULL_NATIVE_DIAGNOSTIC_SCOPE_20261029.json',import.meta.url));
@@ -94,11 +95,13 @@ export function assertDiagnosticFlags(argv){
 }
 export function diagnosticProviderRegistration(sealed){
  const openingMediaRule=sealed.config?.candidate?.openingMediaRule;assertOpeningProductMediaRule(openingMediaRule);
+ assertProspectiveOpeningReadiness(sealed.corpus,openingMediaRule);
  return {sourceSha:sealed.runSourceSha,mode:'PHASE_C_DEVELOPMENT_DIAGNOSTIC_ONLY',arm:'CANDIDATE',openingMediaRule,
   maximumGenerationRequests:diagnosticScope(sealed.corpus).maximumGenerationRequests,ownerContextPresentation:'VI_DATA_BLOCKS_COMPACT_V2'};
 }
 export function diagnosticPreflight(root,registrationPath,worldPath){
  const sealed=read(registrationPath),world=read(worldPath);validateDiagnostic(sealed,world);
+ assertProspectiveOpeningReadiness(sealed.corpus,sealed.config.candidate.openingMediaRule);
  assert.equal(execFileSync('git',['status','--porcelain'],{cwd:root,encoding:'utf8'}).trim(),'','C_DIRTY_SOURCE');
  assertCurrentCandidate(root,sealed.config);assertApprovedDecisions(root,sealed.config);
  execFileSync(process.execPath,[fileURLToPath(new URL('./source-readiness.mjs',import.meta.url)),'--assert',worldPath,registrationPath],{stdio:['ignore','pipe','pipe']});

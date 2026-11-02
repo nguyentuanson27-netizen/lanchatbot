@@ -11,6 +11,7 @@ import { commerceScope, commerceNow, fixtureProfile, fixturePolicy, fixtureProdu
 import { createCommerceReadSources } from "./single-agent-commerce-read-only-sources.js";
 import type { OwnerGeneration, OwnerRequest } from "./single-agent-commerce-read-only.js";
 import type { CartSelectionResult } from "./realtime-sales-catalog.js";
+import {cartSelectionFromSnapshot} from './realtime-sales-catalog.js';
 
 function fixture(productIds = ["SM613"]) {
   const scope = commerceScope(), products = productIds.map(id => fixtureProduct(id));
@@ -655,19 +656,25 @@ it("retains internal price coverage but a holding allowlist cannot send a partia
  expect(r.readCoverage?.records).toContainEqual(expect.objectContaining({operation:"read_product",facet:"PRICE",status:"AVAILABLE"}));
 });
 
-async function seedCart(f: ReturnType<typeof fixture>) {
+async function seedCart(f: ReturnType<typeof fixture>,colour='navy') {
   const scope=commerceScope(), resolution=await fixturePolicy(), policy=resolution.bundle!.policy;
   f.policy.mockResolvedValue({...resolution,mayAffectOutbound:true,bundle:{...resolution.bundle!,channel:"PUBLISHED",sideEffects:"LIVE_OUTBOUND"}});
   let state=createSalesCycleRuntimeState(scope.conversationId,{pageId:scope.pageId,conversationId:scope.conversationId},commerceNow);
   for(const kind of ["FACTS_PRESENTED","MEASUREMENTS_REQUIRED","SIZE_RECOMMENDED"] as const)
     state=applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind,commandId:kind},now:commerceNow}).state;
-  const line=fixtureCartLine(),draft={identity:{cartId:"50000000-0000-4000-8000-000000000001",salesEpisodeId:"60000000-0000-4000-8000-000000000001",customerProfileId:fixtureProfile().profile.profileId},
+  let source:Extract<CartSelectionResult,{status:'READY'}>|null=null;
+  if(colour==='__NO_COLOR__'){
+   f.products[0]!.snapshot.offers.DIRECT!.rows[0]!.color=colour;
+   const selected=cartSelectionFromSnapshot(f.products[0]!.snapshot,{selectionMode:'CANDIDATE_TUPLES',shopAlias:scope.shopAlias,productId:'SM613',offerType:'DIRECT',size:'M',color:colour,quantity:1,lineId:fixtureCartLine().lineId},commerceNow);
+   if(selected.status!=='READY')throw Error('TEST_SOURCE_NOT_READY');source={...selected,shopId:scope.shopId,line:{...selected.line,priceAuthority:{...selected.line.priceAuthority!,shopId:scope.shopId}}};
+  }
+  const line=source?.line??fixtureCartLine();line.components.forEach(c=>{c.color=colour;});const draft={identity:{cartId:"50000000-0000-4000-8000-000000000001",salesEpisodeId:"60000000-0000-4000-8000-000000000001",customerProfileId:fixtureProfile().profile.profileId},
     lines:[line],shopId:scope.shopId,policyRef:{id:policy.policyBundleId,version:policy.policyVersion,contentHash:computeBusinessContentHash(policy)}};
   state=applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind:"CART_OPENED",commandId:"open",cartDraftRef:{id:"draft",version:"1",contentHash:computeBusinessContentHash(draft)},
     expiresAt:new Date(commerceNow.getTime()+1800000).toISOString()},now:commerceNow,
     trustedPorts:{resolveCartDraft:()=>draft,resolveShopPolicy:()=>policy,resolveCartMutation:()=>null,resolveInboundMessage:()=>null,revalidateCheckout:()=>null}}).state;
   f.setCycle(state);
-  f.select.mockResolvedValue({status:"READY",line,shopId:scope.shopId,versions:{price:line.priceAuthority!.priceFactRef,inventory:"i1",size:"s1",eta:null},eta:null,etaExpiresAt:null,
+  f.select.mockResolvedValue(source??{status:"READY",line,shopId:scope.shopId,versions:{price:line.priceAuthority!.priceFactRef,inventory:"i1",size:"s1",eta:null},eta:null,etaExpiresAt:null,
     sourceAuthority:"POS_SNAPSHOT",stockStatus:"IN_STOCK",stockAvailableQuantity:4,sourceObservedAt:commerceNow.toISOString(),sourceExpiresAt:new Date(commerceNow.getTime()+1200000).toISOString()});
 }
 
@@ -1191,6 +1198,46 @@ it('opening checkout confirm commits the native missing-field question and photo
  expect(meta.messages[0]).toMatchObject({kind:'TEXT'});expect(meta.messages[1]).toMatchObject({kind:'IMAGE'});expect(CommerceMediaDeliveryBindingV1Schema.parse(meta.mediaBinding).images).toHaveLength(1);
  expect(meta.effectReadiness?.outcome).toBe('READY');expect(f.cycle().clarification?.missingFields).toEqual(['FULL_NAME']);expect(f.cycle().confirmation).toBeNull();
  expect(owner).toHaveBeenCalledOnce();expect(f.verifier).not.toHaveBeenCalled();expect(f.commit.mock.calls.some(c=>c[1].handoffEventPlan)).toBe(false);
+});
+it.each(['FINAL','CONFIRM','PRIVATE'])('source-proven unlabelled cart uses generic opening media without changing its tuple: %s',async mode=>{
+ const f=openingFixture();await seedCart(f,'__NO_COLOR__');f.enableHandoff();f.message.text=mode==='PRIVATE'?'Tên: Khách thử nghiệm':'Chốt đơn cho chị nhé.';const before=structuredClone(f.cycle().cart!.value);
+ const responses:unknown[]=[];const call={name:'confirm_purchase',args:{}};const r=await f.run(async request=>{responses.push(...request.contents.flatMap(m=>m.parts.flatMap(p=>'functionResponse' in p?[p.functionResponse]:[])));return mode==='FINAL'?{kind:'FINAL',text:'Dạ chị.'}:{kind:'TOOLS',calls:[call],content:{role:'model',parts:[{functionCall:call}]}};},undefined,undefined,undefined,openingRule);
+ expect(r.enqueued,JSON.stringify({result:r,responses})).toBe(2);expect(f.commit.mock.calls.some(c=>c[1].handoffEventPlan)).toBe(false);expect(f.cycle().cart!.value).toEqual(before);
+ expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[]).filter(m=>m.kind==='IMAGE')).toHaveLength(1);
+});
+it.each(['unavailable','physical-constraint','tuple-change'])('unlabelled source media proof cannot authorize changed or constrained cart: %s',async mode=>{
+ const f=openingFixture();await seedCart(f,'__NO_COLOR__');f.enableHandoff();f.message.text='Chốt đơn cho chị nhé.';
+ if(mode==='unavailable')f.select.mockResolvedValue({status:'INVALID',reasonCode:'SOURCE_UNAVAILABLE',availableSizes:[],availableColors:[]});
+ if(mode==='tuple-change'){const selected=await f.select();if(selected.status!=='READY')throw Error('TEST_SOURCE');selected.line.components[0]!.size='L';f.select.mockResolvedValue(selected);}
+ let n=0;const call={name:'select_product_media',args:{subjectRef:'SM613',intent:'GENERIC',color:'red'}};
+ const r=await f.run(async()=>mode==='physical-constraint'&&++n===1?{kind:'TOOLS',calls:[call],content:{role:'model',parts:[{functionCall:call}]}}:{kind:'FINAL',text:'Dạ chị.'},undefined,undefined,undefined,openingRule);
+ expect(r.enqueued).toBe(0);expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);expect(f.verifier).not.toHaveBeenCalled();
+});
+it.each(['PUBLIC','PRIVATE'])('noncanonical source sentinel cannot prove unlabelled media: %s',async mode=>{
+ const f=openingFixture();await seedCart(f,'__NO_COLOR__');f.enableHandoff();f.message.text=mode==='PRIVATE'?'Tên: Khách thử nghiệm':'Chốt đơn cho chị nhé.';
+ const selected=structuredClone(await f.select());if(selected.status!=='READY')throw Error('TEST_SOURCE');
+ selected.line.components.forEach(c=>{c.color='__no_color__';});f.select.mockResolvedValue(selected);
+ f.products[0]!.snapshot.offers.DIRECT!.rows[0]!.color='__no_color__';
+ const r=await f.run(async()=>({kind:'FINAL',text:'Dạ chị.'}),undefined,undefined,undefined,openingRule);
+ expect(r.enqueued).toBe(0);expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);
+});
+it.each(['source','cart','late-cart','revision','authority'])('unlabelled private preparation cannot outlive current authority or evidence: %s',async fault=>{
+ const f=openingFixture();await seedCart(f,'__NO_COLOR__');f.enableHandoff();f.message.text='Tên: Khách thử nghiệm';
+ const selected=structuredClone(await f.select());if(selected.status!=='READY')throw Error('TEST_SOURCE');
+ if(fault==='source')f.select.mockResolvedValue({...selected,sourceExpiresAt:new Date(commerceNow.getTime()+20*60000).toISOString()});
+ if(fault==='cart'){
+  // Source remains fresh while the enclosing thirty-minute cart expires.
+  const sourceObservedAt=new Date(commerceNow.getTime()+30*60000).toISOString();
+  f.products[0]!.snapshot.synced_at=sourceObservedAt;f.select.mockResolvedValue({...selected,sourceObservedAt,sourceExpiresAt:new Date(commerceNow.getTime()+50*60000).toISOString()});
+ }
+ let reads=0;if(fault==='late-cart')f.select.mockImplementation(async()=>{if(reads>=2)f.setClock(new Date(commerceNow.getTime()+31*60000));return {...selected,sourceExpiresAt:new Date(commerceNow.getTime()+60*60000).toISOString()};});
+ f.catalogRead.mockImplementation(async id=>{
+  if(++reads===2){if(fault==='revision')f.changeRevision();else if(fault==='authority')f.transferToHuman();else if(fault!=='late-cart')f.setClock(new Date(commerceNow.getTime()+(fault==='cart'?31:21)*60000));}
+  return f.products.find(p=>p.product.productId===id);
+ });
+ const r=await f.run(vi.fn(),undefined,undefined,undefined,openingRule);
+ expect(r.enqueued).toBe(0);expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);expect(f.cycle().checkoutDraft?.fullName??null).toBeNull();
+ if(fault==='late-cart')expect('privateCheckoutFailure' in r&&r.privateCheckoutFailure?.stage).toBe('SOURCE');
 });
 it('opening private checkout asks the next missing field with product photo and zero models',async()=>{
  const f=openingFixture();await seedCart(f);f.enableHandoff();f.message.text='Tên: Khách thử nghiệm';const owner=vi.fn();

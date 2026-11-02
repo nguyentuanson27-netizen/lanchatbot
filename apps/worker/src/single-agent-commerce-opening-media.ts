@@ -16,14 +16,20 @@ export function withOpeningProductMedia(base:CommerceTools,input:{rule:OpeningPr
   ...(Array.isArray(c.state.cartItems)?c.state.cartItems.flatMap(i=>typeof i?.productRef==='string'?[i.productRef]:[]):[])
  ])].sort();
  const metadata=(c:TrustedContext)=>c.policyLiterals.filter(p=>p.ref.startsWith('media:')||p.ref.startsWith('read:')).flatMap(p=>{try{return [JSON.parse(p.text) as Record<string,unknown>];}catch{return [];}});
- const colors=(c:TrustedContext,id:string)=>[...new Set([...metadata(c).flatMap(m=>{
+ const colors=(c:TrustedContext,id:string)=>{
+  const raw=[...metadata(c).flatMap(m=>{
   if((m.subjectRef??m.productId)!==id)return [];
   return [m,...(Array.isArray(m.sellingOptions)?m.sellingOptions:[])].flatMap(v=>typeof v.color==='string'&&v.color.trim()?[v.color]:[]);
- }),...(Array.isArray(c.state.cartItems)?c.state.cartItems.flatMap(i=>i.productRef===id&&Array.isArray(i.components)?i.components.flatMap((v:{color?:unknown})=>typeof v.color==='string'&&v.color.trim()?[v.color]:[]):[]):[])].map(normalizeCatalogToken))];
+ }),...(Array.isArray(c.state.cartItems)?c.state.cartItems.flatMap(i=>i.productRef===id&&Array.isArray(i.components)?i.components.flatMap((v:{color?:unknown})=>typeof v.color==='string'&&v.color.trim()?[v.color]:[]):[]):[])];
+  const physical=[...new Set(raw.filter(v=>v!=='__NO_COLOR__').map(normalizeCatalogToken))];
+  if(raw.includes('__NO_COLOR__')&&(physical.length||!base.unlabelledCartProducts?.(c).includes(id)))return null;
+  return physical;
+ };
  const currentPhotos=(c:TrustedContext,images:readonly CommerceMediaAsset[])=>images.filter(a=>{
   const now=input.clock().getTime();
   if(a.imageType==='SIZE_GUIDE'||!Number.isFinite(Date.parse(a.observedAt))||Date.parse(a.observedAt)>now||Date.parse(a.expiresAt)<=now||!Number.isFinite(Date.parse(a.expiresAt)))return false;
   const wanted=colors(c,a.productId);
+  if(wanted===null)return false;
   return metadata(c).some(m=>m.subjectRef===a.productId&&m.intent!=='SIZE_GUIDE'&&Array.isArray(m.assets)&&
    m.assets.some(v=>v.assetRef===a.assetRef)&&(!wanted.length||wanted.length===1&&typeof m.color==='string'&&normalizeCatalogToken(m.color)===wanted[0]));
  });
@@ -42,13 +48,14 @@ export function withOpeningProductMedia(base:CommerceTools,input:{rule:OpeningPr
    if(!missing.length)return {status:'READY',requiredProducts,chargedUnits};
    if(!Number.isSafeInteger(control.maxCalls)||control.maxCalls>6||control.maxCalls<missing.length)return fail('OPENING_MEDIA_BUDGET');
    if(existing.length+missing.length>4||!base.prepareProductImage)return fail('OPENING_MEDIA_BOUND_OR_CAPABILITY');
-   if(missing.some(id=>colors(context,id).length>1))return fail('OPENING_MEDIA_COLOR_SCOPE');
+   if(missing.some(id=>colors(context,id)===null||colors(context,id)!.length>1))return fail('OPENING_MEDIA_COLOR_SCOPE');
    for(const id of missing){
     const current=base.snapshot();
     if(!current.state.permission||!current.state.privacyAllowed||current.state.conversationOwner!=='BOT'||
       current.state.bindingVersion!==input.scope.bindingVersion||current.state.recipient!==input.scope.recipient||base.handoffStatus?.())return fail('OPENING_MEDIA_AUTHORITY');
     control.onDispatch();chargedUnits++;
-    const result=await base.prepareProductImage(id,colors(current,id)[0]);
+    const wanted=colors(current,id);if(wanted===null||wanted.length>1)return fail('OPENING_MEDIA_COLOR_SCOPE');
+    const result=await base.prepareProductImage(id,wanted[0]);
     if(result.status!=='OK')return fail('OPENING_MEDIA_SOURCE');
    }
    return ready(base.snapshot())?{status:'READY',requiredProducts,chargedUnits}:fail('OPENING_MEDIA_UNPROVED');

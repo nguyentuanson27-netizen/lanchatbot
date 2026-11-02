@@ -63,3 +63,9 @@ it("preparation-only authoritative facts and engine outcome survive into evaluat
  for(let i=0;i<200;i++)d.observe({name:"read_policy",args:{}},{status:"UNAVAILABLE",reason:"SOURCE_ERROR"});expect(d.snapshot().complete).toBe(false);
  expect(JSON.stringify(d.snapshot())).not.toContain("PRIVATE");
 });
+it('known media exceptions keep their typed code; unknown exception text remains private',async()=>{
+ const events:unknown[]=[];const diagnostics=commerceDiagnostics(e=>events.push(e));
+ for(const reason of ['MEDIA_COLOR_BINDING_UNVERIFIED','PRIVATE_CUSTOMER_OR_SECRET'])await expect(diagnostics.run('MEDIA_SELECT',{},async()=>{throw Error(reason);})).rejects.toThrow(reason);
+ expect(events).toContainEqual(expect.objectContaining({stage:'MEDIA_SELECT',status:'ERROR',reason:'MEDIA_COLOR_BINDING_UNVERIFIED'}));
+ expect(events).toContainEqual(expect.objectContaining({stage:'MEDIA_SELECT',status:'ERROR',reason:'UNKNOWN_INTERNAL'}));expect(JSON.stringify(events)).not.toContain('PRIVATE_CUSTOMER_OR_SECRET');
+});

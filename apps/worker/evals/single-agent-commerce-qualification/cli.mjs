@@ -3,7 +3,7 @@ import {readFileSync,writeFileSync,mkdirSync,existsSync} from 'node:fs';
 import {resolve,relative,sep,isAbsolute} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {randomBytes} from 'node:crypto';
-import {assertPopulationReadiness} from './source-readiness.mjs';
+import {assertPopulationReadiness,assertProspectiveOpeningReadiness} from './source-readiness.mjs';
 import {taskOutcomeSummary} from './task-outcomes.mjs';
 import {assertJudgeSourceInventory} from './evaluator-source.mjs';
 import {approvedDevelopmentInventory,sealDevelopmentInventory} from './development-inventory.mjs';
@@ -73,6 +73,7 @@ try{
    'C_FRESH_CORPUS_REVIEW_REQUIRED');
   check(!JSON.stringify(corpus).includes('{{'),'C_UNRESOLVED_HOLDOUT_INPUT');
   if(config.nativeCodecs){
+   assertProspectiveOpeningReadiness(corpus,config.candidate.openingMediaRule);
    await assertPopulationReadiness(world,corpus,new Date(),config.candidate.openingMediaRule);
    for(const s of corpus.scenarios.filter(s=>s.mode!=='SAFETY'))assertJudgeSourceInventory(s.judgeContext?.sourceInventory,digest(world),world,s);
    check(corpus.scenarios.filter(s=>s.mode!=='SAFETY').every(s=>s.turns.every(t=>t.history.length===0)),'C_INITIAL_HISTORY_SEED_NOT_IMPLEMENTED');

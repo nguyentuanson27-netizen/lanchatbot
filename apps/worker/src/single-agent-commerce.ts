@@ -40,6 +40,8 @@ export async function createCommerceTools(input: {
   quoteTask?: ExplicitQuoteTask;
   openingMediaRule?:OpeningProductMediaRule;
   openingCheckoutMedia?:true;
+  /** Private checkout only: caller validates planned cart tuples against current source. */
+  unlabelledCartProducts?:NonNullable<CommerceTools['unlabelledCartProducts']>;
   read: Parameters<typeof createReadOnlyTools>[0];
   state?: Omit<Parameters<typeof createCustomerStateTools>[0], "base" | "scope" | "clock">;
   effects?: Omit<Parameters<typeof createCommerceEffectTools>[0], "base" | "scope" | "clock"> &
@@ -101,6 +103,7 @@ export async function createCommerceTools(input: {
     tools=createCommerceMediaTools({...input.media,base:tools,catalog,clock,diagnostics});
     availableTools.push("select_product_media","view_product_media");
   }
+  if(input.unlabelledCartProducts)tools={...tools,unlabelledCartProducts:input.unlabelledCartProducts};
   const composed = tools;
   let primitiveDispatches=0;
   const countDispatch=(calls:CommerceToolCall[])=>{primitiveDispatches+=calls.filter(c=>c.name!=="request_handoff").length;};

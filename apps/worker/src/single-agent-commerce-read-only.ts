@@ -29,6 +29,8 @@ export interface VerifierRequest { generationId: string; instructions: string; f
   latest: string; history: { role: "customer" | "shop"; text: string }[]; binding: VerifierBinding; signal: AbortSignal }
 export interface VerifierGeneration { result: unknown; telemetry?: unknown }
 export interface CommerceTools {
+  /** Code-only, current exact cart/source proof; never a model-issued generic-media permission. */
+  unlabelledCartProducts?(context:TrustedContext):readonly string[];
   prepareProductImage?(subjectRef:string,color?:string):Promise<CommerceToolResult>;
   prepareOpeningMedia?(control:import("./single-agent-commerce-read-only-tools.js").PreparationControl):Promise<import("./single-agent-commerce-opening-media.js").OpeningMediaWork>;
   openingMediaReady?(context:TrustedContext,images?:readonly import("./single-agent-commerce-media.js").CommerceMediaAsset[]):boolean;

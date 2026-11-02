@@ -78,6 +78,7 @@ export function createPersistedCommerceExecutor(input: {
     if(!media.images.length)return media; // Proven returning path, unchanged native output.
     const current=await repository.read(scope.conversationId),freshPolicy=await input.policy();
     if(!current||current.revision!==output.plan!.expectedRevision||commerceHash(await input.readAuthority())!==commerceHash(authority))throw new CheckoutMediaPreparationError('AUTHORITY');
+    if(!current.cart||!(Date.parse(current.cart.expiresAt)>input.clock().getTime()))throw new CheckoutMediaPreparationError('SOURCE');
     if(commerceHash(freshPolicy.bundle)!==commerceHash(resolution.bundle))throw new CheckoutMediaPreparationError('SOURCE');
     for(const saved of nativeSelections.values())if(commerceHash(await input.facts.resolveCartSelection!(saved.query,input.clock()))!==saved.hash)throw Error('CHECKOUT_MEDIA_LINE_SOURCE_CHANGED');
     const selections=await Promise.all(cart.lines.map(l=>input.facts.resolveCartSelection!({shopAlias:scope.shopAlias,productId:l.parentProductId,offerType:l.offerId,
@@ -91,6 +92,8 @@ export function createPersistedCommerceExecutor(input: {
     if(output.protectedOutbound?.claims.some(c=>['PRICE','STOCK','ETA'].includes(c.type)&&!freshClaims.some(f=>commerceHash(f)===commerceHash(c))))throw Error('CHECKOUT_MEDIA_FACT_CHANGED');
     if(commerceHash((await input.policy()).bundle)!==commerceHash(resolution.bundle))throw new CheckoutMediaPreparationError('SOURCE');
     if(commerceHash(await input.readAuthority())!==commerceHash(authority))throw new CheckoutMediaPreparationError('AUTHORITY');
+    const at=input.clock().getTime();
+    if(!(Date.parse(current.cart.expiresAt)>at)||ready.some(s=>!(Date.parse(s.sourceObservedAt)<=at&&Date.parse(s.sourceExpiresAt)>at)))throw new CheckoutMediaPreparationError('SOURCE');
     return media;
   }
   async function commit(output: RealtimeSalesCycleOutput, authority: HandoffAuthority, terminal: boolean, resolution: RuntimePolicyResolution,media?:CheckoutMedia,beforeDispatch?:()=>void) {

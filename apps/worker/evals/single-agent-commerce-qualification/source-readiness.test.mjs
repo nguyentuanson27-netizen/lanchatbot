@@ -2,9 +2,14 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {fixtureProduct,fixturePolicyPointers,commerceScope,commerceNow} from '../../dist/single-agent-commerce.test-support.js';
-import {sourceReadiness,assertSourceReadiness,assertTaskReadinessSpec,assertPopulationReadiness} from './source-readiness.mjs';
+import {sourceReadiness,assertSourceReadiness,assertTaskReadinessSpec,assertPopulationReadiness,assertProspectiveOpeningReadiness} from './source-readiness.mjs';
 const world=()=>{const f=fixtureProduct();return {config:{scope:commerceScope(),channel:'CANARY_SHADOW',maxFactAgeSeconds:1200},
  products:[f.product],snapshots:{SM613:f.snapshot},policyRecords:fixturePolicyPointers()};};
+test('new opening-media seals require execution v3 without rewriting historical v2 manifests',()=>{
+ const c={scenarios:[{mode:'SINGLE',judgeContext:{sourceReadiness:{spec:{version:2}}}}]},before=structuredClone(c),rule={version:'FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1'};
+ assert.throws(()=>assertProspectiveOpeningReadiness(c,rule),/EXECUTION_READINESS_V3_REQUIRED/);assert.deepEqual(c,before);
+ assertProspectiveOpeningReadiness(c,undefined);c.scenarios[0].judgeContext.sourceReadiness.spec.version=3;assertProspectiveOpeningReadiness(c,rule);
+});
 test('sales-ready price is exact-offer and expires at the real boundary without renewing source',async()=>{
  const w=world(),before=structuredClone(w),spec={cohort:'SALES_READY',checks:[{facet:'PRICE',productId:'SM613',offerType:'DIRECT'}]};
  const m=await sourceReadiness(w,spec,commerceNow);assert.equal(m.results[0].status,'AVAILABLE');assert.deepEqual(w,before);
@@ -90,4 +95,26 @@ test('discovery/task scope needs photos even without initial product codes',asyn
  await assert.rejects(assertPopulationReadiness(w,{scenarios:[scenario]},commerceNow,{version:'FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1'}),/OPENING_MEDIA_READINESS_REQUIRED/);
  delete spec.task.productId;scenario.judgeContext.sourceReadiness=await sourceReadiness(w,spec,commerceNow);
  await assert.rejects(assertPopulationReadiness(w,{scenarios:[scenario]},commerceNow,{version:'FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1'}),/OPENING_MEDIA_READINESS_REQUIRED/);
+});
+test('v3 readiness executes post-cart colours and the entire declared discovery media scope',async()=>{
+ const w=world(),p=w.products[0];p.images=[{url:'https://content.pancake.vn/readiness.jpg',role:'PRIMARY',angle:'FRONT',imageType:'MODEL',intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:commerceNow.toISOString()}];
+ w.snapshots.SM613.offers.DIRECT.rows[0].color='__NO_COLOR__';
+ const selection={facet:'SELECTION',productId:'SM613',offerType:'DIRECT',size:'M',color:'__NO_COLOR__'};
+ const spec={version:3,task:{purpose:'SALE',productId:'SM613'},cohort:'SALES_READY',checks:[selection],executionPaths:[
+  {kind:'POST_CART',selections:[selection]},{kind:'DISCOVERY',productIds:['SM613']}]};
+ const before=structuredClone(w),m=await sourceReadiness(w,spec,commerceNow);assert.equal(m.executionPaths.length,2);assert(m.executionPaths.every(p=>p.status==='AVAILABLE'));assert.deepEqual(w,before);
+ w.snapshots.SM613.offers.DIRECT.rows[0].color='navy';p.colors=['navy','red'];spec.checks[0].color='navy';spec.executionPaths[0].selections[0].color='navy';
+ await assert.rejects(sourceReadiness(w,spec,commerceNow),/SOURCE_READINESS_BLOCKED/);
+ // Generic image readiness alone cannot establish a colour-bound cart path.
+ const gap=await sourceReadiness(w,{...spec,cohort:'SOURCE_UNAVAILABLE'},commerceNow);assert.equal(gap.executionPaths[0].status,'FAILED');
+ const second=structuredClone(p);second.productId='SECOND';second.canonicalCode='SECOND';second.images=[];w.products.push(second);
+ spec.executionPaths=[{kind:'DISCOVERY',productIds:['SM613','SECOND']}];spec.checks=[{facet:'PRICE',productId:'SM613',offerType:'DIRECT'}];
+ await assert.rejects(sourceReadiness(w,spec,commerceNow),/SOURCE_READINESS_BLOCKED/);
+});
+test('productless acknowledgement/policy needs no invented product, but later discovery and selections cannot use the empty proof',async()=>{
+ const w=world(),spec={version:3,task:{purpose:'CUSTOMER_INPUT'},cohort:'SALES_READY',checks:[{facet:'POLICY'}],noProductFactsRequired:true,executionPaths:[]};
+ const manifest=await sourceReadiness(w,spec,commerceNow),scenario={mode:'SINGLE',turns:[{initialProductCodes:[]}],judgeContext:{sourceReadiness:manifest,sourceRequirements:{kind:'NO_PRODUCT_FACTS',productCodes:[]}}};
+ await assertPopulationReadiness(w,{scenarios:[scenario]},commerceNow,{version:'FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1'});
+ scenario.judgeContext.sourceRequirements={kind:'DISCOVERY_POOL',productCodes:[]};await assert.rejects(assertPopulationReadiness(w,{scenarios:[scenario]},commerceNow),/EMPTY_PRODUCT_SCOPE/);
+ assert.throws(()=>assertTaskReadinessSpec({...spec,checks:[{facet:'SELECTION',productId:'SM613',offerType:'DIRECT'}]}),/EMPTY_PRODUCT_SCOPE/);
 });

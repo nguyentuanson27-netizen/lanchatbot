@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {diagnosticSlots,diagnosticControl,diagnosticProviderRegistration} from './diagnostic.mjs';
 const read=name=>JSON.parse(readFileSync(new URL(name,import.meta.url)));
 const scope=read('./FULL_NATIVE_REMAINDER_SCOPE_20261102.json'),parent=read('./FULL_NATIVE_DIAGNOSTIC_SCOPE_20261029.json'),done=read('./PURCHASE_OPTIONS_DIAGNOSTIC_SCOPE_20261031.json');
-const registration=()=>({runSourceSha:'a'.repeat(40),config:{candidate:{openingMediaRule:{version:'FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1'}}},corpus:{provenance:{diagnosticScope:scope.name},scenarios:scope.cases.map(c=>({id:c.sourceCase,mode:c.turns===3?'JOURNEY':'SINGLE',turns:Array.from({length:c.turns},()=>({latest:'unit'}))}))}});
+const registration=()=>({runSourceSha:'a'.repeat(40),config:{candidate:{openingMediaRule:{version:'FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1'}}},corpus:{provenance:{diagnosticScope:scope.name},scenarios:scope.cases.map(c=>({id:c.sourceCase,mode:c.turns===3?'JOURNEY':'SINGLE',judgeContext:{sourceReadiness:{spec:{version:3}}},turns:Array.from({length:c.turns},()=>({latest:'unit'}))}))}});
 test('remaining population is exactly full22 minus the completed21, with20turns and no repeated case',()=>{
  const completed=new Set(done.cases.map(c=>c.sourceCase));assert.deepEqual(scope.cases,parent.cases.filter(c=>!completed.has(c.sourceCase)));
  const r=registration();r.slots=diagnosticSlots(r.corpus);assert.equal(r.slots.length,12);assert.equal(r.corpus.scenarios.reduce((n,s)=>n+s.turns.length,0),20);

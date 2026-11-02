@@ -399,7 +399,15 @@ export async function createCommerceEffectTools(input: {
   }
   // Establish current evidence before the owner/verifier sees this turn, including existing carts on later turns.
   await refreshSelections();
-  return { invoke, snapshot, ...(input.base.sizeOutcome ? {sizeOutcome: input.base.sizeOutcome} : {}), terminalOutcome, async invokeBatch(calls) {
+  return { invoke, snapshot, unlabelledCartProducts(context){
+    const cart=current.cart,at=input.clock().getTime();
+    if(!cart||Date.parse(cart.expiresAt)<=at||context.cartBinding?.cartId!==cart.value.cartId||context.cartBinding.cartVersion!==cart.value.revision||
+      context.state.revision!==current.revision||commerceHash(context.state.cartItems)!==commerceHash(cartItems())||!context.state.permission||!context.state.privacyAllowed||context.state.conversationOwner!=='BOT'||context.state.bindingVersion!==turnBinding||context.state.recipient!==turnRecipient)return [];
+    const active=activeSelections();return [...new Set(cart.value.lines.map(l=>l.parentProductId))].filter(id=>cart.value.lines.filter(l=>l.parentProductId===id).every(l=>{
+      const s=active.find(s=>selectionsMatchCartLines([l],[s]));return l.components.length>0&&l.components.every(c=>c.color==='__NO_COLOR__')&&!!s&&
+        s.line.components.length>0&&s.line.components.every(c=>c.color==='__NO_COLOR__')&&Date.parse(s.sourceObservedAt)<=at&&Date.parse(s.sourceExpiresAt)>at;
+    }));
+  }, ...(input.base.sizeOutcome ? {sizeOutcome: input.base.sizeOutcome} : {}), terminalOutcome, async invokeBatch(calls) {
     const independent = calls.filter(c => !names.has(c.name) && c.name !== "quote_cart");
     const results = new Map<CommerceToolCall, CommerceToolResult>();
     const readResults = await input.base.invokeBatch(independent); independent.forEach((c, i) => results.set(c, readResults[i]!));

@@ -20,7 +20,7 @@ export function commerceDiagnostics(observe?:CommerceDiagnosticObserver){
   const parent=emit(stage,"STARTED",selector);try{const result=await work();let size:number|null=null,hash:string|null=null;
    if(observe)try{const bytes=result instanceof Uint8Array?result:Buffer.from(JSON.stringify(result)??"null");size=bytes.length;hash=createHash("sha256").update(bytes).digest("hex");}catch{/* A diagnostic encoding failure never affects the source result. */}
    emit(stage,"OK",selector,null,size,parent,hash);return result;}
-  catch(error){emit(stage,"ERROR",selector,"UNKNOWN_INTERNAL",null,parent);throw error;}
+  catch(error){const code=error instanceof Error&&reasons.has(error.message)?error.message:'UNKNOWN_INTERNAL';emit(stage,"ERROR",selector,code,null,parent);throw error;}
  }};
 }
 export type CommerceDiagnostics=ReturnType<typeof commerceDiagnostics>;

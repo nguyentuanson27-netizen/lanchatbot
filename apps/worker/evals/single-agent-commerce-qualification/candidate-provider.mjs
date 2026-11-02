@@ -1,7 +1,7 @@
 import {assertOpeningProductMediaRule} from '../../dist/single-agent-commerce-opening-media.js';
 // Reuses the approved native B inference/serialization. No prompt changes, retry or new model role.
 import assert from 'node:assert/strict';
-import {assertScenarioReadiness} from './source-readiness.mjs';
+import {assertScenarioReadiness,assertProspectiveOpeningReadiness} from './source-readiness.mjs';
 import {readFileSync,appendFileSync} from 'node:fs';
 import {resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -49,6 +49,7 @@ export function candidatePreflight(root,registrationPath,worldPath){
  assert.equal(execFileSync('git',['status','--porcelain'],{cwd:root,encoding:'utf8'}).trim(),'','C_DIRTY_SOURCE');
  assert.equal(execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),sealed.runSourceSha,'C_RUN_SOURCE_CHANGED');
  assertCurrentCandidate(root,sealed.config);assertApprovedDecisions(root,sealed.config);assertSealedInputs(sealed,world,{registrationRoot:dirname(resolve(registrationPath))});
+ assertProspectiveOpeningReadiness(sealed.corpus,sealed.config.candidate.openingMediaRule);
  execFileSync(process.execPath,[fileURLToPath(new URL('./source-readiness.mjs',import.meta.url)),'--assert',worldPath,registrationPath],{stdio:['ignore','pipe','pipe']});
  const m=validateProtocol(read(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/manifest.json')));
  const codex=inspectCodex();assert.equal(codex.version,'codex-cli '+m.models.verifier.generationConfig.cliVersion,'C_PINNED_VERIFIER_CLIENT');
@@ -131,7 +132,10 @@ export function createCandidateProvider({preflight,out,dependencies={}}){
   let preDispatchBudget;
   generations.push(row);counters[role.toLowerCase()]++;audit('STARTED',row);
   try{
-   if(scenario.mode!=='SAFETY'&&(!dependencies.unitFixture||scenario.judgeContext?.sourceReadiness))await assertScenarioReadiness(world,scenario,dependencies.unitFixture&&dependencies.readinessClock?dependencies.readinessClock():new Date(),preflight.registration.openingMediaRule);
+   if(scenario.mode!=='SAFETY'&&(!dependencies.unitFixture||scenario.judgeContext?.sourceReadiness)){
+    assertProspectiveOpeningReadiness({scenarios:[scenario]},preflight.registration.openingMediaRule);
+    await assertScenarioReadiness(world,scenario,dependencies.unitFixture&&dependencies.readinessClock?dependencies.readinessClock():new Date(),preflight.registration.openingMediaRule);
+   }
    const original=role==='OWNER'?withNativePresentation(request,'VI_DATA_BLOCKS_COMPACT_V2'):request;
    const body=role==='OWNER'?buildGeminiCommerceRequest(original,undefined,undefined,value=>{preDispatchBudget=value;}):buildVerifierRequest(m,original);
    row.requestBody=body;row.requestHash=digest(body);
