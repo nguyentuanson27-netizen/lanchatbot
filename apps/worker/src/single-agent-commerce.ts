@@ -39,6 +39,7 @@ export async function createCommerceTools(input: {
   observeDiagnostics?:CommerceDiagnosticObserver;
   quoteTask?: ExplicitQuoteTask;
   openingMediaRule?:OpeningProductMediaRule;
+  openingCheckoutMedia?:true;
   read: Parameters<typeof createReadOnlyTools>[0];
   state?: Omit<Parameters<typeof createCustomerStateTools>[0], "base" | "scope" | "clock">;
   effects?: Omit<Parameters<typeof createCommerceEffectTools>[0], "base" | "scope" | "clock"> &
@@ -159,5 +160,5 @@ export async function createCommerceTools(input: {
   };
   let final:CommerceTools=guarded;
   if(input.quoteTask!==undefined){validateQuoteTask(input.quoteTask);final=withExplicitQuoteTask(final,scope,input.read.entry?.firstContact??null);}
-  return input.openingMediaRule?withOpeningProductMedia(final,{rule:input.openingMediaRule,scope,clock,firstContact:input.read.entry?.firstContact??null}):final;
+  return input.openingMediaRule?withOpeningProductMedia(final,{rule:input.openingMediaRule,scope,clock,firstContact:input.read.entry?.firstContact??null,codeOutputSupported:input.openingCheckoutMedia===true}):final;
 }

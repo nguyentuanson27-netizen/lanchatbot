@@ -5,7 +5,7 @@ import {resolve} from 'node:path';
 import {runtimeProjection,digest,textDigest,outcomeDigest} from './qualification.mjs';
 import {commonModelConfig} from './native-wire.mjs';
 import {selectFrozenCustomerTurn} from './customer-branches.mjs';
-import {captureNativeTerminal,capturedOutputViolations,clarificationCapture} from './native-terminal.mjs';
+import {captureNativeTerminal,capturedOutputViolations,clarificationCapture,previewMediaCapture} from './native-terminal.mjs';
 const silent=(reason,disposition='NO_SEND')=>({disposition,messages:[],images:[],reason});
 export async function collectNativePopulation({preflight,providerPorts,sessionFactory,snapshot,historyStore,out,seedPath,queue,branchSelector}){
  const reg=preflight.sealed,identity=reg.identity,arm=preflight.registration.arm??'CANDIDATE',seed=JSON.parse(readFileSync(seedPath,'utf8')).seed;
@@ -43,9 +43,11 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
    const messages=session.capturePayloads.slice(attachmentStart).flatMap(p=>typeof p.text==='string'?[p.text]:[]),images=session.capturePayloads.slice(attachmentStart).flatMap(p=>
     p.attachment?.type==='image'?[{url:p.attachment.payload.url}]:[]);
    const committedReceipts=after.receipts.filter(r=>!before.receipts.some(old=>old.operation_id===r.operation_id));
-   const clarification=clarificationCapture({result:observed?.result,generations:gens,messages,images,receipts:committedReceipts,
-    authority:after.authority,state:after.publicState});
-   const codeOnly=!!clarification||observed?.result?.mode==='PRIVATE_CODE_PATH'&&gens.length===0&&messages.length>0;
+   const acceptedRows=after.outbox.filter(r=>!before.outbox.some(old=>old.outbox_id===r.outbox_id)).map((r,index)=>{const p=session.capturePayloads.slice(attachmentStart)[index];return {id:r.outbox_id,status:r.status,group:r.response_group_id,sequence:r.sequence_no,kind:p?.attachment?'IMAGE':'TEXT',contentHash:textDigest(p?.text??p?.attachment?.payload.url??''),...(after.outboxMediaProofs?.find(v=>v.id===r.outbox_id)??{})};});
+   const captureInput={result:observed?.result,generations:gens,messages,images,receipts:committedReceipts,authority:after.authority,state:{...after.publicState,checkoutCartProof:after.publicState.cart?{id:after.publicState.cart.cartId,version:after.publicState.cart.revision}:null},acceptedOutbox:acceptedRows,executionIdentity:{requestId:observed?.batch?.evaluationGroupId,sourceMessageIdHash:observed?.inboundMessages?.length?textDigest(observed.inboundMessages.at(-1).messageId??observed.inboundMessages.at(-1).eventKey):null}};
+   const previewMedia=previewMediaCapture(captureInput);
+   const clarification=clarificationCapture(captureInput);
+   const codeOnly=!!clarification||observed?.result?.mode==='PRIVATE_CODE_PATH'&&gens.length===0&&messages.length>0&&(!images.length||!!previewMedia);
    const actual=captureNativeTerminal({native:terminal,codeOnly,messages,images,errorCode}),outputFindings=capturedOutputViolations(actual);
    preflight.diagnosticControl?.afterTurn({errorCode,reason:terminal?.reason,recoveryReason:observed?.result?.recovery?.originalReason,safetyFindings:outputFindings,
     commitStatus:observed?.result?.commitStatus,handoffStatus:observed?.result?.handoff?.status??observed?.result?.recovery?.handoff?.status});
@@ -78,11 +80,12 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
     protectedClaims:trusted.protectedClaims,policyLiterals:trusted.policyLiterals,runtimeProducts:trusted.runtimeProducts??[],effectReceipts:trusted.effectReceipts});}
    if(codeOnly){
     const newRows=after.outbox.filter(r=>!before.outbox.some(old=>old.outbox_id===r.outbox_id));
-    assert.equal(newRows.length,messages.length,'C_CODE_CAPTURE_COUNT');
+    assert.equal(newRows.length,messages.length+images.length,'C_CODE_CAPTURE_COUNT');
     t.codeOwned={kind:clarification?'NATIVE_CHECKOUT_CLARIFICATION':'NATIVE_PRIVATE_CODE_PATH',sourceSha:reg.config.candidate.sourceSha,runtimeInputHash:digest(input),
-     ...(clarification?{committedReceipts,authority:after.authority,state:{revision:after.publicState.revision,salesRevision:after.publicState.salesRevision}}:{}),
+     ...(images.length?{executionIdentity:captureInput.executionIdentity}:{}),
+     ...(clarification||images.length?{committedReceipts,authority:after.authority,state:{revision:after.publicState.revision,salesRevision:after.publicState.salesRevision,stage:after.publicState.stage,checkoutCartProof:after.publicState.cart?{id:after.publicState.cart.cartId,version:after.publicState.cart.revision}:null,...(after.publicState.checkoutPreviewProof?{checkoutPreviewProof:after.publicState.checkoutPreviewProof}:{})}}:{}),
      nativeResult:observed.result,nativeResultHash:digest(observed.result),
-     acceptedOutbox:newRows.map((r,index)=>({id:r.outbox_id,status:r.status,textHash:textDigest(messages[index])}))};
+     acceptedOutbox:images.length?acceptedRows:newRows.map((r,index)=>({id:r.outbox_id,status:r.status,textHash:textDigest(messages[index])}))};
     a.codeOwned=t.codeOwned;
    }
    if(gens.length===0&&!codeOnly){t.precheck={status:'REJECTED',reason:terminal?.reason??'NO_MODEL_CODE_PATH',artifactHash:digest(observed?.result??{}),sourceSha:reg.config.candidate.sourceSha};a.precheck=t.precheck;}

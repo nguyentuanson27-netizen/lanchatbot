@@ -8,7 +8,7 @@ import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import {resolve} from 'node:path';
 import {execFileSync} from 'node:child_process';
-import {HandoffMatrixAdminContentV1Schema} from '@lana/contracts';
+import {CommerceMediaDeliveryBindingV1Schema,HandoffMatrixAdminContentV1Schema} from '@lana/contracts';
 import {PostgresRealtimeRuntimeStore,PostgresRealtimeInboxStore,PostgresRuntimePolicyStore,PostgresChatHistoryStore,LocalEnvelopeCipher,withTransaction,redactAnalyticsMessage} from '@lana/database';
 import {MetaDeliveryAdapter} from '@lana/meta-delivery';
 import {MetaOutboxDispatcher,SinglePageMetaTokenRegistry} from '../../dist/meta-outbox-dispatcher.js';
@@ -548,7 +548,7 @@ try{
    s.components[0]={...s.components[0],size:q.size??'M',color:q.color??'navy',componentSku:'SM613-'+(q.color??'navy').toUpperCase()+'-'+(q.size??'M')};
    if(sourceVariantChanged)s.components[0].componentSku='CHANGED-SOURCE-SKU';
    return {status:'READY',line:s,shopId:'LANA',versions:{price:'synthetic-pos-v1',inventory:'synthetic-stock-v1',size:'synthetic-size-v1',eta:q.deliveryAddress?'synthetic-eta-v1':null},
-    eta:q.deliveryAddress?{minDays:3,maxDays:6}:null,etaExpiresAt:q.deliveryAddress?new Date(Date.now()+1200000).toISOString():null,
+    eta:q.deliveryAddress?{minDays:3,maxDays:6}:null,etaExpiresAt:q.deliveryAddress?new Date(at.getTime()+1200000).toISOString():null,
     sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:10,stockCounter:{source:'PANCAKE_DIRECT',unit:'ITEM',identity:JSON.stringify(['SM613',q.color??'navy',q.size??'M'])},sourceObservedAt:at.toISOString(),sourceExpiresAt:new Date(at.getTime()+172800000).toISOString()};};
   const facts=live?providerPorts.factsForMode(sourceMode):{ready:async()=>true,close:async()=>{},resolve:async()=>{throw new Error('UNUSED');},resolveCartSelection:async q=>selected(q)};
   let policyChanged=false,receiptAvailable=true;
@@ -629,7 +629,15 @@ try{
    const changed=await pool.query('UPDATE sales_cycle_states SET state_revision=$3,state_ciphertext=$4,state_nonce=$5,state_auth_tag=$6,state_encrypted_dek=$7,state_key_ref=$8 WHERE page_id=$1 AND conversation_id=$2',
     [pageId,bound.conversationId,next.revision,encrypted.ciphertext,encrypted.nonce,encrypted.authTag,encrypted.encryptedDek,encrypted.keyRef]);assert.equal(changed.rowCount,1);
   };
-  return {bound,turn,state,changeStoredCart,capture,capturePayloads,gateCalls,deliveryObservations,drain,syntheticNow,
+  const readCheckoutMediaProofs=async()=>{
+   const rows=(await pool.query("SELECT * FROM meta_outbox WHERE page_id=$1 AND conversation_id=$2 AND customer_hash=$3 AND status IN ('SENT_ACCEPTED','DELIVERED','READ') ORDER BY created_at,sequence_no LIMIT 128",[pageId,bound.conversationId,bound.customerHash])).rows;
+   return rows.flatMap(row=>{const payload=cipher.decryptJson({ciphertext:row.payload_ciphertext,nonce:row.payload_nonce,authTag:row.payload_auth_tag,encryptedDek:row.payload_encrypted_dek,keyRef:row.payload_key_ref,expiresAt:row.payload_expires_at},`lana:meta-payload:v2:${pageId}:${row.outbox_id}`),b=CommerceMediaDeliveryBindingV1Schema.safeParse(payload.commerceMediaBinding);
+    if(!b.success)return [];const binding=b.data,unit=payload.kind==='TEXT'?{kind:'TEXT',text:payload.text}:{kind:'IMAGE',imageUrl:payload.imageUrl};
+    assert.equal(binding.pageId,pageId);assert.equal(binding.conversationId,bound.conversationId);assert.equal(binding.customerHash,bound.customerHash);assert.equal(binding.responseGroupId,row.response_group_id);assert.equal(binding.messageHashes[row.sequence_no],commerceHash(unit));
+    return [{id:row.outbox_id,mediaBindingHash:commerceHash(binding),messageHash:commerceHash(unit),bindingRevision:binding.revision,bindingRecipient:binding.recipientHash}];
+   });
+  };
+  return {bound,turn,state,changeStoredCart,capture,capturePayloads,gateCalls,deliveryObservations,drain,syntheticNow,readCheckoutMediaProofs,
    readPolicyStatuses:async()=>({transaction:(await policy()).status,active:(await read.policy()).status}),
    restartDelivery:()=>{dispatcher=makeDispatcher();},changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;},changeHandoffPolicy:()=>{policyChanged=true;},disableReceiptRead:()=>{receiptAvailable=false;},
    revokeMediaProof:()=>{assert(revalidatedMedia);product.product.images[0].revalidation={status:'INVALID'};},
@@ -678,9 +686,9 @@ try{
   const j=await statefulFixture({media:true}),r=await j.turn('Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD',[],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
   assert.equal(r.result.terminal.disposition,'HANDOFF');assert.equal(r.owners,0);assert.equal(r.verifiers,0);assert.equal(r.result.enqueued,0);assert.notEqual((await j.state()).stage,'ORDER_PREVIEW');await j.drain();assert.equal(j.capture.length,0);
  });
- await check('C opening add-confirm batch is fenced before either mutation',async()=>{
+ await check('C opening add-confirm batch commits its native question and photo atomically',async()=>{
   const j=await statefulFixture({media:true}),r=await j.turn('Chị lấy áo navy M, chốt nhé.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}},{name:'confirm_purchase',args:{}}])],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
-  assert.equal(r.result.terminal.disposition,'HANDOFF');assert.equal(r.result.enqueued,0);assert.equal((await j.state()).cart?.value.lines.length??0,0);assert.equal(r.verifiers,0);await j.drain();assert.equal(j.capture.length,0);
+  assert.equal(r.result.terminal.reason,'CHECKOUT_DETAILS_MISSING');assert.equal(r.result.enqueued,2);assert.equal((await j.state()).cart.value.lines.length,1);assert.equal((await j.state()).confirmation,null);assert.equal(r.verifiers,0);assert(r.result.normalToolCalls<=6);await j.drain();assert.equal(j.capture.length,2);assert.equal(j.capture[1],'[CODE_IMAGE]');
  });
 
  for(const reuse of [false,true])await check('C opening add chosen red cannot use navy generic photo '+reuse,async()=>{
@@ -706,6 +714,48 @@ try{
   const j=await statefulFixture({media:true}),r=await j.turn('Mẫu này nhé em.',[say('Dạ chị.')],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});assert.equal(r.result.enqueued,2);
   j.changeMediaSource();j.restartDelivery();await j.drain();assert.equal(j.capture.length,0);
   const rows=(await pool.query('SELECT status FROM meta_outbox WHERE conversation_id=$1',[j.bound.conversationId])).rows;assert.equal(rows.length,2);assert(rows.every(r=>!['SENT_ACCEPTED','DELIVERED','READ'].includes(r.status)));
+ });
+
+ async function pendingCart(media=true){
+  const j=await statefulFixture({media});await j.turn('Chị lấy áo navy M.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);return j;
+ }
+ async function assertCheckoutCapture(j,r,before,preview=false){
+  const {readSessionSnapshot}=await import('../single-agent-commerce-qualification/native-snapshot.mjs'),{clarificationCapture,previewMediaCapture}=await import('../single-agent-commerce-qualification/native-terminal.mjs'),{validCodeOwned,digest}=await import('../single-agent-commerce-qualification/qualification.mjs');
+  const after=await readSessionSnapshot({runtime,pool,historyStore,session:j}),payloads=j.capturePayloads,messages=payloads.flatMap(p=>typeof p.text==='string'?[p.text]:[]),images=payloads.flatMap(p=>p.attachment?[{url:p.attachment.payload.url}]:[]),
+   receipts=after.receipts.filter(v=>!before.receipts.some(old=>old.operation_id===v.operation_id)),rows=after.outbox.filter(v=>!before.outbox.some(old=>old.outbox_id===v.outbox_id)).map((v,i)=>({id:v.outbox_id,status:v.status,group:v.response_group_id,sequence:v.sequence_no,kind:payloads[i].attachment?'IMAGE':'TEXT',contentHash:hash(payloads[i].text??payloads[i].attachment.payload.url),...after.outboxMediaProofs.find(p=>p.id===v.outbox_id)})),
+   executionIdentity={requestId:r.batch.evaluationGroupId,sourceMessageIdHash:hash(r.inboundMessages.at(-1).messageId)},generations=(r.result.generations??[]).map(g=>({...g,role:g.role.toUpperCase()})),input={result:r.result,generations,messages,images,receipts,authority:after.authority,state:{...after.publicState,checkoutCartProof:{id:after.publicState.cart.cartId,version:after.publicState.cart.revision}},acceptedOutbox:rows,executionIdentity};
+  assert(preview?previewMediaCapture(input):clarificationCapture(input),'ACTUAL_CHECKOUT_CAPTURE');
+  const outcome={terminal:{disposition:'CODE_OWNED_SEND',messages,images},codeOwned:{kind:preview?'NATIVE_PRIVATE_CODE_PATH':'NATIVE_CHECKOUT_CLARIFICATION',sourceSha:report.sourceSha,runtimeInputHash:'a'.repeat(64),nativeResult:r.result,nativeResultHash:digest(r.result),committedReceipts:receipts,authority:input.authority,state:input.state,executionIdentity,acceptedOutbox:rows}};
+  assert(validCodeOwned(outcome,generations,report.sourceSha),'ACTUAL_CHECKOUT_QUALIFICATION_PROOF');
+  const tampered=structuredClone(input);tampered.result.checkoutMediaOutput.mediaBindingHash='f'.repeat(64);assert.equal(preview?previewMediaCapture(tampered):clarificationCapture(tampered),null);
+  assert(!JSON.stringify(after.publicHistory).includes('Khách thử nghiệm'));assert(!JSON.stringify(after.publicHistory).includes('0900000000'));
+ }
+ await check('C checkout opening existing-cart confirm has exact accepted native media proof',async()=>{
+  const j=await pendingCart(),{readSessionSnapshot}=await import('../single-agent-commerce-qualification/native-snapshot.mjs'),before=await readSessionSnapshot({runtime,pool,historyStore,session:j});
+  const r=await j.turn('Chốt đơn cho chị nhé.',[native([{name:'confirm_purchase',args:{}}])],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  assert.equal(r.result.enqueued,2);assert.equal(r.result.terminal.reason,'CHECKOUT_DETAILS_MISSING');assert.equal(r.owners,1);assert.equal(r.verifiers,0);await j.drain();await assertCheckoutCapture(j,r,before);
+ });
+ await check('C checkout opening partial private input asks only next field with photo and zero models',async()=>{
+  const j=await pendingCart(),{readSessionSnapshot}=await import('../single-agent-commerce-qualification/native-snapshot.mjs'),before=await readSessionSnapshot({runtime,pool,historyStore,session:j});
+  const r=await j.turn('Tên: Khách thử nghiệm',[],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});assert.equal(r.result.enqueued,2);assert.equal(r.owners,0);assert.equal(r.verifiers,0);assert.equal((await j.state()).checkoutDraft.fullName,'Khách thử nghiệm');await j.drain();assert(j.capture[0].includes('số điện thoại'));await assertCheckoutCapture(j,r,before);
+ });
+ await check('C checkout opening complete private input creates native preview plus photo and exact receipt proof',async()=>{
+  const j=await pendingCart(),{readSessionSnapshot}=await import('../single-agent-commerce-qualification/native-snapshot.mjs'),before=await readSessionSnapshot({runtime,pool,historyStore,session:j});
+  const r=await j.turn('Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD',[],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});assert.equal(r.result.enqueued,2);assert.equal(r.owners,0);assert.equal(r.verifiers,0);assert.equal((await j.state()).stage,'ORDER_PREVIEW');await j.drain();await assertCheckoutCapture(j,r,before,true);
+ });
+ for(const mode of ['public','private'])await check('C checkout opening missing photo prevents native checkout advancement '+mode,async()=>{
+  const j=await pendingCart(false),before=await j.state(),r=await j.turn(mode==='private'?'Tên: Khách thử nghiệm':'Chốt đơn cho chị nhé.',mode==='private'?[]:[native([{name:'confirm_purchase',args:{}}])],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  assert.equal(r.result.enqueued,0);assert.equal(r.result.terminal.disposition,'HANDOFF');assert.equal((await j.state()).checkoutDraft?.fullName??null,before.checkoutDraft?.fullName??null);assert.equal((await j.state()).clarification?.reasonCode??null,before.clarification?.reasonCode??null);await j.drain();assert.equal(j.capture.length,0);
+ });
+ await check('C checkout opening public media cannot obtain another six-call budget',async()=>{
+  const j=await pendingCart(),calls=[...Array.from({length:4},()=>({name:'read_policy',args:{}})),{name:'confirm_purchase',args:{}}],r=await j.turn('Chốt đơn cho chị nhé.',[native(calls)],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  assert.equal(r.result.enqueued,0);assert.equal(r.result.normalToolCalls,6);assert.equal((await j.state()).clarification?.reasonCode??null,null);await j.drain();assert.equal(j.capture.length,0);
+ });
+ await check('C checkout opening media revocation cancels private preview before sequence zero',async()=>{
+  const j=await pendingCart(),r=await j.turn('Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD',[],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});assert.equal(r.result.enqueued,2);j.changeMediaSource();j.restartDelivery();await j.drain();assert.equal(j.capture.length,0);
+ });
+ await check('C checkout opening invitation restarts without duplicate text or photos',async()=>{
+  const j=await pendingCart(),r=await j.turn('Chốt đơn cho chị nhé.',[native([{name:'confirm_purchase',args:{}}])],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});assert.equal(r.result.enqueued,2);j.restartDelivery();await j.drain();j.restartDelivery();await j.drain();assert.equal(j.capture.length,2);assert.equal(j.capture[1],'[CODE_IMAGE]');
  });
  await check('B composed evidence read prepares current facts with one charged work unit and actual accepted Outbox',async()=>{
   const j=await statefulFixture({preparedOffers:true});

@@ -58,7 +58,7 @@ export interface CommerceTools {
   prepare?(admit?:import("./single-agent-commerce-read-only-tools.js").PreparationAdmission, control?:import("./single-agent-commerce-read-only-tools.js").PreparationControl): Promise<number>;
   availableTools?: readonly string[];
   invoke(call: CommerceToolCall): Promise<CommerceToolResult>;
-  invokeBatch(calls: CommerceToolCall[]): Promise<CommerceToolResult[]>;
+  invokeBatch(calls: CommerceToolCall[],terminalMediaControl?:import('./single-agent-commerce-read-only-tools.js').PreparationControl): Promise<CommerceToolResult[]>;
   snapshot(): TrustedContext;
   readback(): Promise<TrustedContext>;
   recover?(outcome: TerminalOutcome): Promise<TerminalOutcome>;
@@ -261,7 +261,7 @@ export async function runCommerceTurn(input: {
       }
       if(input.tools.openingMediaBlocksCodeOutput?.(output.calls))return finish(fallback("PREPARATION_UNAVAILABLE"));
       const toolStarted = performance.now();
-      const results = await input.tools.invokeBatch(output.calls).catch(() => output.calls.map(() => ({ status: "UNAVAILABLE" as const, reason: "TOOL_ERROR" })));
+      const results = await input.tools.invokeBatch(output.calls,{get maxCalls(){return 6-toolCalls;},onDispatch:()=>{if(toolCalls>=6)throw Error('BUDGET');toolCalls++;executedNormalToolInvocations++;}}).catch(() => output.calls.map(() => ({ status: "UNAVAILABLE" as const, reason: "TOOL_ERROR" })));
       rejectedToolCalls += results.filter(result=>result.status==="REJECTED").length;
       toolLatencyMs += performance.now()-toolStarted;
       const actual = await effectTerminal();

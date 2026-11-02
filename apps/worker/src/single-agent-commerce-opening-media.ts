@@ -9,7 +9,7 @@ export interface OpeningMediaWork {status:'NOT_REQUIRED'|'READY'|'UNAVAILABLE';r
 export function assertOpeningProductMediaRule(value:unknown):asserts value is OpeningProductMediaRule {
  if(value===null||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==1||!('version' in value)||value.version!==OPENING_PRODUCT_MEDIA_RULE.version)throw Error('OPENING_MEDIA_RULE');
 }
-export function withOpeningProductMedia(base:CommerceTools,input:{rule:OpeningProductMediaRule;scope:CommerceScope;clock:()=>Date;firstContact:boolean|null}):CommerceTools {
+export function withOpeningProductMedia(base:CommerceTools,input:{rule:OpeningProductMediaRule;scope:CommerceScope;clock:()=>Date;firstContact:boolean|null;codeOutputSupported?:boolean}):CommerceTools {
  assertOpeningProductMediaRule(input.rule);
  const required=(c:TrustedContext)=>input.firstContact===false?[]:[...new Set([
   ...c.boundSubjects.filter(s=>s.kind==='PRODUCT').map(s=>s.ref),
@@ -32,7 +32,7 @@ export function withOpeningProductMedia(base:CommerceTools,input:{rule:OpeningPr
   const photos=currentPhotos(c,images);return ids.every(id=>photos.some(a=>a.productId===id));
  };
  return {...base,openingMediaReady:ready,
-  openingMediaBlocksCodeOutput:calls=>input.firstContact!==false&&calls.some(c=>c.name==='confirm_purchase'),
+  openingMediaBlocksCodeOutput:calls=>!input.codeOutputSupported&&input.firstContact!==false&&calls.some(c=>c.name==='confirm_purchase'),
   async prepareOpeningMedia(control:PreparationControl):Promise<OpeningMediaWork>{
    let chargedUnits=0;const context=base.snapshot(),requiredProducts=required(context);
    const fail=(reason:string):OpeningMediaWork=>({status:'UNAVAILABLE',requiredProducts,chargedUnits,reason});

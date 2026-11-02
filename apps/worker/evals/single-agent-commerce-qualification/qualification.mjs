@@ -1,7 +1,7 @@
 import {publicJudgeContext} from './judge-task-contract.mjs';
 // Phase C evaluation only. No provider, runtime authorization, mutation or send port.
 import assert from 'node:assert/strict';
-import {clarificationCapture} from './native-terminal.mjs';
+import {clarificationCapture,checkoutMediaCapture,previewMediaCapture} from './native-terminal.mjs';
 import {createHash,createHmac} from 'node:crypto';
 import {assertNoEvaluatorLabels} from '../single-agent-commerce-read-only/feedback-control-inputs.mjs';
 import {assertNativeRuntime,decodeVerifierWire,NATIVE_CODECS,commonModelConfig} from './native-wire.mjs';
@@ -201,10 +201,12 @@ function actualHistoryMatches(t){
 export function validCodeOwned(outcome,generations,sourceSha){
  const c=outcome.codeOwned,rows=c?.acceptedOutbox;
  const nativeAllowed=c?.kind==='NATIVE_PRIVATE_CODE_PATH'?generations.length===0&&
-  c.nativeResult?.mode==='PRIVATE_CODE_PATH'&&c.nativeResult.terminal?.disposition==='NO_SEND'&&c.nativeResult.terminal.reason==='PRIVATE_CHECKOUT_COMMITTED':
+  c.nativeResult?.mode==='PRIVATE_CODE_PATH'&&c.nativeResult.terminal?.disposition==='NO_SEND'&&c.nativeResult.terminal.reason==='PRIVATE_CHECKOUT_COMMITTED'&&(!outcome.terminal.images.length||previewMediaCapture({result:c.nativeResult,generations,messages:outcome.terminal.messages,images:outcome.terminal.images,receipts:c.committedReceipts,authority:c.authority,state:c.state,acceptedOutbox:rows,executionIdentity:c.executionIdentity})!==null):
   c?.kind==='NATIVE_CHECKOUT_CLARIFICATION'&&generations.every(g=>g.id?.startsWith(c.nativeResult?.codeOwnedOutput?.requestId+':owner:'))&&
    clarificationCapture({result:c.nativeResult,generations,messages:outcome.terminal.messages,images:outcome.terminal.images,
-    receipts:c.committedReceipts,authority:c.authority,state:c.state})!==null;
+    receipts:c.committedReceipts,authority:c.authority,state:c.state,acceptedOutbox:rows,executionIdentity:c.executionIdentity})!==null;
+ if(outcome.terminal.images.length)return nativeAllowed&&c.sourceSha===sourceSha&&c.nativeResultHash===digest(c.nativeResult)&&hash(c.runtimeInputHash)&&
+  checkoutMediaCapture({result:c.nativeResult,messages:outcome.terminal.messages,images:outcome.terminal.images,receipts:c.committedReceipts,authority:c.authority,state:c.state,acceptedOutbox:rows,executionIdentity:c.executionIdentity})!==null;
  return nativeAllowed&&c.sourceSha===sourceSha&&c.nativeResult.enqueued===outcome.terminal.messages.length&&
   c.nativeResultHash===digest(c.nativeResult)&&hash(c.runtimeInputHash)&&
   outcome.terminal.images.length===0&&outcome.terminal.messages.length>0&&Array.isArray(rows)&&rows.length===outcome.terminal.messages.length&&

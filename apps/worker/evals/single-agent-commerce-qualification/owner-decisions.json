@@ -39,5 +39,14 @@
     "ownerAnswer": "Mọi phản hồi mở đầu của sản phẩm đã xác định đều kèm ảnh; chấp nhận cả câu ETA/ACK có ảnh",
     "verifierSchemaChanged": false,
     "legacyNoImageEtaControlSupersededForRule": true
+  },
+  "openingCheckoutMediaDecision": {
+    "status": "APPROVED",
+    "date": "2026-11-02",
+    "evidenceRef": "OWNER_REQUEST_FIX_OPENING_CHECKOUT_DEFER_CONFLICTING_COMPONENT_COLOURS_20261102",
+    "ownerText": "xử lí trường hợp 1, trường hợp 2 ít xảy ra, chưa cần xử lí",
+    "behavior": "NATIVE_OPENING_CHECKOUT_ATOMIC_TEXT_MEDIA",
+    "conflictingComponentColours": "DEFERRED_UNCHANGED",
+    "modelOrVerifierPromptChange": false
   }
 }

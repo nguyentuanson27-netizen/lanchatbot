@@ -1,3 +1,4 @@
+import {CommerceMediaDeliveryBindingV1Schema} from '@lana/contracts';
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { existsSync,readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -13,7 +14,7 @@ import type { CartSelectionResult } from "./realtime-sales-catalog.js";
 
 function fixture(productIds = ["SM613"]) {
   const scope = commerceScope(), products = productIds.map(id => fixtureProduct(id));
-  let generation = 1, revision = 1, profile = fixtureProfile(), tagId: string | null = null;
+  let generation = 1, revision = 1, profile = fixtureProfile(), tagId: string | null = null, fixtureNow=commerceNow;
   let conversation = createConversationState({ conversationId: scope.conversationId, routingOwner: "APP", now: commerceNow });
   let cycle = createSalesCycleRuntimeState(scope.conversationId, { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
   let checkCommit = async (_prepared: RealtimeCommitInput<unknown>) => {};
@@ -57,13 +58,13 @@ function fixture(productIds = ["SM613"]) {
     facts: { ready: async () => true, resolve: async () => {}, close: async () => {}, resolveCartSelection: select }, policy,
     read: readOverride ?? { policy: () => fixturePolicy(), initialProducts: products.map(p => p.product), catalog: {
       readProduct: catalogRead, searchText: async () => ({ status: "NOT_FOUND" }) } },
-    resolveTagId: () => tagId, clock: () => commerceNow, ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm tra.", owner, verifier,
+    resolveTagId: () => tagId, clock: () => fixtureNow, ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm tra.", owner, verifier,
     ...(handoffReply?{handoffReply}:{}),
     ...(quoteTask?{quoteTask}:{}),
     ...(evaluationTurn?{evaluationTurn}:{}),
     ...(openingMediaRule?{openingMediaRule}:{}),
   } as unknown as Parameters<typeof runPersistedCommerceIngress>[0]);
-  return { run, store, inbox, commit, verifier, select, profileWrite, policy, message, products, catalogRead, history, setRead: (read: typeof readOverride) => { readOverride = read; }, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
+  return {setClock:(at:Date)=>{fixtureNow=at;}, run, store, inbox, commit, verifier, select, profileWrite, policy, message, products, catalogRead, history, setRead: (read: typeof readOverride) => { readOverride = read; }, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
     setCycle: (state: typeof cycle) => { cycle = state; }, cycle: () => cycle, batch,
     newGeneration: () => { batch.generation = generation; },
     checkCommit: (check: typeof checkCommit) => { checkCommit = check; },
@@ -1179,4 +1180,62 @@ it('prior-output cutoff precedes both source time and durable receipt time',asyn
  await f.run(async()=>({kind:'FINAL',text:'Dạ chị.'}),undefined,undefined,undefined,openingRule);
  const query=(f.history as unknown as {hasPriorAcceptedShopOutput:ReturnType<typeof vi.fn>}).hasPriorAcceptedShopOutput;
  expect(query.mock.calls[0]![0]).toMatchObject({pageId:f.batch.pageId,customerHash:f.batch.conversationHash,before:received});
+});
+
+it('opening checkout confirm commits the native missing-field question and photo in one group',async()=>{
+ const f=openingFixture();await seedCart(f);f.enableHandoff();f.message.text='Chốt đơn cho chị nhé.';
+ const call={name:'confirm_purchase',args:{}};const owner=vi.fn(async()=>({kind:'TOOLS' as const,calls:[call],content:{role:'model' as const,parts:[{functionCall:call}]}}));
+ const r=await f.run(owner,undefined,undefined,undefined,openingRule);
+ expect(r.terminal).toMatchObject({disposition:'NO_SEND',reason:'CHECKOUT_DETAILS_MISSING'});expect(r.enqueued).toBe(2);
+ const meta=f.commit.mock.calls.find(c=>c[1].metaPlan)![1].metaPlan!;
+ expect(meta.messages[0]).toMatchObject({kind:'TEXT'});expect(meta.messages[1]).toMatchObject({kind:'IMAGE'});expect(CommerceMediaDeliveryBindingV1Schema.parse(meta.mediaBinding).images).toHaveLength(1);
+ expect(meta.effectReadiness?.outcome).toBe('READY');expect(f.cycle().clarification?.missingFields).toEqual(['FULL_NAME']);expect(f.cycle().confirmation).toBeNull();
+ expect(owner).toHaveBeenCalledOnce();expect(f.verifier).not.toHaveBeenCalled();expect(f.commit.mock.calls.some(c=>c[1].handoffEventPlan)).toBe(false);
+});
+it('opening private checkout asks the next missing field with product photo and zero models',async()=>{
+ const f=openingFixture();await seedCart(f);f.enableHandoff();f.message.text='Tên: Khách thử nghiệm';const owner=vi.fn();
+ const r=await f.run(owner,undefined,undefined,undefined,openingRule);expect(r).toMatchObject({mode:'PRIVATE_CODE_PATH',enqueued:2,terminal:{reason:'PRIVATE_CHECKOUT_COMMITTED'}});
+ const meta=f.commit.mock.calls.find(c=>c[1].metaPlan)![1].metaPlan!;expect(meta.messages[0]).toMatchObject({kind:'TEXT'});expect(meta.messages[1]).toMatchObject({kind:'IMAGE'});
+ expect(CommerceMediaDeliveryBindingV1Schema.parse(meta.mediaBinding).images).toHaveLength(1);expect(f.cycle().checkoutDraft?.fullName).toBe('Khách thử nghiệm');expect(JSON.stringify(meta.messages)).not.toContain('Khách thử nghiệm');expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+});
+
+it.each(['missing','authority','source','policy'])('opening checkout preparation fails before checkout commit: %s',async fault=>{
+ const f=openingFixture(fault!=='missing');await seedCart(f);f.enableHandoff();f.message.text='Tên: Khách thử nghiệm';let n=0;
+ f.catalogRead.mockImplementation(async id=>{
+  if(++n===2){
+   if(fault==='authority')f.transferToHuman();
+   if(fault==='source'){const line=structuredClone(fixtureCartLine());line.posUnitPriceVnd=600000;line.lineTotalVnd=600000;f.select.mockResolvedValue({status:'READY',line,shopId:commerceScope().shopId,versions:{price:'changed',inventory:'i1',size:'s1',eta:null},eta:null,etaExpiresAt:null,sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:4,sourceObservedAt:commerceNow.toISOString(),sourceExpiresAt:new Date(commerceNow.getTime()+1200000).toISOString()});}
+   if(fault==='policy'){const changed=await fixturePolicy();changed.bundle!.policy.shipping.defaultFeeVnd+=1000;f.policy.mockResolvedValue(changed);}
+  }
+  return f.products.find(p=>p.product.productId===id);
+ });
+ const owner=vi.fn(),r=await f.run(owner,undefined,undefined,undefined,openingRule);
+ expect(r.enqueued).toBe(0);expect(f.cycle().checkoutDraft?.fullName??null).toBeNull();expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+});
+it('public checkout image preparation shares the already consumed six-call budget',async()=>{
+ const f=openingFixture();await seedCart(f);f.enableHandoff();f.message.text='Chốt đơn cho chị nhé.';
+ const calls=[...Array.from({length:4},()=>({name:'read_policy',args:{}})),{name:'confirm_purchase',args:{}}];
+ const r=await f.run(async()=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(functionCall=>({functionCall}))}}),undefined,undefined,undefined,openingRule);
+ expect(r.enqueued).toBe(0);expect('normalToolCalls' in r&&r.normalToolCalls).toBe(6);expect(f.cycle().clarification??null).toBeNull();expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);
+});
+
+it.each([false,true])('opening private preview binds each same-product purchase variant to its own stock source: changed=%s',async changed=>{
+ const f=openingFixture();await seedCart(f);f.enableHandoff();const state=structuredClone(f.cycle()),first=state.cart!.value.lines[0]!,second=structuredClone(first);
+ second.lineId='40000000-0000-4000-8000-000000000002';second.offerId='SM613-SECOND';second.priceAuthority={...second.priceAuthority!,offerId:second.offerId,priceFactRef:'pos:SM613-SECOND'};second.components[0]!.size='L';second.components[0]!.componentSku='SM613-NAVY-L';
+ state.cart!.value.lines.push(second);state.cart!.value.subtotalVnd=first.lineTotalVnd!+second.lineTotalVnd!;if(state.cart!.value.grandTotalVnd!==null)state.cart!.value.grandTotalVnd+=second.lineTotalVnd!;f.setCycle(state);
+ let prepared=false;f.catalogRead.mockImplementation(async id=>{prepared=true;return f.products.find(p=>p.product.productId===id);});
+ f.select.mockImplementation(async(...args:unknown[])=>{const q=args[0] as {lineId:string};const line=structuredClone(q.lineId===second.lineId?second:first),sourceChanged=changed&&prepared&&q.lineId===second.lineId;
+  return {status:'READY',line,shopId:commerceScope().shopId,versions:{price:line.priceAuthority!.priceFactRef,inventory:sourceChanged?'stock-new':'stock-old',size:'size-v1',eta:'eta-v1'},eta:{minDays:3,maxDays:6},etaExpiresAt:new Date(commerceNow.getTime()+1200000).toISOString(),sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:4,stockCounter:{source:'PANCAKE_DIRECT',unit:'ITEM',identity:JSON.stringify([line.parentProductId,line.components[0]!.size,line.components[0]!.color])},sourceObservedAt:commerceNow.toISOString(),sourceExpiresAt:new Date(commerceNow.getTime()+1200000).toISOString()};
+ });
+ f.message.text='Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD';const r=await f.run(vi.fn(),undefined,undefined,undefined,openingRule);
+ if(changed){expect(r.enqueued).toBe(0);expect(f.cycle().stage).toBe('CART_OPEN');expect('privateCheckoutFailure' in r&&r.privateCheckoutFailure?.stage).toBe('SOURCE');}
+ else{expect(r.enqueued,JSON.stringify(r)).toBe(2);expect(f.cycle().stage).toBe('ORDER_PREVIEW');expect('checkoutMediaOutput' in r&&r.checkoutMediaOutput?.preview?.cartId).toBe(state.cart!.value.cartId);}
+ expect(f.verifier).not.toHaveBeenCalled();
+});
+it('expiry while preparing a code-owned preview is a known SOURCE failure before transaction dispatch',async()=>{
+ const f=openingFixture();await seedCart(f);f.enableHandoff();let mediaStarted=false;
+ f.catalogRead.mockImplementation(async id=>{mediaStarted=true;return f.products.find(p=>p.product.productId===id);});
+ f.select.mockImplementation(async()=>{if(mediaStarted)f.setClock(new Date(commerceNow.getTime()+21*60000));return {status:'READY',line:fixtureCartLine(),shopId:commerceScope().shopId,versions:{price:'pos:SM613',inventory:'stock-v1',size:'size-v1',eta:'eta-v1'},eta:{minDays:3,maxDays:6},etaExpiresAt:new Date(commerceNow.getTime()+1200000).toISOString(),sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:4,sourceObservedAt:commerceNow.toISOString(),sourceExpiresAt:new Date(commerceNow.getTime()+1200000).toISOString()};});
+ f.message.text='Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD';const r=await f.run(vi.fn(),undefined,undefined,undefined,openingRule);
+ expect(r.enqueued).toBe(0);expect('privateCheckoutFailure' in r&&r.privateCheckoutFailure?.stage).toBe('SOURCE');expect(f.commit.mock.calls.every(c=>!c[1].metaPlan)).toBe(true);expect(f.cycle().stage).toBe('CART_OPEN');
 });

@@ -1,3 +1,5 @@
+import {prepareCheckoutMedia} from './single-agent-commerce-checkout-media.js';
+import type {PreparationControl} from './single-agent-commerce-read-only-tools.js';
 import {assertOpeningProductMediaRule,type OpeningProductMediaRule} from "./single-agent-commerce-opening-media.js";
 import { canonicalCartVariantScopeV2 } from "@lana/contracts";
 import { cartSelectionsHaveIndependentStockV2 } from "./realtime-sales-catalog.js";
@@ -137,13 +139,22 @@ export async function runPersistedCommerceIngress(input: {
     return { ...scope, state: row.state, stateVersion: row.stateVersion, fence: input.fence,
       bindingVersion: `commerce:${generation}:${scope.recipient}`, permission: row.state.conversationOwner === "BOT" };
   };
+  let priorShopOutput:boolean|null=null,privateMode=false,checkoutMediaUnits=0;
+  let publicTools:CommerceTools|undefined,terminalMediaControl:PreparationControl|undefined;
+  const mediaConfig=input.media??{allowedHostSuffixes:(process.env.PRODUCT_SEARCH_ALLOWED_IMAGE_HOSTS??'lanadesign.vn,content.pancake.vn,fbcdn.net,fbsbx.com').split(',').map(s=>s.trim()).filter(Boolean)};
   const executor = createPersistedCommerceExecutor({ scope, clock: input.clock, latest, facts, policy: input.policy, readAuthority,
     store: input.store, transaction, inboxBatchGuard: guard, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId,
     ...(mediaMessage ? {paymentReceiptInbound:{messageId:mediaMessage.messageId??mediaMessage.eventKey,pageId:scope.pageId,conversationId:scope.conversationId,
       senderType:"CUSTOMER" as const,observedAt:mediaMessage.occurredAt,
       attachments:mediaMessage.attachments.map((a,i)=>({attachmentId:`${mediaMessage.messageId??mediaMessage.eventKey}:attachment:${i}`,kind:a.type==="image"?"IMAGE" as const:a.type==="file"?"FILE" as const:"OTHER" as const}))}} : {}),
     handoffSource:()=>mediaLink,
-    productNames: input.read.initialProducts?.map(p => ({ productId: p.productId, title: p.title })) });
+    productNames: input.read.initialProducts?.map(p => ({ productId: p.productId, title: p.title })),
+    ...(input.openingMediaRule?{prepareTerminalMedia:async(cart:Parameters<typeof prepareCheckoutMedia>[0]['cart'])=>{
+      const control:PreparationControl={get maxCalls(){return privateMode?6-checkoutMediaUnits:terminalMediaControl?.maxCalls??-1;},onDispatch(){
+        if(control.maxCalls<=0)throw Error('CHECKOUT_MEDIA_BUDGET');if(!privateMode)terminalMediaControl!.onDispatch();checkoutMediaUnits++;}};
+      return prepareCheckoutMedia({cart,scope,clock:input.clock,firstContact:priorShopOutput===null?null:!priorShopOutput,
+        ...(publicTools?{tools:publicTools}:{}),control,read:{...input.read,scope,clock:input.clock},media:mediaConfig});
+    }}:{}) });
   const completeUnsent = async (handoffStatus?: string) => {
     if (handoffStatus === "COMMITTED" || executor.terminalCommitted()) return "ALREADY_COMMITTED" as const;
     if (unconfirmedCommit || handoffStatus === "UNKNOWN") return "RECONCILE_REQUIRED" as const;
@@ -152,7 +163,6 @@ export async function runPersistedCommerceIngress(input: {
   };
   // Only an accepted shop output before the original durable source batch can
   // prove returning status. A current-turn receipt or30customer messages cannot.
-  let priorShopOutput:boolean|null=null;
   if(input.openingMediaRule&&input.history.hasPriorAcceptedShopOutput){
     const times=[...messages.map(m=>Date.parse(m.occurredAt)),...batch.items.map(i=>i.receivedAt instanceof Date?i.receivedAt.getTime():NaN)];
     if(times.every(Number.isFinite))try{const proof=await input.history.hasPriorAcceptedShopOutput({pageId:scope.pageId,conversationId:scope.conversationId,
@@ -173,14 +183,15 @@ export async function runPersistedCommerceIngress(input: {
   if(record.state.conversationOwner!=="BOT")return closeWithoutSend("HUMAN_OWNS_CONVERSATION");
   const policyBundle = async () => { const r = await input.policy(); if (!r.bundle) throw new Error("POLICY_UNAVAILABLE"); return r.bundle; };
   if (privateInput) {
+    privateMode=true;
     // Customer image contents have no approved privacy projection yet. Keep bytes/URLs in the encrypted Inbox.
     // Only the existing payment-receipt state can consume attachment identity; other media goes to staff.
     const receiptPending=mediaMessage&&(await executor.repository.read(scope.conversationId))?.stage==="PURCHASE_CONFIRMED";
-    const privateResult = input.openingMediaRule&&priorShopOutput!==true
+    const privateResult = input.openingMediaRule&&priorShopOutput===null
       ?{committed:false,messages:0,failure:{stage:"AUTHORITY" as const,reasonCode:"OPENING_PRIVATE_REQUIRES_PRIOR_OUTPUT"}}
       :!mediaMessage||receiptPending ? await executor.advancePrivateCheckout() : {committed:false,messages:0};
     if (privateResult.committed) return { ...noSend("PRIVATE_CHECKOUT_COMMITTED"), mode: "PRIVATE_CODE_PATH", enqueued: privateResult.messages,
-      codeOwnedOutput:executor.codeOwnedOutput() };
+      codeOwnedOutput:executor.codeOwnedOutput(),checkoutMediaOutput:executor.checkoutMediaOutput(),...(input.openingMediaRule?{normalToolCalls:checkoutMediaUnits,toolCalls:checkoutMediaUnits,terminalHandoffCalls:0}:{}) };
     const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction,
       read: readAuthority, inboxBatchGuard: guard, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId,
       ...(mediaLink?{triggerSource:mediaLink}:{}) });
@@ -189,7 +200,7 @@ export async function runPersistedCommerceIngress(input: {
     const terminal = await recovery.recoverFallback!({disposition:"FALLBACK",reason:"PRIVATE_CHECKOUT_UNAVAILABLE",text:null,fallbackId:null});
     return { ...noSend("PRIVATE_CHECKOUT_UNAVAILABLE"), terminal,
       inboxCompletion: await completeUnsent(recovery.handoffStatus?.()?.status),
-      mode: "PRIVATE_CODE_PATH", enqueued: handoff.outboxCount(), privateCheckoutFailure: privateResult.failure ?? null };
+      mode: "PRIVATE_CODE_PATH", enqueued: handoff.outboxCount(), privateCheckoutFailure: privateResult.failure ?? null,...(input.openingMediaRule?{normalToolCalls:checkoutMediaUnits,toolCalls:checkoutMediaUnits+(recovery.handoffStatus?.()?.attempts??0),terminalHandoffCalls:recovery.handoffStatus?.()?.attempts??0}:{}) };
   }
   // Hints select only source-verified identities, never prices or effects. A new unresolved ad must not fall back to an old product.
   const lookup = async (ids: readonly string[]) => {
@@ -236,7 +247,7 @@ export async function runPersistedCommerceIngress(input: {
   const projectedHistory=projectCommerceHistoryMetadata(commerceHistory(rows),recentCartEvents);
   const historyMetadata=projectedHistory.metadata;
   const history=commerceHistory(rows,recentMedia,historyMetadata.publicCartEvents.length?Buffer.byteLength(JSON.stringify(historyMetadata)):0);
-  const tools: CommerceTools = await createCommerceTools({ ...(input.openingMediaRule?{openingMediaRule:input.openingMediaRule}:{}),...(input.quoteTask?{quoteTask:input.quoteTask}:{}),...(input.observeDiagnostics?{observeDiagnostics:input.observeDiagnostics}:{}), read: { ...scopedRead, scope, clock: input.clock,
+  const tools: CommerceTools = await createCommerceTools({ ...(input.openingMediaRule?{openingMediaRule:input.openingMediaRule,openingCheckoutMedia:true as const}:{}),...(input.quoteTask?{quoteTask:input.quoteTask}:{}),...(input.observeDiagnostics?{observeDiagnostics:input.observeDiagnostics}:{}), read: { ...scopedRead, scope, clock: input.clock,
     entry: {firstContact: input.openingMediaRule ? priorShopOutput===null?null:!priorShopOutput : rows.length > 0 || recentMedia.length > 0 || recentCartEvents.length > 0 ? false : mediaHistoryUnavailable || publicHistoryUnavailable ? null : true, fromAd: ads.length > 0} }, state: { store: profilePort,
     sourceMessages,
     sizeInput: async ref => { const { product } = await input.read.catalog.readProduct(ref, false);
@@ -251,7 +262,13 @@ export async function runPersistedCommerceIngress(input: {
       select: q => facts.resolveCartSelection!(q, input.clock()), readAuthority: async () => { const a = await readAuthority(); return { ...scope, revision: a.stateVersion,
         conversationOwner: a.state.conversationOwner, permission: a.permission, bindingVersion: a.bindingVersion }; } },
     handoff: { ...handoff, policy: policyBundle,...(input.handoffReply?{deferredReply:input.handoffReply}:{}) },
-    media: input.media ?? {allowedHostSuffixes:(process.env.PRODUCT_SEARCH_ALLOWED_IMAGE_HOSTS ?? "lanadesign.vn,content.pancake.vn,fbcdn.net,fbsbx.com").split(",").map(s=>s.trim()).filter(Boolean)} });
+    media:mediaConfig });
+  publicTools=tools;
+  if(input.openingMediaRule){const invoke=tools.invokeBatch;tools.invokeBatch=async(calls,control)=>{
+    if(terminalMediaControl)throw Error('CONCURRENT_CHECKOUT_BATCH');terminalMediaControl=control;
+    try{return await invoke(calls);}finally{terminalMediaControl=undefined;}
+  };}
+
   const turnInput={ scope, tools, latest, history, historyMetadata, clock: input.clock, ownerPrompt: input.ownerPrompt, verifierPrompt: input.verifierPrompt, owner: input.owner, verifier: input.verifier,
     ...(input.admitPreparedContext?{admitPreparedContext:input.admitPreparedContext}:{}),
     ...(input.captureBoundaryWitness ? {captureBoundaryWitness:true} : {}) };
@@ -264,7 +281,7 @@ export async function runPersistedCommerceIngress(input: {
   if (result.terminal.disposition !== "SEND_ELIGIBLE") return {
     ...result, ...(result.terminal.disposition === "FALLBACK" ? noSend("FALLBACK_OUTPUT_FORBIDDEN") : {}),
     inboxCompletion: await completeUnsent(tools.handoffStatus?.()?.status),
-    codeOwnedOutput:executor.codeOwnedOutput(),
+    codeOwnedOutput:executor.codeOwnedOutput(),checkoutMediaOutput:executor.checkoutMediaOutput(),
     enqueued: handoff.outboxCount()+executor.outboxCount() };
   // Holding replies (with or without independent media) belong to the atomic
   // handoff group with Inbox completion. Do not enqueue another BOT reply.
