@@ -1221,6 +1221,13 @@ it.each(['PUBLIC','PRIVATE'])('noncanonical source sentinel cannot prove unlabel
  const r=await f.run(async()=>({kind:'FINAL',text:'Dạ chị.'}),undefined,undefined,undefined,openingRule);
  expect(r.enqueued).toBe(0);expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);
 });
+it.each(['PUBLIC','PRIVATE'])('unknown cart component colour is not canonical unlabelled proof: %s',async mode=>{
+ const f=openingFixture();await seedCart(f,'__NO_COLOR__');f.enableHandoff();f.message.text=mode==='PRIVATE'?'Tên: Khách thử nghiệm':'Chốt đơn cho chị nhé.';
+ const cycle=structuredClone(f.cycle());cycle.cart!.value.lines[0]!.components[0]!.color=null;f.setCycle(cycle);
+ const selected=structuredClone(await f.select());if(selected.status!=='READY')throw Error('TEST_SOURCE');selected.line.components[0]!.color=null;f.select.mockResolvedValue(selected);
+ const r=await f.run(async()=>({kind:'FINAL',text:'Dạ chị.'}),undefined,undefined,undefined,openingRule);
+ expect(r.enqueued).toBe(0);expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);
+});
 it.each(['source','cart','late-cart','revision','authority'])('unlabelled private preparation cannot outlive current authority or evidence: %s',async fault=>{
  const f=openingFixture();await seedCart(f,'__NO_COLOR__');f.enableHandoff();f.message.text='Tên: Khách thử nghiệm';
  const selected=structuredClone(await f.select());if(selected.status!=='READY')throw Error('TEST_SOURCE');

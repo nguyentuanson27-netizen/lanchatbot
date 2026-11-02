@@ -17,6 +17,9 @@ export function withOpeningProductMedia(base:CommerceTools,input:{rule:OpeningPr
  ])].sort();
  const metadata=(c:TrustedContext)=>c.policyLiterals.filter(p=>p.ref.startsWith('media:')||p.ref.startsWith('read:')).flatMap(p=>{try{return [JSON.parse(p.text) as Record<string,unknown>];}catch{return [];}});
  const colors=(c:TrustedContext,id:string)=>{
+  const cartItems=Array.isArray(c.state.cartItems)?c.state.cartItems.filter(i=>i.productRef===id):[];
+  // A cart with unknown variant colour cannot borrow the no-selection generic path.
+  if(cartItems.some(i=>!Array.isArray(i.components)||!i.components.length||i.components.some((v:{color?:unknown})=>typeof v.color!=='string'||!v.color.trim())))return null;
   const raw=[...metadata(c).flatMap(m=>{
   if((m.subjectRef??m.productId)!==id)return [];
   return [m,...(Array.isArray(m.sellingOptions)?m.sellingOptions:[])].flatMap(v=>typeof v.color==='string'&&v.color.trim()?[v.color]:[]);

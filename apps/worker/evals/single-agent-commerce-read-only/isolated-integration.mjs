@@ -523,7 +523,7 @@ try{
  if(providerRun)providerPorts=phaseC?phaseCTools.createCandidateProvider({preflight:providerFreeze,out:resolve(out)}):await createStatefulProvider({preflight:providerFreeze,out:resolve(out)});
  if(phaseC&&providerFreeze.registration.arm==='C3')await providerPorts.attachReference({baselineRoot:phaseCArg('--phase-c-baseline-root'),
   baselineBuild:JSON.parse(readFileSync(phaseCArg('--phase-c-baseline-build'),'utf8'))});
- async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false,candidateTuples=false,preparedOffers=false,preorderChoices=false}={}){
+ async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false,candidateTuples=false,preparedOffers=false,preorderChoices=false,checkoutEta=false}={}){
   assert(!live||(!preparedOffers&&!preorderChoices),'SYNTHETIC_PREPARATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||!revalidatedMedia,'SYNTHETIC_REVALIDATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||(dependencyHoldingReply===null&&sizeHoldingReply===null&&!missingDependencyRule),'SYNTHETIC_RULE_FORBIDDEN_IN_PROVIDER_RUN');
@@ -532,6 +532,8 @@ try{
   await runtime.linkProviderConversation(pageId,row.conversationId,'PANCAKE','synthetic-'+randomUUID(),at,new Date(at.getTime()+3600000));
   let sourceVariantChanged=false;
   const product=fixtureProduct('SM613',at);let mediaChanged=false;
+  // Explicit disposable domain input for the full native checkout control only.
+  if(checkoutEta){assert(!live);product.snapshot.shipping_eta={'MIEN-NAM':{transit_min_days:2,transit_max_days:4}};}
   if(candidateTuples){assert(!live);const row=product.snapshot.offers.DIRECT.rows[0];
    product.snapshot.fulfillment_policy={tinh_trang:'READY_STOCK',can_order_when_zero:preorderChoices,prep_min_days:1,prep_max_days:2,
     zero_stock_policy:'',zero_stock_prep_min_days:null,zero_stock_prep_max_days:null,eta_valid_until:'',eta_updated_at:''};
@@ -717,7 +719,7 @@ try{
  });
 
  async function pendingCart(media=true,unlabelled=false){
-  const j=await statefulFixture({media,candidateTuples:unlabelled});await j.turn(unlabelled?'Chị lấy áo M.':'Chị lấy áo navy M.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',...(unlabelled?{}:{color:'navy'})}}]),say('Dạ chị.')]);
+  const j=await statefulFixture({media,candidateTuples:unlabelled,checkoutEta:unlabelled});await j.turn(unlabelled?'Chị lấy áo M.':'Chị lấy áo navy M.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',...(unlabelled?{}:{color:'navy'})}}]),say('Dạ chị.')]);
   // Disposable fixture: cart was saved but the first shop ACK never reached the customer.
   // Preserve its row and use the existing audited cancellation, not delivery or deletion.
   const rows=(await pool.query('SELECT response_group_id,status FROM meta_outbox WHERE page_id=$1 AND conversation_id=$2',[pageId,j.bound.conversationId])).rows;
