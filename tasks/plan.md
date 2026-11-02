@@ -1,4 +1,16 @@
-## Current — remaining12 development cases completed, 2026-11-02
+## Current — source-bound opening checkout fix approved, 2026-11-02
+
+Implemented the [independently approved direction](../docs/specs/c3-phase-c-opening-checkout-independent-direction-review-20261102.json) from base `d4172797`; executable source `b6676b681acf25c027decea4434f96a0f3ede433`. Exact canonical unlabelled source/cart identity permits generic opening media; unknown cart colours and real colour constraints remain closed. Private checkout rechecks cart/source expiry after awaited reads. Known diagnostic codes are retained without raw exception text.
+
+Prospective readiness v3 executes post-cart and combined discovery media paths and is enforced at actual diagnostic/provider entrypoints; historical v2 cohorts/results remain immutable. Productless paths have an explicit guarded exemption. Optional read_product filters accept null as omission; CompactV2 factors only identical same-body policy data with exact round-trip expansion. No owner/verifier prompt/model/effort change, added online role/tool, retry, parser, production wiring or live send.
+
+Observed RED→GREEN and same-reviewer R1–R5 fixes. Final worker2566 PASS, Node827 PASS/2existing SKIP/0FAIL, protected21 PASS, canonical worker build/typecheck/lint exit0. Clean-source disposable PostgreSQL122/122 +7 invariants PASS, database dropped/provider0/sendfalse. Earlier failures remain retained, including first PG54PASS/1 synthetic ETA gap and first Node unit-fixture failure. Reviewer independently matched24source entries and56artifact hashes and **APPROVE IMPLEMENTATION** at `b6676b68`.
+
+[Implementation](../docs/specs/c3-phase-c-opening-checkout-source-bound-fix-20261102.md) · [Verification](../docs/specs/c3-phase-c-opening-checkout-source-bound-verification-20261102.json) · [Independent review](../docs/specs/c3-phase-c-opening-checkout-source-bound-review-20261102.md).
+
+No new model campaign or quality/qualification result. s13 reconstruction has67-byte headroom only; s11 full malformed output is unavailable; offline advice/comparison semantic judgment remains NOT_RUN/original FAIL retained. Qualification BLOCKED/C3 comparison NOT_RUN/B_NOT_GO. A future provider run requires fresh source/readiness/registration and separate authorization; no automatic dispatch, merge or deploy.
+
+## Historical — remaining12 development cases completed, 2026-11-02
 
 Same independent reviewer **APPROVE DIRECTION** after checking3raw/selector replay hashes and allthreeprices; [independent record](../docs/specs/c3-phase-c-opening-checkout-independent-direction-review-20261102.json). Doc-only clarification restricts omit-media-colour to source-proven canonical unlabelledvariant with no effective realcolour constraint, preserves cart/stocktuple and no generic retry after realcolour failure. Required sequence: typedadapter/allowlisteddiagnostics → actualpostcart/discoveryend-to-endnegativecontrols/PG/readiness → exactcontinuation/schema → separateadvice/upsellcontrols. All-admittedproduct image rule remains until separateownercontractdecision. Approval is direction only, no code/provider/quality/retro remainderaudit approval.
 

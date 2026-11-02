@@ -1,4 +1,17 @@
-## Current — remaining12 Phase C model cases completed, 2026-11-02
+## Current — source-bound opening checkout fix, 2026-11-02
+
+- [x] Source-bound canonical sentinel adapter for public/private opening checkout; cart/stock identities unchanged. Unknown/missing cart colour remains fail-closed.
+- [x] Bounded known-code diagnostics; private cart/source expiry rechecked after awaited reads before transaction dispatch.
+- [x] Prospective v3 post-cart/discovery readiness at actual diagnostic/provider entries, with guarded honest productless paths; historical cohorts/results unchanged.
+- [x] Explicit optional-filter nullability and lossless same-body CompactV2 policy reference; no prompt/model/effort/retry/role change.
+- [x] Observed RED→GREEN, self-review and repeated same independent review; R1–R5/P2 source-binding findings closed.
+- [x] Final worker2566 PASS, Node827 PASS/2existing SKIP/0FAIL, protected21, build/typecheck/lint exit0. Clean `b6676b68` PostgreSQL122/122 +7 invariants PASS/database dropped/provider0/sendfalse; failed intermediates preserved.
+- [x] Same reviewer verified24source entries/56artifact hashes/32commands and **APPROVE IMPLEMENTATION** at `b6676b681acf25c027decea4434f96a0f3ede433`.
+- [ ] No new provider/model quality evaluation in this task. Advice/contextual comparison judgment, Phase C qualification and C3 parity remain unverified; no automatic campaign/merge/deploy.
+
+[Implementation](../docs/specs/c3-phase-c-opening-checkout-source-bound-fix-20261102.md) · [Verification](../docs/specs/c3-phase-c-opening-checkout-source-bound-verification-20261102.json) · [Independent review](../docs/specs/c3-phase-c-opening-checkout-source-bound-review-20261102.md).
+
+## Historical — remaining12 Phase C model cases completed, 2026-11-02
 
 - [x] Owner-requested same independent reviewer rechecked3raw/exactselector hashes, frozeneligibility error+generic2 and j3threeprices; **APPROVE DIRECTION** after doc clarifications. [Record](../docs/specs/c3-phase-c-opening-checkout-independent-direction-review-20261102.json): source-proven unlabelledvariant/noeffectivecolourconstraint only, preserveidentity/atomicbounds, end-to-endnegativecontrols/PG beforeprovider. All-admitted→selected media contract change unapproved; no implementation/dispatch/retro remainderaudit/quality approval.
 - [x] Owner-requested primary review of fix+both model batches: exact-selector frozen replay reproduces p08/j6/j4 `__NO_COLOR__`→`NO_COLOR` passed as requested media colour; same product has2eligibleGENERIC assets. Immediate failure identified as MEDIA_COLOR_BINDING_UNVERIFIED masked by diagnostic UNKNOWN_INTERNAL. Historical outcomes/grades unchanged; no runtime fix/provider rerun.
