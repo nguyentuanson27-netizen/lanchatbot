@@ -247,7 +247,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   phase:request.toolsAllowed===false?(callable.length?'TERMINAL_HANDOFF_OR_REPLY':'FINAL_REPLY'):'TOOL_OR_REPLY',
   toolBudget:request.toolBudget?{roundsRemaining:request.toolBudget.roundsRemaining,callsRemaining:request.toolBudget.callsRemaining,
    ...(request.toolWorkAccounting==='PRIMITIVE_WORK_V2'?{accounting:'PRIMITIVE_WORK_V2'}:{})}:null};
- if(compactV2&&new Set(ownerView.execution.availableTools).size===ownerView.execution.availableTools.length&&canonicalJsonV1(ownerView.execution.availableTools)===canonicalJsonV1(ownerView.execution.callableTools)){
+ if(compactV2&&ownerView.execution.availableTools.length>0&&new Set(ownerView.execution.availableTools).size===ownerView.execution.availableTools.length&&canonicalJsonV1(ownerView.execution.availableTools)===canonicalJsonV1(ownerView.execution.callableTools)){
   // Both ordered inventories are already carried by this body's native schemas.
   delete ownerView.execution.availableTools;delete ownerView.execution.callableTools;
   ownerView.execution.toolNamesFrom='DECLARED_TOOL_SCHEMAS';
