@@ -1,0 +1,31 @@
+{
+  "kind": "POST_RUN_PRIMARY_AUDIT_FOLLOWUP_ONLY",
+  "runSourceSha": "1f6a358bc7f26865ca28caa1021614f3b61184a0",
+  "artifacts": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-remainder-primary-audit-20261102.mjs",
+      "sha256": "515ec5c2bcd242703eb2e779cc28186e42204f837e5681b0a344b96066b11147",
+      "bytes": 6280
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-remainder-primary-audit-20261102.log",
+      "sha256": "0d2167f1f547165f4bf2aa0e4aafc64c8fbc99f89066fba43f77139e0af97976",
+      "bytes": 647
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-remainder-primary-audit-final-20261102.log",
+      "sha256": "731cb823cdfca004e84856049072a0c578a1b85724d4c2e9711501eb56a525e7",
+      "bytes": 677
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-remainder-report-20261102-01\\PRIMARY_AUDIT.json",
+      "sha256": "effe01ced6c9cbb22ba2aac5ff8a873cf2468695c82b744213baf2f2926c35fb",
+      "bytes": 774
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-remainder-report-20261102-01\\REVIEW_FAILURE.json",
+      "sha256": "f44be32f186e124183924e540a79de2cb26ac19acb9384364aa26c8a11f0897f",
+      "bytes": 766
+    }
+  ]
+}

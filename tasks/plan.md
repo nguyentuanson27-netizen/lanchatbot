@@ -1,4 +1,12 @@
-## Current — opening-checkout development batch completed, 2026-11-02
+## Current — remaining12 development cases completed, 2026-11-02
+
+Owner explicitly chose originalFULL22 minus completed21-case population:12cases/20turns, zero ID overlap, exact inherited scripts/order, max80/N1/retry0. Evaluation-only allowlisted scope at clean1f6a358b, observedRED2→GREEN36 and independent2tests/code/scope APPROVE; no runtime/packages/prompts/model changes. Fresh107product capture11:10UTC, exact previously approved isolated matrix, real native initial02clean/provider0/DBdropped; same-reviewer inputs APPROVED/finalpreflightPASS. Frozen2ready10sourcegaps retained, not relabeled.
+
+Complete12/12+20/20, noNOT_RUN/hardstop;21generationrecords/20actualrequests (19OWNERrecords/2VERIFIER, oneownerpre-dispatch0HTTP),19OK/1MALFORMED HTTP200/1OWNER_REQUEST_BOUND66639>65536. Actual1eligible/12silentHANDOFF/7HUMANNO_SEND;1text2images. Verifier1PASS1FAIL, no transporttimeout/error. DBdropped/live0. Author primary audit PASS55artifacthashes/20raw/21generation/20wirebody and actualcapturedgroup/durableproof/HUMANfollowups; independent postrun reviewer hit usage limit before writing records, statusNOT_COMPLETED_USAGE_LIMIT, no fabricated approval. Code/scope/input approvals remain valid; qualityNOT_GRADED.
+
+[Report/allconversations](../apps/worker/evals/single-agent-commerce-qualification/opening-remainder-run-20261102/REPORT.md) records exact12case findings. j3 upsell savingsverdict FAIL leads silenthandoff; j4cartopen committed but mediaUNKNOWN_INTERNAL before laternegotiation, no soleunderlyingcause claimed. Separate source/world registrations together cover33unique cases/48turns; do not pool quality/safety denominators. Stop after completed authorized remainder; qualificationBLOCKED/C3NOT_RUN/B_NOT_GO, no automaticfix/providerretry/merge/deploy.
+
+## Completed — opening-checkout development batch, 2026-11-02
 
 Owner requested one model round after implementation approval. Clean source2628987a adds only evaluation diagnostic forwarding of the frozen opening-media rule (RED→GREEN34, same-reviewer APPROVE); worker runtime/packages/prompts unchanged. Fresh107product capture, actual initial PostgreSQL/dropped/provider0 and exact existing isolated handoff matrix; failed initial01 policy aggregate hash is preserved separately before generation. Input/source/readiness and final pinned-client preflight approved.
 

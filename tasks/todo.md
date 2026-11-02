@@ -1,4 +1,16 @@
-## Current — opening-checkout model development run, 2026-11-02
+## Current — remaining12 Phase C model cases completed, 2026-11-02
+
+- [x] Owner explicitly selected12ca/20lượt original FULL22 not in completed PURCHASE21; exact subset/order/scripts, zero overlap, N1/max80/retry0. Eval-only bounded scope RED2→GREEN36, independent2PASS/code/scope APPROVE, commit1f6a358b; runtime/packages/prompts unchanged.
+- [x] Fresh107-product source capture, exact existing isolated matrix, actual initial02clean/provider0/DBdropped; same-reviewer INPUTS APPROVED frozen2SALES_READY/10SOURCE_UNAVAILABLE and final actual-time preflight PASS.
+- [x] Clean1f6 model run complete12/12cases and20/20turns,0NOT_RUN/nohardstop.21records=19OWNER+2VERIFIER;20actualgenerationrequests,19OK/1MALFORMED HTTP200/1pre-dispatch OWNER_REQUEST_BOUND0HTTP. No transporterror/timeout or retry.
+- [x] Actual1eligible/12silentHANDOFF/7HUMANNO_SEND,1text2images. Verifier1PASS/1FAIL. DB dropped/live0; all captured output/receipt state retained. Two separate batches cover33unique cases/48actualturns, not one paired quality population.
+- [x] Author primary audit PASS55artifact/20raw/21generation/20bodyhashes, dispatch/nativefirewall and accepted1text2image group/durable proof; quota failure and initial audit-event-name correction retained.
+- [ ] Independent post-run accounting/report review NOT_COMPLETED_USAGE_LIMIT: reviewer turn failed with usage limit, no approval recorded or model substitution. Prior code/input approval remains. Locked qualityNOT_GRADED/PhaseCqualificationBLOCKED/C3NOT_RUN/B_NOT_GO.
+- [ ] Residual findings: media gaps, s04boundsearch/redundant read, unsupported componentfit, s11malformedtoolargs, s13continuation66639/65536, j3verifierrejectupsellclaim, j4cartcommitthenUNKNOWN_INTERNAL media. Stop authorized remainder, no automatic fixes/reruns/merge/deploy.
+
+[Report](../apps/worker/evals/single-agent-commerce-qualification/opening-remainder-run-20261102/REPORT.md) · [All20 turns](../apps/worker/evals/single-agent-commerce-qualification/opening-remainder-run-20261102/CONVERSATIONS.md) · [Primary audit](../apps/worker/evals/single-agent-commerce-qualification/opening-remainder-run-20261102/PRIMARY_AUDIT.json) · [Coverage](../apps/worker/evals/single-agent-commerce-qualification/opening-remainder-run-20261102/COVERAGE.json).
+
+## Completed — opening-checkout model development run, 2026-11-02
 
 - [x] Owner requested one new model round. Evaluation-only diagnostic opening-media forwarding fix: observed RED→GREEN34, independent7PASS and APPROVE; clean run source2628987a, worker runtime/prompts unchanged.
 - [x] Fresh107-product read-only capture + exact existing approved isolated handoff matrix; actual initial PostgreSQL/dropped/provider0, same-reviewer inputs and final preflight PASS. Preserve failed initial01 aggregate-hash preparation, generation0.
