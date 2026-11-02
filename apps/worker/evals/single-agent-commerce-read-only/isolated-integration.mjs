@@ -690,7 +690,7 @@ try{
  });
  await check('C opening replaced variant cannot reuse the former generic product photo',async()=>{
   const j=await statefulFixture({media:true});await j.turn('Chị lấy áo navy M.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);
-  const line=(await j.state()).cart.value.lines[0],r=await j.turn('Đổi sang đỏ cho chị.',[native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'GENERIC'}},{name:'change_cart_item',args:{subjectRef:line.lineId,action:'REPLACE_LINE',targetSubjectRef:'SM613',offerType:'DIRECT',size:'M',color:'red'}}]),say('Em đã đổi sang đỏ cho chị.')],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  const line=(await j.state()).cart.value.lines[0],r=await j.turn('Đổi sang đỏ cho chị.',[native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'GENERIC'}},{name:'change_cart_item',args:{subjectRef:line.lineId,action:'REPLACE_LINE',targetSubjectRef:'SM613',offerType:'SM613-DIRECT',size:'M',color:'red'}}]),say('Em đã đổi sang đỏ cho chị.')],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
   assert.equal((await j.state()).cart.value.lines[0].components[0].color,'red');assert.equal(r.result.terminal.disposition,'HANDOFF');assert.equal(r.result.enqueued,0);assert.equal(r.verifiers,0);await j.drain();assert.equal(j.capture.length,0);
  });
  await check('C opening returning checkout preserves native private preview',async()=>{
