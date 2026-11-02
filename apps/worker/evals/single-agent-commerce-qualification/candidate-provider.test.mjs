@@ -134,9 +134,7 @@ test('registered readiness expiry between preflight and generation stays counted
  f.world.config.scope=commerceScope();
  f.world.products[0].images=[{url:'https://content.pancake.vn/expiry-control.jpg',role:'PRIMARY',angle:'FRONT',imageType:'MODEL',intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:f.world.products[0].observedAt}];
  const observed=new Date(f.world.snapshots.SV2447.synced_at);
- const manifest=await sourceReadiness(f.world,{version:3,task:{purpose:'SALE',productId:'SV2447'},cohort:'SALES_READY',checks:[{facet:'PRICE',productId:'SV2447',offerType:'DIRECT'}],executionPaths:[{kind:'DISCOVERY',productIds:['SV2447']}]},observed);
- f.preflight.sealed.corpus.scenarios[0].turns[0].initialProductCodes=[];delete manifest.spec.task.productId;
- const {contentHash,...body}=manifest;manifest.contentHash=digest(body); // Explicit no-product control isolates expiry.
+ const manifest=await sourceReadiness(f.world,{version:3,task:{purpose:'SALE',productId:'SV2447'},cohort:'SALES_READY',checks:[{facet:'PRICE',productId:'SV2447',offerType:'DIRECT'},{facet:'MEDIA',productId:'SV2447',intent:'GENERIC',allowedHostSuffixes:['content.pancake.vn']}],executionPaths:[{kind:'DISCOVERY',productIds:['SV2447']}]},observed,OPENING_PRODUCT_MEDIA_RULE);
  f.preflight.sealed.corpus.scenarios[0].judgeContext={sourceReadiness:manifest};at=new Date(observed.getTime()+60000);
  await assert.rejects(f.provider.owner(f.request),/SOURCE_READINESS_BLOCKED/);assert.equal(posts,0);
  assert.equal(f.provider.observed().length,1);assert.equal(f.provider.observed()[0].providerRequests,0);

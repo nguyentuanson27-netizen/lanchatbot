@@ -29,6 +29,9 @@ export interface VerifierRequest { generationId: string; instructions: string; f
   latest: string; history: { role: "customer" | "shop"; text: string }[]; binding: VerifierBinding; signal: AbortSignal }
 export interface VerifierGeneration { result: unknown; telemetry?: unknown }
 export interface CommerceTools {
+  openingMediaTiming?:'BEFORE_OWNER';
+  /** No I/O: known cart targets must leave enough primitive work and image slots. */
+  openingMediaFeasible?(calls:readonly CommerceToolCall[],remaining:number):boolean;
   /** Code-only, current exact cart/source proof; never a model-issued generic-media permission. */
   unlabelledCartProducts?(context:TrustedContext):readonly string[];
   prepareProductImage?(subjectRef:string,color?:string):Promise<CommerceToolResult>;
@@ -206,6 +209,16 @@ export async function runCommerceTurn(input: {
   toolLatencyMs += performance.now() - preparationStarted;
   executedNormalToolInvocations=toolCalls;
   for (let index = 0; index < 3; index++) {
+    if(input.tools.openingMediaTiming==='BEFORE_OWNER'&&input.tools.prepareOpeningMedia){
+      const started=performance.now(),chargedBefore=openingMediaWork?.chargedUnits??0;
+      try{
+        const work=await input.tools.prepareOpeningMedia({maxCalls:6-toolCalls,onDispatch:()=>{if(toolCalls>=6)throw Error('BUDGET');toolCalls++;executedNormalToolInvocations++;}});
+        openingMediaWork={...work,chargedUnits:chargedBefore+work.chargedUnits};
+      }catch{return finish(fallback('PREPARATION_UNAVAILABLE'));}
+      toolLatencyMs+=performance.now()-started;
+      const actual=await effectTerminal();if(actual)return finish(actual,true);
+      if(openingMediaWork.status==='UNAVAILABLE')return finish(fallback('PREPARATION_UNAVAILABLE'));
+    }
     const context = input.tools.snapshot();
     if (!context.state.permission || context.state.conversationOwner !== "BOT" || !context.state.privacyAllowed) {
       return finish({ disposition: "NO_SEND", reason: "PERMISSION_OR_PRIVACY", text: null, fallbackId: null });
@@ -254,6 +267,9 @@ export async function runCommerceTurn(input: {
       if (!output.calls.length || (!terminalCall && (toolRounds >= 2 || toolCalls + units > 6))) {
         rejectedToolCalls += output.calls.length;return finish(fallback("BUDGET"));
       }
+      if(!terminalCall&&input.tools.openingMediaFeasible?.(output.calls,6-toolCalls-units)===false){
+        rejectedToolCalls+=output.calls.length;return finish(fallback('OPENING_MEDIA_BUDGET'));
+      }
       if(quoteCalls.length)quoteAttempted=true;
       if (terminalCall) terminalHandoffCalls++; else {toolRounds++; toolCalls += units;}
       // Account the proposed work and preserve budget rejection attribution,
@@ -291,7 +307,11 @@ export async function runCommerceTurn(input: {
     }
     if(hasResidualPii(output.text))return finish({disposition:"NO_SEND",reason:"PRIVACY",text:null,fallbackId:null});
     if(!output.text.trim()||Buffer.byteLength(output.text)>4096)return finish(fallback("MALFORMED"));
-    if(input.tools.prepareOpeningMedia){
+    if(input.tools.openingMediaTiming==='BEFORE_OWNER'&&input.tools.openingMediaReady?.(input.tools.snapshot())!==true){
+      if(openingMediaWork)openingMediaWork={...openingMediaWork,status:'UNAVAILABLE',reason:'OPENING_MEDIA_INVALIDATED'};
+      return finish(fallback('PREPARATION_UNAVAILABLE'));
+    }
+    if(input.tools.prepareOpeningMedia&&input.tools.openingMediaTiming!=='BEFORE_OWNER'){
       const started=performance.now();
       try{openingMediaWork=await input.tools.prepareOpeningMedia({maxCalls:6-toolCalls,onDispatch:()=>{toolCalls++;executedNormalToolInvocations++;}});}
       catch{return finish(fallback("PREPARATION_UNAVAILABLE"));}

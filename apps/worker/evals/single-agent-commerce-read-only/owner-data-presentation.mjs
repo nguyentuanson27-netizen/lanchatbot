@@ -1,5 +1,6 @@
 // Evaluation-only lossless presentation. No inferred advice, source change or model instruction.
 import assert from 'node:assert/strict';
+import {expandOwnerProducts,expandCurrentFacts} from './owner-product-tables.mjs';
 const labels={turnTime:'Thời điểm xử lý',products:'Sản phẩm',subjects:'Đối tượng đã gắn',facts:'Giá, tồn và kết quả đã xác minh',
  policy:'Quy định và dữ liệu nguồn',state:'Hồ sơ và trạng thái hiện tại',receipts:'Kết quả thao tác đã xác nhận',execution:'Khả năng thực hiện lượt này',untrusted:'Dữ liệu hội thoại kèm theo'};
 const trace=m=>m.parts.flatMap((p,i)=>{try{const v=JSON.parse(p.text);return Array.isArray(v.completedToolTurns)?[{i,value:v}]:[];}catch{return [];}});
@@ -52,12 +53,13 @@ export function compactContextSections(original){
  if(traces.length)sections.push({path:['completedToolTurns'],label:'Lịch sử công cụ đã hoàn tất',value:traces});
  return sections;
 }
-export function readCompactSections(message){
+export function readCompactSections(message,{expandProducts=true}={}){
  assert.equal(message.parts.length,1,'COMPACT_PARTS');
  assert.equal(typeof message.parts[0].text,'string');
  return message.parts[0].text.split('\n\n').map(section=>{
   const split=section.indexOf('\n');assert(split>0,'COMPACT_SECTION');
-  return {label:section.slice(0,split),value:JSON.parse(section.slice(split+1))};
+  const label=section.slice(0,split),value=JSON.parse(section.slice(split+1));
+  return {label,value:expandProducts&&label===labels.products?expandOwnerProducts(value):value};
  });
 }
 export function presentCompactOwnerData(original){
@@ -68,7 +70,7 @@ export function presentCompactOwnerData(original){
  const wire=finalText?presentOwnerData(original):structuredClone(original);
  const sections=compactContextSections(finalText?original:{...original,contents:[original.contents[0]]});
  wire.contents[0]={role:'user',parts:[{text:sections.map(({label,value})=>label+'\n'+JSON.stringify(value)).join('\n\n')}]};
- assert.deepEqual(readCompactSections(wire.contents[0]),sections.map(({label,value})=>({label,value})),'COMPACT_DATA_LOSS');
+ assert.deepEqual(readCompactSections(wire.contents[0],{expandProducts:false}),sections.map(({label,value})=>({label,value})),'COMPACT_DATA_LOSS');
  return wire;
 }
 
@@ -84,8 +86,10 @@ export function expandDeclaredToolExecution(execution,declarations){
  return {...expanded,availableTools:names,callableTools:[...names]};
 }
 
-export function expandDefaultSellingOption(data){
+export function expandDefaultSellingOption(data,trustedFacts=[]){
  assert(data&&typeof data==='object'&&!Array.isArray(data),'DEFAULT_OPTION_REFERENCE');
+ data=structuredClone(data);
+ if(Array.isArray(data.sellingOptions))data.sellingOptions=data.sellingOptions.map(o=>expandCurrentFacts(o,trustedFacts));
  if(!Object.hasOwn(data,'defaultFromOption'))return structuredClone(data);
  const keys=['offerType','variantId','facts','availability','sizeAvailability'];
  assert(data.defaultFromOption===0&&Array.isArray(data.sellingOptions)&&data.sellingOptions.length===1&&

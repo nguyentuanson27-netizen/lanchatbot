@@ -42,9 +42,11 @@ export function assertTaskReadinessSpec(spec,{required=false}={}){
 export function assertProspectiveOpeningReadiness(corpus,rule){
  if(!rule)return;assertOpeningProductMediaRule(rule);
  assert(corpus.scenarios.filter(s=>s.mode!=='SAFETY').every(s=>s.judgeContext?.sourceReadiness?.spec?.version===3),'C_EXECUTION_READINESS_V3_REQUIRED');
+ if(rule.version==='FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2')assert(corpus.scenarios.filter(s=>s.mode!=='SAFETY').every(s=>digest(s.judgeContext.sourceReadiness.openingMediaRule??null)===digest(rule)),'C_OPENING_READINESS_RULE_BINDING');
 }
 
-export async function sourceReadiness(world,spec,at=new Date()){
+export async function sourceReadiness(world,spec,at=new Date(),openingMediaRule=undefined){
+ if(openingMediaRule)assertOpeningProductMediaRule(openingMediaRule);
  assert(Number.isFinite(at.getTime())&&['SALES_READY','SOURCE_UNAVAILABLE'].includes(spec?.cohort)&&Array.isArray(spec.checks)&&spec.checks.length<=32,'C_READINESS_SPEC');
  assertTaskReadinessSpec(spec);
  assert(spec.checks.length||spec.noProductFactsRequired===true,'C_READINESS_EMPTY_REQUIREMENTS');
@@ -97,30 +99,44 @@ export async function sourceReadiness(world,spec,at=new Date()){
   }
   results.push({requirement:structuredClone(q),status:available?'AVAILABLE':'FAILED',reason});
  }
- const executionPaths=spec.version===3?(spec.executionPaths.length?await openingExecutionReadiness(world,spec.executionPaths,at):[]):undefined;
+ const executionPaths=spec.version===3?(spec.executionPaths.length?await openingExecutionReadiness(world,spec.executionPaths,at,openingMediaRule):[]):undefined;
  const all=[...results,...(executionPaths??[])];
  assert(spec.cohort==='SALES_READY'?all.every(r=>r.status==='AVAILABLE'):all.some(r=>r.status==='FAILED'),
   spec.cohort==='SALES_READY'?'C_SOURCE_READINESS_BLOCKED':'C_CONTROL_HAS_NO_SOURCE_FAILURE');
- const body={kind:'C_SOURCE_READINESS_V1',worldHash:digest(world),checkedAt:at.toISOString(),spec:structuredClone(spec),results,...(executionPaths?{executionPaths}:{})};
+ const body={kind:'C_SOURCE_READINESS_V1',worldHash:digest(world),checkedAt:at.toISOString(),spec:structuredClone(spec),results,...(executionPaths?{executionPaths}:{}),...(openingMediaRule?{openingMediaRule:structuredClone(openingMediaRule)}:{})};
  return {...body,contentHash:digest(body)};
 }
 export async function assertSourceReadiness(world,manifest,at=new Date()){
  assert(manifest?.kind==='C_SOURCE_READINESS_V1'&&manifest.worldHash===digest(world),'C_READINESS_WORLD_CHANGED');
  const {contentHash,...body}=manifest;assert(contentHash===digest(body),'C_READINESS_MANIFEST_HASH');
- assert.deepEqual(manifest,await sourceReadiness(world,manifest.spec,new Date(manifest.checkedAt)),'C_READINESS_NOT_DERIVED');
- return sourceReadiness(world,manifest.spec,at);
+ assert.deepEqual(manifest,await sourceReadiness(world,manifest.spec,new Date(manifest.checkedAt),manifest.openingMediaRule),'C_READINESS_NOT_DERIVED');
+ return sourceReadiness(world,manifest.spec,at,manifest.openingMediaRule);
 }
 export async function assertScenarioReadiness(world,s,at=new Date(),openingMediaRule=undefined){
  if(openingMediaRule)assertOpeningProductMediaRule(openingMediaRule);
  if(s.mode!=='SAFETY'){
   assertTaskReadinessSpec(s.judgeContext?.sourceReadiness?.spec,{required:true});
   const spec=s.judgeContext.sourceReadiness.spec;
+  if(openingMediaRule&&s.judgeContext.sourceReadiness.openingMediaRule)assert(digest(s.judgeContext.sourceReadiness.openingMediaRule)===digest(openingMediaRule),'C_OPENING_READINESS_RULE_BINDING');
+  if(openingMediaRule?.version==='FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2')assert(digest(s.judgeContext.sourceReadiness.openingMediaRule??null)===digest(openingMediaRule),'C_OPENING_READINESS_RULE_BINDING');
   const openingProducts=[...new Set([...s.turns.flatMap(t=>t.initialProductCodes),...(s.judgeContext?.sourceRequirements?.productCodes??[]),...(spec.task?.productId?[spec.task.productId]:[])])];
   if(spec.version===3&&spec.executionPaths.length===0)assert(openingProducts.length===0&&['ORDER_ONLY','NO_PRODUCT_FACTS'].includes(s.judgeContext?.sourceRequirements?.kind),'C_EXECUTION_EMPTY_PRODUCT_SCOPE');
-  if(openingMediaRule&&spec.cohort==='SALES_READY')for(const code of openingProducts){
+  const resolvedInitialProducts=openingMediaRule?.version==='FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2'?s.turns.map(t=>[...new Set(t.initialProductCodes.map(code=>{
+   const matches=world.products.filter(p=>[p.productId,p.canonicalCode,...(p.aliases??[])].some(v=>normalizeProductCode(v)===normalizeProductCode(code)));
+   assert(matches.length===1,'C_OPENING_INITIAL_IDENTITY_AMBIGUOUS');return matches[0].productId;
+  }))]):[];
+  const mandatoryProducts=openingMediaRule?.version==='FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2'?[...new Set([
+   ...resolvedInitialProducts.flatMap(ids=>ids.length===1?ids:[]),
+   ...(spec.task?.productId?[spec.task.productId]:[]),
+   ...((s.judgeContext?.sourceRequirements?.productCodes??[]).length===1?s.judgeContext.sourceRequirements.productCodes:[]),
+   ...(spec.executionPaths??[]).flatMap(p=>p.kind==='POST_CART'?p.selections.map(q=>q.productId):p.productIds.length===1?p.productIds:[])
+  ])]:openingProducts;
+  if(openingMediaRule&&spec.cohort==='SALES_READY')for(const code of mandatoryProducts){
    const p=world.products.find(p=>[p.productId,p.canonicalCode,...(p.aliases??[])].some(v=>normalizeProductCode(v)===normalizeProductCode(code)));
    assert(p&&spec.checks.some(q=>q.facet==='MEDIA'&&q.productId===p.productId&&q.intent==='GENERIC'),'C_OPENING_MEDIA_READINESS_REQUIRED');
-   if(spec.version===3)assert(spec.executionPaths.some(path=>path.kind==='DISCOVERY'&&path.productIds?.includes(p.productId)),'C_EXECUTION_DISCOVERY_COVERAGE');
+   if(spec.version===3)assert(spec.executionPaths.some(path=>openingMediaRule.version==='FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2'
+    ?path.kind==='DISCOVERY'&&path.productIds?.length===1&&path.productIds[0]===p.productId||path.kind==='POST_CART'&&path.selections?.some(q=>q.productId===p.productId)
+    :path.kind==='DISCOVERY'&&path.productIds?.includes(p.productId)),'C_EXECUTION_DISCOVERY_COVERAGE');
   }
   if(openingMediaRule&&spec.version===3&&spec.cohort==='SALES_READY'&&openingProducts.length){
    const ids=openingProducts.map(code=>world.products.find(p=>[p.productId,p.canonicalCode,...(p.aliases??[])].some(v=>normalizeProductCode(v)===normalizeProductCode(code)))?.productId);

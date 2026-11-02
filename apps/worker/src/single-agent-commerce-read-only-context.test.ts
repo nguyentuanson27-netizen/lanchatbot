@@ -13,6 +13,19 @@ const attributes = () => buildProductAttributesV1({ productId: "SM613", observed
 } });
 
 describe("read-only source context", () => {
+  it.each(['ETA','receipt','state','product','subject'])("keeps a superseded variant with a retained %s dependency",kind=>{
+    const ref='offer:P1:AO',state=testState(),subjects=[{ref:'P1',kind:'PRODUCT',label:'Áo',bindingVersion:'binding-1'},
+      {ref,kind:'VARIANT',productId:'P1',label:'Áo lẻ',bindingVersion:'binding-1'}];
+    const input:Parameters<typeof buildReadOnlyContext>[0]={state,subjects,supersededVariantRefs:new Set([ref])};
+    expect(buildReadOnlyContext(input).boundSubjects.some(s=>s.ref===ref)).toBe(false);
+    if(kind==='ETA')input.claims=[{type:'ETA',scope:{kind:'PRODUCT',productId:'P1',variantId:ref}}];
+    if(kind==='receipt')input.receipts=[{ref:'receipt:1',operationId:'op1',subjectRef:ref,status:'SUCCESS',effect:'CART_UPDATED',stateRevision:1,recipient:state.recipient,observedAt:now.toISOString(),expiresAt:new Date(now.getTime()+1000).toISOString()}];
+    if(kind==='state')input.state={...state,preferences:{variantRef:ref}};
+    if(kind==='product')input.products=[{ref:'product:P1',subjectRef:'P1',presentation:{variants:[{variantId:ref}]} as never}];
+    if(kind==='subject')input.subjects=[{...subjects[0]!,variantId:ref},subjects[1]!];
+    const retained=buildReadOnlyContext(input);expect(retained.boundSubjects.some(s=>s.ref===ref)).toBe(true);
+    expect(retained.state.factSnapshotVersion).not.toBe(buildReadOnlyContext({state,subjects:subjects.slice(0,1)}).state.factSnapshotVersion);
+  });
   it("accepts current source content and invalidates its changed or expired version", () => {
     const content = { productName: "Áo thử nghiệm", description: "Vải cotton, dáng suông.", productUrl: null,
       metadata: { authority: "WEBSTORE_XML" as const, sourceVersion: "xml-v1", observedAt: now.toISOString(),

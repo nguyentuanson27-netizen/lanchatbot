@@ -14,7 +14,7 @@ export function referenceContextCoverage(trusted,context,historyMetadata,opening
   productPresentation:runtime.filter(p=>p.presentation&&digest(p.presentation)!==digest(presentation??null)).map(p=>p.ref),
   sizeCharts:runtime.filter(p=>p.sizeCharts?.length).map(p=>p.ref),
   sourceContent:runtime.filter(p=>p.content).map(p=>p.ref)};
- const preparationTiming=openingMediaRule?{status:'UNPROVEN',baseline:'BEFORE_STRATEGIST',candidate:'AFTER_OWNER_FINAL'}:null;
+ const preparationTiming=openingMediaRule?{status:'UNPROVEN',baseline:'BEFORE_STRATEGIST',candidate:openingMediaRule.version==='FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2'?'BEFORE_EACH_OWNER':'AFTER_OWNER_FINAL'}:null;
  return {version:1,status:preparationTiming||Object.values(loss).some(rows=>rows.length)?'INFORMATION_PARITY_NOT_ESTABLISHED':'STRUCTURAL_COMMON_FIELDS_PRESENT',
   preparationTiming,
   trustedHash:digest(trusted),contextHash:context.contextHash,

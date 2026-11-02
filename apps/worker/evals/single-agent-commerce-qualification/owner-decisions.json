@@ -33,10 +33,12 @@
   "rolloutAuthorized": false,
   "historicalPhaseBStatus": "B_NOT_GO_UNCHANGED",
   "openingProductMediaDecision": {
-    "version": "FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1",
-    "approvedAt": "2026-11-02",
-    "evidenceRef": "owner-reply:call_6adb3f092d604a2a8905429aed1f6936",
-    "ownerAnswer": "Mọi phản hồi mở đầu của sản phẩm đã xác định đều kèm ảnh; chấp nhận cả câu ETA/ACK có ảnh",
+    "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2",
+    "approvedAt": "2026-11-03",
+    "evidenceRef": "owner-reply:call_b688b5a09ac541008cee4e09c4b5bd68",
+    "ownerAnswer": "Dùng phạm vi này: ảnh bắt buộc với mẫu đã xác định duy nhất hoặc sản phẩm trong giỏ; danh sách mẫu còn phân vân/search chưa bắt buộc mỗi mẫu một ảnh",
+    "preparationTiming": "BEFORE_EACH_OWNER",
+    "previousRule": "FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1",
     "verifierSchemaChanged": false,
     "legacyNoImageEtaControlSupersededForRule": true
   },

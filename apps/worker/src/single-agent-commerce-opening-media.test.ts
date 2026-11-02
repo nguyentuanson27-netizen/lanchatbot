@@ -3,9 +3,10 @@ import {createCommerceTools} from './single-agent-commerce.js';
 import {runCommerceTurn,type VerifierRequest} from './single-agent-commerce-read-only.js';
 import {commerceScope,commerceNow,fixtureProduct,fixturePolicy} from './single-agent-commerce.test-support.js';
 import {createConversationState} from '@lana/conversation-engine';
+import {OPENING_PRODUCT_MEDIA_RULE,type OpeningProductMediaRule} from './single-agent-commerce-opening-media.js';
 import type {HandoffAuthority,CommerceHandoffCommit} from './single-agent-commerce-handoff.js';
 const rule={version:'FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1'} as const;
-async function setup(ids=['SM613'],firstContact:boolean|null=true,withImages=true,focus?:string){
+async function setup(ids=['SM613'],firstContact:boolean|null=true,withImages=true,focus?:string,mediaRule:OpeningProductMediaRule=rule){
  const scope=commerceScope(),fixtures=ids.map(id=>fixtureProduct(id));
  for(const f of fixtures)if(withImages)f.product.images=[{url:`https://content.pancake.vn/${f.product.productId}.jpg`,role:'PRIMARY',angle:'FRONT',imageType:'MODEL',intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:commerceNow.toISOString(),partsVisible:['AO']}];
  const readProduct=vi.fn(async(id:string)=>fixtures.find(f=>f.product.productId===id)!);
@@ -13,7 +14,7 @@ async function setup(ids=['SM613'],firstContact:boolean|null=true,withImages=tru
  const policy={...original,artifacts:{...original.artifacts,handoffMatrix:{schemaVersion:1 as const,kind:'HANDOFF_MATRIX' as const,sourceMetadata:original.artifacts.shopPolicy.sourceMetadata,rules:[{reason:'DEPENDENCY_FAILURE' as const,customerMessagePolicy:'SILENT_HANDOFF' as const,holdingReply:null,tag:'NHAN_VIEN' as const}]}}};
  let authority:HandoffAuthority={...scope,fence:1,stateVersion:scope.revision,state:{...createConversationState({conversationId:scope.conversationId,routingOwner:'APP',now:commerceNow}),revision:scope.revision}};
  const commit=vi.fn(async(change:CommerceHandoffCommit)=>{authority=structuredClone(change.next);return true;});
- const tools=await createCommerceTools({openingMediaRule:rule,read:{scope,clock:()=>commerceNow,entry:{firstContact,fromAd:false},...(focus?{state:()=>({...scope,currentProductId:focus,factSnapshotVersion:""})}:{}),initialProducts:fixtures.map(f=>f.product),policy:fixturePolicy,catalog:{readProduct,searchText:async(query:string)=>{const f=fixtures.find(f=>f.product.productId===query);return f?{status:'MATCHED' as const,matchKind:'EXACT_CODE' as const,product:f.product,score:1,gap:null}:{status:'NOT_FOUND' as const,reasonCode:'NO_CANDIDATES' as const};}}},media:{allowedHostSuffixes:['pancake.vn']},handoff:{read:async()=>structuredClone(authority),commit,policy:async()=>policy}} as Parameters<typeof createCommerceTools>[0]);
+ const tools=await createCommerceTools({openingMediaRule:mediaRule,read:{scope,clock:()=>commerceNow,entry:{firstContact,fromAd:false},...(focus?{state:()=>({...scope,currentProductId:focus,factSnapshotVersion:""})}:{}),initialProducts:fixtures.map(f=>f.product),policy:fixturePolicy,catalog:{readProduct,searchText:async(query:string)=>{const f=fixtures.find(f=>f.product.productId===query);return f?{status:'MATCHED' as const,matchKind:'EXACT_CODE' as const,product:f.product,score:1,gap:null}:{status:'NOT_FOUND' as const,reasonCode:'NO_CANDIDATES' as const};}}},media:{allowedHostSuffixes:['pancake.vn']},handoff:{read:async()=>structuredClone(authority),commit,policy:async()=>policy}} as Parameters<typeof createCommerceTools>[0]);
  const verifier=vi.fn(async(_request:VerifierRequest)=>({result:{verdict:'PASS',violations:[]}}));
  const run=(text='Dạ chị.')=>runCommerceTurn({scope,tools,clock:()=>commerceNow,latest:'Mẫu này nhé em.',history:[],ownerPrompt:'Tư vấn',verifierPrompt:'Kiểm',owner:async()=>({kind:'FINAL',text}),verifier});
  return {scope,tools,fixtures,readProduct,verifier,run,commit,authority:()=>authority,transferToHuman:()=>{authority={...authority,stateVersion:authority.stateVersion+1,state:{...authority.state,revision:authority.stateVersion+1,conversationOwner:"HUMAN"}};}};
@@ -35,6 +36,60 @@ describe('code-owned opening product photos',()=>{
  it('unknown history fails closed for an identified product',async()=>{
   const s=await setup(['SM613'],null),r=await s.run();expect(r.terminal.disposition).toBe('HANDOFF');expect(s.verifier).not.toHaveBeenCalled();expect(s.tools.mediaSelection?.()).toEqual([]);
  });
+});
+
+it('prepays missing mandatory photos before exposing actual owner call capacity',async()=>{
+ const s=await setup(['SM613'],true,true,undefined,OPENING_PRODUCT_MEDIA_RULE);let turn=0,remaining:number|undefined;
+ const r=await runCommerceTurn({scope:s.scope,tools:s.tools,clock:()=>commerceNow,latest:'Áo này giá bao nhiêu em?',history:[],ownerPrompt:'Tư vấn',verifierPrompt:'Kiểm',
+  owner:async request=>{if(++turn===1){remaining=request.toolBudget.callsRemaining;
+   const calls=Array.from({length:request.toolBudget.callsRemaining},()=>({name:'read_product',args:{subjectRef:'SM613',offerType:'DIRECT'}}));
+   return {kind:'TOOLS',calls,content:{role:'model',parts:calls.map(functionCall=>({functionCall}))}};
+  }return {kind:'FINAL',text:'Dạ chị.'};},verifier:s.verifier});
+ expect(remaining).toBe(4);expect(r.terminal.disposition).toBe('SEND_ELIGIBLE');expect(r.normalToolCalls).toBe(6);expect(s.tools.mediaSelection?.()).toHaveLength(1);
+});
+
+it('rejects a batch exceeding prepaid photo capacity before any tool effects',async()=>{
+ const s=await setup(['SM613'],true,true,undefined,OPENING_PRODUCT_MEDIA_RULE),invoke=vi.spyOn(s.tools,'invokeBatch');const calls=Array.from({length:5},()=>({name:'read_product',args:{subjectRef:'SM613',offerType:'DIRECT'}}));
+ const r=await runCommerceTurn({scope:s.scope,tools:s.tools,clock:()=>commerceNow,latest:'Mẫu này nhé.',history:[],ownerPrompt:'Tư vấn',verifierPrompt:'Kiểm',owner:async()=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(functionCall=>({functionCall}))}}),verifier:s.verifier});
+ expect(['HANDOFF','NO_SEND']).toContain(r.terminal.disposition);expect(invoke).not.toHaveBeenCalled();expect(r.rejectedToolCalls).toBe(5);expect(s.verifier).not.toHaveBeenCalled();
+});
+
+it('V2 does not turn ambiguous admitted candidates into mandatory image targets',async()=>{
+ const s=await setup(['SM613','P2'],true,false,'SM613',OPENING_PRODUCT_MEDIA_RULE),r=await s.run('Chị hỏi áo hay cả set ạ?');
+ expect(r.terminal.disposition).toBe('SEND_ELIGIBLE');expect(s.tools.mediaSelection?.()).toEqual([]);expect(r.openingMediaWork?.status).toBe('NOT_REQUIRED');expect(s.verifier).toHaveBeenCalledOnce();
+});
+
+it.each(['add_to_cart','change_cart_item'])('V2 rejects predictable new cart media beyond remaining work before %s effects',async name=>{
+ const s=await setup(['SM613','P2'],true,true,undefined,OPENING_PRODUCT_MEDIA_RULE);
+ s.tools.availableTools=[...s.tools.availableTools!,name];const invoke=vi.spyOn(s.tools,'invokeBatch');
+ const args=name==='add_to_cart'?{subjectRef:'P2',offerType:'DIRECT',size:'M',color:'navy'}:{subjectRef:'line',action:'REPLACE_LINE',targetSubjectRef:'P2',offerType:'DIRECT',size:'M',color:'navy'};
+ const calls=[{name,args},...Array.from({length:3},()=>({name:'read_product',args:{subjectRef:'SM613',offerType:'DIRECT'}}))];
+ const r=await runCommerceTurn({scope:s.scope,tools:s.tools,clock:()=>commerceNow,latest:'Lấy áo P2 nhé.',history:[],ownerPrompt:'Tư vấn',verifierPrompt:'Kiểm',owner:async()=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(functionCall=>({functionCall}))}}),verifier:s.verifier});
+ expect(r.recovery?.originalReason).toBe('OPENING_MEDIA_BUDGET');expect(invoke).not.toHaveBeenCalled();expect(s.verifier).not.toHaveBeenCalled();expect(r.normalToolCalls).toBe(2);
+});
+
+it('V2 FINAL cannot rescue invalidated coverage with another lookup',async()=>{
+ const s=await setup(['SM613'],true,true,undefined,OPENING_PRODUCT_MEDIA_RULE),prepare=vi.spyOn(s.tools,'prepareOpeningMedia');
+ const r=await runCommerceTurn({scope:s.scope,tools:s.tools,clock:()=>commerceNow,latest:'Áo này nhé.',history:[],ownerPrompt:'Tư vấn',verifierPrompt:'Kiểm',owner:async()=>{s.tools.openingMediaReady=()=>false;return {kind:'FINAL',text:'Dạ chị.'};},verifier:s.verifier});
+ expect(prepare).toHaveBeenCalledOnce();expect(r.openingMediaWork?.reason).toBe('OPENING_MEDIA_INVALIDATED');expect(s.verifier).not.toHaveBeenCalled();
+});
+
+it.each([null,undefined])('V2 does not credit a current photo to an unresolved REPLACE colour %s',async color=>{
+ const s=await setup(['SM613'],true,true,undefined,OPENING_PRODUCT_MEDIA_RULE);
+ await s.tools.prepareOpeningMedia!({maxCalls:6,onDispatch:()=>{}});
+ const calls=[{name:'change_cart_item',args:{subjectRef:'line',action:'REPLACE_LINE',targetSubjectRef:'SM613',offerType:'OTHER',...(color===undefined?{}:{color})}}];
+ expect(s.tools.openingMediaReady?.(s.tools.snapshot())).toBe(true);
+ expect(s.tools.openingMediaFeasible?.(calls,0)).toBe(false);
+ expect(s.tools.openingMediaFeasible?.(calls,1)).toBe(true);
+});
+
+it('V2 admits a matching prepaid photo in the same cart batch, without crediting other media work',async()=>{
+ const s=await setup(['SM613','P2'],true,true,undefined,OPENING_PRODUCT_MEDIA_RULE);
+ const mutation={name:'add_to_cart',args:{subjectRef:'P2',offerType:'DIRECT',size:'M',color:'navy'}};
+ const media={name:'select_product_media',args:{subjectRef:'P2',intent:'GENERIC',color:'navy'}};
+ expect(s.tools.openingMediaFeasible?.([mutation,media],0)).toBe(true);
+ for(const call of [{...media,name:'view_product_media'},{...media,args:{...media.args,subjectRef:'SM613'}},{...media,args:{...media.args,color:'red'}},{...media,args:{...media.args,intent:'SIZE_GUIDE'}}])
+  expect(s.tools.openingMediaFeasible?.([mutation,call],0)).toBe(false);
 });
 
 

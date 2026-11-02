@@ -110,13 +110,14 @@ export async function createCommerceEffectTools(input: {
     const cart = current.cart?.value;
     const stateReceipts = base.effectReceipts.filter(r => r.effect === "CUSTOMER_STATE_UPDATED" && r.subjectRef === base.state.customerProfileId &&
       base.boundSubjects.some(s => s.kind === "CUSTOMER_PROFILE" && s.ref === r.subjectRef)).map(r => ({ ...r, stateRevision: current.revision }));
+    const supersededVariantRefs = new Set<string>();
     return buildReadOnlyContext({ state: { ...base.state, ...authority, conversationRevision: authority?.revision ?? base.state.revision, revision: current.revision,
       salesStage: current.stage, cartItems: cartItems(active),
       checkoutStatus: { publicIntake:publicCheckoutState(current),previewAvailable: current.stage === "ORDER_PREVIEW" && current.preview !== null, purchaseConfirmed: current.confirmation !== null,
         missingFields: [!current.checkoutDraft?.fullName && "FULL_NAME", !current.checkoutDraft?.phone && "PHONE", !current.checkoutDraft?.address && "ADDRESS", !current.checkoutDraft?.paymentMethod && "PAYMENT_METHOD"].filter(Boolean) },
       ...(current.stage === "HANDED_OFF" ? { permission: false, conversationOwner: "HUMAN" } : {}),
       ...(cart ? { cartQuote: cartQuote() } : {}) },
-      subjects, products: (()=>{
+      subjects, supersededVariantRefs, products: (()=>{
         const products=new Map((base.runtimeProducts??[]).map(p=>[p.subjectRef,structuredClone(p)]));
         for(const {evidence}of selectionObservations.values()){
           const p=products.get(evidence.productId)??{ref:`product:${evidence.productId}`,subjectRef:evidence.productId};
@@ -126,8 +127,10 @@ export async function createCommerceEffectTools(input: {
         }return [...products.values()];
       })(), claims: [...base.protectedClaims.filter(c => {
         const claim = c as { type: string; scope: { kind: string; productId?: string; variantId?: string } };
-        return !["PRICE", "STOCK"].includes(claim.type) || !active.some(s => claim.scope.kind === "PRODUCT" && claim.scope.productId === s.line.parentProductId &&
+        const replaced = ["PRICE", "STOCK"].includes(claim.type) && active.some(s => claim.scope.kind === "PRODUCT" && claim.scope.productId === s.line.parentProductId &&
           [s.line.offerId, `offer:${s.line.parentProductId}:${s.line.offerId}`].includes(claim.scope.variantId ?? ""));
+        if(replaced && claim.scope.variantId) supersededVariantRefs.add(claim.scope.variantId);
+        return !replaced;
       }), ...selectionClaims],
       // Active shop rules and durable transaction terms have different authority.
       // Never replace a current active-pointer observation with a historical pin.

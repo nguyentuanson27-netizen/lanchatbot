@@ -65,8 +65,10 @@ export function buildReadOnlyContext(input: {
   policies?: TrustedContext["policyLiterals"];
   receipts?: TrustedContext["effectReceipts"];
   cartBinding?: TrustedContext["cartBinding"];
+  /** Effect composition only: offer variants whose claims were replaced by exact cart selections. */
+  supersededVariantRefs?: ReadonlySet<string>;
 }): TrustedContext {
-  const subjects = [...(input.subjects ?? [])].sort((a, b) => a.ref.localeCompare(b.ref));
+  let subjects = [...(input.subjects ?? [])].sort((a, b) => a.ref.localeCompare(b.ref));
   const products = [...(input.products ?? [])].sort((a, b) => a.ref.localeCompare(b.ref));
   const seen = new Set<string>();
   const claims = [...(input.claims ?? [])].filter(c => { const serialized = canonicalJsonV1(c);
@@ -74,6 +76,16 @@ export function buildReadOnlyContext(input: {
   }).sort((a, b) => canonicalJsonV1(a).localeCompare(canonicalJsonV1(b)));
   const policies = [...(input.policies ?? [])].sort((a, b) => a.ref.localeCompare(b.ref));
   const state = Object.fromEntries(stateFields.filter(k => Object.hasOwn(input.state, k)).map(k => [k, input.state[k]]));
+  if (input.supersededVariantRefs?.size) {
+    // Only remove an explicitly superseded variant with no remaining typed dependency.
+    // Literal text is kept conservatively if it mentions the ref; never interpret prose.
+    const references = (value: unknown, ref: string): boolean => typeof value === "string" ? value === ref :
+      Array.isArray(value) ? value.some(v => references(v, ref)) : value !== null && typeof value === "object" && Object.values(value).some(v => references(v, ref));
+    const dependencies = { products, claims, state, receipts: input.receipts, cart: input.cartBinding };
+    subjects = subjects.filter(s => s.kind !== "VARIANT" || !input.supersededVariantRefs!.has(s.ref) ||
+      references(dependencies,s.ref) || policies.some(p => p.text.includes(s.ref)) ||
+      subjects.some(other => other.ref !== s.ref && references(other,s.ref)));
+  }
   state.factSnapshotVersion = commerceHash({ subjects, products, claims, policies, cart: input.cartBinding ?? null });
   const context = { boundSubjects: subjects, protectedClaims: claims, runtimeProducts: products,
     policyLiterals: policies, effectReceipts: input.receipts ?? [], state,

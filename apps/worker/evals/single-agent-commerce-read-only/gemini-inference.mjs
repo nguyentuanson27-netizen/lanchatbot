@@ -8,6 +8,7 @@ import {omitCurrentProductDuplicates} from '../../dist/single-agent-commerce-rea
 import {sizeRequestScope} from '../../dist/single-agent-commerce-state.js';
 import {HandoffReasonV2Schema,canonicalJsonV1,CustomerProfileV1Schema,CommerceHistoryMetadataV1Schema} from '@lana/contracts';
 import {presentOwnerData,presentCompactOwnerData} from './owner-data-presentation.mjs';
+import {compactOwnerProducts,compactCurrentFacts} from './owner-product-tables.mjs';
 
 const requireThat=(ok,reason)=>{if(!ok)throw new Error(reason);};
 const bytes=v=>Buffer.byteLength(typeof v==='string'?v:JSON.stringify(v));
@@ -183,7 +184,10 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
     if(compactV2&&data.sellingOptions.length===1)response.response.data.defaultFromOption=0;
    }
    if(response.response.data.availability)response.response.data.availability=availability(data.availability);
-   if(Array.isArray(data.sellingOptions))response.response.data.sellingOptions=data.sellingOptions.map(o=>({...o,availability:availability(o.availability)}));
+   if(Array.isArray(data.sellingOptions))response.response.data.sellingOptions=data.sellingOptions.map(o=>{
+    const projected={...o,availability:availability(o.availability)};
+    return compactV2?compactCurrentFacts(projected,facts):projected;
+   });
    const differences=priceDifferences(data);
    if(differences.length)response.response.data.priceDifferences=differences;
    if(response.name==='quote_product'&&response.response.data.media?.assets)
@@ -245,6 +249,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
     return {ref:p.ref,text:JSON.stringify(value)};
    }),receipts:c.effectReceipts,
    state};
+ if(compactV2)ownerView.products=compactOwnerProducts(ownerView.products);
  // Configured capabilities remain visible after this generation's call budget ends.
  // Native toolConfig and runtime checks still enforce whether tools can be called.
  if(request.toolBudget)for(const [field,max] of [['roundsRemaining',2],['callsRemaining',6]])

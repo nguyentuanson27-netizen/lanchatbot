@@ -79,6 +79,29 @@ it("binds a validated ambiguous selection to both models and invalidates it when
  f.snapshot.offers.DIRECT!.rows[0]!.stock_quantity=0;
  await expect(s.tools.readback()).rejects.toThrow("SELECTION_EVIDENCE_CHANGED");
 });
+
+it("removes only superseded unreferenced offer subjects when cart selections add two sizes",async()=>{
+ const s=await setup(),f=fixtureProduct(),offer=f.snapshot.offers.DIRECT!;
+ f.snapshot.offers=Object.fromEntries(['DIRECT','AO','CV'].map(name=>[name,structuredClone(offer)]));
+ const base=createReadOnlyTools({scope:s.scope,clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[f.product],
+  catalog:{readProduct:async()=>f,searchText:async()=>({status:'NOT_FOUND' as const,reasonCode:'NO_CANDIDATES' as const})}});
+ expect((await base.invoke({name:'read_product',args:{subjectRef:'SM613',offerTypes:['DIRECT','AO','CV']}})).status).toBe('OK');
+ const prepared=base.snapshot();s.base.snapshot=()=>structuredClone(prepared);
+ const originalSelect=s.select.getMockImplementation()!;
+ s.select.mockImplementation(async q=>{const r=await originalSelect(q);r.line.offerId='DIRECT';r.line.priceAuthority!.offerId='DIRECT';r.line.components[0]!.size=q?.size??'M';return r;});
+ expect((await s.tools.invoke(s.add)).status).toBe('OK');
+ expect((await s.tools.invoke({...s.add,args:{...s.add.args,size:'L'}})).status).toBe('OK');
+ const context=s.tools.snapshot();
+ expect(context.state.cartItems).toHaveLength(2);
+ expect(context.boundSubjects).toHaveLength(8);
+ expect(context.boundSubjects.some(s=>s.ref==='offer:SM613:DIRECT')).toBe(false);
+ expect(context.boundSubjects.filter(s=>s.kind==='VARIANT'&&s.ref.startsWith('cart-variant:'))).toHaveLength(2);
+ expect(hardPrecheck(context,'Dạ chị.',commerceNow)).toBeNull();
+ // A still-referenced offer remains bound even if another claim for it was superseded.
+ prepared.policyLiterals.push({ref:'retained-reference',text:JSON.stringify({variantId:'offer:SM613:DIRECT'}),sourceVersion:'v1',observedAt:commerceNow.toISOString(),expiresAt:null});
+ expect(s.tools.snapshot().boundSubjects.some(s=>s.ref==='offer:SM613:DIRECT')).toBe(true);
+ expect(hardPrecheck(s.tools.snapshot(),'Dạ chị.',commerceNow)).toBe('MALFORMED');
+});
 it("does not accept a different replay envelope merely because its source hash is unchanged",async()=>{
  const s=await setup(),f=fixtureProduct(),row=f.snapshot.offers.DIRECT!.rows[0]!;
  f.snapshot.offers.DIRECT!.rows.push({...structuredClone(row),color:"white"});

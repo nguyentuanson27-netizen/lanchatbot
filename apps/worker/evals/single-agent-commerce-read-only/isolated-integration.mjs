@@ -523,7 +523,7 @@ try{
  if(providerRun)providerPorts=phaseC?phaseCTools.createCandidateProvider({preflight:providerFreeze,out:resolve(out)}):await createStatefulProvider({preflight:providerFreeze,out:resolve(out)});
  if(phaseC&&providerFreeze.registration.arm==='C3')await providerPorts.attachReference({baselineRoot:phaseCArg('--phase-c-baseline-root'),
   baselineBuild:JSON.parse(readFileSync(phaseCArg('--phase-c-baseline-build'),'utf8'))});
- async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false,candidateTuples=false,preparedOffers=false,preorderChoices=false,checkoutEta=false}={}){
+ async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false,candidateTuples=false,preparedOffers=false,preorderChoices=false,checkoutEta=false,multiOfferContext=false}={}){
   assert(!live||(!preparedOffers&&!preorderChoices),'SYNTHETIC_PREPARATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||!revalidatedMedia,'SYNTHETIC_REVALIDATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||(dependencyHoldingReply===null&&sizeHoldingReply===null&&!missingDependencyRule),'SYNTHETIC_RULE_FORBIDDEN_IN_PROVIDER_RUN');
@@ -532,6 +532,8 @@ try{
   await runtime.linkProviderConversation(pageId,row.conversationId,'PANCAKE','synthetic-'+randomUUID(),at,new Date(at.getTime()+3600000));
   let sourceVariantChanged=false;
   const product=fixtureProduct('SM613',at);let mediaChanged=false;
+  if(multiOfferContext){assert(!live&&preparedOffers);const offer=product.snapshot.offers.DIRECT;
+   product.snapshot.offers=Object.fromEntries(['DIRECT','AO','CV'].map(name=>[name,structuredClone(offer)]));}
   // Explicit disposable domain input for the full native checkout control only.
   if(checkoutEta){assert(!live);product.snapshot.shipping_eta={'MIEN-NAM':{transit_min_days:2,transit_max_days:4}};}
   if(candidateTuples){assert(!live);const row=product.snapshot.offers.DIRECT.rows[0];
@@ -546,6 +548,7 @@ try{
    if(candidateTuples){const raw=structuredClone(product.snapshot);if(sourceVariantChanged)raw.offers.DIRECT.rows[0].components[0].variation_sku='CHANGED-SKU';
     return cartSelectionFromSnapshot(raw,q,new Date());}
    const s=fixtureCartLine();s.lineId=q.lineId;s.quantity=q.quantity;s.lineTotalVnd=s.posUnitPriceVnd*s.quantity;
+   if(multiOfferContext){s.offerId=q.offerType;s.priceAuthority.offerId=q.offerType;}
    s.priceAuthority={...s.priceAuthority,shopId:'LANA',priceFactRef:'synthetic-pos-v1',metadata:{...s.priceAuthority.metadata,sourceVersion:'synthetic-pos-v1',observedAt:at.toISOString(),expiresAt:new Date(at.getTime()+172800000).toISOString()}};
    s.components[0]={...s.components[0],size:q.size??'M',color:q.color??'navy',componentSku:'SM613-'+(q.color??'navy').toUpperCase()+'-'+(q.size??'M')};
    if(sourceVariantChanged)s.components[0].componentSku='CHANGED-SOURCE-SKU';
@@ -647,6 +650,20 @@ try{
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+
+ await check('C media context two cart sizes retain current dependency closure after multi-offer preparation',async()=>{
+  const j=await statefulFixture({preparedOffers:true,multiOfferContext:true});
+  const add=size=>({name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size,color:'navy'}});
+  const first=await j.turn('Chị lấy một áo M navy.',[native([add('M')]),say('Dạ chị.')]);assert.equal(first.result.terminal.disposition,'SEND_ELIGIBLE');await j.drain();
+  let seen=false;
+  const second=await j.turn('Lấy thêm một áo L navy nữa.',[native([add('L')]),request=>{
+   seen=true;assert.equal(request.context.boundSubjects.length,8);assert(!request.context.boundSubjects.some(s=>s.ref==='offer:SM613:DIRECT'));
+   return say('Dạ chị.');}]);
+  assert(seen);assert.equal(second.result.terminal.disposition,'SEND_ELIGIBLE');assert.equal(second.verifiers,1);
+  assert.equal((await j.state()).cart.value.lines.length,2);await j.drain();assert.equal(j.capture.length,2);
+  const changed=await j.turn('Dạ em.',[say('Dạ chị.')],{afterVerify:async()=>j.changeVariantSource()});
+  assert.notEqual(changed.result.terminal.disposition,'SEND_ELIGIBLE');assert.equal(changed.result.enqueued,0);assert.equal((await j.state()).cart.value.lines.length,2);
+ });
 
  for(const [kind,text] of [['ACK','Dạ chị.'],['ETA','Shop không hẹn sáng mai chị nhé.'],['QUOTE','Áo 499.000đ chị nhé.']])await check('C opening '+kind+' exact text and photo accepted atomically',async()=>{
   const j=await statefulFixture({media:true}),r=await j.turn('Mẫu này nhé em.',[say(text)],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
@@ -773,7 +790,7 @@ try{
  });
  await check('C checkout opening public media cannot obtain another six-call budget',async()=>{
   const j=await pendingCart(),calls=[...Array.from({length:4},()=>({name:'read_policy',args:{}})),{name:'confirm_purchase',args:{}}],r=await j.turn('Chốt đơn cho chị nhé.',[native(calls)],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
-  assert.equal(r.result.enqueued,0);assert.equal(r.result.normalToolCalls,6);assert.equal((await j.state()).clarification?.reasonCode??null,null);await j.drain();assert.equal(j.capture.length,0);
+  assert.equal(r.result.enqueued,0);assert.equal(r.result.normalToolCalls,2);assert.equal(r.result.rejectedToolCalls,5);assert.equal((await j.state()).clarification?.reasonCode??null,null);await j.drain();assert.equal(j.capture.length,0);
  });
  await check('C checkout opening media revocation cancels private preview before sequence zero',async()=>{
   const j=await pendingCart(),r=await j.turn('Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD',[],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});assert.equal(r.result.enqueued,2);j.changeMediaSource();j.restartDelivery();await j.drain();assert.equal(j.capture.length,0);

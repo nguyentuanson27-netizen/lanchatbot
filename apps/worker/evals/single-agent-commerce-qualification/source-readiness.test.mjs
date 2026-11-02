@@ -3,8 +3,31 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {fixtureProduct,fixturePolicyPointers,commerceScope,commerceNow} from '../../dist/single-agent-commerce.test-support.js';
 import {sourceReadiness,assertSourceReadiness,assertTaskReadinessSpec,assertPopulationReadiness,assertProspectiveOpeningReadiness} from './source-readiness.mjs';
+import {OPENING_PRODUCT_MEDIA_RULE} from '../../dist/single-agent-commerce-opening-media.js';
 const world=()=>{const f=fixtureProduct();return {config:{scope:commerceScope(),channel:'CANARY_SHADOW',maxFactAgeSeconds:1200},
  products:[f.product],snapshots:{SM613:f.snapshot},policyRecords:fixturePolicyPointers()};};
+
+test('V2 binds its rule before seal and permits an ambiguous candidate pool without mandatory per-candidate media',async()=>{
+ const w=world(),second=fixtureProduct('SECOND');w.products.push(second.product);w.snapshots.SECOND=second.snapshot;
+ const spec={version:3,task:{purpose:'CUSTOMER_INPUT'},cohort:'SALES_READY',checks:[{facet:'PRICE',productId:'SM613',offerType:'DIRECT'}],executionPaths:[{kind:'DISCOVERY',productIds:['SM613','SECOND']}]};
+ const manifest=await sourceReadiness(w,spec,commerceNow,OPENING_PRODUCT_MEDIA_RULE);
+ const scenario={mode:'SINGLE',turns:[{initialProductCodes:['SM613','SECOND']}],judgeContext:{sourceReadiness:manifest,sourceRequirements:{kind:'DISCOVERY_POOL',productCodes:['SM613','SECOND']}}},corpus={scenarios:[scenario]};
+ assertProspectiveOpeningReadiness(corpus,OPENING_PRODUCT_MEDIA_RULE);await assertPopulationReadiness(w,corpus,commerceNow,OPENING_PRODUCT_MEDIA_RULE);
+ assert.equal(manifest.executionPaths[0].chargedUnits,0);assert.equal(manifest.executionPaths[0].status,'AVAILABLE');
+ const before=structuredClone(manifest);delete scenario.judgeContext.sourceReadiness.openingMediaRule;
+ assert.throws(()=>assertProspectiveOpeningReadiness(corpus,OPENING_PRODUCT_MEDIA_RULE),/RULE_BINDING/);
+ scenario.judgeContext.sourceReadiness=before;
+ await assert.rejects(sourceReadiness(w,spec,commerceNow),/SOURCE_READINESS_BLOCKED/); // Unbound historical manifests still use V1.
+ spec.task.productId='SM613';scenario.judgeContext.sourceReadiness=await sourceReadiness(w,spec,commerceNow,OPENING_PRODUCT_MEDIA_RULE);
+ await assert.rejects(assertPopulationReadiness(w,corpus,commerceNow,OPENING_PRODUCT_MEDIA_RULE),/OPENING_MEDIA_READINESS_REQUIRED/);
+ delete spec.task.productId;scenario.turns[0].initialProductCodes=['SM613','SM613'];
+ scenario.judgeContext.sourceReadiness=await sourceReadiness(w,spec,commerceNow,OPENING_PRODUCT_MEDIA_RULE);
+ await assert.rejects(assertPopulationReadiness(w,corpus,commerceNow,OPENING_PRODUCT_MEDIA_RULE),/OPENING_MEDIA_READINESS_REQUIRED/);
+ w.products[0].images=[{url:'https://content.pancake.vn/initial.jpg',role:'PRIMARY',angle:'FRONT',imageType:'MODEL',intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:commerceNow.toISOString()}];
+ spec.checks.push({facet:'MEDIA',productId:'SM613',intent:'GENERIC',allowedHostSuffixes:['content.pancake.vn']});
+ scenario.judgeContext.sourceReadiness=await sourceReadiness(w,spec,commerceNow,OPENING_PRODUCT_MEDIA_RULE);
+ await assert.rejects(assertPopulationReadiness(w,corpus,commerceNow,OPENING_PRODUCT_MEDIA_RULE),/EXECUTION_DISCOVERY_COVERAGE/);
+});
 test('new opening-media seals require execution v3 without rewriting historical v2 manifests',()=>{
  const c={scenarios:[{mode:'SINGLE',judgeContext:{sourceReadiness:{spec:{version:2}}}}]},before=structuredClone(c),rule={version:'FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1'};
  assert.throws(()=>assertProspectiveOpeningReadiness(c,rule),/EXECUTION_READINESS_V3_REQUIRED/);assert.deepEqual(c,before);
