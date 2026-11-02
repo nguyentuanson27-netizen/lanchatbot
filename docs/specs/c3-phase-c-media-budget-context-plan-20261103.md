@@ -16,6 +16,8 @@ Revised after self/independent review: avoid a reservation/credit subsystem. V2 
 
 ## W2 — current subject dependencies
 
+Review correction for W1: physical current cart colours supersede prior read filters only under V2; V1 retains its original strict union. A canonical `__NO_COLOR__` cart never erases explicit physical colour constraints from retained read/media metadata. Prepaid same-batch selection must pass the same closed media-argument decoder as actual invocation, including optional component-role validation, before it can count toward feasibility.
+
 In effect context composition, identify only base VARIANT refs whose PRICE/STOCK claims were actually superseded by current cart-selection claims. Remove such a ref only if no retained claim, runtime product, policy literal, receipt, state or other subject refers to it. Keep all PRODUCT/CART/CART_LINE/customer-profile refs and all active cart variants. Apply through the same snapshot/readback builder, regenerating snapshot binding. Do not indiscriminately filter subjects or raise the cap. Historical native outputs/signatures remain intact; they cannot authorize removed current facts. Test two sizes after multi-offer preparation, retained ETA/other dependencies, and source changes invalidating old PASS.
 
 ## W3 — owner wire representation

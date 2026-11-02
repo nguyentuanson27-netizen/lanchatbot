@@ -3,7 +3,7 @@ import {createCommerceTools} from './single-agent-commerce.js';
 import {runCommerceTurn,type VerifierRequest} from './single-agent-commerce-read-only.js';
 import {commerceScope,commerceNow,fixtureProduct,fixturePolicy} from './single-agent-commerce.test-support.js';
 import {createConversationState} from '@lana/conversation-engine';
-import {OPENING_PRODUCT_MEDIA_RULE,type OpeningProductMediaRule} from './single-agent-commerce-opening-media.js';
+import {OPENING_PRODUCT_MEDIA_RULE,withOpeningProductMedia,type OpeningProductMediaRule} from './single-agent-commerce-opening-media.js';
 import type {HandoffAuthority,CommerceHandoffCommit} from './single-agent-commerce-handoff.js';
 const rule={version:'FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1'} as const;
 async function setup(ids=['SM613'],firstContact:boolean|null=true,withImages=true,focus?:string,mediaRule:OpeningProductMediaRule=rule){
@@ -88,8 +88,38 @@ it('V2 admits a matching prepaid photo in the same cart batch, without crediting
  const mutation={name:'add_to_cart',args:{subjectRef:'P2',offerType:'DIRECT',size:'M',color:'navy'}};
  const media={name:'select_product_media',args:{subjectRef:'P2',intent:'GENERIC',color:'navy'}};
  expect(s.tools.openingMediaFeasible?.([mutation,media],0)).toBe(true);
- for(const call of [{...media,name:'view_product_media'},{...media,args:{...media.args,subjectRef:'SM613'}},{...media,args:{...media.args,color:'red'}},{...media,args:{...media.args,intent:'SIZE_GUIDE'}}])
+ for(const call of [{...media,name:'view_product_media'},{...media,args:{...media.args,subjectRef:'SM613'}},{...media,args:{...media.args,color:'red'}},{...media,args:{...media.args,intent:'SIZE_GUIDE'}},
+  {...media,args:{...media.args,unexpected:true}},{...media,args:{...media.args,componentRole:'OTHER'}},{...media,args:{...media.args,componentRole:['TOP']}},{...media,args:{...media.args,color:'x'.repeat(65)}}])
   expect(s.tools.openingMediaFeasible?.([mutation,call],0)).toBe(false);
+});
+
+it('malformed prepaid media cannot admit an otherwise infeasible mutation batch',async()=>{
+ const s=await setup(['SM613','P2'],true,true,undefined,OPENING_PRODUCT_MEDIA_RULE);
+ s.tools.availableTools=[...s.tools.availableTools!,'add_to_cart'];const invoke=vi.spyOn(s.tools,'invokeBatch');
+ const calls=[{name:'add_to_cart',args:{subjectRef:'P2',offerType:'DIRECT',size:'M',color:'navy'}},
+  {name:'select_product_media',args:{subjectRef:'P2',intent:'GENERIC',color:'navy',unexpected:true}},
+  ...Array.from({length:2},()=>({name:'read_product',args:{subjectRef:'P2',offerType:'DIRECT'}}))];
+ const r=await runCommerceTurn({scope:s.scope,tools:s.tools,clock:()=>commerceNow,latest:'Lấy áo P2 nhé.',history:[],ownerPrompt:'Tư vấn',verifierPrompt:'Kiểm',owner:async()=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(functionCall=>({functionCall}))}}),verifier:s.verifier});
+ expect(r.recovery?.originalReason).toBe('OPENING_MEDIA_BUDGET');expect(invoke).not.toHaveBeenCalled();expect(r.normalToolCalls).toBe(2);expect(s.verifier).not.toHaveBeenCalled();
+});
+
+it.each([rule,OPENING_PRODUCT_MEDIA_RULE])('unlabelled cart proof cannot erase a retained physical colour constraint: $version',async mediaRule=>{
+ const s=await setup();await s.tools.invoke({name:'select_product_media',args:{subjectRef:'SM613',intent:'GENERIC'}});
+ const context=s.tools.snapshot();context.state.cartItems=[{productRef:'SM613',components:[{color:'__NO_COLOR__',size:'M'}]}];
+ context.policyLiterals.push({ref:'read:physical',text:JSON.stringify({productId:'SM613',color:'red'}),sourceVersion:'v1',observedAt:commerceNow.toISOString(),expiresAt:null});
+ const tools=withOpeningProductMedia({...s.tools,snapshot:()=>context,unlabelledCartProducts:()=>['SM613']},{rule:mediaRule,scope:s.scope,clock:()=>commerceNow,firstContact:true});
+ expect(tools.openingMediaReady?.(context)).toBe(false);
+ expect(await tools.prepareOpeningMedia!({maxCalls:6,onDispatch:()=>{}})).toMatchObject({status:'UNAVAILABLE',reason:'OPENING_MEDIA_COLOR_SCOPE',chargedUnits:0});
+});
+
+it('V2 uses current physical cart colour after a prior read, while V1 retains its original strict union',async()=>{
+ const s=await setup();await s.tools.invoke({name:'select_product_media',args:{subjectRef:'SM613',intent:'GENERIC',color:'navy'}});
+ const context=s.tools.snapshot();context.state.cartItems=[{productRef:'SM613',components:[{color:'navy',size:'M'}]}];
+ context.policyLiterals.push({ref:'read:old',text:JSON.stringify({productId:'SM613',color:'red'}),sourceVersion:'v1',observedAt:commerceNow.toISOString(),expiresAt:null});
+ for(const mediaRule of [rule,OPENING_PRODUCT_MEDIA_RULE]){
+  const tools=withOpeningProductMedia({...s.tools,snapshot:()=>context},{rule:mediaRule,scope:s.scope,clock:()=>commerceNow,firstContact:true});
+  expect(tools.openingMediaReady?.(context)).toBe(mediaRule===OPENING_PRODUCT_MEDIA_RULE);
+ }
 });
 
 

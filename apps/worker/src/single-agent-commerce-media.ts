@@ -17,6 +17,15 @@ export interface CommerceCatalogImage {subjectRef:string;assetRef:string;sha256:
 export const COMMERCE_VISION_BOUNDS={count:2,maxBytes:512*1024,maxSourceBytes:2*1024*1024,maxDimension:1024,maxSourceDimension:12000,maxSourcePixels:50000000,timeoutMs:8000} as const;
 const intents=new Set<CustomerImageIntent>(["GENERIC","BACK","DETAIL","SIZE_GUIDE","PRODUCT_ONLY","FEEDBACK"]);
 const componentParts={TOP:"AO",SKIRT:"CHAN_VAY",PANTS:"QUAN"};
+/** Shared closed argument contract; does not bind refs, select assets or grant authority. */
+export function decodeCommerceMediaArgs(value:unknown):MediaQuery|null {
+  let a=toolArgs(value,["subjectRef","intent","color","componentRole"]);
+  if(a?.color===null){a={...a};delete a.color;}
+  if(!a||typeof a.subjectRef!=="string"||!intents.has(a.intent as CustomerImageIntent)||
+    (a.color!==undefined&&(typeof a.color!=="string"||!a.color.trim()||a.color.length>64))||
+    (a.componentRole!==undefined&&(typeof a.componentRole!=="string"||!Object.hasOwn(componentParts,a.componentRole))))return null;
+  return a as unknown as MediaQuery;
+}
 // Projection of approved asset metadata, not inferred garment/material properties.
 function descriptionEvidence(query:MediaQuery,assets:readonly CommerceMediaAsset[]) {
   return { color:query.color??null, assets:assets.map((a,imageIndex)=>{
@@ -76,16 +85,12 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
     });
   }
   async function invokeMedia(call:CommerceToolCall,selectionCount:1|4=4):Promise<CommerceToolResult> {
-    let a=toolArgs(call.args,["subjectRef","intent","color","componentRole"]);
-    // Provider tool calls may encode an omitted optional color as null. Normalize
-    // before binding the query so null and omission select the same generic media.
-    if(a?.color===null){a={...a};delete a.color;}
+    const a=decodeCommerceMediaArgs(call.args);
+    // The shared decoder normalizes only the existing optional-null colour contract.
     const base=input.base.snapshot();
     if(!base.state.permission||base.state.conversationOwner!=="BOT"||!base.state.privacyAllowed) return {status:"REJECTED",reason:"MEDIA_PERMISSION"};
-    if(!a||typeof a.subjectRef!=="string"||!base.boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===a.subjectRef)||
-      !intents.has(a.intent as CustomerImageIntent)||(a.color!==undefined&&(typeof a.color!=="string"||!a.color.trim()||a.color.length>64))||
-      (a.componentRole!==undefined&&!Object.hasOwn(componentParts,a.componentRole as string)))return {status:"REJECTED",reason:"MEDIA_ARGUMENTS_OR_REF"};
-    const query=a as unknown as MediaQuery,key=commerceHash(query);
+    if(!a||!base.boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===a.subjectRef))return {status:"REJECTED",reason:"MEDIA_ARGUMENTS_OR_REF"};
+    const query=a,key=commerceHash(query);
     const observationKey=commerceHash({operation:call.name,query});
     if(!observations.has(observationKey)&&observations.size>=6)return {status:"REJECTED",reason:"MEDIA_OBSERVATION_BOUND"};
     let source:SourceCheck|null=null,stage="CATALOG_SELECTION",availableAlternatives:CustomerImageIntent[]|null=null;

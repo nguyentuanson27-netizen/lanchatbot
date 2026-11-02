@@ -1,7 +1,7 @@
 import type {CommerceTools} from './single-agent-commerce-read-only.js';
 import type {CommerceScope,PreparationControl} from './single-agent-commerce-read-only-tools.js';
 import type {TrustedContext} from './single-agent-semantic-verifier-boundary.js';
-import type {CommerceMediaAsset} from './single-agent-commerce-media.js';
+import {decodeCommerceMediaArgs,type CommerceMediaAsset} from './single-agent-commerce-media.js';
 import {normalizeCatalogToken} from '@lana/business-tools';
 export const OPENING_PRODUCT_MEDIA_RULE=Object.freeze({version:'FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2'} as const);
 export type OpeningProductMediaRule=typeof OPENING_PRODUCT_MEDIA_RULE|{readonly version:'FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1'};
@@ -21,10 +21,14 @@ export function withOpeningProductMedia(base:CommerceTools,input:{rule:OpeningPr
   const cartItems=Array.isArray(c.state.cartItems)?c.state.cartItems.filter(i=>i.productRef===id):[];
   // A cart with unknown variant colour cannot borrow the no-selection generic path.
   if(cartItems.some(i=>!Array.isArray(i.components)||!i.components.length||i.components.some((v:{color?:unknown})=>typeof v.color!=='string'||!v.color.trim())))return null;
-  const raw=cartItems.length?cartItems.flatMap(i=>i.components.map((v:{color:string})=>v.color)):metadata(c).flatMap(m=>{
+  const cartColors=cartItems.flatMap(i=>i.components.map((v:{color:string})=>v.color));
+  const filters=metadata(c).flatMap(m=>{
   if((m.subjectRef??m.productId)!==id)return [];
   return [m,...(Array.isArray(m.sellingOptions)?m.sellingOptions:[])].flatMap(v=>typeof v.color==='string'&&v.color.trim()?[v.color]:[]);
  });
+  // V1 retains its strict union. V2 physical cart selections supersede older read
+  // filters; a source-unlabelled tuple never erases an explicit physical constraint.
+  const raw=eager&&cartColors.length&&!cartColors.includes('__NO_COLOR__')?cartColors:[...cartColors,...filters];
   const physical=[...new Set(raw.filter(v=>v!=='__NO_COLOR__').map(normalizeCatalogToken))];
   if(raw.includes('__NO_COLOR__')&&(physical.length||!base.unlabelledCartProducts?.(c).includes(id)))return null;
   return physical;
@@ -58,7 +62,7 @@ export function withOpeningProductMedia(base:CommerceTools,input:{rule:OpeningPr
    const prepaid=(id:string)=>{
     const targets=mutations.filter(m=>m.id===id);
     return targets.length>0&&targets.every(m=>m.color!==null&&calls.some(call=>{
-      const a=call.args as Record<string,unknown>|null;
+      const a=decodeCommerceMediaArgs(call.args);
       return call.name==='select_product_media'&&a?.subjectRef===id&&['GENERIC','BACK','DETAIL','PRODUCT_ONLY','FEEDBACK'].includes(String(a.intent))&&
         typeof a.color==='string'&&normalizeCatalogToken(a.color)===m.color;
     }));
