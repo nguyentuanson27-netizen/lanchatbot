@@ -2,7 +2,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {fixtureProduct,fixturePolicyPointers,commerceScope,commerceNow} from '../../dist/single-agent-commerce.test-support.js';
-import {sourceReadiness,assertSourceReadiness,assertTaskReadinessSpec} from './source-readiness.mjs';
+import {sourceReadiness,assertSourceReadiness,assertTaskReadinessSpec,assertPopulationReadiness} from './source-readiness.mjs';
 const world=()=>{const f=fixtureProduct();return {config:{scope:commerceScope(),channel:'CANARY_SHADOW',maxFactAgeSeconds:1200},
  products:[f.product],snapshots:{SM613:f.snapshot},policyRecords:fixturePolicyPointers()};};
 test('sales-ready price is exact-offer and expires at the real boundary without renewing source',async()=>{
@@ -76,4 +76,18 @@ test('three variant refs do not prove a three-garment composition',async()=>{
  const w=world(),checks=[{facet:'SELECTION',productId:'SM613',offerType:'DIRECT',size:'M',color:'navy',requiredComponentRoles:['TOP','PANTS','SKIRT']}];
  const m=await sourceReadiness(w,{cohort:'SOURCE_UNAVAILABLE',checks},commerceNow);assert.equal(m.results[0].reason,'COMPOSITION_SCOPE_UNAVAILABLE');
  await assert.rejects(sourceReadiness(w,{cohort:'SALES_READY',checks},commerceNow),/SOURCE_READINESS_BLOCKED/);
+});
+
+test('opening-media candidate registration cannot call a no-photo first-contact task sales-ready',async()=>{
+ const w=world(),spec={version:2,task:{purpose:'SALE',productId:'SM613'},cohort:'SALES_READY',checks:[{facet:'PRICE',productId:'SM613',offerType:'DIRECT'}]};
+ const manifest=await sourceReadiness(w,spec,commerceNow),pop={scenarios:[{mode:'SINGLE',turns:[{initialProductCodes:['SM613']}],judgeContext:{sourceReadiness:manifest}}]};
+ await assert.rejects(assertPopulationReadiness(w,pop,commerceNow,{version:'FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1'}),/OPENING_MEDIA_READINESS_REQUIRED/);
+});
+
+test('discovery/task scope needs photos even without initial product codes',async()=>{
+ const w=world(),spec={version:2,task:{purpose:'SALE',productId:'SM613'},cohort:'SALES_READY',checks:[{facet:'PRICE',productId:'SM613',offerType:'DIRECT'}]};
+ const manifest=await sourceReadiness(w,spec,commerceNow),scenario={mode:'SINGLE',turns:[{initialProductCodes:[]}],judgeContext:{sourceReadiness:manifest,sourceRequirements:{kind:'DISCOVERY_POOL',productCodes:['SM613']}}};
+ await assert.rejects(assertPopulationReadiness(w,{scenarios:[scenario]},commerceNow,{version:'FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1'}),/OPENING_MEDIA_READINESS_REQUIRED/);
+ delete spec.task.productId;scenario.judgeContext.sourceReadiness=await sourceReadiness(w,spec,commerceNow);
+ await assert.rejects(assertPopulationReadiness(w,{scenarios:[scenario]},commerceNow,{version:'FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1'}),/OPENING_MEDIA_READINESS_REQUIRED/);
 });

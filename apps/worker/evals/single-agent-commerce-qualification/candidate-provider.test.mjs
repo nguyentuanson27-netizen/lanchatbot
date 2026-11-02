@@ -1,3 +1,4 @@
+import {OPENING_PRODUCT_MEDIA_RULE} from '../../dist/single-agent-commerce-opening-media.js';
 // Local stubbed HTTP only; these responses are never campaign/model evidence.
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
@@ -20,7 +21,7 @@ function setup(t,dependencies={}){
   world={kind:'FROZEN_PUBLIC_BUSINESS_WORLD',config:{scope:{shopAlias:'LANA'},vertex:{projectId:'unit-project'}},products:[p.product],snapshots:{SV2447:p.snapshot},policyRecords:[]};
  world.sourceEvidenceHashes=[digest(world.products),digest(world.snapshots),digest(world.policyRecords)];
  const runtimeInput={latest:'Mẫu SV2447 này giá bao nhiêu em?',history:[],initialProductCodes:['SV2447']};
- const preflight={m,world,registration:{maximumGenerationRequests:8},sealed:{slots:[{slotId:'unit-slot',caseId:'unit-case',arm:'CANDIDATE',mode:'SINGLE'},
+ const preflight={m,world,registration:{maximumGenerationRequests:8,openingMediaRule:OPENING_PRODUCT_MEDIA_RULE},sealed:{slots:[{slotId:'unit-slot',caseId:'unit-case',arm:'CANDIDATE',mode:'SINGLE'},
   {slotId:'unit-next-slot',caseId:'unit-next-case',arm:'CANDIDATE',mode:'SINGLE'}],corpus:{scenarios:[{id:'unit-case',turns:[runtimeInput]},
    {id:'unit-next-case',turns:[runtimeInput]}]}}};
  const provider=createCandidateProvider({preflight,out,dependencies:{unitFixture:true,getToken:async()=>'unit-token-not-real',...dependencies}});
@@ -52,7 +53,7 @@ test('native read policy uses active sources without consuming the transaction p
 const response=()=>new Response(JSON.stringify({modelVersion:'gemini-3.5-flash-lite',usageMetadata:{promptTokenCount:7,candidatesTokenCount:3},
  candidates:[{finishReason:'STOP',content:{role:'model',parts:[{text:'Áo 499k chị nhé.'}]}}]}));
 test('dispatch preflight rejects changed registration corpus, slots, world, codec or exposure seal before clients are constructed',t=>{
- const c=config();c.nativeCodecs=NATIVE_CODECS;const pop=corpus(),world={kind:'FROZEN_PUBLIC_BUSINESS_WORLD',products:[{productId:'P1',canonicalCode:'P1',images:[]}],snapshots:{P1:null}};
+ const c=config();c.candidate.openingMediaRule=OPENING_PRODUCT_MEDIA_RULE;c.nativeCodecs=NATIVE_CODECS;const pop=corpus(),world={kind:'FROZEN_PUBLIC_BUSINESS_WORLD',products:[{productId:'P1',canonicalCode:'P1',images:[]}],snapshots:{P1:null}};
  for(const s of pop.scenarios.filter(s=>s.mode!=='SAFETY')){
   s.judgeContext.sourceInventory=judgeSourceInventory(world,['P1']);s.judgeContext.sourceRequirements={kind:'INITIAL_PRODUCTS',productCodes:['P1']};
  }
@@ -131,9 +132,35 @@ test('registered readiness expiry between preflight and generation stays counted
  const f=setup(t,{fetchImpl:async()=>{posts++;return response();},readinessClock:()=>at});
  f.world.config.maxFactAgeSeconds=60;
  const observed=new Date(f.world.snapshots.SV2447.synced_at);
- const manifest=await sourceReadiness(f.world,{cohort:'SALES_READY',checks:[{facet:'PRICE',productId:'SV2447',offerType:'DIRECT'}]},observed);
+ const manifest=await sourceReadiness(f.world,{version:2,task:{purpose:'SALE',productId:'SV2447'},cohort:'SALES_READY',checks:[{facet:'PRICE',productId:'SV2447',offerType:'DIRECT'}]},observed);
+ f.preflight.sealed.corpus.scenarios[0].turns[0].initialProductCodes=[];delete manifest.spec.task.productId;
+ const {contentHash,...body}=manifest;manifest.contentHash=digest(body); // Explicit no-product control isolates expiry.
  f.preflight.sealed.corpus.scenarios[0].judgeContext={sourceReadiness:manifest};at=new Date(observed.getTime()+60000);
  await assert.rejects(f.provider.owner(f.request),/SOURCE_READINESS_BLOCKED/);assert.equal(posts,0);
  assert.equal(f.provider.observed().length,1);assert.equal(f.provider.observed()[0].providerRequests,0);
  assert.equal(f.provider.observed()[0].failureLayer,'PRE_DISPATCH');
+});
+
+test('current candidate provider refuses a missing or changed opening media rule before generation',t=>{
+ const f=setup(t);delete f.preflight.registration.openingMediaRule;
+ assert.throws(()=>createCandidateProvider({preflight:f.preflight,out:f.out,dependencies:{unitFixture:true}}),/OPENING_MEDIA_RULE/);
+ f.preflight.registration.openingMediaRule={version:'OTHER'};
+ assert.throws(()=>createCandidateProvider({preflight:f.preflight,out:f.out,dependencies:{unitFixture:true}}),/OPENING_MEDIA_RULE/);
+});
+
+test('dispatch rejects a ready price-only opening product before HTTP',async t=>{
+ const {sourceReadiness}=await import('./source-readiness.mjs');let posts=0;
+ const f=setup(t,{fetchImpl:async()=>{posts++;return response();}});
+ const spec={version:2,task:{purpose:'SALE',productId:'SV2447'},cohort:'SALES_READY',checks:[{facet:'PRICE',productId:'SV2447',offerType:'DIRECT'}]};
+ f.preflight.sealed.corpus.scenarios[0].judgeContext={sourceReadiness:await sourceReadiness(f.world,spec,new Date())};
+ await assert.rejects(f.provider.owner(f.request),/OPENING_MEDIA_READINESS_REQUIRED/);assert.equal(posts,0);
+ assert.equal(f.provider.observed()[0].providerRequests,0);
+});
+
+test('discovery product scope fails before HTTP when opening media is not registered',async t=>{
+ const {sourceReadiness}=await import('./source-readiness.mjs');let posts=0;
+ const f=setup(t,{fetchImpl:async()=>{posts++;return response();}}),scenario=f.preflight.sealed.corpus.scenarios[0];
+ scenario.turns[0].initialProductCodes=[];
+ scenario.judgeContext={sourceRequirements:{kind:'DISCOVERY_POOL',productCodes:['SV2447']},sourceReadiness:await sourceReadiness(f.world,{version:2,task:{purpose:'SALE'},cohort:'SALES_READY',checks:[{facet:'PRICE',productId:'SV2447',offerType:'DIRECT'}]},new Date())};
+ await assert.rejects(f.provider.owner(f.request),/OPENING_MEDIA_READINESS_REQUIRED/);assert.equal(posts,0);assert.equal(f.provider.observed()[0].providerRequests,0);
 });

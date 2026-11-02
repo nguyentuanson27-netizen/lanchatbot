@@ -29,6 +29,10 @@ export interface VerifierRequest { generationId: string; instructions: string; f
   latest: string; history: { role: "customer" | "shop"; text: string }[]; binding: VerifierBinding; signal: AbortSignal }
 export interface VerifierGeneration { result: unknown; telemetry?: unknown }
 export interface CommerceTools {
+  prepareProductImage?(subjectRef:string,color?:string):Promise<CommerceToolResult>;
+  prepareOpeningMedia?(control:import("./single-agent-commerce-read-only-tools.js").PreparationControl):Promise<import("./single-agent-commerce-opening-media.js").OpeningMediaWork>;
+  openingMediaReady?(context:TrustedContext,images?:readonly import("./single-agent-commerce-media.js").CommerceMediaAsset[]):boolean;
+  openingMediaBlocksCodeOutput?(calls:readonly CommerceToolCall[]):boolean;
   requestSilentHandoff?(reason:import("@lana/contracts").HandoffReasonV2):Promise<CommerceToolResult>;
   readCoverage?():import("./single-agent-commerce-diagnostics.js").CommerceReadCoverage;
   diagnostic?(stage:import("./single-agent-commerce-diagnostics.js").CommerceDiagnosticStage,status:string,reason?:string|null,resultBytes?:number|null):void;
@@ -107,6 +111,7 @@ export async function runCommerceTurn(input: {
   const turnTime: Readonly<CommerceTurnTime> = Object.freeze({ processingAt: input.clock().toISOString(), timeZone: "Asia/Ho_Chi_Minh" });
   let ownerGenerations = 0, verifierGenerations = 0, toolRounds = 0, toolCalls = 0;
   let executedNormalToolInvocations=0,quoteAttempted=false;
+  let openingMediaWork:import("./single-agent-commerce-opening-media.js").OpeningMediaWork|undefined;
   const primitiveAccounting=input.tools.toolWorkAccounting==="PRIMITIVE_WORK_V2";
   let terminalHandoffCalls = 0, proposedToolCalls = 0, rejectedToolCalls = 0;
   let toolLatencyMs = 0, verificationStarted: number | undefined;
@@ -133,7 +138,7 @@ export async function runCommerceTurn(input: {
     const handoff = input.tools.handoffStatus?.();
     terminalHandoffCalls = Math.max(terminalHandoffCalls, handoff?.attempts ?? 0);
     const quoteTaskWork=input.tools.quoteTaskWork?.()??[];
-    return { terminal, recovery, sendEnabled: false as const, ownerGenerations, verifierGenerations, toolRounds,
+    return { terminal, recovery,...(openingMediaWork?{openingMediaWork}:{}), sendEnabled: false as const, ownerGenerations, verifierGenerations, toolRounds,
       ...(primitiveAccounting?{toolWorkAccounting:"PRIMITIVE_WORK_V2" as const,quoteTaskWork,executedNormalToolInvocations:executedNormalToolInvocations+(input.tools.primitiveToolInvocations?.()??0),
         executedToolInvocations:executedNormalToolInvocations+(input.tools.primitiveToolInvocations?.()??0)+terminalHandoffCalls}:{}),
       normalToolCalls: toolCalls, terminalHandoffCalls, toolCalls: toolCalls + terminalHandoffCalls,
@@ -254,6 +259,7 @@ export async function runCommerceTurn(input: {
       if(request.callableTools&&output.calls.some(c=>!request.callableTools!.includes(c.name))){
         rejectedToolCalls+=output.calls.length;return finish(fallback("OWNER_TOOL_MODE"));
       }
+      if(input.tools.openingMediaBlocksCodeOutput?.(output.calls))return finish(fallback("PREPARATION_UNAVAILABLE"));
       const toolStarted = performance.now();
       const results = await input.tools.invokeBatch(output.calls).catch(() => output.calls.map(() => ({ status: "UNAVAILABLE" as const, reason: "TOOL_ERROR" })));
       rejectedToolCalls += results.filter(result=>result.status==="REJECTED").length;
@@ -281,7 +287,19 @@ export async function runCommerceTurn(input: {
         return finish({disposition:"NO_SEND",reason:"PERMISSION_OR_PRIVACY",text:null,fallbackId:null});
       return finish(fallback("OWNER_OUTPUT_ARTIFACT"));
     }
+    if(hasResidualPii(output.text))return finish({disposition:"NO_SEND",reason:"PRIVACY",text:null,fallbackId:null});
+    if(!output.text.trim()||Buffer.byteLength(output.text)>4096)return finish(fallback("MALFORMED"));
+    if(input.tools.prepareOpeningMedia){
+      const started=performance.now();
+      try{openingMediaWork=await input.tools.prepareOpeningMedia({maxCalls:6-toolCalls,onDispatch:()=>{toolCalls++;executedNormalToolInvocations++;}});}
+      catch{return finish(fallback("PREPARATION_UNAVAILABLE"));}
+      toolLatencyMs+=performance.now()-started;
+      const actual=await effectTerminal();if(actual)return finish(actual,true);
+      if(openingMediaWork.status==='UNAVAILABLE')return finish(fallback("PREPARATION_UNAVAILABLE"));
+    }
     const trusted = input.tools.snapshot();
+    if(!trusted.state.permission||!trusted.state.privacyAllowed||trusted.state.conversationOwner!=="BOT")
+      return finish({disposition:"NO_SEND",reason:"PERMISSION_OR_PRIVACY",text:null,fallbackId:null});
     let draft:string;
     try { draft = input.tools.sealHandoffReply?.(output.text, trusted,input.tools.mediaSelection?.()??[]) ?? output.text; }
     catch { return finish(fallback("HANDOFF_REPLY_BOUND")); }

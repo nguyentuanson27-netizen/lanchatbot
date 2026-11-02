@@ -226,3 +226,11 @@ test('absolute SINGLE packet retains preparation coverage without identifying ar
  const paired=blindComparisonPack(e.config,e.corpus,e.attempts,e.blindSeed);
  assert(!JSON.stringify(paired.publicPacket).includes('readCoverage'));
 });
+
+test('opening-photo wrapper cannot qualify replacement by claiming structural parity',()=>{
+ const e=evidence();e.config.candidate.openingMediaRule={version:'FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1'};
+ e.identity=qualificationIdentity(e.config);e.structural.candidateIdentity=e.identity.candidate;e.realAdapter.candidateIdentity=e.identity.candidate;
+ for(const a of e.attempts){a.identity=e.identity;if(a.arm==='C3')a.c3Boundary={coverage:{status:'STRUCTURAL_COMMON_FIELDS_PRESENT'}};}
+ const r=evaluateQualification(e);assert.equal(r.candidateMeetsTarget,'PASS');assert.equal(r.candidateQualifiesToReplaceC3,'BLOCKED');
+ assert(r.reasons.includes('C3_INPUT_INFORMATION_PARITY_NOT_ESTABLISHED'));
+});

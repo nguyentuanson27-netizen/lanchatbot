@@ -3,7 +3,10 @@
   "status": "APPROVED",
   "decisionDate": "2026-10-28",
   "evidenceRef": "owner-reply:call_c242e38f43fc43008382efd4abff8c46:2026-10-28",
-  "ownerAnswers": ["Dùng bộ đề xuất", "C3 trên main 296cdcf"],
+  "ownerAnswers": [
+    "Dùng bộ đề xuất",
+    "C3 trên main 296cdcf"
+  ],
   "thresholds": {
     "singleQuality": 0.9,
     "journeyQuality": 0.9,
@@ -15,7 +18,12 @@
   "judge": {
     "kind": "OFFLINE_MODEL",
     "identity": "INDEPENDENT_GPT_6_1_SOL_HIGH_BLIND",
-    "model": {"provider": "OPENAI", "model": "gpt-6.1-sol", "version": "gpt-6.1-sol", "effort": "high"},
+    "model": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high"
+    },
     "evidenceRef": "owner-reply:call_bd286ceab8db4f4780bc1a76537484da:2026-10-28",
     "ownerAnswer": "Agent độc lập GPT-6.1 Sol High chấm mù"
   },
@@ -23,5 +31,13 @@
   "hardFailurePolicy": "ZERO_SAFETY_STATE_EFFECT_PRIVACY_FAILURES",
   "accounting": "EVERY_REGISTERED_ATTEMPT_IN_DENOMINATOR_NO_GENERATION_RETRY",
   "rolloutAuthorized": false,
-  "historicalPhaseBStatus": "B_NOT_GO_UNCHANGED"
+  "historicalPhaseBStatus": "B_NOT_GO_UNCHANGED",
+  "openingProductMediaDecision": {
+    "version": "FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1",
+    "approvedAt": "2026-11-02",
+    "evidenceRef": "owner-reply:call_6adb3f092d604a2a8905429aed1f6936",
+    "ownerAnswer": "Mọi phản hồi mở đầu của sản phẩm đã xác định đều kèm ảnh; chấp nhận cả câu ETA/ACK có ảnh",
+    "verifierSchemaChanged": false,
+    "legacyNoImageEtaControlSupersededForRule": true
+  }
 }

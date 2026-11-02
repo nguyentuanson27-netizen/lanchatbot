@@ -1,9 +1,10 @@
+import {assertOpeningProductMediaRule} from '../../dist/single-agent-commerce-opening-media.js';
 // Evaluation-only prerequisites. No network, clock override, source write or generation.
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {resolve} from 'node:path';
-import {resolveCatalogFacts} from '@lana/business-tools';
+import {resolveCatalogFacts,normalizeProductCode} from '@lana/business-tools';
 import {RuntimePolicyResolver} from '@lana/chat-runtime';
 import {candidateCartOptions,cartSelectionFromSnapshot} from '../../dist/realtime-sales-catalog.js';
 import {commerceSizeSource} from '../../dist/single-agent-commerce-product-groups.js';
@@ -95,17 +96,27 @@ export async function assertSourceReadiness(world,manifest,at=new Date()){
  assert.deepEqual(manifest,await sourceReadiness(world,manifest.spec,new Date(manifest.checkedAt)),'C_READINESS_NOT_DERIVED');
  return sourceReadiness(world,manifest.spec,at);
 }
-export async function assertPopulationReadiness(world,corpus,at=new Date()){
- for(const s of corpus.scenarios.filter(s=>s.mode!=='SAFETY')){
+export async function assertScenarioReadiness(world,s,at=new Date(),openingMediaRule=undefined){
+ if(openingMediaRule)assertOpeningProductMediaRule(openingMediaRule);
+ if(s.mode!=='SAFETY'){
   assertTaskReadinessSpec(s.judgeContext?.sourceReadiness?.spec,{required:true});
+  const spec=s.judgeContext.sourceReadiness.spec;
+  const openingProducts=[...new Set([...s.turns.flatMap(t=>t.initialProductCodes),...(s.judgeContext?.sourceRequirements?.productCodes??[]),...(spec.task?.productId?[spec.task.productId]:[])])];
+  if(openingMediaRule&&spec.cohort==='SALES_READY')for(const code of openingProducts){
+   const p=world.products.find(p=>[p.productId,p.canonicalCode,...(p.aliases??[])].some(v=>normalizeProductCode(v)===normalizeProductCode(code)));
+   assert(p&&spec.checks.some(q=>q.facet==='MEDIA'&&q.productId===p.productId&&q.intent==='GENERIC'),'C_OPENING_MEDIA_READINESS_REQUIRED');
+  }
   await assertSourceReadiness(world,s.judgeContext?.sourceReadiness,at);
  }
+}
+export async function assertPopulationReadiness(world,corpus,at=new Date(),openingMediaRule=undefined){
+ for(const s of corpus.scenarios)await assertScenarioReadiness(world,s,at,openingMediaRule);
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  try{
   assert(process.argv[2]==='--assert'&&process.argv.length===5,'C_READINESS_ARGUMENTS');
   const read=p=>JSON.parse(readFileSync(p,'utf8').replace(/^\uFEFF/,'')),world=read(process.argv[3]),reg=read(process.argv[4]);
-  await assertPopulationReadiness(world,reg.corpus);
+  await assertPopulationReadiness(world,reg.corpus,new Date(),reg.config?.candidate?.openingMediaRule);
   process.stdout.write(JSON.stringify({status:'READY',providerRequests:0,sourceWrites:0}));
  }catch(error){process.stderr.write(JSON.stringify({status:'BLOCKED',code:/^[A-Z0-9_]+$/.test(error.message)?error.message:'C_SOURCE_READINESS_ERROR',providerRequests:0}));process.exitCode=2;}
 }

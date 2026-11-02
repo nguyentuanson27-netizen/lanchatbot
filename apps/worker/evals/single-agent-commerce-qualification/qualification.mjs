@@ -433,6 +433,7 @@ export function evaluateQualification(e){
   metrics.safeUsability<e.config.thresholds.safeUsability)return decision('FAIL','BLOCKED',['ABSOLUTE_TARGET_NOT_MET'],metrics);
  const replacementReady=readiness(e.config,{stage:'REPLACEMENT'});
  if(replacementReady.status!=='READY')return decision('PASS','BLOCKED',replacementReady.missing,metrics);
+ if(e.config.candidate.openingMediaRule)return decision('PASS','BLOCKED',['C3_INPUT_INFORMATION_PARITY_NOT_ESTABLISHED'],metrics);
  const baselineSlots=slots.filter(s=>s.arm==='C3');
  if(baselineSlots.some(s=>!bySlot.has(s.slotId)||bySlot.get(s.slotId).status==='NOT_RUN'))return decision('PASS','BLOCKED',['BASELINE_INCOMPLETE_DENOMINATOR'],metrics);
  const baseline=[...bySlot.values()].filter(a=>a.arm==='C3');

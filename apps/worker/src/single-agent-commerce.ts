@@ -1,3 +1,4 @@
+import {withOpeningProductMedia,type OpeningProductMediaRule} from "./single-agent-commerce-opening-media.js";
 import {createMediaCapabilityCache} from "./single-agent-commerce-media-capabilities.js";
 import {withExplicitQuoteTask,validateQuoteTask,type ExplicitQuoteTask} from "./single-agent-commerce-quote.js";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
@@ -37,6 +38,7 @@ function requiredReadHandoffReason(call: CommerceToolCall, result: CommerceToolR
 export async function createCommerceTools(input: {
   observeDiagnostics?:CommerceDiagnosticObserver;
   quoteTask?: ExplicitQuoteTask;
+  openingMediaRule?:OpeningProductMediaRule;
   read: Parameters<typeof createReadOnlyTools>[0];
   state?: Omit<Parameters<typeof createCustomerStateTools>[0], "base" | "scope" | "clock">;
   effects?: Omit<Parameters<typeof createCommerceEffectTools>[0], "base" | "scope" | "clock"> &
@@ -155,6 +157,7 @@ export async function createCommerceTools(input: {
       await handoffRequiredRead(allowed,results);return projected;
     }
   };
-  if(input.quoteTask!==undefined){validateQuoteTask(input.quoteTask);return withExplicitQuoteTask(guarded,scope,input.read.entry?.firstContact??null);}
-  return guarded;
+  let final:CommerceTools=guarded;
+  if(input.quoteTask!==undefined){validateQuoteTask(input.quoteTask);final=withExplicitQuoteTask(final,scope,input.read.entry?.firstContact??null);}
+  return input.openingMediaRule?withOpeningProductMedia(final,{rule:input.openingMediaRule,scope,clock,firstContact:input.read.entry?.firstContact??null}):final;
 }

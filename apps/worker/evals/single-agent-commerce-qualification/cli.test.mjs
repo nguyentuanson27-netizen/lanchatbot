@@ -89,11 +89,31 @@ test('CLI assesses only sealed post-registration evidence and exports a bound bl
  e.blindGrades=packet.assignments.map(a=>({reviewId:a.reviewId,packetHash:packet.packetHash,vote:a.A==='CANDIDATE'?'A':'B',
   adjudicated:true,judgeIdentity:e.config.judge.identity,reason:'Synthetic unit vote, never real qualification.'}));
  const file=resolve(f.root,'evidence.json');writeFileSync(file,JSON.stringify(e));
- const r=f.run('assess',{registration,evidence:file,out:resolve(f.root,'assessment')});assert.equal(r.status,0,r.stderr+r.stdout);
+ const r=f.run('assess',{registration,evidence:file,out:resolve(f.root,'assessment')});assert.equal(r.status,2,r.stderr+r.stdout);
+ assert(JSON.parse(r.stdout).reasons.includes('C3_INPUT_INFORMATION_PARITY_NOT_ESTABLISHED'));
  assert.equal(JSON.parse(r.stdout).rolloutAuthorized,false);
  assert.equal(f.run('absolute',{registration,evidence:file,seed,out:resolve(f.root,'absolute')}).status,0);
  assert.equal(f.run('blind',{registration,evidence:file,seed,out:resolve(f.root,'packet')}).status,0);
  e.attempts[0].startedAt='2000-01-01T00:00:00.000Z';writeFileSync(file,JSON.stringify(e));
  assert.match(f.run('assess',{registration,evidence:file,out:resolve(f.root,'early')}).stderr,/C_PRE_REGISTRATION_RESULTS_FORBIDDEN/);
  assert(!existsSync(resolve(f.root,'early')));
+});
+
+for(const discovery of [false,true])test('normal native seal rejects absent opening MEDIA checks, discovery='+discovery,async t=>{
+ const {fixtureProduct,commerceScope}=await import('../../dist/single-agent-commerce.test-support.js');
+ const {sourceReadiness}=await import('./source-readiness.mjs');
+ const {NATIVE_CODECS}=await import('./native-wire.mjs');
+ const {developmentInventory}=await import('./development-inventory.mjs');
+ const f=setup(t),p=fixtureProduct('P1',new Date());f.c.nativeCodecs=NATIVE_CODECS;
+ Object.assign(f.world,{config:{scope:commerceScope(),channel:'CANARY_SHADOW',maxFactAgeSeconds:1200},products:[p.product],snapshots:{P1:p.snapshot},policyRecords:[]});
+ f.pop.review.worldHash=digest(f.world);
+ for(const s of f.pop.scenarios.filter(s=>s.mode!=='SAFETY')){
+  s.initialContext.worldHash=digest(f.world);
+  if(discovery){for(const t of s.turns)t.initialProductCodes=[];s.judgeContext.sourceRequirements={kind:'DISCOVERY_POOL',productCodes:['P1']};}
+  s.judgeContext.sourceReadiness=await sourceReadiness(f.world,{version:2,task:{purpose:'SALE',productId:'P1'},cohort:'SALES_READY',checks:[{facet:'PRICE',productId:'P1',offerType:'DIRECT'}]},new Date());
+ }
+ const sources=['A','B','C'].map(population=>{const path=resolve(f.root,population+'.json');writeFileSync(path,JSON.stringify(['f'.repeat(64)]));return {path,population};});
+ const inv=developmentInventory(sources);inv.review={status:'APPROVED',inventoryHash:inv.inventoryHash,corpusHash:digest(f.pop),reviewer:'UNIT_ONLY',nearDuplicateReviewHash:'a'.repeat(64),historyCoverageComplete:true};
+ f.write('config',f.c);f.write('world',f.world);f.write('corpus',f.pop);f.write('development',inv);
+ const out=resolve(f.root,'no-photo');const result=f.seal(out);assert.equal(result.status,2,result.stdout);assert.match(result.stderr,/C_OPENING_MEDIA_READINESS_REQUIRED/);assert(!existsSync(out));
 });

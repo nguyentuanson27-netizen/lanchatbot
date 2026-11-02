@@ -73,7 +73,7 @@ try{
    'C_FRESH_CORPUS_REVIEW_REQUIRED');
   check(!JSON.stringify(corpus).includes('{{'),'C_UNRESOLVED_HOLDOUT_INPUT');
   if(config.nativeCodecs){
-   await assertPopulationReadiness(world,corpus);
+   await assertPopulationReadiness(world,corpus,new Date(),config.candidate.openingMediaRule);
    for(const s of corpus.scenarios.filter(s=>s.mode!=='SAFETY'))assertJudgeSourceInventory(s.judgeContext?.sourceInventory,digest(world),world,s);
    check(corpus.scenarios.filter(s=>s.mode!=='SAFETY').every(s=>s.turns.every(t=>t.history.length===0)),'C_INITIAL_HISTORY_SEED_NOT_IMPLEMENTED');
    if(corpus.requiredCapabilities?.includes('PRODUCT_SEARCH'))validateFrozenIndex(world.search,world.config.vertex.embeddingDimension);

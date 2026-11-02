@@ -20,7 +20,16 @@ export async function createReferenceRunner({preflight,baselineRoot,baselineBuil
    recovery:null,sendEnabled:false,ownerGenerations:0,verifierGenerations:0,toolRounds:0,normalToolCalls:0,terminalHandoffCalls:0,
    toolCalls:0,proposedToolCalls:0,rejectedToolCalls:0,handoff:null,generations:gens,toolLatencyMs:0,verificationLatencyMs:null});
   let prepared;const preparationStarted=performance.now();
-  try{prepared=await turn.tools.prepare?.()??0;}catch{return problem('C3_PREPARATION_UNAVAILABLE');}
+  try{prepared=await turn.tools.prepare?.()??0;
+   if(turn.tools.prepareOpeningMedia){
+    const work=await turn.tools.prepareOpeningMedia({maxCalls:6-prepared,onDispatch:()=>{prepared++;}});
+    if(work.status==='UNAVAILABLE'){
+     const result=problem('C3_OPENING_MEDIA_UNAVAILABLE');
+     result.terminal=await turn.tools.recoverFallback?.({disposition:'FALLBACK',reason:'PREPARATION_UNAVAILABLE',text:null,fallbackId:null})??result.terminal;
+     result.normalToolCalls=prepared;result.toolCalls=prepared;return result;
+    }
+   }
+  }catch{return problem('C3_PREPARATION_UNAVAILABLE');}
   const preparationMs=performance.now()-preparationStarted,trusted=turn.tools.snapshot(),at=turn.clock(),products=trusted.boundSubjects.filter(s=>s.kind==='PRODUCT').map(s=>s.ref).sort();
   const sourceHash=rawHash(turn.scope.sourceMessageId),canonical=context.buildCanonicalDecisionEvidenceV1({text:turn.latest,sourceMessageId:turn.scope.sourceMessageId,
    productId:products.length===1?products[0]:null,evaluatedAt:at,modelBuyingIntent:null});
@@ -61,7 +70,7 @@ export async function createReferenceRunner({preflight,baselineRoot,baselineBuil
   result.ownerGenerations=requestNumber;result.toolLatencyMs=preparationMs;
   result.evaluationTiming={attestationMs:guarded.attestationMs,observedTurnMs:performance.now()-initial,
    note:'Observed harness latency includes pinned-source attestation; it is not a production architecture latency estimate.'};
-  result.c3Witness={guarded,capture,trusted,coverage:referenceContextCoverage(trusted,capture.context,turn.historyMetadata),sourceSha:baselineBuild.sourceSha,worldHash:reg.worldHash};
+  result.c3Witness={guarded,capture,trusted,coverage:referenceContextCoverage(trusted,capture.context,turn.historyMetadata,reg.config.candidate?.openingMediaRule),sourceSha:baselineBuild.sourceSha,worldHash:reg.worldHash};
   if(guarded.terminal.disposition==='SEND_ELIGIBLE')result.terminal={disposition:'SEND_ELIGIBLE',reason:'PASS',text:guarded.reply,fallbackId:null};
   return result;
  }};

@@ -1,3 +1,4 @@
+import {OPENING_PRODUCT_MEDIA_RULE} from '../../dist/single-agent-commerce-opening-media.js';
 // Local read-only source inventory. Never loads credentials or starts inference.
 import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
@@ -21,9 +22,9 @@ export function currentCandidate(repo){
  for(const p of ['apps/worker/src/single-agent-commerce-ingress.ts','apps/worker/src/single-agent-commerce.ts',
   'apps/worker/src/single-agent-commerce-media-delivery.ts','apps/worker/src/single-agent-semantic-verifier-boundary.ts'])
   assert(inventory[p],'C_SOURCE_INVENTORY_INCOMPLETE');
- return {sourceSha:git('rev-parse','HEAD'),model:m.models.conversation,promptHash:owner,
+ return {sourceSha:git('rev-parse','HEAD'),model:m.models.conversation,promptHash:owner,openingMediaRule:OPENING_PRODUCT_MEDIA_RULE,
   contextPolicyHash:digest({presentation:'VI_DATA_BLOCKS_COMPACT_V2',bounds:m.requestBounds,source:inventory['apps/worker/src/single-agent-commerce-ingress.ts']}),
-  toolContractHash:digest({calls:m.toolCalls,rounds:m.toolRounds,source:inventory['apps/worker/src/single-agent-commerce.ts']}),
+  toolContractHash:digest({openingMediaRule:OPENING_PRODUCT_MEDIA_RULE,calls:m.toolCalls,rounds:m.toolRounds,source:inventory['apps/worker/src/single-agent-commerce.ts']}),
   assemblyHash:digest({ingress:inventory['apps/worker/src/single-agent-commerce-ingress.ts'],gate:inventory['apps/worker/src/single-agent-commerce-media-delivery.ts']}),
   runtimeHash:digest(inventory),verifier:{model:m.models.verifier,promptHash:verifier,schemaHash:m.schemaHash,
    serializationHash:textDigest(read(base+'protocol.mjs').replaceAll('\r\n','\n')),

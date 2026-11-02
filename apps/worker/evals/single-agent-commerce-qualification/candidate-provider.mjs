@@ -1,6 +1,7 @@
+import {assertOpeningProductMediaRule} from '../../dist/single-agent-commerce-opening-media.js';
 // Reuses the approved native B inference/serialization. No prompt changes, retry or new model role.
 import assert from 'node:assert/strict';
-import {assertSourceReadiness} from './source-readiness.mjs';
+import {assertScenarioReadiness} from './source-readiness.mjs';
 import {readFileSync,appendFileSync} from 'node:fs';
 import {resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -25,6 +26,7 @@ import {MEASUREMENT_POLICY} from './qualification.mjs';
 import {admitPreparedCommerceContext} from '../single-agent-commerce-read-only/preparation-admission.mjs';
 const read=p=>JSON.parse(readFileSync(p,'utf8').replace(/^\uFEFF/,''));
 export function assertSealedInputs(sealed,world,{registrationRoot}={}){
+ assertOpeningProductMediaRule(sealed.config?.candidate?.openingMediaRule);
  assert.equal(sealed.sendEnabled,false,'C_SEALED_SEND_POLICY');
  assert.deepEqual(sealed.identity,qualificationIdentity(sealed.config));validateCorpus(sealed.corpus);
  assert.equal(digest(sealed.corpus),sealed.corpusHash,'C_SEALED_CORPUS_CHANGED');
@@ -53,7 +55,7 @@ export function candidatePreflight(root,registrationPath,worldPath){
  assert.deepEqual(m.models.conversation,sealed.config.candidate.model);assert.deepEqual(m.models.verifier,sealed.config.candidate.verifier.model);
  frozenFacts(world);
  return {root,m,codex,config:world.config,sealed,world,registration:{sourceSha:sealed.runSourceSha,mode:'PHASE_C_FROZEN_NATIVE_PERSISTED',
-  maximumGenerationRequests:sealed.slots.filter(s=>s.arm==='CANDIDATE').reduce((n,s)=>n+s.maximumGenerations,0),ownerContextPresentation:'VI_DATA_BLOCKS_COMPACT_V2'}};
+  openingMediaRule:sealed.config.candidate.openingMediaRule,maximumGenerationRequests:sealed.slots.filter(s=>s.arm==='CANDIDATE').reduce((n,s)=>n+s.maximumGenerations,0),ownerContextPresentation:'VI_DATA_BLOCKS_COMPACT_V2'}};
 }
 export function assertCandidateSource(preflight){
  assert.equal(execFileSync('git',['rev-parse','HEAD'],{cwd:preflight.root,encoding:'utf8'}).trim(),preflight.sealed.runSourceSha,'C_RUN_SOURCE_CHANGED');
@@ -64,6 +66,7 @@ const metrics=(t,latencyMs)=>{const v={latencyMs,inputTokens:t?.inputTokens??t?.
  return {...v,unavailable:Object.fromEntries(['inputTokens','outputTokens','costUSD'].filter(k=>v[k]===null).map(k=>[k,'PROVIDER_NOT_EXPOSED']))};};
 export function createCandidateProvider({preflight,out,dependencies={}}){
  const {m,world}=preflight,facts=frozenFacts(world);
+ if(preflight.registration.maximumGenerationRequests>0)assertOpeningProductMediaRule(preflight.registration.openingMediaRule);
  const ownerPrompt=readFileSync(new URL('../single-agent-commerce-read-only/prompts/owner.vi.txt',import.meta.url),'utf8'),
   verifierPrompt=readFileSync(new URL('../single-agent-commerce-read-only/prompts/verifier.vi.txt',import.meta.url),'utf8');
  let active=null,inFlight=null;const generations=[],pending=new Set(),counters={owner:0,verifier:0,embedding:0,catalogReads:0,posReads:0,selectorCalls:0,readPolicyCalls:0};
@@ -128,7 +131,7 @@ export function createCandidateProvider({preflight,out,dependencies={}}){
   let preDispatchBudget;
   generations.push(row);counters[role.toLowerCase()]++;audit('STARTED',row);
   try{
-   if(scenario.mode!=='SAFETY'&&(!dependencies.unitFixture||scenario.judgeContext?.sourceReadiness))await assertSourceReadiness(world,scenario.judgeContext?.sourceReadiness,dependencies.unitFixture&&dependencies.readinessClock?dependencies.readinessClock():new Date());
+   if(scenario.mode!=='SAFETY'&&(!dependencies.unitFixture||scenario.judgeContext?.sourceReadiness))await assertScenarioReadiness(world,scenario,dependencies.unitFixture&&dependencies.readinessClock?dependencies.readinessClock():new Date(),preflight.registration.openingMediaRule);
    const original=role==='OWNER'?withNativePresentation(request,'VI_DATA_BLOCKS_COMPACT_V2'):request;
    const body=role==='OWNER'?buildGeminiCommerceRequest(original,undefined,undefined,value=>{preDispatchBudget=value;}):buildVerifierRequest(m,original);
    row.requestBody=body;row.requestHash=digest(body);

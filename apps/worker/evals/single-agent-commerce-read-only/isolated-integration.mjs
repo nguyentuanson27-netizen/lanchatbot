@@ -1,3 +1,4 @@
+import {OPENING_PRODUCT_MEDIA_RULE} from '../../dist/single-agent-commerce-opening-media.js';
 // Evaluation-only real PostgreSQL: synthetic inputs by default; explicit provider mode uses live public sources.
 // Delivery is always an in-memory capture transport, never a live customer effect.
 import assert from 'node:assert/strict';
@@ -593,9 +594,9 @@ try{
   const syntheticNow=async()=>{const r=await pool.query(`SELECT GREATEST(clock_timestamp(),
     COALESCE(MAX(accepted_at)+interval '1 millisecond',clock_timestamp())) AS observed_at
     FROM meta_outbox WHERE page_id=$1 AND conversation_id=$2`,[pageId,bound.conversationId]);return r.rows[0].observed_at;};
-  async function turn(text,outputs,{verdict='PASS',inspect=()=>{},beforeCommit=async()=>{},afterVerify=async()=>{},messages=null,loseCommitReply=false,rollbackCommitReply=false,slot='DETERMINISTIC_TURN',testQuoteTask,testQualificationValidator}={}){
+  async function turn(text,outputs,{verdict='PASS',inspect=()=>{},beforeCommit=async()=>{},afterVerify=async()=>{},messages=null,loseCommitReply=false,rollbackCommitReply=false,slot='DETERMINISTIC_TURN',testQuoteTask,testOpeningMediaRule,testQualificationValidator}={}){
    if(attemptQueue.blocked())return attemptQueue.run(slot,()=>{throw Error('BLOCKED_WORK_MUST_NOT_RUN');});
-   assert(!live||(!testQuoteTask&&!testQualificationValidator),'TEST_HOOK_FORBIDDEN_IN_PROVIDER_RUN');
+   assert(!live||(!testQuoteTask&&!testOpeningMediaRule&&!testQualificationValidator),'TEST_HOOK_FORBIDDEN_IN_PROVIDER_RUN');
    const now=await syntheticNow(),id='stateful-'+randomUUID(),envelope={schemaVersion:1,customerSendEnabled:false,routing:{owner:'APP'},message:{schemaVersion:1,traceId:randomUUID(),eventKey:id,pageId,messageId:id,
     senderId:'synthetic-recipient-'+customerHash,conversationId:'synthetic-meta-conversation',occurredAt:now.toISOString(),isEcho:false,appId:null,text,attachments:[]}};
    const inboundMessages=(messages??[{text,attachments:[]}]).map((m,index)=>({...envelope.message,...m,messageId:id+':'+index,eventKey:id+':'+index}));
@@ -607,7 +608,7 @@ try{
    assert(batch&&batch.conversationHash===customerHash,'CURRENT_BATCH');
    let owners=0,verifiers=0,faultInjected=false;const toolResponses=[],diagnostics=[];
    const result=await runPersistedCommerceIngress({batch,fence:batch.generation,scope:bound,store:runtime,inbox,history:historyStore,transaction:async fn=>{await beforeCommit();try{const value=await withTransaction(pool,async client=>{const applied=await fn(client);if(rollbackCommitReply&&!faultInjected){faultInjected=true;throw Error('CONTROLLED_ROLLBACK_REPLY_LOST');}return applied;});if(loseCommitReply&&!faultInjected){faultInjected=true;throw Error('CONTROLLED_COMMIT_REPLY_LOST');}return value;}catch(error){report.composedCommitDiagnostic=/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name;save();throw error;}},
-    ...(phaseC?{captureBoundaryWitness:true}:{}),observeDiagnostics:event=>diagnostics.push(event),
+    ...(phaseC?{captureBoundaryWitness:true}:{}),...(live&&phaseC?{openingMediaRule:providerFreeze.registration.openingMediaRule}:testOpeningMediaRule?{openingMediaRule:testOpeningMediaRule}:{}),observeDiagnostics:event=>diagnostics.push(event),
     ...(preparedOffers?{admitPreparedContext:request=>admitPreparedCommerceContext(JSON.parse(readFileSync(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/manifest.json'),'utf8')),'Synthetic verifier transport.',request)}:live&&providerPorts.admitPreparedContext?{admitPreparedContext:providerPorts.admitPreparedContext}:{}),
     ...(phaseC&&providerPorts.evaluationTurn?{evaluationTurn:providerPorts.evaluationTurn}:{}),
     ...(live&&providerFreeze.m.quoteTask?{quoteTask:providerFreeze.m.quoteTask}:testQuoteTask?{quoteTask:testQuoteTask}:{}),read,facts,policy,resolveTagId:()=> 'synthetic-tag',clock:()=>new Date(),
@@ -636,6 +637,76 @@ try{
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+
+ for(const [kind,text] of [['ACK','Dạ chị.'],['ETA','Shop không hẹn sáng mai chị nhé.'],['QUOTE','Áo 499.000đ chị nhé.']])await check('C opening '+kind+' exact text and photo accepted atomically',async()=>{
+  const j=await statefulFixture({media:true}),r=await j.turn('Mẫu này nhé em.',[say(text)],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  assert.equal(r.result.terminal.disposition,'SEND_ELIGIBLE');assert.equal(r.result.enqueued,2);assert.equal(r.verifiers,1);
+  const rows=(await pool.query('SELECT response_group_id,sequence_no FROM meta_outbox WHERE conversation_id=$1 ORDER BY sequence_no',[j.bound.conversationId])).rows;
+  assert.equal(rows.length,2);assert.equal(new Set(rows.map(r=>r.response_group_id)).size,1);assert.deepEqual(rows.map(r=>r.sequence_no),[0,1]);
+  await j.drain();assert.deepEqual(j.capture,[text,'[CODE_IMAGE]']);assert.equal(new Set(j.gateCalls).size,1);
+ });
+ await check('C opening missing photo silently hands off with no Outbox',async()=>{
+  const j=await statefulFixture(),r=await j.turn('Mẫu này bao nhiêu em?',[say('Áo 499.000đ chị nhé.')],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  assert.equal(r.result.terminal.disposition,'HANDOFF');assert.equal(r.result.enqueued,0);assert.equal(r.verifiers,0);await j.drain();assert.equal(j.capture.length,0);
+  assert.equal((await runtime.loadOrCreate(pageId,j.bound.customerHash,'APP',()=>null)).state.conversationOwner,'HUMAN');
+ });
+ await check('C opening customer-only durable history does not exempt a photo',async()=>{
+  const j=await statefulFixture({media:true}),at=new Date(Date.now()-120000);
+  for(let n=0;n<31;n++)await historyStore.recordInboundCustomerMessage({...j.bound,providerMessageId:'opening-customer-'+randomUUID(),text:'Chị đang xem mẫu này.',occurredAt:at,receivedAt:at});
+  const r=await j.turn('Mẫu này nhé em.',[say('Dạ chị.')],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});assert.equal(r.result.enqueued,2);await j.drain();assert.equal(j.capture.length,2);
+ });
+ await check('C opening durable HUMAN output survives truncated history and binds scope',async()=>{
+  const j=await statefulFixture(),at=new Date(Date.now()-120000);
+  await historyStore.recordOutboundHumanMessage({...j.bound,providerMessageId:'opening-human-'+randomUUID(),text:'Dạ chị.',occurredAt:at,receivedAt:at});
+  for(let n=0;n<31;n++)await historyStore.recordInboundCustomerMessage({...j.bound,providerMessageId:'opening-customer-'+randomUUID(),text:'Chị đang xem mẫu này.',occurredAt:new Date(at.getTime()+1000),receivedAt:new Date(at.getTime()+1000)});
+  assert.equal(await historyStore.hasPriorAcceptedShopOutput({...j.bound,before:new Date()}),true);
+  await assert.rejects(historyStore.hasPriorAcceptedShopOutput({...j.bound,customerHash:hash('other'),before:new Date()}),/SCOPE_MISMATCH/);
+  const r=await j.turn('Dạ em.',[say('Dạ chị.')],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});assert.equal(r.result.enqueued,1);await j.drain();assert.deepEqual(j.capture,['Dạ chị.']);
+ });
+ await check('C opening pending output and same-time acceptance never prove prior contact',async()=>{
+  const j=await statefulFixture({media:true});await j.turn('Mẫu này nhé em.',[say('Dạ chị.')],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  assert.equal(await historyStore.hasPriorAcceptedShopOutput({...j.bound,before:new Date(Date.now()+60000)}),false);
+  await j.drain();const accepted=(await pool.query('SELECT min(accepted_at) AS at FROM meta_outbox WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].at;
+  assert.equal(await historyStore.hasPriorAcceptedShopOutput({...j.bound,before:accepted}),false);
+  assert.equal(await historyStore.hasPriorAcceptedShopOutput({...j.bound,before:new Date(accepted.getTime()+1)}),true);
+ });
+ await check('C opening returning accepted output permits a later text-only reply',async()=>{
+  const j=await statefulFixture({media:true});await j.turn('Mẫu này nhé em.',[say('Dạ chị.')],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});await j.drain();j.changeMediaSource();
+  const r=await j.turn('Cảm ơn em.',[say('Dạ chị.')],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});assert.equal(r.result.enqueued,1);await j.drain();assert.deepEqual(j.capture,['Dạ chị.','[CODE_IMAGE]','Dạ chị.']);
+ });
+ await check('C opening private-first input hands off before checkout writes or public output',async()=>{
+  const j=await statefulFixture({media:true}),r=await j.turn('Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD',[],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  assert.equal(r.result.terminal.disposition,'HANDOFF');assert.equal(r.owners,0);assert.equal(r.verifiers,0);assert.equal(r.result.enqueued,0);assert.notEqual((await j.state()).stage,'ORDER_PREVIEW');await j.drain();assert.equal(j.capture.length,0);
+ });
+ await check('C opening add-confirm batch is fenced before either mutation',async()=>{
+  const j=await statefulFixture({media:true}),r=await j.turn('Chị lấy áo navy M, chốt nhé.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}},{name:'confirm_purchase',args:{}}])],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  assert.equal(r.result.terminal.disposition,'HANDOFF');assert.equal(r.result.enqueued,0);assert.equal((await j.state()).cart?.value.lines.length??0,0);assert.equal(r.verifiers,0);await j.drain();assert.equal(j.capture.length,0);
+ });
+
+ for(const reuse of [false,true])await check('C opening add chosen red cannot use navy generic photo '+reuse,async()=>{
+  const j=await statefulFixture({media:true}),calls=[...(reuse?[{name:'select_product_media',args:{subjectRef:'SM613',intent:'GENERIC'}}]:[]),{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'red'}}];
+  const r=await j.turn('Chị lấy áo đỏ M.',[native(calls),say('Em đã thêm áo đỏ vào giỏ cho chị.')],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  assert.equal((await j.state()).cart.value.lines[0].components[0].color,'red');assert.equal(r.result.terminal.disposition,'HANDOFF');assert.equal(r.result.enqueued,0);assert.equal(r.verifiers,0);await j.drain();assert.equal(j.capture.length,0);
+ });
+ await check('C opening replaced variant cannot reuse the former generic product photo',async()=>{
+  const j=await statefulFixture({media:true});await j.turn('Chị lấy áo navy M.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);
+  const line=(await j.state()).cart.value.lines[0],r=await j.turn('Đổi sang đỏ cho chị.',[native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'GENERIC'}},{name:'change_cart_item',args:{subjectRef:line.lineId,action:'REPLACE_LINE',targetSubjectRef:'SM613',offerType:'DIRECT',size:'M',color:'red'}}]),say('Em đã đổi sang đỏ cho chị.')],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  assert.equal((await j.state()).cart.value.lines[0].components[0].color,'red');assert.equal(r.result.terminal.disposition,'HANDOFF');assert.equal(r.result.enqueued,0);assert.equal(r.verifiers,0);await j.drain();assert.equal(j.capture.length,0);
+ });
+ await check('C opening returning checkout preserves native private preview',async()=>{
+  const j=await statefulFixture({media:true});await j.turn('Chị lấy áo navy M.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Em đã thêm áo vào giỏ cho chị.')],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});await j.drain();
+  const r=await j.turn('Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD',[],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  assert.equal(r.owners,0);assert.equal(r.verifiers,0);assert.equal((await j.state()).stage,'ORDER_PREVIEW');assert(r.result.enqueued>0);await j.drain();
+ });
+ await check('C opening media removed after verifier cannot enqueue a response group',async()=>{
+  const j=await statefulFixture({media:true}),r=await j.turn('Mẫu này nhé em.',[say('Dạ chị.')],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE,afterVerify:async()=>j.changeMediaSource()});
+  assert.notEqual(r.result.terminal.disposition,'SEND_ELIGIBLE');assert.equal(r.result.enqueued,0);assert.equal(r.verifiers,1);await j.drain();assert.equal(j.capture.length,0);
+ });
+ await check('C opening media revoked after enqueue cancels group before sequence zero',async()=>{
+  const j=await statefulFixture({media:true}),r=await j.turn('Mẫu này nhé em.',[say('Dạ chị.')],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});assert.equal(r.result.enqueued,2);
+  j.changeMediaSource();j.restartDelivery();await j.drain();assert.equal(j.capture.length,0);
+  const rows=(await pool.query('SELECT status FROM meta_outbox WHERE conversation_id=$1',[j.bound.conversationId])).rows;assert.equal(rows.length,2);assert(rows.every(r=>!['SENT_ACCEPTED','DELIVERED','READ'].includes(r.status)));
+ });
  await check('B composed evidence read prepares current facts with one charged work unit and actual accepted Outbox',async()=>{
   const j=await statefulFixture({preparedOffers:true});
   const r=await j.turn('Áo này bao nhiêu em?',[request=>{assert.equal(request.toolBudget.callsRemaining,5);assert(request.context.protectedClaims.some(c=>c.type==='PRICE'));return say('Áo giá 499.000đ chị nhé.');}]);

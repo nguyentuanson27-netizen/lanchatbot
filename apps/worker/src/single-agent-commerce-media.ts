@@ -29,7 +29,7 @@ function descriptionEvidence(query:MediaQuery,assets:readonly CommerceMediaAsset
 
 /** Selection only. Existing exact snapshot and group gate own authorization and delivery. */
 export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadOnlyCatalog;clock:()=>Date;allowedHostSuffixes:readonly string[];diagnostics?:import("./single-agent-commerce-diagnostics.js").CommerceDiagnostics}):CommerceTools {
-  const selections=new Map<string,{query:MediaQuery;assets:CommerceMediaAsset[]}>();
+  const selections=new Map<string,{query:MediaQuery;assets:CommerceMediaAsset[];limit?:1}>();
   type SourceCheck={sourceVersion:string;expiresAt:string};
   type Observation={query:MediaQuery;operation:string;stage:string;outcome:string;source:SourceCheck|null;literal:TrustedContext["policyLiterals"][number]};
   const observations=new Map<string,Observation>();
@@ -75,7 +75,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
         angle:image.angle,imageType:image.imageType,feedback:image.feedback===true,partsVisible:image.partsVisible??[]};
     });
   }
-  async function invokeMedia(call:CommerceToolCall):Promise<CommerceToolResult> {
+  async function invokeMedia(call:CommerceToolCall,selectionCount:1|4=4):Promise<CommerceToolResult> {
     let a=toolArgs(call.args,["subjectRef","intent","color","componentRole"]);
     // Provider tool calls may encode an omitted optional color as null. Normalize
     // before binding the query so null and omission select the same generic media.
@@ -114,7 +114,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
     };
     let validating=false,validatingAsset:string|null=null;
     try{
-      const view=call.name==="view_product_media",assets=(await (input.diagnostics?input.diagnostics.run("MEDIA_SELECT",query,()=>select(query,value=>{source=value;},value=>{availableAlternatives=value;})):select(query,value=>{source=value;},value=>{availableAlternatives=value;}))).slice(0,view?COMMERCE_VISION_BOUNDS.count:4);
+      const view=call.name==="view_product_media",assets=(await (input.diagnostics?input.diagnostics.run("MEDIA_SELECT",query,()=>select(query,value=>{source=value;},value=>{availableAlternatives=value;})):select(query,value=>{source=value;},value=>{availableAlternatives=value;}))).slice(0,view?COMMERCE_VISION_BOUNDS.count:selectionCount);
       if(!assets.length)return unavailable("NO_VERIFIED_MATCHING_MEDIA");
       if(view){
         if(catalogImages().length-(viewed.get(key)?.images.length??0)+assets.length>COMMERCE_VISION_BOUNDS.count)return {status:"REJECTED",reason:"VISION_BOUND"};
@@ -152,11 +152,12 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
       }
       if(mediaSelection().length-(selections.get(key)?.assets.length??0)+assets.length>4)return {status:"REJECTED",reason:"MEDIA_BOUND"};
       observations.delete(observationKey);
-      selections.set(key,{query,assets});
+      selections.set(key,{query,assets,...(selectionCount===1?{limit:1 as const}:{})});
       return {status:"OK",data:{subjectRef:query.subjectRef,intent:query.intent,descriptionEvidence:descriptionEvidence(query,assets),assets:assets.map(({assetRef,angle,imageType,feedback,partsVisible})=>({assetRef,angle,imageType,feedback,partsVisible})),scope:query.color?"COLOR_BOUND":"GENERIC_PRODUCT",colorMatched:!!query.color,delivery:"PENDING_FINAL_GATE"}};
     }catch(error){if(validating)input.diagnostics?.emit("MEDIA_VALIDATE","ERROR",{assetRef:validatingAsset},error instanceof Error?error.message:"UNKNOWN_INTERNAL");return unavailable(error instanceof Error&&error.message==="MEDIA_COLOR_BINDING_UNVERIFIED"?error.message:"MEDIA_SOURCE_UNAVAILABLE");}
   }
   return {...input.base,mediaSelection,catalogImages,
+    prepareProductImage:(subjectRef,color)=>invokeMedia({name:"select_product_media",args:{subjectRef,intent:"GENERIC",...(color?{color}:{})}},1),
     fallbackId:()=>input.base.sizeOutcome?.()?"C3_A_NONPROTECTED_V2": [...observations.values()].some(o=>o.outcome!=="OK")
       ?"C3_B_MEDIA_UNAVAILABLE_V1":input.base.fallbackId?.()??"C3_A_NONPROTECTED_V2",snapshot:()=>overlay(input.base.snapshot()),
     invoke:call=>mediaTool(call.name)?invokeMedia(call):input.base.invoke(call),
@@ -176,7 +177,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
         if(!current||commerceHash((current as SourceCheck).sourceVersion)!==commerceHash(o.source.sourceVersion)||outcome!==o.outcome)
           throw new Error("MEDIA_LOOKUP_SOURCE_CHANGED");
       }
-      for(const [key,s]of selections){const assets=(await select(s.query)).slice(0,4);if(!assets.length)throw new Error("MEDIA_SOURCE_CHANGED");selections.set(key,{query:s.query,assets});}
+      for(const [key,s]of selections){const assets=(await select(s.query)).slice(0,s.limit??4);if(!assets.length)throw new Error("MEDIA_SOURCE_CHANGED");selections.set(key,{...s,assets});}
       for(const s of viewed.values()){
         const assets=(await select(s.query)).slice(0,COMMERCE_VISION_BOUNDS.count);if(commerceHash(assets)!==commerceHash(s.assets))throw new Error("VIEWED_MEDIA_SOURCE_CHANGED");
         for(const image of s.images){const asset=assets.find(a=>a.assetRef===image.assetRef)!;

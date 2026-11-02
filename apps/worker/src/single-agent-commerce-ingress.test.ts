@@ -40,7 +40,7 @@ function fixture(productIds = ["SM613"]) {
     isEcho: false, appId: null, text: "Em ơi", attachments: [] };
   const batch = { pageId: scope.pageId, conversationHash: scope.customerHash, eventKind: "CUSTOMER", generation: 1,
     evaluationGroupId: "turn", leaseToken: "lease", inboxIds: ["inbox"], items: [{ envelope: { message } }] };
-  const verifier = vi.fn(async () => ({ result: { verdict: "PASS", violations: [] } }));
+  const verifier = vi.fn(async (_request:Parameters<Parameters<typeof runPersistedCommerceIngress>[0]["verifier"]>[0]) => ({ result: { verdict: "PASS", violations: [] } }));
   const select = vi.fn(async (): Promise<CartSelectionResult> => ({ status: "INVALID", reasonCode: "FIXTURE_SOURCE_UNAVAILABLE", availableSizes: [], availableColors: [] }));
   const inbox = { isBatchCurrent: async () => generation === batch.generation, readGeneration: async () => generation,
     completeBatch: vi.fn(async (_batch: unknown, _requireCurrentGeneration = true) => true) };
@@ -50,7 +50,8 @@ function fixture(productIds = ["SM613"]) {
   let readOverride: Parameters<typeof runPersistedCommerceIngress>[0]["read"] | undefined;
   const run = (owner: Parameters<typeof runPersistedCommerceIngress>[0]["owner"] = async () => ({ kind: "FINAL", text: "Dạ chị." }),
     handoffReply?: Parameters<typeof runPersistedCommerceIngress>[0]["handoffReply"],quoteTask?:Parameters<typeof runPersistedCommerceIngress>[0]["quoteTask"],
-    evaluationTurn?:Parameters<typeof runPersistedCommerceIngress>[0]["evaluationTurn"]) => runPersistedCommerceIngress({
+    evaluationTurn?:Parameters<typeof runPersistedCommerceIngress>[0]["evaluationTurn"],
+    openingMediaRule?:{readonly version:"FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1"}) => runPersistedCommerceIngress({
     batch, fence: 1, scope, store, inbox,
     history, transaction: async (work: (client: never) => Promise<unknown>) => { await beforeTransaction(); return work({} as never); },
     facts: { ready: async () => true, resolve: async () => {}, close: async () => {}, resolveCartSelection: select }, policy,
@@ -60,6 +61,7 @@ function fixture(productIds = ["SM613"]) {
     ...(handoffReply?{handoffReply}:{}),
     ...(quoteTask?{quoteTask}:{}),
     ...(evaluationTurn?{evaluationTurn}:{}),
+    ...(openingMediaRule?{openingMediaRule}:{}),
   } as unknown as Parameters<typeof runPersistedCommerceIngress>[0]);
   return { run, store, inbox, commit, verifier, select, profileWrite, policy, message, products, catalogRead, history, setRead: (read: typeof readOverride) => { readOverride = read; }, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
     setCycle: (state: typeof cycle) => { cycle = state; }, cycle: () => cycle, batch,
@@ -1130,4 +1132,51 @@ it.each(["unchanged","revision","media"])("explicit quote uses the real group eg
  if(mode==="unchanged"){expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(messages).toEqual([{kind:"TEXT",text:"Áo 499.000đ chị nhé."},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);}
  else{expect(result.terminal.disposition).toBe("NO_SEND");expect(messages).toEqual([]);}
  expect(f.verifier).toHaveBeenCalledOnce();
+});
+
+const openingRule={version:"FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1"} as const;
+function openingFixture(withImages=true){
+ const f=fixture();Object.assign(f.history,{hasPriorAcceptedShopOutput:vi.fn(async()=>false)});
+ Object.assign(f.batch.items[0]!,{receivedAt:commerceNow});
+ const p=f.products[0]!.product;
+ if(withImages)p.images=[{url:"https://content.pancake.vn/opening.jpg",role:"PRIMARY",angle:"FRONT",imageType:"MODEL",intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
+ return f;
+}
+it.each(["Dạ chị.","Shop không hẹn sáng mai chị nhé.","Áo 499.000đ chị nhé."])("opening rule attaches media to early FINAL through actual ingress: %s",async text=>{
+ const f=openingFixture();const r=await f.run(async()=>({kind:"FINAL",text}),undefined,undefined,undefined,openingRule);
+ expect(r.terminal.disposition).toBe("SEND_ELIGIBLE");expect(f.commit.mock.calls.at(-1)![1].metaPlan?.messages).toEqual([{kind:"TEXT",text},{kind:"IMAGE",imageUrl:f.products[0]!.product.images[0]!.url}]);
+ const request=f.verifier.mock.calls[0]![0] as unknown as {trusted:{protectedClaims:{type:string}[]}};expect(request.trusted.protectedClaims.some(c=>c.type==="PRODUCT_MEDIA")).toBe(true);
+});
+it("opening rule cannot send an early bare quote without a valid photo",async()=>{
+ const f=openingFixture(false);f.enableHandoff();const r=await f.run(async()=>({kind:"FINAL",text:"Áo 499.000đ chị nhé."}),undefined,undefined,undefined,openingRule);
+ expect(r.terminal.disposition).toBe("HANDOFF");expect(r.terminal.text).toBeNull();expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);expect(f.verifier).not.toHaveBeenCalled();
+});
+it("opening private input cannot commit a code-only message without prior accepted shop output",async()=>{
+ const f=openingFixture();f.enableHandoff();f.message.text="[PHONE] [ADDRESS]";const owner=vi.fn();const r=await f.run(owner,undefined,undefined,undefined,openingRule);
+ expect(r.terminal.disposition).toBe("HANDOFF");expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+});
+
+it('CUSTOMER-only dialogue never substitutes for prior accepted shop output',async()=>{
+ const f=openingFixture();f.history.listConversationHistory.mockResolvedValue(Array.from({length:30},()=>({senderType:'CUSTOMER',direction:'INBOUND',text:'Chị đang xem mẫu này.'})));
+ const r=await f.run(async()=>({kind:'FINAL',text:'Dạ chị.'}),undefined,undefined,undefined,openingRule);expect(r.terminal.disposition).toBe('SEND_ELIGIBLE');expect(f.commit.mock.calls.at(-1)![1].metaPlan?.messages.filter(m=>m.kind==='IMAGE')).toHaveLength(1);
+});
+it('durable returning proof keeps no-photo replies available',async()=>{
+ const f=openingFixture(false);(f.history as unknown as {hasPriorAcceptedShopOutput:ReturnType<typeof vi.fn>}).hasPriorAcceptedShopOutput.mockResolvedValue(true);
+ const r=await f.run(async()=>({kind:'FINAL',text:'Dạ chị.'}),undefined,undefined,undefined,openingRule);expect(r.terminal.disposition).toBe('SEND_ELIGIBLE');expect(f.commit.mock.calls.at(-1)![1].metaPlan?.messages).toEqual([{kind:'TEXT',text:'Dạ chị.'}]);
+});
+it('unknown prior-output source never authorizes a bare opening response',async()=>{
+ const f=openingFixture();f.enableHandoff();(f.history as unknown as {hasPriorAcceptedShopOutput:ReturnType<typeof vi.fn>}).hasPriorAcceptedShopOutput.mockRejectedValue(Error('SOURCE_UNAVAILABLE'));
+ const r=await f.run(async()=>({kind:'FINAL',text:'Dạ chị.'}),undefined,undefined,undefined,openingRule);expect(r.terminal.disposition).toBe('HANDOFF');expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);
+});
+it('egress independently rejects an evaluation runner that bypasses mandatory preparation',async()=>{
+ const f=openingFixture();f.enableHandoff();
+ const reference:NonNullable<Parameters<typeof runPersistedCommerceIngress>[0]['evaluationTurn']>['run']=async turn=>{await turn.tools.prepare?.();return {terminal:{disposition:'SEND_ELIGIBLE',reason:'PASS',text:'Dạ chị.',fallbackId:null},recovery:null,sendEnabled:false,ownerGenerations:0,verifierGenerations:0,toolRounds:0,normalToolCalls:1,terminalHandoffCalls:0,toolCalls:1,proposedToolCalls:0,rejectedToolCalls:0,handoff:null,generations:[],toolLatencyMs:0,verificationLatencyMs:null};};
+ const r=await f.run(async()=>({kind:'FINAL',text:'unused'}),undefined,undefined,{kind:'PINNED_MAIN_C3',run:reference},openingRule);
+ expect(r.terminal.disposition).toBe('HANDOFF');expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);
+});
+it('prior-output cutoff precedes both source time and durable receipt time',async()=>{
+ const f=openingFixture();const received=new Date(commerceNow.getTime()-1000);Object.assign(f.batch.items[0]!,{receivedAt:received});
+ await f.run(async()=>({kind:'FINAL',text:'Dạ chị.'}),undefined,undefined,undefined,openingRule);
+ const query=(f.history as unknown as {hasPriorAcceptedShopOutput:ReturnType<typeof vi.fn>}).hasPriorAcceptedShopOutput;
+ expect(query.mock.calls[0]![0]).toMatchObject({pageId:f.batch.pageId,customerHash:f.batch.conversationHash,before:received});
 });

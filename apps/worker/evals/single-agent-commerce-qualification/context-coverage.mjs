@@ -1,6 +1,6 @@
 // Structural information coverage only. Does not infer semantic equivalence from prose.
 import {digest} from './qualification.mjs';
-export function referenceContextCoverage(trusted,context,historyMetadata){
+export function referenceContextCoverage(trusted,context,historyMetadata,openingMediaRule){
  const claims=new Set(context.verifiedClaims.map(digest)),runtime=trusted.runtimeProducts??[],
   attributes=context.productAttributes,presentation=context.productPresentation;
  const loss={protectedClaims:trusted.protectedClaims.filter(c=>!claims.has(digest(c))).map(c=>c.claimId),
@@ -14,7 +14,9 @@ export function referenceContextCoverage(trusted,context,historyMetadata){
   productPresentation:runtime.filter(p=>p.presentation&&digest(p.presentation)!==digest(presentation??null)).map(p=>p.ref),
   sizeCharts:runtime.filter(p=>p.sizeCharts?.length).map(p=>p.ref),
   sourceContent:runtime.filter(p=>p.content).map(p=>p.ref)};
- return {version:1,status:Object.values(loss).some(rows=>rows.length)?'INFORMATION_PARITY_NOT_ESTABLISHED':'STRUCTURAL_COMMON_FIELDS_PRESENT',
+ const preparationTiming=openingMediaRule?{status:'UNPROVEN',baseline:'BEFORE_STRATEGIST',candidate:'AFTER_OWNER_FINAL'}:null;
+ return {version:1,status:preparationTiming||Object.values(loss).some(rows=>rows.length)?'INFORMATION_PARITY_NOT_ESTABLISHED':'STRUCTURAL_COMMON_FIELDS_PRESENT',
+  preparationTiming,
   trustedHash:digest(trusted),contextHash:context.contextHash,
   provided:{protectedClaimIds:context.verifiedClaims.map(c=>c.claimId),productIds:context.productBinding.productIds,fields:Object.keys(context).sort()},loss,
   note:'Policy literals, receipts, charts and source content have no exact native Context V2 field. Do not assert semantic equivalence or matched replacement solely from a shared world hash.'};
