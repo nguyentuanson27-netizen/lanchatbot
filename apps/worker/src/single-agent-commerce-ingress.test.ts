@@ -1167,7 +1167,7 @@ it('durable returning proof keeps no-photo replies available',async()=>{
 });
 it('unknown prior-output source never authorizes a bare opening response',async()=>{
  const f=openingFixture();f.enableHandoff();(f.history as unknown as {hasPriorAcceptedShopOutput:ReturnType<typeof vi.fn>}).hasPriorAcceptedShopOutput.mockRejectedValue(Error('SOURCE_UNAVAILABLE'));
- const r=await f.run(async()=>({kind:'FINAL',text:'Dạ chị.'}),undefined,undefined,undefined,openingRule);expect(r.terminal.disposition).toBe('HANDOFF');expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);
+ const r=await f.run(async()=>({kind:'FINAL',text:'Dạ chị.'}),undefined,undefined,undefined,openingRule);expect(r.terminal.disposition).toBe('HANDOFF');expect('normalToolCalls' in r&&r.normalToolCalls).toBe(1);expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);
 });
 it('egress independently rejects an evaluation runner that bypasses mandatory preparation',async()=>{
  const f=openingFixture();f.enableHandoff();
@@ -1210,7 +1210,7 @@ it.each(['missing','authority','source','policy'])('opening checkout preparation
   return f.products.find(p=>p.product.productId===id);
  });
  const owner=vi.fn(),r=await f.run(owner,undefined,undefined,undefined,openingRule);
- expect(r.enqueued).toBe(0);expect(f.cycle().checkoutDraft?.fullName??null).toBeNull();expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+ expect(r.enqueued).toBe(0);expect(f.cycle().checkoutDraft?.fullName??null).toBeNull();if(fault==='missing')expect('normalToolCalls' in r&&r.normalToolCalls).toBe(2);expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
 });
 it('public checkout image preparation shares the already consumed six-call budget',async()=>{
  const f=openingFixture();await seedCart(f);f.enableHandoff();f.message.text='Chốt đơn cho chị nhé.';

@@ -738,7 +738,7 @@ try{
   const outcome={terminal:{disposition:'CODE_OWNED_SEND',messages,images},codeOwned:{kind:preview?'NATIVE_PRIVATE_CODE_PATH':'NATIVE_CHECKOUT_CLARIFICATION',sourceSha:report.sourceSha,runtimeInputHash:'a'.repeat(64),nativeResult:r.result,nativeResultHash:digest(r.result),committedReceipts:receipts,authority:input.authority,state:input.state,executionIdentity,acceptedOutbox:rows}};
   assert(validCodeOwned(outcome,generations,report.sourceSha),'ACTUAL_CHECKOUT_QUALIFICATION_PROOF');
   const tampered=structuredClone(input);tampered.result.checkoutMediaOutput.mediaBindingHash='f'.repeat(64);assert.equal(preview?previewMediaCapture(tampered):clarificationCapture(tampered),null);
-  assert(!JSON.stringify(after.publicHistory).includes('Khách thử nghiệm'));assert(!JSON.stringify(after.publicHistory).includes('0900000000'));
+  assert(!JSON.stringify(after.publicHistory.history).includes('Khách thử nghiệm'));assert(!JSON.stringify(after.publicHistory.history).includes('0900000000'));
  }
  await check('C checkout opening existing-cart confirm has exact accepted native media proof',async()=>{
   const j=await pendingCart(),{readSessionSnapshot}=await import('../single-agent-commerce-qualification/native-snapshot.mjs'),before=await readSessionSnapshot({runtime,pool,historyStore,session:j});
