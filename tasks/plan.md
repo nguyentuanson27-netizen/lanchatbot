@@ -1,4 +1,12 @@
-## Current — task-completion implementation, 2026-11-02
+## Current — continuation repair; quote contract pending, 2026-11-02
+
+- P1 implemented and same independent reviewer **APPROVE IMPLEMENTATION P1** at `8eb074ef98e6a125ce7985ca992d26b50699f60e`. Constructed s08 raw64966/presented65143 within unchanged65536;393byte headroom,14tools/signature11024 preserved, exact round-trip after bounded reference expansion. Only known CompactV2 structures changed, legacy schemas/defaults remain.
+- Observed RED10PASS/3FAIL→GREEN15, AJV4810 equivalence comparisons; final focused98PASS, worker348PASS, Node808PASS/0FAIL/2existingSKIP, build/direct TypeScript/lintPASS. First broad805PASS/3FAIL retained and fixed; overlapping counts. Reviewer verified39 artifact hashes and5 source entries.
+- [Implementation and review](../docs/specs/c3-phase-c-continuation-quote-implementation-20261102.md), [commands/hashes](../docs/specs/c3-phase-c-continuation-quote-verification-20261102.json), [plan](../docs/specs/c3-phase-c-continuation-quote-fix-plan-20261102.md).
+- **P2a pending owner choice:** recommended existing verifier reports bounded PRICE assertions/refs; code applies exact image requirement. Alternative every bound-product opening reply gets an image changes ETA/ACK behavior. No existing upstream quote-task producer; optional quote_product/postback alone cannot close free-text bypass. No option activated implicitly.
+- No model/provider evaluation, source-shop write, new PostgreSQL run, merge/deploy/live send. Qualification BLOCKED/C3 NOT_RUN/B_NOT_GO. Continue P2a after required contract choice.
+
+## Historical — task-completion implementation, 2026-11-02
 
 Owner authorized implementation of [revision2 plan](../docs/specs/c3-phase-c-task-completion-fix-plan-20261101.md), then the same independent reviewer → fixes → review. Base `33c80efd`; runtime/PostgreSQL source `5ca28f5a`; final executable `fdbb3cf4` adds offline accounting and exact test assertion only. [Implementation](../docs/specs/c3-phase-c-task-completion-implementation-20261102.md), [review](../docs/specs/c3-phase-c-task-completion-implementation-review-20261102.md), [commands/hashes](../docs/specs/c3-phase-c-task-completion-verification-20261102.json).
 
