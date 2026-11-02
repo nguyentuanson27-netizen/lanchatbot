@@ -1,4 +1,16 @@
-## Current — source-bound opening checkout fix, 2026-11-02
+## Current — source-bound model round completed, 2026-11-03
+
+- [x] Fresh107-product source capture, exact existing isolated matrix, actual native initial/PASS/provider0/dropped atcleana8; v3 inputs independently approved and final preflight PASS for both scopes.
+- [x] Run unchanged33known-development cases/48turns once, two disjoint registrations21/28 and12/20, no automaticgenerationretry/source edit/model substitution.
+- [x] Purchase28/28turns,47records/47HTTP allOK:8eligible+2codeOwned,15silentHANDOFF,3humanNO_SEND;10texts7images.
+- [x] Remainder20/20turns,23records/21HTTP:1eligible,12silentHANDOFF,7humanNO_SEND;1text1image. Preserve2pre-dispatchbound failures,1HTTP200toolshape failure and1verifierquota429/noverdict; no rejected draft scored as sent output.
+- [x] Same independent reviewer APPROVE accounting/firewall/native capture and reportaccuracy for both groups. Complete native hashes/wires/usage/Outbox/code-owned proofs/cleanup checked; full transcripts, drafts and metrics retained.
+- [x] Primary findings separate observed9subject/nativecap8 j1MALFORMED from modeloutput failure; j4 selectionUNAVAILABLE from prior media-sentinel bug. P08 add/replace and j6 native clarification reached, not fullorder completion.
+- [ ] Locked model-quality grading and qualification/C3 comparison remain NOT_GRADED/BLOCKED/NOT_RUN. No automatic follow-up fix/model run/merge/deploy.
+
+[Report and both transcript sets](../apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/REPORT.md).
+
+## Completed — source-bound opening checkout fix, 2026-11-02
 
 - [x] Source-bound canonical sentinel adapter for public/private opening checkout; cart/stock identities unchanged. Unknown/missing cart colour remains fail-closed.
 - [x] Bounded known-code diagnostics; private cart/source expiry rechecked after awaited reads before transaction dispatch.

@@ -1,0 +1,181 @@
+{
+  "runSourceSha": "a8c7ebee18e883770379f6fea665b8ab1cd31839",
+  "status": "REVIEWED_REPORTS_ONLY_NO_RUNTIME_CHANGE",
+  "normalization": "External byte hashes bind retained raw evidence. Git stores text with LF; committed LF copy hashes are listed separately. JSON/Markdown data is unchanged except explicitly approved pending-status/audit-link completion.",
+  "files": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/purchase/ACCOUNTING.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-purchase-report-20261102-01\\ACCOUNTING.json",
+      "externalByteSha256": "2505ef489ba2851b892eb139e309af4cfe4ce4bcf16c57c6f2f1a7af84423482",
+      "gitLfByteSha256": "70594a9e94c11ae5a46302664c6d85e470ae900587aefa65cec5099f13ed484c"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/purchase/ARTIFACTS.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-purchase-report-20261102-01\\ARTIFACTS.json",
+      "externalByteSha256": "8022242e6efdb85e53a8f7ac4f09fb4b7499ebf3f3152237e283b1810bf74b52",
+      "gitLfByteSha256": "3f735bfbfd2300419209e25dbc065381554caf9afd31369558dc5971e6a0fcca"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/purchase/CONVERSATIONS.md",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-purchase-report-20261102-01\\CONVERSATIONS.md",
+      "externalByteSha256": "66f1ff39e02a11035492a576d67195d6a6a5e2db3a579b9e9cd1d2edce15ac6c",
+      "gitLfByteSha256": "1278111c46bfb50a8086db7756ff0fea95911f2d2c78336fd8b0118a36ea4576"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/purchase/DRAFTS.md",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-purchase-report-20261102-01\\DRAFTS.md",
+      "externalByteSha256": "b9ddcff7e55713c444b59183f0f1f47e9df03ffa4fab81f1b3a0325ef3cb4632",
+      "gitLfByteSha256": "36401fca356661194dcd79c50b13c59286c95cdaa6bfa80d9bab90857f0522ad"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/purchase/FINDINGS.md",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-purchase-report-20261102-01\\FINDINGS.md",
+      "externalByteSha256": "7df3527b6d56409069455ad6c576a08b337bf038ec40ec139592df188239dbf9",
+      "gitLfByteSha256": "c3ab91e500c71106392d91c312418c6b036ea2d11a5b31328767006038699f94"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/purchase/FROZEN_POPULATION.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-purchase-report-20261102-01\\FROZEN_POPULATION.json",
+      "externalByteSha256": "9e4bae63f99c5992038c059f4c76ab8a4fb5e02946e91d4b0f158c9bdf3e3c84",
+      "gitLfByteSha256": "3ecb4e11f788d096a37c54ba4aed14285f08bd81b527bbc88f5f260e34fcf10b"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/purchase/GENERATION_ERRORS.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-purchase-report-20261102-01\\GENERATION_ERRORS.json",
+      "externalByteSha256": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+      "gitLfByteSha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/purchase/OPERATIONAL.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-purchase-report-20261102-01\\OPERATIONAL.json",
+      "externalByteSha256": "ded7a6724785463565c5a83d5d380d25b36023e23274159fbefb65b6210cde09",
+      "gitLfByteSha256": "a9c22b5d1bde2d238f7f2707c83c0d00a38ef6d9eafca222b7b6fd07281386cb"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/purchase/POST_RUN_ACCOUNTING_REVIEW.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-purchase-report-20261102-01\\POST_RUN_ACCOUNTING_REVIEW.json",
+      "externalByteSha256": "fac44be76dde12048f2d2c661d1d21ce6ab072c49d618f5793a17cf83b9a7571",
+      "gitLfByteSha256": "fac44be76dde12048f2d2c661d1d21ce6ab072c49d618f5793a17cf83b9a7571"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/purchase/PRIMARY_DIAGNOSTICS.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-purchase-report-20261102-01\\PRIMARY_DIAGNOSTICS.json",
+      "externalByteSha256": "a41c6b8b01712cc7d59a7b33c7a9a9e237eea24099ef03e11a190936f0f86fb2",
+      "gitLfByteSha256": "7ca65861eff30bcec2861e655acc2a98278055aa057fed852c85f95812191721"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/purchase/REPORT.md",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-purchase-report-20261102-01\\REPORT.md",
+      "externalByteSha256": "0d605833cc6f63a1a462e25a6b15d66ee1edf307500c7518a78e9cbdc19f41c4",
+      "gitLfByteSha256": "f2d85f99b5c0d8abc2d5d0ab3c69a545720d1a1646c2349d13d5b0a38875cb00"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/purchase/REPORT_ACCURACY_REVIEW.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-purchase-report-20261102-01\\REPORT_ACCURACY_REVIEW.json",
+      "externalByteSha256": "650588c35543120c3255f32fb41ef0e4f43671621303e2754c56d9c66f6ddfd0",
+      "gitLfByteSha256": "650588c35543120c3255f32fb41ef0e4f43671621303e2754c56d9c66f6ddfd0"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/purchase/REVIEW_STATUS.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-purchase-report-20261102-01\\REVIEW_STATUS.json",
+      "externalByteSha256": "80dbac11bc8975e69397523d83690659120124b0fc7a9ce786e3540c6006369f",
+      "gitLfByteSha256": "22176b01010537d1372a57e773b469a0d67a01595444a1c2aef44fd443350135"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/remainder/ACCOUNTING.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-report-20261102-01\\ACCOUNTING.json",
+      "externalByteSha256": "7956b86f4964de4d22da3ab4cc9a689870e76ab99c22662c813352ac6c616f11",
+      "gitLfByteSha256": "3f274deab5ccb018f6dfbbbdb2ce1fd1e4a34950fbb6045a0b2b2a24db02407a"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/remainder/ARTIFACTS.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-report-20261102-01\\ARTIFACTS.json",
+      "externalByteSha256": "97d96c9948225027192042945208c78e066a0678df3cd4e2d7c672c169f790f7",
+      "gitLfByteSha256": "0699e700bdb86b34f8abe8b528d1201354345ffed3e2474be6bebe4f9261d970"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/remainder/CONVERSATIONS.md",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-report-20261102-01\\CONVERSATIONS.md",
+      "externalByteSha256": "b75df647ef0bb6fe84d439c8b6cd03c5097d2151ce3c484ad8cbe3ed9cbba622",
+      "gitLfByteSha256": "5ee5ba09e28652b8e024c8e34cb89e1541ef11289c80331a98a6d5b1710dc87b"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/remainder/DRAFTS.md",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-report-20261102-01\\DRAFTS.md",
+      "externalByteSha256": "9f21e58d787ec5ad651d285de8f0bccfdc8858a6ef6743cbb0fbb3e29f41080f",
+      "gitLfByteSha256": "372480f8e379f3d97e42cb3243a198fb1fdd85157d4d55fbdbe9ad146590a8cb"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/remainder/FINDINGS.md",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-report-20261102-01\\FINDINGS.md",
+      "externalByteSha256": "c5af5819f129a96545f83a5d0bcdaff3f32b396abaee41e52a3213974fbdf182",
+      "gitLfByteSha256": "42b8240b8c2e4ca646e01d5130f98d6704685fc1535c2e1581e15dba983a677d"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/remainder/FROZEN_POPULATION.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-report-20261102-01\\FROZEN_POPULATION.json",
+      "externalByteSha256": "f008a535311606ab67e616b583fd178fde84bd281e988ee7a22d7f189d0a524f",
+      "gitLfByteSha256": "820f3ac2c59bb767f1a5aaaddfb02b240bdeeeb4de4c0798a7892703f99cd0fe"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/remainder/GENERATION_ERRORS.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-report-20261102-01\\GENERATION_ERRORS.json",
+      "externalByteSha256": "91869cb8d2da7d17475fa51666f4f2f16a994fe51776f152d9e737ad7a6112dc",
+      "gitLfByteSha256": "2bc40c5e8560b04e574d89f4ba9ebb1d92be6355a14c72b91622de67ead6358b"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/remainder/NATIVE_CONTEXT_OBSERVATIONS.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-report-20261102-01\\NATIVE_CONTEXT_OBSERVATIONS.json",
+      "externalByteSha256": "6d1c6230f60420d448b54418b98ee79edb54a114e2d8d977af37ab825d5b7524",
+      "gitLfByteSha256": "a9acd59b29313e5f9d3eae67e18d91aeb4cd5385b01a4aec68e08fa21db4701b"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/remainder/OPERATIONAL.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-report-20261102-01\\OPERATIONAL.json",
+      "externalByteSha256": "1f53369122321af439417953a2454028a6c2aaba82242fed0d9245b59f7e95bb",
+      "gitLfByteSha256": "a8e1c36fb7fd1e790453e41a051d462bffe4fd71b0729f672789227b64da20d8"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/remainder/POST_RUN_ACCOUNTING_REVIEW.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-report-20261102-01\\POST_RUN_ACCOUNTING_REVIEW.json",
+      "externalByteSha256": "30304dda9b9db872a4ff5c6c57827b4fd4513a3288ef3d4ef65d4f3240762cee",
+      "gitLfByteSha256": "30304dda9b9db872a4ff5c6c57827b4fd4513a3288ef3d4ef65d4f3240762cee"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/remainder/PRIMARY_DIAGNOSTICS.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-report-20261102-01\\PRIMARY_DIAGNOSTICS.json",
+      "externalByteSha256": "df189e5ea57f77201a240a4bc7a104e53a65d29c8fd7f988834e84b265d1c4c1",
+      "gitLfByteSha256": "8ced8a8bf9d6179d0d976402a95e9c1be6237f0e9563c97e28b2adfe899e4af7"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/remainder/REPORT.md",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-report-20261102-01\\REPORT.md",
+      "externalByteSha256": "9ac4abcd3c4d371b38c9348a73f774d95d85c4f18e62039001808a77613dfeee",
+      "gitLfByteSha256": "36f9e21143ca01870c5676d56e12464da361d839035dcb98a6453239fbb62bcc"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/remainder/REPORT_ACCURACY_REVIEW.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-report-20261102-01\\REPORT_ACCURACY_REVIEW.json",
+      "externalByteSha256": "20178f02ea030f7d673c892b2a87b58cf6e425c4dfeff49808b654a2b2d03ea2",
+      "gitLfByteSha256": "20178f02ea030f7d673c892b2a87b58cf6e425c4dfeff49808b654a2b2d03ea2"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/remainder/REVIEW_STATUS.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-remainder-report-20261102-01\\REVIEW_STATUS.json",
+      "externalByteSha256": "80dbac11bc8975e69397523d83690659120124b0fc7a9ce786e3540c6006369f",
+      "gitLfByteSha256": "22176b01010537d1372a57e773b469a0d67a01595444a1c2aef44fd443350135"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/REPORT.md",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-overall-report-20261103.md",
+      "externalByteSha256": "39da0265a80d3cbf9475f59a3300e4aeb90dcf03b6539c96fb533781858ca4c7",
+      "gitLfByteSha256": "9162f8c76cdc294ca52e3372d033f747207b31e48d7308b4f8488aec8155a20c"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/COVERAGE.json",
+      "externalSource": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-source-bound-coverage-20261103.json",
+      "externalByteSha256": "a1963875910b0b745458365b2283195024e66e10e9096811243165152e01fc4a",
+      "gitLfByteSha256": "d11cc32eba52e579dce33453792ace09c3e5119bdb5351d89e5631c9f4989512"
+    }
+  ]
+}

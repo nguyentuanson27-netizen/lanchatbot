@@ -1,0 +1,88 @@
+{
+  "sourceSha": "a8c7ebee18e883770379f6fea665b8ab1cd31839",
+  "registeredCases": 21,
+  "registeredTurns": 28,
+  "executedTurns": 28,
+  "generationRecords": 47,
+  "generationHttp": 47,
+  "maxRequestsPerGeneration": 1,
+  "generationStatuses": {
+    "OK": 47
+  },
+  "verifierVerdicts": {
+    "PASS": 8
+  },
+  "verifierLatencyMs": {
+    "n": 8,
+    "p50": 7520.496799999964,
+    "p95": 10118.345700000005
+  },
+  "nativeVerificationAndReadbackMs": {
+    "n": 8,
+    "p50": 9096.710699999996,
+    "p95": 12584.6587
+  },
+  "providerTransportErrors": 0,
+  "preDispatchFailures": 0,
+  "tokenUsage": {
+    "inputObserved": 488277,
+    "outputObserved": 42871,
+    "usageRows": 47,
+    "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+  },
+  "acceptedTexts": 10,
+  "acceptedImages": 7,
+  "terminalCounts": {
+    "SEND_ELIGIBLE": 8,
+    "HANDOFF": 15,
+    "NO_SEND": 3,
+    "CODE_OWNED_SEND": 2
+  },
+  "handoffNoSendRate": 0.6428571428571429,
+  "databaseDropped": true,
+  "providerGenerationRetry": 0,
+  "liveSend": false,
+  "auxiliaryHttp": [
+    {
+      "slotId": "02b28bfe17aca8141f6ae813d064f5fe34383cc65fe64de8232570b35cd2799b",
+      "turnIndex": 0,
+      "invocation": 1,
+      "kind": "OAUTH",
+      "ordinal": 1,
+      "status": 200,
+      "error": null,
+      "latencyMs": 177.02799999999115,
+      "requestHash": null,
+      "usage": null,
+      "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+    },
+    {
+      "slotId": "02b28bfe17aca8141f6ae813d064f5fe34383cc65fe64de8232570b35cd2799b",
+      "turnIndex": 0,
+      "invocation": 1,
+      "kind": "EMBEDDING",
+      "ordinal": 2,
+      "status": 200,
+      "error": null,
+      "latencyMs": 1721.6831000000238,
+      "requestHash": "06fd1ec68a142b1426023ec062599711a5cf4886715903364747068b2b46ba5e",
+      "usage": null,
+      "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+    },
+    {
+      "slotId": "61ba489cf896c25703ee48d01dc219e5df6e85b480bd0fe669e55e7203be3e75",
+      "turnIndex": 0,
+      "invocation": 2,
+      "kind": "EMBEDDING",
+      "ordinal": 3,
+      "status": 200,
+      "error": null,
+      "latencyMs": 2118.0715999999666,
+      "requestHash": "83ad44d2194ef218994324adec2e3f5fb372b86bd086ffd250360217828691f6",
+      "usage": null,
+      "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+    }
+  ],
+  "note": "Harness measurements only, not production SLO or causal latency/quality improvement. Auxiliary OAuth/embedding HTTP retained separately from generation attempts; unexposed token/cost is unavailable.",
+  "providerErrorNoVerdict": 0
+}

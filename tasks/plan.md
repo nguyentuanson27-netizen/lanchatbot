@@ -1,4 +1,16 @@
-## Current — source-bound opening checkout fix approved, 2026-11-02
+## Current — source-bound model round completed, 2026-11-03
+
+Owner authorized one new model round after the approved fix. Clean run source `a8c7ebee18e883770379f6fea665b8ab1cd31839`, runtime b667 byte parity. Fresh107-product public capture, unchanged isolated handoff matrix, real native initial state/provider0/database dropped. Same reviewer APPROVE INPUTS for both v3 registrations; actual-time preflight PASS before dispatch. Same Gemini3.5FlashLite HIGH/GPT6.1Sol HIGH, N1/retry0, no prompt/effort/runtime change.
+
+Completed two independent known-development populations: purchase21cases/28turns/max112 and remainder12cases/20turns/max80. All33cases/48turns executed,0NOT_RUN/nohardstop. Purchase47records/47HTTP allOK, actual8eligible+2code-owned clarification sends/15silentHANDOFF/3humanNO_SEND,10texts7images. Remainder23records/21HTTP,19OK/3provider-error/1malformed, actual1eligible/12silentHANDOFF/7humanNO_SEND,1text1image. Both databases dropped/live0. Aggregate70records/68generationHTTP describes accounting only, not pooled quality/safety grades.
+
+Remaining technical observations: s02/s13 pre-dispatch wire bounds68081/68073>65536 (0HTTP); s04 closed-tool shape diagnostic atHTTP200; j1turn2 nativeMALFORMED despite bothownergenerationsOK with observed9subjects versuscap8 (full gate snapshot unavailable, no sole-cause replay claim); j3 verifier oneHTTP429 usage_limit_reached/noverdict/noretry. j4 attempted selection returnedUNAVAILABLE, no cart/MEDIA_SELECT, so not called a recurrence of old media-sentinel failure. P08 add/replace and j6 code clarification now reached; no model-run proof of completed preview/order. Voice/next-step still have primary observations, no locked quality score or causal/stability claim.
+
+Same independent reviewer APPROVE post-run accounting/firewall/native capture and REPORT ACCURACY for both groups. Frozen cohorts7ready14gaps and2ready10gaps retained. Stop after the authorized round: quality NOT_GRADED/qualification BLOCKED/C3 NOT_RUN/B_NOT_GO; no automatic fix/rerun/C3/merge/deploy.
+
+[Overall report](../apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/REPORT.md) · [21-case conversations](../apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/purchase/CONVERSATIONS.md) · [12-case conversations](../apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/remainder/CONVERSATIONS.md).
+
+## Completed — source-bound opening checkout fix approved, 2026-11-02
 
 Implemented the [independently approved direction](../docs/specs/c3-phase-c-opening-checkout-independent-direction-review-20261102.json) from base `d4172797`; executable source `b6676b681acf25c027decea4434f96a0f3ede433`. Exact canonical unlabelled source/cart identity permits generic opening media; unknown cart colours and real colour constraints remain closed. Private checkout rechecks cart/source expiry after awaited reads. Known diagnostic codes are retained without raw exception text.
 
