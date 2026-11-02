@@ -1,5 +1,7 @@
 ## Current — remaining12 Phase C model cases completed, 2026-11-02
 
+- [x] Owner-requested primary review of fix+both model batches: exact-selector frozen replay reproduces p08/j6/j4 `__NO_COLOR__`→`NO_COLOR` passed as requested media colour; same product has2eligibleGENERIC assets. Immediate failure identified as MEDIA_COLOR_BINDING_UNVERIFIED masked by diagnostic UNKNOWN_INTERNAL. Historical outcomes/grades unchanged; no runtime fix/provider rerun.
+- [x] Review also records all-bound-product image scope/prompt mismatch, navy-only positive coverage/readiness gap, actual s13wirebound and s11schema mismatch, quoteform vs advice trigger, and j3trusted499/449/799price comparison. [Review/evidence](../docs/specs/c3-phase-c-opening-checkout-post-run-review-20261102.md). Next fixes are proposals, not implemented or approved by this review.
 - [x] Owner explicitly selected12ca/20lượt original FULL22 not in completed PURCHASE21; exact subset/order/scripts, zero overlap, N1/max80/retry0. Eval-only bounded scope RED2→GREEN36, independent2PASS/code/scope APPROVE, commit1f6a358b; runtime/packages/prompts unchanged.
 - [x] Fresh107-product source capture, exact existing isolated matrix, actual initial02clean/provider0/DBdropped; same-reviewer INPUTS APPROVED frozen2SALES_READY/10SOURCE_UNAVAILABLE and final actual-time preflight PASS.
 - [x] Clean1f6 model run complete12/12cases and20/20turns,0NOT_RUN/nohardstop.21records=19OWNER+2VERIFIER;20actualgenerationrequests,19OK/1MALFORMED HTTP200/1pre-dispatch OWNER_REQUEST_BOUND0HTTP. No transporterror/timeout or retry.
