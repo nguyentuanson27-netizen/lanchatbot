@@ -4,7 +4,7 @@
 
 Reviewer: `/root/phase_c_task_completion_implementation_review`, the same independent reviewer throughout this fix loop. Implementation base: `d4172797d5eeeca921f2c068ac9bd1ca5beb49d3`; first implementation savepoint: `c9f2c7cb9c51efa35d793b73a7895704e9f8d7d4`.
 
-Scope: [implementation](c3-phase-c-opening-checkout-source-bound-fix-20261102.md) and [sealed verification packet](c3-phase-c-opening-checkout-source-bound-verification-20261102.json), SHA256 `80e9b91ae8edc712c14f89504ace76162b0fd0cd15692ca3ca879669c071b892`. The packet was sealed before the final reviewer decision and retains its pending-review creation status; this record contains the subsequent final decision. The packet bytes have not been changed after review.
+Scope: [implementation](c3-phase-c-opening-checkout-source-bound-fix-20261102.md) and [sealed verification packet](c3-phase-c-opening-checkout-source-bound-verification-20261102.json), external/Windows-copy byte SHA256 `80e9b91ae8edc712c14f89504ace76162b0fd0cd15692ca3ca879669c071b892`. Git text normalization stores the same packet with LF and byte SHA256 `2c37164533749d8057c35dd767d0b3cdfea1467966675fa0b400a610552d7179`; the only difference is 707 CRLF-to-LF conversions, and decoded JSON is identical. The packet was sealed before the final reviewer decision and retains its pending-review creation status; this record contains the subsequent final decision. The external sealed packet bytes have not been changed after review; Git newline normalization is recorded separately above.
 
 ## Review loop
 
