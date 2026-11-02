@@ -27,7 +27,7 @@ Ba ca p08/j6 của batch21 vàj4 của batch12 đều đã CART_OPENED, sau đó
 
 Đây là lỗi nối kiểu dữ liệu ở code, không phải model bịa màu, verifier từ chối, thiếu toàn bộ ảnh hay hai màu thành phần mâu thuẫn. Không cần nguồn thông tin mới để tái hiện immediate failure này. Replay dùng clock tại last owner generation start trong captured turn, không phải timestampinstrumented của MEDIA_SELECT; không suy diễn expiry transition hoặc live-source parity. Không có provider/network/send/state mutation; output JSON là artifact review. [Replay evidence](c3-phase-c-opening-checkout-media-replay-review-20261102.json).
 
-Hướng sửa: phân biệt rõ sentinel/unspecified với màu thật ngay tại adapter màu→media; giữ nguyên canonical cart tuple và stock identity, giữ chặn ảnh sai màu khi thực sự có màu xác định. Áp dụng nhất quán cho readiness/currentPhotos/preparation/final egress. Không vá bằng cách cấp ảnh màuNO_COLOR, thay cart sentinel bằng màu đoán, hoặc bỏ gate ảnh toàn cục.
+Hướng sửa: phân biệt rõ sentinel/unspecified với màu thật ngay tại adapter màu→media; giữ nguyên canonical cart tuple và stock identity, giữ chặn ảnh sai màu khi thực sự có màu xác định. Chỉ bỏ media colour filter khi nguồn đã xác nhận canonical variant không phân loại màu và không có ràng buộc màu thật đang có hiệu lực từ yêu cầu/lựa chọn đã xác minh. Không tự biến string lạ hoặc màu khách chưa cung cấp thành sentinel; không retry ảnh chung sau khi query màu thật thất bại. Áp dụng nhất quán cho readiness/currentPhotos/preparation/final egress. Không vá bằng cách cấp ảnh màuNO_COLOR, thay cart sentinel bằng màu đoán, hoặc bỏ gate ảnh toàn cục.
 
 ## F2 — Phạm vi bắt ảnh làm nghẽn cả câu hỏi làm rõ/care/ACK
 
@@ -37,7 +37,7 @@ Owner đã chọn mọi opening identified-product reply cóảnh. Implementatio
 - s06/s09: phối đồ/chăm sóc áo,2initial refs; ảnh trở thành prerequisite dù lượt không xin ảnh.
 - s15: khách cảmơn/chọn màu; explicit color-media binding failure và code rule cùng làm handoff.
 
-Các trường hợp này một phần là tradeoff của yêu cầu đã chốt, không nên sửa ngầm bằng skip ảnh. Nhưng prompt hiện hành dòng62 còn dặn “không biến ảnh thành điều kiện để tiếp tục tư vấn”, mâu thuẫn với code opening rule. Owner không thấy đầy đủ hậu quả terminal khi một ref không có ảnh.
+Các trường hợp này một phần là tradeoff của yêu cầu đã chốt, không nên sửa ngầm bằng skip ảnh. Nhưng prompt hiện hành dòng62 còn dặn “không biến ảnh thành điều kiện để tiếp tục tư vấn”, mâu thuẫn với code opening rule. Quan sát actual terminal cho thấy một ref thiếu ảnh có thể chặn cả câu hỏi phân biệt; cần xác nhận rõ contract cho tradeoff này, không suy đoán về hiểu biết hoặc ý định của owner.
 
 Hướng xử lý cần chốt contract: phân biệt sản phẩm đã thực sự được xác định/chọn để gửi với tập ứng viên chỉ được admit để so sánh/phân biệt. Nếu vẫn giữ mọi opening identified-product reply cóảnh, readiness/source chuẩn bị phải phản ánh đúng phạm vi này và chấp nhận rõ tradeoff care/ACK. Không dùng parser/classifier mới hoặc owner tự khai nhãn quote để bypass. Không tự mở ngoại lệ chưa được owner duyệt.
 
