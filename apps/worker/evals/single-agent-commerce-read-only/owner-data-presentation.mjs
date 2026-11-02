@@ -71,3 +71,26 @@ export function presentCompactOwnerData(original){
  assert.deepEqual(readCompactSections(wire.contents[0]),sections.map(({label,value})=>({label,value})),'COMPACT_DATA_LOSS');
  return wire;
 }
+
+/** Expand only the bounded same-body reference; no language or task inference. */
+export function expandDeclaredToolExecution(execution,declarations){
+ assert(execution&&typeof execution==='object'&&!Array.isArray(execution),'EXECUTION_REFERENCE');
+ if(!Object.hasOwn(execution,'toolNamesFrom'))return structuredClone(execution);
+ assert(execution.toolNamesFrom==='DECLARED_TOOL_SCHEMAS'&&!Object.hasOwn(execution,'availableTools')&&
+  !Object.hasOwn(execution,'callableTools')&&Array.isArray(declarations),'EXECUTION_REFERENCE');
+ const names=declarations.map(d=>d?.name);
+ assert(names.every(n=>typeof n==='string'&&n.length>0)&&new Set(names).size===names.length,'EXECUTION_REFERENCE');
+ const expanded=structuredClone(execution);delete expanded.toolNamesFrom;
+ return {...expanded,availableTools:names,callableTools:[...names]};
+}
+
+export function expandDefaultSellingOption(data){
+ assert(data&&typeof data==='object'&&!Array.isArray(data),'DEFAULT_OPTION_REFERENCE');
+ if(!Object.hasOwn(data,'defaultFromOption'))return structuredClone(data);
+ const keys=['offerType','variantId','facts','availability','sizeAvailability'];
+ assert(data.defaultFromOption===0&&Array.isArray(data.sellingOptions)&&data.sellingOptions.length===1&&
+  keys.every(k=>!Object.hasOwn(data,k)&&Object.hasOwn(data.sellingOptions[0],k)),'DEFAULT_OPTION_REFERENCE');
+ const expanded=structuredClone(data);delete expanded.defaultFromOption;
+ for(const k of keys)expanded[k]=structuredClone(data.sellingOptions[0][k]);
+ return expanded;
+}

@@ -87,6 +87,14 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  }
  const c=request.context;
  declarations=structuredClone(declarations);
+ const compactV2=request.ownerContextPresentation==='VI_DATA_BLOCKS_COMPACT_V2';
+ if(compactV2)for(const d of declarations){
+  const key=d.name==='apply_customer_state'?'ops':d.name==='recommend_size'?'customerStateOps':null;
+  const properties=d.parametersJsonSchema?.properties,ops=key&&properties?.[key];
+  if(ops&&canonicalJsonV1(ops)===canonicalJsonV1(stateDeclarations[0].parametersJsonSchema.properties.ops))
+   properties[key]={...ops,items:{type:'object',anyOf:ops.items.anyOf.map(branch=>({...branch,additionalProperties:false}))}};
+ }
+
  const canBindProductInBatch=request.callableTools?.includes('search_products')&&request.toolBudget?.callsRemaining>=2;
  const canCreateLineInBatch=request.callableTools?.includes('add_to_cart')&&request.toolBudget?.callsRemaining>=2;
  for(const declaration of declarations){
@@ -126,6 +134,12 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   return keepLocalEvidence?value:omitCurrentProductDuplicates(value,current);
  };
  const defaultInOptions=p=>{
+  if(compactV2&&p.sellingOptions?.length===1){
+   const option=p.sellingOptions[0],same=(a,b)=>canonicalJsonV1(a)===canonicalJsonV1(b);
+   return typeof p.offerType==='string'&&typeof p.variantId==='string'&&Array.isArray(p.facts)&&p.facts.length>0&&
+    ['offerType','variantId','facts','availability','sizeAvailability'].every(k=>Object.hasOwn(p,k)&&Object.hasOwn(option,k)&&same(p[k],option[k]))&&
+    ['sourceVersion','observedAt','expiresAt','metadata'].every(k=>!Object.hasOwn(p,k)||Object.hasOwn(option,k)&&same(p[k],option[k]));
+  }
   if(p.requestedOfferType!==null||!Array.isArray(p.sellingOptions)||p.sellingOptions.length<2||
    typeof p.offerType!=='string'||typeof p.variantId!=='string'||!Array.isArray(p.facts)||!p.facts.length)return false;
   const matches=p.sellingOptions.filter(o=>o.offerType===p.offerType&&o.variantId===p.variantId);
@@ -150,7 +164,10 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
    const partial=['price','stock'].some(field=>data.availability?.[field]&&data.availability[field].status!=='OK');
    response.response.data=product(data,partial);
    // Compare only raw evidence in this response, before availability reasons are sanitized.
-   if(!partial&&defaultInOptions(data))for(const key of ['offerType','variantId','facts','availability','sizeAvailability'])delete response.response.data[key];
+   if(!partial&&defaultInOptions(data)){
+    for(const key of ['offerType','variantId','facts','availability','sizeAvailability'])delete response.response.data[key];
+    if(compactV2&&data.sellingOptions.length===1)response.response.data.defaultFromOption=0;
+   }
    if(response.response.data.availability)response.response.data.availability=availability(data.availability);
    if(Array.isArray(data.sellingOptions))response.response.data.sellingOptions=data.sellingOptions.map(o=>({...o,availability:availability(o.availability)}));
    const differences=priceDifferences(data);
@@ -230,6 +247,11 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   phase:request.toolsAllowed===false?(callable.length?'TERMINAL_HANDOFF_OR_REPLY':'FINAL_REPLY'):'TOOL_OR_REPLY',
   toolBudget:request.toolBudget?{roundsRemaining:request.toolBudget.roundsRemaining,callsRemaining:request.toolBudget.callsRemaining,
    ...(request.toolWorkAccounting==='PRIMITIVE_WORK_V2'?{accounting:'PRIMITIVE_WORK_V2'}:{})}:null};
+ if(compactV2&&new Set(ownerView.execution.availableTools).size===ownerView.execution.availableTools.length&&canonicalJsonV1(ownerView.execution.availableTools)===canonicalJsonV1(ownerView.execution.callableTools)){
+  // Both ordered inventories are already carried by this body's native schemas.
+  delete ownerView.execution.availableTools;delete ownerView.execution.callableTools;
+  ownerView.execution.toolNamesFrom='DECLARED_TOOL_SCHEMAS';
+ }
  if(request.toolWorkAccounting!==undefined)requireThat(request.toolWorkAccounting==='PRIMITIVE_WORK_V2','OWNER_EXECUTION_BOUND');
  if(declarations.some(d=>d.name==='quote_product'))requireThat(request.toolWorkAccounting==='PRIMITIVE_WORK_V2','QUOTE_ACCOUNTING_REQUIRED');
  // At the existing final generation, start a text-only request with the completed
