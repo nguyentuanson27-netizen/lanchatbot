@@ -19,11 +19,15 @@ Reviewed plan savepoint `91d86587660a9e1b30abfa90f91dda27744d553e`. Reviewer fou
 
 Reviewer kiểm exact clean `22654e25c34c4c7c02c8fa1fef59e5f24e8becfb`, xác nhận hai blocker S3/S6 đã đóng. Còn một P1 ở S5: ingress ép mọi inbound khi checkout pending vào private code path, nên mở intake ngay sau add có thể khiến p08 đổi sang áo, j1 sửa số lượng/size và j4 thương lượng chỉ nhận lại câu hỏi tên. Code-owned allowlist không sửa được việc yêu cầu khách không tới owner. Reviewer yêu cầu mandatory feasibility gate và giải pháp tối thiểu giữ mutation/negotiation, privacy/caps/no parser-router; nếu chưa có giải pháp phù hợp phải ghi S5 BLOCKED, không blanket early-intake.
 
-## Revision 3 — prepared, re-review pending
+## Review 3 — APPROVE PLAN
 
 - Bỏ yêu cầu mặc định add→intake; giữ first-turn checkout hiện có, không tắt feature để tránh regression. S5 được đánh dấu FEASIBILITY_REQUIRED trước khi mở rộng hành vi intake sớm.
 - Gate S5-A yêu cầu composed ingress/session/real-PG tests với pending fields/preview: p08/j1/j4 phải có receipt và reply đúng tác vụ, không chỉ clarification text. Candidate reuse privacy boundary cho typed positive public proof; negative detector/parser miss không đủ để đưa raw text cho owner. Không semantic intent router/parser hoặc model thứ ba.
 - Không private commit và owner-effect turn/budget mới cùng inbound; mutation phải xử lý preview/quote revision đúng domain và không đưa PII vào public. Unknown/mixed/unproved input fail-closed.
 - Nếu route không chứng minh được trong các ràng buộc hiện có thì S5 BLOCKED_AT_PRIVACY_OR_INTERRUPTION_CONTRACT. Không activate early-intake prompt hoặc prospective code-owned allowlist/full55 acceptance, không claim hỏi tên lặp là sales progress. S1–S4 có thể bàn giao riêng, không tự đổi campaign denominator.
 
-Status: **NOT YET APPROVED**. Same reviewer must check revision 3. All implementation commands/model/real-PG execution for this plan remain NOT_RUN.
+Reviewer kiểm exact clean commit `7c1dd5ebaaebad6f2b558cbd0c26e0138b307f65` và kết luận **APPROVE PLAN**, không còn blocker ở cấp kế hoạch. Reviewer xác nhận S5 đã có mandatory privacy/interruption feasibility gate, không dùng detector âm tính làm proof public, không chạy hai luồng effect/budget cho cùng inbound, không dùng code-owned allowlist/clarification để che tác vụ bị bỏ. Nếu không chứng minh được route phù hợp thì S5 và full acceptance vẫn BLOCKED. Các sửa S3/S6 vẫn giữ target authority/compatibility, typed evaluator proof và admission.
+
+Final reviewer qualification: approval chỉ cho kế hoạch engineering có điều kiện; chưa chứng minh implementation, privacy route, nguồn shop hoặc chất lượng model đã đạt. Reviewer chỉ đọc, không chạy tests/provider/network hoặc sửa file. Các implementation commands, real PostgreSQL và model run cho kế hoạch này đều **NOT_RUN**. Source publication, merge/deploy/live send không được cấp quyền bởi approval này.
+
+Delivery chỉ cập nhật status đầu plan và record/todo, không sửa contract R3 đã được approve.

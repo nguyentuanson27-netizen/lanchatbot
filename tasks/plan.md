@@ -1,8 +1,8 @@
-## Proposed — sales completion repair plan, 2026-11-03
+## Approved plan — sales completion repair, 2026-11-03
 
 Plan only, base788ce66d. S1verified source/media/chart inventory → S2canonical component and customer-choice vs shop-gap cart outcomes → S3target-bound component fit → S4bounded context/purposeful reads → S5native checkout progression → S6tests/PG/review/frozen provider acceptance. Runtime/prompt/source unchanged; all planned checks and new model runs NOT_RUN. Preserve33cases/48turns; proposed separate full-checkout1case/7turns, total34/55N1, prefix14/23 included rather than rerun. Material source prerequisites must be ready before claiming fixed sales paths; no live source write/deploy authorized.
 
-[Detailed plan and acceptance](../docs/specs/c3-phase-c-sales-completion-fix-plan-20261103.md). Independent review2 closed S3/S6 blockers; remaining S5 pending-intake interruption risk. Revision3 adds mandatory privacy/interruption feasibility gate, no blanket early intake/allowlist activation; S5 remains BLOCKED if no compliant route. Same-reviewer R3 approval pending. No implementation/model/source write.
+[Detailed plan and acceptance](../docs/specs/c3-phase-c-sales-completion-fix-plan-20261103.md). Same independent reviewer APPROVE PLAN revision3 at7c1dd5eb after3reviews: S3targetauthority/legacycompatibility, S6typedcheckoutbridge/admission and S5mandatoryprivacy/interruptionfeasibilitygate. Conditionalengineeringplan only: implementation/source/privacyroute/modelacceptanceNOT_RUN; S5/fullacceptanceBLOCKED if no compliantroute. No implementation/model/source write or live permission granted by review.
 
 ## Current — model continuation completed and audited, 2026-11-03
 
