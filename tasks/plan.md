@@ -1,10 +1,16 @@
-## Current — interrupted model run, missing-only continuation, 2026-11-03
+## Current — model continuation completed and audited, 2026-11-03
 
-Owner requested retry. Original4e873 run stopped on PostgreSQL SSH disconnect after17 captured turns; preserve all requests/errors including started s09 without terminal. Remaining coverage19cases/31turns uses fresh source and separate identities, no repeat of14completed cases. Added fixed7case/11turn scope with cap44; unchanged remainder12/20/cap80. Prompt/models/runtime unchanged. RED2 observed -> focused14PASS; exact idle disposable DB cleanup confirmed. Independent input review and new provider run pending.
+- [x] Preserved interrupted4e873 run:17 captured turns,35generationHTTP including s09 twoOWNER OK and oneVERIFIER error without terminal. Old failure and all raw artifacts retained.
+- [x] Clean source5b679acc; evaluator-only exact7missing cases/11turns/cap44, then unchanged12cases/20turns/cap80. Runtime/prompt/models unchanged; same Gemini3.5FlashLite HIGH/GPT6.1Sol HIGH, N1/retry0. Focused14PASS after2observedRED.
+- [x] Fresh107-product capture, unchanged isolated handoff matrix, real native initial state/provider0/dropped. Independent source and both frozen inputs APPROVE; actual-time preflight PASS. SSH keepalive only, no reconnect/retry.
+- [x] Completed19cases/31turns:purchase11/11,16records15HTTP (15OK,1pre-dispatch OWNER_REQUEST_BOUND0HTTP); remainder20/20,25records25HTTP/allOK. No NOT_RUN/hardstop; both databases dropped, live0. Old exact orphan database cleanup confirmed separately.
+- [x] New actual terminal7SEND_ELIGIBLE+2CODE_OWNED_SEND+14silentHANDOFF+8human-ownedNO_SEND,9texts5images; verifier7PASS3FAIL. Preserve1boundfailure and3rejected drafts; no draft scored as sent output.
+- [x] Independent accounting/capture/reportaccuracy APPROVE after fixing packet links and explicitOAuth accounting2HTTP outside40newgenerationHTTP. Unique48captured turns/33cases across old17+new31;49startednativeattempts includes uncapturedoldS09,75generationHTTP total. Worlds/attempts/denominators kept separate.
+- [ ] Whole-reply quality NOT_GRADED; PhaseCqualificationBLOCKED/C3NOT_RUN/B_NOT_GO. Remaining source/preparation/size gaps, s15 request bound and3verifier semantic rejections documented; no automatic fix/rerun/merge/deploy.
 
-[Continuation plan and limits](../docs/specs/c3-phase-c-interrupted-model-continuation-20261103.md).
+[Report, all transcripts and audited evidence](../apps/worker/evals/single-agent-commerce-qualification/media-budget-context-run-20261103/REPORT.md).
 
-## Current — image gate, work budget and context repaired, 2026-11-03
+## Previous — image gate, work budget and context repaired, 2026-11-03
 
 Owner authorized the fix and approved unique-product/cart opening image scope. Base `a2202402`; runtime `0da6073`; clean actual PostgreSQL head `ba835df`, runtime/eval byte parity. Fixed V2 scope/timing, eager actual-debit photo preparation, pre-batch known-target work/image feasibility, exact current subject dependency cleanup and lossless CompactV2 product/fact representation. V1 historical scope/colour union retained. No verifier/style prompt, model, cap, retry, role or production wiring change.
 

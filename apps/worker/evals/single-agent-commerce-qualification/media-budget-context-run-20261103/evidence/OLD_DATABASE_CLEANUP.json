@@ -1,0 +1,11 @@
+{
+  "status": "CLEANUP_CONFIRMED",
+  "database": "c3_b_test_c55e65bcb8311505",
+  "existed": true,
+  "activeConnections": 0,
+  "testDatabaseDropped": true,
+  "providerRequests": 0,
+  "shopSourceWrites": 0,
+  "liveSends": 0,
+  "at": "2026-11-03T05:27:19.047Z"
+}
