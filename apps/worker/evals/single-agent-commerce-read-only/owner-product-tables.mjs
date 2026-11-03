@@ -26,8 +26,29 @@ function unpack(value,allowed){
  return value.rows.map(row=>({...structuredClone(value.defaults),...Object.fromEntries(value.columns.map((k,i)=>[k,row[i]]))}));
 }
 const ownRead=(v,id,offer)=>object(v)&&same(Object.keys(v).sort(),['offerType','subjectRef'])&&v.subjectRef===id&&v.offerType===offer;
+const component=v=>object(v)&&same(Object.keys(v).sort(),['componentRef','role'])&&typeof v.componentRef==='string'&&v.componentRef.length>0&&v.componentRef.length<=128&&
+ ['TOP','PANTS','SKIRT','DRESS','JACKET','ACCESSORY','OTHER'].includes(v.role);
+function shareComponents(products){
+ const refs=new Map();
+ for(const p of products)for(const o of Array.isArray(p.purchaseOptions)?p.purchaseOptions:[]){
+  const s=o.componentSource;if(s?.status!=='AVAILABLE'||s.completeness!=='INSPECTED_ROWS'||!Array.isArray(s.components)||s.components.length>3||Object.hasOwn(s,'componentIndices'))continue;
+  for(const c of s.components)if(component(c)){
+   const item=refs.get(c.componentRef)??{value:c,parents:new Set(),conflict:false};
+   item.parents.add(p.subjectRef);if(!same(item.value,c))item.conflict=true;refs.set(c.componentRef,item);
+  }
+ }
+ const components=[...refs.values()].filter(r=>r.parents.size>1&&!r.conflict).map(r=>structuredClone(r.value));
+ if(!components.length)return [];
+ for(const p of products)for(const o of Array.isArray(p.purchaseOptions)?p.purchaseOptions:[]){
+  const s=o.componentSource;if(s?.status!=='AVAILABLE'||s.completeness!=='INSPECTED_ROWS'||!Array.isArray(s.components)||s.components.length>3||!s.components.length||Object.hasOwn(s,'componentIndices'))continue;
+  const indices=s.components.map(c=>components.findIndex(v=>same(v,c)));
+  if(indices.every(i=>i>=0)){delete s.components;s.componentIndices=indices;}
+ }
+ return components;
+}
 export function compactOwnerProducts(products){
  const out=JSON.parse(JSON.stringify(products)); // The same JSON omission semantics as the original wire.
+ const components=shareComponents(out);
  for(const p of out){
   if(Array.isArray(p.purchaseOptions)){
    for(const o of p.purchaseOptions)if(!Object.hasOwn(o,'readTargetFromProductAndOffer')&&ownRead(o.priceRead,p.subjectRef,o.offerType)&&ownRead(o.stockRead,p.subjectRef,o.offerType)){
@@ -38,9 +59,16 @@ export function compactOwnerProducts(products){
   if(p.presentation&&Array.isArray(p.presentation.variants))p.presentation.variants=pack(p.presentation.variants,variantKeys);
   for(const e of p.selectionEvidence??[])if(Array.isArray(e.options))e.options=pack(e.options,optionKeys);
  }
- return pack(out,productKeys);
+ const rows=pack(out,productKeys);
+ return components.length?{format:'PRODUCT_COMPONENT_REFERENCES_V1',components,products:rows}:rows;
 }
 export function expandOwnerProducts(value){
+ let components=null;
+ if(object(value)&&value.format==='PRODUCT_COMPONENT_REFERENCES_V1'){
+  assert(same(Object.keys(value).sort(),['components','format','products'])&&Array.isArray(value.components)&&value.components.length>0&&value.components.length<=96&&
+   value.components.every(component)&&new Set(value.components.map(c=>c.componentRef)).size===value.components.length,'PRODUCT_COMPONENT_REFERENCE');
+  components=value.components;value=value.products;
+ }
  const products=structuredClone(unpack(value,productKeys));
  for(const p of products){
   if(p.purchaseOptions){
@@ -48,6 +76,11 @@ export function expandOwnerProducts(value){
    for(const o of p.purchaseOptions)if(Object.hasOwn(o,'readTargetFromProductAndOffer')){
     assert(o.readTargetFromProductAndOffer===true&&!Object.hasOwn(o,'priceRead')&&!Object.hasOwn(o,'stockRead')&&typeof p.subjectRef==='string'&&typeof o.offerType==='string','PRODUCT_READ_TARGET');
     delete o.readTargetFromProductAndOffer;o.priceRead={subjectRef:p.subjectRef,offerType:o.offerType};o.stockRead={...o.priceRead};
+   }
+   for(const o of p.purchaseOptions){const s=o.componentSource;if(!s||!Object.hasOwn(s,'componentIndices'))continue;
+    assert(components&&s.status==='AVAILABLE'&&s.completeness==='INSPECTED_ROWS'&&!Object.hasOwn(s,'components')&&Array.isArray(s.componentIndices)&&s.componentIndices.length>0&&s.componentIndices.length<=3&&
+     s.componentIndices.every(i=>Number.isInteger(i)&&i>=0&&i<components.length),'PRODUCT_COMPONENT_REFERENCE');
+    s.components=s.componentIndices.map(i=>structuredClone(components[i]));delete s.componentIndices;
    }
   }
   if(p.presentation?.variants)p.presentation.variants=unpack(p.presentation.variants,variantKeys);

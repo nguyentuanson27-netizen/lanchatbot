@@ -201,7 +201,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   if(['add_to_cart','change_cart_item','confirm_purchase','record_negotiation'].includes(response.name)&&Array.isArray(data.cartItems))delete data.cart;
  }
  const state=Object.fromEntries(['currentProductId','consideredSize','salesStage','customerMeasurements','fitPreference','preferences','cartQuote','cartItems','checkoutStatus',
-  'customerProfileId','customerProfileRevision','measurementFingerprint','sizeMeasurementFingerprints','customerStateUpdatePending']
+  'customerProfileId','customerProfileRevision','measurementFingerprint','sizeMeasurementFingerprints','sizeFitTargets','customerStateUpdatePending']
   .filter(k=>Object.hasOwn(c.state,k)).map(k=>[k,c.state[k]]));
  if(Array.isArray(state.customerMeasurements))state.customerMeasurements=state.customerMeasurements.map(measurement);
  // Code owns intake; the owner needs only the public confirmation stage, not its collection checklist.

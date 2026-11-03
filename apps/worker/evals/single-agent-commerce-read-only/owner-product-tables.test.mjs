@@ -6,6 +6,20 @@ const products=()=>['P1','P2'].map(subjectRef=>({subjectRef,availableOffers:['AO
  presentation:{variants:Array.from({length:8},(_,n)=>({variantId:`${subjectRef}-${n}`,color:n%2?'be':'__NO_COLOR__',size:String(n)}))},
  selectionEvidence:[{sourceHash:'a'.repeat(64),contentHash:'b'.repeat(64),options:Array.from({length:8},(_,n)=>({size:String(n),color:n%2?'be':'__NO_COLOR__',status:'IN_STOCK',reasonCode:null,identityHash:String(n).padStart(64,'0')}))}]}));
 
+test('shared BOM components appear once while parent offer/source/read identities round-trip independently',()=>{
+ const input=products();
+ for(const p of input)for(const o of p.purchaseOptions){
+  o.componentSource={status:'AVAILABLE',completeness:'INSPECTED_ROWS',sourceRef:`pos:${p.subjectRef}:${o.offerType}`,
+   components:[{componentRef:'SHARED-PHYSICAL-COMPONENT-AO',role:'TOP'}]};
+ }
+ const wire=compactOwnerProducts(input),text=JSON.stringify(wire);
+ assert.equal(text.split('SHARED-PHYSICAL-COMPONENT-AO').length-1,1);
+ assert.deepEqual(expandOwnerProducts(JSON.parse(text)),input);
+ for(const p of input)for(const o of p.purchaseOptions)assert(text.includes(o.componentSource.sourceRef));
+ const conflicting=structuredClone(input);conflicting[1].purchaseOptions[0].componentSource.components[0].role='OTHER';
+ assert.deepEqual(expandOwnerProducts(compactOwnerProducts(conflicting)),conflicting);
+});
+
 test('known product data tables round-trip all values, order and nested source identities',()=>{
  const input=products(),before=structuredClone(input),wire=compactOwnerProducts(input);
  assert(Buffer.byteLength(JSON.stringify(wire))<Buffer.byteLength(JSON.stringify(input)));
