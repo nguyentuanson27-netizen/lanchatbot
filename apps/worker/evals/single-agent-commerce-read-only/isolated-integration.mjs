@@ -651,6 +651,44 @@ try{
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
 
+ if(process.argv.includes('--sales-completion-feasibility'))await check('C sales completion S5 public interruption feasibility',async()=>{
+  assert(!providerRun&&!phaseC&&!phaseCInitial,'FEASIBILITY_SYNTHETIC_ONLY');
+  const rows=[],answers=['Nguyễn Thị Lan','0900000001','12 Đường thử nghiệm, Quận 1, TP Hồ Chí Minh','COD'];
+  for(const [index,position]of ['FULL_NAME','PHONE','ADDRESS','PAYMENT_METHOD','ORDER_PREVIEW'].entries())for(const action of ['REPLACE_LINE','ADD_SIZE','NEGOTIATION']){
+   const row={position,action,status:'NOT_RUN'};rows.push(row);
+   try{
+    const j=await statefulFixture({preparedOffers:true,multiOfferContext:true,checkoutEta:true});
+    await j.turn('Chị lấy áo navy size M.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);await j.drain();
+    await j.turn('Chốt đơn cho chị nhé.',[native([{name:'confirm_purchase',args:{}}])]);await j.drain();
+    for(const answer of answers.slice(0,index)){await j.turn(answer,[]);await j.drain();}
+    const before=await j.state();
+    assert(index===4?before.stage==='ORDER_PREVIEW':before.clarification?.missingFields[0]===position,'PENDING_POSITION_NOT_REACHED');
+    const call=action==='REPLACE_LINE'?{name:'change_cart_item',args:{subjectRef:before.cart.value.lines[0].lineId,action:'REPLACE_LINE',targetSubjectRef:'SM613',offerType:'AO',size:'M',color:'navy'}}:
+      action==='ADD_SIZE'?{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'L',color:'navy'}}:
+      {name:'record_negotiation',args:{intent:'PRICE_OBJECTION',sourceQuote:'Giá hơi cao, bớt cho chị được không?'}};
+    const text=action==='REPLACE_LINE'?'Chị đổi sang áo lẻ navy M nhé.':action==='ADD_SIZE'?'Lấy thêm một áo L navy nữa.':'Giá hơi cao, bớt cho chị được không?';
+    const result=await j.turn(text,[native([call]),say('Dạ chị.')]),after=await j.state();
+    const cartChanged=commerceHash(before.cart)!==commerceHash(after.cart),negotiationChanged=commerceHash(before.negotiation)!==commerceHash(after.negotiation);
+    const receiptEvents=await Promise.all(after.processedCommandIds.filter(id=>!before.processedCommandIds.includes(id))
+      .map(id=>runtime.readCommittedSalesCycleEvent(pageId,j.bound.conversationId,id)));
+    const receiptCount=receiptEvents.filter(e=>e&&e.commandKind===(action==='NEGOTIATION'?'NEGOTIATION_EVENT':'CART_MUTATED')).length;
+    const privateFieldsUnchanged=commerceHash(before.checkoutDraft)===commerceHash(after.checkoutDraft);
+    const lines=after.cart?.value.lines??[],old=before.cart.value.lines[0],sizes=lines.map(l=>l.components.map(c=>c.size).join(',')).sort();
+    const actionSatisfied=action==='REPLACE_LINE'?lines.length===1&&lines[0].lineId===old.lineId&&lines[0].offerId==='AO'&&lines[0].quantity===old.quantity:
+      action==='ADD_SIZE'?lines.length===2&&JSON.stringify(sizes)===JSON.stringify(['L','M'])&&lines.every(l=>l.quantity===1):
+      !!after.negotiation&&after.negotiation.stateVersion===before.negotiation.stateVersion+1&&
+       after.negotiation.consumedObjectionEvidenceIds.length===before.negotiation.consumedObjectionEvidenceIds.length+1;
+    const previewSafe=action==='NEGOTIATION'||before.preview===null||after.preview===null;
+    const fulfilled=result.owners>0&&result.result.terminal.disposition==='SEND_ELIGIBLE'&&receiptCount>0&&privateFieldsUnchanged&&
+      actionSatisfied&&previewSafe&&after.confirmation===null&&(action==='NEGOTIATION'?negotiationChanged:cartChanged);
+    Object.assign(row,{status:fulfilled?'PASS':'BLOCKED',owners:result.owners,verifiers:result.verifiers,disposition:result.result.terminal.disposition,
+      cartChanged,negotiationChanged,receiptCount,privateFieldsUnchanged,actionSatisfied,previewSafe,previewInvalidated:before.preview!==null&&after.preview===null});
+   }catch(error){Object.assign(row,{status:'SETUP_OR_ASSERTION_FAILED',errorType:error.name});}
+  }
+  report.salesCompletionFeasibility={status:rows.every(r=>r.status==='PASS')?'PASS':'BLOCKED_AT_PRIVACY_OR_INTERRUPTION_CONTRACT',rows,providerRequests:0,liveSend:false};save();
+  assert(rows.every(r=>r.status==='PASS'),'S5_PUBLIC_INTERRUPTION_CONTRACT_NOT_READY');
+ });
+
  await check('C media context two cart sizes retain current dependency closure after multi-offer preparation',async()=>{
   const j=await statefulFixture({preparedOffers:true,multiOfferContext:true});
   const add=size=>({name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size,color:'navy'}});
