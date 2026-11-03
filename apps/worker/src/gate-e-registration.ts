@@ -598,6 +598,7 @@ function runtimeSizeGuardInput(
     .filter((claim) => referencedClaimHashes.has(claim.provenance.contentHash))
     .map((claim) => {
       if (claim.scope.kind !== "PRODUCT" ||
+          claim.value.fitTarget?.kind === "COMPONENT" ||
           claim.provenance.authority !== "VERIFIED_SIZE_ENGINE_V1" ||
           claim.value.evidenceBasis !== "MEASUREMENTS" ||
           !claim.provenance.evidenceRef.includes(

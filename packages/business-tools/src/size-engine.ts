@@ -3,6 +3,9 @@ import {
   CustomerProfileV1Schema,
   SizeChartV1Schema,
   SizeRecommendationV1Schema,
+  SizeFitTargetV1Schema,
+  sameSizeFitTarget,
+  type SizeFitTargetV1,
   type BodyMeasurementV1,
   type CustomerProfileV1,
   type MeasurementKind,
@@ -185,6 +188,7 @@ export interface SizeRecommendationTarget {
 
 
 export interface SizeEngineInput {
+  readonly fitTarget?:SizeFitTargetV1;
   readonly profile: CustomerProfileV1;
   readonly target: SizeRecommendationTarget;
   readonly charts: readonly ScopedSizeChart[];
@@ -204,6 +208,7 @@ export type SizeRecommendationDecisionEvidence =
   | null;
 
 export interface SizeEngineDecision {
+  readonly fitTarget?:SizeFitTargetV1;
   readonly action: "REPLY" | "ASK_MORE" | "HANDOFF";
   readonly recommendation: SizeRecommendationV1;
   readonly alternativeSizes: readonly string[];
@@ -404,7 +409,7 @@ const recommendationBase = (
   generatedAt: input.generatedAt,
 });
 
-export function recommendSize(input: SizeEngineInput): SizeEngineDecision {
+function recommendSizeInternal(input: SizeEngineInput): SizeEngineDecision {
   const profile = CustomerProfileV1Schema.parse(input.profile);
   const selected = selectVerifiedSizeChart(input.charts, input.target);
   const base = recommendationBase(input, selected);
@@ -610,6 +615,17 @@ export function recommendSize(input: SizeEngineInput): SizeEngineDecision {
     evidenceBasis,
   };
 }
+/** Preserve legacy product decisions; new target-aware calls bind their scope before evaluation. */
+export function recommendSize(input:SizeEngineInput):SizeEngineDecision {
+  const t=input.fitTarget;
+  if(t){
+    SizeFitTargetV1Schema.parse(t);
+    if((t.kind==="PRODUCT"?t.productId:t.parentProductId)!==input.target.parentProductId||
+      (t.kind==="PRODUCT"&&input.target.componentProductId!==t.productId)||
+      (t.kind==="COMPONENT"&&(t.componentProductId!==input.target.componentProductId||t.componentRole!==input.target.componentRole)))throw Error("SIZE_TARGET_MISMATCH");
+  }
+  const decision=recommendSizeInternal(input);return t?{...decision,fitTarget:t}:decision;
+}
 /** A short-lived, code-created envelope used only by the final outbound guard. */
 export const SIZE_RECOMMENDATION_CLAIM_TTL_MS = 5 * 60 * 1_000;
 export const SIZE_MEASUREMENT_CLAIM_EVIDENCE_MAX_AGE_MS = 48 * 60 * 60 * 1_000;
@@ -619,6 +635,7 @@ export interface VerifiedSizeRecommendationClaimInput {
   readonly decision: SizeEngineDecision;
   readonly productId: string;
   readonly profile: CustomerProfileV1;
+  readonly fitTarget?: SizeFitTargetV1;
 }
 
 function sizeMeasurementFingerprint(
@@ -657,6 +674,17 @@ export function createVerifiedSizeRecommendationClaim(
   input: VerifiedSizeRecommendationClaimInput,
 ): SizeRecommendationProtectedClaimV1 | null {
   const recommendation = input.decision.recommendation;
+  const fitTarget=input.fitTarget;
+  if(fitTarget){
+    if(!SizeFitTargetV1Schema.safeParse(fitTarget).success||
+      (fitTarget.kind==="PRODUCT"?fitTarget.productId:fitTarget.parentProductId)!==input.productId)return null;
+    if(fitTarget.kind==="COMPONENT"&&recommendation.recommendedSizes.some(s=>
+      s.componentProductId!==fitTarget.componentProductId||s.componentRole!==fitTarget.componentRole))return null;
+  }
+  if(input.decision.fitTarget&&!sameSizeFitTarget(input.decision.fitTarget,fitTarget??{kind:"PRODUCT",productId:input.productId}))return null;
+  if(input.decision.fitTarget?.kind==="PRODUCT"&&recommendation.recommendedSizes.some(s=>s.componentProductId!==input.productId))return null;
+  if(fitTarget?.kind==="COMPONENT"&&!input.decision.fitTarget)return null;
+  if(fitTarget?.kind==="COMPONENT"&&input.decision.evidenceBasis?.kind!=="CURRENT_MEASUREMENTS")return null;
   const decisionEvidence = input.decision.evidenceBasis ?? null;
   if (
     input.decision.action !== "REPLY" ||
@@ -701,6 +729,7 @@ export function createVerifiedSizeRecommendationClaim(
     return {
       id: recommendation.recommendationId,
       type: "SIZE_RECOMMENDATION",
+      ...(fitTarget?{fitTarget}:{}),
       value: { recommendedSizes, alternativeSizes },
       productId: input.productId,
       variantId,
@@ -744,6 +773,7 @@ export function createVerifiedSizeRecommendationClaim(
   return {
     id: recommendation.recommendationId,
     type: "SIZE_RECOMMENDATION",
+    ...(fitTarget?{fitTarget}:{}),
     value: { recommendedSizes, alternativeSizes },
     productId: input.productId,
     variantId,

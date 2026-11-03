@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 import type { RuntimePolicyResolution } from "@lana/chat-runtime";
-import { commerceProductGroup, commerceSizeSource, type CommerceProductGroup } from "./single-agent-commerce-product-groups.js";
+import { commerceProductGroup, commerceSizeSource,commerceComponentSizeSource, type CommerceProductGroup } from "./single-agent-commerce-product-groups.js";
 import { fixtureProduct, fixtureSizeInput, fixturePolicy, fixtureProfile, commerceScope, commerceNow } from "./single-agent-commerce.test-support.js";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
 import { createCustomerStateTools } from "./single-agent-commerce-state.js";
@@ -19,6 +19,25 @@ function fixture() {
     artifacts: { sizeCharts: { "source-chart": artifact } } } } as unknown as RuntimePolicyResolution;
   return { product, policy, artifact };
 }
+it.each(["valid","stale","wrong-role","unverified","wrong-parent","global","brand","ambiguous-bom","missing-bom"])("resolves component size only from exact current BOM and scoped chart: %s",fault=>{
+ const {product,policy,artifact}=fixture(),raw=fixtureProduct("MEMBER").snapshot;
+ artifact.scope.parentProductIds=["MEMBER"];
+ raw.offers.DIRECT!.rows[0]!.component_1_sku="MEMBER-QUAN";
+ if(fault==="stale")raw.synced_at="2020-01-01T00:00:00.000Z";
+ if(fault==="wrong-role")artifact.chart.componentRole="TOP";
+ if(fault==="unverified")artifact.chart.reference.verificationStatus="EXTRACTED_UNREVIEWED";
+ if(fault==="wrong-parent")artifact.scope.parentProductIds=["OTHER"];
+ if(fault==="global")Object.assign(artifact.scope,{level:"GLOBAL"});
+ if(fault==="brand")artifact.chart.brand="OTHER";
+ if(fault==="ambiguous-bom")raw.offers.DIRECT!.rows.push({...structuredClone(raw.offers.DIRECT!.rows[0]!),component_1_sku:"OTHER-QUAN"});
+ if(fault==="missing-bom")delete raw.offers.DIRECT!.rows[0]!.component_1_sku;
+ const read=()=>commerceComponentSizeSource(product,raw,policy,"PANTS",commerceNow);
+ if(fault!=="valid")expect(read).toThrow();
+ else{
+  const source=read();expect(source.fitTarget).toEqual({kind:"COMPONENT",parentProductId:"MEMBER",componentProductId:"MEMBER-QUAN",componentRole:"PANTS"});
+  expect(source.charts).toHaveLength(1);expect(source.sourceBindingHash).toMatch(/^[a-f0-9]{64}$/);expect(Date.parse(source.sourceExpiresAt)).toBe(commerceNow.getTime()+1200000);
+ }
+});
 it("delegates only chart applicability to an approved same-name member, preserving source provenance", () => {
   const { product, policy, artifact } = fixture(), before = structuredClone({ product, artifact });
   expect(commerceSizeSource(product, policy).charts).toEqual([]);

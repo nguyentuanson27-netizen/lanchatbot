@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { ProtectedClaimV1Schema, ProductContentV1Schema, SizeChartV1Schema, type ProductAttributesV1,
+import { ProtectedClaimV1Schema, ProductContentV1Schema, SizeChartV1Schema,canonicalJsonV1,SizeFitTargetV1Schema,sizeFitTargetKey,sameSizeFitTarget,type SizeFitTargetV1, type ProductAttributesV1,
   type ProductFactsV2, type ProductPresentationEvidenceV1, type SizeChartV1 } from "@lana/contracts";
 import { verifyProductAttributesV1, verifyProductPresentationEvidenceV1 } from "@lana/business-tools";
 import { hasResidualPii } from "@lana/dataset-review";
@@ -110,15 +110,35 @@ export function hardPrecheck(trusted: TrustedContext, draft: string, now: Date, 
   const parsed = trusted.protectedClaims.map(claim => ProtectedClaimV1Schema.safeParse(claim));
   if (parsed.some(claim => !claim.success)) return "MALFORMED";
   const claims = parsed.flatMap(claim => claim.success ? [claim.data] : []);
+  const targets:SizeFitTargetV1[]=[];
+  if(s.sizeFitTargets!==undefined){
+    if(!record(s.sizeFitTargets)||Object.keys(s.sizeFitTargets).length>4)return "MALFORMED";
+    for(const [key,value]of Object.entries(s.sizeFitTargets)){
+      if(!record(value)||Object.keys(value).sort().join(',')!=="claimHash,claimId,sourceHash,target"||
+        typeof value.sourceHash!=="string"||!/^[a-f0-9]{64}$/.test(value.sourceHash)||
+        typeof value.claimHash!=="string"||!/^[a-f0-9]{64}$/.test(value.claimHash)||typeof value.claimId!=="string")return "MALFORMED";
+      const t=SizeFitTargetV1Schema.safeParse(value.target);if(!t.success||sizeFitTargetKey(t.data)!==key)return "MALFORMED";
+      const claim=claims.find(c=>c.claimId===value.claimId&&c.type==="SIZE_FIT");
+      if(!claim||claim.type!=="SIZE_FIT"||hash(canonicalJsonV1(claim))!==value.claimHash||claim.scope.kind!=="PRODUCT"||
+        !sameSizeFitTarget(claim.value.fitTarget??{kind:"PRODUCT",productId:claim.scope.productId},t.data))return stale("SIZE_TARGET_BINDING");
+      targets.push(t.data);
+    }
+  }
+  if(record(s.sizeFitTargets)&&claims.some(c=>c.type==="SIZE_FIT"&&!Object.values(s.sizeFitTargets as Record<string,unknown>).some(v=>record(v)&&v.claimId===c.claimId)))return stale("SIZE_TARGET_BINDING");
+  const fingerprintKey=(claim:Extract<import("@lana/contracts").ProtectedClaimV1,{type:"SIZE_FIT"}>)=>
+    claim.value.fitTarget?sizeFitTargetKey(claim.value.fitTarget):claim.scope.kind==="PRODUCT"?claim.scope.productId:"";
+  if(claims.some(claim=>claim.type==="SIZE_FIT"&&claim.value.fitTarget?.kind==="COMPONENT"&&
+    !targets.some(t=>sameSizeFitTarget(t,claim.value.fitTarget!))))return stale("SIZE_TARGET_BINDING");
   // Supplied Size Engine results belong to the exact current customer measurements.
   if (claims.some(claim => claim.type === "SIZE_FIT" &&
     (claim.value.customerProfileId !== s.customerProfileId ||
       claim.value.customerProfileRevision !== s.customerProfileRevision ||
       claim.value.measurementFingerprint !== (record(s.sizeMeasurementFingerprints) && claim.scope.kind === "PRODUCT"
-        ? s.sizeMeasurementFingerprints[claim.scope.productId] : s.measurementFingerprint)))) return stale("SIZE_PROFILE_BINDING");
+        ? s.sizeMeasurementFingerprints[fingerprintKey(claim)] : s.measurementFingerprint)))) return stale("SIZE_PROFILE_BINDING");
   const authorization = authorizeRealtimeProtectedClaimProposal({
     declaredClaimIds: claims.map(claim => claim.claimId), observedClaimTypes: [], availableClaims: claims,
     expectedProductIds: trusted.boundSubjects.filter(subject => subject.kind === "PRODUCT").map(subject => subject.ref), now,
+    expectedFitTargets:[...targets,...trusted.boundSubjects.filter(subject=>subject.kind==="PRODUCT").map(subject=>({kind:"PRODUCT" as const,productId:subject.ref}))],
     ...(trusted.boundSubjects.some(subject => subject.variantId !== undefined || subject.kind === "VARIANT") ? {
       expectedProductScopes: trusted.boundSubjects.filter(subject => subject.kind === "PRODUCT" && subject.variantId !== undefined)
         .map(subject => ({ productId: subject.ref, variantId: subject.variantId ?? null }))

@@ -1,8 +1,10 @@
 import type { RuntimePolicyResolution } from "@lana/chat-runtime";
-import { normalizeCatalogToken, selectVerifiedSizeChart, type StableProductDocument, type SizeRecommendationTarget } from "@lana/business-tools";
+import { normalizeCatalogToken, selectVerifiedSizeChart,CatalogSnapshotV3Schema, type StableProductDocument, type SizeRecommendationTarget } from "@lana/business-tools";
 import type { ProductComponentRole } from "@lana/contracts";
 import { sizeChartTarget } from "./size-chart-target.js";
 import { evaluateSizeChartEligibility } from "./size-chart-eligibility.js";
+import {catalogComponentRole} from "./realtime-sales-catalog.js";
+import {commerceHash} from "./single-agent-commerce-read-only-context.js";
 
 /** Explicit owner-approved data, not inferred from similar catalog titles. */
 export interface CommerceProductGroup {
@@ -37,4 +39,41 @@ export function commerceSizeSource(product: StableProductDocument, policy: Runti
   if (!selectVerifiedSizeChart(sourceCharts, target)) return fallback();
   return { target: { ...target, parentProductId: product.productId, componentProductId: product.productId },
     charts: sourceCharts.map(c => ({ chart: c.chart, scope: { ...c.scope, parentProductIds: Object.keys(group.productTitles) } })) };
+}
+
+/** No name delegation here: a unique BOM component and an explicitly scoped published chart are required. */
+export function commerceComponentSizeSource(product:StableProductDocument,raw:unknown,policy:RuntimePolicyResolution,
+ componentRole:ProductComponentRole,now:Date,maxAgeSeconds=1200){
+ const s=CatalogSnapshotV3Schema.parse(raw),at=now.getTime(),observed=Date.parse(s.synced_at);
+ if(!Number.isInteger(maxAgeSeconds)||maxAgeSeconds<60||maxAgeSeconds>86400||s.product_id!==product.productId||!Number.isFinite(at)||observed>at||observed+maxAgeSeconds*1000<=at||
+   !["OK","FULFILLMENT_POLICY_NOT_FOUND"].includes(normalizeCatalogToken(s.data_status)))throw Error("COMPONENT_SOURCE_UNAVAILABLE");
+ const refs=new Set<string>();
+ for(const offer of Object.values(s.offers)){
+   if(offer.rows.length>64)throw Error("COMPONENT_SOURCE_BOUND");
+   for(const row of offer.rows){
+     const components=Array.isArray(row.components)&&row.components.length?row.components:
+       [row.component_1_sku,row.component_2_sku].filter(v=>typeof v==="string"&&v.trim()).map(product_sku=>({product_sku}));
+     if(components.length>3)throw Error("COMPONENT_SOURCE_BOUND");
+     for(const c of components){const v=c as Record<string,unknown>,ref=[v.product_sku,v.variation_sku,v.component_id].find(x=>typeof x==="string"&&x.trim());
+       if(typeof ref!=="string"||Buffer.byteLength(ref)>128)throw Error("COMPONENT_SOURCE_UNAVAILABLE");
+       if(catalogComponentRole(ref)===componentRole)refs.add(ref);
+     }
+   }
+ }
+ if(refs.size!==1)throw Error("COMPONENT_SOURCE_UNAVAILABLE");
+ const componentProductId=[...refs][0]!;
+ const artifacts=Object.values(policy.bundle?.artifacts.sizeCharts??{}).filter(a=>a.scope?.level==="COMPONENT"&&
+   a.scope.componentRole===componentRole&&a.chart.componentRole===componentRole&&normalizeCatalogToken(a.chart.brand)===normalizeCatalogToken(s.brand)&&a.scope.parentProductIds.includes(product.productId));
+ const eligible=artifacts.flatMap(a=>{
+   const target:SizeRecommendationTarget={brand:a.chart.brand,category:a.chart.category,componentRole,parentProductId:product.productId,
+     componentProductId,form:product.silhouettes[0]??null,material:product.materials[0]??null};
+   const charts=evaluateSizeChartEligibility({policy,productId:product.productId,target}).charts.filter(c=>
+     c.chart.reference.chartId===a.chart.reference.chartId&&c.chart.reference.version===a.chart.reference.version);
+   return selectVerifiedSizeChart(charts,target)?[{target,charts}]:[];
+ });
+ if(eligible.length!==1)throw Error("COMPONENT_CHART_UNAVAILABLE");
+ const source=eligible[0]!,fitTarget={kind:"COMPONENT" as const,parentProductId:product.productId,componentProductId,componentRole};
+ const {synced_at:_heartbeat,...content}=s;
+ return {...source,fitTarget,sourceBindingHash:commerceHash({bom:content,fitTarget,charts:source.charts}),
+   sourceExpiresAt:new Date(Math.min(observed+maxAgeSeconds*1000,policy.bundle?.policy?.effectiveUntil?Date.parse(policy.bundle.policy.effectiveUntil):Infinity)).toISOString()};
 }

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import {SizeFitTargetV1Schema} from "./size-fit-target.js";
 import { CartComponentSelectionV1Schema, type CartComponentSelectionV1 } from "./customer-size-cart.js";
 import {
   DECISION_BUYING_INTENT_EVIDENCE_CODES_V1,
@@ -365,6 +366,7 @@ export const ProtectedClaimV1Schema = z.discriminatedUnion("type", [
   ProtectedClaimBase.extend({
     type: z.literal("SIZE_FIT"),
     value: z.object({
+      fitTarget:SizeFitTargetV1Schema.optional(),
       recommendedSizes: z.array(BoundedIdSchema).min(1).max(4),
       alternativeSizes: z.array(BoundedIdSchema).max(4),
       customerProfileId: z.string().uuid(),
@@ -422,6 +424,9 @@ export const ProtectedClaimV1Schema = z.discriminatedUnion("type", [
       message: "protected claim authority does not match claim type",
     });
   }
+  if(claim.type==="SIZE_FIT"&&claim.value.fitTarget&&claim.scope.kind==="PRODUCT"&&
+    (claim.value.fitTarget.kind==="PRODUCT"?claim.value.fitTarget.productId:claim.value.fitTarget.parentProductId)!==claim.scope.productId)
+    context.addIssue({code:z.ZodIssueCode.custom,path:["value","fitTarget"],message:"size target must bind the claim parent"});
   const requiresCartScope = claim.type === "SHIPPING_FEE" ||
     claim.type === "FREESHIP" || claim.type === "PROMOTION_OFFER";
   if (requiresCartScope && claim.scope.kind !== "CART") {

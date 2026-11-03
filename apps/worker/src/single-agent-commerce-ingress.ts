@@ -26,7 +26,7 @@ import { extractAdProductCodes } from "./media-resolution.js";
 import { checkoutDetails, selectionsMatchCartLines } from "./realtime-sales-cycle.js";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
 import { makeCommerceMediaDeliveryBinding } from "./single-agent-commerce-media-delivery.js";
-import { commerceSizeSource } from "./single-agent-commerce-product-groups.js";
+import { commerceSizeSource,commerceComponentSizeSource } from "./single-agent-commerce-product-groups.js";
 
 const textHash = (text: string) => createHash("sha256").update(text, "utf8").digest("hex");
 const noSend = (reason: string) => ({ terminal: { disposition: "NO_SEND", reason, text: null, fallbackId: null } as TerminalOutcome, sendEnabled: false as const, enqueued: 0 });
@@ -252,6 +252,9 @@ export async function runPersistedCommerceIngress(input: {
     sourceMessages,
     sizeInput: async ref => { const { product } = await input.read.catalog.readProduct(ref, false);
       return commerceSizeSource(product, await input.policy(), input.read.productGroups); },
+    componentSizeInput:async request=>{const {product,snapshot}=await input.read.catalog.readProduct(request.parentProductId,true);
+      if(snapshot?.shop_alias!==scope.shopAlias)throw Error("COMPONENT_SOURCE_SCOPE");
+      return commerceComponentSizeSource(product,snapshot,await input.policy(),request.componentRole,input.clock(),input.read.maxFactAgeSeconds??1200);},
     quoteInput: async () => { const state = (await executor.repository.read(scope.conversationId))!, policy = await policyBundle();
       const lines = state.cart && canonicalCartPolicyLinesV2(state.cart.value.lines, scope.shopId); if (!lines || !state.negotiation) throw new Error("CART_REQUIRED");
       const tier = state.negotiation.customerState;
