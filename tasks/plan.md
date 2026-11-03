@@ -1,4 +1,8 @@
-## Implementation in progress — sales completion repair, 2026-11-03
+## Latest — checkout boundary relaxed by owner, 2026-11-03
+
+Owner authorized removal of unconditional pending-checkout private routing. [Scoped amendment/results](../docs/specs/c3-phase-c-checkout-interruption-relaxation-20261103.md) supersede the revision 3 positive-proof-only prerequisite. The same owner/verifier receives public interruptions after existing per-message and joined-batch DLP/intake checks; detected mixed/private input stays in one private path. Source/mechanics independently APPROVE; worker 2,633 / focused 315 PASS; build, direct tsc and lint exit 0. Clean source `6feeaeb5`: real PostgreSQL 15/15 PASS, database dropped, provider requests 0. S5-A scoped mechanics now PASS; unknown PII formats remain a detector limitation. S6 bridge, full 55-turn model acceptance, source readiness and final qualification are not completed by this change. Historical blocked results below are preserved.
+
+## Previous implementation — sales completion repair, 2026-11-03
 
 User selected implementation before run. Base6e97e231; S2canonical component/choice boundary, S3target-aware size and S4bounded continuation mechanics implemented, independently APPROVED with exclusions. Clean9fa7ea5d realPG15journeys:12blocked while privatefield intake,3PASS atORDER_PREVIEW; database dropped/provider0. FullVitest2607PASS withmaxWorkers2, Node835PASS/2SKIP; build/typecheck/lint0. Sources notREADY (chart/colour/media proof), S5positiveprivacycontract BLOCKED; conditionalS6bridge/full55model NOT_EXECUTABLE/NOT_RUN. No earlyintake/allowlist activation. [Current evidence](../docs/specs/c3-phase-c-sales-completion-implementation-20261103.md). Approved conditional scope remains unchanged; no fullsalescompletion/qualityGO.
 

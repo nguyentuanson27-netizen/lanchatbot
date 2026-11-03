@@ -19,4 +19,31 @@ Independent review found that checking only the joined batch could leak a separa
 
 Required controls: private name/phone/address/payment, mixed input, separate private fragments, attachments, HUMAN takeover, superseded inbound, preserved pending private fields and one owner budget. Re-run the existing **15 synthetic real-PostgreSQL journeys** under a new clean source/output identity, retaining the old 12-blocked/3-pass report unchanged. That matrix must inspect exact cart/negotiation state, receipts and preview invalidation. No new provider generation, source publication or live send is authorized by this boundary change itself.
 
-Status at initial implementation: focused tests/build running; independent re-review and real PostgreSQL verification pending. This amendment does not activate blanket early intake, S6 bridge or a new model campaign, nor resolve the separate chart/media/colour source gaps.
+## Actual result
+
+Executable source **`6feeaeb53e865c7e5c92c7e4a33ab2a25bdff37d`**, clean at PostgreSQL execution. Independent source/mechanics review **APPROVE** after the fragment and payment fixes. Reviewer did not run provider/source writes or grant model-quality/GO approval.
+
+Final independent artifact audit also **APPROVE**: integration source/cleanliness, all 15 rows, integration hash, seven log hashes and test counts matched the report. This was a read-only audit, not another execution or broader qualification approval.
+
+- Focused ingress/checkout/effects/public-history/persistence: **315 PASS**.
+- Complete worker Vitest: **2,633 PASS / 154 files**, unchanged timeouts, `--maxWorkers=2`.
+- Worker build, direct `tsc --noEmit`, and worker lint: exit 0.
+- **Real PostgreSQL 15/15 PASS**, all three actions at all five positions. Every tested public interruption ran the same owner and mandatory verifier, produced the expected receipt/state change, preserved saved private fields and made no purchase confirmation. At ORDER_PREVIEW the prior preview was invalidated. Test database dropped; provider generation0/live-sendfalse.
+- Historical source `9fa7ea5d` retains its original **3 PASS / 12 BLOCKED** result. All 12 formerly blocked private-intake positions now passed under the relaxed contract. These are deterministic scripted-owner mechanics results, not measured model task quality or universal PII detection.
+
+Commands actually executed:
+
+```powershell
+pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts -t 'allows a public product question|keeps detected checkout fields' --maxWorkers=1
+pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts -t 'separate fragment|does not classify' --maxWorkers=1
+pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-checkout.test.ts src/single-agent-commerce-effects.test.ts src/single-agent-commerce-public-history.test.ts src/single-agent-commerce-persistence.test.ts --maxWorkers=2
+pnpm --filter @lana/worker exec vitest run src --maxWorkers=2
+pnpm --filter @lana/worker exec tsc -p tsconfig.json --noEmit
+pnpm --filter @lana/worker build
+pnpm --filter @lana/worker lint
+python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-checkout-relax-pg-20261103 COD --sales-completion-feasibility --check-prefix "C sales completion"
+```
+
+The first focused command observed the original four RED failures, then fixture source/provenance failures, then nine selected tests PASS. The second observed two RED failures for a split name and broad payment signal. The complete focused result above is after both fixes; failed output is retained separately. No command failure is reported as PASS.
+
+[Bound results and artifact hashes](c3-phase-c-checkout-relaxation-evidence-20261103.json). This closes the **scoped S5-A interruption mechanics gate under the new owner-approved contract**. It does not activate blanket early intake, implement S6 bridge, run the new model campaign or resolve chart/media/colour source gaps. Full general PostgreSQL matrix/seven-invariant acceptance was not rerun for this narrow change.

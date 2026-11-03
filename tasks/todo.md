@@ -1,4 +1,11 @@
-## In progress — sales completion implementation, 2026-11-03
+## Completed — owner-authorized checkout interruption relaxation, 2026-11-03
+
+- [x] Owner “nới phần này đi” supersedes positive-proof-only pending gate. Existing DLP/intake syntax checks each message and joined batch; detected private/mixed input stays private whole; public interruption reaches same owner/verifier. No business intent classifier or extra role/budget.
+- [x] Observed 4 RED before minimum GREEN; independent review found split-name batch leakage and a broad payment false positive. New 2 RED → fix → APPROVE source/mechanics. Existing authority/effects/final gates preserved; unknown PII formats remain a detector limitation.
+- [x] Focused 315 PASS; full worker 2,633 PASS / 154 files; build, direct tsc and lint exit 0. Clean runtime `6feeaeb5`: real PostgreSQL 15/15 PASS (old 3 PASS / 12 BLOCKED retained), exact actions/receipts/private-field invariance/preview invalidation checked; database dropped, provider requests 0, live send false.
+- [ ] S6 bridge/full 55-turn model acceptance and separate chart/media/colour source readiness remain unfinished. No universal privacy, model-quality or GO claim; no merge or deploy. [Amendment and actual evidence](../docs/specs/c3-phase-c-checkout-interruption-relaxation-20261103.md).
+
+## Previous — sales completion implementation, 2026-11-03
 
 - [x] User selected implement plan before model run; implementation base6e97e231. Read-only107-product capture/provider0/sourceWrites0.
 - [x] PartialS2 typed customer-choice/shop-colour-gap hints; observedRED thenGREEN; missing-size shop gap invokes existing silent handoff, no cart commit. Focused310PASS, direct worker tsc exit0, final focused141PASS. Independent reviewer APPROVE this partial subset after fix; no overall implementation approval.

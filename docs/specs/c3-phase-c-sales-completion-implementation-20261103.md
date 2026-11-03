@@ -1,5 +1,7 @@
 # Phase C sales completion — implementation progress
 
+Latest owner-authorized amendment: the unconditional pending-checkout privacy gate was relaxed after this report. Clean source `6feeaeb5` passed all 15 PostgreSQL interruption journeys. [New contract and results](c3-phase-c-checkout-interruption-relaxation-20261103.md) supersede the S5 interruption BLOCKED status below; the original evidence is retained. Separate source readiness, S6 bridge and full provider acceptance remain unfinished.
+
 Status: **S2–S4 engineering mechanics implemented and independently approved; source-dependent acceptance and S5/S6 full campaign BLOCKED; new provider run NOT_RUN**. Implementation base `6e97e231f9d299edf80546d2a04fe79a0c2c160c`. [Approved revision 3](c3-phase-c-sales-completion-fix-plan-20261103.md) remains the conditional scope. Do not report full sales completion or Phase C GO.
 
 ## Latest savepoints and verification
