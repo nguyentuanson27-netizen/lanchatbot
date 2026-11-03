@@ -1,4 +1,17 @@
-## Current — source-bound model round completed, 2026-11-03
+## Current — image/budget/context fix approved, 2026-11-03
+
+- [x] Owner-approved V2 unique-product/cart scope; retain V1 historical all-admitted behavior and strict colour union.
+- [x] Prepare required photos before owner with actual six-unit debit; FINAL coverage-only; known add/REPLACE feasibility before effects, valid same-batch media continuity, no malformed/null-colour credit.
+- [x] Canonical unlabelled cart proof cannot erase retained physical-colour constraints; shared closed selector argument decoder.
+- [x] Remove only superseded unreferenced base variants; retain ETA/runtime/state/receipt/policy/subject dependencies and unchanged eight-subject cap.
+- [x] Fixed-path reversible CompactV2 tables/exact same-body fact references; frozen actual-output/tool-result continuation reconstruction fits both wire bounds with full expanded body equality.
+- [x] V2 hashed readiness binding and distinct initial source identities; historical manifests/cohorts/results unchanged.
+- [x] RED observed then GREEN; same independent reviewer APPROVE implementation after fixes. Final worker2,585/Node832+2SKIP/protected21 PASS; build/typecheck/lint0. Actual clean `ba835df` scoped PostgreSQL25/25/provider0/livefalse/three databases dropped; runtime `0da6073` parity.
+- [ ] New model-quality/handoff-rate assessment not run or requested. Full PG matrix/seven-validator, PhaseC GO/C3 comparison/deploy remain outside this fix; no automatic rerun.
+
+[Implementation, evidence and limits](../docs/specs/c3-phase-c-media-budget-context-implementation-20261103.md).
+
+## Previous — source-bound model round completed, 2026-11-03
 
 - [x] Fresh107-product source capture, exact existing isolated matrix, actual native initial/PASS/provider0/dropped atcleana8; v3 inputs independently approved and final preflight PASS for both scopes.
 - [x] Run unchanged33known-development cases/48turns once, two disjoint registrations21/28 and12/20, no automaticgenerationretry/source edit/model substitution.

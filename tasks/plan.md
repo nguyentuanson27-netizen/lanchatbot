@@ -1,4 +1,14 @@
-## Current — source-bound model round completed, 2026-11-03
+## Current — image gate, work budget and context repaired, 2026-11-03
+
+Owner authorized the fix and approved unique-product/cart opening image scope. Base `a2202402`; runtime `0da6073`; clean actual PostgreSQL head `ba835df`, runtime/eval byte parity. Fixed V2 scope/timing, eager actual-debit photo preparation, pre-batch known-target work/image feasibility, exact current subject dependency cleanup and lossless CompactV2 product/fact representation. V1 historical scope/colour union retained. No verifier/style prompt, model, cap, retry, role or production wiring change.
+
+Same independent reviewer **APPROVE IMPLEMENTATION** after closing null-colour credit, valid prepaid selection continuity, duplicate initial-identity readiness, retained physical constraint and malformed-media findings. Final worker2,585/Node832+2existingSKIP/protected21 PASS; build/typecheck/lint exit0; actual scoped PostgreSQL25/25 PASS, three databases dropped/provider0/livefalse. Source reconstruction s02/s13 presented65,162/64,904 bytes and full expansion equality; minimum374-byte headroom is bounded evidence only.
+
+[Plan](../docs/specs/c3-phase-c-media-budget-context-plan-20261103.md) · [Implementation/limits](../docs/specs/c3-phase-c-media-budget-context-implementation-20261103.md) · [Review](../docs/specs/c3-phase-c-media-budget-context-review-20261103.md) · [Commands/hashes/logs](../docs/specs/c3-phase-c-media-budget-context-verification-20261103.json).
+
+No new model run requested/executed; no full PG matrix/seven-validator claim, new quality/stability/GO/C3 parity, merge, deploy or live send. Source gaps, component-fit capability, provider quota and legitimate business handoffs remain separate. No automatic rerun.
+
+## Previous — source-bound model round completed, 2026-11-03
 
 Owner authorized one new model round after the approved fix. Clean run source `a8c7ebee18e883770379f6fea665b8ab1cd31839`, runtime b667 byte parity. Fresh107-product public capture, unchanged isolated handoff matrix, real native initial state/provider0/database dropped. Same reviewer APPROVE INPUTS for both v3 registrations; actual-time preflight PASS before dispatch. Same Gemini3.5FlashLite HIGH/GPT6.1Sol HIGH, N1/retry0, no prompt/effort/runtime change.
 

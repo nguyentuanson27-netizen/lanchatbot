@@ -1,0 +1,16 @@
+{
+  "kind": "CAPTURED_COMMAND_LOG_UTF8_V1",
+  "rawSha256": "cf63a08dfd2a6d372eb8e933dfac0fb92d7f34c83e0fd6bdaa658cffec54e8e0",
+  "chunks": [
+    "\r\n",
+    " RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/packages/business-tools\r\n",
+    "\r\n",
+    "·····················\r\n",
+    "\r\n",
+    " Test Files  2 passed (2)\r\n",
+    "      Tests  21 passed (21)\r\n",
+    "   Start at  07:00:57\r\n",
+    "   Duration  2.49s (transform 814ms, setup 0ms, collect 1.27s, tests 115ms, environment 1ms, prepare 1.11s)\r\n",
+    "\r\n"
+  ]
+}

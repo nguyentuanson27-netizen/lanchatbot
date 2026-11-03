@@ -1,0 +1,253 @@
+{
+  "kind": "C_MEDIA_BUDGET_CONTEXT_VERIFICATION_V1",
+  "date": "2026-11-03",
+  "implementationBaseSha": "a2202402baf05b2ec258281797e86641138e29a3",
+  "implementationSavepointSha": "7d8e6a9fde0960603d1efec8f4ff7d50b2265cbb",
+  "finalRuntimeSourceSha": "0da6073c29dfe159865cf3bd504aacacba28c4f0",
+  "finalPgRunSourceSha": "ba835df66d4aa9e33cdb00348964d2dd11e68d28",
+  "sourceCleanAtPgStart": true,
+  "runtimeParity": "git diff --exit-code 0da6073c29dfe159865cf3bd504aacacba28c4f0 ba835df66d4aa9e33cdb00348964d2dd11e68d28 -- apps/worker packages exited 0",
+  "commands": [
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src --reporter=dot",
+      "exitCode": 0,
+      "result": "153 files, 2585 PASS",
+      "log": "../c3-media-context-worker-sealed-20261103.log",
+      "logSha256": "424692571333e8eb030fecccbe97ab25dee3c00d4673317476e404ad219d0243",
+      "repoLogPath": "docs/specs/c3-phase-c-media-budget-context-evidence-20261103/c3-media-context-worker-sealed-20261103.json",
+      "repoLogEncoding": "CAPTURED_COMMAND_LOG_UTF8_V1",
+      "repoLogFileSha256": "eb1e4ac4abea17182eeb2b8984667ef7095860123dae8cce65a73b3c727bae0a"
+    },
+    {
+      "command": "node --test --test-concurrency=1 \"apps/worker/evals/single-agent-semantic-verifier/*.test.mjs\" \"apps/worker/evals/single-agent-commerce-read-only/*.test.mjs\" \"apps/worker/evals/single-agent-commerce-qualification/*.test.mjs\"",
+      "exitCode": 0,
+      "result": "832 PASS, 2 existing SKIP, 0 FAIL",
+      "log": "../c3-media-context-node-sealed-20261103.log",
+      "logSha256": "3096ca583cadf1fe5560064b3112741e2009e80848f91f23cbf2074e1cba1597",
+      "repoLogPath": "docs/specs/c3-phase-c-media-budget-context-evidence-20261103/c3-media-context-node-sealed-20261103.json",
+      "repoLogEncoding": "CAPTURED_COMMAND_LOG_UTF8_V1",
+      "repoLogFileSha256": "cb37ae3a248e2a8b2f27ed99049c017f58ea6cc99dd53c5e14897da86a3f3160"
+    },
+    {
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts --reporter=dot",
+      "exitCode": 0,
+      "result": "21 PASS",
+      "log": "../c3-media-context-protected-final-20261103.log",
+      "logSha256": "cf63a08dfd2a6d372eb8e933dfac0fb92d7f34c83e0fd6bdaa658cffec54e8e0",
+      "repoLogPath": "docs/specs/c3-phase-c-media-budget-context-evidence-20261103/c3-media-context-protected-final-20261103.json",
+      "repoLogEncoding": "CAPTURED_COMMAND_LOG_UTF8_V1",
+      "repoLogFileSha256": "9301fe50eb5a20f0a200d08c1b3e0b80d39a4b1cc26b54d299c8975d200ded92"
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "exitCode": 0,
+      "result": "PASS; final emitted decoder export verified",
+      "log": "../c3-media-context-build-final-20261103.log",
+      "logSha256": "6f7ab9e86c3343672660d95102024a2d3762167cf9b04f6b858ace309a31eeed",
+      "repoLogPath": "docs/specs/c3-phase-c-media-budget-context-evidence-20261103/c3-media-context-build-final-20261103.json",
+      "repoLogEncoding": "CAPTURED_COMMAND_LOG_UTF8_V1",
+      "repoLogFileSha256": "63879dc694942dbf9b15c6bf9a3a5b09d80a0436f2933e71796208d0133105e2"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec tsc -p tsconfig.json --noEmit",
+      "exitCode": 0,
+      "result": "PASS",
+      "log": "../c3-media-context-typecheck-final-20261103.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "repoLogPath": "docs/specs/c3-phase-c-media-budget-context-evidence-20261103/c3-media-context-typecheck-final-20261103.json",
+      "repoLogEncoding": "CAPTURED_COMMAND_LOG_UTF8_V1",
+      "repoLogFileSha256": "448df287f677633cfdc4fc3ba3906d040eba5ffd4759d2ddf9bd32044b9d58e1"
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0,
+      "result": "PASS",
+      "log": "../c3-media-context-lint-final-20261103.log",
+      "logSha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "repoLogPath": "docs/specs/c3-phase-c-media-budget-context-evidence-20261103/c3-media-context-lint-final-20261103.json",
+      "repoLogEncoding": "CAPTURED_COMMAND_LOG_UTF8_V1",
+      "repoLogFileSha256": "cf4d89c72403962db17c7ac0feb3ac990e33f0d7ff4fbebf49c1f281871ea802"
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-media-context-pg-opening-final-20261103 COD --check-prefix \"C opening\"",
+      "exitCode": 0,
+      "result": "16 scoped cases PASS; owned disposable database dropped; zero provider/live sends",
+      "report": "../c3-media-context-pg-opening-final-20261103/integration.json"
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-media-context-pg-checkout-final-20261103 COD --check-prefix \"C checkout\"",
+      "exitCode": 0,
+      "result": "8 scoped cases PASS; owned disposable database dropped; zero provider/live sends",
+      "report": "../c3-media-context-pg-checkout-final-20261103/integration.json"
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-media-context-pg-cart-context-final-20261103 COD --check-prefix \"C media context\"",
+      "exitCode": 0,
+      "result": "1 scoped cases PASS; owned disposable database dropped; zero provider/live sends",
+      "report": "../c3-media-context-pg-cart-context-final-20261103/integration.json"
+    }
+  ],
+  "scopedPostgresReports": [
+    {
+      "path": "../c3-media-context-pg-opening-final-20261103/integration.json",
+      "sha256": "d0223a48bef8e635a4a875b10b5facf7979cd8c074217d6da1c7d0f835d39cd1",
+      "sourceSha": "ba835df66d4aa9e33cdb00348964d2dd11e68d28",
+      "cases": 16,
+      "status": "PASS",
+      "testDatabaseDropped": true,
+      "providerGenerations": 0,
+      "sendEnabled": false,
+      "scope": "C opening",
+      "repoPath": "docs/specs/c3-phase-c-media-budget-context-evidence-20261103/c3-media-context-pg-opening-final-20261103.json"
+    },
+    {
+      "path": "../c3-media-context-pg-checkout-final-20261103/integration.json",
+      "sha256": "ae30efbbfa192515d8569a61ee5e6316f157bdbb2d7f1fb77e2628623636f1b2",
+      "sourceSha": "ba835df66d4aa9e33cdb00348964d2dd11e68d28",
+      "cases": 8,
+      "status": "PASS",
+      "testDatabaseDropped": true,
+      "providerGenerations": 0,
+      "sendEnabled": false,
+      "scope": "C checkout",
+      "repoPath": "docs/specs/c3-phase-c-media-budget-context-evidence-20261103/c3-media-context-pg-checkout-final-20261103.json"
+    },
+    {
+      "path": "../c3-media-context-pg-cart-context-final-20261103/integration.json",
+      "sha256": "7f5590d3914c63bec983c6a2ef79cc38ba237a435d3ce758f2cae8ab8d330913",
+      "sourceSha": "ba835df66d4aa9e33cdb00348964d2dd11e68d28",
+      "cases": 1,
+      "status": "PASS",
+      "testDatabaseDropped": true,
+      "providerGenerations": 0,
+      "sendEnabled": false,
+      "scope": "C media context",
+      "repoPath": "docs/specs/c3-phase-c-media-budget-context-evidence-20261103/c3-media-context-pg-cart-context-final-20261103.json"
+    }
+  ],
+  "sourceInventory": {
+    "apps/worker/evals/single-agent-commerce-qualification/candidate-provider.test.mjs": {
+      "sha256": "1e08c87b6af14084c219322953ad8bff741f6b9d0677771f25032a4ab70b98bf",
+      "gitBlob": "2cbc894459017c2745852c2d3916402fa2e41705"
+    },
+    "apps/worker/evals/single-agent-commerce-qualification/context-coverage.mjs": {
+      "sha256": "9b97dd385bd01e3d077e9bd2edc45075731ef22bdd96c05b22d6df173aea5f61",
+      "gitBlob": "b77a18bc4ad431b18acb6042a6873e4c10877cfc"
+    },
+    "apps/worker/evals/single-agent-commerce-qualification/opening-execution-readiness.mjs": {
+      "sha256": "cb488e37c5e2e353c26ecda8d37fdf6f96b8606c17ef3df065222e17048d9186",
+      "gitBlob": "90520340fd4fe3800496445f3cf52aeef583139a"
+    },
+    "apps/worker/evals/single-agent-commerce-qualification/owner-decisions.json": {
+      "sha256": "e1deec2b5cf29663c60b63256e2ecc74554c5653a9da21fde65094fe4b9eca02",
+      "gitBlob": "c2ec3ee4190d120bad857803d3a48eb5b4fb3629"
+    },
+    "apps/worker/evals/single-agent-commerce-qualification/source-readiness.mjs": {
+      "sha256": "7f940c56c48260cc6076c1f576dd956d78b404f9328fac5f427e5ec2b0e15cdd",
+      "gitBlob": "7e32d1e93d079f442e3c0ee9f6af67136399f436"
+    },
+    "apps/worker/evals/single-agent-commerce-qualification/source-readiness.test.mjs": {
+      "sha256": "8b5834730008a41ee3cf58345bfa3a9f7c06b0dd42a49ae485c68887d1142c98",
+      "gitBlob": "786a84fa9322332525945f85a4d24b276fa18df1"
+    },
+    "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs": {
+      "sha256": "cd015322889c99e94b7c1d519b9d9e993173a6431ce8f62a5d71211a2039c864",
+      "gitBlob": "02d26f612c356ab282f01c8ce32611aeaa2f8c66"
+    },
+    "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs": {
+      "sha256": "2eb1e992bdbc626096fa121ba64b6e8ad2cb320abbe56f8cc5a27b72ad34c56f",
+      "gitBlob": "695fb5ee4f0307f9beff3c59b6aba0d614033a57"
+    },
+    "apps/worker/evals/single-agent-commerce-read-only/owner-data-presentation.mjs": {
+      "sha256": "bc771f368e21cba66418159efe9598722f1dc73c48dcf204d72ddd6cf4a64161",
+      "gitBlob": "ab6d9613cbb44c0da9c3b3d45556f8119c8969d1"
+    },
+    "apps/worker/evals/single-agent-commerce-read-only/owner-product-tables.mjs": {
+      "sha256": "f93ef8164e3ed673639f910cd1ac26413f57912056a7b8dcf9f941ccbbff49c0",
+      "gitBlob": "99b41348f6786b688e7a36e2592d05d07456057a"
+    },
+    "apps/worker/evals/single-agent-commerce-read-only/owner-product-tables.test.mjs": {
+      "sha256": "62a65566e9688f875c7bcf6d9f41f5a394b621680498c791ade7a58ca3a69f0f",
+      "gitBlob": "6f44c154d02d91648581e17cbdb27f811f24aac8"
+    },
+    "apps/worker/src/single-agent-commerce-effects.test.ts": {
+      "sha256": "8c7a24045ad7d69becbaa20c9f3de11ab9ca8e6a884d25746a8fe64da3d3cd44",
+      "gitBlob": "7e8aff1a6adf4bac86380e5f895001e141060c71"
+    },
+    "apps/worker/src/single-agent-commerce-effects.ts": {
+      "sha256": "a28e3cb84a2ec2dc828df31f11d5db8aedcffb7542f712074ccd2ae06be67fcb",
+      "gitBlob": "d446d2e4b62f20c1a00d6a163d25c2596659d2b0"
+    },
+    "apps/worker/src/single-agent-commerce-media.ts": {
+      "sha256": "5db68dabb24e28246084e2ab4fbf5dba88531c3e93b6003e41468bac310a108e",
+      "gitBlob": "ce9b3d119d7a6f8423314ae0812a616e19ddaa14"
+    },
+    "apps/worker/src/single-agent-commerce-opening-media.test.ts": {
+      "sha256": "db4a8741a339c9ca4e7aaeac005de443c9408b7abd4352f54e7c51175f94bb04",
+      "gitBlob": "fda0eff0ec3d91688bd857a43e4573e44fb78082"
+    },
+    "apps/worker/src/single-agent-commerce-opening-media.ts": {
+      "sha256": "cd50724e8939d3a365865f9670dd4ed0a06cdba7e008a69c1493e8cb3e3e1824",
+      "gitBlob": "67de6a5befea922431548b6c75d54542985dda80"
+    },
+    "apps/worker/src/single-agent-commerce-read-only-context.test.ts": {
+      "sha256": "503acf6d4f2074a0812fdbbfbc19f6aada32ac0646eeaba98a078eba28bf8a88",
+      "gitBlob": "a93af288ca79264b06a4c726330a530f7f6fc81f"
+    },
+    "apps/worker/src/single-agent-commerce-read-only-context.ts": {
+      "sha256": "514354bfabf105e064d22db86d25fa0e60abbc4538b112247d30613f7ed49c4c",
+      "gitBlob": "d5336efc55a70713f314ef6eadbf5ac5aed02a97"
+    },
+    "apps/worker/src/single-agent-commerce-read-only.ts": {
+      "sha256": "2524da775653d5656e3e815833bd67058f6cbaaa0c4d6bee847d088c152dff31",
+      "gitBlob": "f8a27513d80fb5d3ffecc5f136a4f32f144c382b"
+    }
+  },
+  "priorFailuresRetained": [
+    "Nine-subject regression observed RED then GREEN with exact current dependency pruning.",
+    "Image scope/budget tests observed RED before V2 eager preparation.",
+    "First canonical build failed test optional spy TS typing; fixed and final canonical build exit 0.",
+    "First full Node run: 831 PASS, 1 FAIL, 2 SKIP; expiry fixture lacked V2 rule/media prerequisites; corrected the fixture to a valid bound media manifest without weakening expiry rejection, then full final 832 PASS.",
+    "Independent review findings: null reuse, matching prepaid selection double-count, duplicate initial identities, unlabelled constraint bypass and malformed prepaid selector; source/tests fixed. Last two controls showed 4 RED before GREEN."
+  ],
+  "providerGenerations": 0,
+  "newModelCampaign": "NOT_RUN_NOT_REQUESTED",
+  "liveSends": 0,
+  "fullPostgresMatrix": "NOT_RUN_THIS_FIX; 25 focused actual cases only, not full matrix or seven-validator claim",
+  "independentReview": {
+    "status": "APPROVE_IMPLEMENTATION",
+    "reviewer": "/root/phase_c_task_completion_implementation_review",
+    "runtimeSourceSha": "0da6073c29dfe159865cf3bd504aacacba28c4f0",
+    "verifiedPgRunSourceSha": "ba835df66d4aa9e33cdb00348964d2dd11e68d28",
+    "sourceFilesMatched": 19,
+    "commandLogsMatched": 6,
+    "repoPgReportsMatched": 3,
+    "scopedPgCasesMatched": 25,
+    "sourceBlockers": "CLOSED",
+    "excludes": [
+      "full PostgreSQL matrix/seven-invariant validator",
+      "new provider/model quality or stability",
+      "qualification/GO",
+      "C3 parity",
+      "merge/deploy/live send"
+    ]
+  },
+  "qualification": "BLOCKED_UNCHANGED",
+  "c3Comparison": "NOT_RUN",
+  "historicalPhaseB": "B_NOT_GO_UNCHANGED",
+  "frozenReconstruction": {
+    "command": "node ../c3-gate-context-replay-20261103.mjs",
+    "status": "PASS",
+    "providerRequests": 0,
+    "networkReads": 0,
+    "effects": 0,
+    "evidence": "docs/specs/c3-phase-c-media-budget-context-reconstruction-20261103.json",
+    "fullExpandedBodiesEqualReconstructedBaseline": true,
+    "presentedBytes": [
+      65162,
+      64904
+    ],
+    "minimumShownHeadroomBytes": 374,
+    "limitation": "Reconstruction from frozen sources/captured successful native output/exact tool results; failed second bodies were not captured. Not universal feasibility or provider/stability evidence."
+  }
+}
