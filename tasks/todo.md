@@ -1,3 +1,10 @@
+## Completed — model round after checkout relaxation, 2026-11-04
+
+- [x] Fresh public107-product capture; original source clocks/proofs and isolated handoff matrix preserved; real initial PostgreSQL state captured/dropped/provider0. Independent input APPROVE after correcting inherited false unchanged-prompt metadata; originals retained. Both actual-time preflights PASS.
+- [x] Clean `88a33140`: full existing33cases/48turns, N1/retry0, current Gemini3.5FlashLite HIGH/GPT6.1Sol HIGH andCompactV2. All33EXECUTED/48captured;71generationrecords/71HTTP,69OK+1ownerMALFORMED+1owner502, no retry/NOT_RUN/hardstop. Actual18SEND+2CODE+20silentHANDOFF+8humanNO_SEND;20texts8images. Both test databases dropped, no live send/source-shop write.
+- [x] Both request/accounting/capture audits and final report accuracy independently APPROVE. Separate2owner-auth+5auxHTTP; no total-network confusion. [Whole run, all transcripts, rejected drafts and evidence](../apps/worker/evals/single-agent-commerce-qualification/checkout-relaxation-run-20261103/REPORT.md).
+- [ ] Quality NOT_GRADED; qualification BLOCKED/C3 NOT_RUN. Separate source gaps and S6/full55 unfinished. Existing33scripts do not directly test public interruption after pending private intake; scripted15PG result is separate. No automatic fix/rerun, merge, deploy or GO.
+
 ## Completed — owner-authorized checkout interruption relaxation, 2026-11-03
 
 - [x] Owner “nới phần này đi” supersedes positive-proof-only pending gate. Existing DLP/intake syntax checks each message and joined batch; detected private/mixed input stays private whole; public interruption reaches same owner/verifier. No business intent classifier or extra role/budget.

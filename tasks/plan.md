@@ -1,4 +1,10 @@
-## Latest — checkout boundary relaxed by owner, 2026-11-03
+## Latest — requested model round completed, 2026-11-04
+
+Clean source `88a331404226b44d2e87e0b5cc1c8689261bb345`; same current Gemini 3.5 Flash Lite HIGH owner / GPT-6.1 Sol HIGH verifier, CompactV2, N1/retry0. Existing two development scopes completed **33 cases / 48 captured turns**, no NOT_RUN/hard stop. Actual18SEND_ELIGIBLE+2CODE_OWNED_SEND+20silentHANDOFF+8humanNO_SEND;71generationrecords/71HTTP, one malformed owner output and one owner502 retained without retry. Input, both accounting/capture groups and final report independently APPROVE. Database drops confirmed, source-shop writes/live sends0. No runtime/prompt edits in this run; metadata comparison corrected before dispatch with originals retained.
+
+[All conversations, actual commands and audited evidence](../apps/worker/evals/single-agent-commerce-qualification/checkout-relaxation-run-20261103/REPORT.md). Quality NOT_GRADED / qualification BLOCKED / C3 NOT_RUN; source cohorts9ready24gap, S6/full55 and actual model public interruption during pending private intake remain unverified. No automatic fix/rerun or qualification dispatch.
+
+## Previous — checkout boundary relaxed by owner, 2026-11-03
 
 Owner authorized removal of unconditional pending-checkout private routing. [Scoped amendment/results](../docs/specs/c3-phase-c-checkout-interruption-relaxation-20261103.md) supersede the revision 3 positive-proof-only prerequisite. The same owner/verifier receives public interruptions after existing per-message and joined-batch DLP/intake checks; detected mixed/private input stays in one private path. Source/mechanics independently APPROVE; worker 2,633 / focused 315 PASS; build, direct tsc and lint exit 0. Clean source `6feeaeb5`: real PostgreSQL 15/15 PASS, database dropped, provider requests 0. S5-A scoped mechanics now PASS; unknown PII formats remain a detector limitation. S6 bridge, full 55-turn model acceptance, source readiness and final qualification are not completed by this change. Historical blocked results below are preserved.
 

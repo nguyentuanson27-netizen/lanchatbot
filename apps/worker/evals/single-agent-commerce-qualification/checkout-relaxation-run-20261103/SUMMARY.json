@@ -1,0 +1,211 @@
+{
+  "sourceSha": "88a331404226b44d2e87e0b5cc1c8689261bb345",
+  "groups": [
+    {
+      "label": "purchase",
+      "sourceSha": "88a331404226b44d2e87e0b5cc1c8689261bb345",
+      "registeredCases": 21,
+      "registeredTurns": 28,
+      "executedTurns": 28,
+      "generationRecords": 49,
+      "generationHttp": 49,
+      "maxRequestsPerGeneration": 1,
+      "generationStatuses": {
+        "OK": 48,
+        "MALFORMED": 1
+      },
+      "verifierVerdicts": {
+        "PASS": 13,
+        "FAIL": 1
+      },
+      "verifierLatencyMs": {
+        "n": 14,
+        "p50": 6457.307499999995,
+        "p95": 13526.95669999998
+      },
+      "nativeVerificationAndReadbackMs": {
+        "n": 14,
+        "p50": 8663.00540000001,
+        "p95": 18785.58879999997
+      },
+      "providerTransportErrors": 0,
+      "preDispatchFailures": 0,
+      "tokenUsage": {
+        "inputObserved": 474754,
+        "outputObserved": 32146,
+        "usageRows": 49,
+        "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+      },
+      "acceptedTexts": 15,
+      "acceptedImages": 6,
+      "terminalCounts": {
+        "SEND_ELIGIBLE": 13,
+        "HANDOFF": 11,
+        "NO_SEND": 2,
+        "CODE_OWNED_SEND": 2
+      },
+      "cohortCounts": {
+        "SALES_READY": 7,
+        "SOURCE_UNAVAILABLE": 14
+      },
+      "diagnosticStop": null,
+      "databaseDropped": true,
+      "providerGenerationRetry": 0,
+      "liveSend": false,
+      "ownerAuthHttp": 1,
+      "auxiliaryHttp": [
+        {
+          "slotId": "7ab3a60632b265c5a2369e1a0cf346012af9f6a29f5e58bfac51981c4116a9ae",
+          "turnIndex": 0,
+          "invocation": 1,
+          "kind": "OAUTH",
+          "ordinal": 1,
+          "status": 200,
+          "error": null,
+          "latencyMs": 165.24300000001676,
+          "requestHash": null,
+          "usage": null,
+          "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+        },
+        {
+          "slotId": "7ab3a60632b265c5a2369e1a0cf346012af9f6a29f5e58bfac51981c4116a9ae",
+          "turnIndex": 0,
+          "invocation": 1,
+          "kind": "EMBEDDING",
+          "ordinal": 2,
+          "status": 200,
+          "error": null,
+          "latencyMs": 1888.460699999996,
+          "requestHash": "06fd1ec68a142b1426023ec062599711a5cf4886715903364747068b2b46ba5e",
+          "usage": null,
+          "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+        },
+        {
+          "slotId": "5d91cf0bf5591db4fc56785469d19bc54b878a0b45229467a83d188f04e16575",
+          "turnIndex": 0,
+          "invocation": 2,
+          "kind": "EMBEDDING",
+          "ordinal": 3,
+          "status": 200,
+          "error": null,
+          "latencyMs": 1672.9433999999892,
+          "requestHash": "5e18028098922e531e2a28efc673c13e3c3fe6a315758ab4c2c7c45403f09459",
+          "usage": null,
+          "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+        }
+      ],
+      "networkAccountingNote": "Generation HTTP excludes owner token acquisition and auxiliary embedding/OAuth HTTP, listed separately. No total-all-network claim.",
+      "quality": "NOT_GRADED"
+    },
+    {
+      "label": "remainder",
+      "sourceSha": "88a331404226b44d2e87e0b5cc1c8689261bb345",
+      "registeredCases": 12,
+      "registeredTurns": 20,
+      "executedTurns": 20,
+      "generationRecords": 22,
+      "generationHttp": 22,
+      "maxRequestsPerGeneration": 1,
+      "generationStatuses": {
+        "OK": 21,
+        "PROVIDER_ERROR": 1
+      },
+      "verifierVerdicts": {
+        "PASS": 5
+      },
+      "verifierLatencyMs": {
+        "n": 5,
+        "p50": 6532.774999999994,
+        "p95": 6758.085099999997
+      },
+      "nativeVerificationAndReadbackMs": {
+        "n": 5,
+        "p50": 8529.458099999989,
+        "p95": 8694.351599999995
+      },
+      "providerTransportErrors": 1,
+      "preDispatchFailures": 0,
+      "tokenUsage": {
+        "inputObserved": 204552,
+        "outputObserved": 20242,
+        "usageRows": 21,
+        "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+      },
+      "acceptedTexts": 5,
+      "acceptedImages": 2,
+      "terminalCounts": {
+        "HANDOFF": 9,
+        "SEND_ELIGIBLE": 5,
+        "NO_SEND": 6
+      },
+      "cohortCounts": {
+        "SOURCE_UNAVAILABLE": 10,
+        "SALES_READY": 2
+      },
+      "diagnosticStop": null,
+      "databaseDropped": true,
+      "providerGenerationRetry": 0,
+      "liveSend": false,
+      "ownerAuthHttp": 1,
+      "auxiliaryHttp": [
+        {
+          "slotId": "7238ff938fc7e0c33b42dafd8c128bb0c926cee1f275235ec67ef03796122fea",
+          "turnIndex": 0,
+          "invocation": 1,
+          "kind": "OAUTH",
+          "ordinal": 1,
+          "status": 200,
+          "error": null,
+          "latencyMs": 186.471000000005,
+          "requestHash": null,
+          "usage": null,
+          "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+        },
+        {
+          "slotId": "7238ff938fc7e0c33b42dafd8c128bb0c926cee1f275235ec67ef03796122fea",
+          "turnIndex": 0,
+          "invocation": 1,
+          "kind": "EMBEDDING",
+          "ordinal": 2,
+          "status": 200,
+          "error": null,
+          "latencyMs": 1769.0261000000028,
+          "requestHash": "1fbbbbfca95878a06d82dc717fce0cf67a91eb811f1eebf1da6410ee38358182",
+          "usage": null,
+          "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+        }
+      ],
+      "networkAccountingNote": "Generation HTTP excludes owner token acquisition and auxiliary embedding/OAuth HTTP, listed separately. No total-all-network claim.",
+      "quality": "NOT_GRADED"
+    }
+  ],
+  "registeredCases": 33,
+  "registeredTurns": 48,
+  "capturedTurns": 48,
+  "terminalCounts": {
+    "SEND_ELIGIBLE": 18,
+    "HANDOFF": 20,
+    "NO_SEND": 8,
+    "CODE_OWNED_SEND": 2
+  },
+  "generationRecords": 71,
+  "generationHttp": 71,
+  "verifierVerdicts": {
+    "PASS": 18,
+    "FAIL": 1
+  },
+  "silentRate": 0.5833333333333334,
+  "acceptedTexts": 20,
+  "acceptedImages": 8,
+  "inputReview": "APPROVED",
+  "postRunAudit": "APPROVED_ACCOUNTING_CAPTURE_REPORT_ACCURACY",
+  "quality": "NOT_GRADED",
+  "qualification": "BLOCKED",
+  "C3": "NOT_RUN",
+  "liveSend": false,
+  "auditExclusions": [
+    "locked quality grade",
+    "semantic safety certification",
+    "qualification or GO"
+  ]
+}

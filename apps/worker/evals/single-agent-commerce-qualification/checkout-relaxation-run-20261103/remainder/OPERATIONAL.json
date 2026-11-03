@@ -1,0 +1,80 @@
+{
+  "sourceSha": "88a331404226b44d2e87e0b5cc1c8689261bb345",
+  "registeredCases": 12,
+  "registeredTurns": 20,
+  "executedTurns": 20,
+  "generationRecords": 22,
+  "generationHttp": 22,
+  "maxRequestsPerGeneration": 1,
+  "generationStatuses": {
+    "OK": 21,
+    "PROVIDER_ERROR": 1
+  },
+  "verifierVerdicts": {
+    "PASS": 5
+  },
+  "verifierLatencyMs": {
+    "n": 5,
+    "p50": 6532.774999999994,
+    "p95": 6758.085099999997
+  },
+  "nativeVerificationAndReadbackMs": {
+    "n": 5,
+    "p50": 8529.458099999989,
+    "p95": 8694.351599999995
+  },
+  "providerTransportErrors": 1,
+  "preDispatchFailures": 0,
+  "tokenUsage": {
+    "inputObserved": 204552,
+    "outputObserved": 20242,
+    "usageRows": 21,
+    "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+  },
+  "acceptedTexts": 5,
+  "acceptedImages": 2,
+  "terminalCounts": {
+    "HANDOFF": 9,
+    "SEND_ELIGIBLE": 5,
+    "NO_SEND": 6
+  },
+  "cohortCounts": {
+    "SOURCE_UNAVAILABLE": 10,
+    "SALES_READY": 2
+  },
+  "diagnosticStop": null,
+  "databaseDropped": true,
+  "providerGenerationRetry": 0,
+  "liveSend": false,
+  "ownerAuthHttp": 1,
+  "auxiliaryHttp": [
+    {
+      "slotId": "7238ff938fc7e0c33b42dafd8c128bb0c926cee1f275235ec67ef03796122fea",
+      "turnIndex": 0,
+      "invocation": 1,
+      "kind": "OAUTH",
+      "ordinal": 1,
+      "status": 200,
+      "error": null,
+      "latencyMs": 186.471000000005,
+      "requestHash": null,
+      "usage": null,
+      "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+    },
+    {
+      "slotId": "7238ff938fc7e0c33b42dafd8c128bb0c926cee1f275235ec67ef03796122fea",
+      "turnIndex": 0,
+      "invocation": 1,
+      "kind": "EMBEDDING",
+      "ordinal": 2,
+      "status": 200,
+      "error": null,
+      "latencyMs": 1769.0261000000028,
+      "requestHash": "1fbbbbfca95878a06d82dc717fce0cf67a91eb811f1eebf1da6410ee38358182",
+      "usage": null,
+      "usageReason": "NATIVE_EMBED_PORT_NOT_EXPOSED"
+    }
+  ],
+  "networkAccountingNote": "Generation HTTP excludes owner token acquisition and auxiliary embedding/OAuth HTTP, listed separately. No total-all-network claim.",
+  "quality": "NOT_GRADED"
+}

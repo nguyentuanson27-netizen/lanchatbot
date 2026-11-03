@@ -1,0 +1,470 @@
+{
+  "sourceSha": "88a331404226b44d2e87e0b5cc1c8689261bb345",
+  "artifacts": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-finalize-inputs-20261103-01.mjs",
+      "sha256": "510c48005c0896d766761b337b28badf38d9d1773961af972eea2042c8acbeb3",
+      "bytes": 2185
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-helper-inventory-20261103-01.json",
+      "sha256": "7e186593eb2e2658b2f3e032c14e9647489f730d19c1d0ad806ca21349a00956",
+      "bytes": 2070
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-initial-20261103-01\\INITIAL_STATE.json",
+      "sha256": "d2d02474f2d7f79cdbbe1c8b1c98e6278cc933c85f0597c2af5d8a0224404e66",
+      "bytes": 700
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-initial-20261103-01\\integration.json",
+      "sha256": "bd8fc5fa89976f37de7c3648e011f064679b73e8abe1ce476a28403947af1866",
+      "bytes": 7576
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-input-index-20261103-01.json",
+      "sha256": "dfb7e34817ae223d6b20bd4c8842935993fce7caaad48afbd192581e5a5df887",
+      "bytes": 915
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-input-metadata-amendment-20261103-01.json",
+      "sha256": "b6fa8f45b11f9f31c29937aef5fbed4566585434d3c644f625067d7bc617a3b0",
+      "bytes": 2560
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-input-metadata-amendment-20261103-01.mjs",
+      "sha256": "92f035b618e9d5fb84a72d7da5830c8c41b06f9aef5f46988d42d6a7fa41d5b8",
+      "bytes": 3631
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-launch-20261103-01.py",
+      "sha256": "d2ae947d19f28c289e87b24374f61cb61787e0498546e5816ea58f73442f667b",
+      "bytes": 3139
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-make-helpers-20261103-01.py",
+      "sha256": "589aefd2df52feac05923fc2dfaefd8370497c293891142e50a448495cdd5f75",
+      "bytes": 2048
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-prepare-20261103-01.mjs",
+      "sha256": "924d80b74d8abb3e92e1989f664dbc5abee8ebe4030082a179485e5b60fc9e85",
+      "bytes": 9272
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-accounting-20261103-01.json",
+      "sha256": "cea76e3bfc5660f6f2ba8d84b0256c2efb1fac554081fe55581edbe09c54583a",
+      "bytes": 124126
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-accounting-20261103-01.mjs",
+      "sha256": "5e2eeb0c6a1de884ebfac63bc2e3196bc6ba8e845837d4a593f0aba2f5ce0d80",
+      "bytes": 4333
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-command-20261103-01.json",
+      "sha256": "c5a1210cef30c98f6ae585391ab7e8311e010d65f4399b307241c98b85d1ab11",
+      "bytes": 984
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-command-started-20261103-01.json",
+      "sha256": "3e03896ce0414e144029edd2281fe8c18cf51c9a2fbeb93b1c71cbb92b953c31",
+      "bytes": 912
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-postrun-audit-20261103-01.json",
+      "sha256": "9f02590f519de392a56ab0751816a356845e7ea0b60d6dc289618372b02dfba9",
+      "bytes": 1778
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\CANDIDATE_EVIDENCE.partial.json",
+      "sha256": "df895603a98c311be59c5fbaa37ed4b6ed5da578da270237695a00b77851e6fc",
+      "bytes": 8514401
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\integration.json",
+      "sha256": "b5a3826cac66423ff8263c5cab24427e24baa77dae81162bd43a0a529b947860",
+      "bytes": 8284
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-2d87ee7a0b1d63264361725c47a99413f9f986db8497639227528eec817960eb-turn-0.json",
+      "sha256": "56978f88f612b30ecd01cdf0eb3944675d179b2feac3070d60830aeaff9f6282",
+      "bytes": 150444
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-43696b6012d31464b92fbb847673dd2beaad8abe0482216b66cd7830e4a9b5ff-turn-0.json",
+      "sha256": "39544d7ce8e1aac7d848c4f2337326781cf34cb932d7c0ed8d248363e5983fa2",
+      "bytes": 455238
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-43696b6012d31464b92fbb847673dd2beaad8abe0482216b66cd7830e4a9b5ff-turn-1.json",
+      "sha256": "c3df2a13eb11d99329d58366312913503ac5b9ba1dc002a02410b08459a048d0",
+      "bytes": 407761
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-483d5d6c77d74b3863f374cdce8fd47982bc58724fefee819df847826d9bc812-turn-0.json",
+      "sha256": "dd556140b902a3ab6e136d0d7f91a88b92f5f015dc03f3e0f03450f3bfe9c597",
+      "bytes": 183964
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-483d5d6c77d74b3863f374cdce8fd47982bc58724fefee819df847826d9bc812-turn-1.json",
+      "sha256": "5cf13ee2abbffed745a66e805076a9b4350fa77ef1995bf6bf90a1c6f8cfa648",
+      "bytes": 6903
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-483d5d6c77d74b3863f374cdce8fd47982bc58724fefee819df847826d9bc812-turn-2.json",
+      "sha256": "6bafd665b25dda8d3aa3bd0d94e6594b19b1756a03f1694d6f4c4681e00f1897",
+      "bytes": 8157
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-4aafba6ee4ad010d3f40c278ed134afb04ed7161e1b59a858a75e6620d3c13e8-turn-0.json",
+      "sha256": "aa249b1adc7fabd0c709a1da488ccc9f50e5bf7dd40af1d3b586c8b218b2a8c8",
+      "bytes": 399370
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-53158365793c11abab2d1fea3eb591a7c52efa92840b4a869ce3b4c5660d5386-turn-0.json",
+      "sha256": "115ea995a9b08f3bee4d69fe50bf9c589a66df7cafcb17322bd4a09584ab6f47",
+      "bytes": 58932
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-5d91cf0bf5591db4fc56785469d19bc54b878a0b45229467a83d188f04e16575-turn-0.json",
+      "sha256": "bde95fa167381a1317bf047296daa78ea344b287289c1cdd8b7d71f83c6986c1",
+      "bytes": 271204
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-6dda2955e59d9e256b323ecf0053db09cbc449b6a849cbbf2b02baeaaac1ef9d-turn-0.json",
+      "sha256": "5d8de9b272c5215a14e77a2017c583aa39b9d67e263bdb4a1f2ac1e5ded2592a",
+      "bytes": 473119
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-735017da24d2096c385b64bb9e98db8e863ac45c2d976a95f05c0d66996294c2-turn-0.json",
+      "sha256": "3b2ff5a52df4cd8d1d440a4081ac9466ae3316cf6e0f62a46ebf7ef7255b8e4f",
+      "bytes": 240323
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-73faaed826afbf5d7a11c6bc75858178cc6919a269e33b69708ab38b1f68b402-turn-0.json",
+      "sha256": "c4ef58215499b95645e7877d54cca63118de1751e186f9299a41a36105bbda53",
+      "bytes": 429664
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-7ab3a60632b265c5a2369e1a0cf346012af9f6a29f5e58bfac51981c4116a9ae-turn-0.json",
+      "sha256": "4e4a7c45a579a3ddb7fef03c434cc6101c0e893e61896b1e071424f41b3d99d5",
+      "bytes": 370257
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-7ae470e6473536580a19c08499c899f640f98fec581778e6383ecf4a4386cb7f-turn-0.json",
+      "sha256": "987939ab3ed5d759ee7659435839403a3580b0a753443f772367f351330db1d3",
+      "bytes": 184713
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-8e536f85bd5367a6ae897c314054fc52736b0ba4d2a69c843602bc15ba2fee24-turn-0.json",
+      "sha256": "f49a2f1ccfc3aea3045438c7bc23d6731da58302d9d190698707d25ea2bf69b6",
+      "bytes": 74965
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-8fc4a2982c9cec72a39f03d99f73d267dd0a35b743688a1637f67dec72ee067f-turn-0.json",
+      "sha256": "e26ffb48c3fdf85aaf5f6d3385024287ee8b87750fcf3938f1cb19fd1dec59c0",
+      "bytes": 150118
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-8fd128bac78418279b7df47e54bfee00990c9a69c380340c7e56a61b0865f5ba-turn-0.json",
+      "sha256": "e0d11169fbd00f9b60c64d28f36c3596a86ed91aea76642587c7b1875c7503f9",
+      "bytes": 440630
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-8fd128bac78418279b7df47e54bfee00990c9a69c380340c7e56a61b0865f5ba-turn-1.json",
+      "sha256": "3fb65204021631de6a0b0687a5d64b7fee6e19e466104c1e5ec5fff44e3be61f",
+      "bytes": 275045
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-924370f6ba6442c8359ba1c2b7e233e22ba049153adb2c326bbac1a849f88a92-turn-0.json",
+      "sha256": "836ae5e89dd96a889a363a15fd27255797256d1fc6105ed9db1ec97f48610067",
+      "bytes": 336488
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-92ddad01f9658b4e289f3819e79e2f5d12a2c4dbc1eca24f49f753be3e02d97f-turn-0.json",
+      "sha256": "e7cf1429d2207edbc27157eed663753d30037fc2a0705f6ff0a739df38ed5828",
+      "bytes": 153719
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-9779def01b8c2cbc3a655ebb6f9a5bad51f72da2196ca5d51d8d267d296aca72-turn-0.json",
+      "sha256": "eb89c9c1de9e6a1367af1898ece7d1db39146d2bfc24df1574b55ff3760ed518",
+      "bytes": 456220
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-9779def01b8c2cbc3a655ebb6f9a5bad51f72da2196ca5d51d8d267d296aca72-turn-1.json",
+      "sha256": "7954f59acc5df1c17a5c88121bc2c98249a05218131d59d3f259e7a4bffca22a",
+      "bytes": 156266
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-9779def01b8c2cbc3a655ebb6f9a5bad51f72da2196ca5d51d8d267d296aca72-turn-2.json",
+      "sha256": "2e9126d5c46fe630b380e05e1c6368c160f567c9a93af0fd66d16e40507b9114",
+      "bytes": 31330
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-d56671766b0716bcd21e99283af5a19a2770d1758f85299f0d16c82e72d34dcd-turn-0.json",
+      "sha256": "f33a50a0f4e111bf01fab90ae1eff379107ceff77594ba9ecaf51c6f4157a088",
+      "bytes": 99832
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-e489d35d3143e76f4f959fc4866694d1f2489e8250a963345e178c1ec67af3a2-turn-0.json",
+      "sha256": "7b2ec23e833703e4a14027c9ed6e49da2062e3d9f423c251c8cd0fd777e31673",
+      "bytes": 473996
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-e489d35d3143e76f4f959fc4866694d1f2489e8250a963345e178c1ec67af3a2-turn-1.json",
+      "sha256": "e4f67271ea5b5f02dc95b693c366748dc69d31938413a5f13b3a4487bd9dfaab",
+      "bytes": 423478
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-f4dcc7ec6280194006f5627c762692433af21476d08bc6293ac5a7dd881569aa-turn-0.json",
+      "sha256": "ebcef48b9d05b5d3a52e36539fb9c52411499c5e36e864a285ce6cedc5fa0fad",
+      "bytes": 310042
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\native-fb784d80b224c9e7b9afbf7bd0c7ab9b5a9b4d3012dea6bf9a515eb97582730e-turn-0.json",
+      "sha256": "9576c18cdb3eaa20ce369bf78a0086859ea532f736b7284cef3ae8ae21c394df",
+      "bytes": 99536
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-run-20261103-01\\NATIVE_REQUESTS.jsonl",
+      "sha256": "0f30c4426d327d4b7fd283603178d75dd824d74873a29dfdf2f169f15e452867",
+      "bytes": 7216580
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-sealed-20261103-01\\DIAGNOSTIC_DISPATCH.json",
+      "sha256": "bc3a4e4d834abac207fe0822861a92c012b72795215640586a0bd7d2eba2a9fb",
+      "bytes": 162
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-sealed-20261103-01\\INPUT_APPROVAL.json",
+      "sha256": "ebf5323ca979f41b0e3d91198fbbc163841a0e74479582c01505b5039b0f8485",
+      "bytes": 1281
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-sealed-20261103-01\\PREFLIGHT.json",
+      "sha256": "01719dcc7133ead06f0753a8f8178a857414ea0d6eaa33c05cf3373fcebb999d",
+      "bytes": 868
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-sealed-20261103-01\\REGISTRATION.before-metadata-review.json",
+      "sha256": "3d83bbedc20c2d33a2c3253f64f991fcce3d8fb7c9a1c08c76c82608c487fba9",
+      "bytes": 1641234
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-sealed-20261103-01\\REGISTRATION.json",
+      "sha256": "0143087ff0d101ba9880ecffb7ac2d38116fca83c103afc14f43eec2cee87b59",
+      "bytes": 1642265
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-sealed-20261103-01\\REGISTRATION.pending.json",
+      "sha256": "3f7b64857464969c906f8edd80ea1e961afa4f3e2e50f38ec7ddae11ac5c9e49",
+      "bytes": 1641840
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-purchase-sealed-20261103-01\\SOURCE_READINESS_REVIEW.json",
+      "sha256": "e038f28042982b4f21d096d2561a6ba8fe9589a7d7c2080c4b53db5ebe81cf8d",
+      "bytes": 29181
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-accounting-20261103-01.json",
+      "sha256": "231887d57105c425814307bb37603c4b48c558665753e61ea722d09a4af49863",
+      "bytes": 68751
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-accounting-20261103-01.mjs",
+      "sha256": "ef3bbc43e3b348a73fe96b86986543d92a9915aa982b19565d6009cd8d3e7d27",
+      "bytes": 4335
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-command-20261103-01.json",
+      "sha256": "a18db9596f0278925a586f261d3a351b8feb81626b218cd8300ef4dbe2f9813b",
+      "bytes": 987
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-command-started-20261103-01.json",
+      "sha256": "ff6d932c9bf05c990b2ecd779b5a0a82ec6c45545e08933367662f88b2816813",
+      "bytes": 915
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\CANDIDATE_EVIDENCE.partial.json",
+      "sha256": "a1b5b81358cac851b5f8e13bf85039cd56e198a630c1daf1bf30c24a725d6f26",
+      "bytes": 4394844
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\integration.json",
+      "sha256": "e4fec755ef9cc8c4b1e2cfd906e9f630916746a806d39084ffa659d2b281ddcd",
+      "bytes": 7824
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-0939b399d175321cbcc2bd24f04ac4338a14709668bcddc25603d76bf2723bad-turn-0.json",
+      "sha256": "75cecb331143628f71b819d52e4c34624bc701341879ef1bf54f5f78a00cb49d",
+      "bytes": 184897
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-0939b399d175321cbcc2bd24f04ac4338a14709668bcddc25603d76bf2723bad-turn-1.json",
+      "sha256": "71c28bd64270edf9bed6a3e8ea65d1c6a45b46049d9b779d49111a4bc4de72c7",
+      "bytes": 6671
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-0939b399d175321cbcc2bd24f04ac4338a14709668bcddc25603d76bf2723bad-turn-2.json",
+      "sha256": "73754c816ea88ac255824c457d6cbb40f0e3d1c81d6291b0d5337e47369338f1",
+      "bytes": 7821
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-395de97cb798f29c6c83283a9da31cdc170c08652f6f29d30f24a4b5f114d270-turn-0.json",
+      "sha256": "12a1ad1d106a87df6d63e645a875b527995ae9e11bed9c57d49d4a97c9766a46",
+      "bytes": 273943
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-7238ff938fc7e0c33b42dafd8c128bb0c926cee1f275235ec67ef03796122fea-turn-0.json",
+      "sha256": "80694eea0bc9f315d82c334c31bd8e9de95ff240f201e65819bef6dfc29c4048",
+      "bytes": 306686
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-8ff1b06b05337bad8b451ef12c66c88c05899fc4b4484ec635c7e8eb65296211-turn-0.json",
+      "sha256": "9a8aa08c8921c83b95bd5a3983064afb47516e1357be77e8839949630246afed",
+      "bytes": 72817
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-8ff1b06b05337bad8b451ef12c66c88c05899fc4b4484ec635c7e8eb65296211-turn-1.json",
+      "sha256": "ccce2bc767b919d8240c0fbde81875753d4c76ee84c2fca87f32742b4aa5ac0b",
+      "bytes": 6695
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-8ff1b06b05337bad8b451ef12c66c88c05899fc4b4484ec635c7e8eb65296211-turn-2.json",
+      "sha256": "b33494d5e832db34812a62ef501f7f08ef63d978b3651b2b34dd9b546037ad51",
+      "bytes": 7797
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-9471d1fa470975ba6627c8733560950130b2342612a961c7420e71f10904e546-turn-0.json",
+      "sha256": "5599a6177e9f7c56fd9f4980d31642d2b298f7100fe3e82a0a24b0b7da1a8d48",
+      "bytes": 504433
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-b93b3ffec720e78e3a22f00d24e68e3ba8d879fdf16657d45096165d01ab0c20-turn-0.json",
+      "sha256": "e28021772e99b98529d0627f84d168ce230b447931aa87c1441eba6f7b8c3c1e",
+      "bytes": 49213
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-c1ef88568e7fbf9e355d0e7cc8bf586e7472d765ac53ee26fb1b1523bed209da-turn-0.json",
+      "sha256": "af2acf781f028d1df02d47386754972bf39f3afa989d48831f846a871c64a2b7",
+      "bytes": 184868
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-c1ef88568e7fbf9e355d0e7cc8bf586e7472d765ac53ee26fb1b1523bed209da-turn-1.json",
+      "sha256": "023168e85ca801d72a959c6400f44243a03fd4e6c82e0bba4ca4b1d4359c291e",
+      "bytes": 6707
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-c1ef88568e7fbf9e355d0e7cc8bf586e7472d765ac53ee26fb1b1523bed209da-turn-2.json",
+      "sha256": "b45b9ae8c3542a4366d7257f984918c802b53e2b946f8cecf7420196f396b043",
+      "bytes": 7937
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-ce82cc3aaf7f87834e6319b6e77a6f2ad5244ebf654a00363fcffc4500885c8d-turn-0.json",
+      "sha256": "8cb6488aebc346b5c8610565858dad08fcffd27737477d22d0ccbd1d25253c54",
+      "bytes": 176202
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-d04a54eb7f9b4935acdbbd6dbd08dfe25b81f5e4f73a712d58c21de8f4df0180-turn-0.json",
+      "sha256": "3eec623d1c941e5b379f68daa9492d97926551b61103a486164e9ec70d845983",
+      "bytes": 74985
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-f233afad479fd7287bef04a31893cb27d5df10a782140a574030c9f478c7fa3b-turn-0.json",
+      "sha256": "2f637c1611cfc0777dfb7cfe30939eae481efb5cd0218254b3015d784a6320a7",
+      "bytes": 175219
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-f4f64b492370bccadb4941e57979bdf51f731ce66ad73b38ed13594d638266f7-turn-0.json",
+      "sha256": "5040d789ddd41b4a2b442f970ebf1ae0773163d7d911fb4d858f936cfa4542ab",
+      "bytes": 307100
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-f6fb196629353583ab24822cfabe91f28a0b44bea8883f7e987f774f5ddff568-turn-0.json",
+      "sha256": "f1d24bda972ee67f9938614e5aa4d093274efb3d4e3408a4f97007b684f1976e",
+      "bytes": 434061
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-f6fb196629353583ab24822cfabe91f28a0b44bea8883f7e987f774f5ddff568-turn-1.json",
+      "sha256": "43f2c0e4ffc2b6f069a50f38f6b5d5e4464eea19c623c5e94a445b27d289eac7",
+      "bytes": 291795
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\native-f6fb196629353583ab24822cfabe91f28a0b44bea8883f7e987f774f5ddff568-turn-2.json",
+      "sha256": "c9be347dfc8f3b7ddc72c7cb665fc185a40c2e56fdc1830dd95c81a5667ac6dc",
+      "bytes": 297835
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-run-20261103-01\\NATIVE_REQUESTS.jsonl",
+      "sha256": "a8524824c5ba4d0eef2ca9858771cc4db838af00a37cd691153f55a64df400b8",
+      "bytes": 3159424
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-sealed-20261103-01\\DIAGNOSTIC_DISPATCH.json",
+      "sha256": "6e3ac3bc41ac8568aa2e949e5c83eec6990d381978abd0252fbf406b903e4b0d",
+      "bytes": 162
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-sealed-20261103-01\\INPUT_APPROVAL.json",
+      "sha256": "d13ffe566d81138259a481ade61c4aa14b99c99b66055f95beb3cc357538de59",
+      "bytes": 1280
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-sealed-20261103-01\\PREFLIGHT.json",
+      "sha256": "f3d90188f662ecf9a6584efc1615d90c4f9e95353abdd6843b0e44be069d5a5d",
+      "bytes": 867
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-sealed-20261103-01\\REGISTRATION.before-metadata-review.json",
+      "sha256": "4255816df5d45999fd0abb349370f8f406d1792116ba0e8edea4b13fb2739397",
+      "bytes": 1191523
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-sealed-20261103-01\\REGISTRATION.json",
+      "sha256": "1ebe9d85b2a917406cb3533a198fb068391dc8646e7ad2e4a22c2a6b35c4e167",
+      "bytes": 1192555
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-sealed-20261103-01\\REGISTRATION.pending.json",
+      "sha256": "94384ce3fd48c206a5efad64950afe6a08e17b63aa948addd05d7b454ade860e",
+      "bytes": 1192129
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-remainder-sealed-20261103-01\\SOURCE_READINESS_REVIEW.json",
+      "sha256": "195151cbe58702fe69a688d2f7811893f319d1c6bb06bbb94a97e09e2a376b4e",
+      "bytes": 20667
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-report-20261103-01.py",
+      "sha256": "a8e7ad229b6f0137ec75051e1d786efddd2f9867be696b56848cfc26d26c115e",
+      "bytes": 8776
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-resolve-world-20261103-01.mjs",
+      "sha256": "b4cc8d0b2b2411a6145195733770defdba223c97ddd991cc69ed080fd358aeb9",
+      "bytes": 1567
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-status-20261103-01.py",
+      "sha256": "19a6ede5ec6b91b06bfc6262f84fe57f181b8a1fd3ca2fa00c11105da679a45c",
+      "bytes": 913
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-world-20261103-01\\SUMMARY.json",
+      "sha256": "0d50934b4234d33b8f914e3ebb2c0efd4a5e431b6ca0edddeaf379cea3e23c71",
+      "bytes": 208
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-world-20261103-01\\WORLD.json",
+      "sha256": "a1b6557438d3161a09193fa5b4333d94711fd26b5fa9b76d7a5d4a8975446749",
+      "bytes": 42770530
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-checkout-relax-model-world-resolved-20261103-01.json",
+      "sha256": "ed8018a1185c82ec7a3f69bbc0c817d0d914dc05659fdd29f204edaf2ce2e8c5",
+      "bytes": 42778383
+    }
+  ]
+}
