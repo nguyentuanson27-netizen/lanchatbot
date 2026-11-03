@@ -2,8 +2,12 @@
 
 - [x] User selected implement plan before model run; implementation base6e97e231. Read-only107-product capture/provider0/sourceWrites0.
 - [x] PartialS2 typed customer-choice/shop-colour-gap hints; observedRED thenGREEN; missing-size shop gap invokes existing silent handoff, no cart commit. Focused310PASS, direct worker tsc exit0, final focused141PASS. Independent reviewer APPROVE this partial subset after fix; no overall implementation approval.
-- [ ] S1source readiness/publication manifest; S2canonical shared-component presentation; S3target-aware size; S4continuation/context; S6evaluator remain unfinished. No new provider run.
-- [ ] S5-A independent source audit BLOCKED_AT_PRIVACY_OR_INTERRUPTION_CONTRACT: no positive public-input proof for pending checkout. New desired-behaviour/PG matrix NOT_RUN. Do not activate early-intake/allowlist/full55 campaign.
+- [x] S2canonical shared-component lossless presentation, S3target-aware size claim chain/PRODUCT-only consumers, S4taskdiscipline/nativecontinuation implemented and independently mechanicsAPPROVED; commits844c070b/da65a176. S15raw65229/presented65406, exactcapturedtoolresults/signedparts retained; reconstructedwire limits explicit.
+- [x] Finalchecks: workerVitest2607PASS/maxWorkers2; Node835PASS/2existingSKIP; contracts92/business140focusedPASS; shared+workerbuild/typecheck/lint0. Canonicalworker test fourfailedattempts retained; boundedfullVitest+fullNodeGREEN separately, no canonicalcommandPASSclaim.
+- [x] RealPG S5matrix atclean9fa7ea5d:15/15journeys recorded,12BLOCKED duringprivateintake and3PASS atORDER_PREVIEW; no requestedmutationreceipt inblockedturns; privatefieldsunchanged. TestDBdropped/provider0/livesendfalse. Earlierconnectionloss orphancheckedinactive/dropped.
+- [x] Read-only sourceinventory53points/51approvedregistryrows. Legacycanonicalroute22hashMATCH/29MISMATCH; strictmethod51checksfailed/compatibilityunestablished; no sourceproofpublication. ExactIDs/hashinventory recorded.
+- [ ] S1source readiness/proofpublication remainsBLOCKED: no TOP/PANTS/SKIRTchartauthority, unrecordedphysicalcolour, expired/invalidmedia andbyte/pipelinemismatch. No new provider run or sourcewrite.
+- [ ] S5-A BLOCKED_AT_PRIVACY_OR_INTERRUPTION_CONTRACT: no positive public-input proof whileprivateintake. ConditionalS6checkoutbridge/full34cases55turnsNOT_EXECUTABLE/NOT_RUN; do notactivateearlyintake/allowlist. FullgeneralPGmatrix/seveninvariantsNOT_RUN forthischange. OverallrecommendationBLOCKED, noqualityGO.
 
 [Implementation evidence and precise remaining scope](../docs/specs/c3-phase-c-sales-completion-implementation-20261103.md).
 
