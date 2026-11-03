@@ -24,6 +24,7 @@ import { commerceHash, commerceUuid } from "./single-agent-commerce-read-only-co
 import { makeBinding, MAX_RUNTIME_PRODUCTS, type TerminalOutcome } from "./single-agent-semantic-verifier-boundary.js";
 import { extractAdProductCodes } from "./media-resolution.js";
 import { checkoutDetails, selectionsMatchCartLines } from "./realtime-sales-cycle.js";
+import {paymentChoice} from "./checkout-payment-choice.js";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
 import { makeCommerceMediaDeliveryBinding } from "./single-agent-commerce-media-delivery.js";
 import { commerceSizeSource,commerceComponentSizeSource } from "./single-agent-commerce-product-groups.js";
@@ -35,6 +36,15 @@ export function isPrivateCommerceText(text: string): boolean {
   const redacted = redactAnalyticsMessage(text).text, details = checkoutDetails(text, undefined);
   return hasResidualPii(text) || !!(details.fullName || details.phone || details.address) || privateMarkers.some(marker => text.includes(marker)) ||
     privateMarkers.filter(marker => marker !== "[NAME]").some(marker => redacted.includes(marker));
+}
+/** Owner-approved relaxation: pending checkout alone is not a reason to hide public input.
+ * Reuse existing private-field syntax/DLP and payment handling; this is a detector,
+ * not proof that arbitrary undetected text contains no PII. Mixed detected input stays private whole. */
+export function isPrivatePendingCheckoutText(text:string):boolean {
+  const name=checkoutDetails(text,undefined,"FULL_NAME","SINGLE_FIELD").fullName;
+  const address=checkoutDetails(text,undefined,"ADDRESS","SINGLE_FIELD").address;
+  const payment=paymentChoice(text);
+  return isPrivateCommerceText(text)||!!name||!!address||redactAnalyticsMessage(text).text.includes("[NAME]")||payment.kind==="RESOLVED"||payment.kind==="AMBIGUOUS";
 }
 /** Drop the whole private message: a redacted phone must not leave its adjacent recipient name in model context. */
 export function commerceHistory(rows: readonly Pick<ChatHistoryItem, "text" | "senderType">[],
@@ -169,7 +179,9 @@ export async function runPersistedCommerceIngress(input: {
       customerHash:scope.customerHash,before:new Date(Math.min(...times))});priorShopOutput=typeof proof==="boolean"?proof:null;}catch{/* Unknown is never returning. */}
   }
   const pendingCheckout = await executor.privateCheckoutPending();
-  const privateInput = !!mediaMessage || pendingCheckout || isPrivateCommerceText(latest);
+  const privateInput = !!mediaMessage || isPrivateCommerceText(latest) ||
+    messages.some(m=>isPrivateCommerceText(m.text??"")) ||
+    (pendingCheckout&&(isPrivatePendingCheckoutText(latest)||messages.some(m=>isPrivatePendingCheckoutText(m.text??""))));
   let sourceMessagePk = "";
   for (const m of messages) {
     const recorded=await input.history.recordInboundCustomerMessage({ pageId: scope.pageId, conversationId: scope.conversationId,

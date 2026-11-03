@@ -6,7 +6,7 @@ import { createConversationState } from "@lana/conversation-engine";
 import { applySalesCycleCommand, computeBusinessContentHash, createSalesCycleRuntimeState } from "@lana/chat-runtime";
 import { LocalEnvelopeCipher, PostgresRealtimeRuntimeStore, type RealtimeCommitInput } from "@lana/database";
 import * as composition from "./single-agent-commerce.js";
-import { commerceHistory, runPersistedCommerceIngress } from "./single-agent-commerce-ingress.js";
+import { commerceHistory,isPrivatePendingCheckoutText, runPersistedCommerceIngress } from "./single-agent-commerce-ingress.js";
 import { commerceScope, commerceNow, fixtureProfile, fixturePolicy, fixtureProduct, fixtureCartLine, fixturePolicyPointers } from "./single-agent-commerce.test-support.js";
 import { createCommerceReadSources } from "./single-agent-commerce-read-only-sources.js";
 import type { OwnerGeneration, OwnerRequest } from "./single-agent-commerce-read-only.js";
@@ -845,7 +845,7 @@ it("fills the public history window after private rows without duplicating the l
   expect(JSON.stringify(captured!)).not.toContain("[PII_REDACTED_MESSAGE]");
 });
 
-it.each(["Nguyễn Thị Lan", "Khoan, áo này giặt máy được không em?"])("keeps pending checkout input private before history or either model (%s)", async text => {
+async function pendingCheckoutFixture(field:"FULL_NAME"|"PHONE"|"ADDRESS"|"PAYMENT_METHOD"="FULL_NAME"){
   const f = fixture(), scope = commerceScope(), resolution = await fixturePolicy(), policy = resolution.bundle!.policy;
   f.policy.mockResolvedValue({...resolution,mayAffectOutbound:true,bundle:{...resolution.bundle!,channel:"PUBLISHED",sideEffects:"LIVE_OUTBOUND"}});
   let state = createSalesCycleRuntimeState(scope.conversationId,{pageId:scope.pageId,conversationId:scope.conversationId},commerceNow);
@@ -856,17 +856,70 @@ it.each(["Nguyễn Thị Lan", "Khoan, áo này giặt máy được không em?"
   state = applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind:"CART_OPENED",commandId:"open",cartDraftRef:{id:"draft",version:"1",contentHash:computeBusinessContentHash(draft)},
     expiresAt:new Date(commerceNow.getTime()+1800000).toISOString()},now:commerceNow,
     trustedPorts:{resolveCartDraft:()=>draft,resolveShopPolicy:()=>policy,resolveCartMutation:()=>null,resolveInboundMessage:()=>null,revalidateCheckout:()=>null}}).state;
-  state = applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind:"CLARIFICATION_REQUESTED",commandId:"asked",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["FULL_NAME"],
+  state = applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind:"CLARIFICATION_REQUESTED",commandId:"asked",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:[field],
     productId:"SM613",questionFingerprint:"f".repeat(64),maxAttempts:3},now:commerceNow}).state;
-  f.setCycle(state); f.message.text = text;
+  f.setCycle(state);
+  f.select.mockResolvedValue({status:"READY",line:structuredClone(state.cart!.value.lines[0]!),shopId:scope.shopId,
+   versions:{price:state.cart!.value.lines[0]!.priceAuthority!.priceFactRef,inventory:"i1",size:"s1",eta:null},eta:null,etaExpiresAt:null,sourceAuthority:"POS_SNAPSHOT",stockStatus:"IN_STOCK",stockAvailableQuantity:4,
+   sourceObservedAt:commerceNow.toISOString(),sourceExpiresAt:new Date(commerceNow.getTime()+1200000).toISOString()});
+  return f;
+}
+it.each(["Nguyễn Thị Lan","Tên: Nguyễn Thị Lan\nSĐT: 0900000001","0900000001","12 Đường Số 3, Quận 7, TP.HCM","COD"])("keeps detected checkout fields private before history or either model (%s)", async text => {
+  const f=await pendingCheckoutFixture();f.message.text=text;
   const owner = vi.fn(async (): Promise<OwnerGeneration> => ({kind:"FINAL",text:"This must not run"}));
   expect(await f.run(owner)).toMatchObject({mode:"PRIVATE_CODE_PATH",enqueued:1});
   expect(owner).not.toHaveBeenCalled(); expect(f.verifier).not.toHaveBeenCalled();
   expect(f.history.recordInboundCustomerMessage).toHaveBeenCalledWith(expect.objectContaining({text:null}));
   expect(f.history.listConversationHistory).not.toHaveBeenCalled();
   const prepared = f.commit.mock.calls.at(-1)![1];
-  expect(prepared.salesCyclePlan?.state).toMatchObject({checkoutDraft:text.startsWith("Nguyễn") ? {fullName:text} : null});
+  if(text==="Nguyễn Thị Lan")expect(prepared.salesCyclePlan?.state).toMatchObject({checkoutDraft:{fullName:text}});
   expect(JSON.stringify(prepared.metaPlan?.messages)).not.toContain(text);
+});
+
+it.each(["FULL_NAME","PHONE","ADDRESS","PAYMENT_METHOD"] as const)("allows a public product question during pending %s without a private intake commit",async field=>{
+ const f=await pendingCheckoutFixture(field),before=structuredClone(f.cycle());
+ f.message.text="Khoan, áo này giặt máy được không em?";
+ const owner=vi.fn(async():Promise<OwnerGeneration>=>({kind:"FINAL",text:"Dạ chị."}));
+ const result=await f.run(owner);
+ expect(owner).toHaveBeenCalledOnce();expect(f.verifier).toHaveBeenCalledOnce();
+ expect(result.terminal.disposition,JSON.stringify(result)).toBe("SEND_ELIGIBLE");
+ expect(f.cycle().checkoutDraft).toEqual(before.checkoutDraft);
+ expect(f.cycle().clarification).toEqual(before.clarification);
+ expect(f.history.recordInboundCustomerMessage).toHaveBeenCalledWith(expect.objectContaining({text:f.message.text}));
+ expect(f.commit.mock.calls.flatMap(c=>c[1].salesCyclePlan?.events??[]).some(e=>e.commandKind==="CHECKOUT_DETAILS_CAPTURED")).toBe(false);
+});
+it.each([
+ "Tên: Nguyễn Thị Lan, chị đổi sang áo lẻ nhé.",
+ "Chị lấy thêm áo L. SĐT: 0900000001",
+ "Đổi sang áo lẻ nhé. Địa chỉ: 12 Đường Số 3, Quận 7, TP.HCM",
+ "Nguyễn Thị Lan\nĐổi sang áo lẻ cho chị.",
+])("keeps a mixed detected private/public inbound in one private path (%s)",async text=>{
+ const f=await pendingCheckoutFixture();f.message.text=text;
+ const owner=vi.fn(),before=structuredClone(f.cycle().cart);
+ await f.run(owner);expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+ expect(f.cycle().cart).toEqual(before);
+ expect(f.history.recordInboundCustomerMessage).toHaveBeenCalledWith(expect.objectContaining({text:null}));
+});
+it.each(["Chị đổi sang áo lẻ nhé.","Lấy thêm áo L navy cho chị.","Giá hơi cao, bớt cho chị được không?","Cảm ơn em nhé.","Chị muốn nhận hàng trước thứ Sáu, kịp không em?"])("does not classify the public request's business intent to interrupt checkout: %s",text=>{
+ expect(isPrivatePendingCheckoutText(text)).toBe(false);
+});
+it.each(["Lan","12 Đường Số 3"])("keeps the entire inbound batch private when one separate fragment is private: %s",async fragment=>{
+ const f=await pendingCheckoutFixture();f.message.text=fragment;
+ f.appendMessage({...f.message,eventKey:"public-followup",messageId:"public-followup",text:"Khoan, áo này giặt máy được không em?"});
+ const owner=vi.fn();await f.run(owner);expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+ expect(f.history.recordInboundCustomerMessage).toHaveBeenCalledTimes(2);
+ expect(f.history.recordInboundCustomerMessage.mock.calls.every(([r])=>(r as {text:unknown}).text===null)).toBe(true);
+});
+it.each(["Lan","Nguyễn Thị Lan","0900000001","12 Đường Số 3, Quận 7, TP.HCM","COD","[PHONE]"])("retains existing private field syntax and marker protection: %s",text=>{
+ expect(isPrivatePendingCheckoutText(text)).toBe(true);
+});
+it("does not resume the owner for a superseded pending checkout interruption",async()=>{
+ const f=await pendingCheckoutFixture();f.message.text="Đổi sang áo lẻ cho chị.";f.supersede();
+ const owner=vi.fn();expect((await f.run(owner)).terminal.reason).toBe("INBOX_BATCH_SUPERSEDED");expect(owner).not.toHaveBeenCalled();
+});
+it("does not resume the owner after HUMAN takes over pending checkout",async()=>{
+ const f=await pendingCheckoutFixture();f.message.text="Đổi sang áo lẻ cho chị.";f.transferToHuman();
+ const owner=vi.fn();expect((await f.run(owner)).terminal.reason).toBe("HUMAN_OWNS_CONVERSATION");expect(owner).not.toHaveBeenCalled();
 });
 
 it("starts the independent generation read while current authority is being loaded", async () => {
