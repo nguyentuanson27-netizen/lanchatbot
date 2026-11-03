@@ -1,3 +1,9 @@
+## Current — interrupted model run, missing-only continuation, 2026-11-03
+
+Owner requested retry. Original4e873 run stopped on PostgreSQL SSH disconnect after17 captured turns; preserve all requests/errors including started s09 without terminal. Remaining coverage19cases/31turns uses fresh source and separate identities, no repeat of14completed cases. Added fixed7case/11turn scope with cap44; unchanged remainder12/20/cap80. Prompt/models/runtime unchanged. RED2 observed -> focused14PASS; exact idle disposable DB cleanup confirmed. Independent input review and new provider run pending.
+
+[Continuation plan and limits](../docs/specs/c3-phase-c-interrupted-model-continuation-20261103.md).
+
 ## Current — image/budget/context fix approved, 2026-11-03
 
 - [x] Owner-approved V2 unique-product/cart scope; retain V1 historical all-admitted behavior and strict colour union.

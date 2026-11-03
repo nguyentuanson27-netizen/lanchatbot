@@ -1,3 +1,9 @@
+## Current — interrupted model run, missing-only continuation, 2026-11-03
+
+Owner requested retry. Original4e873 run stopped on PostgreSQL SSH disconnect after17 captured turns; preserve all requests/errors including started s09 without terminal. Remaining coverage19cases/31turns uses fresh source and separate identities, no repeat of14completed cases. Added fixed7case/11turn scope with cap44; unchanged remainder12/20/cap80. Prompt/models/runtime unchanged. RED2 observed -> focused14PASS; exact idle disposable DB cleanup confirmed. Independent input review and new provider run pending.
+
+[Continuation plan and limits](../docs/specs/c3-phase-c-interrupted-model-continuation-20261103.md).
+
 ## Current — image gate, work budget and context repaired, 2026-11-03
 
 Owner authorized the fix and approved unique-product/cart opening image scope. Base `a2202402`; runtime `0da6073`; clean actual PostgreSQL head `ba835df`, runtime/eval byte parity. Fixed V2 scope/timing, eager actual-debit photo preparation, pre-batch known-target work/image feasibility, exact current subject dependency cleanup and lossless CompactV2 product/fact representation. V1 historical scope/colour union retained. No verifier/style prompt, model, cap, retry, role or production wiring change.
