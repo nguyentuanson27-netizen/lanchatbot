@@ -2,7 +2,7 @@
 
 Plan only, base788ce66d. S1verified source/media/chart inventory → S2canonical component and customer-choice vs shop-gap cart outcomes → S3target-bound component fit → S4bounded context/purposeful reads → S5native checkout progression → S6tests/PG/review/frozen provider acceptance. Runtime/prompt/source unchanged; all planned checks and new model runs NOT_RUN. Preserve33cases/48turns; proposed separate full-checkout1case/7turns, total34/55N1, prefix14/23 included rather than rerun. Material source prerequisites must be ready before claiming fixed sales paths; no live source write/deploy authorized.
 
-[Detailed plan and acceptance](../docs/specs/c3-phase-c-sales-completion-fix-plan-20261103.md). Independent plan review1CHANGES_REQUESTED: two P1 blockers (fit target legacy/consumer authority; typed checkout evaluator bridge/admission). Revision2 prepared and sent back to same reviewer; approval pending. No implementation/model/source write.
+[Detailed plan and acceptance](../docs/specs/c3-phase-c-sales-completion-fix-plan-20261103.md). Independent review2 closed S3/S6 blockers; remaining S5 pending-intake interruption risk. Revision3 adds mandatory privacy/interruption feasibility gate, no blanket early intake/allowlist activation; S5 remains BLOCKED if no compliant route. Same-reviewer R3 approval pending. No implementation/model/source write.
 
 ## Current — model continuation completed and audited, 2026-11-03
 
