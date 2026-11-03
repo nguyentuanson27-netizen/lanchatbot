@@ -1,3 +1,7 @@
+## Implementation in progress — sales completion repair, 2026-11-03
+
+User selected implementation before run. Base6e97e231; partialS2 customer-choice/shop-gap boundary implemented and focused tested. Canonical component view/S3/S4/S6 remain pending. Independent source review finds S5-A blocked without typed positive public-input privacy proof; no blanket early-intake or55-turn campaign activation. [Current implementation evidence](../docs/specs/c3-phase-c-sales-completion-implementation-20261103.md). The approved conditional scope below remains unchanged.
+
 ## Approved plan — sales completion repair, 2026-11-03
 
 Plan only, base788ce66d. S1verified source/media/chart inventory → S2canonical component and customer-choice vs shop-gap cart outcomes → S3target-bound component fit → S4bounded context/purposeful reads → S5native checkout progression → S6tests/PG/review/frozen provider acceptance. Runtime/prompt/source unchanged; all planned checks and new model runs NOT_RUN. Preserve33cases/48turns; proposed separate full-checkout1case/7turns, total34/55N1, prefix14/23 included rather than rerun. Material source prerequisites must be ready before claiming fixed sales paths; no live source write/deploy authorized.

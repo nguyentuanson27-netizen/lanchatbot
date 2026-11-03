@@ -1,3 +1,12 @@
+## In progress — sales completion implementation, 2026-11-03
+
+- [x] User selected implement plan before model run; implementation base6e97e231. Read-only107-product capture/provider0/sourceWrites0.
+- [x] PartialS2 typed customer-choice/shop-colour-gap hints; observedRED thenGREEN; missing-size shop gap invokes existing silent handoff, no cart commit. Focused310PASS, direct worker tsc exit0, final focused141PASS. Independent reviewer APPROVE this partial subset after fix; no overall implementation approval.
+- [ ] S1source readiness/publication manifest; S2canonical shared-component presentation; S3target-aware size; S4continuation/context; S6evaluator remain unfinished. No new provider run.
+- [ ] S5-A independent source audit BLOCKED_AT_PRIVACY_OR_INTERRUPTION_CONTRACT: no positive public-input proof for pending checkout. New desired-behaviour/PG matrix NOT_RUN. Do not activate early-intake/allowlist/full55 campaign.
+
+[Implementation evidence and precise remaining scope](../docs/specs/c3-phase-c-sales-completion-implementation-20261103.md).
+
 ## Approved plan — sales completion repair, 2026-11-03
 
 Plan only, base788ce66d. S1verified source/media/chart inventory → S2canonical component and customer-choice vs shop-gap cart outcomes → S3target-bound component fit → S4bounded context/purposeful reads → S5native checkout progression → S6tests/PG/review/frozen provider acceptance. Runtime/prompt/source unchanged; all planned checks and new model runs NOT_RUN. Preserve33cases/48turns; proposed separate full-checkout1case/7turns, total34/55N1, prefix14/23 included rather than rerun. Material source prerequisites must be ready before claiming fixed sales paths; no live source write/deploy authorized.

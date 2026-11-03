@@ -79,3 +79,17 @@ export function selectionShopDataGap(e:CandidateSelectionEvidence,now:Date):"SHO
  return validSelectionEvidence(e,e.productId,now)&&e.color===null&&e.options.some(o=>o.color===null||o.color==='__NO_COLOR__')
   ?"SHOP_COLOR_UNRECORDED":null;
 }
+
+export type SelectionChoiceResolution =
+ | {kind:"SHOP_DATA_MISSING";reason:"SHOP_COLOR_UNRECORDED"}
+ | {kind:"NEEDS_CUSTOMER_CHOICE";field:"COLOR"|"SIZE";evidenceHash:string;
+    completeness:CandidateSelectionEvidence["completeness"];optionRefs:string[]};
+/** Guidance for the exact unresolved query, never permission to commit or a complete inventory. */
+export function selectionChoiceResolution(e:CandidateSelectionEvidence,now:Date,status:string):SelectionChoiceResolution|null {
+ if(!validSelectionEvidence(e,e.productId,now)||!["COLOR_REQUIRED","SIZE_REQUIRED"].includes(status))return null;
+ if(selectionShopDataGap(e,now))return {kind:"SHOP_DATA_MISSING",reason:"SHOP_COLOR_UNRECORDED"};
+ const usable=e.options.filter(o=>(o.status==="IN_STOCK"||o.status==="PRE_ORDER")&&o.size!==null&&o.color!==null&&o.color!=="__NO_COLOR__");
+ if(!usable.length)return null;
+ return {kind:"NEEDS_CUSTOMER_CHOICE",field:status==="COLOR_REQUIRED"?"COLOR":"SIZE",evidenceHash:e.contentHash,
+  completeness:e.completeness,optionRefs:usable.map(o=>o.identityHash)};
+}

@@ -73,11 +73,30 @@ it("binds a validated ambiguous selection to both models and invalidates it when
  s.select.mockImplementation(async query=>cartSelectionFromSnapshot(f.snapshot,{...query!,selectionMode:"CANDIDATE_TUPLES"},commerceNow) as never);
  const result=await s.tools.invoke({...s.add,args:{...s.add.args,color:null}});
  expect(result).toMatchObject({status:"UNAVAILABLE",data:{selectionEvidence:{quantity:1,options:expect.arrayContaining([expect.objectContaining({color:"be",status:"PRE_ORDER"})])}}});
+ expect(result).toMatchObject({data:{choiceResolution:{kind:"NEEDS_CUSTOMER_CHOICE",field:"COLOR",
+  completeness:"FIRST_8_EXACT_TUPLES_NOT_COMPLETE_INVENTORY",optionRefs:expect.any(Array)}}});
+ const data=result.data as {selectionEvidence:{contentHash:string;options:{identityHash:string}[]};choiceResolution:{evidenceHash:string;optionRefs:string[]}};
+ expect(data.choiceResolution.evidenceHash).toBe(data.selectionEvidence.contentHash);
+ expect(data.choiceResolution.optionRefs).toEqual(data.selectionEvidence.options.map(o=>o.identityHash));
+ expect(s.commits).toHaveLength(0);
  const proof=(result.data as {selectionEvidence:unknown}).selectionEvidence;
  expect(s.tools.snapshot().runtimeProducts?.find(p=>p.subjectRef==="SM613")?.selectionEvidence).toEqual([proof]);
  await expect(s.tools.readback()).resolves.toMatchObject({runtimeProducts:expect.arrayContaining([expect.objectContaining({selectionEvidence:[proof]})])});
  f.snapshot.offers.DIRECT!.rows[0]!.stock_quantity=0;
  await expect(s.tools.readback()).rejects.toThrow("SELECTION_EVIDENCE_CHANGED");
+});
+
+it.each([true,false])("reports missing shop colour before asking for a customer choice (size provided=%s)",async hasSize=>{
+ const s=await setup(),f=fixtureProduct(),row=f.snapshot.offers.DIRECT!.rows[0]!;
+ row.color="__NO_COLOR__";
+ f.snapshot.fulfillment_policy={tinh_trang:"READY_STOCK",can_order_when_zero:true,prep_min_days:1,prep_max_days:2,zero_stock_policy:"ALLOW",zero_stock_prep_min_days:3,zero_stock_prep_max_days:5,eta_valid_until:""};
+ f.snapshot.offers.DIRECT!.rows.push({...structuredClone(row),color:"be",stock_quantity:0});
+ s.select.mockImplementation(async query=>cartSelectionFromSnapshot(f.snapshot,{...query!,selectionMode:"CANDIDATE_TUPLES"},commerceNow) as never);
+ const {size,...withoutSize}=s.add.args;
+ const result=await s.tools.invoke({...s.add,args:{...withoutSize,...(hasSize?{size}:{}),color:null}});
+ expect(result).toMatchObject({status:"UNAVAILABLE",data:{shopDataGap:"SHOP_COLOR_UNRECORDED",
+  choiceResolution:{kind:"SHOP_DATA_MISSING",reason:"SHOP_COLOR_UNRECORDED"}}});
+ expect(s.commits).toHaveLength(0);
 });
 
 it("removes only superseded unreferenced offer subjects when cart selections add two sizes",async()=>{

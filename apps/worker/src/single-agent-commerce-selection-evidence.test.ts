@@ -2,7 +2,7 @@ import {it,expect} from "vitest";
 import {createReadOnlyTools} from "./single-agent-commerce-read-only-tools.js";
 import {fixtureProduct,fixturePolicy,commerceScope,commerceNow} from "./single-agent-commerce.test-support.js";
 import {hardPrecheck} from "./single-agent-semantic-verifier-boundary.js";
-import {expandSelectionOptions,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
+import {expandSelectionOptions,selectionChoiceResolution,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
 
 it("publishes the exact owner tuple view in the verifier snapshot with read-path expiry and immutable readback",async()=>{
  const f=fixtureProduct(),row=f.snapshot.offers.DIRECT!.rows[0]!;
@@ -16,6 +16,10 @@ it("publishes the exact owner tuple view in the verifier snapshot with read-path
  expect(data.selectionEvidence).toBeDefined();
  expect(tools.snapshot().runtimeProducts?.[0]).toHaveProperty("selectionEvidence",[data.selectionEvidence]);
  const evidence=data.selectionEvidence as CandidateSelectionEvidence;
+ expect(selectionChoiceResolution(evidence,commerceNow,"COLOR_REQUIRED")).toMatchObject({kind:"NEEDS_CUSTOMER_CHOICE",field:"COLOR",evidenceHash:evidence.contentHash});
+ expect(selectionChoiceResolution(evidence,commerceNow,"STALE")).toBeNull();
+ expect(selectionChoiceResolution({...evidence,quantity:2},commerceNow,"COLOR_REQUIRED")).toBeNull();
+ expect(selectionChoiceResolution(evidence,new Date(Date.parse(evidence.expiresAt)),"COLOR_REQUIRED")).toBeNull();
  expect(expandSelectionOptions(evidence)).toEqual(data.selectionOptions);
  expect(Date.parse(evidence.expiresAt)).toBe(commerceNow.getTime()+120000);
  expect(evidence.options).toEqual(expect.arrayContaining([expect.objectContaining({color:"be",status:"PRE_ORDER"})]));

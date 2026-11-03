@@ -10,7 +10,7 @@ import type { CommerceTools } from "./single-agent-commerce-read-only.js";
 import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-catalog.js";
 import type { TerminalOutcome, TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import { formatCartLineSelection, selectionsMatchCartLines } from "./realtime-sales-cycle.js";
-import {selectionShopDataGap,validSelectionEvidence,selectionEvidenceFromOptions,mergeSelectionEvidence,selectionMeaningHash,selectionQueryKey,expandSelectionOptions,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
+import {selectionChoiceResolution,validSelectionEvidence,selectionEvidenceFromOptions,mergeSelectionEvidence,selectionMeaningHash,selectionQueryKey,expandSelectionOptions,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
 import { CommerceEffectCommitError, type CommerceEffectFailureStage } from "./single-agent-commerce-effect-failure.js";
 
 const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase", "record_negotiation"]);
@@ -165,8 +165,10 @@ export async function createCommerceEffectTools(input: {
       let checked=proposed;for(const old of selectionObservations.values())if(old.evidence.productId===productId)checked=mergeSelectionEvidence(checked,old.evidence,now);
       mergeSelectionEvidence(checked,bound,now);
       selectionObservations.set(key,{query:previous?.query??query,evidence:bound});
+      const choiceResolution=selectionChoiceResolution(bound,now,result.status);
       return {...result,selectionOptions:expandSelectionOptions(bound),selectionEvidence:bound,selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",selectionStatus:result.status,
-        ...(result.status==="COLOR_REQUIRED"&&selectionShopDataGap(bound,now)?{shopDataGap:"SHOP_COLOR_UNRECORDED"}: {})};
+        ...(choiceResolution?{choiceResolution}:{}),
+        ...(choiceResolution?.kind==="SHOP_DATA_MISSING"?{shopDataGap:choiceResolution.reason}: {})};
     }
     if (result.status !== "READY") return { status: result.status, reasonCode: result.reasonCode,
       selectionOptions:(result.selectionOptions??[]).slice(0,8),selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",selectionStatus:result.status };
