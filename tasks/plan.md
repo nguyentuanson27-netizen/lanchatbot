@@ -1,3 +1,9 @@
+## Proposed — sales completion repair plan, 2026-11-03
+
+Plan only, base788ce66d. S1verified source/media/chart inventory → S2canonical component and customer-choice vs shop-gap cart outcomes → S3target-bound component fit → S4bounded context/purposeful reads → S5native checkout progression → S6tests/PG/review/frozen provider acceptance. Runtime/prompt/source unchanged; all planned checks and new model runs NOT_RUN. Preserve33cases/48turns; proposed separate full-checkout1case/7turns, total34/55N1, prefix14/23 included rather than rerun. Material source prerequisites must be ready before claiming fixed sales paths; no live source write/deploy authorized.
+
+[Detailed plan and acceptance](../docs/specs/c3-phase-c-sales-completion-fix-plan-20261103.md). Independent plan review NOT_RUN; not approved implementation.
+
 ## Current — model continuation completed and audited, 2026-11-03
 
 - [x] Preserved interrupted4e873 run:17 captured turns,35generationHTTP including s09 twoOWNER OK and oneVERIFIER error without terminal. Old failure and all raw artifacts retained.
