@@ -1,3 +1,9 @@
+## Proposed — preserve B capabilities and complete missing infrastructure, 2026-11-04
+
+[Detailed repair plan](../docs/specs/c3-phase-c-b-preserving-infrastructure-plan-20261104.md), planning base d1b15233. I: chart meaning/ranges; II: cross-turn current fit and profile-once/multiple targets; III: selected offer progression, pre-cart total quote and bounded/schema-correct tool path; IV: task-specific media sources and native checkout evaluator witness bridge. Preserve six B differential controls and current authority/privacy/receipts/silent handoff. Missing infrastructure/source is work to add, not a reason to rewrite customer journeys or count handoff as completed sales capability. Existing owner-approved test assumptions remain scoped test inputs.
+
+Plan only, self-reviewed; no implementation/provider/independent approval. Keep33cases/48turns, prefix13/24 then remainder20/24 without repeats; separately planned checkout1/7 only after bridge, maximum34/55. Gate source semantics, deterministic/shared/worker and realPG before seal; retain errors/denominators. No broad style prompt rewrite, semantic overblocking relaxation, retry/cap increase, whole-C rollback or live change.
+
 ## Latest — test-source model round completed, 2026-11-04
 
 Clean executable `e14d26594bb8831909788007f92fba81b3cd54e4`; unchanged Gemini3.5FlashLite HIGH owner / GPT6.1Sol HIGH verifier, CompactV2, N1/retry0. Fresh world incorporates owner-approved isolated chart/white-shirt/assumed-feedback/active-handoff sources. Independent input review before dispatch;18 evaluator purposes corrected before results, no customer/rubric fit after run. Completed33cases/48turns,27texts21images:25SEND_ELIGIBLE+2CODE_OWNED_SEND+14silentHANDOFF+7humanNO_SEND.100records/99generationHTTP include1zeroHTTPboundfailure and2MALFORMED, no hidden retry;2owner-auth and3auxiliaryHTTP listed separately. Both group accounting/capture audits APPROVED; final report accuracy tracked in evidence.

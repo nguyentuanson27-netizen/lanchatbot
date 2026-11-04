@@ -1,3 +1,12 @@
+## Proposed — B-preserving infrastructure repair, 2026-11-04
+
+- [x] Review latest run and source: p04 fit is lost between turns despite unchanged profile/PRODUCT target; j2 direct measurements face point-valued chart ranges; p07 multiple state ops; p09 receives correct latest/history but repeats resolved choice. Existing B/control and checkout plans read. [Detailed plan](../docs/specs/c3-phase-c-b-preserving-infrastructure-plan-20261104.md).
+- [ ] I: verify source chart semantics and normalize valid intervals; retain approved shared test applicability and height/weight path.
+- [ ] II: persist bounded requested fit targets/recompute current evidence across turns; verify one profile update for multiple target calculations without weakening conflicts/receipts.
+- [ ] III: explicit selected-offer continuation, source-backed pre-cart total, bounded continuation and actual tool/schema audit; no parser or hidden retry.
+- [ ] IV: complete missing task-specific media adapters/metadata/assets and native checkout evaluator bridge; preserve owner-approved test assumptions, distinguish real media provenance.
+- [ ] B differential controls + worker/shared/realPG verification, review and source-ready frozen acceptance. Prefix13cases24turns; remainder20/24; separate checkout1/7 after bridge. All implementation/model checks of this plan NOT_RUN, no independent approval or GO.
+
 ## Latest — test-source model round completed, 2026-11-04
 
 - [x] Clean executable e14d26594bb8831909788007f92fba81b3cd54e4; fresh107-product world, owner-approved isolated chart/white-shirt/assumed-feedback/active-handoff sources;27ready6source-gap cases. Corrected18 inherited evaluator SHOP_GAP purposes before provider dispatch, originals retained; independent input review APPROVED.
