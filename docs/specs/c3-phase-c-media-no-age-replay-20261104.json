@@ -1,0 +1,128 @@
+{
+  "kind": "MEDIA_AGE_POLICY_REPLAY",
+  "runtimeSourceSha": "62b4ac409ca81092ba8c702ed06259e0f5dd72d5",
+  "worldHash": "658e571d533c11f02d8d9d79aa4d653544c69324c0cb09e7fc8817d4c305a1a7",
+  "checkedAt": "2026-11-04T02:49:13.681Z",
+  "providerRequests": 0,
+  "sourceWrites": 0,
+  "method": "Identical frozen world and clock; pure metadata eligibility only, not byte preparation or live delivery",
+  "rows": [
+    {
+      "productId": "SQ2447",
+      "before": {
+        "GENERIC": 0,
+        "DETAIL": 0,
+        "FEEDBACK": 0
+      },
+      "after": {
+        "GENERIC": 2,
+        "DETAIL": 2,
+        "FEEDBACK": 0
+      }
+    },
+    {
+      "productId": "SV2447",
+      "before": {
+        "GENERIC": 2,
+        "DETAIL": 2,
+        "FEEDBACK": 0
+      },
+      "after": {
+        "GENERIC": 2,
+        "DETAIL": 2,
+        "FEEDBACK": 0
+      }
+    },
+    {
+      "productId": "SV1561",
+      "before": {
+        "GENERIC": 0,
+        "DETAIL": 0,
+        "FEEDBACK": 0
+      },
+      "after": {
+        "GENERIC": 2,
+        "DETAIL": 1,
+        "FEEDBACK": 0
+      }
+    },
+    {
+      "productId": "V406",
+      "before": {
+        "GENERIC": 0,
+        "DETAIL": 0,
+        "FEEDBACK": 0
+      },
+      "after": {
+        "GENERIC": 2,
+        "DETAIL": 1,
+        "FEEDBACK": 0
+      }
+    },
+    {
+      "productId": "SD023",
+      "before": {
+        "GENERIC": 0,
+        "DETAIL": 0,
+        "FEEDBACK": 0
+      },
+      "after": {
+        "GENERIC": 0,
+        "DETAIL": 0,
+        "FEEDBACK": 0
+      }
+    },
+    {
+      "productId": "SQ748",
+      "before": {
+        "GENERIC": 0,
+        "DETAIL": 0,
+        "FEEDBACK": 0
+      },
+      "after": {
+        "GENERIC": 2,
+        "DETAIL": 1,
+        "FEEDBACK": 0
+      }
+    },
+    {
+      "productId": "SQ675",
+      "before": {
+        "GENERIC": 0,
+        "DETAIL": 0,
+        "FEEDBACK": 0
+      },
+      "after": {
+        "GENERIC": 2,
+        "DETAIL": 1,
+        "FEEDBACK": 0
+      }
+    },
+    {
+      "productId": "V039",
+      "before": {
+        "GENERIC": 0,
+        "DETAIL": 0,
+        "FEEDBACK": 0
+      },
+      "after": {
+        "GENERIC": 2,
+        "DETAIL": 1,
+        "FEEDBACK": 0
+      }
+    },
+    {
+      "productId": "V168",
+      "before": {
+        "GENERIC": 0,
+        "DETAIL": 0,
+        "FEEDBACK": 0
+      },
+      "after": {
+        "GENERIC": 2,
+        "DETAIL": 1,
+        "FEEDBACK": 0
+      }
+    }
+  ]
+}

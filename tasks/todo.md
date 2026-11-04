@@ -1,3 +1,9 @@
+## Completed — remove automatic catalog-photo age expiry, 2026-11-04
+
+- [x] Owner-authorized removal of 30-day photo age limit; executable `62b4ac40`, base `fb40728c`. Current media expiry null until source replacement/revocation; selection/claims/context/provider hints/opening/durable gate agree. Approval/hash/binding/invalid-proof checks and volatile fact/effect/capture expiry preserved; legacy finite records remain readable. No prompt/model/source-shop write or deploy.
+- [x] Observed 2 RED before runtime → focused GREEN; final worker 2635 PASS/154 files, shared focused contracts/business/database + provider-wire tests PASS; worker/dependency build, direct tsc/lint/shared typechecks exit 0. Two obsolete age assertions were updated; their first full-run failures are retained in evidence.
+- [x] Clean executable PostgreSQL 17/17 PASS, including old image persisted/delivered via capture transport and source-change/revocation guards; database dropped/provider0/live0. Identical frozen-world/clock replay restores metadata eligibility for 7 formerly age-blocked products; byte preparation and source gaps are separate. [Implementation and exact verification](../docs/specs/c3-phase-c-media-no-age-limit-20261104.md).
+
 ## Completed — fresh source-gap inventory, 2026-11-04
 
 - [x] Read current public107-product world at09:46VN; current POS sync09:28. Pure media eligibility and chart/variant audit/provider0/sourceWrites0. Photo clock/verification gaps, missing TOP/PANTS/SKIRT applicability, unresolved physical colour for stocked AO, absent approved feedback and absent upstream active HANDOFF_MATRIX recorded separately. Existing isolated testworld matrix is not source publication. [Current details and exact evidence](../docs/specs/c3-phase-c-source-gaps-20261104.md).

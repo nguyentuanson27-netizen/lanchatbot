@@ -1,5 +1,7 @@
 # Current source gaps — 04/11/2026
 
+**Cập nhật theo yêu cầu owner:** giới hạn tuổi ảnh 30 ngày đã được bỏ trong source mới. Bảng `expired` bên dưới là inventory trước thay đổi, được giữ nguyên làm đối chứng; xem [quy tắc hiện hành và replay cùng nguồn/clock](c3-phase-c-media-no-age-limit-20261104.md). Thiếu clock/approval/metadata/feedback/chart vẫn là vấn đề riêng.
+
 Fresh public read-only capture107products at09:46:34 Vietnam time; pure eligibility checked09:49:13. Source `3a9845d0e099dcc3689b4b3a645346efcbc41cdd`, worldhash `658e571d533c11f02d8d9d79aa4d653544c69324c0cb09e7fc8817d4c305a1a7`. Provider0/sourceWrites0. [Exact inventory, chart scopes, variants and timestamps](c3-phase-c-source-gaps-20261104.json). Rawworld remains outside repository at `../c3-source-gap-check-world-20261104-01/WORLD.json`; no customer data copied.
 
 ## 1. Existing photos lack current usable verification
