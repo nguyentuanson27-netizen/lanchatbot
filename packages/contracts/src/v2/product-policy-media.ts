@@ -5,6 +5,7 @@ import { CanonicalProductIdV1Schema } from "./canonical-identifiers.js";
 export const PRICE_INVENTORY_FRESH_FOR_SECONDS = 48 * 60 * 60;
 export const BOM_FRESH_FOR_SECONDS = 7 * 24 * 60 * 60;
 export const FULFILLMENT_FRESH_FOR_SECONDS = 7 * 24 * 60 * 60;
+/** Legacy serialized media TTL only; current catalog media uses until-replaced metadata. */
 export const MEDIA_FRESH_FOR_SECONDS = 30 * 24 * 60 * 60;
 export const DEFAULT_SHIPPING_FEE_VND = 30_000;
 export const MULTI_ITEM_OFFER_MINIMUM_PRODUCTS = 2;
@@ -150,10 +151,14 @@ export const FulfillmentMetadataV1Schema = z
     }
   });
 
-export const MediaMetadataV1Schema = makeFixedTtlMetadataSchema(
+const LegacyMediaMetadataV1Schema = makeFixedTtlMetadataSchema(
   ["QDRANT_STABLE"],
   MEDIA_FRESH_FOR_SECONDS,
 );
+export const MediaMetadataV1Schema = z.union([z.object({
+  authority:z.literal("QDRANT_STABLE"),sourceVersion:SourceVersionSchema,observedAt:DateTimeSchema,
+  expiresAt:z.null(),freshForSeconds:z.null(),freshnessState:FactFreshnessSchema,
+}).strict(),LegacyMediaMetadataV1Schema]);
 
 export const UntilReplacedMetadataV1Schema = z
   .object({

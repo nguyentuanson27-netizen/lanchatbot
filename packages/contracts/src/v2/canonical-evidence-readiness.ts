@@ -316,14 +316,15 @@ const ProtectedClaimAuthorityV1Schema = z.enum([
   "MEDIA_SELECTOR_V2",
 ]);
 
-const ProtectedClaimProvenanceV1Schema = z.object({
+const protectedClaimProvenanceFields = {
   authority: ProtectedClaimAuthorityV1Schema,
   sourceVersion: z.string().trim().min(1).max(256),
   evidenceRef: z.string().trim().min(1).max(512),
   contentHash: Sha256Schema,
   observedAt: z.string().datetime(),
   expiresAt: z.string().datetime(),
-}).strict().superRefine((value, context) => {
+};
+const ProtectedClaimProvenanceV1Schema = z.object(protectedClaimProvenanceFields).strict().superRefine((value, context) => {
   if (Date.parse(value.expiresAt) <= Date.parse(value.observedAt)) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
@@ -331,6 +332,15 @@ const ProtectedClaimProvenanceV1Schema = z.object({
       message: "protected claim provenance must expire after observation",
     });
   }
+});
+
+// Catalog media remains valid until its exact approved source is replaced/revoked.
+// Other claim types retain mandatory bounded expiry.
+const ProtectedMediaProvenanceV1Schema = z.object({...protectedClaimProvenanceFields,
+  expiresAt:z.string().datetime().nullable(),
+}).strict().superRefine((value,context)=>{
+  if(value.expiresAt!==null&&Date.parse(value.expiresAt)<=Date.parse(value.observedAt))
+    context.addIssue({code:z.ZodIssueCode.custom,path:["expiresAt"],message:"media expiry must follow observation"});
 });
 
 const ProtectedClaimBase = z.object({
@@ -404,6 +414,7 @@ export const ProtectedClaimV1Schema = z.discriminatedUnion("type", [
   }).strict(),
   ProtectedClaimBase.extend({
     type: z.literal("PRODUCT_MEDIA"),
+    provenance: ProtectedMediaProvenanceV1Schema,
     value: z.object({ assetId: BoundedIdSchema, assetSha256: Sha256Schema }).strict(),
   }).strict(),
 ]).superRefine((claim, context) => {

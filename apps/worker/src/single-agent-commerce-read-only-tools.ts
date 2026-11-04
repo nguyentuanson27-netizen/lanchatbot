@@ -397,7 +397,7 @@ export function createReadOnlyTools(input: {
       if(!o.offer)return [];
       const options=candidateCartOptions(raw,{shopAlias:scope.shopAlias,productId:id,offerType:o.offer,size:query.size,color:query.color,quantity:1,
         lineId:"00000000-0000-4000-8000-000000000001"},now);
-      const until=Math.min(expires,...o.claims.map(c=>Date.parse(c.provenance.expiresAt)),raw.fulfillment_policy?.eta_valid_until.trim()?Date.parse(raw.fulfillment_policy.eta_valid_until):Infinity);
+      const until=Math.min(expires,...o.claims.map(c=>(c.provenance.expiresAt === null ? Infinity : Date.parse(c.provenance.expiresAt))),raw.fulfillment_policy?.eta_valid_until.trim()?Date.parse(raw.fulfillment_policy.eta_valid_until):Infinity);
       const v=selectionEvidenceFromOptions({productId:id,offerType:o.offer,size:query.size,color:query.color,quantity:1,sourceVersion:raw.release_id,
         sourceHash:selectionSourceHash(raw),observedAt:raw.synced_at,expiresAt:new Date(until).toISOString()},options,now);
       if(!v)throw Error("SELECTION_EVIDENCE_STALE");return [v];
@@ -459,7 +459,7 @@ export function createReadOnlyTools(input: {
       sizeAvailability: selected.sizeAvailability,
       sellingOptions: availableOffers === null ? null : options.map(o => ({ offerType: o.offerType, variantId: o.variantId,
         sourceVersion: raw!.release_id, observedAt: raw!.synced_at,
-        expiresAt: new Date(Math.min(expires, ...o.claims.map(c => Date.parse(c.provenance.expiresAt)))).toISOString(),
+        expiresAt: new Date(Math.min(expires, ...o.claims.map(c => (c.provenance.expiresAt === null ? Infinity : Date.parse(c.provenance.expiresAt))))).toISOString(),
         facts: publicFacts(o.claims), availability: o.availability, sizeAvailability: o.sizeAvailability })),
       attributes: evidence.attributes ?? null, sizeCharts: charts,
       content: evidence.content ?? null,

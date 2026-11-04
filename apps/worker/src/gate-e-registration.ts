@@ -544,7 +544,7 @@ function businessFactsFromContext(context: ContextV2) {
   const observedAt = productClaims[0]?.provenance.observedAt ??
     "2026-08-17T00:00:00.000Z";
   const expiresAt = productClaims
-    .map(({ provenance }) => provenance.expiresAt)
+    .flatMap(({ provenance }) => provenance.expiresAt === null ? [] : [provenance.expiresAt])
     .sort()[0] ?? "2026-08-18T00:00:00.000Z";
   return BusinessFactEnvelopeV1Schema.parse({
     schemaVersion: 1,

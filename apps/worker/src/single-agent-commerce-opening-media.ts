@@ -35,7 +35,8 @@ export function withOpeningProductMedia(base:CommerceTools,input:{rule:OpeningPr
  };
  const covers=(c:TrustedContext,a:CommerceMediaAsset,wanted:readonly string[]|null)=>{
   const now=input.clock().getTime();
-  if(a.imageType==='SIZE_GUIDE'||!Number.isFinite(Date.parse(a.observedAt))||Date.parse(a.observedAt)>now||Date.parse(a.expiresAt)<=now||!Number.isFinite(Date.parse(a.expiresAt)))return false;
+  if(a.imageType==='SIZE_GUIDE'||!Number.isFinite(Date.parse(a.observedAt))||Date.parse(a.observedAt)>now||
+    (a.expiresAt!==null&&(!Number.isFinite(Date.parse(a.expiresAt))||Date.parse(a.expiresAt)<=now)))return false;
   if(wanted===null)return false;
   return metadata(c).some(m=>m.subjectRef===a.productId&&m.intent!=='SIZE_GUIDE'&&Array.isArray(m.assets)&&
    m.assets.some(v=>v.assetRef===a.assetRef)&&(!wanted.length||wanted.length===1&&typeof m.color==='string'&&normalizeCatalogToken(m.color)===wanted[0]));

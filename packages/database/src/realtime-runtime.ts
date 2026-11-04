@@ -572,7 +572,7 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     if (claims.some((claim) =>
       Date.parse(claim.provenance.observedAt) >
         now.getTime() + MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1 ||
-      Date.parse(claim.provenance.expiresAt) <= now.getTime()
+      (claim.provenance.expiresAt !== null && Date.parse(claim.provenance.expiresAt) <= now.getTime())
     )) {
       throw new Error("EFFECT_READINESS_CLAIM_STALE");
     }
@@ -1778,7 +1778,7 @@ function validateMetaEffectReadiness<TState, TSalesState>(
   if (claims.some((claim) =>
     Date.parse(claim.provenance.observedAt) >
       now.getTime() + MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1 ||
-    Date.parse(claim.provenance.expiresAt) <= now.getTime()
+    (claim.provenance.expiresAt !== null && Date.parse(claim.provenance.expiresAt) <= now.getTime())
   )) {
     throw new Error("PROTECTED_OUTBOUND_CLAIM_STALE");
   }

@@ -163,6 +163,14 @@ const unavailableFallback = {
 };
 
 describe("Media selector V2", () => {
+  it("selects old until-replaced media while still rejecting an explicit expiry", () => {
+    const product = facts([asset("old", {view:"FULL_LOOK"})]);
+    product.media.metadata = {...product.media.metadata, observedAt:"2025-01-01T00:00:00.000Z", expiresAt:null, freshForSeconds:null};
+    expect(selectProductMediaV2({product,kind:"FULL_LOOK",now:NOW,unavailableFallback}).selection.selected[0]?.assetId).toBe("old");
+    product.media.metadata = facts([]).media.metadata;
+    expect(selectProductMediaV2({product,kind:"FULL_LOOK",now:new Date("2026-09-01T00:00:00.000Z"),unavailableFallback}).selection.selected).toEqual([]);
+  });
+
   it("normalizes image_registry media aliases into the canonical seven intents", () => {
     expect(normalizeImageRegistryMediaTypeV2(" full-look ")).toBe("FULL_LOOK");
     expect(normalizeImageRegistryMediaTypeV2("chân váy")).toBe("CHAN_VAY");

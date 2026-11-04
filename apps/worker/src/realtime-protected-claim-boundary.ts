@@ -57,11 +57,11 @@ function claimReason(
 ): RealtimeProtectedClaimReasonCode | null {
   if(claim.type==="SIZE_FIT"&&claim.scope.kind!=="PRODUCT")return `PROTECTED_CLAIM_PRODUCT_SCOPE_MISMATCH:${claim.claimId}`;
   const observedAt = Date.parse(claim.provenance.observedAt);
-  const expiresAt = Date.parse(claim.provenance.expiresAt);
+  const expiresAt = claim.provenance.expiresAt===null?null:Date.parse(claim.provenance.expiresAt);
   if (observedAt > input.now.getTime()) {
     return `PROTECTED_CLAIM_FUTURE:${claim.claimId}`;
   }
-  if (expiresAt <= input.now.getTime()) {
+  if (expiresAt!==null&&expiresAt <= input.now.getTime()) {
     return `PROTECTED_CLAIM_STALE:${claim.claimId}`;
   }
   if (claim.scope.kind === "PRODUCT") {

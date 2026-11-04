@@ -19,6 +19,16 @@ import {
 const HASH = "a".repeat(64);
 const OTHER_HASH = "b".repeat(64);
 
+it("allows until-replaced expiry only for protected media, never price or stock",()=>{
+  const price=productClaim("PRICE","P-001");
+  const media={...price,type:"PRODUCT_MEDIA",provenance:{...price.provenance,authority:"MEDIA_SELECTOR_V2",expiresAt:null},
+    value:{assetId:"asset-1",assetSha256:HASH}};
+  expect(ProtectedClaimV1Schema.safeParse(media).success).toBe(true);
+  expect(ProtectedClaimV1Schema.safeParse({...media,provenance:{...media.provenance,authority:"POS_LIVE"}}).success).toBe(false);
+  for(const type of ["PRICE","STOCK"] as const){const c=productClaim(type,"P-001");
+    expect(ProtectedClaimV1Schema.safeParse({...c,provenance:{...c.provenance,expiresAt:null}}).success).toBe(false);}
+});
+
 function productClaim(
   type: "PRICE" | "STOCK" | "ETA",
   productId: string,

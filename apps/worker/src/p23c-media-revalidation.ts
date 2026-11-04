@@ -1,8 +1,10 @@
 import {createHash} from "node:crypto";
 import {isDeepStrictEqual} from "node:util";
 import {createMediaRevalidationProof,mediaRevalidationIdentity,readMediaRevalidation,type MediaRevalidationProof} from "@lana/business-tools";
-import {MEDIA_FRESH_FOR_SECONDS} from "@lana/contracts";
 import {safeRecognitionImageUrl} from "./media-recognition-v2-image-pipeline.js";
+
+// Background integrity-check cadence; this never expires an approved catalog image.
+const MEDIA_INTEGRITY_RECHECK_INTERVAL_MS=15*24*60*60*1000;
 
 export interface MediaRevalidationSource {pointId:string;payload:Record<string,unknown>;approvedPayload:Record<string,unknown>|null}
 export interface MediaRevalidationResult {pointId:string;status:"VERIFIED"|"NOT_DUE"|"BLOCKED"|"WRITE_UNCONFIRMED";reason:string}
@@ -22,7 +24,7 @@ export async function revalidatePublishedMedia(input:{
   const existing=readMediaRevalidation(initial.payload),now=input.clock().getTime();
   if(!input.force&&matches(initial)&&existing?.status==="VALID"){
     const age=now-Date.parse(existing.checkedAt);
-    if(age>=0&&age<MEDIA_FRESH_FOR_SECONDS*500)return result("NOT_DUE","RECENT_BOUND_VERIFICATION");
+    if(age>=0&&age<MEDIA_INTEGRITY_RECHECK_INTERVAL_MS)return result("NOT_DUE","RECENT_BOUND_VERIFICATION");
   }
   let current:MediaRevalidationSource|null=null,sha:string|null=null,reason="SOURCE_NOT_APPROVED";
   try{

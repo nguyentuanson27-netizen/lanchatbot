@@ -105,7 +105,7 @@ export function evaluateDeterministicEffectReadinessV1(
 
   const nowMs = input.checkedAt.getTime();
   for (const claim of input.claims) {
-    if (Date.parse(claim.provenance.expiresAt) <= nowMs) {
+    if (claim.provenance.expiresAt!==null&&Date.parse(claim.provenance.expiresAt) <= nowMs) {
       reasons.add("CLAIM_STALE");
     }
     if (claim.scope.kind === "PRODUCT" && !productIds.includes(claim.scope.productId)) {
@@ -206,7 +206,7 @@ export function evaluateDeterministicEffectReadinessV1(
   }
 
   const freshExpiries = input.claims
-    .map((claim) => Date.parse(claim.provenance.expiresAt))
+    .flatMap((claim) => claim.provenance.expiresAt===null?[]:[Date.parse(claim.provenance.expiresAt)])
     .filter((expiry) => Number.isFinite(expiry) && expiry > nowMs);
   const expiresAtMs = Math.min(
     nowMs + MAX_EFFECT_READINESS_LIFETIME_MS_V1,

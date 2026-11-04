@@ -97,7 +97,7 @@ function assertFreshClaims(
   if (!Number.isFinite(now.getTime())) throw new Error("CONTEXT_V2_CLOCK_INVALID");
   if (claims.some(({ provenance }) =>
     Date.parse(provenance.observedAt) > now.getTime() + 5 * 60_000 ||
-    Date.parse(provenance.expiresAt) <= now.getTime()
+    (provenance.expiresAt !== null && Date.parse(provenance.expiresAt) <= now.getTime())
   )) {
     throw new Error("CONTEXT_V2_CLAIM_STALE");
   }

@@ -523,7 +523,7 @@ try{
  if(providerRun)providerPorts=phaseC?phaseCTools.createCandidateProvider({preflight:providerFreeze,out:resolve(out)}):await createStatefulProvider({preflight:providerFreeze,out:resolve(out)});
  if(phaseC&&providerFreeze.registration.arm==='C3')await providerPorts.attachReference({baselineRoot:phaseCArg('--phase-c-baseline-root'),
   baselineBuild:JSON.parse(readFileSync(phaseCArg('--phase-c-baseline-build'),'utf8'))});
- async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false,candidateTuples=false,preparedOffers=false,preorderChoices=false,checkoutEta=false,multiOfferContext=false}={}){
+ async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,oldMedia=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false,candidateTuples=false,preparedOffers=false,preorderChoices=false,checkoutEta=false,multiOfferContext=false}={}){
   assert(!live||(!preparedOffers&&!preorderChoices),'SYNTHETIC_PREPARATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||!revalidatedMedia,'SYNTHETIC_REVALIDATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||(dependencyHoldingReply===null&&sizeHoldingReply===null&&!missingDependencyRule),'SYNTHETIC_RULE_FORBIDDEN_IN_PROVIDER_RUN');
@@ -569,6 +569,7 @@ try{
   if(revalidatedMedia){assert(media);product.product.observedAt=new Date(at.getTime()-31*86400000).toISOString();
    product.product.images[0].observedAt=product.product.observedAt;
    product.product.images[0].revalidation={status:'VALID',checkedAt:at.toISOString()};}
+  if(oldMedia){assert(media&&!live);product.product.images[0].observedAt='2025-01-01T00:00:00.000Z';}
   const read=live?await providerPorts.read(bound,policyStore,policy,initialProductCodes,facts):{policy:()=>policy(true),catalog:{readProduct:async()=>mediaChanged?{...product,product:{...product.product,images:[]}}:product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
   const scopedSourceReader=createCommerceHandoffSourceReader({
    product:(id,readPos)=>read.catalog.readProduct(id,readPos),
@@ -701,6 +702,12 @@ try{
   assert.equal((await j.state()).cart.value.lines.length,2);await j.drain();assert.equal(j.capture.length,2);
   const changed=await j.turn('Dạ em.',[say('Dạ chị.')],{afterVerify:async()=>j.changeVariantSource()});
   assert.notEqual(changed.result.terminal.disposition,'SEND_ELIGIBLE');assert.equal(changed.result.enqueued,0);assert.equal((await j.state()).cart.value.lines.length,2);
+ });
+
+ await check('C opening old approved image survives persisted delivery without an age deadline',async()=>{
+  const j=await statefulFixture({media:true,oldMedia:true}),r=await j.turn('Mẫu này nhé em.',[say('Dạ chị.')],{testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  assert.equal(r.result.terminal.disposition,'SEND_ELIGIBLE');assert.equal(r.result.enqueued,2);assert.equal(r.verifiers,1);
+  await j.drain();assert.deepEqual(j.capture,['Dạ chị.','[CODE_IMAGE]']);
  });
 
  for(const [kind,text] of [['ACK','Dạ chị.'],['ETA','Shop không hẹn sáng mai chị nhé.'],['QUOTE','Áo 499.000đ chị nhé.']])await check('C opening '+kind+' exact text and photo accepted atomically',async()=>{

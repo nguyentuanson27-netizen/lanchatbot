@@ -383,7 +383,7 @@ export function buildProtectedMediaClaimsV1(input: Readonly<{
   imageUrls: readonly string[];
   sourceVersion: string;
   observedAt: string;
-  expiresAt: string;
+  expiresAt: string | null;
 }>): readonly ProtectedClaimV1[] {
   return [...new Set(input.imageUrls)].map((imageUrl) => {
     const assetSha256 = sha256(imageUrl);
