@@ -1,3 +1,7 @@
+## Owner amendment — test size data, 2026-11-04
+
+Use existing `size-chart:SQ2447` for the configured Thạch Thảo sets and separate TOP/PANTS/SKIRT pieces. Owner-approved test mapping is sufficient; do not require bulk source updates/publication to exercise these paths. Preserve chart bands, exact BOM target and independent price/stock; freeze the explicit mapping in new inputs. [Implementation and verification](../docs/specs/c3-test-component-size-sharing-20261104.md). Existing frozen runs remain unchanged; no new model dispatch authorized by this data confirmation alone.
+
 ## Latest — requested model round completed, 2026-11-04
 
 Clean source `88a331404226b44d2e87e0b5cc1c8689261bb345`; same current Gemini 3.5 Flash Lite HIGH owner / GPT-6.1 Sol HIGH verifier, CompactV2, N1/retry0. Existing two development scopes completed **33 cases / 48 captured turns**, no NOT_RUN/hard stop. Actual18SEND_ELIGIBLE+2CODE_OWNED_SEND+20silentHANDOFF+8humanNO_SEND;71generationrecords/71HTTP, one malformed owner output and one owner502 retained without retry. Input, both accounting/capture groups and final report independently APPROVE. Database drops confirmed, source-shop writes/live sends0. No runtime/prompt edits in this run; metadata comparison corrected before dispatch with originals retained.

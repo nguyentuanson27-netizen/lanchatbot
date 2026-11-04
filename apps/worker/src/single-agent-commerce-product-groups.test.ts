@@ -48,6 +48,32 @@ it("delegates only chart applicability to an approved same-name member, preservi
   expect(actual.charts[0]!.scope?.parentProductIds).toEqual(["SOURCE", "MEMBER"]);
   expect({ product, artifact }).toEqual(before);
 });
+
+it.each(["TOP","PANTS","SKIRT"] as const)("uses explicit owner-approved shared chart for a separate %s without changing published data",role=>{
+ const {product,policy,artifact}=fixture(),raw=fixtureProduct("MEMBER").snapshot;
+ raw.offers.DIRECT!.rows[0]!.component_1_sku=`MEMBER-${{TOP:"AO",PANTS:"QUAN",SKIRT:"CV"}[role]}`;
+ const approved={...group,sharedSize:{...group.sharedSize,componentRoles:[role],componentApprovalRef:"owner-test-size-sharing"}};
+ const before=structuredClone({policy,raw});
+ expect(()=>commerceComponentSizeSource(product,raw,policy,role,commerceNow,1200)).toThrow("COMPONENT_CHART_UNAVAILABLE");
+ const source=commerceComponentSizeSource(product,raw,policy,role,commerceNow,1200,[approved]);
+ expect(source.fitTarget).toMatchObject({kind:"COMPONENT",parentProductId:"MEMBER",componentRole:role});
+ expect(source.charts[0]!.chart.bands).toEqual(artifact.chart.bands);
+ expect(source.charts[0]!.chart.reference).toEqual(artifact.chart.reference);
+ expect(source.charts[0]!.chart.componentRole).toBe(role);
+ expect({policy,raw}).toEqual(before);
+ const otherBrand=structuredClone(raw);otherBrand.brand="OTHER_BRAND";
+ expect(()=>commerceComponentSizeSource(product,otherBrand,policy,role,commerceNow,1200,[approved])).toThrow("COMPONENT_CHART_UNAVAILABLE");
+ for(const sharedSize of [{...approved.sharedSize,componentApprovalRef:""},{...approved.sharedSize,componentRoles:[]}] )
+  expect(()=>commerceComponentSizeSource(product,raw,policy,role,commerceNow,1200,[{...approved,sharedSize}])).toThrow("COMPONENT_CHART_UNAVAILABLE");
+ artifact.scope.parentProductIds=["MEMBER"];
+ // A published PANTS chart scoped directly to MEMBER remains independently valid.
+ if(role!=="PANTS")expect(()=>commerceComponentSizeSource(product,raw,policy,role,commerceNow,1200,[approved])).toThrow("COMPONENT_CHART_UNAVAILABLE");
+ artifact.scope.parentProductIds=["SOURCE"];
+ const changedApproval={...approved,sharedSize:{...approved.sharedSize,componentApprovalRef:"replacement-approval"}};
+ expect(commerceComponentSizeSource(product,raw,policy,role,commerceNow,1200,[changedApproval]).sourceBindingHash).not.toBe(source.sourceBindingHash);
+ artifact.chart.reference.verificationStatus="EXTRACTED_UNREVIEWED";
+ expect(()=>commerceComponentSizeSource(product,raw,policy,role,commerceNow,1200,[approved])).toThrow("COMPONENT_CHART_UNAVAILABLE");
+});
 it.each(["unlisted", "renamed", "ambiguous", "unverified", "garment", "unpublished", "stale", "brand", "scope", "missing"])(
   "does not borrow a chart after %s changes", fault => {
     const { product, policy, artifact } = fixture(); let groups = [group];

@@ -1,3 +1,8 @@
+## Completed — owner-approved shared component chart for test data, 2026-11-04
+
+- [x] Owner confirms existing SQ2447 chart for Thạch Thảo separate pieces; record scoped test configuration and approval. No upstream bulk update/publication prerequisite. Exact BOM target and original chart verification remain; bands/source records unchanged, prices/stock separate.
+- [x] Observed 3 RED → final focused worker256 PASS and Node21 PASS; direct compile/typecheck/lint0. Same-capture pure replay: 2 PRODUCT + 4 COMPONENT size sources available and readiness aligned. Self-reviewed; no model run/deploy. [Details](../docs/specs/c3-test-component-size-sharing-20261104.md).
+
 ## Completed — remove automatic catalog-photo age expiry, 2026-11-04
 
 - [x] Owner-authorized removal of 30-day photo age limit; executable `62b4ac40`, base `fb40728c`. Current media expiry null until source replacement/revocation; selection/claims/context/provider hints/opening/durable gate agree. Approval/hash/binding/invalid-proof checks and volatile fact/effect/capture expiry preserved; legacy finite records remain readable. No prompt/model/source-shop write or deploy.

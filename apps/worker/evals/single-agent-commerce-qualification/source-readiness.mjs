@@ -7,7 +7,7 @@ import {resolve} from 'node:path';
 import {resolveCatalogFacts,normalizeProductCode} from '@lana/business-tools';
 import {RuntimePolicyResolver} from '@lana/chat-runtime';
 import {candidateCartOptions,cartSelectionFromSnapshot} from '../../dist/realtime-sales-catalog.js';
-import {commerceSizeSource} from '../../dist/single-agent-commerce-product-groups.js';
+import {commerceSizeSource,commerceComponentSizeSource} from '../../dist/single-agent-commerce-product-groups.js';
 import {eligibleCommerceMedia,commerceMediaIntents} from '../../dist/single-agent-commerce-media-eligibility.js';
 import {digest} from './qualification.mjs';
 import {openingExecutionReadiness} from './opening-execution-readiness.mjs';
@@ -69,10 +69,13 @@ export async function sourceReadiness(world,spec,at=new Date(),openingMediaRule=
    try{available=eligibleCommerceMedia(p,{subjectRef:q.productId,intent:q.intent,...(q.componentRole?{componentRole:q.componentRole}:{}),...(q.color?{color:q.color}:{})},at.getTime(),q.allowedHostSuffixes).images.length>0;
     reason=available?null:'NO_VERIFIED_MATCHING_MEDIA';}catch{reason='MEDIA_INELIGIBLE';}
   }else if(q.facet==='SIZE_SOURCE'){
-   const source=commerceSizeSource(p,policy,world.config.productGroups??[]);
    const component=q.fitScope==='COMPONENT';
-   available=!component&&source.charts.length>0&&(!q.componentRole||source.target.componentRole===q.componentRole);
-   reason=component?'COMPONENT_FIT_UNSUPPORTED':available?null:'SIZE_SOURCE_UNAVAILABLE';
+   try{
+    const source=component?commerceComponentSizeSource(p,snapshot,policy,q.componentRole,at,world.config.maxFactAgeSeconds??1200,world.config.productGroups??[]):
+      commerceSizeSource(p,policy,world.config.productGroups??[]);
+    available=source.charts.length>0&&(!q.componentRole||source.target.componentRole===q.componentRole);
+    reason=available?null:'SIZE_SOURCE_UNAVAILABLE';
+   }catch{reason=component?'COMPONENT_FIT_UNSUPPORTED':'SIZE_SOURCE_UNAVAILABLE';}
   }else{
    assert(typeof q.offerType==='string'&&q.offerType.trim(),'C_READINESS_EXACT_OFFER');
    const observed=Date.parse(snapshot.synced_at),expires=observed+(world.config.maxFactAgeSeconds??1200)*1000;

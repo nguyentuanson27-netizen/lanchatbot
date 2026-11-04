@@ -10,7 +10,8 @@ import {commerceHash} from "./single-agent-commerce-read-only-context.js";
 export interface CommerceProductGroup {
   name: string; customerNames: readonly string[]; productTitles: Readonly<Record<string, string>>;
   approvalRef: string;
-  sharedSize: { artifactKey: string; sourceProductId: string; brand: string; category: string; componentRole: ProductComponentRole };
+  sharedSize: { artifactKey: string; sourceProductId: string; brand: string; category: string; componentRole: ProductComponentRole;
+    componentRoles?:readonly ProductComponentRole[];componentApprovalRef?:string;componentSourceBrand?:string };
 }
 export function commerceProductGroup(productId: string, title: string, groups: readonly CommerceProductGroup[]) {
   const matches = groups.filter(g => Object.hasOwn(g.productTitles, productId) &&
@@ -41,9 +42,9 @@ export function commerceSizeSource(product: StableProductDocument, policy: Runti
     charts: sourceCharts.map(c => ({ chart: c.chart, scope: { ...c.scope, parentProductIds: Object.keys(group.productTitles) } })) };
 }
 
-/** No name delegation here: a unique BOM component and an explicitly scoped published chart are required. */
+/** A unique current BOM component is required. Optional sharing is explicit owner configuration, never inferred from names. */
 export function commerceComponentSizeSource(product:StableProductDocument,raw:unknown,policy:RuntimePolicyResolution,
- componentRole:ProductComponentRole,now:Date,maxAgeSeconds=1200){
+ componentRole:ProductComponentRole,now:Date,maxAgeSeconds=1200,groups:readonly CommerceProductGroup[]=[]){
  const s=CatalogSnapshotV3Schema.parse(raw),at=now.getTime(),observed=Date.parse(s.synced_at);
  if(!Number.isInteger(maxAgeSeconds)||maxAgeSeconds<60||maxAgeSeconds>86400||s.product_id!==product.productId||!Number.isFinite(at)||observed>at||observed+maxAgeSeconds*1000<=at||
    !["OK","FULFILLMENT_POLICY_NOT_FOUND"].includes(normalizeCatalogToken(s.data_status)))throw Error("COMPONENT_SOURCE_UNAVAILABLE");
@@ -71,9 +72,32 @@ export function commerceComponentSizeSource(product:StableProductDocument,raw:un
      c.chart.reference.chartId===a.chart.reference.chartId&&c.chart.reference.version===a.chart.reference.version);
    return selectVerifiedSizeChart(charts,target)?[{target,charts}]:[];
  });
+ let delegation:unknown=null;
+ if(!eligible.length){
+   const group=commerceProductGroup(product.productId,product.title,groups),shared=group?.sharedSize;
+   if(shared?.componentApprovalRef?.trim()&&shared.componentRoles?.includes(componentRole)&&
+      normalizeCatalogToken(shared.componentSourceBrand??shared.brand)===normalizeCatalogToken(s.brand)){
+     const source=commerceSizeSource(product,policy,groups);
+     const artifact=policy.bundle?.artifacts.sizeCharts[shared.artifactKey];
+     const originalTarget={...source.target,parentProductId:shared.sourceProductId,componentProductId:shared.sourceProductId};
+     const original=artifact?evaluateSizeChartEligibility({policy,productId:shared.sourceProductId,target:originalTarget}).charts.filter(c=>
+       c.chart.reference.chartId===artifact.chart.reference.chartId&&c.chart.reference.version===artifact.chart.reference.version):[];
+     const target:SizeRecommendationTarget={...source.target,componentProductId,componentRole};
+     const charts=source.charts.map(c=>({chart:{...c.chart,componentRole},scope:{...c.scope,level:"COMPONENT" as const,
+       parentProductIds:[product.productId],componentRole}}));
+     if(artifact&&Object.hasOwn(group!.productTitles,shared.sourceProductId)&&artifact.chart.brand===shared.brand&&
+       artifact.chart.category===shared.category&&artifact.chart.componentRole===shared.componentRole&&
+       selectVerifiedSizeChart(original,originalTarget)&&charts.length===1&&
+       charts[0]!.chart.reference.chartId===artifact.chart.reference.chartId&&charts[0]!.chart.reference.version===artifact.chart.reference.version&&
+       selectVerifiedSizeChart(charts,target)){
+       eligible.push({target,charts});
+       delegation={approvalRef:shared.componentApprovalRef,sourceProductId:shared.sourceProductId,artifactKey:shared.artifactKey,componentRole};
+     }
+   }
+ }
  if(eligible.length!==1)throw Error("COMPONENT_CHART_UNAVAILABLE");
  const source=eligible[0]!,fitTarget={kind:"COMPONENT" as const,parentProductId:product.productId,componentProductId,componentRole};
  const {synced_at:_heartbeat,...content}=s;
- return {...source,fitTarget,sourceBindingHash:commerceHash({bom:content,fitTarget,charts:source.charts}),
+ return {...source,fitTarget,sourceBindingHash:commerceHash({bom:content,fitTarget,charts:source.charts,...(delegation?{delegation}:{})}),
    sourceExpiresAt:new Date(Math.min(observed+maxAgeSeconds*1000,policy.bundle?.policy?.effectiveUntil?Date.parse(policy.bundle.policy.effectiveUntil):Infinity)).toISOString()};
 }

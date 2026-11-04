@@ -266,7 +266,7 @@ export async function runPersistedCommerceIngress(input: {
       return commerceSizeSource(product, await input.policy(), input.read.productGroups); },
     componentSizeInput:async request=>{const {product,snapshot}=await input.read.catalog.readProduct(request.parentProductId,true);
       if(snapshot?.shop_alias!==scope.shopAlias)throw Error("COMPONENT_SOURCE_SCOPE");
-      return commerceComponentSizeSource(product,snapshot,await input.policy(),request.componentRole,input.clock(),input.read.maxFactAgeSeconds??1200);},
+      return commerceComponentSizeSource(product,snapshot,await input.policy(),request.componentRole,input.clock(),input.read.maxFactAgeSeconds??1200,input.read.productGroups);},
     quoteInput: async () => { const state = (await executor.repository.read(scope.conversationId))!, policy = await policyBundle();
       const lines = state.cart && canonicalCartPolicyLinesV2(state.cart.value.lines, scope.shopId); if (!lines || !state.negotiation) throw new Error("CART_REQUIRED");
       const tier = state.negotiation.customerState;

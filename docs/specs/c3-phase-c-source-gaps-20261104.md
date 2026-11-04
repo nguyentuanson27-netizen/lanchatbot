@@ -24,6 +24,8 @@ Prior03/11registry/byteaudit remains a separate measurement:53points/51approvedr
 
 ## 2. Component chart applicability is missing
 
+**Đã xử lý cho dữ liệu test:** owner xác nhận dùng bảng hiện có cho các món riêng. Cấu hình test đã nối TOP/PANTS/SKIRT, không cần publish/cập nhật toàn bộ upstream. [Phạm vi, sáu kết quả và kiểm chứng](c3-test-component-size-sharing-20261104.md). Đoạn sau mô tả nguồn trước xác nhận, không còn là yêu cầu chặn test thuộc nhóm này.
+
 Current active source has7SIZE_CHART records. Relevant ThạchThảo chart is `size-chart:SQ2447`, categorySET, componentRoleOTHER, applicabilitynull; existing configured delegation can support PRODUCT-level use. There is no approved TOP/PANTS/SKIRT applicability for the corresponding separate pieces. A chart for the whole set does not independently authorize TOP/PANTS/SKIRT fit. This does not necessarily require three new tables: a verified existing table may be reused if the shop confirms its exact component applicability. The missing item is that authoritative applicability/target mapping, or a separate appropriate chart if reuse is not valid.
 
 ## 3. Physical colour of stocked AO rows is unresolved
