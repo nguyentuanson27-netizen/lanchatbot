@@ -10,6 +10,18 @@
     "revision": 1
   },
   "channel": "PUBLISHED",
+  "testSupportSources": {
+    "approvalRef": "owner-feedback-handoff-test-supplement-20261104",
+    "handoffCandidateHash": "5154e9ea1e04200c8f92b9812ddcdae39d20e7cb508f96fafc7613ae3d833d74",
+    "feedback": [{
+      "productTitles": {"SV2447": "Set váy Thạch Thảo", "SQ2447": "Set quần Thạch Thảo"},
+      "offerType": "AO", "componentSku": "SV2447-AO",
+      "asset": {
+        "url": "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg",
+        "sha256": "4faaa0ba7fea7dc2058d6e7ece47f6d422be40c96ff06ab6ea568ba9c0aa1961", "partsVisible": ["AO"]
+      }
+    }]
+  },
   "testColorSources": [{
     "approvalRef": "owner-white-shirt-test-assumption-20261104",
     "productTitles": {"SV2447": "Set váy Thạch Thảo", "SQ2447": "Set quần Thạch Thảo"},

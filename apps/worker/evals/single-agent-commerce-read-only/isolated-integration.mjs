@@ -155,7 +155,10 @@ try{
  await runtime.loadOrCreateSalesCycle(pageId,key,()=>createSalesCycleRuntimeState(key,{pageId,conversationId:key},now),now);
  livePolicyStore=new PostgresRuntimePolicyStore(process.env.RUNTIME_POLICY_DATABASE_URL);
  const records=phaseC?providerFreeze.world.policyRecords:initialWorld?initialWorld.policyRecords:await livePolicyStore.loadActivePointers({pageId,channel:'PUBLISHED'});
- const handoffCandidate=process.argv.includes('--candidate-handoff')?isolatedHandoffRecords(records,{pageId,
+ const frozenTestSupport=(phaseC?providerFreeze.world:initialWorld)?.testSupportSupplement;
+ if(frozenTestSupport)assert(records.some(r=>r.version.artifactKind==='HANDOFF_MATRIX'&&r.version.versionId===frozenTestSupport.handoffVersionId&&r.version.contentHash===frozenTestSupport.handoffContentHash),'FROZEN_TEST_HANDOFF_CHANGED');
+ // A matrix already frozen into this world must not receive another version/identity after seal.
+ const handoffCandidate=process.argv.includes('--candidate-handoff')&&!frozenTestSupport?isolatedHandoffRecords(records,{pageId,
   candidate:JSON.parse(readFileSync(new URL('./handoff-matrix.candidate.json',import.meta.url)))}):null;
  for(const r of handoffCandidate?.records??records){const v=r.version,p=r.pointer;
   await pool.query('INSERT INTO admin_artifact_versions (version_id,artifact_key,artifact_kind,version_number,lifecycle,revision,content_hash,content,created_by_subject,updated_by_subject,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$9,$10,$11)',
@@ -173,6 +176,7 @@ try{
    versionReferences:policyResolution.bundle.versionReferences.filter(r=>r.artifactKind==='HANDOFF_MATRIX')};
  }
  report.policyBundleHash=policyResolution.bundle.bundleHash;
+ if(frozenTestSupport){assert.equal(handoffContentHash(policyResolution.bundle.artifacts.handoffMatrix),frozenTestSupport.handoffContentHash,'FROZEN_TEST_HANDOFF_NOT_RESOLVED');report.testSupportSupplement=frozenTestSupport;}
  report.policyVersionReferences=policyResolution.bundle.versionReferences;
  let activePrepared,replacementFault=null;const capturedReplacementPlans=[];
  const repository=createPersistedCommerceRepository({store:runtime,transaction:fn=>withTransaction(pool,async client=>{

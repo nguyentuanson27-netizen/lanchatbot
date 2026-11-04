@@ -10,6 +10,7 @@ import {candidateDescription} from '../single-agent-commerce-read-only/candidate
 import {digest} from './qualification.mjs';
 import {capturePublicIndex,createFrozenSearch} from './frozen-search.mjs';
 import {supplementTestColorWorld} from './test-color-source.mjs';
+import {supplementTestSupportWorld} from './test-support-sources.mjs';
 const [out,codesFile]=process.argv.slice(2);assert(out&&codesFile,'C_CAPTURE_ARGUMENTS');
 const outside=relative(process.cwd(),resolve(out));assert(outside&&(outside==='..'||outside.startsWith('..'+sep)||isAbsolute(outside)),'C_CAPTURE_OUTSIDE_SOURCE');
 const git=(...a)=>execFileSync('git',a,{encoding:'utf8'}).trim();assert.equal(git('status','--porcelain'),'','C_DIRTY_SOURCE');
@@ -46,11 +47,12 @@ try{
  assert.equal(git('rev-parse','HEAD'),sourceSha);assert.equal(git('status','--porcelain'),'');
  const rawWorld={kind:'FROZEN_PUBLIC_BUSINESS_WORLD',version:1,sourceSha,capturedAt:at,config,products,snapshots,policyRecords:records,
   sourceEvidenceHashes:[digest(products),digest(snapshots),digest(records),digest(search)],search,providerRequests:0,sourceWrites:0};
- const world=supplementTestColorWorld(rawWorld);
- if(world.testSourceSupplement)writeFileSync(resolve(out,'PUBLIC_SOURCE_WORLD.json'),JSON.stringify(rawWorld,null,2)+'\n',{flag:'wx'});
+ const world=supplementTestSupportWorld(supplementTestColorWorld(rawWorld));
+ if(world.testSourceSupplement||world.testSupportSupplement)writeFileSync(resolve(out,'PUBLIC_SOURCE_WORLD.json'),JSON.stringify(rawWorld,null,2)+'\n',{flag:'wx'});
  writeFileSync(resolve(out,'WORLD.json'),JSON.stringify(world,null,2)+'\n',{flag:'wx'});
  writeFileSync(resolve(out,'SUMMARY.json'),JSON.stringify({status:'CAPTURED',worldHash:digest(world),products:products.length,sourceSha,
-  ...(world.testSourceSupplement?{testSourceSupplement:world.testSourceSupplement}:{}),providerRequests:0,sourceWrites:0}),{flag:'wx'});
+  ...(world.testSourceSupplement?{testSourceSupplement:world.testSourceSupplement}:{}),
+  ...(world.testSupportSupplement?{testSupportSupplement:world.testSupportSupplement}:{}),providerRequests:0,sourceWrites:0}),{flag:'wx'});
  console.log(JSON.stringify({status:'CAPTURED',products:products.length,worldHash:digest(world),providerRequests:0}));
 }catch(e){
  writeFileSync(resolve(out,'SUMMARY.json'),JSON.stringify({status:'BLOCKED',stage:'PUBLIC_WORLD_CAPTURE',errorCode:/^[A-Z0-9_]+$/.test(e.message)?e.message:e.code??'SOURCE_READ_FAILED',providerRequests:0,sourceWrites:0}),{flag:'wx'});throw e;

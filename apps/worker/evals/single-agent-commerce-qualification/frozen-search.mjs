@@ -4,6 +4,7 @@ import {QdrantStableCatalogSearchAdapter,ProductSearchService,stableProductDocum
 import {candidateDescription,candidateSearchResult} from '../single-agent-commerce-read-only/candidate-description.mjs';
 import {digest} from './qualification.mjs';
 import {assertTestColorWorld,supplementTestColorProduct} from './test-color-source.mjs';
+import {assertTestSupportWorld,supplementTestFeedbackProduct} from './test-support-sources.mjs';
 const vector=(v,n)=>Array.isArray(v)&&v.length===n&&v.every(Number.isFinite)&&v.some(x=>x!==0);
 const pointId=v=>Number.isSafeInteger(v)&&v>=0||typeof v==='string'&&/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(v);
 const idOrder=(a,b)=>typeof a==='number'&&typeof b==='number'?a-b:typeof a==='number'?-1:typeof b==='number'?1:String(a)<String(b)?-1:String(a)>String(b)?1:0;
@@ -45,7 +46,11 @@ export function frozenIndexFetch(index){
 export function createFrozenSearch(world,embedding){
  // Raw capture has only config/index. Apply assumptions only after the full world has been supplemented and labelled.
  if(world.testSourceSupplement)assertTestColorWorld(world);
- const project=p=>world.testSourceSupplement?supplementTestColorProduct(p,world.config.testColorSources):p;
+ if(world.testSupportSupplement)assertTestSupportWorld(world);
+ const project=p=>{
+  const colour=world.testSourceSupplement?supplementTestColorProduct(p,world.config.testColorSources):p;
+  return world.testSupportSupplement?supplementTestFeedbackProduct(colour,world.config.testSupportSources):colour;
+ };
  const index=validateFrozenIndex(world.search,world.config.vertex.embeddingDimension),
   native=new QdrantStableCatalogSearchAdapter({baseUrl:'https://phase-c-frozen.invalid',apiKey:'LOCAL_FROZEN_INDEX_NO_CREDENTIAL',
    collection:world.config.qdrantCollection,expectedDimension:index.dimension,embedding,
