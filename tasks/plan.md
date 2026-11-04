@@ -1,3 +1,7 @@
+## Owner amendment — feedback and handoff test sources, 2026-11-04
+
+Owner authorizes supplementing both remaining test-source items without upstream bulk updates. New Phase C captures add explicitly assumed AO-only feedback and the existing reviewed silent handoff matrix to the isolated frozen world, retaining raw sources and exact identities. Active pointer/store/resolver checks replace publication as the test prerequisite. [Implementation and verification](../docs/specs/c3-test-feedback-handoff-sources-20261104.md). Real feedback provenance/live publication and model qualification remain separate; no model dispatch implied.
+
 ## Owner amendment — test colour data, 2026-11-04
 
 Owner selects WHITE as an isolated test assumption for SV2447-AO stock previously unlabelled. New Phase C captures retain raw public inputs and build a separately labelled/hash-bound test world, supplying exact AO colour/size/stock and a pinned AO-only image. No bulk upstream update or source publication prerequisite; other garments/offers/stock counts and original timestamps remain unchanged. [Implementation and evidence](../docs/specs/c3-test-white-shirt-source-20261104.md). No model dispatch or qualification result is implied.

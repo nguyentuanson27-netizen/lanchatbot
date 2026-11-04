@@ -36,9 +36,13 @@ BothSQ2447/SV2447 point AO to `SV2447-AO`. Current AO price499000; stock at `__N
 
 ## 4. Approved feedback media for the requested piece is missing
 
+**Đã bổ sung cho test Phase C:** owner cho phép ảnh feedback giả định, pin đúng ảnh cận AO và SKU SV2447-AO trên hai mã cha; không nhận đây là feedback khách thật. [Phạm vi, đường đọc và kiểm chứng](c3-test-feedback-handoff-sources-20261104.md). Inventory raw bên dưới giữ nguyên làm đối chứng.
+
 No approved FEEDBACK image is exposed for the nine inspected products, including the ThạchThảo AO required by s16. Product photos/detail metadata do exist; MODEL is not customer feedback. Need an approved feedback asset and exact product/component linkage if the shop owns one. No conclusion about the entire uninspected upstream photo library is made.
 
 ## 5. Active policy lacks the candidate handoff matrix
+
+**Đã nối vào active policy của clone test:** capture mới bổ sung matrix hiện hành có hash/version; resolver và real PostgreSQL clone đã đọc đúng frozen identity. Không cần publish upstream để kiểm thử. [Kết quả và giới hạn](c3-test-feedback-handoff-sources-20261104.md). Nguồn live/raw bên dưới không được đổi nhãn thành đã publish.
 
 Active bundle read by this candidate source contains closing/offer/payment/shop policies and sizecharts, but noHANDOFF_MATRIX. The model campaigns explicitly add the previously reviewed isolated HANDOFF_MATRIX candidate only inside their frozen testworld; they do not prove that matrix is published active upstream. Candidate-source policy completion/publication is separate from code handoff mechanics and requires an exact reviewed source change. This is not the cause of previous harness handoffs failing: the testworld already supplied the isolated matrix.
 

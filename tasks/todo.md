@@ -1,3 +1,9 @@
+## Completed — feedback and active handoff test sources, 2026-11-04
+
+- [x] Owner-authorized assumed feedback for exact AO/SV2447-AO and frozen active test HANDOFF_MATRIX added after colour supplementation. Raw world retained; lookup/search agree; no source-shop writes or bulk publication. Existing size/white-stock data preserved.
+- [x] Observed3 RED → Node170 PASS. Same-source replay: feedback2/white selections8/component size4; active30rule matrix,29customer reasons silent,2in-memory ownership commits without messages/media. Clean `2a8a97ac` realPG initial-state/policy1/1 PASS, frozen matrix not reversioned, DB dropped/provider0/live0. [Evidence and limits](../docs/specs/c3-test-feedback-handoff-sources-20261104.md).
+- [ ] No fresh model run, real customer-feedback provenance, image-byte preparation/full delivery or qualification GO claimed.
+
 ## Completed — owner-approved white-shirt test source, 2026-11-04
 
 - [x] Add explicit test colour source for SV2447-AO under SQ2447/SV2447: WHITE assumption selected by owner. Exact AO rows and pinned AO-only detail image supplemented; prices/stock/clocks/BE rows/other offers unchanged. Raw public source retained separately on new Phase C captures; exact lookup/search and frozen facts agree. No upstream bulk update or source publication.
