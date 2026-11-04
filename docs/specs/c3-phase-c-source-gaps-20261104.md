@@ -30,6 +30,8 @@ Current active source has7SIZE_CHART records. Relevant ThạchThảo chart is `s
 
 ## 3. Physical colour of stocked AO rows is unresolved
 
+**Đã bổ sung cho dữ liệu test Phase C:** owner chọn giả định áo trắng. Các dòng tồn AO và ảnh cận áo được nối trong bản sao frozen world, giữ nguyên giá/tồn/clock. Không yêu cầu publish hoặc sửa hàng loạt nguồn thật. [Phạm vi và kiểm chứng](c3-test-white-shirt-source-20261104.md). Đoạn sau vẫn là inventory nguồn raw trước giả định, không phải xác minh màu hàng thực tế.
+
 BothSQ2447/SV2447 point AO to `SV2447-AO`. Current AO price499000; stock at `__NO_COLOR__`:S32/M9/L3/XL12. BE rows are0 for those sizes. Catalogcolors is empty for both parents. No source maps the stocked unlabelled rows to a customer-visible physical colour; they cannot be renamedBE or a new 'standard version'. Need confirmed colour→SKU/offer/size/stock mapping, not another customer question that conceals missing shop data. These quantities are source observations at this capture, not future availability guarantees.
 
 ## 4. Approved feedback media for the requested piece is missing

@@ -1,3 +1,7 @@
+## Owner amendment — test colour data, 2026-11-04
+
+Owner selects WHITE as an isolated test assumption for SV2447-AO stock previously unlabelled. New Phase C captures retain raw public inputs and build a separately labelled/hash-bound test world, supplying exact AO colour/size/stock and a pinned AO-only image. No bulk upstream update or source publication prerequisite; other garments/offers/stock counts and original timestamps remain unchanged. [Implementation and evidence](../docs/specs/c3-test-white-shirt-source-20261104.md). No model dispatch or qualification result is implied.
+
 ## Owner amendment — test size data, 2026-11-04
 
 Use existing `size-chart:SQ2447` for the configured Thạch Thảo sets and separate TOP/PANTS/SKIRT pieces. Owner-approved test mapping is sufficient; do not require bulk source updates/publication to exercise these paths. Preserve chart bands, exact BOM target and independent price/stock; freeze the explicit mapping in new inputs. [Implementation and verification](../docs/specs/c3-test-component-size-sharing-20261104.md). Existing frozen runs remain unchanged; no new model dispatch authorized by this data confirmation alone.

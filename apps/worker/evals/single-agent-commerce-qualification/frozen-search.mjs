@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {QdrantStableCatalogSearchAdapter,ProductSearchService,stableProductDocumentFromQdrantPayload} from '@lana/business-tools';
 import {candidateDescription,candidateSearchResult} from '../single-agent-commerce-read-only/candidate-description.mjs';
 import {digest} from './qualification.mjs';
+import {assertTestColorWorld,supplementTestColorProduct} from './test-color-source.mjs';
 const vector=(v,n)=>Array.isArray(v)&&v.length===n&&v.every(Number.isFinite)&&v.some(x=>x!==0);
 const pointId=v=>Number.isSafeInteger(v)&&v>=0||typeof v==='string'&&/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(v);
 const idOrder=(a,b)=>typeof a==='number'&&typeof b==='number'?a-b:typeof a==='number'?-1:typeof b==='number'?1:String(a)<String(b)?-1:String(a)>String(b)?1:0;
@@ -42,12 +43,18 @@ export function frozenIndexFetch(index){
  };
 }
 export function createFrozenSearch(world,embedding){
+ // Raw capture has only config/index. Apply assumptions only after the full world has been supplemented and labelled.
+ if(world.testSourceSupplement)assertTestColorWorld(world);
+ const project=p=>world.testSourceSupplement?supplementTestColorProduct(p,world.config.testColorSources):p;
  const index=validateFrozenIndex(world.search,world.config.vertex.embeddingDimension),
   native=new QdrantStableCatalogSearchAdapter({baseUrl:'https://phase-c-frozen.invalid',apiKey:'LOCAL_FROZEN_INDEX_NO_CREDENTIAL',
    collection:world.config.qdrantCollection,expectedDimension:index.dimension,embedding,
    fetchImpl:frozenIndexFetch(index)}),service=new ProductSearchService(native,world.config.searchThresholds);
- return {catalog:{findByExactCode:async code=>candidateDescription(await native.findByExactCode(code),world.config.candidateDescriptions)},
-  search:{searchText:async query=>candidateSearchResult(await service.searchText(query),world.config.candidateDescriptions)}};
+ return {catalog:{findByExactCode:async code=>project(candidateDescription(await native.findByExactCode(code),world.config.candidateDescriptions))},
+  search:{searchText:async query=>{
+   const r=candidateSearchResult(await service.searchText(query),world.config.candidateDescriptions);
+   return r.status==='MATCHED'?{...r,product:project(r.product)}:r.status==='AMBIGUOUS'?{...r,candidates:r.candidates.map(c=>({...c,document:project(c.document)}))}:r;
+  }}};
 }
 const publicKeys=['active','product_id','ma_sp','parent_product_id','aliases','title','description_xml','description','description_authority','description_source_version',
  'catalog_version','ingestion_version','product_attributes','search_colors','colors','search_materials','material','materials','search_silhouettes','silhouettes',

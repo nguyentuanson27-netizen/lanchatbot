@@ -1,3 +1,8 @@
+## Completed — owner-approved white-shirt test source, 2026-11-04
+
+- [x] Add explicit test colour source for SV2447-AO under SQ2447/SV2447: WHITE assumption selected by owner. Exact AO rows and pinned AO-only detail image supplemented; prices/stock/clocks/BE rows/other offers unchanged. Raw public source retained separately on new Phase C captures; exact lookup/search and frozen facts agree. No upstream bulk update or source publication.
+- [x] Observed 2 RED / 1 PASS → 4 new tests GREEN; all qualification Node tests131 PASS. Same-capture replay8 white selections + reads/media/opening/readback; in-memory final gates allow unchanged binding/block revocation for both parents. No provider, PG, image-byte preparation or live send; no new model result. [Details](../docs/specs/c3-test-white-shirt-source-20261104.md).
+
 ## Completed — owner-approved shared component chart for test data, 2026-11-04
 
 - [x] Owner confirms existing SQ2447 chart for Thạch Thảo separate pieces; record scoped test configuration and approval. No upstream bulk update/publication prerequisite. Exact BOM target and original chart verification remain; bands/source records unchanged, prices/stock separate.
