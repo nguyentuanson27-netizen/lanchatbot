@@ -1,3 +1,9 @@
+## Latest — test-source model round completed, 2026-11-04
+
+Clean executable `e14d26594bb8831909788007f92fba81b3cd54e4`; unchanged Gemini3.5FlashLite HIGH owner / GPT6.1Sol HIGH verifier, CompactV2, N1/retry0. Fresh world incorporates owner-approved isolated chart/white-shirt/assumed-feedback/active-handoff sources. Independent input review before dispatch;18 evaluator purposes corrected before results, no customer/rubric fit after run. Completed33cases/48turns,27texts21images:25SEND_ELIGIBLE+2CODE_OWNED_SEND+14silentHANDOFF+7humanNO_SEND.100records/99generationHTTP include1zeroHTTPboundfailure and2MALFORMED, no hidden retry;2owner-auth and3auxiliaryHTTP listed separately. Both group accounting/capture audits APPROVED; final report accuracy tracked in evidence.
+
+[Report and transcripts](../apps/worker/evals/single-agent-commerce-qualification/test-sources-run-20261104/REPORT.md). More accepted outputs than previous20/48 does not establish quality gain: fresh world/test assumptions differ, N1, quality NOT_GRADED. p09 context progression, size sequencing/OUT_OF_RANGE, wire/media binding and3semantic rejects remain. Feedback remains a catalog-image test assumption. PhaseCqualificationBLOCKED/C3NOT_RUN; S6/full55/completedcheckout/stability not verified; no automatic fix/rerun/deploy.
+
 ## Owner amendment — feedback and handoff test sources, 2026-11-04
 
 Owner authorizes supplementing both remaining test-source items without upstream bulk updates. New Phase C captures add explicitly assumed AO-only feedback and the existing reviewed silent handoff matrix to the isolated frozen world, retaining raw sources and exact identities. Active pointer/store/resolver checks replace publication as the test prerequisite. [Implementation and verification](../docs/specs/c3-test-feedback-handoff-sources-20261104.md). Real feedback provenance/live publication and model qualification remain separate; no model dispatch implied.
