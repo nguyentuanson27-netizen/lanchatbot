@@ -25,7 +25,7 @@ export function omitCurrentProductDuplicates(value: Record<string, unknown>, cur
 }
 const stateFields = ["conversationOwner", "revision", "currentProductId", "consideredSize", "salesStage",
   "bindingVersion", "recipient", "permission", "privacyAllowed", "customerProfileId", "customerProfileRevision", "measurementFingerprint",
-  "customerMeasurements", "fitPreference", "preferences", "cartQuote", "cartItems", "checkoutStatus", "sizeMeasurementFingerprints", "sizeFitTargets", "conversationRevision", "customerStateUpdatePending"];
+  "customerMeasurements", "fitPreference", "preferences", "shoppingSelection", "cartQuote", "cartItems", "checkoutStatus", "sizeMeasurementFingerprints", "sizeFitTargets", "conversationRevision", "customerStateUpdatePending"];
 
 /** The resolver already validates artifact hashes/lifecycle. This bridge owns scope and public projection. */
 export function publicPolicyLiteral(bundle: RuntimePolicyBundle, pageId: string, shopId: string, now: Date): TrustedContext["policyLiterals"][number] {

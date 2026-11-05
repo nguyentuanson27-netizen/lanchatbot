@@ -18,6 +18,64 @@ async function setup(sourceText = "Eo 74. Eo 85, mông 105.") {
   return { tools, base, store, sizeInput, getStored: () => stored, setStored: (s: CustomerProfileMergeState) => { stored = s; } };
 }
 describe("accepted effective state before dependent tools", () => {
+  it("records an explicit current offer choice without opening a cart or treating a comparison read as a choice",async()=>{
+    const s=await setup();const r=await s.tools.invoke({name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT",customerSelected:true}});
+    expect(r.status).toBe("OK");expect(s.tools.snapshot().state.shoppingSelection).toEqual({productId:"QU714",offerType:"DIRECT"});
+    expect(s.tools.snapshot().state.currentProductId).toBe("QU714");expect(s.tools.snapshot().state.cartItems).toBeUndefined();
+    expect(s.tools.snapshot().effectReceipts).toEqual([]);
+    const before=s.getStored();await s.tools.invoke({name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT"}});
+    expect(s.getStored()).toEqual(before);
+  });
+  it("selection metadata preserves a just-verified fit and real numeric correction receipt",async()=>{
+    const s=await setup("Eo 74.");
+    await s.tools.invoke({name:"recommend_size",args:{subjectRef:"QU714",customerStateOps:[{op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"74"}]}});
+    const receipts=structuredClone(s.tools.snapshot().effectReceipts);
+    await s.tools.invoke({name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT",customerSelected:true}});
+    expect(s.tools.snapshot().effectReceipts).toEqual(receipts);
+    expect(s.tools.snapshot().protectedClaims.filter(c=>(c as {type:string}).type==="SIZE_FIT")).toHaveLength(1);
+    expect(hardPrecheck(s.tools.snapshot(),"Mình chọn M chị nhé.",commerceNow)).toBeNull();
+  });
+  it("drops old unbound advice metadata instead of exhausting a customer lifetime limit",async()=>{
+    const s=await setup(),old=structuredClone(s.getStored());old.profile.sizeAdviceTargets=[1,2,3,4].map(n=>({kind:"PRODUCT",productId:`OLD${n}`}));s.setStored(old);
+    const tools=await createCustomerStateTools({base:s.base,scope:commerceScope(),store:s.store,clock:()=>commerceNow,sizeInput:s.sizeInput,retainAdvice:true});
+    expect((await tools.invoke({name:"recommend_size",args:{subjectRef:"QU714"}})).status).toBe("OK");
+    expect(s.getStored().profile.sizeAdviceTargets).toEqual([{kind:"PRODUCT",productId:"QU714"}]);
+  });
+  it("recomputes retained advice in a new turn and never carries a stale fit after correction",async()=>{
+    const s=await setup();const make=()=>createCustomerStateTools({base:s.base,scope:commerceScope(),store:s.store,
+      clock:()=>commerceNow,sizeInput:s.sizeInput,retainAdvice:true} as Parameters<typeof createCustomerStateTools>[0]);
+    const first=await make();await first.invoke({name:"recommend_size",args:{subjectRef:"QU714"}});
+    expect(first.snapshot().protectedClaims.some(c=>(c as {type:string}).type==="SIZE_FIT")).toBe(true);
+    const second=await make();expect(second.snapshot().protectedClaims.some(c=>(c as {type:string}).type==="SIZE_FIT")).toBe(true);
+    const changed=structuredClone(s.getStored());changed.profile.revision++;changed.profile.measurements=[];s.setStored(changed);
+    expect((await second.readback()).protectedClaims.some(c=>(c as {type:string}).type==="SIZE_FIT")).toBe(false);
+  });
+  it("applies identical inline profile evidence once before computing two targets",async()=>{
+    const s=await setup("Eo 74.");const ops=[{op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"74"}];
+    const results=await s.tools.invokeBatch(["QU714","QU714"].map(subjectRef=>({name:"recommend_size",args:{subjectRef,customerStateOps:ops}})));
+    expect(results.every(r=>r.status==="OK")).toBe(true);expect(s.store.compareAndSwap).toHaveBeenCalledTimes(1);
+  });
+  it("retains two different component targets without a CAS race or losing the real correction receipt",async()=>{
+    const s=await setup("Eo 74.");
+    const componentSizeInput=async(r:{parentProductId:string;componentRole:"TOP"|"PANTS"})=>{
+      const v=fixtureSizeInput(r.parentProductId),target={...v.target,componentProductId:`PART-${r.componentRole}`,componentRole:r.componentRole};
+      return {...v,target,charts:v.charts.map(c=>({chart:{...c.chart,componentRole:r.componentRole},scope:{...c.scope,componentRole:r.componentRole}})),
+        fitTarget:{kind:"COMPONENT" as const,parentProductId:r.parentProductId,componentProductId:target.componentProductId,componentRole:r.componentRole},
+        sourceBindingHash:"b".repeat(64),sourceExpiresAt:new Date(commerceNow.getTime()+1000).toISOString()};
+    };
+    const make=(unavailable=false)=>createCustomerStateTools({base:s.base,scope:commerceScope(),store:s.store,clock:()=>commerceNow,sizeInput:s.sizeInput,
+      sourceMessages:[{text:"Eo 74.",sourceMessageId:commerceScope().sourceMessageId,observedAt:commerceScope().sourceObservedAt}],retainAdvice:true,
+      componentSizeInput:unavailable?async()=>{throw Error("SOURCE_UNAVAILABLE");}:componentSizeInput as NonNullable<Parameters<typeof createCustomerStateTools>[0]["componentSizeInput"]>});
+    const tools=await make(),ops=[{op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"74"}];
+    const results=await tools.invokeBatch(["TOP","PANTS"].map(componentRole=>({name:"recommend_size",args:{subjectRef:"QU714",fitScope:"COMPONENT",componentRole,customerStateOps:ops}})));
+    expect(results.map(r=>r.status)).toEqual(["OK","OK"]);expect(s.store.compareAndSwap).toHaveBeenCalledTimes(2);
+    expect(tools.snapshot().protectedClaims.filter(c=>(c as {type:string}).type==="SIZE_FIT")).toHaveLength(2);
+    expect(tools.snapshot().effectReceipts).toContainEqual(expect.objectContaining({effect:"CUSTOMER_STATE_UPDATED",status:"SUCCESS"}));
+    expect(hardPrecheck(tools.snapshot(),"Dạ, em chọn M chị nhé.",commerceNow)).toBeNull();
+    const restarted=await make();expect(restarted.snapshot().protectedClaims.filter(c=>(c as {type:string}).type==="SIZE_FIT")).toHaveLength(2);
+    const missing=await make(true);expect(missing.snapshot().state.customerStateUpdatePending).toBeUndefined();expect(missing.sizeOutcome?.()).toBeNull();
+    expect(hardPrecheck(missing.snapshot(),"Dạ chị.",commerceNow)).toBeNull();
+  });
   it.each(["backward","forward","profile"])("keeps component evidence nonrenewing and invalidates changed %s source",async mode=>{
     const s=await setup();let delta=100000;
     const source=fixtureSizeInput(),fitTarget={kind:"COMPONENT" as const,parentProductId:"QU714",componentProductId:"PART-PANTS",componentRole:"PANTS" as const};
