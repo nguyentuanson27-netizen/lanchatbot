@@ -166,7 +166,7 @@ export async function createCommerceEffectTools(input: {
       mergeSelectionEvidence(checked,bound,now);
       selectionObservations.set(key,{query:previous?.query??query,evidence:bound});
       const choiceResolution=selectionChoiceResolution(bound,now,result.status);
-      return {...result,selectionOptions:expandSelectionOptions(bound),selectionEvidence:bound,selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",selectionStatus:result.status,
+      return {...result,effectCommitted:false,selectionOptions:expandSelectionOptions(bound),selectionEvidence:bound,selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",selectionStatus:result.status,
         ...(choiceResolution?{choiceResolution}:{}),
         ...(choiceResolution?.kind==="SHOP_DATA_MISSING"?{shopDataGap:choiceResolution.reason}: {})};
     }

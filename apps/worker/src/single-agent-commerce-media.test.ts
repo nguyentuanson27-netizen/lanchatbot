@@ -439,3 +439,14 @@ it("color hints summarize only the requested color tuple from the same read and 
  expect(s.tools.mediaCapabilities!()[0]?.queries).toContainEqual({intent:"GENERIC",componentRole:null,color:"be",status:"MATCH_AVAILABLE"});
  expect(s.tools.mediaSelection!()).toEqual([]);
 });
+
+
+it("a DETAIL attachment does not certify a material detail merely mentioned in the product description",async()=>{
+ const s=await setup();s.f.product.images[0]!.angle="CLOSEUP";s.f.product.images[0]!.imageType="DETAIL";s.f.product.images[0]!.partsVisible=["UNKNOWN"];
+ s.f.product.materials=["ren hoa nổi"];
+ const result=await s.tools.invoke({name:"select_product_media",args:{subjectRef:s.f.product.productId,intent:"DETAIL"}});
+ expect(result.status).toBe("OK");
+ const evidence=(result.data as {descriptionEvidence:{assets:{componentKnown:boolean;confirmedParts:string[]}[]}}).descriptionEvidence;
+ expect(evidence.assets[0]!.componentKnown).toBe(false);expect(evidence.assets[0]!.confirmedParts).toEqual([]);
+ expect(s.tools.catalogImages!()).toEqual([]); // sending by metadata does not imply vision inspection
+});

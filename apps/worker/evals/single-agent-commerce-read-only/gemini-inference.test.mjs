@@ -1034,3 +1034,22 @@ test('opening quote and first-contact context reach the owner without evaluator 
  assert.equal(wire.contents.at(-1).parts[0].functionResponse.response.data.openingQuote.text,'Áo P1 hiện có giá 499.000đ.');
  assert.match(JSON.stringify(wire),/firstContact/);assert.doesNotMatch(JSON.stringify(wire),/EVALUATOR_OPENING|EVALUATOR_EXPECTED/);
 });
+
+
+test('dangling selection-result references stop the actual adapter before auth or HTTP',async()=>{
+ const r=request();r.ownerContextPresentation='VI_DATA_BLOCKS_COMPACT_V2';
+ r.contents=[{role:'user',parts:[{functionResponse:{name:'add_to_cart',response:{status:'UNAVAILABLE',data:{selectionEvidenceFromProduct:{subjectRef:'P1',contentHash:'a'.repeat(64)},selectionOptionsFromEvidence:true}}}}]}];
+ let calls=0,auth=0;const infer=createGeminiCommerceInference(config,{getToken:async()=>{auth++;return 'test-token';},fetchImpl:async()=>{calls++;throw Error('MUST_NOT_FETCH');}});
+ await assert.rejects(()=>infer(r),error=>error.message==='PROVIDER_ERROR'&&error.telemetry.providerRequests===0);assert.equal(calls,0);assert.equal(auth,0);
+});
+
+
+test('actual malformed read telemetry carries schema/argument shape without values',async()=>{
+ const r=request(),privateKey='PRIVATE_FIELD_PERSONAL_ADDRESS',privateValue='PRIVATE_VALUE_PHONE';
+ const infer=createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async()=>new Response(JSON.stringify(body([{functionCall:{name:'read_product',args:{subjectRef:'P1',selection:'SINGLE',offerType:'AO',[privateKey]:privateValue}}}])))});
+ await assert.rejects(()=>infer(r),e=>{
+  assert.equal(e.telemetry.providerRequests,1);assert.match(e.telemetry.requestSchemaHash,/^[a-f0-9]{64}$/);
+  const d=e.telemetry.toolOutputDiagnostic;assert.equal(d.argumentShape.unknownFieldCount,1);assert.equal(d.field,'UNKNOWN_FIELD');
+  assert(!JSON.stringify(e.telemetry).includes(privateKey));assert(!JSON.stringify(e.telemetry).includes(privateValue));return true;
+ });
+});

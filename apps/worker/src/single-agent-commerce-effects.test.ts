@@ -78,6 +78,7 @@ it("binds a validated ambiguous selection to both models and invalidates it when
  const data=result.data as {selectionEvidence:{contentHash:string;options:{identityHash:string}[]};choiceResolution:{evidenceHash:string;optionRefs:string[]}};
  expect(data.choiceResolution.evidenceHash).toBe(data.selectionEvidence.contentHash);
  expect(data.choiceResolution.optionRefs).toEqual(data.selectionEvidence.options.map(o=>o.identityHash));
+ expect(result).toMatchObject({data:{effectCommitted:false}});
  expect(s.commits).toHaveLength(0);
  const proof=(result.data as {selectionEvidence:unknown}).selectionEvidence;
  expect(s.tools.snapshot().runtimeProducts?.find(p=>p.subjectRef==="SM613")?.selectionEvidence).toEqual([proof]);

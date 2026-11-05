@@ -543,7 +543,7 @@ try{
  if(providerRun)providerPorts=phaseC?phaseCTools.createCandidateProvider({preflight:providerFreeze,out:resolve(out)}):await createStatefulProvider({preflight:providerFreeze,out:resolve(out)});
  if(phaseC&&providerFreeze.registration.arm==='C3')await providerPorts.attachReference({baselineRoot:phaseCArg('--phase-c-baseline-root'),
   baselineBuild:JSON.parse(readFileSync(phaseCArg('--phase-c-baseline-build'),'utf8'))});
- async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,oldMedia=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false,candidateTuples=false,preparedOffers=false,preorderChoices=false,checkoutEta=false,multiOfferContext=false}={}){
+ async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,oldMedia=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false,candidateTuples=false,preparedOffers=false,preorderChoices=false,checkoutEta=false,multiOfferContext=false,componentFit=false,physicalChoices=false}={}){
   assert(!live||(!preparedOffers&&!preorderChoices),'SYNTHETIC_PREPARATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||!revalidatedMedia,'SYNTHETIC_REVALIDATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||(dependencyHoldingReply===null&&sizeHoldingReply===null&&!missingDependencyRule),'SYNTHETIC_RULE_FORBIDDEN_IN_PROVIDER_RUN');
@@ -554,6 +554,10 @@ try{
   const product=fixtureProduct('SM613',at);let mediaChanged=false;
   if(multiOfferContext){assert(!live&&preparedOffers);const offer=product.snapshot.offers.DIRECT;
    product.snapshot.offers=Object.fromEntries(['DIRECT','AO','CV'].map(name=>[name,structuredClone(offer)]));}
+  if(componentFit){
+   assert(!live);product.snapshot.brand='lanadesign';
+   product.snapshot.offers.DIRECT.rows[0].components=[{product_sku:'SM613-AO',quantity:1},{product_sku:'SM613-QUAN',quantity:1}];
+  }
   // Explicit disposable domain input for the full native checkout control only.
   if(checkoutEta){assert(!live);product.snapshot.shipping_eta={'MIEN-NAM':{transit_min_days:2,transit_max_days:4}};}
   if(candidateTuples){assert(!live);const row=product.snapshot.offers.DIRECT.rows[0];
@@ -564,6 +568,7 @@ try{
     {...structuredClone(row),size,color:'__NO_COLOR__',parent_variation_id:`SM613-UNLABELLED-${size}`,stock_quantity:9,components:[{product_sku:'SM613',size,color:'__NO_COLOR__',quantity:1}]},
     {...structuredClone(row),size,color:'BE',parent_variation_id:`SM613-BE-${size}`,stock_quantity:0,components:[{product_sku:'SM613',size,color:'BE',quantity:1}]}]);
    for(const r of product.snapshot.offers.DIRECT.rows)Object.assign(r,{inventory_source:'PANCAKE_DIRECT',component_1_sku:'SM613',component_2_sku:''});}
+  if(physicalChoices){assert(!live&&candidateTuples);for(const row of product.snapshot.offers.DIRECT.rows)if(row.color==='__NO_COLOR__'){row.color='WHITE';row.components[0].color='WHITE';}}
   const selected=q=>{if(missingEta&&q.deliveryAddress)return {status:'ETA_UNAVAILABLE',reasonCode:'CONTROLLED_MISSING_REGION',availableSizes:[],availableColors:[]};
    if(candidateTuples){const raw=structuredClone(product.snapshot);if(sourceVariantChanged)raw.offers.DIRECT.rows[0].components[0].variation_sku='CHANGED-SKU';
     return cartSelectionFromSnapshot(raw,q,new Date());}
@@ -591,6 +596,12 @@ try{
    product.product.images[0].revalidation={status:'VALID',checkedAt:at.toISOString()};}
   if(oldMedia){assert(media&&!live);product.product.images[0].observedAt='2025-01-01T00:00:00.000Z';}
   const read=live?await providerPorts.read(bound,policyStore,policy,initialProductCodes,facts):{policy:()=>policy(true),catalog:{readProduct:async()=>mediaChanged?{...product,product:{...product.product,images:[]}}:product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
+  if(componentFit){
+   const group=structuredClone(JSON.parse(readFileSync(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json'),'utf8')).productGroups[0]);
+   group.name='Synthetic component fit test';group.productTitles.SM613=product.product.title;
+   group.approvalRef='SYNTHETIC_DOMAIN_INPUT_NOT_LIVE_DELEGATION';
+   read.productGroups=[group];
+  }
   const scopedSourceReader=createCommerceHandoffSourceReader({
    product:(id,readPos)=>read.catalog.readProduct(id,readPos),
    profile:async b=>{const r=await runtime.loadOrCreateCustomerProfile(b.pageId,b.customerHash,()=>{throw Error('EXISTING_PROFILE_REQUIRED');},new Date());return {profile:r.profile,fieldEvidence:r.fieldEvidence};},
@@ -671,6 +682,53 @@ try{
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+ await check('C target repair component fits reach durable accepted group and restart delivery',async()=>{
+  const j=await statefulFixture({componentFit:true,media:true});
+  const ops=[{op:'SET',field:'measurements.HEIGHT_CM',value:160,sourceQuote:'160'},{op:'SET',field:'measurements.WEIGHT_KG',value:55,sourceQuote:'55'}];
+  const calls=[...['TOP','PANTS'].map(componentRole=>({name:'recommend_size',args:{subjectRef:'SM613',fitScope:'COMPONENT',componentRole,customerStateOps:ops}})),{name:'select_product_media',args:{subjectRef:'SM613',intent:'BACK'}}];
+  const text='Áo và quần mình lấy size M chị nhé.';
+  const r=await j.turn('Chị cao 160, nặng 55, chọn size áo và quần giúp chị.',[native(calls),say(text)]);
+  assert(r.toolResponses.filter(r=>r.name==='recommend_size').every(r=>r.response.data?.status==='RECOMMENDED'),JSON.stringify(r.toolResponses));
+  assert.equal(r.result.terminal.disposition,'SEND_ELIGIBLE',JSON.stringify(r.result));assert.equal(r.verifiers,1);
+  const profile=await runtime.loadOrCreateCustomerProfile(pageId,j.bound.customerHash,()=>{throw Error('PROFILE_REQUIRED');},new Date());
+  assert.equal(profile.profile.measurements.length,2);assert.equal(Object.keys(profile.fieldEvidence).length,2);assert.equal(profile.profile.revision,3);
+  const stateWrites=r.toolResponses.filter(r=>r.name==='recommend_size').map(r=>r.response.data);assert.equal(stateWrites.length,2);
+  j.restartDelivery();await j.drain();assert(j.capture.includes(text));assert(j.capturePayloads.some(p=>p.attachment?.type==='image'));
+  const before=j.capture.length;await j.drain();assert.equal(j.capture.length,before);assert.equal(new Set(j.gateCalls).size,1);
+ });
+ await check('C target repair contradictory same-target claims fail the real DB guard with no accepted sequence',async()=>{
+  const j=await statefulFixture({componentFit:true,media:true}),original=runtime.commitWithinTransaction.bind(runtime);let injected=false,blocked=null;
+  runtime.commitWithinTransaction=async(client,plan,at)=>{
+   const fit=plan.conversationId===j.bound.conversationId?plan.metaPlan?.protectedClaims?.find(c=>c.type==='SIZE_FIT'):null;
+   if(fit){
+    injected=true;plan=structuredClone(plan);
+    const contradictory={...structuredClone(fit),claimId:randomUUID(),provenance:{...fit.provenance,contentHash:'e'.repeat(64)},value:{...fit.value,recommendedSizes:['L']}};
+    plan.metaPlan.protectedClaims.push(contradictory);
+    const rd=plan.metaPlan.effectReadiness;
+    rd.claimSetHash=commerceHash([...plan.metaPlan.protectedClaims].sort((a,b)=>a.claimId.localeCompare(b.claimId)));
+    rd.binding.claimSetHash=rd.claimSetHash;
+    const contracts=await import('@lana/contracts');rd.bindingHash=hash(contracts.effectBindingHashPreimageV1(rd.binding));rd.readinessHash=hash(contracts.deterministicEffectReadinessHashPreimageV1(rd));
+   }
+   try{return await original(client,plan,at);}catch(e){if(fit)blocked=e.message;throw e;}
+  };
+  try{
+   await j.turn('Chị cao 160 nặng 55, chọn size áo giúp chị.',[native([{name:'recommend_size',args:{subjectRef:'SM613',fitScope:'COMPONENT',componentRole:'TOP',customerStateOps:[{op:'SET',field:'measurements.HEIGHT_CM',value:160,sourceQuote:'160'},{op:'SET',field:'measurements.WEIGHT_KG',value:55,sourceQuote:'55'}]}},{name:'select_product_media',args:{subjectRef:'SM613',intent:'BACK'}}]),say('Áo chị mặc M nhé.')]);
+  }catch(e){assert(blocked,'MUST_FAIL_AT_CONFLICT_NOT_AN_UNRELATED_HARNESS_EXCEPTION');}
+  finally{runtime.commitWithinTransaction=original;}
+  assert(injected);assert.equal(blocked,'PROTECTED_OUTBOUND_CLAIM_CONFLICT');
+  await j.drain();assert.equal(j.capture.length,0);
+  assert.equal(Number((await pool.query('SELECT count(*) AS count FROM meta_outbox WHERE page_id=$1 AND conversation_id=$2',[pageId,j.bound.conversationId])).rows[0].count),0);
+ });
+ await check('C target repair missing colour stays non-mutating until supplied for both sizes',async()=>{
+  const j=await statefulFixture({candidateTuples:true,preorderChoices:true,physicalChoices:true});
+  const calls=['M','L'].map(size=>({name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size,color:null}}));
+  const r=await j.turn('Chị lấy hai áo, một M một L nhé.',[native(calls),say('Chị lấy màu nào cho hai áo ạ?')]);
+  assert.equal(r.result.terminal.disposition,'SEND_ELIGIBLE',JSON.stringify(r.result));assert.equal((await j.state()).cart,null);
+  assert.equal(r.toolResponses.length,2);assert(r.toolResponses.every(r=>r.response.data?.effectCommitted===false&&r.response.data.choiceResolution.kind==='NEEDS_CUSTOMER_CHOICE'));
+  const next=await j.turn('Trắng cả hai em nhé.',[native(calls.map(c=>({...c,args:{...c.args,color:'WHITE'}}))),say('Mình lấy hai áo trắng M và L nhé chị.')]);
+  assert.equal(next.result.terminal.disposition,'SEND_ELIGIBLE',JSON.stringify(next.result));
+  const cart=(await j.state()).cart.value;assert.equal(cart.lines.length,2);assert.deepEqual(cart.lines.map(l=>l.components[0].size).sort(),['L','M']);assert(cart.lines.every(l=>l.components[0].color==='WHITE'));
+ });
  await check('C B-preserving selected offer persists without cart and complete native checkout reaches confirmation',async()=>{
   const j=await statefulFixture({preparedOffers:true,multiOfferContext:true,checkoutEta:true});
   const selected=await j.turn('Chị chọn áo lẻ nhé.',[native([{name:'read_product',args:{subjectRef:'SM613',offerType:'AO',customerSelected:true}}]),say('Dạ, mình lấy áo lẻ chị nhé.')]);

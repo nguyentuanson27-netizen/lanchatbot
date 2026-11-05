@@ -7,7 +7,8 @@ import {createReadOnlyTools} from '../../dist/single-agent-commerce-read-only-to
 test('tool parse diagnostic uses code-defined identifiers, never model values or unknown field names',()=>{
  const body={candidates:[{finishReason:'STOP',content:{role:'model',parts:[{functionCall:{name:'read_product',args:{subjectRef:'SM613',selection:'PRIVATE_VALUE',PRIVATE_FIELD:'secret'}}}]}}]};
  assert.throws(()=>parseGeminiGeneration(body),e=>{
-  assert.deepEqual(e.toolOutputDiagnostic,{schemaCode:'OWNER_TOOL_OUTPUT',tool:'read_product',field:'UNKNOWN_FIELD',valueType:'OBJECT',selection:'INVALID',fieldPresent:true,fieldType:'OTHER'});
+  const {argumentShape,...diagnostic}=e.toolOutputDiagnostic;assert.equal(argumentShape.unknownFieldCount,1);assert.equal(argumentShape.unknownFieldNameHashes.length,1);
+  assert.deepEqual(diagnostic,{schemaCode:'OWNER_TOOL_OUTPUT',tool:'read_product',field:'UNKNOWN_FIELD',valueType:'OBJECT',selection:'INVALID',fieldPresent:true,fieldType:'OTHER'});
   assert(!JSON.stringify(e.toolOutputDiagnostic).includes('PRIVATE'));return true;
  });
 });

@@ -36,3 +36,13 @@ test('continuation factors only exact current policy duplicates and preserves na
  const older=buildGeminiCommerceRequest(request(old)).contents.at(-1).parts[0].functionResponse.response;
  assert.deepEqual(older,old);
 });
+
+
+test('read argument diagnostics retain only bounded shape and hashes, never unknown keys or values',async()=>{
+ const {productReadArgumentShape}=await import('./gemini-inference.mjs');
+ const privateKey='private customer name and address',secretValue='do-not-publish-this-value';
+ const d=productReadArgumentShape({subjectRef:'PRIVATE_SUBJECT',selection:'SINGLE',[privateKey]:secretValue,...Object.fromEntries(Array.from({length:20},(_,i)=>['private-'+i,{value:secretValue}]))});
+ assert.equal(d.keyCount,23);assert.equal(d.unknownFieldCount,21);assert.equal(d.unknownFieldNameHashes.length,4);
+ for(const text of [privateKey,secretValue,'PRIVATE_SUBJECT','private-0'])assert(!JSON.stringify(d).includes(text));
+ assert.equal(d.knownFieldTypes.subjectRef,'string');
+});

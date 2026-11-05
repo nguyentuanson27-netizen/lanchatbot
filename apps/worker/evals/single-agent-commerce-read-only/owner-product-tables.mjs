@@ -1,6 +1,7 @@
 // CompactV2 representation of these existing product paths only. No retrieval or inference.
 import assert from 'node:assert/strict';
 import {canonicalJsonV1} from '@lana/contracts';
+import {validSelectionEvidence,expandSelectionOptions} from '../../dist/single-agent-commerce-selection-evidence.js';
 const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
 const same=(a,b)=>canonicalJsonV1(a)===canonicalJsonV1(b);
 const productKeys=['subjectRef','availableOffers','purchaseOptions','productSizeRead','offerLabels','preparation','attributes','content','presentation','colorEvidence','selectionEvidence','offerReadCoverage','sizeCharts'];
@@ -26,7 +27,7 @@ function unpack(value,allowed){
  return value.rows.map(row=>({...structuredClone(value.defaults),...Object.fromEntries(value.columns.map((k,i)=>[k,row[i]]))}));
 }
 const ownRead=(v,id,offer)=>object(v)&&same(Object.keys(v).sort(),['offerType','subjectRef'])&&v.subjectRef===id&&v.offerType===offer;
-const component=v=>object(v)&&same(Object.keys(v).sort(),['componentRef','role'])&&typeof v.componentRef==='string'&&v.componentRef.length>0&&v.componentRef.length<=128&&
+const component=v=>object(v)&&(same(Object.keys(v).sort(),['componentRef','role'])||same(Object.keys(v).sort(),['componentRef','quantity','role'])&&Number.isSafeInteger(v.quantity)&&v.quantity>=1&&v.quantity<=20)&&typeof v.componentRef==='string'&&v.componentRef.length>0&&v.componentRef.length<=128&&
  ['TOP','PANTS','SKIRT','DRESS','JACKET','ACCESSORY','OTHER'].includes(v.role);
 function shareComponents(products){
  const refs=new Map();
@@ -102,4 +103,32 @@ export function expandCurrentFacts(data,facts){
  if(!Object.hasOwn(out,'factsFromTrustedIndices'))return out;
  assert(!Object.hasOwn(out,'facts')&&Array.isArray(out.factsFromTrustedIndices)&&out.factsFromTrustedIndices.length>0&&out.factsFromTrustedIndices.every(i=>Number.isInteger(i)&&i>=0&&i<facts.length),'PRODUCT_FACT_REFERENCE');
  const indices=out.factsFromTrustedIndices;delete out.factsFromTrustedIndices;out.facts=indices.map(i=>structuredClone(facts[i]));return out;
+}
+
+
+// Exact same-body selection observations only. This is presentation, not source
+// validation or a replacement for freshness/transaction/readback checks.
+export function compactSelectionResult(data,products){
+ assert(!Object.hasOwn(data,'selectionEvidenceFromProduct')&&!Object.hasOwn(data,'selectionOptionsFromEvidence'),'SELECTION_RESULT_REFERENCE');
+ const out=structuredClone(data),e=data.selectionEvidence;
+ if(!e||!validSelectionEvidence(e,e.productId,new Date(e.observedAt)))return out;
+ const matches=products.filter(p=>p.subjectRef===e.productId).flatMap(p=>(p.selectionEvidence??[]).filter(v=>same(v,e)));
+ if(matches.length!==1)return out;
+ assert(!Object.hasOwn(out,'selectionEvidenceFromProduct')&&!Object.hasOwn(out,'selectionOptionsFromEvidence'),'SELECTION_RESULT_REFERENCE');
+ delete out.selectionEvidence;out.selectionEvidenceFromProduct={subjectRef:e.productId,contentHash:e.contentHash};
+ if(same(data.selectionOptions,expandSelectionOptions(e))){delete out.selectionOptions;out.selectionOptionsFromEvidence=true;}
+ return out;
+}
+export function expandSelectionResult(data,products){
+ const out=structuredClone(data),ref=data.selectionEvidenceFromProduct;
+ if(!ref){assert(!Object.hasOwn(out,'selectionOptionsFromEvidence'),'SELECTION_RESULT_REFERENCE');return out;}
+ assert(object(ref)&&same(Object.keys(ref).sort(),['contentHash','subjectRef'])&&!Object.hasOwn(out,'selectionEvidence'),'SELECTION_RESULT_REFERENCE');
+ const matches=products.filter(p=>p.subjectRef===ref.subjectRef).flatMap(p=>(p.selectionEvidence??[]).filter(e=>e.contentHash===ref.contentHash));
+ assert(matches.length===1&&validSelectionEvidence(matches[0],ref.subjectRef,new Date(matches[0].observedAt)),'SELECTION_RESULT_REFERENCE');
+ delete out.selectionEvidenceFromProduct;out.selectionEvidence=structuredClone(matches[0]);
+ if(Object.hasOwn(out,'selectionOptionsFromEvidence')){
+  assert(out.selectionOptionsFromEvidence===true&&!Object.hasOwn(out,'selectionOptions'),'SELECTION_RESULT_REFERENCE');
+  delete out.selectionOptionsFromEvidence;out.selectionOptions=expandSelectionOptions(out.selectionEvidence);
+ }
+ return out;
 }

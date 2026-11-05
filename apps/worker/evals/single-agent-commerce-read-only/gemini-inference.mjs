@@ -8,10 +8,17 @@ import {omitCurrentProductDuplicates} from '../../dist/single-agent-commerce-rea
 import {sizeRequestScope} from '../../dist/single-agent-commerce-state.js';
 import {HandoffReasonV2Schema,canonicalJsonV1,CustomerProfileV1Schema,CommerceHistoryMetadataV1Schema} from '@lana/contracts';
 import {presentOwnerData,presentCompactOwnerData} from './owner-data-presentation.mjs';
-import {compactOwnerProducts,compactCurrentFacts} from './owner-product-tables.mjs';
+import {compactOwnerProducts,compactCurrentFacts,compactSelectionResult} from './owner-product-tables.mjs';
 
 const requireThat=(ok,reason)=>{if(!ok)throw new Error(reason);};
 const bytes=v=>Buffer.byteLength(typeof v==='string'?v:JSON.stringify(v));
+/** Failure telemetry only: no argument values or arbitrary field names. */
+export function productReadArgumentShape(args){
+ const allowed=['subjectRef','selection','offerType','offerTypes','color','size','deliveryRegion','customerSelected'];
+ const entries=Object.keys(args),unknown=entries.filter(k=>!allowed.includes(k)),type=v=>v===null?'NULL':Array.isArray(v)?'ARRAY':typeof v;
+ return {keyCount:entries.length,knownFieldTypes:Object.fromEntries(allowed.filter(k=>Object.hasOwn(args,k)).map(k=>[k,type(args[k])])),
+  unknownFieldCount:unknown.length,unknownFieldNameHashes:unknown.slice(0,4).map(k=>createHash('sha256').update(k).digest('hex'))};
+}
 export function publicTurnTime(value){
  if(value===undefined)return undefined; // Older captures have no processing anchor; never infer one from a fact.
  requireThat(value&&typeof value.processingAt==='string'&&value.processingAt.length===24&&
@@ -35,7 +42,7 @@ export function expandCurrentPolicyData(data,literals){
  return {...structuredClone(rest),policy:JSON.parse(matches[0].text),sourceVersion:policyFromTrustedRef.slice(7)};
 }
 export const OWNER_IMAGE_BOUNDS={count:2,maxBytes:512*1024,maxRequestBytes:1507328};
-const safeFailureCodes=new Set(['CAPABILITY_UNAVAILABLE','OWNER_REQUEST_BOUND','CREDENTIAL_SCOPE','AUTH_HTTP','AUTH_INVALID','GENERATION_HTTP',
+const safeFailureCodes=new Set(['SELECTION_RESULT_REFERENCE','CAPABILITY_UNAVAILABLE','OWNER_REQUEST_BOUND','CREDENTIAL_SCOPE','AUTH_HTTP','AUTH_INVALID','GENERATION_HTTP',
  'EMPTY_BODY','RESPONSE_BOUND','OWNER_MODEL_VERSION','OWNER_CANDIDATE_COUNT','OWNER_FINISH_REASON','OWNER_CONTENT_ROLE','OWNER_CONTENT_PARTS',
  'OWNER_OUTPUT_SURFACE','OWNER_TOOL_OUTPUT','OWNER_FINAL_EMPTY','OWNER_FINAL_BOUND','OWNER_EXECUTION_BOUND','OWNER_IMAGE_BINDING']);
 const safeFinishReasons=new Set(['FINISH_REASON_UNSPECIFIED','STOP','MAX_TOKENS','SAFETY','RECITATION','OTHER','BLOCKLIST','PROHIBITED_CONTENT','SPII','MODEL_ARMOR',
@@ -202,7 +209,10 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
    if(data.fieldErrors)data.fieldErrors=data.fieldErrors.map(e=>({...e,field:publicField(e.field)}));
    if(data.unresolvedFields)data.unresolvedFields=data.unresolvedFields.map(publicField);
   }
-  if(['add_to_cart','change_cart_item','confirm_purchase','record_negotiation'].includes(response.name)&&Array.isArray(data.cartItems))delete data.cart;
+  if(['add_to_cart','change_cart_item','confirm_purchase','record_negotiation'].includes(response.name)){
+   if(Array.isArray(data.cartItems))delete data.cart;
+   if(compactV2)response.response.data=compactSelectionResult(data,c.runtimeProducts??[]);
+  }
  }
  const state=Object.fromEntries(['currentProductId','consideredSize','salesStage','customerMeasurements','fitPreference','preferences','cartQuote','cartItems','checkoutStatus',
   'customerProfileId','customerProfileRevision','measurementFingerprint','sizeMeasurementFingerprints','sizeFitTargets','customerStateUpdatePending']
@@ -358,7 +368,7 @@ export function parseGeminiGeneration(body){
    }
    if(c.name==='read_product'){
     const decoded=decodeProductRead(c.args);
-    if(!decoded.ok)throw Object.assign(new Error('OWNER_TOOL_OUTPUT'),{toolOutputDiagnostic:{schemaCode:'OWNER_TOOL_OUTPUT',tool:c.name,valueType:'OBJECT',...decoded.diagnostic}});
+    if(!decoded.ok)throw Object.assign(new Error('OWNER_TOOL_OUTPUT'),{toolOutputDiagnostic:{schemaCode:'OWNER_TOOL_OUTPUT',tool:c.name,valueType:'OBJECT',...decoded.diagnostic,argumentShape:productReadArgumentShape(c.args)}});
     return {...c,args:decoded.args};
    }
    if(c.name==='recommend_size')check(Object.keys(c.args).every(k=>['subjectRef','customerStateOps','fitScope','componentRole'].includes(k))&&sizeRequestScope(c.args)!==null,'fitScope');
@@ -391,7 +401,7 @@ export function createGeminiCommerceInference(config,dependencies={}){
    const body=buildGeminiCommerceRequest(request,config.declarations??readOnlyDeclarations,value=>{(telemetry.mediaCapabilityAudit??=[]).push(value);},value=>{telemetry.requestBudget=value;});
    if(config.model==='gemini-3.8-flash')delete body.generationConfig.candidateCount;
    const wire=JSON.stringify(body);
-   telemetry.requestBytes=Buffer.byteLength(wire);telemetry.requestHash=createHash('sha256').update(wire).digest('hex');
+   telemetry.requestSchemaHash=createHash('sha256').update(JSON.stringify(body.tools)).digest('hex');telemetry.requestBytes=Buffer.byteLength(wire);telemetry.requestHash=createHash('sha256').update(wire).digest('hex');
    telemetry.functionCallingMode=body.toolConfig.functionCallingConfig.mode;
    telemetry.declaredToolCount=body.tools.reduce((n,tool)=>n+tool.functionDeclarations.length,0);
    if(!token||token.expiresAt-Date.now()<60000){
@@ -438,7 +448,7 @@ export function createGeminiCommerceInference(config,dependencies={}){
      field:['ARGS','UNKNOWN_FIELD','subjectRef','offerType','offerTypes','selection','size','color','deliveryRegion','ops','customerStateOps'].includes(d.field)?d.field:'UNKNOWN_FIELD',
      ...(productReadSelections.includes(d.selection)||d.selection==='INVALID'?{selection:d.selection,fieldPresent:d.fieldPresent===true,
        fieldType:['MISSING','NULL','ARRAY','STRING','OTHER'].includes(d.fieldType)?d.fieldType:'OTHER'}:{}),
-     valueType:['ARRAY','NULL','OBJECT','OTHER'].includes(d.valueType)?d.valueType:'OTHER'};
+     valueType:['ARRAY','NULL','OBJECT','OTHER'].includes(d.valueType)?d.valueType:'OTHER',...(d.argumentShape?{argumentShape:d.argumentShape}:{})};
    }
    telemetry.failureCode=timedOut?'TIMEOUT':safeFailureCodes.has(error?.message)?error.message:
     stage==='AUTH'?'AUTH_UNAVAILABLE':stage==='GENERATION'?'TRANSPORT_ERROR':stage==='RESPONSE'?'RESPONSE_INVALID':'UNKNOWN';
