@@ -1,3 +1,9 @@
+## Approved plan — target/composition/continuation repair, 2026-11-05
+
+[Detailed revision 2](../docs/specs/c3-phase-c-target-composition-continuation-repair-plan-20261105.md): S1 target-aware SIZE_FIT conflict through shared validator/transaction/egress; S2 quantity-aware multiset purchase composition preserving exact variants/shared stock; S3 actionable missing-choice results and lossless bounded continuation; S4 evidence-led image/decoder diagnostics. Preserve B strengths, existing models/caps/retry0, authority/privacy/receipts, silent handoff and original scripts; no broad prompt/style change.
+
+Same independent reviewer REVISE → fix → APPROVE PLAN. Two findings closed: multimodal wire versus text bounds, and logical quantity authority/invalid handling. Proposed future staged model coverage4cases7turns →9/17 →20/24 →checkout1/7, disjoint maximum34/55; no rerun for group splitting. This request is plan/review only: code/prompt/provider unchanged, implementation/tests/model NOT_RUN, previous functionalFAIL remains. No merge/deploy/live send.
+
 ## Current result — B-preserving prefix FAIL, 2026-11-05
 
 Implementation and independent reviews completed; exact run69bd1221 executed13cases/24turns once. Seven material task failures keep20remainingcases/24turns and separatecheckout1case/7turns NOT_RUN. Source/claim-target/continuation findings and next scoped fixes are recorded in [report](../apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/REPORT.md). No automatic new campaign, GO, merge or deploy; original frozen attempts remain immutable.

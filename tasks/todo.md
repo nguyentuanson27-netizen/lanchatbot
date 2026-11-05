@@ -1,3 +1,10 @@
+## Approved plan only — targeted repair, 2026-11-05
+
+- [x] Read latest24terminal outcomes, rejected draft/tool/state and actual source consumers. Separate confirmed code defects (target conflict/BOM ordering), owner missing-choice planning, continuation size and unknown malformed causes. [Plan revision2](../docs/specs/c3-phase-c-target-composition-continuation-repair-plan-20261105.md).
+- [x] Self-review → independent REVISE (multimodal bounds and authoritative logical quantity) → plan fix → same reviewer APPROVE PLAN. Source/prompt/provider/config unchanged in this planning task; no test/provider PASS inferred.
+- [ ] Implement S1–S4 with RED→GREEN, native consumer/transaction/delivery acceptance and clean PostgreSQL/readback/cleanup; separate independent implementation review. Not authorized by plan approval alone.
+- [ ] Subsequent new model campaign only after implementation/source/input gates and user instruction; proposed disjoint4/7 →9/17 →20/24 →1/7, maximum34/55, N1/retry0 and original scripts. Previous prefixFAIL and21cases31turnsNOT_RUN remain historical facts.
+
 ## Latest — B-preserving implementation and model prefix completed, 2026-11-05
 
 - [x] I–IV implemented/savepoints77083bda/e0e46c0c/4e77b8e8/70579605; independent scoped implementation APPROVE. Evaluator-only69bd1221 corrects missing-customer-choice classification/conditional later-cart proof and new checkout script intake before model; original33scripts unchanged. Worker2648PASS/shared223PASS/Node848PASS+2SKIP, focused evaluator35PASS; build/typecheck/lint0. Clean70579605 realPG2/2PASS and clean69bd1221initial state, DBs dropped/provider0.
