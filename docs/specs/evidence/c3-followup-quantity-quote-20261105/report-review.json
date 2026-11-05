@@ -1,0 +1,192 @@
+{
+  "status": "APPROVED_REPORT_EVIDENCE_ACCURACY_ONLY",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-05T15:44:31.710504+00:00",
+  "reviewedExecutableSha": "94911899adaaceef5b314518a4d6bb237d8f2208",
+  "reportPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\docs\\specs\\c3-phase-c-followup-quantity-quote-implementation-20261105.md",
+  "reportSha256": "8c53c6d204a3ceeb5fc5ac2d2bbd52007a14828666155b8c23ccf7150ac0b861",
+  "unresolvedMaterialFindings": [],
+  "checks": {
+    "focused418AndWire6CoverageCorrect": true,
+    "fullNode859Pass2SkipCleanSourceCorrect": true,
+    "PG1CleanSourceDroppedProvider0": true,
+    "eightSourceHashesMatchApprovedImplementation": true,
+    "historicalReplay978100NotModelOrCurrentAuthority": true,
+    "precommitBuildAndFocusedVsCleanNodePgAttributionCorrect": true,
+    "ownerPromptDelta507BytesActual": true,
+    "noModelAcceptanceHistoricalR1Fail30Cases48TurnsNotRunPreserved": true,
+    "allLogInventoryHashesAndSizes": true,
+    "stagedJsonLogBytesExactOtherTextNormalizedParity": true,
+    "cachedDiffCheckPassNoRuntimeChanges": true,
+    "knownSecretSignatureScanNoHits": true
+  },
+  "logInventoryCount": 14,
+  "manifest": [
+    {
+      "path": "docs/specs/c3-phase-c-followup-quantity-quote-implementation-20261105.md",
+      "sha256": "8c53c6d204a3ceeb5fc5ac2d2bbd52007a14828666155b8c23ccf7150ac0b861",
+      "bytes": 5740,
+      "stagedBlobSha256": "8c53c6d204a3ceeb5fc5ac2d2bbd52007a14828666155b8c23ccf7150ac0b861",
+      "exactParity": true
+    },
+    {
+      "path": "tasks/plan.md",
+      "sha256": "0f92019f157a8bef9137dd7924fcb660fe933ec7e8516937a56e9fd2cd67d994",
+      "bytes": 584590,
+      "stagedBlobSha256": "0f92019f157a8bef9137dd7924fcb660fe933ec7e8516937a56e9fd2cd67d994",
+      "exactParity": true
+    },
+    {
+      "path": "tasks/todo.md",
+      "sha256": "5d98ad015343c731e3abc496d6eb935bd6debf444512331a6dd1c3f8dde653d6",
+      "bytes": 542262,
+      "stagedBlobSha256": "5d98ad015343c731e3abc496d6eb935bd6debf444512331a6dd1c3f8dde653d6",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/.gitattributes",
+      "sha256": "f5db6ffac624ebda2856334cb169e128a79785f25e53c2823f8088af55c8bb87",
+      "bytes": 63,
+      "stagedBlobSha256": "f5db6ffac624ebda2856334cb169e128a79785f25e53c2823f8088af55c8bb87",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/engineering-review.json",
+      "sha256": "2a56d529b83c82ad4ed205c1b933470ca19b6a544a516ca5f478f98d6a9d49da",
+      "bytes": 8644,
+      "stagedBlobSha256": "2a56d529b83c82ad4ed205c1b933470ca19b6a544a516ca5f478f98d6a9d49da",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/failed-world-replay.json",
+      "sha256": "ca7d5ba993eda4e27a69b9f691af2ca8674dc2eea0046705f9f8d76c94b0b780",
+      "bytes": 1866,
+      "stagedBlobSha256": "ca7d5ba993eda4e27a69b9f691af2ca8674dc2eea0046705f9f8d76c94b0b780",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/logs/c3-followup-quote-build-20261105.log",
+      "sha256": "ae7d910086a47bb4f475e34c8b30339f03d7cae4971b0661bf6ac2dfb4fc76d6",
+      "bytes": 5249,
+      "stagedBlobSha256": "ae7d910086a47bb4f475e34c8b30339f03d7cae4971b0661bf6ac2dfb4fc76d6",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/logs/c3-followup-quote-evals-20261105.log",
+      "sha256": "6f6a993691e0bc51b6917f353b6fa700a94eff2c32c9aa0f45dd0be439232139",
+      "bytes": 94432,
+      "stagedBlobSha256": "6f6a993691e0bc51b6917f353b6fa700a94eff2c32c9aa0f45dd0be439232139",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/logs/c3-followup-quote-failed-world-replay-20261105.log",
+      "sha256": "9ab1f4a832fb471a8f3f5e360cdd1f34b30923f4d1662d09cdc71857a91fdd3c",
+      "bytes": 1415,
+      "stagedBlobSha256": "9ab1f4a832fb471a8f3f5e360cdd1f34b30923f4d1662d09cdc71857a91fdd3c",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/logs/c3-followup-quote-green-20261105-02.log",
+      "sha256": "f3c1b72571154d7db794ca9f1f8e25a640a0234979239840e7f0bf4bd2144a17",
+      "bytes": 380,
+      "stagedBlobSha256": "f3c1b72571154d7db794ca9f1f8e25a640a0234979239840e7f0bf4bd2144a17",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/logs/c3-followup-quote-green-20261105.log",
+      "sha256": "61c3fa89e00a1369f6ff43357745d653e87562350cc31cee4107c9e8c67ac27f",
+      "bytes": 5820,
+      "stagedBlobSha256": "61c3fa89e00a1369f6ff43357745d653e87562350cc31cee4107c9e8c67ac27f",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/logs/c3-followup-quote-ingress-20261105.log",
+      "sha256": "56e2012f1fd615d8df46ceb7b0a36de920e03cb9a87964f2032020ab71e2e6fa",
+      "bytes": 18938,
+      "stagedBlobSha256": "56e2012f1fd615d8df46ceb7b0a36de920e03cb9a87964f2032020ab71e2e6fa",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/logs/c3-followup-quote-lint-20261105.log",
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "bytes": 171,
+      "stagedBlobSha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/logs/c3-followup-quote-pg-20261105-01.log",
+      "sha256": "0b7a374f50b3eff99567a04e36599da52239f70e061893d384e38180457398c6",
+      "bytes": 99,
+      "stagedBlobSha256": "0b7a374f50b3eff99567a04e36599da52239f70e061893d384e38180457398c6",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/logs/c3-followup-quote-red-20261105.log",
+      "sha256": "b57b7cebcf4e1922209b68b90d8bb9e9eecea0646203a8b60d130cc89228b38d",
+      "bytes": 7963,
+      "stagedBlobSha256": "b57b7cebcf4e1922209b68b90d8bb9e9eecea0646203a8b60d130cc89228b38d",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/logs/c3-followup-quote-typecheck-20261105.log",
+      "sha256": "58e79ec09e0ddfa0b5fc079313190923878f9b4c7f96e07b3e9855e7df997031",
+      "bytes": 5266,
+      "stagedBlobSha256": "58e79ec09e0ddfa0b5fc079313190923878f9b4c7f96e07b3e9855e7df997031",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/logs/c3-followup-quote-wire-green-20261105.log",
+      "sha256": "4c1933d572e2eaf8568a01c18a206df204c04796e323dd7c3a593d996ff9f662",
+      "bytes": 730,
+      "stagedBlobSha256": "4c1933d572e2eaf8568a01c18a206df204c04796e323dd7c3a593d996ff9f662",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/logs/c3-followup-quote-wire-red-20261105-02.log",
+      "sha256": "237cea6a1fb627601e1e9b19c4d12b5722eaaa147ff03dea86c3c652f4084af2",
+      "bytes": 1753,
+      "stagedBlobSha256": "237cea6a1fb627601e1e9b19c4d12b5722eaaa147ff03dea86c3c652f4084af2",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/logs/c3-followup-quote-wire-red-20261105.log",
+      "sha256": "0933c9b0fa3d9e5622debbd99f4e886e5e73125300dfb2a3470652f9e6afd3bb",
+      "bytes": 3400,
+      "stagedBlobSha256": "0933c9b0fa3d9e5622debbd99f4e886e5e73125300dfb2a3470652f9e6afd3bb",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/logs/c3-followup-quote-worker-focused-20261105.log",
+      "sha256": "1aa5c705e17f6f0d953152524a1ec2faf091ae02550ef93d18e4b6b37aa0b30b",
+      "bytes": 987,
+      "stagedBlobSha256": "1aa5c705e17f6f0d953152524a1ec2faf091ae02550ef93d18e4b6b37aa0b30b",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/pg.json",
+      "sha256": "2deddb1fe85047f5258d05ed17ddbb19d681eb3cb028b46fefe534c86a3c2d45",
+      "bytes": 6399,
+      "stagedBlobSha256": "2deddb1fe85047f5258d05ed17ddbb19d681eb3cb028b46fefe534c86a3c2d45",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/source-manifest.json",
+      "sha256": "e95ef773e964713138e12ac1c2593137e05a71dadac674903de6ee6a5f8c9c43",
+      "bytes": 2322,
+      "stagedBlobSha256": "e95ef773e964713138e12ac1c2593137e05a71dadac674903de6ee6a5f8c9c43",
+      "exactParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-followup-quantity-quote-20261105/verification.json",
+      "sha256": "9b6c2df00d631258626da4b6dd5968bc198ba64f71da07b86574d99234b36ca1",
+      "bytes": 6481,
+      "stagedBlobSha256": "9b6c2df00d631258626da4b6dd5968bc198ba64f71da07b86574d99234b36ca1",
+      "exactParity": true
+    }
+  ],
+  "limits": [
+    "Report/evidence accuracy approval only. No tests/provider calls/source edits byreviewer for thisdelivery.",
+    "ScopedimplementationAPPROVE949 remains separate frommodelacceptance/quality/stability/qualificationGO.",
+    "Futureexactcopyofthisapproval isnotself-included inmanifest."
+  ]
+}

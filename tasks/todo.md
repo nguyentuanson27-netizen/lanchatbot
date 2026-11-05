@@ -1,3 +1,10 @@
+## Follow-up quantity quote repaired — 2026-11-05
+
+- [x] Identify missing capability: quote_product was first-contact-only, so actual j1T3 could not use its pre-cart quote path.
+- [x] RED→GREEN fix returning quote + no-image/native schema/prompt alignment; one offer/explicit quantity, existing calculator/readback/binding, same budget/authority. Source94911899 independently APPROVED.
+- [x] Focused418worker + fullNode859PASS/2SKIP, build/typecheck/lintPASS; actualPG1PASS/DBdropped/provider0, historical failed-world total978100 replay. [Report/limits](../docs/specs/c3-phase-c-followup-quantity-quote-implementation-20261105.md).
+- [ ] Model re-run NOT_RUN; oldR1FAIL and R2–R4 30cases48turnsNOT_RUN unchanged. Fresh source/registration required for any next campaign; no automatic dispatch/deploy.
+
 ## Latest model round — repaired R1 completed and STOP, 2026-11-05
 
 - [x] Evaluator-only R1/R2 admission RED2→GREEN13; exact disjoint13/24 prefix, frozen original scripts/caps, same independent reviewer APPROVE.

@@ -1,3 +1,9 @@
+## Follow-up quantity quote repaired — 2026-11-05
+
+Owner requested fix j1T3. Implementation base4530be07, independently approved executable94911899: expose existing quote_product to known returning conversations for one offer + explicit quantity, compute current pre-cart total without colour/cart/image, preserve first-contact image path and unknown-history block. Native schema/prompt/tool description aligned; no verifier relaxation, state/effect write, parser, retry or cap increase. [Implementation/evidence](../docs/specs/c3-phase-c-followup-quantity-quote-implementation-20261105.md).
+
+RuntimeRED6→GREEN35quote, focusedworker418PASS, fullNode859PASS/2SKIP, build/typecheck/lintPASS. RealPG1PASS/droptrue/provider0 on clean949; captured failed-world component replay quotes978100 from exact price/discount/ship, no cart/media. Source attribution and overlapping coverage disclosed. Independent engineering APPROVE; provider/model NOT_RUN. HistoricalR1FAIL/30cases48turnsNOT_RUN remain; no automatic newcampaign, GO, merge/deploy/live send.
+
 ## Latest model diagnostic — target repair R1 FAIL, 2026-11-05
 
 Owner authorized new model after approved implementation. Clean run94c367a8 only adds independently reviewed evaluator stage admission; runtime/prompts/models unchanged. Fresh107-product world, current initialPG/drop, independent four-group input review and actual-time preflight. R1 completed4cases/7turns:6SEND_ELIGIBLE+1silentHANDOFF,6text4images/10Outbox;22generation/22HTTP(15owner7verifier),0errors/retry,DBdropped. Post-run integrity APPROVE, functional gate FAIL (j1T3 sentinel misuse/current colour coverage); p06/p07 and j1T2 repaired paths observed working. [Report and all conversations](../apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/REPORT.md).
