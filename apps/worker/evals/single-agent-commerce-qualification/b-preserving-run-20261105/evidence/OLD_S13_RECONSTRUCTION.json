@@ -1,0 +1,24 @@
+{
+  "kind": "FROZEN_CONTINUATION_RECONSTRUCTION",
+  "observations": [
+    {
+      "file": "native-3f3e117ae00300cabe5e9c6481a22d457a04992b3df836b0b91e4b7f4a50cb42-turn-0.json",
+      "latest": "Chị lấy một áo Thạch Thảo, gửi về Cần Thơ thì cả ship hết bao nhiêu em?",
+      "error": "OWNER_REQUEST_BOUND",
+      "budget": {
+        "textFrameBytes": 72693,
+        "systemBytes": 21488,
+        "toolSchemaBytes": 19691,
+        "trustedFrameBytes": 16784,
+        "dialogueBytes": 14470,
+        "textLimitBytes": 65536
+      },
+      "actualToolResultsMatched": true,
+      "nativeSignedContentPreserved": null
+    }
+  ],
+  "providerRequests": 0,
+  "networkReads": 0,
+  "effects": 0,
+  "limitation": "Failed second bodies were not captured. These are reconstructions from frozen sources and captured successful outputs/tool results at the original clock, not byte-identical historical requests or model results."
+}

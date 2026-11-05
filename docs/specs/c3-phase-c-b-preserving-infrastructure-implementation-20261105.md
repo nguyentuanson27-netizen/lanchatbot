@@ -1,6 +1,6 @@
 # Phase C — B-preserving implementation, 2026-11-05
 
-Implementation base: `d83dc3c85cb22b9fccd463c1025606cd010b5f7a` (approved plan); prior model source `e14d26594bb8831909788007f92fba81b3cd54e4`. [Plan](c3-phase-c-b-preserving-infrastructure-plan-20261104.md). Code complete; independent final source review/input review and new model acceptance are separate gates. No qualification GO, live source write, deploy or live send.
+Implementation base: `d83dc3c85cb22b9fccd463c1025606cd010b5f7a` (approved plan); prior model source `e14d26594bb8831909788007f92fba81b3cd54e4`. [Plan](c3-phase-c-b-preserving-infrastructure-plan-20261104.md). Scoped source/evaluator/input reviews APPROVE; model prefix13cases24turns completed at69bd1221 with functional gate FAIL/STOP. [Actual outcomes and remaining defects](../../apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/REPORT.md). Engineering approval did not establish model acceptance. No qualification GO, live source write, deploy or live send.
 
 ## Changes
 

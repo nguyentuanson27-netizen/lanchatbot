@@ -1,0 +1,75 @@
+{
+  "basis": "Actual completed local command logs, not re-execution or remote CI",
+  "logs": [
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-preserve-red-size-20261104.log",
+      "sha256": "734321154c3fb8a2c8cc85c5bad387dbfdf695348d00af61b69852e1d3493ce6",
+      "bytes": 3856
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-preserve-red-state-20261104.log",
+      "sha256": "c5fb80fdd325ccc3c9ea379bb44a1be6e3f2288a5c5ab6299e0b211e115c5ce5",
+      "bytes": 9754
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-preserve-red-quote-20261104.log",
+      "sha256": "e32e88f8c7a62243ea98a8a0e39bdfecf0a3da6c41397f7461c9e6dcde46bd35",
+      "bytes": 4674
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-preserve-red-media-20261104.log",
+      "sha256": "1aaa41bf11862acdaae5692a131833193e52b7c6e780172198adb3d03a8a4600",
+      "bytes": 7375
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-preserve-red-checkout-20261104.log",
+      "sha256": "a8f66832163bc24a267327f440861ae1330d80081f8e00d2c82ed99b9f87113a",
+      "bytes": 1239
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-preserve-worker-tests-20261105-02.log",
+      "sha256": "db979ef58a1e3b63c9bd078e15bfa7c843d85392a9d233ae747ee88ee539f8bf",
+      "bytes": 12211
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-preserve-shared-tests-20261105.log",
+      "sha256": "bf2f254337feb6898e78ad75277a796521ba0639a40b998e76e53b0e0c338e41",
+      "bytes": 1025
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-preserve-all-evals-20261105.log",
+      "sha256": "89d19528dd9c1e31647ee4022d63060edf668f085e3ad252e272e844965f8372",
+      "bytes": 93330
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-preserve-final-typecheck-20261105.log",
+      "sha256": "8fd1e320d24f59dea859032769b7e1dba1b81f6699033894e9313096075b9183",
+      "bytes": 5266
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-preserve-final-lint-20261105.log",
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "bytes": 171
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-preserve-worker-build-20261105.log",
+      "sha256": "ff7f86a14de54f676dc20c2f4709aaeb54825f72572078d9c6e5389ae36088e4",
+      "bytes": 5249
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-preserve-contracts-typecheck-20261105.log",
+      "sha256": "1b7113c9a1e3ca485b1878418e0237fc26beddeea42b4f5d0205fe6510e7d7e8",
+      "bytes": 186
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-preserve-business-typecheck-20261105.log",
+      "sha256": "3333868def9afe9b4c5ecc6803cd7da86599de45e5774ed721cb470e8e77ad5d",
+      "bytes": 804
+    },
+    {
+      "artifact": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-preserve-evaluator-correction-green-20261105.log",
+      "sha256": "d848d337ccd71586ac72c4b91719695d342537baef7ecb3c225e37468486c0d8",
+      "bytes": 3747
+    }
+  ]
+}

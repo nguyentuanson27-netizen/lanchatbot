@@ -1,3 +1,7 @@
+## Current result — B-preserving prefix FAIL, 2026-11-05
+
+Implementation and independent reviews completed; exact run69bd1221 executed13cases/24turns once. Seven material task failures keep20remainingcases/24turns and separatecheckout1case/7turns NOT_RUN. Source/claim-target/continuation findings and next scoped fixes are recorded in [report](../apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/REPORT.md). No automatic new campaign, GO, merge or deploy; original frozen attempts remain immutable.
+
 ## Implementation update — B-preserving infrastructure, 2026-11-05
 
 I–IV implemented; tests and remaining acceptance are recorded in [implementation evidence](../docs/specs/c3-phase-c-b-preserving-infrastructure-implementation-20261105.md). Preserve exact prefix/remainder scopes and original scripts; no provider run before clean seal/input review. Whole-reply quality and C3 parity remain unverified.

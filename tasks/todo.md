@@ -1,3 +1,10 @@
+## Latest — B-preserving implementation and model prefix completed, 2026-11-05
+
+- [x] I–IV implemented/savepoints77083bda/e0e46c0c/4e77b8e8/70579605; independent scoped implementation APPROVE. Evaluator-only69bd1221 corrects missing-customer-choice classification/conditional later-cart proof and new checkout script intake before model; original33scripts unchanged. Worker2648PASS/shared223PASS/Node848PASS+2SKIP, focused evaluator35PASS; build/typecheck/lint0. Clean70579605 realPG2/2PASS and clean69bd1221initial state, DBs dropped/provider0.
+- [x] Fresh107world plus isolated approved test sources; independent final02inputs/preflight PASS. Clean run69bd1221 prefix13cases/24turns completedN1/retry0, allcaptured/DBdropped/nohardstop/live0.52generationrecords51HTTP,48OK3MALFORMED1preHTTPbound.12SEND+2CODE+6silentHANDOFF+4NO_SEND;13verifierPASS1FAIL. Accounting/capture/firewall independent audit APPROVE evidence, functional gateFAIL.
+- [x] All24terminal outcomes read. Seven task failures: p06component-order falsevariance, p07target-blind SIZE_FIT conflict, s03unsupported photo description, s13/s15/j4malformed/decoder, j1cartcontinuationbound. p04cross-turnfit/p09choice/j2bodymax improve descriptively; no stability/qualityGO. Minor repetitive voice deferred.
+- [ ] STOP prefix. Remainder20cases24turns +checkout1case7turns NOT_RUN under actualFAILgate; do not bypass or rerun. Follow-up fixes are recommendations, not implemented in this model source. QualificationBLOCKED/C3NOT_RUN/qualityNOT_GRADED. [Report and24conversations](../apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/REPORT.md).
+
 ## Implemented — B-preserving infrastructure repair, 2026-11-05
 
 - [x] Review latest run and source: p04 fit is lost between turns despite unchanged profile/PRODUCT target; j2 direct measurements face point-valued chart ranges; p07 multiple state ops; p09 receives correct latest/history but repeats resolved choice. Existing B/control and checkout plans read. [Detailed plan](../docs/specs/c3-phase-c-b-preserving-infrastructure-plan-20261104.md).
@@ -5,7 +12,7 @@
 - [x] II: persist bounded requested fit targets/recompute current evidence across turns; verify one profile update for multiple target calculations without weakening conflicts/receipts.
 - [x] III: explicit selected-offer continuation, source-backed pre-cart total, bounded continuation and actual tool/schema audit; no parser or hidden retry.
 - [x] IV: complete missing task-specific media adapters/metadata/assets and native checkout evaluator bridge; preserve owner-approved test assumptions, distinguish real media provenance.
-- [ ] B differential controls + worker/shared/realPG verification, review and source-ready frozen acceptance. Prefix13cases24turns; remainder20/24; separate checkout1/7 after bridge. Worker2648PASS/shared223PASS/Node848PASS+2SKIP; typecheck/build/lint0; worktree realPG2/2PASS/droptrue/provider0. Latest duplicate s13 wire still bound; new full-schema quote path56441bytes. Clean-source review/input/model acceptance pending; no GO. [Implementation evidence](../docs/specs/c3-phase-c-b-preserving-infrastructure-implementation-20261105.md).
+- [ ] B differential controls + worker/shared/realPG verification, review and source-ready frozen acceptance. Prefix13cases24turns; remainder20/24; separate checkout1/7 after bridge. Worker2648PASS/shared223PASS/Node848PASS+2SKIP; typecheck/build/lint0; worktree realPG2/2PASS/droptrue/provider0. Latest duplicate s13 wire still bound; new full-schema quote path56441bytes. Independent source/input review completed; prefix model acceptance FAIL, conditional remainder/checkout NOT_RUN; no GO. [Implementation evidence](../docs/specs/c3-phase-c-b-preserving-infrastructure-implementation-20261105.md).
 
 ## Latest — test-source model round completed, 2026-11-04
 
