@@ -5,9 +5,11 @@ import {catalogPolicyContext,businessFactMaxAgeSeconds} from '../../dist/redis-b
 import {digest} from './qualification.mjs';
 import {assertTestColorWorld} from './test-color-source.mjs';
 import {assertTestSupportWorld} from './test-support-sources.mjs';
+import {assertTestMediaWorld} from './test-media-source.mjs';
 export function frozenFacts(world){
  assertTestColorWorld(world);
  assertTestSupportWorld(world);
+ assertTestMediaWorld(world);
  assert.equal(world.kind,'FROZEN_PUBLIC_BUSINESS_WORLD');
  assert.deepEqual(world.sourceEvidenceHashes,[digest(world.products),digest(world.snapshots),digest(world.policyRecords),...(world.search?.status==='FROZEN_NATIVE_INDEX'?[digest(world.search)]:[])],'C_WORLD_SOURCE_HASH');
  const snapshots=Object.fromEntries(Object.entries(world.snapshots).map(([k,v])=>[normalizeCatalogToken(k),structuredClone(v)])),alias=normalizeCatalogToken(world.config.scope.shopAlias);

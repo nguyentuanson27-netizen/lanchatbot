@@ -12,7 +12,7 @@ export function createMediaCapabilityCache(clock:()=>Date,hosts:readonly string[
  const clear=(id:string,reason?:string)=>{entries.delete(id);if(reason)omissions.add(reason);};
  const observe=(id:string,p:StableProductDocument)=>{
   clear(id);const at=clock().getTime(),t=Date.parse(p.observedAt??'');
-  if(entries.size>=8||p.productId!==id||!Number.isFinite(at)||!Number.isFinite(t)||t>at){omissions.add("SUBJECT_OR_CLOCK");return;}
+  if(entries.size>=8||p.productId!==id||!Number.isFinite(at)||p.observedAt!=null&&(!Number.isFinite(t)||t>at)){omissions.add("SUBJECT_OR_CLOCK");return;}
   const product=structuredClone(p);
   const basic=eligibleCommerceMedia(product,{subjectRef:id,intent:'GENERIC'},at,hosts);
   entries.set(id,{product,at,expires:basic.expiresAt,hash:commerceHash({id,images:product.images??[],colors:product.colors,hosts})});
@@ -23,7 +23,7 @@ export function createMediaCapabilityCache(clock:()=>Date,hosts:readonly string[
    const result:MediaCapability[]=[];
    for(const[id,e]of entries){
     if(now<e.at||(e.expires!==null&&now>=e.expires)||!context.boundSubjects.some(s=>s.ref===id&&s.kind==='PRODUCT'&&s.bindingVersion===bindingVersion)){clear(id,e.expires!==null&&now>=e.expires?"EXPIRED":"SUBJECT_OR_CLOCK");continue;}
-    const queries:MediaQuery[]=[{subjectRef:id,intent:'GENERIC'},{subjectRef:id,intent:'FEEDBACK'},
+    const queries:MediaQuery[]=[{subjectRef:id,intent:'GENERIC'},{subjectRef:id,intent:'FEEDBACK'},{subjectRef:id,intent:'DETAIL'},
      ...(['TOP','SKIRT','PANTS'] as const).map(componentRole=>({subjectRef:id,intent:'DETAIL' as const,componentRole})),{subjectRef:id,intent:'BACK'}];
     if(e.color)queries.push({subjectRef:id,intent:'GENERIC',color:e.color});
     const rows=queries.map(q=>{let available=false;try{available=eligibleCommerceMedia(e.product,q,e.at,hosts).images.length>0;}catch{}

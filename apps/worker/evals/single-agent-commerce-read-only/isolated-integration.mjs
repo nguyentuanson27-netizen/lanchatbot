@@ -123,6 +123,22 @@ try{
  const base=()=>{const f=fixtureProduct('QU714');return createReadOnlyTools({scope,clock:()=>now,policy:()=>fixturePolicy(),initialProducts:[f.product],
   catalog:{readProduct:async()=>f,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})}});};
  const stateTools=()=>createCustomerStateTools({base:base(),scope,store:statePort,clock:()=>now,sizeInput:async()=>fixtureSizeInput(),sourceMessages:[{text:"Eo 85, mông 105. Eo 75, mông 95.",sourceMessageId:scope.sourceMessageId,observedAt:scope.sourceObservedAt}]});
+ await check('C B-preserving profile-once distinct fits survive new adapter and source invalidation',async()=>{
+  const isolatedScope={...scope,customerHash:createHash('sha256').update(randomUUID()).digest('hex')},localPort=createRealtimeCustomerStatePort(runtime,isolatedScope,()=>{
+   const p=createProfile();p.profile.customerKey.digest=isolatedScope.customerHash;return p;},()=>now);
+  const componentSource=async r=>{const v=fixtureSizeInput(),target={...v.target,componentProductId:`PART-${r.componentRole}`,componentRole:r.componentRole};
+   return {...v,target,charts:v.charts.map(c=>({chart:{...c.chart,componentRole:r.componentRole},scope:{...c.scope,componentRole:r.componentRole}})),fitTarget:{kind:'COMPONENT',parentProductId:'QU714',componentProductId:target.componentProductId,componentRole:r.componentRole},
+    sourceBindingHash:'b'.repeat(64),sourceExpiresAt:new Date(now.getTime()+60000).toISOString()};};
+  const make=()=>createCustomerStateTools({base:base(),scope,store:localPort,clock:()=>now,sizeInput:async()=>fixtureSizeInput(),retainAdvice:true,componentSizeInput:componentSource,
+   sourceMessages:[{text:'Eo 75, mông 95.',sourceMessageId:scope.sourceMessageId,observedAt:scope.sourceObservedAt}]});
+  const ops=[{op:'SET',field:'measurements.WAIST_CM',value:75,sourceQuote:'75'},{op:'SET',field:'measurements.HIPS_CM',value:95,sourceQuote:'95'}],t=await make();
+  const results=await t.invokeBatch(['TOP','PANTS'].map(componentRole=>({name:'recommend_size',args:{subjectRef:'QU714',fitScope:'COMPONENT',componentRole,customerStateOps:ops}})));
+  assert(results.every(r=>r.status==='OK'&&r.data.status==='RECOMMENDED'));
+  assert.equal(t.snapshot().protectedClaims.filter(c=>c.type==='SIZE_FIT').length,2);
+  const next=await make();assert.equal(next.snapshot().protectedClaims.filter(c=>c.type==='SIZE_FIT').length,2);
+  const prior=await localPort.read();assert.equal(await localPort.compareAndSwap(prior.profile.revision,{...prior,profile:{...prior.profile,revision:prior.profile.revision+1,measurements:[]}}),true);
+  assert.equal((await next.readback()).protectedClaims.filter(c=>c.type==='SIZE_FIT').length,0);
+ });
  await check('B2 real profile persists across turns and correction precedes dependent size',async()=>{
   for(const [index,waist,hips,size] of [[0,85,105,'L'],[1,75,95,'M']]){
    now=new Date(now.getTime()+1000);scope.sourceMessageId='b2-'+index;scope.sourceObservedAt=now.toISOString();
@@ -655,6 +671,18 @@ try{
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+ await check('C B-preserving selected offer persists without cart and complete native checkout reaches confirmation',async()=>{
+  const j=await statefulFixture({preparedOffers:true,multiOfferContext:true,checkoutEta:true});
+  const selected=await j.turn('Chị chọn áo lẻ nhé.',[native([{name:'read_product',args:{subjectRef:'SM613',offerType:'AO',customerSelected:true}}]),say('Dạ, mình lấy áo lẻ chị nhé.')]);
+  assert.equal(selected.result.terminal.disposition,'SEND_ELIGIBLE');assert.equal((await j.state()).cart,null);
+  const profile=await runtime.loadOrCreateCustomerProfile(pageId,j.bound.customerHash,()=>{throw Error('EXISTING_PROFILE_REQUIRED');},new Date());
+  assert.deepEqual(profile.profile.shoppingSelection,{productId:'SM613',offerType:'AO'});
+  await j.turn('Chị lấy áo navy M, lên đơn cho chị nhé.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'AO',color:'navy',size:'M'}}]),native([{name:'confirm_purchase',args:{}}])]);
+  for(const text of ['Tên: Khách thử nghiệm','Số điện thoại: 0900000001','Địa chỉ: 12 đường Số 3, phường An Khánh, TP.HCM','Chị trả tiền khi nhận hàng'])await j.turn(text,[]);
+  const state=await j.state();assert.equal(state.stage,'ORDER_PREVIEW');assert(state.preview);assert.equal(state.confirmation,null);
+  const r=await j.turn('Đúng rồi, chốt đơn cho chị nhé.',[native([{name:'confirm_purchase',args:{}}])]);assert.equal(r.owners,1);
+  assert.equal((await j.state()).stage,'PURCHASE_CONFIRMED');assert((await j.state()).confirmation);
+ });
 
  if(process.argv.includes('--sales-completion-feasibility'))await check('C sales completion S5 public interruption feasibility',async()=>{
   assert(!providerRun&&!phaseC&&!phaseCInitial,'FEASIBILITY_SYNTHETIC_ONLY');

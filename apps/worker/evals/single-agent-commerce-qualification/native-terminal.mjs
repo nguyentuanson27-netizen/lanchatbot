@@ -44,6 +44,39 @@ export function captureNativeTerminal({native,codeOnly,messages,images,errorCode
  if(native?.disposition==='SEND_ELIGIBLE'&&messages.length)return {disposition:'SEND_ELIGIBLE',messages,images};
  return {disposition:'NO_SEND',messages,images,reason:errorCode??native?.reason??'NO_ACCEPTED_CUSTOMER_OUTPUT'};
 }
+/** Evaluator-only state witness. No customer identity values or send permission. */
+export function checkoutBranchWitness(input,terminal,publicState){
+ const {result,authority,receipts,acceptedOutbox,executionIdentity,messages,images}=input;
+ const allUnits=[...messages.map(text=>({kind:'TEXT',contentHash:hash(text)})),...images.map(i=>({kind:'IMAGE',contentHash:hash(i.url)}))];
+ if(!executionIdentity?.requestId||!/^[a-f0-9]{64}$/.test(executionIdentity.sourceMessageIdHash??'')||
+  !Array.isArray(acceptedOutbox)||acceptedOutbox.length!==allUnits.length||new Set(acceptedOutbox.map(r=>r.id)).size!==allUnits.length||
+  acceptedOutbox.some((r,i)=>!r.id||!['SENT_ACCEPTED','DELIVERED','READ'].includes(r.status)||r.kind!==allUnits[i].kind||r.contentHash!==allUnits[i].contentHash||r.sequence!==i||!r.group||r.group!==acceptedOutbox[0].group)||
+  publicState.revision!==input.state.revision||publicState.salesRevision!==input.state.salesRevision||!publicState.cart)return null;
+ const progress=result?.checkoutProgressOutput;
+ const progressValid=progress?.kind==='NATIVE_CHECKOUT_PROGRESS_V1'&&progress.requestId===executionIdentity.requestId&&progress.sourceMessageIdHash===executionIdentity.sourceMessageIdHash&&
+  progress.recipient===authority?.recipientHash&&progress.conversationRevision===publicState.revision&&progress.salesRevision===publicState.salesRevision&&
+  progress.cart?.id===publicState.cart.cartId&&progress.cart?.version===publicState.cart.revision&&
+  digest(progress.unitKinds)===digest(allUnits.map(u=>u.kind))&&digest(progress.unitHashes)===digest(allUnits.map(u=>u.contentHash))&&
+  acceptedOutbox.every(r=>r.group===progress.responseGroupId)&&Array.isArray(progress.operations)&&progress.operations.length>0&&
+  progress.operations.every(op=>receipts?.some(r=>r.operation_id===op.id&&r.commandKind===op.kind&&r.stateRevisionAfter<=publicState.salesRevision));
+ const currentReceipt=kind=>progressValid&&progress.operations.some(op=>op.kind===kind&&receipts?.some(r=>r.operation_id===op.id&&r.commandKind===kind&&r.stateRevisionAfter===publicState.salesRevision));
+ let condition=null;
+ const clarification=clarificationCapture(input);
+ if(clarification&&clarification.requestId===executionIdentity.requestId&&clarification.sourceMessageIdHash===executionIdentity.sourceMessageIdHash&&
+  digest(publicState.checkoutPublic?.lastQuestion?.missingFields)===digest(clarification.missingFields)&&
+  publicState.checkoutPublic?.lastQuestion?.questionFingerprint===clarification.messageHashes[0])condition={kind:'MISSING_FIELD',field:clarification.missingFields[0]};
+ else if(authority?.owner==='BOT'&&terminal.disposition==='CODE_OWNED_SEND'&&publicState.stage==='ORDER_PREVIEW'&&publicState.checkoutPreviewProof&&
+  digest(progress?.preview)===digest(publicState.checkoutPreviewProof)&&
+  publicState.checkoutPreviewProof.cartId===publicState.cart.cartId&&publicState.checkoutPreviewProof.cartVersion===publicState.cart.revision&&
+  currentReceipt('PREVIEW_CREATED')&&result.mode==='PRIVATE_CODE_PATH'&&input.generations.length===0&&messages.length)condition={kind:'PREVIEW_READY'};
+ else if(['SEND_ELIGIBLE','CODE_OWNED_SEND'].includes(terminal.disposition)&&publicState.stage==='PURCHASE_CONFIRMED'&&publicState.confirmation&&currentReceipt('PURCHASE_CONFIRMED'))condition={kind:'PURCHASE_CONFIRMED'};
+ else if(authority?.owner==='BOT'&&['SEND_ELIGIBLE','CODE_OWNED_SEND'].includes(terminal.disposition)&&messages.length&&
+  (currentReceipt('CART_OPENED')||input.result?.boundaryWitness?.terminal?.disposition==='SEND_ELIGIBLE'&&
+   digest(input.result.boundaryWitness.currentPublicContext?.cartBinding)===digest({cartId:publicState.cart.cartId,cartVersion:publicState.cart.revision})))condition={kind:'CART_READY'};
+ if(!condition)return null;
+ const v={...condition,stateHash:digest(publicState),priorOutcomeHash:digest(terminal),requestId:executionIdentity.requestId,sourceMessageIdHash:executionIdentity.sourceMessageIdHash};
+ return {...v,hash:digest(v)};
+}
 export function capturedOutputViolations(terminal){
  return ['HANDOFF','NO_SEND'].includes(terminal.disposition)&&(terminal.messages.length||terminal.images.length)
   ?[{kind:terminal.disposition==='HANDOFF'?'SILENT_HANDOFF_CUSTOMER_OUTPUT':'NO_SEND_CUSTOMER_OUTPUT'}]:[];

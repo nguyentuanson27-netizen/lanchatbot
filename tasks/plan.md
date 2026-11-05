@@ -1,3 +1,7 @@
+## Implementation update — B-preserving infrastructure, 2026-11-05
+
+I–IV implemented; tests and remaining acceptance are recorded in [implementation evidence](../docs/specs/c3-phase-c-b-preserving-infrastructure-implementation-20261105.md). Preserve exact prefix/remainder scopes and original scripts; no provider run before clean seal/input review. Whole-reply quality and C3 parity remain unverified.
+
 ## Proposed — preserve B capabilities and complete missing infrastructure, 2026-11-04
 
 [Detailed repair plan](../docs/specs/c3-phase-c-b-preserving-infrastructure-plan-20261104.md), planning base d1b15233. I: chart meaning/ranges; II: cross-turn current fit and profile-once/multiple targets; III: selected offer progression, pre-cart total quote and bounded/schema-correct tool path; IV: task-specific media sources and native checkout evaluator witness bridge. Preserve six B differential controls and current authority/privacy/receipts/silent handoff. Missing infrastructure/source is work to add, not a reason to rewrite customer journeys or count handoff as completed sales capability. Existing owner-approved test assumptions remain scoped test inputs.

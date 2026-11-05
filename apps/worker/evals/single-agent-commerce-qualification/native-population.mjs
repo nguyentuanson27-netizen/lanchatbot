@@ -4,8 +4,8 @@ import {writeFileSync,readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {runtimeProjection,digest,textDigest,outcomeDigest} from './qualification.mjs';
 import {commonModelConfig} from './native-wire.mjs';
-import {selectFrozenCustomerTurn} from './customer-branches.mjs';
-import {captureNativeTerminal,capturedOutputViolations,clarificationCapture,previewMediaCapture} from './native-terminal.mjs';
+import {selectFrozenCustomerTurn,selectCheckoutCustomerTurn} from './customer-branches.mjs';
+import {captureNativeTerminal,capturedOutputViolations,clarificationCapture,previewMediaCapture,checkoutBranchWitness} from './native-terminal.mjs';
 const silent=(reason,disposition='NO_SEND')=>({disposition,messages:[],images:[],reason});
 export async function collectNativePopulation({preflight,providerPorts,sessionFactory,snapshot,historyStore,out,seedPath,queue,branchSelector}){
  const reg=preflight.sealed,identity=reg.identity,arm=preflight.registration.arm??'CANDIDATE',seed=JSON.parse(readFileSync(seedPath,'utf8')).seed;
@@ -30,9 +30,11 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
     modelHash:digest(commonModelConfig(arm==='C3'?reg.config.baseline.model:reg.config.candidate.model)),customerPolicyHash:scenario.mode==='JOURNEY'?scenario.customerPolicy.hash:null}};
   attempts[scenarioIndex]=a;save();
   for(let i=0;i<scenario.turns.length;i++){
-   const choice=branchSelector?await branchSelector({scenario,turnIndex:i,priorTerminal:a.turns.at(-1)?.terminal??null}):null,
-    selected=selectFrozenCustomerTurn(scenario,i,a.turns.at(-1)?.terminal??null,choice);
-   const before=await snapshot(session),accepted=before.publicHistory.history,input=runtimeProjection(scenario,i,{acceptedHistory:accepted,latest:selected.latest}),turnStart=performance.now(),
+   const before=await snapshot(session),choice=branchSelector?await branchSelector({scenario,turnIndex:i,priorTerminal:a.turns.at(-1)?.terminal??null}):null,
+    selected=i>0&&scenario.customerPolicy?.selector==='EVALUATOR_CODE_PROOF'
+     ?selectCheckoutCustomerTurn(scenario,i,a.turns.at(-1)?.terminal,a.turns.at(-1)?.checkoutBranchWitness,digest(before.publicState))
+     :selectFrozenCustomerTurn(scenario,i,a.turns.at(-1)?.terminal??null,choice);
+   const accepted=before.publicHistory.history,input=runtimeProjection(scenario,i,{acceptedHistory:accepted,latest:selected.latest}),turnStart=performance.now(),
     generationStart=providerPorts.observed().length,captureStart=session.capture.length,attachmentStart=session.capturePayloads.length;
    providerPorts.setSlot({slotId:slot.slotId,turnIndex:i,runtimeInput:input});
    let observed,errorCode=null;
@@ -89,6 +91,10 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
     a.codeOwned=t.codeOwned;
    }
    if(gens.length===0&&!codeOnly){t.precheck={status:'REJECTED',reason:terminal?.reason??'NO_MODEL_CODE_PATH',artifactHash:digest(observed?.result??{}),sourceSha:reg.config.candidate.sourceSha};a.precheck=t.precheck;}
+   if(scenario.customerPolicy?.selector==='EVALUATOR_CODE_PROOF'){
+    t.checkoutBranchWitness=checkoutBranchWitness(captureInput,actual,after.publicState);
+    if(codeOnly)assert(t.checkoutBranchWitness,'C_CHECKOUT_CODE_PROOF_REQUIRED');
+   }
    t.beforeHistoryHash=digest(t.historyBefore);t.afterHistoryHash=digest(t.historyAfter);
    a.turns.push(t);a.generations.push(...gens);a.terminal=actual;
    if(b){a.verification=t.verification;a.finalGate=t.finalGate;}

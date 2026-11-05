@@ -203,7 +203,7 @@ export async function runPersistedCommerceIngress(input: {
       ?{committed:false,messages:0,failure:{stage:"AUTHORITY" as const,reasonCode:"OPENING_PRIVATE_REQUIRES_PRIOR_OUTPUT"}}
       :!mediaMessage||receiptPending ? await executor.advancePrivateCheckout() : {committed:false,messages:0};
     if (privateResult.committed) return { ...noSend("PRIVATE_CHECKOUT_COMMITTED"), mode: "PRIVATE_CODE_PATH", enqueued: privateResult.messages,
-      codeOwnedOutput:executor.codeOwnedOutput(),checkoutMediaOutput:executor.checkoutMediaOutput(),...(input.openingMediaRule?{normalToolCalls:checkoutMediaUnits,toolCalls:checkoutMediaUnits,terminalHandoffCalls:0}:{}) };
+      codeOwnedOutput:executor.codeOwnedOutput(),checkoutMediaOutput:executor.checkoutMediaOutput(),checkoutProgressOutput:executor.checkoutProgressOutput(),...(input.openingMediaRule?{normalToolCalls:checkoutMediaUnits,toolCalls:checkoutMediaUnits,terminalHandoffCalls:0}:{}) };
     const handoff = createPersistedCommerceHandoffPort({ scope, clock: input.clock, store: input.store, transaction,
       read: readAuthority, inboxBatchGuard: guard, resolveTagId: input.resolveTagId, deliveryRecipient: last.senderId,
       ...(mediaLink?{triggerSource:mediaLink}:{}) });
@@ -264,6 +264,7 @@ export async function runPersistedCommerceIngress(input: {
     sourceMessages,
     sizeInput: async ref => { const { product } = await input.read.catalog.readProduct(ref, false);
       return commerceSizeSource(product, await input.policy(), input.read.productGroups); },
+    retainAdvice:true,
     componentSizeInput:async request=>{const {product,snapshot}=await input.read.catalog.readProduct(request.parentProductId,true);
       if(snapshot?.shop_alias!==scope.shopAlias)throw Error("COMPONENT_SOURCE_SCOPE");
       return commerceComponentSizeSource(product,snapshot,await input.policy(),request.componentRole,input.clock(),input.read.maxFactAgeSeconds??1200,input.read.productGroups);},
@@ -296,7 +297,7 @@ export async function runPersistedCommerceIngress(input: {
   if (result.terminal.disposition !== "SEND_ELIGIBLE") return {
     ...result, ...(result.terminal.disposition === "FALLBACK" ? noSend("FALLBACK_OUTPUT_FORBIDDEN") : {}),
     inboxCompletion: await completeUnsent(tools.handoffStatus?.()?.status),
-    codeOwnedOutput:executor.codeOwnedOutput(),checkoutMediaOutput:executor.checkoutMediaOutput(),
+    codeOwnedOutput:executor.codeOwnedOutput(),checkoutMediaOutput:executor.checkoutMediaOutput(),checkoutProgressOutput:executor.checkoutProgressOutput(),
     enqueued: handoff.outboxCount()+executor.outboxCount() };
   // Holding replies (with or without independent media) belong to the atomic
   // handoff group with Inbox completion. Do not enqueue another BOT reply.

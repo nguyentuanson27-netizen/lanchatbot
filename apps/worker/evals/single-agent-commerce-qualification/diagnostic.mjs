@@ -20,8 +20,10 @@ export const FULL_NATIVE_DIAGNOSTIC_SCOPE=read(new URL('./FULL_NATIVE_DIAGNOSTIC
 export const PURCHASE_OPTIONS_DIAGNOSTIC_SCOPE=read(new URL('./PURCHASE_OPTIONS_DIAGNOSTIC_SCOPE_20261031.json',import.meta.url));
 export const FULL_NATIVE_REMAINDER_SCOPE=read(new URL('./FULL_NATIVE_REMAINDER_SCOPE_20261102.json',import.meta.url));
 export const PURCHASE_MISSING_SCOPE=read(new URL('./PURCHASE_MISSING_SCOPE_20261103.json',import.meta.url));
+export const B_PRESERVING_SCOPES=['PREFIX','REMAINDER','CHECKOUT'].map(n=>read(new URL(`./B_PRESERVING_${n}_SCOPE_20261104.json`,import.meta.url)));
 export function diagnosticScope(corpus){
  const name=corpus.provenance?.diagnosticScope;
+ const repairScope=B_PRESERVING_SCOPES.find(s=>s.name===name);if(repairScope)return repairScope;
  assert(name===undefined||[FULL_NATIVE_DIAGNOSTIC_SCOPE.name,PURCHASE_OPTIONS_DIAGNOSTIC_SCOPE.name,FULL_NATIVE_REMAINDER_SCOPE.name,PURCHASE_MISSING_SCOPE.name].includes(name),'D_UNKNOWN_SCOPE');
  return name===PURCHASE_MISSING_SCOPE.name?PURCHASE_MISSING_SCOPE:name===FULL_NATIVE_REMAINDER_SCOPE.name?FULL_NATIVE_REMAINDER_SCOPE:name===PURCHASE_OPTIONS_DIAGNOSTIC_SCOPE.name?PURCHASE_OPTIONS_DIAGNOSTIC_SCOPE:name===FULL_NATIVE_DIAGNOSTIC_SCOPE.name?FULL_NATIVE_DIAGNOSTIC_SCOPE:DIAGNOSTIC_SCOPE;
 }
@@ -38,7 +40,7 @@ export function validateDiagnostic(reg,world){
  const scope=diagnosticScope(reg.corpus);
  assert(reg.kind==='PHASE_C_DEVELOPMENT_DIAGNOSTIC_V1'&&reg.status==='REGISTERED_DEVELOPMENT_NOT_QUALIFICATION'&&
   reg.sendEnabled===false&&reg.corpus.provenance?.developmentOnly===true&&reg.scopeHash===digest(scope),'D_REGISTRATION_KIND');
- if(scope===FULL_NATIVE_DIAGNOSTIC_SCOPE||scope===PURCHASE_OPTIONS_DIAGNOSTIC_SCOPE||scope===FULL_NATIVE_REMAINDER_SCOPE||scope===PURCHASE_MISSING_SCOPE)assert.equal(digest(reg.corpus.scenarios.map(s=>({id:s.id,mode:s.mode,turns:s.turns,customerPolicy:s.customerPolicy??null}))),scope.customerScriptsHash,'D_CUSTOMER_SCRIPTS_CHANGED');
+ if(scope===FULL_NATIVE_DIAGNOSTIC_SCOPE||scope===PURCHASE_OPTIONS_DIAGNOSTIC_SCOPE||scope===FULL_NATIVE_REMAINDER_SCOPE||scope===PURCHASE_MISSING_SCOPE||B_PRESERVING_SCOPES.includes(scope))assert.equal(digest(reg.corpus.scenarios.map(s=>({id:s.id,mode:s.mode,turns:s.turns,customerPolicy:s.customerPolicy??null}))),scope.customerScriptsHash,'D_CUSTOMER_SCRIPTS_CHANGED');
  validateConfig(reg.config);assert.equal(reg.config.repetitions,1);assert.equal(reg.config.retry,0);
  assert.deepEqual(reg.identity,qualificationIdentity(reg.config));assert.equal(reg.worldHash,digest(world));frozenFacts(world);
  assert.equal(reg.corpusHash,digest(reg.corpus));assert.deepEqual(reg.slots,diagnosticSlots(reg.corpus));
@@ -56,7 +58,9 @@ export function validateDiagnostic(reg,world){
   assert.deepEqual(reg.sourceChecks[i],s.diagnosticTrusted,'D_SOURCE_BINDING');
   if(s.mode!=='SAFETY'){assert.equal(s.initialContext.worldHash,reg.worldHash);assert.equal(s.initialContext.initialStateHash,digest(initial.publicState));
    assertJudgeSourceInventory(s.judgeContext?.sourceInventory,reg.worldHash,world,s);
-   assert.deepEqual(s.nativeCodeOwnedTurns??[],s.id==='c-20261028-j6'?[1,2]:[],'D_CODE_OWNED_SCOPE');
+   const checkout=B_PRESERVING_SCOPES.includes(scope)&&s.id==='c-20261104-checkout-complete';
+   assert.deepEqual(s.nativeCodeOwnedTurns??[],checkout?[0,1,2,3,4,5,6]:s.id==='c-20261028-j6'?[1,2]:[],'D_CODE_OWNED_SCOPE');
+   if(checkout)assert(s.customerPolicy?.selector==='EVALUATOR_CODE_PROOF','D_CHECKOUT_SELECTOR');
   }else assert(s.evaluator.unsafe===false&&s.nativeSafety?.worldHash===reg.worldHash&&s.nativeSafety.sourceHash===digest(s.diagnosticTrusted)&&
     digest(s.nativeSafety.trusted)===digest(s.diagnosticTrusted)&&s.nativeSafety.review?.status==='APPROVED','D_PROBE_BINDING');
  }

@@ -1,11 +1,11 @@
-## Proposed — B-preserving infrastructure repair, 2026-11-04
+## Implemented — B-preserving infrastructure repair, 2026-11-05
 
 - [x] Review latest run and source: p04 fit is lost between turns despite unchanged profile/PRODUCT target; j2 direct measurements face point-valued chart ranges; p07 multiple state ops; p09 receives correct latest/history but repeats resolved choice. Existing B/control and checkout plans read. [Detailed plan](../docs/specs/c3-phase-c-b-preserving-infrastructure-plan-20261104.md).
-- [ ] I: verify source chart semantics and normalize valid intervals; retain approved shared test applicability and height/weight path.
-- [ ] II: persist bounded requested fit targets/recompute current evidence across turns; verify one profile update for multiple target calculations without weakening conflicts/receipts.
-- [ ] III: explicit selected-offer continuation, source-backed pre-cart total, bounded continuation and actual tool/schema audit; no parser or hidden retry.
-- [ ] IV: complete missing task-specific media adapters/metadata/assets and native checkout evaluator bridge; preserve owner-approved test assumptions, distinguish real media provenance.
-- [ ] B differential controls + worker/shared/realPG verification, review and source-ready frozen acceptance. Prefix13cases24turns; remainder20/24; separate checkout1/7 after bridge. All implementation/model checks of this plan NOT_RUN, no independent approval or GO.
+- [x] I: verify source chart semantics and normalize valid intervals; retain approved shared test applicability and height/weight path.
+- [x] II: persist bounded requested fit targets/recompute current evidence across turns; verify one profile update for multiple target calculations without weakening conflicts/receipts.
+- [x] III: explicit selected-offer continuation, source-backed pre-cart total, bounded continuation and actual tool/schema audit; no parser or hidden retry.
+- [x] IV: complete missing task-specific media adapters/metadata/assets and native checkout evaluator bridge; preserve owner-approved test assumptions, distinguish real media provenance.
+- [ ] B differential controls + worker/shared/realPG verification, review and source-ready frozen acceptance. Prefix13cases24turns; remainder20/24; separate checkout1/7 after bridge. Worker2648PASS/shared223PASS/Node848PASS+2SKIP; typecheck/build/lint0; worktree realPG2/2PASS/droptrue/provider0. Latest duplicate s13 wire still bound; new full-schema quote path56441bytes. Clean-source review/input/model acceptance pending; no GO. [Implementation evidence](../docs/specs/c3-phase-c-b-preserving-infrastructure-implementation-20261105.md).
 
 ## Latest — test-source model round completed, 2026-11-04
 

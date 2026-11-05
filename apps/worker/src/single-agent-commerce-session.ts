@@ -42,6 +42,9 @@ export function createPersistedCommerceExecutor(input: {
   let checkoutMediaOutput:{kind:'NATIVE_CHECKOUT_MEDIA_V1';requestId:string;responseGroupId:string;recipient:string;conversationRevision:number;
     salesRevision:number;sourceMessageIdHash:string;operations:{id:string;kind:string}[];preview:{id:string;hash:string;cartId:string;cartVersion:number}|null;
     payloadHash:string;messageHashes:string[];imageHashes:string[];mediaBindingHash:string}|null=null;
+  let checkoutProgressOutput:{kind:"NATIVE_CHECKOUT_PROGRESS_V1";requestId:string;sourceMessageIdHash:string;recipient:string;conversationRevision:number;salesRevision:number;
+    responseGroupId:string;unitHashes:string[];unitKinds:string[];operations:{id:string;kind:string}[];cart:{id:string;version:number}|null;
+    preview:{id:string;hash:string;cartId:string;cartVersion:number}|null}|null=null;
   let codeOwnedOutput: {kind:"NATIVE_CHECKOUT_CLARIFICATION";requestId:string;recipient:string;conversationRevision:number;
     salesRevision:number;sourceMessageIdHash:string;operationIds:string[];payloadHash:string;messageHashes:string[];missingFields:readonly string[]} | null = null;
   const repository: SalesCycleStateRepositoryV1 = {
@@ -150,6 +153,11 @@ export function createPersistedCommerceExecutor(input: {
       return r;
     });
     if (terminal && committed.stateCommitted) terminalCommitted = true;
+    if(committed.stateCommitted&&Array.isArray(output.plan.events)&&output.plan.events.length)checkoutProgressOutput={kind:"NATIVE_CHECKOUT_PROGRESS_V1",requestId:scope.requestId,
+      sourceMessageIdHash:output.plan.sourceMessageIdHash!,recipient:scope.recipient,conversationRevision:next.revision,salesRevision:output.plan.state.revision,
+      responseGroupId,unitHashes:messages.map(m=>createHash('sha256').update(m.kind==='TEXT'?m.text:m.imageUrl).digest('hex')),unitKinds:messages.map(m=>m.kind),
+      operations:output.plan.events.map(e=>({id:e.commandId,kind:e.commandKind})),cart:cart?{id:cart.cartId,version:cart.revision}:null,
+      preview:output.plan.state.preview?{id:output.plan.state.preview.previewId,hash:output.plan.state.preview.previewHash,cartId:output.plan.state.preview.cartId,cartVersion:output.plan.state.preview.cartVersion}:null};
     if(terminal&&committed.stateCommitted&&mediaBinding)checkoutMediaOutput={kind:'NATIVE_CHECKOUT_MEDIA_V1',requestId:scope.requestId,responseGroupId,recipient:scope.recipient,
       conversationRevision:next.revision,salesRevision:output.plan.state.revision,sourceMessageIdHash:output.plan.sourceMessageIdHash!,operations:output.plan.events.map(e=>({id:e.commandId,kind:e.commandKind})),
       preview:output.plan.state.preview?{id:output.plan.state.preview.previewId,hash:output.plan.state.preview.previewHash,cartId:output.plan.state.preview.cartId,cartVersion:output.plan.state.preview.cartVersion}:null,
@@ -168,6 +176,7 @@ export function createPersistedCommerceExecutor(input: {
   return { repository, outboxCount: () => outboxMessages, terminalCommitted: () => terminalCommitted,
     codeOwnedOutput:()=>codeOwnedOutput?structuredClone(codeOwnedOutput):null,
     checkoutMediaOutput:()=>checkoutMediaOutput?structuredClone(checkoutMediaOutput):null,
+    checkoutProgressOutput:()=>checkoutProgressOutput?structuredClone(checkoutProgressOutput):null,
     readReceipt: createPersistedCommerceReceiptReader({ store: input.store, repository, scope, conversationKey: scope.conversationId }),
     async privateCheckoutPending() {
       const current = await repository.read(scope.conversationId);

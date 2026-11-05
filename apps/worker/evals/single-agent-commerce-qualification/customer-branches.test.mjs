@@ -2,7 +2,19 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {corpus} from './fixtures.test-support.mjs';
 import {digest} from './qualification.mjs';
-import {selectFrozenCustomerTurn} from './customer-branches.mjs';
+import {selectFrozenCustomerTurn,selectCheckoutCustomerTurn} from './customer-branches.mjs';
+
+test('checkout branches require code proof for the exact frozen state and prior output',()=>{
+ const terminal={disposition:'CODE_OWNED_SEND',messages:['Chị cho em tên người nhận nhé.'],images:[]},stateHash='a'.repeat(64);
+ const branch={turnIndex:1,latest:'Mai Anh nhé em.',condition:{kind:'MISSING_FIELD',field:'FULL_NAME'}},
+  scenario={id:'c-20261104-checkout-complete',mode:'JOURNEY',turns:[{}, {latest:'Em lên đơn cho chị nhé.'}],customerPolicy:{selector:'EVALUATOR_CODE_PROOF',branches:[branch],hash:digest([branch])}},
+  value={kind:'MISSING_FIELD',field:'FULL_NAME',stateHash,priorOutcomeHash:digest(terminal),requestId:'r',sourceMessageIdHash:'b'.repeat(64)},w={...value,hash:digest(value)};
+ const chosen=selectCheckoutCustomerTurn(scenario,1,terminal,w,stateHash);
+ assert.equal(chosen.latest,branch.latest);assert.equal(chosen.selection.actor,'EVALUATOR_CODE_PROOF');
+ assert.throws(()=>selectCheckoutCustomerTurn(scenario,1,terminal,w,'c'.repeat(64)),/PROOF/);
+ assert.throws(()=>selectCheckoutCustomerTurn(scenario,1,terminal,{...w,field:'PHONE'},stateHash),/PROOF/);
+ assert.throws(()=>selectCheckoutCustomerTurn(scenario,1,terminal,null,stateHash),/PROOF/);
+});
 test('default turns are recorded as defaults, never claimed as adaptive simulated customers',()=>{
  const s=corpus().scenarios.find(s=>s.mode==='JOURNEY'),terminal={disposition:'SEND_ELIGIBLE',messages:['Chị lấy cỡ nào?'],images:[]},
   selected=selectFrozenCustomerTurn(s,1,terminal);

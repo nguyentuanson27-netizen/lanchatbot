@@ -397,6 +397,13 @@ it("prepares bounded media hints without an extra read, never renews a cached ob
  expect(s.tools.mediaCapabilities!()).toEqual([]);
 });
 
+it("advertises a verified dress closeup without inventing a TOP/SKIRT component binding",async()=>{
+ const s=await setup();s.f.product.images=[{...s.f.product.images[0]!,imageType:"DETAIL",angle:"CLOSEUP",partsVisible:["VAY"],intents:["MATERIAL_CLOSEUP"]}];
+ await s.tools.prepare!();
+ expect(s.tools.mediaCapabilities!()[0]?.queries).toContainEqual({intent:"DETAIL",componentRole:null,color:null,status:"MATCH_AVAILABLE"});
+ expect((await s.tools.invoke({name:"select_product_media",args:{subjectRef:s.f.product.productId,intent:"DETAIL"}})).status).toBe("OK");
+});
+
 it.each([{status:"INVALID"} as const,{status:"VALID",color:"navy",sha256:"a".repeat(64)} as const,{status:"VALID",color:"be",sha256:"b".repeat(64)} as const])("blocks corrupt/conflicting color proof even on a single-color product (%j)",async colorBinding=>{
  const s=await setup();s.f.product.colors=["be"];s.f.product.images[0]!.colorBinding=colorBinding;
  expect(await s.tools.invoke({name:"select_product_media",args:{subjectRef:s.f.product.productId,intent:"BACK",color:"be"}})).toMatchObject({status:"UNAVAILABLE"});

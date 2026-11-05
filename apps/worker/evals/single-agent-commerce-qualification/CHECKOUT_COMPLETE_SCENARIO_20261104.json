@@ -1,0 +1,390 @@
+{
+  "id": "c-20261104-checkout-complete",
+  "mode": "JOURNEY",
+  "family": "NATIVE_COMPLETE_CHECKOUT",
+  "turns": [
+    {
+      "latest": "Chị lấy set váy Thạch Thảo size M nhé.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    {
+      "latest": "Em lên đơn cho chị nhé.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    {
+      "latest": "Em lên đơn cho chị nhé.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    {
+      "latest": "Em lên đơn cho chị nhé.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    {
+      "latest": "Em lên đơn cho chị nhé.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    {
+      "latest": "Em lên đơn cho chị nhé.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    {
+      "latest": "Em lên đơn cho chị nhé.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    }
+  ],
+  "customerPolicy": {
+    "kind": "FROZEN_SCRIPTED_BRANCHES",
+    "selector": "EVALUATOR_CODE_PROOF",
+    "branches": [
+      {
+        "turnIndex": 1,
+        "latest": "Em lên đơn cho chị nhé.",
+        "condition": {
+          "kind": "CART_READY"
+        }
+      },
+      {
+        "turnIndex": 1,
+        "latest": "Mai Anh nhé em.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "FULL_NAME"
+        }
+      },
+      {
+        "turnIndex": 1,
+        "latest": "Số chị 0900000001 nhé.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "PHONE"
+        }
+      },
+      {
+        "turnIndex": 1,
+        "latest": "Gửi chị số 12 đường Số 3, phường An Khánh, TP.HCM.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "ADDRESS"
+        }
+      },
+      {
+        "turnIndex": 1,
+        "latest": "Chị trả tiền khi nhận hàng nhé.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "PAYMENT_METHOD"
+        }
+      },
+      {
+        "turnIndex": 1,
+        "latest": "Đúng rồi, chốt đơn cho chị nhé.",
+        "condition": {
+          "kind": "PREVIEW_READY"
+        }
+      },
+      {
+        "turnIndex": 1,
+        "latest": "Cảm ơn em nhé.",
+        "condition": {
+          "kind": "PURCHASE_CONFIRMED"
+        }
+      },
+      {
+        "turnIndex": 2,
+        "latest": "Em lên đơn cho chị nhé.",
+        "condition": {
+          "kind": "CART_READY"
+        }
+      },
+      {
+        "turnIndex": 2,
+        "latest": "Mai Anh nhé em.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "FULL_NAME"
+        }
+      },
+      {
+        "turnIndex": 2,
+        "latest": "Số chị 0900000001 nhé.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "PHONE"
+        }
+      },
+      {
+        "turnIndex": 2,
+        "latest": "Gửi chị số 12 đường Số 3, phường An Khánh, TP.HCM.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "ADDRESS"
+        }
+      },
+      {
+        "turnIndex": 2,
+        "latest": "Chị trả tiền khi nhận hàng nhé.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "PAYMENT_METHOD"
+        }
+      },
+      {
+        "turnIndex": 2,
+        "latest": "Đúng rồi, chốt đơn cho chị nhé.",
+        "condition": {
+          "kind": "PREVIEW_READY"
+        }
+      },
+      {
+        "turnIndex": 2,
+        "latest": "Cảm ơn em nhé.",
+        "condition": {
+          "kind": "PURCHASE_CONFIRMED"
+        }
+      },
+      {
+        "turnIndex": 3,
+        "latest": "Em lên đơn cho chị nhé.",
+        "condition": {
+          "kind": "CART_READY"
+        }
+      },
+      {
+        "turnIndex": 3,
+        "latest": "Mai Anh nhé em.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "FULL_NAME"
+        }
+      },
+      {
+        "turnIndex": 3,
+        "latest": "Số chị 0900000001 nhé.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "PHONE"
+        }
+      },
+      {
+        "turnIndex": 3,
+        "latest": "Gửi chị số 12 đường Số 3, phường An Khánh, TP.HCM.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "ADDRESS"
+        }
+      },
+      {
+        "turnIndex": 3,
+        "latest": "Chị trả tiền khi nhận hàng nhé.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "PAYMENT_METHOD"
+        }
+      },
+      {
+        "turnIndex": 3,
+        "latest": "Đúng rồi, chốt đơn cho chị nhé.",
+        "condition": {
+          "kind": "PREVIEW_READY"
+        }
+      },
+      {
+        "turnIndex": 3,
+        "latest": "Cảm ơn em nhé.",
+        "condition": {
+          "kind": "PURCHASE_CONFIRMED"
+        }
+      },
+      {
+        "turnIndex": 4,
+        "latest": "Em lên đơn cho chị nhé.",
+        "condition": {
+          "kind": "CART_READY"
+        }
+      },
+      {
+        "turnIndex": 4,
+        "latest": "Mai Anh nhé em.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "FULL_NAME"
+        }
+      },
+      {
+        "turnIndex": 4,
+        "latest": "Số chị 0900000001 nhé.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "PHONE"
+        }
+      },
+      {
+        "turnIndex": 4,
+        "latest": "Gửi chị số 12 đường Số 3, phường An Khánh, TP.HCM.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "ADDRESS"
+        }
+      },
+      {
+        "turnIndex": 4,
+        "latest": "Chị trả tiền khi nhận hàng nhé.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "PAYMENT_METHOD"
+        }
+      },
+      {
+        "turnIndex": 4,
+        "latest": "Đúng rồi, chốt đơn cho chị nhé.",
+        "condition": {
+          "kind": "PREVIEW_READY"
+        }
+      },
+      {
+        "turnIndex": 4,
+        "latest": "Cảm ơn em nhé.",
+        "condition": {
+          "kind": "PURCHASE_CONFIRMED"
+        }
+      },
+      {
+        "turnIndex": 5,
+        "latest": "Em lên đơn cho chị nhé.",
+        "condition": {
+          "kind": "CART_READY"
+        }
+      },
+      {
+        "turnIndex": 5,
+        "latest": "Mai Anh nhé em.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "FULL_NAME"
+        }
+      },
+      {
+        "turnIndex": 5,
+        "latest": "Số chị 0900000001 nhé.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "PHONE"
+        }
+      },
+      {
+        "turnIndex": 5,
+        "latest": "Gửi chị số 12 đường Số 3, phường An Khánh, TP.HCM.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "ADDRESS"
+        }
+      },
+      {
+        "turnIndex": 5,
+        "latest": "Chị trả tiền khi nhận hàng nhé.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "PAYMENT_METHOD"
+        }
+      },
+      {
+        "turnIndex": 5,
+        "latest": "Đúng rồi, chốt đơn cho chị nhé.",
+        "condition": {
+          "kind": "PREVIEW_READY"
+        }
+      },
+      {
+        "turnIndex": 5,
+        "latest": "Cảm ơn em nhé.",
+        "condition": {
+          "kind": "PURCHASE_CONFIRMED"
+        }
+      },
+      {
+        "turnIndex": 6,
+        "latest": "Em lên đơn cho chị nhé.",
+        "condition": {
+          "kind": "CART_READY"
+        }
+      },
+      {
+        "turnIndex": 6,
+        "latest": "Mai Anh nhé em.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "FULL_NAME"
+        }
+      },
+      {
+        "turnIndex": 6,
+        "latest": "Số chị 0900000001 nhé.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "PHONE"
+        }
+      },
+      {
+        "turnIndex": 6,
+        "latest": "Gửi chị số 12 đường Số 3, phường An Khánh, TP.HCM.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "ADDRESS"
+        }
+      },
+      {
+        "turnIndex": 6,
+        "latest": "Chị trả tiền khi nhận hàng nhé.",
+        "condition": {
+          "kind": "MISSING_FIELD",
+          "field": "PAYMENT_METHOD"
+        }
+      },
+      {
+        "turnIndex": 6,
+        "latest": "Đúng rồi, chốt đơn cho chị nhé.",
+        "condition": {
+          "kind": "PREVIEW_READY"
+        }
+      },
+      {
+        "turnIndex": 6,
+        "latest": "Cảm ơn em nhé.",
+        "condition": {
+          "kind": "PURCHASE_CONFIRMED"
+        }
+      }
+    ],
+    "hash": "d337e2f469a3cfaf2bed0662bd581b3d5f1a5114bf6eacaa2393f68dc89ad881"
+  },
+  "nativeCodeOwnedTurns": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ]
+}
