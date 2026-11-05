@@ -33,3 +33,10 @@ New quote path on that same frozen source/clock returns529,000VND including ship
 Fresh source capture, clean runtime seal and independent frozen input review precede model dispatch. Prefix13cases24turns first; material failure stops remainder20cases24turns. Separate full checkout1case7turns only after readiness. No hidden retries, changed denominator or customer-script repair after results.
 
 BE photo binding remains a source gap; ACK need not request optional images. Feedback is an owner-approved catalog test assumption, not verified customer-worn provenance. Native successful purchase may legitimately transfer HUMAN ownership; do not treat stage alone or blanket HANDOFF as a receipt-backed continuation. Keep actual terminal outcome and denominator. No model stability, whole-reply quality or qualification success inferred from test PASS.
+
+
+## Pre-provider input review correction
+
+Independent review caught inherited `CART_COLOR_REQUIRED` classified as shop-data absence. Known stock options exist; this is missing customer choice. Original pending inputs are retained outside source. Conditional later-cart prerequisites now explicitly require an accepted prior customer reply, while first-contact paths still require media; this is evaluator-only source/capability evidence, never runtime send permission or evidence that a reply has occurred. Original33 customer scripts remain unchanged.
+
+The newly added checkout-only script uses plain synthetic name/address when those fields are asked. Earlier conversational wrappers were not accepted by existing private intake; no parser or production flow was expanded to fit the case. Policy/scope hashes change before provider results. Focused source-readiness/diagnostic/branch/terminal tests:35PASS, including observed RED then GREEN for the conditional path. New executable identity and clean initial-state capture are required before dispatch; original frozen world source/clocks remain unchanged and freshness is rechecked at actual time.

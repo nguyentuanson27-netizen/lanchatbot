@@ -66,7 +66,7 @@
       },
       {
         "turnIndex": 1,
-        "latest": "Mai Anh nhé em.",
+        "latest": "Mai Anh",
         "condition": {
           "kind": "MISSING_FIELD",
           "field": "FULL_NAME"
@@ -82,7 +82,7 @@
       },
       {
         "turnIndex": 1,
-        "latest": "Gửi chị số 12 đường Số 3, phường An Khánh, TP.HCM.",
+        "latest": "12 đường Số 3, phường An Khánh, TP.HCM",
         "condition": {
           "kind": "MISSING_FIELD",
           "field": "ADDRESS"
@@ -119,7 +119,7 @@
       },
       {
         "turnIndex": 2,
-        "latest": "Mai Anh nhé em.",
+        "latest": "Mai Anh",
         "condition": {
           "kind": "MISSING_FIELD",
           "field": "FULL_NAME"
@@ -135,7 +135,7 @@
       },
       {
         "turnIndex": 2,
-        "latest": "Gửi chị số 12 đường Số 3, phường An Khánh, TP.HCM.",
+        "latest": "12 đường Số 3, phường An Khánh, TP.HCM",
         "condition": {
           "kind": "MISSING_FIELD",
           "field": "ADDRESS"
@@ -172,7 +172,7 @@
       },
       {
         "turnIndex": 3,
-        "latest": "Mai Anh nhé em.",
+        "latest": "Mai Anh",
         "condition": {
           "kind": "MISSING_FIELD",
           "field": "FULL_NAME"
@@ -188,7 +188,7 @@
       },
       {
         "turnIndex": 3,
-        "latest": "Gửi chị số 12 đường Số 3, phường An Khánh, TP.HCM.",
+        "latest": "12 đường Số 3, phường An Khánh, TP.HCM",
         "condition": {
           "kind": "MISSING_FIELD",
           "field": "ADDRESS"
@@ -225,7 +225,7 @@
       },
       {
         "turnIndex": 4,
-        "latest": "Mai Anh nhé em.",
+        "latest": "Mai Anh",
         "condition": {
           "kind": "MISSING_FIELD",
           "field": "FULL_NAME"
@@ -241,7 +241,7 @@
       },
       {
         "turnIndex": 4,
-        "latest": "Gửi chị số 12 đường Số 3, phường An Khánh, TP.HCM.",
+        "latest": "12 đường Số 3, phường An Khánh, TP.HCM",
         "condition": {
           "kind": "MISSING_FIELD",
           "field": "ADDRESS"
@@ -278,7 +278,7 @@
       },
       {
         "turnIndex": 5,
-        "latest": "Mai Anh nhé em.",
+        "latest": "Mai Anh",
         "condition": {
           "kind": "MISSING_FIELD",
           "field": "FULL_NAME"
@@ -294,7 +294,7 @@
       },
       {
         "turnIndex": 5,
-        "latest": "Gửi chị số 12 đường Số 3, phường An Khánh, TP.HCM.",
+        "latest": "12 đường Số 3, phường An Khánh, TP.HCM",
         "condition": {
           "kind": "MISSING_FIELD",
           "field": "ADDRESS"
@@ -331,7 +331,7 @@
       },
       {
         "turnIndex": 6,
-        "latest": "Mai Anh nhé em.",
+        "latest": "Mai Anh",
         "condition": {
           "kind": "MISSING_FIELD",
           "field": "FULL_NAME"
@@ -347,7 +347,7 @@
       },
       {
         "turnIndex": 6,
-        "latest": "Gửi chị số 12 đường Số 3, phường An Khánh, TP.HCM.",
+        "latest": "12 đường Số 3, phường An Khánh, TP.HCM",
         "condition": {
           "kind": "MISSING_FIELD",
           "field": "ADDRESS"
@@ -376,7 +376,7 @@
         }
       }
     ],
-    "hash": "d337e2f469a3cfaf2bed0662bd581b3d5f1a5114bf6eacaa2393f68dc89ad881"
+    "hash": "6cda5476e594aed0191853467f8bf445b3ee20bc71b7460fb1d6e2cba7e14e8c"
   },
   "nativeCodeOwnedTurns": [
     0,

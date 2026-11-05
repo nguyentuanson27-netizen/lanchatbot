@@ -141,3 +141,15 @@ test('productless acknowledgement/policy needs no invented product, but later di
  scenario.judgeContext.sourceRequirements={kind:'DISCOVERY_POOL',productCodes:[]};await assert.rejects(assertPopulationReadiness(w,{scenarios:[scenario]},commerceNow),/EMPTY_PRODUCT_SCOPE/);
  assert.throws(()=>assertTaskReadinessSpec({...spec,checks:[{facet:'SELECTION',productId:'SM613',offerType:'DIRECT'}]}),/EMPTY_PRODUCT_SCOPE/);
 });
+
+
+test('conditional later-cart prerequisite never stands in for first-contact media readiness',async()=>{
+ const w=world();w.products[0].images=[];
+ const selection={facet:'SELECTION',productId:'SM613',offerType:'DIRECT',size:'M',color:'navy'};
+ const spec={version:3,task:{purpose:'CUSTOMER_INPUT'},cohort:'SALES_READY',checks:[selection],executionPaths:[{kind:'POST_CART',selections:[selection],afterAcceptedReply:true}]};
+ const r=await sourceReadiness(w,spec,commerceNow,OPENING_PRODUCT_MEDIA_RULE);
+ assert.equal(r.executionPaths[0].status,'AVAILABLE');assert.equal(r.executionPaths[0].conditionalOn,'ACCEPTED_PRIOR_CUSTOMER_REPLY');
+ const immediate=structuredClone(spec);delete immediate.executionPaths[0].afterAcceptedReply;
+ await assert.rejects(sourceReadiness(w,immediate,commerceNow,OPENING_PRODUCT_MEDIA_RULE),/SOURCE_READINESS_BLOCKED/);
+ for(const value of [false,'true',1]){const forged=structuredClone(spec);forged.executionPaths[0].afterAcceptedReply=value;await assert.rejects(sourceReadiness(w,forged,commerceNow,OPENING_PRODUCT_MEDIA_RULE),/EXECUTION_PATH/);}
+});

@@ -9,7 +9,7 @@
   "maximumOwnerGenerationsPerNativeTurn": 3,
   "maximumVerifierGenerationsPerTurn": 1,
   "generationRetry": 0,
-  "customerScriptsHash": "9e6fe3b99b4824cb6105ee113041a8f3bba9043372876025cea6912954db4895",
+  "customerScriptsHash": "32547850ae2097a8aca1a7292bbdd042ea0a23bcea0add65588043df0c992455",
   "cases": [
     {
       "sourceCase": "c-20261104-checkout-complete",

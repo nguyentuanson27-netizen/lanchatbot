@@ -20,7 +20,8 @@ export async function openingExecutionReadiness(world,paths,at,rule={version:'FI
    searchText:async()=>{throw Error('C_EXECUTION_SEARCH_NOT_REGISTERED');}}};
  const results=[];
  for(const path of paths){
-  assert(path&&['POST_CART','DISCOVERY'].includes(path.kind)&&Object.keys(path).every(k=>['kind','selections','productIds'].includes(k)),'C_EXECUTION_PATH');
+  assert(path&&['POST_CART','DISCOVERY'].includes(path.kind)&&Object.keys(path).every(k=>['kind','selections','productIds','afterAcceptedReply'].includes(k)),'C_EXECUTION_PATH');
+  assert(path.afterAcceptedReply===undefined||path.kind==='POST_CART'&&path.afterAcceptedReply===true,'C_EXECUTION_PATH_CONDITION');
   let units=0;const control={get maxCalls(){return 6-units;},onDispatch(){assert(units<6,'C_EXECUTION_BUDGET');units++;}};
   try{
    if(path.kind==='POST_CART'){
@@ -35,8 +36,8 @@ export async function openingExecutionReadiness(world,paths,at,rule={version:'FI
     // An unsent prerequisite cart with real source lines; shipping has not been quoted.
     const cart=CartV1Schema.parse({schemaVersion:1,cartId:uuid(4),salesEpisodeId:uuid(5),customerProfileId:uuid(6),revision:1,currency:'VND',status:'OPEN',
      checkoutEligibility:'BLOCKED_MISSING_SHIPPING_FEE',lines,adjustments:[],shippingFeeVnd:null,subtotalVnd:lines.reduce((n,l)=>n+l.lineTotalVnd,0),discountTotalVnd:0,grandTotalVnd:null,createdAt:at.toISOString(),updatedAt:at.toISOString()});
-    const media=await prepareCheckoutMedia({cart,scope,clock:()=>at,firstContact:true,control,read,media:{allowedHostSuffixes:hosts}});
-    assert(media.images.length>0,'C_EXECUTION_MEDIA');
+    const media=await prepareCheckoutMedia({cart,scope,clock:()=>at,firstContact:path.afterAcceptedReply===true?false:true,control,read,media:{allowedHostSuffixes:hosts}});
+    assert(path.afterAcceptedReply===true?media.images.length===0:media.images.length>0,'C_EXECUTION_MEDIA');
    }else{
     assert(Array.isArray(path.productIds)&&path.productIds.length>0&&path.productIds.length<=4&&new Set(path.productIds).size===path.productIds.length&&!path.selections,'C_EXECUTION_DISCOVERY');
     const products=path.productIds.map(id=>world.products.find(p=>p.productId===id));assert(products.every(Boolean),'C_EXECUTION_SOURCE');
@@ -44,7 +45,7 @@ export async function openingExecutionReadiness(world,paths,at,rule={version:'FI
     const work=await tools.prepareOpeningMedia(control);assert(['READY','NOT_REQUIRED'].includes(work.status),'C_EXECUTION_MEDIA');
     assert.equal(tools.openingMediaReady(await tools.readback(),tools.mediaSelection()),true);
    }
-   results.push({path:structuredClone(path),status:'AVAILABLE',chargedUnits:units,reason:null});
+   results.push({path:structuredClone(path),status:'AVAILABLE',chargedUnits:units,reason:null,...(path.afterAcceptedReply?{conditionalOn:'ACCEPTED_PRIOR_CUSTOMER_REPLY'}:{})});
   }catch{results.push({path:structuredClone(path),status:'FAILED',chargedUnits:units,reason:'EXECUTION_PREREQUISITE_UNAVAILABLE'});}
  }
  return results;
