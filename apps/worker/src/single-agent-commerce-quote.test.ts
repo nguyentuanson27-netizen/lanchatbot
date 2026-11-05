@@ -7,7 +7,7 @@ import type {HandoffAuthority} from "./single-agent-commerce-handoff.js";
 import {makeBinding,finalGate} from "./single-agent-semantic-verifier-boundary.js";
 
 const config={version:"EXPLICIT_QUOTE_V1",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:2,standalone:true,maxPerTurn:1} as const;
-async function setup(enabled=true){
+async function setup(enabled=true,firstContact:boolean|null=true){
  const scope=commerceScope(),f=fixtureProduct();
  f.product.images=[{url:"https://content.pancake.vn/front.jpg",role:"PRIMARY",angle:"FRONT",imageType:"MODEL",intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
  const readProduct=vi.fn(async()=>f);
@@ -16,7 +16,7 @@ async function setup(enabled=true){
   rules:(["PRICE_UNAVAILABLE","DEPENDENCY_FAILURE"] as const).map(reason=>({reason,customerMessagePolicy:"SILENT_HANDOFF" as const,holdingReply:null,tag:"NHAN_VIEN" as const}))}}};
  let authority:HandoffAuthority={...scope,fence:1,stateVersion:scope.revision,state:{...createConversationState({conversationId:scope.conversationId,routingOwner:"APP",now:commerceNow}),revision:scope.revision}};
  const readPolicy=vi.fn(fixturePolicy);
- const tools=await createCommerceTools({read:{scope,clock:()=>commerceNow,entry:{firstContact:true,fromAd:false},initialProducts:[f.product],policy:readPolicy,
+ const tools=await createCommerceTools({read:{scope,clock:()=>commerceNow,entry:{firstContact,fromAd:false},initialProducts:[f.product],policy:readPolicy,
   catalog:{readProduct,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}},
   media:{allowedHostSuffixes:["pancake.vn"]},handoff:{read:async()=>structuredClone(authority),commit:vi.fn(async change=>{authority=structuredClone(change.next);return true;}),policy:async()=>policy},
   ...(enabled?{quoteTask:config}:{})} as Parameters<typeof createCommerceTools>[0]);
@@ -24,8 +24,8 @@ async function setup(enabled=true){
 }
 const quote={name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"]}};
 describe("explicit quote operation",()=>{
- it("blocks an old verifier pass when quote policy changes and at strict price expiry",async()=>{
-  const s=await setup();await s.tools.prepare!();
+ it.each([true,false])("blocks an old verifier pass on changed policy or expired quote, firstContact=%s",async firstContact=>{
+  const s=await setup(true,firstContact);await s.tools.prepare!();
   await s.tools.invoke({...quote,args:{...quote.args,quantity:2,deliveryRegion:"MIEN-NAM"}});
   const text="Hai áo cả ship chị nhé.",before=s.tools.snapshot(),expected=makeBinding("quote-test",text,before),response={kind:"VERDICT" as const,binding:expected,result:{verdict:"PASS",violations:[]}};
   expect(finalGate({expected,response,current:before,finalDraft:text,now:commerceNow}).disposition).toBe("SEND_ELIGIBLE");
@@ -61,10 +61,33 @@ describe("explicit quote operation",()=>{
   const s=await setup();await s.tools.prepare!();s.readProduct.mockClear();
   expect((await s.tools.invoke({name:"quote_product",args})).status).toBe("REJECTED");expect(s.readProduct).not.toHaveBeenCalled();
  });
- it.each([false,null])("does not expose quote to non-first contact %s",async firstContact=>{
-  const s=await setup();const {withExplicitQuoteTask}=await import("./single-agent-commerce-quote.js");
-  const t=withExplicitQuoteTask({...s.tools,availableTools:s.tools.availableTools!.filter(n=>n!=="quote_product")},s.scope,firstContact);
-  expect(t.availableTools).not.toContain("quote_product");expect((await t.invoke(quote)).status).toBe("REJECTED");expect(s.readProduct).not.toHaveBeenCalled();
+ it("does not expose quote when prior contact is unknown",async()=>{
+  const s=await setup(true,null);expect(s.tools.availableTools).not.toContain("quote_product");
+  expect((await s.tools.invoke(quote)).status).toBe("REJECTED");expect(s.readProduct).not.toHaveBeenCalled();
+ });
+ it("returning customer can obtain a quantity total without colour, cart or another image",async()=>{
+  const s=await setup(true,false);s.f.product.images=[];await s.tools.prepare!();
+  expect(s.tools.availableTools).toContain("quote_product");
+  const before=s.tools.snapshot(),r=await s.tools.invoke({...quote,args:{...quote.args,quantity:2}});
+  expect(r).toMatchObject({status:"OK",data:{preCartQuote:{quantity:2,subtotalVnd:998000,discountTotalVnd:49900,shippingFeeVnd:25000,grandTotalVnd:973100}}});
+  expect((r.data as Record<string,unknown>).media).toBeUndefined();expect(s.tools.mediaSelection!()).toEqual([]);
+  const {factSnapshotVersion:_beforeRead,...businessBefore}=before.state,{factSnapshotVersion:_afterRead,...businessAfter}=s.tools.snapshot().state;
+  expect(businessAfter).toEqual(businessBefore);expect(s.tools.snapshot().effectReceipts).toEqual(before.effectReceipts);
+  expect(s.tools.quoteTaskWork!()).toEqual([{reservedUnits:2,readInvocations:1,selectionInvocations:0}]);
+  expect((await s.tools.readback()).policyLiterals.some(p=>p.ref.startsWith("pre-cart-quote:"))).toBe(true);
+ });
+ it("follow-up quantity quote reaches final verifier with current total and no mutation or image",async()=>{
+  const s=await setup(true,false);s.f.product.images=[];let n=0;
+  const call={...quote,args:{...quote.args,quantity:2}},verifier=vi.fn(async()=>({result:{verdict:"PASS",violations:[]}}));
+  const r=await runCommerceTurn({scope:s.scope,tools:s.tools,clock:()=>commerceNow,latest:"Em báo tổng cả phí ship nhé.",history:[{role:"customer",text:"Chị lấy hai áo, một M một L."},{role:"shop",text:"Chị lấy màu nào ạ?"}],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",verifier,
+   owner:async request=>{expect(request.availableTools).toContain("quote_product");return ++n===1?{kind:"TOOLS",calls:[call],content:{role:"model",parts:[{functionCall:call}]}}:{kind:"FINAL",text:"Hai áo cả ship là 973.100đ chị nhé."};}});
+  expect(r).toMatchObject({terminal:{disposition:"SEND_ELIGIBLE"},ownerGenerations:2,verifierGenerations:1,normalToolCalls:3,executedNormalToolInvocations:2});
+  expect(verifier).toHaveBeenCalledOnce();expect(s.tools.snapshot().effectReceipts).toHaveLength(0);expect(s.tools.snapshot().state.cartQuote).toBeUndefined();
+  const proof=s.tools.snapshot().policyLiterals.find(p=>p.ref.startsWith("pre-cart-quote:"));expect(proof).toBeDefined();expect(JSON.parse(proof!.text).grandTotalVnd).toBe(973100);
+ });
+ it.each([{...quote.args},{...quote.args,deliveryRegion:"MIEN-NAM"},{subjectRef:"SM613",offerTypes:["DIRECT","AO"],quantity:2}])("returning quotes require explicit quantity and exactly one offer before reading: %j",async args=>{
+  const s=await setup(true,false);await s.tools.prepare!();s.readProduct.mockClear();
+  expect((await s.tools.invoke({name:"quote_product",args})).reason).toBe("QUOTE_ARGUMENTS_OR_REF");expect(s.readProduct).not.toHaveBeenCalled();
  });
  it.each(["price","media"])("hands off silently on required %s failure and accounts partial execution",async mode=>{
   const s=await setup();await s.tools.prepare!();
@@ -101,5 +124,23 @@ describe("explicit quote operation",()=>{
   expect(result.executedNormalToolInvocations).toBe(name==="read_product"?2:1);
   expect(s.tools.primitiveToolInvocations!()).toBe(name==="read_product"?1:0);
   if(name==="quote_product")expect(result.quoteTaskWork).toEqual([{reservedUnits:2,readInvocations:0,selectionInvocations:0}]);
+ });
+});
+
+
+describe("returning total source and budget boundaries",()=>{
+ it("keeps a missing current price fail-closed without fabricating a total",async()=>{
+  const s=await setup(true,false);await s.tools.prepare!();s.f.snapshot=null as never;
+  const r=await s.tools.invoke({...quote,args:{...quote.args,quantity:2}});
+  expect(r.status).not.toBe("OK");expect(s.tools.snapshot().policyLiterals.some(p=>p.ref.startsWith("pre-cart-quote:"))).toBe(false);
+  expect(s.tools.snapshot().effectReceipts).toHaveLength(0);expect(s.tools.quoteTaskWork!()).toEqual([{reservedUnits:2,readInvocations:1,selectionInvocations:0}]);
+ });
+ it.each([3,4])("reserves the same two units for a returning quote after %s reads",async prior=>{
+  const s=await setup(true,false);let n=0;const verifier=vi.fn(async()=>({result:{verdict:"PASS",violations:[]}}));
+  const call={...quote,args:{...quote.args,quantity:2}};
+  const r=await runCommerceTurn({scope:s.scope,tools:s.tools,clock:()=>commerceNow,latest:"Hai áo cả ship bao nhiêu?",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",verifier,
+   owner:async()=>++n===1?{kind:"TOOLS",calls:Array.from({length:prior},()=>({name:"read_policy",args:{}})),content:{role:"model",parts:[]}}:n===2?{kind:"TOOLS",calls:[call],content:{role:"model",parts:[{functionCall:call}]}}:{kind:"FINAL",text:"Hai áo cả ship 973.100đ chị nhé."}});
+  if(prior===3){expect(r).toMatchObject({terminal:{disposition:"SEND_ELIGIBLE"},normalToolCalls:6,executedNormalToolInvocations:5});expect(verifier).toHaveBeenCalledOnce();}
+  else{expect(r.recovery?.originalReason).toBe("BUDGET");expect(s.tools.quoteTaskWork!()).toEqual([]);expect(verifier).not.toHaveBeenCalled();}
  });
 });

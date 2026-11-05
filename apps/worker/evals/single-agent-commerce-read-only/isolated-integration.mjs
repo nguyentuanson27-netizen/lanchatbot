@@ -1,3 +1,4 @@
+import {EXPLICIT_QUOTE_TASK} from '../../dist/single-agent-commerce-quote.js';
 import {OPENING_PRODUCT_MEDIA_RULE} from '../../dist/single-agent-commerce-opening-media.js';
 // Evaluation-only real PostgreSQL: synthetic inputs by default; explicit provider mode uses live public sources.
 // Delivery is always an in-memory capture transport, never a live customer effect.
@@ -682,6 +683,22 @@ try{
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+ await check('C follow-up quote reads a total without colour or cart and delivers text once after restart',async()=>{
+  assert(!providerRun&&!phaseC&&!phaseCInitial,'FOLLOW_UP_QUOTE_SYNTHETIC_ONLY');
+  const j=await statefulFixture();await j.turn('Chị lấy hai áo, một M một L.',[say('Chị lấy màu nào ạ?')]);await j.drain();
+  const before=await j.state(),capturedBefore=j.capture.length;let proof,text;
+  const call={name:'quote_product',args:{subjectRef:'SM613',offerTypes:['DIRECT'],quantity:2}};
+  const result=await j.turn('Em báo tổng cả phí ship cho chị nhé.',[native([call]),request=>{
+   const p=request.context.policyLiterals.find(p=>p.ref.startsWith('pre-cart-quote:'));assert(p,'CURRENT_TOTAL_PROOF_REQUIRED');proof=JSON.parse(p.text);
+   assert.equal(proof.quantity,2);assert.equal(proof.subtotalVnd,998000);assert(Number.isSafeInteger(proof.grandTotalVnd));
+   text=`Hai áo cả ship là ${proof.grandTotalVnd.toLocaleString('vi-VN')}đ chị nhé.`;return say(text);
+  }],{testQuoteTask:EXPLICIT_QUOTE_TASK,testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE,inspect:request=>assert(request.availableTools.includes('quote_product'))});
+  assert.equal(result.result.terminal.disposition,'SEND_ELIGIBLE');assert.equal(result.verifiers,1);assert.equal(result.result.normalToolCalls,3);assert.equal(result.result.executedNormalToolInvocations,2);
+  assert.deepEqual(result.result.quoteTaskWork,[{reservedUnits:2,readInvocations:1,selectionInvocations:0}]);
+  const after=await j.state();assert.equal(after.cart,null);assert.deepEqual(after.processedCommandIds,before.processedCommandIds);assert.equal(after.checkoutDraft,null);
+  j.restartDelivery();await j.drain();assert.deepEqual(j.capture.slice(capturedBefore),[text]);assert(!j.capturePayloads.slice(capturedBefore).some(p=>p.attachment));
+  await j.drain();assert.deepEqual(j.capture.slice(capturedBefore),[text]);
+ });
  await check('C target repair component fits reach durable accepted group and restart delivery',async()=>{
   const j=await statefulFixture({componentFit:true,media:true});
   const ops=[{op:'SET',field:'measurements.HEIGHT_CM',value:160,sourceQuote:'160'},{op:'SET',field:'measurements.WEIGHT_KG',value:55,sourceQuote:'55'}];

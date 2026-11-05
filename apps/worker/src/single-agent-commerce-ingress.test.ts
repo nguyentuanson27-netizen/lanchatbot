@@ -1346,3 +1346,18 @@ it('expiry while preparing a code-owned preview is a known SOURCE failure before
  f.message.text='Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD';const r=await f.run(vi.fn(),undefined,undefined,undefined,openingRule);
  expect(r.enqueued).toBe(0);expect('privateCheckoutFailure' in r&&r.privateCheckoutFailure?.stage).toBe('SOURCE');expect(f.commit.mock.calls.every(c=>!c[1].metaPlan)).toBe(true);expect(f.cycle().stage).toBe('CART_OPEN');
 });
+
+
+it.each(["unchanged","revision"])("returning total before colour selection reaches native egress without a cart or another image: %s",async mode=>{
+ const {EXPLICIT_QUOTE_TASK}=await import("./single-agent-commerce-quote.js");const f=openingFixture(false);
+ (f.history as unknown as {hasPriorAcceptedShopOutput:ReturnType<typeof vi.fn>}).hasPriorAcceptedShopOutput.mockResolvedValue(true);
+ f.history.listConversationHistory.mockResolvedValue([{direction:"INBOUND",senderType:"CUSTOMER",text:"Chị lấy hai áo, một M một L."},{direction:"OUTBOUND",senderType:"BOT",text:"Chị lấy màu nào ạ?"}]);
+ f.message.text="Em báo tổng cả phí ship cho chị nhé.";let n=0;
+ f.verifier.mockImplementation(async()=>{if(mode==="revision")f.changeRevision();return {result:{verdict:"PASS",violations:[]}};});
+ const call={name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity:2}},text="Hai áo cả ship là 973.100đ chị nhé.";
+ const result=await f.run(async request=>{expect(request.availableTools).toContain("quote_product");return ++n===1?{kind:"TOOLS",calls:[call],content:{role:"model",parts:[{functionCall:call}]}}:{kind:"FINAL",text};},undefined,EXPLICIT_QUOTE_TASK,undefined,openingRule);
+ const messages=f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[]);
+ if(mode==="unchanged"){expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(messages).toEqual([{kind:"TEXT",text}]);expect(f.cycle().cart).toBeNull();expect(f.cycle().checkoutDraft).toBeNull();expect(f.cycle().confirmation).toBeNull();}
+ else{expect(result.terminal.disposition).toBe("NO_SEND");expect(messages).toEqual([]);}
+ expect(f.verifier).toHaveBeenCalledOnce();expect(f.select).not.toHaveBeenCalled();
+});

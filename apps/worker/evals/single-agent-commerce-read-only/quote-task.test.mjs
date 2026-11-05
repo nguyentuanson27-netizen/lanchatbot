@@ -56,3 +56,16 @@ test('registered tool schema includes quote only when enabled, and binds its exa
  assert.equal(statefulToolSchemaHash({}),statefulToolSchemaHash({},changed));
  assert.notEqual(statefulToolSchemaHash({}),statefulToolSchemaHash({quoteTask:EXPLICIT_QUOTE_TASK}));
 });
+
+
+test('returning quote wire requires quantity for one offer and keeps the code total without media or evaluator labels',async()=>{
+ const r=await request();r.ownerContextPresentation='VI_DATA_BLOCKS_COMPACT_V2';
+ const entry=r.context.policyLiterals.find(p=>p.ref==='conversation-entry');entry.text=JSON.stringify({firstContact:false,fromAd:false});
+ const data=r.contents.at(-1).parts[0].functionResponse.response.data;delete data.media;
+ data.preCartQuote={kind:'PRE_CART_TOTAL_V1',subjectRef:'SM613',offerType:'DIRECT',quantity:2,subtotalVnd:998000,shippingFeeVnd:25000,discountTotalVnd:49900,grandTotalVnd:973100};
+ let body;
+ await createGeminiCommerceInference({model:'gemini-3.5-flash-lite',effort:'high',projectId:'test-project',location:'global'},{getToken:async()=>'mock-token',fetchImpl:async(_url,init)=>{body=JSON.parse(init.body);return new Response(JSON.stringify({modelVersion:'gemini-3.5-flash-lite',candidates:[{finishReason:'STOP',content:{role:'model',parts:[{text:'Hai áo cả ship là 973.100đ chị nhé.'}]}}]}));}})(r);
+ const d=body.tools[0].functionDeclarations.find(d=>d.name==='quote_product');assert.deepEqual(d.parametersJsonSchema.required,['subjectRef','offerTypes','quantity']);assert.equal(d.parametersJsonSchema.properties.offerTypes.maxItems,1);
+ const result=body.contents.at(-1).parts[0].functionResponse.response.data;assert.deepEqual(result.preCartQuote,data.preCartQuote);assert(!Object.hasOwn(result,'media'));assert(!JSON.stringify(body).includes('EVAL_ONLY'));
+ assert.deepEqual(body.contents.at(-2),r.contents.at(-2));
+});

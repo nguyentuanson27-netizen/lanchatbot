@@ -43,7 +43,11 @@ export function withExplicitQuoteTask(base:CommerceTools,scope:CommerceScope,fir
   return evidence;
  }
  const withQuote=(current:ReturnType<CommerceTools["snapshot"]>)=>quoteLiteral?{...current,policyLiterals:[...current.policyLiterals,quoteLiteral]}:current;
- if(firstContact===true&&["read_product","select_product_media","request_handoff"].every(n=>availableTools.includes(n)))availableTools.push("quote_product");
+ // Returning totals reuse the same bounded read/policy calculation, without
+ // turning a later price question into another opening image task.
+ const opening=firstContact===true,followUp=firstContact===false&&!!policy;
+ if(["read_product","request_handoff"].every(n=>availableTools.includes(n))&&
+  (opening&&availableTools.includes("select_product_media")||followUp))availableTools.push("quote_product");
  const reject=(reason:string):CommerceToolResult=>({status:"REJECTED",reason});
  const fail=async(reason:string):Promise<CommerceToolResult>=>{
   if(!base.handoffStatus?.())await base.invoke({name:"request_handoff",args:{reason}});
@@ -62,7 +66,8 @@ export function withExplicitQuoteTask(base:CommerceTools,scope:CommerceScope,fir
    (a.color!==undefined&&(typeof a.color!=="string"||!a.color.trim()||Buffer.byteLength(a.color)>64))||
    (a.quantity!==undefined&&(!Number.isInteger(a.quantity)||Number(a.quantity)<1||Number(a.quantity)>100))||
    (a.deliveryRegion!==undefined&&(typeof a.deliveryRegion!=="string"||!a.deliveryRegion.trim()||Buffer.byteLength(a.deliveryRegion)>128))||
-   ((a.quantity!==undefined||a.deliveryRegion!==undefined)&&(a.offerTypes.length!==1||!policy)))return reject("QUOTE_ARGUMENTS_OR_REF");
+   ((a.quantity!==undefined||a.deliveryRegion!==undefined)&&(a.offerTypes.length!==1||!policy))||
+   (!opening&&(a.quantity===undefined||a.offerTypes.length!==1)))return reject("QUOTE_ARGUMENTS_OR_REF");
   const literal=context.policyLiterals.find(p=>p.ref===`offers:${a.subjectRef}`);
   let offers:unknown;
   try{offers=literal?JSON.parse(literal.text).availableOffers:null;}catch{return reject("QUOTE_OFFERS_UNVERIFIED");}
@@ -81,14 +86,17 @@ export function withExplicitQuoteTask(base:CommerceTools,scope:CommerceScope,fir
    const matches=options.filter(o=>o.offerType===offer),o=matches[0],prices=o?.facts?.filter(f=>f.type==="PRICE")??[];
    return matches.length!==1||o?.availability?.price?.status!=="OK"||prices.length!==1||!(current.protectedClaims as ProtectedClaimV1[]).some(c=>c.type==="PRICE"&&commerceHash({scope:c.scope,value:c.value})===commerceHash({scope:prices[0]!.scope,value:prices[0]!.value}));
   }))return fail("PRICE_UNAVAILABLE");
-  const media=await invoke("select_product_media",{subjectRef:a.subjectRef,intent:"GENERIC",...(a.color!==undefined?{color:a.color}:{})});
-  if(media.status!=="OK"||!media.data||typeof media.data!=="object"){await fail("DEPENDENCY_FAILURE");return media;}
-  const m=media.data as Record<string,unknown>;
-  if(m.subjectRef!==a.subjectRef||!Array.isArray(m.assets)||!m.assets.length)return fail("DEPENDENCY_FAILURE");
+  let m:Record<string,unknown>|null=null;
+  if(opening){
+   const media=await invoke("select_product_media",{subjectRef:a.subjectRef,intent:"GENERIC",...(a.color!==undefined?{color:a.color}:{})});
+   if(media.status!=="OK"||!media.data||typeof media.data!=="object"){await fail("DEPENDENCY_FAILURE");return media;}
+   m=media.data as Record<string,unknown>;
+   if(m.subjectRef!==a.subjectRef||!Array.isArray(m.assets)||!m.assets.length)return fail("DEPENDENCY_FAILURE");
+  }
   let preCartQuote:unknown=null;
   if(a.quantity!==undefined||a.deliveryRegion!==undefined){quoteRequest={subjectRef:a.subjectRef,offerType:offerTypes[0]!,quantity:Number(a.quantity??1),deliveryRegion:typeof a.deliveryRegion==="string"?a.deliveryRegion:null};
    preCartQuote=await total(base.snapshot());if(!preCartQuote)return fail("PRICE_UNAVAILABLE");}
-  return {status:"OK",data:{...data,quoteTaskStatus:"PREPARED_PENDING_FINAL_GATE",media:{...m},...(preCartQuote?{preCartQuote}:{})}};
+  return {status:"OK",data:{...data,quoteTaskStatus:"PREPARED_PENDING_FINAL_GATE",...(m?{media:{...m}}:{}),...(preCartQuote?{preCartQuote}:{})}};
  }
  return {...base,availableTools,toolWorkAccounting:"PRIMITIVE_WORK_V2",quoteTaskWork:()=>structuredClone(work),
   snapshot:()=>withQuote(base.snapshot()),readback:async()=>{const current=await base.readback();if(quoteRequest){quoteLiteral=null;await total(current);}return withQuote(current);},
