@@ -931,3 +931,39 @@ it.each(["empty", "unknown", "size-filter", "stale"])("does not expand confirmed
     if (mode !== "size-filter") expect(data.openingQuote?.text).not.toContain("Size:");
   }
 });
+
+
+describe("logical purchase composition",()=>{
+ const composition=async(rows:unknown[])=>{
+  const f=fixtureProduct();f.snapshot.offers.DIRECT!.rows=rows as NonNullable<typeof f.snapshot.offers.DIRECT>["rows"];
+  const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,initialProducts:[f.product],policy:fixturePolicy,
+   catalog:{readProduct:async()=>f,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+  await tools.prepare();const literal=tools.snapshot().policyLiterals.find(p=>p.ref==="offers:SM613")!;
+  return JSON.parse(literal.text).purchaseOptions[0].componentSource;
+ };
+ const row=()=>structuredClone(fixtureProduct().snapshot.offers.DIRECT!.rows[0]!);
+ const c=(sku:string,quantity:unknown=1)=>({product_sku:sku,quantity});
+ it("compares order-independent quantities without dropping duplicate SKUs",async()=>{
+  const a={...row(),components:[c("A-AO"),c("B-QUAN"),c("B-QUAN")]};
+  const b={...row(),size:"L",components:[c("B-QUAN",2),c("A-AO")]};
+  const r=await composition([a,b]);expect(r.status).toBe("AVAILABLE");
+  expect(r.components).toEqual([{componentRef:"A-AO",role:"TOP",quantity:1},{componentRef:"B-QUAN",role:"PANTS",quantity:2}]);
+  expect((await composition([a,{...b,components:[c("B-QUAN"),c("A-AO")]}])).status).toBe("VARIANT_DEPENDENT");
+ });
+ it.each([undefined,0,-1,1.5,Number.MAX_SAFE_INTEGER+1])("does not invent a component quantity for %s",async quantity=>{
+  const r=await composition([{...row(),components:[{product_sku:"A-AO",...(quantity===undefined?{}:{quantity})}]}]);
+  expect(r.status).toBe("INCOMPLETE_SOURCE");expect(r.components).toEqual([]);
+ });
+ it("rejects overbound source rather than expanding quantity",async()=>{
+  expect((await composition([{...row(),components:[c("A-AO",21)]}])).status).toBe("BOUND_EXCEEDED");
+ });
+});
+
+
+it.each([null,"invalid",{product_sku:"A-AO",quantity:1}])("explicit malformed BOM does not become a legacy one-item composition (%j)",async components=>{
+ const f=fixtureProduct();f.snapshot.offers.DIRECT!.rows[0]!.components=components;
+ f.snapshot.offers.DIRECT!.rows[0]!.component_1_sku="A-AO";
+ const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,initialProducts:[f.product],policy:fixturePolicy,catalog:{readProduct:async()=>f,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
+ await tools.prepare();const literal=tools.snapshot().policyLiterals.find(p=>p.ref==="offers:SM613")!;
+ expect(JSON.parse(literal.text).purchaseOptions[0].componentSource).toMatchObject({status:"INCOMPLETE_SOURCE",components:[]});
+});
