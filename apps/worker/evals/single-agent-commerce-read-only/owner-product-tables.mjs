@@ -112,8 +112,9 @@ export function compactSelectionResult(data,products){
  assert(!Object.hasOwn(data,'selectionEvidenceFromProduct')&&!Object.hasOwn(data,'selectionOptionsFromEvidence'),'SELECTION_RESULT_REFERENCE');
  const out=structuredClone(data),e=data.selectionEvidence;
  if(!e||!validSelectionEvidence(e,e.productId,new Date(e.observedAt)))return out;
- const matches=products.filter(p=>p.subjectRef===e.productId).flatMap(p=>(p.selectionEvidence??[]).filter(v=>same(v,e)));
- if(matches.length!==1)return out;
+ const matches=products.filter(p=>p.subjectRef===e.productId).flatMap(p=>(p.selectionEvidence??[]).filter(v=>v.contentHash===e.contentHash));
+ if(!matches.length)return out;
+ assert(matches.length===1&&same(matches[0],e),'SELECTION_RESULT_REFERENCE');
  assert(!Object.hasOwn(out,'selectionEvidenceFromProduct')&&!Object.hasOwn(out,'selectionOptionsFromEvidence'),'SELECTION_RESULT_REFERENCE');
  delete out.selectionEvidence;out.selectionEvidenceFromProduct={subjectRef:e.productId,contentHash:e.contentHash};
  if(same(data.selectionOptions,expandSelectionOptions(e))){delete out.selectionOptions;out.selectionOptionsFromEvidence=true;}

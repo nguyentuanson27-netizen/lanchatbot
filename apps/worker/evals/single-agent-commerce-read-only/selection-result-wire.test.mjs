@@ -29,3 +29,9 @@ test('quantity-bearing logical components preserve multiplicity across owner pro
  const products=['P1','P2'].map(subjectRef=>({subjectRef,purchaseOptions:[{offerType:'SET',componentSource:{status:'AVAILABLE',completeness:'INSPECTED_ROWS',components:[component]}}]}));
  assert.deepEqual(expandOwnerProducts(compactOwnerProducts(products)),products);
 });
+
+
+test('a conflicting dictionary cannot emit an ambiguous same-body reference',()=>{
+ const {data,products}=fixture();products[0].selectionEvidence.push({...data.selectionEvidence,sourceVersion:'forged-same-hash'});
+ assert.throws(()=>compactSelectionResult(data,products),/SELECTION_RESULT_REFERENCE/);
+});
