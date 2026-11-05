@@ -182,7 +182,7 @@ export function catalogComponentRole(value: string): ProductComponentRole {
   return "OTHER";
 }
 
-function offerKind(value: string, componentCount: number): CartLineV1["offerKind"] {
+export function offerKind(value: string, componentCount: number): CartLineV1["offerKind"] {
   const normalized = normalizeCatalogToken(value);
   if (normalized === "COMBO_3" || componentCount === 3) return "COMBO_3";
   if (/^(?:SET|COMPOSITE)/u.test(normalized) || componentCount > 1) return "SET";

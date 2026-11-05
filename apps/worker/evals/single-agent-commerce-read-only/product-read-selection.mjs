@@ -5,7 +5,8 @@ export function decodeProductRead(a){
  const selection=productReadSelections.includes(a.selection)?a.selection:'INVALID';
  const fail=field=>({ok:false,diagnostic:{field,selection,fieldPresent:field==='UNKNOWN_FIELD'||own(a,field),fieldType:
   field==='UNKNOWN_FIELD'?'OTHER':!own(a,field)?'MISSING':a[field]===null?'NULL':Array.isArray(a[field])?'ARRAY':typeof a[field]==='string'?'STRING':'OTHER'}});
- if(Object.keys(a).some(k=>!['subjectRef','selection','offerType','offerTypes','color','size','deliveryRegion'].includes(k)))return fail('UNKNOWN_FIELD');
+ if(Object.keys(a).some(k=>!['subjectRef','selection','offerType','offerTypes','color','size','deliveryRegion','customerSelected'].includes(k)))return fail('UNKNOWN_FIELD');
+ if(own(a,'customerSelected')&&(a.customerSelected!==true||selection!=='SINGLE'))return fail('customerSelected');
  if(!text(a.subjectRef,128))return fail('subjectRef');
  for(const [k,max]of [['color',64],['size',16],['deliveryRegion',64]])if(own(a,k)&&a[k]!==null&&!text(a[k],max))return fail(k);
  const {selection:_selection,...args}=a;

@@ -162,6 +162,7 @@ export async function createCommerceTools(input: {
     }
   };
   let final:CommerceTools=guarded;
-  if(input.quoteTask!==undefined){validateQuoteTask(input.quoteTask);final=withExplicitQuoteTask(final,scope,input.read.entry?.firstContact??null);}
+  if(input.quoteTask!==undefined){validateQuoteTask(input.quoteTask);final=withExplicitQuoteTask(final,scope,input.read.entry?.firstContact??null,
+    async()=>{const p=await input.read.policy();if(!p.bundle)throw Error("POLICY_UNAVAILABLE");return p.bundle.policy;},clock);}
   return input.openingMediaRule?withOpeningProductMedia(final,{rule:input.openingMediaRule,scope,clock,firstContact:input.read.entry?.firstContact??null,codeOutputSupported:input.openingCheckoutMedia===true}):final;
 }

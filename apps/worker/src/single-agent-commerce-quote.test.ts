@@ -4,6 +4,7 @@ import {runCommerceTurn,type OwnerGeneration} from "./single-agent-commerce-read
 import {commerceNow,commerceScope,fixturePolicy,fixtureProduct} from "./single-agent-commerce.test-support.js";
 import {createConversationState} from "@lana/conversation-engine";
 import type {HandoffAuthority} from "./single-agent-commerce-handoff.js";
+import {makeBinding,finalGate} from "./single-agent-semantic-verifier-boundary.js";
 
 const config={version:"EXPLICIT_QUOTE_V1",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:2,standalone:true,maxPerTurn:1} as const;
 async function setup(enabled=true){
@@ -14,14 +15,34 @@ async function setup(enabled=true){
  const policy={...original,artifacts:{...original.artifacts,handoffMatrix:{schemaVersion:1 as const,kind:"HANDOFF_MATRIX" as const,sourceMetadata:original.artifacts.shopPolicy.sourceMetadata,
   rules:(["PRICE_UNAVAILABLE","DEPENDENCY_FAILURE"] as const).map(reason=>({reason,customerMessagePolicy:"SILENT_HANDOFF" as const,holdingReply:null,tag:"NHAN_VIEN" as const}))}}};
  let authority:HandoffAuthority={...scope,fence:1,stateVersion:scope.revision,state:{...createConversationState({conversationId:scope.conversationId,routingOwner:"APP",now:commerceNow}),revision:scope.revision}};
- const tools=await createCommerceTools({read:{scope,clock:()=>commerceNow,entry:{firstContact:true,fromAd:false},initialProducts:[f.product],policy:fixturePolicy,
+ const readPolicy=vi.fn(fixturePolicy);
+ const tools=await createCommerceTools({read:{scope,clock:()=>commerceNow,entry:{firstContact:true,fromAd:false},initialProducts:[f.product],policy:readPolicy,
   catalog:{readProduct,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}},
   media:{allowedHostSuffixes:["pancake.vn"]},handoff:{read:async()=>structuredClone(authority),commit:vi.fn(async change=>{authority=structuredClone(change.next);return true;}),policy:async()=>policy},
   ...(enabled?{quoteTask:config}:{})} as Parameters<typeof createCommerceTools>[0]);
- return {scope,f,tools,readProduct,authority:()=>authority};
+ return {scope,f,tools,readProduct,readPolicy,authority:()=>authority};
 }
 const quote={name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"]}};
 describe("explicit quote operation",()=>{
+ it("blocks an old verifier pass when quote policy changes and at strict price expiry",async()=>{
+  const s=await setup();await s.tools.prepare!();
+  await s.tools.invoke({...quote,args:{...quote.args,quantity:2,deliveryRegion:"MIEN-NAM"}});
+  const text="Hai áo cả ship chị nhé.",before=s.tools.snapshot(),expected=makeBinding("quote-test",text,before),response={kind:"VERDICT" as const,binding:expected,result:{verdict:"PASS",violations:[]}};
+  expect(finalGate({expected,response,current:before,finalDraft:text,now:commerceNow}).disposition).toBe("SEND_ELIGIBLE");
+  expect(finalGate({expected,response,current:before,finalDraft:text,now:new Date(commerceNow.getTime()+1200001)}).disposition).not.toBe("SEND_ELIGIBLE");
+  s.readPolicy.mockImplementation(()=>fixturePolicy(30000));
+  const after=await s.tools.readback();expect(after.policyLiterals.find(p=>p.ref.startsWith("pre-cart-quote:"))?.text).not.toBe(before.policyLiterals.find(p=>p.ref.startsWith("pre-cart-quote:"))?.text);
+  expect(finalGate({expected,response,current:after,finalDraft:text,now:commerceNow}).disposition).not.toBe("SEND_ELIGIBLE");
+ });
+ it("quotes quantity plus shipping before a cart and invalidates the total on a price change",async()=>{
+  const s=await setup();await s.tools.prepare!();
+  const r=await s.tools.invoke({...quote,args:{...quote.args,quantity:1,deliveryRegion:"Cần Thơ"}});
+  expect(r).toMatchObject({status:"OK",data:{preCartQuote:{grandTotalVnd:524000,quantity:1,deliveryRegion:"Cần Thơ"}}});
+  expect(s.tools.snapshot().state.cartQuote).toBeUndefined();expect(s.tools.snapshot().effectReceipts).toHaveLength(0);
+  const before=s.tools.snapshot();expect(before.policyLiterals.some(p=>p.ref.startsWith("pre-cart-quote:"))).toBe(true);
+  s.f.snapshot.offers.DIRECT!.sale_price=599000;s.f.snapshot.offers.DIRECT!.rows[0]!.sale_price=599000;
+  await expect(s.tools.readback()).rejects.toThrow("POS_OBSERVATION_CHANGED");
+ });
  it("opt-in completes price and selected media before exact final verification",async()=>{
   const s=await setup();expect(s.tools.availableTools).toContain("quote_product");
   let n=0;const verifier=vi.fn(async()=>({result:{verdict:"PASS",violations:[]}}));
