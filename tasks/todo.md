@@ -1,3 +1,10 @@
+## Latest model round — follow-up quote R1 PASS / R2 FAIL, 2026-11-05
+
+- [x] Freeze clean48 source, current ownerprompt/schema + unchangedGemini3.5FlashLiteHIGH/Sol6.1HIGH; fresh107world/realPGinitial/drop, all4input approvals and actual-timepreflights before provider.
+- [x] R1 4/7 complete,7SEND_ELIGIBLE, independenttaskPASS; j1T3 actualquote_product subtotal/discount/ship978100sent without cart/image.
+- [x] R2 9/17 complete,6SEND_ELIGIBLE+2CODE_OWNED_SEND+6HANDOFF+3HUMAN_NO_SEND; materialFAIL6cases. Combined53records51HTTP (2localbounds0HTTP/2malformedretained),15texts7images,DBsdropped/retry0/sourceclean/live0. [Report/24actualturns](../apps/worker/evals/single-agent-commerce-qualification/followup-quote-run-20261105/REPORT.md).
+- [ ] R3/R4 21cases31turns NOT_RUN dueR2FAIL. No furtherfix/modelrun/GO/deploy. Stability/whole-replyquality/C3comparison unverified; previouscampaignFAIL/NOT_RUN counts remain separate.
+
 ## Follow-up quantity quote repaired — 2026-11-05
 
 - [x] Identify missing capability: quote_product was first-contact-only, so actual j1T3 could not use its pre-cart quote path.

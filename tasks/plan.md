@@ -1,3 +1,9 @@
+## Latest model round — follow-up quote R1 PASS / R2 FAIL, 2026-11-05
+
+Clean source48e8a428 (approved runtime949) ran unchanged original staged cases on fresh107-product world, after independent input/preflight approval. R1 completed4cases/7turns with7eligible, taskPASS; j1T3 now uses quote_product and sends verified978100 without cart. R2 completed9cases/17turns with6eligible+2code/6silenthandoff/3HUMANno-send, taskFAIL6cases. Combined13/24:53records51HTTP39owner14verifier,2malformed+2zeroHTTPbound retained,15texts7images; allDBsdropped/sourceclean/retry0/live0. [Full report and conversations](../apps/worker/evals/single-agent-commerce-qualification/followup-quote-run-20261105/REPORT.md).
+
+R3/R4 21cases31turns NOT_RUN. Remaining failures: malformedp04/j4, boundp09/s15, photoevidence s03, sharedcomponentplanning s13. Independent accounting/task gates preserveR1PASS/R2FAIL; whole-reply quality/C3comparison notgraded/notrun. Priorcampaignresults immutable; stop, no automaticfix/rerun/merge/deploy.
+
 ## Follow-up quantity quote repaired — 2026-11-05
 
 Owner requested fix j1T3. Implementation base4530be07, independently approved executable94911899: expose existing quote_product to known returning conversations for one offer + explicit quantity, compute current pre-cart total without colour/cart/image, preserve first-contact image path and unknown-history block. Native schema/prompt/tool description aligned; no verifier relaxation, state/effect write, parser, retry or cap increase. [Implementation/evidence](../docs/specs/c3-phase-c-followup-quantity-quote-implementation-20261105.md).
