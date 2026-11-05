@@ -476,6 +476,12 @@ function recommendSizeInternal(input: SizeEngineInput): SizeEngineDecision {
     .map((kind) => measurements.get(kind))
     .filter((item): item is BodyMeasurementV1 => item !== undefined);
   let bands = source === null ? [] : matchingBands(selected.chart, used);
+  // Explicitly authorized body-capacity charts describe maximum measurements,
+  // not a set of equally appropriate overlapping sizes. Ordinary charts retain
+  // their existing boundary/fit-preference behavior.
+  if (source === "MEASUREMENTS" && selected.chart.capacitySelection === "SMALLEST_FITTING_BODY_MAXIMUM") {
+    bands = bands.slice(0, 1);
+  }
   if (source === null) {
     const priorHistory = acceptedHistoryEvidence(profile, input.target, selected.chart);
     if (priorHistory !== null) {

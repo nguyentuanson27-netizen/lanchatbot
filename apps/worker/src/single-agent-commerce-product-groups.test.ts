@@ -4,6 +4,25 @@ import { commerceProductGroup, commerceSizeSource,commerceComponentSizeSource, t
 import { fixtureProduct, fixtureSizeInput, fixturePolicy, fixtureProfile, commerceScope, commerceNow } from "./single-agent-commerce.test-support.js";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
 import { createCustomerStateTools } from "./single-agent-commerce-state.js";
+import {recommendSize} from "@lana/business-tools";
+
+it("normalizes only explicitly approved body maxima and selects the smallest fitting size",()=>{
+ const {product,policy,artifact}=fixture();
+ artifact.chart.bands=["S","M","L"].map((size,i)=>({size,note:null,ranges:[
+  {kind:"WAIST_CM",minInclusive:62+i*4,maxInclusive:78+i*4},
+  {kind:"BUST_CM",minInclusive:86+i*4,maxInclusive:86+i*4},{kind:"HIPS_CM",minInclusive:98+i*4,maxInclusive:98+i*4}]}));
+ const approved={...group,sharedSize:{...group.sharedSize,bodyMaximum:{kinds:["BUST_CM","HIPS_CM"],approvalRef:"owner-body-maxima"}}} as CommerceProductGroup;
+ const original=structuredClone(artifact.chart);
+ const source=commerceSizeSource(product,policy,[approved]),customer=fixtureProfile().profile;
+ customer.measurements=[{kind:"BUST_CM",value:88},{kind:"WAIST_CM",value:74},{kind:"HIPS_CM",value:94}].map(m=>({...m,
+  provenance:{source:"CUSTOMER_MESSAGE" as const,sourceEventHash:"a".repeat(64),observedAt:commerceNow.toISOString(),confidence:1}})) as typeof customer.measurements;
+ customer.fitPreference="RELAXED";
+ const d=recommendSize({...source,profile:customer,generatedAt:commerceNow.toISOString()});
+ expect(d.recommendation.status).toBe("RECOMMENDED");expect(d.recommendation.recommendedSizes[0]?.size).toBe("M");
+ expect(artifact.chart).toEqual(original);
+ expect(source.charts[0]!.chart.reference.version).not.toBe(original.reference.version);
+ expect(commerceSizeSource(product,policy,[group]).charts[0]!.chart).toEqual(original);
+});
 
 const group: CommerceProductGroup = { name: "Thanh Mai", customerNames: ["set Thanh Mai"],
   productTitles: { SOURCE: "Set quần Thanh Mai", MEMBER: "Set váy Thanh Mai" }, approvalRef: "owner-decision",

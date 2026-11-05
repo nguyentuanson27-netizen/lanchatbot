@@ -1,6 +1,6 @@
 import type { RuntimePolicyResolution } from "@lana/chat-runtime";
 import { normalizeCatalogToken, selectVerifiedSizeChart,CatalogSnapshotV3Schema, type StableProductDocument, type SizeRecommendationTarget } from "@lana/business-tools";
-import type { ProductComponentRole } from "@lana/contracts";
+import {SizeChartV1Schema,type ProductComponentRole,type MeasurementKind} from "@lana/contracts";
 import { sizeChartTarget } from "./size-chart-target.js";
 import { evaluateSizeChartEligibility } from "./size-chart-eligibility.js";
 import {catalogComponentRole} from "./realtime-sales-catalog.js";
@@ -11,7 +11,8 @@ export interface CommerceProductGroup {
   name: string; customerNames: readonly string[]; productTitles: Readonly<Record<string, string>>;
   approvalRef: string;
   sharedSize: { artifactKey: string; sourceProductId: string; brand: string; category: string; componentRole: ProductComponentRole;
-    componentRoles?:readonly ProductComponentRole[];componentApprovalRef?:string;componentSourceBrand?:string };
+    componentRoles?:readonly ProductComponentRole[];componentApprovalRef?:string;componentSourceBrand?:string;
+    bodyMaximum?:{kinds:readonly MeasurementKind[];approvalRef:string} };
 }
 export function commerceProductGroup(productId: string, title: string, groups: readonly CommerceProductGroup[]) {
   const matches = groups.filter(g => Object.hasOwn(g.productTitles, productId) &&
@@ -39,7 +40,19 @@ export function commerceSizeSource(product: StableProductDocument, policy: Runti
   // configured source itself must match; another eligible chart cannot vouch for it.
   if (!selectVerifiedSizeChart(sourceCharts, target)) return fallback();
   return { target: { ...target, parentProductId: product.productId, componentProductId: product.productId },
-    charts: sourceCharts.map(c => ({ chart: c.chart, scope: { ...c.scope, parentProductIds: Object.keys(group.productTitles) } })) };
+    charts: sourceCharts.map(c => {
+      let chart=c.chart;
+      const maxima=shared.bodyMaximum;
+      if(maxima){
+        if(!maxima.approvalRef.trim()||!maxima.kinds.length||new Set(maxima.kinds).size!==maxima.kinds.length||
+          maxima.kinds.some(k=>!["BUST_CM","HIPS_CM"].includes(k))||
+          c.chart.bands.some(b=>maxima.kinds.some(k=>!b.ranges.some(r=>r.kind===k&&r.minInclusive===r.maxInclusive&&r.maxInclusive!==null))))throw Error("SIZE_MAXIMUM_DELEGATION");
+        chart=SizeChartV1Schema.parse({...c.chart,capacitySelection:"SMALLEST_FITTING_BODY_MAXIMUM",reference:{...c.chart.reference,
+          version:`body-max-${commerceHash({chart:c.chart,approval:maxima}).slice(0,24)}`,verifiedByRef:maxima.approvalRef},
+          bands:c.chart.bands.map(b=>({...b,ranges:b.ranges.map(r=>maxima.kinds.includes(r.kind)?{...r,minInclusive:null}:r)}))});
+      }
+      return {chart,scope:{...c.scope,parentProductIds:Object.keys(group.productTitles)}};
+    }) };
 }
 
 /** A unique current BOM component is required. Optional sharing is explicit owner configuration, never inferred from names. */
@@ -88,7 +101,7 @@ export function commerceComponentSizeSource(product:StableProductDocument,raw:un
      if(artifact&&Object.hasOwn(group!.productTitles,shared.sourceProductId)&&artifact.chart.brand===shared.brand&&
        artifact.chart.category===shared.category&&artifact.chart.componentRole===shared.componentRole&&
        selectVerifiedSizeChart(original,originalTarget)&&charts.length===1&&
-       charts[0]!.chart.reference.chartId===artifact.chart.reference.chartId&&charts[0]!.chart.reference.version===artifact.chart.reference.version&&
+       charts[0]!.chart.reference.chartId===artifact.chart.reference.chartId&&
        selectVerifiedSizeChart(charts,target)){
        eligible.push({target,charts});
        delegation={approvalRef:shared.componentApprovalRef,sourceProductId:shared.sourceProductId,artifactKey:shared.artifactKey,componentRole};
