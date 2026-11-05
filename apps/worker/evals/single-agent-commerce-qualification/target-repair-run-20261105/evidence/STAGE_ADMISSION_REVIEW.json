@@ -1,0 +1,48 @@
+{
+  "status": "APPROVED_EVALUATOR_STAGE_ADMISSION_ONLY",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-05T13:58:49.300400+00:00",
+  "baseSha": "da2397146882269985627df16b570378c8e8343b",
+  "checks": [
+    "R1exactparentfilter p06/p07/p08/j1:4cases7turns28generationcap.",
+    "R2exactremainingparentfilter:9cases17turns68cap.",
+    "Disjointunion equals original13cases24turns96cap.",
+    "Both customerScriptsHash independentlyrederived from frozen69bdprefixregistration and matched.",
+    "Existing diagnostic admission applies exactscripts/source/slots/initial/codeowned checks to newscopes.",
+    "Runtime projection excludes stage/case/evaluatorlabels; native/runtime/prompt/provider source unchanged."
+  ],
+  "commandsActuallyRun": [
+    {
+      "command": "node --test --test-concurrency=1 apps/worker/evals/single-agent-commerce-qualification/target-repair-stages.test.mjs apps/worker/evals/single-agent-commerce-qualification/diagnostic.test.mjs",
+      "result": "9PASS"
+    },
+    {
+      "command": "Independent Node rederive R1/R2 scriptsdigest from original69bdprefix REGISTRATION",
+      "result": "Bothmatch"
+    }
+  ],
+  "unresolvedMaterialFindings": [],
+  "fileManifest": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/diagnostic.mjs",
+      "sha256": "4e88ca8838b3fc10f55f9dde79c204025e5f02633cb0ed1ce8487d16cb16ec3d"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/TARGET_REPAIR_R1_SCOPE_20261105.json",
+      "sha256": "608b0cf2a49a11583cbd6a65cb2cfd2b1bb5caadecfe3b41e3effb0b006e93b2"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/TARGET_REPAIR_R2_SCOPE_20261105.json",
+      "sha256": "df43ac6aeedae3e3e0d3d9b23ad98b96f0796417ed1981a8e1740c916fecf8d5"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/target-repair-stages.test.mjs",
+      "sha256": "75a30b4a42ad0497512d1eb6ac0d827256b126abf90262f9059c948815b5ea23"
+    }
+  ],
+  "limits": [
+    "Sourceadmissionreview only, not approval todispatch any pendingregistration.",
+    "Need cleancommittedsource/currentworld/initial/sourceprereqs/helperinventory/independentinputreview and conditionalpreviousgroupPASS beforeprovider.",
+    "No provider calls, modelresults or qualificationGO."
+  ]
+}

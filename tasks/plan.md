@@ -1,3 +1,9 @@
+## Latest model diagnostic — target repair R1 FAIL, 2026-11-05
+
+Owner authorized new model after approved implementation. Clean run94c367a8 only adds independently reviewed evaluator stage admission; runtime/prompts/models unchanged. Fresh107-product world, current initialPG/drop, independent four-group input review and actual-time preflight. R1 completed4cases/7turns:6SEND_ELIGIBLE+1silentHANDOFF,6text4images/10Outbox;22generation/22HTTP(15owner7verifier),0errors/retry,DBdropped. Post-run integrity APPROVE, functional gate FAIL (j1T3 sentinel misuse/current colour coverage); p06/p07 and j1T2 repaired paths observed working. [Report and all conversations](../apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/REPORT.md).
+
+R2/R3/R4 remain30cases/48turns NOT_RUN because R1 material failure. Historical69bd1221 FAIL and21/31NOT_RUN remain separate. No broad style change, new quality/C3/qualification GO, automatic next fix/modelrun, merge or deploy.
+
 ## Implementation approved — target/composition/continuation repair, 2026-11-05
 
 Owner authorized implementation after the approved revision 2. [Implementation and verification](../docs/specs/c3-phase-c-target-composition-continuation-implementation-20261105.md): S1 target-aware shared SIZE_FIT conflict; S2 order-independent logical quantities; S3 validated non-commit choice feedback and lossless same-body continuation; S4 safe diagnostics and media evidence regression. Incremental savepoints 2d01ab74 / 6ab7ec0f / c7b485b0 / 639aff10. Same independent reviewer requested fixes, verified closure and **APPROVED scoped implementation** at clean executable `639aff103898ad9e6cad5119d27c08f4809f9896`.

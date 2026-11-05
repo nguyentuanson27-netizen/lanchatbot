@@ -1,3 +1,11 @@
+## Latest model round — repaired R1 completed and STOP, 2026-11-05
+
+- [x] Evaluator-only R1/R2 admission RED2→GREEN13; exact disjoint13/24 prefix, frozen original scripts/caps, same independent reviewer APPROVE.
+- [x] Clean source94c367a8, fresh107-product world and realPGinitial/drop; independent all4input approvals and actual-time R1 preflight/dispatch approval, unchanged Gemini3.5FlashLiteHIGH + GPT6.1SolHIGH/N1/retry0.
+- [x] Complete R1 4/4cases +7/7turns;6eligible/1silentHANDOFF,6text4image/10Outbox;22generation22HTTP,0providererror/retry,DBdropped. Independent integrity audit APPROVE; material task gate FAIL at j1T3.
+- [x] p06 composition/989k and p07 two-target send now work; j1T2 no longer exceeds wire bound. j1T3 still misuses sentinel and lacks current colour proof after filtered failed reads; no unsupported effect committed. [Report/transcripts/evidence](../apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/REPORT.md).
+- [ ] R2/R3/R4 30cases/48turns NOT_RUN, gated by material failure. Historical21/31NOT_RUN remains separate. S4/model stability/whole-reply quality/C3 parity/PhaseC GO unverified. Stop; no automatic fix/rerun/deploy.
+
 ## Implemented and independently approved — targeted repair, 2026-11-05
 
 - [x] S1 shared SIZE_FIT scope distinguishes PRODUCT and COMPONENT targets; same-target contradictory claims still fail the actual DB transaction. RED observed before GREEN.
