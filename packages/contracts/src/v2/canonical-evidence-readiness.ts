@@ -474,7 +474,14 @@ export function requiredProtectedClaimTypesForEffectV1(
 
 function protectedClaimScopeKeyV1(claim: ProtectedClaimV1): string {
   if (claim.scope.kind === "PRODUCT") {
-    return `PRODUCT:${claim.scope.productId}:${claim.scope.variantId ?? ""}`;
+    const scope = `PRODUCT:${claim.scope.productId}:${claim.scope.variantId ?? ""}`;
+    if (claim.type !== "SIZE_FIT") return scope;
+    // Legacy fits describe the whole product. Neither revision nor the result
+    // belongs in identity: contradictory evidence for one target must conflict.
+    const target = claim.value.fitTarget ?? { kind: "PRODUCT", productId: claim.scope.productId };
+    return `${scope}:FIT:${JSON.stringify(target.kind === "PRODUCT"
+      ? ["PRODUCT", target.productId]
+      : ["COMPONENT", target.parentProductId, target.componentProductId, target.componentRole])}`;
   }
   if (claim.scope.kind === "CART") {
     return `CART:${claim.scope.cartId}:${claim.scope.cartVersion}`;
