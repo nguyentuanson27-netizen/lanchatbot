@@ -1,0 +1,22 @@
+{
+  "kind": "RECONSTRUCTED_J1_CURRENT_SELECTION_RESULT_WIRE",
+  "budget": {
+    "textFrameBytes": 60459,
+    "systemBytes": 21488,
+    "toolSchemaBytes": 18241,
+    "trustedFrameBytes": 6482,
+    "dialogueBytes": 13988,
+    "textLimitBytes": 65536,
+    "presentedTextFrameBytes": 60636,
+    "basePresentedFrameBytes": 60636,
+    "inlineImageBytes": 0,
+    "frameLimitBytes": 65536
+  },
+  "wireBytes": 60636,
+  "toolCount": 13,
+  "fullResultExpansionEquality": true,
+  "nativeSignedPartsPreserved": true,
+  "providerRequests": 0,
+  "networkReads": 0,
+  "limitation": "Failed body was not captured; reconstructed public owner context from captured first request plus exact subsequent tool observations. No claim byte-identical historic context or model outcome."
+}

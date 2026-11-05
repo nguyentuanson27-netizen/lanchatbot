@@ -1,4 +1,10 @@
-## Approved plan — target/composition/continuation repair, 2026-11-05
+## Implementation approved — target/composition/continuation repair, 2026-11-05
+
+Owner authorized implementation after the approved revision 2. [Implementation and verification](../docs/specs/c3-phase-c-target-composition-continuation-implementation-20261105.md): S1 target-aware shared SIZE_FIT conflict; S2 order-independent logical quantities; S3 validated non-commit choice feedback and lossless same-body continuation; S4 safe diagnostics and media evidence regression. Incremental savepoints 2d01ab74 / 6ab7ec0f / c7b485b0 / 639aff10. Same independent reviewer requested fixes, verified closure and **APPROVED scoped implementation** at clean executable `639aff103898ad9e6cad5119d27c08f4809f9896`.
+
+Full worker 2,659 PASS / 154 files; final exact-source Node 856 PASS / 2 SKIP; focused shared 75 + 42 + 56 PASS, planned adapter set 103 PASS; worker build/typecheck/lint and shared typechecks PASS. Real PostgreSQL final 3/3 PASS including actual DB conflict rejection and missing-colour non-mutation; B-preserving PG 2/2 PASS at unchanged runtime c7b485b0. All isolated DBs dropped; provider generation 0, no live send. Coverage overlaps are disclosed; model behavior/quality, s03 evidence use and malformed provider output remain unproved. Previous prefix FAIL and 21 cases / 31 turns NOT_RUN remain. R1–R4 campaign is NOT_RUN; no automatic model dispatch, qualification GO, merge or deploy.
+
+## Previous planning-only approval — target/composition/continuation repair, 2026-11-05
 
 [Detailed revision 2](../docs/specs/c3-phase-c-target-composition-continuation-repair-plan-20261105.md): S1 target-aware SIZE_FIT conflict through shared validator/transaction/egress; S2 quantity-aware multiset purchase composition preserving exact variants/shared stock; S3 actionable missing-choice results and lossless bounded continuation; S4 evidence-led image/decoder diagnostics. Preserve B strengths, existing models/caps/retry0, authority/privacy/receipts, silent handoff and original scripts; no broad prompt/style change.
 

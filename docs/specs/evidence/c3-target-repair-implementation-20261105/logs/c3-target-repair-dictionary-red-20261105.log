@@ -1,0 +1,32 @@
+✔ same-body exact selection result references preserve the full query and options (8.8086ms)
+✔ different historical/source/query evidence remains local; references cannot dangle or forge a hash (3.6837ms)
+✔ quantity-bearing logical components preserve multiplicity across owner product packing (1.5129ms)
+✖ a conflicting dictionary cannot emit an ambiguous same-body reference (1.8584ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 586.1428
+
+✖ failing tests:
+
+test at apps\worker\evals\single-agent-commerce-read-only\selection-result-wire.test.mjs:34:1
+✖ a conflicting dictionary cannot emit an ambiguous same-body reference (1.8584ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/selection-result-wire.test.mjs:36:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /SELECTION_RESULT_REFERENCE/,
+    operator: 'throws',
+    diff: 'simple'
+  }

@@ -1,8 +1,18 @@
-## Approved plan only — targeted repair, 2026-11-05
+## Implemented and independently approved — targeted repair, 2026-11-05
+
+- [x] S1 shared SIZE_FIT scope distinguishes PRODUCT and COMPONENT targets; same-target contradictory claims still fail the actual DB transaction. RED observed before GREEN.
+- [x] S2 quantity-aware order-independent composition preserves multiplicity, rejects malformed explicit BOM/quantity, retains stock/cart semantics and legacy unit slots. RED observed before GREEN.
+- [x] S3 selection feedback has effectCommitted:false until complete; same-body exact evidence references expand without loss and fail closed on reserved/dangling/ambiguous references. Actual adapter zero-HTTP rejection and RED→GREEN covered.
+- [x] S4 safe argument-shape/schema-hash diagnostics and media evidence regression; no invented source facts, parser, retry, prompt/config change or claimed provider-behavior fix.
+- [x] Independent review → fixes → same reviewer APPROVE exact clean executable 639aff103898ad9e6cad5119d27c08f4809f9896. [Report and evidence](../docs/specs/c3-phase-c-target-composition-continuation-implementation-20261105.md).
+- [x] Worker 2,659 PASS / 154 files; final Node 856 PASS / 2 SKIP; focused shared 75 + 42 + 56, planned adapter 103 PASS; worker build/typecheck/lint + shared typechecks PASS. Real PG final 3/3 and B-preserving 2/2 PASS, source scopes and overlapping coverage disclosed, DBs dropped/provider 0/live send false.
+- [ ] Model campaign R1–R4 NOT_RUN. Preserve historical prefix FAIL and 21 cases / 31 turns NOT_RUN; no new sales quality, stability, qualification GO or C3-comparison claim. Owner s03/decoder behavior still needs measured evidence. No automatic campaign/deploy.
+
+## Previous planning-only task — targeted repair, 2026-11-05
 
 - [x] Read latest24terminal outcomes, rejected draft/tool/state and actual source consumers. Separate confirmed code defects (target conflict/BOM ordering), owner missing-choice planning, continuation size and unknown malformed causes. [Plan revision2](../docs/specs/c3-phase-c-target-composition-continuation-repair-plan-20261105.md).
 - [x] Self-review → independent REVISE (multimodal bounds and authoritative logical quantity) → plan fix → same reviewer APPROVE PLAN. Source/prompt/provider/config unchanged in this planning task; no test/provider PASS inferred.
-- [ ] Implement S1–S4 with RED→GREEN, native consumer/transaction/delivery acceptance and clean PostgreSQL/readback/cleanup; separate independent implementation review. Not authorized by plan approval alone.
+- [x] Subsequently implemented by explicit owner instruction; current implementation verification and independent approval are recorded above. This earlier plan-only task did not itself authorize implementation.
 - [ ] Subsequent new model campaign only after implementation/source/input gates and user instruction; proposed disjoint4/7 →9/17 →20/24 →1/7, maximum34/55, N1/retry0 and original scripts. Previous prefixFAIL and21cases31turnsNOT_RUN remain historical facts.
 
 ## Latest — B-preserving implementation and model prefix completed, 2026-11-05

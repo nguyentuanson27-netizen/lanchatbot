@@ -1,0 +1,10 @@
+✔ tool parse diagnostic uses code-defined identifiers, never model values or unknown field names (7.8166ms)
+✔ HTTP200 output-contract error retains one request, tokens, completion stage and sanitized diagnostic (127.6138ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 903.0005
