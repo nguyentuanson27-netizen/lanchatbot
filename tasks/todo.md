@@ -1,3 +1,14 @@
+## Latest fix — task-path presentation, 2026-11-06
+
+- [x] Read B–C findings; discard redundant read dedup and schema refactor that increased wire size.
+- [x] Preserve emitted schemas, owner prompt, all callable tools, code authority, caps and retry0; shorten repeated descriptions with manual obligation map.
+- [x] Add inspected quantity-one shared-component read targets without source/price/stock/chart merge; test positive, conflict and native wire roundtrip.
+- [x] Add bounded value-free malformed-call telemetry, retaining non-STOP rejection and one-request accounting; self-review ninth-call truncation RED→GREEN.
+- [x] Reconstruct p09/s15 at historical clocks; both fit current raw/presented cap, signed content unchanged; retain old s13 overflow and s15 non-persistent replay limitation.
+- [x] Final adapter119 PASS; full Node868 PASS/2SKIP; worker commerce937 PASS; worker build/typecheck/lint PASS. [Evidence](../docs/specs/c3-phase-c-task-path-repair-implementation-20261106.md).
+- [x] Same independent reviewer APPROVED scoped engineering, exact executable/test hashes; self-ran9/9 and rebuilt both continuation requests. Earlier usage-limit failure was not approval.
+- [ ] New provider behavior/quality and remaining Phase C acceptance: NOT_RUN. Source-specific s03 detail evidence and legacy s13 capacity remain open; historical failures are unchanged.
+
 ## Latest model round — follow-up quote R1 PASS / R2 FAIL, 2026-11-05
 
 - [x] Freeze clean48 source, current ownerprompt/schema + unchangedGemini3.5FlashLiteHIGH/Sol6.1HIGH; fresh107world/realPGinitial/drop, all4input approvals and actual-timepreflights before provider.

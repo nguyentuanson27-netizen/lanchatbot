@@ -29,6 +29,29 @@ function unpack(value,allowed){
 const ownRead=(v,id,offer)=>object(v)&&same(Object.keys(v).sort(),['offerType','subjectRef'])&&v.subjectRef===id&&v.offerType===offer;
 const component=v=>object(v)&&(same(Object.keys(v).sort(),['componentRef','role'])||same(Object.keys(v).sort(),['componentRef','quantity','role'])&&Number.isSafeInteger(v.quantity)&&v.quantity>=1&&v.quantity<=20)&&typeof v.componentRef==='string'&&v.componentRef.length>0&&v.componentRef.length<=128&&
  ['TOP','PANTS','SKIRT','DRESS','JACKET','ACCESSORY','OTHER'].includes(v.role);
+/** Presentation-only links from inspected single-item composition, never title matching.
+ * Each target keeps its own price/stock/size authority. No target is selected here. */
+export function sharedSingleItemReads(products){
+ if(!Array.isArray(products)||products.length>32||products.some(p=>!object(p)||typeof p.subjectRef!=='string')||new Set(products.map(p=>p.subjectRef)).size!==products.length)return [];
+ const refs=new Map();
+ for(const p of products){
+  const options=p.purchaseOptions;
+  if(!Array.isArray(options))continue;
+  if(options.length>32||options.some(o=>!object(o)||typeof o.offerType!=='string')||new Set(options.map(o=>o.offerType)).size!==options.length)return [];
+  for(const o of options){
+   const s=o.componentSource;
+   if(s?.status!=='AVAILABLE'||s.completeness!=='INSPECTED_ROWS'||!Array.isArray(s.components)||s.components.length>3)continue;
+   for(const c of s.components){
+    if(!component(c))continue;
+    const r=refs.get(c.componentRef)??{componentRef:c.componentRef,role:c.role,conflict:false,readTargets:[]};
+    if(r.role!==c.role||(c.quantity??1)!==1)r.conflict=true;
+    if(s.components.length===1&&(c.quantity??1)===1&&ownRead(o.priceRead,p.subjectRef,o.offerType)&&ownRead(o.stockRead,p.subjectRef,o.offerType))r.readTargets.push({subjectRef:p.subjectRef,offerType:o.offerType});
+    refs.set(c.componentRef,r);
+   }
+  }
+ }
+ return [...refs.values()].filter(r=>!r.conflict&&new Set(r.readTargets.map(t=>t.subjectRef)).size>1).map(({componentRef,role,readTargets})=>({componentRef,role,readTargets}));
+}
 function shareComponents(products){
  const refs=new Map();
  for(const p of products)for(const o of Array.isArray(p.purchaseOptions)?p.purchaseOptions:[]){
