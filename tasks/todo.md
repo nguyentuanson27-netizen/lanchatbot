@@ -1,3 +1,11 @@
+## Phase C — completed diagnostic, 2026-11-06
+
+- [x] Owner requested continuation; R1/R2 FAIL retained, all34cases/55turns executed without retries; three remaining groups and checkout independently audited.
+- [x] R2 FAIL5: p04 request bound; s03 unsupported photo claim; s13 invalid quote+media batch; j4/j6 verifier429. p09/s15 sent in this single run, no stability proof.
+- [x] Remainder FAIL5: p01/s05/s01 quote+media batch; s02 asks unnecessary parent; s08 fails to recommend. s11 BE-gap control not reached.
+- [x] Checkout scoped PASS: preview and unique confirmation receipt, private fields code-only, HUMAN handoff; no POS/live-send claim.
+- [ ] Phase C qualification/whole-reply blind scoring/C3 parity remain unverified; no GO. [Evidence](../apps/worker/evals/single-agent-commerce-qualification/task-path-model-run-20261106/FULL_REPORT.md).
+
 ## Latest model — task-path R1 FAIL, 2026-11-06
 
 - [x] Fresh107-product capture on third read attempt (first two source timeouts, 0 generation); clean actual PostgreSQL initial/drop and 4 staged preflights.

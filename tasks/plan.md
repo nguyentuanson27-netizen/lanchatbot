@@ -1,3 +1,7 @@
+## Phase C — owner requested full diagnostic, 2026-11-06
+
+All34 cases/55 turns executed, owner continued after R1 FAIL without changing earlier gates. R1 FAIL1, R2 FAIL5, remainder FAIL5; checkout scoped PASS with preview, confirmation receipt and HUMAN handoff. Actual31 model replies+5 code replies+13 handoff+6 no-send; 113 generation/112 HTTP includes1 local bound+2 verifier429, no retry. [Report and all redacted terminal conversations](../apps/worker/evals/single-agent-commerce-qualification/task-path-model-run-20261106/FULL_REPORT.md). Independently audited; no quality qualification/C3 comparison/GO, no live send. All test DBs dropped.
+
 ## Latest model — task-path R1 FAIL, 2026-11-06
 
 Clean source `9b2cfff594c89d09a11e32c9c4274556291d72a1` / fresh world `436a5be7095ec64c2eaa851b1fcdf7c0a6a6ee5b381a049c3a84978be1159b4f`: R1 completed4cases/7turns, 6 SEND_ELIGIBLE + 1 silent HANDOFF. p07 owner suggested pants L after current component fit gave M only; verifier FAIL and customer received no text. 22 generation / 22 HTTP, 22 OK, retry0, test DB dropped; no live send. R1 fails registered task gate; R2/remainder/checkout 30 cases/48 turns NOT_RUN. Independent post-run integrity audit PASS and task gate FAIL. [Report and seven actual turns](../apps/worker/evals/single-agent-commerce-qualification/task-path-model-run-20261106/REPORT.md). No claim on p09/s15/s13/s03, Phase C GO, quality or model stability.

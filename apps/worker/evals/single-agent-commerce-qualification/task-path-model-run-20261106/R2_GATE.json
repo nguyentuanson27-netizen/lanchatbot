@@ -1,0 +1,21 @@
+{
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-06T08:47:37.266740+00:00",
+  "sourceSha": "9b2cfff594c89d09a11e32c9c4274556291d72a1",
+  "registrationHash": "6b057e083a641f28bface02630ed858eb372d7218ed7ec2c8e87b06828fec1e6",
+  "capturedTurns": 17,
+  "materialTaskFailures": 5,
+  "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-taskpath-model-r2-run-20261106-02\\CANDIDATE_EVIDENCE.partial.json",
+  "evidenceSha256": "2106695d44227c59da006a1653b94a5c7abc6d1681ed38165401f16ccdb9afb0",
+  "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-taskpath-model-r2-run-20261106-02\\integration.json",
+  "integrationSha256": "dc06198202e2931e5b29be784f3c492b4401a1e5fb5fbbf5023300c808e214e5",
+  "status": "FAIL",
+  "casesExecuted": 9,
+  "reason": "Five case-level material failures: local continuation bound, unsupported image detail, quote batch mode violation and two verifier quota errors with downstream human silence.",
+  "nextStageAllowed": false,
+  "operationalContinuationRisk": "HIGH_VERIFIER_QUOTA_EXHAUSTED",
+  "notRun": {
+    "cases": 21,
+    "turns": 31
+  }
+}
