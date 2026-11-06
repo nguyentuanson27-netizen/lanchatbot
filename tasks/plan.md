@@ -1,3 +1,7 @@
+## Latest model — task-path R1 FAIL, 2026-11-06
+
+Clean source `9b2cfff594c89d09a11e32c9c4274556291d72a1` / fresh world `436a5be7095ec64c2eaa851b1fcdf7c0a6a6ee5b381a049c3a84978be1159b4f`: R1 completed4cases/7turns, 6 SEND_ELIGIBLE + 1 silent HANDOFF. p07 owner suggested pants L after current component fit gave M only; verifier FAIL and customer received no text. 22 generation / 22 HTTP, 22 OK, retry0, test DB dropped; no live send. R1 fails registered task gate; R2/remainder/checkout 30 cases/48 turns NOT_RUN. Independent post-run integrity audit PASS and task gate FAIL. [Report and seven actual turns](../apps/worker/evals/single-agent-commerce-qualification/task-path-model-run-20261106/REPORT.md). No claim on p09/s15/s13/s03, Phase C GO, quality or model stability.
+
 ## Latest fix — bounded task-path presentation, 2026-11-06
 
 Owner authorized implementation after the B–C review. Base `4e2ac3489fab80be30cd831a0d4397c04a4af9ad`; [plan](../docs/specs/c3-phase-c-task-path-repair-20261106.md), [implementation and limits](../docs/specs/c3-phase-c-task-path-repair-implementation-20261106.md). Shortened repeated tool descriptions without changing schemas/prompts/callable inventory; added source-backed shared single-item read targets and bounded value-free malformed-call diagnostics. No runtime/shared business code changes, source changes or provider calls.

@@ -1,3 +1,11 @@
+## Latest model — task-path R1 FAIL, 2026-11-06
+
+- [x] Fresh107-product capture on third read attempt (first two source timeouts, 0 generation); clean actual PostgreSQL initial/drop and 4 staged preflights.
+- [x] Run R1 once: 4 cases / 7 turns, 6 sent + 1 handoff; 22 generation/22 HTTP, all OK, no retry/live send, test DB dropped. [All outcomes](../apps/worker/evals/single-agent-commerce-qualification/task-path-model-run-20261106/REPORT.md).
+- [x] Identify p07 material failure: tool chose M for both, owner additionally suggested unsupported pants L, verifier FAIL and silent handoff. No provider timeout or request-bound error in p07.
+- [x] Independent post-run audit: integrity PASS, task gate FAIL; 7 native hashes, 22 request hashes/firewall/binding and Outbox checked. Input checker finished, first reviewer turn was interrupted; subsequent review completed.
+- [ ] R2/remainder/checkout 30 cases/48 turns NOT_RUN because R1 failed registered gate. No conclusion yet on p09/s15/s13/s03 or Phase C qualification.
+
 ## Latest fix — task-path presentation, 2026-11-06
 
 - [x] Read B–C findings; discard redundant read dedup and schema refactor that increased wire size.
