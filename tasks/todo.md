@@ -1,3 +1,10 @@
+## Complete model campaign — owner continuation, 2026-11-08
+
+- [x] Owner explicitly requested remaining30cases48turns afterR1FAIL, with exactly one review after all runs; no intermediate reviewer calls. Continued exact06b3901b source/frozen inputs, then restored report branch.
+- [x] All34cases55turns EXECUTED/notRun0:33modelSEND+7codeSEND+10silentHANDOFF+5HUMANno-send.120generation120HTTP (84owner36verifier),119OK1MALFORMED retained/retry0, all4DBsdropped/live0/sourcewrites0.
+- [x] Automated all-request/hash/firewall/binding/Outbox validation plus one independent whole-campaign review:23TASK_OK,6MATERIAL_FAIL,4EXPECTED_HANDOFF,1CONTROL_NOT_REACHED. Review selectedsource evidence; no claim independent exhaustive revalidation.
+- [ ] STOP/noPhaseCGO: j1precarttotal,p04malformed,s15unnecessarymedia,j2size/recoveryafterprofilecommit,j4lostselectionproof,s04completeness. s11controlnotreached; N1stability/blindquality/C3comparison unverified. [Full report/all55turns/single review](../apps/worker/evals/single-agent-commerce-qualification/quote-batch-run-20261108/FULL_REPORT.md).
+
 ## Latest model — quote batch R1 FAIL, 2026-11-08
 
 - [x] Restore realPG access; correct test-only lazy state setup and explicit opening-work expectation. Clean06b3901b required PG1/1PASS/droptrue/provider0, independent approval; closes prior PG blocker.
