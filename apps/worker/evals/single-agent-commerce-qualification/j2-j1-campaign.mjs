@@ -100,7 +100,9 @@ export async function executeCampaign({root,input,inputFile,world,out,ports,sess
  };
  const capture=async(j,latest)=>{
   let request;ports.preparation({capture:r=>{request=r;}});
-  await j.turn(latest,[]);assert(request,'CAMPAIGN_CAPTURE_MISSING');return request;
+   const observed=await j.turn(latest,[]);
+   write(resolve(out,'CAPTURE_'+digest(latest).slice(0,12)+'.json'),{latest,ownerRequestCaptured:!!request,observed,after:await snapshot(j)});
+   assert(request,'CAMPAIGN_CAPTURE_MISSING');return request;
  };
  if(input.mode==='PREPARE'){
   const j1=await seedJ1(),total=await capture(j1,j1Texts[2]);
