@@ -135,8 +135,11 @@ export async function executeCampaign({root,input,inputFile,world,out,ports,sess
  }
  assert.equal(input.mode,'RUN');assert.deepEqual(input.limits,J1_LIMITS);
  assert.equal(input.toolchainHash,ports.toolchain.binarySha256,'CAMPAIGN_TOOLCHAIN_CHANGED');
- const reg=read(input.j1Registration);assert.equal(digest(reg),input.j1RegistrationHash,'CAMPAIGN_PRIMARY_CHANGED');
- const required=12*90000+reg.schedule.primaryBudgetMs+reg.schedule.nativeBudgetMs+input.safetyMarginMs;
+ const reg=input.j1PreparationBlocked?null:read(input.j1Registration);
+ if(reg)assert.equal(digest(reg),input.j1RegistrationHash,'CAMPAIGN_PRIMARY_CHANGED');
+ if(input.j1PreparationBlocked)assert(input.j1PreparationBlocked.reason==='NATIVE_CART_CONTROL_PREPARATION_UNAVAILABLE'&&input.j1PreparationBlocked.evidenceFile&&
+  byteHash(readFileSync(input.j1PreparationBlocked.evidenceFile))===input.j1PreparationBlocked.evidenceHash,'CAMPAIGN_BLOCKER_BINDING');
+ const required=12*90000+(reg?reg.schedule.primaryBudgetMs+reg.schedule.nativeBudgetMs:0)+input.safetyMarginMs;
  assert(Date.parse(input.minimumProofExpiresAt)-Date.now()>=required,'CAMPAIGN_FULL_HEADROOM');
  write(resolve(out,'CAMPAIGN_DISPATCH.json'),{inputHash:digest(input),sourceSha:input.runSourceSha,worldHash:input.worldHash,scriptHash:campaignScriptHash,toolchain:ports.toolchain,startedAt:new Date().toISOString()});
  const results=[];
@@ -146,6 +149,14 @@ export async function executeCampaign({root,input,inputFile,world,out,ports,sess
   const observed=await j2.turn(j2Texts[i],[]);ports.checkOutcome(observed);if(observed.qualification?.status==='VALID')await j2.drain();
   const after=await snapshot(j2),row={phase:'J2',turn:i,customer:j2Texts[i],observed,before,after,messages:j2.capturePayloads.slice(start)};
   write(resolve(out,'J2_TURN_'+i+'.json'),row);results.push(row);
+ }
+ if(input.j1PreparationBlocked){
+  const result={mode:'J2_COLLECTED_J1_PREFLIGHT_BLOCKED',sourceSha:input.runSourceSha,worldHash:input.worldHash,
+   registered:{j2Turns:3,j2GenerationMaximum:12,primarySlots:10,nativeArms:2,nativeGenerationMaximum:8,totalMaximum:30},
+   j2Turns:results.length,primary:{attempted:0,completed:0,errors:0,notRun:10,reason:input.j1PreparationBlocked.reason},
+   conditional:{attempted:0,notRun:2,reason:'PRIMARY_NOT_RUN'},generations:ports.generations,
+   providerRequests:ports.generations.reduce((n,g)=>n+g.providerRequests,0),retry:0,liveSend:false,sourceWrites:0,qualification:'BLOCKED_NO_GO'};
+  assert(result.providerRequests<=12,'CAMPAIGN_J2_CAP');write(resolve(out,'RESULT.json'),result);return result;
  }
  ports.setStage('J1_PRIMARY');
  const primaryOut=resolve(out,'primary');
