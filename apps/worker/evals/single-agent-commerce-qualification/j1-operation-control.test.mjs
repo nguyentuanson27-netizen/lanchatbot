@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join,dirname,basename,resolve} from 'node:path';
 import {createHash,generateKeyPairSync} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
-import {buildJ1BodyPair,registerJ1,j1Preflight,runJ1Primary,scoreJ1Primary,runJ1NativePairs,createJ1Sender,validateJ1Registration,J1_PREDICATES} from './j1-operation-control.mjs';
+import {assertJ1Wire,buildJ1BodyPair,registerJ1,j1Preflight,runJ1Primary,scoreJ1Primary,runJ1NativePairs,createJ1Sender,validateJ1Registration,J1_PREDICATES} from './j1-operation-control.mjs';
 import {byteHash,digest} from './bc-control.mjs';
 import {OWNER_REQUEST_MAX_BYTES,OWNER_IMAGE_BOUNDS} from '../single-agent-commerce-read-only/gemini-inference.mjs';
 
@@ -55,6 +55,10 @@ test('multimodal bytes are kept, text cap still applies and final image frame is
  r.context.policyLiterals.push({ref:'vision:P1',text:JSON.stringify({subjectRef:'P1',assets:[{assetRef:'img',sha256,mimeType:'image/jpeg'}]})});
  const p=buildJ1BodyPair(r);assert.equal(p.a.contents[1].parts[1].inlineData.data,p.b.contents[1].parts[1].inlineData.data);
  assert(Buffer.byteLength(JSON.stringify(p.b))<=OWNER_IMAGE_BOUNDS.maxRequestBytes);
+ const text=structuredClone(p.b);text.contents.splice(1,1);delete text.generationConfig.mediaResolution;
+ const gap=OWNER_REQUEST_MAX_BYTES-Buffer.byteLength(JSON.stringify(text));
+ p.b.systemInstruction.parts[0].text+='x'.repeat(gap);assert.doesNotThrow(()=>assertJ1Wire(p.b));
+ p.b.systemInstruction.parts[0].text+='x';assert.throws(()=>assertJ1Wire(p.b),/J1_TEXT_BOUND/);
 });
 
 test('evaluator labels cannot enter a captured body, including nested JSON',()=>{

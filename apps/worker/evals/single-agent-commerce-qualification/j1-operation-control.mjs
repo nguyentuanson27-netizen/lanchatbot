@@ -29,6 +29,15 @@ export function assertJ1Wire(body){
  const images=body.contents.flatMap(c=>c.parts).filter(p=>p.inlineData);
  assert(images.length<=OWNER_IMAGE_BOUNDS.count,'J1_IMAGE_COUNT');
  for(const p of images)assert(Buffer.from(p.inlineData.data,'base64').length<=OWNER_IMAGE_BOUNDS.maxBytes,'J1_IMAGE_BOUND');
+ // The native builder inserts catalog images as a dedicated second content.
+ // Recount actual text (including optional capability hints) after metadata
+ // insertion; the larger image cap must never replace the text cap.
+ const textOnly=structuredClone(body);
+ if(images.length){
+  assert(body.contents[1]?.role==='user'&&body.contents[1].parts.filter(p=>p.inlineData).length===images.length,'J1_CATALOG_IMAGE_FRAME');
+  textOnly.contents.splice(1,1);delete textOnly.generationConfig.mediaResolution;
+ }
+ assert(bytes(textOnly)<=OWNER_REQUEST_MAX_BYTES,'J1_TEXT_BOUND');
  assert(bytes(body)<=(images.length?OWNER_IMAGE_BOUNDS.maxRequestBytes:OWNER_REQUEST_MAX_BYTES),'J1_WIRE_BOUND');
  assert.deepEqual(body.generationConfig,{candidateCount:1,responseMimeType:'text/plain',maxOutputTokens:8192,
   thinkingConfig:{thinkingLevel:'HIGH',includeThoughts:false},...(images.length?{mediaResolution:'MEDIA_RESOLUTION_MEDIUM'}:{})},'J1_MODEL_CONFIG');
