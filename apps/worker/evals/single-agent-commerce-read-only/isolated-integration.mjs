@@ -44,7 +44,10 @@ const phaseCArg=name=>{const i=process.argv.indexOf(name);return i<0?null:proces
 assertDiagnosticFlags(process.argv);
 const phaseCDiagnostic=phaseCArg('--phase-c-diagnostic-registration');
 const phaseC=phaseCArg('--phase-c-registration')??phaseCDiagnostic;
-const phaseCInitial=phaseCArg('--phase-c-initial-world');
+const j2j1File=phaseCArg('--j2-j1-campaign');
+const j2j1Input=j2j1File?JSON.parse(readFileSync(j2j1File,'utf8')):null;
+assert(!j2j1File||!['--provider-run','--provider-preflight','--phase-c-registration','--phase-c-diagnostic-registration','--phase-c-initial-world'].some(f=>process.argv.includes(f)),'J2_J1_FLAGS_CONFLICT');
+const phaseCInitial=phaseCArg('--phase-c-initial-world')??j2j1Input?.worldFile;
 const initialWorld=phaseCInitial?JSON.parse(readFileSync(phaseCInitial,'utf8')):null;
 const phaseCTools=phaseC||phaseCInitial?Object.assign({},...await Promise.all([
  import('../single-agent-commerce-qualification/candidate-provider.mjs'),
@@ -53,7 +56,7 @@ const phaseCTools=phaseC||phaseCInitial?Object.assign({},...await Promise.all([
   import('../single-agent-commerce-qualification/dispatch-gates.mjs'),
   import('../single-agent-commerce-qualification/native-snapshot.mjs')])):null;
 const providerRun=!!phaseC||process.argv.includes('--provider-run'),providerPreflight=process.argv.includes('--provider-preflight');
-const checkPrefixIndex=process.argv.indexOf('--check-prefix'),checkPrefix=phaseCInitial?'C initial state capture':checkPrefixIndex<0?null:process.argv[checkPrefixIndex+1];
+const checkPrefixIndex=process.argv.indexOf('--check-prefix'),checkPrefix=j2j1Input?'C j2 j1 campaign':phaseCInitial?'C initial state capture':checkPrefixIndex<0?null:process.argv[checkPrefixIndex+1];
 assert(checkPrefixIndex<0||(!providerRun&&!providerPreflight&&typeof checkPrefix==='string'&&checkPrefix.length>0&&checkPrefix.length<=128),'DETERMINISTIC_CHECK_PREFIX_ONLY');
 const providerFreeze=phaseCDiagnostic?diagnosticPreflight(root,phaseC,phaseCArg('--phase-c-world')):phaseC?phaseCTools.candidatePreflight(root,phaseC,phaseCArg('--phase-c-world')):providerRun||providerPreflight?statefulPreflight(root):null;
 if(providerPreflight){console.log(JSON.stringify({status:'PREFLIGHT_PASS',...providerFreeze.registration,providerGenerations:0}));process.exit(0);}
@@ -74,7 +77,7 @@ const out=process.argv[2];assert(out,'NEW_EVIDENCE_DIRECTORY_REQUIRED');mkdirSyn
 const paymentMethod=process.argv[3]??'COD';assert(['COD','BANK_TRANSFER'].includes(paymentMethod));
 const report={sourceSha:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),
  sourceDirty:!!execFileSync('git',['status','--porcelain',...(phaseC||phaseCInitial?[]:['--','apps/worker/src','apps/worker/evals/single-agent-commerce-read-only','packages'])],{cwd:root,encoding:'utf8'}).trim(),
- mode:providerRun?providerFreeze.registration.mode:'REAL_POSTGRES_SYNTHETIC_DOMAIN_INPUTS_CURRENT_POLICY_CAPTURE',paymentMethod,sendEnabled:false,providerGenerations:0,cases:[],testDatabaseDropped:false};
+ mode:j2j1Input?'REGISTERED_J2_J1_ISOLATED_CAMPAIGN':providerRun?providerFreeze.registration.mode:'REAL_POSTGRES_SYNTHETIC_DOMAIN_INPUTS_CURRENT_POLICY_CAPTURE',paymentMethod,sendEnabled:false,providerGenerations:0,cases:[],testDatabaseDropped:false};
 const save=()=>writeFileSync(resolve(out,'integration.json'),JSON.stringify(report,null,2));
 const check=async(name,fn)=>{if((checkPrefix&&!name.startsWith(checkPrefix))||providerRun||(process.argv.includes('--composed-only')&&!name.startsWith('B composed')) ||
  (process.argv.includes('--handoff-delivery-only')&&!['B composed snapshot invalidation ','B composed dependency holding delivery ','B composed candidate first ',
@@ -544,6 +547,8 @@ try{
  if(providerRun)providerPorts=phaseC?phaseCTools.createCandidateProvider({preflight:providerFreeze,out:resolve(out)}):await createStatefulProvider({preflight:providerFreeze,out:resolve(out)});
  if(phaseC&&providerFreeze.registration.arm==='C3')await providerPorts.attachReference({baselineRoot:phaseCArg('--phase-c-baseline-root'),
   baselineBuild:JSON.parse(readFileSync(phaseCArg('--phase-c-baseline-build'),'utf8'))});
+ if(j2j1Input){const {createCampaignPorts}=await import('../single-agent-commerce-qualification/j2-j1-campaign.mjs');
+  providerPorts=await createCampaignPorts({root,input:j2j1Input,world:initialWorld,out:resolve(out),readPorts:providerPorts});}
  async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,oldMedia=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false,candidateTuples=false,preparedOffers=false,preorderChoices=false,checkoutEta=false,multiOfferContext=false,componentFit=false,physicalChoices=false}={}){
   assert(!live||(!preparedOffers&&!preorderChoices),'SYNTHETIC_PREPARATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||!revalidatedMedia,'SYNTHETIC_REVALIDATION_FORBIDDEN_IN_PROVIDER_RUN');
@@ -646,10 +651,10 @@ try{
    assert(batch&&batch.conversationHash===customerHash,'CURRENT_BATCH');
    let owners=0,verifiers=0,faultInjected=false;const toolResponses=[],diagnostics=[];
    const result=await runPersistedCommerceIngress({batch,fence:batch.generation,scope:bound,store:runtime,inbox,history:historyStore,transaction:async fn=>{await beforeCommit();try{const value=await withTransaction(pool,async client=>{const applied=await fn(client);if(rollbackCommitReply&&!faultInjected){faultInjected=true;throw Error('CONTROLLED_ROLLBACK_REPLY_LOST');}return applied;});if(loseCommitReply&&!faultInjected){faultInjected=true;throw Error('CONTROLLED_COMMIT_REPLY_LOST');}return value;}catch(error){report.composedCommitDiagnostic=/^[A-Z0-9_]{1,128}$/.test(error.message)?error.message:error.name;save();throw error;}},
-    ...(phaseC?{captureBoundaryWitness:true}:{}),...(live&&phaseC?{openingMediaRule:providerFreeze.registration.openingMediaRule}:testOpeningMediaRule?{openingMediaRule:testOpeningMediaRule}:{}),observeDiagnostics:event=>diagnostics.push(event),
+    ...(phaseC?{captureBoundaryWitness:true}:{}),...(live&&(phaseC||j2j1Input)?{openingMediaRule:j2j1Input?providerPorts.openingMediaRule:providerFreeze.registration.openingMediaRule}:testOpeningMediaRule?{openingMediaRule:testOpeningMediaRule}:{}),observeDiagnostics:event=>diagnostics.push(event),
     ...(preparedOffers?{admitPreparedContext:request=>admitPreparedCommerceContext(JSON.parse(readFileSync(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/manifest.json'),'utf8')),'Synthetic verifier transport.',request)}:live&&providerPorts.admitPreparedContext?{admitPreparedContext:providerPorts.admitPreparedContext}:{}),
     ...(phaseC&&providerPorts.evaluationTurn?{evaluationTurn:providerPorts.evaluationTurn}:{}),
-    ...(live&&providerFreeze.m.quoteTask?{quoteTask:providerFreeze.m.quoteTask}:testQuoteTask?{quoteTask:testQuoteTask}:{}),read,facts,policy,resolveTagId:()=> 'synthetic-tag',clock:()=>new Date(),
+    ...(live&&(j2j1Input?providerPorts.m:providerFreeze.m).quoteTask?{quoteTask:(j2j1Input?providerPorts.m:providerFreeze.m).quoteTask}:testQuoteTask?{quoteTask:testQuoteTask}:{}),read,facts,policy,resolveTagId:()=> 'synthetic-tag',clock:()=>new Date(),
     ...(live?{handoffReply:{approvedHoldingHashes:providerFreeze.m.handoffReply.approvedHoldingHashes}}:deferredHandoff?{handoffReply:{approvedHoldingHashes:[commerceHash(dependencyHoldingReply)]}}:{}),
     ownerPrompt:live?providerPorts.ownerPrompt:'Synthetic owner transport, never a provider run.',verifierPrompt:live?providerPorts.verifierPrompt:'Synthetic verifier transport.',
     owner:async request=>{owners++;inspect(request);toolResponses.push(...request.contents.flatMap(c=>c.parts.flatMap(p=>p.functionResponse?[p.functionResponse]:[])));if(live)return providerPorts.owner(request);
@@ -683,6 +688,12 @@ try{
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+ if(j2j1Input)await check('C j2 j1 campaign',async()=>{
+  const {executeCampaign}=await import('../single-agent-commerce-qualification/j2-j1-campaign.mjs');
+  const snapshot=session=>phaseCTools.readSessionSnapshot({runtime,pool,historyStore,session});
+  report.j2j1=await executeCampaign({root,input:j2j1Input,inputFile:j2j1File,world:initialWorld,out:resolve(out),ports:providerPorts,sessionFactory:statefulFixture,snapshot});
+  report.providerGenerations=report.j2j1.providerRequests;
+ });
  await check('C j2 pending recovery commits complete correction and delivers retained TOP advice once',async()=>{
   assert(!providerRun&&!phaseC&&!phaseCInitial,'J2_SYNTHETIC_ONLY');
   const j=await statefulFixture({componentFit:true});
