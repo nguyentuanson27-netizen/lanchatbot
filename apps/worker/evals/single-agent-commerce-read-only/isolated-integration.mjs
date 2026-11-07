@@ -685,7 +685,10 @@ try{
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
  await check('C quote batch V2 delivers original quote and image once without cart mutation',async()=>{
   assert(!providerRun&&!phaseC&&!phaseCInitial,'QUOTE_BATCH_SYNTHETIC_ONLY');
-  const j=await statefulFixture({media:true}),before=await j.state();
+  const j=await statefulFixture({media:true});
+  await runtime.loadOrCreateSalesCycle(pageId,j.bound.conversationId,
+   ()=>createSalesCycleRuntimeState(j.bound.conversationId,{pageId,conversationId:j.bound.conversationId},new Date()));
+  const before=await j.state();
   const calls=[{name:'quote_product',args:{subjectRef:'SM613',offerTypes:['DIRECT']}},
    {name:'select_product_media',args:{subjectRef:'SM613',intent:'BACK'}}];
   const text='Áo 499.000đ chị nhé.';
@@ -693,7 +696,10 @@ try{
    assert.deepEqual(request.contents.at(-1).parts.map(p=>p.functionResponse.name),calls.map(c=>c.name));return say(text);
   }],{testQuoteTask:EXPLICIT_QUOTE_TASK,testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
   assert.equal(result.result.terminal.disposition,'SEND_ELIGIBLE');assert.equal(result.verifiers,1);
-  assert.equal(result.result.normalToolCalls,4);assert.equal(result.result.executedNormalToolInvocations,4);
+  // First-contact opening preparation (read + image), quote (read + image), explicit BACK image.
+  assert.equal(result.result.normalToolCalls,5);assert.equal(result.result.executedNormalToolInvocations,5);
+  assert.equal(result.result.openingMediaWork.chargedUnits,1);
+  assert.deepEqual(result.result.quoteTaskWork,[{reservedUnits:2,readInvocations:1,selectionInvocations:1}]);
   const after=await j.state();assert.equal(after.cart,null);assert.deepEqual(after.processedCommandIds,before.processedCommandIds);
   j.restartDelivery();await j.drain();assert.equal(j.capture.filter(x=>x===text).length,1);assert.equal(j.capturePayloads.filter(p=>p.attachment).length,1);
   const delivered=j.capture.length;await j.drain();assert.equal(j.capture.length,delivered);
