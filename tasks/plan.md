@@ -1,3 +1,11 @@
+## Next plan — j2 recovery first, j1 controlled diagnostic, 2026-11-08
+
+- [x] Pin independent rootcause review and existing offlineprobe; planbase b7dc99c9. J2 pending HEIGHT confirmed; j1 design hypothesis remains unproven.
+- [x] Write concrete plan: separate rejected proposal/grounded pending/unconfirmedcommit; TDD current-turn correction + COMPONENT/retainedfit + negativeguards + realPG before model.
+- [ ] Implement j2, observe RED→GREEN and verify focused/PG; no blanketpendingclear/groundingrelaxation.
+- [ ] Build j1 eval-only A/B prerequisite-view diagnostic with unchanged prompts/tools/facts;10one-step slots plus conditional8native generations, no forcedtoolselection. J2modelacceptance max12; proposed futurebudget30total, providerNOT_RUN.
+- [ ] Self-review/seal first; one independent review only after all registered runs. No automaticfull55/promptpatch/nextloop. [Detailed plan](../docs/specs/c3-phase-c-j2-recovery-j1-controlled-plan-20261108.md).
+
 ## Complete model campaign — owner continuation, 2026-11-08
 
 - [x] Owner explicitly requested remaining30cases48turns afterR1FAIL, with exactly one review after all runs; no intermediate reviewer calls. Continued exact06b3901b source/frozen inputs, then restored report branch.

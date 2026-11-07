@@ -1,0 +1,36 @@
+{
+  "planBaseSha": "b7dc99c9dbc1d87cd67f38dd3264b670eb5ffe66",
+  "records": [
+    {
+      "source": "c3-rootcause-independent-review-20261108.md",
+      "originalRawSha256": "ab8d2e301c063c6c5f604fb28b4ee2fc78f143acc67a44e6bdefc037f55af6d7",
+      "publication": "independent-rootcause-review.md",
+      "publicationSha256": "ab8d2e301c063c6c5f604fb28b4ee2fc78f143acc67a44e6bdefc037f55af6d7",
+      "normalization": "CRLF_TO_LF_ONLY"
+    },
+    {
+      "source": "c3-rootcause-independent-review-20261108.json",
+      "originalRawSha256": "7396cbc29fb1fec8fc089716aeb78821e422db4c172fdc14e222fcab85d28e43",
+      "publication": "independent-rootcause-review.json",
+      "publicationSha256": "7396cbc29fb1fec8fc089716aeb78821e422db4c172fdc14e222fcab85d28e43",
+      "normalization": "CRLF_TO_LF_ONLY"
+    },
+    {
+      "source": "c3-rootcause-state-probe-20261108.mjs",
+      "originalRawSha256": "7bffb9937e9394c25207b7dfa8a84842c13e3395c3ca5671d9ff162a87d17a9c",
+      "publication": "j2-pending-probe.mjs",
+      "publicationSha256": "7bffb9937e9394c25207b7dfa8a84842c13e3395c3ca5671d9ff162a87d17a9c",
+      "normalization": "CRLF_TO_LF_ONLY"
+    },
+    {
+      "source": "c3-rootcause-state-probe-20261108.json",
+      "originalRawSha256": "0e19b4c9b1f77479713c376ef50efc6744610296daf9f23e8747428eb386113a",
+      "publication": "j2-pending-probe.json",
+      "publicationSha256": "0e19b4c9b1f77479713c376ef50efc6744610296daf9f23e8747428eb386113a",
+      "normalization": "CRLF_TO_LF_ONLY"
+    }
+  ],
+  "probeScope": "Historical minimal PRODUCT/QU714 in-memory diagnostic, not full COMPONENT/PG acceptance; original task-local imports retained; do not run archive copy as a test.",
+  "newRuntimeChanges": false,
+  "newProviderRequests": 0
+}
