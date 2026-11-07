@@ -2,6 +2,7 @@
 
 - [x] Pin independent rootcause review and existing offlineprobe; planbase b7dc99c9. J2 pending HEIGHT confirmed; j1 design hypothesis remains unproven.
 - [x] Write concrete plan: separate rejected proposal/grounded pending/unconfirmedcommit; TDD current-turn correction + COMPONENT/retainedfit + negativeguards + realPG before model.
+- [x] Revise plan after independent REQUEST_CHANGES: current-invalid fields stay blocked; one request/profile ledger across writer paths; reject partial recovery before CAS; freeze behavioral A/B predicates, wire bounds and freshness headroom. Same independent reviewer APPROVE_PLAN Revision 2, R1/R2/R3 CLOSED; implementation/provider NOT_RUN. [Pinned review](../docs/specs/evidence/c3-j2-j1-plan-20261108/plan-review-r2.md).
 - [ ] Implement j2, observe RED→GREEN and verify focused/PG; no blanketpendingclear/groundingrelaxation.
 - [ ] Build j1 eval-only A/B prerequisite-view diagnostic with unchanged prompts/tools/facts;10one-step slots plus conditional8native generations, no forcedtoolselection. J2modelacceptance max12; proposed futurebudget30total, providerNOT_RUN.
 - [ ] Self-review/seal first; one independent review only after all registered runs. No automaticfull55/promptpatch/nextloop. [Detailed plan](../docs/specs/c3-phase-c-j2-recovery-j1-controlled-plan-20261108.md).

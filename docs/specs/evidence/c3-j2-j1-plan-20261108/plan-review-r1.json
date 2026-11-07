@@ -1,0 +1,108 @@
+{
+  "kind": "INDEPENDENT_PLAN_REVIEW",
+  "date": "2026-11-08",
+  "verdict": "REQUEST_CHANGES",
+  "review_invocations": 1,
+  "repo": "C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005",
+  "source_head": "f0cf4a502b60fd9b9a987b336d525ad5472fc0e2",
+  "plan": "docs/specs/c3-phase-c-j2-recovery-j1-controlled-plan-20261108.md",
+  "implementation_reviewed": false,
+  "acceptance_claimed": false,
+  "provider_requests": 0,
+  "tests_or_evals_run": 0,
+  "repo_mutations": 0,
+  "subagents_spawned": 0,
+  "required_findings": [
+    {
+      "id": "R1",
+      "priority": "P1",
+      "title": "Mixed-valid patch must retain current-quote invalid value/domain blockers",
+      "plan_lines": [
+        33,
+        34,
+        41,
+        42,
+        43,
+        44,
+        52,
+        53,
+        64,
+        68
+      ],
+      "source_refs": [
+        "apps/worker/src/single-agent-commerce-state.ts:57",
+        "apps/worker/src/single-agent-commerce-state.ts:193",
+        "apps/worker/src/single-agent-commerce-state.ts:218"
+      ],
+      "amendment": "Distinguish provably non-current rejected proposal from fully validated pending correction and current/unknown invalid field. Current/unknown invalid fields remain blockers until that field validates and readback confirms; valid unrelated fields cannot unlock. Add mixed valid WEIGHT/current-quote wrong-value BUST and invalid-domain controls."
+    },
+    {
+      "id": "R2",
+      "priority": "P2",
+      "title": "Define recovery scope and partial replacement behavior across writer entry paths",
+      "plan_lines": [
+        42,
+        43,
+        44,
+        65
+      ],
+      "source_refs": [
+        "apps/worker/src/single-agent-commerce-state.ts:284",
+        "apps/worker/src/single-agent-commerce-state.ts:313",
+        "apps/worker/src/single-agent-commerce-state.ts:369",
+        "apps/worker/src/single-agent-commerce-state.ts:393"
+      ],
+      "amendment": "Keep pending profile corrections global to request/source/profile; use code-owned origin scope across inline, standalone, and identical-patch batch. Define partial replacement before CAS, preferably reject missing grounded pending fields. A different fit target cannot clear profile pending. Preserve commit uncertainty separately. Add focused entry-path/target controls."
+    },
+    {
+      "id": "R3",
+      "priority": "P2",
+      "title": "Freeze behavioral gate and control predicates before observing j1 outputs",
+      "plan_lines": [
+        118,
+        120,
+        122,
+        124,
+        147
+      ],
+      "source_refs": [],
+      "amendment": "Require at least one valid behavioral non-direct-quote response in A, so technical errors alone cannot open conditional gate; otherwise INCONCLUSIVE/NOT_RUN without retries. Freeze identical ACK/cart one-step allowed and forbidden predicates for A/B. Keep all errors in denominator and separate NOT_RUN from attempted samples; reserve terminal usability claims for paired native."
+    }
+  ],
+  "optional_findings": [
+    {
+      "id": "O1",
+      "title": "Freeze native-wire metadata field list, insertion point and byte-bound checks",
+      "source_refs": [
+        "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs:143",
+        "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs:269",
+        "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs:329"
+      ],
+      "amendment": "Use actual emitted schemas after native projection; ensure metadata survives presentation and only allowlisted final-wire field differs; rerun byte bounds after insertion, without production hook or context removal."
+    },
+    {
+      "id": "O2",
+      "title": "Freeze matched-pair dispatch order and source-lifetime headroom",
+      "amendment": "Keep pairs adjacent and freeze actual-time deadline/headroom; fail closed to NOT_RUN if source lifetime cannot cover dispatch. Do not renew timestamps or switch bundles between arms."
+    }
+  ],
+  "unknowns": [
+    "Implementation behavior after fix",
+    "Fresh bundle/config/credential availability and lifetime",
+    "New deterministic and real PostgreSQL acceptance results",
+    "Native model outcomes and sales acceptance",
+    "Causal effect and stability of J1 metadata"
+  ],
+  "constraints_preserved": [
+    "No generic intent parser or framework",
+    "No prompt patch loop",
+    "No tool hiding",
+    "One owner and at most one verifier",
+    "Code authority for state, facts, effects, receipts, freshness and privacy",
+    "First-contact image policy and silent fallback",
+    "Maximum proposed future runtime budget 30; no generation authorization in this review",
+    "Historical 18-slot population unchanged",
+    "One review invocation only"
+  ]
+}
+

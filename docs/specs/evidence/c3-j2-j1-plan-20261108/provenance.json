@@ -28,9 +28,59 @@
       "publication": "j2-pending-probe.json",
       "publicationSha256": "0e19b4c9b1f77479713c376ef50efc6744610296daf9f23e8747428eb386113a",
       "normalization": "CRLF_TO_LF_ONLY"
+    },
+    {
+      "source": "c3-j2-j1-plan-independent-review-20261108.md",
+      "originalRawSha256": "96280814de2a7036225a3d1a364e1a27717b073ec25dd3b7f3a7d6d0f6389eaf",
+      "publication": "plan-review-r1.md",
+      "publicationSha256": "96280814de2a7036225a3d1a364e1a27717b073ec25dd3b7f3a7d6d0f6389eaf",
+      "normalization": "CRLF_TO_LF_ONLY"
+    },
+    {
+      "source": "c3-j2-j1-plan-independent-review-20261108.json",
+      "originalRawSha256": "a91ad56f2daafd3ae6c79b269488a1766c9d592044650d6d7831707f43a4908e",
+      "publication": "plan-review-r1.json",
+      "publicationSha256": "a91ad56f2daafd3ae6c79b269488a1766c9d592044650d6d7831707f43a4908e",
+      "normalization": "CRLF_TO_LF_ONLY"
+    },
+    {
+      "source": "c3-j2-j1-plan-independent-review-20261108-r2.md",
+      "originalRawSha256": "e92a4af0f82de7c3ab32e8c6e210e874351a87e65e2f010b7e97614d212c8c26",
+      "publication": "plan-review-r2.md",
+      "publicationSha256": "e92a4af0f82de7c3ab32e8c6e210e874351a87e65e2f010b7e97614d212c8c26",
+      "normalization": "CRLF_TO_LF_ONLY"
+    },
+    {
+      "source": "c3-j2-j1-plan-independent-review-20261108-r2.json",
+      "originalRawSha256": "1b73d37e776b1d689cdd4021207b67f380925c63178df1531a346d12df4dda8f",
+      "publication": "plan-review-r2.json",
+      "publicationSha256": "1b73d37e776b1d689cdd4021207b67f380925c63178df1531a346d12df4dda8f",
+      "normalization": "CRLF_TO_LF_ONLY"
     }
   ],
   "probeScope": "Historical minimal PRODUCT/QU714 in-memory diagnostic, not full COMPONENT/PG acceptance; original task-local imports retained; do not run archive copy as a test.",
   "newRuntimeChanges": false,
-  "newProviderRequests": 0
+  "newProviderRequests": 0,
+  "planApproval": {
+    "revision": 2,
+    "verdict": "APPROVE_PLAN",
+    "plan": "docs/specs/c3-phase-c-j2-recovery-j1-controlled-plan-20261108.md",
+    "planSha256": "2c617c4d6b467a92797a706279d37ee43bdc9ac38f47bdb8767b3539e71d0393",
+    "review": "plan-review-r2.json",
+    "sameReviewer": true,
+    "reviewRounds": 2,
+    "requiredFindingsClosed": [
+      "R1",
+      "R2",
+      "R3"
+    ],
+    "optionalFindingsAddressed": [
+      "O1",
+      "O2"
+    ],
+    "scope": "PLAN_ONLY",
+    "implementation": "NOT_IMPLEMENTED",
+    "providerRequests": 0,
+    "newRuntimeTests": 0
+  }
 }

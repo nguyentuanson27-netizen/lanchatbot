@@ -1,0 +1,108 @@
+{
+  "kind": "INDEPENDENT_PLAN_REVIEW",
+  "revision": 2,
+  "date": "2026-11-08",
+  "verdict": "APPROVE_PLAN",
+  "approval_scope": "Exact plan bytes only; not implementation, acceptance, model outcomes, Phase C GO, provider execution or deployment",
+  "repo": "C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005",
+  "source_head": "f0cf4a502b60fd9b9a987b336d525ad5472fc0e2",
+  "plan": "docs/specs/c3-phase-c-j2-recovery-j1-controlled-plan-20261108.md",
+  "plan_sha256": "2c617c4d6b467a92797a706279d37ee43bdc9ac38f47bdb8767b3539e71d0393",
+  "plan_uncommitted": true,
+  "required_findings": [],
+  "closures": [
+    {
+      "id": "R1",
+      "status": "CLOSED",
+      "plan_lines": [
+        31,
+        35,
+        37,
+        38,
+        41,
+        49,
+        51,
+        76,
+        77,
+        78
+      ],
+      "reason": "Current-invalid/unknown blockers cannot be discarded as stale reuse; mixed-valid regression controls added."
+    },
+    {
+      "id": "R2",
+      "status": "CLOSED",
+      "plan_lines": [
+        43,
+        45,
+        47,
+        50,
+        51,
+        52,
+        53,
+        55,
+        75,
+        79,
+        80,
+        82
+      ],
+      "reason": "Unified profile/request ledger, all entry paths, partial rejection before CAS, target-independent pending and separate uncertainty defined."
+    },
+    {
+      "id": "R3",
+      "status": "CLOSED",
+      "plan_lines": [
+        143,
+        145,
+        146,
+        147,
+        149,
+        151,
+        153,
+        155
+      ],
+      "reason": "Frozen planning controls and behavioral baseline miss requirement; technical-only misses inconclusive; phase accounting and native outcome limits explicit."
+    },
+    {
+      "id": "O1",
+      "status": "ADDRESSED",
+      "plan_lines": [
+        120,
+        122,
+        124
+      ]
+    },
+    {
+      "id": "O2",
+      "status": "ADDRESSED",
+      "plan_lines": [
+        155
+      ]
+    }
+  ],
+  "implementation_constraints_already_in_plan": [
+    "Numeric helper only validates numeric copy/unit/domain; never grants provenance or fabricates history sources.",
+    "Current source completeness and stored provenance must be established by code-owned native ingress/profile evidence.",
+    "If reuse proof is unavailable, classify UNKNOWN/blocker; never equality-only bypass or blanket pending clear.",
+    "Keep exact reviewed plan bytes; record approval/hash in separate evidence."
+  ],
+  "feasibility_basis": [
+    "Native ingress constructs sourceMessages from current claimed batch after schema/scope/isBatchCurrent checks (single-agent-commerce-ingress.ts:120-135,262-264).",
+    "Existing numeric validation can be factored as a pure helper without granting source authority (single-agent-commerce-state.ts:57-90).",
+    "Eval adapter after final native projection can append one bounded metadata part without changing production OwnerRequest (gemini-inference.mjs:143-149,269-289,329-366)."
+  ],
+  "unknowns": [
+    "Implementation and source binding correctness",
+    "Deterministic RED/GREEN and real PostgreSQL acceptance",
+    "Credential/model/source availability and actual lifetime headroom",
+    "Model outcomes and sales acceptance",
+    "J1 causal effect or stability"
+  ],
+  "provider_requests": 0,
+  "tests_or_evals_run": 0,
+  "repo_mutations": 0,
+  "subagents_spawned": 0,
+  "future_runtime_generation_budget_max": 30,
+  "future_generation_authorized_by_review": false,
+  "prior_reports_overwritten": false
+}
+
