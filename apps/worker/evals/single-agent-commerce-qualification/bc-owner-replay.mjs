@@ -11,10 +11,10 @@ async function bounded(response,max){
  try{for(;;){const {value,done}=await reader.read();if(done)break;bytes+=value.byteLength;if(bytes>max){await reader.cancel();throw Error('CONTROL_RESPONSE_BOUND');}chunks.push(Buffer.from(value));}
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));}finally{reader.releaseLock();}
 }
-export function createCapturedOwnerSender({projectId,model},{fetchImpl=fetch,credential}={}){
+export function createCapturedOwnerSender({projectId,model},{fetchImpl=fetch,credential,assertBody=assertWire}={}){
  assert(model.model==='gemini-3.5-flash-lite'&&model.effort==='high'&&model.generationConfig.retry===0,'CONTROL_OWNER_IDENTITY');let token=null;
  return async(body,expectedHash)=>{
-  assertWire(body);const wire=JSON.stringify(body);assert.equal(byteHash(wire),expectedHash,'CONTROL_OWNER_BODY_CHANGED');
+  assertBody(body);const wire=JSON.stringify(body);assert.equal(byteHash(wire),expectedHash,'CONTROL_OWNER_BODY_CHANGED');
   const telemetry={providerRequests:0,authRequests:0,httpStatus:null,modelVersion:null,inputTokens:null,outputTokens:null,cost:null,requestHash:expectedHash};
   const start=performance.now(),signal=AbortSignal.timeout(90000);let raw=null,stage='AUTH';
   try{

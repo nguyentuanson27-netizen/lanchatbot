@@ -198,13 +198,21 @@ describe("j2 request/profile recovery ledger", () => {
     expect(Object.values(ctx.state.sizeFitTargets as Record<string,unknown>)).toContainEqual(expect.objectContaining({target:{kind:"COMPONENT",parentProductId:"QU714",componentRole:"TOP",componentProductId:"PART-TOP"}}));
     expect(ctx.effectReceipts).toContainEqual(expect.objectContaining({effect:"CUSTOMER_STATE_UPDATED"}));
   });
-  it("keeps conflicting current corrections and unconfirmed writes blocked",async()=>{
+  it("keeps unconfirmed writes blocked after a later valid patch",async()=>{
     const s=await recovery();
     await s.apply([correct[0],set("BUST_CM",86,"ngực 88")]);
     expect((await s.apply([set("WEIGHT_KG",51,"51kg"),set("BUST_CM",88,"ngực 88")])).status).toBe("OK");
     s.store.compareAndSwap.mockRejectedValueOnce(new Error("UNKNOWN_COMMIT"));
     await s.apply([set("WAIST_CM",70,"eo 70")]);await s.apply(correct);
     expect(s.tools.snapshot().state.customerStateUpdatePending).toBe(true);
+  });
+  it("fails closed on conflicting validated evidence in the same recovery group",async()=>{
+    const s=await setup("Eo 74, mông 96. Eo mới 75.");
+    await s.apply([set("WAIST_CM",74,"Eo 74"),set("HIPS_CM",76,"mông 96")]);
+    expect((await s.apply([set("WAIST_CM",75,"Eo mới 75"),set("HIPS_CM",96,"mông 96")])).status).toBe("REJECTED");
+    expect(s.store.compareAndSwap).not.toHaveBeenCalled();
+    expect(s.tools.snapshot().state.customerStateUpdatePending).toBe(true);
+    expect((await s.apply([set("WAIST_CM",74,"Eo 74"),set("HIPS_CM",96,"mông 96")])).status).toBe("REJECTED");
   });
   it("cannot replace a pending SET with CLEAR, a preference or an empty patch",async()=>{
     const s=await recovery();
