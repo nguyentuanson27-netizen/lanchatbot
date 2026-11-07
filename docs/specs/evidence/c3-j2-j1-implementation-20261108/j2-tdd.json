@@ -1,0 +1,28 @@
+{
+  "redRuntimeBaseSha": "01d73f694642f25f173129a7f1812814f160bae7",
+  "red": {
+    "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-grounded-state.test.ts --reporter=json --outputFile=../../../../c3-j2-red-20261108.json",
+    "failed": 14,
+    "passed": 20,
+    "artifactSha256": "4c50ae12164947b5312f1943bb2d81b789281948f09c41120e3c3d27e91393e5"
+  },
+  "additionalObservedRed": "CLEAR cannot resolve pending SET: 1 failed / 34 passed before pending-operation guard",
+  "focusedGreen": {
+    "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-state.test.ts src/single-agent-commerce-grounded-state.test.ts src/single-agent-commerce-quote.test.ts src/single-agent-commerce-ingress.test.ts --reporter=json --outputFile=../../../c3-j2-focused-green-20261108.json",
+    "failed": 0,
+    "passed": 310,
+    "artifactSha256": "16be9ddb3956824c5fdf567fd942683b23e3d73327d64d77f60d250885241117"
+  },
+  "pg": {
+    "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-j2-pg-recovery-20261108-01 COD --check-prefix \"C j2 pending recovery\"",
+    "rawSha256": "8717ef6334cbc19ede71da007086b323094c4bb4c594cc34637ebfbbc683bf2f",
+    "publishedSha256": "5b5fdb5ed9369ae71a5b335290b45c4d8df15d25f1ceb453dec6776e1a147558",
+    "selected": 1,
+    "passed": 1,
+    "databaseDropped": true,
+    "providerGenerations": 0
+  },
+  "attribution": "Tests ran on uncommitted J2 edits based on 01d73f69; PG report correctly records sourceDirty=true. Not exact-clean-source or provider acceptance.",
+  "providerRequests": 0,
+  "productionEntrypointsChanged": false
+}

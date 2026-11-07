@@ -683,6 +683,40 @@ try{
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+ await check('C j2 pending recovery commits complete correction and delivers retained TOP advice once',async()=>{
+  assert(!providerRun&&!phaseC&&!phaseCInitial,'J2_SYNTHETIC_ONLY');
+  const j=await statefulFixture({componentFit:true});
+  await runtime.loadOrCreateSalesCycle(pageId,j.bound.conversationId,
+   ()=>createSalesCycleRuntimeState(j.bound.conversationId,{pageId,conversationId:j.bound.conversationId},new Date()));
+  const fit=ops=>({name:'recommend_size',args:{subjectRef:'SM613',fitScope:'COMPONENT',componentRole:'TOP',...(ops?{customerStateOps:ops}:{})}});
+  const op=(kind,value,sourceQuote)=>({op:'SET',field:'measurements.'+kind,value,sourceQuote});
+  const first=await j.turn('Chị cao 162cm, nặng 56kg, chọn size áo giúp chị.',[
+   native([fit([op('HEIGHT_CM',162,'162cm'),op('WEIGHT_KG',56,'56kg')])]),say('Dạ chị.')]);
+  assert.equal(first.result.terminal.disposition,'SEND_ELIGIBLE');await j.drain();
+  const readProfile=()=>runtime.loadOrCreateCustomerProfile(pageId,j.bound.customerHash,()=>{throw Error('PROFILE_REQUIRED');},new Date());
+  const prior=await readProfile(),height=prior.profile.measurements.find(m=>m.kind==='HEIGHT_CM'),before=await j.state(),delivered=j.capture.length;
+  const corrections=[op('WEIGHT_KG',51,'51kg'),op('BUST_CM',88,'ngực 88'),op('WAIST_CM',70,'eo 70'),op('HIPS_CM',94,'mông 94')];
+  let finalContext,text;
+  const r=await j.turn('Chị nhắn nhầm, 51kg thôi nhé. Số đo ngực 88, eo 70, mông 94.',[
+   native([fit([op('HEIGHT_CM',162,'cao 162cm'),...corrections])]),
+   native([fit(corrections)]),request=>{
+    finalContext=request.context;
+    const claim=finalContext.protectedClaims.find(c=>c.type==='SIZE_FIT');assert(claim,'NEW_FIT_REQUIRED');
+    assert.equal(claim.value.fitTarget.kind,'COMPONENT');assert.equal(claim.value.fitTarget.parentProductId,'SM613');assert.equal(claim.value.fitTarget.componentRole,'TOP');
+    assert(!finalContext.state.customerStateUpdatePending);assert(finalContext.effectReceipts.some(r=>r.effect==='CUSTOMER_STATE_UPDATED'));
+    text=`Áo mình lấy size ${claim.value.recommendedSizes[0]} chị nhé.`;return say(text);
+   }]);
+  assert.equal(r.result.terminal.disposition,'SEND_ELIGIBLE',JSON.stringify(r.result));assert.equal(r.owners,3);assert.equal(r.verifiers,1);
+  const current=await readProfile();assert(current.profile.revision>prior.profile.revision);
+  assert.deepEqual(current.profile.measurements.find(m=>m.kind==='HEIGHT_CM'),height);
+  for(const c of corrections)assert.equal(current.profile.measurements.find(m=>'measurements.'+m.kind===c.field)?.value,c.value);
+  assert(current.profile.sizeAdviceTargets.some(t=>t.kind==='COMPONENT'&&t.parentProductId==='SM613'&&t.componentRole==='TOP'));
+  const after=await j.state();assert.equal(after.cart,null);assert.deepEqual(after.processedCommandIds,before.processedCommandIds);
+  j.restartDelivery();await j.drain();assert.deepEqual(j.capture.slice(delivered),[text]);
+  await j.drain();assert.deepEqual(j.capture.slice(delivered),[text]);
+  report.j2Recovery={profileRevision:current.profile.revision,oldHeightUnchanged:true,completeCorrectionReadback:true,
+   retainedTarget:'COMPONENT/TOP',numericalUpdateReceipt:true,acceptedDeliveryExactlyOnce:true,cartMutation:false,providerGenerations:0};
+ });
  await check('C quote batch V2 delivers original quote and image once without cart mutation',async()=>{
   assert(!providerRun&&!phaseC&&!phaseCInitial,'QUOTE_BATCH_SYNTHETIC_ONLY');
   const j=await statefulFixture({media:true});

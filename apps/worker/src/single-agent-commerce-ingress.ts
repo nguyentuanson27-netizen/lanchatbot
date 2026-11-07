@@ -262,6 +262,8 @@ export async function runPersistedCommerceIngress(input: {
   const tools: CommerceTools = await createCommerceTools({ ...(input.openingMediaRule?{openingMediaRule:input.openingMediaRule,openingCheckoutMedia:true as const}:{}),...(input.quoteTask?{quoteTask:input.quoteTask}:{}),...(input.observeDiagnostics?{observeDiagnostics:input.observeDiagnostics}:{}), read: { ...scopedRead, scope, clock: input.clock,
     entry: {firstContact: input.openingMediaRule ? priorShopOutput===null?null:!priorShopOutput : rows.length > 0 || recentMedia.length > 0 || recentCartEvents.length > 0 ? false : mediaHistoryUnavailable || publicHistoryUnavailable ? null : true, fromAd: ads.length > 0} }, state: { store: profilePort,
     sourceMessages,
+    verifiedCurrentSourceHash:commerceHash({pageId:scope.pageId,conversationId:scope.conversationId,
+      customerHash:scope.customerHash,requestId:scope.requestId,sourceMessages}),
     sizeInput: async ref => { const { product } = await input.read.catalog.readProduct(ref, false);
       return commerceSizeSource(product, await input.policy(), input.read.productGroups); },
     retainAdvice:true,

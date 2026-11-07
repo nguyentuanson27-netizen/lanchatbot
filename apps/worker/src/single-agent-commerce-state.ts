@@ -53,6 +53,29 @@ export function sizeRequestScope(a:{fitScope?:unknown;componentRole?:unknown}):"
   if(scope==="PRODUCT")return a.componentRole===undefined?"PRODUCT":null;
   return scope==="COMPONENT"&&["TOP","PANTS","SKIRT","DRESS","OTHER"].includes(a.componentRole as string)?"COMPONENT":null;
 }
+/** Numeric copy validation only. Never establishes a source or semantic field meaning. */
+function validateMeasurementCopy(text: string, index: number, quote: string, kind: MeasurementKind, value: unknown) {
+  const numbers = [...quote.matchAll(/[+-]?\d+(?:[.,]\d+)?/gu)];
+  if (!numbers.length) throw new Error("MEASUREMENT_SCALAR");
+  const first = index + numbers[0]!.index!, last = numbers.at(-1)!, lastEnd = index + last.index! + last[0].length;
+  if (/[\d+-]/u.test(text[first - 1] ?? "") || /\d/u.test(text[lastEnd] ?? "") ||
+    (/[.,]/u.test(text[first - 1] ?? "") && /\d/u.test(text[first - 2] ?? "")) ||
+    (/[.,]/u.test(text[lastEnd] ?? "") && /\d/u.test(text[lastEnd + 1] ?? ""))) throw new Error("MEASUREMENT_TOKEN");
+  const compact = quote.match(/([12])\s*m\s*(\d{1,2})(?!\d)/iu);
+  let scalar: number;
+  if (kind === "HEIGHT_CM" && numbers.length === 2 && compact && compact.index === numbers[0]!.index &&
+    compact.index! + compact[0].length === numbers[1]!.index! + numbers[1]![0].length) {
+    scalar = Number(compact[1]) * 100 + Number(compact[2]!.padEnd(2, "0"));
+  } else {
+    if (numbers.length !== 1) throw new Error("MEASUREMENT_SCALAR");
+    const number = numbers[0]!, start = index + number.index!, end = start + number[0].length;
+    const unit = text.slice(end).match(/^\s*(cm|kg|m)(?![\p{L}\p{N}])/iu)?.[1]?.toLowerCase();
+    scalar = Number(number[0].replace(",", "."));
+    if (unit === "m" && kind === "HEIGHT_CM") scalar *= 100;
+    else if ((unit === "kg" && kind !== "WEIGHT_KG") || (unit === "cm" && kind === "WEIGHT_KG") || unit === "m") throw new Error("MEASUREMENT_UNIT");
+  }
+  if (scalar !== value) throw new Error("MEASUREMENT_VALUE");
+}
 /** Numeric copy check only; the owner still interprets field, referent and correction meaning. */
 function measurementSource(sources: readonly CustomerStateSourceMessage[], quote: unknown, kind: MeasurementKind,
   value: unknown, scope: CommerceScope, now: Date) {
@@ -64,26 +87,7 @@ function measurementSource(sources: readonly CustomerStateSourceMessage[], quote
   if (!matches.length) throw new Error("MEASUREMENT_QUOTE_NOT_FOUND");
   if (matches.length !== 1) throw new Error("MEASUREMENT_QUOTE_AMBIGUOUS");
   const { source, index } = matches[0]!;
-  const numbers = [...quote.matchAll(/[+-]?\d+(?:[.,]\d+)?/gu)];
-  if (!numbers.length) throw new Error("MEASUREMENT_SCALAR");
-  const first = index + numbers[0]!.index!, last = numbers.at(-1)!, lastEnd = index + last.index! + last[0].length;
-  if (/[\d+-]/u.test(source.text[first - 1] ?? "") || /\d/u.test(source.text[lastEnd] ?? "") ||
-    (/[.,]/u.test(source.text[first - 1] ?? "") && /\d/u.test(source.text[first - 2] ?? "")) ||
-    (/[.,]/u.test(source.text[lastEnd] ?? "") && /\d/u.test(source.text[lastEnd + 1] ?? ""))) throw new Error("MEASUREMENT_TOKEN");
-  const compact = quote.match(/([12])\s*m\s*(\d{1,2})(?!\d)/iu);
-  let scalar: number;
-  if (kind === "HEIGHT_CM" && numbers.length === 2 && compact && compact.index === numbers[0]!.index &&
-    compact.index! + compact[0].length === numbers[1]!.index! + numbers[1]![0].length) {
-    scalar = Number(compact[1]) * 100 + Number(compact[2]!.padEnd(2, "0"));
-  } else {
-    if (numbers.length !== 1) throw new Error("MEASUREMENT_SCALAR");
-    const number = numbers[0]!, start = index + number.index!, end = start + number[0].length;
-    const unit = source.text.slice(end).match(/^\s*(cm|kg|m)(?![\p{L}\p{N}])/iu)?.[1]?.toLowerCase();
-    scalar = Number(number[0].replace(",", "."));
-    if (unit === "m" && kind === "HEIGHT_CM") scalar *= 100;
-    else if ((unit === "kg" && kind !== "WEIGHT_KG") || (unit === "cm" && kind === "WEIGHT_KG") || unit === "m") throw new Error("MEASUREMENT_UNIT");
-  }
-  if (scalar !== value) throw new Error("MEASUREMENT_VALUE");
+  validateMeasurementCopy(source.text, index, quote, kind, value);
   if (!source.sourceMessageId || !Number.isFinite(Date.parse(source.observedAt)) ||
     Date.parse(source.observedAt) > now.getTime()) throw new Error("MEASUREMENT_SOURCE");
   return { source: "CUSTOMER_MESSAGE" as const, sourceEventHash: commerceHash({ pageId: scope.pageId,
@@ -98,6 +102,9 @@ export async function createCustomerStateTools(input: {
     Omit<SizeEngineInput,"profile"|"generatedAt">&{fitTarget:Extract<SizeFitTargetV1,{kind:"COMPONENT"}>;sourceBindingHash:string;sourceExpiresAt:string}>;
   quoteInput?: () => Promise<ShopPolicyEvaluationInput>;
   sourceMessages?: readonly CustomerStateSourceMessage[];
+  /** Code-only hash of the complete verified current ingress batch and scope.
+   * An owner tool argument, shop history or numeric helper cannot grant this proof. */
+  verifiedCurrentSourceHash?: string;
   /** Candidate opt-in. Persist only requested targets, never a verdict or fit claim. */
   retainAdvice?:boolean;
 }): Promise<CommerceTools> {
@@ -105,7 +112,33 @@ export async function createCustomerStateTools(input: {
   let commitUnconfirmed = false;
   const invalidateCommit = () => { commitUnconfirmed = true; blockedDependencies = true; committedUpdate = undefined; sizes.clear(); cartQuote = undefined; quoteRead = false; };
   const pendingFields = new Set<string>();
-  const blocked = () => blockedDependencies || pendingFields.size > 0;
+  // Request-local and profile-wide, shared by standalone, inline and batch writes.
+  // null means a current/unknown invalid correction, not an accepted value.
+  const pendingCorrections = new Map<string, string | null>();
+  const pendingOperations = new Map<string, "CLEAR" | "WRITE">();
+  let rejectedReusePending = false, stateConflict = false;
+  const blocked = () => blockedDependencies || stateConflict || rejectedReusePending || pendingFields.size > 0;
+  function nonCurrentReuse(op: Record<string, unknown>, current: CustomerProfileMergeState): boolean {
+    const sources = input.sourceMessages ?? [], now = input.clock().getTime();
+    if (!input.verifiedCurrentSourceHash || !sources.length || typeof op.sourceQuote !== "string" ||
+      !op.sourceQuote.trim() || op.sourceQuote.length > 160 || !["SET", "REPLACE"].includes(String(op.op)) ||
+      current.profile.customerKey.digest !== input.scope.customerHash ||
+      input.verifiedCurrentSourceHash !== commerceHash({pageId:input.scope.pageId,conversationId:input.scope.conversationId,
+        customerHash:input.scope.customerHash,requestId:input.scope.requestId,sourceMessages:sources}) ||
+      new Set(sources.map(s=>s.sourceMessageId)).size !== sources.length ||
+      !sources.some(s=>s.sourceMessageId === input.scope.sourceMessageId && s.observedAt === input.scope.sourceObservedAt) ||
+      sources.some(s=>!s.sourceMessageId || !Number.isFinite(Date.parse(s.observedAt)) || Date.parse(s.observedAt)>now || s.text.includes(op.sourceQuote as string))) return false;
+    const kind = String(op.field).slice("measurements.".length) as MeasurementKind;
+    const old = current.profile.measurements.find(m=>m.kind===kind);
+    if (!old || old.value !== op.value || !["CUSTOMER_MESSAGE","HUMAN_CONFIRMED"].includes(old.provenance.source) ||
+      old.provenance.confidence !== 1 || !/^[a-f0-9]{64}$/.test(old.provenance.sourceEventHash ?? "") ||
+      !Number.isFinite(Date.parse(old.provenance.observedAt)) ||
+      sources.some(s=>old.provenance.sourceEventHash === commerceHash({pageId:input.scope.pageId,
+        conversationId:input.scope.conversationId,sourceMessageId:s.sourceMessageId}) || Date.parse(old.provenance.observedAt)>=Date.parse(s.observedAt)) ||
+      (current.fieldEvidence[String(op.field)] && commerceHash(current.fieldEvidence[String(op.field)])!==commerceHash(old.provenance))) return false;
+    try { validateMeasurementCopy(op.sourceQuote,0,op.sourceQuote,kind,op.value); return BodyMeasurementV1Schema.safeParse(old).success; }
+    catch { return false; }
+  }
   let sizeOutcome: { status: string } | null = null;
   const sizes = new Map<string, { claims: readonly unknown[]; fingerprint: string | undefined; profileHash: string; sourceHash: string;
     fitTarget:SizeFitTargetV1;sourceExpiresAt:string|null;request:{parentProductId:string;componentRole:ProductComponentRole}|null }>();
@@ -159,28 +192,50 @@ export async function createCustomerStateTools(input: {
   };
   async function apply(args: unknown): Promise<CommerceToolResult> {
     if (commitUnconfirmed) return { status: "REJECTED", reason: "STATE_COMMIT_UNCONFIRMED" };
+    if (stateConflict) return { status:"REJECTED", reason:"STATE_CONFLICT" };
     const a = toolArgs(args, ["ops"]);
+    const priorPending = new Set(pendingFields);
+    for (const raw of a && Array.isArray(a.ops) && a.ops.length ? a.ops : [null]) {
+      const field = raw && typeof raw === "object" && typeof raw.field === "string" ? raw.field : "*";
+      pendingFields.add(field);
+      if (!pendingCorrections.has(field)) pendingCorrections.set(field, null);
+      if (!pendingOperations.has(field) && raw && typeof raw === "object")
+        pendingOperations.set(field, raw.op === "CLEAR" ? "CLEAR" : "WRITE");
+    }
     if (!a || !Array.isArray(a.ops) || !a.ops.length || a.ops.length > 8) return { status: "REJECTED", reason: "STATE_ARGUMENTS" };
     const observedAt = input.scope.sourceObservedAt;
     if (!observedAt || !Number.isFinite(Date.parse(observedAt)) || Date.parse(observedAt) > input.clock().getTime()) return { status: "REJECTED", reason: "SOURCE_TIME" };
     let current: CustomerProfileMergeState;
     try { current = await input.store.read(); } catch { return {status:"UNAVAILABLE",reason:"STATE_SOURCE_UNAVAILABLE"}; }
-    if (commerceHash(current) !== commerceHash(effective)) { blockedDependencies = true; return { status: "REJECTED", reason: "STATE_CONFLICT" }; }
+    if (commerceHash(current) !== commerceHash(effective)) { stateConflict = true; blockedDependencies = true; return { status: "REJECTED", reason: "STATE_CONFLICT" }; }
     const evidence = { source: "CUSTOMER_MESSAGE" as const, sourceEventHash: commerceHash({ pageId: input.scope.pageId,
       conversationId: input.scope.conversationId, sourceMessageId: input.scope.sourceMessageId }), observedAt, confidence: 1 };
     const patch: CustomerProfilePatch = { profileId: current.profile.profileId, expectedRevision: current.profile.revision };
     const measurements = [], clears: MeasurementKind[] = [], absentClears: MeasurementKind[] = [], fields = new Set<string>();
     const fieldErrors: { field: string; reason: string; allowedValues?: readonly string[]; hint?: string }[] = [];
+    const stage = (field: string, value: unknown, source: unknown, operation: unknown) => {
+      const proof = commerceHash({value,source,operation:operation === "CLEAR" ? "CLEAR" : "WRITE"});
+      const prior = pendingCorrections.get(field);
+      if (prior && prior !== proof) {
+        pendingFields.add("*"); pendingCorrections.set("*",null);
+        fieldErrors.push({field,reason:"CONFLICTING_CURRENT_CORRECTION"});
+      } else pendingCorrections.set(field,proof);
+    };
     for (const raw of a.ops) {
       const op = toolArgs(raw, ["op", "field", "value", "sourceQuote"]);
       if (!op || !["SET", "REPLACE", "CLEAR"].includes(String(op.op)) || typeof op.field !== "string" ||
         fields.has(op.field) || (op.op === "CLEAR" && Object.hasOwn(op, "value"))) throw new Error("STATE_OPERATION");
       fields.add(op.field);
+      if (pendingOperations.get(op.field) !== (op.op === "CLEAR" ? "CLEAR" : "WRITE")) {
+        fieldErrors.push({field:op.field,reason:"CORRECTION_OPERATION_CHANGED"});
+        continue;
+      }
       if (op.field.startsWith("measurements.")) {
         const kind = op.field.slice("measurements.".length) as MeasurementKind;
         if (!(measurementKinds as readonly string[]).includes(kind)) throw new Error("STATE_FIELD");
         const old = current.profile.measurements.find(m => m.kind === kind);
         if (op.op === "CLEAR") {
+          stage(op.field,null,evidence,op.op);
           if (old) { clears.push(kind); measurements.push({ ...old, provenance: evidence }); }
           else {
             const previous = current.fieldEvidence[op.field];
@@ -192,9 +247,15 @@ export async function createCustomerStateTools(input: {
           try {
             const parsed = BodyMeasurementV1Schema.safeParse({ kind, value: op.value,
               provenance: measurementSource(input.sourceMessages ?? [], op.sourceQuote, kind, op.value, input.scope, input.clock()) });
-            if (parsed.success) measurements.push(parsed.data);
+            if (parsed.success) { measurements.push(parsed.data); stage(op.field,parsed.data.value,parsed.data.provenance,op.op); }
             else fieldErrors.push({field:op.field,reason:"INVALID_DOMAIN_VALUE",hint:parsed.error.issues[0]!.message.slice(0,160)});
           } catch (error) {
+            // Rejected non-current reuse is not a current correction. It still
+            // rejects the proposal and cannot authorize a fit without recovery.
+            if (error instanceof Error && error.message === "MEASUREMENT_QUOTE_NOT_FOUND" && nonCurrentReuse(op,current)) {
+              rejectedReusePending = true;
+              if (!priorPending.has(op.field)) { pendingFields.delete(op.field); pendingCorrections.delete(op.field); pendingOperations.delete(op.field); }
+            }
             fieldErrors.push({ field: op.field, reason: error instanceof Error && Object.hasOwn(measurementReasons, error.message) ? measurementReasons[error.message]! : "INVALID_DOMAIN_VALUE" });
           }
         }
@@ -205,7 +266,7 @@ export async function createCustomerStateTools(input: {
         else if (op.op !== "CLEAR" && (typeof op.sourceQuote !== "string" || !op.sourceQuote.trim() || op.sourceQuote.length > 160 ||
           !(input.sourceMessages ?? []).some(source => source.sourceMessageId === input.scope.sourceMessageId && source.text.includes(op.sourceQuote as string)))) {
           fieldErrors.push({field:op.field,reason:"QUOTE_NOT_IN_CURRENT_MESSAGE"});
-        } else Object.assign(patch, { fitPreference: { value: parsed.data.fitPreference, evidence } });
+        } else { Object.assign(patch, { fitPreference: { value: parsed.data.fitPreference, evidence } }); stage(op.field,parsed.data.fitPreference,evidence,op.op); }
       } else {
         const key = op.field.slice("preferences.".length) as typeof preferenceKinds[number];
         if (!op.field.startsWith("preferences.") || !preferenceKinds.includes(key)) throw new Error("STATE_FIELD");
@@ -213,9 +274,11 @@ export async function createCustomerStateTools(input: {
         if (!Array.isArray(value) || value.length > 20 || value.some(v => typeof v !== "string" || !v.trim() || v.length > 64)) { fieldErrors.push({field:op.field,reason:"INVALID_DOMAIN_VALUE"}); continue; }
         const list = op.op === "SET" ? [...current.profile.preferences[key], ...value] : value;
         Object.assign(patch, { preferences: { ...patch.preferences, [key]: { value: list, evidence } } });
+        stage(op.field,list,evidence,op.op);
       }
     }
     if (fieldErrors.length) return { status: "REJECTED", reason: fieldErrors.some(f => !f.field.startsWith("measurements.") || f.reason === "INVALID_DOMAIN_VALUE") ? "STATE_FIELD_INVALID" : "MEASUREMENT_SOURCE_INVALID", data: { fieldErrors } };
+    if ([...pendingFields].some(field=>!fields.has(field))) return {status:"REJECTED",reason:"STATE_UPDATE_INCOMPLETE"};
     // Only this C3 writer may correct the same grounded event under the current CAS.
     // Never weaken the shared timestamp/confidence/source ordering for other writers.
     const mergeBase = { ...structuredClone(current), fieldEvidence: { ...current.fieldEvidence } };
@@ -240,7 +303,7 @@ export async function createCustomerStateTools(input: {
     let readback: CustomerProfileMergeState;
     try {
       if (next.profile.revision !== current.profile.revision && !await input.store.compareAndSwap(current.profile.revision, next)) {
-        blockedDependencies = true; return { status: "REJECTED", reason: "STATE_CONFLICT" };
+        stateConflict = true; blockedDependencies = true; return { status: "REJECTED", reason: "STATE_CONFLICT" };
       }
       readback = await input.store.read();
     } catch {
@@ -249,6 +312,9 @@ export async function createCustomerStateTools(input: {
     if (commerceHash(readback) !== commerceHash(next)) { invalidateCommit(); return { status: "REJECTED", reason: "STATE_READBACK_CHANGED" }; }
     const changed = commerceHash(effective) !== commerceHash(readback);
     effective = readback; blockedDependencies = false;
+    // Only covered, validated fields after exact commit/readback can resolve.
+    for (const field of fields) { pendingFields.delete(field); pendingCorrections.delete(field); pendingOperations.delete(field); }
+    if (changed && measurements.some(m=>!clears.includes(m.kind))) rejectedReusePending = false;
     if (!changed) return { status: "OK", data: { revision: effective.profile.revision, applied: false,
       measurements: effective.profile.measurements.map(m => ({ kind: m.kind, value: m.value })) } };
     sizeOutcome = null; sizes.clear(); cartQuote = undefined; quoteRead = false;
@@ -282,14 +348,9 @@ export async function createCustomerStateTools(input: {
         return {...r,data:{...data,shoppingSelection:selection,selectionStatus:"CUSTOMER_CHOICE_RECORDED_NOT_PURCHASE"}};
       }
       if (call.name === "apply_customer_state") {
-        const args = toolArgs(call.args, ["ops"]);
-        const fields = args && Array.isArray(args.ops) && args.ops.length ? args.ops.map(op =>
-          op && typeof op === "object" && typeof op.field === "string" ? op.field as string : "*") : ["*"];
-        fields.forEach(field => pendingFields.add(field));
         let result: CommerceToolResult;
         try { result = await apply(call.args); }
-        catch { result = { status: "REJECTED", reason: "STATE_OR_DOMAIN_INPUT" }; }
-        if (result.status === "OK") fields.forEach(field => pendingFields.delete(field));
+        catch { pendingFields.add("*"); pendingCorrections.set("*",null); result = { status: "REJECTED", reason: "STATE_OR_DOMAIN_INPUT" }; }
         return result.status === "OK" ? result : { ...result, data: { ...result.data as Record<string, unknown>, ...(!commitUnconfirmed ? { applied: false } : {}), unresolvedFields: [...pendingFields] } };
       }
       if (call.name === "recommend_size") {

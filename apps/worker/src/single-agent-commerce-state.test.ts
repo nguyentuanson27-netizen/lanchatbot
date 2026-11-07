@@ -381,8 +381,12 @@ describe("accepted effective state before dependent tools", () => {
     expect(s.store.compareAndSwap).not.toHaveBeenCalled();
   });
   it("source-message provenance and revisions are supplied by code", async () => {
+    const invalid = await setup();
+    expect((await invalid.tools.invoke({ name: "apply_customer_state", args: { expectedRevision: 100, ops: [] } })).status).toBe("REJECTED");
+    expect(invalid.tools.snapshot().state.customerStateUpdatePending).toBe(true);
+    // Unknown-shape recovery stays blocked for that request. Test the valid
+    // provenance contract on a separate request, rather than resetting its ledger.
     const s = await setup();
-    expect((await s.tools.invoke({ name: "apply_customer_state", args: { expectedRevision: 100, ops: [] } })).status).toBe("REJECTED");
     await s.tools.invoke({ name: "apply_customer_state", args: { ops: [{ op: "REPLACE", field: "preferences.colors", value: ["navy"] }] } });
     expect(s.getStored().profile.preferences.colors).toEqual(["navy"]);
     expect(s.getStored().fieldEvidence["preferences.colors"]!.source).toBe("CUSTOMER_MESSAGE");
