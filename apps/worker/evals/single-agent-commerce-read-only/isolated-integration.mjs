@@ -655,7 +655,7 @@ try{
     ...(preparedOffers?{admitPreparedContext:request=>admitPreparedCommerceContext(JSON.parse(readFileSync(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/manifest.json'),'utf8')),'Synthetic verifier transport.',request)}:live&&providerPorts.admitPreparedContext?{admitPreparedContext:providerPorts.admitPreparedContext}:{}),
     ...(phaseC&&providerPorts.evaluationTurn?{evaluationTurn:providerPorts.evaluationTurn}:{}),
     ...(live&&(j2j1Input?providerPorts.m:providerFreeze.m).quoteTask?{quoteTask:(j2j1Input?providerPorts.m:providerFreeze.m).quoteTask}:testQuoteTask?{quoteTask:testQuoteTask}:{}),read,facts,policy,resolveTagId:()=> 'synthetic-tag',clock:()=>new Date(),
-    ...(live?{handoffReply:{approvedHoldingHashes:providerFreeze.m.handoffReply.approvedHoldingHashes}}:deferredHandoff?{handoffReply:{approvedHoldingHashes:[commerceHash(dependencyHoldingReply)]}}:{}),
+    ...(live?{handoffReply:{approvedHoldingHashes:(j2j1Input?providerPorts.m:providerFreeze.m).handoffReply.approvedHoldingHashes}}:deferredHandoff?{handoffReply:{approvedHoldingHashes:[commerceHash(dependencyHoldingReply)]}}:{}),
     ownerPrompt:live?providerPorts.ownerPrompt:'Synthetic owner transport, never a provider run.',verifierPrompt:live?providerPorts.verifierPrompt:'Synthetic verifier transport.',
     owner:async request=>{owners++;inspect(request);toolResponses.push(...request.contents.flatMap(c=>c.parts.flatMap(p=>p.functionResponse?[p.functionResponse]:[])));if(live)return providerPorts.owner(request);
       const next=outputs.shift();if(!next)throw new Error('CONTROLLED_GENERATION_FAILURE');return typeof next==='function'?next(request):next;},
