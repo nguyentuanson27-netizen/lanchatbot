@@ -38,6 +38,7 @@ import {assertDiagnosticFlags,diagnosticPreflight,claimDiagnostic} from '../sing
 import {admitPreparedCommerceContext} from './preparation-admission.mjs';
 import {collectSafety} from '../single-agent-commerce-qualification/collect-safety.mjs';
 import {cartSelectionFromSnapshot} from '../../dist/realtime-sales-catalog.js';
+import {createPersistedCommerceExecutor} from '../../dist/single-agent-commerce-session.js';
 
 const root=fileURLToPath(new URL('../../../../',import.meta.url));
 const phaseCArg=name=>{const i=process.argv.indexOf(name);return i<0?null:process.argv[i+1];};
@@ -680,7 +681,33 @@ try{
     return [{id:row.outbox_id,mediaBindingHash:commerceHash(binding),messageHash:commerceHash(unit),bindingRevision:binding.revision,bindingRecipient:binding.recipientHash}];
    });
   };
-  return {bound,turn,state,changeStoredCart,capture,capturePayloads,gateCalls,deliveryObservations,drain,syntheticNow,readCheckoutMediaProofs,
+  const seedControlCart=async args=>{
+   assert(j2j1Input?.mode==='PREPARE'&&live,'REGISTERED_CART_PREPARATION_ONLY');
+   const at=await syntheticNow(),id='cart-control-'+randomUUID(),text=`Chị lấy áo Thạch Thảo ${args.color.toLocaleLowerCase('vi-VN')} size M nhé.`;
+   await inbox.enqueue({pageId,metaAppId:'synthetic',eventKey:id,providerMessageId:id,conversationHash:customerHash,occurredAt:at,receivedAt:at,signatureKeyVersion:'synthetic',envelope:{synthetic:true}});
+   await pool.query('UPDATE conversation_ingress_heads SET quiet_until=now() WHERE page_id=$1 AND conversation_hash=$2',[pageId,customerHash]);
+   const batch=await inbox.claimNextBatch('j1-control-seed',300000);assert(batch?.conversationHash===customerHash,'CONTROL_CURRENT_BATCH');
+   const authority=await runtime.loadOrCreate(pageId,customerHash,'APP',()=>{throw Error('CONTROL_CONVERSATION_REQUIRED');});
+   const scoped={...bound,sourceMessageId:id,sourceObservedAt:at.toISOString(),requestId:batch.evaluationGroupId,recipient:hash('synthetic-recipient-'+customerHash),
+    bindingVersion:`commerce:${batch.generation}:${hash('synthetic-recipient-'+customerHash)}`,revision:authority.stateVersion,conversationOwner:'BOT',permission:true,privacyAllowed:true};
+   const guard={generation:batch.generation,leaseToken:batch.leaseToken,inboxIds:batch.inboxIds};
+   const readAuthority=async()=>{const row=await runtime.loadOrCreate(pageId,customerHash,'APP',()=>{throw Error('CONTROL_CONVERSATION_REQUIRED');});
+    return {...scoped,state:row.state,stateVersion:row.stateVersion,fence:batch.generation,permission:row.state.conversationOwner==='BOT'};};
+   const executor=createPersistedCommerceExecutor({scope:scoped,clock:()=>new Date(),latest:text,facts:bindCommerceFacts(facts,scoped),policy,readAuthority,
+    store:runtime,transaction:fn=>withTransaction(pool,fn),inboxBatchGuard:guard,resolveTagId:()=> 'synthetic-tag'});
+   const create=()=>{const f=fixtureProfile();f.profile.profileId=randomUUID();f.profile.customerKey.digest=customerHash;f.profile.measurements=[];f.profile.fitPreference=null;return f;};
+   const port=createRealtimeCustomerStatePort(runtime,scoped,create,()=>new Date(),{read:async()=>{const a=await readAuthority();return {...scoped,stateVersion:a.stateVersion};},inboxBatchGuard:guard});
+   const profile=await port.read();
+   const tools=await createCommerceTools({read:{...read,scope:scoped,clock:()=>new Date()},state:{store:port,sizeInput:async()=>{throw Error('CONTROL_NO_SIZE');}},
+    effects:{...executor,conversationKey:bound.conversationId,identity:{cartId:randomUUID(),salesEpisodeId:randomUUID(),customerProfileId:profile.profile.profileId},
+     authorize:async()=> (await readAuthority()).permission&&await inbox.isBatchCurrent(batch),policy:async()=>{const p=await policy();assert(p.bundle);return p.bundle;},
+     select:q=>bindCommerceFacts(facts,scoped).resolveCartSelection(q,new Date()),readAuthority:async()=>{const a=await readAuthority();return {...scoped,revision:a.stateVersion,conversationOwner:a.state.conversationOwner,permission:a.permission};}}});
+   const result=await tools.invoke({name:'add_to_cart',args});assert.equal(result.status,'OK',JSON.stringify(result));
+   const current=await tools.readback();assert(current.effectReceipts.some(r=>r.effect==='CART_OPENED'));
+   assert.equal((await readAuthority()).state.conversationOwner,'BOT');await inbox.completeBatch(batch);
+   return {result,receipts:current.effectReceipts,mode:'DIRECT_REAL_EXECUTOR_NO_TERMINAL_SEND'};
+  };
+  return {bound,turn,state,seedControlCart,changeStoredCart,capture,capturePayloads,gateCalls,deliveryObservations,drain,syntheticNow,readCheckoutMediaProofs,
    readPolicyStatuses:async()=>({transaction:(await policy()).status,active:(await read.policy()).status}),
    restartDelivery:()=>{dispatcher=makeDispatcher();},changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;},changeHandoffPolicy:()=>{policyChanged=true;},disableReceiptRead:()=>{receiptAvailable=false;},
    revokeMediaProof:()=>{assert(revalidatedMedia);product.product.images[0].revalidation={status:'INVALID'};},
