@@ -24,5 +24,11 @@
   },
   "attribution": "Tests ran on uncommitted J2 edits based on 01d73f69; PG report correctly records sourceDirty=true. Not exact-clean-source or provider acceptance.",
   "providerRequests": 0,
-  "productionEntrypointsChanged": false
+  "productionEntrypointsChanged": false,
+  "finalFocusedGreen": {
+    "passed": 311,
+    "failed": 0,
+    "artifactRawSha256": "3a05eb23b8a86c507b8a563d6dada91a3626957b962b4a31389ec19cdb99b981",
+    "additionalControl": "conflicting validated current corrections stay blocked"
+  }
 }

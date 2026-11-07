@@ -2,10 +2,11 @@
 
 - [x] Pin independent rootcause review and existing offlineprobe; planbase b7dc99c9. J2 pending HEIGHT confirmed; j1 design hypothesis remains unproven.
 - [x] Write concrete plan: separate rejected proposal/grounded pending/unconfirmedcommit; TDD current-turn correction + COMPONENT/retainedfit + negativeguards + realPG before model.
-- [x] Revise plan after independent REQUEST_CHANGES: current-invalid fields stay blocked; one request/profile ledger across writer paths; reject partial recovery before CAS; freeze behavioral A/B predicates, wire bounds and freshness headroom. Same independent reviewer APPROVE_PLAN Revision 2, R1/R2/R3 CLOSED; implementation/provider NOT_RUN. [Pinned review](../docs/specs/evidence/c3-j2-j1-plan-20261108/plan-review-r2.md).
-- [ ] Implement j2, observe RED→GREEN and verify focused/PG; no blanketpendingclear/groundingrelaxation.
-- [ ] Build j1 eval-only A/B prerequisite-view diagnostic with unchanged prompts/tools/facts;10one-step slots plus conditional8native generations, no forcedtoolselection. J2modelacceptance max12; proposed futurebudget30total, providerNOT_RUN.
-- [ ] Self-review/seal first; one independent review only after all registered runs. No automaticfull55/promptpatch/nextloop. [Detailed plan](../docs/specs/c3-phase-c-j2-recovery-j1-controlled-plan-20261108.md).
+- [x] Revise plan after independent REQUEST_CHANGES: current-invalid fields stay blocked; one request/profile ledger across writer paths; reject partial recovery before CAS; freeze behavioral A/B predicates, wire bounds and freshness headroom. Same independent reviewer APPROVE_PLAN Revision 2, R1/R2/R3 CLOSED; approval was plan-only. Implementation status follows below. [Pinned review](../docs/specs/evidence/c3-j2-j1-plan-20261108/plan-review-r2.md).
+- [x] Implement j2 recovery: observed RED14, final focused311PASS + protected regression75PASS; realPG1/1PASS, DBdropped/provider0, working-edit attribution retained. No blanketclear/groundingrelaxation. [Implementation/evidence](../docs/specs/evidence/c3-j2-j1-implementation-20261108/IMPLEMENTATION.md).
+- [x] Build j1 eval-only wire view/10slot primary + conditional8 native wrapper; focused23PASS, offline captured-world capacity978100VND/CAS0/provider0. Prompts/tools/facts unchanged; no model outcome or adoption evidence yet.
+- [x] Self-review implementation and retain test/source attribution; worker build/typecheck/lint PASS. New provider calls0.
+- [ ] At execution: capture fresh inputs + real seeded cart controls, bind isolated native stores, seal clean HEAD and check lifetime/config/credentials; j2 max12 + primary10 + conditional8 = max30. One independent review after all registered runs; no automaticfull55/promptpatch/nextloop. [Detailed plan](../docs/specs/c3-phase-c-j2-recovery-j1-controlled-plan-20261108.md).
 
 ## Complete model campaign — owner continuation, 2026-11-08
 

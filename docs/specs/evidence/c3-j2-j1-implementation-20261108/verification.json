@@ -1,0 +1,173 @@
+{
+  "kind": "IMPLEMENTATION_VERIFICATION_NOT_PROVIDER_ACCEPTANCE",
+  "implementationBaseSha": "01d73f694642f25f173129a7f1812814f160bae7",
+  "j2Savepoint": "a0b7c6af",
+  "j1Savepoint": "82971134",
+  "approvedPlanSha256": "2c617c4d6b467a92797a706279d37ee43bdc9ac38f47bdb8767b3539e71d0393",
+  "currentExecutableHashes": {
+    "apps/worker/src/single-agent-commerce-state.ts": "afd42953f3dcb1a84f58ab923ebcaac5eb379ad97b48a16eddb04c2ec5d6833f",
+    "apps/worker/src/single-agent-commerce-ingress.ts": "2beeac050cce535e6776fc0e2ec50ca0cae4b2c539202214b0250982dd8d4031",
+    "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs": "41bd42afbc19b42039e0acd92c8abb3b2198d30179ce56bcbbffa159bd91a5a5",
+    "apps/worker/evals/single-agent-commerce-qualification/j1-operation-control.mjs": "1ac8231fc969ce904c9aa1b9e233a3b835e5ea5ed301ae52e7276185fd22e1fd",
+    "apps/worker/evals/single-agent-commerce-qualification/j1-code-replay.mjs": "62574ca0cf49d586c55a7c0bd22b60e6839bcac9b411388eaf46594ae46be045",
+    "apps/worker/evals/single-agent-commerce-qualification/bc-owner-replay.mjs": "e2835ac5df8a1f2237928024c6c9eeae8e979e90e4c3207c56fca6d443be1d94"
+  },
+  "commandsActuallyRun": [
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-state.test.ts src/single-agent-commerce-grounded-state.test.ts src/single-agent-commerce-quote.test.ts src/single-agent-commerce-ingress.test.ts --reporter=json --outputFile=../../../c3-j2-focused-final-20261108.json",
+      "result": "PASS",
+      "tests": 311,
+      "artifactRawSha256": "3a05eb23b8a86c507b8a563d6dada91a3626957b962b4a31389ec19cdb99b981"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/track-b-protected-claim-boundary.test.ts src/single-agent-semantic-verifier-boundary.test.ts --reporter=json --outputFile=../../../c3-j2-protected-regression-20261108.json",
+      "result": "PASS",
+      "tests": 75,
+      "artifactRawSha256": "2321fe96650dbae663aca06e4fbce74cda6cd79d3c9ff1476ac93dc67267bb45"
+    },
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-qualification/j1-operation-control.test.mjs apps/worker/evals/single-agent-commerce-qualification/bc-control.test.mjs",
+      "result": "PASS",
+      "tests": 23,
+      "artifactRawSha256": "7ae88ea9c3a919e34c159e212589f4de2e4c5cc3262c535518151002e4516594"
+    },
+    {
+      "command": "pnpm --filter @lana/worker test:evals",
+      "result": "PASS",
+      "tests": 886,
+      "skipped": 2,
+      "artifactRawSha256": "e81a2feb1c967d767c8279ce5ac257daa69a788bae298afddbf4016a94b52d01",
+      "attribution": "Intermediate working edits; latest direct-quote/prose and actual multimodal text-cap self-review fixes verified by final focused23PASS. Not an exact-clean-head full-suite attestation."
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "result": "PASS",
+      "artifactRawSha256": "762f98e0d955d589a8ef75f42842d8439f68de731efde9cbec025e751d10d1a3",
+      "attribution": "After final runtime edits; later changes affected eval modules and test coverage."
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "result": "PASS",
+      "artifactRawSha256": "c3c936d1c1b207cdf8b151b405765c8efed7fef4f48132ece96c2244b1ca2fd0"
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "result": "PASS",
+      "note": "Also rerun after latest TypeScript test additions."
+    },
+    {
+      "command": "node --check apps/worker/evals/single-agent-commerce-qualification/j1-code-replay.mjs",
+      "result": "PASS"
+    },
+    {
+      "command": "node --check apps/worker/evals/single-agent-commerce-qualification/j1-operation-control.mjs",
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    }
+  ],
+  "logs": {
+    "build": {
+      "artifact": "c3-j2-j1-build-20261108.log",
+      "rawSha256": "762f98e0d955d589a8ef75f42842d8439f68de731efde9cbec025e751d10d1a3",
+      "encoding": "UTF8"
+    },
+    "typecheck": {
+      "artifact": "c3-j2-j1-typecheck-20261108.log",
+      "rawSha256": "c3c936d1c1b207cdf8b151b405765c8efed7fef4f48132ece96c2244b1ca2fd0",
+      "encoding": "UTF8"
+    },
+    "lint": {
+      "artifact": "c3-j2-j1-lint-20261108.log",
+      "rawSha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "encoding": "UTF8"
+    },
+    "evalsIntermediate": {
+      "artifact": "c3-j2-j1-evals-20261108.log",
+      "rawSha256": "abf8c4a960cbd1aeb21cb22c995f36c5c6311ab24a4d534eda1fd0d6298f429a",
+      "encoding": "UTF8",
+      "counts": {
+        "tests": 884,
+        "pass": 882,
+        "fail": 0,
+        "skipped": 2
+      }
+    },
+    "evalsLater": {
+      "artifact": "c3-j2-j1-evals-final-20261108.log",
+      "rawSha256": "e81a2feb1c967d767c8279ce5ac257daa69a788bae298afddbf4016a94b52d01",
+      "encoding": "UTF8",
+      "counts": {
+        "tests": 888,
+        "pass": 886,
+        "fail": 0,
+        "skipped": 2
+      }
+    },
+    "j1FocusedFinal": {
+      "artifact": "c3-j1-controls-final-20261108.log",
+      "rawSha256": "7ae88ea9c3a919e34c159e212589f4de2e4c5cc3262c535518151002e4516594",
+      "encoding": "UTF8",
+      "counts": {
+        "tests": 23,
+        "pass": 23,
+        "fail": 0,
+        "skipped": 0
+      }
+    }
+  },
+  "offlineReplay": "j1-code-replay.json",
+  "postgres": "j2-pg-acceptance.json",
+  "tdd": "j2-tdd.json",
+  "selfReview": {
+    "status": "COMPLETED",
+    "fixes": [
+      "CLEAR cannot replace pending WRITE",
+      "unknown-shape request stays blocked; valid provenance control moved to fresh request",
+      "current-invalid fields cannot be discarded as stale reuse",
+      "profile ledger spans target/wrapper/batch",
+      "exact source/project/wire identity and request bounds",
+      "frozen denominator/predicates and primary claim prevent hidden retry",
+      "valid bounded quote/read siblings not misclassified; prose is reviewed whole-output offline",
+      "recount actual text after metadata/optional hints even with images; image cap never substitutes text cap, limit and limit+1 tested"
+    ],
+    "independentImplementationReview": "NOT_RUN; plan defers one consolidated independent outcome review until registered model runs complete"
+  },
+  "interimFailuresRetained": [
+    "Observed pre-fix RED14/20",
+    "Observed CLEAR-bypass RED1/34, then fixed",
+    "Earlier focused310: one old test assumed recovery after unknown-shaped request; split requests per approved conservative contract",
+    "Initial typecheck found optional result and nullable hash errors; fixed before final build/typecheck/lint",
+    "J1 colour-selection negative test exposed an overly permissive direct predicate; fixed and final focused passed",
+    "J1 replay composition needed existing state/quoteInput/handoff capabilities; final replay PASSED without I/O/effects"
+  ],
+  "structuralComplexity": {
+    "newOnlineRoles": 0,
+    "newRuntimeToolArguments": 0,
+    "newPersistentTables": 0,
+    "newSemanticParsers": 0,
+    "newProductionEntrypointWiring": 0,
+    "runtimeChange": "request-local correction ledger + code-owned ingress source binding; reuse numeric validator",
+    "evalChange": "one scoped J1 adapter/sampler/gate/native wrapper and offline replay, existing provider sender reused"
+  },
+  "providerRequests": 0,
+  "upstreamHttpDuringStubTests": 0,
+  "modelAcceptance": "NOT_RUN",
+  "conditionalNativeProviderAcceptance": "NOT_RUN",
+  "newRunIdentity": "NOT_SEALED",
+  "liveSend": 0,
+  "liveSourceWrites": 0,
+  "merge": false,
+  "deploy": false,
+  "pendingExecution": [
+    "fresh current input population/real executor-seeded cart controls",
+    "isolated native store/history binding and canonical parity",
+    "clean-source seal + actual credential/model/lifetime preflight",
+    "j2 journey max12; primary10; conditional8 only if gate allows; max30 total",
+    "single consolidated independent outcome review"
+  ],
+  "qualification": "Existing Phase C STOP remains; no adoption/GO claim",
+  "j1BoundsSavepoint": "7aa253bb"
+}
