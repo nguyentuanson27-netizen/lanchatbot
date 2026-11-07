@@ -37,4 +37,3 @@ Không thấy plan nới code authority, ảnh first-contact/silent fallback, 1 
 Không chạy tests/evals/archive probe/provider, không gọi nguồn live, không sửa code hoặc plan, không spawn subagent hay gọi reviewer khác. Chỉ xuất hai report r2 ngoài repo. Chưa xác minh implementation, source binding mới, RED/GREEN/real-PG, credential/model/source availability, lifetime headroom thực tế hoặc sales acceptance. Các kiểm tra đó vẫn thuộc lượt implementation/execute có authorization riêng.
 
 Trạng thái approval/hash nên lưu trong evidence riêng như header hiện quy định; không cần sửa plan đã được hash để chèn kết luận này.
-

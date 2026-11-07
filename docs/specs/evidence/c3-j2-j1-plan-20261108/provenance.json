@@ -33,29 +33,29 @@
       "source": "c3-j2-j1-plan-independent-review-20261108.md",
       "originalRawSha256": "96280814de2a7036225a3d1a364e1a27717b073ec25dd3b7f3a7d6d0f6389eaf",
       "publication": "plan-review-r1.md",
-      "publicationSha256": "96280814de2a7036225a3d1a364e1a27717b073ec25dd3b7f3a7d6d0f6389eaf",
-      "normalization": "CRLF_TO_LF_ONLY"
+      "publicationSha256": "f314659330f9a2346134910ed544347b8e005fc8f6d6f9d24300d8b143bc8703",
+      "normalization": "CRLF_TO_LF_AND_SINGLE_FINAL_NEWLINE"
     },
     {
       "source": "c3-j2-j1-plan-independent-review-20261108.json",
       "originalRawSha256": "a91ad56f2daafd3ae6c79b269488a1766c9d592044650d6d7831707f43a4908e",
       "publication": "plan-review-r1.json",
-      "publicationSha256": "a91ad56f2daafd3ae6c79b269488a1766c9d592044650d6d7831707f43a4908e",
-      "normalization": "CRLF_TO_LF_ONLY"
+      "publicationSha256": "fc83fa9fd2409f83b3307dd7777202ac056d92d4e68cda0a10ef218a660575cb",
+      "normalization": "CRLF_TO_LF_AND_SINGLE_FINAL_NEWLINE"
     },
     {
       "source": "c3-j2-j1-plan-independent-review-20261108-r2.md",
       "originalRawSha256": "e92a4af0f82de7c3ab32e8c6e210e874351a87e65e2f010b7e97614d212c8c26",
       "publication": "plan-review-r2.md",
-      "publicationSha256": "e92a4af0f82de7c3ab32e8c6e210e874351a87e65e2f010b7e97614d212c8c26",
-      "normalization": "CRLF_TO_LF_ONLY"
+      "publicationSha256": "9fd236d8d137ca4b4d477ef9fe3982fab29be0dab3a8aac16001e8c4ec29cc4c",
+      "normalization": "CRLF_TO_LF_AND_SINGLE_FINAL_NEWLINE"
     },
     {
       "source": "c3-j2-j1-plan-independent-review-20261108-r2.json",
       "originalRawSha256": "1b73d37e776b1d689cdd4021207b67f380925c63178df1531a346d12df4dda8f",
       "publication": "plan-review-r2.json",
-      "publicationSha256": "1b73d37e776b1d689cdd4021207b67f380925c63178df1531a346d12df4dda8f",
-      "normalization": "CRLF_TO_LF_ONLY"
+      "publicationSha256": "143e24423ac9f0af5190b47dc28eaeaaf2e33157ecbddf476c62aa36b6732fac",
+      "normalization": "CRLF_TO_LF_AND_SINGLE_FINAL_NEWLINE"
     }
   ],
   "probeScope": "Historical minimal PRODUCT/QU714 in-memory diagnostic, not full COMPONENT/PG acceptance; original task-local imports retained; do not run archive copy as a test.",
@@ -82,5 +82,19 @@
     "implementation": "NOT_IMPLEMENTED",
     "providerRequests": 0,
     "newRuntimeTests": 0
+  },
+  "documentationVerification": {
+    "scope": "documentation only",
+    "checks": [
+      "reviewed-plan SHA256 matches approval",
+      "all published evidence hashes match",
+      "JSON parse",
+      "plan/current task links exist",
+      "UTF-8/LF and single final newline for review publications",
+      "credential-pattern scan with token boundaries",
+      "git diff --check (including new files)"
+    ],
+    "runtimeTests": "NOT_RUN",
+    "providerRequests": 0
   }
 }
