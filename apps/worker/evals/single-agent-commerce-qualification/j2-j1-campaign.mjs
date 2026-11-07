@@ -105,9 +105,12 @@ export async function executeCampaign({root,input,inputFile,world,out,ports,sess
  if(input.mode==='PREPARE'){
   const j1=await seedJ1(),total=await capture(j1,j1Texts[2]);
   const cart=await fixture();let call=0;
-  ports.preparation({owner:()=>call++===0?native([{name:'add_to_cart',args:{subjectRef:'SV2447',offerType:'AO',size:'M',color:'WHITE',quantity:1}}]):{kind:'FINAL',text:'Dạ chị.'}});
+  const colors=[...new Set(world.snapshots.SV2447.offers.AO.rows.filter(r=>r.size==='M'&&r.stock_quantity>0&&r.color!=='__NO_COLOR__').map(r=>r.color))];
+  assert(colors.length===1,'CAMPAIGN_UNIQUE_CONTROL_COLOR');
+  ports.preparation({owner:()=>call++===0?native([{name:'add_to_cart',args:{subjectRef:'SV2447',offerType:'AO',size:'M',color:colors[0],quantity:1}}]):{kind:'FINAL',text:'Dạ chị.'}});
   const seeded=await cart.turn('Chị lấy áo Thạch Thảo trắng size M nhé.',[]);await cart.drain();
-  const cartState=await snapshot(cart);assert(cartState.publicState.cart&&cartState.receipts.length,'CAMPAIGN_REAL_CART_SEED');
+  const cartState=await snapshot(cart);write(resolve(out,'CART_SEED.json'),{observed:seeded,state:cartState});
+  assert(cartState.publicState.cart&&cartState.receipts.length,'CAMPAIGN_REAL_CART_SEED');
   const cartRequest=await capture(cart,'Tổng cả phí ship cho chị bao nhiêu em?');
   assert(cartRequest.context.state.cartQuote,'CAMPAIGN_CURRENT_CART_QUOTE');
   const ack=await fixture(['SV2447','SQ2447']);const ackRequest=await capture(ack,'Chị thích áo Thạch Thảo màu be, cảm ơn em nhé.');
