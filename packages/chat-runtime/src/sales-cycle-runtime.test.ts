@@ -188,6 +188,48 @@ function addPreview(state: SalesCycleRuntimeState, payment: "COD" | "BANK_TRANSF
 const confirmationIntent = { source: "MODEL_STRUCTURED_OUTPUT" as const, intent: "PURCHASE_CONFIRMATION" as const, sourceMessageId: "mid-ok-1" };
 
 describe("Phase 3 sales-cycle runtime", () => {
+ it("keeps the payment blocker after actual private-field progress resets its question budget to zero",()=>{
+  const cart=addCart();
+  let state={...cart,checkoutDraft:{...cart.checkoutDraft!,fullName:null},clarification:{reasonCode:"CHECKOUT_DETAILS_MISSING" as const,
+   missingFields:["PAYMENT_METHOD"],productId:"CB182",attemptCount:2,maxAttempts:3,
+   askedQuestionFingerprints:["a".repeat(64),"b".repeat(64)],lastRequestedAt:now.toISOString()}};
+  const run=(command:Parameters<typeof applySalesCycleCommand>[0]["command"])=>applySalesCycleCommand({state,expectedRevision:state.revision,command,now,trustedPorts:trustedPorts()});
+  const captured=run({kind:"CHECKOUT_DETAILS_CAPTURED",commandId:"actual-name-progress",details:{fullName:recipient.fullName}});
+  expect(captured).toMatchObject({status:"APPLIED",state:{clarification:{attemptCount:0,missingFields:["PAYMENT_METHOD"],askedQuestionFingerprints:[]}}});
+  const progressed=captured.state;
+  expect(applySalesCycleCommand({state:progressed,expectedRevision:progressed.revision,command:{kind:"PREVIEW_CREATED",commandId:"zero-preview",preview:preview()},now})).toMatchObject({status:"REJECTED",reasonCode:"PAYMENT_CHOICE_UNRESOLVED"});
+  expect(applySalesCycleCommand({state:progressed,expectedRevision:progressed.revision,command:{kind:"CONFIRM_PURCHASE",commandId:"zero-confirm",intent:confirmationIntent},now})).toMatchObject({status:"REJECTED",reasonCode:"PAYMENT_CHOICE_UNRESOLVED"});
+  expect(applySalesCycleCommand({state:progressed,expectedRevision:progressed.revision,command:{kind:"CLARIFICATION_REQUESTED",commandId:"first-after-progress",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["PAYMENT_METHOD"],productId:"CB182",questionFingerprint:"c".repeat(64),maxAttempts:3},now})).toMatchObject({status:"APPLIED",state:{clarification:{attemptCount:1}}});
+  expect(applySalesCycleCommand({state:progressed,expectedRevision:progressed.revision,command:{kind:"CHECKOUT_DETAILS_CAPTURED",commandId:"actual-name-progress",details:{fullName:recipient.fullName}},now})).toMatchObject({status:"DUPLICATE",state:progressed});
+ });
+ it("payment clarification blocks direct preview/confirm and cannot be resolved by other intake fields",()=>{
+  let state=addPreview(addCart());
+  const run=(command:Parameters<typeof applySalesCycleCommand>[0]["command"])=>applySalesCycleCommand({state,expectedRevision:state.revision,command,now,trustedPorts:trustedPorts()});
+  const pending=run({kind:"CLARIFICATION_REQUESTED",commandId:"payment-unclear",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["PAYMENT_METHOD"],productId:null,questionFingerprint:"a".repeat(64),maxAttempts:3});
+  expect(pending.status).toBe("APPLIED");state=pending.state;
+  expect(run({kind:"PREVIEW_CREATED",commandId:"preview-stale-method",preview:preview()}).status).toBe("REJECTED");
+  expect(run({kind:"CLARIFICATION_RESOLVED",commandId:"fake-resolve"}).status).toBe("REJECTED");
+  expect(run({kind:"CLARIFICATION_REQUESTED",commandId:"fake-replace",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["FULL_NAME"],productId:null,questionFingerprint:"b".repeat(64),maxAttempts:3}).status).toBe("REJECTED");
+  expect(run({kind:"CLARIFICATION_REQUESTED",commandId:"fake-widen",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["FULL_NAME","PAYMENT_METHOD"],productId:null,questionFingerprint:"b".repeat(64),maxAttempts:3}).status).toBe("REJECTED");
+  state=run({kind:"CHECKOUT_DETAILS_CAPTURED",commandId:"other-field",details:{fullName:recipient.fullName}}).state;
+  expect(state.clarification?.missingFields).toEqual(["PAYMENT_METHOD"]);
+  expect(run({kind:"CONFIRM_PURCHASE",commandId:"confirm-stale-method",intent:{source:"DETERMINISTIC_CLASSIFIER",intent:"PURCHASE_CONFIRMATION",sourceMessageId:"new-source"}})).toMatchObject({status:"REJECTED",reasonCode:"PAYMENT_CHOICE_UNRESOLVED"});
+  state=run({kind:"CHECKOUT_DETAILS_CAPTURED",commandId:"payment-chosen",details:{paymentMethod:"COD"}}).state;
+  expect(state.preview).toBeNull();
+  expect(state.clarification?.missingFields).toEqual(["ORDER_PREVIEW"]);
+  expect(state.clarification?.attemptCount).toBe(1);
+  expect(run({kind:"CLARIFICATION_REQUESTED",commandId:"fake-replace-preview",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["FULL_NAME"],productId:null,questionFingerprint:"b".repeat(64),maxAttempts:3})).toMatchObject({status:"REJECTED",reasonCode:"PAYMENT_RECAPTURE_PREVIEW_REQUIRED"});
+  const disputedAgain=run({kind:"CLARIFICATION_REQUESTED",commandId:"payment-disputed-again",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["PAYMENT_METHOD"],productId:null,questionFingerprint:"b".repeat(64),maxAttempts:3});
+  expect(disputedAgain).toMatchObject({status:"APPLIED",state:{clarification:{attemptCount:2,askedQuestionFingerprints:["a".repeat(64),"b".repeat(64)]}}});
+  expect(run({kind:"CLARIFICATION_RESOLVED",commandId:"fake-resolve-preview"})).toMatchObject({status:"REJECTED",reasonCode:"PAYMENT_RECAPTURE_PREVIEW_REQUIRED"});
+  expect(run({kind:"CONFIRM_PURCHASE",commandId:"fake-confirm-preview",intent:confirmationIntent})).toMatchObject({status:"REJECTED",reasonCode:"PAYMENT_RECAPTURE_PREVIEW_REQUIRED"});
+  const stalePreview=run({kind:"PREVIEW_CREATED",commandId:"bad-fresh-preview",preview:{...preview(),expiresAt:now.toISOString()}});
+  expect(stalePreview.status).toBe("REJECTED");
+  expect(stalePreview.state.clarification).toEqual(state.clarification);
+  const fresh=run({kind:"PREVIEW_CREATED",commandId:"fresh-preview-after-choice",preview:preview()});
+  expect(fresh.status).toBe("APPLIED"); state=fresh.state;
+  expect(state.clarification).toBeNull();
+ });
   it("rejects caller-supplied commerce data when trusted resolvers are absent or content is tampered", () => {
     let state = createSalesCycleRuntimeState("conversation-hash", routing, now);
     for (const [kind, commandId] of [["FACTS_PRESENTED", "facts"], ["MEASUREMENTS_REQUIRED", "measure"], ["SIZE_RECOMMENDED", "size"]] as const) {

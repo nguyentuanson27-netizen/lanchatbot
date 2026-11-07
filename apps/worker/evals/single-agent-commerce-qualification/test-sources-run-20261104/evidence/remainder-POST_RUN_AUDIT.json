@@ -1,0 +1,122 @@
+{
+  "kind": "INDEPENDENT_POST_RUN_ACCOUNTING_AND_CAPTURE_AUDIT_V1",
+  "status": "APPROVED",
+  "reviewer": "/root/test_sources_report_review",
+  "auditedAt": "2026-11-04T12:48:47.000Z",
+  "scope": "Remainder development diagnostic only: accounting, provenance, request capture and deterministic bindings. Not conversation quality, semantic false-PASS grading, qualification, GO or deployment.",
+  "sourceSha": "e14d26594bb8831909788007f92fba81b3cd54e4",
+  "worldHash": "524aeac4caaa99c1042b4347f4f945a317ae3351cd1b304cdd11e5838b78f1d3",
+  "registrationHash": "d765dec4abf80c2377ff43e5e3fd836948ce0d6cc4043d488c4439baa2a9333a",
+  "pendingRegistrationHash": "f553593639c02905cc9f54691c66c8f0dbf2f2e245587e9fc4f2d9a53f73dc9a",
+  "artifacts": {
+    "registration": {
+      "path": "../c3-test-sources-model-remainder-sealed-20261104-01/REGISTRATION.json",
+      "sha256": "81128422afdcd9a4a83f33f3de4be76b6fddfda8f96b19c298d48faf8583cb59"
+    },
+    "inputApproval": {
+      "path": "../c3-test-sources-model-remainder-sealed-20261104-01/INPUT_APPROVAL.json",
+      "sha256": "4b359d780e47fe123082f07f89dc2d8866e1df4b3347c4d0182a0558288b6919"
+    },
+    "integration": {
+      "path": "../c3-test-sources-model-remainder-run-20261104-01/integration.json",
+      "sha256": "0fce7ac5293d1d8ade2f93fd40ffeecea9bed5a6fbf922e3b0232d224b6b61ea"
+    },
+    "candidateEvidence": {
+      "path": "../c3-test-sources-model-remainder-run-20261104-01/CANDIDATE_EVIDENCE.partial.json",
+      "sha256": "d5f54cdeb994e6420d6fe17fc7bac3b23251af174df34074ac74bdfa9c372ef0"
+    },
+    "nativeJournal": {
+      "path": "../c3-test-sources-model-remainder-run-20261104-01/NATIVE_REQUESTS.jsonl",
+      "sha256": "b9033bb2bb24b1be8cdd18c51e3d0275e35d12c4880011e864832b6bcbab4262"
+    },
+    "accounting": {
+      "path": "../c3-test-sources-model-remainder-accounting-20261104-01.json",
+      "sha256": "830882071049c069f56e19762bd481e00bce2f4e9752c9c1f0506e1897d4ec94"
+    },
+    "command": {
+      "path": "../c3-test-sources-model-remainder-command-20261104-01.json",
+      "sha256": "c7d5591c528bf6eed94fc55c0e8d21cb1cf5db5a99448a0103bb139e197311a7"
+    }
+  },
+  "checks": {
+    "registeredDenominator": "PASS: 12 unique executed slots / 20 native artifacts, no missing turn or diagnostic stop",
+    "nativeArtifactHashes": "PASS: all 20 raw native object hashes match evidence",
+    "generationAccounting": "PASS: 32 unique generations, 31 instrumented dispatches; 23 OWNER / 9 VERIFIER; 29 OK, 1 pre-dispatch bound error, 2 malformed owner responses; journal STARTED/REQUEST/DISPATCH/terminal identity reconciled",
+    "requestCapAndRetry": "PASS: <=1 recorded dispatch/generation, <=3 OWNER and <=1 VERIFIER/turn, retry0, 31/80 HTTP cap",
+    "runtimeRequestAndFirewall": "PASS: all 31 retained provider bodies match request hashes, runtime projection, native wire codec and evaluator-label/case-ID firewall",
+    "verifierBinding": "PASS: all 9 exact draft/snapshot hashes and wire binding reproduced",
+    "finalGateReplay": "PASS: all 8 sends replay SEND_ELIGIBLE at recorded checkedAt/current readback with exact request/draft/snapshot/revision/recipient binding",
+    "acceptedCapture": "PASS: 8 TEXT / 7 IMAGE hashes match accepted Outbox IDs, group, sequence, status and new DB rows; 12 silent terminals have no customer units",
+    "sourceAndExecution": "PASS: sealed/preflight/approval identities match clean source reported by integration; exit0; no live send",
+    "databaseCleanup": "PASS by integration flag and existing awaited cleanup control flow; reviewer did not query DB catalog",
+    "measurements": "PASS: packet raw-accounting parity, token totals and nearest-rank verifier percentiles recomputed"
+  },
+  "counts": {
+    "casesRegistered": 12,
+    "casesExecuted": 12,
+    "turnsRegistered": 20,
+    "frames": 20,
+    "generationRecords": 32,
+    "generationHttp": 31,
+    "ownerGenerations": 23,
+    "verifierGenerations": 9,
+    "generationStatus": {
+      "OK": 29,
+      "PROVIDER_ERROR": 1,
+      "MALFORMED": 2
+    },
+    "actualTerminal": {
+      "SEND_ELIGIBLE": 8,
+      "HANDOFF": 6,
+      "NO_SEND": 6
+    },
+    "verifierVerdicts": {
+      "PASS": 8,
+      "FAIL": 1
+    },
+    "acceptedTexts": 8,
+    "acceptedImages": 7,
+    "ownerAuthHttp": 1,
+    "auxiliaryHttp": 0
+  },
+  "blockedDrafts": [
+    {
+      "caseId": "c-20261028-s11",
+      "turnIndex": 0,
+      "draftHash": "555190228e60ce24b01e137d7bba7b907fe2bf27cd56438c26f9a75f1e49144b",
+      "actualDisposition": "HANDOFF"
+    }
+  ],
+  "errors": [
+    {
+      "id": "c8227f75-9adf-4e4c-b98e-fc307bdbd48c:owner:2",
+      "turnIndex": 0,
+      "status": "PROVIDER_ERROR",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "providerRequests": 0
+    },
+    {
+      "id": "0ee79d4a-3f87-4a56-bfb9-f733a43ca2e9:owner:1",
+      "turnIndex": 0,
+      "status": "MALFORMED",
+      "errorCode": "PROVIDER_ERROR",
+      "providerRequests": 1
+    },
+    {
+      "id": "7b60da9c-4d16-4909-8269-a7ddcfac2530:owner:1",
+      "turnIndex": 0,
+      "status": "MALFORMED",
+      "errorCode": "PROVIDER_ERROR",
+      "providerRequests": 1
+    }
+  ],
+  "exclusions": [
+    "No usefulness/persuasion/naturalness/policy-meaning or verifier false-PASS/false-rejection grading; REPORT accuracy not audited yet.",
+    "Known-development population, N1/retry0, not full55/S6/holdout/C3 comparison/qualification.",
+    "Retains owner-approved test assumptions; assumed feedback photo is not genuine customer feedback provenance and WHITE/shared chart are isolated test labels.",
+    "Per-generation instrumentation is not independent network packet capture; owner auth is separate from generation HTTP; credentials intentionally not retained.",
+    "No independent DB catalog cleanup probe. Source cleanliness is runner attestation plus sealed source, not proof of every external helper operation.",
+    "No provider requests, source/shop/runtime/helper/input mutation or live operations by reviewer; only this outside-repository audit file created."
+  ],
+  "findings": []
+}

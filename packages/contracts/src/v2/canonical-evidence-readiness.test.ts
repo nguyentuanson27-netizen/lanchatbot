@@ -19,6 +19,16 @@ import {
 const HASH = "a".repeat(64);
 const OTHER_HASH = "b".repeat(64);
 
+it("allows until-replaced expiry only for protected media, never price or stock",()=>{
+  const price=productClaim("PRICE","P-001");
+  const media={...price,type:"PRODUCT_MEDIA",provenance:{...price.provenance,authority:"MEDIA_SELECTOR_V2",expiresAt:null},
+    value:{assetId:"asset-1",assetSha256:HASH}};
+  expect(ProtectedClaimV1Schema.safeParse(media).success).toBe(true);
+  expect(ProtectedClaimV1Schema.safeParse({...media,provenance:{...media.provenance,authority:"POS_LIVE"}}).success).toBe(false);
+  for(const type of ["PRICE","STOCK"] as const){const c=productClaim(type,"P-001");
+    expect(ProtectedClaimV1Schema.safeParse({...c,provenance:{...c.provenance,expiresAt:null}}).success).toBe(false);}
+});
+
 function productClaim(
   type: "PRICE" | "STOCK" | "ETA",
   productId: string,
@@ -723,4 +733,23 @@ describe("DF06 deterministic readiness contract", () => {
       authorization: "NONE",
     }).success).toBe(false);
   });
+});
+
+
+describe("component fit conflict identity",()=>{
+ const fit=(target:Record<string,unknown>|undefined,hash=HASH)=>ProtectedClaimV1Schema.parse({
+  ...productClaim("PRICE","P-001",hash),type:"SIZE_FIT",provenance:{...productClaim("PRICE","P-001",hash).provenance,authority:"VERIFIED_SIZE_ENGINE_V1"},
+  value:{...(target?{fitTarget:target}:{}),recommendedSizes:["M"],alternativeSizes:[],customerProfileId:"3f4c7f35-3ac1-4bb1-a398-1f6fc5b6e361",customerProfileRevision:1,measurementFingerprint:HASH,evidenceBasis:"BODY_PROFILE"}});
+ const top={kind:"COMPONENT",parentProductId:"P-001",componentProductId:"P-001-AO",componentRole:"TOP"};
+ const pants={kind:"COMPONENT",parentProductId:"P-001",componentProductId:"P-001-QUAN",componentRole:"PANTS"};
+ const check=(claims:ProtectedClaimV1[])=>validateEffectClaimSemanticsV1({effect:"PROTECTED_OUTBOUND",productIds:["P-001"],cartId:null,cartVersion:null,protectedClaimTypes:["SIZE_FIT"],claims});
+ it("allows independent targets but still conflicts on the same target",()=>{
+  expect(check([fit(top),fit(pants,OTHER_HASH)])).toEqual({missing:false,conflict:false});
+  expect(check([fit(top),fit(top,OTHER_HASH)]).conflict).toBe(true);
+  expect(check([fit(undefined),fit({kind:"PRODUCT",productId:"P-001"},OTHER_HASH)]).conflict).toBe(true);
+  expect(check([fit(undefined),fit(top,OTHER_HASH)]).conflict).toBe(false);
+ });
+ it("rejects a forged component parent at the contract boundary",()=>{
+  expect(()=>fit({...top,parentProductId:"OTHER"})).toThrow();
+ });
 });

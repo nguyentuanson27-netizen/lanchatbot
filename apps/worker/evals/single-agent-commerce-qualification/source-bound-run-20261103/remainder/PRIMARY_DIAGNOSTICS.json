@@ -1,0 +1,576 @@
+[
+  {
+    "caseId": "c-20261028-s01",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "nativeReason": "DEPENDENCY_FAILURE",
+    "recovery": null,
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "openingMediaWork": null,
+    "normalToolCalls": 3,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": [
+      {
+        "stage": "RESULT_PROJECTION",
+        "operation": "select_product_media",
+        "status": "UNAVAILABLE",
+        "reason": "NO_VERIFIED_MATCHING_MEDIA"
+      }
+    ]
+  },
+  {
+    "caseId": "c-20261028-s02",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "nativeReason": "DEPENDENCY_FAILURE",
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "PROVIDER_ERROR"
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "openingMediaWork": null,
+    "normalToolCalls": 4,
+    "toolResults": [
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-s03",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "RESPONSE_UNAVAILABLE"
+    },
+    "nativeReason": "RESPONSE_UNAVAILABLE",
+    "recovery": null,
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "RESPONSE_UNAVAILABLE"
+    },
+    "openingMediaWork": null,
+    "normalToolCalls": 1,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-s04",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "nativeReason": "DEPENDENCY_FAILURE",
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "PROVIDER_ERROR"
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "openingMediaWork": null,
+    "normalToolCalls": 3,
+    "toolResults": [
+      {
+        "name": "search_products",
+        "status": "REJECTED",
+        "reason": "PRODUCT_BOUND",
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": [
+      {
+        "stage": "RESULT_PROJECTION",
+        "operation": "search_products",
+        "status": "REJECTED",
+        "reason": "PRODUCT_BOUND"
+      }
+    ]
+  },
+  {
+    "caseId": "c-20261028-s07",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "SIZE_RULE_UNAVAILABLE"
+    },
+    "nativeReason": "SIZE_RULE_UNAVAILABLE",
+    "recovery": null,
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "SIZE_RULE_UNAVAILABLE"
+    },
+    "openingMediaWork": null,
+    "normalToolCalls": 3,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": [
+      {
+        "stage": "RESULT_PROJECTION",
+        "operation": "recommend_size",
+        "status": "UNAVAILABLE",
+        "reason": "SIZE_SOURCE_UNAVAILABLE"
+      }
+    ]
+  },
+  {
+    "caseId": "c-20261028-s11",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "nativeReason": "DEPENDENCY_FAILURE",
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "PREPARATION_UNAVAILABLE"
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "openingMediaWork": {
+      "status": "UNAVAILABLE",
+      "requiredProducts": [
+        "SQ2447",
+        "SV2447"
+      ],
+      "chargedUnits": 0,
+      "reason": "OPENING_MEDIA_BUDGET"
+    },
+    "normalToolCalls": 6,
+    "toolResults": [
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-s13",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "nativeReason": "DEPENDENCY_FAILURE",
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "PROVIDER_ERROR"
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "openingMediaWork": null,
+    "normalToolCalls": 4,
+    "toolResults": [
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-s16",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "PRODUCT_AMBIGUOUS"
+    },
+    "nativeReason": "PRODUCT_AMBIGUOUS",
+    "recovery": null,
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "PRODUCT_AMBIGUOUS"
+    },
+    "openingMediaWork": null,
+    "normalToolCalls": 2,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-j1",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Em đã thêm áo set váy Thạch Thảo size L vào giỏ hàng cho chị rồi ạ. Tổng giỏ hàng hiện tại là 529.000đ (đã gồm 30.000đ phí ship). Chị cần xem thêm gì cứ báo em nhé ạ!"
+      ],
+      "images": [
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+        }
+      ]
+    },
+    "nativeReason": "PASS",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": {
+      "status": "READY",
+      "requiredProducts": [
+        "SV2447"
+      ],
+      "chargedUnits": 1
+    },
+    "normalToolCalls": 3,
+    "toolResults": [
+      {
+        "name": "add_to_cart",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-j1",
+    "turnIndex": 1,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "RESPONSE_UNAVAILABLE"
+    },
+    "nativeReason": "RESPONSE_UNAVAILABLE",
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "MALFORMED"
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "RESPONSE_UNAVAILABLE"
+    },
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "normalToolCalls": 2,
+    "toolResults": [
+      {
+        "name": "add_to_cart",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-j1",
+    "turnIndex": 2,
+    "actualTerminal": {
+      "disposition": "NO_SEND",
+      "messages": [],
+      "images": [],
+      "reason": "HUMAN_OWNS_CONVERSATION"
+    },
+    "nativeReason": "HUMAN_OWNS_CONVERSATION",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": null,
+    "normalToolCalls": null,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-j3",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "nativeReason": "DEPENDENCY_FAILURE",
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "PROVIDER_ERROR"
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "openingMediaWork": {
+      "status": "READY",
+      "requiredProducts": [
+        "SV2447"
+      ],
+      "chargedUnits": 0
+    },
+    "normalToolCalls": 3,
+    "toolResults": [
+      {
+        "name": "quote_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-j3",
+    "turnIndex": 1,
+    "actualTerminal": {
+      "disposition": "NO_SEND",
+      "messages": [],
+      "images": [],
+      "reason": "HUMAN_OWNS_CONVERSATION"
+    },
+    "nativeReason": "HUMAN_OWNS_CONVERSATION",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": null,
+    "normalToolCalls": null,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-j3",
+    "turnIndex": 2,
+    "actualTerminal": {
+      "disposition": "NO_SEND",
+      "messages": [],
+      "images": [],
+      "reason": "HUMAN_OWNS_CONVERSATION"
+    },
+    "nativeReason": "HUMAN_OWNS_CONVERSATION",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": null,
+    "normalToolCalls": null,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-j4",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "nativeReason": "DEPENDENCY_FAILURE",
+    "recovery": null,
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "openingMediaWork": null,
+    "normalToolCalls": 2,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": [
+      {
+        "stage": "RESULT_PROJECTION",
+        "operation": "add_to_cart",
+        "status": "UNAVAILABLE",
+        "reason": "SELECTION_UNAVAILABLE"
+      }
+    ]
+  },
+  {
+    "caseId": "c-20261028-j4",
+    "turnIndex": 1,
+    "actualTerminal": {
+      "disposition": "NO_SEND",
+      "messages": [],
+      "images": [],
+      "reason": "HUMAN_OWNS_CONVERSATION"
+    },
+    "nativeReason": "HUMAN_OWNS_CONVERSATION",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": null,
+    "normalToolCalls": null,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-j4",
+    "turnIndex": 2,
+    "actualTerminal": {
+      "disposition": "NO_SEND",
+      "messages": [],
+      "images": [],
+      "reason": "HUMAN_OWNS_CONVERSATION"
+    },
+    "nativeReason": "HUMAN_OWNS_CONVERSATION",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": null,
+    "normalToolCalls": null,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-j5",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "ORDER_STATUS"
+    },
+    "nativeReason": "ORDER_STATUS",
+    "recovery": null,
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "ORDER_STATUS"
+    },
+    "openingMediaWork": null,
+    "normalToolCalls": 0,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-j5",
+    "turnIndex": 1,
+    "actualTerminal": {
+      "disposition": "NO_SEND",
+      "messages": [],
+      "images": [],
+      "reason": "HUMAN_OWNS_CONVERSATION"
+    },
+    "nativeReason": "HUMAN_OWNS_CONVERSATION",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": null,
+    "normalToolCalls": null,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-j5",
+    "turnIndex": 2,
+    "actualTerminal": {
+      "disposition": "NO_SEND",
+      "messages": [],
+      "images": [],
+      "reason": "HUMAN_OWNS_CONVERSATION"
+    },
+    "nativeReason": "HUMAN_OWNS_CONVERSATION",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": null,
+    "normalToolCalls": null,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  }
+]

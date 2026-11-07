@@ -1,0 +1,1081 @@
+{
+  "kind": "CONTEXT_PUBLICATION_MODEL_ACCOUNTING_V1",
+  "runSourceSha": "5b679acc30e64c4d7a271b4f7aaa49534f10de54",
+  "casesRegistered": 7,
+  "turnsRegistered": 11,
+  "casesStatus": {
+    "EXECUTED": 7
+  },
+  "frames": 11,
+  "terminalCounts": {
+    "SEND_ELIGIBLE": 3,
+    "HANDOFF": 4,
+    "NO_SEND": 4
+  },
+  "actualTerminalCounts": {
+    "SEND_ELIGIBLE": 3,
+    "HANDOFF": 4,
+    "NO_SEND": 2,
+    "CODE_OWNED_SEND": 2
+  },
+  "generationCount": 16,
+  "roles": {
+    "OWNER": 13,
+    "VERIFIER": 3
+  },
+  "generationStatuses": {
+    "OK": 15,
+    "PROVIDER_ERROR": 1
+  },
+  "providerRequests": 15,
+  "verifierLatencyMs": {
+    "p50": 7038.6033000000025,
+    "p95": 8909.77469999998
+  },
+  "tokenUsage": {
+    "inputObserved": 139617,
+    "outputObserved": 12012,
+    "usageRows": 15,
+    "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+  },
+  "cohorts": [
+    {
+      "caseId": "c-20261028-s09",
+      "cohort": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "caseId": "c-20261028-s10",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261028-s12",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261028-s14",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "cohort": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "cohort": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "cohort": "SALES_READY"
+    }
+  ],
+  "rawJournalSha256": "3934397b401bf28626a25578e9046054a850c9206dc80469ac3ecd2837fdaaba",
+  "journalRows": 66,
+  "sourceWrites": 0,
+  "liveSends": 0,
+  "semanticRoles": [
+    "OWNER",
+    "VERIFIER"
+  ],
+  "framesEvidence": [
+    {
+      "caseId": "c-20261028-s09",
+      "turnIndex": 0,
+      "customer": "Áo Thạch Thảo này có cần giặt tay không hay cho máy được em?",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, áo tơ thêu bên em ưu tiên giặt tay để giữ form dáng và độ bền cho chất vải cũng như họa tiết thêu chị nhé. Nếu giặt máy, chị nhớ cho áo vào túi giặt và chọn chế độ nhẹ (gentle cycle) giúp em ạ.",
+        "fallbackId": null
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, áo tơ thêu bên em ưu tiên giặt tay để giữ form dáng và độ bền cho chất vải cũng như họa tiết thêu chị nhé. Nếu giặt máy, chị nhớ cho áo vào túi giặt và chọn chế độ nhẹ (gentle cycle) giúp em ạ."
+        ],
+        "images": []
+      },
+      "captured": [
+        "Dạ, áo tơ thêu bên em ưu tiên giặt tay để giữ form dáng và độ bền cho chất vải cũng như họa tiết thêu chị nhé. Nếu giặt máy, chị nhớ cho áo vào túi giặt và chọn chế độ nhẹ (gentle cycle) giúp em ạ."
+      ],
+      "capturedImages": [],
+      "acceptedOutbox": [
+        {
+          "id": "e5bc1bdf-4515-4975-ba9d-cafe05fb4a93",
+          "group": "0887fcc1-4138-48cd-b467-52e441b0d3fe",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED",
+          "kind": "TEXT",
+          "contentHash": "ffb2356bdc3ecfab64894dd0d020a71fa876f6332145eb1beb02067e3a8dee4a"
+        }
+      ],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "f885810b26ce76d3f42a59969e819dfbf588517632aa58300c1e307e02e72c10",
+      "verificationLatencyMs": 10241.486799999999,
+      "ownerGenerations": 2,
+      "verifierGenerations": 1,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "8b7682699ae33448208144aa7089f015be4645c386205a3905b38fc2efffcacd",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "63e357dd378f839aaebafb424f5bb8d8ea125e1bcae117e8ab2427a1741b4972"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "7445fb6423c4d8ca56a82896df0ceabf6b150ece4759dbf7879defe1800c0c5e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "08450f6708dc28beddc7c0e1d55f04994d9438f8be4912f235e889ceec1a0772"
+          },
+          {
+            "ordinal": 3,
+            "operation": "read_policy",
+            "facet": "POLICY",
+            "selectorHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "906fbffe774816e52945fa07021e6f4536818fb85c96034ee800848b20ec620e"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 1,
+          "callsRemaining": 3
+        }
+      },
+      "generations": [
+        {
+          "id": "3ac6d049-a234-41b0-9091-730995dcadd6:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 4357.968200000003,
+            "inputTokens": 10049,
+            "outputTokens": 519,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "3ac6d049-a234-41b0-9091-730995dcadd6:owner:2",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 3373.782299999999,
+            "inputTokens": 12012,
+            "outputTokens": 495,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "3ac6d049-a234-41b0-9091-730995dcadd6:verifier:1",
+          "role": "VERIFIER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 7038.6033000000025,
+            "inputTokens": 7607,
+            "outputTokens": 77,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-2b0c4ca4909cf261f4099937781ebde927bd638648d84f1b00d1032dbbe8c3dd-turn-0.json"
+    },
+    {
+      "caseId": "c-20261028-s10",
+      "turnIndex": 0,
+      "customer": "Áo chị đặt hôm trước chưa nhận, giờ chị muốn đổi màu thì làm thế nào em?",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "EXCHANGE",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "EXCHANGE"
+      },
+      "captured": [],
+      "capturedImages": [],
+      "acceptedOutbox": [],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "6f71474f42c2b32f7bcc9c07dcbd435d964810683a1687759a6bef0e7b13ff0b",
+      "verificationLatencyMs": null,
+      "ownerGenerations": 2,
+      "verifierGenerations": 0,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": "EXCHANGE",
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "read_policy",
+            "facet": "POLICY",
+            "selectorHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "906fbffe774816e52945fa07021e6f4536818fb85c96034ee800848b20ec620e"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 1,
+          "callsRemaining": 5
+        }
+      },
+      "generations": [
+        {
+          "id": "b37532e5-9041-4d92-9cdc-5823f7e25781:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 4198.939200000008,
+            "inputTokens": 8038,
+            "outputTokens": 632,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "b37532e5-9041-4d92-9cdc-5823f7e25781:owner:2",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 5143.725399999996,
+            "inputTokens": 9281,
+            "outputTokens": 1188,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-0e7ec4e10a4ad63ff05b765163518edc7cca034db924dd2309bef8d62332e033-turn-0.json"
+    },
+    {
+      "caseId": "c-20261028-s12",
+      "turnIndex": 0,
+      "customer": "Chị mới mở hộp, khóa váy bị kẹt. Giờ chị muốn đổi thì làm thế nào em?",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEFECT",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEFECT"
+      },
+      "captured": [],
+      "capturedImages": [],
+      "acceptedOutbox": [],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "74c9432d3787aff7e71b00819ef6eb4aeea9d901786ef27d053cd3b78d610a71",
+      "verificationLatencyMs": null,
+      "ownerGenerations": 2,
+      "verifierGenerations": 0,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": "DEFECT",
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "read_policy",
+            "facet": "POLICY",
+            "selectorHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "906fbffe774816e52945fa07021e6f4536818fb85c96034ee800848b20ec620e"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 1,
+          "callsRemaining": 5
+        }
+      },
+      "generations": [
+        {
+          "id": "7f879a00-32f9-497b-9a94-768a566399c4:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 4059.822899999999,
+            "inputTokens": 8040,
+            "outputTokens": 680,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "7f879a00-32f9-497b-9a94-768a566399c4:owner:2",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 5049.740700000009,
+            "inputTokens": 9331,
+            "outputTokens": 1208,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-36ba6f39982ea96fd7d4eb58e52f3cb9a34435cb192cedd10691f5c1d94e58d4-turn-0.json"
+    },
+    {
+      "caseId": "c-20261028-s14",
+      "turnIndex": 0,
+      "customer": "Em để chị xem thêm đã, khi nào lấy chị nhắn nhé.",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ vâng, chị cứ xem thêm nhé ạ! Khi nào cần chị cứ nhắn em hỗ trợ nha chị.",
+        "fallbackId": null
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ vâng, chị cứ xem thêm nhé ạ! Khi nào cần chị cứ nhắn em hỗ trợ nha chị."
+        ],
+        "images": []
+      },
+      "captured": [
+        "Dạ vâng, chị cứ xem thêm nhé ạ! Khi nào cần chị cứ nhắn em hỗ trợ nha chị."
+      ],
+      "capturedImages": [],
+      "acceptedOutbox": [
+        {
+          "id": "1522b589-b27f-4585-9f61-538586785f4b",
+          "group": "f2c8dfe4-018c-49a5-afe4-17fabf41532f",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED",
+          "kind": "TEXT",
+          "contentHash": "0d0225de1a12b46dfa529ad74e21c24c5499c8a7d96b547282395db1885e59e8"
+        }
+      ],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "b8677cff3f574f77b9b0b8749c524075c50c25f5ce314483924fba1506cb17df",
+      "verificationLatencyMs": 6408.789400000009,
+      "ownerGenerations": 1,
+      "verifierGenerations": 1,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [],
+        "budget": {
+          "roundsRemaining": 2,
+          "callsRemaining": 6
+        }
+      },
+      "generations": [
+        {
+          "id": "d1b2b7d7-bc3c-4e2e-af9d-fd1cd9f23eef:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 2954.5155000000086,
+            "inputTokens": 8031,
+            "outputTokens": 316,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "d1b2b7d7-bc3c-4e2e-af9d-fd1cd9f23eef:verifier:1",
+          "role": "VERIFIER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 4820.362499999988,
+            "inputTokens": 4146,
+            "outputTokens": 22,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-b3125ba3d3b90c2bb30254f0e5f94c5bf99230eae7595252057572cb29d0d02a-turn-0.json"
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "turnIndex": 0,
+      "customer": "Chị thích áo Thạch Thảo màu be, cảm ơn em nhé.",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      },
+      "captured": [],
+      "capturedImages": [],
+      "acceptedOutbox": [],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "60f6ac5712d2ac83d5c88e09ab189ced19a40dca2ac6e1d650ed6bc7389e10d6",
+      "verificationLatencyMs": null,
+      "ownerGenerations": 2,
+      "verifierGenerations": 0,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "8b7682699ae33448208144aa7089f015be4645c386205a3905b38fc2efffcacd",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "63e357dd378f839aaebafb424f5bb8d8ea125e1bcae117e8ab2427a1741b4972"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "7445fb6423c4d8ca56a82896df0ceabf6b150ece4759dbf7879defe1800c0c5e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "08450f6708dc28beddc7c0e1d55f04994d9438f8be4912f235e889ceec1a0772"
+          },
+          {
+            "ordinal": 3,
+            "operation": "read_product",
+            "facet": "PRICE",
+            "selectorHash": "7c7ce3c46cad1eb1d579afc24348d646192d8734651838ef1a45fcb7b5d56c83",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "565a1efaffc79a9e9759ff524d0a2920438ce0e5dc1c250e5d74e529720af5b9"
+          },
+          {
+            "ordinal": 4,
+            "operation": "read_product",
+            "facet": "STOCK",
+            "selectorHash": "7c7ce3c46cad1eb1d579afc24348d646192d8734651838ef1a45fcb7b5d56c83",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "565a1efaffc79a9e9759ff524d0a2920438ce0e5dc1c250e5d74e529720af5b9"
+          },
+          {
+            "ordinal": 5,
+            "operation": "read_product",
+            "facet": "PRICE",
+            "selectorHash": "94840c697cc4fbecc73019cc67b8cb1674ce9a72e33cf7040a8db276bf5c29dc",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "1b0143343db4727588b14e362dabc9971796dd646962509b9824e267bd9a1f20"
+          },
+          {
+            "ordinal": 6,
+            "operation": "read_product",
+            "facet": "STOCK",
+            "selectorHash": "94840c697cc4fbecc73019cc67b8cb1674ce9a72e33cf7040a8db276bf5c29dc",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "1b0143343db4727588b14e362dabc9971796dd646962509b9824e267bd9a1f20"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 1,
+          "callsRemaining": 1
+        }
+      },
+      "generations": [
+        {
+          "id": "fe2ef3fb-c7f3-4f60-9e7b-14b3aeb925a8:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 9843.09520000001,
+            "inputTokens": 10047,
+            "outputTokens": 2864,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "fe2ef3fb-c7f3-4f60-9e7b-14b3aeb925a8:owner:2",
+          "role": "OWNER",
+          "status": "PROVIDER_ERROR",
+          "providerRequests": 0,
+          "errorCode": "OWNER_REQUEST_BOUND",
+          "metrics": {
+            "latencyMs": 1044.2706999999937,
+            "inputTokens": null,
+            "outputTokens": null,
+            "costUSD": null,
+            "unavailable": {
+              "inputTokens": "PROVIDER_NOT_EXPOSED",
+              "outputTokens": "PROVIDER_NOT_EXPOSED",
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-1ad19dd1ce91220bfc77e46326f20a6b046302802c13c90dfe0c64e2b04e8dd5-turn-0.json"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 0,
+      "customer": "Chị muốn chọn size áo của bộ váy Thạch Thảo, cao 1m62 nặng 56kg.",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "SIZE_RULE_UNAVAILABLE",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "SIZE_RULE_UNAVAILABLE"
+      },
+      "captured": [],
+      "capturedImages": [],
+      "acceptedOutbox": [],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "bb784d078cbb42a3e75d70566289875a02681cf7d7293fac7fc59b05d43deeb9",
+      "verificationLatencyMs": null,
+      "ownerGenerations": 1,
+      "verifierGenerations": 0,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "7445fb6423c4d8ca56a82896df0ceabf6b150ece4759dbf7879defe1800c0c5e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "08450f6708dc28beddc7c0e1d55f04994d9438f8be4912f235e889ceec1a0772"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "4429267e6fc63a1feb842442455b2e598d6b4da801c18daaa9b1f50741550573",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "17cd3a07237ed57af33b40fe11e3e5259787cbc02d136ea1f8f46271eb9abf5b"
+          },
+          {
+            "ordinal": 3,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "4429267e6fc63a1feb842442455b2e598d6b4da801c18daaa9b1f50741550573",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "ab27ba18a8e1a00ea8f3a08c4535cd46cdbde6e22d86c51c25a8b739c5d8a6fd"
+          },
+          {
+            "ordinal": 4,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "eeea794d4b3de24dc1bfd9d2380004043494ec2971c931e4c69cea085ac6542e"
+          },
+          {
+            "ordinal": 5,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "9f2f912817ea93b1134df8ed028846528574b24f824208ab38c3f340754f3683"
+          },
+          {
+            "ordinal": 6,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "2426e768c1091b36145389d952524df6cb1f1bdf63145487c6304c8693ff8096"
+          },
+          {
+            "ordinal": 7,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "38854d90b80b3c466139960a8749bdec8e6348bcfe275cea78faf09f43c96b46"
+          },
+          {
+            "ordinal": 8,
+            "operation": "recommend_size",
+            "facet": "SIZE_ENGINE",
+            "selectorHash": "906ec35e5b58153d3399b9e3c6de65155dd5a525d697bffa57fb2d3ec4033d7b",
+            "status": "FAILED",
+            "reason": "SIZE_SOURCE_UNAVAILABLE",
+            "resultHash": "eba07ec8c30ab7195266b86e1b13fb98cc211f2bc6809e0fa435351fb52ceb5e"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 1,
+          "callsRemaining": 3
+        }
+      },
+      "generations": [
+        {
+          "id": "ccb0a5f1-0eb4-4ec2-a87f-25f3606a73e9:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 4933.720100000006,
+            "inputTokens": 10205,
+            "outputTokens": 1230,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-46d4cd21689bf697cecf2acdee878df0bdec1863dd69c2eed5402244e58c2006-turn-0.json"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 1,
+      "customer": "Chị nhắn nhầm cân nặng, 51kg thôi em nhé. Ngực 88, eo 70, mông 94.",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "HUMAN_OWNS_CONVERSATION",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualTerminal": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION"
+      },
+      "captured": [],
+      "capturedImages": [],
+      "acceptedOutbox": [],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "0ef02ef238f1e8b38b4a289f1d4dec12b863cf716f637381c09d2cdc2b19f650",
+      "verificationLatencyMs": null,
+      "ownerGenerations": 0,
+      "verifierGenerations": 0,
+      "readCoverage": null,
+      "generations": [],
+      "nativeArtifact": "native-46d4cd21689bf697cecf2acdee878df0bdec1863dd69c2eed5402244e58c2006-turn-1.json"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 2,
+      "customer": "Chị thích mặc thoải mái một chút, em chọn size giúp chị nhé.",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "HUMAN_OWNS_CONVERSATION",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualTerminal": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION"
+      },
+      "captured": [],
+      "capturedImages": [],
+      "acceptedOutbox": [],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "75cb17fd1a4d4af40159732f39361a59d97a1d6bafa51c258fdc2ca741d897ea",
+      "verificationLatencyMs": null,
+      "ownerGenerations": 0,
+      "verifierGenerations": 0,
+      "readCoverage": null,
+      "generations": [],
+      "nativeArtifact": "native-46d4cd21689bf697cecf2acdee878df0bdec1863dd69c2eed5402244e58c2006-turn-2.json"
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 0,
+      "customer": "Chị lấy set váy Thạch Thảo size M nhé.",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. \n\nTổng giỏ hàng hiện tại là 799.000đ (phí ship 30.000đ, tổng thanh toán 829.000đ). Chị sẵn sàng chốt đơn thì báo em nhé ạ!",
+        "fallbackId": null
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. \n\nTổng giỏ hàng hiện tại là 799.000đ (phí ship 30.000đ, tổng thanh toán 829.000đ). Chị sẵn sàng chốt đơn thì báo em nhé ạ!"
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "captured": [
+        "Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. \n\nTổng giỏ hàng hiện tại là 799.000đ (phí ship 30.000đ, tổng thanh toán 829.000đ). Chị sẵn sàng chốt đơn thì báo em nhé ạ!"
+      ],
+      "capturedImages": [
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+        }
+      ],
+      "acceptedOutbox": [
+        {
+          "id": "da9fd46c-14c9-4ac7-a51b-3c2b28b1544b",
+          "group": "e8140fe7-326f-43a9-9a21-bc62d3c4ed81",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED",
+          "kind": "TEXT",
+          "contentHash": "567bdd844a643d22809e45bd5a9ee0e2f0d9b402842148ff2a9e834c03427025"
+        },
+        {
+          "id": "90d6a7f9-97d0-44c0-b969-8ffd9138a8a3",
+          "group": "e8140fe7-326f-43a9-9a21-bc62d3c4ed81",
+          "sequence": 1,
+          "status": "SENT_ACCEPTED",
+          "kind": "IMAGE",
+          "contentHash": "1fe0770fc6ca6ef2ad18531ce5bb53060a415f59b0719eb74c1b117f319bebb4"
+        }
+      ],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "b13f14a0a7a2112ade699dfa355957a8ed4f4fc79dc5d9ff0d85f1ba2b74202e",
+      "verificationLatencyMs": 11852.315699999977,
+      "ownerGenerations": 2,
+      "verifierGenerations": 1,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "7445fb6423c4d8ca56a82896df0ceabf6b150ece4759dbf7879defe1800c0c5e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "08450f6708dc28beddc7c0e1d55f04994d9438f8be4912f235e889ceec1a0772"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "4429267e6fc63a1feb842442455b2e598d6b4da801c18daaa9b1f50741550573",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "17cd3a07237ed57af33b40fe11e3e5259787cbc02d136ea1f8f46271eb9abf5b"
+          },
+          {
+            "ordinal": 3,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "4429267e6fc63a1feb842442455b2e598d6b4da801c18daaa9b1f50741550573",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "ab27ba18a8e1a00ea8f3a08c4535cd46cdbde6e22d86c51c25a8b739c5d8a6fd"
+          },
+          {
+            "ordinal": 4,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "eeea794d4b3de24dc1bfd9d2380004043494ec2971c931e4c69cea085ac6542e"
+          },
+          {
+            "ordinal": 5,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "9f2f912817ea93b1134df8ed028846528574b24f824208ab38c3f340754f3683"
+          },
+          {
+            "ordinal": 6,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "2426e768c1091b36145389d952524df6cb1f1bdf63145487c6304c8693ff8096"
+          },
+          {
+            "ordinal": 7,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "38854d90b80b3c466139960a8749bdec8e6348bcfe275cea78faf09f43c96b46"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 1,
+          "callsRemaining": 3
+        }
+      },
+      "generations": [
+        {
+          "id": "891105ff-01b6-416d-a630-694897eb7532:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 5384.739500000025,
+            "inputTokens": 10191,
+            "outputTokens": 1238,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "891105ff-01b6-416d-a630-694897eb7532:owner:2",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 4382.232799999998,
+            "inputTokens": 12965,
+            "outputTokens": 773,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "891105ff-01b6-416d-a630-694897eb7532:verifier:1",
+          "role": "VERIFIER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 8909.77469999998,
+            "inputTokens": 9420,
+            "outputTokens": 120,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-9840706bab5f4cc05b9b63db8ced511eda70fda689229ddbaafdd1f79d391e83-turn-0.json"
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 1,
+      "customer": "Em lên đơn cho chị đi.",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "CHECKOUT_DETAILS_MISSING",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualTerminal": {
+        "disposition": "CODE_OWNED_SEND",
+        "messages": [
+          "Chị cho em tên người nhận nhé."
+        ],
+        "images": []
+      },
+      "captured": [
+        "Chị cho em tên người nhận nhé."
+      ],
+      "capturedImages": [],
+      "acceptedOutbox": [
+        {
+          "id": "de238f1c-918f-4de5-9609-e918829a00de",
+          "group": "070c328d-2ca6-4a30-a2f8-0a5b15d01e9d",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED",
+          "kind": "TEXT",
+          "contentHash": "d04585b28fb64c62250f917950ddf3293a2436ec31506184cbab99bd9f532125"
+        }
+      ],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "c95de128ddea7c12f69328799654b106a2e7bf9b699bc9c724c23395718e18b4",
+      "verificationLatencyMs": null,
+      "ownerGenerations": 1,
+      "verifierGenerations": 0,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "7445fb6423c4d8ca56a82896df0ceabf6b150ece4759dbf7879defe1800c0c5e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "08450f6708dc28beddc7c0e1d55f04994d9438f8be4912f235e889ceec1a0772"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "eeea794d4b3de24dc1bfd9d2380004043494ec2971c931e4c69cea085ac6542e"
+          },
+          {
+            "ordinal": 3,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "9f2f912817ea93b1134df8ed028846528574b24f824208ab38c3f340754f3683"
+          },
+          {
+            "ordinal": 4,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "2426e768c1091b36145389d952524df6cb1f1bdf63145487c6304c8693ff8096"
+          },
+          {
+            "ordinal": 5,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "38854d90b80b3c466139960a8749bdec8e6348bcfe275cea78faf09f43c96b46"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 1,
+          "callsRemaining": 4
+        }
+      },
+      "generations": [
+        {
+          "id": "1c26496c-9476-4cf6-bc30-d3d934eb6aae:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 4124.3138000000035,
+            "inputTokens": 10254,
+            "outputTokens": 650,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-9840706bab5f4cc05b9b63db8ced511eda70fda689229ddbaafdd1f79d391e83-turn-1.json"
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 2,
+      "customer": "Chị muốn trả khi nhận hàng.",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "PRIVATE_CHECKOUT_COMMITTED",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualTerminal": {
+        "disposition": "CODE_OWNED_SEND",
+        "messages": [
+          "Chị cho em tên người nhận nhé."
+        ],
+        "images": []
+      },
+      "captured": [
+        "Chị cho em tên người nhận nhé."
+      ],
+      "capturedImages": [],
+      "acceptedOutbox": [
+        {
+          "id": "73297e10-c7bd-4905-9411-340b83d158fe",
+          "group": "219cf4b0-8bcc-4222-958b-0fb3573f8cf1",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED",
+          "kind": "TEXT",
+          "contentHash": "d04585b28fb64c62250f917950ddf3293a2436ec31506184cbab99bd9f532125"
+        }
+      ],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "d263594fb47ca52394450f953fb596128598101a725acfda8041329c4f82139c",
+      "verificationLatencyMs": null,
+      "ownerGenerations": 0,
+      "verifierGenerations": 0,
+      "readCoverage": null,
+      "generations": [],
+      "nativeArtifact": "native-9840706bab5f4cc05b9b63db8ced511eda70fda689229ddbaafdd1f79d391e83-turn-2.json"
+    }
+  ]
+}

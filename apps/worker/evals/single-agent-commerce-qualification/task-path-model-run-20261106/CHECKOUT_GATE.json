@@ -1,0 +1,17 @@
+{
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-06T09:15:52.307111+00:00",
+  "sourceSha": "9b2cfff594c89d09a11e32c9c4274556291d72a1",
+  "registrationHash": "24f3e5da645785dec9830b36c8fff30fb475a56847ae7133e7c493ac94574296",
+  "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-taskpath-model-checkout-run-20261106-02\\CANDIDATE_EVIDENCE.partial.json",
+  "evidenceSha256": "2f32e96b70d9cffd5590a1228e892a1a9843045adef0009085ad27b14d95e884",
+  "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-taskpath-model-checkout-run-20261106-02\\integration.json",
+  "integrationSha256": "ab070fa1476ebae830d8d027d7097b208d6de40394e045dba24532c9629b472f",
+  "capturedTurns": 7,
+  "casesExecuted": 1,
+  "materialTaskFailures": 0,
+  "status": "PASS",
+  "scope": "Independent task-outcome gate for completed owner-overridden diagnostic group only; priorFAIL unchanged",
+  "reason": "Real native preview+confirmation receipt+HUMAN handoff verified, private fields kept code-only.",
+  "nextStageAllowed": null
+}

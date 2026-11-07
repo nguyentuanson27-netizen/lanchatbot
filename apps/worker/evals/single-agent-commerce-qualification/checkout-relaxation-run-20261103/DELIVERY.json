@@ -1,0 +1,151 @@
+{
+  "runSourceSha": "88a331404226b44d2e87e0b5cc1c8689261bb345",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "sha256": "8b9c3028d6467ff3be7c793141927841d70f47f52d0590677438f488ca154992",
+      "bytes": 9
+    },
+    {
+      "path": "ARTIFACTS.json",
+      "sha256": "34d19daa98f2a30e9a4639907182447daac877f96a1278be64e10fd0b5a9b856",
+      "bytes": 27388
+    },
+    {
+      "path": "evidence/HELPER_INVENTORY.json",
+      "sha256": "7e186593eb2e2658b2f3e032c14e9647489f730d19c1d0ad806ca21349a00956",
+      "bytes": 2070
+    },
+    {
+      "path": "evidence/INPUT_METADATA_AMENDMENT.json",
+      "sha256": "b6fa8f45b11f9f31c29937aef5fbed4566585434d3c644f625067d7bc617a3b0",
+      "bytes": 2560
+    },
+    {
+      "path": "evidence/POST_RUN_AUDITS.json",
+      "sha256": "139613dd2378983bbeb2b2747515afa61372759a57b830ba8bfa1b5fc0fe4531",
+      "bytes": 942
+    },
+    {
+      "path": "evidence/purchase-COMMAND.json",
+      "sha256": "c5a1210cef30c98f6ae585391ab7e8311e010d65f4399b307241c98b85d1ab11",
+      "bytes": 984
+    },
+    {
+      "path": "evidence/purchase-DIAGNOSTIC_DISPATCH.json",
+      "sha256": "bc3a4e4d834abac207fe0822861a92c012b72795215640586a0bd7d2eba2a9fb",
+      "bytes": 162
+    },
+    {
+      "path": "evidence/purchase-INPUT_APPROVAL.json",
+      "sha256": "ebf5323ca979f41b0e3d91198fbbc163841a0e74479582c01505b5039b0f8485",
+      "bytes": 1281
+    },
+    {
+      "path": "evidence/purchase-PREFLIGHT.json",
+      "sha256": "01719dcc7133ead06f0753a8f8178a857414ea0d6eaa33c05cf3373fcebb999d",
+      "bytes": 868
+    },
+    {
+      "path": "evidence/remainder-COMMAND.json",
+      "sha256": "a18db9596f0278925a586f261d3a351b8feb81626b218cd8300ef4dbe2f9813b",
+      "bytes": 987
+    },
+    {
+      "path": "evidence/remainder-DIAGNOSTIC_DISPATCH.json",
+      "sha256": "6e3ac3bc41ac8568aa2e949e5c83eec6990d381978abd0252fbf406b903e4b0d",
+      "bytes": 162
+    },
+    {
+      "path": "evidence/remainder-INPUT_APPROVAL.json",
+      "sha256": "d13ffe566d81138259a481ade61c4aa14b99c99b66055f95beb3cc357538de59",
+      "bytes": 1280
+    },
+    {
+      "path": "evidence/remainder-PREFLIGHT.json",
+      "sha256": "f3d90188f662ecf9a6584efc1615d90c4f9e95353abdd6843b0e44be069d5a5d",
+      "bytes": 867
+    },
+    {
+      "path": "purchase/ACCOUNTING.json",
+      "sha256": "efd82851be0e6184e896efc1eab8c57b5aa0fb62b1192e003ca595d9c290bce1",
+      "bytes": 127477
+    },
+    {
+      "path": "purchase/CONVERSATIONS.md",
+      "sha256": "a504c4747783ff4c48dc911a69db6e282b6fb41a5aa82eb59b57e8f585a7c956",
+      "bytes": 12180
+    },
+    {
+      "path": "purchase/DRAFTS.md",
+      "sha256": "3c46cadead9bd1ac52c3e1e2e9f800d567e59874e27923639e4b3fafbbfc9ca2",
+      "bytes": 4763
+    },
+    {
+      "path": "purchase/FROZEN_IDENTITIES.json",
+      "sha256": "839613343db576be8b324dd19b71a67672523e64fc391473ec89d000d31070ba",
+      "bytes": 8105
+    },
+    {
+      "path": "purchase/FROZEN_POPULATION.json",
+      "sha256": "15fc39b43ef03563750b4349f7f5663823bcea48a5dac756609b1a49bacb42ff",
+      "bytes": 30402
+    },
+    {
+      "path": "purchase/OPERATIONAL.json",
+      "sha256": "dcd6bbca901f4ae38dea2192f1cd6756b594c0dd52c580fd02c0e68e7a4f448e",
+      "bytes": 2676
+    },
+    {
+      "path": "purchase/PRIMARY_DIAGNOSTICS.json",
+      "sha256": "34c03795b7ac3621edeedf576220dd0a4d10ad1d28aafe51e2fbb57b4bb65ffe",
+      "bytes": 71228
+    },
+    {
+      "path": "remainder/ACCOUNTING.json",
+      "sha256": "761542ea1607c616ccf7a898eca7546a7d381b70fd96e621373577733b2e0973",
+      "bytes": 70622
+    },
+    {
+      "path": "remainder/CONVERSATIONS.md",
+      "sha256": "40a4f8a5d0f52cb895710630a29f69ee32fdedcfc89bc5c375e141a6b4a0eac1",
+      "bytes": 7430
+    },
+    {
+      "path": "remainder/DRAFTS.md",
+      "sha256": "786f8db1c6ca0347ddea08806a4bb93a1f6b1294b49d29d167418bd2fddef464",
+      "bytes": 2136
+    },
+    {
+      "path": "remainder/FROZEN_IDENTITIES.json",
+      "sha256": "e3c25f030bdd5711c60ab0ada4e6a8f1d406de2f2ed4b3734ce7a88378736952",
+      "bytes": 8123
+    },
+    {
+      "path": "remainder/FROZEN_POPULATION.json",
+      "sha256": "8be4d60f890f4d4f321d052882646c27074496ad0479f919f82f11a57bb60ecf",
+      "bytes": 21522
+    },
+    {
+      "path": "remainder/OPERATIONAL.json",
+      "sha256": "f2bace632a7da27f3b3b8966295203dc8ce494730ee7555da9f6d4712230291d",
+      "bytes": 2186
+    },
+    {
+      "path": "remainder/PRIMARY_DIAGNOSTICS.json",
+      "sha256": "9863ab725afd18957510cb803ea1d380816c3aac789ced1f6e2bacec12d7ff99",
+      "bytes": 41524
+    },
+    {
+      "path": "REPORT.md",
+      "sha256": "5b19527cb74103e043f44632d9d825c178ac9ddb6f16172d63d7875077fe1d25",
+      "bytes": 9152
+    },
+    {
+      "path": "SUMMARY.json",
+      "sha256": "6cf1f4e02aaa1f9494659162c00fd3ad7029bec30ae00ec9bf060e39e9ba355e",
+      "bytes": 6424
+    }
+  ],
+  "note": "Exact public packet bytes; raw artifacts remain separately hash-bound, private blind seed excluded."
+}

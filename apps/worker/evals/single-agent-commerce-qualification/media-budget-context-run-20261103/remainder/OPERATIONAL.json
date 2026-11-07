@@ -1,0 +1,48 @@
+{
+  "sourceSha": "5b679acc30e64c4d7a271b4f7aaa49534f10de54",
+  "registeredCases": 12,
+  "registeredTurns": 20,
+  "executedTurns": 20,
+  "generationRecords": 25,
+  "generationHttp": 25,
+  "maxRequestsPerGeneration": 1,
+  "generationStatuses": {
+    "OK": 25
+  },
+  "verifierVerdicts": {
+    "PASS": 4,
+    "FAIL": 3
+  },
+  "verifierLatencyMs": {
+    "n": 7,
+    "p50": 9558.039500000014,
+    "p95": 33498.77129999999
+  },
+  "nativeVerificationAndReadbackMs": {
+    "n": 7,
+    "p50": 11832.660899999959,
+    "p95": 39840.85579999999
+  },
+  "providerTransportErrors": 0,
+  "preDispatchFailures": 0,
+  "tokenUsage": {
+    "inputObserved": 260391,
+    "outputObserved": 28317,
+    "usageRows": 25,
+    "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+  },
+  "acceptedTexts": 4,
+  "acceptedImages": 4,
+  "terminalCounts": {
+    "HANDOFF": 10,
+    "SEND_ELIGIBLE": 4,
+    "NO_SEND": 6
+  },
+  "handoffNoSendRate": 0.8,
+  "databaseDropped": true,
+  "providerGenerationRetry": 0,
+  "liveSend": false,
+  "auxiliaryHttp": [],
+  "note": "Harness measurements only, not production SLO or causal latency/quality improvement. Auxiliary OAuth/embedding HTTP retained separately from generation attempts; unexposed token/cost is unavailable.",
+  "authHttpRequests": 1
+}

@@ -1,0 +1,29 @@
+{
+  "kind": "NEW_QUOTE_PATH_OFFLINE_CONSTRUCTED_NOT_MODEL",
+  "observations": [
+    {
+      "file": "native-3f3e117ae00300cabe5e9c6481a22d457a04992b3df836b0b91e4b7f4a50cb42-turn-0.json",
+      "latest": "Chị lấy một áo Thạch Thảo, gửi về Cần Thơ thì cả ship hết bao nhiêu em?",
+      "error": null,
+      "budget": {
+        "textFrameBytes": 56264,
+        "systemBytes": 21488,
+        "toolSchemaBytes": 19691,
+        "trustedFrameBytes": 11996,
+        "dialogueBytes": 2829,
+        "textLimitBytes": 65536,
+        "presentedTextFrameBytes": 56441,
+        "basePresentedFrameBytes": 56441,
+        "inlineImageBytes": 0,
+        "frameLimitBytes": 65536
+      },
+      "quoteStatus": "OK",
+      "quotedTotal": 529000,
+      "requestBodyConstructed": true
+    }
+  ],
+  "providerRequests": 0,
+  "networkReads": 0,
+  "effects": 0,
+  "limitation": "Constructed quote path using current tools at historical frozen source clock. No provider or prediction that owner chooses this operation. No historical signed part was modified; constructed content has no provider signature."
+}

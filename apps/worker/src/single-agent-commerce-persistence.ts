@@ -127,10 +127,10 @@ export async function prepareNativeCommerceTransition(input: {
   const legacyIntent = buildCanonicalDecisionEvidenceV1({ text: source.text, sourceMessageId: source.messageId,
     productId: source.productId, evaluatedAt: source.now, modelBuyingIntent: requestedAction
       ? { decision: "COMMITTED" as const, requestedAction, quantity, evidenceText: source.text, confidence: 1 } : null }).buyingIntent;
-  const line = mutation?.kind === "ADD_LINE" ? mutation.line : mutation ? source.state.cart?.value.lines.find(l => l.lineId === mutation.lineId) : draft?.lines[0];
+  const line = mutation?.kind === "ADD_LINE" || mutation?.kind === "REPLACE_LINE" ? mutation.line : mutation ? source.state.cart?.value.lines.find(l => l.lineId === mutation.lineId) : draft?.lines[0];
   const canonicalBuyingIntent = (mutation || draft) && line ? CanonicalBuyingIntentV1Schema.parse({
     schemaVersion: 1, authorityVersion: "CANONICAL_BUYING_INTENT_V1", decision: "COMMITTED",
-    requestedAction: mutation?.kind === "SET_COMPONENT_VARIANT" ? "SET_COMPONENT_VARIANT" : mutation?.kind === "REMOVE_LINE" ? "REMOVE_FROM_CART" : mutation?.kind === "SET_QUANTITY" ? "SET_QUANTITY" : draft ? "OPEN_CART" : "ADD_TO_CART",
+    requestedAction: mutation?.kind === "REPLACE_LINE" ? "REPLACE_LINE" : mutation?.kind === "SET_COMPONENT_VARIANT" ? "SET_COMPONENT_VARIANT" : mutation?.kind === "REMOVE_LINE" ? "REMOVE_FROM_CART" : mutation?.kind === "SET_QUANTITY" ? "SET_QUANTITY" : draft ? "OPEN_CART" : "ADD_TO_CART",
     quantity: mutation?.kind === "SET_QUANTITY" ? mutation.quantity : mutation?.kind === "REMOVE_LINE" || mutation?.kind === "SET_COMPONENT_VARIANT" ? null : line.quantity,
     productId: line.parentProductId, contributors: ["NATIVE_TOOL_PERMISSION"], sourceMessageIdHash: textHash(source.messageId),
     evidenceHash: commerceHash(["NATIVE_COMMERCE_PERMISSION_V1", textHash(source.messageId), textHash(command.commandId), commerceHash(mutation ? { mutation } : draft)]),

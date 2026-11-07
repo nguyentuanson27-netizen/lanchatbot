@@ -1,0 +1,327 @@
+{
+  "kind": "PRIMARY_ACCOUNTING_VERIFICATION_NOT_INDEPENDENT",
+  "status": "PASS",
+  "runSourceSha": "c31a308952534dd558a98fc48eedf1b694bb5c06",
+  "registeredCases": 21,
+  "registeredTurns": 28,
+  "executedCases": 15,
+  "executedTurns": 18,
+  "notRunCases": 6,
+  "notRunTurns": 10,
+  "generationRecords": 37,
+  "generationHTTP": 36,
+  "requestBodiesChecked": 36,
+  "rawCanonicalHashesChecked": 18,
+  "eligibleFinalGateBindingsChecked": 9,
+  "actualCustomerTexts": 9,
+  "acceptedOutbox": 9,
+  "images": 0,
+  "sourceCleanAtRun": true,
+  "testDatabaseDropped": true,
+  "liveSends": 0,
+  "independentAuditStatus": "INCOMPLETE_WORKSPACE_OUT_OF_CREDITS",
+  "blindGradingStatus": "NOT_AVAILABLE_WORKSPACE_OUT_OF_CREDITS",
+  "rows": [
+    {
+      "id": "a8830ec4-a8ef-4f0f-95ea-40fdb4567243:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "a8830ec4-a8ef-4f0f-95ea-40fdb4567243:owner:2",
+      "role": "OWNER",
+      "status": "MALFORMED",
+      "providerRequests": 1,
+      "failureLayer": "MODEL_OUTPUT",
+      "errorCode": "PROVIDER_ERROR"
+    },
+    {
+      "id": "bc0a86a9-bf5d-4985-9be5-dce393853dd7:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "5edb027c-7fcf-48a1-a070-71f5403ce43f:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "5edb027c-7fcf-48a1-a070-71f5403ce43f:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "e3c957ca-215f-42a9-b157-af45a1ebac45:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "e3c957ca-215f-42a9-b157-af45a1ebac45:owner:2",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "e3c957ca-215f-42a9-b157-af45a1ebac45:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "0c373a56-00cc-4585-9b8c-5fa3d551ccab:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "0c373a56-00cc-4585-9b8c-5fa3d551ccab:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "c283299d-5e88-4e36-a9b4-72ac381c52ca:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "3094e4b9-6e1b-495e-962c-6c79005bffe0:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "3094e4b9-6e1b-495e-962c-6c79005bffe0:owner:2",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "3094e4b9-6e1b-495e-962c-6c79005bffe0:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "1a70d588-003a-4e1f-b6eb-210c1e76367c:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "1a70d588-003a-4e1f-b6eb-210c1e76367c:owner:2",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "1a70d588-003a-4e1f-b6eb-210c1e76367c:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "8f8b20fb-69ea-4e5c-b04a-9d2e427a9dfc:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "8f8b20fb-69ea-4e5c-b04a-9d2e427a9dfc:owner:2",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "5110d8ba-9a1c-4800-b558-a188d4c2c95a:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "5110d8ba-9a1c-4800-b558-a188d4c2c95a:owner:2",
+      "role": "OWNER",
+      "status": "PROVIDER_ERROR",
+      "providerRequests": 0,
+      "failureLayer": "PRE_DISPATCH",
+      "errorCode": "OWNER_REQUEST_BOUND"
+    },
+    {
+      "id": "2a03ebc4-4469-49c7-a441-d4a859444a21:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "2a03ebc4-4469-49c7-a441-d4a859444a21:owner:2",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "2a03ebc4-4469-49c7-a441-d4a859444a21:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "d68f90aa-9e7c-4f55-8edc-29e107255fb2:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "68ba3058-a022-4ee1-a773-592b18b7d3ff:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "4e30a3aa-e64a-48a6-aa35-5dd8c3606bd0:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "4e30a3aa-e64a-48a6-aa35-5dd8c3606bd0:owner:2",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "4e30a3aa-e64a-48a6-aa35-5dd8c3606bd0:owner:3",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "4e30a3aa-e64a-48a6-aa35-5dd8c3606bd0:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "b24bfd48-a094-48b7-8118-d0812aae658a:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "b24bfd48-a094-48b7-8118-d0812aae658a:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "0b22806a-b3b7-401d-9749-aa338aa4fc04:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "0b22806a-b3b7-401d-9749-aa338aa4fc04:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "377b23c0-a19a-4e08-89b2-722bd0b79ebe:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "377b23c0-a19a-4e08-89b2-722bd0b79ebe:owner:2",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    },
+    {
+      "id": "377b23c0-a19a-4e08-89b2-722bd0b79ebe:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "failureLayer": null,
+      "errorCode": null
+    }
+  ],
+  "limits": [
+    "Primary author verification, not independent approval.",
+    "10 verifier PASS verdicts include one final-gate blocked draft.",
+    "No A2 or C3 comparison in this development run."
+  ]
+}

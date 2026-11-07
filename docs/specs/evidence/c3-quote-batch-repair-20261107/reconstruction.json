@@ -1,0 +1,43 @@
+{
+  "kind": "FROZEN_CONTINUATION_RECONSTRUCTION",
+  "worldHash": "436a5be7095ec64c2eaa851b1fcdf7c0a6a6ee5b381a049c3a84978be1159b4f",
+  "observations": [
+    {
+      "label": "p04",
+      "file": "native-6f715fafb0e76e1b3a9f83337cadc27c3d78805f593b88b18463daebc9bf0b00-turn-0.json",
+      "error": null,
+      "budget": {
+        "textFrameBytes": 62603,
+        "systemBytes": 20077,
+        "toolSchemaBytes": 14369,
+        "trustedFrameBytes": 7559,
+        "dialogueBytes": 20338,
+        "textLimitBytes": 65536,
+        "presentedTextFrameBytes": 62780,
+        "basePresentedFrameBytes": 62780,
+        "inlineImageBytes": 0,
+        "frameLimitBytes": 65536
+      },
+      "actualToolResultsMatched": true,
+      "nativeSignedContentPreserved": true,
+      "requestHash": "72ce722163e63a6c447a7dce2f1c91b139dbdd9da4d4a20e1568baa5da68143a",
+      "bodyHash": "d404455d2348c39edeaeb209c1aa1a3fcdee1af7420f8a9115009a444d5217ae"
+    },
+    {
+      "label": "legacy-s13-20261104",
+      "error": "OWNER_REQUEST_BOUND",
+      "budget": {
+        "textFrameBytes": 67821,
+        "systemBytes": 21488,
+        "toolSchemaBytes": 14625,
+        "trustedFrameBytes": 16978,
+        "dialogueBytes": 14470,
+        "textLimitBytes": 65536
+      }
+    }
+  ],
+  "providerRequests": 0,
+  "networkReads": 0,
+  "effects": 0,
+  "limitation": "Failed historical bodies were not captured. Rebuilt contexts use original clock, frozen sources and captured native outputs/results; p04 applies the captured public profile result in memory without replaying mutation/receipt persistence. These are not exact historical wire bodies, new model results, or complete stateful acceptance."
+}

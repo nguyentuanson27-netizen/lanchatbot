@@ -1,0 +1,31 @@
+{
+  "status": "APPROVED",
+  "reviewer": "/root/b_preserving_independent_review",
+  "sourceSha": "48e8a42858061e16df60ffbd98f19c47fc3bbd80",
+  "pendingRegistrationHash": "bcc6ea54d33b0510094cfdc6b2602b722e7b886078212844832cbce83a54939e",
+  "worldHash": "3fdf95b12080e6003da655fecf343ea216ea2e4af09c8b0b28a025a34d9733d2",
+  "corpusHash": "f1fcbc71ed56abfd84daa3c2963789460cbb963d1ea594333db6d9bf4e6ccb5c",
+  "sourceChecksHash": "3d737db75dc8c5e77559583e3739c15fb5ea4a1f342ea7c6af26ce5ad486d191",
+  "helperInventoryHash": "ceb1acddafade3620b3d929ef8bb81170b0f6e1562b5de4c2503e91fd1e450d3",
+  "evaluationPolicyHash": "856f4e80ad896106acadc932010a554fd846fbd9a3289f908cf24269c235fe54",
+  "reviewedAt": "2026-11-05T15:54:49.668Z",
+  "newProviderResultsObserved": 0,
+  "scope": "Frozen development inputs only; staged conditional dispatch, not quality or GO",
+  "counts": {
+    "cases": 20,
+    "turns": 24,
+    "maximumGenerationRequests": 96,
+    "cohorts": {
+      "SALES_READY": 19,
+      "SOURCE_UNAVAILABLE": 1
+    }
+  },
+  "conditions": [
+    "Actual-time preflight/readback before each dispatch; expired source fails closed, no clock renewal.",
+    "Only R1 may start after successful final preflight; every later group needs independently audited immediately prior group PASS/completecleanup/zero materialtaskfailure.",
+    "All34cases55turns are disjoint; original33scripts and separately trackedcheckout1/7 unchanged. No rerun due group split.",
+    "Missingcustomercolour requires usableclarification; exactWHITEsourceoption proof is evaluator-only and notcustomerselection.",
+    "Unitquantity/registeredfacets readiness does not guarantee futuresearch/budget/taskcompletion.",
+    "N1/retry0/3owner1verifier,cap28/68/96/28,allerrorsremain denominator; no qualificationGO/live send."
+  ]
+}

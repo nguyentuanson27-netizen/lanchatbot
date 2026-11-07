@@ -4,6 +4,8 @@ import {createCommerceTools} from "./single-agent-commerce.js";
 import {runCommerceTurn,type OwnerGeneration} from "./single-agent-commerce-read-only.js";
 import type {HandoffAuthority} from "./single-agent-commerce-handoff.js";
 import {commerceNow,commerceScope,fixturePolicy,fixtureProduct,fixtureProfile,fixtureSizeInput} from "./single-agent-commerce.test-support.js";
+import {createSalesCycleRuntimeState} from "@lana/chat-runtime";
+import {cartSelectionFromSnapshot} from "./realtime-sales-catalog.js";
 
 async function setup(mode:"missing-pos"|"complete"|"policy-error"="missing-pos",commitMode:"ok"|"denied"|"unknown"="ok") {
  const scope=commerceScope(),product=fixtureProduct("QU714"),original=(await fixturePolicy()).bundle!;
@@ -23,14 +25,39 @@ async function setup(mode:"missing-pos"|"complete"|"policy-error"="missing-pos",
 const native=(name:string,args:unknown):OwnerGeneration=>({kind:"TOOLS",calls:[{name,args}],content:{role:"model",parts:[{functionCall:{name,args}}]}});
 
 describe("missing shop information uses real handoff; missing customer input stays conversational",()=>{
+ it.each([true,false])("enforces an unknown-colour shop gap before asking for customer size (size provided=%s)",async hasSize=>{
+  const s=await setup("complete"),profile=fixtureProfile(),row=s.product.snapshot.offers.DIRECT!.rows[0]!;
+  row.color="__NO_COLOR__";
+  s.product.snapshot.offers.DIRECT!.rows.push({...structuredClone(row),color:"be"});
+  const cycle=createSalesCycleRuntimeState(s.scope.conversationId,{pageId:s.scope.pageId,conversationId:s.scope.conversationId},commerceNow);
+  const mutate=vi.fn(),commitCart=vi.fn(),policy=(await fixturePolicy()).bundle!;
+  const tools=await createCommerceTools({read:s.read,handoff:s.handoff,
+   state:{store:{read:async()=>structuredClone(profile),compareAndSwap:vi.fn()},sourceMessages:[],sizeInput:async()=>fixtureSizeInput()},
+   effects:{conversationKey:s.scope.conversationId,repository:{read:async()=>structuredClone(cycle),compareAndSwap:commitCart},
+    identity:{cartId:"50000000-0000-4000-8000-000000000001",salesEpisodeId:"60000000-0000-4000-8000-000000000001",customerProfileId:profile.profile.profileId},
+    authorize:async()=>true,policy:async()=>policy,select:async q=>cartSelectionFromSnapshot(s.product.snapshot,{...q,selectionMode:"CANDIDATE_TUPLES"},commerceNow),
+    executeCommand:mutate,readAuthority:async()=>({...s.scope,revision:s.current().stateVersion,conversationOwner:s.current().state.conversationOwner}),readReceipt:async()=>null}});
+  const result=await tools.invoke({name:"add_to_cart",args:{subjectRef:"QU714",offerType:"DIRECT",color:null,...(hasSize?{size:"M"}:{})}});
+  expect(result).toMatchObject({status:"UNAVAILABLE",data:{choiceResolution:{kind:"SHOP_DATA_MISSING"},shopDataGap:"SHOP_COLOR_UNRECORDED"}});
+  expect(await tools.terminalOutcome!()).toMatchObject({disposition:"HANDOFF",text:null});
+  expect(s.commit).toHaveBeenCalledOnce();expect(mutate).not.toHaveBeenCalled();expect(commitCart).not.toHaveBeenCalled();
+ });
+ it.each(["ok","denied","unknown"] as const)("unsupported component sizing uses silent handoff with %s authority",async mode=>{
+  const s=await setup("complete",mode),profile=fixtureProfile(),sizeInput=vi.fn(async()=>fixtureSizeInput());
+  const tools=await createCommerceTools({read:s.read,handoff:s.handoff,state:{store:{read:async()=>structuredClone(profile),compareAndSwap:vi.fn()},sourceMessages:[],sizeInput}});
+  const result=await tools.invoke({name:"recommend_size",args:{subjectRef:"QU714",fitScope:"COMPONENT",componentRole:"PANTS"}});
+  expect(result).toMatchObject({status:"UNAVAILABLE",reason:"SIZE_SOURCE_UNAVAILABLE"});expect(sizeInput).not.toHaveBeenCalled();
+  expect(await tools.terminalOutcome!()).toMatchObject({disposition:mode==="ok"?"HANDOFF":"NO_SEND",text:null});expect(s.commit).toHaveBeenCalledOnce();
+  expect(tools.snapshot().protectedClaims.filter(c=>(c as {type:string}).type==="SIZE_FIT")).toEqual([]);
+ });
  it("hands off a failed product source read before another owner or verifier",async()=>{
   const s=await setup();s.read.catalog.readProduct=async()=>{throw Error("SOURCE_OFFLINE");};
   const tools=await createCommerceTools({read:s.read,handoff:s.handoff});
   const owner=vi.fn(async()=>native("read_product",{subjectRef:"QU714",offerType:"DIRECT"})),verifier=vi.fn();
   const result=await runCommerceTurn({scope:s.scope,tools,owner,verifier,clock:s.read.clock,latest:"Quần size M còn không, bao nhiêu em?",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm"});
-  expect(result.terminal).toMatchObject({disposition:"HANDOFF",reason:"DEPENDENCY_FAILURE",text:"Bên em sẽ kiểm tra lại rồi báo chị nhé."});
+  expect(result.terminal).toMatchObject({disposition:"HANDOFF",reason:"DEPENDENCY_FAILURE",text:null});
   expect(s.current().state.conversationOwner).toBe("HUMAN");expect(s.commit).toHaveBeenCalledOnce();
-  expect(owner).toHaveBeenCalledOnce();expect(verifier).not.toHaveBeenCalled();
+  expect(owner).not.toHaveBeenCalled();expect(verifier).not.toHaveBeenCalled();
   await tools.invokeBatch([{name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT"}}]);expect(s.commit).toHaveBeenCalledOnce();
  });
  it.each(["denied","unknown"] as const)("does not claim a transfer or resume model advice after an unproved %s handoff",async mode=>{
@@ -39,7 +66,7 @@ describe("missing shop information uses real handoff; missing customer input sta
   const owner=vi.fn(async()=>native("read_product",{subjectRef:"QU714",offerType:"DIRECT"})),verifier=vi.fn();
   const result=await runCommerceTurn({scope:s.scope,tools,owner,verifier,clock:s.read.clock,latest:"Quần bao nhiêu em?",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm"});
   expect(result.terminal).toMatchObject({disposition:"NO_SEND",text:null});expect(s.commit).toHaveBeenCalledOnce();
-  expect(owner).toHaveBeenCalledOnce();expect(verifier).not.toHaveBeenCalled();
+  expect(owner).not.toHaveBeenCalled();expect(verifier).not.toHaveBeenCalled();
   expect(await tools.invokeBatch([{name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT"}}])).toMatchObject([{status:"REJECTED"}]);
   expect(s.commit).toHaveBeenCalledOnce();
  });
@@ -113,4 +140,14 @@ describe("missing shop information uses real handoff; missing customer input sta
   expect(await tools.invoke({name:"recommend_size",args:{subjectRef:"QU714"}})).toMatchObject({status:"UNAVAILABLE",reason:"SIZE_SOURCE_UNAVAILABLE"});
   expect(await tools.terminalOutcome!()).toMatchObject({disposition:"HANDOFF",reason:"SIZE_RULE_UNAVAILABLE"});expect(s.commit).toHaveBeenCalledOnce();
  });
+});
+
+it.each(["ok","denied","unknown"] as const)("required source handoff stays silent under a holding-message policy (%s)",async mode=>{
+ const s=await setup("missing-pos",mode);s.read.catalog.readProduct=async()=>{throw Error("SOURCE_OFFLINE");};
+ const tools=await createCommerceTools({read:s.read,handoff:s.handoff});
+ await tools.invoke({name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT"}});
+ const terminal=await tools.terminalOutcome!();expect(terminal?.text).toBeNull();
+ expect(terminal?.disposition).toBe(mode==="ok"?"HANDOFF":"NO_SEND");expect(s.commit).toHaveBeenCalledOnce();
+ expect(s.commit.mock.calls[0]![0]).toMatchObject({decision:{customerMessages:[],customerMessagePolicy:"SILENT_HANDOFF"}});
+ await tools.invoke({name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT"}});expect(s.commit).toHaveBeenCalledOnce();
 });

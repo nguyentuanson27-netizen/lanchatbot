@@ -1,0 +1,139 @@
+{
+  "kind": "INTERRUPTED_MODEL_BATCH_ACCOUNTING",
+  "runSourceSha": "4e87350c94a034bc2913a96d3a804047f36c4c28",
+  "registrationHash": "478d85a57004fcb642639352ffa3bbe7390a540fe82c5f139c22b5d0fb480dfe",
+  "capturedNativeTurns": 17,
+  "plannedTurns": 48,
+  "completeCases": 14,
+  "startedCaseWithoutTerminal": "c-20261028-s09",
+  "unstartedPurchaseCases": 6,
+  "unstartedRemainderCases": 12,
+  "generationRecords": 35,
+  "generationRequests": 35,
+  "generationStatuses": {
+    "OK": 33,
+    "MALFORMED": 1,
+    "PROVIDER_ERROR": 1
+  },
+  "interruptedS09Generations": [
+    {
+      "id": "2a8ed314-46a7-46f3-acf1-48027d5a577e:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "errorCode": null
+    },
+    {
+      "id": "2a8ed314-46a7-46f3-acf1-48027d5a577e:owner:2",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "errorCode": null
+    },
+    {
+      "id": "2a8ed314-46a7-46f3-acf1-48027d5a577e:verifier:1",
+      "role": "VERIFIER",
+      "status": "PROVIDER_ERROR",
+      "providerRequests": 1,
+      "errorCode": "PROVIDER_ERROR"
+    }
+  ],
+  "error": "connect ECONNREFUSED 127.0.0.1:18401",
+  "originalDatabaseDropped": false,
+  "laterCleanup": {
+    "status": "CLEANUP_CONFIRMED",
+    "database": "c3_b_test_c55e65bcb8311505",
+    "existed": true,
+    "activeConnections": 0,
+    "testDatabaseDropped": true,
+    "providerRequests": 0,
+    "shopSourceWrites": 0,
+    "liveSends": 0,
+    "at": "2026-11-03T05:27:19.047Z"
+  },
+  "newAttemptIsNotOldGenerationRetry": true,
+  "quality": "NOT_GRADED",
+  "liveSends": 0,
+  "artifacts": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\CANDIDATE_EVIDENCE.partial.json",
+      "sha256": "330f1803d8879a5ca74fd6abf52fe335bef0a9b5e00ed1938e6787972b120625"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\integration.json",
+      "sha256": "c2bcebdd04bc2ff33661f08a7f29f752913f75e6af7734cd7f97f031dbc07dae"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-2100b5c3ea0d0e9fc64bc2128e5d6f3c73c2ecfedcf94bb4045a844c9c3e3dce-turn-0.json",
+      "sha256": "9dd34ef741886566ca18358b45339ad2443a9850289086360eed69ba3e47e491"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-2100b5c3ea0d0e9fc64bc2128e5d6f3c73c2ecfedcf94bb4045a844c9c3e3dce-turn-1.json",
+      "sha256": "1fadec557df1cb46521bafd74a7c0f2bd27ea32cf639868d5d9420bbcd5e4e22"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-579193f8af36937c1703a8a27f38932c40113afee459df01114c90b983e0816d-turn-0.json",
+      "sha256": "01a5bbacc10f34c7ae441b2e874c02a996f691fac3e75eb6c44559e53f0a9197"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-66ba378dd77aa7d342de6a74741197cc6f462e261939bc7e009f8dab21f693d4-turn-0.json",
+      "sha256": "e6fcf29676715fb9d929a68a31f15b7ef6d98422b37e65e1ec92f2f0a677264e"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-87a792308da88d968c6f9f01f1986bc960d89a368c83f6a62a708ce49eaa3a77-turn-0.json",
+      "sha256": "5295dd460c9bebe80a6a80a7e6fe352fc34a837ef31b7d7d50dc85db8efd7e06"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-9207e28383b8bcbe9ba38618b11f0f4f3f6b0775edc1e514b90b5905bb634814-turn-0.json",
+      "sha256": "d6b6c20904fb3d683ee3b1fcea7ebc377463087281542bb2fc51f78c80c7a439"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-98835f39c44a39ec310b2bd9f8083da1348fa79b45ab36080b9fc5675c88a539-turn-0.json",
+      "sha256": "3be0501fb3783a11b656452be61c6506aa4383b96b970bf4e1956d5e1dea9203"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-a5cf19bfa93a1f099ac1ddc00fbb73d960ffaeefebabc6a095283dac4dda278d-turn-0.json",
+      "sha256": "6d86c588492e4c02ea5d8e1bd0b1fe5b06ca8980dcd0c575e6e27825f0fdd459"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-a5cf19bfa93a1f099ac1ddc00fbb73d960ffaeefebabc6a095283dac4dda278d-turn-1.json",
+      "sha256": "7fddc6c44621faeb19c7874914c1b333756a2717427e42a3b9c85506d1cb72d3"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-a87c6e43f535e152b9eff7b1d770b49310a17c31a619225ca0455ba9448facb0-turn-0.json",
+      "sha256": "ce60c94d0ee64d14446058ef3365e458f2bc270ddd94776a58e7a08ec0d04ec8"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-bdb9dbf739fb96e23ef5e31f950d743190e182eed10d096aff9799ec2511f403-turn-0.json",
+      "sha256": "648d09cbf2f9e91f95c1f563d2a2fbf7114dadaa949d1c7ac890c6e779131b3d"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-d022ee6e77ac04bc05ac27454e653a56de04b80c3fd401cb96e9ccbc3dc5615a-turn-0.json",
+      "sha256": "cb668c3b00668ae1759db175a8c0f944fa23386ff3af95f95f8fa7dcfff87f07"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-df9944c40c1891929746b7b4ccd21fb7070889738f421172f377e8cec9f0126a-turn-0.json",
+      "sha256": "ee7f72c93174e5dfd12fa3f5266401d4e3bb09d6caa42c57874f9f4c3e187641"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-df9944c40c1891929746b7b4ccd21fb7070889738f421172f377e8cec9f0126a-turn-1.json",
+      "sha256": "00a5993112c318f91c32382ff8fc004cdc714799e260a3891c55f94f4c85505d"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-e1c2aace2e6c7fce6105a49cc02e4b6c47021031e6d680822592684c62b0a4ef-turn-0.json",
+      "sha256": "c944ba0545f88c111fe90c55432a87900f9613011f057911b76e8443d7c3378d"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-e45f13f952708e61f253d29c47b928413068e8e5d0c60cc9510e147a5265f6ce-turn-0.json",
+      "sha256": "a525160f9575bded2d9ff480314fe583acaaf6affba0cbcbc7a4357c69f00338"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-e75ff230eee9aa9dc73f2436bcef7a0cbd6fe79136e81a64aee09fa84753a7c4-turn-0.json",
+      "sha256": "f1477a1e1c369e595b287f44bafe6728b075c665d4f134e4590f6601f62e37c3"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\NATIVE_REQUESTS.jsonl",
+      "sha256": "2f34b0ea671579a1338ea3e866b3f68531f4f90301f0fc84b6278defd57fd91b"
+    }
+  ]
+}

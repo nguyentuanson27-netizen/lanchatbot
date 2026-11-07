@@ -1,0 +1,181 @@
+{
+  "runSourceSha": "88a331404226b44d2e87e0b5cc1c8689261bb345",
+  "config": {
+    "version": 1,
+    "qualificationStage": "ABSOLUTE",
+    "nativeCodecs": {
+      "OWNER": "NATIVE_B_OWNER_V1",
+      "VERIFIER": "NATIVE_B_VERIFIER_V1",
+      "STRATEGIST": "MAIN_C3_V1",
+      "RESPONDER": "MAIN_C3_V1"
+    },
+    "sendEnabled": false,
+    "retry": 0,
+    "repetitions": 1,
+    "implementationBaseSha": "f160dfa4f7e0c8b3e29232570710d99d4f5ed012",
+    "candidate": {
+      "sourceSha": "88a331404226b44d2e87e0b5cc1c8689261bb345",
+      "model": {
+        "provider": "VERTEX_AI",
+        "model": "gemini-3.5-flash-lite",
+        "version": "gemini-3.5-flash-lite",
+        "effort": "high",
+        "location": "global",
+        "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+        "generationConfig": {
+          "candidateCount": 1,
+          "responseMimeType": "text/plain",
+          "maxOutputTokens": 8192,
+          "thinkingConfig": {
+            "thinkingLevel": "HIGH",
+            "includeThoughts": false
+          },
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "retry": 0,
+          "timeoutMs": 90000
+        }
+      },
+      "promptHash": "fdb071bf6079af059819c1a984be80ca386ab2d92fb5988418271d08e450db2b",
+      "openingMediaRule": {
+        "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2"
+      },
+      "contextPolicyHash": "9e4dd36e138a6674df8f0f47d0587db483707ed7b3bada790ff23a367c67e978",
+      "toolContractHash": "fca446c9ee0e569f378750e79cde33424ceefed9dc087c073a943d132a577160",
+      "assemblyHash": "0d59a6bd90e4d7c7a7ce87204c098a3782b85c37994a4e87288d3eb668013fb2",
+      "runtimeHash": "4c690c0b322b47d3ee1b65e364bbab3b1ded7c99c30bf5111616b240510b03c9",
+      "verifier": {
+        "model": {
+          "provider": "OPENAI",
+          "model": "gpt-6.1-sol",
+          "version": "gpt-6.1-sol",
+          "effort": "high",
+          "credentialRoute": "CODEX_CHATGPT_LOGIN",
+          "generationConfig": {
+            "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+            "cliVersion": "0.159.2",
+            "wireApi": "responses",
+            "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+            "tools": [],
+            "tool_choice": "none",
+            "parallel_tool_calls": false,
+            "store": false,
+            "stream": true,
+            "reasoningEffort": "high",
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+            "timeoutMs": 90000,
+            "maxResponseBytes": 1048576,
+            "relayUpstreamRequestsPerAttempt": 1,
+            "retry": 0,
+            "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+            "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+          }
+        },
+        "promptHash": "6ffaebf52151edca3baae03581e44731d727a29dc3b132e87c8dcc8f1ae5f944",
+        "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+        "serializationHash": "93bd246918f3c61426fc61a67b5a29109ec348bb7569da927f16b065c1232f70",
+        "bindingHash": "f7a63d2727e695ff2050ad4b4e2b7dd1c9cf697fae833fce6fb260912646a2b1",
+        "boundsHash": "6179ba4eb906926b3b58c2cd754f53c4e511bc4d8b2a6e0049d2463a32a1c26b"
+      }
+    },
+    "measurementPolicy": {
+      "latency": "MONOTONIC_MS_EVERY_GENERATION",
+      "percentiles": "NEAREST_RANK",
+      "tokens": "PROVIDER_OR_EXPLICIT_UNAVAILABLE",
+      "cost": "PROVIDER_OR_EXPLICIT_UNAVAILABLE",
+      "toolCalls": "EVERY_ATTEMPT",
+      "terminalReasons": "EVERY_NON_SEND",
+      "embedding": {
+        "kind": "NATIVE_VERTEX_EMBED_TEXT_V1",
+        "maximumPredictHttpPerInvocation": 2,
+        "retry": "ONE_REFRESH_AND_RETRY_ONLY_AFTER_FIRST_PREDICT_401",
+        "oauth": "NATIVE_TOKEN_CACHE_SINGLE_REFRESH_NO_OAUTH_RETRY",
+        "generationRequests": 0,
+        "requestEvidence": "PREDICT_BODY_HASH_ONLY_OAUTH_BODY_NEVER_RETAINED",
+        "usage": "NOT_EXPOSED_BY_NATIVE_EMBED_PORT"
+      }
+    },
+    "onlineRoles": [
+      "OWNER",
+      "VERIFIER"
+    ],
+    "maximumOwnerGenerations": 3,
+    "maximumVerifierGenerations": 1,
+    "ownerDecision": {
+      "status": "APPROVED",
+      "evidenceRef": "owner-reply:call_c242e38f43fc43008382efd4abff8c46:2026-10-28",
+      "decisionHash": "87d2a2535bfb174c4ffe731b8072c89211c8d50a121807348a735d67021d7eeb"
+    },
+    "thresholds": {
+      "singleQuality": 0.9,
+      "journeyQuality": 0.9,
+      "safeUsability": 0.9,
+      "singleNetWin": 0.1,
+      "journeyNetWin": 0.1
+    },
+    "judge": {
+      "kind": "OFFLINE_MODEL",
+      "identity": "INDEPENDENT_GPT_6_1_SOL_HIGH_BLIND",
+      "model": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high"
+      },
+      "approvalRef": "owner-reply:call_bd286ceab8db4f4780bc1a76537484da:2026-10-28",
+      "promptHash": "80843a39c70548e8709a5cbd42628927b0c34515cd3d2d55e7667212355d6bff",
+      "rubricHash": "a652669b2ea5d788eaba897bfd24f0bbf8fe3fbe3a6ab6e64ecdc4cb51984fad",
+      "blind": true,
+      "disagreement": "REQUIRE_ADJUDICATION"
+    },
+    "baseline": {
+      "sourceSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+      "capabilityPath": "apps/worker/src/track-c-c3-two-pass-candidate.ts",
+      "model": null,
+      "capabilityStatus": "UNVERIFIED_MATCHED_MODEL_AND_STATEFUL_PARITY"
+    },
+    "blinding": {
+      "scheme": "HMAC_SHA256_ORDER_V1",
+      "seedCommitment": "3c09eec51ccec1200629e9bb424ce16eb637f0b726e00eedbb825ada0709af8a"
+    }
+  },
+  "corpusHash": "d3055c3d3101f9110ae17026953c7ec49303edb747aa476e465cf62f6f80f385",
+  "scopeHash": "19f5d98df43a2a49a9f44206ceabe91f73fa1685b2f3e8b0bf4e1f9b4f500840",
+  "worldHash": "38fb7a629f9dc3ddf7e4336a0f56ce298476ffe51dd40bdeefb5800f1f3bf7cb",
+  "initialStateArtifactHash": "9cc5802349b7cc950b1760235a4ed4ff45f0f918fd1d38bf44929ed80fc1deee",
+  "review": {
+    "status": "APPROVED",
+    "reviewer": "/root/sales_completion_implementation_review",
+    "evidenceRef": "../c3-checkout-relax-model-remainder-sealed-20261103-01/INPUT_APPROVAL.json",
+    "newProviderResultsObserved": 0,
+    "corpusHash": "d3055c3d3101f9110ae17026953c7ec49303edb747aa476e465cf62f6f80f385",
+    "worldHash": "38fb7a629f9dc3ddf7e4336a0f56ce298476ffe51dd40bdeefb5800f1f3bf7cb",
+    "sourceChecksHash": "7281449b0882bcc2142d4776bbda34cfa39ac8f00f71e9651792782c47265417"
+  },
+  "provenance": {
+    "developmentOnly": true,
+    "diagnosticScope": "FULL_NATIVE_REMAINDER_12_20261102",
+    "sourceBindingsPending": false,
+    "candidatePromptUnchanged": false,
+    "verifierPromptUnchanged": false,
+    "repairPlan": "c3-phase-c-sales-completion-fix-plan-20261103.md",
+    "authoredFrom": "Owner asks remaining cases; exact original FULL22 minus completed PURCHASE21, no previous slot replay",
+    "developmentExposure": "Known development population; not fresh holdout",
+    "historicalEvidenceRef": "variant-stock-search-rerun-20261030/REPORT.md",
+    "noNewProviderResultsBeforeSeal": true,
+    "knownDevelopmentExposure": true,
+    "sourceBoundReadinessVersion": 3,
+    "previousRegistrationHash": "3e3671f769e95a580ee3661f4e1d58ec5490560b41f1f2323942c79e95899ec9",
+    "ownerAmendment": "c3-phase-c-checkout-interruption-relaxation-20261103.md",
+    "promptComparison": {
+      "basis": "EXACT_PREVIOUS_REGISTRATION",
+      "previousRegistrationHash": "3e3671f769e95a580ee3661f4e1d58ec5490560b41f1f2323942c79e95899ec9",
+      "previousOwnerPromptHash": "2a17c6b9fcc36a1dcea771631f0c8f3e7ff77d2f47f857550e9b906f801346ce",
+      "currentOwnerPromptHash": "fdb071bf6079af059819c1a984be80ca386ab2d92fb5988418271d08e450db2b",
+      "previousVerifierPromptHash": "d9d999d0b6f08dd111081cfbf1324e26aaf29904d3c03c8519eb7614b0216c73",
+      "currentVerifierPromptHash": "6ffaebf52151edca3baae03581e44731d727a29dc3b132e87c8dcc8f1ae5f944"
+    }
+  }
+}

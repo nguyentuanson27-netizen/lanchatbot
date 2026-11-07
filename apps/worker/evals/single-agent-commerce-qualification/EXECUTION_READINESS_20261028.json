@@ -1,0 +1,192 @@
+{
+  "version": 2,
+  "status": "CANDIDATE_EXECUTION_COMPLETE_QUALIFICATION_BLOCKED",
+  "asOf": "2026-10-29",
+  "runSourceSha": "36e45015c381ebe91a2591a288b112e3dd8caa0e",
+  "registrationHash": "c8bc31502f1c5bdb7b040430ed423240e58f2d57230bda65da256514c380e3c7",
+  "sealedRegistration": "run-20261029/REGISTRATION.json",
+  "report": "run-20261029/REPORT.md",
+  "execution": {
+    "registeredSlots": 68,
+    "candidateExecuted": 46,
+    "c3NotRun": 22,
+    "nativeScenarios": 22,
+    "nativeCustomerTurns": 34,
+    "generationRecords": 94,
+    "actualGenerationHttpRequests": 93,
+    "previousCampaignRequests": 24,
+    "invalidatedRegistration02Requests": 0,
+    "safeEligible": 11,
+    "safeTotal": 12,
+    "unsafeSendEligibleFalsePass": 0,
+    "unsafeTotal": 12,
+    "realAdapterChecksPass": 66,
+    "realAdapterNamedInvariantsPass": 7,
+    "sourceWrites": 0,
+    "liveSends": 0,
+    "testDatabasesDropped": true
+  },
+  "grades": {
+    "pass": 12,
+    "fail": 2,
+    "unresolved": 8,
+    "denominator": 22
+  },
+  "blockers": [
+    "UNRESOLVED_INDEPENDENT_JUDGEMENT",
+    "CODE_OWNED_CAPTURE_EVIDENCE_REQUIRED",
+    "C3_INFORMATION_PARITY_UNPROVED"
+  ],
+  "rolloutAuthorized": false,
+  "historicalPhaseBStatus": "B_NOT_GO_UNCHANGED",
+  "verification": {
+    "sourceSha": "36e45015c381ebe91a2591a288b112e3dd8caa0e",
+    "focusedPass": 62,
+    "broadPass": 738,
+    "broadFail": 0,
+    "broadSkip": 2,
+    "workerBuild": "EXIT_0",
+    "workerDirectTypecheck": "EXIT_0",
+    "workerLint": "EXIT_0"
+  },
+  "previousReadinessSnapshotHistorical": {
+    "version": 1,
+    "status": "BLOCKED_NOT_REGISTERED_NOT_RUN",
+    "authorization": "Owner requested complete Phase C, independent review, then run model",
+    "ownerModel": "gemini-3.5-flash-lite",
+    "ownerEffort": "high",
+    "verifierModel": "gpt-6.1-sol",
+    "verifierEffort": "high",
+    "judge": "INDEPENDENT_GPT_6_1_SOL_HIGH_BLIND",
+    "repetitions": 1,
+    "baselineSourceSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+    "baselineBuild": {
+      "status": "OFFLINE_LOCKFILE_INSTALL_AND_BUILD_EXIT_0",
+      "sourceFiles": 638,
+      "builtFiles": 2044,
+      "sourceHash": "b2de7a8f799d136402c14475e7b5c06489b87da91021d8e0786fb9abbe4f4424",
+      "buildHash": "329e510b1aec79f137752c53227bb1572dc836465d9434f50b421c7e841d97c3"
+    },
+    "codexTransport": {
+      "status": "PINNED_CLIENT_AND_CHATGPT_LOGIN_AVAILABLE",
+      "version": "codex-cli 0.159.2",
+      "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a",
+      "selection": "Existing c3-eval-runtime-01592, process-scoped APPDATA only; global client unchanged",
+      "providerRequests": 0
+    },
+    "sourceCredentialPreflight": {
+      "existingRoute": "credential-launcher.py -> existing source-session.py",
+      "attempts": 4,
+      "exitCodes": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "reason": "SSH source host port 22 connection timed out before credential retrieval",
+      "configuredLocalVertexCredentialVariables": 0,
+      "providerRequests": 0,
+      "sourceWrites": 0
+    },
+    "localPostgresFallback": {
+      "status": "UNAVAILABLE",
+      "evidence": "docker info failed: Docker Desktop Linux engine pipe absent",
+      "testDatabasesCreated": 0
+    },
+    "runSourceSha": null,
+    "sealedRegistration": null,
+    "registeredAttempts": 0,
+    "actualProviderRequests": 0,
+    "modelGrades": 0,
+    "realAdapterExecution": "NOT_RUN",
+    "missing": [
+      "reachable existing public-source and Vertex credential route",
+      "new frozen public world and real native initial-state readback",
+      "reviewed source bindings and finalized fresh corpus",
+      "sealed clean source/input registration",
+      "matched C3 information parity or explicit package-only qualification disposition",
+      "actual model, independent blind grades and real-adapter evidence"
+    ],
+    "rolloutAuthorized": false,
+    "historicalPhaseBStatus": "B_NOT_GO_UNCHANGED",
+    "frozenSearch": {
+      "implementation": "BUILT_INDEPENDENT_REVIEW_APPROVED",
+      "sourceSnapshot": "NOT_CAPTURED",
+      "ranking": "EXACT_COSINE_SHARED_NATIVE_ADAPTER_V1",
+      "productionHnswParity": "NOT_CLAIMED",
+      "embeddingHttpAccounting": "ACTUAL_OAUTH_AND_PREDICT_SEPARATE_FROM_GENERATIONS",
+      "retry": "ONE_REFRESH_AND_RETRY_ONLY_AFTER_FIRST_PREDICT_401"
+    },
+    "draftHistory": {
+      "authoredInitialShopHistory": 0,
+      "nativeJourneys": 6,
+      "corpusReview": "PENDING_SOURCE_BINDINGS"
+    },
+    "boundedImplementationApproval": {
+      "sourceSha": "02fc8205a58a8244c485c65de52da94697e86efc",
+      "reviewer": "/root/phase_c_independent_review",
+      "status": "APPROVE_EXACT_CLEAN_HEAD",
+      "qualificationApproval": false
+    },
+    "verification": {
+      "phaseCFocused": {
+        "pass": 58,
+        "fail": 0,
+        "skip": 0
+      },
+      "allEvaluationSuites": {
+        "pass": 734,
+        "fail": 0,
+        "skip": 2,
+        "total": 736
+      },
+      "workerBuild": "EXIT_0",
+      "workerDirectTypecheck": "EXIT_0",
+      "workerLint": "EXIT_0"
+    },
+    "draftPreflight": {
+      "sourceSha": "02fc8205a58a8244c485c65de52da94697e86efc",
+      "status": "BLOCKED",
+      "missing": [
+        "BLINDING_REGISTRATION",
+        "CORPUS_BINDING_AND_REVIEW",
+        "FROZEN_SEARCH_SOURCE_BINDING"
+      ],
+      "providerRequests": 0
+    },
+    "pullRequest": "https://github.com/nguyentuanson27-netizen/lanchatbot/pull/392",
+    "latestOwnerRequestedPreflight": {
+      "recordedAt": "2026-10-28T15:31:49.663423+00:00",
+      "sourceSha": "ea700591742811655740ba90c3a2f39d1842ad29",
+      "ownerInstruction": "chạy model",
+      "stage": "BEFORE_REGISTRATION_AND_GENERATION",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py",
+        "node",
+        "--input-type=module",
+        "-e",
+        "console.log(JSON.stringify({status:'EXISTING_SOURCE_CREDENTIAL_ROUTE_READY',credentialConfigured:!!process.env.C3_VERTEX_CREDENTIAL_FILE,sourceConfigured:!!process.env.QDRANT_BASE_URL&&!!process.env.REDIS_URL,databaseConfigured:!!process.env.C3_B_TEST_ADMIN_DATABASE_URL,providerRequests:0}))"
+      ],
+      "exitCode": 1,
+      "result": "SSH_CONNECT_TIMEOUT_BEFORE_CREDENTIAL_RETRIEVAL",
+      "networkProbes": [
+        {
+          "port": 22,
+          "reachable": false,
+          "error": "TimeoutError"
+        },
+        {
+          "port": 443,
+          "reachable": false,
+          "error": "TimeoutError"
+        }
+      ],
+      "registeredAttempts": 0,
+      "generationRequests": 0,
+      "sourceWrites": 0,
+      "status": "BLOCKED_NOT_RUN",
+      "artifact": "c3-phase-c-source-preflight-20261028T153149Z.json"
+    }
+  }
+}

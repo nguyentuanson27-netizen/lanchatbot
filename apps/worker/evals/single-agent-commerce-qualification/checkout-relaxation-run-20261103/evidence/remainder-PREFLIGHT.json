@@ -1,0 +1,19 @@
+{
+  "status": "PREFLIGHT_PASS",
+  "source": "88a331404226b44d2e87e0b5cc1c8689261bb345",
+  "pendingRegistrationHash": "aa0337a7b0b71b357d4785e6f9b46db531e74ed62b00039916c3e299fe7a3c8d",
+  "registrationHash": "b5180ceae6ff87dabe30398b2b052aa135b178d31461f20a6a2d1c0a9c1ab01b",
+  "corpusHash": "d3055c3d3101f9110ae17026953c7ec49303edb747aa476e465cf62f6f80f385",
+  "configHash": "2c6e8024dcb692288ebef1f54444c3c1c6bd3473e51a14fe8d760cc801be8f55",
+  "worldHash": "38fb7a629f9dc3ddf7e4336a0f56ce298476ffe51dd40bdeefb5800f1f3bf7cb",
+  "initialHash": "9cc5802349b7cc950b1760235a4ed4ff45f0f918fd1d38bf44929ed80fc1deee",
+  "codex": {
+    "version": "codex-cli 0.159.2",
+    "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+  },
+  "cases": 12,
+  "turns": 20,
+  "maximumGenerationRequests": 80,
+  "sendEnabled": false,
+  "providerRequests": 0
+}

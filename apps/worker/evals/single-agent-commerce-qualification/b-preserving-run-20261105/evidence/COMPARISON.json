@@ -1,0 +1,481 @@
+{
+  "basis": "Same24case-turn keys; N1 different freshworld/source/code, not causal or stability proof",
+  "rows": [
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 0,
+      "previousTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Với chiều cao 1m60, cân nặng 55kg và sở thích mặc thoải mái, em tư vấn mình mặc **size M** nhé ạ."
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "currentTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, với chiều cao 1m60, nặng 55kg và thích mặc thoải mái, Set váy Thạch Thảo này chị mặc size M là vừa đẹp ạ."
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 1,
+      "previousTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "RESPONSE_UNAVAILABLE"
+      },
+      "currentTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, set váy Thạch Thảo (cả áo và chân váy) có giá 799.000đ, chị mặc size M là chuẩn đẹp ạ."
+        ],
+        "images": []
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-po-20261031-p06",
+      "turnIndex": 0,
+      "previousTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      },
+      "currentTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "PRODUCT_AMBIGUOUS"
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "turnIndex": 0,
+      "previousTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "SIZE_RULE_UNAVAILABLE"
+      },
+      "currentTerminal": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "EGRESS_READINESS"
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 0,
+      "previousTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. Tổng đơn của mình là 829.000đ (gồm 799.000đ tiền hàng và 30.000đ phí vận chuyển)."
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "currentTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. \n\nTổng đơn hàng của chị là 799.000đ (chưa gồm phí ship 30.000đ), tổng thanh toán là 829.000đ. Chị cần em hỗ trợ chốt đơn hay xem thêm thông tin gì không ạ?"
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 1,
+      "previousTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Áo lẻ size M có hai màu Trắng (sẵn hàng) và Be (hàng đặt trước). Chị lấy màu nào ạ?"
+        ],
+        "images": []
+      },
+      "currentTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, mẫu áo thêu size M có hai màu là Trắng (sẵn hàng) và Be (đặt trước). Chị lấy áo màu nào ạ?"
+        ],
+        "images": []
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "turnIndex": 0,
+      "previousTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, mẫu Set Thạch Thảo nhà em có cả bản set quần và set váy, cả hai mẫu này đều còn size M chị nhé:\n\n- Set quần Thạch Thảo: 769.000đ\n- Set váy Thạch Thảo: 799.000đ\n\nChị thích mẫu set quần hay set váy hơn ạ?"
+        ],
+        "images": []
+      },
+      "currentTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, set Thạch Thảo nhà em hiện có cả 2 phiên bản và đều còn size M chị nhé:\n\n- Set quần Thạch Thảo: 769.000đ\n- Set váy Thạch Thảo: 799.000đ\n\nChị muốn xem hoặc lấy set quần hay set váy ạ?"
+        ],
+        "images": []
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "turnIndex": 1,
+      "previousTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, cả hai mẫu Set Thạch Thảo nhà em đều còn size M chị nhé:\n\n- **Set quần Thạch Thảo:** 769.000đ (chất liệu tơ Hàn thêu cao cấp, nhẹ nhàng và bay bổng)\n- **Set váy Thạch Thảo:** 799.000đ (áo tơ Hàn thêu kết hợp chân váy ren tơ Hàn mềm mại)\n\nChị thích mẫu set quần hay set váy hơn ạ?"
+        ],
+        "images": []
+      },
+      "currentTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Em đã thêm set quần Thạch Thảo size M vào giỏ hàng cho mình rồi ạ. Tổng đơn hiện tại của chị là 799.000đ (gồm 769.000đ tiền sản phẩm và 30.000đ phí vận chuyển). Chị muốn chốt đơn luôn hay cần xem thêm gì nữa không ạ?"
+        ],
+        "images": []
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-20261028-s03",
+      "turnIndex": 0,
+      "previousTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "RESPONSE_UNAVAILABLE"
+      },
+      "currentTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "RESPONSE_UNAVAILABLE"
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-20261028-s13",
+      "turnIndex": 0,
+      "previousTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      },
+      "currentTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "turnIndex": 0,
+      "previousTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      },
+      "currentTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-20261028-s16",
+      "turnIndex": 0,
+      "previousTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, em gửi chị ảnh feedback khách mặc áo Thạch Thảo ạ!"
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "currentTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, em gửi chị xem ảnh khách mặc áo Thạch Thảo nhà em nhé ạ!"
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 0,
+      "previousTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      },
+      "currentTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ áo lẻ Thạch Thảo size L nhà em có hai màu Trắng (có sẵn) và Be (hàng đặt trước). Chị lấy màu nào ạ?"
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 1,
+      "previousTerminal": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION"
+      },
+      "currentTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 2,
+      "previousTerminal": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION"
+      },
+      "currentTerminal": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION"
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 0,
+      "previousTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, với chiều cao 1m62 và nặng 56kg, áo của set váy Thạch Thảo chị mặc **size M** vừa đẹp ạ."
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "currentTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, với chiều cao 1m62 và cân nặng 56kg, chị mặc áo set Thạch Thảo size M là vừa đẹp ạ."
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 1,
+      "previousTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "SIZE_RULE_UNAVAILABLE"
+      },
+      "currentTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, với số đo 88 - 70 - 94 và cân nặng 51kg, áo set Thạch Thảo chị mặc size M là chuẩn đẹp chị nhé."
+        ],
+        "images": []
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 2,
+      "previousTerminal": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION"
+      },
+      "currentTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, với sở thích mặc thoải mái, áo set Thạch Thảo chị vẫn mặc size M là vừa đẹp và thoải mái chị nhé."
+        ],
+        "images": []
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 0,
+      "previousTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      },
+      "currentTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 1,
+      "previousTerminal": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION"
+      },
+      "currentTerminal": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION"
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 2,
+      "previousTerminal": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION"
+      },
+      "currentTerminal": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION"
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 0,
+      "previousTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Em đã thêm set váy Thạch Thảo size M vào giỏ cho chị rồi ạ. Tổng giỏ hàng của mình hiện là 829.000đ (đã gồm 30.000đ phí ship). Chị muốn chốt đơn luôn không ạ?"
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "currentTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Em đã thêm set váy Thạch Thảo size M vào giỏ cho chị rồi ạ. Tổng giỏ hàng của chị là 829.000đ (gồm 799.000đ tiền sản phẩm và 30.000đ phí ship). Chị cần em hỗ trợ thêm thông tin gì cứ nhắn em nhé!"
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 1,
+      "previousTerminal": {
+        "disposition": "CODE_OWNED_SEND",
+        "messages": [
+          "Chị cho em tên người nhận nhé."
+        ],
+        "images": []
+      },
+      "currentTerminal": {
+        "disposition": "CODE_OWNED_SEND",
+        "messages": [
+          "Chị cho em tên người nhận nhé."
+        ],
+        "images": []
+      },
+      "sameCustomer": true
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 2,
+      "previousTerminal": {
+        "disposition": "CODE_OWNED_SEND",
+        "messages": [
+          "Chị cho em tên người nhận nhé."
+        ],
+        "images": []
+      },
+      "currentTerminal": {
+        "disposition": "CODE_OWNED_SEND",
+        "messages": [
+          "Chị cho em tên người nhận nhé."
+        ],
+        "images": []
+      },
+      "sameCustomer": true
+    }
+  ]
+}

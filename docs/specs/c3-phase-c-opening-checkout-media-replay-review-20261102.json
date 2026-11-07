@@ -1,0 +1,78 @@
+{
+  "kind": "OFFLINE_EXACT_SELECTOR_FROZEN_MEDIA_REPLAY",
+  "status": "REPRODUCED",
+  "checks": [
+    {
+      "run": "opening21",
+      "caseId": "c-po-20261031-p08",
+      "rawArtifact": "../c3-opening-checkout-run-20261102-01/native-cceda1d7fd27d18614c65a090077eccc66a73b8fb9ea1ebcc0622b57dff8da9b-turn-0.json",
+      "rawCanonicalHash": "e84c1d1a40535433c178068d29c1fb18a761a52327a1dfd0ecf6504ed1106380",
+      "clockBasis": "LAST_OWNER_GENERATION_STARTED_AT_WITHIN_CAPTURED_TURN",
+      "at": "2026-11-02T09:52:09.189Z",
+      "query": {
+        "subjectRef": "SV2447",
+        "intent": "GENERIC",
+        "color": "NO_COLOR"
+      },
+      "selectorHash": "d4d25da7b0c31595efd37b63d2d4cf5871050d1682061516773519c86bb6987f",
+      "actualSelectorHash": "d4d25da7b0c31595efd37b63d2d4cf5871050d1682061516773519c86bb6987f",
+      "observedDiagnosticError": "UNKNOWN_INTERNAL",
+      "offlineExactEligibilityError": "MEDIA_COLOR_BINDING_UNVERIFIED",
+      "sameProductGenericEligibleCount": 2,
+      "cartCommitted": true,
+      "liveRequests": 0,
+      "sourceWrites": 0
+    },
+    {
+      "run": "opening21",
+      "caseId": "c-20261028-j6",
+      "rawArtifact": "../c3-opening-checkout-run-20261102-01/native-60e93f29eb4fbba3bfc0ade68a897ad8f9d40acaa3737811f144945d69233d0f-turn-0.json",
+      "rawCanonicalHash": "09e76c042b23085d27ce407c819584f5abe7862cb39beed31cc6df32553ccd50",
+      "clockBasis": "LAST_OWNER_GENERATION_STARTED_AT_WITHIN_CAPTURED_TURN",
+      "at": "2026-11-02T09:58:26.832Z",
+      "query": {
+        "subjectRef": "SV2447",
+        "intent": "GENERIC",
+        "color": "NO_COLOR"
+      },
+      "selectorHash": "d4d25da7b0c31595efd37b63d2d4cf5871050d1682061516773519c86bb6987f",
+      "actualSelectorHash": "d4d25da7b0c31595efd37b63d2d4cf5871050d1682061516773519c86bb6987f",
+      "observedDiagnosticError": "UNKNOWN_INTERNAL",
+      "offlineExactEligibilityError": "MEDIA_COLOR_BINDING_UNVERIFIED",
+      "sameProductGenericEligibleCount": 2,
+      "cartCommitted": true,
+      "liveRequests": 0,
+      "sourceWrites": 0
+    },
+    {
+      "run": "remainder12",
+      "caseId": "c-20261028-j4",
+      "rawArtifact": "../c3-opening-remainder-run-20261102-01/native-89f832745f10a30d243af580ebe1051868c8a5302ea74f539bb5c93b1477d145-turn-0.json",
+      "rawCanonicalHash": "65b8e45475dd152b8f8cf5159453ac71ee1fe91b131a39d888f936214b979955",
+      "clockBasis": "LAST_OWNER_GENERATION_STARTED_AT_WITHIN_CAPTURED_TURN",
+      "at": "2026-11-02T11:31:48.137Z",
+      "query": {
+        "subjectRef": "SV2447",
+        "intent": "GENERIC",
+        "color": "NO_COLOR"
+      },
+      "selectorHash": "d4d25da7b0c31595efd37b63d2d4cf5871050d1682061516773519c86bb6987f",
+      "actualSelectorHash": "d4d25da7b0c31595efd37b63d2d4cf5871050d1682061516773519c86bb6987f",
+      "observedDiagnosticError": "UNKNOWN_INTERNAL",
+      "offlineExactEligibilityError": "MEDIA_COLOR_BINDING_UNVERIFIED",
+      "sameProductGenericEligibleCount": 2,
+      "cartCommitted": true,
+      "liveRequests": 0,
+      "sourceWrites": 0
+    }
+  ],
+  "meaning": "Exact query selector hashes match actual observed operations. Cart __NO_COLOR__ sentinel was passed as literal requested media color; generic media exists on the same frozen product. Offline eligibility rethrows MEDIA_COLOR_BINDING_UNVERIFIED. Diagnostic wrapper replaces thrown error text with UNKNOWN_INTERNAL. This establishes the immediate failure path, not live-source completeness or full checkout success.",
+  "limits": [
+    "Clock is within captured turn, not an instrumented exact MEDIA_SELECT timestamp; no expiry transition is claimed.",
+    "Generic query is an offline counterfactual eligibility check, not an authorized sent outcome.",
+    "No production fix, provider rerun or evidence regrade."
+  ],
+  "providerRequests": 0,
+  "stateWrites": 0,
+  "liveSends": 0
+}

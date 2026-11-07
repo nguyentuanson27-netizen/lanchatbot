@@ -1,0 +1,28 @@
+{
+  "sourceSha": "5b679acc30e64c4d7a271b4f7aaa49534f10de54",
+  "providerRequestsBeforeInputReview": 0,
+  "generationRetry": 0,
+  "sshReconnect": 0,
+  "artifacts": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-media-context-model-prepare-20261103-02.mjs",
+      "sha256": "b2e8c16cd09ef6e4c5237bed916146cdf579f1d6221f85f7c4f6b1dc3295851f"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-media-context-model-resolve-world-20261103-02.mjs",
+      "sha256": "c4432db6f59c2ac1b9debfb4919fa64ffeca6ab0dd7d39353a750ea9cfab74ca"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-media-context-model-finalize-inputs-20261103-02.mjs",
+      "sha256": "8bba2b09169caaf2e468360e467896f212435f43e08880d13721b545914e7eae"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-media-context-model-launch-20261103-02.py",
+      "sha256": "3f85bb9f106d87d819b172ea186f9747ca787d5defe46404681a236b1abf4059"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-media-context-model-source-wrapper-20261103-02.py",
+      "sha256": "21a677bf3ed5afa959ed00fb87053edabe603b677fbb4c0db7d099f140ac68d3"
+    }
+  ]
+}

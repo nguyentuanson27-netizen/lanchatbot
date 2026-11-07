@@ -1,0 +1,82 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+ ❯ src/single-agent-commerce-media.test.ts (46 tests | 1 failed) 307ms
+   ✓ does not mislabel a second asset fetch failure as validation of that asset 29ms
+   ✓ candidate product media > keeps an old approved image until its source is replaced or revoked 9ms
+   ✓ candidate product media > binds claims to a successful revalidation and rejects later proof changes 10ms
+   ✓ candidate product media > preserves approved whole-look evidence without inventing component or material evidence 3ms
+   ✓ candidate product media > describes only confirmed parts of selected assets, never catalog fabric or requested color 1ms
+   ✓ candidate product media > pairs the overview with a complementary approved angle instead of a second front image 44ms
+   ✓ candidate product media > keeps detail and verified feedback distinct without substituting catalog images 5ms
+   ✓ candidate product media > never uses legacy imageUrls when no approved overview remains 1ms
+   ✓ candidate product media > distinguishes an unverified color binding from an unavailable source or missing approved image 2ms
+   ✓ candidate product media > lets the same owner inspect verified public bytes without selecting an outbound image 16ms
+   ✓ candidate product media > never passes invalid image bytes to the owner 2ms
+   ✓ candidate product media > keeps the registry reconciliation hash separate from the exact downloaded bytes 4ms
+   ✓ candidate product media > prepares bounded approved assets without sending and exposes their evidence to the verifier 2ms
+   ✓ candidate product media > fails closed when selected media lacks source authority (review) 1ms
+   ✓ candidate product media > fails closed when selected media lacks source authority (hash) 1ms
+   ✓ candidate product media > fails closed when selected media lacks source authority (timestamp) 1ms
+   ✓ candidate product media > fails closed when selected media lacks source authority (host) 1ms
+   ✓ candidate product media > fails closed when selected media lacks source authority (color) 1ms
+   ✓ candidate product media > rejects a fake URL argument or a subject not supplied by code 1ms
+   ✓ candidate product media > does not authorize changed media with an old verifier PASS 11ms
+   ✓ media lookup observations > offers only eligible alternatives from the same lookup, visible to both models 17ms
+   ✓ media lookup observations > does not offer another component, unknown color or a failed source as an alternative 3ms
+   ✓ media lookup observations > binds no-match evidence and rejects a later feedback asset 2ms
+   ✓ media lookup observations > binds color uncertainty to the inspected source 2ms
+   ✓ media lookup observations > keeps selected images when view decoding fails and exposes only operation evidence 4ms
+   ✓ media observation final gate > keeps lookup timestamps fixed without an automatic age deadline 7ms
+   ✓ media observation final gate > records a catalog error as an operation event without retrying or leaking its error 1ms
+   ✓ media observation final gate > passes identical scoped evidence to both models and blocks a changed source after PASS 8ms
+   ✓ does not ask the customer to repeat an image choice after a failed feedback lookup 9ms
+   ✓ retains feedback provenance but does not blame available media for a semantic rejection 11ms
+   ✓ does not claim an image was unavailable after a successful visual read for sales advice 11ms
+   ✓ keeps repeated readbacks unchanged for a no-match component lookup after all offers 18ms
+   ✓ offers an explicit unselected color-free query, preserving intent/component and requiring a real second selection 4ms
+   ✓ treats null optional media color as a generic lookup without claiming the requested color 4ms
+   ✓ accepts null color for viewing only verified generic image bytes 2ms
+   ✓ uses verified per-asset color for multicolor products and never falls back for invalid bindings 2ms
+   ✓ prepares bounded media hints without an extra read, never renews a cached observation, and clears failed reads 15ms
+   ✓ advertises a verified dress closeup without inventing a TOP/SKIRT component binding 6ms
+   ✓ blocks corrupt/conflicting color proof even on a single-color product ({"status":"INVALID"}) 1ms
+   ✓ blocks corrupt/conflicting color proof even on a single-color product ({"status":"VALID","color":"navy","sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}) 1ms
+   ✓ blocks corrupt/conflicting color proof even on a single-color product ({"status":"VALID","color":"be","sha256":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}) 2ms
+   ✓ does not invalidate an unchanged text-only reply merely because an optional media hint changes 8ms
+   ✓ clears capabilities on a failed media source read, not only read_product 6ms
+   ✓ capability observations are immutable and bounded and never cross subject or permission boundaries 10ms
+   ✓ color hints summarize only the requested color tuple from the same read and do not prepare attachments 3ms
+   × a DETAIL attachment does not certify a material detail merely mentioned in the product description 3ms
+     → expected undefined to be false // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/single-agent-commerce-media.test.ts > a DETAIL attachment does not certify a material detail merely mentioned in the product description
+AssertionError: expected undefined to be false // Object.is equality
+
+- Expected: 
+false
+
++ Received: 
+undefined
+
+ ❯ src/single-agent-commerce-media.test.ts:450:34
+    448|  expect(result.status).toBe("OK");
+    449|  const evidence=(result.data as {descriptionEvidence:{componentKnown:b…
+    450|  expect(evidence.componentKnown).toBe(false);expect(evidence.confirmed…
+       |                                  ^
+    451|  expect(s.tools.catalogImages!()).toEqual([]); // sending by metadata …
+    452| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 45 passed (46)
+   Start at  17:15:45
+   Duration  3.69s (transform 1.51s, setup 0ms, collect 2.39s, tests 307ms, environment 0ms, prepare 270ms)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/single-agent-commerce-media.test.ts

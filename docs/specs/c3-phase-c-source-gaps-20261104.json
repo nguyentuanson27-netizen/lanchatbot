@@ -1,0 +1,980 @@
+{
+  "kind": "READ_ONLY_SOURCE_GAP_CHECK",
+  "capturedAt": "2026-11-04T02:46:34.672Z",
+  "checkedAt": "2026-11-04T02:49:13.681Z",
+  "sourceSha": "3a9845d0e099dcc3689b4b3a645346efcbc41cdd",
+  "worldHash": "658e571d533c11f02d8d9d79aa4d653544c69324c0cb09e7fc8817d4c305a1a7",
+  "sourceWrites": 0,
+  "providerRequests": 0,
+  "mediaFreshForSeconds": 2592000,
+  "rows": [
+    {
+      "productId": "SQ2447",
+      "observedAt": "2026-09-28T04:31:05.725Z",
+      "images": 10,
+      "expired": 10,
+      "invalidMediaClock": 0,
+      "approvedFeedback": 0,
+      "eligible": {
+        "GENERIC": 0,
+        "DETAIL": 0,
+        "FEEDBACK": 0
+      },
+      "catalogColors": [],
+      "snapshotSyncedAt": "2026-11-04T02:28:59.740Z",
+      "offers": {
+        "SET_QUAN": {
+          "price": 769000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 28,
+              "sku": "SQ2447"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 5,
+              "sku": "SQ2447"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 0,
+              "sku": "SQ2447"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "XL",
+              "stock": 10,
+              "sku": "SQ2447"
+            }
+          ]
+        },
+        "AO": {
+          "price": 499000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 32,
+              "sku": "SV2447-AO"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 9,
+              "sku": "SV2447-AO"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 3,
+              "sku": "SV2447-AO"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "XL",
+              "stock": 12,
+              "sku": "SV2447-AO"
+            },
+            {
+              "color": "BE",
+              "size": "S",
+              "stock": 0,
+              "sku": "SV2447-AO"
+            },
+            {
+              "color": "BE",
+              "size": "M",
+              "stock": 0,
+              "sku": "SV2447-AO"
+            },
+            {
+              "color": "BE",
+              "size": "L",
+              "stock": 0,
+              "sku": "SV2447-AO"
+            },
+            {
+              "color": "BE",
+              "size": "XL",
+              "stock": 0,
+              "sku": "SV2447-AO"
+            }
+          ]
+        },
+        "QUAN": {
+          "price": 429000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 31,
+              "sku": "SQ2447-QUAN"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 20,
+              "sku": "SQ2447-QUAN"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 8,
+              "sku": "SQ2447-QUAN"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "XL",
+              "stock": 18,
+              "sku": "SQ2447-QUAN"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "productId": "SV2447",
+      "observedAt": "2026-09-28T04:31:05.725Z",
+      "images": 11,
+      "expired": 0,
+      "invalidMediaClock": 1,
+      "approvedFeedback": 0,
+      "eligible": {
+        "GENERIC": 2,
+        "DETAIL": 2,
+        "FEEDBACK": 0
+      },
+      "catalogColors": [],
+      "snapshotSyncedAt": "2026-11-04T02:28:59.740Z",
+      "offers": {
+        "SET_VAY": {
+          "price": 799000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 5,
+              "sku": "SV2447"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 4,
+              "sku": "SV2447"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 3,
+              "sku": "SV2447"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "XL",
+              "stock": 1,
+              "sku": "SV2447"
+            }
+          ]
+        },
+        "AO": {
+          "price": 499000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 32,
+              "sku": "SV2447-AO"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 9,
+              "sku": "SV2447-AO"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 3,
+              "sku": "SV2447-AO"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "XL",
+              "stock": 12,
+              "sku": "SV2447-AO"
+            },
+            {
+              "color": "BE",
+              "size": "S",
+              "stock": 0,
+              "sku": "SV2447-AO"
+            },
+            {
+              "color": "BE",
+              "size": "M",
+              "stock": 0,
+              "sku": "SV2447-AO"
+            },
+            {
+              "color": "BE",
+              "size": "L",
+              "stock": 0,
+              "sku": "SV2447-AO"
+            },
+            {
+              "color": "BE",
+              "size": "XL",
+              "stock": 0,
+              "sku": "SV2447-AO"
+            }
+          ]
+        },
+        "CV": {
+          "price": 449000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 9,
+              "sku": "SV2447-CV"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 5,
+              "sku": "SV2447-CV"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 11,
+              "sku": "SV2447-CV"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "XL",
+              "stock": 1,
+              "sku": "SV2447-CV"
+            },
+            {
+              "color": "BE",
+              "size": "S",
+              "stock": 0,
+              "sku": "SV2447-CV"
+            },
+            {
+              "color": "BE",
+              "size": "M",
+              "stock": 0,
+              "sku": "SV2447-CV"
+            },
+            {
+              "color": "BE",
+              "size": "L",
+              "stock": 0,
+              "sku": "SV2447-CV"
+            },
+            {
+              "color": "BE",
+              "size": "XL",
+              "stock": 0,
+              "sku": "SV2447-CV"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "productId": "SV1561",
+      "observedAt": "2026-09-28T04:31:05.725Z",
+      "images": 11,
+      "expired": 11,
+      "invalidMediaClock": 0,
+      "approvedFeedback": 0,
+      "eligible": {
+        "GENERIC": 0,
+        "DETAIL": 0,
+        "FEEDBACK": 0
+      },
+      "catalogColors": [],
+      "snapshotSyncedAt": "2026-11-04T02:28:59.740Z",
+      "offers": {
+        "SET_VAY": {
+          "price": 999000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 3,
+              "sku": "SV1561"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 0,
+              "sku": "SV1561"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 0,
+              "sku": "SV1561"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "XL",
+              "stock": 0,
+              "sku": "SV1561"
+            }
+          ]
+        },
+        "AO": {
+          "price": 499000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 5,
+              "sku": "SV1561-AO"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 0,
+              "sku": "SV1561-AO"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 1,
+              "sku": "SV1561-AO"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "XL",
+              "stock": 0,
+              "sku": "SV1561-AO"
+            }
+          ]
+        },
+        "CV": {
+          "price": 499000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 3,
+              "sku": "SV1561-CV"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 0,
+              "sku": "SV1561-CV"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 1,
+              "sku": "SV1561-CV"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "XL",
+              "stock": 3,
+              "sku": "SV1561-CV"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "productId": "V406",
+      "observedAt": "2026-09-05T10:07:31.041Z",
+      "images": 11,
+      "expired": 11,
+      "invalidMediaClock": 0,
+      "approvedFeedback": 0,
+      "eligible": {
+        "GENERIC": 0,
+        "DETAIL": 0,
+        "FEEDBACK": 0
+      },
+      "catalogColors": [],
+      "snapshotSyncedAt": "2026-11-04T02:28:59.740Z",
+      "offers": {
+        "DIRECT": {
+          "price": 699000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 32,
+              "sku": "V406"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 28,
+              "sku": "V406"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 29,
+              "sku": "V406"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "XL",
+              "stock": 20,
+              "sku": "V406"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "productId": "SD023",
+      "observedAt": null,
+      "images": 10,
+      "expired": 0,
+      "invalidMediaClock": 10,
+      "approvedFeedback": 0,
+      "eligible": {
+        "GENERIC": 0,
+        "DETAIL": 0,
+        "FEEDBACK": 0
+      },
+      "catalogColors": [],
+      "snapshotSyncedAt": "2026-11-04T02:28:59.740Z",
+      "offers": {
+        "COMPOSITE": {
+          "price": 989000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 5,
+              "sku": "SD023"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 42,
+              "sku": "SD023"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 15,
+              "sku": "SD023"
+            }
+          ]
+        },
+        "AO": {
+          "price": 779000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 3,
+              "sku": "SD023-AO"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 21,
+              "sku": "SD023-AO"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 8,
+              "sku": "SD023-AO"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "productId": "SQ748",
+      "observedAt": "2026-09-28T04:31:05.725Z",
+      "images": 7,
+      "expired": 7,
+      "invalidMediaClock": 0,
+      "approvedFeedback": 0,
+      "eligible": {
+        "GENERIC": 0,
+        "DETAIL": 0,
+        "FEEDBACK": 0
+      },
+      "catalogColors": [
+        "KEM",
+        "HỒNG"
+      ],
+      "snapshotSyncedAt": "2026-11-04T02:28:59.740Z",
+      "offers": {
+        "SET_QUAN": {
+          "price": 799000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 4,
+              "sku": "SQ748"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 0,
+              "sku": "SQ748"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 2,
+              "sku": "SQ748"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "XL",
+              "stock": 0,
+              "sku": "SQ748"
+            }
+          ]
+        },
+        "AO": {
+          "price": 499000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 4,
+              "sku": "SQ748-AO"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 1,
+              "sku": "SQ748-AO"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 2,
+              "sku": "SQ748-AO"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "XL",
+              "stock": 0,
+              "sku": "SQ748-AO"
+            }
+          ]
+        },
+        "QUAN": {
+          "price": 399000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 4,
+              "sku": "SQ748-QUAN"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 1,
+              "sku": "SQ748-QUAN"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 2,
+              "sku": "SQ748-QUAN"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "XL",
+              "stock": 0,
+              "sku": "SQ748-QUAN"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "productId": "SQ675",
+      "observedAt": "2026-09-28T04:31:05.725Z",
+      "images": 5,
+      "expired": 5,
+      "invalidMediaClock": 0,
+      "approvedFeedback": 0,
+      "eligible": {
+        "GENERIC": 0,
+        "DETAIL": 0,
+        "FEEDBACK": 0
+      },
+      "catalogColors": [
+        "NÂU"
+      ],
+      "snapshotSyncedAt": "2026-11-04T02:28:59.740Z",
+      "offers": {
+        "SET_QUAN": {
+          "price": 1279000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 0,
+              "sku": "SQ675"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 0,
+              "sku": "SQ675"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 0,
+              "sku": "SQ675"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "XL",
+              "stock": 0,
+              "sku": "SQ675"
+            }
+          ]
+        },
+        "AO": {
+          "price": 729000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 0,
+              "sku": "SQ675-AO"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 0,
+              "sku": "SQ675-AO"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 0,
+              "sku": "SQ675-AO"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "XL",
+              "stock": 1,
+              "sku": "SQ675-AO"
+            }
+          ]
+        },
+        "QUAN": {
+          "price": 629000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 0,
+              "sku": "SQ675-QUAN"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 1,
+              "sku": "SQ675-QUAN"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 1,
+              "sku": "SQ675-QUAN"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "XL",
+              "stock": 0,
+              "sku": "SQ675-QUAN"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "productId": "V039",
+      "observedAt": "2026-09-05T10:07:31.041Z",
+      "images": 10,
+      "expired": 10,
+      "invalidMediaClock": 0,
+      "approvedFeedback": 0,
+      "eligible": {
+        "GENERIC": 0,
+        "DETAIL": 0,
+        "FEEDBACK": 0
+      },
+      "catalogColors": [],
+      "snapshotSyncedAt": "2026-11-04T02:28:59.740Z",
+      "offers": {
+        "DIRECT": {
+          "price": 799000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "*",
+              "stock": 0,
+              "sku": "V039"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 13,
+              "sku": "V039"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 0,
+              "sku": "V039"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 0,
+              "sku": "V039"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "XL",
+              "stock": 0,
+              "sku": "V039"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "productId": "V168",
+      "observedAt": "2026-09-05T10:07:31.041Z",
+      "images": 12,
+      "expired": 12,
+      "invalidMediaClock": 0,
+      "approvedFeedback": 0,
+      "eligible": {
+        "GENERIC": 0,
+        "DETAIL": 0,
+        "FEEDBACK": 0
+      },
+      "catalogColors": [],
+      "snapshotSyncedAt": "2026-11-04T02:28:59.740Z",
+      "offers": {
+        "DIRECT": {
+          "price": 699000,
+          "priceStatus": "OK",
+          "variants": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "S",
+              "stock": 0,
+              "sku": "V168"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "M",
+              "stock": 0,
+              "sku": "V168"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "L",
+              "stock": 0,
+              "sku": "V168"
+            },
+            {
+              "color": "__NO_COLOR__",
+              "size": "XL",
+              "stock": 0,
+              "sku": "V168"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "charts": [
+    {
+      "artifactKey": "size-chart:SD276",
+      "scope": {
+        "forms": [],
+        "level": "COMPONENT",
+        "materials": [],
+        "categories": [
+          "ÁO DÀI"
+        ],
+        "componentRole": "OTHER",
+        "parentProductIds": [
+          "SD276"
+        ]
+      },
+      "category": "ÁO DÀI",
+      "applicability": null
+    },
+    {
+      "artifactKey": "size-chart:SD365",
+      "scope": {
+        "forms": [],
+        "level": "COMPONENT",
+        "materials": [],
+        "categories": [
+          "ÁO DÀI"
+        ],
+        "componentRole": "DRESS",
+        "parentProductIds": [
+          "SD365"
+        ]
+      },
+      "category": "ÁO DÀI",
+      "applicability": null
+    },
+    {
+      "artifactKey": "size-chart:SD375",
+      "scope": {
+        "forms": [],
+        "level": "COMPONENT",
+        "materials": [],
+        "categories": [
+          "AO DAI"
+        ],
+        "componentRole": "DRESS",
+        "parentProductIds": [
+          "SD375"
+        ]
+      },
+      "category": "AO DAI",
+      "applicability": null
+    },
+    {
+      "artifactKey": "size-chart:SD396",
+      "scope": {
+        "forms": [],
+        "level": "COMPONENT",
+        "materials": [],
+        "categories": [
+          "ÁO DÀI"
+        ],
+        "componentRole": "DRESS",
+        "parentProductIds": [
+          "SD396"
+        ]
+      },
+      "category": "ÁO DÀI",
+      "applicability": null
+    },
+    {
+      "artifactKey": "size-chart:SD398",
+      "scope": {
+        "forms": [],
+        "level": "COMPONENT",
+        "materials": [],
+        "categories": [
+          "ÁO DÀI"
+        ],
+        "componentRole": "DRESS",
+        "parentProductIds": [
+          "SD398"
+        ]
+      },
+      "category": "ÁO DÀI",
+      "applicability": null
+    },
+    {
+      "artifactKey": "size-chart:SQ2447",
+      "scope": {
+        "forms": [],
+        "level": "COMPONENT",
+        "materials": [],
+        "categories": [
+          "SET"
+        ],
+        "componentRole": "OTHER",
+        "parentProductIds": [
+          "SQ2447"
+        ]
+      },
+      "category": "SET",
+      "applicability": null
+    },
+    {
+      "artifactKey": "size-chart:SQ520",
+      "scope": {
+        "forms": [],
+        "level": "COMPONENT",
+        "materials": [],
+        "categories": [
+          "DRESS"
+        ],
+        "componentRole": "DRESS",
+        "parentProductIds": [
+          "SQ520"
+        ]
+      },
+      "category": "DRESS",
+      "applicability": null
+    }
+  ],
+  "policyKinds": [
+    "CLOSING_STRATEGY",
+    "OFFER_POLICY",
+    "PAYMENT_POLICY",
+    "SHOP_POLICY",
+    "SIZE_CHART",
+    "SIZE_CHART",
+    "SIZE_CHART",
+    "SIZE_CHART",
+    "SIZE_CHART",
+    "SIZE_CHART",
+    "SIZE_CHART"
+  ],
+  "verificationScope": "Fresh read-only public PostgreSQL policy, Redis catalog snapshots and Qdrant stable index; pure media eligibility, not new image-byte download/revalidation/publication.",
+  "rawWorldFileSha256": "40055f519c53efc8c6bf3fe17b0fb7655d738e6098b7e1956b4845a7278a594b",
+  "imagesUnchangedFromPriorRun": [
+    "SQ2447",
+    "SV2447",
+    "SV1561",
+    "V406",
+    "SD023"
+  ],
+  "activeUpstreamPoliciesUnchangedFromPriorRun": true
+}

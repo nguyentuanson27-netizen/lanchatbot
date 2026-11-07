@@ -12,6 +12,17 @@ const setup = (description?: string) => {
   return { scope, tools, verifier, clock: () => commerceNow, latest: "Mẫu này bao nhiêu em?", history: [], ownerPrompt: "Tư vấn theo nguồn.", verifierPrompt: "Kiểm exact reply." };
 };
 const final = (text = "Áo giá 499k chị nhé."): OwnerGeneration => ({ kind: "FINAL", text });
+it("captures the actual final boundary only on explicit evaluation request", async () => {
+  const regular=setup(),captured=setup();
+  const a=await runCommerceTurn({...regular,owner:async()=>final()});
+  const b=await runCommerceTurn({...captured,owner:async()=>final(),captureBoundaryWitness:true});
+  expect(a).not.toHaveProperty("boundaryWitness");expect(b.terminal).toEqual(a.terminal);
+  expect(b).toHaveProperty("boundaryWitness");
+  if (!("boundaryWitness" in b)||!b.boundaryWitness)throw Error("BOUNDARY_WITNESS_REQUIRED");
+  expect(b.boundaryWitness).toMatchObject({terminal:b.terminal,responseKind:"VERDICT",checkedAt:commerceNow.toISOString()});
+  expect(b).toHaveProperty("boundaryWitness.expected.requestId",captured.scope.requestId);
+  expect(b).toHaveProperty("boundaryWitness.currentBinding.requestId",captured.scope.requestId);
+});
 const tool = (name: string, args: unknown = {}): OwnerGeneration => ({ kind: "TOOLS", calls: [{ name, args }],
   content: { role: "model", parts: [{ functionCall: { name, args }, thoughtSignature: "opaque-signature" }] } });
 

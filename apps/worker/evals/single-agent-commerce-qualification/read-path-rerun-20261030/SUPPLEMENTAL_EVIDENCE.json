@@ -1,0 +1,59 @@
+{
+  "kind": "POST_RUN_SUPPLEMENTAL_EVIDENCE_NOT_NEW_EXECUTION",
+  "runSourceSha": "89070980e9fb407fe4031a01f2eae110f7f17181",
+  "artifacts": [
+    {
+      "path": "../c3-c-readfix-preparation-20261030-01.json",
+      "sha256": "8c83897faa3fbeb65d14cf4e5345688b254c211032f42b142538d13cc73cb641"
+    },
+    {
+      "path": "../c3-c-readfix-preflight-20261030-01.log",
+      "sha256": "ac37cbde46b4273048c9b15a6cc5040fde007eecd37ac701f936a81cb9031003"
+    },
+    {
+      "path": "../c3-c-readfix-DISPATCH_READINESS_REVIEW-20261030-01.json",
+      "sha256": "eb09645a563aeab72fc36d92f403c21d5be5877663f58c11266d41c41008bd03"
+    },
+    {
+      "path": "../c3-c-readfix-accounting-audit-20261030-01.json",
+      "sha256": "1e1243c0c428c925f38258c4315a7401383fe429e77e241bd2092abf0a5daa7c"
+    },
+    {
+      "path": "../c3-c-readfix-development-inventory-20261030-01.json",
+      "sha256": "ba4e990cd70fae8bc1d8e44b70a889c09ea66050b368461468b95719604f227a"
+    },
+    {
+      "path": "../c3-c-readfix-blind-20261030-01/PUBLIC_INDEX.json",
+      "sha256": "524b48aed82d12ad6247bd1a8b84100786ee92c6241ec41b96b8264b6bf096ba"
+    },
+    {
+      "path": "../c3-c-readfix-blind-20261030-01/GRADES.json",
+      "sha256": "8c692f64e8dbe03c2f18099199b16222fac0454c49d7508c383302c8e0da2e83"
+    },
+    {
+      "path": "../c3-c-readfix-blind-20261030-01/GRADES.partial.json",
+      "sha256": "ff9b082995d957d6c4870164196d5202a8421de1ab14331d71bc00e939754a1e"
+    },
+    {
+      "path": "../c3-c-readfix-probe-20261030-01.log",
+      "sha256": "d94d651e08280aa511bd23fd9b358b04225b97441991b84e8a760ea0620ce59b"
+    },
+    {
+      "path": "../c3-c-readfix-registration-20261030-01.log",
+      "sha256": "e1757149720cf13c0f62b21ac680ddc1a533b66f404a28c96929188498e85c55"
+    },
+    {
+      "path": "../c3-c-readfix-registration-20261030-02.log",
+      "sha256": "fe98d2cc85b17f608d06f8e5863668d7fc9c444bb3a12eccfb0f70b9e2d12317"
+    }
+  ],
+  "developmentExposure": {
+    "inventoryHash": "f630a553f7acc14437d30f736142ea92c45019ea9b9f943a43c2746c23add89a",
+    "artifacts": 6551,
+    "missing": 0,
+    "needsSourceMapping": 2381,
+    "status": "PENDING"
+  },
+  "formalGradeImport": "NOT_RUN_DEVELOPMENT_PACKET_USES_SEPARATE_REVIEWID_NAMESPACE",
+  "primaryCaseReview": "NON_BLIND_DISTINCT_FROM_INDEPENDENT_GRADES"
+}

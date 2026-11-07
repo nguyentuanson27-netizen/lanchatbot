@@ -1,0 +1,54 @@
+{
+  "kind": "POST_RUN_CAPTURE_ACCOUNTING_REPORT_AUDIT",
+  "status": "APPROVED",
+  "reviewer": "/root/missing_run_review",
+  "checkedAtUTC": "2026-11-03T06:01:41Z",
+  "sourceSha": "5b679acc30e64c4d7a271b4f7aaa49534f10de54",
+  "reviewerProviderRequests": 0,
+  "authHttpRequests": 1,
+  "auxiliaryHttpRequests": 0,
+  "quality": "NOT_GRADED",
+  "qualification": "BLOCKED",
+  "C3": "NOT_RUN",
+  "cases": 7,
+  "capturedTurns": 11,
+  "generationRecords": 16,
+  "generationHttpRequests": 15,
+  "acceptedTexts": 5,
+  "acceptedImages": 1,
+  "verifierVerdicts": {
+    "PASS": 3
+  },
+  "actualTerminals": {
+    "SEND_ELIGIBLE": 3,
+    "CODE_OWNED_SEND": 2,
+    "HANDOFF": 4,
+    "NO_SEND": 2
+  },
+  "checks": {
+    "rawFrameHashes": "PASS",
+    "completeGenerationJournal": "PASS",
+    "requestHashesNativeWireFirewall": "PASS",
+    "singleDispatchAndFrozenCaps": "PASS",
+    "transcriptsDraftsAndDiagnostics": "PASS",
+    "tokenAndLatencyMetrics": "PASS",
+    "commandAndSealedRegistrationBindings": "PASS",
+    "artifactHashesAndReportCopies": "PASS",
+    "cleanSourceDatabaseDroppedSendDisabled": "PASS",
+    "noHardStopOrUnknownCompletion": "PASS",
+    "outboxContentAndCheckoutReceipts": "PASS"
+  },
+  "retainedFailure": {
+    "caseId": "c-20261028-s15",
+    "errorCode": "OWNER_REQUEST_BOUND",
+    "failureLayer": "PRE_DISPATCH",
+    "providerRequests": 0
+  },
+  "evidenceSha256": {
+    "integration": "2fc08dd9cc834980706704027e379cd1a9f1b5ed3864e96619d5f3f903511d57",
+    "candidateEvidence": "38a0bde7803625c32013ffe4c4d966f782637b650c8e1a21af3d50567fe1d096",
+    "nativeRequests": "3934397b401bf28626a25578e9046054a850c9206dc80469ac3ecd2837fdaaba",
+    "accounting": "d7556f2b375bcfdd40301b402b012285ede8703a90b8c02a2db9ad999bcfeb6c",
+    "operational": "77c0bec7d5ef9c3990e67e200b4cf44026d51af7c4ed67dfab8acc237da44c29"
+  }
+}

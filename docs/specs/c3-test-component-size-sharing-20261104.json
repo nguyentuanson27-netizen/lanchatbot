@@ -1,0 +1,69 @@
+{
+  "kind": "OWNER_APPROVED_TEST_COMPONENT_SIZE_SHARING",
+  "approvalRef": "owner-test-component-size-sharing-20261104",
+  "checkedAt": "2026-11-04T02:46:34.672Z",
+  "clockPolicy": "Replay original capture clock; no freshness renewal or model run",
+  "sourceWrites": 0,
+  "providerRequests": 0,
+  "publishedPolicyRecordsUnchanged": true,
+  "rows": [
+    {
+      "productId": "SQ2447",
+      "target": "PRODUCT",
+      "status": "AVAILABLE"
+    },
+    {
+      "productId": "SQ2447",
+      "target": {
+        "kind": "COMPONENT",
+        "parentProductId": "SQ2447",
+        "componentProductId": "SV2447-AO",
+        "componentRole": "TOP"
+      },
+      "status": "AVAILABLE",
+      "chartId": "image_registry:42e42d5a-c407-5927-af69-0fe8ab21a8e4:SQ2447",
+      "sourceBindingHash": "40dd16350ef34f1e19898233602d556ca38ec1a90c02f3a8a74c4c876f2dcf8b"
+    },
+    {
+      "productId": "SQ2447",
+      "target": {
+        "kind": "COMPONENT",
+        "parentProductId": "SQ2447",
+        "componentProductId": "SQ2447-QUAN",
+        "componentRole": "PANTS"
+      },
+      "status": "AVAILABLE",
+      "chartId": "image_registry:42e42d5a-c407-5927-af69-0fe8ab21a8e4:SQ2447",
+      "sourceBindingHash": "edc7852aec9c61b8375de9f426729b6da5c9916c9165e80e8df98b398e95ec5b"
+    },
+    {
+      "productId": "SV2447",
+      "target": "PRODUCT",
+      "status": "AVAILABLE"
+    },
+    {
+      "productId": "SV2447",
+      "target": {
+        "kind": "COMPONENT",
+        "parentProductId": "SV2447",
+        "componentProductId": "SV2447-AO",
+        "componentRole": "TOP"
+      },
+      "status": "AVAILABLE",
+      "chartId": "image_registry:42e42d5a-c407-5927-af69-0fe8ab21a8e4:SQ2447",
+      "sourceBindingHash": "7a5cc52cdc2d8368e28bb7c71c7218f068add1bc2c9acb02aa32bf10a596c9e8"
+    },
+    {
+      "productId": "SV2447",
+      "target": {
+        "kind": "COMPONENT",
+        "parentProductId": "SV2447",
+        "componentProductId": "SV2447-CV",
+        "componentRole": "SKIRT"
+      },
+      "status": "AVAILABLE",
+      "chartId": "image_registry:42e42d5a-c407-5927-af69-0fe8ab21a8e4:SQ2447",
+      "sourceBindingHash": "fe64ef5ed58c3947f2f67cb0cb6ca43383da601fd2a08a6c5b313f54e900c7c3"
+    }
+  ]
+}

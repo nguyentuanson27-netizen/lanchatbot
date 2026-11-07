@@ -1,0 +1,2044 @@
+{
+  "kind": "OFFLINE_FROZEN_WORLD_ROOT_CAUSE_REVIEW_NOT_MODEL_RUN",
+  "sourceSha": "5a011a55dcea7755ea41d2f3db0b9834c3fcef59",
+  "reviewedRunSource": "e43e1b75c6ba3da2b3f77243e17bd6045131731a",
+  "worldHash": "65af6c5e3b74d4ad751e1975a6df10fe58514301f9ef2bd9fb91b75effe08917",
+  "priorWorldHash": "a46067d9e203eff5c5f77f6447b3b9b3efe04df813fae43091d71dbb605a4f0e",
+  "providerGenerations": 0,
+  "networkReads": 0,
+  "effects": 0,
+  "sendEnabled": false,
+  "requestTrace": [
+    {
+      "id": "s02",
+      "requests": [
+        {
+          "generation": "06f2346e-2d79-4cd0-b971-c556ea6db8e3:owner:1",
+          "phase": "TOOL_OR_REPLY",
+          "budget": {
+            "roundsRemaining": 2,
+            "callsRemaining": 6,
+            "accounting": "PRIMITIVE_WORK_V2"
+          },
+          "callable": [
+            "search_products",
+            "read_product",
+            "read_policy",
+            "apply_customer_state",
+            "recommend_size",
+            "quote_cart",
+            "add_to_cart",
+            "change_cart_item",
+            "confirm_purchase",
+            "record_negotiation",
+            "request_handoff",
+            "select_product_media",
+            "view_product_media",
+            "quote_product"
+          ],
+          "subjects": [
+            {
+              "ref": "SQ2447",
+              "label": "Set quần Thạch Thảo"
+            },
+            {
+              "ref": "SV2447",
+              "label": "Set váy Thạch Thảo"
+            }
+          ],
+          "products": [],
+          "factCount": 0
+        },
+        {
+          "generation": "06f2346e-2d79-4cd0-b971-c556ea6db8e3:owner:2",
+          "phase": "TOOL_OR_REPLY",
+          "budget": {
+            "roundsRemaining": 1,
+            "callsRemaining": 4,
+            "accounting": "PRIMITIVE_WORK_V2"
+          },
+          "callable": [
+            "search_products",
+            "read_product",
+            "read_policy",
+            "apply_customer_state",
+            "recommend_size",
+            "quote_cart",
+            "add_to_cart",
+            "change_cart_item",
+            "confirm_purchase",
+            "record_negotiation",
+            "request_handoff",
+            "select_product_media",
+            "view_product_media",
+            "quote_product"
+          ],
+          "subjects": [
+            {
+              "ref": "SQ2447",
+              "label": "Set quần Thạch Thảo"
+            },
+            {
+              "ref": "SV2447",
+              "label": "Set váy Thạch Thảo"
+            }
+          ],
+          "products": [
+            {
+              "ref": "SQ2447",
+              "offers": [
+                "AO",
+                "QUAN",
+                "SET_QUAN"
+              ],
+              "notRead": [
+                "PRICE",
+                "STOCK",
+                "ETA",
+                "SIZE_FIT"
+              ]
+            },
+            {
+              "ref": "SV2447",
+              "offers": [
+                "AO",
+                "CV",
+                "SET_VAY"
+              ],
+              "notRead": [
+                "PRICE",
+                "STOCK",
+                "ETA",
+                "SIZE_FIT"
+              ]
+            }
+          ],
+          "factCount": 0
+        }
+      ],
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, bên em có cả set quần Thạch Thảo và set váy Thạch Thảo đều có bán áo lẻ. Chị đang quan tâm mẫu áo của set quần hay set váy Thạch Thảo ạ?"
+        ],
+        "images": []
+      },
+      "tools": [
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null
+        }
+      ],
+      "verdict": {
+        "verdict": "PASS",
+        "violations": []
+      }
+    },
+    {
+      "id": "s04",
+      "requests": [
+        {
+          "generation": "2bae5304-9606-4557-bc3e-3e593a644932:owner:1",
+          "phase": "TOOL_OR_REPLY",
+          "budget": {
+            "roundsRemaining": 2,
+            "callsRemaining": 6,
+            "accounting": "PRIMITIVE_WORK_V2"
+          },
+          "callable": [
+            "search_products",
+            "read_product",
+            "read_policy",
+            "apply_customer_state",
+            "recommend_size",
+            "quote_cart",
+            "add_to_cart",
+            "change_cart_item",
+            "confirm_purchase",
+            "record_negotiation",
+            "request_handoff",
+            "select_product_media",
+            "view_product_media",
+            "quote_product"
+          ],
+          "subjects": [
+            {
+              "ref": "SQ2447",
+              "label": "Set quần Thạch Thảo"
+            },
+            {
+              "ref": "SV2447",
+              "label": "Set váy Thạch Thảo"
+            }
+          ],
+          "products": [],
+          "factCount": 0
+        },
+        {
+          "generation": "2bae5304-9606-4557-bc3e-3e593a644932:owner:2",
+          "phase": "TOOL_OR_REPLY",
+          "budget": {
+            "roundsRemaining": 1,
+            "callsRemaining": 4,
+            "accounting": "PRIMITIVE_WORK_V2"
+          },
+          "callable": [
+            "search_products",
+            "read_product",
+            "read_policy",
+            "apply_customer_state",
+            "recommend_size",
+            "quote_cart",
+            "add_to_cart",
+            "change_cart_item",
+            "confirm_purchase",
+            "record_negotiation",
+            "request_handoff",
+            "select_product_media",
+            "view_product_media",
+            "quote_product"
+          ],
+          "subjects": [
+            {
+              "ref": "SQ2447",
+              "label": "Set quần Thạch Thảo"
+            },
+            {
+              "ref": "SV2447",
+              "label": "Set váy Thạch Thảo"
+            }
+          ],
+          "products": [
+            {
+              "ref": "SQ2447",
+              "offers": [
+                "AO",
+                "QUAN",
+                "SET_QUAN"
+              ],
+              "notRead": [
+                "PRICE",
+                "STOCK",
+                "ETA",
+                "SIZE_FIT"
+              ]
+            },
+            {
+              "ref": "SV2447",
+              "offers": [
+                "AO",
+                "CV",
+                "SET_VAY"
+              ],
+              "notRead": [
+                "PRICE",
+                "STOCK",
+                "ETA",
+                "SIZE_FIT"
+              ]
+            }
+          ],
+          "factCount": 0
+        }
+      ],
+      "terminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "RESPONSE_UNAVAILABLE"
+      },
+      "tools": [
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null
+        }
+      ],
+      "verdict": null
+    },
+    {
+      "id": "s07",
+      "requests": [
+        {
+          "generation": "86329ffe-bbe9-4082-9ab4-9cb43faf1b70:owner:1",
+          "phase": "TOOL_OR_REPLY",
+          "budget": {
+            "roundsRemaining": 2,
+            "callsRemaining": 6,
+            "accounting": "PRIMITIVE_WORK_V2"
+          },
+          "callable": [
+            "search_products",
+            "read_product",
+            "read_policy",
+            "apply_customer_state",
+            "recommend_size",
+            "quote_cart",
+            "add_to_cart",
+            "change_cart_item",
+            "confirm_purchase",
+            "record_negotiation",
+            "request_handoff",
+            "select_product_media",
+            "view_product_media",
+            "quote_product"
+          ],
+          "subjects": [
+            {
+              "ref": "SQ2447",
+              "label": "Set quần Thạch Thảo"
+            },
+            {
+              "ref": "SV2447",
+              "label": "Set váy Thạch Thảo"
+            }
+          ],
+          "products": [],
+          "factCount": 0
+        },
+        {
+          "generation": "86329ffe-bbe9-4082-9ab4-9cb43faf1b70:owner:2",
+          "phase": "TOOL_OR_REPLY",
+          "budget": {
+            "roundsRemaining": 1,
+            "callsRemaining": 5,
+            "accounting": "PRIMITIVE_WORK_V2"
+          },
+          "callable": [
+            "search_products",
+            "read_product",
+            "read_policy",
+            "apply_customer_state",
+            "recommend_size",
+            "quote_cart",
+            "add_to_cart",
+            "change_cart_item",
+            "confirm_purchase",
+            "record_negotiation",
+            "request_handoff",
+            "select_product_media",
+            "view_product_media",
+            "quote_product"
+          ],
+          "subjects": [
+            {
+              "ref": "SQ2447",
+              "label": "Set quần Thạch Thảo"
+            },
+            {
+              "ref": "SV2447",
+              "label": "Set váy Thạch Thảo"
+            }
+          ],
+          "products": [],
+          "factCount": 0
+        },
+        {
+          "generation": "86329ffe-bbe9-4082-9ab4-9cb43faf1b70:owner:3",
+          "phase": "TERMINAL_HANDOFF_OR_REPLY",
+          "budget": {
+            "roundsRemaining": 0,
+            "callsRemaining": 3,
+            "accounting": "PRIMITIVE_WORK_V2"
+          },
+          "callable": [
+            "request_handoff"
+          ],
+          "subjects": [
+            {
+              "ref": "SQ2447",
+              "label": "Set quần Thạch Thảo"
+            },
+            {
+              "ref": "SV2447",
+              "label": "Set váy Thạch Thảo"
+            }
+          ],
+          "products": [
+            {
+              "ref": "SQ2447",
+              "offers": [
+                "AO",
+                "QUAN",
+                "SET_QUAN"
+              ],
+              "notRead": [
+                "PRICE",
+                "STOCK",
+                "ETA",
+                "SIZE_FIT"
+              ]
+            },
+            {
+              "ref": "SV2447",
+              "offers": [
+                "AO",
+                "CV",
+                "SET_VAY"
+              ],
+              "notRead": [
+                "PRICE",
+                "STOCK",
+                "ETA",
+                "SIZE_FIT"
+              ]
+            }
+          ],
+          "factCount": 0
+        }
+      ],
+      "terminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "SIZE_RULE_UNAVAILABLE"
+      },
+      "tools": [
+        {
+          "name": "search_products",
+          "status": "REJECTED",
+          "reason": "PRODUCT_BOUND"
+        },
+        {
+          "name": "search_products",
+          "status": "REJECTED",
+          "reason": "PRODUCT_BOUND"
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null
+        }
+      ],
+      "verdict": null
+    },
+    {
+      "id": "s11",
+      "requests": [
+        {
+          "generation": "def36ddd-2dc9-42b2-952a-4e833ac7c90d:owner:1",
+          "phase": "TOOL_OR_REPLY",
+          "budget": {
+            "roundsRemaining": 2,
+            "callsRemaining": 6,
+            "accounting": "PRIMITIVE_WORK_V2"
+          },
+          "callable": [
+            "search_products",
+            "read_product",
+            "read_policy",
+            "apply_customer_state",
+            "recommend_size",
+            "quote_cart",
+            "add_to_cart",
+            "change_cart_item",
+            "confirm_purchase",
+            "record_negotiation",
+            "request_handoff",
+            "select_product_media",
+            "view_product_media",
+            "quote_product"
+          ],
+          "subjects": [
+            {
+              "ref": "SQ2447",
+              "label": "Set quần Thạch Thảo"
+            },
+            {
+              "ref": "SV2447",
+              "label": "Set váy Thạch Thảo"
+            }
+          ],
+          "products": [],
+          "factCount": 0
+        },
+        {
+          "generation": "def36ddd-2dc9-42b2-952a-4e833ac7c90d:owner:2",
+          "phase": "TOOL_OR_REPLY",
+          "budget": {
+            "roundsRemaining": 1,
+            "callsRemaining": 4,
+            "accounting": "PRIMITIVE_WORK_V2"
+          },
+          "callable": [
+            "search_products",
+            "read_product",
+            "read_policy",
+            "apply_customer_state",
+            "recommend_size",
+            "quote_cart",
+            "add_to_cart",
+            "change_cart_item",
+            "confirm_purchase",
+            "record_negotiation",
+            "request_handoff",
+            "select_product_media",
+            "view_product_media",
+            "quote_product"
+          ],
+          "subjects": [
+            {
+              "ref": "SQ2447",
+              "label": "Set quần Thạch Thảo"
+            },
+            {
+              "ref": "SV2447",
+              "label": "Set váy Thạch Thảo"
+            }
+          ],
+          "products": [
+            {
+              "ref": "SQ2447",
+              "offers": [
+                "AO",
+                "QUAN",
+                "SET_QUAN"
+              ],
+              "notRead": [
+                "PRICE",
+                "STOCK",
+                "ETA",
+                "SIZE_FIT"
+              ]
+            },
+            {
+              "ref": "SV2447",
+              "offers": [
+                "AO",
+                "CV",
+                "SET_VAY"
+              ],
+              "notRead": [
+                "PRICE",
+                "STOCK",
+                "ETA",
+                "SIZE_FIT"
+              ]
+            }
+          ],
+          "factCount": 0
+        },
+        {
+          "generation": "def36ddd-2dc9-42b2-952a-4e833ac7c90d:owner:3",
+          "phase": "TERMINAL_HANDOFF_OR_REPLY",
+          "budget": {
+            "roundsRemaining": 0,
+            "callsRemaining": 2,
+            "accounting": "PRIMITIVE_WORK_V2"
+          },
+          "callable": [
+            "request_handoff"
+          ],
+          "subjects": [
+            {
+              "ref": "SQ2447",
+              "label": "Set quần Thạch Thảo"
+            },
+            {
+              "ref": "SV2447",
+              "label": "Set váy Thạch Thảo"
+            }
+          ],
+          "products": [
+            {
+              "ref": "SQ2447",
+              "offers": [
+                "AO",
+                "QUAN",
+                "SET_QUAN"
+              ],
+              "notRead": null
+            },
+            {
+              "ref": "SV2447",
+              "offers": [
+                "AO",
+                "CV",
+                "SET_VAY"
+              ],
+              "notRead": null
+            }
+          ],
+          "factCount": 0
+        }
+      ],
+      "terminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "PRODUCT_AMBIGUOUS"
+      },
+      "tools": [
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null
+        }
+      ],
+      "verdict": null
+    },
+    {
+      "id": "s13",
+      "requests": [
+        {
+          "generation": "342d41b5-fe6f-45a3-87fb-0cd0af2d4ffa:owner:1",
+          "phase": "TOOL_OR_REPLY",
+          "budget": {
+            "roundsRemaining": 2,
+            "callsRemaining": 6,
+            "accounting": "PRIMITIVE_WORK_V2"
+          },
+          "callable": [
+            "search_products",
+            "read_product",
+            "read_policy",
+            "apply_customer_state",
+            "recommend_size",
+            "quote_cart",
+            "add_to_cart",
+            "change_cart_item",
+            "confirm_purchase",
+            "record_negotiation",
+            "request_handoff",
+            "select_product_media",
+            "view_product_media",
+            "quote_product"
+          ],
+          "subjects": [
+            {
+              "ref": "SQ2447",
+              "label": "Set quần Thạch Thảo"
+            },
+            {
+              "ref": "SV2447",
+              "label": "Set váy Thạch Thảo"
+            }
+          ],
+          "products": [],
+          "factCount": 0
+        },
+        {
+          "generation": "342d41b5-fe6f-45a3-87fb-0cd0af2d4ffa:owner:2",
+          "phase": "TOOL_OR_REPLY",
+          "budget": {
+            "roundsRemaining": 1,
+            "callsRemaining": 5,
+            "accounting": "PRIMITIVE_WORK_V2"
+          },
+          "callable": [
+            "search_products",
+            "read_product",
+            "read_policy",
+            "apply_customer_state",
+            "recommend_size",
+            "quote_cart",
+            "add_to_cart",
+            "change_cart_item",
+            "confirm_purchase",
+            "record_negotiation",
+            "request_handoff",
+            "select_product_media",
+            "view_product_media",
+            "quote_product"
+          ],
+          "subjects": [
+            {
+              "ref": "SQ2447",
+              "label": "Set quần Thạch Thảo"
+            },
+            {
+              "ref": "SV2447",
+              "label": "Set váy Thạch Thảo"
+            }
+          ],
+          "products": [],
+          "factCount": 0
+        },
+        {
+          "generation": "342d41b5-fe6f-45a3-87fb-0cd0af2d4ffa:owner:3",
+          "phase": "TERMINAL_HANDOFF_OR_REPLY",
+          "budget": {
+            "roundsRemaining": 0,
+            "callsRemaining": 3,
+            "accounting": "PRIMITIVE_WORK_V2"
+          },
+          "callable": [
+            "request_handoff"
+          ],
+          "subjects": [
+            {
+              "ref": "SQ2447",
+              "label": "Set quần Thạch Thảo"
+            },
+            {
+              "ref": "SV2447",
+              "label": "Set váy Thạch Thảo"
+            }
+          ],
+          "products": [
+            {
+              "ref": "SQ2447",
+              "offers": [
+                "AO",
+                "QUAN",
+                "SET_QUAN"
+              ],
+              "notRead": [
+                "PRICE",
+                "STOCK",
+                "ETA",
+                "SIZE_FIT"
+              ]
+            },
+            {
+              "ref": "SV2447",
+              "offers": [
+                "AO",
+                "CV",
+                "SET_VAY"
+              ],
+              "notRead": [
+                "PRICE",
+                "STOCK",
+                "ETA",
+                "SIZE_FIT"
+              ]
+            }
+          ],
+          "factCount": 0
+        }
+      ],
+      "terminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "PRICE_UNAVAILABLE"
+      },
+      "tools": [
+        {
+          "name": "search_products",
+          "status": "REJECTED",
+          "reason": "PRODUCT_BOUND"
+        },
+        {
+          "name": "search_products",
+          "status": "REJECTED",
+          "reason": "PRODUCT_BOUND"
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null
+        }
+      ],
+      "verdict": null
+    },
+    {
+      "id": "j1",
+      "requests": [
+        {
+          "generation": "c711d52a-19fa-42d4-bbe0-c2490571a125:owner:1",
+          "phase": "TOOL_OR_REPLY",
+          "budget": {
+            "roundsRemaining": 2,
+            "callsRemaining": 5,
+            "accounting": "PRIMITIVE_WORK_V2"
+          },
+          "callable": [
+            "search_products",
+            "read_product",
+            "read_policy",
+            "apply_customer_state",
+            "recommend_size",
+            "quote_cart",
+            "add_to_cart",
+            "change_cart_item",
+            "confirm_purchase",
+            "record_negotiation",
+            "request_handoff",
+            "select_product_media",
+            "view_product_media",
+            "quote_product"
+          ],
+          "subjects": [
+            {
+              "ref": "SV2447",
+              "label": "Set váy Thạch Thảo"
+            }
+          ],
+          "products": [
+            {
+              "ref": "SV2447",
+              "offers": [
+                "AO",
+                "CV",
+                "SET_VAY"
+              ],
+              "notRead": null
+            }
+          ],
+          "factCount": 6
+        },
+        {
+          "generation": "c711d52a-19fa-42d4-bbe0-c2490571a125:owner:2",
+          "phase": "TOOL_OR_REPLY",
+          "budget": {
+            "roundsRemaining": 1,
+            "callsRemaining": 4,
+            "accounting": "PRIMITIVE_WORK_V2"
+          },
+          "callable": [
+            "search_products",
+            "read_product",
+            "read_policy",
+            "apply_customer_state",
+            "recommend_size",
+            "quote_cart",
+            "add_to_cart",
+            "change_cart_item",
+            "confirm_purchase",
+            "record_negotiation",
+            "request_handoff",
+            "select_product_media",
+            "view_product_media",
+            "quote_product"
+          ],
+          "subjects": [
+            {
+              "ref": "SV2447",
+              "label": "Set váy Thạch Thảo"
+            }
+          ],
+          "products": [
+            {
+              "ref": "SV2447",
+              "offers": [
+                "AO",
+                "CV",
+                "SET_VAY"
+              ],
+              "notRead": null
+            }
+          ],
+          "factCount": 6
+        }
+      ],
+      "terminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "RESPONSE_UNAVAILABLE"
+      },
+      "tools": [
+        {
+          "name": "add_to_cart",
+          "status": "UNAVAILABLE",
+          "reason": "SELECTION_UNAVAILABLE"
+        }
+      ],
+      "verdict": {
+        "verdict": "FAIL",
+        "violations": [
+          {
+            "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+            "protectedRef": "product:SV2447",
+            "excerpt": "và bản tiêu chuẩn",
+            "basis": "Nguồn chỉ ghi nhận lựa chọn size L chưa có thông tin màu (__NO_COLOR__, UNRECORDED_IS_NOT_A_PHYSICAL_COLOR), không xác nhận đây là một “bản tiêu chuẩn” riêng để khách chọn bên cạnh màu be."
+          }
+        ]
+      }
+    },
+    {
+      "id": "j4",
+      "requests": [
+        {
+          "generation": "4f1113c9-f9e2-45ea-99f2-5a90aca49947:owner:1",
+          "phase": "TOOL_OR_REPLY",
+          "budget": {
+            "roundsRemaining": 2,
+            "callsRemaining": 5,
+            "accounting": "PRIMITIVE_WORK_V2"
+          },
+          "callable": [
+            "search_products",
+            "read_product",
+            "read_policy",
+            "apply_customer_state",
+            "recommend_size",
+            "quote_cart",
+            "add_to_cart",
+            "change_cart_item",
+            "confirm_purchase",
+            "record_negotiation",
+            "request_handoff",
+            "select_product_media",
+            "view_product_media",
+            "quote_product"
+          ],
+          "subjects": [
+            {
+              "ref": "SV2447",
+              "label": "Set váy Thạch Thảo"
+            }
+          ],
+          "products": [
+            {
+              "ref": "SV2447",
+              "offers": [
+                "AO",
+                "CV",
+                "SET_VAY"
+              ],
+              "notRead": null
+            }
+          ],
+          "factCount": 6
+        },
+        {
+          "generation": "4f1113c9-f9e2-45ea-99f2-5a90aca49947:owner:2",
+          "phase": "TOOL_OR_REPLY",
+          "budget": {
+            "roundsRemaining": 1,
+            "callsRemaining": 4,
+            "accounting": "PRIMITIVE_WORK_V2"
+          },
+          "callable": [
+            "search_products",
+            "read_product",
+            "read_policy",
+            "apply_customer_state",
+            "recommend_size",
+            "quote_cart",
+            "add_to_cart",
+            "change_cart_item",
+            "confirm_purchase",
+            "record_negotiation",
+            "request_handoff",
+            "select_product_media",
+            "view_product_media",
+            "quote_product"
+          ],
+          "subjects": [
+            {
+              "ref": "SV2447",
+              "label": "Set váy Thạch Thảo"
+            }
+          ],
+          "products": [
+            {
+              "ref": "SV2447",
+              "offers": [
+                "AO",
+                "CV",
+                "SET_VAY"
+              ],
+              "notRead": null
+            }
+          ],
+          "factCount": 6
+        }
+      ],
+      "terminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "RESPONSE_UNAVAILABLE"
+      },
+      "tools": [
+        {
+          "name": "add_to_cart",
+          "status": "UNAVAILABLE",
+          "reason": "SELECTION_UNAVAILABLE"
+        }
+      ],
+      "verdict": {
+        "verdict": "FAIL",
+        "violations": [
+          {
+            "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+            "protectedRef": "product:SV2447",
+            "excerpt": "màu tiêu chuẩn (có sẵn)",
+            "basis": "Nguồn xác nhận áo size M có sẵn nhưng màu là __NO_COLOR__, với nghĩa chưa ghi nhận màu, không phải một màu vật lý. Không có căn cứ giới thiệu lựa chọn này là “màu tiêu chuẩn” để khách chọn."
+          }
+        ]
+      }
+    }
+  ],
+  "color": [
+    {
+      "label": "PREVIOUS",
+      "id": "j1",
+      "size": "L",
+      "clock": "2026-10-30T08:42:39.713Z",
+      "stockPolicy": {
+        "can_order_when_zero": true
+      },
+      "status": "COLOR_REQUIRED",
+      "reason": "CART_COLOR_REQUIRED",
+      "options": [
+        {
+          "color": "__NO_COLOR__",
+          "status": "IN_STOCK",
+          "size": "L"
+        },
+        {
+          "color": "BE",
+          "status": "PRE_ORDER",
+          "size": "L"
+        }
+      ],
+      "semanticRows": [
+        {
+          "color": "__NO_COLOR__",
+          "stock": 8,
+          "parent": "",
+          "source": "PANCAKE_DIRECT"
+        },
+        {
+          "color": "BE",
+          "stock": 0,
+          "parent": "",
+          "source": "PANCAKE_DIRECT"
+        }
+      ]
+    },
+    {
+      "label": "PREVIOUS",
+      "id": "j4",
+      "size": "M",
+      "clock": "2026-10-30T08:46:31.409Z",
+      "stockPolicy": {
+        "can_order_when_zero": true
+      },
+      "status": "COLOR_REQUIRED",
+      "reason": "CART_COLOR_REQUIRED",
+      "options": [
+        {
+          "color": "__NO_COLOR__",
+          "status": "IN_STOCK",
+          "size": "M"
+        },
+        {
+          "color": "BE",
+          "status": "PRE_ORDER",
+          "size": "M"
+        }
+      ],
+      "semanticRows": [
+        {
+          "color": "__NO_COLOR__",
+          "stock": 14,
+          "parent": "",
+          "source": "PANCAKE_DIRECT"
+        },
+        {
+          "color": "BE",
+          "stock": 0,
+          "parent": "",
+          "source": "PANCAKE_DIRECT"
+        }
+      ]
+    },
+    {
+      "label": "CURRENT",
+      "id": "j1",
+      "size": "L",
+      "clock": "2026-10-30T16:15:19.335Z",
+      "stockPolicy": {
+        "can_order_when_zero": true
+      },
+      "status": "COLOR_REQUIRED",
+      "reason": "CART_COLOR_REQUIRED",
+      "options": [
+        {
+          "color": "__NO_COLOR__",
+          "status": "IN_STOCK",
+          "size": "L"
+        },
+        {
+          "color": "BE",
+          "status": "PRE_ORDER",
+          "size": "L"
+        }
+      ],
+      "semanticRows": [
+        {
+          "color": "__NO_COLOR__",
+          "stock": 8,
+          "parent": "",
+          "source": "PANCAKE_DIRECT"
+        },
+        {
+          "color": "BE",
+          "stock": 0,
+          "parent": "",
+          "source": "PANCAKE_DIRECT"
+        }
+      ]
+    },
+    {
+      "label": "CURRENT",
+      "id": "j4",
+      "size": "M",
+      "clock": "2026-10-30T16:18:29.035Z",
+      "stockPolicy": {
+        "can_order_when_zero": true
+      },
+      "status": "COLOR_REQUIRED",
+      "reason": "CART_COLOR_REQUIRED",
+      "options": [
+        {
+          "color": "__NO_COLOR__",
+          "status": "IN_STOCK",
+          "size": "M"
+        },
+        {
+          "color": "BE",
+          "status": "PRE_ORDER",
+          "size": "M"
+        }
+      ],
+      "semanticRows": [
+        {
+          "color": "__NO_COLOR__",
+          "stock": 14,
+          "parent": "",
+          "source": "PANCAKE_DIRECT"
+        },
+        {
+          "color": "BE",
+          "stock": 0,
+          "parent": "",
+          "source": "PANCAKE_DIRECT"
+        }
+      ]
+    }
+  ],
+  "media": [
+    {
+      "id": "s01",
+      "productId": "SV1561",
+      "clock": "2026-10-30T16:08:31.710Z",
+      "query": {
+        "intent": "GENERIC"
+      },
+      "total": 11,
+      "expired": 11,
+      "verified": 11,
+      "feedbackCount": 0,
+      "eligible": 0,
+      "alternatives": [],
+      "assets": [
+        {
+          "angle": "FRONT",
+          "type": "MODEL",
+          "parts": [
+            "FULL_SET",
+            "AO",
+            "CHAN_VAY"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "SIZE_GUIDE",
+          "parts": [
+            "FULL_SET"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "MODEL",
+          "parts": [
+            "AO",
+            "CHAN_VAY"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "MODEL",
+          "parts": [
+            "AO",
+            "CHAN_VAY"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "MODEL",
+          "parts": [
+            "AO",
+            "CHAN_VAY"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "FLATLAY",
+          "parts": [
+            "AO",
+            "CHAN_VAY"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "PRODUCT_ONLY",
+          "parts": [
+            "CHAN_VAY"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        },
+        {
+          "angle": "BACK",
+          "type": "MODEL",
+          "parts": [
+            "FULL_SET"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        },
+        {
+          "angle": "UNKNOWN",
+          "type": "SIZE_GUIDE",
+          "parts": [
+            "UNKNOWN"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "PRODUCT_ONLY",
+          "parts": [
+            "AO"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "MODEL",
+          "parts": [
+            "AO",
+            "CHAN_VAY"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "productId": "V406",
+      "clock": "2026-10-30T16:09:17.079Z",
+      "query": {
+        "intent": "DETAIL"
+      },
+      "total": 11,
+      "expired": 11,
+      "verified": 11,
+      "feedbackCount": 0,
+      "eligible": 0,
+      "alternatives": [],
+      "assets": [
+        {
+          "angle": "UNKNOWN",
+          "type": "SIZE_GUIDE",
+          "parts": [
+            "UNKNOWN"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-05T10:07:31.041Z",
+          "expiresAt": "2026-10-05T10:07:31.041Z",
+          "expired": true
+        },
+        {
+          "angle": "SIDE",
+          "type": "MODEL",
+          "parts": [
+            "VAY"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-05T10:07:31.041Z",
+          "expiresAt": "2026-10-05T10:07:31.041Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "PRODUCT_ONLY",
+          "parts": [
+            "VAY",
+            "PHU_KIEN"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-05T10:07:31.041Z",
+          "expiresAt": "2026-10-05T10:07:31.041Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "MODEL",
+          "parts": [
+            "VAY",
+            "PHU_KIEN"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-05T10:07:31.041Z",
+          "expiresAt": "2026-10-05T10:07:31.041Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "MODEL",
+          "parts": [
+            "VAY",
+            "PHU_KIEN"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-05T10:07:31.041Z",
+          "expiresAt": "2026-10-05T10:07:31.041Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "SIZE_GUIDE",
+          "parts": [
+            "VAY"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-05T10:07:31.041Z",
+          "expiresAt": "2026-10-05T10:07:31.041Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "DETAIL",
+          "parts": [
+            "VAY"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-05T10:07:31.041Z",
+          "expiresAt": "2026-10-05T10:07:31.041Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "MODEL",
+          "parts": [
+            "VAY"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-05T10:07:31.041Z",
+          "expiresAt": "2026-10-05T10:07:31.041Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "MODEL",
+          "parts": [
+            "VAY",
+            "PHU_KIEN"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-05T10:07:31.041Z",
+          "expiresAt": "2026-10-05T10:07:31.041Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "MODEL",
+          "parts": [
+            "VAY",
+            "PHU_KIEN"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-05T10:07:31.041Z",
+          "expiresAt": "2026-10-05T10:07:31.041Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "MODEL",
+          "parts": [
+            "VAY",
+            "PHU_KIEN"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-05T10:07:31.041Z",
+          "expiresAt": "2026-10-05T10:07:31.041Z",
+          "expired": true
+        }
+      ]
+    },
+    {
+      "id": "s16",
+      "productId": "SQ2447",
+      "clock": "2026-10-30T16:14:56.162Z",
+      "query": {
+        "intent": "FEEDBACK",
+        "componentRole": "TOP"
+      },
+      "total": 10,
+      "expired": 10,
+      "verified": 10,
+      "feedbackCount": 0,
+      "eligible": 0,
+      "alternatives": [],
+      "assets": [
+        {
+          "angle": "CLOSEUP",
+          "type": "DETAIL",
+          "parts": [
+            "QUAN"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        },
+        {
+          "angle": "UNKNOWN",
+          "type": "SIZE_GUIDE",
+          "parts": [
+            "UNKNOWN"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "MODEL",
+          "parts": [
+            "AO",
+            "QUAN"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "MODEL",
+          "parts": [
+            "FULL_SET"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "MODEL",
+          "parts": [
+            "AO",
+            "QUAN"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        },
+        {
+          "angle": "CLOSEUP",
+          "type": "DETAIL",
+          "parts": [
+            "AO"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "MODEL",
+          "parts": [
+            "FULL_SET",
+            "AO",
+            "QUAN"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "MODEL",
+          "parts": [
+            "FULL_SET",
+            "AO",
+            "QUAN"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        },
+        {
+          "angle": "FRONT",
+          "type": "SIZE_GUIDE",
+          "parts": [
+            "AO",
+            "QUAN"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        },
+        {
+          "angle": "BACK",
+          "type": "MODEL",
+          "parts": [
+            "AO",
+            "QUAN"
+          ],
+          "feedback": false,
+          "review": "APPROVED",
+          "metadata": true,
+          "hashPresent": true,
+          "revalidation": null,
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "expiresAt": "2026-10-28T04:31:05.725Z",
+          "expired": true
+        }
+      ]
+    }
+  ],
+  "size": [
+    {
+      "productId": "SV2447",
+      "chartCount": 1,
+      "chartIds": [
+        "image_registry:42e42d5a-c407-5927-af69-0fe8ab21a8e4:SQ2447"
+      ],
+      "target": {
+        "brand": "La.na Design",
+        "category": "SET",
+        "componentRole": "OTHER",
+        "parentProductId": "SV2447",
+        "componentProductId": "SV2447",
+        "form": null,
+        "material": "REN"
+      },
+      "status": "RECOMMENDED",
+      "action": "REPLY",
+      "missing": [],
+      "recommended": [
+        {
+          "componentProductId": "SV2447",
+          "componentRole": "OTHER",
+          "size": "M"
+        }
+      ],
+      "alternatives": []
+    },
+    {
+      "productId": "SQ2447",
+      "chartCount": 1,
+      "chartIds": [
+        "image_registry:42e42d5a-c407-5927-af69-0fe8ab21a8e4:SQ2447"
+      ],
+      "target": {
+        "brand": "La.na Design",
+        "category": "SET",
+        "componentRole": "OTHER",
+        "parentProductId": "SQ2447",
+        "componentProductId": "SQ2447",
+        "form": null,
+        "material": "TƠ"
+      },
+      "status": "RECOMMENDED",
+      "action": "REPLY",
+      "missing": [],
+      "recommended": [
+        {
+          "componentProductId": "SQ2447",
+          "componentRole": "OTHER",
+          "size": "M"
+        }
+      ],
+      "alternatives": []
+    }
+  ],
+  "prices": [
+    {
+      "productId": "SQ2447",
+      "status": "OK",
+      "reason": null,
+      "price": [
+        {
+          "amountVnd": 499000,
+          "currency": "VND"
+        }
+      ]
+    },
+    {
+      "productId": "SV2447",
+      "status": "OK",
+      "reason": null,
+      "price": [
+        {
+          "amountVnd": 499000,
+          "currency": "VND"
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Source-backed deterministic probes do not establish owner would choose the same tools or draft under a changed request",
+    "Do not change historical blind grades after unmask",
+    "Prior/current full model outputs not controlled paired samples"
+  ],
+  "actualColorArgumentContrast": [
+    {
+      "run": "PREVIOUS",
+      "case": "j1",
+      "args": {
+        "subjectRef": "SV2447",
+        "size": "L",
+        "offerType": "AO",
+        "color": "__NO_COLOR__",
+        "quantity": 1
+      },
+      "terminal": "SEND_ELIGIBLE",
+      "cartExistsAfter": true,
+      "rawHash": "02ef1200f5d8956962c64e38e4993b8a384d53bd236531080a902d653649012f"
+    },
+    {
+      "run": "PREVIOUS",
+      "case": "j4",
+      "args": {
+        "size": "M",
+        "quantity": 1,
+        "color": "__NO_COLOR__",
+        "subjectRef": "SV2447",
+        "offerType": "AO"
+      },
+      "terminal": "SEND_ELIGIBLE",
+      "cartExistsAfter": true,
+      "rawHash": "8715855090d8daa0a8284f27c1fb334df95ca8fe2737e58e622cb3dfe11903d1"
+    },
+    {
+      "run": "CURRENT",
+      "case": "j1",
+      "args": {
+        "quantity": 1,
+        "subjectRef": "SV2447",
+        "size": "L",
+        "color": null,
+        "offerType": "AO"
+      },
+      "terminal": "HANDOFF",
+      "cartExistsAfter": false,
+      "rawHash": "a22a64ee9e17378755d1b9d5761c780d5beb914974601b87b574c175b21a4dac"
+    },
+    {
+      "run": "CURRENT",
+      "case": "j4",
+      "args": {
+        "offerType": "AO",
+        "size": "M",
+        "subjectRef": "SV2447",
+        "color": null
+      },
+      "terminal": "HANDOFF",
+      "cartExistsAfter": false,
+      "rawHash": "00d830799232d27d632bda0db2a3042b48fbdb288e5cc1cd7e578c80884a3ec6"
+    }
+  ],
+  "interpretation": {
+    "budget": "s07/s13 actual third generation has no read tools after search + metadata-only round; unused call count does not grant a third read round",
+    "size": "with declared existing owner-approved group mapping and RELAXED fit, source engine returns M for both products; not a customer-visible reply or an obligation to skip product clarification",
+    "color": "both prior/current frozen worlds yield COLOR_REQUIRED for null color under current resolver, previous actual owners supplied sentinel while current owners supplied null; no controlled full model causal proof",
+    "media": "Exact latest journal: s01 quote SV1561 GENERIC, s03 V406 DETAIL with no TOP filter, s16 SQ2447 FEEDBACK/TOP. Actual media counts11/11/10 all stale; feedback0 for both ThachThao products remains separate population limitation."
+  },
+  "actualJournalToolCalls": [
+    {
+      "case": "s01",
+      "ownerOutputCalls": [
+        {
+          "name": "quote_product",
+          "args": {
+            "subjectRef": "SV1561",
+            "offerTypes": [
+              "SET_VAY"
+            ]
+          },
+          "id": "call_1380164"
+        }
+      ]
+    },
+    {
+      "case": "s03",
+      "ownerOutputCalls": [
+        {
+          "name": "select_product_media",
+          "args": {
+            "subjectRef": "V406",
+            "intent": "DETAIL"
+          },
+          "id": "call_360102"
+        }
+      ]
+    },
+    {
+      "case": "s04",
+      "ownerOutputCalls": [
+        {
+          "name": "read_product",
+          "args": {
+            "subjectRef": "SQ2447",
+            "detailsOnly": true
+          },
+          "id": "call_1170839"
+        },
+        {
+          "name": "read_product",
+          "args": {
+            "subjectRef": "SV2447",
+            "detailsOnly": true
+          },
+          "id": "call_1170840"
+        },
+        {
+          "name": "request_handoff",
+          "args": {
+            "reason": "RESPONSE_UNAVAILABLE"
+          },
+          "id": "call_1130378"
+        }
+      ]
+    },
+    {
+      "case": "s07",
+      "ownerOutputCalls": [
+        {
+          "name": "search_products",
+          "args": {
+            "query": "Áo Thạch Thảo"
+          },
+          "id": "call_962600"
+        },
+        {
+          "name": "read_product",
+          "args": {
+            "subjectRef": "SQ2447",
+            "detailsOnly": true
+          },
+          "id": "call_193472"
+        },
+        {
+          "name": "read_product",
+          "args": {
+            "subjectRef": "SV2447",
+            "detailsOnly": true
+          },
+          "id": "call_193473"
+        },
+        {
+          "name": "request_handoff",
+          "args": {
+            "reason": "SIZE_RULE_UNAVAILABLE"
+          },
+          "id": "call_1413849"
+        }
+      ]
+    },
+    {
+      "case": "s13",
+      "ownerOutputCalls": [
+        {
+          "name": "search_products",
+          "args": {
+            "query": "áo Thạch Thảo"
+          },
+          "id": "call_315572"
+        },
+        {
+          "name": "read_product",
+          "args": {
+            "subjectRef": "SQ2447",
+            "detailsOnly": true
+          },
+          "id": "call_2303757"
+        },
+        {
+          "name": "read_product",
+          "args": {
+            "subjectRef": "SV2447",
+            "detailsOnly": true
+          },
+          "id": "call_2303758"
+        },
+        {
+          "name": "request_handoff",
+          "args": {
+            "reason": "PRICE_UNAVAILABLE"
+          },
+          "id": "call_2608595"
+        }
+      ]
+    },
+    {
+      "case": "s16",
+      "ownerOutputCalls": [
+        {
+          "name": "search_products",
+          "args": {
+            "query": "áo Thạch Thảo"
+          },
+          "id": "call_1180379"
+        },
+        {
+          "name": "select_product_media",
+          "args": {
+            "intent": "FEEDBACK",
+            "componentRole": "TOP",
+            "subjectRef": "SQ2447"
+          },
+          "id": "call_2598703"
+        }
+      ]
+    }
+  ],
+  "journalByteSha256": "02c14f0ef3f7ea711e00c818520cccb54d304d14042a8b5367c85712e9ad4e4d",
+  "scriptArtifacts": [
+    {
+      "path": "..\\c3-variant-rootcause-review-final-20261031.mjs",
+      "sha256": "15d2f030992c51953e2244e4eaa2bf56f071cf820543a6c24eb150206362e107",
+      "bytes": 8263
+    },
+    {
+      "path": "..\\c3-variant-rootcause-review-final-20261031.log",
+      "sha256": "22a87a2a3a280b5498083ac52aa0d3aae74c2f3493092077ae88928d7c374e6b",
+      "bytes": 2532
+    },
+    {
+      "path": "..\\c3-variant-rootcause-review-20261030.log",
+      "sha256": "d2d01c96ffd975fcf9d7370839e2f480a710849fb75a4ff9096b4b97a4d32667",
+      "bytes": 1700
+    },
+    {
+      "path": "..\\c3-variant-rootcause-review-20261030.mjs",
+      "sha256": "046b062393905f318fc9dccaed0cd86d6064f78ae7b0bc5ec13f2f4a0b354860",
+      "bytes": 8257
+    },
+    {
+      "path": "..\\c3-variant-rootcause-review-20261030-02.log",
+      "sha256": "9911e535a7b9d03103b4439344f554460321a980078b6626cc2ddbdf65bfe923",
+      "bytes": 2584
+    }
+  ],
+  "inspectionCorrectionsRetained": [
+    "Initial local sizing probe used invalid LOOSE enum, corrected to RELAXED with no runtime change.",
+    "Initial diagnostic hypothesized prior DETAIL/TOP and SV2447 FEEDBACK for new run. Exact journal RESULT outputs show new s03 has no component and new s16 targets SQ2447/TOP. Final media replay uses actual new query; initial local probe not used as evidence for actual new selection."
+  ]
+}

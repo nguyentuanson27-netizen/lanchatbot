@@ -1,0 +1,21 @@
+{
+  "name": "B_PRESERVING_CHECKOUT_20261104",
+  "purpose": "DEVELOPMENT_ONLY_NOT_QUALIFICATION",
+  "repetitions": 1,
+  "maximumCases": 1,
+  "maximumNativeCustomerTurns": 7,
+  "maximumVerifierOnlyProbes": 0,
+  "maximumGenerationRequests": 28,
+  "maximumOwnerGenerationsPerNativeTurn": 3,
+  "maximumVerifierGenerationsPerTurn": 1,
+  "generationRetry": 0,
+  "customerScriptsHash": "32547850ae2097a8aca1a7292bbdd042ea0a23bcea0add65588043df0c992455",
+  "cases": [
+    {
+      "sourceCase": "c-20261104-checkout-complete",
+      "mode": "JOURNEY",
+      "turns": 7,
+      "maximumGenerationRequests": 28
+    }
+  ]
+}

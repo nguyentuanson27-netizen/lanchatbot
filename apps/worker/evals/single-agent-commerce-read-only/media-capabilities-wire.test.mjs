@@ -42,6 +42,16 @@ test('captured generation clock keeps audit and HTTP selection deterministic at 
  r.mediaCapabilitiesAt=Date.parse(h.expiresAt);assert.equal(JSON.parse(buildGeminiCommerceRequest(r).contents[0].parts[0].text).trusted.execution.mediaCapabilities,undefined);
 });
 
+test('old approved media hints without an age deadline reach the provider unchanged',()=>{
+ const r=request(),h={...hint(),observedAt:'2025-01-01T00:00:00.000Z',expiresAt:null};
+ r.mediaCapabilities=[h];
+ assert.deepEqual(JSON.parse(buildGeminiCommerceRequest(r).contents[0].parts[0].text).trusted.execution.mediaCapabilities,[h]);
+ for(const observedAt of ['invalid',new Date(Date.now()+60000).toISOString()]){
+  r.mediaCapabilities=[{...h,observedAt}];
+  assert.equal(JSON.parse(buildGeminiCommerceRequest(r).contents[0].parts[0].text).trusted.execution.mediaCapabilities,undefined);
+ }
+});
+
 test('omitting an optional hint never rejects an otherwise valid large image request on the default transport',()=>{
  const r=request(),data=Buffer.alloc(70000,1),sha256=createHash('sha256').update(data).digest('hex');
  const subjectRef=hint().subjectRef,assetRef='asset:large';

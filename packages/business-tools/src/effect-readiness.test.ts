@@ -524,6 +524,8 @@ describe("deterministic effect readiness", () => {
     const input={...base,effect:"PROTECTED_OUTBOUND" as const,buyingIntent:null,productIds:["product-1","product-2"],claims:[...claims,media],
       protectedClaimTypes:["PRICE","STOCK","PRODUCT_MEDIA"] as const,parentReadinessHash:hash("e"),payloadHash:hash("b"),deterministicEvidenceHash:hash("b")};
     expect(evaluateDeterministicEffectReadinessV1(input).outcome).toBe("READY");
+    const stableMedia=ProtectedClaimV1Schema.parse({...media,provenance:{...media.provenance,observedAt:"2025-01-01T00:00:00.000Z",expiresAt:null}});
+    expect(evaluateDeterministicEffectReadinessV1({...input,claims:[...claims,stableMedia]}).outcome).toBe("READY");
     expect(evaluateDeterministicEffectReadinessV1({...input,productIds:["product-1"]}).outcome).toBe("BLOCKED");
     expect(evaluateDeterministicEffectReadinessV1({...input,productIds:[...input.productIds,"product-3"]}).outcome).toBe("BLOCKED");
     expect(evaluateDeterministicEffectReadinessV1({...input,effect:"CART_READY"}).outcome).toBe("BLOCKED");

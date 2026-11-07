@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "sourceSha": "48e8a42858061e16df60ffbd98f19c47fc3bbd80",
+  "registrationHash": "802e2eaaed5f9f9344f0f77f83f24eb328784c95316d77f504ec79c6bb7d2b39",
+  "reviewer": "/root/b_preserving_independent_review",
+  "capturedTurns": 7,
+  "materialTaskFailures": 0,
+  "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r1-run-20261105-01\\CANDIDATE_EVIDENCE.partial.json",
+  "evidenceSha256": "b24f152510d9856675bab9f4d8e8f7c537cdf579493603e0ba1a492b0ad952e7",
+  "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r1-run-20261105-01\\integration.json",
+  "integrationSha256": "381015227d3ad752f310231f1625ff71e0380794d0b4e6811e42e0f1d923e6ef",
+  "auditPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r1-independent-post-run-audit-20261105-01.json",
+  "auditSha256": "5fb70d5bff7cf1c8fbd420b26240427cf61f31efe9b4708f0cbb326e0bbaddb3",
+  "testDatabaseDropped": true,
+  "recommendation": "ADMIT_R2_CONDITIONAL_ON_ACTUAL_TIME_PREFLIGHT"
+}

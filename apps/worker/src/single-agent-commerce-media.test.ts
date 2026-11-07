@@ -19,7 +19,32 @@ const setup = async (clock:()=>Date=()=>commerceNow) => {
   const call={name:"select_product_media",args:{subjectRef:f.product.productId,intent:"BACK"}};
   return {f,scope,tools,call,image,readProduct};
 };
+
+it("does not mislabel a second asset fetch failure as validation of that asset",async()=>{
+ const s=await setup(),events:import("./single-agent-commerce-diagnostics.js").CommerceDiagnostic[]=[];
+ s.f.product.images[0]!.angle="FRONT";s.f.product.images=[...s.f.product.images,{...s.f.product.images[0]!,angle:"BACK",url:"https://content.pancake.vn/second-back.jpg",sortOrder:1}];
+ const png=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jY90AAAAASUVORK5CYII=","base64");let fetched=0;
+ const mock=vi.spyOn(globalThis,"fetch").mockImplementation(async()=>{if(fetched++>0)throw Error("secret fetch failure");return new Response(png,{headers:{"content-type":"image/png"}});});
+ try{const tools=await createCommerceTools({read:{scope:s.scope,clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[s.f.product],catalog:{readProduct:async()=>structuredClone(s.f),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}},
+   media:{allowedHostSuffixes:["content.pancake.vn"]},observeDiagnostics:e=>events.push(e)});
+  expect(await tools.invoke({name:"view_product_media",args:{subjectRef:s.f.product.productId,intent:"GENERIC"}})).toMatchObject({status:"UNAVAILABLE",reason:"MEDIA_SOURCE_UNAVAILABLE"});
+  expect(events.filter(e=>e.stage==="MEDIA_FETCH"&&e.status==="STARTED")).toHaveLength(2);
+  expect(events.filter(e=>e.stage==="MEDIA_VALIDATE"&&e.status==="STARTED")).toHaveLength(1);
+  expect(events.filter(e=>e.stage==="MEDIA_VALIDATE"&&e.status==="OK")).toHaveLength(1);
+  expect(events.filter(e=>e.stage==="MEDIA_VALIDATE"&&e.status==="ERROR")).toHaveLength(0);
+  expect(JSON.stringify(events)).not.toContain("secret");
+ }finally{mock.mockRestore();}
+});
 describe("candidate product media",()=>{
+  it("keeps an old approved image until its source is replaced or revoked",async()=>{
+    const s=await setup();s.f.product.images[0]!.observedAt="2025-01-01T00:00:00.000Z";
+    expect(await s.tools.invoke(s.call)).toMatchObject({status:"OK"});
+    expect(s.tools.mediaSelection?.()[0]).toMatchObject({observedAt:"2025-01-01T00:00:00.000Z",expiresAt:null});
+    expect((s.tools.snapshot().protectedClaims as ProtectedClaimV1[]).find(c=>c.type==="PRODUCT_MEDIA")?.provenance.expiresAt).toBeNull();
+    await expect(s.tools.readback()).resolves.toEqual(s.tools.snapshot());
+    s.f.product.images[0]!.metadataVerified=false;
+    await expect(s.tools.readback()).rejects.toThrow("MEDIA_SOURCE_CHANGED");
+  });
   it("binds claims to a successful revalidation and rejects later proof changes",async()=>{
     const s=await setup();s.f.product.images[0]!.observedAt="2026-09-01T00:00:00.000Z";
     s.f.product.images[0]!.revalidation={status:"VALID",checkedAt:commerceNow.toISOString()};
@@ -242,13 +267,14 @@ describe("media lookup observations",()=>{
 });
 
 describe("media observation final gate",()=>{
-  it("keeps timestamps fixed and expires without renewing the observation",async()=>{
+  it("keeps lookup timestamps fixed without an automatic age deadline",async()=>{
     let now=commerceNow;const s=await setup(()=>now);
     await s.tools.invoke({...s.call,args:{subjectRef:s.f.product.productId,intent:"FEEDBACK"}});
     const before=s.tools.snapshot();now=new Date(now.getTime()+1000);
     expect(await s.tools.readback()).toEqual(before);
-    now=new Date(before.policyLiterals.find(p=>p.ref.startsWith("media-lookup:"))!.expiresAt!);
-    await expect(s.tools.readback()).rejects.toThrow("MEDIA_LOOKUP_EXPIRED");
+    expect(before.policyLiterals.find(p=>p.ref.startsWith("media-lookup:"))!.expiresAt).toBeNull();
+    now=new Date(now.getTime()+31*24*60*60*1000);
+    expect(await s.tools.readback()).toEqual(before);
   });
   it("records a catalog error as an operation event without retrying or leaking its error",async()=>{
     const s=await setup();s.readProduct.mockRejectedValue(new Error("SECRET_RAW_ERROR"));
@@ -364,10 +390,18 @@ it("prepares bounded media hints without an extra read, never renews a cached ob
  const first=s.tools.mediaCapabilities!();expect(first).toHaveLength(1);
  expect(first[0]!.queries).toContainEqual({intent:"BACK",componentRole:null,color:null,status:"MATCH_AVAILABLE"});
  now=new Date(now.getTime()+1000);expect(s.tools.mediaCapabilities!()).toEqual(first);expect(s.readProduct).toHaveBeenCalledTimes(reads);
- now=new Date(Date.parse(first[0]!.expiresAt)+1);expect(s.tools.mediaCapabilities!()).toEqual([]);
+ expect(first[0]!.expiresAt).toBeNull();
+ now=new Date(now.getTime()+31*24*60*60*1000);expect(s.tools.mediaCapabilities!()).toEqual(first);
  now=new Date(commerceNow);await s.tools.invoke({name:"read_product",args:{subjectRef:s.f.product.productId,detailsOnly:true}});expect(s.tools.mediaCapabilities!()).toHaveLength(1);
  s.readProduct.mockRejectedValue(new Error("source down"));await s.tools.invoke({name:"read_product",args:{subjectRef:s.f.product.productId,detailsOnly:true}});
  expect(s.tools.mediaCapabilities!()).toEqual([]);
+});
+
+it("advertises a verified dress closeup without inventing a TOP/SKIRT component binding",async()=>{
+ const s=await setup();s.f.product.images=[{...s.f.product.images[0]!,imageType:"DETAIL",angle:"CLOSEUP",partsVisible:["VAY"],intents:["MATERIAL_CLOSEUP"]}];
+ await s.tools.prepare!();
+ expect(s.tools.mediaCapabilities!()[0]?.queries).toContainEqual({intent:"DETAIL",componentRole:null,color:null,status:"MATCH_AVAILABLE"});
+ expect((await s.tools.invoke({name:"select_product_media",args:{subjectRef:s.f.product.productId,intent:"DETAIL"}})).status).toBe("OK");
 });
 
 it.each([{status:"INVALID"} as const,{status:"VALID",color:"navy",sha256:"a".repeat(64)} as const,{status:"VALID",color:"be",sha256:"b".repeat(64)} as const])("blocks corrupt/conflicting color proof even on a single-color product (%j)",async colorBinding=>{
@@ -404,4 +438,15 @@ it("color hints summarize only the requested color tuple from the same read and 
  await s.tools.invoke({name:"read_product",args:{subjectRef:s.f.product.productId,offerType:"DIRECT",color:"be"}});
  expect(s.tools.mediaCapabilities!()[0]?.queries).toContainEqual({intent:"GENERIC",componentRole:null,color:"be",status:"MATCH_AVAILABLE"});
  expect(s.tools.mediaSelection!()).toEqual([]);
+});
+
+
+it("a DETAIL attachment does not certify a material detail merely mentioned in the product description",async()=>{
+ const s=await setup();s.f.product.images[0]!.angle="CLOSEUP";s.f.product.images[0]!.imageType="DETAIL";s.f.product.images[0]!.partsVisible=["UNKNOWN"];
+ s.f.product.materials=["ren hoa nổi"];
+ const result=await s.tools.invoke({name:"select_product_media",args:{subjectRef:s.f.product.productId,intent:"DETAIL"}});
+ expect(result.status).toBe("OK");
+ const evidence=(result.data as {descriptionEvidence:{assets:{componentKnown:boolean;confirmedParts:string[]}[]}}).descriptionEvidence;
+ expect(evidence.assets[0]!.componentKnown).toBe(false);expect(evidence.assets[0]!.confirmedParts).toEqual([]);
+ expect(s.tools.catalogImages!()).toEqual([]); // sending by metadata does not imply vision inspection
 });

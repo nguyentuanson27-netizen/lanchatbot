@@ -1,3 +1,439 @@
+## Latest model — quote batch R1 FAIL, 2026-11-08
+
+- [x] Restore realPG access; correct test-only lazy state setup and explicit opening-work expectation. Clean06b3901b required PG1/1PASS/droptrue/provider0, independent approval; closes prior PG blocker.
+- [x] Fresh107-product world, clean initialPG/drop, all4 frozen input approvals/preflights. Same Gemini3.5FlashLiteHIGH/Sol6.1HIGH, N1/retry0, unchanged caps.
+- [x] R1 completed4cases/7turns:7SEND_ELIGIBLE,7texts4images,23generation/23HTTP allOK, no retry/bound/error/handoff; DB dropped/live0. Integrity independentlyPASS, taskFAIL1 at j1T3: asks colour instead of available pre-cart total.
+- [ ] R2/remainder/checkout30cases48turns NOT_RUN by frozenFAILgate. Mixed quote batches/continuation/selection behavior unverified on model; no quality score, stability, C3comparison or PhaseCGO. [Report/conversations](../apps/worker/evals/single-agent-commerce-qualification/quote-batch-run-20261108/REPORT.md).
+
+## Quote/read task repair — 2026-11-07
+
+- [x] Implement quoteV2 read batches, per-target total proofs/readback, overlap/mutation/customerSelected guards, stopped siblings and full primitive accounting.
+- [x] Keep signed parts and exact-current omission; derive only identical local selection options. Clarify enquiry vs purchase and valid size alternatives, retain advice/voice/policy rules.
+- [x] Final commerce944PASS; Node870PASS/2SKIP; adapter38PASS; build/typecheck/lintPASS. Retain earlier RED and transient round60 local-stub failure followed by targeted7PASS/fullgreen.
+- [x] Record p04 frozen-source reconstruction and size-matched stress, no exact historical body/model claim; old s13 oversized path remains open.
+- [ ] Required real PostgreSQL quote+media acceptance BLOCKED by SSH timeout; Docker Linux API unavailable. No test DB created in these attempts. Engineering code review does not replace it.
+- [ ] New model campaign NOT_RUN. Previous34cases/55turns and failures remain unchanged; no qualification GO. [Detailed evidence](../docs/specs/c3-phase-c-quote-batch-implementation-20261107.md).
+
+## Phase C — completed diagnostic, 2026-11-06
+
+- [x] Owner requested continuation; R1/R2 FAIL retained, all34cases/55turns executed without retries; three remaining groups and checkout independently audited.
+- [x] R2 FAIL5: p04 request bound; s03 unsupported photo claim; s13 invalid quote+media batch; j4/j6 verifier429. p09/s15 sent in this single run, no stability proof.
+- [x] Remainder FAIL5: p01/s05/s01 quote+media batch; s02 asks unnecessary parent; s08 fails to recommend. s11 BE-gap control not reached.
+- [x] Checkout scoped PASS: preview and unique confirmation receipt, private fields code-only, HUMAN handoff; no POS/live-send claim.
+- [ ] Phase C qualification/whole-reply blind scoring/C3 parity remain unverified; no GO. [Evidence](../apps/worker/evals/single-agent-commerce-qualification/task-path-model-run-20261106/FULL_REPORT.md).
+
+## Latest model — task-path R1 FAIL, 2026-11-06
+
+- [x] Fresh107-product capture on third read attempt (first two source timeouts, 0 generation); clean actual PostgreSQL initial/drop and 4 staged preflights.
+- [x] Run R1 once: 4 cases / 7 turns, 6 sent + 1 handoff; 22 generation/22 HTTP, all OK, no retry/live send, test DB dropped. [All outcomes](../apps/worker/evals/single-agent-commerce-qualification/task-path-model-run-20261106/REPORT.md).
+- [x] Identify p07 material failure: tool chose M for both, owner additionally suggested unsupported pants L, verifier FAIL and silent handoff. No provider timeout or request-bound error in p07.
+- [x] Independent post-run audit: integrity PASS, task gate FAIL; 7 native hashes, 22 request hashes/firewall/binding and Outbox checked. Input checker finished, first reviewer turn was interrupted; subsequent review completed.
+- [ ] R2/remainder/checkout 30 cases/48 turns NOT_RUN because R1 failed registered gate. No conclusion yet on p09/s15/s13/s03 or Phase C qualification.
+
+## Latest fix — task-path presentation, 2026-11-06
+
+- [x] Read B–C findings; discard redundant read dedup and schema refactor that increased wire size.
+- [x] Preserve emitted schemas, owner prompt, all callable tools, code authority, caps and retry0; shorten repeated descriptions with manual obligation map.
+- [x] Add inspected quantity-one shared-component read targets without source/price/stock/chart merge; test positive, conflict and native wire roundtrip.
+- [x] Add bounded value-free malformed-call telemetry, retaining non-STOP rejection and one-request accounting; self-review ninth-call truncation RED→GREEN.
+- [x] Reconstruct p09/s15 at historical clocks; both fit current raw/presented cap, signed content unchanged; retain old s13 overflow and s15 non-persistent replay limitation.
+- [x] Final adapter119 PASS; full Node868 PASS/2SKIP; worker commerce937 PASS; worker build/typecheck/lint PASS. [Evidence](../docs/specs/c3-phase-c-task-path-repair-implementation-20261106.md).
+- [x] Same independent reviewer APPROVED scoped engineering, exact executable/test hashes; self-ran9/9 and rebuilt both continuation requests. Earlier usage-limit failure was not approval.
+- [ ] New provider behavior/quality and remaining Phase C acceptance: NOT_RUN. Source-specific s03 detail evidence and legacy s13 capacity remain open; historical failures are unchanged.
+
+## Latest model round — follow-up quote R1 PASS / R2 FAIL, 2026-11-05
+
+- [x] Freeze clean48 source, current ownerprompt/schema + unchangedGemini3.5FlashLiteHIGH/Sol6.1HIGH; fresh107world/realPGinitial/drop, all4input approvals and actual-timepreflights before provider.
+- [x] R1 4/7 complete,7SEND_ELIGIBLE, independenttaskPASS; j1T3 actualquote_product subtotal/discount/ship978100sent without cart/image.
+- [x] R2 9/17 complete,6SEND_ELIGIBLE+2CODE_OWNED_SEND+6HANDOFF+3HUMAN_NO_SEND; materialFAIL6cases. Combined53records51HTTP (2localbounds0HTTP/2malformedretained),15texts7images,DBsdropped/retry0/sourceclean/live0. [Report/24actualturns](../apps/worker/evals/single-agent-commerce-qualification/followup-quote-run-20261105/REPORT.md).
+- [ ] R3/R4 21cases31turns NOT_RUN dueR2FAIL. No furtherfix/modelrun/GO/deploy. Stability/whole-replyquality/C3comparison unverified; previouscampaignFAIL/NOT_RUN counts remain separate.
+
+## Follow-up quantity quote repaired — 2026-11-05
+
+- [x] Identify missing capability: quote_product was first-contact-only, so actual j1T3 could not use its pre-cart quote path.
+- [x] RED→GREEN fix returning quote + no-image/native schema/prompt alignment; one offer/explicit quantity, existing calculator/readback/binding, same budget/authority. Source94911899 independently APPROVED.
+- [x] Focused418worker + fullNode859PASS/2SKIP, build/typecheck/lintPASS; actualPG1PASS/DBdropped/provider0, historical failed-world total978100 replay. [Report/limits](../docs/specs/c3-phase-c-followup-quantity-quote-implementation-20261105.md).
+- [ ] Model re-run NOT_RUN; oldR1FAIL and R2–R4 30cases48turnsNOT_RUN unchanged. Fresh source/registration required for any next campaign; no automatic dispatch/deploy.
+
+## Latest model round — repaired R1 completed and STOP, 2026-11-05
+
+- [x] Evaluator-only R1/R2 admission RED2→GREEN13; exact disjoint13/24 prefix, frozen original scripts/caps, same independent reviewer APPROVE.
+- [x] Clean source94c367a8, fresh107-product world and realPGinitial/drop; independent all4input approvals and actual-time R1 preflight/dispatch approval, unchanged Gemini3.5FlashLiteHIGH + GPT6.1SolHIGH/N1/retry0.
+- [x] Complete R1 4/4cases +7/7turns;6eligible/1silentHANDOFF,6text4image/10Outbox;22generation22HTTP,0providererror/retry,DBdropped. Independent integrity audit APPROVE; material task gate FAIL at j1T3.
+- [x] p06 composition/989k and p07 two-target send now work; j1T2 no longer exceeds wire bound. j1T3 still misuses sentinel and lacks current colour proof after filtered failed reads; no unsupported effect committed. [Report/transcripts/evidence](../apps/worker/evals/single-agent-commerce-qualification/target-repair-run-20261105/REPORT.md).
+- [ ] R2/R3/R4 30cases/48turns NOT_RUN, gated by material failure. Historical21/31NOT_RUN remains separate. S4/model stability/whole-reply quality/C3 parity/PhaseC GO unverified. Stop; no automatic fix/rerun/deploy.
+
+## Implemented and independently approved — targeted repair, 2026-11-05
+
+- [x] S1 shared SIZE_FIT scope distinguishes PRODUCT and COMPONENT targets; same-target contradictory claims still fail the actual DB transaction. RED observed before GREEN.
+- [x] S2 quantity-aware order-independent composition preserves multiplicity, rejects malformed explicit BOM/quantity, retains stock/cart semantics and legacy unit slots. RED observed before GREEN.
+- [x] S3 selection feedback has effectCommitted:false until complete; same-body exact evidence references expand without loss and fail closed on reserved/dangling/ambiguous references. Actual adapter zero-HTTP rejection and RED→GREEN covered.
+- [x] S4 safe argument-shape/schema-hash diagnostics and media evidence regression; no invented source facts, parser, retry, prompt/config change or claimed provider-behavior fix.
+- [x] Independent review → fixes → same reviewer APPROVE exact clean executable 639aff103898ad9e6cad5119d27c08f4809f9896. [Report and evidence](../docs/specs/c3-phase-c-target-composition-continuation-implementation-20261105.md).
+- [x] Worker 2,659 PASS / 154 files; final Node 856 PASS / 2 SKIP; focused shared 75 + 42 + 56, planned adapter 103 PASS; worker build/typecheck/lint + shared typechecks PASS. Real PG final 3/3 and B-preserving 2/2 PASS, source scopes and overlapping coverage disclosed, DBs dropped/provider 0/live send false.
+- [ ] Model campaign R1–R4 NOT_RUN. Preserve historical prefix FAIL and 21 cases / 31 turns NOT_RUN; no new sales quality, stability, qualification GO or C3-comparison claim. Owner s03/decoder behavior still needs measured evidence. No automatic campaign/deploy.
+
+## Previous planning-only task — targeted repair, 2026-11-05
+
+- [x] Read latest24terminal outcomes, rejected draft/tool/state and actual source consumers. Separate confirmed code defects (target conflict/BOM ordering), owner missing-choice planning, continuation size and unknown malformed causes. [Plan revision2](../docs/specs/c3-phase-c-target-composition-continuation-repair-plan-20261105.md).
+- [x] Self-review → independent REVISE (multimodal bounds and authoritative logical quantity) → plan fix → same reviewer APPROVE PLAN. Source/prompt/provider/config unchanged in this planning task; no test/provider PASS inferred.
+- [x] Subsequently implemented by explicit owner instruction; current implementation verification and independent approval are recorded above. This earlier plan-only task did not itself authorize implementation.
+- [ ] Subsequent new model campaign only after implementation/source/input gates and user instruction; proposed disjoint4/7 →9/17 →20/24 →1/7, maximum34/55, N1/retry0 and original scripts. Previous prefixFAIL and21cases31turnsNOT_RUN remain historical facts.
+
+## Latest — B-preserving implementation and model prefix completed, 2026-11-05
+
+- [x] I–IV implemented/savepoints77083bda/e0e46c0c/4e77b8e8/70579605; independent scoped implementation APPROVE. Evaluator-only69bd1221 corrects missing-customer-choice classification/conditional later-cart proof and new checkout script intake before model; original33scripts unchanged. Worker2648PASS/shared223PASS/Node848PASS+2SKIP, focused evaluator35PASS; build/typecheck/lint0. Clean70579605 realPG2/2PASS and clean69bd1221initial state, DBs dropped/provider0.
+- [x] Fresh107world plus isolated approved test sources; independent final02inputs/preflight PASS. Clean run69bd1221 prefix13cases/24turns completedN1/retry0, allcaptured/DBdropped/nohardstop/live0.52generationrecords51HTTP,48OK3MALFORMED1preHTTPbound.12SEND+2CODE+6silentHANDOFF+4NO_SEND;13verifierPASS1FAIL. Accounting/capture/firewall independent audit APPROVE evidence, functional gateFAIL.
+- [x] All24terminal outcomes read. Seven task failures: p06component-order falsevariance, p07target-blind SIZE_FIT conflict, s03unsupported photo description, s13/s15/j4malformed/decoder, j1cartcontinuationbound. p04cross-turnfit/p09choice/j2bodymax improve descriptively; no stability/qualityGO. Minor repetitive voice deferred.
+- [ ] STOP prefix. Remainder20cases24turns +checkout1case7turns NOT_RUN under actualFAILgate; do not bypass or rerun. Follow-up fixes are recommendations, not implemented in this model source. QualificationBLOCKED/C3NOT_RUN/qualityNOT_GRADED. [Report and24conversations](../apps/worker/evals/single-agent-commerce-qualification/b-preserving-run-20261105/REPORT.md).
+
+## Implemented — B-preserving infrastructure repair, 2026-11-05
+
+- [x] Review latest run and source: p04 fit is lost between turns despite unchanged profile/PRODUCT target; j2 direct measurements face point-valued chart ranges; p07 multiple state ops; p09 receives correct latest/history but repeats resolved choice. Existing B/control and checkout plans read. [Detailed plan](../docs/specs/c3-phase-c-b-preserving-infrastructure-plan-20261104.md).
+- [x] I: verify source chart semantics and normalize valid intervals; retain approved shared test applicability and height/weight path.
+- [x] II: persist bounded requested fit targets/recompute current evidence across turns; verify one profile update for multiple target calculations without weakening conflicts/receipts.
+- [x] III: explicit selected-offer continuation, source-backed pre-cart total, bounded continuation and actual tool/schema audit; no parser or hidden retry.
+- [x] IV: complete missing task-specific media adapters/metadata/assets and native checkout evaluator bridge; preserve owner-approved test assumptions, distinguish real media provenance.
+- [ ] B differential controls + worker/shared/realPG verification, review and source-ready frozen acceptance. Prefix13cases24turns; remainder20/24; separate checkout1/7 after bridge. Worker2648PASS/shared223PASS/Node848PASS+2SKIP; typecheck/build/lint0; worktree realPG2/2PASS/droptrue/provider0. Latest duplicate s13 wire still bound; new full-schema quote path56441bytes. Independent source/input review completed; prefix model acceptance FAIL, conditional remainder/checkout NOT_RUN; no GO. [Implementation evidence](../docs/specs/c3-phase-c-b-preserving-infrastructure-implementation-20261105.md).
+
+## Latest — test-source model round completed, 2026-11-04
+
+- [x] Clean executable e14d26594bb8831909788007f92fba81b3cd54e4; fresh107-product world, owner-approved isolated chart/white-shirt/assumed-feedback/active-handoff sources;27ready6source-gap cases. Corrected18 inherited evaluator SHOP_GAP purposes before provider dispatch, originals retained; independent input review APPROVED.
+- [x] Completed33cases/48turns N1/retry0:25SEND_ELIGIBLE+2CODE_OWNED_SEND+14silentHANDOFF+7humanNO_SEND;27texts21images.100generation records/99HTTP,97OK2MALFORMED1pre-dispatch OWNER_REQUEST_BOUND0HTTP;25verifierPASS3FAIL. No NOT_RUN/hardstop, both databases dropped, live/source-shop writes0.
+- [x] Read all48 actual terminal captures and relevant native diagnostics/drafts. p09 repeats the choice already resolved; p07 multi-state-update rejection, j2 OUT_OF_RANGE, s13 wire bound, s15 media-colour binding and three semantic rejections remain distinct. Feedback customer-worn provenance is assumed, not proved.
+- [x] Purchase and remainder independent accounting/capture audits APPROVED. Whole-reply quality NOT_GRADED; final report accuracy tracked in packet evidence. No build/typecheck/lint rerun for documentation-only packaging.
+- [ ] PhaseCqualificationBLOCKED/C3NOT_RUN; S6/full55, completed checkout and multi-run stability not verified. No automatic fix/rerun/deploy. [Report and all conversations](../apps/worker/evals/single-agent-commerce-qualification/test-sources-run-20261104/REPORT.md).
+
+## Completed — feedback and active handoff test sources, 2026-11-04
+
+- [x] Owner-authorized assumed feedback for exact AO/SV2447-AO and frozen active test HANDOFF_MATRIX added after colour supplementation. Raw world retained; lookup/search agree; no source-shop writes or bulk publication. Existing size/white-stock data preserved.
+- [x] Observed3 RED → Node170 PASS. Same-source replay: feedback2/white selections8/component size4; active30rule matrix,29customer reasons silent,2in-memory ownership commits without messages/media. Clean `2a8a97ac` realPG initial-state/policy1/1 PASS, frozen matrix not reversioned, DB dropped/provider0/live0. [Evidence and limits](../docs/specs/c3-test-feedback-handoff-sources-20261104.md).
+- [ ] No fresh model run, real customer-feedback provenance, image-byte preparation/full delivery or qualification GO claimed.
+
+## Completed — owner-approved white-shirt test source, 2026-11-04
+
+- [x] Add explicit test colour source for SV2447-AO under SQ2447/SV2447: WHITE assumption selected by owner. Exact AO rows and pinned AO-only detail image supplemented; prices/stock/clocks/BE rows/other offers unchanged. Raw public source retained separately on new Phase C captures; exact lookup/search and frozen facts agree. No upstream bulk update or source publication.
+- [x] Observed 2 RED / 1 PASS → 4 new tests GREEN; all qualification Node tests131 PASS. Same-capture replay8 white selections + reads/media/opening/readback; in-memory final gates allow unchanged binding/block revocation for both parents. No provider, PG, image-byte preparation or live send; no new model result. [Details](../docs/specs/c3-test-white-shirt-source-20261104.md).
+
+## Completed — owner-approved shared component chart for test data, 2026-11-04
+
+- [x] Owner confirms existing SQ2447 chart for Thạch Thảo separate pieces; record scoped test configuration and approval. No upstream bulk update/publication prerequisite. Exact BOM target and original chart verification remain; bands/source records unchanged, prices/stock separate.
+- [x] Observed 3 RED → final focused worker256 PASS and Node21 PASS; direct compile/typecheck/lint0. Same-capture pure replay: 2 PRODUCT + 4 COMPONENT size sources available and readiness aligned. Self-reviewed; no model run/deploy. [Details](../docs/specs/c3-test-component-size-sharing-20261104.md).
+
+## Completed — remove automatic catalog-photo age expiry, 2026-11-04
+
+- [x] Owner-authorized removal of 30-day photo age limit; executable `62b4ac40`, base `fb40728c`. Current media expiry null until source replacement/revocation; selection/claims/context/provider hints/opening/durable gate agree. Approval/hash/binding/invalid-proof checks and volatile fact/effect/capture expiry preserved; legacy finite records remain readable. No prompt/model/source-shop write or deploy.
+- [x] Observed 2 RED before runtime → focused GREEN; final worker 2635 PASS/154 files, shared focused contracts/business/database + provider-wire tests PASS; worker/dependency build, direct tsc/lint/shared typechecks exit 0. Two obsolete age assertions were updated; their first full-run failures are retained in evidence.
+- [x] Clean executable PostgreSQL 17/17 PASS, including old image persisted/delivered via capture transport and source-change/revocation guards; database dropped/provider0/live0. Identical frozen-world/clock replay restores metadata eligibility for 7 formerly age-blocked products; byte preparation and source gaps are separate. [Implementation and exact verification](../docs/specs/c3-phase-c-media-no-age-limit-20261104.md).
+
+## Completed — fresh source-gap inventory, 2026-11-04
+
+- [x] Read current public107-product world at09:46VN; current POS sync09:28. Pure media eligibility and chart/variant audit/provider0/sourceWrites0. Photo clock/verification gaps, missing TOP/PANTS/SKIRT applicability, unresolved physical colour for stocked AO, absent approved feedback and absent upstream active HANDOFF_MATRIX recorded separately. Existing isolated testworld matrix is not source publication. [Current details and exact evidence](../docs/specs/c3-phase-c-source-gaps-20261104.md).
+- [ ] Source proof/colour/chart/matrix publication and any runtime/task changes remain separate unfinished work; no readiness/qualityGO inferred from fresh capture.
+
+## Completed — whole-turn review of latest model round, 2026-11-04
+
+- [x] Read all33conversations/48terminalcaptures plus drafts/verdicts/native tool/state journals. Classified all20handoffs by direct observed cause;8humanNO_SEND remain separate. Verifier blocked1supported semantic error; no evidence that verifier overblocking explains most handoffs.
+- [x] Found remaining task gaps in s02/s13/p08/j6/s15/s08; quote_product media dependency in s05 and DETAILS_ONLY→PRODUCT_BOUND path in s04 distinguished from semantic rejection. Prompt already contains relevant task rules; no new voice/example patch recommended. [Detailed findings, case evidence and next priorities](../docs/specs/c3-phase-c-checkout-relaxation-run-review-20261104.md).
+- [ ] No model/provider run, runtime/prompt/source change or formal locked quality grade in this review. SupplementalS6/fullcheckout and actual model pending-public-interruption coverage remain unfinished; proposed fixes are not yet executed.
+
+## Completed — model round after checkout relaxation, 2026-11-04
+
+- [x] Fresh public107-product capture; original source clocks/proofs and isolated handoff matrix preserved; real initial PostgreSQL state captured/dropped/provider0. Independent input APPROVE after correcting inherited false unchanged-prompt metadata; originals retained. Both actual-time preflights PASS.
+- [x] Clean `88a33140`: full existing33cases/48turns, N1/retry0, current Gemini3.5FlashLite HIGH/GPT6.1Sol HIGH andCompactV2. All33EXECUTED/48captured;71generationrecords/71HTTP,69OK+1ownerMALFORMED+1owner502, no retry/NOT_RUN/hardstop. Actual18SEND+2CODE+20silentHANDOFF+8humanNO_SEND;20texts8images. Both test databases dropped, no live send/source-shop write.
+- [x] Both request/accounting/capture audits and final report accuracy independently APPROVE. Separate2owner-auth+5auxHTTP; no total-network confusion. [Whole run, all transcripts, rejected drafts and evidence](../apps/worker/evals/single-agent-commerce-qualification/checkout-relaxation-run-20261103/REPORT.md).
+- [ ] Quality NOT_GRADED; qualification BLOCKED/C3 NOT_RUN. Separate source gaps and S6/full55 unfinished. Existing33scripts do not directly test public interruption after pending private intake; scripted15PG result is separate. No automatic fix/rerun, merge, deploy or GO.
+
+## Completed — owner-authorized checkout interruption relaxation, 2026-11-03
+
+- [x] Owner “nới phần này đi” supersedes positive-proof-only pending gate. Existing DLP/intake syntax checks each message and joined batch; detected private/mixed input stays private whole; public interruption reaches same owner/verifier. No business intent classifier or extra role/budget.
+- [x] Observed 4 RED before minimum GREEN; independent review found split-name batch leakage and a broad payment false positive. New 2 RED → fix → APPROVE source/mechanics. Existing authority/effects/final gates preserved; unknown PII formats remain a detector limitation.
+- [x] Focused 315 PASS; full worker 2,633 PASS / 154 files; build, direct tsc and lint exit 0. Clean runtime `6feeaeb5`: real PostgreSQL 15/15 PASS (old 3 PASS / 12 BLOCKED retained), exact actions/receipts/private-field invariance/preview invalidation checked; database dropped, provider requests 0, live send false.
+- [ ] S6 bridge/full 55-turn model acceptance and separate chart/media/colour source readiness remain unfinished. No universal privacy, model-quality or GO claim; no merge or deploy. [Amendment and actual evidence](../docs/specs/c3-phase-c-checkout-interruption-relaxation-20261103.md).
+
+## Previous — sales completion implementation, 2026-11-03
+
+- [x] User selected implement plan before model run; implementation base6e97e231. Read-only107-product capture/provider0/sourceWrites0.
+- [x] PartialS2 typed customer-choice/shop-colour-gap hints; observedRED thenGREEN; missing-size shop gap invokes existing silent handoff, no cart commit. Focused310PASS, direct worker tsc exit0, final focused141PASS. Independent reviewer APPROVE this partial subset after fix; no overall implementation approval.
+- [x] S2canonical shared-component lossless presentation, S3target-aware size claim chain/PRODUCT-only consumers, S4taskdiscipline/nativecontinuation implemented and independently mechanicsAPPROVED; commits844c070b/da65a176. S15raw65229/presented65406, exactcapturedtoolresults/signedparts retained; reconstructedwire limits explicit.
+- [x] Finalchecks: workerVitest2607PASS/maxWorkers2; Node835PASS/2existingSKIP; contracts92/business140focusedPASS; shared+workerbuild/typecheck/lint0. Canonicalworker test fourfailedattempts retained; boundedfullVitest+fullNodeGREEN separately, no canonicalcommandPASSclaim.
+- [x] RealPG S5matrix atclean9fa7ea5d:15/15journeys recorded,12BLOCKED duringprivateintake and3PASS atORDER_PREVIEW; no requestedmutationreceipt inblockedturns; privatefieldsunchanged. TestDBdropped/provider0/livesendfalse. Earlierconnectionloss orphancheckedinactive/dropped.
+- [x] Read-only sourceinventory53points/51approvedregistryrows. Legacycanonicalroute22hashMATCH/29MISMATCH; strictmethod51checksfailed/compatibilityunestablished; no sourceproofpublication. ExactIDs/hashinventory recorded.
+- [ ] S1source readiness/proofpublication remainsBLOCKED: no TOP/PANTS/SKIRTchartauthority, unrecordedphysicalcolour, expired/invalidmedia andbyte/pipelinemismatch. No new provider run or sourcewrite.
+- [ ] S5-A BLOCKED_AT_PRIVACY_OR_INTERRUPTION_CONTRACT: no positive public-input proof whileprivateintake. ConditionalS6checkoutbridge/full34cases55turnsNOT_EXECUTABLE/NOT_RUN; do notactivateearlyintake/allowlist. FullgeneralPGmatrix/seveninvariantsNOT_RUN forthischange. OverallrecommendationBLOCKED, noqualityGO.
+
+[Implementation evidence and precise remaining scope](../docs/specs/c3-phase-c-sales-completion-implementation-20261103.md).
+
+## Approved plan — sales completion repair, 2026-11-03
+
+Plan only, base788ce66d. S1verified source/media/chart inventory → S2canonical component and customer-choice vs shop-gap cart outcomes → S3target-bound component fit → S4bounded context/purposeful reads → S5native checkout progression → S6tests/PG/review/frozen provider acceptance. Runtime/prompt/source unchanged; all planned checks and new model runs NOT_RUN. Preserve33cases/48turns; proposed separate full-checkout1case/7turns, total34/55N1, prefix14/23 included rather than rerun. Material source prerequisites must be ready before claiming fixed sales paths; no live source write/deploy authorized.
+
+[Detailed plan and acceptance](../docs/specs/c3-phase-c-sales-completion-fix-plan-20261103.md). Same independent reviewer APPROVE PLAN revision3 at7c1dd5eb after3reviews: S3targetauthority/legacycompatibility, S6typedcheckoutbridge/admission and S5mandatoryprivacy/interruptionfeasibilitygate. Conditionalengineeringplan only: implementation/source/privacyroute/modelacceptanceNOT_RUN; S5/fullacceptanceBLOCKED if no compliantroute. No implementation/model/source write or live permission granted by review.
+
+## Current — model continuation completed and audited, 2026-11-03
+
+- [x] Preserved interrupted4e873 run:17 captured turns,35generationHTTP including s09 twoOWNER OK and oneVERIFIER error without terminal. Old failure and all raw artifacts retained.
+- [x] Clean source5b679acc; evaluator-only exact7missing cases/11turns/cap44, then unchanged12cases/20turns/cap80. Runtime/prompt/models unchanged; same Gemini3.5FlashLite HIGH/GPT6.1Sol HIGH, N1/retry0. Focused14PASS after2observedRED.
+- [x] Fresh107-product capture, unchanged isolated handoff matrix, real native initial state/provider0/dropped. Independent source and both frozen inputs APPROVE; actual-time preflight PASS. SSH keepalive only, no reconnect/retry.
+- [x] Completed19cases/31turns:purchase11/11,16records15HTTP (15OK,1pre-dispatch OWNER_REQUEST_BOUND0HTTP); remainder20/20,25records25HTTP/allOK. No NOT_RUN/hardstop; both databases dropped, live0. Old exact orphan database cleanup confirmed separately.
+- [x] New actual terminal7SEND_ELIGIBLE+2CODE_OWNED_SEND+14silentHANDOFF+8human-ownedNO_SEND,9texts5images; verifier7PASS3FAIL. Preserve1boundfailure and3rejected drafts; no draft scored as sent output.
+- [x] Independent accounting/capture/reportaccuracy APPROVE after fixing packet links and explicitOAuth accounting2HTTP outside40newgenerationHTTP. Unique48captured turns/33cases across old17+new31;49startednativeattempts includes uncapturedoldS09,75generationHTTP total. Worlds/attempts/denominators kept separate.
+- [x] Primary whole-conversation review read33cases/48capturedturns plus blocked drafts/native diagnostics, compared previous48keys.18reply/22handoff/8humanNO_SEND;4semantic rejects have supported reasons. Pure capture-clock audit distinguishes expired/missing-clock photos, unsupported COMPONENT fit and null-vs-canonical cart choices. No new provider, source write, code/prompt fix or locked quality grade. [Detailed review](../docs/specs/c3-phase-c-whole-run-review-20261103.md).
+- [ ] Whole-reply quality NOT_GRADED; PhaseCqualificationBLOCKED/C3NOT_RUN/B_NOT_GO. Remaining source/preparation/size gaps, s15 request bound and3verifier semantic rejections documented; no automatic fix/rerun/merge/deploy.
+
+[Report, all transcripts and audited evidence](../apps/worker/evals/single-agent-commerce-qualification/media-budget-context-run-20261103/REPORT.md).
+
+## Previous — image/budget/context fix approved, 2026-11-03
+
+- [x] Owner-approved V2 unique-product/cart scope; retain V1 historical all-admitted behavior and strict colour union.
+- [x] Prepare required photos before owner with actual six-unit debit; FINAL coverage-only; known add/REPLACE feasibility before effects, valid same-batch media continuity, no malformed/null-colour credit.
+- [x] Canonical unlabelled cart proof cannot erase retained physical-colour constraints; shared closed selector argument decoder.
+- [x] Remove only superseded unreferenced base variants; retain ETA/runtime/state/receipt/policy/subject dependencies and unchanged eight-subject cap.
+- [x] Fixed-path reversible CompactV2 tables/exact same-body fact references; frozen actual-output/tool-result continuation reconstruction fits both wire bounds with full expanded body equality.
+- [x] V2 hashed readiness binding and distinct initial source identities; historical manifests/cohorts/results unchanged.
+- [x] RED observed then GREEN; same independent reviewer APPROVE implementation after fixes. Final worker2,585/Node832+2SKIP/protected21 PASS; build/typecheck/lint0. Actual clean `ba835df` scoped PostgreSQL25/25/provider0/livefalse/three databases dropped; runtime `0da6073` parity.
+- [ ] New model-quality/handoff-rate assessment not run or requested. Full PG matrix/seven-validator, PhaseC GO/C3 comparison/deploy remain outside this fix; no automatic rerun.
+
+[Implementation, evidence and limits](../docs/specs/c3-phase-c-media-budget-context-implementation-20261103.md).
+
+## Previous — source-bound model round completed, 2026-11-03
+
+- [x] Fresh107-product source capture, exact existing isolated matrix, actual native initial/PASS/provider0/dropped atcleana8; v3 inputs independently approved and final preflight PASS for both scopes.
+- [x] Run unchanged33known-development cases/48turns once, two disjoint registrations21/28 and12/20, no automaticgenerationretry/source edit/model substitution.
+- [x] Purchase28/28turns,47records/47HTTP allOK:8eligible+2codeOwned,15silentHANDOFF,3humanNO_SEND;10texts7images.
+- [x] Remainder20/20turns,23records/21HTTP:1eligible,12silentHANDOFF,7humanNO_SEND;1text1image. Preserve2pre-dispatchbound failures,1HTTP200toolshape failure and1verifierquota429/noverdict; no rejected draft scored as sent output.
+- [x] Same independent reviewer APPROVE accounting/firewall/native capture and reportaccuracy for both groups. Complete native hashes/wires/usage/Outbox/code-owned proofs/cleanup checked; full transcripts, drafts and metrics retained.
+- [x] Primary findings separate observed9subject/nativecap8 j1MALFORMED from modeloutput failure; j4 selectionUNAVAILABLE from prior media-sentinel bug. P08 add/replace and j6 native clarification reached, not fullorder completion.
+- [ ] Locked model-quality grading and qualification/C3 comparison remain NOT_GRADED/BLOCKED/NOT_RUN. No automatic follow-up fix/model run/merge/deploy.
+
+[Report and both transcript sets](../apps/worker/evals/single-agent-commerce-qualification/source-bound-run-20261103/REPORT.md).
+
+## Completed — source-bound opening checkout fix, 2026-11-02
+
+- [x] Source-bound canonical sentinel adapter for public/private opening checkout; cart/stock identities unchanged. Unknown/missing cart colour remains fail-closed.
+- [x] Bounded known-code diagnostics; private cart/source expiry rechecked after awaited reads before transaction dispatch.
+- [x] Prospective v3 post-cart/discovery readiness at actual diagnostic/provider entries, with guarded honest productless paths; historical cohorts/results unchanged.
+- [x] Explicit optional-filter nullability and lossless same-body CompactV2 policy reference; no prompt/model/effort/retry/role change.
+- [x] Observed RED→GREEN, self-review and repeated same independent review; R1–R5/P2 source-binding findings closed.
+- [x] Final worker2566 PASS, Node827 PASS/2existing SKIP/0FAIL, protected21, build/typecheck/lint exit0. Clean `b6676b68` PostgreSQL122/122 +7 invariants PASS/database dropped/provider0/sendfalse; failed intermediates preserved.
+- [x] Same reviewer verified24source entries/56artifact hashes/32commands and **APPROVE IMPLEMENTATION** at `b6676b681acf25c027decea4434f96a0f3ede433`.
+- [ ] No new provider/model quality evaluation in this task. Advice/contextual comparison judgment, Phase C qualification and C3 parity remain unverified; no automatic campaign/merge/deploy.
+
+[Implementation](../docs/specs/c3-phase-c-opening-checkout-source-bound-fix-20261102.md) · [Verification](../docs/specs/c3-phase-c-opening-checkout-source-bound-verification-20261102.json) · [Independent review](../docs/specs/c3-phase-c-opening-checkout-source-bound-review-20261102.md).
+
+## Historical — remaining12 Phase C model cases completed, 2026-11-02
+
+- [x] Owner-requested same independent reviewer rechecked3raw/exactselector hashes, frozeneligibility error+generic2 and j3threeprices; **APPROVE DIRECTION** after doc clarifications. [Record](../docs/specs/c3-phase-c-opening-checkout-independent-direction-review-20261102.json): source-proven unlabelledvariant/noeffectivecolourconstraint only, preserveidentity/atomicbounds, end-to-endnegativecontrols/PG beforeprovider. All-admitted→selected media contract change unapproved; no implementation/dispatch/retro remainderaudit/quality approval.
+- [x] Owner-requested primary review of fix+both model batches: exact-selector frozen replay reproduces p08/j6/j4 `__NO_COLOR__`→`NO_COLOR` passed as requested media colour; same product has2eligibleGENERIC assets. Immediate failure identified as MEDIA_COLOR_BINDING_UNVERIFIED masked by diagnostic UNKNOWN_INTERNAL. Historical outcomes/grades unchanged; no runtime fix/provider rerun.
+- [x] Review also records all-bound-product image scope/prompt mismatch, navy-only positive coverage/readiness gap, actual s13wirebound and s11schema mismatch, quoteform vs advice trigger, and j3trusted499/449/799price comparison. [Review/evidence](../docs/specs/c3-phase-c-opening-checkout-post-run-review-20261102.md). Next fixes are proposals, not implemented or approved by this review.
+- [x] Owner explicitly selected12ca/20lượt original FULL22 not in completed PURCHASE21; exact subset/order/scripts, zero overlap, N1/max80/retry0. Eval-only bounded scope RED2→GREEN36, independent2PASS/code/scope APPROVE, commit1f6a358b; runtime/packages/prompts unchanged.
+- [x] Fresh107-product source capture, exact existing isolated matrix, actual initial02clean/provider0/DBdropped; same-reviewer INPUTS APPROVED frozen2SALES_READY/10SOURCE_UNAVAILABLE and final actual-time preflight PASS.
+- [x] Clean1f6 model run complete12/12cases and20/20turns,0NOT_RUN/nohardstop.21records=19OWNER+2VERIFIER;20actualgenerationrequests,19OK/1MALFORMED HTTP200/1pre-dispatch OWNER_REQUEST_BOUND0HTTP. No transporterror/timeout or retry.
+- [x] Actual1eligible/12silentHANDOFF/7HUMANNO_SEND,1text2images. Verifier1PASS/1FAIL. DB dropped/live0; all captured output/receipt state retained. Two separate batches cover33unique cases/48actualturns, not one paired quality population.
+- [x] Author primary audit PASS55artifact/20raw/21generation/20bodyhashes, dispatch/nativefirewall and accepted1text2image group/durable proof; quota failure and initial audit-event-name correction retained.
+- [ ] Independent post-run accounting/report review NOT_COMPLETED_USAGE_LIMIT: reviewer turn failed with usage limit, no approval recorded or model substitution. Prior code/input approval remains. Locked qualityNOT_GRADED/PhaseCqualificationBLOCKED/C3NOT_RUN/B_NOT_GO.
+- [ ] Residual findings: media gaps, s04boundsearch/redundant read, unsupported componentfit, s11malformedtoolargs, s13continuation66639/65536, j3verifierrejectupsellclaim, j4cartcommitthenUNKNOWN_INTERNAL media. Stop authorized remainder, no automatic fixes/reruns/merge/deploy.
+
+[Report](../apps/worker/evals/single-agent-commerce-qualification/opening-remainder-run-20261102/REPORT.md) · [All20 turns](../apps/worker/evals/single-agent-commerce-qualification/opening-remainder-run-20261102/CONVERSATIONS.md) · [Primary audit](../apps/worker/evals/single-agent-commerce-qualification/opening-remainder-run-20261102/PRIMARY_AUDIT.json) · [Coverage](../apps/worker/evals/single-agent-commerce-qualification/opening-remainder-run-20261102/COVERAGE.json).
+
+## Completed — opening-checkout model development run, 2026-11-02
+
+- [x] Owner requested one new model round. Evaluation-only diagnostic opening-media forwarding fix: observed RED→GREEN34, independent7PASS and APPROVE; clean run source2628987a, worker runtime/prompts unchanged.
+- [x] Fresh107-product read-only capture + exact existing approved isolated handoff matrix; actual initial PostgreSQL/dropped/provider0, same-reviewer inputs and final preflight PASS. Preserve failed initial01 aggregate-hash preparation, generation0.
+- [x] Complete21/21cases and28/28turns, N1/max112/retry0:36actualrequests (31OWNER/5VERIFIER),35OK/1MALFORMED ownerHTTP200; no timeout/transporterror. Frozen8ready/13source gaps unchanged.
+- [x] Actual5eligible/17silentHANDOFF/6HUMAN-ownedNO_SEND,5texts4images; verifier5PASS/0reject. No registered NOT_RUN or missing turns. DB dropped/live0.
+- [x] Same independent reviewer APPROVE ACCOUNTING/CAPTURE and REPORT ACCURACY after94artifact/28raw/36wire hashes and exact accepted outputs. Primary findings and all conversations retained; locked independent quality grades NOT_GRADED.
+- [ ] p08/j6 cartcommitted then MEDIA_SELECT UNKNOWN_INTERNAL before confirm: native checkout completion still unproved by model run. p10 post-search media prerequisite, source image/colour/component-fit gaps and1malformed owner remain; no automatic fixes/reruns or post-result cohort changes. PhaseCqualificationBLOCKED/C3NOT_RUN/B_NOT_GO.
+
+[Report](../apps/worker/evals/single-agent-commerce-qualification/opening-checkout-run-20261102/REPORT.md) · [All conversations](../apps/worker/evals/single-agent-commerce-qualification/opening-checkout-run-20261102/CONVERSATIONS.md) · [Independent audit](../apps/worker/evals/single-agent-commerce-qualification/opening-checkout-run-20261102/POST_RUN_AUDIT.json).
+
+## Implemented — first-contact checkout with photos, 2026-11-02
+
+- [x] Implement opening add→confirm/existing-cart confirm and private native clarification/preview with approved photos in one atomic group; no unnecessary first-contact fence when persisted capability is present.
+- [x] Shared six-unit debit, exact variant/source replay, pre-dispatch authority/readiness, durable capture proof, private-data exclusion and restart whole-group gate; R1–R3 independent findings fixed.
+- [x] Observed RED2→GREEN; final worker893, Node819/2existingSKIP, protected21, build/typecheck/lintPASS. Clean dd88 actual PostgreSQL118/118 +7invariantsPASS, database dropped/provider0/livefalse. Earlier failures preserved; counts overlap.
+- [x] Same independent reviewer **APPROVE IMPLEMENTATION** atdd88;15 source hashes and47 artifact hashes independently matched, full118PG/7invariants/cleanup and commands verified. Add→confirm evidence query withdrawn after exact retained-case check. No remaining implementation blocker; no model campaign or new quality/qualification claim.
+- [ ] Conflicting component colours deferred by owner; existing silent handoff retained. Model quality/PhaseC qualification/C3 parity remain NOT_RUN/BLOCKED.
+
+[Implementation](../docs/specs/c3-phase-c-opening-checkout-media-implementation-20261102.md) · [Review](../docs/specs/c3-phase-c-opening-checkout-media-review-20261102.md) · [Commands/hashes](../docs/specs/c3-phase-c-opening-checkout-media-verification-20261102.json).
+
+## Historical — opening product photos, 2026-11-02
+
+- [x] Owner choice: every opening identified-product reply includes an image, including ETA/ACK; no verifier schema/prompt change.
+- [x] Implement durable scoped prior-output proof; all-admitted-product, exact nested component-colour, count1 pre-verifier preparation and independent atomic egress coverage. First private/confirm checkout hands off; returning paths supported.
+- [x] Bind current candidate/driver/config and normal seal/per-dispatch readiness, including discovery; machine-block unproved C3 information/timing parity.
+- [x] Retain RED/intermediate/PG01 failures; full worker883, database267/30SKIP, protected21, finalNode817/2SKIP, build/typecheck/lintPASS. Current clean41adPG110/110+7invariantsPASS; DBdropped/provider0/livefalse. Counts overlap.
+- [x] Same independent reviewer closedR1-R4;25source hashes/Gitblobs matched;58→41runtime byte parity proved. Only exact-offer fixture argument changed in41.
+- [x] Same reviewer **APPROVE IMPLEMENTATION P2** at41ad;45artifact hashes,25source entries,PG110/110+7invariants and all final checks verified. No remaining implementation blocker.
+- [ ] New source-bound model quality/qualification and C3 information parity/comparison NOT_RUN/BLOCKED. No automatic provider run, merge, deploy or live send.
+
+[Implementation](../docs/specs/c3-phase-c-opening-product-media-implementation-20261102.md) · [Review](../docs/specs/c3-phase-c-opening-product-media-review-20261102.md) · [Commands/hashes](../docs/specs/c3-phase-c-opening-product-media-verification-20261102.json).
+
+## Historical — continuation repair before opening-photo decision, 2026-11-02
+
+- P1 implemented and same independent reviewer **APPROVE IMPLEMENTATION P1** at `8eb074ef98e6a125ce7985ca992d26b50699f60e`. Constructed s08 raw64966/presented65143 within unchanged65536;393byte headroom,14tools/signature11024 preserved, exact round-trip after bounded reference expansion. Only known CompactV2 structures changed, legacy schemas/defaults remain.
+- Observed RED10PASS/3FAIL→GREEN15, AJV4810 equivalence comparisons; final focused98PASS, worker348PASS, Node808PASS/0FAIL/2existingSKIP, build/direct TypeScript/lintPASS. First broad805PASS/3FAIL retained and fixed; overlapping counts. Reviewer verified39 artifact hashes and5 source entries.
+- [Implementation and review](../docs/specs/c3-phase-c-continuation-quote-implementation-20261102.md), [commands/hashes](../docs/specs/c3-phase-c-continuation-quote-verification-20261102.json), [plan](../docs/specs/c3-phase-c-continuation-quote-fix-plan-20261102.md).
+- **P2a pending owner choice:** recommended existing verifier reports bounded PRICE assertions/refs; code applies exact image requirement. Alternative every bound-product opening reply gets an image changes ETA/ACK behavior. No existing upstream quote-task producer; optional quote_product/postback alone cannot close free-text bypass. No option activated implicitly.
+- No model/provider evaluation, source-shop write, new PostgreSQL run, merge/deploy/live send. Qualification BLOCKED/C3 NOT_RUN/B_NOT_GO. Continue P2a after required contract choice.
+
+## Historical — task-completion implementation, 2026-11-02
+
+- [x] Implement P0 atomic replacement with old+target authority and actual PostgreSQL acceptance.
+- [x] Implement P1 callable closure, P2b selection decoder and P3 readiness/public judge/development error accounting.
+- [x] Fix same-reviewer findings, observe reporting RED4→GREEN5; complete focused/shared/Node/build/typecheck/lint/PG checks and retain prior failures.
+- [x] Same reviewer APPROVE IMPLEMENTATION at fdbb3cf4 after final checks and63 artifact hashes; P1/P2a remain explicitly unresolved.
+- [ ] Resolve P1 raw request bound and P2a trusted quote-producer design gates before any new provider batch.
+- [ ] New provider quality/qualification/C3 comparison NOT_RUN; no deployment/live send.
+
+Owner authorized implementation of [revision2 plan](../docs/specs/c3-phase-c-task-completion-fix-plan-20261101.md), then the same independent reviewer → fixes → review. Base `33c80efd`; runtime/PostgreSQL source `5ca28f5a`; final executable `fdbb3cf4` adds offline accounting and exact test assertion only. [Implementation](../docs/specs/c3-phase-c-task-completion-implementation-20261102.md), [review](../docs/specs/c3-phase-c-task-completion-implementation-review-20261102.md), [commands/hashes](../docs/specs/c3-phase-c-task-completion-verification-20261102.json).
+
+P0 atomic sole-line replacement is implemented across kernel/contracts/authority/receipt/reprice/native/PostgreSQL replay. P1 structured callable closure and P2b shared read-selection decoding are implemented. P3 task-scoped readiness, public judge context and separate outcome/error attribution are implemented; new model population is not frozen. Existing owner/verifier prompts/models/caps/retry0, final authority and silent handoff remain unchanged.
+
+Verified: worker932; shared contracts79/kernel11/business88/runtime23/database56; final fullNode793PASS/2existingSKIP, qualification107PASS, reporting observedRED4→GREEN5 and exact native-domain effects110PASS (overlap, not additive). Worker build/typecheck/lint PASS; actual clean5ca PostgreSQL94/94 +7/7 existing invariants, DB dropped/provider0/sendfalse. Final offline/test-only delta has runtime/shared Git-blob parity. Earlier failures retained;63 artifact hashes checked. Same independent reviewer APPROVE IMPLEMENTATION at fdbb3cf4; no remaining implementation blocker in the bounded scope. P1/P2a gates remain unresolved.
+
+**Unresolved gates:** P1 raw continuation67436/65536 remains BOUND_BLOCKED before rendering/HTTP with all14 tools reachable. P2a trusted free-text quote producer remains DESIGN_BLOCKED; optional quote_product is not an image guarantee. Phase C qualification BLOCKED/C3 NOT_RUN/B_NOT_GO. No new provider evaluation, shop-source writes, merge, deploy or live send; no automatic next model run.
+
+## Historical — approved task completion repair plan, 2026-11-01
+
+- [x] Đọc approved root-cause review của5batch/102ca/148lượt, inspect native mutation/shared contracts, quote path, callable wire và readiness.
+- [x] Viết/self-review [kế hoạch](../docs/specs/c3-phase-c-task-completion-fix-plan-20261101.md); chỉ docs, không runtime/prompt/model/grade/source shop change.
+- [x] Independent REQUEST_CHANGES R1/R2 → revision2 full shared replacement/dual binding/DB replay và legal same-batch callable closure → cùng reviewer **APPROVE PLAN exact hash3fcfb9e4** sau clarification combined-source byte acceptance. [Review record](../docs/specs/c3-phase-c-task-completion-plan-review-20261101.md). Chưa approval implementation hoặc quality; P2a quote-producer proof gate chưa chứng minh.
+- [ ] Sau owner yêu cầu build: native RED→GREEN/replacement atomicity và trusted-quote producer proof gates, schema headroom, readiness/judge contract, focused/shared/build/typecheck/lint/actualPG → independent implementation review.
+- [ ] Provider/qualification/C3 comparison mới NOT_RUN; không deploy/live send hoặc tự mở run trong task kế hoạch.
+
+## Historical — context publication repair and full development run, 2026-11-01
+
+- [x] Independent plan review → revision → APPROVE. Code review bắt lỗi policy read race; test RED→GREEN rồi thêm generation guard. Reviewer duyệt implementation tại exact source `1427d2f1`. [Implementation/review](../docs/specs/c3-phase-c-context-publication-implementation-20261101.md).
+- [x] Worker 512 PASS / 15 matching files; Node 781 PASS / 2 existing SKIP; native 85 PASS. Worker build/typecheck/lint PASS. Actual isolated PostgreSQL 76/76 + validator 7/7 PASS, source sạch1427, DB đã drop, generation=0. Giữ bằng chứng RED và lỗi typecheck/initial-state preparation đã sửa.
+- [x] Policy replay cùng world/clock cũ ổn định. Continuation đủ envelope: current prompt 64399 byte, giữ signature9900 ký tự, optional hints bị bỏ theo cap hiện có; không provider/network/effects.
+- [x] Capture mới107 sản phẩm, actual native initial state và drop; reviewer APPROVE inputs/preflight/dispatch cho batch mới21 ca/28 lượt, N=1/retry=0/max112. Full execution52 records/51HTTP; 13 eligible,11 silent handoff,4 no-send;13text/2image; DB đã drop, live=0. Giữ6 NOT_RUN trong batch cũ.
+- [x] Independent accounting kiểm28 raw hashes,51 wire/firewall/model identities,35 source inventories,13 eligible bindings và15 Outbox rows. Chấm mù khóa21 grades trước unmask:13 wholeTurnPass,7 FAIL,1 UNRESOLVED;8 ca đủ cả3 flags. Không import như official qualification, regrade, đổi cohort hoặc chạy so C3. [Report/conversations](../apps/worker/evals/single-agent-commerce-qualification/context-publication-run-20261101/REPORT.md).
+- [x] Reviewer APPROVE REPORT ACCURACY sau kiểm58 artifact hashes, locked grades, hội thoại và accounting; lưu delivery trong branch/PR. Phase C vẫn BLOCKED; C3 NOT_RUN / B_NOT_GO; không deploy/live send.
+- [ ] Trước run mới: ưu tiên cart replacement bị reject và bước hướng dẫn khách không thực hiện được, callable-tool/wire budget, owner tool selection malformed, ACK tạo phụ thuộc ảnh thừa. Sửa prerequisites của evaluator về component fit, ảnh báo giá và referent combo. Provider failure giữ cart đã commit; không replay effects hoặc tự mở thêm vòng fix/run.
+
+## Historical — purchase-options model run, 2026-11-01
+
+- [x] Preregister 21 ca / 28 lượt, N=1, max 112 generations trên source sạch `c31a3089`; prompts/models/runtime TypeScript giữ nguyên. P05 bị chặn trước đăng ký vì không có một mã chứa cả hai loại set. Capture mới 107 sản phẩm bằng route read-only; lấy initial PostgreSQL thực và drop DB riêng. 15 SALES_READY / 6 SOURCE_UNAVAILABLE; reviewer APPROVE inputs và dispatch; preflight PASS; 97 Phase C tests PASS.
+- [x] Batch chạy 15 ca / 18 lượt rồi hard stop. 37 generation records / 36 HTTP; 1 owner HTTP200 malformed, 1 OWNER_REQUEST_BOUND trước HTTP. 10 verifier PASS, nhưng 1 bị snapshot gate chặn; 9 eligible / 8 silent HANDOFF / 1 NO_SEND; 9 text / 0 ảnh. DB đã drop, live send=0; giữ đủ 6 ca / 10 lượt NOT_RUN.
+- [x] Root cause s09: offline replay cùng world/clock tái hiện prepare→policy→snapshot→readback bổ sung chart SQ2447. Diff chỉ gồm sizeCharts và factSnapshotVersion; không phải nguồn hết hạn. Không patch runtime hoặc retry model sau stop. [Báo cáo/raw mapping](../apps/worker/evals/single-agent-commerce-qualification/purchase-options-run-20261101/REPORT.md).
+- [x] Primary audit đối chiếu 18 raw hashes / 36 request bodies / 9 final-gate và accepted-text bindings. Sửa accounting V2 do bản đầu đọc sai capture field, giữ artifact cũ. Ghi rõ P07 source control gửi reply và P08 T0 gửi / T1 handoff; không tuyên bố 6/6 controls PASS.
+- [ ] Final independent audit và blind grades chưa hoàn tất: cả hai agents OUT_OF_CREDITS; chưa có INDEPENDENT_GRADES/GRADE_LOCK. Không tự tạo điểm, quality pass rate hoặc final APPROVE.
+- [ ] Cần kế hoạch trước run mới: ổn định trusted context trước verifier, request bound sau selected read/khi có hai targets, applicability và hành vi khi thiếu size từng phần. Màu/media vẫn cần nguồn có thẩm quyền. Không bypass caps/verifier/hard latch. Phase C BLOCKED / C3 NOT_RUN / B_NOT_GO.
+
+## Historical — purchase-option implementation, 2026-10-31
+
+- [x] RED observed before preparation/coverage/delegation/selection/readiness implementation. Runtime TS5666f172; evaluator source b2368109; no model generation or shop-source writes.
+- [x] Prepare exact bounded offer/read refs, actual debit/admission and atomic staging; preserve admitted numeric facts. Source BOM malformed/oversize/fallback parity covered. Product-level size lookup remains separate; component sizing explicitly unsupported, no invented chart.
+- [x] Required shop-source gap → code-owned silent handoff under holding policies; denied/unknown/repeat blocked. Keep explicit-owner business handoff and delivery-source/receipt compatibility separately tested.
+- [x] F04/F05 code: bounded prep/tool/engine coverage, frozen delegation/evaluator isolation; readiness exact price/usable stock/colour/media/product-size/policy/selector-BOM, recheck before provider dispatch. New corpus still needs reviewed requirements and actual native history.
+- [x] Final local verification511worker focused,776NodePASS/2existingSKIP,55business, canonical workerbuild/typecheck/lintPASS. Actual isolatedPG76/76+7existing invariantsPASS/DBdropped/provider0/sendfalse; PG01 and earlier test failures retained in [evidence](../docs/specs/c3-phase-c-purchase-options-verification-20261031.json).
+- [x] Same independent reviewer closed6findings plus1BOMfinding; APPROVE CODE REVIEW5666/b236. [Review record](../docs/specs/c3-phase-c-purchase-options-implementation-review-20261031.md).
+- [x] Final independent **APPROVE IMPLEMENTATION + verification evidence** exact2f0f8d1e: reviewer independently22artifact hashes, runtime equality, actualPG7invariants/cleanup. Không có quality/model/source-readiness GO.
+- [ ] SOURCE_BLOCKED: confirm missing physical-colour bindings and eligible media through real source process; no silent TTL renewal or source approval in code task. Historical four-product inventory is not a fresh capture.
+- [ ] Freeze/deduplicate source-ready vs handoff provider corpus, readiness requirements, genuine history/registered branches and denominator before any requested model run. F01/F06 sales improvement MODEL_NOT_RUN; F09 minor voice remains ACCEPTED_LIMITATION. PhaseC BLOCKED/C3NOT_RUN/B_NOT_GO.
+
+## Historical — purchase-option read path, owner direction 2026-10-31
+
+- [x] Cập nhật [kế hoạch](../docs/specs/c3-phase-c-purchase-options-read-path-plan-20261031.md): một mã/multi-offer là luồng chính; hai mã trùng tên nhánh phụ. Code chuẩn bị source references/coverage, owner chọn offer; không gộp nguồn theo tên, không tăng budget.
+- [x] Đối chiếu B–C REPORT §3: thiếu preparation hai bound refs tồn tại cả B/C. Giữ attribution riêng của hồi quy admission đã xác nhận/sửa; không sửa grades/raw lịch sử.
+- [x] Thêm draft ca mua riêng/combo/component size/đổi lựa chọn/tên chưa rõ; kế hoạch giữ B controls cùng input và tách sales-ready khỏi source-unavailable handoff trước seal. Draft chưa phải frozen corpus/provider registration.
+- [x] Revision 2 §7–9: map F01–F09 tới các ca đã review, thay đổi cần làm, nghiệm thu/BLOCKED và thứ tự thực hiện; ghi rõ giọng nhẹ là ACCEPTED_LIMITATION, không coi đã sửa.
+- [x] Independent review revision 2 → fix hai findings preparation debit/admission và genuine history/frozen branches → cùng reviewer **APPROVE PLAN revision 3** trên305b5ecb/hash e853d527. [Review record](../docs/specs/c3-phase-c-purchase-options-read-path-plan-review-20261031.md); chưa implementation/provider/source readiness.
+- [ ] F02: audit canonical colour binding tại nguồn; projection phân biệt customer chưa chọn/shop chưa ghi nhận/variant không có; kiểm source changes và silent handoff. Chưa xác nhận nguồn thì sales path liên quan SOURCE_BLOCKED.
+- [ ] F04: observed read coverage theo scope, metadata vs fact/engine, budget/trace completeness; reason owner riêng; instrumentation bounded không đổi terminal hoặc thêm I/O.
+- [ ] F05: evaluator frozen delegation/applicability + actual read/engine coverage, blinding và actual-wire firewall; giữ historical grades, không tự bù source approval.
+- [ ] Implementation RED→GREEN, focused regression/build/typecheck/lint và scoped integration khi cần; chưa thực hiện trong task cập nhật hướng fix.
+- [ ] Map/deduplicate corpus + audit data/media prerequisites + source applicability cho judge trước model run. Không retry/hạ standards/gia hạn TTL để đạt readiness; không gọi plan delivery là Phase C GO.
+
+## Historical — post-run causal review, 2026-10-31
+
+- [x] Review22cases/34turns, prompts/tooldeclarations/exactrequestbudgets +generationRESULT journal vàold/newsource. [Root cause và bằng chứng](../apps/worker/evals/single-agent-commerce-qualification/variant-stock-search-rerun-20261030/ROOT_CAUSE.md).
+- [x] Offline replay gen0/network0/effect0: haiAOprice499k; source-approvedsharedchart160/55/RELAXED→M; nullcolor→COLOR_REQUIRED cả2worlds; oldactualsentinel/newactualnull; actual media11/11/10assetsstale trong3queryscopes,feedback0. Requestactuals07/s13phase terminal sau2rounds dùcòn3calls.
+- [x] Tách ownerplanning vs source thiếu vs verifierFAILđúng vs evaluatorgap. Giữ raw/grades/rubric, không thayhistoricalscore; sửa attribution media theoactualjournal s03DETAILnoTOP/s16SQFEEDBACKTOP, không nhận initialdiagnosticassumption làactualtrace.
+- [ ] Chưa triển khai fix hoặcchạyprovider/PG trongreviewtask. Hướng tiếp: sourcecolorbinding; shortreadpath/budget+observedcause; source mediaeligibility; judgeapplicabilitycontext. Không tăngrounds/caps/nớiverifier/parser/templategrowth hoặcrollbacktoànC. PhaseC BLOCKED/C3NOT_RUN/B_NOT_GO.
+
+## Current — model run after variant/search implementation, 2026-10-30
+
+- [x] Freshsourcee43clean, unchanged22scripts/34turns/N1/retry0/models/prompts/rubric. Protocol86PASS; directcapturefailures01/02retained; reviewedcapture03TLSroutefresh107publicproducts/sourcewrites0, actualinitialPGclean/drop/gen0. Same reviewer inputs/preflight/dispatchAPPROVE trướcprovider.
+- [x] Full22/22+34/34complete,65generationHTTP(51OWNER14VERIFIER),0error/retry;12eligible/13silentHANDOFF/7HUMANno-send/2CODE,14texts+2images/16acceptedOutbox, DBdropped/live0. Independentactualaccounting/model/firewall/draft+snapshot+gate/captureauditPASS.
+- [x] Fresh independentSol6.1HIGHblindjudge22gradeslockedbeforeunmask;whole9/16SINGLE+3/6JOURNEY;1UNRESOLVEDj2chartapplicability vìpublicpacketthiếuexistingowner-sharingrule. Không sửa grade/threshold/historicalresults. [Report/allconversations](../apps/worker/evals/single-agent-commerce-qualification/variant-stock-search-rerun-20261030/REPORT.md).
+- [x] Same reviewer APPROVEreportaccuracy,22grade/outcomemappings+31artifacthashesPASS. Source/runtime/prompt/corpus scripts không patch saumodelresult. Searchadmissionbenefit cótrace, mixedM/Lpathnotreachedj1/cartnull; không dùngimplementationPGPASS làm modelqualityproof.
+- [ ] STOPdevelopmentbatch, PhaseCqualificationBLOCKED/C3NOT_RUN/B_NOT_GO. Residuals: unrecordedcolor/mediaeligibility, ownerreadplanning/partialanswer/clarification vàjudgecontextgap. Không tựmởvòngpromptfix/nớiverifier/rerun hoặcrollout.
+
+## Current — variant stock scope / search admission implementation, 2026-10-30
+
+- [x] Thực hiện plan trên base3c793f6c, giữ observed RED contracts/search/source-error/reverse-race logs trước sửa. F1 exact variant/demand/fullcart shared+2DBguards, raw source units và conflict provenance; F2 reserved targets, staged admission và source reconciliation trước publication, giữ existing discovery duplicate budget.
+- [x] Same reviewer REQUEST_CHANGES→fix→review; thêm regressions same-value/different-source, Unicode order, deferred search/read hai chiều, prepare failure, batch baseline; **APPROVE IMPLEMENTATION exact3a06936f**. [Implementation/review/evidence](../docs/specs/c3-variant-stock-search-admission-implementation-20261030.md).
+- [x] Final507workerPASS,768NodePASS/2existingSKIP,71contracts/55business/56DBPASS; typechecks/builds/workerlintPASS. ActualPG04 76/76+7invariantsPASS,clean/droptrue/provider0/sendfalse; independently56artifact hashes/PG validatorPASS. FailedPG01/02 vàPG03priorPASS giữ nguyên.
+- [x] Sameworld/clock finalreplay L8/M14 independentclaimsOK, repeatedM15blocked; with/withoutpriorsearch đọcSQ2447/SV2447OK. Không provider/source mutation hoặc sửa historical grades.
+- [x] Owner đã yêu cầu và chạy developmentmodelbatch sau sửa tại exacte43; kết quả/report ở currententry phía trên. Nguồn ảnh/chart/ambiguity/ownerplanning vàjudgecontext residuals còn, PhaseCqualificationBLOCKED/C3NOT_RUN/B_NOT_GO; không GO/merge/deploy/live send.
+
+## Current — variant stock scope / search admission, 2026-10-30
+
+- [x] Rà source và deterministic replay đã lưu: M14/L8 bị cùng offer scope; search3candidates làm mất slot target thứ2. Không chạy replay/provider mới trong task plan này.
+- [x] Lập [plan revision1](../docs/specs/c3-variant-stock-search-admission-fix-plan-20261030.md), self-review → independent review → sửa alias/source-unit/async staging và acceptance → APPROVE PLAN. [Review record](../docs/specs/c3-variant-stock-search-admission-independent-20261030.md).
+- [x] Implementation F1: exact variant claims, aggregate quantity, conservative overlap/source-unit authority, worker/shared/2DB guards; RED→GREEN đã quan sát, xem current implementation ở trên.
+- [x] Implementation F2: reservation initial targets, all-or-nothing admission và atomic publication cả pins/hints; không tăng cap/evict evidence.
+- [x] Focused/shared/worker checks, actual isolated PG +7 existing invariants và new cases; independent implementation APPROVE3a06936f. Model/campaign mới NOT_RUN; không rollout/GO hoặc sửa historical grades.
+
+## Current — diagnostic sau selection/private checkout fix,29/10/2026
+
+- [x] Owner yêu cầu chạy model; cùng reviewer APPROVE order/preparation exact0c4c6c4a → fresh world/actual initial → frozen inputs/preflight → APPROVE dispatch registration388ee0ae. Thứ tự j1→j6→s09→s06→s11→probe; N1/max37, runtime/prompts/models giữ nguyên.
+- [x] Hoàn tất6/6purposes:5native scenarios/9customer turns+1probe;18generationHTTP(14owner+4verifier),0errors/retry/labelleaks,1OAuth riêng. Sourceclean/DBdrop/live0. [Report](../apps/worker/evals/single-agent-commerce-qualification/selection-checkout-diagnostic-20261029/REPORT.md), [toàn bộ hội thoại](../apps/worker/evals/single-agent-commerce-qualification/selection-checkout-diagnostic-20261029/CONVERSATIONS.md), [accounting](../apps/worker/evals/single-agent-commerce-qualification/selection-checkout-diagnostic-20261029/ACCOUNTING.json).
+- [x] Independent audit APPROVE accounting/capture:18request hashes/9native hashes matched, recursive0evaluator leaks,2code questions cóacceptedOutbox/witness. Native2eligible/2code-owned/3handoff/2NO_SEND;probePASS chỉ verifier-only.
+- [x] j6naturalCODnull→COD và NAMEcount1 được giữ: cải thiệnstate thực, chưacheckoutcomplete. s09FAQPASS. j1owner thấyBE PRE_ORDER/NO_COLOR IN_STOCK, verifier chỉNO_COLOR→projection parity chưaxong; “màu gốc” là diễn giải sentinel sai. s06viewmedia→dependencyhandoff/chưa rõlowercause; s11tuple-not-found không phải shopwideOOS.
+- [ ] STOP batch, không post-result patch/rerun. Cần phương án residual tuple/customer-label/owner–verifier parity và media diagnostics trước batch mới. N1 không stabilityproof; không overallqualityPASS. Qualification BLOCKED / C3 NOT_RUN / B_NOT_GO / A OWNER_BYPASS; historicalsource36grades vàsource6cdiagnostic giữ nguyên. No merge/deploy/live send.
+
+## Previous — selection/private checkout implementation, 29/10/2026
+
+- [x] [Approved plan revision1](../docs/specs/c3-phase-c-selection-checkout-fix-plan-20261029.md), implementation base ff078377. F0 audited producer NO_COLOR/stock grouping; actual BE0 can be PRE_ORDER, not proof to force unlabelled selection.
+- [x] F1 candidate exact tuple/quantity/source view across read/selection/error, default legacy resolver preserved; product-scope deduplicated without merging M/L cart lines or relaxing readiness; source sentinel omitted from display.
+- [x] F2 closed private payment intake and persisted unresolved-payment guards; shared domain/DB replay derives real required-field progress, bounded retry budget and preview readiness. No raw private input to model, no model fallback in candidate intake.
+- [x] RED→GREEN; same independent reviewer REQUEST_CHANGES→fix→APPROVE code e46be004, then existing affirmative-verb compatibility fix→APPROVE 5b35328b. [Implementation and limitations](../docs/specs/c3-phase-c-selection-checkout-implementation-20261029.md), [review](../docs/specs/c3-phase-c-selection-checkout-implementation-review-20261029.md), [commands/hashes](../docs/specs/c3-phase-c-selection-checkout-verification-20261029.json).
+- [x] Final worker/boundary/protected focused485PASS; Node756PASS/2SKIP; worker build/typecheck/lint exit0. Shared566PASS/30SKIP and typechecks; shared bytes unchanged at final source. Failed PG01–03 and full01 retained.
+- [x] Actual full PostgreSQL70/70 +7/7named invariants PASS on clean5b35328b, DB dropped,0provider generations. Both new selection/private-checkout cases PASS; same reviewer APPROVE final verification at ad6e8dd6 after54artifact/file hashes matched. No remaining implementation finding.
+- [x] Development diagnostic mới đã chạy riêng tại source0c4c6c4a,18requests; không nâng implementation tests thành model-quality proof. Xem entry hiện hành vàreport mới.
+- [ ] Fresh qualification/C3 parity vẫnNOT_RUN/BLOCKED; development mappings/near-duplicate review và freshsource-bound holdout cònpending. No merge/deploy/live send.
+
+## Previous — Phase C development diagnostic,29/10/2026
+
+- [x] Owner yêu cầu chạy model: code diagnostic→same independent review→fix→APPROVE6c5023ab; input/source/actualinitial03/preflight reviewed riêng trước dispatch. [Report +all conversations](../apps/worker/evals/single-agent-commerce-qualification/diagnostic-20261029/REPORT.md).
+- [x] Một batch6/6cases,9native turns+1probe,N1;20generationHTTP(15owner/5verifier),0retry/error,1OAuth riêng; sourceclean/DBdrop/live0. Independent audit20request hashes/9raw/0label leaks. Native3eligible/2code-owned/2handoff/2NO_SEND, probePASS chỉ verifier-only.
+- [x] Append17diagnosticartifacts và rebuild inventory6426/missing0,2378needmapping/PENDING; không approve fresh corpus từ exact hashes.
+- [ ] STOP diagnostic/replan residuals: read/selection availability hintBE lệchstock0 làm j1vẫnFAIL; j6lời trả khi nhận chưapersistCOD; s06dài. Không tựfix/rerun. Fresh qualification inventory/mappings/holdout vẫnPENDING; Phase C BLOCKED/C3NOT_RUN, primarygradesunchanged.
+
+## Previous — Phase C remediation implementation,29/10/2026
+
+- [x] Sửa kế hoạch→cùng independent reviewer→sửa thêm cap semantics→APPROVE PLAN revision2 tạiabe8c798. [Plan review](../docs/specs/c3-phase-c-remediation-independent-review-20261029.md).
+- [x] Đối chiếu campaign03/raw findings với consumer/resolver, packet/capture/history và native wire; [kế hoạch sửa chi tiết, đã self-review](../docs/specs/c3-phase-c-remediation-plan-20261029.md).
+- [x] S0 audit đủ22ca bằng raw/source/tool/terminal; không đổi primary grades. [Diagnosis](../apps/worker/evals/single-agent-commerce-qualification/remediation-20261029/DIAGNOSIS.md).
+- [x] S1 active-policy/durable-pin +selection/color; S2 source completeness/code-owned capture/public intake; S3 image/text bounds, numeric diagnostics và actual latency. Không viết lại prompt giọng.
+- [x] S4 build→independent review→fix→review:4findings evidence/seal đóng; code APPROVE430ee4fa. Final750NodePASS/2existingSKIP,346workerPASS,21protected/assemblyPASS; typecheck/build/lintPASS; realPG68checks/7invariantsPASS,DBdrop,provider0. [Implementation/review/evidence](../apps/worker/evals/single-agent-commerce-qualification/remediation-20261029/IMPLEMENTATION.md).
+- [x] S5 development diagnostic đã chạy riêng6cases/max37,20requests; không qualification. [Report](../apps/worker/evals/single-agent-commerce-qualification/diagnostic-20261029/REPORT.md).
+- [ ] S5 fresh qualificationNOT_RUN: inventory1125artifacts cần mapping/review, thêm exposure diagnostic mới/full history+near-duplicate review; fresh source-bound holdout trước seal. Qualification24SAFETY/16SINGLE/6JOURNEY,N1; không retry/tăng benchmark.
+- [ ] Qualification03 vẫnBLOCKED, C3NOT_RUN; B_NOT_GO/AOWNER_BYPASS unchanged. Không merge/deploy/live send; model behavior sau sửa chưa verified.
+
+## Current — Phase C actual execution,29/10/2026
+
+- [x] Seal clean36e45015 and fresh approved world/corpus/initial state. Recovered existing source route; isolated approved handoff matrix explicitly declared, no source publication.
+- [x] Run all24SAFETY N1:12unsafe zero observed send-eligible false PASS,11/12safe eligible,24actualrequests; strict native aggregate gate PASS.
+- [x] Run all22native scenarios/34customer turns,69actualrequests/70records;0retry, DB cleanup. Independent fresh GPT6.1SolHigh blind judge:12PASS/2FAIL/8UNRESOLVED; retain all outcomes and93totalcampaignrequests.
+- [x] Real-PostgreSQL66checks/7namedinvariantsPASS,0generation/live-send. Exact36 focused62PASS; broad738PASS/0FAIL/2SKIP; workerbuild/typecheck/lintPASS.
+- [x] Preserve [report, all conversations, primary grades/accounting](../apps/worker/evals/single-agent-commerce-qualification/run-20261029/REPORT.md), previous24-request campaign and0-request stale registration separately. No post-result runtime/source/prompt changes.
+- [ ] Qualification/replacement BLOCKED:8unresolved evaluator ground-truth gaps; CODE_OWNED_CAPTURE_EVIDENCE_REQUIRED; C3 information parity unproved. Even resolving all8 as PASS leaves JOURNEY≤5/6<90%.22C3NOT_RUN. Next scope: evaluator source completeness/code-owned registration/policy PINNED contract/request bounds and privacy-safe history, not another voice-prompt patch. B_NOT_GO/AOWNER_BYPASS unchanged; no merge/deploy/live send.
+
+## Historical — Phase C qualification foundation,28/10/2026
+
+- [x] Refresh main296cdcf, preserve B_NOT_GO, branch separately from B basef160dfa4. Record owner thresholds/N1/baseline source decisions; no re-approval requested.
+- [x] Build evaluator protocol/CLI, source/runtime/verifier wire binding, denominator/state-history continuity, separate gates/blind packets and operational summaries. Focused32/32PASS; broad eval707PASS/2existingSKIP; worker build/typecheck/lintPASS. [Evidence/limits](../apps/worker/evals/single-agent-commerce-qualification/CHECKPOINT_C.md).
+- [x] Same independent reviewer: REQUEST_CHANGES → fix → repeated review → APPROVE exactf644e0b1, independently32/32PASS. [Review](../apps/worker/evals/single-agent-commerce-qualification/INDEPENDENT_REVIEW.md). Existing boundary57/57PASS; actual CLI draft preflight BLOCKED on documented missing dependencies,0provider requests.
+- [x] Build bounded native collectors, main296 transitive-source/build pin, genuine two-pass C3 guard in shared persisted ingress/Outbox, native wire codec, request ledger, actual boundary/capture witnesses, source coverage/loss, grade import/merge and real-adapter driver. Local main C3 integration and215workerPASS, workerbuild/lint/typecheckPASS. Independent bounded-code review APPROVE exact48b79f23; subsequent frozen-search snapshot APPROVE exact02fc8205. [Follow-up status](../apps/worker/evals/single-agent-commerce-qualification/CHECKPOINT_C.md).
+- [x] Owner approves independent GPT6.1SolHigh offline blind judge; freeze model/prompt/rubric identity. Recovered existing pinnedCodex0.159.2/hash/login through process-scoped APPDATA; no global/model substitution.
+- [x] Build bounded frozen native search/capture and actual auxiliary embedding/OAuth HTTP accounting; fix nested public-projection privacy and concurrent invocation identity findings. Same independent reviewer APPROVE exact02fc8205;58focused Node PASS, final broad734PASS/2existingSKIP, workerbuild/typecheck/lintPASS. Draft removes two authored-history dependencies; native JOURNEY history retained.
+- [ ] Complete source-bound corpus/world/pre-state review/seal and actual frozen search capture. Main C3 information loss still prevents matched replacement parity; do not claim full bridge qualification from unit tests.
+- [ ] Actual candidate safety/absolute model run, independent blind grades, matched comparison and structural/real-adapter execution. Three source/credential route attempts timed out before retrieval; local Docker PG unavailable; qualification0requests/0newDB. Phase C BLOCKED/NOT_RUN, not complete; no rollout/deploy. [Readiness](../apps/worker/evals/single-agent-commerce-qualification/EXECUTION_READINESS_20261028.json).
+
 ## Current — tái xác nhận nguồn ảnh, 28/10/2026
 
 - [x] Review lại toàn bộ51whole-turn/17controls sau run; phân biệt10handoff đúng rule/nguồn/nhu cầu chưa giải quyết, đối chiếu traces và frozeninputs. Findings mới:11ảnh thiếucolorBinding/0feedback; discoverylongpants1279k vượtbudget, short799k; giữ comparative-wrinkle/advice findings theo phạm vi nghĩa. [Review +per-case audit](../apps/worker/evals/single-agent-commerce-read-only/media-approved-run-20261028/POST_RUN_REVIEW.md). Không model/code/source change.
@@ -2683,3 +3119,67 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Owner-authorized sealed source `33d83f68`: 17/17 controls PASS, all51 native once, source unchanged; 42eligible/0fallback/7handoff/2codecheckout. 165 captured provider wires, 0 label matches, 1 request/generation max; 5 isolated DBs dropped. [Full report and all terminals](../apps/worker/evals/single-agent-commerce-read-only/recovery-priority-full-20261025/CHECKPOINT_B.md).
 - [x] Review all51: camera closeup delivered; 5 failed attempts durably handed off, 2 business handoffs; existing receipt recovery kept a verified quote after rejected embroidery claim. Preserve six original failed drafts/completions, not six successful advice results. Code/plaintext capture hash explains over-redacted negotiation display.
 - [ ] B readiness: null/unproven media referent, final-only tool call, malformed provider completion, and prior-discount receipt absent on a later quote turn remain unresolved. Generic fact recovery/mixed-intent routing/style tuning are not silently opened. STOP/BnotGO; no automatic next run or deploy.
+
+
+## Phase C — full22 development rerun, 2026-10-29
+
+- [x] Freeze exact original22 customer scripts/branches and 34turns, N1/max136/retry0; preserve old diagnostic scope; RED2→GREEN8, fullfocused80PASS, independent patch/input/preflight APPROVE.
+- [x] Clean run source68d5c33b; fresh107product public capture/read-only + approved isolated matrix; current-source actualPG initial/DBdrop/generation0; pinnedCodex0.159.2preflightPASS.
+- [x] Execute22/22cases and34/34turns,62generationHTTP/0retry/0timeout,1malformed owner result.12texts+2images;10eligible/2code-owned/15handoff/7no-send. All raw retained; independent62wire/34raw/40manifesthash accounting auditPASS; DBdropped/live0.
+- [x] Primary qualitative review of22 whole conversations; [results/evidence](../apps/worker/evals/single-agent-commerce-qualification/full22-rerun-20261029/REPORT.md). Do not treat rejection drafts as customer replies or all handoffs as quality failure.
+- [ ] Complete offline blind grades: separateSolHighjudge hit workspace credit limit before writingGRADES.json; statusBLIND_GRADING_INCOMPLETE_QUOTA. No invented grades/model substitution or automatic rerun.
+- [ ] PhaseC qualification/C3parity/comparison remainBLOCKED/NOT_RUN. Development exposure inventory6483/missing0/reviewPENDING. STOP after authorized batch, no auto next fix/run/deploy.
+
+
+## Phase C — evidence/read-path plan, 2026-10-30
+
+- [x] Draft concrete plan from full22raw/history and prior implementation; preserve unknown dependency causes and source-based size expected.
+- [x] Independent same-reviewer REQUEST_CHANGES exact43560762: four findings.
+- [x] Revise F1–F4; independent same-reviewer **APPROVE PLAN revision2 exactf9b6e0843382e1c2be192137c5148a9d3f8e0c96**, no remaining blocking plan findings. [Plan/review](../docs/specs/c3-phase-c-evidence-read-path-fix-plan-20261030.md).
+- [x] Subsequent owner-authorized implementation completed and independently APPROVED; current evidence and limits are in the implementation section below. The plan-only task above did not run code/provider.
+- [ ] Provider/model requalification remains NOT_RUN after this implementation; no automatic run/deploy/live send.
+
+
+## Phase C — evidence/read-path implementation, 2026-10-30
+
+- [x] P0 bounded safe diagnostics + P1 canonical tuple proof to owner/verifier/finalgate; retain queries, full replay/expiry/policy/conflict validation; no heartbeat renewal.
+- [x] P2 exact duplicate projection shared by budget/wire; P3candidate-only one-observation current offers, work1of6, actualowner/verifierwire admission, atomic no-partial publication and independent catalog preservation. Legacy defaults/bounds unchanged.
+- [x] P4 replay correct chart/profile: firstM, correctedOUT_OF_RANGE/missingInputs0; retain source limitation/handoff, no fabricated chart tolerance.
+- [x] Same reviewer REQUEST_CHANGES→fix R1–R5; fullPG exposed R6deliveryquery whitelist mismatch. MeaningfulRED3→GREEN12 +handoffdelivery/effects/ingress236PASS; oldfailedPG33PASS/1FAIL retained/DBdropped.
+- [x] Finalclean executable97c6ce86: currentbuild/typecheck/lintPASS, Node761PASS/2SKIP, actualPG73/73PASS+7invariantsPASS, DBdropped/gen0/sendfalse. Priorworker510+37additional uniquecoverage/protected21PASS, overlapping reruns disclosed.
+- [x] Unconditional independent **APPROVE IMPLEMENTATION** exact97c6ce86; reviewer verified51artifact hashes/currentidentity/PGcleanup. [Report/review/evidence](../docs/specs/c3-phase-c-evidence-read-path-implementation-20261030.md).
+- [ ] Newmodelquality/blindgrades/stability/qualification and C3parity/comparison remain unverified. Originalfull22results immutable; PhaseCqualificationBLOCKED/C3NOT_RUN/B_NOT_GO. No automatic nextmodelrun, merge, deploy or live send.
+
+
+## Phase C — post read-path model diagnostic, 2026-10-30
+
+- [x] Freeze source89070980, original22scripts/34turns/N1/retry0, unchanged models/prompts; fresh107product capture, currentinitialPG/drop, independent source-check compatibility/input/preflight/dispatch APPROVE.
+- [x] Complete22/22cases+34/34turns,66generationHTTP/0error/0retry,11eligible/14silentHANDOFF/7NO_SEND/2CODE-owned;13texts+2images/15Outbox; sourceclean/DBdropped/live0.
+- [x] Independent accounting auditPASS: all66wire/model/firewall checks and34raw/40artifacthashes, receipts/capture; finaljournal=attempts=raw=66, earlier62interim only.
+- [x] FreshindependentSolHighblindjudge22RESOLVED/0UNRESOLVED, whole-turn10/16+4/6; frozen conjunctive quality6/16+2/6, both below90%; hardSafety22/22 on observed outcomes only. [Reports/findings/grades](../apps/worker/evals/single-agent-commerce-qualification/read-path-rerun-20261030/REPORT.md). Priorblindgrades still incomplete; no fabricated pairedcomparison.
+- [ ] Qualification remainsBLOCKED: unmetquality, separateSAFETY/freshholdout/exposuremapping/parity/C3comparison. Source/toolplanning/sentinel/media matching findings remain. Stop authorizedbatch; no automatic fix, modelrerun, merge or deploy.
+
+## Controlled B–C diagnosis — 2026-10-30
+
+- [x] Freeze six historical B SEND_ELIGIBLE cases and exact captured owner bodies/trusted drafts; B source4efbea67 vs C runtime ec468293; common107product world retained without claiming full historical B DB.
+- [x] Build exact B detached worktree; focused6/6 + qualification86/86 PASS. Commit/seal diagnostic source3731e05b, 1287 artifact hashes, input5702bcdd; production source/packages/prompts unchanged.
+- [x] Offline same-input controls: all-offer SV2447 B OK/C REJECTED; single offers both OK; size same input gives M both arms; six hard prechecks accepted at explicitly derived lower-bound clock, not captured final gate time. Media expiry reproduced both arms, C explicit revalidation difference retained. Ambiguous metadata/policy-read controls same B/C; native prepare callback not measured.
+- [x] Owner18/18 registered samples, one HTTP each/0error/0retry, identical per-case wire hashes/firewall18PASS; no tool execution/effect/send. Two cases change read scope/tool sequence; size sourceQuote and total wording differences kept separate from decision instability. Post-run analysis asserts original artifacts and denominator.
+- [ ] Historical live Qdrant/index/vector parity and paired full E2E quality remain unmeasured. No candidate runtime fix, new qualification result or GO claim. [Report/evidence](../apps/worker/evals/single-agent-commerce-qualification/bc-controlled-20261030/REPORT.md).
+
+## B–C review and bounded repair — 2026-10-30
+
+- [x] Audit exact finalBf160→C38files, B51 and C22cases/34turns; keep C tuple/state safeguards, no broad rollback. Full case mapping/source/model/ownership unknowns in approved plan.
+- [x] Same independent reviewer REQUEST_CHANGES→revision2APPROVE PLAN f57518e8 (TTL compatibility, exact errors, full mapping).
+- [x] TDD RED5→GREEN9, then10compact/selection unit coverage; lossless strict V2/shared expander across4consumers, failclosed proof construction, closed bound/conflict/unknown attribution. No prompt/shared runtime/source shop change.
+- [x] Exact implementation e6880a70: canonical worker build/typecheck/lintPASS, focused340/protected21, Node768PASS2SKIP0FAIL, realPG73/73+7invariantsPASS/DBdropped/provider0/sendfalse. Same world/query/clock: finalB6OK, Cbefore2reject, Cafter6OK; all6protectedclaims match B, readback unchanged, SV2447all6965B.
+- [x] Same reviewer APPROVE IMPLEMENTATION e688 and test-only3ace47b3 (native full24tuple parity, production byte-identical); reviewer independent10unit/1wire and all20artifact hashes checked. [Report/review/verification](../docs/specs/c3-bc-review-repair-implementation-20261030.md).
+- [ ] Remaining source expiry/metadata/chart and NO_COLOR/tool-planning/model-quality/search-parity limitations not repaired by compaction. PhaseCqualificationBLOCKED/C3NOT_RUN/B_NOT_GO unchanged; no model generation, automatic newcampaign, merge/deploy/live send.
+
+## Phase C — model batch after B–C admission repair, 2026-10-30
+
+- [x] Fresh clean run sourcefe4b8293, unchanged22scripts/34turns/N1/max136/retry0 and models/prompts; protocol86PASS, fresh107publiccapture/read-only, current-source initialPG/drop/gen0, same independenthelper/input/preflight/dispatch approval.
+- [x] Complete22/22+34/34,71generationHTTP(56OWNER/15VERIFIER),0providererror/retry;15eligible/13silenthandoff/4HUMANno-send/2code;17texts+2images/19acceptedOutbox, DBdropped/live0. Independentactual accounting/firewall/model/binding/captureauditPASS.
+- [x] Fresh independentGPT6.1SolHIGH judge22RESOLVED beforeunmask: whole10/16SINGLE+5/6JOURNEY; requiredconjunction6/16+1/6, below90%; observedhardSafety22/22 only. [Report/wholehistories/grades](../apps/worker/evals/single-agent-commerce-qualification/bc-repair-rerun-20261030/REPORT.md).
+- [x] Preserve3failedpreregistrationnativeinventoryattempts: SQ2447all-offer+policychart bound; reviewedlegacyadapterONLY evaluatorinventory, currentV2native/runtime/world/boundsunchanged. Developmentinventory6621/missing0/reviewPENDING; notfreshholdout.
+- [ ] Remaining: s02/s07/s13search→detailed-readSOURCE_ERROR; j1MaddCLAIM_CONFLICT despiteatomicpreservation; sourceimages/ambiguity and modelplanning residuals. BatchSTOP/PhaseCqualificationBLOCKED/C3NOT_RUN/B_NOT_GO; no automaticnextfix/rerun/merge/deploy.

@@ -13,6 +13,7 @@ import {
   STATE_ADVANCING_SALES_OUTCOMES_V1,
   SALES_CYCLE_COMMAND_KINDS_V1,
   SalesCycleStageV1Schema,
+  SalesCycleClarificationStateV1Schema,
   VersionedBusinessReferenceV1Schema,
   isSalesStageTransitionAllowedV1,
   isStateAdvancingSalesOutcomeV1,
@@ -26,6 +27,18 @@ const fact = (status: "MATCHED" | "CHANGED" | "STALE" | "MISSING" = "MATCHED") =
   sourceVersionBefore: status === "MATCHED" ? "v1" : null,
   sourceVersionAfter: status === "MATCHED" ? "v1" : null,
   checkedAt: "2026-07-22T05:00:00.000Z",
+});
+
+it("permits zero pending-payment questions only after progress, and roundtrips old positive clarification states", () => {
+  const q = { reasonCode: "CHECKOUT_DETAILS_MISSING", missingFields: ["PAYMENT_METHOD"], productId: "CB182",
+    attemptCount: 0, maxAttempts: 3, askedQuestionFingerprints: [], lastRequestedAt: "2026-07-22T05:00:00.000Z" };
+  expect(SalesCycleClarificationStateV1Schema.parse(q)).toEqual(q);
+  for (const fields of [["FULL_NAME"], ["ORDER_PREVIEW"], ["FULL_NAME", "PAYMENT_METHOD"]]) {
+    expect(SalesCycleClarificationStateV1Schema.safeParse({ ...q, missingFields: fields }).success).toBe(false);
+  }
+  expect(SalesCycleClarificationStateV1Schema.safeParse({ ...q, askedQuestionFingerprints: ["a".repeat(64)] }).success).toBe(false);
+  const old = { ...q, attemptCount: 1, missingFields: ["FULL_NAME"], askedQuestionFingerprints: ["a".repeat(64)] };
+  expect(SalesCycleClarificationStateV1Schema.parse(old)).toEqual(old);
 });
 
 const revalidation = {

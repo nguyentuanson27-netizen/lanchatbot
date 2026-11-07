@@ -40,15 +40,23 @@ describe("persisted native commerce session", () => {
     expect(await start.executeCommand(call)).toMatchObject({status:"CHECKOUT_REQUESTED"});
     expect(messages[0]).toContain("tên người nhận"); expect(messages[0]).not.toContain("địa chỉ");
     expect(state.clarification?.missingFields).toEqual(["FULL_NAME"]);
+    expect(start.codeOwnedOutput()).toMatchObject({kind:"NATIVE_CHECKOUT_CLARIFICATION",requestId:scope.requestId,
+      recipient:scope.recipient,missingFields:["FULL_NAME"]});
+    expect(start.codeOwnedOutput()!.messageHashes).toHaveLength(1);
     expect(state.confirmation).toBeNull(); expect(state.preview).toBeNull();
     expect(state.cart!.value.lines).toEqual(draft.lines);
     await start.executeCommand({...call,expectedRevision:state.revision,conversationRevision:conversation.revision});
     expect(messages).toHaveLength(1);
+    await executor("Chị muốn trả khi nhận hàng.", "payment-natural").advancePrivateCheckout();
+    expect(state.checkoutDraft?.paymentMethod).toBe("COD");
+    expect(state.clarification?.attemptCount).toBe(1);
+    expect(state.clarification?.missingFields).toEqual(["FULL_NAME"]);
+    expect(state.checkoutDraft?.fullName).toBeNull();
     const partial=await executor("Nguyễn Thị Lan").advancePrivateCheckout();
     expect(partial).toEqual({committed:true,messages:1});
     expect(state.checkoutDraft?.fullName).toBe("Nguyễn Thị Lan");
-    expect(messages[1]).not.toContain("tên người nhận"); expect(messages[1]).not.toContain("Nguyễn Thị Lan");
-    expect(messages[1]).toContain("số điện thoại"); expect(state.confirmation).toBeNull();
+    expect(messages[2]).not.toContain("tên người nhận"); expect(messages[2]).not.toContain("Nguyễn Thị Lan");
+    expect(messages[2]).toContain("số điện thoại"); expect(state.confirmation).toBeNull();
     await executor("Khoan, áo này giặt máy được không em?", "question").advancePrivateCheckout();
     expect(state.checkoutDraft?.fullName).toBe("Nguyễn Thị Lan");
     expect(state.checkoutDraft?.phone).toBeNull();

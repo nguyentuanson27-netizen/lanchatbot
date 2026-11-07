@@ -1,0 +1,141 @@
+{
+  "name": "PURCHASE_OPTIONS_21_20261031",
+  "purpose": "DEVELOPMENT_ONLY_NOT_QUALIFICATION",
+  "repetitions": 1,
+  "maximumCases": 21,
+  "maximumNativeCustomerTurns": 28,
+  "maximumVerifierOnlyProbes": 0,
+  "maximumGenerationRequests": 112,
+  "maximumOwnerGenerationsPerNativeTurn": 3,
+  "maximumVerifierGenerationsPerTurn": 1,
+  "generationRetry": 0,
+  "customerScriptsHash": "71048240866c61e7e37988cfb6c91673b8aee10fdacdc18c899ef3089c53f137",
+  "cases": [
+    {
+      "sourceCase": "c-po-20261031-p01",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-po-20261031-p02",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-po-20261031-p03",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-po-20261031-p04",
+      "mode": "JOURNEY",
+      "turns": 2,
+      "maximumGenerationRequests": 8
+    },
+    {
+      "sourceCase": "c-po-20261031-p06",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-po-20261031-p07",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-po-20261031-p08",
+      "mode": "JOURNEY",
+      "turns": 2,
+      "maximumGenerationRequests": 8
+    },
+    {
+      "sourceCase": "c-po-20261031-p09",
+      "mode": "JOURNEY",
+      "turns": 2,
+      "maximumGenerationRequests": 8
+    },
+    {
+      "sourceCase": "c-po-20261031-p10",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-po-20261031-h01",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-po-20261031-h02",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s05",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s06",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s08",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s09",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s10",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s12",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s14",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s15",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-j2",
+      "mode": "JOURNEY",
+      "turns": 3,
+      "maximumGenerationRequests": 12
+    },
+    {
+      "sourceCase": "c-20261028-j6",
+      "mode": "JOURNEY",
+      "turns": 3,
+      "maximumGenerationRequests": 12
+    }
+  ]
+}

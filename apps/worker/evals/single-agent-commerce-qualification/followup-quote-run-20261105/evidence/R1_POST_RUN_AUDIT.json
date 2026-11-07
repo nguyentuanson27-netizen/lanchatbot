@@ -1,0 +1,560 @@
+{
+  "status": "APPROVED_R1_DEVELOPMENT_TASK_GATE_PASS_NOT_QUALIFICATION",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-05T16:03:58.387Z",
+  "sourceSha": "48e8a42858061e16df60ffbd98f19c47fc3bbd80",
+  "registrationHash": "802e2eaaed5f9f9344f0f77f83f24eb328784c95316d77f504ec79c6bb7d2b39",
+  "worldHash": "3fdf95b12080e6003da655fecf343ea216ea2e4af09c8b0b28a025a34d9733d2",
+  "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r1-run-20261105-01\\CANDIDATE_EVIDENCE.partial.json",
+  "evidenceSha256": "b24f152510d9856675bab9f4d8e8f7c537cdf579493603e0ba1a492b0ad952e7",
+  "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r1-run-20261105-01\\integration.json",
+  "integrationSha256": "381015227d3ad752f310231f1625ff71e0380794d0b4e6811e42e0f1d923e6ef",
+  "casesRegistered": 4,
+  "casesExecuted": 4,
+  "capturedTurns": 7,
+  "registeredTurns": 7,
+  "generationCount": 22,
+  "providerRequests": 22,
+  "ownerGenerations": 15,
+  "verifierGenerations": 7,
+  "maxProviderRequestsPerGeneration": 1,
+  "authEvents": 1,
+  "allGenerationsStatusOK": true,
+  "noGenerationRetryObserved": true,
+  "terminalCounts": {
+    "SEND_ELIGIBLE": 7
+  },
+  "materialTaskFailures": 0,
+  "caseOutcomes": [
+    {
+      "caseId": "c-po-20261031-p06",
+      "result": "PASS",
+      "reason": "Source-backed COMPOSITE989000 and threepieces delivered withapprovedopeningimage."
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "result": "PASS_WITH_DEFERRED_VOICE_LIMITS",
+      "reason": "TOP/PANTS M currentcomponentfits both authorizedthroughfinalsnapshotgate andacceptedtext/image; genericadvisorywording notnewmaterialfailure."
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "result": "PASS_CUSTOMER_CLARIFICATION",
+      "reason": "Initialsetcartreceipt/829000total, laterthree failedreplacequeries endedusableWHITE/BEquestion andcartunchanged; nofalsecompletedreplacement."
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "result": "PASS_PRE_CART_TOTAL_AND_COLOUR_CLARIFICATION",
+      "reason": "M/L quantity2retained; no mutationwithoutcolour. Lastturn standalonefollowupquote_productreturnedcurrentproof998000-49900+30000=978100andactualreply gaveamountthenaskedcolour. Noexistingcartquoted,noimageclaim/nosentinelcolourcommit."
+    }
+  ],
+  "checks": {
+    "allRawArtifactHashes": true,
+    "all22WireHashesAndRuntimeFirewall": true,
+    "currentBindingUnchangedForAll7EligibleReplies": true,
+    "actualTextHashesVsAcceptedOutbox": true,
+    "imageCountsAndRawOutboxIds": true,
+    "noMutationWhenColourMissing": true,
+    "j1QuoteOfferQuantitySourcePolicyCurrentProof": true,
+    "testDatabaseDropped": true,
+    "sourceDirty": false,
+    "hardStop": false,
+    "liveSend": false
+  },
+  "nativeArtifacts": [
+    {
+      "caseId": "c-po-20261031-p06",
+      "turnIndex": 0,
+      "artifact": "native-426e58ba6fab6891ae1abe684da100c7c4ba31f25bd461866ffd563252c05265-turn-0.json",
+      "sha256": "07db2f0116c2163bd26767a7cee45eb26a64bb07c716dbe2c418a0dc7e97187b"
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "turnIndex": 0,
+      "artifact": "native-4bd5a4e52bd6f0728781b714360c41cb6079161dd391fda83981757dca249cb0-turn-0.json",
+      "sha256": "01dba697c2e0d8e7bbd11025cf137391d581bdc36900e231f8fbe0e2650abb4d"
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 0,
+      "artifact": "native-2005a64f1903408857cf60dd59717c68f6938ae97f47d355352f5e009c93af04-turn-0.json",
+      "sha256": "482489fa6ac56e14930665fbda6fad32d293b06c9ca36b59ba7feea550be8345"
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 1,
+      "artifact": "native-2005a64f1903408857cf60dd59717c68f6938ae97f47d355352f5e009c93af04-turn-1.json",
+      "sha256": "9cbb53471a4e90035d7ddd3e534b0f707af569b867ea5eea4f7d60b6db3806cb"
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 0,
+      "artifact": "native-b36ba8734a2af1fccc902ad22f3935567f328fa59a61424f6f0fd59a38f42c3e-turn-0.json",
+      "sha256": "bcf19779732407cf60c9ba4c893ac6f8498999894fd78aaf096310322aae8646"
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 1,
+      "artifact": "native-b36ba8734a2af1fccc902ad22f3935567f328fa59a61424f6f0fd59a38f42c3e-turn-1.json",
+      "sha256": "bb4283499ccd111db7a9c640dbf692826d637b454f08cb9a2d7890be94ad4775"
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 2,
+      "artifact": "native-b36ba8734a2af1fccc902ad22f3935567f328fa59a61424f6f0fd59a38f42c3e-turn-2.json",
+      "sha256": "68b7c0fb436db742d12b76e2bec0597c26d681e2bf7a45ac837a7455a415fc01"
+    }
+  ],
+  "frames": [
+    {
+      "caseId": "c-po-20261031-p06",
+      "turnIndex": 0,
+      "customer": "Em tính cả ba món cho chị bao nhiêu?",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Cả bộ SD023 gồm 3 món có giá 989.000đ, hiện có sẵn các size S, M, L chị nhé."
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/f8/01/35/62/552cb23c4c117004dcb3ac97565a0dec3ed2a2f5371555e7f4ea0001-w:4000-h:6000-l:4576023-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "cartBefore": null,
+      "cartAfter": null,
+      "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+      "sourceTargetResults": [
+        {
+          "name": "quote_product",
+          "status": "OK",
+          "selectionStatus": null,
+          "effectCommitted": null,
+          "preCartQuote": null,
+          "fit": null
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "turnIndex": 0,
+      "customer": "Chị cao 1m60, nặng 55kg. Áo chị hay mặc M mà quần lại hay lấy L, em chọn size từng phần giúp chị nhé.",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, với chiều cao 1m60 và nặng 55kg, set Thạch Thảo này em tư vấn chị mặc **size M** cho cả áo và quần nhé ạ. Form set được thiết kế cân đối nên mặc size M sẽ vừa vặn, thoải mái và gọn gàng nhất cho mình ạ."
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/67/8a/4f/3a/0cf58588fcd21f80a5ff8a11bd57c62f820bb105802782ca2350f85f-w:3658-h:5487-l:1151930-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "cartBefore": null,
+      "cartAfter": null,
+      "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+      "sourceTargetResults": [
+        {
+          "name": "recommend_size",
+          "status": "OK",
+          "selectionStatus": null,
+          "effectCommitted": null,
+          "preCartQuote": null,
+          "fit": [
+            {
+              "componentProductId": "SV2447-AO",
+              "componentRole": "TOP",
+              "size": "M"
+            }
+          ]
+        },
+        {
+          "name": "recommend_size",
+          "status": "OK",
+          "selectionStatus": null,
+          "effectCommitted": null,
+          "preCartQuote": null,
+          "fit": [
+            {
+              "componentProductId": "SQ2447-QUAN",
+              "componentRole": "PANTS",
+              "size": "M"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 0,
+      "customer": "Chị lấy cả bộ size M nhé.",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Em đã thêm set váy Thạch Thảo size M (cả bộ) vào giỏ hàng cho chị rồi ạ. Tổng giỏ hàng hiện tại của chị là 829.000đ ạ."
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "cartBefore": null,
+      "cartAfter": {
+        "schemaVersion": 1,
+        "cartId": "a2e79406-ed7d-585a-8e78-bae73fb97975",
+        "salesEpisodeId": "1b1f6089-085b-5b37-8f20-f3ce7c210c6c",
+        "customerProfileId": "4865fd2a-8e83-4710-8b6a-23e24371eb6b",
+        "revision": 1,
+        "currency": "VND",
+        "status": "OPEN",
+        "checkoutEligibility": "ELIGIBLE",
+        "lines": [
+          {
+            "lineId": "f694e522-29c5-5087-8475-c63f2e222daa",
+            "parentProductId": "SV2447",
+            "offerId": "SET_VAY",
+            "offerKind": "SET",
+            "quantity": 1,
+            "components": [
+              {
+                "componentProductId": "SV2447_AO",
+                "componentSku": "SV2447_AO_M",
+                "componentRole": "TOP",
+                "color": "__NO_COLOR__",
+                "size": "M",
+                "quantity": 1
+              },
+              {
+                "componentProductId": "SV2447_CV",
+                "componentSku": "SV2447_CV_M",
+                "componentRole": "SKIRT",
+                "color": "__NO_COLOR__",
+                "size": "M",
+                "quantity": 1
+              }
+            ],
+            "allowMixedSizes": false,
+            "allowComponentSale": false,
+            "posUnitPriceVnd": 799000,
+            "priceAuthority": {
+              "priceFactRef": "price:sha256:5907f2106adc9cd8f797b1f932bb977ace4a08eaa078d610da81ec8a068337ba",
+              "shopId": "LANA_DESIGN",
+              "parentProductId": "SV2447",
+              "offerId": "SET_VAY",
+              "offerPriceKind": "SET",
+              "componentProductId": null,
+              "metadata": {
+                "authority": "PANCAKE_POS",
+                "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default",
+                "observedAt": "2026-11-05T15:29:06.081Z",
+                "expiresAt": "2026-11-07T15:29:06.081Z",
+                "freshForSeconds": 172800,
+                "freshnessState": "FRESH"
+              }
+            },
+            "lineTotalVnd": 799000
+          }
+        ],
+        "adjustments": [],
+        "shippingFeeVnd": 30000,
+        "subtotalVnd": 799000,
+        "discountTotalVnd": 0,
+        "grandTotalVnd": 829000,
+        "createdAt": "2026-11-05T15:59:11.004Z",
+        "updatedAt": "2026-11-05T15:59:11.004Z"
+      },
+      "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+      "sourceTargetResults": [
+        {
+          "name": "add_to_cart",
+          "status": "OK",
+          "selectionStatus": null,
+          "effectCommitted": null,
+          "preCartQuote": null,
+          "fit": null
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 1,
+      "customer": "Thôi chị lấy mỗi áo thôi, em đổi lại nhé.",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Áo lẻ Thạch Thảo size M hiện có màu trắng và be, chị thích lấy màu nào ạ?"
+        ],
+        "images": []
+      },
+      "cartBefore": {
+        "schemaVersion": 1,
+        "cartId": "a2e79406-ed7d-585a-8e78-bae73fb97975",
+        "salesEpisodeId": "1b1f6089-085b-5b37-8f20-f3ce7c210c6c",
+        "customerProfileId": "4865fd2a-8e83-4710-8b6a-23e24371eb6b",
+        "revision": 1,
+        "currency": "VND",
+        "status": "OPEN",
+        "checkoutEligibility": "ELIGIBLE",
+        "lines": [
+          {
+            "lineId": "f694e522-29c5-5087-8475-c63f2e222daa",
+            "parentProductId": "SV2447",
+            "offerId": "SET_VAY",
+            "offerKind": "SET",
+            "quantity": 1,
+            "components": [
+              {
+                "componentProductId": "SV2447_AO",
+                "componentSku": "SV2447_AO_M",
+                "componentRole": "TOP",
+                "color": "__NO_COLOR__",
+                "size": "M",
+                "quantity": 1
+              },
+              {
+                "componentProductId": "SV2447_CV",
+                "componentSku": "SV2447_CV_M",
+                "componentRole": "SKIRT",
+                "color": "__NO_COLOR__",
+                "size": "M",
+                "quantity": 1
+              }
+            ],
+            "allowMixedSizes": false,
+            "allowComponentSale": false,
+            "posUnitPriceVnd": 799000,
+            "priceAuthority": {
+              "priceFactRef": "price:sha256:5907f2106adc9cd8f797b1f932bb977ace4a08eaa078d610da81ec8a068337ba",
+              "shopId": "LANA_DESIGN",
+              "parentProductId": "SV2447",
+              "offerId": "SET_VAY",
+              "offerPriceKind": "SET",
+              "componentProductId": null,
+              "metadata": {
+                "authority": "PANCAKE_POS",
+                "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default",
+                "observedAt": "2026-11-05T15:29:06.081Z",
+                "expiresAt": "2026-11-07T15:29:06.081Z",
+                "freshForSeconds": 172800,
+                "freshnessState": "FRESH"
+              }
+            },
+            "lineTotalVnd": 799000
+          }
+        ],
+        "adjustments": [],
+        "shippingFeeVnd": 30000,
+        "subtotalVnd": 799000,
+        "discountTotalVnd": 0,
+        "grandTotalVnd": 829000,
+        "createdAt": "2026-11-05T15:59:11.004Z",
+        "updatedAt": "2026-11-05T15:59:11.004Z"
+      },
+      "cartAfter": {
+        "schemaVersion": 1,
+        "cartId": "a2e79406-ed7d-585a-8e78-bae73fb97975",
+        "salesEpisodeId": "1b1f6089-085b-5b37-8f20-f3ce7c210c6c",
+        "customerProfileId": "4865fd2a-8e83-4710-8b6a-23e24371eb6b",
+        "revision": 1,
+        "currency": "VND",
+        "status": "OPEN",
+        "checkoutEligibility": "ELIGIBLE",
+        "lines": [
+          {
+            "lineId": "f694e522-29c5-5087-8475-c63f2e222daa",
+            "parentProductId": "SV2447",
+            "offerId": "SET_VAY",
+            "offerKind": "SET",
+            "quantity": 1,
+            "components": [
+              {
+                "componentProductId": "SV2447_AO",
+                "componentSku": "SV2447_AO_M",
+                "componentRole": "TOP",
+                "color": "__NO_COLOR__",
+                "size": "M",
+                "quantity": 1
+              },
+              {
+                "componentProductId": "SV2447_CV",
+                "componentSku": "SV2447_CV_M",
+                "componentRole": "SKIRT",
+                "color": "__NO_COLOR__",
+                "size": "M",
+                "quantity": 1
+              }
+            ],
+            "allowMixedSizes": false,
+            "allowComponentSale": false,
+            "posUnitPriceVnd": 799000,
+            "priceAuthority": {
+              "priceFactRef": "price:sha256:5907f2106adc9cd8f797b1f932bb977ace4a08eaa078d610da81ec8a068337ba",
+              "shopId": "LANA_DESIGN",
+              "parentProductId": "SV2447",
+              "offerId": "SET_VAY",
+              "offerPriceKind": "SET",
+              "componentProductId": null,
+              "metadata": {
+                "authority": "PANCAKE_POS",
+                "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default",
+                "observedAt": "2026-11-05T15:29:06.081Z",
+                "expiresAt": "2026-11-07T15:29:06.081Z",
+                "freshForSeconds": 172800,
+                "freshnessState": "FRESH"
+              }
+            },
+            "lineTotalVnd": 799000
+          }
+        ],
+        "adjustments": [],
+        "shippingFeeVnd": 30000,
+        "subtotalVnd": 799000,
+        "discountTotalVnd": 0,
+        "grandTotalVnd": 829000,
+        "createdAt": "2026-11-05T15:59:11.004Z",
+        "updatedAt": "2026-11-05T15:59:11.004Z"
+      },
+      "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+      "sourceTargetResults": [
+        {
+          "name": "change_cart_item",
+          "status": "UNAVAILABLE",
+          "selectionStatus": "VARIANT_UNAVAILABLE",
+          "effectCommitted": false,
+          "preCartQuote": null,
+          "fit": null
+        },
+        {
+          "name": "change_cart_item",
+          "status": "UNAVAILABLE",
+          "selectionStatus": "VARIANT_UNAVAILABLE",
+          "effectCommitted": false,
+          "preCartQuote": null,
+          "fit": null
+        },
+        {
+          "name": "change_cart_item",
+          "status": "UNAVAILABLE",
+          "selectionStatus": "COLOR_REQUIRED",
+          "effectCommitted": false,
+          "preCartQuote": null,
+          "fit": null
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 0,
+      "customer": "Chị lấy áo của bộ váy Thạch Thảo size L nhé.",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Áo tơ thêu size L hiện có hai màu Trắng (sẵn hàng) và Be (hàng đặt trước). Chị thích lấy màu nào ạ?"
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "cartBefore": null,
+      "cartAfter": null,
+      "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+      "sourceTargetResults": [
+        {
+          "name": "add_to_cart",
+          "status": "UNAVAILABLE",
+          "selectionStatus": "COLOR_REQUIRED",
+          "effectCommitted": false,
+          "preCartQuote": null,
+          "fit": null
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 1,
+      "customer": "Lấy hai chiếc cho chị, một M một L.",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ áo tơ thêu (cả size M và L) có hai màu: Trắng (sẵn hàng) và Be (hàng đặt trước). Chị lấy áo màu nào ạ?"
+        ],
+        "images": []
+      },
+      "cartBefore": null,
+      "cartAfter": null,
+      "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+      "sourceTargetResults": [
+        {
+          "name": "add_to_cart",
+          "status": "UNAVAILABLE",
+          "selectionStatus": "COLOR_REQUIRED",
+          "effectCommitted": false,
+          "preCartQuote": null,
+          "fit": null
+        },
+        {
+          "name": "add_to_cart",
+          "status": "UNAVAILABLE",
+          "selectionStatus": "COLOR_REQUIRED",
+          "effectCommitted": false,
+          "preCartQuote": null,
+          "fit": null
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 2,
+      "customer": "Em báo lại tổng cả phí ship cho chị nhé.",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, 2 áo tơ thêu (size M và L) có giá 998.000đ, phí ship 30.000đ và ưu đãi giảm 49.900đ, tổng cộng là 978.100đ ạ. Chị chọn áo màu Trắng hay Be để em chuẩn bị đơn cho chị nhé?"
+        ],
+        "images": []
+      },
+      "cartBefore": null,
+      "cartAfter": null,
+      "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+      "sourceTargetResults": [
+        {
+          "name": "quote_product",
+          "status": "OK",
+          "selectionStatus": null,
+          "effectCommitted": null,
+          "preCartQuote": {
+            "kind": "PRE_CART_TOTAL_V1",
+            "subjectRef": "SV2447",
+            "offerType": "AO",
+            "quantity": 2,
+            "deliveryRegion": null,
+            "subtotalVnd": 998000,
+            "shippingFeeVnd": 30000,
+            "discountTotalVnd": 49900,
+            "grandTotalVnd": 978100,
+            "priceHash": "c2bf6cc3e157767ef1abb8026d858b0fbf29ea9dbd23b62fbe8ca6868ced9eb5",
+            "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+            "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+            "bindingVersion": "commerce:7:3064531e11fb6427b35e6529cd7462163efc2cce1deaa7e26a75803d01a2df70",
+            "recipient": "3064531e11fb6427b35e6529cd7462163efc2cce1deaa7e26a75803d01a2df70"
+          },
+          "fit": null
+        }
+      ]
+    }
+  ],
+  "nextStage": "R2 maydispatchonlyafteritsactualtimepreflightandunchangedsource/world/helperbindings",
+  "remaining": {
+    "cases": 30,
+    "turns": 48,
+    "status": "CONDITIONAL_NOT_YET_RUN"
+  },
+  "limits": [
+    "DevelopmentN1R1only; noquality/stability/PhaseCGO/C3comparison.",
+    "HistoricalFAILcampaigns unchanged; no semantic-safety-proof claim.",
+    "Minorvoiceissuesdeferred; thisPASSmeansregisteredtaskdelivery, notsalespersuasionquality90%.",
+    "No provider callsbyreviewer; no source/evidence edits/rerun."
+  ]
+}

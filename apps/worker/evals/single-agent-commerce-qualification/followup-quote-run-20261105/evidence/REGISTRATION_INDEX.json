@@ -1,0 +1,50 @@
+{
+  "sourceSha": "48e8a42858061e16df60ffbd98f19c47fc3bbd80",
+  "outputs": [
+    {
+      "label": "r1",
+      "out": "../c3-followup-model-r1-sealed-20261105-01",
+      "pendingRegistrationHash": "43a416488e1c6d757e2e46723d15508d97a3b742ab490815849de63c05fb1f7f",
+      "worldHash": "3fdf95b12080e6003da655fecf343ea216ea2e4af09c8b0b28a025a34d9733d2",
+      "cases": 4,
+      "turns": 7,
+      "maxRequests": 28,
+      "ready": 4,
+      "sourceGaps": 0
+    },
+    {
+      "label": "r2",
+      "out": "../c3-followup-model-r2-sealed-20261105-01",
+      "pendingRegistrationHash": "2dba34d767dcaa9461c2a813fd171c98280aa25dd0f344f38ca95f52cc812599",
+      "worldHash": "3fdf95b12080e6003da655fecf343ea216ea2e4af09c8b0b28a025a34d9733d2",
+      "cases": 9,
+      "turns": 17,
+      "maxRequests": 68,
+      "ready": 9,
+      "sourceGaps": 0
+    },
+    {
+      "label": "remainder",
+      "out": "../c3-followup-model-remainder-sealed-20261105-01",
+      "pendingRegistrationHash": "bcc6ea54d33b0510094cfdc6b2602b722e7b886078212844832cbce83a54939e",
+      "worldHash": "3fdf95b12080e6003da655fecf343ea216ea2e4af09c8b0b28a025a34d9733d2",
+      "cases": 20,
+      "turns": 24,
+      "maxRequests": 96,
+      "ready": 19,
+      "sourceGaps": 1
+    },
+    {
+      "label": "checkout",
+      "out": "../c3-followup-model-checkout-sealed-20261105-01",
+      "pendingRegistrationHash": "2ca794f2d4665cc3e713f5a60604e996788302770439656b7b9e333c00d226b9",
+      "worldHash": "3fdf95b12080e6003da655fecf343ea216ea2e4af09c8b0b28a025a34d9733d2",
+      "cases": 1,
+      "turns": 7,
+      "maxRequests": 28,
+      "ready": 1,
+      "sourceGaps": 0
+    }
+  ],
+  "providerRequests": 0
+}

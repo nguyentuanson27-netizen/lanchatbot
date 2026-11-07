@@ -224,6 +224,7 @@ export function createCommerceHandoffTools(input: {
       } catch { /* Unknown/rejected commits never authorize output or another attempt. */ }
       return {disposition:"NO_SEND",reason:"FALLBACK_HANDOFF_UNPROVED",text:null,fallbackId:null};
     },
+    requestSilentHandoff:async(reason)=>request(reason,false,true),
     handoffStatus:()=>attempts?{attempts,status,reason:attemptedReason}:null,
     async readback() { await input.base.readback(); await read(); return snapshot(); }, async invokeBatch(calls) {
     if (committed || uncertain || pending) return calls.map(() => ({ status: "REJECTED", reason: "HANDOFF_TERMINAL" }));

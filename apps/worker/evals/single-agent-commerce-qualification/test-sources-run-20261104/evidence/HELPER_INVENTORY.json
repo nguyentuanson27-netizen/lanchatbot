@@ -1,0 +1,59 @@
+{
+  "sourceSha": "e14d26594bb8831909788007f92fba81b3cd54e4",
+  "providerRequestsBeforeInputReview": 0,
+  "generationRetry": 0,
+  "artifacts": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-test-sources-model-make-helpers-20261104-01.py",
+      "sha256": "4435bc032eed5813fc2f3f5a8dd417256708d662264c56811c41d21403af6bb4"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-test-sources-model-prepare-20261104-01.mjs",
+      "sha256": "c791bc052e1db2b249177b799e270a8af5a7165a012676c42b613890f240b2d9"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-test-sources-model-finalize-inputs-20261104-01.mjs",
+      "sha256": "fe383e3bd6416038e3f28fe0c6ae7df8ac222df641e89db8d05da5851e4b68fd"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-test-sources-model-launch-20261104-01.py",
+      "sha256": "43e35ad1bd5dc48e2ccab8265548873fdea7c688876a772c94ede7bc4c14d3f6"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-test-sources-model-purchase-accounting-20261104-01.mjs",
+      "sha256": "fa5160f2fd5f47c9aca9dae7c34986d3013e18672a394fd13c16984932f9632a"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-test-sources-model-remainder-accounting-20261104-01.mjs",
+      "sha256": "03fc306fbde686a660f80a586a015136482574f7fdd777c38f4f6173e629b530"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-test-sources-model-report-20261104-01.py",
+      "sha256": "3b4487f8472f4ed547fa12d707a75a246b5dcbd88f32f90fbf1306ff97122c28"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-source-wrapper-20261103-02.py",
+      "sha256": "21a677bf3ed5afa959ed00fb87053edabe603b677fbb4c0db7d099f140ac68d3"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-qualification\\test-support-sources.mjs",
+      "sha256": "59a4c14a0286d64085af09af6e8e4b9cb7c2f5900a846aa294fa99e50b51b271"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-qualification\\test-color-source.mjs",
+      "sha256": "fe7cac68a6d3b4d868ffda5192af7e9db20ab293c87e141ee4d0aa8ec8d90f01"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "sha256": "af7c3b70679780dfe78b784e3eea5c44e6c0a201b07956b89432c12fbdffb1b8"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\handoff-matrix.candidate.json",
+      "sha256": "69ff7dadeec5acda4416e7872faaad342ea34960d32db2a630b9a0606beccc92"
+    },
+    {
+      "path": "C:/Users/nguye/Documents/Sản phẩm AI/c3-test-sources-model-purpose-amendment-20261104-01.mjs",
+      "sha256": "d4b8cb35e2c226b2db9a13c93a4f461b8dfece2637a49af99cbeee66f45933be"
+    }
+  ]
+}

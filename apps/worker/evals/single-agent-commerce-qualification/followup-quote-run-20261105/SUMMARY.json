@@ -1,0 +1,90 @@
+{
+  "status": "STOP_R2_MATERIAL_TASK_FAILURE",
+  "runSourceSha": "48e8a42858061e16df60ffbd98f19c47fc3bbd80",
+  "worldHash": "3fdf95b12080e6003da655fecf343ea216ea2e4af09c8b0b28a025a34d9733d2",
+  "groups": [
+    {
+      "label": "r1",
+      "cases": 4,
+      "turns": 7,
+      "terminalCounts": {
+        "SEND_ELIGIBLE": 7
+      },
+      "generationRecords": 22,
+      "generationHttp": 22,
+      "gate": "PASS",
+      "materialTaskFailures": 0
+    },
+    {
+      "label": "r2",
+      "cases": 9,
+      "turns": 17,
+      "terminalCounts": {
+        "HANDOFF": 6,
+        "NO_SEND": 3,
+        "SEND_ELIGIBLE": 6,
+        "CODE_OWNED_SEND": 2
+      },
+      "generationRecords": 31,
+      "generationHttp": 29,
+      "gate": "FAIL",
+      "materialTaskFailures": 6
+    }
+  ],
+  "casesExecuted": 13,
+  "turnsExecuted": 24,
+  "terminalCounts": {
+    "SEND_ELIGIBLE": 13,
+    "HANDOFF": 6,
+    "NO_SEND": 3,
+    "CODE_OWNED_SEND": 2
+  },
+  "capturedTexts": 15,
+  "capturedImages": 7,
+  "acceptedOutbox": 22,
+  "notRunCases": 21,
+  "notRunTurns": 31,
+  "generationRecords": 53,
+  "generationHttp": 51,
+  "generationRoleCounts": {
+    "OWNER": 39,
+    "VERIFIER": 14
+  },
+  "generationStatuses": {
+    "OK": 49,
+    "MALFORMED": 2,
+    "PROVIDER_ERROR": 2
+  },
+  "authHttpSeparate": 2,
+  "auxiliaryRequestRecordsSeparate": 2,
+  "maxHttpPerGeneration": 1,
+  "retry": 0,
+  "verifierVerdicts": {
+    "PASS": 13,
+    "FAIL": 1
+  },
+  "verifierLatencyMs": {
+    "samples": 14,
+    "p50": 9302.377500000002,
+    "p95": 19231.720700000005
+  },
+  "addedVerificationReadbackLatencyMs": {
+    "samples": 14,
+    "p50": 11280.963199999998,
+    "p95": 21607.532799999986
+  },
+  "tokenUsage": {
+    "inputObserved": 545167,
+    "outputObserved": 41975,
+    "usageRows": 51,
+    "cost": "NOT_EXPOSED"
+  },
+  "fallbackTextCount": 0,
+  "handoffRate": 0.25,
+  "noSendRate": 0.125,
+  "allTestDatabasesDropped": true,
+  "sourceBusinessWrites": 0,
+  "liveSend": false,
+  "wholeReplyQuality": "NOT_GRADED",
+  "qualification": "BLOCKED_UNCHANGED_C3_NOT_RUN"
+}

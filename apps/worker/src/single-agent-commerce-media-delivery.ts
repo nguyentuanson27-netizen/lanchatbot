@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { MEDIA_FRESH_FOR_SECONDS, CommerceMediaDeliveryBindingV1Schema as bindingSchema,
+import { CommerceMediaDeliveryBindingV1Schema as bindingSchema,
   type CommerceMediaDeliveryImageV1 as MediaDeliveryImage, type CommerceMediaDeliveryBindingV1 as CommerceMediaDeliveryBinding } from "@lana/contracts";
 import type { RuntimePolicyBundle } from "@lana/chat-runtime";
 import {mediaObservationTime,type StableProductDocument} from "@lana/business-tools";
@@ -49,7 +49,7 @@ export function createCommerceMediaPreSendGate(input: {
       const policy = await input.policy(b);
       const validAt = (at: Date) => commerceDeliveryPolicyHash(policy, b.pageId, b.shopId, at) === b.policyHash &&
         b.images.every(image => Date.parse(image.observedAt) <= at.getTime() &&
-          Date.parse(image.expiresAt) > at.getTime() && Date.parse(image.observedAt) + MEDIA_FRESH_FOR_SECONDS * 1000 > at.getTime());
+          (image.expiresAt===null||Date.parse(image.expiresAt)>at.getTime()));
       if (authority.stateVersion !== b.revision || authority.generation !== b.generation || !authority.appSendEnabled || authority.killSwitch ||
         authority.routingOwner !== "APP" || commerceHash(authority.state) !== b.stateHash ||
         !validAt(input.clock())) return blocked();
@@ -59,8 +59,7 @@ export function createCommerceMediaPreSendGate(input: {
         safeRecognitionImageUrl(expected.url, input.allowedHostSuffixes);
         if (!product || product.productId !== expected.productId || !asset || asset.reviewStatus !== "APPROVED" || !asset.metadataVerified ||
           !asset.sourceContentSha256 || !/^[a-f0-9]{64}$/u.test(asset.sourceContentSha256) ||
-          Date.parse(expected.observedAt) > now.getTime() || Date.parse(expected.expiresAt) <= now.getTime() ||
-          Date.parse(expected.observedAt) + MEDIA_FRESH_FOR_SECONDS * 1000 <= now.getTime() ||
+          Date.parse(expected.observedAt) > now.getTime() || (expected.expiresAt!==null&&Date.parse(expected.expiresAt)<=now.getTime()) ||
           mediaObservationTime(asset,product.observedAt) !== Date.parse(expected.observedAt) ||
           commerceHash({ productId: product.productId, catalogVersion: product.catalogVersion, image: asset }) !== expected.sourceVersion) return blocked();
       }

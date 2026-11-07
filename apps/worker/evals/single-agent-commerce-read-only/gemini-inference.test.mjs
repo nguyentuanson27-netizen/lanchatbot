@@ -1,4 +1,35 @@
 import test from 'node:test';
+test('component size scope remains explicit in decoded args and signed native content',()=>{
+ const args={subjectRef:'P1',fitScope:'COMPONENT',componentRole:'TOP'};
+ const raw=body([{functionCall:{name:'recommend_size',args},thoughtSignature:'signed-component'}]);
+ const parsed=parseGeminiGeneration(raw);assert.deepEqual(parsed.calls[0].args,args);
+ assert.deepEqual(parsed.content,raw.candidates[0].content);
+ for(const scope of [{fitScope:null},{fitScope:'COMPONENT'},{fitScope:'PRODUCT',componentRole:'TOP'},{fitScope:'COMPONENT',componentRole:'BAD'}])
+  assert.throws(()=>parseGeminiGeneration(body([{functionCall:{name:'recommend_size',args:{subjectRef:'P1',...scope}}}])),/OWNER_TOOL_OUTPUT/);
+ const r=request();r.availableTools=['recommend_size'];const d=buildGeminiCommerceRequest(r).tools[0].functionDeclarations[0];
+ assert.deepEqual(d.parametersJsonSchema.properties.fitScope.enum,['PRODUCT','COMPONENT']);
+});
+test('unrecorded source color is explicit and never becomes a customer selection',()=>{
+ const r=request();r.context.runtimeProducts=[{ref:'product:P1',subjectRef:'P1',presentation:{variants:[{variantId:'P1-M',color:'__NO_COLOR__',size:'M'}]}}];
+ const before=structuredClone(r.context);
+ const view=JSON.parse(buildGeminiCommerceRequest(r).contents[0].parts[0].text).trusted;
+ assert.deepEqual(view.products[0].colorEvidence,{sourceColorLabels:[],unrecordedColorInSource:true,meaning:'VARIANT_LABELS_NOT_CUSTOMER_SELECTION_OR_STOCK'});
+ assert.deepEqual(r.context,before);
+});
+test('CompactV2 applies the existing image frame cap separately from the unchanged text cap',()=>{
+ const r=request();r.ownerContextPresentation='VI_DATA_BLOCKS_COMPACT_V2';r.availableTools=[];
+ r.context.boundSubjects=[{ref:'P1',kind:'PRODUCT',label:'Áo',bindingVersion:'v1'}];
+ const data=Buffer.alloc(60000,1).toString('base64'),sha256=createHash('sha256').update(Buffer.from(data,'base64')).digest('hex');
+ r.catalogImages=[{subjectRef:'P1',assetRef:'asset:unit',sha256,mimeType:'image/jpeg',data}];
+ r.context.policyLiterals.push({ref:'vision:unit',text:JSON.stringify({subjectRef:'P1',assets:[{assetRef:'asset:unit',sha256,mimeType:'image/jpeg'}]})});
+ let budget;const result=buildGeminiCommerceRequest(r,undefined,undefined,value=>{budget=value;});
+ assert(Buffer.byteLength(JSON.stringify(result))>65536);assert(Buffer.byteLength(JSON.stringify(result))<=1507328);
+ assert.equal(result.contents[1].parts[1].inlineData.data,data);
+ assert.equal(budget.inlineImageBytes,60000);assert.equal(budget.textLimitBytes,65536);assert(Object.values(budget).every(v=>typeof v==='number'));
+ assert(budget.presentedTextFrameBytes<=65536);
+ const oversized=request();oversized.ownerContextPresentation='VI_DATA_BLOCKS_COMPACT_V2';oversized.instructions='x'.repeat(65536);
+ assert.throws(()=>buildGeminiCommerceRequest(oversized),/OWNER_REQUEST_BOUND/);
+});
 test('Gemini 3.8 Flash uses its exact endpoint without unsupported candidateCount',async()=>{
  let url,wire;
  const cfg={...config,model:'gemini-3.8-flash'};
@@ -34,6 +65,25 @@ import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {createCommerceVerifier} from './protocol.mjs';
 import {createGeminiCommerceInference,parseGeminiGeneration,buildGeminiCommerceRequest,stateDeclarations,effectDeclarations} from './gemini-inference.mjs';
+
+test('runtime callable manifest prunes declarations while preserving the configured capability list',()=>{
+ const r=request();r.availableTools=['recommend_size','change_cart_item','confirm_purchase','request_handoff'];r.callableTools=['request_handoff'];
+ r.toolsAllowed=true;r.toolBudget={roundsRemaining:2,callsRemaining:6};
+ const before=structuredClone(r),wire=buildGeminiCommerceRequest(r);
+ assert.deepEqual(wire.tools[0].functionDeclarations.map(d=>d.name),['request_handoff']);
+ const execution=JSON.parse(wire.contents[0].parts[0].text).trusted.execution;
+ assert.deepEqual(execution.availableTools,r.availableTools);assert.deepEqual(execution.callableTools,['request_handoff']);
+ assert.deepEqual(r.context,before.context);
+});
+test('native product-read schema requires a subject as well as a closed selection branch',()=>{
+ assert.throws(()=>parseGeminiGeneration(body([{functionCall:{name:'read_product',args:{selection:'SINGLE',offerType:'AO'}}}])),/OWNER_TOOL_OUTPUT/);
+});
+test('replacement color supports the same null value as the runtime selection contract',()=>{
+ const r=request(),d=buildGeminiCommerceRequest(r,effectDeclarations).tools[0].functionDeclarations.find(d=>d.name==='change_cart_item');
+ assert.equal(d.parameters.properties.color.nullable,true);assert(d.parameters.properties.action.enum.includes('REPLACE_LINE'));
+ const raw=body([{functionCall:{name:'change_cart_item',args:{subjectRef:'line',action:'REPLACE_LINE',targetSubjectRef:'P1',offerType:'AO',color:null}}}]);
+ const decoded=parseGeminiGeneration(raw);assert.equal(decoded.calls[0].args.color,null);assert.deepEqual(decoded.content,raw.candidates[0].content);
+});
 
 test('actual owner wire describes silent handoff consistently without changing receipts, history or tool authority',()=>{
  const r=request();r.availableTools=['request_handoff','select_product_media'];
@@ -983,4 +1033,23 @@ test('opening quote and first-contact context reach the owner without evaluator 
  }})(r);
  assert.equal(wire.contents.at(-1).parts[0].functionResponse.response.data.openingQuote.text,'Áo P1 hiện có giá 499.000đ.');
  assert.match(JSON.stringify(wire),/firstContact/);assert.doesNotMatch(JSON.stringify(wire),/EVALUATOR_OPENING|EVALUATOR_EXPECTED/);
+});
+
+
+test('dangling selection-result references stop the actual adapter before auth or HTTP',async()=>{
+ const r=request();r.ownerContextPresentation='VI_DATA_BLOCKS_COMPACT_V2';
+ r.contents=[{role:'user',parts:[{functionResponse:{name:'add_to_cart',response:{status:'UNAVAILABLE',data:{selectionEvidenceFromProduct:{subjectRef:'P1',contentHash:'a'.repeat(64)},selectionOptionsFromEvidence:true}}}}]}];
+ let calls=0,auth=0;const infer=createGeminiCommerceInference(config,{getToken:async()=>{auth++;return 'test-token';},fetchImpl:async()=>{calls++;throw Error('MUST_NOT_FETCH');}});
+ await assert.rejects(()=>infer(r),error=>error.message==='PROVIDER_ERROR'&&error.telemetry.providerRequests===0);assert.equal(calls,0);assert.equal(auth,0);
+});
+
+
+test('actual malformed read telemetry carries schema/argument shape without values',async()=>{
+ const r=request(),privateKey='PRIVATE_FIELD_PERSONAL_ADDRESS',privateValue='PRIVATE_VALUE_PHONE';
+ const infer=createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async()=>new Response(JSON.stringify(body([{functionCall:{name:'read_product',args:{subjectRef:'P1',selection:'SINGLE',offerType:'AO',[privateKey]:privateValue}}}])))});
+ await assert.rejects(()=>infer(r),e=>{
+  assert.equal(e.telemetry.providerRequests,1);assert.match(e.telemetry.requestSchemaHash,/^[a-f0-9]{64}$/);
+  const d=e.telemetry.toolOutputDiagnostic;assert.equal(d.argumentShape.unknownFieldCount,1);assert.equal(d.field,'UNKNOWN_FIELD');
+  assert(!JSON.stringify(e.telemetry).includes(privateKey));assert(!JSON.stringify(e.telemetry).includes(privateValue));return true;
+ });
 });

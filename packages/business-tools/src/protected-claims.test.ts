@@ -37,6 +37,11 @@ function verifiedFacts(productId: string, salePriceVnd: number) {
 }
 
 describe("DF05 typed protected-claim provenance", () => {
+  it("retains the real asset observation without minting an artificial future expiry",()=>{
+    const claims=buildProtectedMediaClaimsV1({productId:"P1",imageUrls:["https://content.pancake.vn/old.jpg"],
+      sourceVersion:"media-1",observedAt:"2025-01-01T00:00:00.000Z",expiresAt:null});
+    expect(claims[0]?.provenance).toMatchObject({observedAt:"2025-01-01T00:00:00.000Z",expiresAt:null});
+  });
   it("adapts canonical cart policy decisions into shipping and promotion claims", () => {
     const claims = buildProtectedCartPolicyClaimsV1({
       cart: {

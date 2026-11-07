@@ -1,0 +1,151 @@
+{
+  "kind": "PRE_PROVIDER_TASK_PURPOSE_METADATA_AMENDMENT",
+  "sourceSha": "e14d26594bb8831909788007f92fba81b3cd54e4",
+  "worldHash": "524aeac4caaa99c1042b4347f4f945a317ae3351cd1b304cdd11e5838b78f1d3",
+  "providerResultsObserved": 0,
+  "changedAt": "2026-11-04T08:22:31.903Z",
+  "changes": [
+    {
+      "label": "purchase",
+      "beforePendingHash": "6253089d7db83ae5c5d05dd3847554325805f58066c8f55117e587f9919f9538",
+      "afterPendingHash": "1a633ff2cdaa9d5bcbbd53c134f941e2b6111e8741a29d1b33037fd4e1ab9826",
+      "customerScriptsHash": "71048240866c61e7e37988cfb6c91673b8aee10fdacdc18c899ef3089c53f137",
+      "rows": [
+        {
+          "caseId": "c-po-20261031-p02",
+          "beforePurpose": "SHOP_GAP",
+          "afterPurpose": "SALE",
+          "beforeReadinessHash": "10867ebe5838741f01fa56d2ae86c93588fd992854355313173190539005b5ed",
+          "afterReadinessHash": "7f852daa565f026ccd612a3fab34e350127ecb2171f6e1a53a9775c4a9e765e7"
+        },
+        {
+          "caseId": "c-po-20261031-p07",
+          "beforePurpose": "SHOP_GAP",
+          "afterPurpose": "SALE",
+          "beforeReadinessHash": "07f33c7513180b9eb2bb1496d4c17365f6aa7a0383df4866b251db839c9fb588",
+          "afterReadinessHash": "4c6e9e90454675ed36a5672fdb5c772fa853a88e09f44dee8252ab77653078e1"
+        },
+        {
+          "caseId": "c-po-20261031-p09",
+          "beforePurpose": "SHOP_GAP",
+          "afterPurpose": "SALE",
+          "beforeReadinessHash": "c350ea87e5dfc6c8f3e2d8d3f38e7eeda7ebbadd010845d93e57d069bd145ca2",
+          "afterReadinessHash": "537871946f3372b6478958698404f12d7678055fa7566e1263832fe7f6c5d5ec"
+        },
+        {
+          "caseId": "c-po-20261031-p10",
+          "beforePurpose": "SHOP_GAP",
+          "afterPurpose": "SALE",
+          "beforeReadinessHash": "0ed10f00185d93297234e7c04dcc406b2a6c1a97af64f8766d57273feae30539",
+          "afterReadinessHash": "39b48da832c55fe2578e787859056673e9dc6595ab5826184391f83f2ff15efc"
+        },
+        {
+          "caseId": "c-po-20261031-h02",
+          "beforePurpose": "SHOP_GAP",
+          "afterPurpose": "SALE",
+          "beforeReadinessHash": "a918be4fb848d3aa6d0fdea3e149897bf15956e6e325053b39d2f08c529bbabf",
+          "afterReadinessHash": "05f66533614d65f74e4b8b353e649e777903d40cb267acfa0094b414992716a7"
+        },
+        {
+          "caseId": "c-20261028-s05",
+          "beforePurpose": "SHOP_GAP",
+          "afterPurpose": "SALE",
+          "beforeReadinessHash": "97ab480a96a0f6bd5d36cfff10c4ebef0add537ad043c6a5f066a798bc83646d",
+          "afterReadinessHash": "bd330062f18a1ebe33a49b7511f7aff891d9a41981463169390c2831536a2df2"
+        },
+        {
+          "caseId": "c-20261028-s06",
+          "beforePurpose": "SHOP_GAP",
+          "afterPurpose": "SALE",
+          "beforeReadinessHash": "a6e5e8f4e9d8e896781523a7a9982b3363068995aacc8b497a813af1a3c08156",
+          "afterReadinessHash": "b42368a78e99621d85deaa87471a7029d6b199dd629bb45955980e0c8482a6aa"
+        },
+        {
+          "caseId": "c-20261028-s08",
+          "beforePurpose": "SHOP_GAP",
+          "afterPurpose": "SALE",
+          "beforeReadinessHash": "eea7331d382b93877db6443b54572f35c6b371996004c1ad671cc6cfc466856a",
+          "afterReadinessHash": "8d5cee37d4840cb0735f3a3a59ce6ca8e4bbc49bb1bfe6cf8a0f3287fc678b8b"
+        },
+        {
+          "caseId": "c-20261028-s09",
+          "beforePurpose": "SHOP_GAP",
+          "afterPurpose": "SALE",
+          "beforeReadinessHash": "a6e5e8f4e9d8e896781523a7a9982b3363068995aacc8b497a813af1a3c08156",
+          "afterReadinessHash": "b42368a78e99621d85deaa87471a7029d6b199dd629bb45955980e0c8482a6aa"
+        },
+        {
+          "caseId": "c-20261028-s15",
+          "beforePurpose": "SHOP_GAP",
+          "afterPurpose": "SALE",
+          "beforeReadinessHash": "f70665f67f999cb1d770e4fd29a58b94067c5d2268b36a7d0966b5b9768a33a7",
+          "afterReadinessHash": "b10dd31961556bb35761d0d65459e62639fa3d6064df5fdb0a3028da3044ec0e"
+        },
+        {
+          "caseId": "c-20261028-j2",
+          "beforePurpose": "SHOP_GAP",
+          "afterPurpose": "SALE",
+          "beforeReadinessHash": "b276a94e2bf25535a838caedba0cc32db2d42d1935da2d799bcadc0d205a7b02",
+          "afterReadinessHash": "d3c6f95586f4fc4697b7a819eb03332aa5048a514e12f5fe99dd9c6b8716414c"
+        }
+      ]
+    },
+    {
+      "label": "remainder",
+      "beforePendingHash": "89ea39d99cfad755b550ad015edf92cbfe5707a65d510e3dbc4d05b8964c60ce",
+      "afterPendingHash": "f553593639c02905cc9f54691c66c8f0dbf2f2e245587e9fc4f2d9a53f73dc9a",
+      "customerScriptsHash": "9c9ea9e77a6f774b9ae7fca4d9b166544f21daaaf2d6256c5089c32ac28aa9e9",
+      "rows": [
+        {
+          "caseId": "c-20261028-s01",
+          "beforePurpose": "SHOP_GAP",
+          "afterPurpose": "SALE",
+          "beforeReadinessHash": "a918be4fb848d3aa6d0fdea3e149897bf15956e6e325053b39d2f08c529bbabf",
+          "afterReadinessHash": "05f66533614d65f74e4b8b353e649e777903d40cb267acfa0094b414992716a7"
+        },
+        {
+          "caseId": "c-20261028-s02",
+          "beforePurpose": "SHOP_GAP",
+          "afterPurpose": "SALE",
+          "beforeReadinessHash": "49d9afd1aeec7914fff3498989f058bc7d9ec82629e9bcbae282c95ae5834abf",
+          "afterReadinessHash": "7389c41bd936971c891096d0c69fcf7f6091f02a179e734fbae318af93d8d39a"
+        },
+        {
+          "caseId": "c-20261028-s03",
+          "beforePurpose": "SHOP_GAP",
+          "afterPurpose": "SALE",
+          "beforeReadinessHash": "aed33c8eef8f0a3eaae5e7dfb3f054861921ad0ac0a239b2d1e3a49c9c67367a",
+          "afterReadinessHash": "bd9566b8aba9abd3ab3af33b5dabb33c5ed0d6f8c36cb465080a064c4cd3895f"
+        },
+        {
+          "caseId": "c-20261028-s04",
+          "beforePurpose": "SHOP_GAP",
+          "afterPurpose": "SALE",
+          "beforeReadinessHash": "5e127faffd793c5f59cd622780b18ce42fb2a9680fb34708963482ebb64abfbb",
+          "afterReadinessHash": "5a58cdcbe321f85f236d1af915336cd15210721eca622c98764e9811dfc79b4e"
+        },
+        {
+          "caseId": "c-20261028-s07",
+          "beforePurpose": "SHOP_GAP",
+          "afterPurpose": "SALE",
+          "beforeReadinessHash": "987feffe9d0b90fe224d5fc0081eeac665f4f3213478fd2a8b28b6ffa0d94ba5",
+          "afterReadinessHash": "283427a730daf67f1f5b2103b4b2ce9faa7dedfa4cd3e969478a4b08cedf2ff9"
+        },
+        {
+          "caseId": "c-20261028-s13",
+          "beforePurpose": "SHOP_GAP",
+          "afterPurpose": "SALE",
+          "beforeReadinessHash": "7a12d50fb833fa92b49f8595d56b399458d9e674490ee3fcca583d910e91556c",
+          "afterReadinessHash": "7feefdf775efa1bd7c7c31909a88ecb43832c30505b7d591d6b5f690c4d2d2e6"
+        },
+        {
+          "caseId": "c-20261028-s16",
+          "beforePurpose": "SHOP_GAP",
+          "afterPurpose": "SALE",
+          "beforeReadinessHash": "057fc087b47981227e96fcdf4f577c4d80c8d329e51879c674bf9156e8e5188e",
+          "afterReadinessHash": "ca55d98d60109d5576d480e241ab51f067fb4bd7dac6a864d3f713418bf9aad2"
+        }
+      ]
+    }
+  ]
+}

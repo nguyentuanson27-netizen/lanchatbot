@@ -170,15 +170,15 @@ function buildMediaFacts(
 }
 
 describe("realtime ProductFactsV2 media projection", () => {
-  it("uses current per-image revalidation for pre-send facts and excludes stale or revoked assets",()=>{
+  it("keeps old approved assets without an age expiry and still excludes revoked proofs",()=>{
     const now=new Date("2026-10-28T12:00:00.000Z"),checkedAt="2026-10-28T11:00:00.000Z";
     const current=image("FRONT",["AO"],{url:"https://content.pancake.vn/current.jpg",observedAt:"2026-09-01T00:00:00.000Z",revalidation:{status:"VALID",checkedAt}});
     const revoked=image("BACK",["AO"],{url:"https://content.pancake.vn/revoked.jpg",observedAt:checkedAt,revalidation:{status:"INVALID"}});
     const stale=image("SIDE",["AO"],{url:"https://content.pancake.vn/stale.jpg",observedAt:"2026-09-01T00:00:00.000Z"});
     const facts=buildRealtimeProductFactsV2({snapshot:mediaSnapshot("P1",["TOP"],now.toISOString()),
       product:mediaProduct("P1","2026-09-01T00:00:00.000Z",[current,revoked,stale]),policy:null,now});
-    expect(facts?.media.metadata).toMatchObject({observedAt:checkedAt,freshnessState:"FRESH"});
-    expect(facts?.media.assets.map(a=>a.url)).toEqual([current.url]);
+    expect(facts?.media.metadata).toMatchObject({observedAt:"2026-09-01T00:00:00.000Z",expiresAt:null,freshForSeconds:null,freshnessState:"FRESH"});
+    expect(facts?.media.assets.map(a=>a.url)).toEqual([current.url,stale.url]);
   });
   it("preserves registry-owned content and attributes in ProductFacts V2", () => {
     const observedAt = "2026-08-10T00:00:00.000Z";

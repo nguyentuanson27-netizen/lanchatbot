@@ -1,0 +1,26 @@
+{
+  "kind": "AUTHOR_PRIMARY_POST_RUN_AUDIT_NOT_INDEPENDENT",
+  "status": "PASS",
+  "runSourceSha": "1f6a358bc7f26865ca28caa1021614f3b61184a0",
+  "artifactHashes": 55,
+  "nativeTurns": 20,
+  "generationRecords": 21,
+  "requestBodies": 20,
+  "providerRequests": 20,
+  "verifierBodies": 2,
+  "acceptedText": 1,
+  "acceptedImages": 2,
+  "acceptedUnits": 3,
+  "silentHandoffNoSendNoPayload": true,
+  "humanFollowupsNoModelsOrStateWrites": true,
+  "cleanSource": true,
+  "databaseDropped": true,
+  "liveSend": false,
+  "noCaseOverlap": true,
+  "quality": "NOT_GRADED",
+  "independentPostRunReview": "NOT_COMPLETED_USAGE_LIMIT",
+  "limitations": [
+    "Primary author check does not replace independent post-run audit.",
+    "No qualification/C3/GO or stable quality claim."
+  ]
+}

@@ -1,0 +1,935 @@
+{
+  "status": "APPROVE_EVIDENCE_INTEGRITY_FAIL_R2_TASK_GATE",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-05T16:14:17.588Z",
+  "sourceSha": "48e8a42858061e16df60ffbd98f19c47fc3bbd80",
+  "registrationHash": "293f3c01086378e0723b10bc4f5de411d87c06b1d310028af6fd477ae16118a1",
+  "worldHash": "3fdf95b12080e6003da655fecf343ea216ea2e4af09c8b0b28a025a34d9733d2",
+  "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\CANDIDATE_EVIDENCE.partial.json",
+  "evidenceSha256": "d073ede30ba921e5502572b653dd95d5e1796ba9be94cc007a826cd9026e0c29",
+  "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\integration.json",
+  "integrationSha256": "754aaf693192ed8cbe8306f376433daa486965353c3b2fa2287d618991543fe2",
+  "casesRegistered": 9,
+  "casesExecuted": 9,
+  "capturedTurns": 17,
+  "generationCount": 31,
+  "providerRequests": 29,
+  "ownerGenerations": 24,
+  "verifierGenerations": 7,
+  "authEvents": 1,
+  "generationStatuses": {
+    "MALFORMED": 2,
+    "OK": 27,
+    "PROVIDER_ERROR": 2
+  },
+  "terminalCounts": {
+    "HANDOFF": 6,
+    "NO_SEND": 3,
+    "SEND_ELIGIBLE": 6,
+    "CODE_OWNED_SEND": 2
+  },
+  "materialTaskFailures": 6,
+  "caseOutcomes": [
+    {
+      "caseId": "c-po-20261031-p04",
+      "result": "FAIL",
+      "category": "PROVIDER_COMPLETION",
+      "reason": "FirstOWNER HTTP200 MALFORMED_FUNCTION_CALL; notquota/source/bound; T2silence followsHUMANowner."
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "result": "FAIL",
+      "category": "CONTINUATION_BOUND",
+      "reason": "T1usabletwo-designclarification; T2two read_product followed local66579-byte rawrequest>65536,0HTTPcontinuation."
+    },
+    {
+      "caseId": "c-20261028-s03",
+      "result": "FAIL",
+      "category": "OWNER_MEDIA_SEMANTICS",
+      "reason": "DETAIL image notconfirmedlace; ownerclaimedlacecloseup,verifierrejected,actualhandoff."
+    },
+    {
+      "caseId": "c-20261028-s13",
+      "result": "FAIL",
+      "category": "OWNER_READ_PLAN_AND_REFERENT",
+      "reason": "Initialtwo linkedparentsAO shareSV2447-AO component; ownersearchrejectedPRODUCT_BOUND thenreadsAO both andhandoffPRODUCT_AMBIGUOUS withoutquote. Notmissingproductsource."
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "result": "FAIL",
+      "category": "CONTINUATION_BOUND",
+      "reason": "apply_customer_statecommitted butACK blocked by66088-byte continuation,0HTTP; no unknowncommit."
+    },
+    {
+      "caseId": "c-20261028-s16",
+      "result": "PASS_WITH_TEST_ASSUMPTION",
+      "category": "MEDIA_ROUTE",
+      "reason": "Approvedtestfeedbackattachment+scopedtextsent; notgenuinecustomerprovenance."
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "result": "PASS_WITH_DEFERRED_VOICE_LIMITS",
+      "category": "CURRENT_SIZE_CORRECTION",
+      "reason": "All3turns deliveredM,currentchart/bodymax/correction/fitpreferenceused; repeatedmeasurementvoice remainsdeferred."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "result": "FAIL",
+      "category": "PROVIDER_COMPLETION",
+      "reason": "FirstOWNER HTTP200 MALFORMED_FUNCTION_CALL; subsequent2turns HUMANsilence samefailure."
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "result": "PASS_REGISTERED_PARTIAL_CHECKOUT",
+      "category": "CODE_INTAKE",
+      "reason": "Realcart829000receipt; codeasksname; CODpersistedwhenprovided,name stillmissing.2actualcodequestions,notno-send,notfullcheckout."
+    }
+  ],
+  "checks": {
+    "all17RawHashes": true,
+    "all29WireHashesRuntimeFirewall": true,
+    "allEligibleCurrentBindingsUnchanged": true,
+    "allActualTextsAndImagesAcceptedOutbox": true,
+    "silentHandoffAndHumanSilence": true,
+    "errorsRetainedNoGenerationRetry": true,
+    "CODPersistedAndMissingNameQuestionsCorrect": true,
+    "sourceDirty": false,
+    "testDatabaseDropped": true,
+    "liveSend": false,
+    "hardStop": false
+  },
+  "nativeArtifacts": [
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 0,
+      "artifact": "native-15ad6a9a2d2beda6c84fb07792f5186d87bbf4c386853fff32c01cf44b4f7ba3-turn-0.json",
+      "sha256": "f261b9df32fce8f4a702cdabd4a7d1b819793dd3fbe1ead9295816fcc69e90d5"
+    },
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 1,
+      "artifact": "native-15ad6a9a2d2beda6c84fb07792f5186d87bbf4c386853fff32c01cf44b4f7ba3-turn-1.json",
+      "sha256": "e87e07bf340caa8a5e73d38bf3ffda5c06479ec472c285e970f5d963422f3bce"
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "turnIndex": 0,
+      "artifact": "native-17e2f9dc6371e64a6fcf296720d0396439b19e6be8171a3951d8e7bcc2ce1d09-turn-0.json",
+      "sha256": "864cdc46070707c00f44e819475a36ba066b5417f5a506d54435bd8d28003be7"
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "turnIndex": 1,
+      "artifact": "native-17e2f9dc6371e64a6fcf296720d0396439b19e6be8171a3951d8e7bcc2ce1d09-turn-1.json",
+      "sha256": "43357488dca810958322e8f66b07b74748d5df310975c62b3f81d872f89bc949"
+    },
+    {
+      "caseId": "c-20261028-s03",
+      "turnIndex": 0,
+      "artifact": "native-571c7e94cf54653a49302907657e530247a2d88900c48a1576be472bd2e0b6e9-turn-0.json",
+      "sha256": "c6ebb1f3548756c8638185505710952c3a6d0640c11792366d8669ab61039b9e"
+    },
+    {
+      "caseId": "c-20261028-s13",
+      "turnIndex": 0,
+      "artifact": "native-8532951f089eba6b398ef6d13042391739d90f6be48cd6f616acff59e36d3326-turn-0.json",
+      "sha256": "dc3b5786219004f2c74969875af9e0ffe6aa82b5e725372a315d5aa2a5837da0"
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "turnIndex": 0,
+      "artifact": "native-55f9da48e743326e074a65ef4b641eef52b9586106c91536acd151f0bced1740-turn-0.json",
+      "sha256": "acedf377d1a0dc41ae1c1c008cf99a6c8799d09b0d4421fe46ecb950e6c60a09"
+    },
+    {
+      "caseId": "c-20261028-s16",
+      "turnIndex": 0,
+      "artifact": "native-921622e8836cff103ce67237cacb18faeda7c9d760b89ad82f56f7a90cd513a1-turn-0.json",
+      "sha256": "e11b4104de9d0f8799552229c4012999fa34bc500c47a626c29899b4d3fc493e"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 0,
+      "artifact": "native-76dec7be8cbd34d3d1c65444abc3c91d781e0963c78f35fb61adf3ac30e209f2-turn-0.json",
+      "sha256": "03242772ea134ae5fa1d9a41f1a547257e8f59d49eb7f5cb8de23bdcab2f1549"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 1,
+      "artifact": "native-76dec7be8cbd34d3d1c65444abc3c91d781e0963c78f35fb61adf3ac30e209f2-turn-1.json",
+      "sha256": "daa5446744bff9db0d854f3d74b6c2b83531ba21be455e383c25a33a70dd75f1"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 2,
+      "artifact": "native-76dec7be8cbd34d3d1c65444abc3c91d781e0963c78f35fb61adf3ac30e209f2-turn-2.json",
+      "sha256": "a9220f64c0cae5fdaba5977befdb20ec6493335ef74436d683f2462ac17efbf7"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 0,
+      "artifact": "native-643bb7976e34cb13b9a5e6727923c2dbc61901958502ecfa4f40d241e82531c6-turn-0.json",
+      "sha256": "8d0f246731ee41ce5c61f8e306f45f3f71c95fa4005262803f064e8f4d2a32ee"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 1,
+      "artifact": "native-643bb7976e34cb13b9a5e6727923c2dbc61901958502ecfa4f40d241e82531c6-turn-1.json",
+      "sha256": "3eed64fb47e398f256e5536e2a67b0ac2b7de78a5f13a1ff8945e8613fc679ae"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 2,
+      "artifact": "native-643bb7976e34cb13b9a5e6727923c2dbc61901958502ecfa4f40d241e82531c6-turn-2.json",
+      "sha256": "d7852dc34591ff433ae486772e1ab575a7208e3dfe1680845de1e16dab539742"
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 0,
+      "artifact": "native-537f22ef11eb01f5683cc0feb60438d4c9176dc80c947aaa0b02e42329adc578-turn-0.json",
+      "sha256": "b80da51da8adf352de025fd1c712c273251e15584e5f6359111b8354b0282b82"
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 1,
+      "artifact": "native-537f22ef11eb01f5683cc0feb60438d4c9176dc80c947aaa0b02e42329adc578-turn-1.json",
+      "sha256": "860347b9cb66cfff33cc9c04b43ebdb2cd49d13396b3a755dac5d376be58fed7"
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 2,
+      "artifact": "native-537f22ef11eb01f5683cc0feb60438d4c9176dc80c947aaa0b02e42329adc578-turn-2.json",
+      "sha256": "404634b66463f94c7d6ddbf9c055a6ea0dcb7e3d9e48820c9b0da44bd10a2d67"
+    }
+  ],
+  "frames": [
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 0,
+      "customer": "Chị cao 1m60, nặng 55kg, thích mặc rộng một chút. Em chọn size giúp chị nhé.",
+      "actualTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      },
+      "internalTerminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "checkoutPublic": null,
+      "sourceTargetResults": [],
+      "generationErrors": [
+        {
+          "id": "91a463a1-f46c-479b-90e5-aa816c0b9788:owner:1",
+          "status": "MALFORMED",
+          "errorCode": "PROVIDER_ERROR",
+          "providerRequests": 1,
+          "diagnostics": {
+            "generationId": "91a463a1-f46c-479b-90e5-aa816c0b9788:owner:1",
+            "providerRequests": 1,
+            "authRequests": 1,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 10456,
+            "outputTokens": 1882,
+            "cost": null,
+            "finishReason": "MALFORMED_FUNCTION_CALL",
+            "mediaCapabilityAudit": [
+              {
+                "includedProducts": 1,
+                "bytes": 778
+              }
+            ],
+            "requestBudget": {
+              "textFrameBytes": 49191,
+              "systemBytes": 21996,
+              "toolSchemaBytes": 19608,
+              "trustedFrameBytes": 7194,
+              "dialogueBytes": 133,
+              "textLimitBytes": 65536,
+              "presentedTextFrameBytes": 49368,
+              "basePresentedFrameBytes": 49368,
+              "inlineImageBytes": 0,
+              "frameLimitBytes": 65536
+            },
+            "requestSchemaHash": "4920784974a12abee1b868a88db4075cf9393f8c3208b6a74b35685d7a129ad0",
+            "requestBytes": 50277,
+            "requestHash": "85aa09df6561b22d333b31afc3050398a58e07f36d399fb3b2b95a3a59b5c59f",
+            "functionCallingMode": "AUTO",
+            "declaredToolCount": 14,
+            "thinkingTokens": 1752,
+            "rawFinishReason": "MALFORMED_FUNCTION_CALL",
+            "failureStage": "COMPLETION",
+            "failureCode": "OWNER_FINISH_REASON"
+          }
+        }
+      ],
+      "verifier": []
+    },
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 1,
+      "customer": "Vậy cả bộ bao nhiêu em?",
+      "actualTerminal": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION"
+      },
+      "internalTerminal": {
+        "disposition": "NO_SEND",
+        "reason": "HUMAN_OWNS_CONVERSATION",
+        "text": null,
+        "fallbackId": null
+      },
+      "checkoutPublic": null,
+      "sourceTargetResults": [],
+      "generationErrors": [],
+      "verifier": []
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "turnIndex": 0,
+      "customer": "Set Thạch Thảo còn size M không em?",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, cả hai set Thạch Thảo (set quần và set váy) đều còn size M chị nha:\n- Set quần Thạch Thảo: 769.000đ\n- Set váy Thạch Thảo: 799.000đ\n\nChị ưng mẫu set quần hay set váy hơn ạ?"
+        ],
+        "images": []
+      },
+      "internalTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, cả hai set Thạch Thảo (set quần và set váy) đều còn size M chị nha:\n- Set quần Thạch Thảo: 769.000đ\n- Set váy Thạch Thảo: 799.000đ\n\nChị ưng mẫu set quần hay set váy hơn ạ?",
+        "fallbackId": null
+      },
+      "checkoutPublic": null,
+      "sourceTargetResults": [
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "selectionStatus": null,
+          "fit": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "selectionStatus": null,
+          "fit": null
+        }
+      ],
+      "generationErrors": [],
+      "verifier": [
+        {
+          "draft": "Dạ, cả hai set Thạch Thảo (set quần và set váy) đều còn size M chị nha:\n- Set quần Thạch Thảo: 769.000đ\n- Set váy Thạch Thảo: 799.000đ\n\nChị ưng mẫu set quần hay set váy hơn ạ?",
+          "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "turnIndex": 1,
+      "customer": "Bộ quần nhé.",
+      "actualTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      },
+      "internalTerminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "checkoutPublic": null,
+      "sourceTargetResults": [
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "selectionStatus": null,
+          "fit": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "selectionStatus": null,
+          "fit": null
+        }
+      ],
+      "generationErrors": [
+        {
+          "id": "a1da73dd-39dc-49da-a7cf-0d364b82de9e:owner:2",
+          "status": "PROVIDER_ERROR",
+          "errorCode": "OWNER_REQUEST_BOUND",
+          "providerRequests": 0,
+          "diagnostics": {
+            "providerRequests": 0,
+            "authRequests": 0,
+            "failureStage": "BUILD",
+            "failureCode": "OWNER_REQUEST_BOUND",
+            "requestBudget": {
+              "textFrameBytes": 66579,
+              "systemBytes": 21996,
+              "toolSchemaBytes": 19619,
+              "trustedFrameBytes": 10733,
+              "dialogueBytes": 13971,
+              "textLimitBytes": 65536
+            },
+            "requestBytes": 66579
+          }
+        }
+      ],
+      "verifier": []
+    },
+    {
+      "caseId": "c-20261028-s03",
+      "turnIndex": 0,
+      "customer": "Váy Ngọc Trâm có ảnh chụp gần phần ren không em?",
+      "actualTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "RESPONSE_UNAVAILABLE"
+      },
+      "internalTerminal": {
+        "disposition": "HANDOFF",
+        "reason": "RESPONSE_UNAVAILABLE",
+        "text": null,
+        "fallbackId": null
+      },
+      "checkoutPublic": null,
+      "sourceTargetResults": [
+        {
+          "name": "select_product_media",
+          "status": "OK",
+          "reason": null,
+          "selectionStatus": null,
+          "fit": null
+        }
+      ],
+      "generationErrors": [],
+      "verifier": [
+        {
+          "draft": "Dạ, em gửi chị ảnh chụp cận cảnh chi tiết ren của Váy Ngọc Trâm nhé ạ!",
+          "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media:a0ee96b205397ea2d64ff44d1b2b1f81dc0ac1498576acdb3a3d911c5851904b\",\"excerpt\":\"ảnh chụp cận cảnh chi tiết ren của Váy Ngọc Trâm\",\"basis\":\"Nguồn chỉ xác nhận ảnh DETAIL góc FRONT, không xác nhận chi tiết ren trong ảnh: confirmedParts rỗng và componentKnown=false. Mô tả sản phẩm có ren không đủ chứng minh ảnh được chọn chụp cận phần ren.\"}]}"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s13",
+      "turnIndex": 0,
+      "customer": "Chị lấy một áo Thạch Thảo, gửi về Cần Thơ thì cả ship hết bao nhiêu em?",
+      "actualTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "PRODUCT_AMBIGUOUS"
+      },
+      "internalTerminal": {
+        "disposition": "HANDOFF",
+        "reason": "PRODUCT_AMBIGUOUS",
+        "text": null,
+        "fallbackId": null
+      },
+      "checkoutPublic": null,
+      "sourceTargetResults": [
+        {
+          "name": "search_products",
+          "status": "REJECTED",
+          "reason": "PRODUCT_BOUND",
+          "selectionStatus": null,
+          "fit": null
+        },
+        {
+          "name": "search_products",
+          "status": "REJECTED",
+          "reason": "PRODUCT_BOUND",
+          "selectionStatus": null,
+          "fit": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "selectionStatus": null,
+          "fit": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "selectionStatus": null,
+          "fit": null
+        }
+      ],
+      "generationErrors": [],
+      "verifier": []
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "turnIndex": 0,
+      "customer": "Chị thích áo Thạch Thảo màu be, cảm ơn em nhé.",
+      "actualTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      },
+      "internalTerminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "checkoutPublic": null,
+      "sourceTargetResults": [
+        {
+          "name": "apply_customer_state",
+          "status": "OK",
+          "reason": null,
+          "selectionStatus": null,
+          "fit": null
+        }
+      ],
+      "generationErrors": [
+        {
+          "id": "4b90bade-2ac1-47ea-9286-99448c6fb1f4:owner:2",
+          "status": "PROVIDER_ERROR",
+          "errorCode": "OWNER_REQUEST_BOUND",
+          "providerRequests": 0,
+          "diagnostics": {
+            "providerRequests": 0,
+            "authRequests": 0,
+            "failureStage": "BUILD",
+            "failureCode": "OWNER_REQUEST_BOUND",
+            "requestBudget": {
+              "textFrameBytes": 66088,
+              "systemBytes": 21996,
+              "toolSchemaBytes": 19608,
+              "trustedFrameBytes": 6712,
+              "dialogueBytes": 17512,
+              "textLimitBytes": 65536
+            },
+            "requestBytes": 66088
+          }
+        }
+      ],
+      "verifier": []
+    },
+    {
+      "caseId": "c-20261028-s16",
+      "turnIndex": 0,
+      "customer": "Shop có ảnh khách mặc áo Thạch Thảo không em?",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, em gửi chị ảnh feedback áo Thạch Thảo ạ."
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "internalTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, em gửi chị ảnh feedback áo Thạch Thảo ạ.",
+        "fallbackId": null
+      },
+      "checkoutPublic": null,
+      "sourceTargetResults": [
+        {
+          "name": "select_product_media",
+          "status": "OK",
+          "reason": null,
+          "selectionStatus": null,
+          "fit": null
+        }
+      ],
+      "generationErrors": [],
+      "verifier": [
+        {
+          "draft": "Dạ, em gửi chị ảnh feedback áo Thạch Thảo ạ.",
+          "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 0,
+      "customer": "Chị muốn chọn size áo của bộ váy Thạch Thảo, cao 1m62 nặng 56kg.",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ với chiều cao 1m62 và cân nặng 56kg, em tư vấn mình mặc áo Thạch Thảo size M nhé ạ."
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "internalTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ với chiều cao 1m62 và cân nặng 56kg, em tư vấn mình mặc áo Thạch Thảo size M nhé ạ.",
+        "fallbackId": null
+      },
+      "checkoutPublic": null,
+      "sourceTargetResults": [
+        {
+          "name": "recommend_size",
+          "status": "OK",
+          "reason": null,
+          "selectionStatus": null,
+          "fit": [
+            {
+              "componentProductId": "SV2447-AO",
+              "componentRole": "TOP",
+              "size": "M"
+            }
+          ]
+        }
+      ],
+      "generationErrors": [],
+      "verifier": [
+        {
+          "draft": "Dạ với chiều cao 1m62 và cân nặng 56kg, em tư vấn mình mặc áo Thạch Thảo size M nhé ạ.",
+          "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 1,
+      "customer": "Chị nhắn nhầm cân nặng, 51kg thôi em nhé. Ngực 88, eo 70, mông 94.",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Với số đo ngực 88, eo 70 và cân nặng 51kg, áo Thạch Thảo em tư vấn mình mặc size M nhé ạ."
+        ],
+        "images": []
+      },
+      "internalTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Với số đo ngực 88, eo 70 và cân nặng 51kg, áo Thạch Thảo em tư vấn mình mặc size M nhé ạ.",
+        "fallbackId": null
+      },
+      "checkoutPublic": null,
+      "sourceTargetResults": [
+        {
+          "name": "recommend_size",
+          "status": "OK",
+          "reason": null,
+          "selectionStatus": null,
+          "fit": [
+            {
+              "componentProductId": "SV2447-AO",
+              "componentRole": "TOP",
+              "size": "M"
+            }
+          ]
+        }
+      ],
+      "generationErrors": [],
+      "verifier": [
+        {
+          "draft": "Với số đo ngực 88, eo 70 và cân nặng 51kg, áo Thạch Thảo em tư vấn mình mặc size M nhé ạ.",
+          "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 2,
+      "customer": "Chị thích mặc thoải mái một chút, em chọn size giúp chị nhé.",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ với dáng áo tơ Hàn form nhẹ và sở thích mặc thoải mái, em tư vấn chị chọn size M nhé ạ."
+        ],
+        "images": []
+      },
+      "internalTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ với dáng áo tơ Hàn form nhẹ và sở thích mặc thoải mái, em tư vấn chị chọn size M nhé ạ.",
+        "fallbackId": null
+      },
+      "checkoutPublic": null,
+      "sourceTargetResults": [
+        {
+          "name": "recommend_size",
+          "status": "OK",
+          "reason": null,
+          "selectionStatus": null,
+          "fit": [
+            {
+              "componentProductId": "SV2447-AO",
+              "componentRole": "TOP",
+              "size": "M"
+            }
+          ]
+        }
+      ],
+      "generationErrors": [],
+      "verifier": [
+        {
+          "draft": "Dạ với dáng áo tơ Hàn form nhẹ và sở thích mặc thoải mái, em tư vấn chị chọn size M nhé ạ.",
+          "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 0,
+      "customer": "Chị lấy áo của bộ váy Thạch Thảo size M.",
+      "actualTerminal": {
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "DEPENDENCY_FAILURE"
+      },
+      "internalTerminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "checkoutPublic": null,
+      "sourceTargetResults": [],
+      "generationErrors": [
+        {
+          "id": "b8471500-a214-4b3f-a272-6d0f6ba3a82d:owner:1",
+          "status": "MALFORMED",
+          "errorCode": "PROVIDER_ERROR",
+          "providerRequests": 1,
+          "diagnostics": {
+            "generationId": "b8471500-a214-4b3f-a272-6d0f6ba3a82d:owner:1",
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 10440,
+            "outputTokens": 1111,
+            "cost": null,
+            "finishReason": "MALFORMED_FUNCTION_CALL",
+            "mediaCapabilityAudit": [
+              {
+                "includedProducts": 1,
+                "bytes": 778
+              }
+            ],
+            "requestBudget": {
+              "textFrameBytes": 49151,
+              "systemBytes": 21996,
+              "toolSchemaBytes": 19608,
+              "trustedFrameBytes": 7194,
+              "dialogueBytes": 93,
+              "textLimitBytes": 65536,
+              "presentedTextFrameBytes": 49328,
+              "basePresentedFrameBytes": 49328,
+              "inlineImageBytes": 0,
+              "frameLimitBytes": 65536
+            },
+            "requestSchemaHash": "4920784974a12abee1b868a88db4075cf9393f8c3208b6a74b35685d7a129ad0",
+            "requestBytes": 50237,
+            "requestHash": "d413b15ea70b4b9dd5b4083ce3ad51e47af1b497f9cd180d0cc95fb8078c8326",
+            "functionCallingMode": "AUTO",
+            "declaredToolCount": 14,
+            "thinkingTokens": 1067,
+            "rawFinishReason": "MALFORMED_FUNCTION_CALL",
+            "failureStage": "COMPLETION",
+            "failureCode": "OWNER_FINISH_REASON"
+          }
+        }
+      ],
+      "verifier": []
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 1,
+      "customer": "Shop hỗ trợ thêm cho chị được chút nào không?",
+      "actualTerminal": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION"
+      },
+      "internalTerminal": {
+        "disposition": "NO_SEND",
+        "reason": "HUMAN_OWNS_CONVERSATION",
+        "text": null,
+        "fallbackId": null
+      },
+      "checkoutPublic": null,
+      "sourceTargetResults": [],
+      "generationErrors": [],
+      "verifier": []
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 2,
+      "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+      "actualTerminal": {
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION"
+      },
+      "internalTerminal": {
+        "disposition": "NO_SEND",
+        "reason": "HUMAN_OWNS_CONVERSATION",
+        "text": null,
+        "fallbackId": null
+      },
+      "checkoutPublic": null,
+      "sourceTargetResults": [],
+      "generationErrors": [],
+      "verifier": []
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 0,
+      "customer": "Chị lấy set váy Thạch Thảo size M nhé.",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. Tổng đơn của mình là 829.000đ (gồm 799.000đ tiền sản phẩm và 30.000đ phí vận chuyển)."
+        ],
+        "images": [
+          {
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          }
+        ]
+      },
+      "internalTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. Tổng đơn của mình là 829.000đ (gồm 799.000đ tiền sản phẩm và 30.000đ phí vận chuyển).",
+        "fallbackId": null
+      },
+      "checkoutPublic": null,
+      "sourceTargetResults": [
+        {
+          "name": "add_to_cart",
+          "status": "OK",
+          "reason": null,
+          "selectionStatus": null,
+          "fit": null
+        }
+      ],
+      "generationErrors": [],
+      "verifier": [
+        {
+          "draft": "Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. Tổng đơn của mình là 829.000đ (gồm 799.000đ tiền sản phẩm và 30.000đ phí vận chuyển).",
+          "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 1,
+      "customer": "Em lên đơn cho chị đi.",
+      "actualTerminal": {
+        "disposition": "CODE_OWNED_SEND",
+        "messages": [
+          "Chị cho em tên người nhận nhé."
+        ],
+        "images": []
+      },
+      "internalTerminal": {
+        "disposition": "NO_SEND",
+        "reason": "CHECKOUT_DETAILS_MISSING",
+        "text": null,
+        "fallbackId": null
+      },
+      "checkoutPublic": {
+        "provenance": "CODE_PERSISTED_CHECKOUT_STATE",
+        "paymentMethod": null,
+        "lastQuestion": {
+          "missingFields": [
+            "FULL_NAME"
+          ],
+          "attemptCount": 1,
+          "questionFingerprint": "d04585b28fb64c62250f917950ddf3293a2436ec31506184cbab99bd9f532125",
+          "delivery": "UNKNOWN"
+        }
+      },
+      "sourceTargetResults": [],
+      "generationErrors": [],
+      "verifier": []
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 2,
+      "customer": "Chị muốn trả khi nhận hàng.",
+      "actualTerminal": {
+        "disposition": "CODE_OWNED_SEND",
+        "messages": [
+          "Chị cho em tên người nhận nhé."
+        ],
+        "images": []
+      },
+      "internalTerminal": {
+        "disposition": "NO_SEND",
+        "reason": "PRIVATE_CHECKOUT_COMMITTED",
+        "text": null,
+        "fallbackId": null
+      },
+      "checkoutPublic": {
+        "provenance": "CODE_PERSISTED_CHECKOUT_STATE",
+        "paymentMethod": "COD",
+        "lastQuestion": {
+          "missingFields": [
+            "FULL_NAME"
+          ],
+          "attemptCount": 1,
+          "questionFingerprint": "d04585b28fb64c62250f917950ddf3293a2436ec31506184cbab99bd9f532125",
+          "delivery": "UNKNOWN"
+        }
+      },
+      "sourceTargetResults": [],
+      "generationErrors": [],
+      "verifier": []
+    }
+  ],
+  "combinedCampaign": {
+    "cases": 13,
+    "turns": 24,
+    "generationRecords": 53,
+    "generationHttp": 51,
+    "ownerRecords": 39,
+    "verifierRecords": 14,
+    "actualTerminals": {
+      "SEND_ELIGIBLE": 13,
+      "CODE_OWNED_SEND": 2,
+      "HANDOFF": 6,
+      "NO_SEND": 3
+    },
+    "textCount": 15,
+    "imageCount": 7
+  },
+  "remaining": {
+    "cases": 21,
+    "turns": 31,
+    "status": "NOT_RUN_R2_MATERIAL_FAILURE"
+  },
+  "limits": [
+    "R1PASSremainsvalidregisteredtaskresult; R2FAILstopsremaindercheckout. No universalquote-fixregressionorprovideroutagecausalclaim.",
+    "TwoMALFORMED plus2localbuildrejections countedseparately;3laterHUMANsilencesarederived,notnewindependentgenerationfailures.",
+    "Noquality/stability/PhaseCGO orC3comparison; genericvoiceissuesdeferred.",
+    "No providerbyreviewer, source/evidence edits, rerun orcontinuation beyondstagegate."
+  ]
+}

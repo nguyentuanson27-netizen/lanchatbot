@@ -1,0 +1,2 @@
+# Preserve audited capture/report bytes, including model whitespace and Windows logs.
+* -text

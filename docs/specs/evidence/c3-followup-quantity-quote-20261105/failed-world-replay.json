@@ -1,0 +1,77 @@
+{
+  "kind": "HISTORICAL_SOURCE_COMPONENT_REPLAY_NOT_MODEL_RESULT_OR_CURRENT_AUTHORIZATION",
+  "sourceSha": "94911899adaaceef5b314518a4d6bb237d8f2208",
+  "sourceDirty": false,
+  "worldHash": "dd16e7c161f33f70e190b0510af85e685ff67a75d6ebeeea78db3fa1dd37ab79",
+  "at": "2026-11-05T14:14:04.200Z",
+  "status": "OK",
+  "preCartQuote": {
+    "kind": "PRE_CART_TOTAL_V1",
+    "subjectRef": "SV2447",
+    "offerType": "AO",
+    "quantity": 2,
+    "deliveryRegion": null,
+    "subtotalVnd": 998000,
+    "shippingFeeVnd": 30000,
+    "discountTotalVnd": 49900,
+    "grandTotalVnd": 978100,
+    "priceHash": "3441b043aa3518c7f17f714a7048e8826f51618c20ec15e5a082dbf16e4d72d3",
+    "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+    "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+    "bindingVersion": "c3-b1-source-v1",
+    "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f"
+  },
+  "choices": [
+    {
+      "size": "S",
+      "color": "TRẮNG",
+      "status": "IN_STOCK"
+    },
+    {
+      "size": "M",
+      "color": "TRẮNG",
+      "status": "IN_STOCK"
+    },
+    {
+      "size": "L",
+      "color": "TRẮNG",
+      "status": "IN_STOCK"
+    },
+    {
+      "size": "XL",
+      "color": "TRẮNG",
+      "status": "IN_STOCK"
+    },
+    {
+      "size": "S",
+      "color": "BE",
+      "status": "PRE_ORDER"
+    },
+    {
+      "size": "M",
+      "color": "BE",
+      "status": "PRE_ORDER"
+    },
+    {
+      "size": "L",
+      "color": "BE",
+      "status": "PRE_ORDER"
+    },
+    {
+      "size": "XL",
+      "color": "BE",
+      "status": "PRE_ORDER"
+    }
+  ],
+  "work": [
+    {
+      "reservedUnits": 2,
+      "readInvocations": 1,
+      "selectionInvocations": 0
+    }
+  ],
+  "providerRequests": 0,
+  "sourceWrites": 0,
+  "cartCreated": false,
+  "mediaSelected": false
+}

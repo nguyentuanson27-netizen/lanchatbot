@@ -1,7 +1,7 @@
-import { BodyMeasurementV1Schema, CustomerProfileV1Schema, type MeasurementKind } from "@lana/contracts";
+import { BodyMeasurementV1Schema, CustomerProfileV1Schema, SizeFitTargetV1Schema,sizeFitTargetKey,sameSizeFitTarget,type SizeFitTargetV1,type ProductComponentRole, type MeasurementKind } from "@lana/contracts";
 import { buildProtectedClaimsFromVerifiedFactsV1, createVerifiedSizeRecommendationClaim, mergeCustomerProfile,
   recommendSize, type CustomerProfileMergeState, type CustomerProfilePatch, type SizeEngineInput,
-  evaluateShopPolicy, type ShopPolicyEvaluationInput } from "@lana/business-tools";
+  evaluateShopPolicy,selectVerifiedSizeChart, type ShopPolicyEvaluationInput } from "@lana/business-tools";
 import { buildReadOnlyContext, commerceHash } from "./single-agent-commerce-read-only-context.js";
 import { toolArgs, type CommerceScope, type CommerceToolCall, type CommerceToolResult } from "./single-agent-commerce-read-only-tools.js";
 import type { CommerceTools } from "./single-agent-commerce-read-only.js";
@@ -47,6 +47,12 @@ const measurementReasons: Record<string, string> = {
   MEASUREMENT_VALUE: "VALUE_DOES_NOT_MATCH_QUOTE",
 };
 export interface CustomerStateSourceMessage { text: string; sourceMessageId: string; observedAt: string }
+/** Structured argument validation only; never interprets a customer's wording. */
+export function sizeRequestScope(a:{fitScope?:unknown;componentRole?:unknown}):"PRODUCT"|"COMPONENT"|null {
+  const scope=a.fitScope===undefined?"PRODUCT":a.fitScope;
+  if(scope==="PRODUCT")return a.componentRole===undefined?"PRODUCT":null;
+  return scope==="COMPONENT"&&["TOP","PANTS","SKIRT","DRESS","OTHER"].includes(a.componentRole as string)?"COMPONENT":null;
+}
 /** Numeric copy check only; the owner still interprets field, referent and correction meaning. */
 function measurementSource(sources: readonly CustomerStateSourceMessage[], quote: unknown, kind: MeasurementKind,
   value: unknown, scope: CommerceScope, now: Date) {
@@ -87,8 +93,13 @@ function measurementSource(sources: readonly CustomerStateSourceMessage[], quote
 export async function createCustomerStateTools(input: {
   base: CommerceTools; scope: CommerceScope; store: CustomerStatePort; clock: () => Date;
   sizeInput: (subjectRef: string) => Promise<Omit<SizeEngineInput, "profile" | "generatedAt">>;
+  /** Trusted source port resolves BOM identity and chart applicability independently of claims/model fields. */
+  componentSizeInput?:(request:{parentProductId:string;componentRole:ProductComponentRole})=>Promise<
+    Omit<SizeEngineInput,"profile"|"generatedAt">&{fitTarget:Extract<SizeFitTargetV1,{kind:"COMPONENT"}>;sourceBindingHash:string;sourceExpiresAt:string}>;
   quoteInput?: () => Promise<ShopPolicyEvaluationInput>;
   sourceMessages?: readonly CustomerStateSourceMessage[];
+  /** Candidate opt-in. Persist only requested targets, never a verdict or fit claim. */
+  retainAdvice?:boolean;
 }): Promise<CommerceTools> {
   let effective = await input.store.read(), blockedDependencies = false;
   let commitUnconfirmed = false;
@@ -96,21 +107,52 @@ export async function createCustomerStateTools(input: {
   const pendingFields = new Set<string>();
   const blocked = () => blockedDependencies || pendingFields.size > 0;
   let sizeOutcome: { status: string } | null = null;
-  const sizes = new Map<string, { claims: readonly unknown[]; fingerprint: string | undefined; profileHash: string; sourceHash: string }>();
+  const sizes = new Map<string, { claims: readonly unknown[]; fingerprint: string | undefined; profileHash: string; sourceHash: string;
+    fitTarget:SizeFitTargetV1;sourceExpiresAt:string|null;request:{parentProductId:string;componentRole:ProductComponentRole}|null }>();
   let cartQuote: unknown;
   let quoteRead = false;
   let committedUpdate: { hash: string; receipt: TrustedContext["effectReceipts"][number] } | undefined;
+  let rehydrationTarget:SizeFitTargetV1|undefined;
   const profileHash = () => commerceHash(effective.profile);
+  const validateComponent=(s:Awaited<ReturnType<NonNullable<typeof input.componentSizeInput>>>,request:{parentProductId:string;componentRole:ProductComponentRole})=>{
+    const t=SizeFitTargetV1Schema.parse(s.fitTarget);
+    if(t.kind!=="COMPONENT"||t.parentProductId!==request.parentProductId||t.componentRole!==request.componentRole||
+      s.target.parentProductId!==t.parentProductId||s.target.componentProductId!==t.componentProductId||s.target.componentRole!==t.componentRole||
+      !/^[a-f0-9]{64}$/.test(s.sourceBindingHash)||!Number.isFinite(Date.parse(s.sourceExpiresAt))||Date.parse(s.sourceExpiresAt)<=input.clock().getTime()||
+      !selectVerifiedSizeChart(s.charts,s.target))throw Error("COMPONENT_SOURCE_UNAVAILABLE");
+  };
+  async function rememberTargets(targets:SizeFitTargetV1[]){
+    if(!input.retainAdvice)return;
+    const prior=effective,nextTargets=[...(prior.profile.sizeAdviceTargets??[])].filter(t=>snapshot().boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===(t.kind==="PRODUCT"?t.productId:t.parentProductId)));
+    for(const t of targets)if(!nextTargets.some(v=>sameSizeFitTarget(v,t)))nextTargets.push(t);
+    if(commerceHash(nextTargets)===commerceHash(prior.profile.sizeAdviceTargets??[]))return;
+    if(nextTargets.length>4)throw Error("SIZE_TARGET_BOUND");
+    const next={...prior,profile:CustomerProfileV1Schema.parse({...prior.profile,sizeAdviceTargets:nextTargets,
+      revision:prior.profile.revision+1,updatedAt:input.clock().toISOString()})};
+    const retainedReceipt=committedUpdate?.hash===commerceHash(prior)?committedUpdate:undefined;
+    try{
+      if(!await input.store.compareAndSwap(prior.profile.revision,next))throw Error("STATE_CONFLICT");
+      const current=await input.store.read();if(commerceHash(current)!==commerceHash(next))throw Error("STATE_READBACK_CHANGED");
+      effective=current;sizes.clear();
+      // Only advice metadata changed. The actual numeric update receipt remains
+      // immutable and still describes the same committed measurement fields.
+      committedUpdate=retainedReceipt?{hash:commerceHash(current),receipt:retainedReceipt.receipt}:undefined;
+    }catch{invalidateCommit();throw Error("STATE_COMMIT_UNCONFIRMED");}
+  }
   const snapshot = (): TrustedContext => {
     const base = input.base.snapshot();
     const valid = [...sizes.entries()].filter(([, s]) => !blocked() && s.profileHash === profileHash());
     const update = !blocked() && committedUpdate?.hash === commerceHash(effective) ? committedUpdate.receipt : undefined;
     return buildReadOnlyContext({ ...base, state: { ...base.state,
+      ...(effective.profile.shoppingSelection&&base.boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===effective.profile.shoppingSelection!.productId)?{
+        currentProductId:effective.profile.shoppingSelection.productId,shoppingSelection:effective.profile.shoppingSelection}:{}),
       customerProfileId: effective.profile.profileId, customerProfileRevision: effective.profile.revision,
       customerMeasurements: effective.profile.measurements.map(m => ({ kind: m.kind, value: m.value })),
       fitPreference: effective.profile.fitPreference, preferences: effective.profile.preferences,
       ...(blocked() ? { customerStateUpdatePending: true } : {}),
       sizeMeasurementFingerprints: Object.fromEntries(valid.filter(([, s]) => s.fingerprint).map(([id, s]) => [id, s.fingerprint])),
+      sizeFitTargets:Object.fromEntries(valid.filter(([,s])=>s.claims.length===1).map(([id,s])=>[id,{target:s.fitTarget,sourceHash:s.sourceHash,
+        claimId:(s.claims[0] as {claimId:string}).claimId,claimHash:commerceHash(s.claims[0])}])),
       ...(!blocked() && cartQuote ? { cartQuote } : {}) },
       subjects: [...base.boundSubjects, ...(update ? [{ ref: effective.profile.profileId, kind: "CUSTOMER_PROFILE", label: `Thông tin tư vấn, phiên bản ${effective.profile.revision}`, bindingVersion: base.state.bindingVersion }] : [])], products: base.runtimeProducts ?? [], policies: base.policyLiterals,
       receipts: [...base.effectReceipts, ...(update ? [{ ...update, stateRevision: base.state.revision }] : [])], claims: [...base.protectedClaims.filter(c => (c as { type: string }).type !== "SIZE_FIT"), ...valid.flatMap(([, s]) => s.claims)] });
@@ -220,6 +262,25 @@ export async function createCustomerStateTools(input: {
     const state = input.base.snapshot().state;
     if (!state.permission || !state.privacyAllowed || state.conversationOwner !== "BOT") return { status: "REJECTED", reason: "PERMISSION" };
     try {
+      if(call.name==="read_product"&&call.args&&typeof call.args==="object"&&Object.hasOwn(call.args,"customerSelected")){
+        const a=call.args as Record<string,unknown>,{customerSelected,...read}=a;
+        if(customerSelected!==true||typeof a.subjectRef!=="string"||typeof a.offerType!=="string"||a.offerTypes!==undefined||a.detailsOnly!==undefined)return {status:"REJECTED",reason:"SELECTION_ARGUMENTS"};
+        const r=await input.base.invoke({name:"read_product",args:read});if(r.status!=="OK")return r;
+        const data=r.data as {subjectRef?:string;requestedOfferType?:string;availableOffers?:string[]};
+        if(data.subjectRef!==a.subjectRef||data.requestedOfferType!==a.offerType||!data.availableOffers?.includes(a.offerType))return {status:"REJECTED",reason:"SELECTION_SOURCE"};
+        const selection={productId:a.subjectRef,offerType:a.offerType};
+        if(commerceHash(effective.profile.shoppingSelection??null)===commerceHash(selection))return r;
+        const prior=effective,next={...prior,profile:CustomerProfileV1Schema.parse({...prior.profile,shoppingSelection:selection,
+          revision:prior.profile.revision+1,updatedAt:input.clock().toISOString()})};
+        const retainedReceipt=committedUpdate?.hash===commerceHash(prior)?committedUpdate:undefined;
+        const previousFits=[...sizes.values()].map(s=>s.fitTarget);
+        try{if(!await input.store.compareAndSwap(prior.profile.revision,next))throw Error("STATE_CONFLICT");
+          const current=await input.store.read();if(commerceHash(current)!==commerceHash(next))throw Error("STATE_READBACK_CHANGED");
+          effective=current;sizes.clear();committedUpdate=retainedReceipt?{hash:commerceHash(current),receipt:retainedReceipt.receipt}:undefined;
+          for(const t of previousFits)await refreshAdvice(t);
+        }catch{invalidateCommit();return {status:"REJECTED",reason:"STATE_COMMIT_UNCONFIRMED"};}
+        return {...r,data:{...data,shoppingSelection:selection,selectionStatus:"CUSTOMER_CHOICE_RECORDED_NOT_PURCHASE"}};
+      }
       if (call.name === "apply_customer_state") {
         const args = toolArgs(call.args, ["ops"]);
         const fields = args && Array.isArray(args.ops) && args.ops.length ? args.ops.map(op =>
@@ -232,8 +293,21 @@ export async function createCustomerStateTools(input: {
         return result.status === "OK" ? result : { ...result, data: { ...result.data as Record<string, unknown>, ...(!commitUnconfirmed ? { applied: false } : {}), unresolvedFields: [...pendingFields] } };
       }
       if (call.name === "recommend_size") {
-        const a = toolArgs(call.args, ["subjectRef", "customerStateOps"]);
+        const a = toolArgs(call.args, ["subjectRef", "customerStateOps", "fitScope", "componentRole"]);
         if (!a || typeof a.subjectRef !== "string" || !snapshot().boundSubjects.some(s => s.kind === "PRODUCT" && s.ref === a.subjectRef)) return { status: "REJECTED", reason: "STATE_OR_REF" };
+        const fitScope=sizeRequestScope(a);
+        if (!fitScope) return {status:"REJECTED",reason:"STATE_OR_REF"};
+        // The existing port targets a product. Never turn an unsupported component request
+        // into a product calculation, nor commit inline inputs as a side effect of that request.
+        const request=fitScope==="COMPONENT"?{parentProductId:a.subjectRef,componentRole:a.componentRole as ProductComponentRole}:null;
+        let componentSource:Awaited<ReturnType<NonNullable<typeof input.componentSizeInput>>>|undefined;
+        if(request){
+          try{
+            if(!input.componentSizeInput)throw Error("COMPONENT_SOURCE_UNAVAILABLE");
+            componentSource=await input.componentSizeInput(request);
+            validateComponent(componentSource,request);
+          }catch{blockedDependencies=true;sizes.clear();sizeOutcome={status:"NO_VERIFIED_CHART"};return {status:"UNAVAILABLE",reason:"SIZE_SOURCE_UNAVAILABLE"};}
+        }
         // A single explicit size request may carry new customer inputs. Reuse the
         // exact writer (validation, CAS, readback, receipt), never calculate on a rejected patch.
         if (a.customerStateOps !== undefined) {
@@ -242,15 +316,31 @@ export async function createCustomerStateTools(input: {
         }
         if (blocked()) return { status: "REJECTED", reason: "STATE_OR_REF" };
         let source: Awaited<ReturnType<typeof input.sizeInput>>;
-        try { source = await input.sizeInput(a.subjectRef); }
+        try { source = componentSource??await input.sizeInput(a.subjectRef); }
         catch { blockedDependencies=true;return {status:"UNAVAILABLE",reason:"SIZE_SOURCE_UNAVAILABLE"}; }
         if (source.target.parentProductId !== a.subjectRef) return { status: "REJECTED", reason: "SIZE_SUBJECT" };
-        const decision = recommendSize({ ...source, profile: effective.profile, generatedAt: input.clock().toISOString() });
+        const fitTarget:SizeFitTargetV1=componentSource?componentSource.fitTarget:{kind:"PRODUCT",productId:a.subjectRef};
+        const calculate=()=>recommendSize({...source,...(componentSource?{fitTarget:componentSource.fitTarget}:{}),
+          profile:componentSource?{...effective.profile,sizeHistory:[]}:effective.profile,generatedAt:input.clock().toISOString()});
+        let decision=calculate();
+        if(rehydrationTarget&&!sameSizeFitTarget(rehydrationTarget,fitTarget))return {status:"UNAVAILABLE",reason:"SIZE_TARGET_CHANGED"};
+        if(input.retainAdvice&&!rehydrationTarget&&decision.recommendation.status==="RECOMMENDED"&&!effective.profile.sizeAdviceTargets?.some(t=>sameSizeFitTarget(t,fitTarget))){
+          const targets=effective.profile.sizeAdviceTargets??[];
+          await rememberTargets([fitTarget]);
+          for(const t of targets)if(snapshot().boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===(t.kind==="PRODUCT"?t.productId:t.parentProductId)))
+            await refreshAdvice(t);
+          decision=calculate();
+        }
         sizeOutcome = { status: decision.recommendation.status };
-        const claim = createVerifiedSizeRecommendationClaim({ decision, profile: effective.profile, productId: a.subjectRef });
-        sizes.set(a.subjectRef, { claims: buildProtectedClaimsFromVerifiedFactsV1({ facts: null, sizeClaim: claim, expectedProductId: a.subjectRef }).claims,
-          fingerprint: claim?.measurementFingerprint, profileHash: profileHash(), sourceHash: commerceHash({ target: source.target, charts: source.charts }) });
+        let claim = createVerifiedSizeRecommendationClaim({ decision, profile: effective.profile, productId: a.subjectRef,...(componentSource?{fitTarget}:{}) });
+        if(claim&&componentSource)claim={...claim,expiresAt:new Date(Math.min(Date.parse(claim.expiresAt),Date.parse(componentSource.sourceExpiresAt))).toISOString()};
+        const sourceHash=commerceHash({target:source.target,charts:source.charts,...(componentSource?{fitTarget,sourceBindingHash:componentSource.sourceBindingHash}:{})});
+        if(!sizes.has(sizeFitTargetKey(fitTarget))&&sizes.size>=4)return {status:"REJECTED",reason:"SIZE_TARGET_BOUND"};
+        sizes.set(sizeFitTargetKey(fitTarget), { claims: buildProtectedClaimsFromVerifiedFactsV1({ facts: null, sizeClaim: claim, expectedProductId: a.subjectRef,expectedFitTarget:fitTarget }).claims,
+          fingerprint: claim?.measurementFingerprint, profileHash: profileHash(), sourceHash,fitTarget,sourceExpiresAt:componentSource?.sourceExpiresAt??null,request });
         return { status: "OK", data: { status: decision.recommendation.status, action: decision.action,
+          fitScope:fitTarget,...(componentSource?{}:{unsupportedScopes:["COMPONENT"]}),
+          sizeSourceHash:sourceHash,
           missingInputs: decision.missingInputs, recommendedSizes: claim ? decision.recommendation.recommendedSizes : [],
           inputFitPreference:effective.profile.fitPreference, alternativeSizes:claim?.value.alternativeSizes??null } };
       }
@@ -265,10 +355,46 @@ export async function createCustomerStateTools(input: {
       return await input.base.invoke(call);
     } catch { blockedDependencies = true; return { status: "REJECTED", reason: "STATE_OR_DOMAIN_INPUT" }; }
   }
-  return { invoke, snapshot, sizeOutcome: () => sizeOutcome, async invokeBatch(calls) {
+  async function refreshAdvice(t:SizeFitTargetV1){
+    const previousBlocked=blockedDependencies,previousOutcome=sizeOutcome;
+    const previousSizes=new Map(sizes);
+    rehydrationTarget=t;
+    try{
+      const outcome=await invoke({name:"recommend_size",args:t.kind==="PRODUCT"?{subjectRef:t.productId}:{subjectRef:t.parentProductId,fitScope:"COMPONENT",componentRole:t.componentRole}});
+      if(outcome.status!=="OK"){
+        sizes.clear();for(const [key,value]of previousSizes)if(key!==sizeFitTargetKey(t))sizes.set(key,value);
+      }
+    }finally{rehydrationTarget=undefined;blockedDependencies=previousBlocked;sizeOutcome=previousOutcome;}
+  }
+  const result:CommerceTools={ invoke, snapshot, sizeOutcome: () => sizeOutcome, async invokeBatch(calls) {
     const writesState = (c: CommerceToolCall) => c.name === "apply_customer_state" ||
+      (c.name==="read_product"&&!!c.args&&typeof c.args==="object"&&Object.hasOwn(c.args,"customerSelected"))||
       (c.name === "recommend_size" && !!c.args && typeof c.args === "object" && Object.hasOwn(c.args, "customerStateOps"));
     const updates = calls.filter(writesState);
+    if(updates.length>1&&updates.every(c=>c.name==="recommend_size")&&
+       updates.every(c=>commerceHash((c.args as Record<string,unknown>).customerStateOps)===commerceHash((updates[0]!.args as Record<string,unknown>).customerStateOps))){
+      // Only identical, grounded profile patches may be joined. Resolve every
+      // dependent target first; unsupported targets must not partially write.
+      const batchTargets:SizeFitTargetV1[]=[];
+      try{
+        for(const c of updates){const a=toolArgs(c.args,["subjectRef","customerStateOps","fitScope","componentRole"]);
+          if(!a||typeof a.subjectRef!=="string"||!snapshot().boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===a.subjectRef)||!sizeRequestScope(a))throw Error("STATE_OR_REF");
+          if(sizeRequestScope(a)==="COMPONENT"){
+            if(!input.componentSizeInput)throw Error("COMPONENT_SOURCE_UNAVAILABLE");
+            const s=await input.componentSizeInput({parentProductId:a.subjectRef,componentRole:a.componentRole as ProductComponentRole});
+            validateComponent(s,{parentProductId:a.subjectRef,componentRole:a.componentRole as ProductComponentRole});batchTargets.push(s.fitTarget);
+          }else{const s=await input.sizeInput(a.subjectRef);if(s.target.parentProductId!==a.subjectRef||!selectVerifiedSizeChart(s.charts,s.target))throw Error("SIZE_SOURCE_UNAVAILABLE");
+            batchTargets.push({kind:"PRODUCT",productId:a.subjectRef});}
+        }
+      }catch{blockedDependencies=true;return calls.map(()=>({status:"REJECTED",reason:"STATE_OR_REF"}));}
+      const active=(effective.profile.sizeAdviceTargets??[]).filter(t=>snapshot().boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===(t.kind==="PRODUCT"?t.productId:t.parentProductId)));
+      const union=new Set([...active,...batchTargets].map(sizeFitTargetKey));
+      if(input.retainAdvice&&union.size>4)return calls.map(()=>({status:"REJECTED",reason:"SIZE_TARGET_BOUND"}));
+      const written=await invoke({name:"apply_customer_state",args:{ops:(updates[0]!.args as Record<string,unknown>).customerStateOps}});
+      if(written.status!=="OK")return calls.map(()=>written);
+      try{await rememberTargets(batchTargets);}catch{return calls.map(()=>({status:"REJECTED",reason:"STATE_COMMIT_UNCONFIRMED"}));}
+      return result.invokeBatch(calls.map(c=>updates.includes(c)?{...c,args:Object.fromEntries(Object.entries(c.args as Record<string,unknown>).filter(([k])=>k!=="customerStateOps"))}:c));
+    }
     if (updates.length > 1) {
       blockedDependencies = true;
       for (const call of updates) {
@@ -282,15 +408,29 @@ export async function createCustomerStateTools(input: {
     const local=calls.filter(c=>!writesState(c)&&["recommend_size","quote_cart"].includes(c.name));
     const remote=calls.filter(c=>!writesState(c)&&!local.includes(c));
     const remoteResults=await input.base.invokeBatch(remote);
-    const localResults=await Promise.all(local.map(invoke));
+    const localResults:CommerceToolResult[]=[];
+    // Retained target registration uses profile CAS. Keep those registrations
+    // ordered; two independent target requests must not race the same revision.
+    if(input.retainAdvice){for(const call of local)localResults.push(await invoke(call));}
+    else localResults.push(...await Promise.all(local.map(invoke)));
     return calls.map(c=>writesState(c)?updateResults[updates.indexOf(c)]!:local.includes(c)?localResults[local.indexOf(c)]!:remoteResults[remote.indexOf(c)]!);
   }, async readback() {
     await input.base.readback();
     const current = await input.store.read();
     if (commerceHash(current) !== commerceHash(effective)) { effective = current; committedUpdate = undefined; sizes.clear(); cartQuote = undefined; }
     for (const [id, result] of sizes) {
-      const source = await input.sizeInput(id);
-      if (result.sourceHash !== commerceHash({ target: source.target, charts: source.charts })) sizes.delete(id);
+      try{
+        if(result.request){
+          if(!input.componentSizeInput)throw Error("COMPONENT_SOURCE_UNAVAILABLE");
+          const source=await input.componentSizeInput(result.request);
+          if(!Number.isFinite(Date.parse(source.sourceExpiresAt))||Date.parse(source.sourceExpiresAt)<Date.parse(result.sourceExpiresAt!)||
+            !sameSizeFitTarget(source.fitTarget,result.fitTarget)||result.sourceHash!==commerceHash({target:source.target,charts:source.charts,
+            fitTarget:source.fitTarget,sourceBindingHash:source.sourceBindingHash}))sizes.delete(id);
+        }else{
+          const source = await input.sizeInput(id);
+          if (result.sourceHash !== commerceHash({ target: source.target, charts: source.charts })) sizes.delete(id);
+        }
+      }catch{sizes.delete(id);}
     }
     if (quoteRead && input.quoteInput) {
       const source = await input.quoteInput();
@@ -299,4 +439,11 @@ export async function createCustomerStateTools(input: {
     }
     return snapshot();
   }, ...(input.base.recover ? { recover: input.base.recover } : {}) };
+  if(input.retainAdvice)for(const t of effective.profile.sizeAdviceTargets??[]){
+    const id=t.kind==="PRODUCT"?t.productId:t.parentProductId;
+    if(snapshot().boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===id)){
+      await refreshAdvice(t);
+    }
+  }
+  return result;
 }

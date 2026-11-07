@@ -1,0 +1,25 @@
+{
+  "kind": "OFFLINE_CAPTURE_CLOCK_SOURCE_REPLAY_NOT_CURRENT_AUTHORIZATION",
+  "capturedSourceSha": "7057960591ac39a481665befc58e508f9dfdbd02",
+  "composition": {
+    "status": "AVAILABLE",
+    "completeness": "INSPECTED_ROWS",
+    "sourceRef": "pos:57b8396b28ad61a79e932e52d987eea48d2190d71d80b64342218b74f1ffb367",
+    "components": [
+      {
+        "componentRef": "QD001",
+        "role": "OTHER",
+        "quantity": 2
+      },
+      {
+        "componentRef": "SD023-AO",
+        "role": "TOP",
+        "quantity": 1
+      }
+    ]
+  },
+  "priceVnd": 989000,
+  "sourceUnchanged": true,
+  "providerRequests": 0,
+  "sourceWrites": 0
+}

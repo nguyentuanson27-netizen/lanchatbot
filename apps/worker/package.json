@@ -13,7 +13,7 @@
     "pretest": "pnpm -r --filter \"@lana/worker^...\" build",
     "benchmark:c2:validate": "node evals/track-c-c2/v2/validate-benchmark.mjs && node evals/track-c-c2/v2/validate-quality-harness.mjs && node evals/track-c-c2/v2/validate-journeys.mjs",
     "test": "pnpm benchmark:c2:validate && vitest run src && pnpm test:evals",
-    "test:evals": "node --test --test-concurrency=1 \"evals/single-agent-semantic-verifier/*.test.mjs\" \"evals/single-agent-commerce-read-only/*.test.mjs\"",
+    "test:evals": "node --test --test-concurrency=1 \"evals/single-agent-semantic-verifier/*.test.mjs\" \"evals/single-agent-commerce-read-only/*.test.mjs\" \"evals/single-agent-commerce-qualification/*.test.mjs\"",
     "lint": "tsc -p tsconfig.json --noEmit",
     "meta-outbox:cancel": "node dist/meta-outbox-operator.js",
     "behavior-mode:operator": "node dist/runtime-behavior-mode-operator.js"
