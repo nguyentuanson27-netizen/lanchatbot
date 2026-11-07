@@ -8,23 +8,34 @@ import {makeBinding,finalGate} from "./single-agent-semantic-verifier-boundary.j
 import {quoteBatchWork} from "./single-agent-commerce-quote.js";
 
 const config={version:"EXPLICIT_QUOTE_V2",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:2,readOnlyBatch:true,maxPerTurn:2} as const;
-async function setup(enabled=true,firstContact:boolean|null=true){
- const scope=commerceScope(),f=fixtureProduct();
+async function setup(enabled=true,firstContact:boolean|null=true,secondProduct=false){
+ const scope=commerceScope(),f=fixtureProduct(),f2=fixtureProduct("SM614");
  f.product.images=[{url:"https://content.pancake.vn/front.jpg",role:"PRIMARY",angle:"FRONT",imageType:"MODEL",intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
- const readProduct=vi.fn(async()=>f);
+ const readProduct=vi.fn(async(id:string)=>id==="SM614"?f2:f);
  const original=(await fixturePolicy()).bundle!;
  const policy={...original,artifacts:{...original.artifacts,handoffMatrix:{schemaVersion:1 as const,kind:"HANDOFF_MATRIX" as const,sourceMetadata:original.artifacts.shopPolicy.sourceMetadata,
   rules:(["PRICE_UNAVAILABLE","DEPENDENCY_FAILURE"] as const).map(reason=>({reason,customerMessagePolicy:"SILENT_HANDOFF" as const,holdingReply:null,tag:"NHAN_VIEN" as const}))}}};
  let authority:HandoffAuthority={...scope,fence:1,stateVersion:scope.revision,state:{...createConversationState({conversationId:scope.conversationId,routingOwner:"APP",now:commerceNow}),revision:scope.revision}};
  const readPolicy=vi.fn(fixturePolicy);
- const tools=await createCommerceTools({read:{scope,clock:()=>commerceNow,entry:{firstContact,fromAd:false},initialProducts:[f.product],policy:readPolicy,
+ const tools=await createCommerceTools({read:{scope,clock:()=>commerceNow,entry:{firstContact,fromAd:false},initialProducts:secondProduct?[f.product,f2.product]:[f.product],policy:readPolicy,
   catalog:{readProduct,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}},
   media:{allowedHostSuffixes:["pancake.vn"]},handoff:{read:async()=>structuredClone(authority),commit:vi.fn(async change=>{authority=structuredClone(change.next);return true;}),policy:async()=>policy},
   ...(enabled?{quoteTask:config}:{})} as Parameters<typeof createCommerceTools>[0]);
- return {scope,f,tools,readProduct,readPolicy,authority:()=>authority};
+ return {scope,f,f2,tools,readProduct,readPolicy,authority:()=>authority};
 }
 const quote={name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"]}};
 describe("quote read batches",()=>{
+ it("keeps two parent sources separate and invalidates old PASS when one source changes",async()=>{
+  const s=await setup(true,false,true);s.f2.snapshot.offers.DIRECT!.sale_price=399000;s.f2.snapshot.offers.DIRECT!.rows.forEach(r=>{r.sale_price=399000;});await s.tools.prepare!();
+  const calls=[{...quote,args:{...quote.args,quantity:1}},{name:"quote_product",args:{subjectRef:"SM614",offerTypes:["DIRECT"],quantity:2}}];
+  expect((await s.tools.invokeBatch(calls)).map(r=>r.status)).toEqual(["OK","OK"]);
+  const before=s.tools.snapshot(),proofs=before.policyLiterals.filter(p=>p.ref.startsWith("pre-cart-quote:")).map(p=>JSON.parse(p.text));
+  expect(proofs.map(p=>[p.subjectRef,p.subtotalVnd])).toEqual([["SM613",499000],["SM614",798000]]);
+  const text="Chị xem hai lựa chọn nhé.",binding=makeBinding("two-parent",text,before),response={kind:"VERDICT" as const,binding,result:{verdict:"PASS",violations:[]}};
+  expect(finalGate({expected:binding,response,current:before,finalDraft:text,now:commerceNow}).disposition).toBe("SEND_ELIGIBLE");
+  s.f2.snapshot.offers.DIRECT!.rows[0]!.stock_quantity=0;
+  await expect(s.tools.readback()).rejects.toThrow("POS_OBSERVATION_CHANGED");expect(s.tools.snapshot().effectReceipts).toHaveLength(0);
+ });
  it.each([2,3])("reserves all sibling and preparation work before I/O (%s policy reads)",async count=>{
   const s=await setup();let n=0;const verifier=vi.fn(async()=>({result:{verdict:"PASS",violations:[]}}));
   const calls=[quote,{name:"select_product_media",args:{subjectRef:"SM613",intent:"GENERIC"}},...Array.from({length:count},()=>({name:"read_policy",args:{}}))];

@@ -1,3 +1,12 @@
+## Quote/read task repair — 2026-11-07
+
+- [x] Implement quoteV2 read batches, per-target total proofs/readback, overlap/mutation/customerSelected guards, stopped siblings and full primitive accounting.
+- [x] Keep signed parts and exact-current omission; derive only identical local selection options. Clarify enquiry vs purchase and valid size alternatives, retain advice/voice/policy rules.
+- [x] Final commerce944PASS; Node870PASS/2SKIP; adapter38PASS; build/typecheck/lintPASS. Retain earlier RED and transient round60 local-stub failure followed by targeted7PASS/fullgreen.
+- [x] Record p04 frozen-source reconstruction and size-matched stress, no exact historical body/model claim; old s13 oversized path remains open.
+- [ ] Required real PostgreSQL quote+media acceptance BLOCKED by SSH timeout; Docker Linux API unavailable. No test DB created in these attempts. Engineering code review does not replace it.
+- [ ] New model campaign NOT_RUN. Previous34cases/55turns and failures remain unchanged; no qualification GO. [Detailed evidence](../docs/specs/c3-phase-c-quote-batch-implementation-20261107.md).
+
 ## Phase C — completed diagnostic, 2026-11-06
 
 - [x] Owner requested continuation; R1/R2 FAIL retained, all34cases/55turns executed without retries; three remaining groups and checkout independently audited.

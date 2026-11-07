@@ -1,3 +1,9 @@
+## Latest code repair — quote batches and enquiry selection, 2026-11-07
+
+Base5c623a20, executable savepointd9f4e55f: explicit quoteV2 allows bounded read-only batches/two distinct quote calls with independent total proofs; preserves6primitive/2round/3owner/retry0, native order and source/receipt authority. Local selection derivation is lossless; existing exact-current omission stays first. Core inquiry-versus-purchase and current-fit instructions clarified; shared targets labeled; technical repetition reduced while advice/voice/customer-policy rules retained. [Implementation/evidence](../docs/specs/c3-phase-c-quote-batch-implementation-20261107.md).
+
+Final commerce944PASS/33files, Node870PASS/2existingSKIP, focusedadapter38PASS, workerbuild/typecheck/lintPASS. Observed RED retained. CODE_REVIEW_APPROVED but realPG acceptance BLOCKED: SSH timeout twice before DB creation, local Docker Linux API unavailable. New persisted quote+media regression implemented but NOT_RUN. No new provider run, complete acceptance or Phase C GO; prior55-turn results immutable. Model behavior on enquiry cart/sizing/shared targets and s03 exact photo source remain unproved/unresolved.
+
 ## Phase C — owner requested full diagnostic, 2026-11-06
 
 All34 cases/55 turns executed, owner continued after R1 FAIL without changing earlier gates. R1 FAIL1, R2 FAIL5, remainder FAIL5; checkout scoped PASS with preview, confirmation receipt and HUMAN handoff. Actual31 model replies+5 code replies+13 handoff+6 no-send; 113 generation/112 HTTP includes1 local bound+2 verifier429, no retry. [Report and all redacted terminal conversations](../apps/worker/evals/single-agent-commerce-qualification/task-path-model-run-20261106/FULL_REPORT.md). Independently audited; no quality qualification/C3 comparison/GO, no live send. All test DBs dropped.
