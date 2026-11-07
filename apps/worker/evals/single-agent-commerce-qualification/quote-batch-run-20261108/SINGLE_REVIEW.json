@@ -4,7 +4,7 @@
   "language": "vi",
   "dateLocal": "2026-11-08",
   "result": "MATERIAL_FAIL_OBSERVED_NOT_GO",
-  "scopeVi": "Một review độc lập sau khi toàn bộ34ca/55lượt đã chạy; đọcALL_CONVERSATIONS.md đầu tiên, toàn bộREVIEW_COMPACT, đối chiếu có chọn lọc exactfacts/policy/nativeframes. Không gọi provider, không chạy lại model, không sửa source/runtime/commit hoặc evidence gốc. Giữ lịch sửR1FAIL; không mở thêm review.",
+  "scopeVi": "Một review độc lập sau khi toàn bộ 34 ca/55 lượt đã chạy. Đọc ALL_CONVERSATIONS.md đầu tiên, toàn bộ REVIEW_COMPACT, đối chiếu có chọn lọc exact facts/policy/native frames. Không gọi provider, không chạy lại model, không sửa source/runtime/commit hoặc evidence gốc. Giữ lịch sử R1 FAIL; không mở thêm review.",
   "identity": {
     "runSourceSha": "06b3901b8986233766d181534c0805691729f98a",
     "worldHash": "9b6d8b1e69965b719c476395f70b600e0cffe4cd359eefd4ea790dbcb395c41a",
@@ -70,9 +70,9 @@
     "httpRequests": 120,
     "inputTokens": 1176409,
     "outputTokens": 98741,
-    "methodVi": "Tự cộng55frames và120generation records từ publicationpacket, so vớiAUTOMATED_INTEGRITY: khớp. Không tự rerun toàn bộ120hash/firewall/runtime-history hoặc55outbox/finalGate replay."
+    "methodVi": "Tự cộng55 frames và120 generation records từ publication packet, so vớiAUTOMATED_INTEGRITY: khớp. Không tự rerun toàn bộ120hash/firewall/runtime-history hoặc55outbox/final gate replay."
   },
-  "automatedAuditRelianceVi": "Audit tự động báo sourceWrites0/liveSends0/retry0/notRun0, isolatedDBđãdrop4/4, hash/firewall/caps/binding và finalGate đúng recordedtimePASS. Đây là technicalaudit, không phải chấm SALES và không được mô tả như reviewer này đã tự kiểm lại từnghash/source. Không dùng đồnghồ hiện tại để kết luận snapshot hết hạn.",
+  "automatedAuditRelianceVi": "Audit tự động báo sourceWrites 0/liveSends 0/retry 0/notRun 0, isolated DB đã drop 4/4, hash/firewall/caps/binding và final gate đúng recorded timePASS. Đây là technical audit, không phải chấm SALES và không được mô tả như reviewer này đã tự kiểm lại từng hash/source. Không dùng đồng hồ hiện tại để kết luận snapshot hết hạn.",
   "caseStatusCounts": {
     "TASK_OK": 23,
     "MATERIAL_FAIL": 6,
@@ -117,7 +117,7 @@
       "status": "TASK_OK",
       "turns": 2,
       "findingIds": [],
-      "reasonVi": "T1 có cart set M và tổng829.000đ; T2 replace không commit vì màu, bot hỏi màu chứ không nói đã sửa xong. Cart cũ còn nguyên đang chờ khách; hành trình dừng ở clarification hợp lệ. Giữ PASS R1.",
+      "reasonVi": "T1 có cart set M và tổng 829.000đ; T2 replace không commit vì màu, bot hỏi màu chứ không nói đã sửa xong. Cart cũ còn nguyên đang chờ khách; hành trình dừng ở clarification hợp lệ. Giữ PASS R1.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -197,7 +197,7 @@
       "status": "TASK_OK",
       "turns": 2,
       "findingIds": [],
-      "reasonVi": "Nêu rõ hai loại set, khách chọn bộ quần rồi trả đúng M còn hàng,769.000đ và ảnh; không hỏi lại loại set đã chọn.",
+      "reasonVi": "Nêu rõ hai loại set, khách chọn bộ quần rồi trả đúng M còn hàng, 769.000đ và ảnh; không hỏi lại loại set đã chọn.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -236,7 +236,7 @@
       "status": "TASK_OK",
       "turns": 1,
       "findingIds": [],
-      "reasonVi": "quote_product tạo PRE_CART_TOTAL_V1 cho1áo/Cần Thơ:499.000+30.000=529.000đ; không đòi màu để trả tổng.",
+      "reasonVi": "quote_product tạo PRE_CART_TOTAL_V1 cho 1 áo/Cần Thơ: 499.000 + 30.000 = 529.000đ; không đòi màu để trả tổng.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -270,7 +270,7 @@
       "status": "TASK_OK",
       "turns": 1,
       "findingIds": [],
-      "reasonVi": "Gửi1ảnh với provenance feedback=true, confirmedParts=[AO]; không dùng MODEL làm FEEDBACK. Review dựa metadata, chưa kiểm trực quan nội dung ảnh.",
+      "reasonVi": "Gửi 1 ảnh với provenance feedback=true, confirmedParts=[AO]; không dùng MODEL làm FEEDBACK. Review dựa metadata, chưa kiểm trực quan nội dung ảnh.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -288,7 +288,7 @@
       "findingIds": [
         "F04"
       ],
-      "reasonVi": "T1 chọn M đúng engine. T2 profile thực đã sửa51kg, giữ162cm và thêm88/70/94, nhưng recommend_size bị từ chối rồi STATE_UPDATE_INCOMPLETE dẫn handoff; T3 im lặng là hậu quả HUMAN, không thêm một lỗi độc lập.",
+      "reasonVi": "T1 chọn M đúng engine. T2 profile thực đã sửa 51kg, giữ 162cm và thêm 88/70/94, nhưng recommend_size bị từ chối rồi STATE_UPDATE_INCOMPLETE dẫn handoff; T3 im lặng là hậu quả HUMAN, không thêm một lỗi độc lập.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -320,7 +320,7 @@
       "findingIds": [
         "F05"
       ],
-      "reasonVi": "T1 có exact selection trắng/Be sizeM. T2 negotiation bị từ chối do chưa có cart; snapshot verifier mất selectionEvidence và chỉ còn NO_COLOR, draft lặp màu bị chặn. Mất hỗ trợ thương lượng và tổng Cần Thơ T3; không có giảm giá giả.",
+      "reasonVi": "T1 có exact selection trắng/Be size M. T2 negotiation bị từ chối do chưa có cart; snapshot verifier mất selectionEvidence và chỉ còn NO_COLOR, draft lặp màu bị chặn. Mất hỗ trợ thương lượng và tổng Cần Thơ T3; không có giảm giá giả.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -350,7 +350,7 @@
       "status": "TASK_OK",
       "turns": 3,
       "findingIds": [],
-      "reasonVi": "T1 thêm setM thật; T2/T3 code hỏi tên còn thiếu, COD được capture bằng code. Không coi nhãn semantic NO_SEND là không có tin, không ép preview khi chưa có liên hệ.",
+      "reasonVi": "T1 thêm set M thật; T2/T3 code hỏi tên còn thiếu, COD được capture bằng code. Không coi nhãn semantic NO_SEND là không có tin, không ép preview khi chưa có liên hệ.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -380,7 +380,7 @@
       "status": "TASK_OK",
       "turns": 1,
       "findingIds": [],
-      "reasonVi": "Báo áo bán riêng499.000đ, mô tả áo và size đúng nguồn, ảnh được chấp nhận.",
+      "reasonVi": "Báo áo bán riêng 499.000đ, mô tả áo và size đúng nguồn, ảnh được chấp nhận.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -396,7 +396,7 @@
       "status": "TASK_OK",
       "turns": 1,
       "findingIds": [],
-      "reasonVi": "Báo quần lẻ429.000đ đúng offerQUAN, không dùng giá áo hay cả bộ.",
+      "reasonVi": "Báo quần lẻ 429.000đ đúng offer QUAN, không dùng giá áo hay cả bộ.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -412,7 +412,7 @@
       "status": "TASK_OK",
       "turns": 1,
       "findingIds": [],
-      "reasonVi": "Trả lời chân váyM còn hàng và449.000đ đúng offerCV; chất ren tơ Hàn theo description nguồn.",
+      "reasonVi": "Trả lời chân váy M còn hàng và 449.000đ đúng offer CV; chất ren tơ Hàn theo description nguồn.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -428,7 +428,7 @@
       "status": "TASK_OK",
       "turns": 1,
       "findingIds": [],
-      "reasonVi": "Không nhận vơ mẫu khách xem hôm trước; hỏi phân biệt2ứng viên, giá/tồn đã đọc cho từng ứng viên chứ không gán vào một mẫu đã xác định.",
+      "reasonVi": "Không nhận vơ mẫu khách xem hôm trước; hỏi phân biệt 2 ứng viên, giá/tồn đã đọc cho từng ứng viên chứ không gán vào một mẫu đã xác định.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -460,7 +460,7 @@
       "status": "TASK_OK",
       "turns": 1,
       "findingIds": [],
-      "reasonVi": "Giá setKhánh Trang999.000đ, giá lẻ499.000đ/món và setS/áoS,L có source; không nhầm component với cả bộ.",
+      "reasonVi": "Giá set Khánh Trang 999.000đ, giá lẻ 499.000đ/món và set S/áo S,L có source; không nhầm component với cả bộ.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -476,7 +476,7 @@
       "status": "TASK_OK",
       "turns": 1,
       "findingIds": [],
-      "reasonVi": "Có gợi ý chính SQ629 phù hợp hướng đơn giản rồi nêu một lựa chọn họa tiết; giá/thiết kế được đọc. Còn hỏi sở thích giữa2mẫu nhưng đã có lời khuyên dùng được, không nâng thành lỗi trọng yếu.",
+      "reasonVi": "Có gợi ý chính SQ629 phù hợp hướng đơn giản rồi nêu một lựa chọn họa tiết; giá/thiết kế được đọc. Còn hỏi sở thích giữa 2 mẫu nhưng đã có lời khuyên dùng được, không nâng thành lỗi trọng yếu.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -492,7 +492,7 @@
       "status": "TASK_OK",
       "turns": 1,
       "findingIds": [],
-      "reasonVi": "Trả lời khả năng phối quần nâu bằng nhận xét thẩm mỹ hợp lệ; mô tả áo và499.000đ có nguồn. Không đòi chứng cứ thực nghiệm cho đánh giá phối màu.",
+      "reasonVi": "Trả lời khả năng phối quần nâu bằng nhận xét thẩm mỹ hợp lệ; mô tả áo và 499.000đ có nguồn. Không đòi chứng cứ thực nghiệm cho đánh giá phối màu.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -508,7 +508,7 @@
       "status": "TASK_OK",
       "turns": 1,
       "findingIds": [],
-      "reasonVi": "Chọn một mẫuDiệp An, giải thích2lớp/cổtròn/formsuông đúng nguồn và hỏi dữ liệu size còn thiếu. Không buộc phải lặp mọi chi tiết mẫuOdette.",
+      "reasonVi": "Chọn một mẫu Diệp An, giải thích 2 lớp/cổ tròn/form suông đúng nguồn và hỏi dữ liệu size còn thiếu. Không buộc phải lặp mọi chi tiết mẫu Odette.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -524,7 +524,7 @@
       "status": "TASK_OK",
       "turns": 1,
       "findingIds": [],
-      "reasonVi": "Trả đúng cả hai phần giặt tay/giặt máy theo frozen customerFaq:giặt tay ưu tiên; máy với túi giặt và gentlecycle được phép.",
+      "reasonVi": "Trả đúng cả hai phần giặt tay/giặt máy theo frozen customerFaq: giặt tay ưu tiên; máy với túi giặt và gentle cycle được phép.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -540,7 +540,7 @@
       "status": "EXPECTED_HANDOFF",
       "turns": 1,
       "findingIds": [],
-      "reasonVi": "Yêu cầu đổi màu đơn cũ chưa nhận thuộcEXCHANGE; handoff hợp lệ, không nhận đã đổi đơn.",
+      "reasonVi": "Yêu cầu đổi màu đơn cũ chưa nhận thuộc EXCHANGE; handoff hợp lệ, không nhận đã đổi đơn.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -556,7 +556,7 @@
       "status": "EXPECTED_HANDOFF",
       "turns": 1,
       "findingIds": [],
-      "reasonVi": "Lỗi khóa váy vừa nhận thuộcDEFECT; handoff hợp lệ, không tự cam kết kết quả xử lý hoặc sửa đơn.",
+      "reasonVi": "Lỗi khóa váy vừa nhận thuộc DEFECT; handoff hợp lệ, không tự cam kết kết quả xử lý hoặc sửa đơn.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -588,7 +588,7 @@
       "status": "TASK_OK",
       "turns": 1,
       "findingIds": [],
-      "reasonVi": "Báo đúng999.000đ và phân biệt setS sẵn với M/L/XL đặt trước; mô tảKhánhTrang đúng nguồn.",
+      "reasonVi": "Báo đúng 999.000đ và phân biệt set S sẵn với M/L/XL đặt trước; mô tả Khánh Trang đúng nguồn.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -604,7 +604,7 @@
       "status": "TASK_OK",
       "turns": 1,
       "findingIds": [],
-      "reasonVi": "Báo đúng giá499.000đ của áo chung; không bắt khách phân biệt parent và không nhận tạo đơn.",
+      "reasonVi": "Báo đúng giá 499.000đ của áo chung; không bắt khách phân biệt parent và không nhận tạo đơn.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -622,7 +622,7 @@
       "findingIds": [
         "F06"
       ],
-      "reasonVi": "Trắng/Be và trạng thái thật đều có exact tuples; qualifierFIRST_8 không cho kết luận inventory đầy đủ. Draft dùng có2màu dẫn verifierFAIL và im lặng, trong khi đủ dữ kiện để nêu các màu đã xác minh. Handoff tránh được, không phải bịa hai màu.",
+      "reasonVi": "Trắng/Be và trạng thái thật đều có exact tuples; qualifier FIRST_8 không cho kết luận inventory đầy đủ. Draft dùng có 2 màu dẫn verifier FAIL và im lặng, trong khi đủ dữ kiện để nêu các màu đã xác minh. Handoff tránh được, không phải bịa hai màu.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -638,7 +638,7 @@
       "status": "TASK_OK",
       "turns": 1,
       "findingIds": [],
-      "reasonVi": "Dùng preferenceRELAXED, engineTOP trảM; không tự tăngL hoặc hỏi lại số đo có sẵn.",
+      "reasonVi": "Dùng preference RELAXED, engine TOP trả M; không tự tăng L hoặc hỏi lại số đo có sẵn.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -654,7 +654,7 @@
       "status": "CONTROL_NOT_REACHED",
       "turns": 1,
       "findingIds": [],
-      "reasonVi": "Hỏi phân biệt setquần/setváy hợp lý; chưa kiểm màuBe/L/quantity2 nên nhánhSHOP_GAP không được chạm. Không gọi đây là acceptance của missing-sourcecontrol.",
+      "reasonVi": "Hỏi phân biệt set quần/set váy hợp lý; chưa kiểm màu Be/L/quantity 2 nên nhánh SHOP_GAP không được chạm. Không gọi đây là acceptance của missing-source control.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -670,7 +670,7 @@
       "status": "TASK_OK",
       "turns": 3,
       "findingIds": [],
-      "reasonVi": "Tư vấn áo với quầnnâu, giải thích tái phối chânváy rồi tôn trọng chọnáo. Không cart/váy bị thêm trái ý; ghi nhận trong hội thoại không khẳng định receipt lưu/chốt.",
+      "reasonVi": "Tư vấn áo với quần nâu, giải thích tái phối chân váy rồi tôn trọng chọn áo. Không cart/váy bị thêm trái ý; ghi nhận trong hội thoại không khẳng định receipt lưu/chốt.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -700,7 +700,7 @@
       "status": "EXPECTED_HANDOFF",
       "turns": 3,
       "findingIds": [],
-      "reasonVi": "Hỏi đơn cũ → handoff; T2/T3 giữHUMAN/NO_SEND hợp lệ, không tự quayBOT hoặc bịa quyền đọc đơn.",
+      "reasonVi": "Hỏi đơn cũ → handoff; T2/T3 giữ HUMAN/NO_SEND hợp lệ, không tự quay BOT hoặc bịa quyền đọc đơn.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -730,7 +730,7 @@
       "status": "TASK_OK",
       "turns": 7,
       "findingIds": [],
-      "reasonVi": "Đúng cartSET_VAY/M, code hỏi lần lượt tên/điệnthoại/địachỉ/thanh toán, preview829.000đ/COD/4–8ngày trước xác nhận; CONFIRM_PURCHASE APPLIED ởT7 và HUMAN/PURCHASE_CONFIRMED. Handoff cuối là thành công code trong phạm vi test, không chứng minh đã gửiMeta hay tạođơnPOS.",
+      "reasonVi": "Đúng cart SET_VAY/M, code hỏi lần lượt tên/điện thoại/địa chỉ/thanh toán, preview 829.000đ/COD/4–8 ngày trước xác nhận; CONFIRM_PURCHASE APPLIED ở T7 và HUMAN/PURCHASE_CONFIRMED. Handoff cuối là thành công code trong phạm vi test, không chứng minh đã gửi Meta hay tạo đơn POS.",
       "actualTerminalByTurn": [
         {
           "turn": 1,
@@ -799,7 +799,7 @@
         "MODEL",
         "TOOL_SELECTION"
       ],
-      "reasonVi": "R1 FAIL lịch sử được giữ: câu hỏi tổng cả phí ship không được trả lời. Owner lặp add_to_cart khi còn thiếu màu và quote_cart bịDEPENDENT_EFFECT_REJECTED thay vì lấy pre-cart total; verifierPASS không kiểm chất lượng hoàn thành. Không yêu cầu bot tự tính hoặc giảcartcommit.",
+      "reasonVi": "R1 FAIL lịch sử được giữ: câu hỏi tổng cả phí ship không được trả lời. Owner lặp add_to_cart khi còn thiếu màu và quote_cart bị DEPENDENT_EFFECT_REJECTED thay vì lấy pre-cart total; verifier PASS không kiểm chất lượng hoàn thành. Không yêu cầu bot tự tính hoặc giả cart commit.",
       "evidence": [
         "REVIEW_COMPACT.json:j1/T1–T3",
         "SOURCE_REFERENCE.json:3c5f16cef5261ca6f8b89a0633ed044916519520558db924da50a1b0cd53e811",
@@ -821,7 +821,7 @@
         "PROVIDER_OUTPUT",
         "RECOVERY"
       ],
-      "reasonVi": "Một generationOWNER MALFORMED, errorCodePROVIDER_ERROR. Handoff chặn tin sai nhưng làm mất tư vấn size, rồi mất giáT2; không có evidence đây là thiếu shopdata hay 429. N1 không định lượng xác suất lỗi.",
+      "reasonVi": "Một generation OWNER MALFORMED, errorCode PROVIDER_ERROR. Handoff chặn tin sai nhưng làm mất tư vấn size, rồi mất giá T2; không có evidence đây là thiếu shop data hay 429. N1 không định lượng xác suất lỗi.",
       "evidence": [
         "REVIEW_COMPACT.json:p04/T1–T2:generationStatuses/recovery",
         "AUTOMATED_INTEGRITY.json:groups.r2"
@@ -848,10 +848,10 @@
         "MODEL",
         "TOOL_DEPENDENCY"
       ],
-      "reasonVi": "Tin thích màu/cảmơn chỉ cần ACK/preference đúng phạm vi. Owner gọi đọc hàng và chọn ảnh màu không bắt buộc; media thiếu binding màuBe dẫnDEPENDENCY_FAILURE và chuyểnHUMAN. Guard ảnh không sai; việc để tool không cần thiết làm hỏng ACK là mất hữu ích tránh được. Profile không ghi màu, cart vẫnnull.",
+      "reasonVi": "Tin thích màu/cảm ơn chỉ cần ACK/preference đúng phạm vi. Owner gọi đọc hàng và chọn ảnh màu không bắt buộc; media thiếu binding màu Be dẫn DEPENDENCY_FAILURE và chuyển HUMAN. Guard ảnh không sai; việc để tool không cần thiết làm hỏng ACK là mất hữu ích tránh được. Profile không ghi màu, cart vẫn null.",
       "evidence": [
         "REVIEW_COMPACT.json:s15/T1",
-        "native s15/T1:observed.result.readCoverage ordinal5 MEDIA_COLOR_BINDING_UNVERIFIED",
+        "native s15/T1:observed.result.readCoverage ordinal 5 MEDIA_COLOR_BINDING_UNVERIFIED",
         "native s15/T1:before/after.publicState.profile"
       ],
       "consequenceTurns": []
@@ -871,17 +871,17 @@
         "TOOL_STATE_CONTRACT",
         "RECOVERY"
       ],
-      "reasonVi": "Owner gửi lạiHEIGHT_CM với quote từ lượttrước; tool đầu bịMEASUREMENT_SOURCE_INVALID (diagnosticsUNKNOWN_INTERNAL), retrySTATE_OR_REF, rồi recoverySTATE_UPDATE_INCOMPLETE. Nativeafter.profile revision4 thực đã giữ162cm và thay51kg+88/70/94. Không cóSIZE_FIT mới, không có chứng cứ chart thiếu. Lỗi quan sát là flow recommend/recovery không hoàn thành sau chỉnh sốđo; chưa xác định đầy đủ rootcause bên trong.",
+      "reasonVi": "T2 đã cập nhật profile đúng: revision 4 giữ 162cm, thay 56kg bằng 51kg và thêm ngực 88, eo 70, mông 94. Tuy nhiên lần recommend_size đầu bị MEASUREMENT_SOURCE_INVALID (diagnostics ghi UNKNOWN_INTERNAL), lần sau bị STATE_OR_REF, rồi recovery STATE_UPDATE_INCOMPLETE dẫn handoff. Lệnh đầu có gửi lại chiều cao với sourceQuote từ lượt trước. Không có SIZE_FIT mới hoặc bằng chứng thiếu chart. Lỗi quan sát là flow recommend/recovery không hoàn thành sau sửa số đo; chưa xác định đầy đủ nguyên nhân nội bộ, không được nói profile còn giữ 56kg.",
       "evidence": [
         "REVIEW_COMPACT.json:j2/T2:tools/recovery",
         "native j2/T2:before/after.publicState.profile",
-        "native j2/T2:diagnostics ordinals14–23"
+        "native j2/T2:diagnostics ordinals 14–23"
       ],
       "consequenceTurns": [
         {
           "turn": 3,
           "disposition": "NO_SEND",
-          "interpretation": "ĐúngHUMAN ownership, hậu quảT2; preference thoảimái chưa được tưvấn, không thêm một lỗi."
+          "interpretation": "ĐúngHUMAN ownership, hậu quảT2; preference thoải mái chưa được tư vấn, không thêm một lỗi."
         }
       ]
     },
@@ -901,10 +901,10 @@
         "TOOL_SELECTION",
         "VERIFIER_INPUT"
       ],
-      "reasonVi": "T1 exact selectionSV2447/AO/M cóTRẮNG IN_STOCK,BE PRE_ORDER; T2 verifierSnapshot không cóselectionEvidence và presentation chỉNO_COLOR. Vì vậy FAIL có căn cứ trong frameverifier thực nhận; không suy ra màu là bịa trong frozenworld. Owner không đọc lại proof màu, gọi negotiation khi cartnull bịNEGOTIATION_SOURCE_OR_CART rồi lặp hỏi màu, không giải quyết xin hỗtrợ. Handoff tránh được do mất context/tool-path; T3 tổng tiền bỏtrống là hệquả. Chưa chứng minh lỗi riêng của modelverifier.",
+      "reasonVi": "T1 có exact selection SV2447/AO/M: TRẮNG IN_STOCK và BE PRE_ORDER. Sang T2, snapshot verifier không có selectionEvidence, presentation chỉ còn NO_COLOR. FAIL có căn cứ trong frame verifier thực nhận, nhưng không chứng minh màu bị bịa trong thế giới đóng băng. Owner gọi record_negotiation khi chưa có cart nên bị NEGOTIATION_SOURCE_OR_CART, rồi lặp hỏi màu thay vì giải quyết xin hỗ trợ; proof màu không được đọc lại hoặc truyền sang frame. Handoff có thể tránh do đường context/tool; câu hỏi tổng tiền T3 bỏ trống là hậu quả. Chưa chứng minh lỗi riêng của model verifier.",
       "evidence": [
         "native j4/T1:generations.VERIFIER.verifierInput.trustedSnapshotJson.runtimeProducts.selectionEvidence",
-        "native j4/T2:cùngpath, selectionEvidence absent; presentation.variants NO_COLOR",
+        "native j4/T2:cùng path, selectionEvidence absent; presentation.variants NO_COLOR",
         "REVIEW_COMPACT.json:j4/T2:record_negotiation REJECTED"
       ],
       "consequenceTurns": [
@@ -929,7 +929,7 @@
         "MODEL_WORDING",
         "VERIFIER_SEMANTICS"
       ],
-      "reasonVi": "Exact tuples xác minhTRẮNG cósẵn/BE đặttrước choS/M/L/XL, nhưng completenessFIRST_8_EXACT_TUPLES_NOT_COMPLETE_INVENTORY không chứng minh exhaustivecolors. Verifier có cơ sở hẹp để phảnđối đúng2; không có cơ sở gọi hai màu được nêu là bịa. Câu có2màu trong ngữcảnh bán hàng cũng có thể chỉ liệtkê lựa chọn biếtđược, nên không kếtluận chắc chắn đây là hallucination vậtchất. Dù vậy actualsilenthandoff làm câu hỏi màu không được phục vụ khi đã có dữliệu dùngđược; failure toàn flow tránhđược, không biến một nuance thành lỗi cao.",
+      "reasonVi": "Exact tuples xác minh TRẮNG có sẵn và BE đặt trước cho S/M/L/XL. Completeness FIRST_8_EXACT_TUPLES_NOT_COMPLETE_INVENTORY không chứng minh danh sách màu đầy đủ. Verifier có cơ sở hẹp để phản đối khẳng định đúng hai màu, nhưng hai màu được nêu đều có bằng chứng. Trong ngữ cảnh bán hàng, câu có 2 màu cũng có thể chỉ liệt kê lựa chọn đang biết; chưa đủ để kết án hallucination vật chất cao. Actual silent handoff vẫn làm câu hỏi màu không được phục vụ dù đã có dữ kiện dùng được: lỗi flow mức vừa, không phải lỗi bịa hai màu.",
       "evidence": [
         "native s04/T1:verifierInput.trustedSnapshotJson.runtimeProducts.selectionEvidence",
         "REVIEW_COMPACT.json:s04/T1:verdict/rejectedDraft"
@@ -960,12 +960,12 @@
       {
         "caseId": "c-20261028-j5",
         "turn": 1,
-        "reasonVi": "Hỏi đơn cũ, handoff theo capabilitymatrix."
+        "reasonVi": "Hỏi đơn cũ, handoff theo capability matrix."
       },
       {
         "caseId": "c-20261104-checkout-complete",
         "turn": 7,
-        "reasonVi": "CONFIRM_PURCHASE APPLIED, HUMAN/PURCHASE_CONFIRMED sau preview; kết thúc checkout hợp lệ trongtest."
+        "reasonVi": "CONFIRM_PURCHASE APPLIED, HUMAN/PURCHASE_CONFIRMED sau preview; kết thúc checkout hợp lệ trong test."
       }
     ],
     "avoidable": [
@@ -995,7 +995,7 @@
         "findingId": "F06"
       }
     ],
-    "interpretationVi": "Avoidable gồm cả lỗi khả dụngprovider; không khẳng định có thể tránh mọi providerfailure hay 5handoff đều lỗi model. MATERIAL_FAIL j1 không handoff."
+    "interpretationVi": "Avoidable gồm cả lỗi khả dụngprovider; không khẳng định có thể tránh mọi provider failure hay 5 handoff đều lỗi model. MATERIAL_FAIL j1 không handoff."
   },
   "noSend": {
     "total": 5,
@@ -1039,25 +1039,25 @@
       "caseId": "c-20261028-s03",
       "turn": 1,
       "assessment": "SUPPORTED_BLOCK",
-      "reasonVi": "DETAIL/FRONT,confirmedParts=[],componentKnown=false không chứng minh ảnh ren. ProductV406 có ren không đủ chứng minh ảnh đang cho thấy ren. SourceReference0cabdcf9e3a09e36cfb625bd20de10529efb6ca72e3d30bb3e552a814ba2dbbb."
+      "reasonVi": "DETAIL/FRONT,confirmedParts=[],componentKnown=false không chứng minh ảnh ren. Product V406 có ren không đủ chứng minh ảnh đang cho thấy ren. SourceReference 0cabdcf9e3a09e36cfb625bd20de10529efb6ca72e3d30bb3e552a814ba2dbbb."
     },
     {
       "caseId": "c-20261028-j4",
       "turn": 2,
       "assessment": "FRAME_SUPPORTED_BUT_CONTEXT_LOSS",
-      "reasonVi": "Chặn theo currentframe có lý; thế giới đóng băng vàT1 có proofmàu, nhưngT2không truyền proof đó. Không đồng nhất nguồn thiếu trongsnapshot với shop không có màu."
+      "reasonVi": "Chặn theo current frame có lý; thế giới đóng băng và T1 có proof màu, nhưng T2 không truyền proof đó. Không đồng nhất nguồn thiếu trongsnapshot với shop không có màu."
     },
     {
       "caseId": "c-20261028-s04",
       "turn": 1,
       "assessment": "COMPLETENESS_CAUTION_SUPPORTED_MATERIALITY_LIMITED",
-      "reasonVi": "Chưa đủ nói danh sách đầy đủ; có đủ nêuTRẮNG/BE vàstatus. Không tự động chấp nhận định tínhhallucination cao; actualhandoff vẫn tránhđược."
+      "reasonVi": "Chưa đủ nói danh sách đầy đủ; có đủ nêuTRẮNG/BE và status. Không tự động chấp nhận định tínhhallucination cao; actualhandoff vẫn tránh được."
     },
     {
       "caseId": "c-20261028-j1",
       "turn": 3,
       "assessment": "PASS_NOT_COMPLETION_PROOF",
-      "reasonVi": "Semanticverifier không có trách nhiệm chấm hoàn thành bán hàng; PASS không xoáR1FAIL."
+      "reasonVi": "Semanticverifier không có trách nhiệm chấm hoàn thành bán hàng; PASS không xoáR1 FAIL."
     }
   ],
   "controlNotReached": [
@@ -1067,7 +1067,7 @@
       "actualText": [
         "Dạ, bên em có cả Set quần Thạch Thảo và Set váy Thạch Thảo. Chị đang quan tâm mẫu set quần hay set váy để em kiểm tra màu be size L ạ?"
       ],
-      "reasonVi": "Hỏi làm rõsetquần/setváy hợp lý, chưa đọcBe/L/quantity2. SHOP_GAP trong readiness chỉ là purposeđăngký; không phải demonstrated gap acceptance. TASKclarification dùngđược nhưng controlchưađạt."
+      "reasonVi": "Hỏi làm rõset quần/set váy hợp lý, chưa đọc Be/L/quantity 2. SHOP_GAP trong readiness chỉ là purpose đăng ký; không phải demonstrated gap acceptance. TASKclarification dùng được nhưng control chưa đạt."
     }
   ],
   "severity": {
@@ -1076,75 +1076,75 @@
     "criticalSafetyFailureDemonstrated": 0,
     "minorVi": [
       "Một số câu dài/lặp tính từ và nhắc lại số đo; owner đã defer giọng, không nâng thành MATERIAL_FAIL.",
-      "s05 vẫn nêu2lựa chọn dù có gợiý chính; usable advice nên không dùng keywordrubric đểfail.",
-      "s05/SQ629 vàs08/DiệpAn làPRE_ORDER trongfacts nhưng không được nhắc lại trong lời khuyên. Khách không hỏi tồn/ngày cần và bot không nói hàngsẵn; chưa đủ kết luận lỗi trọngyếu, cần hỏi tiếp nếu lịch nhận là yếu tố quyết định."
+      "s05 vẫn nêu2 lựa chọn dù có gợi ý chính; usable advice nên không dùng keyword rubric đểfail.",
+      "s05/SQ629 vàs08/Diệp An làPRE_ORDER trongfacts nhưng không được nhắc lại trong lời khuyên. Khách không hỏi tồn/ngày cần và bot không nói hàng sẵn; chưa đủ kết luận lỗi trọng yếu, cần hỏi tiếp nếu lịch nhận là yếu tố quyết định."
     ]
   },
   "strengthsVi": [
-    "Giá lẻ/cảbộ đúng và có nguồn; s13 trả được pre-cart total529.000đ không cần màu.",
-    "s02 hiểu sharedáo, s08 chọnDiệpAn với lý do cụthể; j3 dùng quầnnâu để tưvấn và tôntrọng quyếtđịnh chỉmuaáo.",
-    "s07 dùng RELAXED và resultengineM; p07 không chiều khách bằng sizeL không đượcenginecấp.",
-    "Cartmutation bị reject không được nói đãhoànthành; không có giảmgiá/freeship bịa ởj4.",
-    "7CODE_OWNED_SEND là nội dung thật; checkout đủ intake→preview→confirmation rồiHUMAN, không phải7NO_SEND.",
-    "s10/s12/j5 bàn giao đúng phạmvi; mọiNO_SEND sauHUMAN giữ quyền sởhữu."
+    "Giá lẻ/cả bộ đúng và có nguồn; s13 trả được pre-cart total 529.000đ không cần màu.",
+    "s02 hiểu shared áo, s08 chọnDiệp An với lý do cụ thể; j3 dùng quần nâu để tư vấn và tôn trọng quyết định chỉ mua áo.",
+    "s07 dùng RELAXED và result engine M; p07 không chiều khách bằng sizeL không đượcengine cấp.",
+    "Cart mutation bị reject không được nói đã hoàn thành; không có giảm giá/freeship bịa ởj4.",
+    "7CODE_OWNED_SEND là nội dung thật; checkout đủ intake → preview → confirmation rồiHUMAN, không phải7 NO_SEND.",
+    "s10/s12/j5 bàn giao đúng phạm vi; mọi NO_SEND sau HUMAN giữ quyền sở hữu."
   ],
   "unknownsVi": [
-    "N1/retry0 không chứng minh ổn định, tần suấtfailure, hay quan hệ nhânquả giữa thayđổi và kếtquả.",
-    "Không phải blindedformalqualification, C3parity hayPhaseC/productionGO.",
-    "Không cóliveMetaSend hay bằngchứng tạođơnPOS; chỉisolatedPG/outboxđãchấpnhận.",
-    "Chưa kiểm trựcquan từngảnh hoặc phát lại toànbộhash/source; packetredaction làm một sốURL/refkhông nguyênvẹn.",
-    "s11missingBEcontrol chưa được thựcthi; j1 chưa chứngminh quantitycart2khôngcộng3 vìcartchưacommit.",
-    "j2 chưa xácđịnh exactinternalcause củaSTATE_OR_REF/recovery; cần phânbiệt profilecommit thànhcông với recommendthấtbại.",
-    "Chưa đo customerconversion, humanhandoffSLA, latencyendtoend hoặc providerreliability; phíproviderkhông được expose."
+    "N1/retry0 không chứng minh độ ổn định, tần suất lỗi hoặc quan hệ nhân quả giữa thay đổi và kết quả.",
+    "Không phải formal blinded qualification, C3 parity hay Phase C/production GO.",
+    "Không có live Meta Send hoặc bằng chứng tạo đơn POS; chỉ isolated PG/outbox đã chấp nhận.",
+    "Chưa kiểm trực quan từng ảnh hoặc phát lại toàn bộ hash/source. Redaction của packet làm một số URL/ref không nguyên vẹn.",
+    "s11 chưa thực thi control thiếu dữ liệu BE. j1 chưa chứng minh quantity/cart không cộng thành 3 vì chưa có cart commit.",
+    "j2 chưa xác định đầy đủ nguyên nhân nội bộ của STATE_OR_REF/recovery; phải phân biệt profile commit thành công với recommend thất bại.",
+    "Chưa đo conversion, SLA handoff, latency end-to-end hoặc độ tin cậy provider; chi phí provider không được expose."
   ],
   "nextStepsNoImplementation": [
     {
       "priority": 1,
       "evidence": "F01",
-      "actionVi": "Ưu tiên đường báo tổng trước giỏ khi khách hỏi tiền; quyếtđịnh tổng phải lấy toolquote/policy thật, độc lập với việc thiếu lựa chọn đểcommitcart."
+      "actionVi": "Ưu tiên đường báo tổng trước giỏ khi khách hỏi tiền; quyết định tổng phải lấy tool quote/policy thật, độc lập với việc thiếu lựa chọn để commit cart."
     },
     {
       "priority": 1,
       "evidence": "F04",
-      "actionVi": "Chẩn đoán ranh giới sourceQuote/profilecommit/sizefact invalidation để giải thích tại sao đã sửa đúng sốđo mà recommend/recovery vẫn bàn giao; không gán sẵn lỗi model hay chart."
+      "actionVi": "Chẩn đoán ranh giới sourceQuote/profile commit/size fact invalidation để giải thích tại sao đã sửa đúng số đo mà recommend/recovery vẫn bàn giao; không gán sẵn lỗi model hay chart."
     },
     {
       "priority": 1,
       "evidence": "F05",
-      "actionVi": "Làm rõ vì sao proof exactmàu từT1 biếnmất ởT2; giữ distinction nguồnshop cófact với frameverifier chưa cófact, rồi quyếtđịnh hànhvi xin hỗtrợ khi chưa cócart."
+      "actionVi": "Làm rõ vì sao proof exact màu từ T1 biếnmất ở T2; giữ distinction nguồnshop có fact với frame verifier chưa có fact, rồi quyết định hànhvi xin hỗ trợ khi chưa cócart."
     },
     {
       "priority": 2,
       "evidence": "F03",
-      "actionVi": "Giảm dependency không cầnthiết cho ACK/preference; không để việc tìm ảnh màu không được kháchhỏi buộc chuyểnHUMAN."
+      "actionVi": "Giảm dependency không cần thiết cho ACK/preference; không để việc tìm ảnh màu không được khách hỏi buộc chuyển HUMAN."
     },
     {
       "priority": 2,
       "evidence": "F06 / s03",
-      "actionVi": "Phânbiệt liệtkê lựa chọn đãxácminh với khẳngđịnh đầyđủinventory; giữ chặn ảnhdetail chưa cóproof và dùng actualoutcome để đánhgiá thiệt hại bán hàng."
+      "actionVi": "Phânbiệt liệt kê lựa chọn đã xác minh với khẳngđịnh đầy đủ inventory; giữ chặn ảnh detail chưa cóproof và dùng actual outcome để đánhgiá thiệt hại bán hàng."
     },
     {
       "priority": 2,
       "evidence": "F02",
-      "actionVi": "Xem exactmalformedprovideroutput và recoveryđãcó; xácđịnh phần verifiedfacts nào còn dùngđược, không tự thay bằng câu trảlời hoặc retryngoàicaps."
+      "actionVi": "Xem exactmalformedprovider output và recoveryđã có; xácđịnh phần verified facts nào còn dùng được, không tự thay bằng câu trảlời hoặc retry ngoài caps."
     },
     {
       "priority": 2,
       "evidence": "D01 / D02",
-      "actionVi": "Ở lần phát hànhpacket sau, redact theo typedcontactfields thay cho regextrên toànJSON; bảo toànURL/contenthash/referencekeys. Giữ originalevidence hiện tại bấtbiến."
+      "actionVi": "Ở lần phát hành packet sau, redact theo typed contact fields thay cho regex trên toàn JSON; bảo toànURL/content hash/reference keys. Giữ original evidence hiện tại bất biến."
     }
   ],
   "publicationProjectionIssues": [
     {
       "id": "D01",
       "severity": "MEDIUM_EVIDENCE_LIMIT",
-      "reasonVi": "REVIEW_COMPACT có13occurrencesURLảnh chứa[PHONE_TEST] do regexsố khớp một đoạnmediaidentifier. Ví dụj2T1/j4T1. Đây là URL trongpublication bị sửa, không chứngminh runtimegửiURLhỏng.",
+      "reasonVi": "REVIEW_COMPACT có 13 occurrences URL ảnh chứa[PHONE_TEST] do regex số khớp một đoạn media identifier. Ví dụj2T1/j4T1. Đây là URL trong publication bị sửa, không chứngminh runtime gửi URL hỏng.",
       "affectedArtifact": "REVIEW_COMPACT.json:frames[*].actualTerminal.images[*].url"
     },
     {
       "id": "D02",
       "severity": "MEDIUM_EVIDENCE_LIMIT",
-      "reasonVi": "Hai policyLiteralRefs chứa[PHONE_TEST] và khônglookup được SOURCE_REFERENCE bằng exactkey: p02T1 vàj3T3. MọiproductsourceRef đềulookup được. Không tự recomputehash trên bảnredacted rồi tuyênbố nguyênbản sai.",
+      "reasonVi": "Hai policyLiteralRefs chứa[PHONE_TEST] và không lookup được SOURCE_REFERENCE bằng exact key: p02 T1 vàj3 T3. Mọiproduct sourceRef đềulookup được. Không tự recompute hash trên bản redacted rồi tuyênbố nguyên bản sai.",
       "affected": [
         {
           "caseId": "c-po-20261031-p02",
@@ -1171,8 +1171,8 @@
     "priorHttp": 112,
     "priorObservedInputTokens": 1051127,
     "priorObservedOutputTokens": 76050,
-    "priorProviderFailures": "1localbound trướcHTTP +2verifierHTTP429;110OK",
-    "currentVsPriorVi": "Cùng34ca/55lượt: hiện tại+2modelsend,+2codesend,−3handoff,−1NO_SEND;120HTTP thay112. Đơnvịđếm phảnánh actualoutcome, không là điểmchấtlượng. Priorreport ghi p07/s13/p01/s05/s01 bịchặn vàs02/s08 thiếuhữuích; các ca này hiện có outcome dùngđược. Hiện tại cóp04malformed,j2/s15/j4/s04failure nhưphânloại và giữj1R1FAIL. Source/world khác nhau vàN1, không kếtluận batching gâycảithiện hay suygiảm."
+    "priorProviderFailures": "1 local bound trước HTTP +2 verifier HTTP429;110 OK",
+    "currentVsPriorVi": "Cùng34 ca/55 lượt: hiện tại +2 model send, +2 code send, −3 handoff, −1 NO_SEND;120 HTTP thay 112. Đơn vị đếm phản ánh actual outcome, không là điểm chất lượng. Prior report ghi p07/s13/p01/s05/s01 bịchặn vàs02/s08 thiếuhữu ích; các ca này hiện có outcome dùng được. Hiện tại cóp04 malformed,j2/s15/j4/s04 failure như phân loại và giữ j1 R1 FAIL. Source/world khác nhau và N1, không kết luận batching gây cải thiện hay suy giảm."
   },
   "historicalR1": {
     "preserved": true,
@@ -1182,6 +1182,6 @@
       "c-po-20261031-p08": "TASK_OK",
       "c-20261028-j1": "MATERIAL_FAIL"
     },
-    "reasonVi": "Owner yêu cầu chạy hết phầncòn lại sauR1FAIL không phải xoá/thay kếtluậnR1."
+    "reasonVi": "Owner yêu cầu chạy hết phầncòn lại sauR1 FAIL không phải xoá/thay kết luậnR1."
   }
 }

@@ -308,8 +308,8 @@
     "COMPLETE_AUTOMATED_INTEGRITY.json": "cfde382e759eb6200182465365d49b59cb2e6c7673e38e234693cebd3010b108",
     "CONTINUATION_AUTHORIZATION.json": "0d15c527bf2b252e6f6b5db3c60441b827dad7b6b21865272dfe6ff6b903ee51",
     "FULL_CONVERSATIONS.md": "08a7b6c5ece35ab4668eafe209565eb3318e9d646192e574d1d6dfdb71069e34",
-    "SINGLE_REVIEW.json": "9425e71c06ef64c5e7800d2c6f34b049d6c645af23aa21c2908edf13740bd1c1",
-    "SINGLE_REVIEW.md": "5f7cabc4775f06066aeef502c8388990a35cc5bafdb8a9681caf43eef9701118"
+    "SINGLE_REVIEW.json": "3999a1ec7ef266815d89acf958868d8d288b8efb1e13ef2139b3fc2c93d27eb9",
+    "SINGLE_REVIEW.md": "dc3565bd35a799295c61324b29ab88d65ab8c6a5ede40657935c96b8e9b92a98"
   },
   "remainingRuntimeKnowns": "R1FAIL retained; no new code/prompt/provider changes, no automatic generation retry, no live send/source-shop writes; no formal blind quality/C3 comparison/GO.",
   "commandsActuallyRun": [
