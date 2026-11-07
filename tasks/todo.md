@@ -1,3 +1,10 @@
+## Latest model — quote batch R1 FAIL, 2026-11-08
+
+- [x] Restore realPG access; correct test-only lazy state setup and explicit opening-work expectation. Clean06b3901b required PG1/1PASS/droptrue/provider0, independent approval; closes prior PG blocker.
+- [x] Fresh107-product world, clean initialPG/drop, all4 frozen input approvals/preflights. Same Gemini3.5FlashLiteHIGH/Sol6.1HIGH, N1/retry0, unchanged caps.
+- [x] R1 completed4cases/7turns:7SEND_ELIGIBLE,7texts4images,23generation/23HTTP allOK, no retry/bound/error/handoff; DB dropped/live0. Integrity independentlyPASS, taskFAIL1 at j1T3: asks colour instead of available pre-cart total.
+- [ ] R2/remainder/checkout30cases48turns NOT_RUN by frozenFAILgate. Mixed quote batches/continuation/selection behavior unverified on model; no quality score, stability, C3comparison or PhaseCGO. [Report/conversations](../apps/worker/evals/single-agent-commerce-qualification/quote-batch-run-20261108/REPORT.md).
+
 ## Quote/read task repair — 2026-11-07
 
 - [x] Implement quoteV2 read batches, per-target total proofs/readback, overlap/mutation/customerSelected guards, stopped siblings and full primitive accounting.

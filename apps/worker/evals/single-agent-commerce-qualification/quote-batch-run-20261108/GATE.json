@@ -1,0 +1,41 @@
+{
+  "reviewer": "/root/quote_pg_run_review",
+  "reviewedAt": "2026-11-07T17:32:22.865Z",
+  "sourceSha": "06b3901b8986233766d181534c0805691729f98a",
+  "registrationHash": "4feda53c5e72737df2ba681261990ca0f481b620d6a5cc9ede304f3954aecd5c",
+  "worldHash": "9b6d8b1e69965b719c476395f70b600e0cffe4cd359eefd4ea790dbcb395c41a",
+  "capturedTurns": 7,
+  "materialTaskFailures": 1,
+  "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r1-run-20261108-01\\CANDIDATE_EVIDENCE.partial.json",
+  "evidenceSha256": "927d16029047e27d5a74d10daa47f67f67eb9beefb56da8a3d4a91a60dcbc8dd",
+  "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r1-run-20261108-01\\integration.json",
+  "integrationSha256": "5c6c8e1f969ade83e34e75046c81e2659d2afecbda0e1813d9ab4ccce79d8156",
+  "status": "FAIL",
+  "casesExecuted": 4,
+  "nextStageAllowed": false,
+  "findings": [
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 2,
+      "category": "OWNER_UNNECESSARY_CART_COLOUR_DEPENDENCY_PREVENTS_AVAILABLE_QUANTITY_QUOTE",
+      "customerTask": "Provide total for two AO items, one M and one L, including shipping.",
+      "observed": "Owner dispatched add_to_cart M/null + add_to_cart L/null + quote_cart instead of the available quote_product quantity2 path. No cart was committed; customer received another colour question with no total. Both source colours have the same 499000 unit price, so missing colour blocks final variant selection, not this pre-cart quote.",
+      "actualReply": "Dạ, áo lẻ Set Thạch Thảo có hai màu Trắng và Be. Chị chọn màu nào cho size M và size L để em tính tổng tiền và phí ship chính xác cho mình nhé ạ?",
+      "notCause": [
+        "All generation requests succeeded; no request-bound, timeout or provider error.",
+        "quote_product remained in the native declaration and returning quantity-total capability was verified before campaign.",
+        "Current source and quantity/size history were available.",
+        "Verifier PASS checks protected assertions, not whether the customer task was completed."
+      ],
+      "basis": "Frozen customer j1 turn3 asks for the total including shipping; the sealed corpus requiredCustomerOutcomes requires a policy/source-backed total including fees. The stage policy requires preserving M/L and does not require cart completion before colour is supplied. Failure is the unanswered total request and unnecessary cart/colour dependency, not the legitimate earlier colour clarification or minor voice."
+    }
+  ],
+  "limits": [
+    "R1 development diagnostic only, no whole-reply quality score, C3 comparison or Phase C GO.",
+    "N1 cannot establish stability or causal attribution of prompt/runtime changes."
+  ],
+  "notRun": {
+    "cases": 30,
+    "turns": 48
+  }
+}

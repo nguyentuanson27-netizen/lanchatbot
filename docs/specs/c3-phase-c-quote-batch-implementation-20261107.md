@@ -40,3 +40,7 @@ The older s13 request with its old instructions still exceeds the cap (67,821); 
 New deterministic PostgreSQL fixture/check is implemented: original quote+image batch → verifier stub → accepted text/image group → restart → one delivery, cart unchanged. It has **not run**. Existing unit/mock evidence is not substituted for that requirement. Review/verification records and raw log hashes: [evidence directory](evidence/c3-quote-batch-repair-20261107/verification.json).
 
 Final report accuracy review approved the source/log attribution, cross-parent regression and reconstructed budgets; [review record](evidence/c3-quote-batch-repair-20261107/report-review-pg-blocked.json). Required PostgreSQL acceptance remains BLOCKED, and no new provider behavior/quality result is claimed.
+
+## Follow-up evidence — 08/11/2026
+
+The required realPG acceptance formerly BLOCKED is now complete on clean06b3901b:1/1PASS/droptrue/provider0, after correcting test-only setup/accounting. New model R1 completed4/7, integrityPASS/taskFAIL1 at j1T3; remaining30/48NOT_RUN. No unconditional quality/qualificationGO. [Result and independent audits](../../apps/worker/evals/single-agent-commerce-qualification/quote-batch-run-20261108/REPORT.md).

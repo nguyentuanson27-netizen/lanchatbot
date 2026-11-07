@@ -1,3 +1,10 @@
+## Latest model — quote batch R1 FAIL, 2026-11-08
+
+- [x] Restore realPG access; correct test-only lazy state setup and explicit opening-work expectation. Clean06b3901b required PG1/1PASS/droptrue/provider0, independent approval; closes prior PG blocker.
+- [x] Fresh107-product world, clean initialPG/drop, all4 frozen input approvals/preflights. Same Gemini3.5FlashLiteHIGH/Sol6.1HIGH, N1/retry0, unchanged caps.
+- [x] R1 completed4cases/7turns:7SEND_ELIGIBLE,7texts4images,23generation/23HTTP allOK, no retry/bound/error/handoff; DB dropped/live0. Integrity independentlyPASS, taskFAIL1 at j1T3: asks colour instead of available pre-cart total.
+- [ ] R2/remainder/checkout30cases48turns NOT_RUN by frozenFAILgate. Mixed quote batches/continuation/selection behavior unverified on model; no quality score, stability, C3comparison or PhaseCGO. [Report/conversations](../apps/worker/evals/single-agent-commerce-qualification/quote-batch-run-20261108/REPORT.md).
+
 ## Latest code repair — quote batches and enquiry selection, 2026-11-07
 
 Base5c623a20, executable savepointd9f4e55f: explicit quoteV2 allows bounded read-only batches/two distinct quote calls with independent total proofs; preserves6primitive/2round/3owner/retry0, native order and source/receipt authority. Local selection derivation is lossless; existing exact-current omission stays first. Core inquiry-versus-purchase and current-fit instructions clarified; shared targets labeled; technical repetition reduced while advice/voice/customer-policy rules retained. [Implementation/evidence](../docs/specs/c3-phase-c-quote-batch-implementation-20261107.md).

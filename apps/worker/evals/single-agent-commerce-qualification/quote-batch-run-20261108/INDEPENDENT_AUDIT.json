@@ -1,0 +1,194 @@
+{
+  "reviewer": "/root/quote_pg_run_review",
+  "reviewedAt": "2026-11-07T17:32:22.865Z",
+  "sourceSha": "06b3901b8986233766d181534c0805691729f98a",
+  "registrationHash": "4feda53c5e72737df2ba681261990ca0f481b620d6a5cc9ede304f3954aecd5c",
+  "worldHash": "9b6d8b1e69965b719c476395f70b600e0cffe4cd359eefd4ea790dbcb395c41a",
+  "capturedTurns": 7,
+  "materialTaskFailures": 1,
+  "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r1-run-20261108-01\\CANDIDATE_EVIDENCE.partial.json",
+  "evidenceSha256": "927d16029047e27d5a74d10daa47f67f67eb9beefb56da8a3d4a91a60dcbc8dd",
+  "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r1-run-20261108-01\\integration.json",
+  "integrationSha256": "5c6c8e1f969ade83e34e75046c81e2659d2afecbda0e1813d9ab4ccce79d8156",
+  "status": "AUDITED_INTEGRITY_PASS_FUNCTIONAL_GATE_FAIL",
+  "accountingPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-quote-batch-model-r1-accounting-20261108-01.json",
+  "accountingSha256": "27a289474ce7d49257452b6299e49cc0b9f375f58b17718911fed2e242918040",
+  "evaluationPolicySha256": "6ebd313fc65b5890de87712590f4bbd39ac804a5d2e5e69985a5976e67538bc6",
+  "casesRegistered": 4,
+  "casesExecuted": 4,
+  "registeredMaximumGenerations": 28,
+  "generationRecords": 23,
+  "generationHttpRequests": 23,
+  "owner": 16,
+  "verifier": 7,
+  "statusOK": 23,
+  "automaticGenerationRetries": 0,
+  "authRequestsSeparate": 1,
+  "journalRows": 100,
+  "actualTerminalCounts": {
+    "SEND_ELIGIBLE": 7
+  },
+  "capturedTexts": 7,
+  "capturedImages": 4,
+  "testDatabaseDropped": true,
+  "sourceDirty": false,
+  "liveSend": false,
+  "checks": [
+    "Exact source/config/corpus/registration and raw native hashes.",
+    "All23 captured provider request hashes, evaluator firewall and projected actual customer/history bindings.",
+    "One STARTED/REQUEST/RESULT and one dispatched request per generation; within3owner/1verifier/turn and28total.",
+    "All7 exact final drafts, snapshot/binding identity and deterministic final-gate replay at actual recorded check times.",
+    "Actual captured text hashes, image counts, acceptedOutbox IDs/groups/order and persisted native outbox.",
+    "All7 whole terminal customer outcomes and native operations reviewed against frozen task policy."
+  ],
+  "caseFindings": [
+    {
+      "caseId": "c-po-20261031-p06",
+      "status": "PASS_TASK",
+      "reason": "Current COMPOSITE989000/three-item source and approved opening image; no false order conflict."
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "status": "PASS_TASK",
+      "reason": "Separate component-fit M/M reaches customer; no unsupported L alternative. Height/weight repetition is minor voice only."
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "status": "PASS_TASK",
+      "reason": "First-turn explicit set purchase has real cart receipt; second turn requests missing AO colour, with no unsupported switch or false success."
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "status": "FAIL_TASK",
+      "reason": "Owner dispatched add_to_cart M/null + add_to_cart L/null + quote_cart instead of the available quote_product quantity2 path. No cart was committed; customer received another colour question with no total. Both source colours have the same 499000 unit price, so missing colour blocks final variant selection, not this pre-cart quote."
+    }
+  ],
+  "materialFailures": [
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 2,
+      "category": "OWNER_UNNECESSARY_CART_COLOUR_DEPENDENCY_PREVENTS_AVAILABLE_QUANTITY_QUOTE",
+      "customerTask": "Provide total for two AO items, one M and one L, including shipping.",
+      "observed": "Owner dispatched add_to_cart M/null + add_to_cart L/null + quote_cart instead of the available quote_product quantity2 path. No cart was committed; customer received another colour question with no total. Both source colours have the same 499000 unit price, so missing colour blocks final variant selection, not this pre-cart quote.",
+      "actualReply": "Dạ, áo lẻ Set Thạch Thảo có hai màu Trắng và Be. Chị chọn màu nào cho size M và size L để em tính tổng tiền và phí ship chính xác cho mình nhé ạ?",
+      "notCause": [
+        "All generation requests succeeded; no request-bound, timeout or provider error.",
+        "quote_product remained in the native declaration and returning quantity-total capability was verified before campaign.",
+        "Current source and quantity/size history were available.",
+        "Verifier PASS checks protected assertions, not whether the customer task was completed."
+      ],
+      "basis": "Frozen customer j1 turn3 asks for the total including shipping; the sealed corpus requiredCustomerOutcomes requires a policy/source-backed total including fees. The stage policy requires preserving M/L and does not require cart completion before colour is supplied. Failure is the unanswered total request and unnecessary cart/colour dependency, not the legitimate earlier colour clarification or minor voice."
+    }
+  ],
+  "frames": [
+    {
+      "caseId": "c-po-20261031-p06",
+      "turnIndex": 0,
+      "customer": "Em tính cả ba món cho chị bao nhiêu?",
+      "disposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, cả bộ SD023 gồm ba món có giá 989.000đ, hiện có sẵn các size S, M, L chị nhé."
+      ],
+      "imageCount": 1,
+      "verdict": "PASS",
+      "normalToolCalls": 4,
+      "toolRounds": 1,
+      "nativeArtifact": "native-d7535ee87c8a9aeca2089bfee67b32011bf6ecdc57a438bc835b462c35fb3289-turn-0.json",
+      "nativeSha256": "1b03b5b99c4063b27305762e82e9f4c75992dc27c10bb077b41fbbde8046ec56"
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "turnIndex": 0,
+      "customer": "Chị cao 1m60, nặng 55kg. Áo chị hay mặc M mà quần lại hay lấy L, em chọn size từng phần giúp chị nhé.",
+      "disposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ với chiều cao 1m60 và cân nặng 55kg, mẫu set quần Thạch Thảo này chị mặc size M vừa vặn cho cả áo lẫn quần luôn ạ."
+      ],
+      "imageCount": 1,
+      "verdict": "PASS",
+      "normalToolCalls": 6,
+      "toolRounds": 2,
+      "nativeArtifact": "native-f40ab87616e3e34db2187ed5ca29836c627c89985af475f06748708ec9de20cd-turn-0.json",
+      "nativeSha256": "0a85cbd7048983963bb07acfc389b917e295222ae6a00af036016f64779b320e"
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 0,
+      "customer": "Chị lấy cả bộ size M nhé.",
+      "disposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ em đã thêm set váy Thạch Thảo size M vào giỏ cho chị rồi ạ. Tổng giỏ hàng của mình là 829.000đ (đã gồm 30.000đ phí ship). Chị muốn chốt đơn luôn hay cần xem thêm gì không ạ?"
+      ],
+      "imageCount": 1,
+      "verdict": "PASS",
+      "normalToolCalls": 3,
+      "toolRounds": 1,
+      "nativeArtifact": "native-a24d3d97de2af683468e25a577a7bdad7dbb85515c04bb94c90ce38d085c902d-turn-0.json",
+      "nativeSha256": "1fd89b2e51dd7280e0e3e16f88741a420ebf32fead6c1d802df8dde1a2c1060d"
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 1,
+      "customer": "Thôi chị lấy mỗi áo thôi, em đổi lại nhé.",
+      "disposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, áo thêu Thạch Thảo có hai màu Trắng và Be (màu Be là hàng đặt trước). Chị muốn lấy áo màu nào ạ?"
+      ],
+      "imageCount": 0,
+      "verdict": "PASS",
+      "normalToolCalls": 4,
+      "toolRounds": 2,
+      "nativeArtifact": "native-a24d3d97de2af683468e25a577a7bdad7dbb85515c04bb94c90ce38d085c902d-turn-1.json",
+      "nativeSha256": "3fea3e2c50cbd7ed88185272a6f8aad8fd39fdf4e042b820dd176e2ead16cbb0"
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 0,
+      "customer": "Chị lấy áo của bộ váy Thạch Thảo size L nhé.",
+      "disposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, áo lẻ Set Thạch Thảo size L nhà em có hai màu Trắng (sẵn) và Be (đặt trước). Chị lấy màu nào ạ?"
+      ],
+      "imageCount": 1,
+      "verdict": "PASS",
+      "normalToolCalls": 3,
+      "toolRounds": 1,
+      "nativeArtifact": "native-39fdf96a18b56ac055792a8cb8774593c7e30d656ae9373ca98df143d397c951-turn-0.json",
+      "nativeSha256": "cb950fc5026ef73b1ee68e6c940acbd51919719b7778ddd1a72de217fbeedba8"
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 1,
+      "customer": "Lấy hai chiếc cho chị, một M một L.",
+      "disposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, áo lẻ Set Thạch Thảo size M và size L có hai màu Trắng và Be. Chị lấy màu nào cho từng size ạ?"
+      ],
+      "imageCount": 0,
+      "verdict": "PASS",
+      "normalToolCalls": 4,
+      "toolRounds": 1,
+      "nativeArtifact": "native-39fdf96a18b56ac055792a8cb8774593c7e30d656ae9373ca98df143d397c951-turn-1.json",
+      "nativeSha256": "4e5131415bf9f6bd0a7f8e021fd7ffb2767f8c1a7d0fbfa4eb7cd81a76af054a"
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 2,
+      "customer": "Em báo lại tổng cả phí ship cho chị nhé.",
+      "disposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, áo lẻ Set Thạch Thảo có hai màu Trắng và Be. Chị chọn màu nào cho size M và size L để em tính tổng tiền và phí ship chính xác cho mình nhé ạ?"
+      ],
+      "imageCount": 0,
+      "verdict": "PASS",
+      "normalToolCalls": 4,
+      "toolRounds": 1,
+      "nativeArtifact": "native-39fdf96a18b56ac055792a8cb8774593c7e30d656ae9373ca98df143d397c951-turn-2.json",
+      "nativeSha256": "1a47af5236a5aecede128c4019ab675c2bceaa417f8c809a4f8eb6a602851e35"
+    }
+  ],
+  "limits": [
+    "R1 development diagnostic only, no whole-reply quality score, C3 comparison or Phase C GO.",
+    "N1 cannot establish stability or causal attribution of prompt/runtime changes."
+  ]
+}
