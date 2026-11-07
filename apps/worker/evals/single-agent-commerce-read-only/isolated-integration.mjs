@@ -683,6 +683,21 @@ try{
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+ await check('C quote batch V2 delivers original quote and image once without cart mutation',async()=>{
+  assert(!providerRun&&!phaseC&&!phaseCInitial,'QUOTE_BATCH_SYNTHETIC_ONLY');
+  const j=await statefulFixture({media:true}),before=await j.state();
+  const calls=[{name:'quote_product',args:{subjectRef:'SM613',offerTypes:['DIRECT']}},
+   {name:'select_product_media',args:{subjectRef:'SM613',intent:'BACK'}}];
+  const text='Áo 499.000đ chị nhé.';
+  const result=await j.turn('Áo này bao nhiêu, gửi chị ảnh phía sau nhé.',[native(calls),request=>{
+   assert.deepEqual(request.contents.at(-1).parts.map(p=>p.functionResponse.name),calls.map(c=>c.name));return say(text);
+  }],{testQuoteTask:EXPLICIT_QUOTE_TASK,testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  assert.equal(result.result.terminal.disposition,'SEND_ELIGIBLE');assert.equal(result.verifiers,1);
+  assert.equal(result.result.normalToolCalls,4);assert.equal(result.result.executedNormalToolInvocations,4);
+  const after=await j.state();assert.equal(after.cart,null);assert.deepEqual(after.processedCommandIds,before.processedCommandIds);
+  j.restartDelivery();await j.drain();assert.equal(j.capture.filter(x=>x===text).length,1);assert.equal(j.capturePayloads.filter(p=>p.attachment).length,1);
+  const delivered=j.capture.length;await j.drain();assert.equal(j.capture.length,delivered);
+ });
  await check('C follow-up quote reads a total without colour or cart and delivers text once after restart',async()=>{
   assert(!providerRun&&!phaseC&&!phaseCInitial,'FOLLOW_UP_QUOTE_SYNTHETIC_ONLY');
   const j=await statefulFixture();await j.turn('Chị lấy hai áo, một M một L.',[say('Chị lấy màu nào ạ?')]);await j.drain();

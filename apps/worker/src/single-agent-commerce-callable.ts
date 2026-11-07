@@ -16,7 +16,7 @@ export function commerceCallableTools(request: Pick<OwnerRequest,"availableTools
   return configured.filter(name=>{
     if(name==="request_handoff")return true;
     if(calls<1)return false;
-    if(name==="quote_product")return calls>=2&&subjects.some(s=>s.kind==="PRODUCT"); // Standalone two-primitive task.
+    if(name==="quote_product")return calls>=2&&subjects.some(s=>s.kind==="PRODUCT"); // Each explicit quote reserves two primitive units.
     if(["read_product","recommend_size","add_to_cart","select_product_media","view_product_media"].includes(name))return product;
     if(name==="change_cart_item")return line;
     if(name==="confirm_purchase"||name==="record_negotiation")return cart||created;

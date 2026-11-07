@@ -1,7 +1,7 @@
 // Evaluation-only lossless presentation. No inferred advice, source change or model instruction.
 import assert from 'node:assert/strict';
 import {expandOwnerProducts,expandCurrentFacts} from './owner-product-tables.mjs';
-const labels={turnTime:'Thời điểm xử lý',products:'Sản phẩm',subjects:'Đối tượng đã gắn',facts:'Giá, tồn và kết quả đã xác minh',
+const labels={sharedSingleItemReads:'Một món có nhiều đường đọc theo nguồn',turnTime:'Thời điểm xử lý',products:'Sản phẩm',subjects:'Đối tượng đã gắn',facts:'Giá, tồn và kết quả đã xác minh',
  policy:'Quy định và dữ liệu nguồn',state:'Hồ sơ và trạng thái hiện tại',receipts:'Kết quả thao tác đã xác nhận',execution:'Khả năng thực hiện lượt này',untrusted:'Dữ liệu hội thoại kèm theo'};
 const trace=m=>m.parts.flatMap((p,i)=>{try{const v=JSON.parse(p.text);return Array.isArray(v.completedToolTurns)?[{i,value:v}]:[];}catch{return [];}});
 export function contextDataBlocks(wire){

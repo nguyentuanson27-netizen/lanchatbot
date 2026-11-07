@@ -10,7 +10,7 @@ import type {CommerceToolCall,CommerceToolResult} from "./single-agent-commerce-
 const fixture=JSON.parse(readFileSync(new URL("../evals/single-agent-commerce-read-only/fixtures/discovery-feasibility.public.json",import.meta.url),"utf8"));
 const bytes=(v:unknown)=>Buffer.byteLength(JSON.stringify(v));
 const ownerPrompt=readFileSync(new URL("../evals/single-agent-commerce-read-only/prompts/owner.vi.txt",import.meta.url),"utf8");
-const config={version:"EXPLICIT_QUOTE_V1",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:2,standalone:true,maxPerTurn:1} as const;
+const config={version:"EXPLICIT_QUOTE_V2",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:2,readOnlyBatch:true,maxPerTurn:2} as const;
 
 describe("discovery feasibility through composed reads and actual mocked owner wire",()=>{
  it.each(["complete","partial","source-failure"])("keeps representative two-candidate batch within existing bounds: %s",async mode=>{

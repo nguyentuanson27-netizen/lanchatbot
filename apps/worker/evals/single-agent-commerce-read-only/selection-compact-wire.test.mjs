@@ -10,7 +10,17 @@ import {buildVerifierRequest} from './protocol.mjs';
 import {withNativePresentation} from './native-presentation.mjs';
 import {readCompactSections} from './owner-data-presentation.mjs';
 import {makeBinding,finalGate} from '../../dist/single-agent-semantic-verifier-boundary.js';
+import {compactSelectionResult,expandSelectionResult} from './owner-product-tables.mjs';
 const manifest=JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url))),owner=readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8'),verifier=readFileSync(new URL('./prompts/verifier.vi.txt',import.meta.url),'utf8');
+test('local historical selection derives only exact options without current-evidence substitution',async()=>{
+ const f=fixtureProduct(),tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,candidateEvidence:true,initialProducts:[f.product],catalog:{readProduct:async()=>structuredClone(f),searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})}});
+ const result=await tools.invoke({name:'read_product',args:{subjectRef:f.product.productId,offerType:'DIRECT'}}),data=result.data;
+ assert(data.selectionEvidence);const before=structuredClone(data),wire=compactSelectionResult(data,[]);
+ assert.equal(wire.selectionOptionsFromEvidence,true);assert(!Object.hasOwn(wire,'selectionOptions'));assert.deepEqual(wire.selectionEvidence,data.selectionEvidence);
+ assert.deepEqual(expandSelectionResult(wire,[]),data);assert.deepEqual(data,before);
+ const different=structuredClone(data);different.selectionOptions[0].status='PRE_ORDER';assert.deepEqual(compactSelectionResult(different,[]),different);
+ for(const bad of [{...wire,selectionOptionsFromEvidence:false},{...wire,selectionOptions:[]},{...wire,selectionEvidence:{...wire.selectionEvidence,contentHash:'f'.repeat(64)}}])assert.throws(()=>expandSelectionResult(bad,[]),/SELECTION_RESULT_REFERENCE/);
+});
 test('all three offers keep every exact tuple in both native wires and fit unchanged product/result/wire bounds',async()=>{
  const f=fixtureProduct(),template=f.snapshot.offers.DIRECT,row=template.rows[0];
  f.snapshot.offers=Object.fromEntries(['AO','CV','SET'].map(offer=>[offer,{...structuredClone(template),rows:['be','navy','white','black','red','blue','green','brown'].map(color=>({...structuredClone(row),offer_type:offer,color,parent_variation_id:`SM613-${offer}-${color}`}))}]));

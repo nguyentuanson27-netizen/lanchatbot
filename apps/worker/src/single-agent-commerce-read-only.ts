@@ -5,6 +5,7 @@ import { finalGate, hardPrecheck, makeBinding, terminalFallback, type TerminalOu
 import type { CommerceScope, CommerceToolCall, CommerceToolResult } from "./single-agent-commerce-read-only-tools.js";
 import { omitCurrentProductDuplicates } from "./single-agent-commerce-read-only-context.js";
 import { commerceCallableTools } from "./single-agent-commerce-callable.js";
+import { quoteBatchWork } from "./single-agent-commerce-quote.js";
 
 export interface NativeContent { role: "user" | "model"; parts: Record<string, unknown>[] }
 /** Request metadata, never part of the mutable world/fact snapshot. */
@@ -115,7 +116,7 @@ export async function runCommerceTurn(input: {
   const gateFallback = () => {const value=selectedFallback();return {id:value.fallbackId??"",text:value.text??""};};
   const turnTime: Readonly<CommerceTurnTime> = Object.freeze({ processingAt: input.clock().toISOString(), timeZone: "Asia/Ho_Chi_Minh" });
   let ownerGenerations = 0, verifierGenerations = 0, toolRounds = 0, toolCalls = 0;
-  let executedNormalToolInvocations=0,quoteAttempted=false;
+  let executedNormalToolInvocations=0,quoteAttempts=0;const quoteTargets=new Set<string>();
   let openingMediaWork:import("./single-agent-commerce-opening-media.js").OpeningMediaWork|undefined;
   const primitiveAccounting=input.tools.toolWorkAccounting==="PRIMITIVE_WORK_V2";
   let terminalHandoffCalls = 0, proposedToolCalls = 0, rejectedToolCalls = 0;
@@ -247,10 +248,11 @@ export async function runCommerceTurn(input: {
       if(!Array.isArray(output.calls)||output.calls.some(c=>!c||typeof c.name!=="string"))return finish(fallback("MALFORMED"));
       proposedToolCalls += output.calls.length;
       const quoteCalls=output.calls.filter(c=>c.name==="quote_product");
-      if(quoteCalls.length&&(output.calls.length!==1||quoteAttempted)){
+      const batch=quoteCalls.length?quoteBatchWork(output.calls):null;
+      if(quoteCalls.length&&(!batch||quoteAttempts+batch.quotes>2||batch.targets.some(t=>quoteTargets.has(t)))){
         rejectedToolCalls+=output.calls.length;return finish(fallback("OWNER_TOOL_MODE"));
       }
-      const units=primitiveAccounting&&quoteCalls.length?2:output.calls.length;
+      const units=primitiveAccounting&&batch?batch.units:output.calls.length;
       const handoffCalls = output.calls.filter(c => c.name === "request_handoff");
       const terminalCall = handoffCalls.length === 1 && output.calls.length === 1;
       if (handoffCalls.length && (!terminalCall || (!terminalHandoffAllowed && (!request.toolsAllowed || input.tools.availableTools !== undefined)))) {
@@ -270,7 +272,7 @@ export async function runCommerceTurn(input: {
       if(!terminalCall&&input.tools.openingMediaFeasible?.(output.calls,6-toolCalls-units)===false){
         rejectedToolCalls+=output.calls.length;return finish(fallback('OPENING_MEDIA_BUDGET'));
       }
-      if(quoteCalls.length)quoteAttempted=true;
+      if(batch){quoteAttempts+=batch.quotes;batch.targets.forEach(t=>quoteTargets.add(t));}
       if (terminalCall) terminalHandoffCalls++; else {toolRounds++; toolCalls += units;}
       // Account the proposed work and preserve budget rejection attribution,
       // then reject a non-callable name before any tool I/O.

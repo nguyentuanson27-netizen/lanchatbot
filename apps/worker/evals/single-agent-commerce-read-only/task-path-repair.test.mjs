@@ -13,9 +13,23 @@ export const request=(returning=false,compact=true)=>({instructions:'Tư vấn t
  policyLiterals:[{ref:'conversation-entry',text:JSON.stringify({firstContact:!returning})}],effectReceipts:[],state:{revision:1,currentProductId:'P1'}}});
 export const contract=r=>{const b=wire.buildGeminiCommerceRequest(r);return {schemas:b.tools[0].functionDeclarations.map(({description,...d})=>d),toolConfig:b.toolConfig};};
 const baseline=JSON.parse(readFileSync(new URL('./task-path-contract-baseline.json',import.meta.url)));
-test('full emitted schemas, names, native call policy and owner prompt remain unchanged',()=>{
+test('observed p04 context/dialogue envelope fits full tools without altering signed content',()=>{
+ // Exact observed section sizes, synthetic contents. This is a portable stress control, not a historical body.
+ const r=request(true);r.instructions=readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8');
+ r.context.policyLiterals.push({ref:'synthetic-public-source',text:''});
+ const signed={role:'model',parts:[{functionCall:{id:'read',name:'read_product',args:{subjectRef:'P1',selection:'SINGLE',offerType:'AO'}},thoughtSignature:''}]};
+ r.contents.push(signed,{role:'user',parts:[{functionResponse:{name:'read_product',id:'read',response:{status:'OK',data:{subjectRef:'P1'}}}}]});
+ let budget;wire.buildGeminiCommerceRequest(r,undefined,undefined,b=>budget=b);
+ r.context.policyLiterals.at(-1).text='x'.repeat(9393-budget.trustedFrameBytes);
+ signed.parts[0].thoughtSignature='s'.repeat(20338-Buffer.byteLength(JSON.stringify(r.contents)));
+ const saved=structuredClone(signed),body=wire.buildGeminiCommerceRequest(r,undefined,undefined,b=>budget=b);
+ assert.equal(budget.trustedFrameBytes,9393);assert.equal(budget.dialogueBytes,20338);
+ assert(budget.presentedTextFrameBytes<=65536);assert.deepEqual(body.contents.at(-2),saved);assert.equal(body.tools[0].functionDeclarations.length,14);
+ const larger=structuredClone(r);larger.instructions+='x'.repeat(2000);assert.throws(()=>wire.buildGeminiCommerceRequest(larger),/OWNER_REQUEST_BOUND/);
+});
+test('emitted schemas and call policy preserved; current owner prompt matches manifest',()=>{
  for(const compact of [false,true])for(const returning of [false,true])assert.equal(hash(contract(request(returning,compact))),baseline.contracts[`${compact}:${returning}`]);
- assert.equal(createHash('sha256').update(readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url))).digest('hex'),baseline.ownerPromptHash);
+ assert.equal(createHash('sha256').update(readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url))).digest('hex'),JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url))).promptHashes.owner);
 });
 test('full native tool instructions save at least 4KiB without dropping tools',()=>{
  const b=wire.buildGeminiCommerceRequest(request());
@@ -36,7 +50,7 @@ test('emitted CompactV2 links retain both independent offers without altering so
  for(const p of ps)r.context.policyLiterals.push({ref:`offers:${p.subjectRef}`,text:JSON.stringify({productId:p.subjectRef,availableOffers:['AO'],purchaseOptions:p.purchaseOptions})});
  const before=structuredClone(r),body=wire.buildGeminiCommerceRequest(r);
  const sections=readCompactSections(body.contents[0]);
- assert.deepEqual(sections.find(s=>s.label==='"sharedSingleItemReads"').value,tables.sharedSingleItemReads(ps));
+ assert.deepEqual(sections.find(s=>s.label==='Một món có nhiều đường đọc theo nguồn').value,tables.sharedSingleItemReads(ps));
  const visible=sections.find(s=>s.label==='Sản phẩm').value;
  assert.equal(visible.length,2);assert.deepEqual(visible.map(p=>p.purchaseOptions),ps.map(p=>p.purchaseOptions));assert.deepEqual(r,before);
 });

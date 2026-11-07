@@ -136,22 +136,24 @@ export function compactSelectionResult(data,products){
  const out=structuredClone(data),e=data.selectionEvidence;
  if(!e||!validSelectionEvidence(e,e.productId,new Date(e.observedAt)))return out;
  const matches=products.filter(p=>p.subjectRef===e.productId).flatMap(p=>(p.selectionEvidence??[]).filter(v=>v.contentHash===e.contentHash));
- if(!matches.length)return out;
- assert(matches.length===1&&same(matches[0],e),'SELECTION_RESULT_REFERENCE');
- assert(!Object.hasOwn(out,'selectionEvidenceFromProduct')&&!Object.hasOwn(out,'selectionOptionsFromEvidence'),'SELECTION_RESULT_REFERENCE');
- delete out.selectionEvidence;out.selectionEvidenceFromProduct={subjectRef:e.productId,contentHash:e.contentHash};
+ if(matches.length){
+  assert(matches.length===1&&same(matches[0],e),'SELECTION_RESULT_REFERENCE');
+  delete out.selectionEvidence;out.selectionEvidenceFromProduct={subjectRef:e.productId,contentHash:e.contentHash};
+ }
  if(same(data.selectionOptions,expandSelectionOptions(e))){delete out.selectionOptions;out.selectionOptionsFromEvidence=true;}
  return out;
 }
 export function expandSelectionResult(data,products){
  const out=structuredClone(data),ref=data.selectionEvidenceFromProduct;
- if(!ref){assert(!Object.hasOwn(out,'selectionOptionsFromEvidence'),'SELECTION_RESULT_REFERENCE');return out;}
- assert(object(ref)&&same(Object.keys(ref).sort(),['contentHash','subjectRef'])&&!Object.hasOwn(out,'selectionEvidence'),'SELECTION_RESULT_REFERENCE');
- const matches=products.filter(p=>p.subjectRef===ref.subjectRef).flatMap(p=>(p.selectionEvidence??[]).filter(e=>e.contentHash===ref.contentHash));
- assert(matches.length===1&&validSelectionEvidence(matches[0],ref.subjectRef,new Date(matches[0].observedAt)),'SELECTION_RESULT_REFERENCE');
- delete out.selectionEvidenceFromProduct;out.selectionEvidence=structuredClone(matches[0]);
+ if(Object.hasOwn(out,'selectionEvidenceFromProduct')){
+  assert(object(ref)&&same(Object.keys(ref).sort(),['contentHash','subjectRef'])&&!Object.hasOwn(out,'selectionEvidence'),'SELECTION_RESULT_REFERENCE');
+  const matches=products.filter(p=>p.subjectRef===ref.subjectRef).flatMap(p=>(p.selectionEvidence??[]).filter(e=>e.contentHash===ref.contentHash));
+  assert(matches.length===1&&validSelectionEvidence(matches[0],ref.subjectRef,new Date(matches[0].observedAt)),'SELECTION_RESULT_REFERENCE');
+  delete out.selectionEvidenceFromProduct;out.selectionEvidence=structuredClone(matches[0]);
+ }
  if(Object.hasOwn(out,'selectionOptionsFromEvidence')){
-  assert(out.selectionOptionsFromEvidence===true&&!Object.hasOwn(out,'selectionOptions'),'SELECTION_RESULT_REFERENCE');
+  assert(out.selectionOptionsFromEvidence===true&&!Object.hasOwn(out,'selectionOptions')&&out.selectionEvidence&&
+   validSelectionEvidence(out.selectionEvidence,out.selectionEvidence.productId,new Date(out.selectionEvidence.observedAt)),'SELECTION_RESULT_REFERENCE');
   delete out.selectionOptionsFromEvidence;out.selectionOptions=expandSelectionOptions(out.selectionEvidence);
  }
  return out;

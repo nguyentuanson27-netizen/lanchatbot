@@ -68,7 +68,7 @@
     }
   },
   "promptHashes": {
-    "owner": "a3e486eb540becdf64149c4450b66bc32cee141c36a15e320267b4e88b323c9d",
+    "owner": "75e29844627f136512f5dd427df4592b57f33598b03eff8118fc495fb9d1e109",
     "verifier": "6ffaebf52151edca3baae03581e44731d727a29dc3b132e87c8dcc8f1ae5f944"
   },
   "verdictSchema": {
@@ -185,11 +185,11 @@
     "customerMessagePolicy": "SILENT_HANDOFF"
   },
   "quoteTask": {
-    "version": "EXPLICIT_QUOTE_V1",
+    "version": "EXPLICIT_QUOTE_V2",
     "toolWorkAccounting": "PRIMITIVE_WORK_V2",
     "normalUnits": 2,
-    "standalone": true,
-    "maxPerTurn": 1
+    "readOnlyBatch": true,
+    "maxPerTurn": 2
   },
   "fallbackDelivery": {
     "mode": "SILENT_HANDOFF",
