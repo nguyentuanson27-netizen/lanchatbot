@@ -107,6 +107,9 @@ export async function executeCampaign({root,input,inputFile,world,out,ports,sess
  if(input.mode==='PREPARE'){
   const j1=await seedJ1(),total=await capture(j1,j1Texts[2]);
   const cart=await fixture();
+  ports.preparation({owner:()=>({kind:'FINAL',text:'Dạ chị.'})});
+  const introduction=await cart.turn('Chị xem áo của bộ váy Thạch Thảo nhé.',[]);
+  assert.equal(introduction.result?.terminal?.disposition,'SEND_ELIGIBLE','CAMPAIGN_RETURNING_CART_CONTEXT');await cart.drain();
   const colors=[...new Set(world.snapshots.SV2447.offers.AO.rows.filter(r=>r.size==='M'&&r.stock_quantity>0&&r.color!=='__NO_COLOR__').map(r=>r.color))];
   assert(colors.length===1,'CAMPAIGN_UNIQUE_CONTROL_COLOR');
   const seeded=await cart.seedControlCart({subjectRef:'SV2447',offerType:'AO',size:'M',color:colors[0],quantity:1});
@@ -118,7 +121,8 @@ export async function executeCampaign({root,input,inputFile,world,out,ports,sess
   const expiry=[];
   const walk=v=>{if(!v||typeof v!=='object')return;for(const [k,x]of Object.entries(v)){if(k==='expiresAt'&&Number.isFinite(Date.parse(x)))expiry.push(Date.parse(x));else walk(x);}};
   [total,cartRequest,ackRequest].forEach(r=>walk(r.context));
-  const minimumProofExpiresAt=new Date(Math.min(...expiry)).toISOString();
+  const cartNative=await cart.state();assert(cartNative.cart?.expiresAt,'CAMPAIGN_CART_EXPIRY_REQUIRED');
+  const minimumProofExpiresAt=new Date(Math.min(...expiry,Date.parse(cartNative.cart.expiresAt))).toISOString();
   const model=ports.m.models.conversation;
   const artifacts=[inputFile,input.worldFile].map(path=>({path:resolve(path),sha256:byteHash(readFileSync(path))}));
   const reg=registerJ1({cases:[{id:'j1-total',request:total,evaluator:{subjectRef:'SV2447',offerType:'AO',quantity:2}},
@@ -127,24 +131,28 @@ export async function executeCampaign({root,input,inputFile,world,out,ports,sess
    runSourceSha:input.runSourceSha,artifacts,schedule:input.schedule,minimumProofExpiresAt});
   write(resolve(out,'J1_REGISTRATION.json'),reg);
   write(resolve(out,'PREPARATION.json'),{worldHash:input.worldHash,sourceSha:input.runSourceSha,scriptHash:campaignScriptHash,
-   toolchain:ports.toolchain,minimumProofExpiresAt,requestHashes:reg.cases.map(c=>({id:c.id,hashes:c.pair.hashes})),
+   toolchain:ports.toolchain,minimumProofExpiresAt,cartExpiresAt:cartNative.cart.expiresAt,requestHashes:reg.cases.map(c=>({id:c.id,hashes:c.pair.hashes})),
    realCartSeed:{profile:cartState.publicState.profile,cart:cartState.publicState.cart,receipts:cartState.receipts},
    prefixMeaning:'Scripted copies of prior accepted public conversation, prepared by zero-provider native fixture. Not model outcomes or new business authority.',
    scriptedVerifierUsedForPreparationOnly:true,providerRequests:0,mode:'PREPARATION_NOT_ACCEPTANCE'});
   return {mode:'PREPARATION_NOT_ACCEPTANCE',providerRequests:0,preparedSlots:10,minimumProofExpiresAt};
  }
  assert.equal(input.mode,'RUN');assert.deepEqual(input.limits,J1_LIMITS);
+ if(input.skipJ2){
+  assert(input.priorJ2&&byteHash(readFileSync(input.priorJ2.file))===input.priorJ2.sha256,'CAMPAIGN_PRIOR_J2_BINDING');
+  const prior=read(input.priorJ2.file);assert(prior.j2Turns===3&&prior.providerRequests<=12&&prior.retry===0,'CAMPAIGN_PRIOR_J2_BUDGET');
+ }
  assert.equal(input.toolchainHash,ports.toolchain.binarySha256,'CAMPAIGN_TOOLCHAIN_CHANGED');
  const reg=input.j1PreparationBlocked?null:read(input.j1Registration);
  if(reg)assert.equal(digest(reg),input.j1RegistrationHash,'CAMPAIGN_PRIMARY_CHANGED');
  if(input.j1PreparationBlocked)assert(input.j1PreparationBlocked.reason==='NATIVE_CART_CONTROL_PREPARATION_UNAVAILABLE'&&input.j1PreparationBlocked.evidenceFile&&
   byteHash(readFileSync(input.j1PreparationBlocked.evidenceFile))===input.j1PreparationBlocked.evidenceHash,'CAMPAIGN_BLOCKER_BINDING');
- const required=12*90000+(reg?reg.schedule.primaryBudgetMs+reg.schedule.nativeBudgetMs:0)+input.safetyMarginMs;
+ const required=(input.skipJ2?0:12*90000)+(reg?reg.schedule.primaryBudgetMs+reg.schedule.nativeBudgetMs:0)+input.safetyMarginMs;
  assert(Date.parse(input.minimumProofExpiresAt)-Date.now()>=required,'CAMPAIGN_FULL_HEADROOM');
  write(resolve(out,'CAMPAIGN_DISPATCH.json'),{inputHash:digest(input),sourceSha:input.runSourceSha,worldHash:input.worldHash,scriptHash:campaignScriptHash,toolchain:ports.toolchain,startedAt:new Date().toISOString()});
  const results=[];
  const j2=await fixture();
- for(let i=0;i<3;i++){
+ for(let i=0;i<(input.skipJ2?0:3);i++){
   const before=await snapshot(j2),start=j2.capturePayloads.length;ports.setStage('J2',i);
   const observed=await j2.turn(j2Texts[i],[]);ports.checkOutcome(observed);if(observed.qualification?.status==='VALID')await j2.drain();
   const after=await snapshot(j2),row={phase:'J2',turn:i,customer:j2Texts[i],observed,before,after,messages:j2.capturePayloads.slice(start)};
@@ -190,5 +198,7 @@ export async function executeCampaign({root,input,inputFile,world,out,ports,sess
   gate:gate.status,conditional:{attempted:conditional.length,notRun:2-conditional.length},
   generations:ports.generations,providerRequests:nativeRequests+primaryRequests,primaryProviderRequests:primaryRequests,nativeProviderRequests:nativeRequests,
   retry:0,liveSend:false,sourceWrites:0,qualification:'NOT_QUALIFICATION_NO_GO'};
+ if(input.skipJ2){result.priorJ2={...input.priorJ2,providerRequests:read(input.priorJ2.file).providerRequests};
+  result.combinedProviderRequests=result.providerRequests+result.priorJ2.providerRequests;assert(result.combinedProviderRequests<=30,'CAMPAIGN_COMBINED_CAP');}
  assert(result.providerRequests<=30,'CAMPAIGN_TOTAL_CAP');write(resolve(out,'RESULT.json'),result);return result;
 }
