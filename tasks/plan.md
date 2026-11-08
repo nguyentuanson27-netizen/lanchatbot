@@ -1,3 +1,10 @@
+## Baseline native model run — J1/ACK, 2026-11-08
+
+- [x] Execute source6ac0eb78/clean, fresh world551b7fc0; two registered cases N1/max8generation. Actual6HTTP/4owner2verifier, allOK/retry0; source/media readiness and exact CLI checked before dispatch. Separate-TOP preflight was over-specified and corrected to actual GENERIC gate before provider; failed preparation retained.
+- [x] J1 quote-product quantity2→978100VND without colour/cart dependency. ACK commits be preference, no price/media task, but final generic follow-up remains a voice/usefulness limitation. Actual2SEND,0fallback/handoff; one disposableDB dropped/live0/sourcewrites0.
+- [x] Review both complete customer outcomes once; audit ledger/wire hashes/firewall/model identity and exact draft/capture bindings. [Report/all conversations](../apps/worker/evals/single-agent-commerce-qualification/j1-baseline-run-20261108/REPORT.md).
+- [ ] No PhaseC GO/stability/causal improvement/C3 parity claim. Keep baseline and historical B gate/conditionalNOT_RUN; no automatic prompt fix or model rerun.
+
 ## Implementation — J1 baseline diagnostic and runner stages, 2026-11-08
 
 - [x] Keep J2/runtime/prompt/verifier and baseline J1; metadata B remains eval-only/not adopted. Historical results/gates and Revision2 plan bytes unchanged.
