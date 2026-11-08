@@ -11,8 +11,8 @@
       "exitCode": 0,
       "result": "1067 PASS; 36 files",
       "log": "worker-focused.log",
-      "sha256": "a69c6f97e7d4a473493a94cfcad93b4b8bbb03bea38099ccbd9ea9f9eb8ff250",
-      "bytes": 3807
+      "sha256": "9c82dc46aa0a4c2550e93da0e521d6698efe4a393971e4c6309779d87fea21a0",
+      "bytes": 3788
     },
     {
       "id": "fixture-final",
@@ -20,8 +20,8 @@
       "exitCode": 0,
       "result": "30 PASS after fixture typing cleanup; subset of 1067",
       "log": "fixture-final.log",
-      "sha256": "4a4fac92f5b558d6cee9a2f3745d6e28408751a96a68978a3bdee2d73a791e2e",
-      "bytes": 379
+      "sha256": "67c5d24e9ab57c1019c5fde3148606163252843794392a5b0eb3d47e16e418f9",
+      "bytes": 369
     },
     {
       "id": "owner-adapter-source",
@@ -29,8 +29,8 @@
       "exitCode": 0,
       "result": "87 PASS",
       "log": "owner-adapter-source.log",
-      "sha256": "718b2b2eb665fc9ca7228a4ff3b3fa0b6fd0a4057b975ce7b0a447a47040c108",
-      "bytes": 9461
+      "sha256": "89f86dba0b675d80e2593c03ef3dac2885106eec70f01ba3c256df376579d671",
+      "bytes": 9366
     },
     {
       "id": "verifier-adapter",
@@ -38,8 +38,8 @@
       "exitCode": 0,
       "result": "24 PASS / 1 SKIP; installed-login test not enabled",
       "log": "verifier-adapter.log",
-      "sha256": "e7cc4ed322e98021976a5b59ba08b0478773e6e9500fb371b8f71b286087efb0",
-      "bytes": 2589
+      "sha256": "dfe35923ede8b5aa6a1f9a073bfb160fb9400c8bfbc43fb9db0a5f28363e1d6f",
+      "bytes": 2556
     },
     {
       "id": "protected-reply",
@@ -47,8 +47,8 @@
       "exitCode": 0,
       "result": "22 PASS; shared package source unchanged",
       "log": "protected-reply.log",
-      "sha256": "b640ad077e7cca84d364a77c311246e2bb6fb74503930fd208b07429c33f8514",
-      "bytes": 375
+      "sha256": "502e7b16b5bb3e1cb97c814ac299a7b116a236baaab107f19d5eeeb70572f5f2",
+      "bytes": 365
     },
     {
       "id": "worker-build",
@@ -65,8 +65,8 @@
       "exitCode": 0,
       "result": "PASS; tsc -p tsconfig.json --noEmit",
       "log": "worker-lint-typecheck.log",
-      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
-      "bytes": 171
+      "sha256": "0d0a8de522f21dbf44fffd2752d4913d7410fc8a951bd2542f2352aabfe5a3aa",
+      "bytes": 167
     },
     {
       "id": "dataset-guard",
@@ -74,8 +74,8 @@
       "exitCode": 0,
       "result": "PASS",
       "log": "dataset-guard.log",
-      "sha256": "745c52b41d3303a69e6595df2e22f28f9fc5f1f0b5392d560db215ff5a6e14ca",
-      "bytes": 338
+      "sha256": "0e6619c6d4e6b5872ffd09ca0a95fd5e4f910645c44667fa29a723cd6a790e5c",
+      "bytes": 332
     }
   ],
   "postgresRuns": [
@@ -228,5 +228,6 @@
     "Owner relevance and final media choice still require native testing.",
     "S08 owner semantic paraphrase and J1 upstream transport not claimed fixed.",
     "Full repository check and remote CI not claimed PASS."
-  ]
+  ],
+  "logSerialization": "Published stdout logs normalize CRLF to LF; sha256/bytes refer to these committed bytes. Raw session logs remain outside repo."
 }
