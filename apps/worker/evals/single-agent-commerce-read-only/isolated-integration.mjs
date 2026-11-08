@@ -715,6 +715,24 @@ try{
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+ await check('C post-full contract incidental media failure retains a verified acknowledgement',async()=>{
+  const j=await statefulFixture({media:true}),text='Dạ, em cảm ơn chị nhé.';
+  const r=await j.turn('Chị thích màu be, cảm ơn em nhé.',[
+   native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'FEEDBACK'}}]),say(text)]);
+  assert.equal(r.owners,2);assert.equal(r.verifiers,1);assert.equal(r.result.terminal.disposition,'SEND_ELIGIBLE',JSON.stringify(r.result));
+  assert.equal(r.result.enqueued,1);await j.drain();j.restartDelivery();await j.drain();
+  assert.deepEqual(j.capture,[text]);assert.equal((await pool.query('SELECT count(*)::int AS n FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,0);
+ });
+ await check('C post-full contract relevant media failure commits silent handoff under holding policy',async()=>{
+  const j=await statefulFixture({media:true,dependencyHoldingReply:'Bên em sẽ kiểm tra rồi báo chị nhé.'});
+  const r=await j.turn('Cho chị xem ảnh khách mặc mẫu này nhé.',[
+   native([{name:'select_product_media',args:{subjectRef:'SM613',intent:'FEEDBACK'}}]),
+   native([{name:'request_handoff',args:{reason:'DEPENDENCY_FAILURE'}}])]);
+  assert.equal(r.owners,2);assert.equal(r.verifiers,0);assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));
+  assert.equal(r.result.terminal.text,null);assert.equal(r.result.enqueued,0);await j.drain();j.restartDelivery();await j.drain();
+  assert.deepEqual(j.capture,[]);assert.equal((await pool.query('SELECT count(*)::int AS n FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,1);
+  assert.equal((await runtime.loadOrCreate(pageId,j.bound.customerHash,'APP',()=>null)).state.conversationOwner,'HUMAN');
+ });
  if(j2j1Input)await check('C j2 j1 campaign',async()=>{
   const {executeCampaign}=await import('../single-agent-commerce-qualification/j2-j1-campaign.mjs');
   const snapshot=session=>phaseCTools.readSessionSnapshot({runtime,pool,historyStore,session});

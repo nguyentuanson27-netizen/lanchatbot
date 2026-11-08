@@ -16,7 +16,7 @@ export function withOpeningProductMedia(base:CommerceTools,input:{rule:OpeningPr
   ...c.boundSubjects.filter(s=>s.kind==='PRODUCT'&&(!eager||c.boundSubjects.filter(s=>s.kind==='PRODUCT').length===1)).map(s=>s.ref),
   ...(Array.isArray(c.state.cartItems)?c.state.cartItems.flatMap(i=>typeof i?.productRef==='string'?[i.productRef]:[]):[])
  ])].sort();
- const metadata=(c:TrustedContext)=>c.policyLiterals.filter(p=>p.ref.startsWith('media:')||p.ref.startsWith('read:')).flatMap(p=>{try{return [JSON.parse(p.text) as Record<string,unknown>];}catch{return [];}});
+ const metadata=(c:TrustedContext)=>c.policyLiterals.filter(p=>p.ref.startsWith('media:')||p.ref.startsWith('read:')||p.ref.startsWith('media-lookup:')).flatMap(p=>{try{return [JSON.parse(p.text) as Record<string,unknown>];}catch{return [];}});
  const colors=(c:TrustedContext,id:string)=>{
   const cartItems=Array.isArray(c.state.cartItems)?c.state.cartItems.filter(i=>i.productRef===id):[];
   // A cart with unknown variant colour cannot borrow the no-selection generic path.
@@ -24,7 +24,7 @@ export function withOpeningProductMedia(base:CommerceTools,input:{rule:OpeningPr
   const cartColors=cartItems.flatMap(i=>i.components.map((v:{color:string})=>v.color));
   const filters=metadata(c).flatMap(m=>{
   if((m.subjectRef??m.productId)!==id)return [];
-  return [m,...(Array.isArray(m.sellingOptions)?m.sellingOptions:[])].flatMap(v=>typeof v.color==='string'&&v.color.trim()?[v.color]:[]);
+  return [m,...(m.requested&&typeof m.requested==='object'?[m.requested as Record<string,unknown>]:[]),...(Array.isArray(m.sellingOptions)?m.sellingOptions:[])].flatMap(v=>typeof v.color==='string'&&v.color.trim()?[v.color]:[]);
  });
   // V1 retains its strict union. V2 physical cart selections supersede older read
   // filters; a source-unlabelled tuple never erases an explicit physical constraint.
@@ -78,6 +78,10 @@ export function withOpeningProductMedia(base:CommerceTools,input:{rule:OpeningPr
    if(input.firstContact===null)return fail('OPENING_HISTORY_UNKNOWN');
    const existing=base.mediaSelection?.()??[],photos=currentPhotos(context,existing),missing=requiredProducts.filter(id=>!photos.some(a=>a.productId===id));
    if(!missing.length)return {status:'READY',requiredProducts,chargedUnits};
+   // A prior failed lookup for a code-required opening photo cannot be retried
+   // implicitly or replaced by a generic query. Incidental lookups on returning
+   // conversations remain ordinary scoped owner results.
+   if(metadata(context).some(m=>missing.includes(String(m.subjectRef))&&m.scope==='MEDIA_ONLY'&&typeof m.outcome==='string'&&m.outcome!=='OK'))return fail('OPENING_MEDIA_SOURCE');
    if(!Number.isSafeInteger(control.maxCalls)||control.maxCalls>6||control.maxCalls<missing.length)return fail('OPENING_MEDIA_BUDGET');
    if(existing.length+missing.length>4||!base.prepareProductImage)return fail('OPENING_MEDIA_BOUND_OR_CAPABILITY');
    if(missing.some(id=>colors(context,id)===null||colors(context,id)!.length>1))return fail('OPENING_MEDIA_COLOR_SCOPE');

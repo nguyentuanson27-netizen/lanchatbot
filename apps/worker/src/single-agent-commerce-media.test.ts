@@ -36,6 +36,35 @@ it("does not mislabel a second asset fetch failure as validation of that asset",
  }finally{mock.mockRestore();}
 });
 describe("candidate product media",()=>{
+  it("replaces the delivery group without carrying old claims, while explicit APPEND preserves comparisons",async()=>{
+    const first=fixtureProduct("SM613"),second=fixtureProduct("QU714"),s=await setup();
+    first.product.images=[{...s.image,url:"https://content.pancake.vn/first.jpg"}];
+    second.product.images=[{...s.image,url:"https://content.pancake.vn/second.jpg"}];
+    const products=[first,second],tools=await createCommerceTools({read:{scope:s.scope,clock:()=>commerceNow,policy:fixturePolicy,
+      initialProducts:products.map(p=>p.product),catalog:{readProduct:async id=>structuredClone(products.find(p=>p.product.productId===id)!),
+      searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}},media:{allowedHostSuffixes:["content.pancake.vn"]}});
+    const select=(subjectRef:string,deliveryMode?:string)=>tools.invoke({name:"select_product_media",args:{subjectRef,intent:"BACK",...(deliveryMode?{deliveryMode}:{})}});
+    expect((await select("SM613")).status).toBe("OK");
+    expect((await select("QU714","APPEND")).status).toBe("OK");
+    expect(tools.mediaSelection!().map(a=>a.productId)).toEqual(["SM613","QU714"]);
+    expect((await select("QU714")).status).toBe("OK");
+    expect(tools.mediaSelection!().map(a=>a.productId)).toEqual(["QU714"]);
+    const context=tools.snapshot();
+    expect(context.protectedClaims.filter(c=>(c as {type:string}).type==="PRODUCT_MEDIA")).toHaveLength(1);
+    const metadata=context.policyLiterals.filter(p=>p.ref.startsWith("media:"));
+    expect(metadata).toHaveLength(1);expect(JSON.parse(metadata[0]!.text).subjectRef).toBe("QU714");
+    await expect(tools.readback()).resolves.toEqual(context);
+    first.product.images=[];
+    expect((await select("SM613")).status).toBe("UNAVAILABLE");
+    expect(tools.mediaSelection!().map(a=>a.productId)).toEqual(["QU714"]);
+  });
+  it("does not certify customer-wearing evidence from a feedback flag on a detail photo",async()=>{
+    const s=await setup();s.f.product.images[0]!.feedback=true;s.f.product.images[0]!.imageType="DETAIL";
+    const result=await s.tools.invoke({...s.call,args:{subjectRef:s.f.product.productId,intent:"FEEDBACK"}});
+    expect(result).toMatchObject({status:"OK",data:{descriptionEvidence:{assets:[{feedback:true,customerWearingEvidence:"NOT_RECORDED"}]}}});
+    const literal=s.tools.snapshot().policyLiterals.find(p=>p.ref.startsWith("media:"))!;
+    expect(JSON.parse(literal.text).descriptionEvidence).toEqual((result.data as {descriptionEvidence:unknown}).descriptionEvidence);
+  });
   it("keeps an old approved image until its source is replaced or revoked",async()=>{
     const s=await setup();s.f.product.images[0]!.observedAt="2025-01-01T00:00:00.000Z";
     expect(await s.tools.invoke(s.call)).toMatchObject({status:"OK"});

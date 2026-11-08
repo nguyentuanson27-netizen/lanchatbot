@@ -144,11 +144,13 @@ export async function createCommerceEffectTools(input: {
       // receipt's current scope; unavailable source data adds no new assertion.
       receipts: [...stateReceipts, ...(receipt && active.length === selections.size ? [receipt] : [])], ...(cart ? { cartBinding: { cartId: cart.cartId, cartVersion: cart.revision } } : {}) });
   };
-  async function selection(productId: string, a: Record<string, unknown>, lineId: string, offerType: string | null = null) {
+  async function selection(productId: string, a: Record<string, unknown>, lineId: string, offerType: string | null = null, requireColorChoice=false) {
     const query:CartSelectionQuery={ shopAlias: input.scope.shopAlias, productId, offerType,
-      size: typeof a.size === "string" ? a.size : null, color: typeof a.color === "string" ? a.color : null,
+      size: typeof a.size === "string" ? a.size : null, color: requireColorChoice?null:typeof a.color === "string" ? a.color : null,
+      ...(requireColorChoice?{requireColorChoice:true}:{}),
       quantity: typeof a.quantity === "number" ? a.quantity : 1, lineId,selectionMaxAgeSeconds:input.selectionMaxAgeSeconds??1200};
     const result = await input.select(query);
+    if(requireColorChoice&&result.status==="READY")throw Error("SELECTION_COLOR_CHOICE_UNPROVED");
     if(result.status!=="READY"&&result.selectionEvidence){
       const e=result.selectionEvidence,now=input.clock();
       if(!validSelectionEvidence(e,productId,now)||normalizeCatalogToken(e.offerType)!==normalizeCatalogToken(offerType??"")||e.quantity!==query.quantity||
@@ -225,12 +227,15 @@ export async function createCommerceEffectTools(input: {
       let negotiationSource: NonNullable<typeof input.negotiationSources>[number] | undefined;
       if(call.name==="record_negotiation"){
         const quote=a.sourceQuote;
-        if(!current.cart||!current.negotiation||!["PRICE_OBJECTION","PURCHASE_READY"].includes(String(a.intent))||
+        if(!["PRICE_OBJECTION","PURCHASE_READY"].includes(String(a.intent))||
           typeof quote!=="string"||!quote.trim()||Buffer.byteLength(quote)>512)return {status:"REJECTED",reason:"NEGOTIATION_SOURCE_OR_CART"};
         const matches=input.negotiationSources?.filter(source=>source.text.includes(quote))??[];
         negotiationSource=matches[0];
         if(matches.length!==1||!negotiationSource?.sourceMessageId||
           negotiationSource.text.indexOf(quote)!==negotiationSource.text.lastIndexOf(quote))return {status:"REJECTED",reason:"NEGOTIATION_SOURCE_OR_CART"};
+        if(!current.cart||!current.negotiation)return {status:"REJECTED",reason:"NEGOTIATION_CONTEXT_REQUIRED",data:{
+          effectCommitted:false,negotiationStatus:"NOT_EVALUATED",supportAvailability:"UNKNOWN",
+          missing:[...(!current.cart?["CART"]:[]),...(!current.negotiation?["NEGOTIATION"]:[])]}};
       }
       if (call.name === "add_to_cart" && (typeof a.offerType !== "string" || !a.offerType.trim())) {
         return { status: "REJECTED", reason: "OFFER_REQUIRED" };
@@ -286,7 +291,9 @@ export async function createCommerceEffectTools(input: {
         } else mutation = { kind: "ADD_LINE", line: selected };
       } else if (call.name === "change_cart_item") {
         if (a.action === "REPLACE_LINE") {
-          const selected = await selection(target!.ref,{...a,quantity:a.quantity??line!.quantity},line!.lineId,a.offerType as string);
+          const changedScope=target!.ref!==line!.parentProductId||normalizeCatalogToken(a.offerType as string)!==normalizeCatalogToken(line!.offerId);
+          const requireColorChoice=changedScope&&a.color==="__NO_COLOR__";
+          const selected = await selection(target!.ref,{...a,quantity:a.quantity??line!.quantity},line!.lineId,a.offerType as string,requireColorChoice);
           if (selected.status !== "READY") return {status:"UNAVAILABLE",reason:"SELECTION_UNAVAILABLE",data:selected};
           if (normalizeCatalogToken(selected.line.offerId) !== normalizeCatalogToken(a.offerType as string) ||
             selected.line.quantity !== (a.quantity??line!.quantity) ||

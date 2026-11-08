@@ -47,6 +47,8 @@ interface RawOfferRow {
 export interface CartSelectionQuery {
   /** Code-owned candidate adapter mode. Legacy callers retain their matching contract. */
   readonly selectionMode?: "CANDIDATE_TUPLES" | undefined;
+  /** Code-owned replacement prerequisite; never auto-select a physical colour. */
+  readonly requireColorChoice?: boolean | undefined;
   readonly selectionMaxAgeSeconds?:number;
   readonly shopAlias: string;
   readonly productId: string;
@@ -116,7 +118,7 @@ export function candidateCartOptions(raw:unknown,query:CartSelectionQuery,now:Da
   const identityHash=createHash("sha256").update(canonicalJson({offer,size,color,priceSku:row.price_sku,components:row.components,
    component1:row.component_1_sku,component2:row.component_2_sku,parent:row.parent_variation_id,parentSku:row.parent_variation_sku})).digest("hex");
   if(seen.has(identityHash))return [];seen.add(identityHash);
-  const resolved=cartSelectionFromSnapshot(s,{...query,selectionMode:undefined,offerType:offer,size,color},now);
+  const resolved=cartSelectionFromSnapshot(s,{...query,selectionMode:undefined,requireColorChoice:undefined,offerType:offer,size,color},now);
   const validStatus=normalizeCatalogToken(text(row.stock_status))==="OK";
   return [{productId:s.product_id,offerType:offer,size,color,quantity:query.quantity,
    status:!validStatus?"UNKNOWN":resolved.status==="READY"?resolved.stockStatus:resolved.status==="OUT_OF_STOCK"?"OUT_OF_STOCK":"UNKNOWN",
@@ -411,6 +413,7 @@ export function cartSelectionFromSnapshot(
   const [offerName, offer] = selectedOffer;
   const rows = offer.rows as readonly RawOfferRow[];
   const candidate=query.selectionMode==="CANDIDATE_TUPLES";
+  if(query.requireColorChoice&&(!candidate||query.color!==null))return failed("INVALID","CART_COLOR_CHOICE_CONTRACT");
   const options=candidate?candidateCartOptions(snapshot,query,now):[];
   const evidenceExpiry=Math.min(expiresAt.getTime(),observedAt+(query.selectionMaxAgeSeconds??PRICE_FRESH_SECONDS)*1000,
     snapshot.fulfillment_policy?.eta_valid_until.trim()?Date.parse(snapshot.fulfillment_policy.eta_valid_until):Infinity);
@@ -431,6 +434,7 @@ export function cartSelectionFromSnapshot(
   const colors = availableValues(matching, "color");
   if(candidate&&!color){
    const usable=options.filter(o=>["IN_STOCK","PRE_ORDER"].includes(o.status));
+   if(query.requireColorChoice&&usable.length)return rejected("COLOR_REQUIRED","CART_COLOR_REQUIRED",matching);
    if(usable.length===1)matching=matching.filter(r=>text(r.color)===usable[0]!.color&&text(r.size)===usable[0]!.size);
    else if(usable.length>1)return rejected("COLOR_REQUIRED","CART_COLOR_REQUIRED",matching);
    else return rejected("INVALID","CART_SELECTION_DATA_UNRESOLVED",matching);

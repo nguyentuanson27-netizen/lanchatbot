@@ -6,12 +6,13 @@ import type {HandoffAuthority} from "./single-agent-commerce-handoff.js";
 import {commerceNow,commerceScope,fixturePolicy,fixtureProduct,fixtureProfile,fixtureSizeInput} from "./single-agent-commerce.test-support.js";
 import {createSalesCycleRuntimeState} from "@lana/chat-runtime";
 import {cartSelectionFromSnapshot} from "./realtime-sales-catalog.js";
+import {OPENING_PRODUCT_MEDIA_RULE} from "./single-agent-commerce-opening-media.js";
 
 async function setup(mode:"missing-pos"|"complete"|"policy-error"="missing-pos",commitMode:"ok"|"denied"|"unknown"="ok") {
  const scope=commerceScope(),product=fixtureProduct("QU714"),original=(await fixturePolicy()).bundle!;
  const policy={...original,artifacts:{...original.artifacts,handoffMatrix:{schemaVersion:1 as const,kind:"HANDOFF_MATRIX" as const,sourceMetadata:original.artifacts.shopPolicy.sourceMetadata,
   rules:(["PRICE_UNAVAILABLE","STOCK_UNAVAILABLE","ETA_UNAVAILABLE","POLICY_UNAVAILABLE","SIZE_RULE_UNAVAILABLE","DEPENDENCY_FAILURE"] as const).map(reason=>({
-   reason,customerMessagePolicy:"HOLDING_REPLY_THEN_HANDOFF" as const,holdingReply:"Bên em sẽ kiểm tra lại rồi báo chị nhé.",tag:"NHAN_VIEN" as const}))}}};
+   reason,customerMessagePolicy:"SILENT_HANDOFF" as const,holdingReply:null,tag:"NHAN_VIEN" as const}))}}};
  let current:HandoffAuthority={...scope,fence:1,stateVersion:scope.revision,state:{...createConversationState({conversationId:scope.conversationId,routingOwner:"APP",now:commerceNow}),revision:scope.revision}};
  const commit=vi.fn(async ({next}:{next:HandoffAuthority})=>{
   if(commitMode==="unknown")throw Error("COMMIT_UNKNOWN");if(commitMode==="denied")return false;current=structuredClone(next);return true;
@@ -114,11 +115,48 @@ describe("missing shop information uses real handoff; missing customer input sta
   await tools.invoke({name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT",deliveryRegion:"MIEN-NAM"}});
   expect(await tools.terminalOutcome!()).toBeNull();expect(s.commit).not.toHaveBeenCalled();
  });
- it.each(["GENERIC","FEEDBACK"])("hands off a missing requested %s image instead of calling a different image a substitute",async intent=>{
+ it.each(["GENERIC","FEEDBACK"])("returns missing %s media to the owner, then honours a relevant silent handoff",async intent=>{
   const s=await setup("complete"),tools=await createCommerceTools({read:s.read,handoff:s.handoff,media:{allowedHostSuffixes:["content.pancake.vn"]}});
   const result=await tools.invoke({name:"select_product_media",args:{subjectRef:"QU714",intent}});
   expect(result).toMatchObject({status:"UNAVAILABLE",reason:"NO_VERIFIED_MATCHING_MEDIA"});
+  expect(await tools.terminalOutcome!()).toBeNull();expect(s.commit).not.toHaveBeenCalled();
+  await tools.invoke({name:"request_handoff",args:{reason:"DEPENDENCY_FAILURE"}});
   expect(await tools.terminalOutcome!()).toMatchObject({disposition:"HANDOFF",reason:"DEPENDENCY_FAILURE"});expect(s.commit).toHaveBeenCalledOnce();
+ });
+ it("keeps an acknowledgement conversational after an incidental media lookup fails, with verifier mandatory",async()=>{
+  const s=await setup("complete"),tools=await createCommerceTools({read:s.read,handoff:s.handoff,media:{allowedHostSuffixes:["content.pancake.vn"]}});
+  let n=0;const verifier=vi.fn(async()=>({result:{verdict:"PASS",violations:[]}}));
+  const result=await runCommerceTurn({scope:s.scope,tools,owner:async()=>++n===1?native("select_product_media",{subjectRef:"QU714",intent:"FEEDBACK"}):{kind:"FINAL",text:"Dạ, em cảm ơn chị nhé."},
+   verifier,clock:s.read.clock,latest:"Chị thích màu be, cảm ơn em nhé.",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm"});
+  expect(result.terminal).toMatchObject({disposition:"SEND_ELIGIBLE",text:"Dạ, em cảm ơn chị nhé."});
+  expect(n).toBe(2);expect(verifier).toHaveBeenCalledOnce();expect(s.commit).not.toHaveBeenCalled();expect(tools.mediaSelection!()).toEqual([]);
+ });
+ it("still blocks a missing code-required opening image before owner generation",async()=>{
+  const s=await setup("complete"),tools=await createCommerceTools({read:{...s.read,entry:{firstContact:true,fromAd:false}},handoff:s.handoff,
+   media:{allowedHostSuffixes:["content.pancake.vn"]},openingMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  const owner=vi.fn(),verifier=vi.fn();
+  const result=await runCommerceTurn({scope:s.scope,tools,owner,verifier,clock:s.read.clock,latest:"Mẫu này bao nhiêu em?",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm"});
+  expect(result.terminal).toMatchObject({disposition:"HANDOFF",text:null});expect(owner).not.toHaveBeenCalled();expect(verifier).not.toHaveBeenCalled();
+ });
+ it("finishes a genuinely missing requested image by silent handoff through the normal owner loop",async()=>{
+  const s=await setup("complete"),tools=await createCommerceTools({read:s.read,handoff:s.handoff,media:{allowedHostSuffixes:["content.pancake.vn"]}});
+  let n=0;const verifier=vi.fn();
+  const result=await runCommerceTurn({scope:s.scope,tools,owner:async()=>++n===1?native("select_product_media",{subjectRef:"QU714",intent:"FEEDBACK"}):native("request_handoff",{reason:"DEPENDENCY_FAILURE"}),
+   verifier,clock:s.read.clock,latest:"Gửi chị ảnh khách mặc quần nhé.",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm"});
+  expect(result.terminal).toMatchObject({disposition:"HANDOFF",text:null});expect(n).toBe(2);expect(verifier).not.toHaveBeenCalled();
+  expect(s.commit).toHaveBeenCalledOnce();expect(tools.mediaSelection!()).toEqual([]);
+ });
+ it.each(["ok","denied","unknown"] as const)("keeps explicit missing-media recovery silent under a legacy holding policy (%s)",async mode=>{
+  const s=await setup("complete",mode),original=await s.handoff.policy();
+  const handoff={...s.handoff,policy:async()=>({...original,artifacts:{...original.artifacts,handoffMatrix:{...original.artifacts.handoffMatrix!,
+   rules:original.artifacts.handoffMatrix!.rules.map(r=>({...r,customerMessagePolicy:"HOLDING_REPLY_THEN_HANDOFF" as const,holdingReply:"Bên em sẽ kiểm tra rồi báo chị nhé."}))}}})};
+  const tools=await createCommerceTools({read:s.read,handoff,media:{allowedHostSuffixes:["content.pancake.vn"]}});
+  await tools.invoke({name:"select_product_media",args:{subjectRef:"QU714",intent:"FEEDBACK"}});
+  expect(await tools.invoke({name:"request_handoff",args:{reason:"DEPENDENCY_FAILURE",untrustedOverride:true}})).toMatchObject({status:"REJECTED"});
+  expect(s.commit).not.toHaveBeenCalled();
+  await tools.invokeBatch([{name:"request_handoff",args:{reason:"DEPENDENCY_FAILURE"}}]);
+  expect(await tools.terminalOutcome!()).toMatchObject({disposition:mode==="ok"?"HANDOFF":"NO_SEND",text:null});
+  expect(s.commit).toHaveBeenCalledOnce();
  });
  it("does not invent a handoff capability in the isolated read-only harness",async()=>{
   const s=await setup(),tools=await createCommerceTools({read:s.read});

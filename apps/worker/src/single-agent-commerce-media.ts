@@ -18,7 +18,9 @@ const intents=new Set<CustomerImageIntent>(["GENERIC","BACK","DETAIL","SIZE_GUID
 const componentParts={TOP:"AO",SKIRT:"CHAN_VAY",PANTS:"QUAN"};
 /** Shared closed argument contract; does not bind refs, select assets or grant authority. */
 export function decodeCommerceMediaArgs(value:unknown):MediaQuery|null {
-  let a=toolArgs(value,["subjectRef","intent","color","componentRole"]);
+  let a=toolArgs(value,["subjectRef","intent","color","componentRole","deliveryMode"]);
+  if(a?.deliveryMode!==undefined&&!['REPLACE','APPEND'].includes(String(a.deliveryMode)))return null;
+  if(a){a={...a};delete a.deliveryMode;}
   if(a?.color===null){a={...a};delete a.color;}
   if(!a||typeof a.subjectRef!=="string"||!intents.has(a.intent as CustomerImageIntent)||
     (a.color!==undefined&&(typeof a.color!=="string"||!a.color.trim()||a.color.length>64))||
@@ -30,9 +32,9 @@ function descriptionEvidence(query:MediaQuery,assets:readonly CommerceMediaAsset
   return { color:query.color??null, assets:assets.map((a,imageIndex)=>{
     const confirmedParts=a.partsVisible.filter(p=>Object.values(componentParts).includes(p));
     const wholeLook=a.partsVisible.some(p=>["FULL_SET","FULL_LOOK","FULL_BODY"].includes(normalizeCatalogToken(p)));
-    return {imageIndex,angle:a.angle,imageType:a.imageType,feedback:a.feedback===true,
+    return {imageIndex,angle:a.angle,imageType:a.imageType,feedback:a.feedback===true,customerWearingEvidence:"NOT_RECORDED",
       wholeLook,confirmedParts,componentKnown:confirmedParts.length>0&&confirmedParts.length===a.partsVisible.length};
-  }), limits:"wholeLook confirms an approved whole-look photo, not each component or detail. confirmedParts describes only individually confirmed parts; componentKnown=false does not negate wholeLook. Product fabric does not prove which fabric an image shows. A null color is unverified, not absent." };
+  }), limits:"wholeLook confirms an approved whole-look photo, not each component or detail. confirmedParts describes only individually confirmed parts; componentKnown=false does not negate wholeLook. feedback is a source classification, not proof of customer provenance or a person wearing it; NOT_RECORDED does not prove absence. Product fabric does not prove which fabric an image shows. A null color is unverified, not absent." };
 }
 
 /** Selection only. Existing exact snapshot and group gate own authorization and delivery. */
@@ -85,10 +87,11 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
   }
   async function invokeMedia(call:CommerceToolCall,selectionCount:1|4=4):Promise<CommerceToolResult> {
     const a=decodeCommerceMediaArgs(call.args);
+    const deliveryMode=(call.args as {deliveryMode?:unknown}|null)?.deliveryMode??"REPLACE";
     // The shared decoder normalizes only the existing optional-null colour contract.
     const base=input.base.snapshot();
     if(!base.state.permission||base.state.conversationOwner!=="BOT"||!base.state.privacyAllowed) return {status:"REJECTED",reason:"MEDIA_PERMISSION"};
-    if(!a||!base.boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===a.subjectRef))return {status:"REJECTED",reason:"MEDIA_ARGUMENTS_OR_REF"};
+    if(!a||(call.name==="view_product_media"&&(call.args as {deliveryMode?:unknown}).deliveryMode!==undefined)||!base.boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===a.subjectRef))return {status:"REJECTED",reason:"MEDIA_ARGUMENTS_OR_REF"};
     const query=a,key=commerceHash(query);
     const observationKey=commerceHash({operation:call.name,query});
     if(!observations.has(observationKey)&&observations.size>=6)return {status:"REJECTED",reason:"MEDIA_OBSERVATION_BOUND"};
@@ -154,14 +157,16 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
         viewed.set(key,{query,assets,images});
         return {status:"OK",data:{subjectRef:query.subjectRef,assets:images.map(({data:_data,...metadata})=>metadata),use:"APPEARANCE_ONLY"}};
       }
-      if(mediaSelection().length-(selections.get(key)?.assets.length??0)+assets.length>4)return {status:"REJECTED",reason:"MEDIA_BOUND"};
+      if((deliveryMode==="APPEND"?mediaSelection().length-(selections.get(key)?.assets.length??0):0)+assets.length>4)return {status:"REJECTED",reason:"MEDIA_BOUND"};
       observations.delete(observationKey);
+      if(deliveryMode==="REPLACE")selections.clear();
       selections.set(key,{query,assets,...(selectionCount===1?{limit:1 as const}:{})});
-      return {status:"OK",data:{subjectRef:query.subjectRef,intent:query.intent,descriptionEvidence:descriptionEvidence(query,assets),assets:assets.map(({assetRef,angle,imageType,feedback,partsVisible})=>({assetRef,angle,imageType,feedback,partsVisible})),scope:query.color?"COLOR_BOUND":"GENERIC_PRODUCT",colorMatched:!!query.color,delivery:"PENDING_FINAL_GATE"}};
+      return {status:"OK",data:{subjectRef:query.subjectRef,intent:query.intent,deliveryMode,selectedProductRefs:[...new Set(mediaSelection().map(a=>a.productId))],
+        descriptionEvidence:descriptionEvidence(query,assets),assets:assets.map(({assetRef,angle,imageType,feedback,partsVisible})=>({assetRef,angle,imageType,feedback,partsVisible})),scope:query.color?"COLOR_BOUND":"GENERIC_PRODUCT",colorMatched:!!query.color,delivery:"PENDING_FINAL_GATE"}};
     }catch(error){if(validating)input.diagnostics?.emit("MEDIA_VALIDATE","ERROR",{assetRef:validatingAsset},error instanceof Error?error.message:"UNKNOWN_INTERNAL");return unavailable(error instanceof Error&&error.message==="MEDIA_COLOR_BINDING_UNVERIFIED"?error.message:"MEDIA_SOURCE_UNAVAILABLE");}
   }
   return {...input.base,mediaSelection,catalogImages,
-    prepareProductImage:(subjectRef,color)=>invokeMedia({name:"select_product_media",args:{subjectRef,intent:"GENERIC",...(color?{color}:{})}},1),
+    prepareProductImage:(subjectRef,color)=>invokeMedia({name:"select_product_media",args:{subjectRef,intent:"GENERIC",deliveryMode:"APPEND",...(color?{color}:{})}},1),
     fallbackId:()=>input.base.sizeOutcome?.()?"C3_A_NONPROTECTED_V2": [...observations.values()].some(o=>o.outcome!=="OK")
       ?"C3_B_MEDIA_UNAVAILABLE_V1":input.base.fallbackId?.()??"C3_A_NONPROTECTED_V2",snapshot:()=>overlay(input.base.snapshot()),
     invoke:call=>mediaTool(call.name)?invokeMedia(call):input.base.invoke(call),

@@ -9,7 +9,7 @@ const rule={version:'FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1'} as const;
 async function setup(ids=['SM613'],firstContact:boolean|null=true,withImages=true,focus?:string,mediaRule:OpeningProductMediaRule=rule){
  const scope=commerceScope(),fixtures=ids.map(id=>fixtureProduct(id));
  for(const f of fixtures)if(withImages)f.product.images=[{url:`https://content.pancake.vn/${f.product.productId}.jpg`,role:'PRIMARY',angle:'FRONT',imageType:'MODEL',intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:commerceNow.toISOString(),partsVisible:['AO']}];
- const readProduct=vi.fn(async(id:string)=>fixtures.find(f=>f.product.productId===id)!);
+ const readProduct=vi.fn(async(id:string,_readPos?:boolean)=>fixtures.find(f=>f.product.productId===id)!);
  const original=(await fixturePolicy()).bundle!;
  const policy={...original,artifacts:{...original.artifacts,handoffMatrix:{schemaVersion:1 as const,kind:'HANDOFF_MATRIX' as const,sourceMetadata:original.artifacts.shopPolicy.sourceMetadata,rules:[{reason:'DEPENDENCY_FAILURE' as const,customerMessagePolicy:'SILENT_HANDOFF' as const,holdingReply:null,tag:'NHAN_VIEN' as const}]}}};
  let authority:HandoffAuthority={...scope,fence:1,stateVersion:scope.revision,state:{...createConversationState({conversationId:scope.conversationId,routingOwner:'APP',now:commerceNow}),revision:scope.revision}};
@@ -132,7 +132,9 @@ it('does not accept a chart-only asset as an opening product photo',async()=>{
 });
 it('does not retry a failed colour lookup as generic opening media',async()=>{
  const s=await setup();await s.tools.invoke({name:'select_product_media',args:{subjectRef:'SM613',intent:'GENERIC',color:'red'}});
- const count=s.readProduct.mock.calls.length;const r=await s.run();expect(r.terminal.disposition).toBe('HANDOFF');expect(s.readProduct).toHaveBeenCalledTimes(count);expect(s.verifier).not.toHaveBeenCalled();
+ const mediaReads=s.readProduct.mock.calls.filter(c=>c[1]===false).length;
+ const r=await s.run();expect(r.terminal.disposition).toBe('HANDOFF');
+ expect(s.readProduct.mock.calls.filter(c=>c[1]===false)).toHaveLength(mediaReads);expect(s.verifier).not.toHaveBeenCalled();
 });
 it('four missing photos cannot exceed the six primitive budget',async()=>{
  const s=await setup(['P1','P2','P3','P4']);const r=await s.run();expect(r.terminal.disposition).toBe('HANDOFF');expect(r.normalToolCalls).toBe(4);expect(s.tools.mediaSelection?.()).toEqual([]);expect(s.verifier).not.toHaveBeenCalled();

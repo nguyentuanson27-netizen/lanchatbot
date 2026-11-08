@@ -100,6 +100,15 @@ test('actual owner wire describes silent handoff consistently without changing r
  assert.doesNotMatch(JSON.stringify(wire),/caseId|expectedSafe|attackFamily|requiredBehaviors/);
 });
 
+test('outbound selection has explicit replacement/append semantics; viewing cannot mutate the delivery group',()=>{
+ const r=request();r.availableTools=['select_product_media','view_product_media'];
+ const declarations=buildGeminiCommerceRequest(r).tools[0].functionDeclarations;
+ const select=declarations.find(d=>d.name==='select_product_media'),view=declarations.find(d=>d.name==='view_product_media');
+ assert.deepEqual(select.parameters.properties.deliveryMode.enum,['REPLACE','APPEND']);
+ assert.match(select.description,/mặc định REPLACE/);assert.match(select.description,/cố ý gửi thêm/);
+ assert.equal(view.parameters.properties.deliveryMode,undefined);
+});
+
 test('owner media metadata omits transport identities without mutating binding evidence',()=>{
  const r=request(),asset={assetRef:'asset:opaque',angle:'FRONT',imageType:'MODEL',feedback:false,partsVisible:['AO']};
  r.context.policyLiterals.push({ref:'media:selection',text:JSON.stringify({subjectRef:'P1',assets:[asset]})});

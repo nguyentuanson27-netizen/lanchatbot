@@ -66,6 +66,43 @@ async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi c
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; }, setActiveFee:(v:number)=>{activeFee=v;} };
 }
 
+describe("replacement choices and negotiation prerequisites",()=>{
+ it("keeps a valid unlabelled tuple selectable within its existing offer",async()=>{
+  const s=await setup(),f=fixtureProduct();f.snapshot.offers.DIRECT!.rows[0]!.color="__NO_COLOR__";
+  s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+  const add={...s.add,args:{...s.add.args,color:"__NO_COLOR__"}};
+  expect((await s.tools.invoke(add)).status).toBe("OK");const line=s.current().cart!.value.lines[0]!;
+  expect((await s.tools.invoke({name:"change_cart_item",args:{subjectRef:line.lineId,action:"REPLACE_LINE",targetSubjectRef:"SM613",offerType:"DIRECT",size:"M",color:"__NO_COLOR__"}})).status).toBe("OK");
+  expect(s.current().cart!.value.lines[0]!.components[0]!.color).toBe("__NO_COLOR__");
+ });
+ it("does not commit when a legacy selector ignores a replacement colour prerequisite",async()=>{
+  const s=await setup();expect((await s.tools.invoke(s.add)).status).toBe("OK");const before=structuredClone(s.current());
+  const result=await s.tools.invoke({name:"change_cart_item",args:{subjectRef:before.cart!.value.lines[0]!.lineId,action:"REPLACE_LINE",targetSubjectRef:"SM613",offerType:"AO",size:"M",color:"__NO_COLOR__"}});
+  expect(result.status).toBe("UNAVAILABLE");expect(s.current()).toEqual(before);expect(s.commits).toHaveLength(1);
+ });
+ it.each([1,2])("does not inherit an unrecorded colour into a new offer (%s physical choices)",async count=>{
+  const s=await setup(),f=fixtureProduct(),row=f.snapshot.offers.DIRECT!.rows[0]!;
+  row.color="__NO_COLOR__";
+  f.snapshot.offers.AO={...structuredClone(f.snapshot.offers.DIRECT!),rows:[{...structuredClone(row),color:"white"},
+   ...(count===2?[{...structuredClone(row),color:"be"}]:[])]};
+  s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+  expect((await s.tools.invoke({...s.add,args:{...s.add.args,color:"__NO_COLOR__"}})).status).toBe("OK");
+  const before=structuredClone(s.current()),commits=s.commits.length,line=before.cart!.value.lines[0]!;
+  const result=await s.tools.invoke({name:"change_cart_item",args:{subjectRef:line.lineId,action:"REPLACE_LINE",targetSubjectRef:"SM613",offerType:"AO",size:"M",color:"__NO_COLOR__"}});
+  expect(result).toMatchObject({status:"UNAVAILABLE",data:{effectCommitted:false,selectionStatus:"COLOR_REQUIRED",
+   choiceResolution:{kind:"NEEDS_CUSTOMER_CHOICE",field:"COLOR"},selectionEvidence:{color:null}}});
+  expect(s.current()).toEqual(before);expect(s.commits).toHaveLength(commits);
+  expect(s.select.mock.calls.at(-1)![0]).toMatchObject({offerType:"AO",color:null});
+ });
+ it("distinguishes unexamined negotiation from a denial of further shop support",async()=>{
+  const s=await setup(),before=structuredClone(s.current());
+  expect(await s.tools.invoke({name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao, bớt cho chị được không?"}}))
+   .toMatchObject({status:"REJECTED",reason:"NEGOTIATION_CONTEXT_REQUIRED",data:{effectCommitted:false,
+    negotiationStatus:"NOT_EVALUATED",missing:["CART","NEGOTIATION"],supportAvailability:"UNKNOWN"}});
+  expect(s.current()).toEqual(before);expect(s.commits).toHaveLength(0);
+ });
+});
+
 it("binds a validated ambiguous selection to both models and invalidates it when source changes",async()=>{
  const s=await setup(),f=fixtureProduct(),row=f.snapshot.offers.DIRECT!.rows[0]!;
  f.snapshot.fulfillment_policy={tinh_trang:"READY_STOCK",can_order_when_zero:true,prep_min_days:1,prep_max_days:2,zero_stock_policy:"ALLOW",zero_stock_prep_min_days:3,zero_stock_prep_max_days:5,eta_valid_until:""};
