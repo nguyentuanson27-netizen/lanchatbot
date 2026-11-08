@@ -1,3 +1,11 @@
+## Full34 after J2 repair — completed, 2026-11-08
+
+- [x] Owner explicitly chose full34cases55turns/current source, N1/retry0. Clean eb134d5d, common fresh world878a8091; original scripts/scopes/models/limits retained, all4 input preflights sealed before generation. No intermediate reviewer calls.
+- [x] All34/55 EXECUTED/notRun0:33modelSEND+7codeSEND+12silentHANDOFF+3HUMANno-send;128attempts128generationHTTP (89owner39verifier),127OK1upstreamtransportERROR retained/no retry. Four modelDBs and one initialDB dropped/live0/sourcewrites0.
+- [x] Whole-conversation manual review once after completion:22TASK_OK,7MATERIAL/cases needing adjudication,5EXPECTED_HANDOFF. J2/correction and p04/s04 observed working; J1 quote path correct but provider transport failed; p08/s15/s16/j4/s08/s05 remain. S05 text selectsSQ748 but pictures alsoSQ675; not a minor voice finding. [Report/all55turns/failures](../apps/worker/evals/single-agent-commerce-qualification/post-j2-full-run-20261108/REPORT.md).
+- [x] Mechanical hashes/accounting/firewall/history/capture/private-literal checks PASS; media coherence inspected separately. No full gate replay or independent/blind judge.
+- [ ] STOP/noPhaseCGO: do not infer stability/causality fromN1/fresh-world changes; no C3 comparison, automatic next fix/model run, merge/deploy/live send.
+
 ## Baseline native model run — J1/ACK, 2026-11-08
 
 - [x] Execute source6ac0eb78/clean, fresh world551b7fc0; two registered cases N1/max8generation. Actual6HTTP/4owner2verifier, allOK/retry0; source/media readiness and exact CLI checked before dispatch. Separate-TOP preflight was over-specified and corrected to actual GENERIC gate before provider; failed preparation retained.
