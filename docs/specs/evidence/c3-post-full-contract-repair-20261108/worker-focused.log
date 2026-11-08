@@ -16,4 +16,3 @@ DISCOVERY_FEASIBILITY source-failure {"fixtureBytes":5314,"requestedCandidates":
       Tests  1067 passed (1067)
    Start at  23:47:50
    Duration  91.83s (transform 7.38s, setup 0ms, collect 28.72s, tests 37.67s, environment 12ms, prepare 10.78s)
-

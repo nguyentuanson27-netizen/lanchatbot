@@ -11,8 +11,8 @@
       "exitCode": 0,
       "result": "1067 PASS; 36 files",
       "log": "worker-focused.log",
-      "sha256": "9c82dc46aa0a4c2550e93da0e521d6698efe4a393971e4c6309779d87fea21a0",
-      "bytes": 3788
+      "sha256": "a49bf059442fea7c2b42ed8e1ba9a0e3497600150b7a205c629814969eeedf6c",
+      "bytes": 3787
     },
     {
       "id": "fixture-final",
@@ -20,8 +20,8 @@
       "exitCode": 0,
       "result": "30 PASS after fixture typing cleanup; subset of 1067",
       "log": "fixture-final.log",
-      "sha256": "67c5d24e9ab57c1019c5fde3148606163252843794392a5b0eb3d47e16e418f9",
-      "bytes": 369
+      "sha256": "da48436aaf998adec3ed5d8e03920bfe6ff77b48456ee771e7734217b369c33b",
+      "bytes": 368
     },
     {
       "id": "owner-adapter-source",
@@ -47,8 +47,8 @@
       "exitCode": 0,
       "result": "22 PASS; shared package source unchanged",
       "log": "protected-reply.log",
-      "sha256": "502e7b16b5bb3e1cb97c814ac299a7b116a236baaab107f19d5eeeb70572f5f2",
-      "bytes": 365
+      "sha256": "cef7cf59387f394aadec6bdc67c00c951277af54e650ba66986c2588a0c4ab83",
+      "bytes": 364
     },
     {
       "id": "worker-build",
@@ -65,8 +65,8 @@
       "exitCode": 0,
       "result": "PASS; tsc -p tsconfig.json --noEmit",
       "log": "worker-lint-typecheck.log",
-      "sha256": "0d0a8de522f21dbf44fffd2752d4913d7410fc8a951bd2542f2352aabfe5a3aa",
-      "bytes": 167
+      "sha256": "4b3587ccdf0c086e506a79a7e3de4a3cc401dc06f0bb68aa783fe64decd3b9e5",
+      "bytes": 166
     },
     {
       "id": "dataset-guard",
@@ -229,5 +229,5 @@
     "S08 owner semantic paraphrase and J1 upstream transport not claimed fixed.",
     "Full repository check and remote CI not claimed PASS."
   ],
-  "logSerialization": "Published stdout logs normalize CRLF to LF; sha256/bytes refer to these committed bytes. Raw session logs remain outside repo."
+  "logSerialization": "Published stdout logs normalize CRLF to LF and remove trailing blank lines; sha256/bytes refer to these committed bytes. Raw session logs remain outside repo."
 }
