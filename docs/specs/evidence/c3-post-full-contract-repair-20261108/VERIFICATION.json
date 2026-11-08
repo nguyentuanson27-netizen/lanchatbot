@@ -1,0 +1,232 @@
+{
+  "implementationBaseSha": "7c75dbb1fd68a05601b47a0c1a5ceb85b932278e",
+  "implementationCommit": "4e0d1e542dc79f23b32d51cc348eae4e51e45c2e",
+  "review": "SELF_REVIEW_ONLY",
+  "providerGenerations": 0,
+  "liveSends": 0,
+  "checks": [
+    {
+      "id": "worker-focused",
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce src/realtime-sales-catalog.test.ts src/single-agent-semantic-verifier-boundary.test.ts src/track-b-protected-claim-boundary.test.ts --reporter=dot --maxWorkers=2 --no-file-parallelism",
+      "exitCode": 0,
+      "result": "1067 PASS; 36 files",
+      "log": "worker-focused.log",
+      "sha256": "a69c6f97e7d4a473493a94cfcad93b4b8bbb03bea38099ccbd9ea9f9eb8ff250",
+      "bytes": 3807
+    },
+    {
+      "id": "fixture-final",
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-missing-information.test.ts --reporter=dot --maxWorkers=1 --no-file-parallelism",
+      "exitCode": 0,
+      "result": "30 PASS after fixture typing cleanup; subset of 1067",
+      "log": "fixture-final.log",
+      "sha256": "4a4fac92f5b558d6cee9a2f3745d6e28408751a96a68978a3bdee2d73a791e2e",
+      "bytes": 379
+    },
+    {
+      "id": "owner-adapter-source",
+      "command": "node --test --test-concurrency=1 apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/owner-product-tables.test.mjs apps/worker/evals/single-agent-commerce-qualification/test-support-sources.test.mjs",
+      "exitCode": 0,
+      "result": "87 PASS",
+      "log": "owner-adapter-source.log",
+      "sha256": "718b2b2eb665fc9ca7228a4ff3b3fa0b6fd0a4057b975ce7b0a447a47040c108",
+      "bytes": 9461
+    },
+    {
+      "id": "verifier-adapter",
+      "command": "node --test apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference-diagnostics.test.mjs",
+      "exitCode": 0,
+      "result": "24 PASS / 1 SKIP; installed-login test not enabled",
+      "log": "verifier-adapter.log",
+      "sha256": "e7cc4ed322e98021976a5b59ba08b0478773e6e9500fb371b8f71b286087efb0",
+      "bytes": 2589
+    },
+    {
+      "id": "protected-reply",
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts --reporter=dot --maxWorkers=1 --no-file-parallelism",
+      "exitCode": 0,
+      "result": "22 PASS; shared package source unchanged",
+      "log": "protected-reply.log",
+      "sha256": "b640ad077e7cca84d364a77c311246e2bb6fb74503930fd208b07429c33f8514",
+      "bytes": 375
+    },
+    {
+      "id": "worker-build",
+      "command": "pnpm --filter @lana/worker exec tsc -p tsconfig.json",
+      "exitCode": 0,
+      "result": "PASS; final worker emit",
+      "log": "worker-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "id": "worker-lint-typecheck",
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0,
+      "result": "PASS; tsc -p tsconfig.json --noEmit",
+      "log": "worker-lint-typecheck.log",
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "bytes": 171
+    },
+    {
+      "id": "dataset-guard",
+      "command": "pnpm check:dataset-boundary",
+      "exitCode": 0,
+      "result": "PASS",
+      "log": "dataset-guard.log",
+      "sha256": "745c52b41d3303a69e6595df2e22f28f9fc5f1f0b5392d560db215ff5a6e14ca",
+      "bytes": 338
+    }
+  ],
+  "postgresRuns": [
+    {
+      "sourceSha": "7c75dbb1fd68a05601b47a0c1a5ceb85b932278e",
+      "sourceDirty": true,
+      "providerGenerations": 0,
+      "sendEnabled": false,
+      "testDatabaseDropped": true,
+      "cases": [
+        {
+          "name": "C B-preserving profile-once distinct fits survive new adapter and source invalidation",
+          "status": "PASS"
+        },
+        {
+          "name": "C B-preserving selected offer persists without cart and complete native checkout reaches confirmation",
+          "status": "PASS"
+        }
+      ],
+      "command": "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-contract-repair-pg-b-preserving-20261108-01 COD --check-prefix \"C B-preserving\"",
+      "rawReport": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-contract-repair-pg-b-preserving-20261108-01\\integration.json",
+      "sha256": "01df101d37a1148a5b2c05a514b075f9eb9abf3dc146f21cbf05dd4d8458472b"
+    },
+    {
+      "sourceSha": "7c75dbb1fd68a05601b47a0c1a5ceb85b932278e",
+      "sourceDirty": true,
+      "providerGenerations": 0,
+      "sendEnabled": false,
+      "testDatabaseDropped": true,
+      "cases": [
+        {
+          "name": "C post-full contract incidental media failure retains a verified acknowledgement",
+          "status": "PASS"
+        },
+        {
+          "name": "C post-full contract relevant media failure commits silent handoff under holding policy",
+          "status": "PASS"
+        }
+      ],
+      "command": "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-contract-repair-pg-recovery-20261108-01 COD --check-prefix \"C post-full contract\"",
+      "rawReport": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-contract-repair-pg-recovery-20261108-01\\integration.json",
+      "sha256": "d2277fa59cd3011c214832a1a03dcadc0e1a9783c2c1d12faccb842eec271b6d"
+    },
+    {
+      "sourceSha": "4e0d1e542dc79f23b32d51cc348eae4e51e45c2e",
+      "sourceDirty": false,
+      "providerGenerations": 0,
+      "sendEnabled": false,
+      "testDatabaseDropped": true,
+      "cases": [
+        {
+          "name": "C post-full contract incidental media failure retains a verified acknowledgement",
+          "status": "PASS"
+        },
+        {
+          "name": "C post-full contract relevant media failure commits silent handoff under holding policy",
+          "status": "PASS"
+        }
+      ],
+      "command": "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-contract-repair-pg-recovery-20261108-02 COD --check-prefix \"C post-full contract\"",
+      "rawReport": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-contract-repair-pg-recovery-20261108-02\\integration.json",
+      "sha256": "ea7e3fbfb8ecbfa6036b4a5d3b1275ec126953312fa9229817aa15468bc226f1"
+    }
+  ],
+  "postgresUniqueControls": 4,
+  "postgresExecutions": 6,
+  "postgresNote": "Recovery pair repeated once on clean implementation commit; not independent samples or model quality. Earlier two runs were dirty worktree checks.",
+  "prompts": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt",
+      "sha256": "75e29844627f136512f5dd427df4592b57f33598b03eff8118fc495fb9d1e109",
+      "unchanged": true
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/prompts/verifier.vi.txt",
+      "sha256": "6ffaebf52151edca3baae03581e44731d727a29dc3b132e87c8dcc8f1ae5f944",
+      "unchanged": true
+    }
+  ],
+  "changedExecutableAndTestFiles": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs",
+      "sha256": "41d243d2ad699d8efd59a707a11fe28a1ebd0594f38ac24accc124065bf3acc3",
+      "gitBlob": "036357300aa5df0b9198355655b97b0ffb1aea4f"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs",
+      "sha256": "5fc763c659a345da55bdf0900c67a096529c7efc08eb4329c721a26b0c9f2f54",
+      "gitBlob": "64280c9dc404cd512e227787f21561e21d1d6844"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "sha256": "b1ba718f613ec7b3543ae7951e915460eb24cc1556c4c71022e82419a8fb0387",
+      "gitBlob": "048916f8dbae0b5897c0cf458f5cb4f2da54c94d"
+    },
+    {
+      "path": "apps/worker/src/realtime-sales-catalog.ts",
+      "sha256": "750121b2bda5155f5b008d47aa69eeeda624e6337b9c00c99b0bcebfaad15a9e",
+      "gitBlob": "50766b6c7f5a41ab265519859adc779529dec946"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-effects.test.ts",
+      "sha256": "098690189ed5628be92fb037fa9c4b1c48f654cf5167cc5f04ec515a03dcac8b",
+      "gitBlob": "cd968942f931d65b8972c3f736f036d8cf8d36c3"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-effects.ts",
+      "sha256": "6352e811094aba427de7fd59611706095e493f6d00eb39b25f59516daacbd526",
+      "gitBlob": "6dd17c256ac87e8540ac83b3390cf24ab4277860"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-ingress.test.ts",
+      "sha256": "78e51c0de979b0d64c996525af1d202cdaad7d587e350cf3843369a801a5ab10",
+      "gitBlob": "c4d6514292b9df2a321244de3250eafb1f790cb8"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-media.test.ts",
+      "sha256": "6fb6f4d119f933e0fe1bba3f3f79984e557212478955e891766fa3bbf3899278",
+      "gitBlob": "5523444663968aead40eaf7f0a7fa9ea0b03c407"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-media.ts",
+      "sha256": "70029ce01fa1f86965934f99290a2b035ab1e84acd09adca340abcbedb1860f4",
+      "gitBlob": "1561c418db9d96a6bf14e22cd43ca70154d644c8"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-missing-information.test.ts",
+      "sha256": "7831acd3a99eef1ac8b5d2003d1c03f2b9f14ca3de2578d58a0017f549323146",
+      "gitBlob": "e23aa1845cb47db6b78204b64a8f3f27811716f6"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-opening-media.test.ts",
+      "sha256": "5e7515e5227f462a14533a7dbed5a3de78152aad6461c44ab9a703233d648b81",
+      "gitBlob": "4515a93a07a3e53b938b847156d32b55818d259c"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-opening-media.ts",
+      "sha256": "d665a91bac4dd66302258b68fd89653eba086571ccd4fd3c1a92b650db694f20",
+      "gitBlob": "bfa525f84a46eef586d8d19b65736c67e9a9b389"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce.ts",
+      "sha256": "3081e88f688a31df9edd323f7115649f3a12ea773aead84428764bbf694a6f93",
+      "gitBlob": "b2e740ed655cda503b72bfb81f3dbcd676866eec"
+    }
+  ],
+  "limitations": [
+    "No provider/model requalification or formal blind judge.",
+    "Source feedback flag does not establish customer-wearing provenance.",
+    "Owner relevance and final media choice still require native testing.",
+    "S08 owner semantic paraphrase and J1 upstream transport not claimed fixed.",
+    "Full repository check and remote CI not claimed PASS."
+  ]
+}

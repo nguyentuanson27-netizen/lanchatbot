@@ -3224,3 +3224,12 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Fresh independentGPT6.1SolHIGH judge22RESOLVED beforeunmask: whole10/16SINGLE+5/6JOURNEY; requiredconjunction6/16+1/6, below90%; observedhardSafety22/22 only. [Report/wholehistories/grades](../apps/worker/evals/single-agent-commerce-qualification/bc-repair-rerun-20261030/REPORT.md).
 - [x] Preserve3failedpreregistrationnativeinventoryattempts: SQ2447all-offer+policychart bound; reviewedlegacyadapterONLY evaluatorinventory, currentV2native/runtime/world/boundsunchanged. Developmentinventory6621/missing0/reviewPENDING; notfreshholdout.
 - [ ] Remaining: s02/s07/s13search→detailed-readSOURCE_ERROR; j1MaddCLAIM_CONFLICT despiteatomicpreservation; sourceimages/ambiguity and modelplanning residuals. BatchSTOP/PhaseCqualificationBLOCKED/C3NOT_RUN/B_NOT_GO; no automaticnextfix/rerun/merge/deploy.
+
+## Phase C — post-full contract repair, 2026-11-08
+
+- [x] Read full-run failures and current consumers; record implementation base7c75dbb1 and [bounded scope](../docs/specs/c3-phase-c-post-full-contract-repair-20261108.md).
+- [x] Observe RED8 before executable fix; implement4e0d1e54: replacement colour prerequisite without auto-commit, replace/append media group, scoped media errors to owner, silent explicit dependency handoff under legacy policy, NOT_EVALUATED negotiation and non-invented feedback meaning.
+- [x] Self-review and correct tuple prerequisite propagation, required opening-photo retry/substitution, legacy holding leakage and consumer tests. No advice/verifier prompt growth or case-specific parser.
+- [x] Worker1067PASS/36files; fixture30 subset rechecked after typing cleanup; adapter/source87PASS; verifier24PASS/1SKIP; protected/reply22PASS; final worker emit/noEmit/lint and dataset guard PASS. [Exact commands/logs/limits](../docs/specs/c3-phase-c-post-full-contract-repair-implementation-20261108.md).
+- [x] Actual PG four distinct controls/six executions/three DBs dropped; final recovery pair on clean4e0d1e54. Scripted owner/verifier, provider0/live0; not model stability evidence.
+- [ ] Native owner relevance and actual final text/media selection unverified; feedback customer-wearing provenance absent, S08 paraphrase and J1 transport not claimed fixed. New sealed/preflighted provider run only when requested. PhaseCnotGO; no merge/deploy/live send.
