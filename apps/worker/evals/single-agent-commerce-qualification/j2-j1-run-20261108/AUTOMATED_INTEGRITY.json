@@ -1,0 +1,17 @@
+{
+  "kind": "AUTOMATED_REQUEST_AND_CAPTURE_CHECKS_NOT_FULL_GATE_REPLAY",
+  "generationAttempts": 19,
+  "generationHttpRequests": 19,
+  "primaryRegistered": 10,
+  "primaryCapturedRequests": 10,
+  "allActualRequestHashesMatch": true,
+  "evaluatorFirewall": "PASS",
+  "J1OnlyInsertedMetadataDiff": true,
+  "exactJ2FinalDraftAndCaptureBindings": 3,
+  "sourceRuntimeAcrossPhasesUnchanged": true,
+  "providerErrors": 0,
+  "providerTimeouts": 0,
+  "rawRunnerErrorRetained": "CAMPAIGN_OFFLINE_ASSESSMENT_MISSING",
+  "noFullFinalGateReplayClaim": true,
+  "providerRequestsAdded": 0
+}

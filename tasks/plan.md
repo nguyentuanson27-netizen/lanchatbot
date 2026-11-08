@@ -6,7 +6,8 @@
 - [x] Implement j2 recovery: observed RED14, final focused311PASS + protected regression75PASS; realPG1/1PASS, DBdropped/provider0, working-edit attribution retained. No blanketclear/groundingrelaxation. [Implementation/evidence](../docs/specs/evidence/c3-j2-j1-implementation-20261108/IMPLEMENTATION.md).
 - [x] Build j1 eval-only wire view/10slot primary + conditional8 native wrapper; focused23PASS, offline captured-world capacity978100VND/CAS0/provider0. Prompts/tools/facts unchanged; no model outcome or adoption evidence yet.
 - [x] Self-review implementation and retain test/source attribution; worker build/typecheck/lint PASS. New provider calls0.
-- [ ] At execution: capture fresh inputs + real seeded cart controls, bind isolated native stores, seal clean HEAD and check lifetime/config/credentials; j2 max12 + primary10 + conditional8 = max30. One independent review after all registered runs; no automaticfull55/promptpatch/nextloop. [Detailed plan](../docs/specs/c3-phase-c-j2-recovery-j1-controlled-plan-20261108.md).
+- [x] Execute scoped J2/J1 phases: fresh world4acd541d; J2 source d9b81907 3/3SEND/9HTTP; J1 source4516f06c 10primary/10HTTP, A3/3 B2/3, cart2PASS ACK2FAIL, NO_ADOPTION_EVIDENCE/native2NOT_RUN. Total19HTTP/retry0, DBsdropped; same runtime/packages, different eval sources. One independent post-run review. Runner assessment wait FAIL retained; offline score supplement only. [Run/report](../apps/worker/evals/single-agent-commerce-qualification/j2-j1-run-20261108/REPORT.md).
+- [ ] No PhaseC GO/adoption: keep baseline j1, no metadata B runtime wiring; pending runner durable offline assessment/accounting design and ACK over-tasking/comfort overconfidence findings. No automatic provider rerun or prompt-patch loop.
 
 ## Complete model campaign — owner continuation, 2026-11-08
 

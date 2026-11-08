@@ -1,0 +1,125 @@
+{
+  "kind": "ONE_CONSOLIDATED_INDEPENDENT_POST_RUN_REVIEW",
+  "date": "2026-11-08",
+  "verdict": "LIMITED_J2_ACCEPTANCE_J1_NO_ADOPTION_RUNNER_FAIL_NO_PHASE_C_GO",
+  "reviewInvocationForThisPostRun": 1,
+  "head": "4516f06c4cf8ef0372b77315381c3eb2909ec046",
+  "planSha256": "2c617c4d6b467a92797a706279d37ee43bdc9ac38f47bdb8767b3539e71d0393",
+  "j2SourceSha": "d9b8190703bee3f6838d73ac43992fa8e8c8af74",
+  "j1SourceSha": "4516f06c4cf8ef0372b77315381c3eb2909ec046",
+  "sameExactSourceCampaign": false,
+  "runtimeAndPackagesDiffEmpty": true,
+  "phaseStatus": {
+    "priorDeterministicPG": "SEPARATE_RECORDED_PASS_NOT_RERUN",
+    "j2": "LIMITED_SINGLE_JOURNEY_ACCEPTANCE_3_SEND_ELIGIBLE",
+    "j2RejectedOldHeightModelRecovery": "NOT_EXERCISED",
+    "j1Primary": "NO_ADOPTION_EVIDENCE",
+    "j1DirectQuote": {
+      "A": 3,
+      "B": 2,
+      "denominatorPerArm": 3
+    },
+    "j1CartControls": {
+      "A": true,
+      "B": true
+    },
+    "j1AckControls": {
+      "A": false,
+      "B": false
+    },
+    "j1ConditionalNative": {
+      "plannedArms": 2,
+      "attemptedArms": 0,
+      "notRunArms": 2,
+      "reason": "NO_ADOPTION_EVIDENCE; raw runner also timed out"
+    },
+    "runner": "FAIL_CAMPAIGN_OFFLINE_ASSESSMENT_MISSING",
+    "phaseC": "NO_GO_CLAIM"
+  },
+  "independentlyRecomputed": {
+    "packetListedArtifactHashesAndSizes": {
+      "count": 43,
+      "mismatches": 0,
+      "scope": "43 listed entries only, not exhaustive world/toolchain audit"
+    },
+    "j2Claims": 9,
+    "j2Results": 9,
+    "j2ProviderHttp": 9,
+    "j2Owner": 6,
+    "j2Verifier": 3,
+    "j2StatusErrors": 0,
+    "j1Rows": 10,
+    "j1ProviderHttp": 10,
+    "j1StatusErrors": 0,
+    "j1ToolsExecuted": 0,
+    "totalGenerationAttempts": 19,
+    "totalProviderHttp": 19,
+    "totalOwner": 16,
+    "totalVerifier": 3,
+    "frozenBodyMetadataOnlyComparison": {
+      "cases": 3,
+      "allEqualAfterMetadataRemoval": true,
+      "metadataUtf8Bytes": [
+        568,
+        568,
+        557
+      ],
+      "scope": "parsed JSON equality, not full independently replayed provider wire/gates"
+    }
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "priority": "P2",
+      "type": "OPERATIONAL_FAILURE",
+      "title": "Runner offline-assessment wait expired; offline score does not replace raw failure",
+      "source": "apps/worker/evals/single-agent-commerce-qualification/j2-j1-campaign.mjs:173",
+      "action": "Preserve integration FAIL and label offline gate supplemental; use persisted offline assessment/resume for future runner work without rerunning current generations."
+    },
+    {
+      "id": "F2",
+      "priority": "P2",
+      "type": "ACCOUNTING_LIMIT",
+      "title": "Failed outer integration counter reports providerGenerations0 despite10 primary requests",
+      "action": "Use persisted journal/PRIMARY recount19 total; do not report outer0 as authoritative generation cost."
+    },
+    {
+      "id": "L1",
+      "type": "INFERENCE_LIMIT",
+      "title": "J2 model emitted corrected4ops directly; old-HEIGHT rejected-recovery was not exercised",
+      "action": "Keep deterministic/PG recovery evidence separate from model journey acceptance."
+    },
+    {
+      "id": "L2",
+      "type": "SALES_QUALITY_OBSERVATION",
+      "title": "Comfort and best-fit prose is overconfident relative to explicit claim detail",
+      "confirmedSafetyViolation": false,
+      "action": "Record voice/comfort limitation; do not label verifier false PASS without evidence contradicting current fit/material/qualitative-advice policy."
+    },
+    {
+      "id": "L3",
+      "type": "EXPERIMENT_OUTCOME",
+      "title": "Metadata B failed gate; both arms failed ACK control",
+      "action": "No adoption; keep native NOT_RUN; no prompt patch loop, refills or stability claims."
+    }
+  ],
+  "nextStep": "Close current run with scoped conclusions; retain J2 evidence, keep J1 baseline, no B adoption or new provider generation requested by this review.",
+  "unknowns": [
+    "J1 paired native task outcomes",
+    "Metadata causal effect or stability",
+    "Actual ACK execution outcomes",
+    "Actual garment comfort",
+    "Full candidate qualification",
+    "Complete world/preparation/CLI binary audit"
+  ],
+  "reviewActions": {
+    "providerCalls": 0,
+    "testsOrEvalsRun": 0,
+    "repoEdits": 0,
+    "newAgents": 0,
+    "liveEffects": 0
+  },
+  "phaseCGo": false,
+  "adoptionProof": false,
+  "approvalForDeploy": false
+}
