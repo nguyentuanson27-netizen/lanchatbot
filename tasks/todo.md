@@ -1,3 +1,11 @@
+## Implementation — J1 baseline diagnostic and runner stages, 2026-11-08
+
+- [x] Keep runtime J2/J1 and existing owner/verifier prompts; reject metadata B adoption. New eval runner closes after collection, scores offline and resumes only with revalidated gate/source/world/lifetime and one-use claim.
+- [x] Persist primary/native request accounting across exceptions; unknown stays unknown and stops dispatch. Add full registered primary failure denominator instead of losing attempts.
+- [x] Prepare two baseline-only native cases (J1 total, ACK), N1/max8generation/retry0; assess actual final outcomes, not extra reads alone. [Scope/verification](../docs/specs/c3-phase-c-j1-baseline-runner-repair-20261108.md).
+- [x] Focused31PASS after RED/self-review; syntax/diff PASS. Final full evals898PASS/2existingSKIP and focused32PASS after empty-ledger fix. Historical offline replay retained NO_ADOPTION_EVIDENCE with provider0. [Verification](../docs/specs/evidence/c3-j1-runner-repair-20261108/verification.json).
+- [ ] Model run/new native PostgreSQL acceptance NOT_RUN here; no PhaseC GO or automatic provider rerun.
+
 ## Next plan — j2 recovery first, j1 controlled diagnostic, 2026-11-08
 
 - [x] Pin independent rootcause review and existing offlineprobe; planbase b7dc99c9. J2 pending HEIGHT confirmed; j1 design hypothesis remains unproven.

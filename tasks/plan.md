@@ -1,3 +1,11 @@
+## Implementation — J1 baseline diagnostic and runner stages, 2026-11-08
+
+- [x] Keep J2/runtime/prompt/verifier and baseline J1; metadata B remains eval-only/not adopted. Historical results/gates and Revision2 plan bytes unchanged.
+- [x] Split collection/offline score/one-use conditional resume; persist generation accounting on success and exceptions. Primary unknown completion keeps full10-slot failure denominator. [Repair scope and commands](../docs/specs/c3-phase-c-j1-baseline-runner-repair-20261108.md).
+- [x] Add separate fixed BASELINE_NATIVE diagnostic: J1 total and ACK, N1 each/max8generations/retry0, actual terminal/Outbox/state evidence; no B insertion or forced tool-choice quality verdict.
+- [x] Observed RED7 initially, then partial-accounting RED1; focused32PASS after implementation/self-review. Syntax/diff checks PASS. Final full evals898PASS/2existingSKIP and focused32PASS after empty-ledger fix. Historical offline score matches NO_ADOPTION_EVIDENCE/provider0. [Verification](../docs/specs/evidence/c3-j1-runner-repair-20261108/verification.json).
+- [ ] Fresh-source native/model acceptance NOT_RUN in this implementation turn. No new provider calls, adoption, PhaseC GO, merge/deploy/live send.
+
 ## Next plan — j2 recovery first, j1 controlled diagnostic, 2026-11-08
 
 - [x] Pin independent rootcause review and existing offlineprobe; planbase b7dc99c9. J2 pending HEIGHT confirmed; j1 design hypothesis remains unproven.

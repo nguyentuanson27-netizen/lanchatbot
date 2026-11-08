@@ -1554,6 +1554,11 @@ try{
  report.status=providerRun?(attemptQueue.blocked()?'QUALIFICATION_FAILED':'COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW'):'PASS';save();
 }catch(error){report.status='FAIL';report.errorType=error.name;report.error=error.message;save();console.error(error.stack);process.exitCode=1;}
 finally{
+ if(j2j1Input&&providerPorts?.accounting){
+  report.providerAccounting=providerPorts.accounting();
+  report.providerGenerations=report.providerAccounting.providerRequests;
+  report.providerGenerationAttempts=report.providerAccounting.attempted;save();
+ }
  await Promise.allSettled([runtime?.close(),inbox?.close(),policyStore?.close(),livePolicyStore?.close(),historyStore?.close(),providerPorts?.close(),pool?.end()]);
  if(created){assert(/^c3_b_test_[a-f0-9]{16}$/.test(databaseName));await admin.query('DROP DATABASE '+databaseName);report.testDatabaseDropped=true;save();}
  if(report.initialStateArtifact){report.initialStateArtifact.testDatabaseDropped=report.testDatabaseDropped;

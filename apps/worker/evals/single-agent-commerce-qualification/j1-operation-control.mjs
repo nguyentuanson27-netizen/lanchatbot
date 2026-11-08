@@ -131,13 +131,13 @@ export function validateJ1Registration(reg){
  return reg;
 }
 
-export async function runJ1Primary({registration,registrationPath,sealHash,out,root,send,preflight=j1Preflight,now=Date.now}){
+export async function runJ1Primary({registration,registrationPath,sealHash,out,root,send,preflight=j1Preflight,now=Date.now,remainingNative=true}){
  assert.equal(digest(registration),sealHash,'J1_SEAL_CHANGED');outside(root,out);mkdirSync(out);
  outside(root,registrationPath);assert.equal(digest(JSON.parse(readFileSync(registrationPath,'utf8'))),sealHash,'J1_REGISTRATION_FILE');
  validateJ1Registration(registration);
  const deadline=now()+registration.schedule.primaryBudgetMs,rows=[];
  const verify=()=>{assert.equal(digest(registration),sealHash,'J1_SEAL_CHANGED');preflight(registration,{root,now:now(),remainingPrimaryBudgetMs:0,remainingNative:false});};
- preflight(registration,{root,now:now()});
+ preflight(registration,{root,now:now(),remainingNative});
  write(resolve(dirname(resolve(registrationPath)),'J1_PRIMARY_'+sealHash+'.claim.json'),{sealHash,registrationPath:resolve(registrationPath),out:resolve(out),startedAt:new Date(now()).toISOString()});
  write(resolve(out,'DISPATCH.json'),{sealHash,startedAt:new Date(now()).toISOString(),planned:10,retry:0});
  for(const slot of registration.slots){
@@ -150,8 +150,19 @@ export async function runJ1Primary({registration,registrationPath,sealHash,out,r
   appendFileSync(resolve(out,'REQUESTS.jsonl'),JSON.stringify({...slot,body})+'\n');
   // Sender retains known auth/provider/timeout errors. Unexpected throws have
   // unknown accounting and stop the run; never refill or retry that slot.
-  const r=await send(body,slot.bodyHash);
-  assert(Number.isInteger(r.telemetry?.providerRequests)&&r.telemetry.providerRequests>=0&&r.telemetry.providerRequests<=1,'J1_UNKNOWN_ACCOUNTING');
+  let r;
+  try{r=await send(body,slot.bodyHash,slot);
+   assert(Number.isInteger(r.telemetry?.providerRequests)&&r.telemetry.providerRequests>=0&&r.telemetry.providerRequests<=1,'J1_UNKNOWN_ACCOUNTING');
+  }catch(error){
+   const known=r?.telemetry?.providerRequests??error.telemetry?.providerRequests;
+   const row={...slot,status:'UNKNOWN',providerRequests:Number.isInteger(known)&&known>=0&&known<=1?known:null};
+   rows.push(row);write(resolve(out,slot.slotId+'.result.json'),row);
+   const remainder=registration.slots.slice(rows.length).map(s=>({...s,status:'NOT_RUN',reason:'UNKNOWN_COMPLETION',providerRequests:0}));
+   write(resolve(out,'PRIMARY_FAILURE.json'),{kind:'INCOMPLETE_PRIMARY_UNKNOWN_COMPLETION',sealHash,planned:10,
+    attempted:rows.filter(r=>r.status!=='NOT_RUN').length,notRun:rows.filter(r=>r.status==='NOT_RUN').length+remainder.length,
+    providerRequests:null,knownProviderRequests:rows.reduce((n,r)=>n+(r.providerRequests??0),0),rows:[...rows,...remainder]});
+   throw error;
+  }
   const row={...slot,...r,providerRequests:r.telemetry.providerRequests};rows.push(row);
   write(resolve(out,slot.slotId+'.result.json'),row);
  }
