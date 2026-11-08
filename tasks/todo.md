@@ -3241,3 +3241,11 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Single consolidated root review of55 actual turns:22TASK_OK/7MATERIAL/5EXPECTED. [Evidence](../apps/worker/evals/single-agent-commerce-qualification/post-contract-full-run-20261109/REPORT.md). Integrity121wires/caps/firewall/history/Outboxhashes,32exactdraftcapture bindings,36witness rows; not fullfinalgatereplay or exhaustive safety audit.
 - [ ] P06 component-source specificity, S15/J4 forbidden quote+write batches, S04/S09 schema branch failures, J2 transport and S16 customer-wearing provenance remain. P08 clarification recovered; no claim completed replacement after colour choice or stable voice/media-owner behaviour.
 - [ ] Independent/blind quality, formalPhaseC/C3comparison/stability NOT_RUN. STOP/noGO; no automatic new fix/provider run/merge/deploy/live send.
+
+## Phase C — tool-contract completion plan, 2026-11-09
+
+- [x] Revise root-cause proposal against independent findings; preserve source/code base076d3969, six-unit/two-round/three-owner/one-verifier/retry0 bounds.
+- [x] Same reviewer revision2 REQUEST_CHANGES: VIEW conflated with SELECT delivery constraints; recommend_size(no ops) may CAS retained target so not a quote sibling. Fix both in revision3; explicit negative acceptance added.
+- [x] Independent **APPROVE PLAN revision3**, exactSHA2566495b49aff8016df34050d79f86b31330905ef2deb9714033b92ecde13cc3bdd, zero remaining blockers. [Approval evidence](../docs/specs/evidence/c3-tool-contract-plan-20261109/README.md). Plan bytes kept unchanged; separate approval record controls current status.
+- [ ] Implement W1–W5 only when requested: observed RED→GREEN, current official schema documentation, PG/receipt/media/budget/source differential controls and independent implementation review. Not implemented by plan approval.
+- [ ] Native screen/full require new source/config/input seal and explicit run request; NOT_EXERCISED is not PASS; no automatic retry/fix/run loop. S16 positive customer-wearing source and J2 transport reliability remain unknown. No PhaseC GO/merge/deploy/live send.
