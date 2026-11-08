@@ -1,0 +1,365 @@
+{
+  "kind": "POST_CONTRACT_FULL34_DEVELOPMENT_DIAGNOSTIC_NOT_QUALIFICATION",
+  "runSourceSha": "312858f5f782d1372339e2dd03bfd3a480ce1578",
+  "implementationCommit": "4e0d1e542dc79f23b32d51cc348eae4e51e45c2e",
+  "worldHash": "2b8cf58c3ce6496ffbd0f87050133e2d627b2e38e4c6234aa9de4dbfc6066a9d",
+  "worldCapturedAt": "2026-11-08T17:08:33.929Z",
+  "ownerRequest": "chạy model đi",
+  "scopeBasis": "Repeat latest34case55turn Phase C development population, no expansion.",
+  "models": {
+    "sourceSha": "312858f5f782d1372339e2dd03bfd3a480ce1578",
+    "model": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "promptHash": "75e29844627f136512f5dd427df4592b57f33598b03eff8118fc495fb9d1e109",
+    "openingMediaRule": {
+      "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2"
+    },
+    "contextPolicyHash": "e9c9940dfddeee1550d1bc7ff50076655f04ac92440993e9b42d1a7a1a73fd74",
+    "toolContractHash": "5572dd3fca00c5841ea6c349c35f4d2b513797075ef1a12fb40e88714e16da9f",
+    "assemblyHash": "0eca650c770e837f12af2c06663959bf0416cb3f45235a1dd20d84837e796dbc",
+    "runtimeHash": "0e11bbd73c5afed62a858e753c98ce9308a705a4ca934362df32d66c59837d92",
+    "verifier": {
+      "model": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      },
+      "promptHash": "6ffaebf52151edca3baae03581e44731d727a29dc3b132e87c8dcc8f1ae5f944",
+      "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+      "serializationHash": "aff01bf07dd1715b8e6f4b2447c2c1cf29fa52644cc6b61c2be2767d633fe24f",
+      "bindingHash": "f7a63d2727e695ff2050ad4b4e2b7dd1c9cf697fae833fce6fb260912646a2b1",
+      "boundsHash": "6179ba4eb906926b3b58c2cd754f53c4e511bc4d8b2a6e0049d2463a32a1c26b"
+    }
+  },
+  "cases": 34,
+  "turns": 55,
+  "repetitions": 1,
+  "generationCap": 220,
+  "actualGenerations": 121,
+  "retry": 0,
+  "sourceCleanThroughoutDispatch": true,
+  "runtimeChangedDuringRun": false,
+  "promptsChangedDuringRun": false,
+  "customerScriptsChanged": false,
+  "inputReview": "Root self-review plus executable assertions; not independent",
+  "postRunReview": "One consolidated root review after all34/55, not independent/blind/formal grade",
+  "clockPolicy": "Actual wall clock; fresh source capture, no timestamp renewal",
+  "sourceShopWrites": 0,
+  "liveSends": 0,
+  "initialDatabaseDropped": true,
+  "modelDatabasesDropped": 4,
+  "testSourceAssumptions": {
+    "colour": {
+      "kind": "OWNER_APPROVED_ISOLATED_COLOR_V1",
+      "configurationHash": "379b0b825749e59132e63388a254357375d62fd11add4c15aa258925942422ef",
+      "publicSourceWorldHash": "f845c9b29c6beaf4cbb078e9442ea396b30bbf488bacc1f4022f3331ad479f75",
+      "approvalRefs": [
+        "owner-white-shirt-test-assumption-20261104"
+      ],
+      "changedRows": [
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "S",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "M",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "L",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "XL",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "S",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "M",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "L",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "XL",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        }
+      ],
+      "meaning": "Owner-approved test assumption; not verified physical stock colour or source publication."
+    },
+    "support": {
+      "kind": "OWNER_APPROVED_TEST_FEEDBACK_HANDOFF_V1",
+      "configurationHash": "d4eee9dc3bd07ad198b3a28cb0416bba03c70f5e8b8d997c81e4f31fdd09fedf",
+      "approvalRef": "owner-feedback-handoff-test-supplement-20261104",
+      "baseWorldHash": "aabd8c32fb448ffd46955f9072be610fe68f6395b6fe9d156d226baac13b0bbb",
+      "handoffContentHash": "sha256:5154e9ea1e04200c8f92b9812ddcdae39d20e7cb508f96fafc7613ae3d833d74",
+      "handoffVersionId": "ee92f932-91ea-5490-a2a9-8e6338ae26f2",
+      "meaning": "Owner-approved isolated test feedback; not verified customer provenance. Handoff policy is active only in the test clone."
+    },
+    "media": {
+      "kind": "OWNER_APPROVED_NEW_TEST_MEDIA_V1",
+      "configurationHash": "c07b0e453200180fab37ebcc3e42aa950326c8631f286bec48484a2f4a46f67d",
+      "approvalRef": "owner-new-test-media-SD023-20261104",
+      "baseWorldHash": "f25752d9589466f9366da433616475fa2acdd6d6d954ea6b696e026296d39181",
+      "assets": [
+        {
+          "productId": "SD023",
+          "url": "https://content.pancake.vn/1/s3000x3000/f8/01/35/62/552cb23c4c117004dcb3ac97565a0dec3ed2a2f5371555e7f4ea0001-w:4000-h:6000-l:4576023-t:image/jpeg.jpeg",
+          "sha256": "4a4a5aba84f6bda6b3c392c401beea862877df16c81c6ba3af39e1b6bab7d3bc",
+          "checkedAt": "2026-11-08T17:10:16.937Z"
+        }
+      ],
+      "meaning": "New isolated test assets from actual canonical bytes; not a successful old-hash revalidation or live publication."
+    }
+  },
+  "groupCommands": [
+    {
+      "label": "r1",
+      "sourceSha": "312858f5f782d1372339e2dd03bfd3a480ce1578",
+      "worldHash": "2b8cf58c3ce6496ffbd0f87050133e2d627b2e38e4c6234aa9de4dbfc6066a9d",
+      "command": [
+        "python",
+        "../c3-media-context-model-source-wrapper-20261103-02.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "..\\c3-post-contract-full-r1-run-20261109-01",
+        "COD",
+        "--phase-c-diagnostic-registration",
+        "..\\c3-post-contract-full-r1-sealed-20261109-01\\REGISTRATION.json",
+        "--phase-c-world",
+        "../c3-post-contract-full-world-20261109-02/WORLD.json",
+        "--phase-c-seed",
+        "..\\c3-post-contract-full-r1-sealed-20261109-01\\PRIVATE_BLIND_SEED.json"
+      ],
+      "registrationHash": "311573de780a55580d4729dae9fdf04ee48d8e178c2c1141af5dbd8188116a0a",
+      "retry": 0,
+      "startedAt": "2026-11-08T17:15:41.913676+00:00",
+      "authorityStopsRetained": true,
+      "continueDespiteMaterialTaskFailure": true,
+      "exitCode": 0,
+      "completedAt": "2026-11-08T17:20:31.842649+00:00"
+    },
+    {
+      "label": "r2",
+      "sourceSha": "312858f5f782d1372339e2dd03bfd3a480ce1578",
+      "worldHash": "2b8cf58c3ce6496ffbd0f87050133e2d627b2e38e4c6234aa9de4dbfc6066a9d",
+      "command": [
+        "python",
+        "../c3-media-context-model-source-wrapper-20261103-02.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "..\\c3-post-contract-full-r2-run-20261109-01",
+        "COD",
+        "--phase-c-diagnostic-registration",
+        "..\\c3-post-contract-full-r2-sealed-20261109-01\\REGISTRATION.json",
+        "--phase-c-world",
+        "../c3-post-contract-full-world-20261109-02/WORLD.json",
+        "--phase-c-seed",
+        "..\\c3-post-contract-full-r2-sealed-20261109-01\\PRIVATE_BLIND_SEED.json"
+      ],
+      "registrationHash": "cdd6fc8d2b2cf34d476dacce65643397cf738280f6f1f1d7682b7f8d6a6c0602",
+      "retry": 0,
+      "startedAt": "2026-11-08T17:20:47.735080+00:00",
+      "authorityStopsRetained": true,
+      "continueDespiteMaterialTaskFailure": true,
+      "exitCode": 0,
+      "completedAt": "2026-11-08T17:29:41.140825+00:00"
+    },
+    {
+      "label": "remainder",
+      "sourceSha": "312858f5f782d1372339e2dd03bfd3a480ce1578",
+      "worldHash": "2b8cf58c3ce6496ffbd0f87050133e2d627b2e38e4c6234aa9de4dbfc6066a9d",
+      "command": [
+        "python",
+        "../c3-media-context-model-source-wrapper-20261103-02.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "..\\c3-post-contract-full-remainder-run-20261109-01",
+        "COD",
+        "--phase-c-diagnostic-registration",
+        "..\\c3-post-contract-full-remainder-sealed-20261109-01\\REGISTRATION.json",
+        "--phase-c-world",
+        "../c3-post-contract-full-world-20261109-02/WORLD.json",
+        "--phase-c-seed",
+        "..\\c3-post-contract-full-remainder-sealed-20261109-01\\PRIVATE_BLIND_SEED.json"
+      ],
+      "registrationHash": "73159089ceec5f9e7884f353bc584aaaf68ef02efe18f1a4d370d8597ae1103b",
+      "retry": 0,
+      "startedAt": "2026-11-08T17:30:12.303182+00:00",
+      "authorityStopsRetained": true,
+      "continueDespiteMaterialTaskFailure": true,
+      "exitCode": 0,
+      "completedAt": "2026-11-08T17:42:27.887237+00:00"
+    },
+    {
+      "label": "checkout",
+      "sourceSha": "312858f5f782d1372339e2dd03bfd3a480ce1578",
+      "worldHash": "2b8cf58c3ce6496ffbd0f87050133e2d627b2e38e4c6234aa9de4dbfc6066a9d",
+      "command": [
+        "python",
+        "../c3-media-context-model-source-wrapper-20261103-02.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "..\\c3-post-contract-full-checkout-run-20261109-01",
+        "COD",
+        "--phase-c-diagnostic-registration",
+        "..\\c3-post-contract-full-checkout-sealed-20261109-01\\REGISTRATION.json",
+        "--phase-c-world",
+        "../c3-post-contract-full-world-20261109-02/WORLD.json",
+        "--phase-c-seed",
+        "..\\c3-post-contract-full-checkout-sealed-20261109-01\\PRIVATE_BLIND_SEED.json"
+      ],
+      "registrationHash": "a07e7a65b78831d4cc6bffdd331a16fe9a7085f8f7dd11f3e26c2ae851810e87",
+      "retry": 0,
+      "startedAt": "2026-11-08T17:42:34.232180+00:00",
+      "authorityStopsRetained": true,
+      "continueDespiteMaterialTaskFailure": true,
+      "exitCode": 0,
+      "completedAt": "2026-11-08T17:44:38.462957+00:00"
+    }
+  ],
+  "preparationCommands": [
+    "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-qualification/capture-world.mjs ../c3-post-contract-full-world-20261109-02 ../c3-media-context-model-codes-20261103-02.json",
+    "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-post-contract-full-initial-20261109-01 COD --phase-c-initial-world ../c3-post-contract-full-world-20261109-02/WORLD.json",
+    "node ../c3-post-contract-full-prepare-20261109-01.mjs",
+    "node ../c3-post-contract-full-seal-20261109-01.mjs",
+    "python ../c3-post-contract-full-launch-20261109-01.py"
+  ],
+  "preparationFailureRetained": "First capture used target-model code list containing synthetic SM613; null stable product validation failed before generation. Retained blocked directory01. Corrected to actual product list used by prior full run; fresh capture02, no fixture substituted.",
+  "auditCorrection": "Sealed post-run audit v1 expected a response modelVersion even for failed transport and stopped. Post-run audit v2 retains that generation as response-model-version unavailable, checks its TRANSPORT_ERROR/httpStatusnull and leaves original script/results unchanged. Not runtime/verdict/corpus change or a provider retry.",
+  "notRun": [
+    "New worker build/typecheck/lint/fullsuite: prior implementation checks separate",
+    "Independent/blind judge or formal PhaseCquality",
+    "C3 baseline A/B/parity",
+    "Full final-gate replay or exhaustive semantic falsePASS audit",
+    "Model retry, post-run fix, merge, deploy, live send"
+  ],
+  "rawInventorySha256": "f2b822799d55d3a0d53615392600b46f2ac259b54e41a3c12246b4858cf2648e",
+  "postRunAuditCommands": [
+    "node ../c3-post-contract-full-accounting-20261109-01.mjs r1",
+    "node ../c3-post-contract-full-accounting-20261109-01.mjs r2",
+    "node ../c3-post-contract-full-accounting-20261109-01.mjs remainder",
+    "node ../c3-post-contract-full-accounting-20261109-01.mjs checkout",
+    "node ../c3-post-contract-full-audit-20261109-01.mjs (FAIL: transport response model version unavailable)",
+    "node ../c3-post-contract-full-audit-20261109-02.mjs (PASS: preserves unavailable response model version)",
+    "node ../c3-post-contract-full-public-view-20261109-01.mjs"
+  ],
+  "helperInventory": {
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-helper-inventory-20261109-01.json",
+    "sha256": "eda8dab19856ea477da6ce101eb9973f187d315822ece3f34415381a1efc0e12"
+  },
+  "publicationChecks": {
+    "jsonSyntax": "PASS",
+    "rawFilesRehashed": 137,
+    "knownSyntheticContactValues": "ABSENT_IN_PUBLIC_FILES",
+    "secretPatterns": "PASS",
+    "executableDiff": "EMPTY_VS_RUN_SOURCE",
+    "markdownTrailingWhitespace": "PASS",
+    "localLinks": "PASS"
+  },
+  "publishedArtifacts": [
+    {
+      "path": "CONVERSATIONS.md",
+      "sha256": "d99b82f31fb01f3b1903189a9c0b9549c724848c474ec42021443f3b3ef0496a"
+    },
+    {
+      "path": "FAILURES.md",
+      "sha256": "fca8708b4151f7129fc920c7fcde89f53e121aac91c3a90610045e2d4e991b20"
+    },
+    {
+      "path": "INTEGRITY.json",
+      "sha256": "9e06660cdfe025592c45288f356b3416f40c2983893f188e9f56c2fbaabd669a"
+    },
+    {
+      "path": "MEDIA_COHERENCE.json",
+      "sha256": "ad9a94f3bdbe60c4ae504554544c12f0d24e300f487fc024cef4462603dc4b44"
+    },
+    {
+      "path": "METRICS.json",
+      "sha256": "392aced591838c37f3749b0f6a6c31d3459f3ea36f7c4ab76c516623a089d22d"
+    },
+    {
+      "path": "RAW_ARTIFACTS.json",
+      "sha256": "f2b822799d55d3a0d53615392600b46f2ac259b54e41a3c12246b4858cf2648e"
+    },
+    {
+      "path": "REPORT.md",
+      "sha256": "4682840d49e239abbe2e2677031b19835da4b0a06333d06ea89568da4181d466"
+    },
+    {
+      "path": "REVIEW.json",
+      "sha256": "318d87cd096835fb44ea1bba1df2b4841874ce0329f96be32806613339dccafd"
+    }
+  ]
+}

@@ -3233,3 +3233,11 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Worker1067PASS/36files; fixture30 subset rechecked after typing cleanup; adapter/source87PASS; verifier24PASS/1SKIP; protected/reply22PASS; final worker emit/noEmit/lint and dataset guard PASS. [Exact commands/logs/limits](../docs/specs/c3-phase-c-post-full-contract-repair-implementation-20261108.md).
 - [x] Actual PG four distinct controls/six executions/three DBs dropped; final recovery pair on clean4e0d1e54. Scripted owner/verifier, provider0/live0; not model stability evidence.
 - [ ] Native owner relevance and actual final text/media selection unverified; feedback customer-wearing provenance absent, S08 paraphrase and J1 transport not claimed fixed. New sealed/preflighted provider run only when requested. PhaseCnotGO; no merge/deploy/live send.
+
+## Phase C — post-contract full model run, 2026-11-09
+
+- [x] Fresh107-product source capture with approved test assumptions; retain failed first capture with synthetic code, no generation/source write; realPG initial capture/drop, exact clean source312858f5 and unchanged34scripts55turns frozen/preflighted.
+- [x] All34/55 collected once,121generationHTTP/0retry;32modelSEND+7codeSEND+13silentHF+3HUMANno-send, four model DBs dropped.85owner/36verifier; one ownertransport and two schema-malformed responses retained.
+- [x] Single consolidated root review of55 actual turns:22TASK_OK/7MATERIAL/5EXPECTED. [Evidence](../apps/worker/evals/single-agent-commerce-qualification/post-contract-full-run-20261109/REPORT.md). Integrity121wires/caps/firewall/history/Outboxhashes,32exactdraftcapture bindings,36witness rows; not fullfinalgatereplay or exhaustive safety audit.
+- [ ] P06 component-source specificity, S15/J4 forbidden quote+write batches, S04/S09 schema branch failures, J2 transport and S16 customer-wearing provenance remain. P08 clarification recovered; no claim completed replacement after colour choice or stable voice/media-owner behaviour.
+- [ ] Independent/blind quality, formalPhaseC/C3comparison/stability NOT_RUN. STOP/noGO; no automatic new fix/provider run/merge/deploy/live send.
