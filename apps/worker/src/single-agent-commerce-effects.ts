@@ -73,6 +73,9 @@ export async function createCommerceEffectTools(input: {
       shippingFeeVnd: cart.shippingFeeVnd, discountTotalVnd: cart.discountTotalVnd, grandTotalVnd: cart.grandTotalVnd } : null;
   };
   async function terminalOutcome(): Promise<TerminalOutcome | null> {
+    // An unproved effect blocks every reply, including an otherwise harmless
+    // ACK. Recovery of a rejected draft is not a substitute for this send gate.
+    if(uncertain)return {disposition:"NO_SEND",reason:"UNKNOWN_COMMIT",text:null,fallbackId:null};
     if (!committedTerminal) {
       await refreshAuthority();
       if (authority && (!authority.permission || !authority.privacyAllowed || authority.conversationOwner !== "BOT" ||

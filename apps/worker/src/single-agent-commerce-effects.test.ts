@@ -325,6 +325,13 @@ describe("code-owned commerce effects and recovery", () => {
         s.setCurrent(state);operationId=call.command.commandId;return {status:"APPLIED",state,transferToHuman:false};}});
     expect((await tools.invoke(s.add)).status).toBe(available?"OK":"UNAVAILABLE");expect(readReceipt).toHaveBeenCalledOnce();
     if(available)expect(tools.snapshot().effectReceipts).toEqual([await readReceipt.mock.results[0]!.value]);else expect(tools.snapshot().effectReceipts).toEqual([]);
+    if(!available){
+      expect(await tools.terminalOutcome!()).toMatchObject({disposition:'NO_SEND',reason:'UNKNOWN_COMMIT',text:null});
+      const owner=vi.fn(async()=>({kind:'FINAL' as const,text:'Dạ chị.'})),verifier=vi.fn(async()=>({result:{verdict:'PASS',violations:[]}}));
+      const r=await runCommerceTurn({scope:s.scope,tools,clock:()=>commerceNow,latest:'Dạ chị.',history:[],ownerPrompt:'Tư vấn',verifierPrompt:'Kiểm',owner,verifier});
+      expect(r.terminal.disposition).not.toBe('SEND_ELIGIBLE');expect(owner).not.toHaveBeenCalled();expect(verifier).not.toHaveBeenCalled();
+    }
+
   });
   it("returns the committed bounded quote in each effect response, including duplicates, without rewriting earlier versions", async () => {
     const s = await setup(), added = await s.tools.invoke(s.add);
