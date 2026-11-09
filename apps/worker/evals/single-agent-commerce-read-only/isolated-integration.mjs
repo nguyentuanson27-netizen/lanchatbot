@@ -819,9 +819,10 @@ try{
   const j=await statefulFixture({media:true,canonicalOfferIds:true});
   const seed=await j.turn('Chị lấy áo navy M.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);
   assert.equal(seed.result.terminal.disposition,'SEND_ELIGIBLE');await j.drain();const before=j.capture.length;
-  if(!known)j.disableReceiptRead();
+  const originalReceiptRead=runtime.readCommittedSalesCycleEvent.bind(runtime);
+  if(!known)runtime.readCommittedSalesCycleEvent=async(...args)=>{const event=await originalReceiptRead(...args);return args[0]===pageId&&args[1]===j.bound.conversationId&&event?.commandKind==='NEGOTIATION_EVENT'?null:event;};
   const calls=[{name:'record_negotiation',args:{intent:'PRICE_OBJECTION',sourceQuote:'Giá hơi cao'}},{name:'quote_product',args:{subjectRef:'SM613',offerTypes:['DIRECT'],quantity:1}}];
-  const r=await j.turn('Giá hơi cao, bớt cho chị nhé.',[native(calls),say('Dạ chị.')],{testQuoteTask:EXPLICIT_QUOTE_TASK,testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE,loseCommitReply:true});
+  let r;try{r=await j.turn('Giá hơi cao, bớt cho chị nhé.',[native(calls),say('Dạ chị.')],{testQuoteTask:EXPLICIT_QUOTE_TASK,testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE,loseCommitReply:true});}finally{runtime.readCommittedSalesCycleEvent=originalReceiptRead;}
   assert.equal(r.result.quoteTaskWork.length,known?1:0);assert.equal(r.result.enqueued,known?1:0);
   assert.equal((await pool.query("SELECT count(*)::int n FROM sales_cycle_events WHERE conversation_id=$1 AND command_kind='NEGOTIATION_EVENT'",[j.bound.conversationId])).rows[0].n,1);
   j.restartDelivery();await j.drain();assert.equal(j.capture.length,before+(known?1:0));
