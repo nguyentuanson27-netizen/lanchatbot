@@ -1,0 +1,32 @@
+# Phase C — tool contract completion implementation, 2026-11-09
+
+Status: IMPLEMENTED, final acceptance and independent review in progress. No provider run in this implementation record yet.
+
+Implementation base: `36058803b95324d8888ef4e6c76773e01b61bb6f`. Approved [revision 3 plan](c3-phase-c-tool-contract-completion-plan-20261109.md), SHA256 `6495b49aff8016df34050d79f86b31330905ef2deb9714033b92ecde13cc3bdd`, remains byte-identical. Planning approval does not approve implementation or model qualification.
+
+## Resulting contract
+
+- W1: public `read_product` has required flat `offerTypes` (0–3), one shared schema/decoder definition and actual native `parametersJsonSchema`. No `selection`/singular public alias. Details reject filters; offer null filters normalize to omitted. Exactly one offer may retain `customerSelected=true`; underlying profile CAS/source and native signatures stay intact.
+- W2: only quote-containing batches change. At most one writer, first; exact closed sibling allowlist. Prevalidate complete shapes/capabilities/known refs/offer targets/budget before writer. Execute each original call sequentially through existing ports. Confirm readback and unchanged business state before continuing. The only non-OK writer exemption is a code-owned no-commit negotiation validation result with unchanged current authority.
+- W2 authority: the handoff wrapper synchronizes a successful negotiation to the effect's own receipt-proven conversation revision, rejecting any different external revision. It does not treat arbitrary newer revisions as valid. A separate no-I/O exact completed-read offer-price proof supplies pre-cart quotes when cart overlay legitimately supersedes generic facts. Cart variant claims, totals and receipts are unchanged. Trusted quote evidence binds exact source/provenance/hash/expiry/request/binding/recipient and says PRE_CART_ONLY / appliesNegotiationReceipt=false. Readback rechecks the same proof. `currentCartQuoteRef` is available only for matching current cart identity/version/product/offer/quantity and requested color.
+- W3: quote reads cost one primitive; actual opening media preparation costs one per product. Before writes, reserve missing photos, including photos removed by a later REPLACE; reuse costs zero. Successful opening quote targets require photos even in a candidate pool. Price/read color and VIEW observation do not create outbound color demands. Explicit SELECT/cart constraints and final group gates remain. No hidden media call inside quote.
+- W4: source-known composition is separate from known labels. Only exact refs from the supplied frozen map can supply a bounded label. Unknown component refs are opaque only in owner presentation; internal/verifier identities remain exact. No SKU-specific role parser or child retrieval. S16 has no authorized customer-wearing provenance: it is registered prospectively as SOURCE_GAP_CONTROL, excluded from sales quality; historical failure remains unchanged.
+- W5: closed safe transport cause categories; one generation request per attempt, retry0. Mid-body reset/abort tests retain request accounting and expose no raw errors, URLs or credentials.
+
+Owner/verifier sales prompts and examples are unchanged. Technical tool declaration now describes the implemented contract. One owner plus at most one verifier; caps remain 6 primitive / 2 rounds / 3 owner / 1 verifier. No production entrypoint, source-shop write, deployment or live send.
+
+## Evidence and fixes during acceptance
+
+Observed RED before flat decoder/schema, writer-first batches, transport diagnostics and unknown-label projection. Later independent/self review added RED controls for external revision changes, same-target cart refs, replacement-photo reservation and cart overlay offer-price isolation.
+
+Independent [implementation R1](evidence/c3-tool-contract-plan-20261109/implementation-review-r1.md) requested scope-bound cart refs and W4/W5 evidence. [R2](evidence/c3-tool-contract-plan-20261109/implementation-review-r2.md) closed these and caught a real PostgreSQL negotiated-batch failure. The synthetic old offer ID alias had bypassed the canonical cart overlay. With canonical offer IDs, acceptance exposed cached handoff authority, then missing generic offer prices after correct cart overlay. Both are code contract issues; the stub owner's assertion error is not a real provider outage. Failed acceptance artifacts are retained. No native generation was used to tune these fixes.
+
+Official API documentation checked before adapter changes: [Google FunctionDeclaration JSON Schema fields](https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest/Shared.Types/FunctionDeclaration) and [Google structured-output/schema support](https://blog.google/innovation-and-ai/technology/developers-tools/gemini-api-structured-outputs/). `parametersJsonSchema` is mutually exclusive with `parameters`; AUTO mode/model/effort/retry remain unchanged. Local actual-wire validation does not itself prove provider acceptance.
+
+## Commands and run gate
+
+Machine-readable verification and exact log hashes will be recorded under `evidence/c3-tool-contract-plan-20261109/`. Active commands actually executed include focused worker Vitest, flat protocol/provider adapter Node tests, protected-claim/reply-assembler tests, worker build/typecheck/lint and dataset-boundary guard. PostgreSQL controls use the existing authorized credential wrapper and disposable databases, with synthetic owner/verifier only; generation0 and cleanup are recorded.
+
+The new [screen scope](../../apps/worker/evals/single-agent-commerce-qualification/TOOL_CONTRACT_SCREEN_SCOPE_20261109.json) is 13 cases / 27 turns / maximum108 generation requests, N1/retry0. It preserves exact customer scripts from the prior full run: seven observed failures plus J1/P08/P07/P09/full checkout/comparison controls. S16 is a source-gap control; 12 cases are eligible for sales quality review. Native exercise of state+quote does not substitute for exercise of negotiation+quote. NOT_EXERCISED is not PASS. Freeze/review source, world and complete inputs before dispatch; no automatic rerun to seek a passing sample, and no full remainder until screen gate plus owner request.
+
+Current recommendation: NOT_READY_FOR_MODEL until final acceptance and independent implementation approval. No Phase C GO, stability, causal improvement or C3 comparison claim.

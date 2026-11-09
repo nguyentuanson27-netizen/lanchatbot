@@ -550,7 +550,7 @@ try{
   baselineBuild:JSON.parse(readFileSync(phaseCArg('--phase-c-baseline-build'),'utf8'))});
  if(j2j1Input){const {createCampaignPorts}=await import('../single-agent-commerce-qualification/j2-j1-campaign.mjs');
   providerPorts=await createCampaignPorts({root,input:j2j1Input,world:initialWorld,out:resolve(out),readPorts:providerPorts});}
- async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,oldMedia=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false,candidateTuples=false,preparedOffers=false,preorderChoices=false,checkoutEta=false,multiOfferContext=false,componentFit=false,physicalChoices=false}={}){
+ async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,oldMedia=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false,candidateTuples=false,preparedOffers=false,preorderChoices=false,checkoutEta=false,multiOfferContext=false,componentFit=false,physicalChoices=false,canonicalOfferIds=false}={}){
   assert(!live||(!preparedOffers&&!preorderChoices),'SYNTHETIC_PREPARATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||!revalidatedMedia,'SYNTHETIC_REVALIDATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||(dependencyHoldingReply===null&&sizeHoldingReply===null&&!missingDependencyRule),'SYNTHETIC_RULE_FORBIDDEN_IN_PROVIDER_RUN');
@@ -580,7 +580,7 @@ try{
    if(candidateTuples){const raw=structuredClone(product.snapshot);if(sourceVariantChanged)raw.offers.DIRECT.rows[0].components[0].variation_sku='CHANGED-SKU';
     return cartSelectionFromSnapshot(raw,q,new Date());}
    const s=fixtureCartLine();s.lineId=q.lineId;s.quantity=q.quantity;s.lineTotalVnd=s.posUnitPriceVnd*s.quantity;
-   if(multiOfferContext){s.offerId=q.offerType;s.priceAuthority.offerId=q.offerType;}
+   if(multiOfferContext||canonicalOfferIds){s.offerId=q.offerType;s.priceAuthority.offerId=q.offerType;}
    s.priceAuthority={...s.priceAuthority,shopId:'LANA',priceFactRef:'synthetic-pos-v1',metadata:{...s.priceAuthority.metadata,sourceVersion:'synthetic-pos-v1',observedAt:at.toISOString(),expiresAt:new Date(at.getTime()+172800000).toISOString()}};
    s.components[0]={...s.components[0],size:q.size??'M',color:q.color??'navy',componentSku:'SM613-'+(q.color??'navy').toUpperCase()+'-'+(q.size??'M')};
    if(sourceVariantChanged)s.components[0].componentSku='CHANGED-SOURCE-SKU';
@@ -773,7 +773,71 @@ try{
   report.j2Recovery={profileRevision:current.profile.revision,oldHeightUnchanged:true,completeCorrectionReadback:true,
    retainedTarget:'COMPONENT/TOP',numericalUpdateReceipt:true,acceptedDeliveryExactlyOnce:true,cartMutation:false,providerGenerations:0};
  });
- await check('C quote batch V2 delivers original quote and image once without cart mutation',async()=>{
+
+ for(const mode of ['state','selection','no-cart','negotiated'])await check('C tool contract mixed '+mode+' has durable ordering, source proof and exactly-once delivery',async()=>{
+  assert(!providerRun&&!phaseC&&!phaseCInitial,'SYNTHETIC_ONLY');
+  const j=await statefulFixture({media:true,canonicalOfferIds:true});
+  if(mode==='negotiated'){
+   const seed=await j.turn('Chị lấy áo navy M.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);
+   assert.equal(seed.result.terminal.disposition,'SEND_ELIGIBLE');await j.drain();
+  }
+  const latest=mode==='state'?'Chị thích màu navy, áo bao nhiêu em?':mode==='selection'?'Chị lấy áo này, giá bao nhiêu em?':'Giá hơi cao, bớt cho chị được không?';
+  const writer=mode==='state'?{name:'apply_customer_state',args:{ops:[{op:'SET',field:'preferences.colors',value:['navy']}]}}:
+   mode==='selection'?{name:'read_product',args:{subjectRef:'SM613',offerType:'DIRECT',customerSelected:true}}:
+   {name:'record_negotiation',args:{intent:'PRICE_OBJECTION',sourceQuote:'Giá hơi cao'}};
+  const calls=[writer,{name:'quote_product',args:{subjectRef:'SM613',offerTypes:['DIRECT'],quantity:1}}];
+  let results,current;const text='Áo 499.000đ chị nhé.',before=j.capture.length;
+  const r=await j.turn(latest,[native(calls),request=>{
+   results=request.contents.at(-1).parts.map(p=>p.functionResponse.response);current=request.context;
+   report.toolContractMixedResults??={};report.toolContractMixedResults[mode]=results.map(r=>({status:r.status,reason:r.reason??null,calculationBasis:r.data?.calculationBasis??null,currentCartQuoteRef:r.data?.currentCartQuoteRef??null}));save();
+   assert.equal(results[0].status,mode==='no-cart'?'REJECTED':'OK',JSON.stringify(results));assert.equal(results[1].status,'OK',JSON.stringify(results));
+   assert.equal(results[1].data.calculationBasis,'PRE_CART_POLICY');assert.equal(results[1].data.appliesNegotiationReceipt,false);
+   if(mode==='negotiated'){assert(current.state.cartQuote);assert.equal(results[1].data.currentCartQuoteRef,commerceHash(current.state.cartQuote));}
+   if(mode==='no-cart'){assert.equal(results[0].reason,'NEGOTIATION_CONTEXT_REQUIRED');assert.equal(current.effectReceipts.length,0);}
+   return say(text);
+  }],{testQuoteTask:EXPLICIT_QUOTE_TASK,testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  assert.equal(r.result.terminal.disposition,'SEND_ELIGIBLE',JSON.stringify(r.result));assert(results);
+  if(mode==='state')assert(current.state.preferences.colors.includes('navy'));
+  if(mode==='selection')assert.equal(current.state.currentProductId,'SM613');
+  const events=(await pool.query("SELECT command_kind FROM sales_cycle_events WHERE conversation_id=$1",[j.bound.conversationId])).rows;
+  if(mode==='no-cart')assert.equal(events.length,0);
+  if(mode==='negotiated')assert.equal(events.filter(e=>e.command_kind==='NEGOTIATION_EVENT').length,1);
+  j.restartDelivery();await j.drain();assert.equal(j.capture.slice(before).filter(t=>t===text).length,1);
+  const delivered=j.capture.length;await j.drain();assert.equal(j.capture.length,delivered);
+ });
+
+ await check('C tool contract rejected writer preserves profile and skips dependent quote',async()=>{
+  const j=await statefulFixture({media:true});
+  const writer={name:'apply_customer_state',args:{ops:[{op:'SET',field:'measurements.HEIGHT_CM',value:160,sourceQuote:'160'}]}};
+  const r=await j.turn('Báo giá cho chị nhé.',[native([writer,{name:'quote_product',args:{subjectRef:'SM613',offerTypes:['DIRECT'],quantity:1}}]),say('Dạ chị.')],{testQuoteTask:EXPLICIT_QUOTE_TASK,testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  assert.equal(r.result.quoteTaskWork.length,0);assert.equal(r.result.enqueued,0);
+  const profile=await runtime.loadOrCreateCustomerProfile(pageId,j.bound.customerHash,()=>{throw Error('PROFILE_REQUIRED');},new Date());
+  assert(!profile.profile.measurements.some(m=>m.kind==='HEIGHT_CM'&&m.value===160));
+  assert.equal((await pool.query("SELECT count(*)::int n FROM sales_cycle_events WHERE conversation_id=$1",[j.bound.conversationId])).rows[0].n,0);
+ });
+ for(const known of [true,false])await check('C tool contract lost negotiation reply with '+(known?'proved receipt':'unknown receipt')+' preserves exactly one effect',async()=>{
+  const j=await statefulFixture({media:true,canonicalOfferIds:true});
+  const seed=await j.turn('Chị lấy áo navy M.',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);
+  assert.equal(seed.result.terminal.disposition,'SEND_ELIGIBLE');await j.drain();const before=j.capture.length;
+  if(!known)j.disableReceiptRead();
+  const calls=[{name:'record_negotiation',args:{intent:'PRICE_OBJECTION',sourceQuote:'Giá hơi cao'}},{name:'quote_product',args:{subjectRef:'SM613',offerTypes:['DIRECT'],quantity:1}}];
+  const r=await j.turn('Giá hơi cao, bớt cho chị nhé.',[native(calls),say('Dạ chị.')],{testQuoteTask:EXPLICIT_QUOTE_TASK,testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE,loseCommitReply:true});
+  assert.equal(r.result.quoteTaskWork.length,known?1:0);assert.equal(r.result.enqueued,known?1:0);
+  assert.equal((await pool.query("SELECT count(*)::int n FROM sales_cycle_events WHERE conversation_id=$1 AND command_kind='NEGOTIATION_EVENT'",[j.bound.conversationId])).rows[0].n,1);
+  j.restartDelivery();await j.drain();assert.equal(j.capture.length,before+(known?1:0));
+ });
+ for(const bad of ['reverse','unknown','recommend','search','cart','two-writers'])await check('C tool contract invalid '+bad+' rejects before CAS or quote',async()=>{
+  const j=await statefulFixture({media:true});
+  const writer={name:'apply_customer_state',args:{ops:[{op:'SET',field:'preferences.colors',value:['navy'],sourceQuote:'navy'}]}};
+  const quote={name:'quote_product',args:{subjectRef:bad==='unknown'?'UNKNOWN':'SM613',offerTypes:['DIRECT'],quantity:1}};
+  const calls=bad==='reverse'?[quote,writer]:bad==='two-writers'?[writer,writer,quote]:[writer,quote,...(bad==='unknown'?[]:[{name:bad==='recommend'?'recommend_size':bad==='search'?'search_products':'quote_cart',args:bad==='recommend'?{subjectRef:'SM613'}:bad==='search'?{query:'áo'}:{}}])];
+  const r=await j.turn('Chị thích navy, báo giá nhé.',[native(calls),say('Dạ chị.')],{testQuoteTask:EXPLICIT_QUOTE_TASK,testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  assert.equal(r.result.quoteTaskWork.length,0);
+  assert(!r.toolResponses.some(t=>t.name==='apply_customer_state'&&t.response.status==='OK'));
+  const profile=await runtime.loadOrCreateCustomerProfile(pageId,j.bound.customerHash,()=>{throw Error('PROFILE_REQUIRED');},new Date());assert(!profile.profile.preferences.colors.includes('navy'));
+  assert.equal((await pool.query("SELECT count(*)::int n FROM sales_cycle_events WHERE conversation_id=$1",[j.bound.conversationId])).rows[0].n,0);
+ });
+ await check('C tool contract quote-media delivers original quote and image once without cart mutation',async()=>{
   assert(!providerRun&&!phaseC&&!phaseCInitial,'QUOTE_BATCH_SYNTHETIC_ONLY');
   const j=await statefulFixture({media:true});
   await runtime.loadOrCreateSalesCycle(pageId,j.bound.conversationId,
@@ -786,10 +850,10 @@ try{
    assert.deepEqual(request.contents.at(-1).parts.map(p=>p.functionResponse.name),calls.map(c=>c.name));return say(text);
   }],{testQuoteTask:EXPLICIT_QUOTE_TASK,testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
   assert.equal(result.result.terminal.disposition,'SEND_ELIGIBLE');assert.equal(result.verifiers,1);
-  // First-contact opening preparation (read + image), quote (read + image), explicit BACK image.
-  assert.equal(result.result.normalToolCalls,5);assert.equal(result.result.executedNormalToolInvocations,5);
+  // Opening read + photo, explicit quote read, explicit BACK selection: 4 actual primitives.
+  assert.equal(result.result.normalToolCalls,4);assert.equal(result.result.executedNormalToolInvocations,4);
   assert.equal(result.result.openingMediaWork.chargedUnits,1);
-  assert.deepEqual(result.result.quoteTaskWork,[{reservedUnits:2,readInvocations:1,selectionInvocations:1}]);
+  assert.deepEqual(result.result.quoteTaskWork,[{reservedUnits:1,readInvocations:1,selectionInvocations:0}]);
   const after=await j.state();assert.equal(after.cart,null);assert.deepEqual(after.processedCommandIds,before.processedCommandIds);
   j.restartDelivery();await j.drain();assert.equal(j.capture.filter(x=>x===text).length,1);assert.equal(j.capturePayloads.filter(p=>p.attachment).length,1);
   const delivered=j.capture.length;await j.drain();assert.equal(j.capture.length,delivered);
@@ -804,8 +868,8 @@ try{
    assert.equal(proof.quantity,2);assert.equal(proof.subtotalVnd,998000);assert(Number.isSafeInteger(proof.grandTotalVnd));
    text=`Hai áo cả ship là ${proof.grandTotalVnd.toLocaleString('vi-VN')}đ chị nhé.`;return say(text);
   }],{testQuoteTask:EXPLICIT_QUOTE_TASK,testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE,inspect:request=>assert(request.availableTools.includes('quote_product'))});
-  assert.equal(result.result.terminal.disposition,'SEND_ELIGIBLE');assert.equal(result.verifiers,1);assert.equal(result.result.normalToolCalls,3);assert.equal(result.result.executedNormalToolInvocations,2);
-  assert.deepEqual(result.result.quoteTaskWork,[{reservedUnits:2,readInvocations:1,selectionInvocations:0}]);
+  assert.equal(result.result.terminal.disposition,'SEND_ELIGIBLE');assert.equal(result.verifiers,1);assert.equal(result.result.normalToolCalls,2);assert.equal(result.result.executedNormalToolInvocations,2);
+  assert.deepEqual(result.result.quoteTaskWork,[{reservedUnits:1,readInvocations:1,selectionInvocations:0}]);
   const after=await j.state();assert.equal(after.cart,null);assert.deepEqual(after.processedCommandIds,before.processedCommandIds);assert.equal(after.checkoutDraft,null);
   j.restartDelivery();await j.drain();assert.deepEqual(j.capture.slice(capturedBefore),[text]);assert(!j.capturePayloads.slice(capturedBefore).some(p=>p.attachment));
   await j.drain();assert.deepEqual(j.capture.slice(capturedBefore),[text]);

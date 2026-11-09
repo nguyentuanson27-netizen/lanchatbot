@@ -13,22 +13,23 @@ export function withOpeningProductMedia(base:CommerceTools,input:{rule:OpeningPr
  assertOpeningProductMediaRule(input.rule);
  const eager=input.rule.version===OPENING_PRODUCT_MEDIA_RULE.version;
  const required=(c:TrustedContext)=>input.firstContact===false?[]:[...new Set([
+  ...(base.openingQuoteTargets?.()??[]),
   ...c.boundSubjects.filter(s=>s.kind==='PRODUCT'&&(!eager||c.boundSubjects.filter(s=>s.kind==='PRODUCT').length===1)).map(s=>s.ref),
   ...(Array.isArray(c.state.cartItems)?c.state.cartItems.flatMap(i=>typeof i?.productRef==='string'?[i.productRef]:[]):[])
  ])].sort();
- const metadata=(c:TrustedContext)=>c.policyLiterals.filter(p=>p.ref.startsWith('media:')||p.ref.startsWith('read:')||p.ref.startsWith('media-lookup:')).flatMap(p=>{try{return [JSON.parse(p.text) as Record<string,unknown>];}catch{return [];}});
+ const metadata=(c:TrustedContext)=>c.policyLiterals.filter(p=>p.ref.startsWith('media:')||p.ref.startsWith('media-lookup:')||!eager&&p.ref.startsWith('read:')).flatMap(p=>{try{return [JSON.parse(p.text) as Record<string,unknown>];}catch{return [];}});
  const colors=(c:TrustedContext,id:string)=>{
   const cartItems=Array.isArray(c.state.cartItems)?c.state.cartItems.filter(i=>i.productRef===id):[];
   // A cart with unknown variant colour cannot borrow the no-selection generic path.
   if(cartItems.some(i=>!Array.isArray(i.components)||!i.components.length||i.components.some((v:{color?:unknown})=>typeof v.color!=='string'||!v.color.trim())))return null;
   const cartColors=cartItems.flatMap(i=>i.components.map((v:{color:string})=>v.color));
   const filters=metadata(c).flatMap(m=>{
-  if((m.subjectRef??m.productId)!==id)return [];
+  if((m.subjectRef??m.productId)!==id||m.operation==='view_product_media')return [];
   return [m,...(m.requested&&typeof m.requested==='object'?[m.requested as Record<string,unknown>]:[]),...(Array.isArray(m.sellingOptions)?m.sellingOptions:[])].flatMap(v=>typeof v.color==='string'&&v.color.trim()?[v.color]:[]);
  });
   // V1 retains its strict union. V2 physical cart selections supersede older read
   // filters; a source-unlabelled tuple never erases an explicit physical constraint.
-  const raw=eager&&cartColors.length&&!cartColors.includes('__NO_COLOR__')?cartColors:[...cartColors,...filters];
+  const raw=[...cartColors,...filters];
   const physical=[...new Set(raw.filter(v=>v!=='__NO_COLOR__').map(normalizeCatalogToken))];
   if(raw.includes('__NO_COLOR__')&&(physical.length||!base.unlabelledCartProducts?.(c).includes(id)))return null;
   return physical;
@@ -49,26 +50,33 @@ export function withOpeningProductMedia(base:CommerceTools,input:{rule:OpeningPr
  return {...base,openingMediaReady:ready,...(eager?{openingMediaTiming:'BEFORE_OWNER' as const}:{}),
   openingMediaFeasible(calls,remaining){
    if(!eager||input.firstContact===false)return true;
-   const context=base.snapshot(),existing=base.mediaSelection?.()??[],photos=currentPhotos(context,existing);
+   const context=base.snapshot(),existing=base.mediaSelection?.()??[];
+   // SELECT defaults to REPLACE. Earlier selections, including already covering
+   // photos, cannot fund an obligation after a later replacement clears them.
+   let lastReplace=-1;
+   calls.forEach((c,index)=>{if(c.name==='select_product_media'&&decodeCommerceMediaArgs(c.args)!==null&&
+    ((c.args as {deliveryMode?:unknown}).deliveryMode??'REPLACE')==='REPLACE')lastReplace=index;});
+   const retained=lastReplace<0?existing:[],photos=currentPhotos(context,retained);
    const mutations=calls.flatMap(call=>{
     const a=call.args as Record<string,unknown>|null;
     const id=call.name==='add_to_cart'?a?.subjectRef:call.name==='change_cart_item'&&a?.action==='REPLACE_LINE'?a.targetSubjectRef:null;
     return typeof id==='string'?[{id,color:typeof a?.color==='string'?normalizeCatalogToken(a.color):null}]:[];
    });
-   const ids=[...new Set([...required(context),...mutations.map(m=>m.id)])];
+   const quoteTargets=calls.filter(c=>c.name==='quote_product').map(c=>(c.args as {subjectRef:string}).subjectRef);
+   const ids=[...new Set([...required(context),...mutations.map(m=>m.id),...quoteTargets])];
    // Null/omission cannot prove a new canonical tuple keeps the old photo colour.
    const missing=ids.filter(id=>!photos.some(p=>p.productId===id&&mutations.filter(m=>m.id===id).every(m=>m.color!==null&&covers(context,p,[m.color]))));
    // A matching selection in this already-debited batch may cover the lookup.
    // This is feasibility only; actual assets/source/colour are checked after I/O.
-   const prepaid=(id:string)=>{
-    const targets=mutations.filter(m=>m.id===id);
-    return targets.length>0&&targets.every(m=>m.color!==null&&calls.some(call=>{
-      const a=decodeCommerceMediaArgs(call.args);
-      return call.name==='select_product_media'&&a?.subjectRef===id&&['GENERIC','BACK','DETAIL','PRODUCT_ONLY','FEEDBACK'].includes(String(a.intent))&&
-        typeof a.color==='string'&&normalizeCatalogToken(a.color)===m.color;
-    }));
-   };
-   return missing.filter(id=>!prepaid(id)).length<=remaining&&existing.length+missing.length<=4;
+   const prepaid=(id:string)=>calls.some((call,index)=>{
+    if(index<lastReplace)return false;
+    if(call.name!=='select_product_media')return false;
+    const a=decodeCommerceMediaArgs(call.args);if(a?.subjectRef!==id||a.intent==='SIZE_GUIDE')return false;
+    const wanted=colors(context,id),changed=mutations.filter(m=>m.id===id);
+    return wanted!==null&&(!wanted.length||wanted.length===1&&typeof a.color==='string'&&normalizeCatalogToken(a.color)===wanted[0])&&
+     changed.every(m=>m.color!==null&&typeof a.color==='string'&&normalizeCatalogToken(a.color)===m.color);
+   });
+   return missing.filter(id=>!prepaid(id)).length<=remaining&&retained.length+missing.length<=4;
   },
   openingMediaBlocksCodeOutput:calls=>!input.codeOutputSupported&&input.firstContact!==false&&calls.some(c=>c.name==='confirm_purchase'),
   async prepareOpeningMedia(control:PreparationControl):Promise<OpeningMediaWork>{
@@ -81,7 +89,7 @@ export function withOpeningProductMedia(base:CommerceTools,input:{rule:OpeningPr
    // A prior failed lookup for a code-required opening photo cannot be retried
    // implicitly or replaced by a generic query. Incidental lookups on returning
    // conversations remain ordinary scoped owner results.
-   if(metadata(context).some(m=>missing.includes(String(m.subjectRef))&&m.scope==='MEDIA_ONLY'&&typeof m.outcome==='string'&&m.outcome!=='OK'))return fail('OPENING_MEDIA_SOURCE');
+   if(metadata(context).some(m=>missing.includes(String(m.subjectRef))&&m.scope==='MEDIA_ONLY'&&m.operation==='select_product_media'&&typeof m.outcome==='string'&&m.outcome!=='OK'))return fail('OPENING_MEDIA_SOURCE');
    if(!Number.isSafeInteger(control.maxCalls)||control.maxCalls>6||control.maxCalls<missing.length)return fail('OPENING_MEDIA_BUDGET');
    if(existing.length+missing.length>4||!base.prepareProductImage)return fail('OPENING_MEDIA_BOUND_OR_CAPABILITY');
    if(missing.some(id=>colors(context,id)===null||colors(context,id)!.length>1))return fail('OPENING_MEDIA_COLOR_SCOPE');

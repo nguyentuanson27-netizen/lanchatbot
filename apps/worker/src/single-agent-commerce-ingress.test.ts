@@ -274,7 +274,8 @@ it("keeps an automatic recovery handoff silent when current policy is silent",as
 
 it.each([false,true])("retains V2 executed counters after ingress recovery (normal read=%s)",async readFirst=>{
   const f=fixture();await enableRecoveryHandoff(f,"silent");
-  const quoteTask={version:"EXPLICIT_QUOTE_V2",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:2,readOnlyBatch:true,maxPerTurn:2} as const;
+  for(const p of f.products)p.product.images=[{url:"https://content.pancake.vn/front.jpg",role:"PRIMARY",angle:"FRONT",imageType:"MODEL",intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
+  const quoteTask={version:"EXPLICIT_QUOTE_V3",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:1,readOnlyBatch:false,maxPerTurn:2} as const;
   let n=0;
   const owner=vi.fn(async():Promise<OwnerGeneration>=>{
     if(readFirst&&++n===1){const call={name:"read_policy",args:{}};return {kind:"TOOLS",calls:[call],content:{role:"model",parts:[{functionCall:call}]}};}
@@ -296,7 +297,8 @@ it.each(["rejected","unknown","readback"])("accounts V2 recovery attempt when co
   if(fault==="rejected")f.commit.mockResolvedValue({stateCommitted:false,metaOutboxCreated:0,inboxBatchStatus:"STALE",handoffEventCreated:false,pancakeTagOutboxCreated:false} as never);
   if(fault==="unknown")f.commit.mockRejectedValue(Error("COMMIT_UNKNOWN"));
   if(fault==="readback")f.checkCommit(async()=>{f.store.loadOrCreate=async()=>{throw Error("READBACK_UNAVAILABLE");};});
-  const quoteTask={version:"EXPLICIT_QUOTE_V2",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:2,readOnlyBatch:true,maxPerTurn:2} as const;
+  for(const p of f.products)p.product.images=[{url:"https://content.pancake.vn/front.jpg",role:"PRIMARY",angle:"FRONT",imageType:"MODEL",intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
+  const quoteTask={version:"EXPLICIT_QUOTE_V3",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:1,readOnlyBatch:false,maxPerTurn:2} as const;
   const result=await f.run(async()=>{throw Error("HTTP_429");},undefined,quoteTask);
   expect(result.terminal).toMatchObject({disposition:"NO_SEND",text:null});
   expect(result).toMatchObject({toolWorkAccounting:"PRIMITIVE_WORK_V2",terminalHandoffCalls:1});

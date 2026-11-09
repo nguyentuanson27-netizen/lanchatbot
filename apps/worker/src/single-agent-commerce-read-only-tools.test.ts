@@ -947,7 +947,7 @@ describe("logical purchase composition",()=>{
   const a={...row(),components:[c("A-AO"),c("B-QUAN"),c("B-QUAN")]};
   const b={...row(),size:"L",components:[c("B-QUAN",2),c("A-AO")]};
   const r=await composition([a,b]);expect(r.status).toBe("AVAILABLE");
-  expect(r.components).toEqual([{componentRef:"A-AO",role:"TOP",quantity:1},{componentRef:"B-QUAN",role:"PANTS",quantity:2}]);
+  expect(r.components).toEqual([{componentRef:"A-AO",role:"TOP",quantity:1,label:null,labelSource:null},{componentRef:"B-QUAN",role:"PANTS",quantity:2,label:null,labelSource:null}]);
   expect((await composition([a,{...b,components:[c("B-QUAN"),c("A-AO")]}])).status).toBe("VARIANT_DEPENDENT");
  });
  it.each([undefined,0,-1,1.5,Number.MAX_SAFE_INTEGER+1])("does not invent a component quantity for %s",async quantity=>{
@@ -966,4 +966,15 @@ it.each([null,"invalid",{product_sku:"A-AO",quantity:1}])("explicit malformed BO
  const tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,initialProducts:[f.product],policy:fixturePolicy,catalog:{readProduct:async()=>f,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}});
  await tools.prepare();const literal=tools.snapshot().policyLiterals.find(p=>p.ref==="offers:SM613")!;
  expect(JSON.parse(literal.text).purchaseOptions[0].componentSource).toMatchObject({status:"INCOMPLETE_SOURCE",components:[]});
+});
+
+
+it('does not publish component labels that exceed the aggregate product byte bound',async()=>{
+ const parent=fixtureProduct(),children=['child-a','child-b','child-c'].map(id=>fixtureProduct(id));
+ for(const c of children){c.product.title='á'.repeat(64);c.product.catalogVersion='v'.repeat(128);}
+ parent.snapshot.offers.DIRECT!.rows[0]!.components=children.map(c=>({product_sku:c.product.productId,quantity:1}));
+ const data=new Map([parent,...children].map(f=>[f.product.productId,f]));
+ const t=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[parent.product,...children.map(c=>c.product)],catalog:{readProduct:async id=>data.get(id)!,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})}});
+ await expect(t.prepare()).rejects.toThrow('PRODUCT_EVIDENCE_BOUND');
+ expect(t.snapshot().policyLiterals.some(p=>p.ref==='offers:SM613')).toBe(false);
 });

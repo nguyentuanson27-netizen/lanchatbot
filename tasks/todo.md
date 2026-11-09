@@ -1,3 +1,11 @@
+## Tool contract completion — implementation, 2026-11-09
+
+- [x] Implement W1 flat shared native schema/decoder; W2 closed ordered writer-first quote; W3 separate photo obligations/reservation; W4 bounded map labels/owner opaque refs; W5 safe transport cause/retry0.
+- [x] Observe RED→GREEN for new behavior; preserve owner/verifier sales prompts, native signatures, current caps, cart/source/permission/privacy gates.
+- [x] Independent implementation R1/R2 review and fixes; final PG exposed canonical cart-overlay/own-commit authority issues, retained as failures and fixed at code boundary, not prompt. [Implementation record](../docs/specs/c3-phase-c-tool-contract-completion-implementation-20261109.md).
+- [ ] Complete final acceptance (including canonical PG positive/unknown commit), same reviewer APPROVE, clean source seal and independent input review.
+- [ ] Execute preregistered 13-case/27-turn screen once; prospective S16 SOURCE_GAP, no automatic full/retry, no Phase C GO.
+
 ## Full34 after J2 repair — completed, 2026-11-08
 
 - [x] Owner explicitly chose full34cases55turns/current source, N1/retry0. Clean eb134d5d, common fresh world878a8091; original scripts/scopes/models/limits retained, all4 input preflights sealed before generation. No intermediate reviewer calls.

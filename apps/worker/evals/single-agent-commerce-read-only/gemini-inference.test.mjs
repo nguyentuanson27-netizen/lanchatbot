@@ -76,7 +76,7 @@ test('runtime callable manifest prunes declarations while preserving the configu
  assert.deepEqual(r.context,before.context);
 });
 test('native product-read schema requires a subject as well as a closed selection branch',()=>{
- assert.throws(()=>parseGeminiGeneration(body([{functionCall:{name:'read_product',args:{selection:'SINGLE',offerType:'AO'}}}])),/OWNER_TOOL_OUTPUT/);
+ assert.throws(()=>parseGeminiGeneration(body([{functionCall:{name:'read_product',args:{offerTypes:['AO']}}}])),/OWNER_TOOL_OUTPUT/);
 });
 test('replacement color supports the same null value as the runtime selection contract',()=>{
  const r=request(),d=buildGeminiCommerceRequest(r,effectDeclarations).tools[0].functionDeclarations.find(d=>d.name==='change_cart_item');
@@ -120,17 +120,17 @@ test('owner media metadata omits transport identities without mutating binding e
  assert.deepEqual(r.contents,original.contents);
 });
 
-test('native reads require an explicit SINGLE, COMPARE or DETAILS_ONLY scope without rewriting signed calls',()=>{
- const original=body([{functionCall:{id:'read-1',name:'read_product',args:{subjectRef:'P1',selection:'SINGLE',offerType:'AO'}},thoughtSignature:'signed'}]);
+test('native reads use flat offer arrays without rewriting signed calls',()=>{
+ const original=body([{functionCall:{id:'read-1',name:'read_product',args:{subjectRef:'P1',offerTypes:['AO']}},thoughtSignature:'signed'}]);
  const saved=structuredClone(original),parsed=parseGeminiGeneration(original);
  assert.deepEqual(parsed.calls[0].args,{subjectRef:'P1',offerType:'AO'});
  assert.deepEqual(parsed.content,original.candidates[0].content);assert.deepEqual(original,saved);
- assert.deepEqual(parseGeminiGeneration(body([{functionCall:{name:'read_product',args:{subjectRef:'P1',selection:'COMPARE',offerTypes:['AO','SET']}}}])).calls[0].args,{subjectRef:'P1',offerTypes:['AO','SET']});
- assert.deepEqual(parseGeminiGeneration(body([{functionCall:{name:'read_product',args:{subjectRef:'P1',selection:'DETAILS_ONLY'}}}])).calls[0].args,{subjectRef:'P1',detailsOnly:true});
- for(const args of [{subjectRef:'P1'},{subjectRef:'P1',offerType:null},{subjectRef:'P1',selection:'COMPARE',offerTypes:['AO','AO']},{subjectRef:'P1',selection:'DETAILS_ONLY',offerType:'AO'}])
+ assert.deepEqual(parseGeminiGeneration(body([{functionCall:{name:'read_product',args:{subjectRef:'P1',offerTypes:['AO','SET']}}}])).calls[0].args,{subjectRef:'P1',offerTypes:['AO','SET']});
+ assert.deepEqual(parseGeminiGeneration(body([{functionCall:{name:'read_product',args:{subjectRef:'P1',offerTypes:[]}}}])).calls[0].args,{subjectRef:'P1',detailsOnly:true});
+ for(const args of [{subjectRef:'P1'},{subjectRef:'P1',offerType:null},{subjectRef:'P1',offerTypes:['AO','AO']},{subjectRef:'P1',selection:'DETAILS_ONLY',offerType:'AO'}])
   assert.throws(()=>parseGeminiGeneration(body([{functionCall:{name:'read_product',args}}])),/OWNER_TOOL_OUTPUT/);
  const r=request();const d=buildGeminiCommerceRequest(r).tools[0].functionDeclarations.find(x=>x.name==='read_product');
- assert.ok(d.parameters.required.includes('selection'));assert.deepEqual(d.parameters.properties.selection.enum,['SINGLE','COMPARE','DETAILS_ONLY']);
+ assert.ok(d.parametersJsonSchema.required.includes('offerTypes'));assert.equal(d.parametersJsonSchema.properties.offerTypes.maxItems,3);
 });
 const config={model:'gemini-3.5-flash-lite',effort:'high',projectId:'test-project',location:'global'};
 const request=()=>({generationId:'turn:owner:1',instructions:'Tư vấn theo dữ liệu nguồn.',contents:[{role:'user',parts:[{text:'Áo bao nhiêu em?'}]}],
@@ -1014,7 +1014,7 @@ test('final reply data retains partial writes, errors, earlier evidence and rece
  const turns=[
   {role:'model',parts:[{functionCall:{id:'s1',name:'apply_customer_state',args:{ops:[]}},thoughtSignature:'opaque'},{text:'Đang xử lý.'}]},
   {role:'user',parts:[{functionResponse:{id:'s1',name:'apply_customer_state',response:{status:'UNAVAILABLE',reason:'STATE_COMMIT_UNCONFIRMED',data:{applied:true,unresolvedFields:['measurements.HIPS_CM']}}}}]},
-  {role:'model',parts:[{functionCall:{id:'r1',name:'read_product',args:{subjectRef:'P1',selection:'SINGLE',offerType:'AO'}},thoughtSignature:'opaque'}]},
+  {role:'model',parts:[{functionCall:{id:'r1',name:'read_product',args:{subjectRef:'P1',offerTypes:['AO']}},thoughtSignature:'opaque'}]},
   {role:'user',parts:[{functionResponse:{id:'r1',name:'read_product',response:{status:'OK',data:{subjectRef:'P1',content:{description:'Earlier description'},availability:{price:{status:'UNAVAILABLE',reason:'PRICE_NOT_FOUND'}}}}}}]},
  ];
  r.contents.push(...turns);r.context.effectReceipts=[{ref:'receipt:committed',status:'COMMITTED'}];
@@ -1055,10 +1055,51 @@ test('dangling selection-result references stop the actual adapter before auth o
 
 test('actual malformed read telemetry carries schema/argument shape without values',async()=>{
  const r=request(),privateKey='PRIVATE_FIELD_PERSONAL_ADDRESS',privateValue='PRIVATE_VALUE_PHONE';
- const infer=createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async()=>new Response(JSON.stringify(body([{functionCall:{name:'read_product',args:{subjectRef:'P1',selection:'SINGLE',offerType:'AO',[privateKey]:privateValue}}}])))});
+ const infer=createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async()=>new Response(JSON.stringify(body([{functionCall:{name:'read_product',args:{subjectRef:'P1',offerTypes:['AO'],[privateKey]:privateValue}}}])))});
  await assert.rejects(()=>infer(r),e=>{
   assert.equal(e.telemetry.providerRequests,1);assert.match(e.telemetry.requestSchemaHash,/^[a-f0-9]{64}$/);
   const d=e.telemetry.toolOutputDiagnostic;assert.equal(d.argumentShape.unknownFieldCount,1);assert.equal(d.field,'UNKNOWN_FIELD');
   assert(!JSON.stringify(e.telemetry).includes(privateKey));assert(!JSON.stringify(e.telemetry).includes(privateValue));return true;
  });
+});
+
+
+test('transport cause diagnostics use a closed allowlist and keep generation retry zero',async()=>{
+ for(const [code,expected] of [['UND_ERR_CONNECT_TIMEOUT','CONNECT_TIMEOUT'],['UND_ERR_HEADERS_TIMEOUT','HEADERS_TIMEOUT'],['ECONNRESET','READ_RESET'],['ENOTFOUND','DNS'],['PRIVATE_ERROR_CODE','OTHER']]){
+  let calls=0;
+  const infer=createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async()=>{calls++;throw Object.assign(new TypeError('PRIVATE_URL_TOKEN'),{cause:{code,hostname:'PRIVATE_HOST'}});}});
+  await assert.rejects(infer(request()),error=>{
+   assert.equal(error.telemetry.transportCause,expected);assert.equal(error.telemetry.providerRequests,1);
+   assert(!JSON.stringify(error.telemetry).includes('PRIVATE'));return true;
+  });assert.equal(calls,1);
+ }
+});
+
+test('unknown component names are opaque only in owner projection with exact identity retained',()=>{
+ const r=request();r.context.boundSubjects=[{ref:'P1',kind:'PRODUCT',label:'Combo',bindingVersion:'v1'}];
+ r.context.policyLiterals=[{ref:'offers:P1',text:JSON.stringify({productId:'P1',availableOffers:['COMBO'],purchaseOptions:[{offerType:'COMBO',componentSource:{status:'AVAILABLE',labelsStatus:'UNKNOWN',components:[{componentRef:'QD001',role:'OTHER',quantity:1,label:null}]}}]})}];
+ const before=structuredClone(r.context),wire=buildGeminiCommerceRequest(r);
+ assert(!JSON.stringify(wire).includes('QD001'));
+ const component=JSON.parse(wire.contents[0].parts[0].text).trusted.products[0].purchaseOptions[0].componentSource.components[0];
+ assert.match(component.componentRef,/^component:[a-f0-9]{64}$/);assert.equal(component.label,null);assert.equal(component.role,'OTHER');assert.equal(component.quantity,1);
+ assert.deepEqual(r.context,before);assert.equal(JSON.parse(r.context.policyLiterals[0].text).purchaseOptions[0].componentSource.components[0].componentRef,'QD001');
+});
+
+
+test('response stream reset and abort retain exactly one generation request with safe diagnostics',async()=>{
+ for(const mode of ['stream','abort']){
+  let calls=0;const controller=new AbortController();
+  const infer=createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async()=>{
+   calls++;
+   if(mode==='abort'){controller.abort();throw Object.assign(new Error('PRIVATE_AUTH_URL'),{name:'AbortError'});}
+   return new Response(new ReadableStream({start(c){c.enqueue(new TextEncoder().encode('{'));c.error(Object.assign(new Error('PRIVATE_BODY_URL'),{cause:{code:'ECONNRESET',address:'PRIVATE_HOST'}}));}}));
+  }});
+  await assert.rejects(infer({...request(),signal:controller.signal}),error=>{
+   assert.equal(error.message,mode==='abort'?'PROVIDER_TIMEOUT':'PROVIDER_ERROR');
+   assert.equal(error.telemetry.failureStage,mode==='abort'?'GENERATION':'RESPONSE');
+   assert.equal(error.telemetry.transportCause,mode==='abort'?'OTHER':'READ_RESET');
+   assert.equal(error.telemetry.providerRequests,1);assert.equal(error.telemetry.httpStatus,mode==='stream'?200:null);
+   assert(!JSON.stringify(error.telemetry).includes('PRIVATE'));return true;
+  });assert.equal(calls,1);
+ }
 });

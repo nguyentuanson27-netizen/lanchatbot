@@ -40,7 +40,7 @@ export function validateToolWorkAccounting(r){
  for(const k of ['normalToolCalls','terminalHandoffCalls','toolCalls','executedNormalToolInvocations','executedToolInvocations'])check(Number.isInteger(r[k])&&r[k]>=0,'TOOL_WORK_COUNTER');
  check(r.normalToolCalls<=6&&r.terminalHandoffCalls<=1&&r.toolCalls===r.normalToolCalls+r.terminalHandoffCalls&&r.executedNormalToolInvocations<=r.normalToolCalls&&r.executedToolInvocations===r.executedNormalToolInvocations+r.terminalHandoffCalls&&r.executedToolInvocations<=7,'TOOL_WORK_COUNTER');
  check(Array.isArray(r.quoteTaskWork)&&r.quoteTaskWork.length<=2,'QUOTE_WORK_TRACE');
- for(const w of r.quoteTaskWork)check(w.reservedUnits===2&&[0,1].includes(w.readInvocations)&&[0,1].includes(w.selectionInvocations)&&w.selectionInvocations<=w.readInvocations&&w.readInvocations+w.selectionInvocations<=r.executedNormalToolInvocations,'QUOTE_WORK_TRACE');
+ for(const w of r.quoteTaskWork)check(w.reservedUnits===1&&[0,1].includes(w.readInvocations)&&[0,1].includes(w.selectionInvocations)&&w.selectionInvocations<=w.readInvocations&&w.readInvocations+w.selectionInvocations<=r.executedNormalToolInvocations,'QUOTE_WORK_TRACE');
 }
 export function validateProtocol(m){
  check(m.fallbackDelivery?.mode==='SILENT_HANDOFF'&&m.fallbackDelivery.unavailable==='NO_SEND'&&
@@ -48,7 +48,7 @@ export function validateProtocol(m){
  check(JSON.stringify(m.terminalMap)===JSON.stringify({PASS:'SEND_ELIGIBLE_SEND_DISABLED',FAIL:'SILENT_HANDOFF_OR_NO_SEND',
   UNCERTAIN:'SILENT_HANDOFF_OR_NO_SEND',MALFORMED:'SILENT_HANDOFF_OR_NO_SEND',TIMEOUT:'SILENT_HANDOFF_OR_NO_SEND',
   PROVIDER_ERROR:'SILENT_HANDOFF_OR_NO_SEND',STALE:'SILENT_HANDOFF_OR_NO_SEND',PERMISSION:'NO_SEND',PRIVACY:'NO_SEND',RECIPIENT:'NO_SEND'}),'TERMINAL_DISPOSITION_MAP');
- if(m.quoteTask!==undefined)check(JSON.stringify(Object.entries(m.quoteTask).sort())===JSON.stringify(Object.entries({version:'EXPLICIT_QUOTE_V2',toolWorkAccounting:'PRIMITIVE_WORK_V2',normalUnits:2,readOnlyBatch:true,maxPerTurn:2}).sort()),'QUOTE_TASK_CONFIG');
+ if(m.quoteTask!==undefined)check(JSON.stringify(Object.entries(m.quoteTask).sort())===JSON.stringify(Object.entries({version:'EXPLICIT_QUOTE_V3',toolWorkAccounting:'PRIMITIVE_WORK_V2',normalUnits:1,readOnlyBatch:false,maxPerTurn:2}).sort()),'QUOTE_TASK_CONFIG');
  check(m.schemaVersion===1&&m.sendEnabled===false&&m.ownerGenerations===3&&m.toolRounds===2&&m.toolCalls===6&&m.verifierGenerations===1,'PROTOCOL');
  check(m.terminalHandoffAttempts===1&&m.maximumExecutedToolInvocations===7,'TERMINAL_HANDOFF_BUDGET');
  check(JSON.stringify(m.handoffReply?.sourceCheckKinds)===JSON.stringify(['PRODUCT','PROFILE','SIZE_SOURCE','CART_SELECTION','SALES_STATE','RECEIPT']),'HANDOFF_SOURCE_KINDS');

@@ -95,7 +95,7 @@ export async function createCommerceTools(input: {
   }
   // State/effect adapters expose their own explicit surface. Attach these
   // code-only proofs after composition so they cannot be lost between layers.
-  tools={...tools,handoffSources,boundedPrice:readTools.boundedPrice};
+  tools={...tools,handoffSources,boundedPrice:readTools.boundedPrice,quotePriceEvidence:readTools.quotePriceEvidence};
   if (input.handoff) {
     tools = createCommerceHandoffTools({ ...input.handoff, base: tools, scope, clock });
     availableTools.push("request_handoff");
@@ -171,5 +171,6 @@ export async function createCommerceTools(input: {
   let final:CommerceTools=guarded;
   if(input.quoteTask!==undefined){validateQuoteTask(input.quoteTask);final=withExplicitQuoteTask(final,scope,input.read.entry?.firstContact??null,
     async()=>{const p=await input.read.policy();if(!p.bundle)throw Error("POLICY_UNAVAILABLE");return p.bundle.policy;},clock);}
-  return input.openingMediaRule?withOpeningProductMedia(final,{rule:input.openingMediaRule,scope,clock,firstContact:input.read.entry?.firstContact??null,codeOutputSupported:input.openingCheckoutMedia===true}):final;
+  const openingRule=input.openingMediaRule??(input.quoteTask?{version:"FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2" as const}:null);
+  return openingRule?withOpeningProductMedia(final,{rule:openingRule,scope,clock,firstContact:input.read.entry?.firstContact??null,codeOutputSupported:input.openingCheckoutMedia===true}):final;
 }

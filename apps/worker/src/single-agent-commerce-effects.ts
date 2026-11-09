@@ -46,6 +46,7 @@ export async function createCommerceEffectTools(input: {
     return s;
   }
   let current = await read(), policy: RuntimePolicyBundle | null = null, uncertain = false, failedEffect = false;
+  const noCommitNegotiations=new WeakMap<CommerceToolResult,{state:string;authority:string}>();
   const selections = new Map<string, Extract<CartSelectionResult, { status: "READY" }>>();
   const selectionObservations=new Map<string,{query:CartSelectionQuery;evidence:CandidateSelectionEvidence}>();
   let authority = await input.readAuthority?.();
@@ -406,12 +407,18 @@ export async function createCommerceEffectTools(input: {
   }
   async function invoke(call: CommerceToolCall): Promise<CommerceToolResult> {
     const result = await invokeEffect(call);
+    if(call.name==="record_negotiation"&&result.reason==="NEGOTIATION_CONTEXT_REQUIRED"&&result.failureStage==="VALIDATION"&&!uncertain)
+      noCommitNegotiations.set(result,{state:commerceHash(current),authority:commerceHash(authority??input.scope)});
     if (names.has(call.name) && result.status !== "OK") failedEffect = true;
     return result;
   }
   // Establish current evidence before the owner/verifier sees this turn, including existing carts on later turns.
   await refreshSelections();
-  return { invoke, snapshot, unlabelledCartProducts(context){
+  return { invoke, snapshot, noCommitNegotiationResult(result){
+    const proof=noCommitNegotiations.get(result),s=snapshot().state;
+    return !!proof&&!uncertain&&s.permission&&s.privacyAllowed&&s.conversationOwner==="BOT"&&s.bindingVersion===turnBinding&&s.recipient===turnRecipient&&
+      proof.state===commerceHash(current)&&proof.authority===commerceHash(authority??input.scope);
+  },unlabelledCartProducts(context){
     const cart=current.cart,at=input.clock().getTime();
     if(!cart||Date.parse(cart.expiresAt)<=at||context.cartBinding?.cartId!==cart.value.cartId||context.cartBinding.cartVersion!==cart.value.revision||
       context.state.revision!==current.revision||commerceHash(context.state.cartItems)!==commerceHash(cartItems())||!context.state.permission||!context.state.privacyAllowed||context.state.conversationOwner!=='BOT'||context.state.bindingVersion!==turnBinding||context.state.recipient!==turnRecipient)return [];

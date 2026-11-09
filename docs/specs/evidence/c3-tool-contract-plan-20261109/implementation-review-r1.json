@@ -1,0 +1,29 @@
+{
+  "kind": "INDEPENDENT_IMPLEMENTATION_REVIEW",
+  "reviewer": "/root/post_contract_plan_review",
+  "revision": 1,
+  "verdict": "REQUEST_CHANGES",
+  "baseSha": "36058803b95324d8888ef4e6c76773e01b61bb6f",
+  "worktreeChangingDuringReview": true,
+  "reviewedPlanSha256": "6495b49aff8016df34050d79f86b31330905ef2deb9714033b92ecde13cc3bdd",
+  "scope": "IMPLEMENTATION_ONLY_NO_PROVIDER_OR_QUALIFICATION",
+  "remainingFindings": [
+    {"id":"IR1-F1","priority":"P2","file":"apps/worker/src/single-agent-commerce-quote.ts","lines":[81,161],"title":"currentCartQuoteRef may reference unrelated product/offer/quantity","required":"Code-prove same canonical selection and current source before publishing, otherwise null; owner and verifier evidence agree; matching/unrelated/stale tests."},
+    {"id":"IR1-F2","priority":"P2","file":"apps/worker/src/single-agent-commerce-read-only-tools.ts","lines":[135,138,141,143],"title":"Missing positive and byte-bound label-source admission controls","required":"Exact-ref frozen-map positive/negative, 128UTF8/1024aggregate bounds and actual owner/verifier request admission without new binding or numeric facts."},
+    {"id":"IR1-F3","priority":"P2","file":"apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs","lines":[1067],"title":"Transport tests do not exercise mid-body failure and timeout","required":"Safe RESPONSE and timeout/abort fault injections, one generation request, no retry/raw exceptions, unavailable modelVersion and preserved committed state."}
+  ],
+  "closedDuringReview": ["native quote description old accounting/allowlist", "preference sourceQuote schema mismatch", "writer readback state fingerprint", "returning quote shape preflight before writer"],
+  "observedFileSha256": {
+    "apps/worker/src/single-agent-commerce-quote.ts":"536a3f0c6f26dde37be6648e98bb90958dadcd47948271bdac1cb755d326216c",
+    "apps/worker/src/single-agent-commerce-opening-media.ts":"1606bde922f77aff5baafa1cffc3ef6574ae09bdf79a17f2463ef722f690704b",
+    "apps/worker/src/single-agent-commerce-effects.ts":"ffb0d36383ab5588ea6ab59f9745b987b59c15b0bf4cb5171ee951fb89b2d767",
+    "apps/worker/src/single-agent-commerce-read-only-tools.ts":"dff58d6aa153e7376436a7b8970ca679f9f626fec5a77098bfc97e0442c52e91",
+    "apps/worker/evals/single-agent-commerce-read-only/product-read-selection.mjs":"08a2ee46d98be1782653f418cdc529e27a497eab39f7d2bc7b45b6dfd0b33b1b",
+    "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs":"5e2a2f008ec8bd9648910dbf4f00fb3dd4d64ecabc229f9d8ee5c78d73b7a1e5",
+    "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs":"32d513e3a5917fbca8db8b0c1a3c5a71be91a4d87ffb0d0a22ea6d7f0347da1b"
+  },
+  "checksActuallyPerformed": ["Read-only git diff/source/test review", "Get-FileHash exact plan and reviewed files", "Read Node log91/91 recorded PASS before final changes", "Read real-PG artifact11/11 generation0 and DBdropped"],
+  "testsExecutedByReviewer": [],
+  "providerRequestsByReviewer": 0,
+  "approvalScope": "NONE_PENDING_FIX_AND_REVIEW"
+}

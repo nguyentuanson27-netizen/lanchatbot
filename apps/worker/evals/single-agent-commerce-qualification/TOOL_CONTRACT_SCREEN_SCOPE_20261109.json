@@ -1,0 +1,115 @@
+{
+  "name": "TOOL_CONTRACT_SCREEN_20261109",
+  "purpose": "DEVELOPMENT_ONLY_NOT_QUALIFICATION",
+  "repetitions": 1,
+  "maximumCases": 13,
+  "maximumNativeCustomerTurns": 27,
+  "maximumVerifierOnlyProbes": 0,
+  "maximumGenerationRequests": 108,
+  "maximumOwnerGenerationsPerNativeTurn": 3,
+  "maximumVerifierGenerationsPerTurn": 1,
+  "generationRetry": 0,
+  "customerScriptsHash": "b166b46d14014d59621e1851f062175715374713a6ac3ebf19143b387fa60344",
+  "cases": [
+    {
+      "sourceCase": "c-po-20261031-p06",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s15",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s16",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-j2",
+      "mode": "JOURNEY",
+      "turns": 3,
+      "maximumGenerationRequests": 12
+    },
+    {
+      "sourceCase": "c-20261028-j4",
+      "mode": "JOURNEY",
+      "turns": 3,
+      "maximumGenerationRequests": 12
+    },
+    {
+      "sourceCase": "c-20261028-s04",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-s09",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-20261028-j1",
+      "mode": "JOURNEY",
+      "turns": 3,
+      "maximumGenerationRequests": 12
+    },
+    {
+      "sourceCase": "c-po-20261031-p08",
+      "mode": "JOURNEY",
+      "turns": 2,
+      "maximumGenerationRequests": 8
+    },
+    {
+      "sourceCase": "c-po-20261031-p07",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-po-20261031-p09",
+      "mode": "JOURNEY",
+      "turns": 2,
+      "maximumGenerationRequests": 8
+    },
+    {
+      "sourceCase": "c-20261104-checkout-complete",
+      "mode": "JOURNEY",
+      "turns": 7,
+      "maximumGenerationRequests": 28
+    },
+    {
+      "sourceCase": "c-20261028-s08",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    }
+  ],
+  "screenGate": {
+    "sourceGapControls": [
+      "c-20261028-s16"
+    ],
+    "qualityDenominatorCases": 12,
+    "requiredNativeEvidence": [
+      "W1_VALID_FLAT_READ",
+      "W2_WRITER_THEN_QUOTE",
+      "W3_VALID_QUOTE_PHOTO_TARGET",
+      "W4_COMPOSITION_WITHOUT_INVENTED_LABEL",
+      "J1_P08_P07_P09_CHECKOUT_COMPARISON_CONTROL"
+    ],
+    "outcomes": [
+      "EXERCISED_PASS",
+      "EXERCISED_FAIL",
+      "NOT_EXERCISED",
+      "SOURCE_GAP"
+    ],
+    "notExercisedIsPass": false,
+    "automaticRerun": false,
+    "fullRemainderRequiresOwnerRequest": true
+  }
+}

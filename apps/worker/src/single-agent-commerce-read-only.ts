@@ -30,6 +30,9 @@ export interface VerifierRequest { generationId: string; instructions: string; f
   latest: string; history: { role: "customer" | "shop"; text: string }[]; binding: VerifierBinding; signal: AbortSignal }
 export interface VerifierGeneration { result: unknown; telemetry?: unknown }
 export interface CommerceTools {
+  /** Request-local code proofs, not model-issued delivery requirements. */
+  openingQuoteTargets?():readonly string[];
+  noCommitNegotiationResult?(result:CommerceToolResult):boolean;
   openingMediaTiming?:'BEFORE_OWNER';
   /** No I/O: known cart targets must leave enough primitive work and image slots. */
   openingMediaFeasible?(calls:readonly CommerceToolCall[],remaining:number):boolean;
@@ -48,6 +51,8 @@ export interface CommerceTools {
   quoteTaskWork?(): readonly import("./single-agent-commerce-quote.js").QuoteTaskWork[];
   handoffSources?(): import("@lana/contracts").CommerceHandoffSourceCheckV1[] | null;
   boundedPrice?(): { text: string; claims: import("@lana/contracts").ProtectedClaimV1[] } | null;
+  /** Exact completed read proof only, no I/O and no cart-variant substitution. */
+  quotePriceEvidence?(query:import("./single-agent-commerce-read-only-tools.js").QuotePriceQuery):readonly import("./single-agent-commerce-read-only-tools.js").QuotePriceEvidence[];
   sealHandoffReply?(text: string, trusted: TrustedContext, images: readonly import("./single-agent-commerce-media-delivery.js").MediaDeliveryImage[]): string;
   completeHandoff?(outcome: TerminalOutcome, readback: () => Promise<TrustedContext>): Promise<TerminalOutcome>;
   /** Code-only recovery: atomically transfer ownership without customer output. */

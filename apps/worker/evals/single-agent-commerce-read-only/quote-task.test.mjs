@@ -42,13 +42,13 @@ test('quote parse rejects extra fields/duplicate offers and preserves signed con
  for(const args of [{subjectRef:'SM613',offerTypes:['DIRECT','DIRECT']},{subjectRef:'SM613',offerTypes:['DIRECT'],skipMedia:true},{subjectRef:'SM613',offerTypes:['DIRECT'],color:null}])assert.throws(()=>parseGeminiGeneration(body(args)),/OWNER_TOOL_OUTPUT/);
 });
 test('phase/budget and primitive accounting are bound; legacy configuration remains valid',async()=>{
- const r=await request();r.toolBudget.callsRemaining=1;assert(!buildGeminiCommerceRequest(r).tools[0].functionDeclarations.some(d=>d.name==='quote_product'));
+ const r=await request();r.toolBudget.callsRemaining=0;assert(!buildGeminiCommerceRequest(r).tools[0].functionDeclarations.some(d=>d.name==='quote_product'));
  const m=JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url)));validateProtocol(m);delete m.quoteTask;validateProtocol(m);
- m.quoteTask={...EXPLICIT_QUOTE_TASK,normalUnits:1};assert.throws(()=>validateProtocol(m),/QUOTE_TASK_CONFIG/);
- const result={toolWorkAccounting:'PRIMITIVE_WORK_V2',normalToolCalls:3,terminalHandoffCalls:1,toolCalls:4,executedNormalToolInvocations:2,executedToolInvocations:3,quoteTaskWork:[{reservedUnits:2,readInvocations:1,selectionInvocations:0}]};validateToolWorkAccounting(result);
- for(const x of [{...result,executedToolInvocations:4},{...result,normalToolCalls:7},{...result,quoteTaskWork:[{reservedUnits:1,readInvocations:1,selectionInvocations:0}]}])assert.throws(()=>validateToolWorkAccounting(x));
+ m.quoteTask={...EXPLICIT_QUOTE_TASK,normalUnits:2};assert.throws(()=>validateProtocol(m),/QUOTE_TASK_CONFIG/);
+ const result={toolWorkAccounting:'PRIMITIVE_WORK_V2',normalToolCalls:3,terminalHandoffCalls:1,toolCalls:4,executedNormalToolInvocations:2,executedToolInvocations:3,quoteTaskWork:[{reservedUnits:1,readInvocations:1,selectionInvocations:0}]};validateToolWorkAccounting(result);
+ for(const x of [{...result,executedToolInvocations:4},{...result,normalToolCalls:7},{...result,quoteTaskWork:[{reservedUnits:2,readInvocations:1,selectionInvocations:0}]}])assert.throws(()=>validateToolWorkAccounting(x));
  validateToolWorkAccounting({normalToolCalls:2});
- validateToolWorkAccounting({...result,executedNormalToolInvocations:1,executedToolInvocations:2,quoteTaskWork:[{reservedUnits:2,readInvocations:0,selectionInvocations:0}]});
+ validateToolWorkAccounting({...result,executedNormalToolInvocations:1,executedToolInvocations:2,quoteTaskWork:[{reservedUnits:1,readInvocations:0,selectionInvocations:0}]});
 });
 test('registered tool schema includes quote only when enabled, and binds its exact schema',()=>{
  const changed=structuredClone(quoteDeclarations);changed[0].parametersJsonSchema.properties.offerTypes.maxItems=1;
@@ -68,4 +68,12 @@ test('returning quote wire requires quantity for one offer and keeps the code to
  const d=body.tools[0].functionDeclarations.find(d=>d.name==='quote_product');assert.deepEqual(d.parametersJsonSchema.required,['subjectRef','offerTypes','quantity']);assert.equal(d.parametersJsonSchema.properties.offerTypes.maxItems,1);
  const result=body.contents.at(-1).parts[0].functionResponse.response.data;assert.deepEqual(result.preCartQuote,data.preCartQuote);assert(!Object.hasOwn(result,'media'));assert(!JSON.stringify(body).includes('EVAL_ONLY'));
  assert.deepEqual(body.contents.at(-2),r.contents.at(-2));
+});
+
+
+test('one remaining primitive exposes returning quote on the actual wire, with runtime photo feasibility separate',async()=>{
+ const r=await request();r.toolBudget.callsRemaining=1;
+ r.context.policyLiterals.find(p=>p.ref==='conversation-entry').text=JSON.stringify({firstContact:false,fromAd:false});
+ const quote=buildGeminiCommerceRequest(r).tools[0].functionDeclarations.find(d=>d.name==='quote_product');
+ assert(quote);assert.deepEqual(quote.parametersJsonSchema.required,['subjectRef','offerTypes','quantity']);
 });

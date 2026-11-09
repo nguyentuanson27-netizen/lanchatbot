@@ -6,13 +6,13 @@ import {createReadOnlyTools} from '../../dist/single-agent-commerce-read-only-to
 import {fixtureProduct,fixturePolicy,commerceScope,commerceNow} from '../../dist/single-agent-commerce.test-support.js';
 import {readCompactSections} from './owner-data-presentation.mjs';
 test('optional read filters explicitly treat null as omitted, retaining closed selection and actual filters',()=>{
- const base={subjectRef:'SV2447',selection:'SINGLE',offerType:'AO'};
+ const base={subjectRef:'SV2447',offerTypes:['AO']};
  assert.deepEqual(decodeProductRead({...base,color:null,size:null,deliveryRegion:null}),decodeProductRead(base));
  assert.deepEqual(decodeProductRead({...base,color:'navy',size:'M'}),{ok:true,args:{subjectRef:'SV2447',offerType:'AO',color:'navy',size:'M'}});
  for(const patch of [{offerType:null},{selection:null},{color:1},{color:''},{size:[]},{unknown:null}])assert.equal(decodeProductRead({...base,...patch}).ok,false);
- const props=readOnlyDeclarations.find(d=>d.name==='read_product').parameters.properties;
- for(const key of ['color','size','deliveryRegion'])assert.equal(props[key].nullable,true);
- assert.notEqual(props.offerType.nullable,true);
+ const props=readOnlyDeclarations.find(d=>d.name==='read_product').parametersJsonSchema.properties;
+ for(const key of ['color','size','deliveryRegion'])assert(props[key].anyOf.some(v=>v.type==='null'));
+ assert.equal(props.offerTypes.type,'array');
 });
 test('continuation factors only exact current policy duplicates and preserves native signatures and old values',async()=>{
  const f=fixtureProduct(),tools=createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[f.product],

@@ -1,19 +1,25 @@
-// One native selection vocabulary and decoder; no customer-language parsing.
-export const productReadSelections=Object.freeze(['SINGLE','COMPARE','DETAILS_ONLY']);
-const own=(a,k)=>Object.hasOwn(a,k),text=(v,max)=>typeof v==='string'&&v.trim().length>0&&Buffer.byteLength(v)<=max;
+// Public shape and decoder share the same schema; domain ports still own refs/byte/source/permission checks.
+import Ajv from 'ajv';
+export const productReadSelections=Object.freeze(['SINGLE','COMPARE','DETAILS_ONLY']); // Historical diagnostics only; no legacy input aliases.
+const text=max=>({type:'string',minLength:1,maxLength:max});
+export function productReadSchema(allowCustomerSelection=false){
+ const subjectRef=text(128),offers=(min,max)=>({type:'array',items:text(64),minItems:min,maxItems:max,uniqueItems:true});
+ const filters={color:{anyOf:[text(64),{type:'null'}]},size:{anyOf:[text(16),{type:'null'}]},deliveryRegion:{anyOf:[text(64),{type:'null'}]}};
+ const branch=(properties,required=['subjectRef','offerTypes'])=>({type:'object',properties,required,additionalProperties:false});
+ return {type:'object',properties:{subjectRef,offerTypes:offers(0,3),...filters,...(allowCustomerSelection?{customerSelected:{type:'boolean',enum:[true]}}:{})},
+  required:['subjectRef','offerTypes'],additionalProperties:false,anyOf:[
+   branch({subjectRef,offerTypes:offers(0,0)}),branch({subjectRef,offerTypes:offers(1,3),...filters}),
+   ...(allowCustomerSelection?[branch({subjectRef,offerTypes:offers(1,1),...filters,customerSelected:{type:'boolean',enum:[true]}},['subjectRef','offerTypes','customerSelected'])]:[])]};
+}
+const validator=new Ajv({strict:false}).compile(productReadSchema(true));
 export function decodeProductRead(a){
- const selection=productReadSelections.includes(a.selection)?a.selection:'INVALID';
- const fail=field=>({ok:false,diagnostic:{field,selection,fieldPresent:field==='UNKNOWN_FIELD'||own(a,field),fieldType:
-  field==='UNKNOWN_FIELD'?'OTHER':!own(a,field)?'MISSING':a[field]===null?'NULL':Array.isArray(a[field])?'ARRAY':typeof a[field]==='string'?'STRING':'OTHER'}});
- if(Object.keys(a).some(k=>!['subjectRef','selection','offerType','offerTypes','color','size','deliveryRegion','customerSelected'].includes(k)))return fail('UNKNOWN_FIELD');
- if(own(a,'customerSelected')&&(a.customerSelected!==true||selection!=='SINGLE'))return fail('customerSelected');
- if(!text(a.subjectRef,128))return fail('subjectRef');
- for(const [k,max]of [['color',64],['size',16],['deliveryRegion',64]])if(own(a,k)&&a[k]!==null&&!text(a[k],max))return fail(k);
- const {selection:_selection,...args}=a;
- // Explicit schema semantics: null means no optional filter, never an inferred colour/size.
- for(const k of ['color','size','deliveryRegion'])if(args[k]===null)delete args[k];
- if(selection==='SINGLE')return text(a.offerType,64)&&!own(a,'offerTypes')?{ok:true,args}:fail('offerType');
- if(selection==='COMPARE')return !own(a,'offerType')&&Array.isArray(a.offerTypes)&&a.offerTypes.length>=2&&a.offerTypes.length<=3&&
-  a.offerTypes.every(v=>text(v,64))&&new Set(a.offerTypes).size===a.offerTypes.length?{ok:true,args}:fail('offerTypes');
- return selection==='DETAILS_ONLY'&&!own(a,'offerType')&&!own(a,'offerTypes')?{ok:true,args:{...args,detailsOnly:true}}:fail('selection');
+ if(!validator(a)){
+  const known=['subjectRef','offerTypes','color','size','deliveryRegion','customerSelected'];
+  const field=a&&typeof a==='object'?Object.keys(a).find(k=>!known.includes(k))?'UNKNOWN_FIELD':!Object.hasOwn(a,'subjectRef')?'subjectRef':'offerTypes':'ARGS';
+  return {ok:false,diagnostic:{field,selection:'INVALID',fieldPresent:!!a&&Object.hasOwn(a,field),fieldType:'OTHER'}};
+ }
+ const {offerTypes,...args}=a;
+ for(const key of ['color','size','deliveryRegion'])if(args[key]===null)delete args[key];
+ if(!offerTypes.length)return {ok:true,args:{...args,detailsOnly:true}};
+ return {ok:true,args:{...args,...(offerTypes.length===1?{offerType:offerTypes[0]}:{offerTypes:[...offerTypes]})}};
 }

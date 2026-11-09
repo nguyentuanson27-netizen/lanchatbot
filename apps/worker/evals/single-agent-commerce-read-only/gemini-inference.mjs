@@ -1,5 +1,5 @@
 import {projectMediaCapabilities} from "./media-capabilities.mjs";
-import {productReadSelections,decodeProductRead} from './product-read-selection.mjs';
+import {productReadSelections,decodeProductRead,productReadSchema} from './product-read-selection.mjs';
 import {commerceCallableTools} from '../../dist/single-agent-commerce-callable.js';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
@@ -70,7 +70,7 @@ const offerLabels={AO:'áo lẻ',CV:'chân váy lẻ',QUAN:'quần lẻ',VAY:'v�
  SET_VAY:'bộ có váy',SET_CV:'bộ có chân váy',SET_QUAN:'bộ có quần',COMBO_3:'combo 3 món',DIRECT:'sản phẩm'};
 export const readOnlyDeclarations=[
  {name:'search_products',description:'Tìm theo productCode hoặc query tên/nhu cầu; cần ít nhất một, mã được ưu tiên. Trả products.subjectRef để đọc. AMBIGUOUS chưa xác định mẫu; ứng viên chưa xác nhận giá/phù hợp. PRODUCT_BOUND: context đã đầy, dùng mẫu đã có. Theo quy tắc tìm mẫu trong prompt: chỉ đọc tối đa hai ứng viên phù hợp, không mở mọi offers.',parameters:{type:'OBJECT',properties:{productCode:string,query:string}}},
- {name:'read_product',description:'Đọc PRODUCT theo đường purchaseOptions đã có, không search lại. SINGLE + offerType đọc một phần; COMPARE + 2–3 offerTypes so sánh; DETAILS_ONLY không cấp giá/tồn. Truyền màu/size/khu vực đã biết; null bỏ lọc. Mua bộ/lẻ dùng đúng offer. Size filter chỉ kiểm tồn, không chứng minh vừa.',parameters:{type:'OBJECT',properties:{subjectRef:string,selection:{type:'STRING',enum:productReadSelections},offerType:string,offerTypes:{type:'ARRAY',items:string,minItems:2,maxItems:3},color:{...string,nullable:true},size:{...string,nullable:true},deliveryRegion:{...string,nullable:true}},required:['subjectRef','selection']}},
+ {name:'read_product',description:'Đọc PRODUCT: offerTypes=[] chỉ mô tả; một offer đọc phần bán đó; 2–3 offers so sánh. Truyền màu/size/vùng khi đọc offer; size filter chỉ kiểm tồn, không chứng minh vừa. Null filter nghĩa bỏ lọc. Code kiểm scope/source và byte bounds.',parametersJsonSchema:productReadSchema()},
  {name:'read_policy',description:'Đọc policy hiện hành; không đọc lịch sử đơn. orderEligibility=null: chưa xét điều kiện của đơn khách.',parameters:{type:'OBJECT',properties:{}}},
 ];
 const stateFieldPaths=Object.freeze({HEIGHT_CM:'measurements.HEIGHT_CM',WEIGHT_KG:'measurements.WEIGHT_KG',BUST_CM:'measurements.BUST_CM',WAIST_CM:'measurements.WAIST_CM',HIPS_CM:'measurements.HIPS_CM',fitPreference:'fitPreference','preferences.colors':'preferences.colors','preferences.styles':'preferences.styles','preferences.materials':'preferences.materials'});
@@ -97,7 +97,7 @@ delete sizeDeclaration.parameters;
 sizeDeclaration.parametersJsonSchema={type:'object',additionalProperties:false,required:['subjectRef'],properties:{
  subjectRef:{type:'string'},fitScope:{type:'string',enum:['PRODUCT','COMPONENT']},componentRole:{type:'string',enum:['TOP','PANTS','SKIRT','DRESS','OTHER']},
  customerStateOps:structuredClone(stateDeclarations[0].parametersJsonSchema.properties.ops)}};
-export const quoteDeclarations=[{name:'quote_product',description:'Báo giá PRODUCT, không sửa giỏ. Khách mới: 1–2 offerTypes, code đọc giá + ảnh GENERIC. Lượt sau: một offerType + quantity, trả preCartQuote gồm ship/ưu đãi, không chọn ảnh. Bỏ color chưa chọn; dùng tổng code, không cộng tay. Giỏ đúng lựa chọn thì dùng cartQuote. Được batch cùng tool đọc, tối đa hai quote khác target/lượt, hai đơn vị mỗi quote; không đi cùng mutation/handoff/customerSelected. Đã gồm ảnh GENERIC ở mở đầu, không cần chọn lại. Không thay kiểm tồn/fit/sửa giỏ/ảnh cụ thể. Chưa gửi, không phải receipt mua hàng.',parametersJsonSchema:{type:'object',additionalProperties:false,required:['subjectRef','offerTypes'],properties:{subjectRef:{type:'string'},offerTypes:{type:'array',items:{type:'string',minLength:1,maxLength:64},minItems:1,maxItems:2,uniqueItems:true},color:{type:'string',minLength:1,maxLength:64},quantity:{type:'integer',minimum:1,maximum:100},deliveryRegion:{type:'string',minLength:1,maxLength:128}}}}];
+export const quoteDeclarations=[{name:'quote_product',description:'Báo giá PRODUCT, không sửa giỏ. offerTypes có 1–2 phần; quantity/deliveryRegion chỉ dùng với một phần. Khách mới: giá được đọc trước, gate chung chọn/reuse ảnh GENERIC cho mỗi sản phẩm đã báo giá; color lọc giá không yêu cầu ảnh cùng màu. Khách cũ: bắt buộc quantity, một phần; không thêm nghĩa vụ ảnh. Mỗi quote đọc một primitive, ảnh gate thực chạy tính riêng trong cap6. Batch giữ nguyên thứ tự: không writer hoặc đúng một writer đầu (apply_customer_state, read_product customerSelected=true, record_negotiation); sau đó chỉ quote_product/read_product không ghi lựa chọn/read_policy/select_product_media/view_product_media. Không recommend_size/search/quote_cart/cart mutation/handoff trong batch này. PRE_CART_POLICY không áp receipt thương lượng; dùng cartQuote hiện hành cho tổng giỏ sau hỗ trợ. Không tự cộng tiền, không thay kiểm tồn/fit/ảnh cụ thể, không là receipt mua hàng.',parametersJsonSchema:{type:'object',additionalProperties:false,required:['subjectRef','offerTypes'],properties:{subjectRef:{type:'string'},offerTypes:{type:'array',items:{type:'string',minLength:1,maxLength:64},minItems:1,maxItems:2,uniqueItems:true},color:{type:'string',minLength:1,maxLength:64},quantity:{type:'integer',minimum:1,maximum:100},deliveryRegion:{type:'string',minLength:1,maxLength:128}}}}];
 export const effectDeclarations=[
  {name:'record_negotiation',description:'Ghi PRICE_OBJECTION/PURCHASE_READY của giỏ hiện tại với sourceQuote nguyên văn tin mới. Hỏi giá/tổng hoặc chê kiểu dáng không phải phản đối giá. Code quyết ưu đãi, trả cartQuote; dùng hỗ trợ đó trước bán thêm. Không truyền tiền/tier/policy hay hứa giảm trước kết quả; tổng ưu đãi không phải giảm thêm.',parameters:{type:'OBJECT',properties:{intent:{type:'STRING',enum:['PRICE_OBJECTION','PURCHASE_READY']},sourceQuote:{type:'STRING',maxLength:512}},required:['intent','sourceQuote']}},
  {name:'add_to_cart',description:'Thêm lựa chọn khách yêu cầu mua: PRODUCT subjectRef + offerType từ nguồn. size/color/quantity theo khách, giữ phần không đổi; color=null chỉ khi chưa chọn. Khách đã chọn offer/size thì gọi trực tiếp, không cần đọc lại/fit. Code kiểm giá/tồn/biến thể; OK xác nhận thao tác, cartItems là lựa chọn hiện tại.',parameters:{type:'OBJECT',properties:{subjectRef:string,offerType:string,size:string,color:{type:'STRING',nullable:true},quantity:{type:'INTEGER',minimum:1,maximum:20}},required:['subjectRef','offerType','color']}},
@@ -120,8 +120,8 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  const c=request.context;
  declarations=structuredClone(declarations);
  if(declarations.some(d=>d.name==='apply_customer_state'))for(const d of declarations.filter(d=>d.name==='read_product')){
-  d.parameters.properties.customerSelected={type:'BOOLEAN',description:'true khi khách vừa chọn chính mẫu và offer này; không xác nhận mua hoặc mở giỏ.'};
-  d.description+=' Khách vừa chốt lựa chọn giữa các mẫu/phần bán thì dùng SINGLE cùng customerSelected=true cho đúng lựa chọn đó; không đọc lại các lựa chọn khách đã loại. Không dùng cờ này khi chỉ hỏi giá/so sánh. ';
+  d.parametersJsonSchema=productReadSchema(true);
+  d.description+=' customerSelected=true chỉ khi khách vừa chọn đúng một offer; code ghi lựa chọn đã xác minh, không tạo giỏ hoặc chốt mua.';
  }
  const compactV2=request.ownerContextPresentation==='VI_DATA_BLOCKS_COMPACT_V2';
  if(compactV2)for(const d of declarations){
@@ -252,7 +252,12 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   const literal=c.policyLiterals.find(p=>p.ref===`offers:${s.ref}`);if(!literal)continue;
   const data=JSON.parse(literal.text);
   if(data.productId!==s.ref||!Array.isArray(data.availableOffers))continue;
-  offers.set(s.ref,data.availableOffers);if(data.productSizeRead)productSizeReads.set(s.ref,data.productSizeRead);if(Array.isArray(data.purchaseOptions))purchaseOptions.set(s.ref,data.purchaseOptions);offerRefs.add(literal.ref);
+  offers.set(s.ref,data.availableOffers);if(data.productSizeRead)productSizeReads.set(s.ref,data.productSizeRead);
+  if(Array.isArray(data.purchaseOptions))purchaseOptions.set(s.ref,data.purchaseOptions.map(option=>{
+   if(!option.componentSource)return option;
+   return {...option,componentSource:{...option.componentSource,components:option.componentSource.components.map(component=>
+    component.label==null?{...component,componentRef:'component:'+createHash('sha256').update(canonicalJsonV1([s.ref,option.offerType,component.componentRef])).digest('hex')}:component)}};
+  }));offerRefs.add(literal.ref);
   if(!products.has(s.ref))products.set(s.ref,{subjectRef:s.ref});
  }
  const preparationRefs=new Set();
@@ -266,7 +271,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  // An enum is only an argument hint; the selector still validates the chosen product/offer.
  if(!canBindProductInBatch&&productRefs.length&&productRefs.every(ref=>offers.get(ref)?.length&&offers.get(ref).every(v=>typeof v==='string'&&v.trim()&&bytes(v)<=64)))
   for(const d of declarations.filter(d=>['read_product','add_to_cart'].includes(d.name)))
-   d.parameters.properties.offerType={type:'STRING',enum:[...new Set(productRefs.flatMap(ref=>offers.get(ref)))]};
+   if(d.name==='add_to_cart')d.parameters.properties.offerType={type:'STRING',enum:[...new Set(productRefs.flatMap(ref=>offers.get(ref)))]};
  const ownerView={subjects:c.boundSubjects.map(subject),products:[...products.values()].map(p=>({subjectRef:p.subjectRef,
    availableOffers:offers.get(p.subjectRef)??null,
    ...(purchaseOptions.has(p.subjectRef)?{purchaseOptions:purchaseOptions.get(p.subjectRef),productSizeRead:productSizeReads.get(p.subjectRef)}:{}),
@@ -297,7 +302,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   requireThat(Number.isInteger(request.toolBudget[field])&&request.toolBudget[field]>=0&&request.toolBudget[field]<=max,'OWNER_EXECUTION_BOUND');
  if(request.callableTools!==undefined)requireThat(JSON.stringify(request.callableTools)===JSON.stringify(commerceCallableTools(request)),'OWNER_EXECUTION_BOUND');
  const callable=declarations.filter(d=>(request.callableTools===undefined||request.callableTools.includes(d.name))&&
-  (request.toolsAllowed!==false||d.name==='request_handoff'&&request.terminalHandoffAllowed===true)&&(d.name!=='quote_product'||!request.toolBudget||request.toolBudget.callsRemaining>=2));
+  (request.toolsAllowed!==false||d.name==='request_handoff'&&request.terminalHandoffAllowed===true)&&(d.name!=='quote_product'||!request.toolBudget||request.toolBudget.callsRemaining>=1));
  if(request.pendingHandoff!==undefined){
   requireThat(request.pendingHandoff&&Object.keys(request.pendingHandoff).length===1&&HandoffReasonV2Schema.options.includes(request.pendingHandoff.reason),'OWNER_EXECUTION_BOUND');
   ownerView.pendingHandoff={reason:request.pendingHandoff.reason,status:'PREPARED_NOT_COMMITTED'};
@@ -467,6 +472,11 @@ export function createGeminiCommerceInference(config,dependencies={}){
    telemetry.unexpectedToolCall=parsed.kind==='TOOLS'&&parsed.calls.some(c=>!body.tools.some(t=>t.functionDeclarations.some(d=>d.name===c.name)));
    return {...parsed,telemetry};
   }catch(error){
+   if(stage==='GENERATION'||stage==='RESPONSE'){
+    const causes={UND_ERR_CONNECT_TIMEOUT:'CONNECT_TIMEOUT',UND_ERR_HEADERS_TIMEOUT:'HEADERS_TIMEOUT',UND_ERR_SOCKET:'READ_RESET',ECONNRESET:'READ_RESET',EPIPE:'READ_RESET',ENOTFOUND:'DNS',EAI_AGAIN:'DNS'};
+    const code=error?.cause?.code??error?.code;
+    telemetry.transportCause=Object.hasOwn(causes,code)?causes[code]:'OTHER';
+   }
    const timedOut=signal.aborted||error?.name==='AbortError'||error?.name==='TimeoutError';
    if(error?.message==='OWNER_REQUEST_BOUND'&&Number.isSafeInteger(error.requestBytes))telemetry.requestBytes=error.requestBytes;
    telemetry.failureStage=stage;

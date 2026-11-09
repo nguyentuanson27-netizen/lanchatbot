@@ -200,7 +200,23 @@ export function createCommerceHandoffTools(input: {
   }
   async function invoke(call: CommerceToolCall): Promise<CommerceToolResult> {
     if (committed || uncertain || pending) return { status: "REJECTED", reason: "HANDOFF_TERMINAL" };
-    if (call.name !== "request_handoff") return input.base.invoke(call);
+    if (call.name !== "request_handoff") {
+      const result=await input.base.invoke(call);
+      if(call.name==="record_negotiation"&&result.status==="OK"){
+        // Effects already read back their own durable commit and authority. Do
+        // not overlay that revision with this wrapper's pre-write cache, nor
+        // accept a later external revision merely because it is newer.
+        const proof=input.base.snapshot(),operationId=(result.data as {operationId?:unknown}|undefined)?.operationId;
+        const receipt=proof.effectReceipts.find(r=>r.operationId===operationId&&r.effect==="NEGOTIATION_UPDATED"&&r.status==="SUCCESS");
+        try{
+          const current=await read();
+          if(!receipt||proof.state.conversationRevision!==current.stateVersion||!scopeMatches(current)||
+            !current.permission||!current.privacyAllowed||current.state.conversationOwner!=="BOT")
+            return {status:"UNAVAILABLE",reason:"COMMITTED_AUTHORITY_CHANGED",failureStage:"READBACK"};
+        }catch{return {status:"UNAVAILABLE",reason:"COMMITTED_AUTHORITY_CHANGED",failureStage:"READBACK"};}
+      }
+      return result;
+    }
     const a = toolArgs(call.args, ["reason"]), parsed = HandoffReasonV2Schema.safeParse(a?.reason);
     if (!a || !parsed.success || parsed.data === "ADMIN_REQUEST") return { status: "REJECTED", reason: "HANDOFF_ARGUMENTS" };
     try { return await request(parsed.data); } catch { return { status: "UNAVAILABLE", reason: "HANDOFF_POLICY_OR_SOURCE" }; }

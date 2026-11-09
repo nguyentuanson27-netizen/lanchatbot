@@ -28,6 +28,8 @@ export type PreparationAdmission = (context: TrustedContext, work?: PreparationW
 export interface CommerceToolCall { name: string; args: unknown; id?: string }
 export interface CommerceToolResult { status: "OK" | "REJECTED" | "UNAVAILABLE" | "STALE"; data?: unknown; reason?: string;
   failureStage?: import("./single-agent-commerce-effect-failure.js").CommerceEffectFailureStage }
+export interface QuotePriceQuery {subjectRef:string;offerTypes:readonly string[];color?:string}
+export interface QuotePriceEvidence {offerType:string;claim:Extract<ProtectedClaimV1,{type:"PRICE"}>;sourceVersion:string;observedAt:string;expiresAt:string}
 export function toolArgs(value: unknown, fields: readonly string[]): Record<string, unknown> | null {
   return value !== null && typeof value === "object" && !Array.isArray(value) &&
     Object.keys(value).every(k => fields.includes(k)) ? value as Record<string, unknown> : null;
@@ -105,6 +107,7 @@ export function createReadOnlyTools(input: {
     const availableOffers = Object.keys(raw.offers).sort();
     if (!["OK", "FULFILLMENT_POLICY_NOT_FOUND"].includes(normalizeCatalogToken(raw.data_status)) ||
       observed > now || expires <= now || availableOffers.length > 8) return null;
+    let addedLabelBytes=0;
     const purchaseOptions=availableOffers.map(offerType=>{
       let incomplete=false,overbound=rowsOverBound(raw.offers[offerType]!.rows);
       const rows=raw.offers[offerType]!.rows;
@@ -130,11 +133,21 @@ export function createReadOnlyTools(input: {
         return [...amounts.values()].sort((a,b)=>a.componentRef.localeCompare(b.componentRef)||a.role.localeCompare(b.role));
       });
       const structure=structures[0]??[],consistent=!overbound&&!incomplete&&structures.every(v=>commerceHash(v)===commerceHash(structure));
+      // Labels may come only from the already supplied catalog map. No child I/O,
+      // SKU inference, new product binding or numeric evidence is created here.
+      const components=consistent?structure.map(c=>{
+        const p=(input.initialProducts??[]).find(p=>p.productId===c.componentRef);
+        const label=p&&p.observedAt&&Date.parse(p.observedAt)<=now&&text(p.title,128)?p.title:null;
+        return {...c,label,labelSource:label?{productRef:p!.productId,sourceVersion:p!.catalogVersion,observedAt:p!.observedAt}:null};
+      }):[];
+      const labelBytes=Buffer.byteLength(JSON.stringify(components.map(({componentRef:_r,role:_t,quantity:_q,...v})=>v)));
+      addedLabelBytes+=labelBytes;
+      if(addedLabelBytes>1024)throw new Error("PRODUCT_EVIDENCE_BOUND");
       return {offerType,priceRead:{subjectRef:id,offerType},stockRead:{subjectRef:id,offerType},
         componentSource:{status:overbound?'BOUND_EXCEEDED':incomplete?'INCOMPLETE_SOURCE':!structures.some(v=>v.length)?'NOT_RECORDED':consistent?'AVAILABLE':'VARIANT_DEPENDENT',
           completeness:rows.length<=64?'INSPECTED_ROWS':'FIRST_64_ROWS_ONLY',
           sourceRef:'pos:'+commerceHash({releaseId:raw.release_id,productId:id,offerType}),
-          components:consistent?structure:[]},
+          structureKnown:consistent&&structure.length>0,labelsStatus:components.length&&components.every(c=>c.label!==null)?'KNOWN':'UNKNOWN',components},
         sizeApplicability:{status:'NOT_READ',componentSizing:'UNSUPPORTED_BY_PRODUCT_TARGET_API',chartRef:null},
         colorSemantics:'UNRECORDED_IS_NOT_A_PHYSICAL_COLOR'};
     });
@@ -576,6 +589,22 @@ export function createReadOnlyTools(input: {
     }
   }
   return { invoke, snapshot, prepare,
+    quotePriceEvidence(query:QuotePriceQuery):QuotePriceEvidence[]{
+      if(!permitted())return [];
+      const pin=posPins.get(query.subjectRef),now=input.clock().getTime();
+      if(!pin||Date.parse(pin.snapshot.synced_at)+maxAge*1000<=now)return [];
+      const matching=[...reads].filter(([,a])=>a.subjectRef===query.subjectRef&&!a.detailsOnly&&!a.preparationOnly&&a.size===undefined&&a.deliveryRegion===undefined&&
+        commerceHash(a.offerTypes??[a.offerType])===commerceHash(query.offerTypes)&&
+        normalizeCatalogToken(String(a.color??""))===normalizeCatalogToken(query.color??""));
+      if(matching.length!==1)return [];
+      const values=(claims.get(matching[0]![0])??[]) as ProtectedClaimV1[];
+      return query.offerTypes.flatMap(offer=>{
+        const prices=values.filter((c):c is Extract<ProtectedClaimV1,{type:"PRICE"}>=>c.type==="PRICE"&&c.scope.kind==="PRODUCT"&&c.scope.productId===query.subjectRef&&c.scope.variantId===`offer:${query.subjectRef}:${offer}`);
+        const price=prices[0];if(prices.length!==1||!price?.provenance.expiresAt||Date.parse(price.provenance.expiresAt)<=now)return [];
+        return [{offerType:offer,claim:structuredClone(price),sourceVersion:pin.snapshot.release_id,observedAt:pin.snapshot.synced_at,
+          expiresAt:new Date(Math.min(Date.parse(pin.snapshot.synced_at)+maxAge*1000,...values.filter(c=>c.scope.kind==="PRODUCT"&&c.scope.productId===query.subjectRef&&c.scope.variantId===`offer:${query.subjectRef}:${offer}`).map(c=>c.provenance.expiresAt?Date.parse(c.provenance.expiresAt):Infinity))).toISOString()}];
+      });
+    },
     boundedPrice(){
       if(ambiguousPriceRead||priceReads.size!==1)return null;
       const entry=[...priceReads.values()][0]!,values=(claims.get(entry.readKey)??[]) as ProtectedClaimV1[];

@@ -152,8 +152,8 @@ it("retains option-specific BOM roles without claiming component size applicabil
  const s=setup("many");s.f.snapshot.offers.AO!.rows[0]!.components=[{product_sku:"DESIGN_AO",quantity:1}];
  s.f.snapshot.offers.QUAN!.rows[0]!.components=[{product_sku:"DESIGN_QUAN",quantity:1}];
  await s.tools.prepare();const data=JSON.parse(s.tools.snapshot().policyLiterals.find(p=>p.ref===`offers:${s.f.product.productId}`)!.text);
- expect(data.purchaseOptions.find((o:{offerType:string})=>o.offerType==="AO").componentSource.components).toEqual([{componentRef:"DESIGN_AO",role:"TOP",quantity:1}]);
- expect(data.purchaseOptions.find((o:{offerType:string})=>o.offerType==="QUAN").componentSource.components).toEqual([{componentRef:"DESIGN_QUAN",role:"PANTS",quantity:1}]);
+ expect(data.purchaseOptions.find((o:{offerType:string})=>o.offerType==="AO").componentSource.components).toEqual([{componentRef:"DESIGN_AO",role:"TOP",quantity:1,label:null,labelSource:null}]);
+ expect(data.purchaseOptions.find((o:{offerType:string})=>o.offerType==="QUAN").componentSource.components).toEqual([{componentRef:"DESIGN_QUAN",role:"PANTS",quantity:1,label:null,labelSource:null}]);
  for(const o of data.purchaseOptions){expect(o).not.toHaveProperty("sizeRead");expect(o.sizeApplicability).toMatchObject({status:"NOT_READ",componentSizing:"UNSUPPORTED_BY_PRODUCT_TARGET_API",chartRef:null});}
  expect(data.productSizeRead.scope).toBe("PRODUCT_ONLY");
 });
@@ -166,5 +166,5 @@ it.each([null,{product_sku:"x".repeat(129)},{}])("does not publish a partial BOM
 it("empty BOM array uses the same legacy source components as the cart resolver",async()=>{
  const s=setup("many"),row=s.f.snapshot.offers.AO!.rows[0]!;row.components=[];row.component_1_sku="DESIGN_AO";row.component_2_sku="DESIGN_QUAN";
  await s.tools.prepare();const options=JSON.parse(s.tools.snapshot().policyLiterals.find(p=>p.ref===`offers:${s.f.product.productId}`)!.text).purchaseOptions;
- expect(options.find((o:{offerType:string})=>o.offerType==="AO").componentSource).toMatchObject({status:"AVAILABLE",components:[{componentRef:"DESIGN_AO",role:"TOP",quantity:1},{componentRef:"DESIGN_QUAN",role:"PANTS",quantity:1}]});
+ expect(options.find((o:{offerType:string})=>o.offerType==="AO").componentSource).toMatchObject({status:"AVAILABLE",components:[{componentRef:"DESIGN_AO",role:"TOP",quantity:1,label:null,labelSource:null},{componentRef:"DESIGN_QUAN",role:"PANTS",quantity:1,label:null,labelSource:null}]});
 });

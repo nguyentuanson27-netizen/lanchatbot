@@ -185,10 +185,10 @@
     "customerMessagePolicy": "SILENT_HANDOFF"
   },
   "quoteTask": {
-    "version": "EXPLICIT_QUOTE_V2",
+    "version": "EXPLICIT_QUOTE_V3",
     "toolWorkAccounting": "PRIMITIVE_WORK_V2",
-    "normalUnits": 2,
-    "readOnlyBatch": true,
+    "normalUnits": 1,
+    "readOnlyBatch": false,
     "maxPerTurn": 2
   },
   "fallbackDelivery": {

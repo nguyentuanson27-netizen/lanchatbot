@@ -106,7 +106,7 @@ it('malformed prepaid media cannot admit an otherwise infeasible mutation batch'
 it.each([rule,OPENING_PRODUCT_MEDIA_RULE])('unlabelled cart proof cannot erase a retained physical colour constraint: $version',async mediaRule=>{
  const s=await setup();await s.tools.invoke({name:'select_product_media',args:{subjectRef:'SM613',intent:'GENERIC'}});
  const context=s.tools.snapshot();context.state.cartItems=[{productRef:'SM613',components:[{color:'__NO_COLOR__',size:'M'}]}];
- context.policyLiterals.push({ref:'read:physical',text:JSON.stringify({productId:'SM613',color:'red'}),sourceVersion:'v1',observedAt:commerceNow.toISOString(),expiresAt:null});
+ context.policyLiterals.push({ref:'media-lookup:physical',text:JSON.stringify({productId:'SM613',color:'red'}),sourceVersion:'v1',observedAt:commerceNow.toISOString(),expiresAt:null});
  const tools=withOpeningProductMedia({...s.tools,snapshot:()=>context,unlabelledCartProducts:()=>['SM613']},{rule:mediaRule,scope:s.scope,clock:()=>commerceNow,firstContact:true});
  expect(tools.openingMediaReady?.(context)).toBe(false);
  expect(await tools.prepareOpeningMedia!({maxCalls:6,onDispatch:()=>{}})).toMatchObject({status:'UNAVAILABLE',reason:'OPENING_MEDIA_COLOR_SCOPE',chargedUnits:0});
@@ -171,4 +171,17 @@ it('image cap preserves four existing selections instead of dropping them for an
  s.fixtures[0]!.product.images=Array.from({length:4},(_,n)=>({...image,url:`https://content.pancake.vn/photo-${n}.jpg`,sortOrder:n,feedback:true}));
  await s.tools.invoke({name:'select_product_media',args:{subjectRef:'SM613',intent:'FEEDBACK'}});expect(s.tools.mediaSelection?.()).toHaveLength(4);
  const r=await s.run();expect(r.terminal.disposition).toBe('HANDOFF');expect(s.tools.mediaSelection?.()).toHaveLength(4);expect(s.verifier).not.toHaveBeenCalled();
+});
+
+
+it('reserves replacement loss before any batch write and does not credit selections cleared later in the batch',async()=>{
+ const s=await setup(['SM613','P2'],true,true,undefined,OPENING_PRODUCT_MEDIA_RULE);
+ await s.tools.prepare!();
+ const t=withOpeningProductMedia({...s.tools,openingQuoteTargets:()=>['SM613','P2']},{rule:OPENING_PRODUCT_MEDIA_RULE,scope:s.scope,clock:()=>commerceNow,firstContact:true});
+ expect((await t.prepareOpeningMedia!({maxCalls:6,onDispatch:()=>{}})).status).toBe('READY');
+ const select=(subjectRef:string,deliveryMode='REPLACE')=>({name:'select_product_media',args:{subjectRef,intent:'GENERIC',deliveryMode}});
+ expect(t.openingMediaFeasible?.([select('P2')],0)).toBe(false);
+ expect(t.openingMediaFeasible?.([select('P2')],1)).toBe(true);
+ expect(t.openingMediaFeasible?.([select('SM613'),select('P2')],0)).toBe(false);
+ expect(t.openingMediaFeasible?.([select('SM613'),select('P2','APPEND')],0)).toBe(true);
 });

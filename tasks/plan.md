@@ -1,3 +1,7 @@
+## Current — tool contract completion, 2026-11-09
+
+Execute [approved revision 3](../docs/specs/c3-phase-c-tool-contract-completion-plan-20261109.md) in W1→W2/W3→W4/W5 order. Preserve exact plan hash and historic results. [Implementation](../docs/specs/c3-phase-c-tool-contract-completion-implementation-20261109.md) covers flat native read schema, ordered writer-first quote, separate code-owned pre-cart/offer-price/cart receipt authority, opening photo reservation, bounded source labels and transport diagnostics. Final acceptance/independent implementation approval precedes clean-source/native input review and the 13-case/27-turn screen. N1/retry0, no automatic full remainder or deploy. Missing S16 wearer provenance remains a prospective source-gap control, never a sale-quality pass.
+
 ## Full34 after J2 repair — completed, 2026-11-08
 
 - [x] Owner explicitly chose full34cases55turns/current source, N1/retry0. Clean eb134d5d, common fresh world878a8091; original scripts/scopes/models/limits retained, all4 input preflights sealed before generation. No intermediate reviewer calls.

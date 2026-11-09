@@ -21,6 +21,7 @@ export const PURCHASE_OPTIONS_DIAGNOSTIC_SCOPE=read(new URL('./PURCHASE_OPTIONS_
 export const FULL_NATIVE_REMAINDER_SCOPE=read(new URL('./FULL_NATIVE_REMAINDER_SCOPE_20261102.json',import.meta.url));
 export const PURCHASE_MISSING_SCOPE=read(new URL('./PURCHASE_MISSING_SCOPE_20261103.json',import.meta.url));
 export const B_PRESERVING_SCOPES=[...['PREFIX','REMAINDER','CHECKOUT'].map(n=>read(new URL(`./B_PRESERVING_${n}_SCOPE_20261104.json`,import.meta.url))),...['R1','R2'].map(n=>read(new URL(`./TARGET_REPAIR_${n}_SCOPE_20261105.json`,import.meta.url)))];
+B_PRESERVING_SCOPES.push(read(new URL('./TOOL_CONTRACT_SCREEN_SCOPE_20261109.json',import.meta.url)));
 export function diagnosticScope(corpus){
  const name=corpus.provenance?.diagnosticScope;
  const repairScope=B_PRESERVING_SCOPES.find(s=>s.name===name);if(repairScope)return repairScope;
