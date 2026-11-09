@@ -1,0 +1,28 @@
+✖ one remaining primitive exposes returning quote on the actual wire, with runtime photo feasibility separate (59.9068ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2541.4517
+
+✖ failing tests:
+
+test at apps\worker\evals\single-agent-commerce-read-only\quote-task.test.mjs:74:1
+✖ one remaining primitive exposes returning quote on the actual wire, with runtime photo feasibility separate (59.9068ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert(quote)
+  
+      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/quote-task.test.mjs:78:2)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
