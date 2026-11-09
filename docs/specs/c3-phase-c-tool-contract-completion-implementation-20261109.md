@@ -1,6 +1,6 @@
 # Phase C — tool contract completion implementation, 2026-11-09
 
-Status: IMPLEMENTED, final acceptance and independent review in progress. No provider run in this implementation record yet.
+Status: IMPLEMENTED, acceptance PASS; independently APPROVED at `f4ba36b5`. No provider run in this implementation record yet.
 
 Implementation base: `36058803b95324d8888ef4e6c76773e01b61bb6f`. Approved [revision 3 plan](c3-phase-c-tool-contract-completion-plan-20261109.md), SHA256 `6495b49aff8016df34050d79f86b31330905ef2deb9714033b92ecde13cc3bdd`, remains byte-identical. Planning approval does not approve implementation or model qualification.
 
@@ -29,4 +29,10 @@ Machine-readable verification and exact log hashes will be recorded under `evide
 
 The new [screen scope](../../apps/worker/evals/single-agent-commerce-qualification/TOOL_CONTRACT_SCREEN_SCOPE_20261109.json) is 13 cases / 27 turns / maximum108 generation requests, N1/retry0. It preserves exact customer scripts from the prior full run: seven observed failures plus J1/P08/P07/P09/full checkout/comparison controls. S16 is a source-gap control; 12 cases are eligible for sales quality review. Native exercise of state+quote does not substitute for exercise of negotiation+quote. NOT_EXERCISED is not PASS. Freeze/review source, world and complete inputs before dispatch; no automatic rerun to seek a passing sample, and no full remainder until screen gate plus owner request.
 
-Current recommendation: NOT_READY_FOR_MODEL until final acceptance and independent implementation approval. No Phase C GO, stability, causal improvement or C3 comparison claim.
+Current recommendation: NOT_READY_FOR_MODEL until independent implementation approval. No Phase C GO, stability, causal improvement or C3 comparison claim.
+
+## Final acceptance evidence
+
+[Verification record and log hashes](evidence/c3-tool-contract-plan-20261109/implementation-tests/verification.json): worker focused **1094/1094**, Node **102/102**, protected/reply **22/22**, PostgreSQL **14/14**, worker build/typecheck/lint and dataset guard PASS. Final PG used clean `f4ba36b5`, provider0 and DB dropped. Earlier failed runs remain separate artifacts; no result was discarded to obtain a denominator.
+
+The unknown-receipt negative exposed a further terminal gap: quote correctly stopped but a generic ACK could still pass because uncertainty was handled only during fallback recovery. A deterministic RED test proved `terminalOutcome()` returned null after an unproved persisted effect. Code now returns NO_SEND/UNKNOWN_COMMIT for any current uncertainty, before another owner/verifier or send. It does not reset state or bypass valid-receipt reconciliation. Actual PG fault witness: receipt reader hit1, quote0, owner1, verifier0, Outbox0, durable negotiation event1. Known lost reply with its exact valid receipt remains quote1/send1/event1. No claim of a persisted handoff is made for NO_SEND.

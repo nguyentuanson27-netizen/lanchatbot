@@ -13,3 +13,7 @@ Plan giữ nguyên bytes đã gửi reviewer; dòng PENDING trong plan là trạ
 Revision 2 đã xử lý ảnh báo giá trong pool nhiều refs, hai loại total trước giỏ/sau concession, customerSelected/retained target, no-commit proof và acceptance nguồn/native. Revision 3 đóng hai findings còn lại: VIEW observation không thành outbound constraint; sibling allowlist loại mọi recommend_size kể cả không ops, search/quote_cart/unknown trước I/O.
 
 Approval chỉ dành cho **kế hoạch**. Chưa có implementation mới, chưa sửa prompt/corpus, chưa chạy test thực thi/provider/model/PG trong lượt planning. Implementation còn phải chứng minh schema compatibility, ordered invocation/current receipts, media obligation và accounting trong cap, source bounds và các regression controls. Phase C vẫn chưa GO; không merge/deploy/live send.
+
+## Implementation approval
+
+Implementation is independently **APPROVED** at `f4ba36b53abc69a682924c6103eb073d113114e3`: [review R3](implementation-review-r3.md), [machine record](implementation-review-r3.json), [verification/log hashes and retained failures](implementation-tests/verification.json). This supersedes the pending implementation statements above, without changing historical plan bytes. PG14/14, worker focused1094, Node102, protected22, build/typecheck/lint/dataset PASS. Provider0. This is not approval of prospective native inputs or Phase C qualification.
