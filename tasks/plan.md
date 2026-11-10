@@ -1,4 +1,8 @@
-## Current — owner result screen complete, STOP, 2026-11-10
+## Current — price, intent and media repair implemented, 2026-11-10
+
+[Approved plan](../docs/specs/c3-phase-c-price-intent-media-repair-plan-20261110.md) and [implementation review](../docs/specs/evidence/c3-phase-c-next-repair-review-20261110/code-r2.md). Commit `162fba6f8d55699f388aa99e939f431ae8bf5c9d` reuses standard pre-cart pricing, clarifies cart tool instructions, handles a declared missing wearer requirement before sibling effects, and preserves both parent proofs and history for one physical attachment. The model screen below remains STOP pending behavioral evidence.
+
+## Previous — owner result screen complete, STOP, 2026-11-10
 
 User authorized the new model screen after implementation approval. Clean run source `205cd497eedad3bebe8a2a0fe4a98c7c49ced838`; fresh world/input review APPROVE and preflight precede execution. All13 cases/27 turns executed N1/retry0,66 generation HTTP (46owner/20verifier),allOK; initial/model disposable databases dropped, live sends/source writes0. [Whole-run report, conversations and independent review](../apps/worker/evals/single-agent-commerce-qualification/owner-result-screen-run-20261110/REPORT.md).
 

@@ -1,3 +1,9 @@
+## Price, intent and media repair — implemented, 2026-11-10
+
+- [x] Complete independent plan review and R2 approval. Implement the bounded changes for J4, P09 and S16 and close three implementation review findings.
+- [x] Obtain independent code APPROVE for `162fba6f`. Worker, adapter, database, protected reply and four disposable PostgreSQL controls pass. [Review](../docs/specs/evidence/c3-phase-c-next-repair-review-20261110/code-r2.md) and [verification](../docs/specs/evidence/c3-phase-c-next-repair-review-20261110/verification.md).
+- [ ] Measure J4 and P09 owner behavior and S16 verifier behavior when the owner omits the required proof. Use fresh preregistered inputs for the changed verifier. Phase C stays STOP pending a new screen.
+
 ## Owner result model screen — complete, STOP, 2026-11-10
 
 - [x] Capture fresh public world and actual initial state; same13/27 population,12 sales-ready/1 S16 source-gap, unchanged customer scripts/caps/models. Independent input APPROVE before seal/preflight/provider.
