@@ -1,0 +1,1631 @@
+[
+  {
+    "caseId": "c-po-20261031-p06",
+    "turn": 1,
+    "nativeArtifact": "native-73b4eee16271d27fd41367057a1de4b4de475fe8a5ee7a0c97b74b29bf39c503-turn-0.json",
+    "nativeArtifactHash": "63aad2d2c5686f97ebee88d12193d7b1a9a4fc5b8f18371e675399e1226a9fe8",
+    "normalToolCalls": 4,
+    "toolRounds": 1,
+    "quoteTaskWork": [
+      {
+        "reservedUnits": 1,
+        "readInvocations": 1,
+        "selectionInvocations": 0
+      }
+    ],
+    "openingMediaWork": {
+      "status": "READY",
+      "requiredProducts": [
+        "SD023"
+      ],
+      "chargedUnits": 1
+    },
+    "responses": [
+      {
+        "name": "select_product_media",
+        "status": "OK",
+        "reason": null,
+        "data": {}
+      },
+      {
+        "name": "quote_product",
+        "status": "OK",
+        "reason": null,
+        "data": {
+          "missing": [
+            "ATTRIBUTES"
+          ]
+        }
+      }
+    ],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "DISCOVERY",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [],
+        "grandTotalVnd": null
+      },
+      "receiptKinds": [],
+      "eventCount": 0
+    }
+  },
+  {
+    "caseId": "c-20261028-s15",
+    "turn": 1,
+    "nativeArtifact": "native-34d0827672f9f7ce935e9986e9ba5ef0b6754acb57510fbaca9275c4ad112c18-turn-0.json",
+    "nativeArtifactHash": "03ce106474601cd5fdb579615829fe9e86fc199f0016f552d48156361d91cd7b",
+    "normalToolCalls": 5,
+    "toolRounds": 1,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "responses": [
+      {
+        "name": "apply_customer_state",
+        "status": "OK",
+        "reason": null,
+        "data": {}
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "data": {
+          "missing": [
+            "ATTRIBUTES"
+          ]
+        }
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "data": {
+          "missing": [
+            "ATTRIBUTES"
+          ]
+        }
+      }
+    ],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "DISCOVERY",
+      "profile": {
+        "revision": 2,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [
+            "be"
+          ],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [],
+        "grandTotalVnd": null
+      },
+      "receiptKinds": [],
+      "eventCount": 0
+    }
+  },
+  {
+    "caseId": "c-20261028-s16",
+    "turn": 1,
+    "nativeArtifact": "native-fbe18069f3e475b97758cbc2aef7105dae2e850c554db7a97ae447895a47c3ee-turn-0.json",
+    "nativeArtifactHash": "a6383eb0ff80a065f77d2d36300d9400612e14d3a4a7819a54875555c42c895b",
+    "normalToolCalls": 4,
+    "toolRounds": 1,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "responses": [
+      {
+        "name": "select_product_media",
+        "status": "OK",
+        "reason": null,
+        "data": {}
+      },
+      {
+        "name": "select_product_media",
+        "status": "OK",
+        "reason": null,
+        "data": {}
+      }
+    ],
+    "stateAfter": {
+      "owner": "HUMAN",
+      "stage": "DISCOVERY",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [],
+        "grandTotalVnd": null
+      },
+      "receiptKinds": [],
+      "eventCount": 0
+    }
+  },
+  {
+    "caseId": "c-20261028-j2",
+    "turn": 1,
+    "nativeArtifact": "native-eefcfdbde4fd7f70d5e4fb375058a1bc94aa7ba34b08cfa66259e2b5ebc0776a-turn-0.json",
+    "nativeArtifactHash": "1a2d2deb0116d095f3c0b11892f8915a72bc45c5a29509b81d29c433ecfdde7e",
+    "normalToolCalls": 3,
+    "toolRounds": 1,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "READY",
+      "requiredProducts": [
+        "SV2447"
+      ],
+      "chargedUnits": 1
+    },
+    "responses": [
+      {
+        "name": "recommend_size",
+        "status": "OK",
+        "reason": null,
+        "data": {
+          "status": "RECOMMENDED",
+          "missingInputs": [],
+          "recommendedSizes": [
+            {
+              "componentProductId": "SV2447-AO",
+              "componentRole": "TOP",
+              "size": "M"
+            }
+          ],
+          "inputFitPreference": null,
+          "alternativeSizes": [],
+          "fitScope": {
+            "kind": "COMPONENT",
+            "parentProductId": "SV2447",
+            "componentProductId": "SV2447-AO",
+            "componentRole": "TOP"
+          }
+        }
+      }
+    ],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "DISCOVERY",
+      "profile": {
+        "revision": 3,
+        "measurements": [
+          {
+            "kind": "HEIGHT_CM",
+            "value": 162,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-11-10T02:32:18.103Z",
+              "sourceEventHash": "17ccece4ca42d72ade7f04326a64053785fccace1c1e2a17916c4394e9b4033c"
+            }
+          },
+          {
+            "kind": "WEIGHT_KG",
+            "value": 56,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-11-10T02:32:18.103Z",
+              "sourceEventHash": "17ccece4ca42d72ade7f04326a64053785fccace1c1e2a17916c4394e9b4033c"
+            }
+          }
+        ],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [],
+        "grandTotalVnd": null
+      },
+      "receiptKinds": [],
+      "eventCount": 0
+    }
+  },
+  {
+    "caseId": "c-20261028-j2",
+    "turn": 2,
+    "nativeArtifact": "native-eefcfdbde4fd7f70d5e4fb375058a1bc94aa7ba34b08cfa66259e2b5ebc0776a-turn-1.json",
+    "nativeArtifactHash": "5b80fe381ae98babb291547274710e826f416cd1dca55f70c9d59da6110e371e",
+    "normalToolCalls": 2,
+    "toolRounds": 1,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "responses": [
+      {
+        "name": "recommend_size",
+        "status": "OK",
+        "reason": null,
+        "data": {
+          "status": "RECOMMENDED",
+          "missingInputs": [],
+          "recommendedSizes": [
+            {
+              "componentProductId": "SV2447-AO",
+              "componentRole": "TOP",
+              "size": "M"
+            }
+          ],
+          "inputFitPreference": null,
+          "alternativeSizes": [],
+          "fitScope": {
+            "kind": "COMPONENT",
+            "parentProductId": "SV2447",
+            "componentProductId": "SV2447-AO",
+            "componentRole": "TOP"
+          }
+        }
+      }
+    ],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "DISCOVERY",
+      "profile": {
+        "revision": 4,
+        "measurements": [
+          {
+            "kind": "HEIGHT_CM",
+            "value": 162,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-11-10T02:32:18.103Z",
+              "sourceEventHash": "17ccece4ca42d72ade7f04326a64053785fccace1c1e2a17916c4394e9b4033c"
+            }
+          },
+          {
+            "kind": "WEIGHT_KG",
+            "value": 51,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-11-10T02:32:54.148Z",
+              "sourceEventHash": "2c358b4449191fedc383ad7ef75ed8fe726e93e665c3c1de0cb71a1eb9155707"
+            }
+          },
+          {
+            "kind": "BUST_CM",
+            "value": 88,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-11-10T02:32:54.148Z",
+              "sourceEventHash": "2c358b4449191fedc383ad7ef75ed8fe726e93e665c3c1de0cb71a1eb9155707"
+            }
+          },
+          {
+            "kind": "WAIST_CM",
+            "value": 70,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-11-10T02:32:54.148Z",
+              "sourceEventHash": "2c358b4449191fedc383ad7ef75ed8fe726e93e665c3c1de0cb71a1eb9155707"
+            }
+          },
+          {
+            "kind": "HIPS_CM",
+            "value": 94,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-11-10T02:32:54.148Z",
+              "sourceEventHash": "2c358b4449191fedc383ad7ef75ed8fe726e93e665c3c1de0cb71a1eb9155707"
+            }
+          }
+        ],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [],
+        "grandTotalVnd": null
+      },
+      "receiptKinds": [],
+      "eventCount": 0
+    }
+  },
+  {
+    "caseId": "c-20261028-j2",
+    "turn": 3,
+    "nativeArtifact": "native-eefcfdbde4fd7f70d5e4fb375058a1bc94aa7ba34b08cfa66259e2b5ebc0776a-turn-2.json",
+    "nativeArtifactHash": "031f87408b86dd9c04a3339a320145cf8babef6a773cabcecd95c395ecfc04d5",
+    "normalToolCalls": 2,
+    "toolRounds": 1,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "responses": [
+      {
+        "name": "recommend_size",
+        "status": "OK",
+        "reason": null,
+        "data": {
+          "status": "RECOMMENDED",
+          "missingInputs": [],
+          "recommendedSizes": [
+            {
+              "componentProductId": "SV2447-AO",
+              "componentRole": "TOP",
+              "size": "M"
+            }
+          ],
+          "inputFitPreference": "RELAXED",
+          "alternativeSizes": [],
+          "fitScope": {
+            "kind": "COMPONENT",
+            "parentProductId": "SV2447",
+            "componentProductId": "SV2447-AO",
+            "componentRole": "TOP"
+          }
+        }
+      }
+    ],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "DISCOVERY",
+      "profile": {
+        "revision": 5,
+        "measurements": [
+          {
+            "kind": "HEIGHT_CM",
+            "value": 162,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-11-10T02:32:18.103Z",
+              "sourceEventHash": "17ccece4ca42d72ade7f04326a64053785fccace1c1e2a17916c4394e9b4033c"
+            }
+          },
+          {
+            "kind": "WEIGHT_KG",
+            "value": 51,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-11-10T02:32:54.148Z",
+              "sourceEventHash": "2c358b4449191fedc383ad7ef75ed8fe726e93e665c3c1de0cb71a1eb9155707"
+            }
+          },
+          {
+            "kind": "BUST_CM",
+            "value": 88,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-11-10T02:32:54.148Z",
+              "sourceEventHash": "2c358b4449191fedc383ad7ef75ed8fe726e93e665c3c1de0cb71a1eb9155707"
+            }
+          },
+          {
+            "kind": "WAIST_CM",
+            "value": 70,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-11-10T02:32:54.148Z",
+              "sourceEventHash": "2c358b4449191fedc383ad7ef75ed8fe726e93e665c3c1de0cb71a1eb9155707"
+            }
+          },
+          {
+            "kind": "HIPS_CM",
+            "value": 94,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-11-10T02:32:54.148Z",
+              "sourceEventHash": "2c358b4449191fedc383ad7ef75ed8fe726e93e665c3c1de0cb71a1eb9155707"
+            }
+          }
+        ],
+        "fitPreference": "RELAXED",
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [],
+        "grandTotalVnd": null
+      },
+      "receiptKinds": [],
+      "eventCount": 0
+    }
+  },
+  {
+    "caseId": "c-20261028-j4",
+    "turn": 1,
+    "nativeArtifact": "native-3d08d79cce26541d00f8ce59d4b1662b9674b9fbfb228a5f4d180334a3091dd1-turn-0.json",
+    "nativeArtifactHash": "730c6ee52ceaa81b22aa767ae991e178b9f6f4f6887220ca00af2ef512be4f7c",
+    "normalToolCalls": 3,
+    "toolRounds": 1,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "READY",
+      "requiredProducts": [
+        "SV2447"
+      ],
+      "chargedUnits": 1
+    },
+    "responses": [
+      {
+        "name": "add_to_cart",
+        "status": "UNAVAILABLE",
+        "reason": "SELECTION_UNAVAILABLE",
+        "data": {
+          "status": "COLOR_REQUIRED",
+          "effectCommitted": false
+        }
+      }
+    ],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "DISCOVERY",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [],
+        "grandTotalVnd": null
+      },
+      "receiptKinds": [],
+      "eventCount": 0
+    }
+  },
+  {
+    "caseId": "c-20261028-j4",
+    "turn": 2,
+    "nativeArtifact": "native-3d08d79cce26541d00f8ce59d4b1662b9674b9fbfb228a5f4d180334a3091dd1-turn-1.json",
+    "nativeArtifactHash": "b65f41081343a55e47b39276e9b6467a5d89365873c7af27733d581043d6d9c9",
+    "normalToolCalls": 3,
+    "toolRounds": 2,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "responses": [
+      {
+        "name": "record_negotiation",
+        "status": "REJECTED",
+        "reason": "NEGOTIATION_CONTEXT_REQUIRED",
+        "data": {
+          "effectCommitted": false,
+          "negotiationStatus": "NOT_EVALUATED",
+          "supportAvailability": "UNKNOWN",
+          "missing": [
+            "CART",
+            "NEGOTIATION"
+          ]
+        }
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "data": {
+          "missing": [
+            "ATTRIBUTES"
+          ]
+        }
+      }
+    ],
+    "stateAfter": {
+      "owner": "HUMAN",
+      "stage": "DISCOVERY",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [],
+        "grandTotalVnd": null
+      },
+      "receiptKinds": [],
+      "eventCount": 0
+    }
+  },
+  {
+    "caseId": "c-20261028-j4",
+    "turn": 3,
+    "nativeArtifact": "native-3d08d79cce26541d00f8ce59d4b1662b9674b9fbfb228a5f4d180334a3091dd1-turn-2.json",
+    "nativeArtifactHash": "fa7e274d363a1eda96d667d598dd8b63c3e1c9de57506e44287157eeb88582d3",
+    "normalToolCalls": null,
+    "toolRounds": null,
+    "quoteTaskWork": null,
+    "openingMediaWork": null,
+    "responses": [],
+    "stateAfter": {
+      "owner": "HUMAN",
+      "stage": "DISCOVERY",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [],
+        "grandTotalVnd": null
+      },
+      "receiptKinds": [],
+      "eventCount": 0
+    }
+  },
+  {
+    "caseId": "c-20261028-s04",
+    "turn": 1,
+    "nativeArtifact": "native-4ecdbc4a5d95c7f4d991c288cef1a0f23bddc83b1b096f810db25ceb3f154ed3-turn-0.json",
+    "nativeArtifactHash": "3eb79f76a8dd60d31037319303370a10070506a219e1d160903258ef4da7c867",
+    "normalToolCalls": 4,
+    "toolRounds": 1,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "responses": [
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "data": {
+          "missing": [
+            "ATTRIBUTES"
+          ]
+        }
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "data": {
+          "missing": [
+            "ATTRIBUTES"
+          ]
+        }
+      }
+    ],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "DISCOVERY",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [],
+        "grandTotalVnd": null
+      },
+      "receiptKinds": [],
+      "eventCount": 0
+    }
+  },
+  {
+    "caseId": "c-20261028-s09",
+    "turn": 1,
+    "nativeArtifact": "native-a8fe984d3e42dc16d30386c486ac30769418c9ceac82b80ae7ac763269f711c8-turn-0.json",
+    "nativeArtifactHash": "cb3a8260c6e91d296adb9365e90c55765c1d1246c752185c7af59c6a04402db8",
+    "normalToolCalls": 3,
+    "toolRounds": 1,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "responses": [
+      {
+        "name": "read_policy",
+        "status": "OK",
+        "reason": null,
+        "data": {}
+      }
+    ],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "DISCOVERY",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [],
+        "grandTotalVnd": null
+      },
+      "receiptKinds": [],
+      "eventCount": 0
+    }
+  },
+  {
+    "caseId": "c-20261028-j1",
+    "turn": 1,
+    "nativeArtifact": "native-23b4484f717c6242e3f503b1e37f241f6954450dbcaa4349cc8b076852fbac7f-turn-0.json",
+    "nativeArtifactHash": "b42c0b9ca1f01dc1a35ec37d5bc83d8aa5104282e6b4b1e38e2bf64bd326cdac",
+    "normalToolCalls": 3,
+    "toolRounds": 1,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "READY",
+      "requiredProducts": [
+        "SV2447"
+      ],
+      "chargedUnits": 1
+    },
+    "responses": [
+      {
+        "name": "add_to_cart",
+        "status": "UNAVAILABLE",
+        "reason": "SELECTION_UNAVAILABLE",
+        "data": {
+          "status": "COLOR_REQUIRED",
+          "effectCommitted": false
+        }
+      }
+    ],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "DISCOVERY",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [],
+        "grandTotalVnd": null
+      },
+      "receiptKinds": [],
+      "eventCount": 0
+    }
+  },
+  {
+    "caseId": "c-20261028-j1",
+    "turn": 2,
+    "nativeArtifact": "native-23b4484f717c6242e3f503b1e37f241f6954450dbcaa4349cc8b076852fbac7f-turn-1.json",
+    "nativeArtifactHash": "145337c444deae6f19ae185dac09e033a4d68976c6a643f5ffc64cde6daffca6",
+    "normalToolCalls": 3,
+    "toolRounds": 1,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "responses": [
+      {
+        "name": "add_to_cart",
+        "status": "UNAVAILABLE",
+        "reason": "SELECTION_UNAVAILABLE",
+        "data": {
+          "status": "COLOR_REQUIRED",
+          "effectCommitted": false
+        }
+      },
+      {
+        "name": "add_to_cart",
+        "status": "UNAVAILABLE",
+        "reason": "SELECTION_UNAVAILABLE",
+        "data": {
+          "status": "COLOR_REQUIRED",
+          "effectCommitted": false
+        }
+      }
+    ],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "DISCOVERY",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [],
+        "grandTotalVnd": null
+      },
+      "receiptKinds": [],
+      "eventCount": 0
+    }
+  },
+  {
+    "caseId": "c-20261028-j1",
+    "turn": 3,
+    "nativeArtifact": "native-23b4484f717c6242e3f503b1e37f241f6954450dbcaa4349cc8b076852fbac7f-turn-2.json",
+    "nativeArtifactHash": "60208388e45a3a1b048080abcff7acba53b9713844280892abb4e983b43cd474",
+    "normalToolCalls": 4,
+    "toolRounds": 1,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "responses": [
+      {
+        "name": "add_to_cart",
+        "status": "UNAVAILABLE",
+        "reason": "SELECTION_UNAVAILABLE",
+        "data": {
+          "status": "COLOR_REQUIRED",
+          "effectCommitted": false
+        }
+      },
+      {
+        "name": "add_to_cart",
+        "status": "UNAVAILABLE",
+        "reason": "SELECTION_UNAVAILABLE",
+        "data": {
+          "status": "COLOR_REQUIRED",
+          "effectCommitted": false
+        }
+      },
+      {
+        "name": "quote_cart",
+        "status": "REJECTED",
+        "reason": "DEPENDENT_EFFECT_REJECTED",
+        "data": {}
+      }
+    ],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "DISCOVERY",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [],
+        "grandTotalVnd": null
+      },
+      "receiptKinds": [],
+      "eventCount": 0
+    }
+  },
+  {
+    "caseId": "c-po-20261031-p08",
+    "turn": 1,
+    "nativeArtifact": "native-20ea0df4848967cc0977ca22a310912310101f937f0c891371a08a81b5494268-turn-0.json",
+    "nativeArtifactHash": "10cb8fc088575bbe1b4fc0734447bcde54c9f6a11256600851ece4f7eebb24ea",
+    "normalToolCalls": 3,
+    "toolRounds": 1,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "READY",
+      "requiredProducts": [
+        "SV2447"
+      ],
+      "chargedUnits": 1
+    },
+    "responses": [
+      {
+        "name": "add_to_cart",
+        "status": "OK",
+        "reason": null,
+        "data": {}
+      }
+    ],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "CART_OPEN",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [
+          {
+            "product": "SV2447",
+            "offer": "SET_VAY",
+            "quantity": 1,
+            "sizes": [
+              "M",
+              "M"
+            ]
+          }
+        ],
+        "grandTotalVnd": 829000
+      },
+      "receiptKinds": [
+        "FACTS_PRESENTED",
+        "MEASUREMENTS_REQUIRED",
+        "SIZE_RECOMMENDED",
+        "CART_OPENED"
+      ],
+      "eventCount": 4
+    }
+  },
+  {
+    "caseId": "c-po-20261031-p08",
+    "turn": 2,
+    "nativeArtifact": "native-20ea0df4848967cc0977ca22a310912310101f937f0c891371a08a81b5494268-turn-1.json",
+    "nativeArtifactHash": "fe349b99b9cac495378dbc02f822df0f221eee55a957c521b7a41870e3d427f3",
+    "normalToolCalls": 2,
+    "toolRounds": 1,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "responses": [
+      {
+        "name": "change_cart_item",
+        "status": "UNAVAILABLE",
+        "reason": "SELECTION_UNAVAILABLE",
+        "data": {
+          "status": "COLOR_REQUIRED",
+          "effectCommitted": false
+        }
+      }
+    ],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "CART_OPEN",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [
+          {
+            "product": "SV2447",
+            "offer": "SET_VAY",
+            "quantity": 1,
+            "sizes": [
+              "M",
+              "M"
+            ]
+          }
+        ],
+        "grandTotalVnd": 829000
+      },
+      "receiptKinds": [
+        "FACTS_PRESENTED",
+        "MEASUREMENTS_REQUIRED",
+        "SIZE_RECOMMENDED",
+        "CART_OPENED"
+      ],
+      "eventCount": 4
+    }
+  },
+  {
+    "caseId": "c-po-20261031-p07",
+    "turn": 1,
+    "nativeArtifact": "native-ebbfd692055f99322f893bed784e4f59df5a06a073d226c88fb44e11ba4203e8-turn-0.json",
+    "nativeArtifactHash": "ef9f188bcbbf78f151ede962c67b1b3c8d550e694bbff36c55c1e6473de2fe2e",
+    "normalToolCalls": 4,
+    "toolRounds": 1,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "READY",
+      "requiredProducts": [
+        "SQ2447"
+      ],
+      "chargedUnits": 1
+    },
+    "responses": [
+      {
+        "name": "recommend_size",
+        "status": "OK",
+        "reason": null,
+        "data": {
+          "status": "RECOMMENDED",
+          "missingInputs": [],
+          "recommendedSizes": [
+            {
+              "componentProductId": "SV2447-AO",
+              "componentRole": "TOP",
+              "size": "M"
+            }
+          ],
+          "inputFitPreference": null,
+          "alternativeSizes": [],
+          "fitScope": {
+            "kind": "COMPONENT",
+            "parentProductId": "SQ2447",
+            "componentProductId": "SV2447-AO",
+            "componentRole": "TOP"
+          }
+        }
+      },
+      {
+        "name": "recommend_size",
+        "status": "OK",
+        "reason": null,
+        "data": {
+          "status": "RECOMMENDED",
+          "missingInputs": [],
+          "recommendedSizes": [
+            {
+              "componentProductId": "SQ2447-QUAN",
+              "componentRole": "PANTS",
+              "size": "M"
+            }
+          ],
+          "inputFitPreference": null,
+          "alternativeSizes": [],
+          "fitScope": {
+            "kind": "COMPONENT",
+            "parentProductId": "SQ2447",
+            "componentProductId": "SQ2447-QUAN",
+            "componentRole": "PANTS"
+          }
+        }
+      }
+    ],
+    "stateAfter": {
+      "owner": "HUMAN",
+      "stage": "DISCOVERY",
+      "profile": {
+        "revision": 3,
+        "measurements": [
+          {
+            "kind": "HEIGHT_CM",
+            "value": 160,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-11-10T02:40:07.609Z",
+              "sourceEventHash": "9e1c27761e7db9adc319580fd20353a815dd43940eca0f0ce410e1dc845dd992"
+            }
+          },
+          {
+            "kind": "WEIGHT_KG",
+            "value": 55,
+            "provenance": {
+              "source": "CUSTOMER_MESSAGE",
+              "confidence": 1,
+              "observedAt": "2026-11-10T02:40:07.609Z",
+              "sourceEventHash": "9e1c27761e7db9adc319580fd20353a815dd43940eca0f0ce410e1dc845dd992"
+            }
+          }
+        ],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [],
+        "grandTotalVnd": null
+      },
+      "receiptKinds": [],
+      "eventCount": 0
+    }
+  },
+  {
+    "caseId": "c-po-20261031-p09",
+    "turn": 1,
+    "nativeArtifact": "native-4c9838b85f982015d1db52d7cd39a3aa2b540f0ecea46149a5f71749ffca4ce6-turn-0.json",
+    "nativeArtifactHash": "0e183de46a529afc9d5d5fc4df76116278e25053f90666d577dab84bf3604588",
+    "normalToolCalls": 2,
+    "toolRounds": 0,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "responses": [],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "DISCOVERY",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [],
+        "grandTotalVnd": null
+      },
+      "receiptKinds": [],
+      "eventCount": 0
+    }
+  },
+  {
+    "caseId": "c-po-20261031-p09",
+    "turn": 2,
+    "nativeArtifact": "native-4c9838b85f982015d1db52d7cd39a3aa2b540f0ecea46149a5f71749ffca4ce6-turn-1.json",
+    "nativeArtifactHash": "fc6cbf21632b51938db4c4fc7d7f597bd189c5ced98a8eb11767a3ab88f55b03",
+    "normalToolCalls": 3,
+    "toolRounds": 1,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "responses": [
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "data": {
+          "missing": [
+            "ATTRIBUTES"
+          ]
+        }
+      }
+    ],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "DISCOVERY",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [],
+        "grandTotalVnd": null
+      },
+      "receiptKinds": [],
+      "eventCount": 0
+    }
+  },
+  {
+    "caseId": "c-20261104-checkout-complete",
+    "turn": 1,
+    "nativeArtifact": "native-17c082af6bdd0265c77ccfc9b92800186ce7637a4dff9e65f2b8d846b9402ea8-turn-0.json",
+    "nativeArtifactHash": "7f74192c0c8414a019472cc9c839f061cc9917c08abb62bff34b610f20e39aeb",
+    "normalToolCalls": 3,
+    "toolRounds": 1,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "READY",
+      "requiredProducts": [
+        "SV2447"
+      ],
+      "chargedUnits": 1
+    },
+    "responses": [
+      {
+        "name": "add_to_cart",
+        "status": "OK",
+        "reason": null,
+        "data": {}
+      }
+    ],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "CART_OPEN",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [
+          {
+            "product": "SV2447",
+            "offer": "SET_VAY",
+            "quantity": 1,
+            "sizes": [
+              "M",
+              "M"
+            ]
+          }
+        ],
+        "grandTotalVnd": 829000
+      },
+      "receiptKinds": [
+        "FACTS_PRESENTED",
+        "MEASUREMENTS_REQUIRED",
+        "SIZE_RECOMMENDED",
+        "CART_OPENED"
+      ],
+      "eventCount": 4
+    }
+  },
+  {
+    "caseId": "c-20261104-checkout-complete",
+    "turn": 2,
+    "nativeArtifact": "native-17c082af6bdd0265c77ccfc9b92800186ce7637a4dff9e65f2b8d846b9402ea8-turn-1.json",
+    "nativeArtifactHash": "fc72e1db0238ce8a61d275dc4f85c683552651ad7bacab7599948b71823ac561",
+    "normalToolCalls": 2,
+    "toolRounds": 1,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "responses": [],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "CART_OPEN",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [
+          {
+            "product": "SV2447",
+            "offer": "SET_VAY",
+            "quantity": 1,
+            "sizes": [
+              "M",
+              "M"
+            ]
+          }
+        ],
+        "grandTotalVnd": 829000
+      },
+      "receiptKinds": [
+        "FACTS_PRESENTED",
+        "MEASUREMENTS_REQUIRED",
+        "SIZE_RECOMMENDED",
+        "CART_OPENED",
+        "CLARIFICATION_REQUESTED"
+      ],
+      "eventCount": 5
+    }
+  },
+  {
+    "caseId": "c-20261104-checkout-complete",
+    "turn": 3,
+    "nativeArtifact": "native-17c082af6bdd0265c77ccfc9b92800186ce7637a4dff9e65f2b8d846b9402ea8-turn-2.json",
+    "nativeArtifactHash": "425074437aa99f37022fa539f891fc44208a8958b307f079954c393cdca9a818",
+    "normalToolCalls": 0,
+    "toolRounds": null,
+    "quoteTaskWork": null,
+    "openingMediaWork": null,
+    "responses": [],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "CART_OPEN",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [
+          {
+            "product": "SV2447",
+            "offer": "SET_VAY",
+            "quantity": 1,
+            "sizes": [
+              "M",
+              "M"
+            ]
+          }
+        ],
+        "grandTotalVnd": 829000
+      },
+      "receiptKinds": [
+        "FACTS_PRESENTED",
+        "MEASUREMENTS_REQUIRED",
+        "SIZE_RECOMMENDED",
+        "CART_OPENED",
+        "CLARIFICATION_REQUESTED",
+        "CHECKOUT_DETAILS_CAPTURED",
+        "CLARIFICATION_RESOLVED",
+        "CLARIFICATION_REQUESTED"
+      ],
+      "eventCount": 8
+    }
+  },
+  {
+    "caseId": "c-20261104-checkout-complete",
+    "turn": 4,
+    "nativeArtifact": "native-17c082af6bdd0265c77ccfc9b92800186ce7637a4dff9e65f2b8d846b9402ea8-turn-3.json",
+    "nativeArtifactHash": "32b01b2bf1cb9f4b69602779753e25394d0131108588cddb0a13b6c3ea781fe9",
+    "normalToolCalls": 0,
+    "toolRounds": null,
+    "quoteTaskWork": null,
+    "openingMediaWork": null,
+    "responses": [],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "CART_OPEN",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [
+          {
+            "product": "SV2447",
+            "offer": "SET_VAY",
+            "quantity": 1,
+            "sizes": [
+              "M",
+              "M"
+            ]
+          }
+        ],
+        "grandTotalVnd": 829000
+      },
+      "receiptKinds": [
+        "FACTS_PRESENTED",
+        "MEASUREMENTS_REQUIRED",
+        "SIZE_RECOMMENDED",
+        "CART_OPENED",
+        "CLARIFICATION_REQUESTED",
+        "CHECKOUT_DETAILS_CAPTURED",
+        "CLARIFICATION_RESOLVED",
+        "CLARIFICATION_REQUESTED",
+        "CHECKOUT_DETAILS_CAPTURED",
+        "CLARIFICATION_RESOLVED",
+        "CLARIFICATION_REQUESTED"
+      ],
+      "eventCount": 11
+    }
+  },
+  {
+    "caseId": "c-20261104-checkout-complete",
+    "turn": 5,
+    "nativeArtifact": "native-17c082af6bdd0265c77ccfc9b92800186ce7637a4dff9e65f2b8d846b9402ea8-turn-4.json",
+    "nativeArtifactHash": "a0262a6c6d0f2455a6cf82993ba37d0fb8938aab417abe2697fb832755c8cf60",
+    "normalToolCalls": 0,
+    "toolRounds": null,
+    "quoteTaskWork": null,
+    "openingMediaWork": null,
+    "responses": [],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "CART_OPEN",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [
+          {
+            "product": "SV2447",
+            "offer": "SET_VAY",
+            "quantity": 1,
+            "sizes": [
+              "M",
+              "M"
+            ]
+          }
+        ],
+        "grandTotalVnd": 829000
+      },
+      "receiptKinds": [
+        "FACTS_PRESENTED",
+        "MEASUREMENTS_REQUIRED",
+        "SIZE_RECOMMENDED",
+        "CART_OPENED",
+        "CLARIFICATION_REQUESTED",
+        "CHECKOUT_DETAILS_CAPTURED",
+        "CLARIFICATION_RESOLVED",
+        "CLARIFICATION_REQUESTED",
+        "CHECKOUT_DETAILS_CAPTURED",
+        "CLARIFICATION_RESOLVED",
+        "CLARIFICATION_REQUESTED",
+        "CHECKOUT_DETAILS_CAPTURED",
+        "CLARIFICATION_RESOLVED",
+        "CLARIFICATION_REQUESTED"
+      ],
+      "eventCount": 14
+    }
+  },
+  {
+    "caseId": "c-20261104-checkout-complete",
+    "turn": 6,
+    "nativeArtifact": "native-17c082af6bdd0265c77ccfc9b92800186ce7637a4dff9e65f2b8d846b9402ea8-turn-5.json",
+    "nativeArtifactHash": "b5ec1221f0532524bd7fdeab91e126cb34eece30cbfd6dd6cccb73f7c9798aaa",
+    "normalToolCalls": 0,
+    "toolRounds": null,
+    "quoteTaskWork": null,
+    "openingMediaWork": null,
+    "responses": [],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "ORDER_PREVIEW",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [
+          {
+            "product": "SV2447",
+            "offer": "SET_VAY",
+            "quantity": 1,
+            "sizes": [
+              "M",
+              "M"
+            ]
+          }
+        ],
+        "grandTotalVnd": 829000
+      },
+      "receiptKinds": [
+        "FACTS_PRESENTED",
+        "MEASUREMENTS_REQUIRED",
+        "SIZE_RECOMMENDED",
+        "CART_OPENED",
+        "CLARIFICATION_REQUESTED",
+        "CHECKOUT_DETAILS_CAPTURED",
+        "CLARIFICATION_RESOLVED",
+        "CLARIFICATION_REQUESTED",
+        "CHECKOUT_DETAILS_CAPTURED",
+        "CLARIFICATION_RESOLVED",
+        "CLARIFICATION_REQUESTED",
+        "CHECKOUT_DETAILS_CAPTURED",
+        "CLARIFICATION_RESOLVED",
+        "CLARIFICATION_REQUESTED",
+        "CHECKOUT_DETAILS_CAPTURED",
+        "CART_READY",
+        "PREVIEW_CREATED"
+      ],
+      "eventCount": 17
+    }
+  },
+  {
+    "caseId": "c-20261104-checkout-complete",
+    "turn": 7,
+    "nativeArtifact": "native-17c082af6bdd0265c77ccfc9b92800186ce7637a4dff9e65f2b8d846b9402ea8-turn-6.json",
+    "nativeArtifactHash": "eb51f810b05d213ad4cfeabdcbf53ef86b9f137d091066d0435e3aeb980aa173",
+    "normalToolCalls": 2,
+    "toolRounds": 1,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "responses": [],
+    "stateAfter": {
+      "owner": "HUMAN",
+      "stage": "PURCHASE_CONFIRMED",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [
+          {
+            "product": "SV2447",
+            "offer": "SET_VAY",
+            "quantity": 1,
+            "sizes": [
+              "M",
+              "M"
+            ]
+          }
+        ],
+        "grandTotalVnd": 829000
+      },
+      "receiptKinds": [
+        "FACTS_PRESENTED",
+        "MEASUREMENTS_REQUIRED",
+        "SIZE_RECOMMENDED",
+        "CART_OPENED",
+        "CLARIFICATION_REQUESTED",
+        "CHECKOUT_DETAILS_CAPTURED",
+        "CLARIFICATION_RESOLVED",
+        "CLARIFICATION_REQUESTED",
+        "CHECKOUT_DETAILS_CAPTURED",
+        "CLARIFICATION_RESOLVED",
+        "CLARIFICATION_REQUESTED",
+        "CHECKOUT_DETAILS_CAPTURED",
+        "CLARIFICATION_RESOLVED",
+        "CLARIFICATION_REQUESTED",
+        "CHECKOUT_DETAILS_CAPTURED",
+        "CART_READY",
+        "PREVIEW_CREATED",
+        "CONFIRM_PURCHASE"
+      ],
+      "eventCount": 18
+    }
+  },
+  {
+    "caseId": "c-20261028-s08",
+    "turn": 1,
+    "nativeArtifact": "native-0a92230771de75021cc1cb0d305558077a0e294ad27901a81f839bbb9d426b09-turn-0.json",
+    "nativeArtifactHash": "29f0fc8eef0b4fc898c47f76a0c2ad4b83c70dee80057c4d5f89b34d5666ff8b",
+    "normalToolCalls": 4,
+    "toolRounds": 1,
+    "quoteTaskWork": [],
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "responses": [
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "data": {
+          "missing": [
+            "ATTRIBUTES"
+          ]
+        }
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "data": {
+          "missing": [
+            "ATTRIBUTES"
+          ]
+        }
+      }
+    ],
+    "stateAfter": {
+      "owner": "BOT",
+      "stage": "DISCOVERY",
+      "profile": {
+        "revision": 1,
+        "measurements": [],
+        "fitPreference": null,
+        "preferences": {
+          "colors": [],
+          "styles": [],
+          "materials": []
+        }
+      },
+      "cart": {
+        "lines": [],
+        "grandTotalVnd": null
+      },
+      "receiptKinds": [],
+      "eventCount": 0
+    }
+  }
+]

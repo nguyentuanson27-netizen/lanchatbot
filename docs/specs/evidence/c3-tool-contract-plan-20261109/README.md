@@ -17,3 +17,7 @@ Approval chỉ dành cho **kế hoạch**. Chưa có implementation mới, chưa
 ## Implementation approval
 
 Implementation is independently **APPROVED** at `f4ba36b53abc69a682924c6103eb073d113114e3`: [review R3](implementation-review-r3.md), [machine record](implementation-review-r3.json), [verification/log hashes and retained failures](implementation-tests/verification.json). This supersedes the pending implementation statements above, without changing historical plan bytes. PG14/14, worker focused1094, Node102, protected22, build/typecheck/lint/dataset PASS. Provider0. This is not approval of prospective native inputs or Phase C qualification.
+
+## Subsequent input approval and model screen, 10/11/2026
+
+The offline judge photo rule was corrected to match approved runtime scope, with RED→GREEN41/41 and independent exact-head/input approval. Clean run source8b4e190c, fresh world4eeaa30a; all13cases/27turns,62generationHTTP/allOK/retry0. [Report/independent review/provenance](../../../../apps/worker/evals/single-agent-commerce-qualification/tool-contract-screen-run-20261110/REPORT.md): STOP, three material cases J1/J4/P07; W2 native NOT_EXERCISED. No automatic remainder, stability/qualification claim, merge/deploy/live send. Historical planning/zero-provider records above remain unchanged.

@@ -1,6 +1,6 @@
 # Phase C — tool contract completion implementation, 2026-11-09
 
-Status: IMPLEMENTED, acceptance PASS; independently APPROVED at `f4ba36b5`. No provider run in this implementation record yet.
+Status: IMPLEMENTED, acceptance PASS; independently APPROVED at `f4ba36b5`. The subsequent model screen is recorded separately below.
 
 Implementation base: `36058803b95324d8888ef4e6c76773e01b61bb6f`. Approved [revision 3 plan](c3-phase-c-tool-contract-completion-plan-20261109.md), SHA256 `6495b49aff8016df34050d79f86b31330905ef2deb9714033b92ecde13cc3bdd`, remains byte-identical. Planning approval does not approve implementation or model qualification.
 
@@ -42,3 +42,7 @@ The unknown-receipt negative exposed a further terminal gap: quote correctly sto
 Independent input review found an outdated offline judge rule requiring a photo for every admitted candidate. `TASK_OUTCOME_CONTEXT_V3` now matches approved W3: opening unique/current-cart/successful-quote targets require photos, including ETA/ACK; a search/ambiguous pool alone does not. Returning proof, conditional unknown-entry blocking, explicit SELECT/cart constraints and silent handoff remain. This changes evaluator context only; runtime and owner/verifier prompts are unchanged. Both absolute and paired packets carry the same rule; a runtime-projection test proves the judge rule stays evaluator-only.
 
 Observed RED: qualification test 33 PASS / 1 FAIL against V2. GREEN: `node --test apps/worker/evals/single-agent-commerce-qualification/qualification.test.mjs apps/worker/evals/single-agent-commerce-qualification/diagnostic.test.mjs` **41/41 PASS**. Logs are preserved with normalized LF under `implementation-tests/judge-scope-{red,green}-20261110.log`; original outside logs retain raw command output. The previous zero-provider pending registration is retained, not reused after this source change. Recapture actual sources and prepare new clean-source initial state/registration before independent input review. No new provider generation has occurred.
+
+## Model screen, 2026-11-10
+
+After the above zero-provider input correction, source `8b4e190c` and fresh world `4eeaa30a` received independent input APPROVE and preflight. All13cases/27turns ran once:62generationHTTP, allOK/retry0. Root and independent whole-conversation review agree three material cases J1/J4/P07; S16 remains source gap. W2 native writer→quote NOT_EXERCISED, controls fail: recommendation STOP, no automatic remainder. [Full results, all conversations, actual commands and limits](../../apps/worker/evals/single-agent-commerce-qualification/tool-contract-screen-run-20261110/REPORT.md). Code acceptance does not grant model qualification or deployment.

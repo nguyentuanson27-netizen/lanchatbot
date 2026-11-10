@@ -1,6 +1,8 @@
-## Current — tool contract completion, 2026-11-09
+## Current — tool contract completion screen STOP, 2026-11-10
 
 Execute [approved revision 3](../docs/specs/c3-phase-c-tool-contract-completion-plan-20261109.md) in W1→W2/W3→W4/W5 order. Preserve exact plan hash and historic results. [Implementation](../docs/specs/c3-phase-c-tool-contract-completion-implementation-20261109.md) covers flat native read schema, ordered writer-first quote, separate code-owned pre-cart/offer-price/cart receipt authority, opening photo reservation, bounded source labels and transport diagnostics. Final acceptance/independent implementation approval precedes clean-source/native input review and the 13-case/27-turn screen. N1/retry0, no automatic full remainder or deploy. Missing S16 wearer provenance remains a prospective source-gap control, never a sale-quality pass.
+
+Implementation independently approved; clean-source8b4e190c inputs independently approved after correcting stale evaluator-only opening-photo scope. Screen ran all13cases/27turns with62generationHTTP/allOK/retry0. [Whole-run report and independent review](../apps/worker/evals/single-agent-commerce-qualification/tool-contract-screen-run-20261110/REPORT.md): three material cases J1/J4/P07, nine of12 sales cases task-adequate, one S16 source-gap control. W2 native writer→quote NOT_EXERCISED; no automatic full remainder. Preserve results and exact world/source before defining any new repair; do not patch prompts with per-case examples or rerun for a lucky PASS. No Phase C GO/merge/deploy.
 
 ## Full34 after J2 repair — completed, 2026-11-08
 

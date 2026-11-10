@@ -4,8 +4,10 @@
 - [x] Observe RED→GREEN for new behavior; preserve owner/verifier sales prompts, native signatures, current caps, cart/source/permission/privacy gates.
 - [x] Independent implementation R1/R2 review and fixes; final PG exposed canonical cart-overlay/own-commit authority issues, retained as failures and fixed at code boundary, not prompt. [Implementation record](../docs/specs/c3-phase-c-tool-contract-completion-implementation-20261109.md).
 - [x] Final acceptance: PG14/14 with clean f4ba36b5, focused1094, Node102, protected22 and worker build/typecheck/lint/dataset PASS; same independent reviewer APPROVE implementation R3. Unproved effects block ACK as well as quote/verifier.
-- [ ] Clean run-source seal and independent input review before native dispatch.
-- [ ] Execute preregistered 13-case/27-turn screen once; prospective S16 SOURCE_GAP, no automatic full/retry, no Phase C GO.
+- [x] Clean source8b4e190c; independent input APPROVE after evaluator-only photo-scope correction, fresh world4eeaa30a and preflight. Original zero-provider pending inputs retained; no stale-source reuse.
+- [x] Execute all13cases/27turns once, N1/retry0:62HTTP (42owner20verifier), allOK;17modelSEND+5codeSEND+4silentHF+1HUMANno-send. Both disposable DBs dropped, live0/sourcewrites0.
+- [x] Root and independent whole-conversation reviews agree9/12task-adequate sales cases,3material J1/J4/P07; S16 prospective source gap excluded. [Report/all27turns/independent review](../apps/worker/evals/single-agent-commerce-qualification/tool-contract-screen-run-20261110/REPORT.md).
+- [ ] STOP: W2 native writer→quote NOT_EXERCISED; controls J1/P07 fail. No automatic full/retry, Phase C GO, stability/C3 replacement claim, merge/deploy/live send. A new repair/run requires a separately reviewed scope.
 
 ## Full34 after J2 repair — completed, 2026-11-08
 
