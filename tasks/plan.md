@@ -1,4 +1,8 @@
-## Current — tool contract completion screen STOP, 2026-11-10
+## Current — owner result meaning repair implemented, 2026-11-10
+
+User authorized repair after the13/27 screen. [Scope](../docs/specs/c3-phase-c-owner-result-meaning-repair-20261110.md) and [implementation amendment](../docs/specs/c3-phase-c-owner-result-meaning-review-amendment-20261110.md): distinguish buy prerequisites from quote request targets, preserve UNKNOWN negotiation, present per-call fit with actual profile/source identity, align obsolete technical prompt instructions. Exact implementation86acecc4 independently APPROVED after R1 fixes. [Verification and limits](../docs/specs/c3-phase-c-owner-result-meaning-implementation-20261110.md):1114worker/133Node/22protected plus build/typecheck/lint/dataset PASS; provider0. Model improvement remains unverified. No automatic model/full dispatch; freeze/review new inputs and population first. Original screen STOP and historical results below remain unchanged.
+
+## Previous — tool contract completion screen STOP, 2026-11-10
 
 Execute [approved revision 3](../docs/specs/c3-phase-c-tool-contract-completion-plan-20261109.md) in W1→W2/W3→W4/W5 order. Preserve exact plan hash and historic results. [Implementation](../docs/specs/c3-phase-c-tool-contract-completion-implementation-20261109.md) covers flat native read schema, ordered writer-first quote, separate code-owned pre-cart/offer-price/cart receipt authority, opening photo reservation, bounded source labels and transport diagnostics. Final acceptance/independent implementation approval precedes clean-source/native input review and the 13-case/27-turn screen. N1/retry0, no automatic full remainder or deploy. Missing S16 wearer provenance remains a prospective source-gap control, never a sale-quality pass.
 

@@ -1,3 +1,10 @@
+## Owner result meaning repair — implemented, 2026-11-10
+
+- [x] Implement approved scope4729fb56 and amendment23e336ae; exact code86acecc4. Typed missing-choice/quote-request distinction, code-only original-result proof, per-call engine/support result grouping, metadata/profile scope and obsolete public prompt/schema alignment.
+- [x] Same reviewer REQUEST_CHANGES → fix three blockers → exact-head APPROVE. No engine/chart/verifier/cap/retry change or per-case examples. [Implementation/review/evidence](../docs/specs/c3-phase-c-owner-result-meaning-implementation-20261110.md).
+- [x] Observed RED→GREEN; final1114worker/133Node/22protected, worker build/typecheck/lint and dataset PASS; source diff-check PASS. Provider0, no new PG/transaction acceptance claim.
+- [ ] Model effect NOT_VERIFIED; previous screen STOP intact. Before next run: preregister targeted/control population and freeze/review fresh inputs. No automatic full/repeat/merge/deploy/live send.
+
 ## Tool contract completion — implementation, 2026-11-09
 
 - [x] Implement W1 flat shared native schema/decoder; W2 closed ordered writer-first quote; W3 separate photo obligations/reservation; W4 bounded map labels/owner opaque refs; W5 safe transport cause/retry0.

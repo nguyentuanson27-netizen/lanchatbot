@@ -1,0 +1,128 @@
+{
+  "kind": "IMPLEMENTATION_VERIFICATION_NOT_MODEL_QUALITY",
+  "implementationBaseSha": "de6579ec5f3be29ed12271e19bafacd1f7eba0c2",
+  "implementationSha": "86acecc40b16486eca686422500cf3d6f30995ed",
+  "providerGenerations": 0,
+  "liveSends": 0,
+  "sourceShopWrites": 0,
+  "newPostgresAcceptance": "NOT_RUN_TRANSACTION_BEHAVIOR_UNCHANGED",
+  "commands": [
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-quote-routing.test.ts --reporter=dot",
+      "status": "EXPECTED_RED_14_PASS_2_FAIL",
+      "rawPath": "../c3-owner-result-meaning-worker-red-final-20261110.log",
+      "rawSha256": "a33b1a58509672af780de450d14dfdb9548f405793bbf99f28b525758cb574a8",
+      "archivePath": "worker-red.log",
+      "archiveSha256": "412c62f4c4ddacd85af98e4383449ac993a3eb599cb42c41939ba8f7aeb35617",
+      "archiveEncoding": "UTF8_LF_TRAILING_DISPLAY_WHITESPACE_REMOVED_NOT_RAW_BYTES"
+    },
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/owner-result-meaning.test.mjs",
+      "status": "EXPECTED_RED_0_PASS_3_FAIL",
+      "rawPath": "../c3-owner-result-meaning-node-red-20261110.log",
+      "rawSha256": "38f2416ba0327ec119d4225a265f1f1edc792dda0c125b47894c1a251ccc3d06",
+      "archivePath": "node-red.log",
+      "archiveSha256": "76b8c4e770ddc180c57c901d26df5c6d11155953141db69d1da14e6fbff9745f",
+      "archiveEncoding": "UTF8_LF_TRAILING_DISPLAY_WHITESPACE_REMOVED_NOT_RAW_BYTES"
+    },
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/owner-result-meaning.test.mjs",
+      "status": "EXPECTED_RED_3_PASS_5_FAIL",
+      "rawPath": "../c3-owner-result-meaning-history-red-20261110.log",
+      "rawSha256": "5f7d3be25c6038cb977eccce31838ba5745a0e0195f7c728d697ba2d0d163069",
+      "archivePath": "history-red.log",
+      "archiveSha256": "8f07f652f9423c60825efd3d5d0bb1f34a37c6d75e033bf85aa0bc62c71b4a44",
+      "archiveEncoding": "UTF8_LF_TRAILING_DISPLAY_WHITESPACE_REMOVED_NOT_RAW_BYTES"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce src/realtime-sales-catalog.test.ts src/single-agent-semantic-verifier-boundary.test.ts src/track-b-protected-claim-boundary.test.ts --reporter=dot --maxWorkers=2 --no-file-parallelism",
+      "status": "PASS_1114_37_FILES",
+      "rawPath": "../c3-owner-result-meaning-focused-final-20261110.log",
+      "rawSha256": "49bbb5c0553d3e1ca0480c53166eb95a855184e8bf2565d85f0d1a763da6fb01",
+      "archivePath": "focused.log",
+      "archiveSha256": "d123cbe7d416294c7cedda16eb57134114f27905ca033bfb113515cc691ba96d",
+      "archiveEncoding": "UTF8_LF_TRAILING_DISPLAY_WHITESPACE_REMOVED_NOT_RAW_BYTES"
+    },
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/owner-result-meaning.test.mjs apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/product-read-selection.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-commerce-read-only/owner-data-presentation.test.mjs apps/worker/evals/single-agent-commerce-read-only/owner-data-compact.test.mjs apps/worker/evals/single-agent-commerce-read-only/native-presentation.test.mjs apps/worker/evals/single-agent-commerce-read-only/selection-compact-wire.test.mjs apps/worker/evals/single-agent-commerce-read-only/quote-task.test.mjs apps/worker/evals/single-agent-commerce-read-only/tool-contract-completion.test.mjs",
+      "status": "PASS_133",
+      "rawPath": "../c3-owner-result-meaning-node-final-20261110.log",
+      "rawSha256": "aa8d7c8934cebcf1776ff1a6de2119efd5d7cb8bad97f43ab50220c5651ce5d0",
+      "archivePath": "node.log",
+      "archiveSha256": "7bec3c6969fe117c30d0f5a06cb4d8418d1453a1dda38d8ae9ab96af3078f712",
+      "archiveEncoding": "UTF8_LF_TRAILING_DISPLAY_WHITESPACE_REMOVED_NOT_RAW_BYTES"
+    },
+    {
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts --reporter=dot",
+      "status": "PASS_22",
+      "rawPath": "../c3-owner-result-meaning-protected-final-20261110.log",
+      "rawSha256": "4d50f7502e89477a98c91c0f2ec20b38a8a688cc42fe0c3d23aab1cd65a010b9",
+      "archivePath": "protected.log",
+      "archiveSha256": "3780bf1bd8c5c962f2200a75b26090e3da2a357e6963a5b3bad7c0b009499877",
+      "archiveEncoding": "UTF8_LF_TRAILING_DISPLAY_WHITESPACE_REMOVED_NOT_RAW_BYTES"
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "status": "PASS",
+      "rawPath": "../c3-owner-result-meaning-build-final-20261110.log",
+      "rawSha256": "6e49fba112edd01e6676f814a83d1b0501900a4df5c3de4bc9bb3aaee6eff9bb",
+      "archivePath": "build.log",
+      "archiveSha256": "17c430b5e6a9c06c515eec2d717719341c43ed83a13ebb981549b851170b1b84",
+      "archiveEncoding": "UTF8_LF_TRAILING_DISPLAY_WHITESPACE_REMOVED_NOT_RAW_BYTES"
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "status": "PASS",
+      "rawPath": "../c3-owner-result-meaning-typecheck-final-20261110.log",
+      "rawSha256": "a76229f46115888e44f09ad19dbf2977055f650fdc7daab7043c630528af94c6",
+      "archivePath": "typecheck.log",
+      "archiveSha256": "62d3a68a829d423fea666f54f084624e3da13cfac22376cae8cf3332807ee680",
+      "archiveEncoding": "UTF8_LF_TRAILING_DISPLAY_WHITESPACE_REMOVED_NOT_RAW_BYTES"
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "status": "PASS",
+      "rawPath": "../c3-owner-result-meaning-lint-final-20261110.log",
+      "rawSha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "archivePath": "lint.log",
+      "archiveSha256": "4b3587ccdf0c086e506a79a7e3de4a3cc401dc06f0bb68aa783fe64decd3b9e5",
+      "archiveEncoding": "UTF8_LF_TRAILING_DISPLAY_WHITESPACE_REMOVED_NOT_RAW_BYTES"
+    },
+    {
+      "command": "pnpm check:dataset-boundary",
+      "status": "PASS",
+      "rawPath": "../c3-owner-result-meaning-dataset-final-20261110.log",
+      "rawSha256": "745c52b41d3303a69e6595df2e22f28f9fc5f1f0b5392d560db215ff5a6e14ca",
+      "archivePath": "dataset.log",
+      "archiveSha256": "0e6619c6d4e6b5872ffd09ca0a95fd5e4f910645c44667fa29a723cd6a790e5c",
+      "archiveEncoding": "UTF8_LF_TRAILING_DISPLAY_WHITESPACE_REMOVED_NOT_RAW_BYTES"
+    }
+  ],
+  "retainedDevelopmentFailures": [
+    {
+      "path": "../c3-owner-result-meaning-worker-red-20261110.log",
+      "sha256": "dcf7e977fe713c4d3aeb7cd7e9589bd590c30f07113759c7976f96fc4c101965"
+    },
+    {
+      "path": "../c3-owner-result-meaning-worker-red-scope-20261110.log",
+      "sha256": "24a2ad42cab18efb6e195c15dd8ab3cef2fb2f2e1b0e5b8e55a28fe86e7108aa"
+    },
+    {
+      "path": "../c3-owner-result-meaning-build-20261110.log",
+      "sha256": "ef43af4780733fb9027382150f0e6e8a87161d3bfcfaa2a9415b49520662844f"
+    },
+    {
+      "path": "../c3-owner-result-meaning-reviewfix-focused-20261110.log",
+      "sha256": "4b6264e0a4a12c372cd07df232b529b0c7a41ed283bbee4d0b1c5973a60d9f2c"
+    },
+    {
+      "path": "../c3-owner-result-meaning-composed-wire-20261110.log",
+      "sha256": "3b13518a7adc0e7f4c72bde31102f3afe76b271cd0ee2423d22dfa56677a17b9"
+    },
+    {
+      "path": "../c3-owner-result-meaning-composed-wire-diagnostic-20261110.log",
+      "sha256": "ccb1fb9939ba30a002ec030428bf749dc16926782c6ca477339cb5304cfdb3bb"
+    }
+  ],
+  "failureInterpretation": "Initial UUID/capability fixture and TypeScript test typing mistakes are not semantic RED evidence. Lost reply AFTER reconciled correctly and was replaced by a typed READBACK-unknown fixture to test actual uncertainty; partial coordinator accounting failure was fixed in the test composition, no production guard weakened."
+}
