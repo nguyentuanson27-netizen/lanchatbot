@@ -1,9 +1,16 @@
+## Owner result model screen — complete, STOP, 2026-11-10
+
+- [x] Capture fresh public world and actual initial state; same13/27 population,12 sales-ready/1 S16 source-gap, unchanged customer scripts/caps/models. Independent input APPROVE before seal/preflight/provider.
+- [x] Execute all27 turns at clean source205cd497:66 unique generations/66HTTP,46owner/20verifier,allOK,retry0. Audit captures/draft bindings/history/firewall/known synthetic PII/caps; both disposable DBs dropped, live/source writes0.
+- [x] Review all13 conversations and obtain independent whole-run review:10/12 sales cases task-adequate, J4/P09 material failures, S16 separate semantic false PASS/control FAIL. [Report and full evidence](../apps/worker/evals/single-agent-commerce-qualification/owner-result-screen-run-20261110/REPORT.md).
+- [ ] Screen STOP: J4 policy/UNKNOWN use, P09 disambiguation versus buy intent, S16 unsupported wearer implication and duplicate asset remain. W2 writer→quote native NOT_EXERCISED; no formal blind qualification/stability/C3 parity claim. No automatic full/repeat or further fix in this run.
+
 ## Owner result meaning repair — implemented, 2026-11-10
 
 - [x] Implement approved scope4729fb56 and amendment23e336ae; exact code86acecc4. Typed missing-choice/quote-request distinction, code-only original-result proof, per-call engine/support result grouping, metadata/profile scope and obsolete public prompt/schema alignment.
 - [x] Same reviewer REQUEST_CHANGES → fix three blockers → exact-head APPROVE. No engine/chart/verifier/cap/retry change or per-case examples. [Implementation/review/evidence](../docs/specs/c3-phase-c-owner-result-meaning-implementation-20261110.md).
 - [x] Observed RED→GREEN; final1114worker/133Node/22protected, worker build/typecheck/lint and dataset PASS; source diff-check PASS. Provider0, no new PG/transaction acceptance claim.
-- [ ] Model effect NOT_VERIFIED; previous screen STOP intact. Before next run: preregister targeted/control population and freeze/review fresh inputs. No automatic full/repeat/merge/deploy/live send.
+- [x] Subsequent authorized model screen froze/reviewed fresh inputs and ran all13/27; see current section. J1/P07 sample improved, overall screen remains STOP; stable model improvement NOT_VERIFIED. Historical screen retained, no automatic full/repeat/merge/deploy/live send.
 
 ## Tool contract completion — implementation, 2026-11-09
 
