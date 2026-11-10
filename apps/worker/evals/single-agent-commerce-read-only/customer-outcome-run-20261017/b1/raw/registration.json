@@ -1,0 +1,51 @@
+{
+  "bRunSourceSha": "38beb4b0f2ee8cc9ea01ff86f79edae6ba70b592",
+  "manifestHash": "7858b36c2a76cd0127cd82d7de27fe1a58881e897463fc2d7285c02514ee081d",
+  "sourceConfigHash": "5ca8dc68da2a11d6a29bb9d03617686f3116a3e43b8c646da0b012212bcefb6e",
+  "promptHashes": {
+    "owner": "569b89d98a2d25fb2c03d9f09560f06d4f9e90aa1e2431a0d3813144573da161",
+    "verifier": "b3633274a8e34fa536f6e64dbd47b203c06da172e0336664244c6333bdab6e24"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "toolSchemaHash": "23867cc18d8d7c1fb37d789960f4807b8129b20cd607551b09021292ed0b40f8",
+  "inputHash": "8f858e80f27984008e5d29d87d421645ee1b3c53631e09b31c4c2ea7eb722267",
+  "caseIds": [
+    "b1-changed-occasion",
+    "b1-search-read",
+    "b1-buying-concern",
+    "b1-changed-occasion-v2",
+    "b1-partial-source-v2",
+    "b1-buying-concern-v2",
+    "b1-current-policy",
+    "b1-partial-source",
+    "b1-price",
+    "b1-component-stock",
+    "b1-policy-used",
+    "b1-current-policy-v2",
+    "b1-price-v2",
+    "b1-component-stock-v2",
+    "b1-search-read-v2",
+    "b1-policy-used-v2",
+    "b1-changed-occasion-v3",
+    "b1-current-policy-v3",
+    "b1-partial-source-v3",
+    "b1-price-v3",
+    "b1-component-stock-v3",
+    "b1-search-read-v3",
+    "b1-buying-concern-v3",
+    "b1-policy-used-v3"
+  ],
+  "registered": 24,
+  "repetitions": 1,
+  "maximumGenerationRequests": 96,
+  "dispatch": {
+    "first": 1,
+    "last": 24
+  },
+  "registeredAt": "2026-10-17T12:18:08.867Z",
+  "codex": {
+    "version": "codex-cli 0.159.2",
+    "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+  },
+  "sendEnabled": false
+}

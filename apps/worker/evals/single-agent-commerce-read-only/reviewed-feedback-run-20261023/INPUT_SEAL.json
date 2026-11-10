@@ -1,0 +1,12 @@
+{
+  "sourceSha": "362876e83be4014c28fae60abcaf2e5a3243adb1",
+  "captureHash": "c1a5146b63ab461226cc655740a1fdb24ed28b69313fee304b3cc75083d95557",
+  "controlBundleHash": "b939ad9120fba4390aa63a238fdf84a13cd123a558bc1d8818760927c3e72add",
+  "files": {
+    "REGISTRATION.json": "e2b35a3b81b5768decf0d905180dc7c48aff1a5b92ab08bb2d43554f3be841b1",
+    "source/capture.json": "a843f2e04cdc0af7ef3853fa379019c7f422d4747b332f3c976b18dc2691c1db",
+    "preflight/prepared.json": "fa874af2d02492df2b6fcae05dbb6e1d39b9c8f28c9f25542a1a1e43792dc8e8",
+    "visual-preflight/preflight.json": "d56064c11d5a4bd6c1fd18acaee2902b3298d3f991486b3bac76b6e4963c8dcf"
+  },
+  "providerRequestsBeforeSeal": 0
+}

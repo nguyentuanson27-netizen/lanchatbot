@@ -1,0 +1,17 @@
+{
+  "command": [
+    "python",
+    "apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py",
+    "node",
+    "apps/worker/evals/single-agent-commerce-read-only/run.mjs",
+    "--config",
+    "apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json",
+    "--cases",
+    "apps/worker/evals/single-agent-commerce-read-only/cases.b1.json",
+    "--range",
+    "1:1",
+    "--preflight"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 10.128289699554443
+}

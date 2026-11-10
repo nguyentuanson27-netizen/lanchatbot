@@ -1,0 +1,30 @@
+{
+  "sourceSha": "e51db388c6dfa95c5e5af7b2b82c21646e1e1933",
+  "status": "COLLECTED_REQUIRES_REVIEW",
+  "jobs": {
+    "b1-1-4": {
+      "exitCode": 0
+    },
+    "negotiation": {
+      "exitCode": 0
+    },
+    "b1-5-8": {
+      "exitCode": 0
+    },
+    "b1-9-12": {
+      "exitCode": 0
+    },
+    "stateful": {
+      "exitCode": 0
+    },
+    "b1-13-16": {
+      "exitCode": 0
+    },
+    "b1-17-20": {
+      "exitCode": 0
+    },
+    "b1-21-24": {
+      "exitCode": 0
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "status": "ACCOUNTING_BINDINGS_AND_PROJECTION_VERIFIED",
+  "rawDiskAndGitHashes": 33,
+  "ownerDispatchHashes": 51,
+  "verifierExactBindings": 19,
+  "eligibleExactDraftMatches": 18,
+  "allGeneratedFinalsVerified": true,
+  "evaluatorLeaks": 0,
+  "privateFixtureLeaksInRequests": 0,
+  "privateCheckoutModelRequests": 0,
+  "atMostOneRequestPerKnownGeneration": true,
+  "sourceIdentityPreserved": true,
+  "all25OutcomesRetained": true,
+  "testDatabaseDropped": true,
+  "humanAcceptance": null,
+  "providerEcho": "Prepared/dispatched body hash plus adapter capture tests; no independent provider-side echo"
+}

@@ -1,0 +1,102 @@
+{
+  "kind": "PINNED_B_CURRENT_C_OFFLINE_COMPARISON",
+  "inputHashEqual": true,
+  "worldHashEqual": true,
+  "bSourceSha": "4efbea67356f1e3e4f7fa886dec48d58c4ab1474",
+  "cSourceSha": "d83dc3c85cb22b9fccd463c1025606cd010b5f7a",
+  "cSourceDirty": true,
+  "historical": [
+    {
+      "caseId": "b1-price",
+      "inputHashEqual": true,
+      "bGate": null,
+      "cGate": null
+    },
+    {
+      "caseId": "b1-search-read-v2",
+      "inputHashEqual": true,
+      "bGate": null,
+      "cGate": null
+    },
+    {
+      "caseId": "b1-current-policy",
+      "inputHashEqual": true,
+      "bGate": null,
+      "cGate": null
+    },
+    {
+      "caseId": "sales-size-advice:height-weight",
+      "inputHashEqual": true,
+      "bGate": null,
+      "cGate": null
+    },
+    {
+      "caseId": "media-and-size:ask",
+      "inputHashEqual": true,
+      "bGate": null,
+      "cGate": null
+    },
+    {
+      "caseId": "stateful-quote",
+      "inputHashEqual": true,
+      "bGate": null,
+      "cGate": null
+    }
+  ],
+  "readStatuses": [
+    {
+      "query": {
+        "subjectRef": "SV2447"
+      },
+      "inputEqual": true,
+      "b": "OK",
+      "c": "OK"
+    },
+    {
+      "query": {
+        "subjectRef": "SV2447",
+        "offerType": "AO"
+      },
+      "inputEqual": true,
+      "b": "OK",
+      "c": "OK"
+    },
+    {
+      "query": {
+        "subjectRef": "SV2447",
+        "offerType": "SET_VAY"
+      },
+      "inputEqual": true,
+      "b": "OK",
+      "c": "OK"
+    },
+    {
+      "query": {
+        "subjectRef": "SV1561"
+      },
+      "inputEqual": true,
+      "b": "OK",
+      "c": "OK"
+    },
+    {
+      "query": {
+        "subjectRef": "SV1561",
+        "offerType": "SET_VAY"
+      },
+      "inputEqual": true,
+      "b": "OK",
+      "c": "OK"
+    }
+  ],
+  "size": {
+    "b": "RECOMMENDED",
+    "c": "RECOMMENDED"
+  },
+  "providerRequests": 0,
+  "limitations": [
+    "Scripted read-only ports and size evaluation, not real PostgreSQL/native ingress replay",
+    "Historical hard gate checks cannot measure model semantics or replace verifier",
+    "Freshness counterfactual applies only to media component, not current authorization",
+    "Search algorithm parity is not established"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "status": "RETRY_COMPLETED",
+  "outcomes": 1,
+  "terminal": {
+    "disposition": "SEND_ELIGIBLE",
+    "reason": "PASS",
+    "text": "Dạ, Set váy Thạch Thảo (mã SV2447) có giá là 799.000đ ạ.",
+    "fallbackId": null
+  },
+  "automaticRetry": 0,
+  "previousTimeoutRetained": true,
+  "remaining44Dispatched": false
+}

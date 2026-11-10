@@ -1,0 +1,95 @@
+[
+  {
+    "run": "targeted",
+    "id": "f7ec8a1c-f6c1-432b-946a-f10aa37d6c1f:verifier:1",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "POLICY_OR_BENEFIT_STRENGTHENING",
+          "protectedRef": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+        }
+      ]
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "11e97094-2786-46ff-98ed-7d3265ff9eac:verifier:1",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "POLICY_OR_BENEFIT_STRENGTHENING",
+          "protectedRef": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+        },
+        {
+          "kind": "MATERIAL_CONDITION_LOSS",
+          "protectedRef": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+        }
+      ]
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "1b358be2-bce1-4feb-83e0-c340dd1b8407:verifier:1",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "POLICY_OR_BENEFIT_STRENGTHENING",
+          "protectedRef": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+        }
+      ]
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "4c972c88-7d68-4fbf-9605-8d9db064777c:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "c9a1c547-7a4e-4320-914c-83fe5d72d6e8:verifier:1",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "POLICY_OR_BENEFIT_STRENGTHENING",
+          "protectedRef": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+        }
+      ]
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "3bb53c3b-c83a-4db6-87d5-078728255429:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "487a3c64-ff1d-45d1-88c4-201f19447cc6:verifier:1",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "POLICY_OR_BENEFIT_STRENGTHENING",
+          "protectedRef": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+        }
+      ]
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "dfc9bd71-08dd-4048-aa4f-86d9bef334fd:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  }
+]

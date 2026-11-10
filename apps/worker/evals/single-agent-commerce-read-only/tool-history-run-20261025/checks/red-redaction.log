@@ -1,0 +1,46 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/packages/database
+
+ ❯ src/shadow-mirror.test.ts (13 tests | 1 failed | 12 skipped) 27ms
+   × shadow mirror privacy helpers > keeps ordinary product construction language while protecting actual street addresses 24ms
+     → expected '[ADDRESS]' to be 'Em gửi chị xem ảnh cận cảnh họa tiết …' // Object.is equality
+   ↓ shadow mirror privacy helpers > redacts direct identifiers before analytical persistence
+   ↓ shadow mirror privacy helpers > keeps ordinary Vietnamese words that merely end in an address token
+   ↓ shadow mirror privacy helpers > still redacts a line naming a real address component
+   ↓ shadow mirror privacy helpers > keeps an address keyword that carries no address content
+   ↓ shadow mirror privacy helpers > judges the address keyword by its own clause, not the rest of the line
+   ↓ shadow mirror privacy helpers > still redacts an address keyword followed by real address content
+   ↓ shadow mirror privacy helpers > still redacts an address declaration that carries no digit
+   ↓ shadow mirror privacy helpers > redacts a declaration whatever its capitalization
+   ↓ shadow mirror privacy helpers > keeps a question that names an address component or a shop
+   ↓ shadow mirror privacy helpers > does not let a question word rescue a line that names a real address
+   ↓ shadow mirror privacy helpers > compares internal keys without accepting different lengths
+   ↓ shadow mirror privacy helpers > redacts free-form identity, location, reference and long numeric values
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/shadow-mirror.test.ts > shadow mirror privacy helpers > keeps ordinary product construction language while protecting actual street addresses
+AssertionError: expected '[ADDRESS]' to be 'Em gửi chị xem ảnh cận cảnh họa tiết …' // Object.is equality
+
+Expected: "Em gửi chị xem ảnh cận cảnh họa tiết thêu nổi trên áo để mình dễ dàng quan sát từng đường nét thêu nhé ạ."
+Received: "[ADDRESS]"
+
+ ❯ src/shadow-mirror.test.ts:14:50
+
+     12|       "Phần cổ có đường viền nhỏ, tay áo may đường đôi.",
+     13|       "Đường cắt ở vai nhìn gọn hơn chị nhé.",
+     14|     ]) expect(redactAnalyticsMessage(text).text).toBe(text);
+       |                                                  ^
+     15|     for (const text of ["Giao chị 12 đường Lê Lợi, Q. 1", "Nhà chị ở đ…
+     16|       "Áo có đường viền nhỏ, gửi tới 25 Đ. Lê Duẩn", "12/3 duong le lo…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 skipped (13)
+   Start at  02:11:14
+   Duration  1.94s (transform 231ms, setup 0ms, collect 404ms, tests 27ms, environment 1ms, prepare 597ms)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\database:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/shadow-mirror.test.ts -t ordinary product construction

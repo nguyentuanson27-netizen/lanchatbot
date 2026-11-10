@@ -1,0 +1,195 @@
+{
+  "kind": "IMAGE_PRELOAD_VS_ON_DEMAND",
+  "corpusHash": "c9219393e49f13e464955271ce78c3483432e239ed9abe23a8415c33abb81abb",
+  "registered": 12,
+  "repetitions": 1,
+  "maximumGenerationRequests": 48,
+  "retry": 0,
+  "slots": [
+    {
+      "caseIndex": 0,
+      "arm": "CONTROL"
+    },
+    {
+      "caseIndex": 0,
+      "arm": "PRELOAD"
+    },
+    {
+      "caseIndex": 1,
+      "arm": "PRELOAD"
+    },
+    {
+      "caseIndex": 1,
+      "arm": "CONTROL"
+    },
+    {
+      "caseIndex": 2,
+      "arm": "CONTROL"
+    },
+    {
+      "caseIndex": 2,
+      "arm": "PRELOAD"
+    },
+    {
+      "caseIndex": 3,
+      "arm": "PRELOAD"
+    },
+    {
+      "caseIndex": 3,
+      "arm": "CONTROL"
+    },
+    {
+      "caseIndex": 4,
+      "arm": "CONTROL"
+    },
+    {
+      "caseIndex": 4,
+      "arm": "PRELOAD"
+    },
+    {
+      "caseIndex": 5,
+      "arm": "PRELOAD"
+    },
+    {
+      "caseIndex": 5,
+      "arm": "CONTROL"
+    }
+  ],
+  "cases": [
+    {
+      "caseId": "b1-buying-concern",
+      "productCode": "SV2447",
+      "images": [
+        {
+          "subjectRef": "SV2447",
+          "assetRef": "asset:1d468b542cef730ec27e5adf3a1fcc4d4a8ff56a3660ac9c875a51b8fd5a8f77",
+          "sha256": "bfaf228341477016679338166533275767daf06fa94236956150093d5e530a08",
+          "downloadSha256": "c35087700062bd468e2894ad4485550ef6ea8e236b683d5401e9f5c20f8d7602",
+          "registrySha256": "2052d1c8bf997f04e8f4e9f80dcbc59b62797bb1865b146f41b775197b36cb6a",
+          "mimeType": "image/jpeg"
+        },
+        {
+          "subjectRef": "SV2447",
+          "assetRef": "asset:53b6839931377606f16df706e12bf083d15ebacfd2ac7ea28d824075d822da9e",
+          "sha256": "85d42822bfb5eb7e98d8fb13ad2f1f5b5b44c7ff626d9fd674f22fac05865fea",
+          "downloadSha256": "2ebcb52a8d3f2923a9e5e02f5f66f1ceeaaf4ef6db75493d09916ec5230483f7",
+          "registrySha256": "fde1e4c575c26587d753dad576701b4a51634a25ef6ac1dd5510b5db16e14f9f",
+          "mimeType": "image/jpeg"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-buying-concern-v2",
+      "productCode": "SV2447",
+      "images": [
+        {
+          "subjectRef": "SV2447",
+          "assetRef": "asset:1d468b542cef730ec27e5adf3a1fcc4d4a8ff56a3660ac9c875a51b8fd5a8f77",
+          "sha256": "bfaf228341477016679338166533275767daf06fa94236956150093d5e530a08",
+          "downloadSha256": "c35087700062bd468e2894ad4485550ef6ea8e236b683d5401e9f5c20f8d7602",
+          "registrySha256": "2052d1c8bf997f04e8f4e9f80dcbc59b62797bb1865b146f41b775197b36cb6a",
+          "mimeType": "image/jpeg"
+        },
+        {
+          "subjectRef": "SV2447",
+          "assetRef": "asset:53b6839931377606f16df706e12bf083d15ebacfd2ac7ea28d824075d822da9e",
+          "sha256": "85d42822bfb5eb7e98d8fb13ad2f1f5b5b44c7ff626d9fd674f22fac05865fea",
+          "downloadSha256": "2ebcb52a8d3f2923a9e5e02f5f66f1ceeaaf4ef6db75493d09916ec5230483f7",
+          "registrySha256": "fde1e4c575c26587d753dad576701b4a51634a25ef6ac1dd5510b5db16e14f9f",
+          "mimeType": "image/jpeg"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-changed-occasion-v3",
+      "productCode": "SV2447",
+      "images": [
+        {
+          "subjectRef": "SV2447",
+          "assetRef": "asset:1d468b542cef730ec27e5adf3a1fcc4d4a8ff56a3660ac9c875a51b8fd5a8f77",
+          "sha256": "bfaf228341477016679338166533275767daf06fa94236956150093d5e530a08",
+          "downloadSha256": "c35087700062bd468e2894ad4485550ef6ea8e236b683d5401e9f5c20f8d7602",
+          "registrySha256": "2052d1c8bf997f04e8f4e9f80dcbc59b62797bb1865b146f41b775197b36cb6a",
+          "mimeType": "image/jpeg"
+        },
+        {
+          "subjectRef": "SV2447",
+          "assetRef": "asset:53b6839931377606f16df706e12bf083d15ebacfd2ac7ea28d824075d822da9e",
+          "sha256": "85d42822bfb5eb7e98d8fb13ad2f1f5b5b44c7ff626d9fd674f22fac05865fea",
+          "downloadSha256": "2ebcb52a8d3f2923a9e5e02f5f66f1ceeaaf4ef6db75493d09916ec5230483f7",
+          "registrySha256": "fde1e4c575c26587d753dad576701b4a51634a25ef6ac1dd5510b5db16e14f9f",
+          "mimeType": "image/jpeg"
+        }
+      ]
+    },
+    {
+      "caseId": "image-transfer-nha-vy",
+      "productCode": "SQ149",
+      "images": [
+        {
+          "subjectRef": "SQ149",
+          "assetRef": "asset:88a1071a6b2496892d53e005eb7f6f0f98b0786200d56e1d2897c43d73c019a7",
+          "sha256": "1335e0f8fb7ce1da237cdcb0e86df28125e97d8d57e9ffcea340b07bab7cf18a",
+          "downloadSha256": "50d9a934adbb8887a694c45adeb421174c4e962c0ff98560cdd2eb4254516a23",
+          "registrySha256": "bbaeb3632b5b9c657d70078a95b7ef629a0c795b7d4922315d3793a2028ebbb6",
+          "mimeType": "image/jpeg"
+        },
+        {
+          "subjectRef": "SQ149",
+          "assetRef": "asset:b6eb099f763b29afb689250cf1396805dc8fa809d43621e47d42d7cd1605a65f",
+          "sha256": "5e67d3a15afe57912497f040fab471d03c9ade5298b3d67e2f6ae6ebf7588965",
+          "downloadSha256": "ce52283d9ecc984c07f66f38a6131d8eba5f843106ccc7e2a825d98acee7df5b",
+          "registrySha256": "bcae03b25260501250e37cf42e5fecd8396c3453e2bb35ef530a04fda18f92cb",
+          "mimeType": "image/jpeg"
+        }
+      ]
+    },
+    {
+      "caseId": "image-transfer-bich-tra",
+      "productCode": "SV463",
+      "images": [
+        {
+          "subjectRef": "SV463",
+          "assetRef": "asset:9cb2ed0b9b45fcbce9854581b15ebefb2949fa028e97c1f527319a6bd5ce5be4",
+          "sha256": "b73385021179d457a8b217b829cd34ea998c8de8ff8508618f93a7275d4a05a6",
+          "downloadSha256": "b0d9c07db6395cd194652c3ec3871f4ac9cf8b64d8c79d3aa61ffabf82a96012",
+          "registrySha256": "972335fe9eb2166536fee4c992365ca10ace44e3a5723e46394e965fc7b64357",
+          "mimeType": "image/jpeg"
+        },
+        {
+          "subjectRef": "SV463",
+          "assetRef": "asset:ee41dbf1997b2f28139a141ad4ca2929bb3f081e5126fb382d7188dd75b7478a",
+          "sha256": "ccb2620713dac5c19990015a2b54ee63f9ad31f9bde9d3f615154619a22678cc",
+          "downloadSha256": "ccb2620713dac5c19990015a2b54ee63f9ad31f9bde9d3f615154619a22678cc",
+          "registrySha256": "7f00903a9dca739f184a04da8b37ceb40174d0e7deb15e5a2a888db438b19570",
+          "mimeType": "image/jpeg"
+        }
+      ]
+    },
+    {
+      "caseId": "image-transfer-bach-lien",
+      "productCode": "SQ784",
+      "images": [
+        {
+          "subjectRef": "SQ784",
+          "assetRef": "asset:a0c472ba86a21ce8d774048e8f40fb8da903bf860f013aa01eab455c7bd44591",
+          "sha256": "1e51822686244058c5aa60d1dba3e69f32745f533d25849e9fb3ecdcdcf83e23",
+          "downloadSha256": "a00a180a17ec978ccd40c2198868566230d2ade64a94444f3160e3939f04e5d9",
+          "registrySha256": "b10f9d22522d5b87693b2a43cc55e92cc6592fd5c80f8e5362220a522eaa358e",
+          "mimeType": "image/jpeg"
+        },
+        {
+          "subjectRef": "SQ784",
+          "assetRef": "asset:8d0af1af31c3bc6e2d70a1e3ac013b0b7620e8cd0c12018746c5276ead5fd476",
+          "sha256": "899fdf8a01bca1486ee38c2eecb4f512b64d274dfffe73bad4d111059404bb92",
+          "downloadSha256": "2a13467cf9e7c184dcc0b8e71b7df014e7841f65d2d537da591cb195d9c8ef02",
+          "registrySha256": "5efcc3b01aaedfcb2ae7f42d1ac790aec1917ca0981eda9a4ea631eba1979f2f",
+          "mimeType": "image/jpeg"
+        }
+      ]
+    }
+  ],
+  "prerequisiteCheckedAt": "2026-10-22T12:08:37.506Z",
+  "providerGenerations": 0,
+  "sendEnabled": false
+}

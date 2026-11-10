@@ -1,0 +1,36 @@
+{
+  "runSourceSha": "13dea00c0ba7498edfe66a5b5067aa01d939d2e4",
+  "primaryLockCommit": "0dbb6fb5d36406ba125cd6690d5b894487cbcbba",
+  "checks": {
+    "executablePromptConfigInputGitBlobsUnchangedSinceRunSource": 12,
+    "frozenInputMapReviewHashes": 4,
+    "activePromptHashes": 2,
+    "primaryLockHash": true,
+    "successfulChildCommands": 2,
+    "publicRawAndGitHashesMatched": 18,
+    "privateKeyMaterialFound": false
+  },
+  "tests": {
+    "observedRed": {
+      "pass": 2,
+      "fail": 3
+    },
+    "minimumGreen": {
+      "pass": 5,
+      "fail": 0
+    },
+    "focusedFinal": {
+      "pass": 64,
+      "fail": 0,
+      "skip": 0
+    },
+    "workerBuildExitCode": 0
+  },
+  "evidenceCorrections": [
+    "First staged diff check found trailing spaces in verbatim Markdown quotes; display whitespace trimmed, exact JSON/raw unchanged.",
+    "First raw Git check found ignored log files unstaged; explicit force-add of public raw logs retained exact bytes. Final staged check and18raw hash checks passed."
+  ],
+  "conditionalIntegrated16": "NOT_DISPATCHED_CANDIDATE_FALLBACKS",
+  "sendEnabled": false,
+  "testDatabaseCreated": false
+}

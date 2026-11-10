@@ -1,0 +1,60 @@
+{
+  "sourceSha": "d9d96e4b2f035941f8ac0afa2ac25d5536da8f1c",
+  "registeredOutcomes": 7,
+  "completedOutcomes": 7,
+  "generations": 15,
+  "verifierRequests": 2,
+  "providerRequests": 14,
+  "knownOwnerAuthRequests": 1,
+  "codexAuthCount": null,
+  "retries": 0,
+  "errors": 1,
+  "timeouts": 0,
+  "terminalCounts": {
+    "FALLBACK": 4,
+    "HANDOFF": 2,
+    "NO_SEND": 1
+  },
+  "terminalFallbackHandoffNoSendRate": 1,
+  "totalInputTokens": 61634,
+  "totalOutputTokens": 8893,
+  "cost": null,
+  "costEvidence": "NOT_EXPOSED; no estimate substituted",
+  "percentileMethod": "nearest rank, descriptive, no post-hoc acceptance threshold",
+  "ownerLatency": {
+    "n": 13,
+    "p50Ms": 3244.536500000002,
+    "p95Ms": 4798.771700000005
+  },
+  "verifierLatency": {
+    "n": 2,
+    "p50Ms": 11921.400999999998,
+    "p95Ms": 13446.777599999994
+  },
+  "addedVerificationLatency": {
+    "n": 2,
+    "p50Ms": 17851.664300000004,
+    "p95Ms": 20194.3986
+  },
+  "endToEndLatency": {
+    "n": 7,
+    "p50Ms": 27967.067699999985,
+    "p95Ms": 59076.0842
+  },
+  "runtimeToolCalls": 14,
+  "embeddingRequests": 0,
+  "sendEnabled": false,
+  "providerHttpErrorCount": 0,
+  "generationErrorsAfterDispatch": 0,
+  "clientBeforeDispatchFailureCount": 1,
+  "ownerHttpRequests": 12,
+  "ownerGenerationAttempts": 13,
+  "errorsAreRuntimeGenerationErrors": true,
+  "preparedRequestEnvelopes": 14,
+  "tokenUsageCoverage": {
+    "generationsWithInputAndOutput": 14,
+    "totalGenerations": 15
+  },
+  "generationErrorRate": 0.06666666666666667,
+  "timeoutRate": 0
+}

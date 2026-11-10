@@ -1,0 +1,122 @@
+{
+  "mode": "READ_ONLY_SOURCE_DIAGNOSIS",
+  "sourceSha": "59bd75cae5e7eea60ef69ee24375c0153e393e1c",
+  "observedAt": "2026-10-16T04:37:12.723Z",
+  "providerGenerations": 0,
+  "embeddingCalls": 0,
+  "sendEnabled": false,
+  "product": {
+    "id": "SV2447",
+    "title": "Set váy Thạch Thảo",
+    "descriptionAuthority": "WEBSTORE_XML",
+    "hasDescription": true,
+    "attributes": null,
+    "payloads": [
+      {
+        "hasProductAttributes": false,
+        "validProductAttributes": false,
+        "descriptionAuthority": null,
+        "catalogVersion": "catalog-v2"
+      },
+      {
+        "hasProductAttributes": false,
+        "validProductAttributes": false,
+        "descriptionAuthority": null,
+        "catalogVersion": "catalog-v2"
+      },
+      {
+        "hasProductAttributes": false,
+        "validProductAttributes": false,
+        "descriptionAuthority": null,
+        "catalogVersion": "catalog-v2"
+      },
+      {
+        "hasProductAttributes": false,
+        "validProductAttributes": false,
+        "descriptionAuthority": null,
+        "catalogVersion": "catalog-v2"
+      },
+      {
+        "hasProductAttributes": false,
+        "validProductAttributes": false,
+        "descriptionAuthority": null,
+        "catalogVersion": "catalog-v2"
+      },
+      {
+        "hasProductAttributes": false,
+        "validProductAttributes": false,
+        "descriptionAuthority": null,
+        "catalogVersion": "catalog-v2"
+      },
+      {
+        "hasProductAttributes": false,
+        "validProductAttributes": false,
+        "descriptionAuthority": null,
+        "catalogVersion": "catalog-v2"
+      },
+      {
+        "hasProductAttributes": false,
+        "validProductAttributes": false,
+        "descriptionAuthority": null,
+        "catalogVersion": "catalog-v2"
+      },
+      {
+        "hasProductAttributes": false,
+        "validProductAttributes": false,
+        "descriptionAuthority": null,
+        "catalogVersion": "catalog-v2"
+      },
+      {
+        "hasProductAttributes": false,
+        "validProductAttributes": false,
+        "descriptionAuthority": null,
+        "catalogVersion": "catalog-v2"
+      },
+      {
+        "hasProductAttributes": false,
+        "validProductAttributes": false,
+        "descriptionAuthority": null,
+        "catalogVersion": "catalog-v2"
+      }
+    ]
+  },
+  "fulfillment": {
+    "dataStatus": "OK",
+    "policy": {
+      "tinh_trang": "READY-STOCK",
+      "can_order_when_zero": true,
+      "prep_min_days": 1,
+      "prep_max_days": 2,
+      "zero_stock_policy": "PRE-ORDER",
+      "zero_stock_prep_min_days": 5,
+      "zero_stock_prep_max_days": 8,
+      "eta_valid_until": "",
+      "eta_updated_at": ""
+    },
+    "regions": {
+      "NOI-THANH-HN": {
+        "transit_min_days": 1,
+        "transit_max_days": 2
+      },
+      "MIEN-BAC": {
+        "transit_min_days": 2,
+        "transit_max_days": 4
+      },
+      "MIEN-TRUNG": {
+        "transit_min_days": 3,
+        "transit_max_days": 5
+      },
+      "MIEN-NAM": {
+        "transit_min_days": 3,
+        "transit_max_days": 6
+      }
+    },
+    "selectedStockQuantity": 0,
+    "selectedStockStatus": "OK",
+    "selectionStatus": "ETA_UNAVAILABLE",
+    "selectionReason": "CART_ETA_UNAVAILABLE"
+  },
+  "sourcePublication": false,
+  "registryRead": false,
+  "registryMissingVsUnpublished": "NOT_DETERMINED_BY_INDEX_READ"
+}

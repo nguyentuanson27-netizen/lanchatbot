@@ -1,0 +1,243 @@
+{
+  "initialCampaign": {
+    "status": "BLOCKED_AUTH_NOT_MODEL_QUALITY",
+    "registeredNative": 51,
+    "executedNative": 0,
+    "registeredControls": 17,
+    "executedControls": 17,
+    "upstreamRequests": 17,
+    "retry": 0,
+    "errors401": 17,
+    "actualLiveSends": 0,
+    "controlsFixtureFallbackTextIsNotRuntimeDelivery": true,
+    "attempts": [
+      {
+        "attempt": 1,
+        "terminal": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "httpStatus": 401,
+        "providerRequests": 1,
+        "clientRequests": 1,
+        "rejectedClientRequests": 0,
+        "artifactSha256": "b0ef9870ff57e068f08a5861303985d5703c28d42be1bae464d36e8e977df7bf"
+      },
+      {
+        "attempt": 2,
+        "terminal": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "httpStatus": 401,
+        "providerRequests": 1,
+        "clientRequests": 1,
+        "rejectedClientRequests": 0,
+        "artifactSha256": "71a3032c7e1631a44f3c06460fe4228cb8fb63a40949e3b395b6dc744ea02d29"
+      },
+      {
+        "attempt": 3,
+        "terminal": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "httpStatus": 401,
+        "providerRequests": 1,
+        "clientRequests": 1,
+        "rejectedClientRequests": 0,
+        "artifactSha256": "1824ce7ff33777753f2daddb5f4ad92591b95ca19ba1dbd038b0e744bbfff590"
+      },
+      {
+        "attempt": 4,
+        "terminal": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "httpStatus": 401,
+        "providerRequests": 1,
+        "clientRequests": 1,
+        "rejectedClientRequests": 0,
+        "artifactSha256": "2a88d0cc4596d4f6ae9fa98f8830ecec26244bb0b7cc947d367ad80724fd7216"
+      },
+      {
+        "attempt": 5,
+        "terminal": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "httpStatus": 401,
+        "providerRequests": 1,
+        "clientRequests": 1,
+        "rejectedClientRequests": 0,
+        "artifactSha256": "902262b4fb79e785cf6d164343a95ee95bd80fb50059a1e66d9ce462781f886a"
+      },
+      {
+        "attempt": 6,
+        "terminal": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "httpStatus": 401,
+        "providerRequests": 1,
+        "clientRequests": 1,
+        "rejectedClientRequests": 0,
+        "artifactSha256": "b0bc97f21abfb8c567bc300eebb76f95436a97740b3dcf9b97b41c05b9dda58e"
+      },
+      {
+        "attempt": 7,
+        "terminal": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "httpStatus": 401,
+        "providerRequests": 1,
+        "clientRequests": 1,
+        "rejectedClientRequests": 0,
+        "artifactSha256": "ccfaea95a77612ff3c80f7f6b45fb7eb0bc6277bd958219bbe21e6fd57125363"
+      },
+      {
+        "attempt": 8,
+        "terminal": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "httpStatus": 401,
+        "providerRequests": 1,
+        "clientRequests": 1,
+        "rejectedClientRequests": 0,
+        "artifactSha256": "23617665fac866af5e1971c5d5abd47e65ff92f8913e3660eb4f55e877563307"
+      },
+      {
+        "attempt": 9,
+        "terminal": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "httpStatus": 401,
+        "providerRequests": 1,
+        "clientRequests": 1,
+        "rejectedClientRequests": 0,
+        "artifactSha256": "6e29bfe0fa9a7a43cbac35652c969385cebebbea8d6df7302694c8414c2e2a24"
+      },
+      {
+        "attempt": 10,
+        "terminal": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "httpStatus": 401,
+        "providerRequests": 1,
+        "clientRequests": 1,
+        "rejectedClientRequests": 0,
+        "artifactSha256": "d7450132dbad15ab222a79652521e1b7fe6e0f067d5cd10340460825b025834b"
+      },
+      {
+        "attempt": 11,
+        "terminal": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "httpStatus": 401,
+        "providerRequests": 1,
+        "clientRequests": 1,
+        "rejectedClientRequests": 0,
+        "artifactSha256": "937d1e1756b27c4cfe55ca47407259a1ebba8da8e5062134174e08f26acb569e"
+      },
+      {
+        "attempt": 12,
+        "terminal": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "httpStatus": 401,
+        "providerRequests": 1,
+        "clientRequests": 1,
+        "rejectedClientRequests": 0,
+        "artifactSha256": "a7661a487813b71a12ab0d98cfd85cfbcdf389fb8a9ee058e9066a2268918747"
+      },
+      {
+        "attempt": 13,
+        "terminal": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "httpStatus": 401,
+        "providerRequests": 1,
+        "clientRequests": 1,
+        "rejectedClientRequests": 0,
+        "artifactSha256": "46094b2a2f892d491bf17b56673ae8f592ae7020e2ec746f4f38caef1cf2a7bb"
+      },
+      {
+        "attempt": 14,
+        "terminal": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "httpStatus": 401,
+        "providerRequests": 1,
+        "clientRequests": 1,
+        "rejectedClientRequests": 0,
+        "artifactSha256": "f8a817904986575d0097892905fa3dc0d44418182f5d5367868c1ca3399a834f"
+      },
+      {
+        "attempt": 15,
+        "terminal": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "httpStatus": 401,
+        "providerRequests": 1,
+        "clientRequests": 1,
+        "rejectedClientRequests": 0,
+        "artifactSha256": "11057122f29a722162122d65de15648403bc1b7ff87fb8be7329c87d3fbce76d"
+      },
+      {
+        "attempt": 16,
+        "terminal": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "httpStatus": 401,
+        "providerRequests": 1,
+        "clientRequests": 1,
+        "rejectedClientRequests": 0,
+        "artifactSha256": "53b04b52987507b7b0cfa4371c9d6c869223b6502433a118334c38b64aa1bb1f"
+      },
+      {
+        "attempt": 17,
+        "terminal": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "httpStatus": 401,
+        "providerRequests": 1,
+        "clientRequests": 1,
+        "rejectedClientRequests": 0,
+        "artifactSha256": "e57d9bace85dcbeb001fc6035c8ccf3fb2c68cc216d0607376da4b781dd64e64"
+      }
+    ]
+  },
+  "continuation": {
+    "previousRunStatus": "BLOCKED_AUTH_401",
+    "attemptsRetained": 17,
+    "nativeNotRun": 51,
+    "nextRunDirectory": "c3-b-silent-fallback-model-20261028-auth-refresh",
+    "reason": "Owner requested continue; cached login last_refresh is newer than all failed attempts. New campaign, no overwrite or within-attempt retry.",
+    "loginStatus": "Logged in using ChatGPT",
+    "observedLastRefreshUtc": "2026-10-27T21:31:34.902923800Z"
+  },
+  "initialSourceSha": "dc69f712fa85ef318ff3f58bf7e26c8d28368aee",
+  "initialRegistrationSha256": "70555bdc154e5b3c8ef83362cb310ef0832068fd7e2fa211e8ee24c598dd7420",
+  "initialCommands": [
+    {
+      "name": "source-capture",
+      "command": [
+        "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-session.py",
+        "node",
+        "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\feedback-source-capture.mjs",
+        "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-silent-fallback-model-20261028\\source"
+      ],
+      "status": "COMPLETE",
+      "exitCode": 0
+    },
+    {
+      "name": "controls-preflight",
+      "command": [
+        "node",
+        "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\feedback-controls-20261023.mjs",
+        "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-silent-fallback-model-20261028\\controls-preflight",
+        "--capture",
+        "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-silent-fallback-model-20261028\\source\\capture.json",
+        "--preflight"
+      ],
+      "status": "COMPLETE",
+      "exitCode": 0
+    },
+    {
+      "name": "controls",
+      "command": [
+        "node",
+        "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\feedback-controls-20261023.mjs",
+        "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-silent-fallback-model-20261028\\controls",
+        "--capture",
+        "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-silent-fallback-model-20261028\\source\\capture.json",
+        "--prepared",
+        "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-silent-fallback-model-20261028\\controls-preflight\\prepared.json"
+      ],
+      "status": "COMPLETE",
+      "exitCode": 1
+    }
+  ],
+  "successfulCampaignGenerationRequests": 140,
+  "totalGenerationRequestsAcrossBothCampaigns": 157,
+  "initialFailedAttemptsExcludedFromSuccessfulCampaignDenominatorButRetainedSeparately": true,
+  "noWithinAttemptRetry": true,
+  "currentAuthenticationStatusNotAnExplanationOfPast401Body": true
+}

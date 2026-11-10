@@ -1,0 +1,317 @@
+[
+  {
+    "rep": 1,
+    "population": "B2_B3",
+    "slot": 1,
+    "path": "candidate/rep1/stateful/raw/provider-attempt-1.json",
+    "logs": "candidate/rep1/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 1,
+    "population": "B2_B3",
+    "slot": 2,
+    "path": "candidate/rep1/stateful/raw/provider-attempt-2.json",
+    "logs": "candidate/rep1/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 1,
+    "population": "B2_B3",
+    "slot": 3,
+    "path": "candidate/rep1/stateful/raw/provider-attempt-3.json",
+    "logs": "candidate/rep1/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 1,
+    "population": "B2_B3",
+    "slot": 4,
+    "path": "candidate/rep1/stateful/raw/provider-attempt-4.json",
+    "logs": "candidate/rep1/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 1,
+    "population": "B2_B3",
+    "slot": 5,
+    "path": "candidate/rep1/stateful/raw/provider-attempt-5.json",
+    "logs": "candidate/rep1/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 1,
+    "population": "B2_B3",
+    "slot": 6,
+    "path": "candidate/rep1/stateful/raw/provider-attempt-6.json",
+    "logs": "candidate/rep1/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 1,
+    "population": "B2_B3",
+    "slot": 7,
+    "path": "candidate/rep1/stateful/raw/provider-attempt-7.json",
+    "logs": "candidate/rep1/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 1,
+    "population": "B1",
+    "slot": 1,
+    "path": "candidate/rep1/b1-priority/raw/attempt-1.json",
+    "logs": "candidate/rep1/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 1,
+    "population": "B1",
+    "slot": 2,
+    "path": "candidate/rep1/b1-priority/raw/attempt-2.json",
+    "logs": "candidate/rep1/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 1,
+    "population": "B1",
+    "slot": 3,
+    "path": "candidate/rep1/b1-priority/raw/attempt-3.json",
+    "logs": "candidate/rep1/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 1,
+    "population": "B1",
+    "slot": 4,
+    "path": "candidate/rep1/b1-priority/raw/attempt-4.json",
+    "logs": "candidate/rep1/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 1,
+    "population": "B1",
+    "slot": 5,
+    "path": "candidate/rep1/b1-priority/raw/attempt-5.json",
+    "logs": "candidate/rep1/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 1,
+    "population": "B1",
+    "slot": 6,
+    "path": "candidate/rep1/b1-priority/raw/attempt-6.json",
+    "logs": "candidate/rep1/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 1,
+    "population": "B1",
+    "slot": 7,
+    "path": "candidate/rep1/b1-priority/raw/attempt-7.json",
+    "logs": "candidate/rep1/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 1,
+    "population": "B1",
+    "slot": 8,
+    "path": "candidate/rep1/b1-priority/raw/attempt-8.json",
+    "logs": "candidate/rep1/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 2,
+    "population": "B2_B3",
+    "slot": 1,
+    "path": "candidate/rep2/stateful/raw/provider-attempt-1.json",
+    "logs": "candidate/rep2/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 2,
+    "population": "B2_B3",
+    "slot": 2,
+    "path": "candidate/rep2/stateful/raw/provider-attempt-2.json",
+    "logs": "candidate/rep2/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 2,
+    "population": "B2_B3",
+    "slot": 3,
+    "path": "candidate/rep2/stateful/raw/provider-attempt-3.json",
+    "logs": "candidate/rep2/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 2,
+    "population": "B2_B3",
+    "slot": 4,
+    "path": "candidate/rep2/stateful/raw/provider-attempt-4.json",
+    "logs": "candidate/rep2/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 2,
+    "population": "B2_B3",
+    "slot": 5,
+    "path": "candidate/rep2/stateful/raw/provider-attempt-5.json",
+    "logs": "candidate/rep2/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 2,
+    "population": "B2_B3",
+    "slot": 6,
+    "path": "candidate/rep2/stateful/raw/provider-attempt-6.json",
+    "logs": "candidate/rep2/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 2,
+    "population": "B2_B3",
+    "slot": 7,
+    "path": "candidate/rep2/stateful/raw/provider-attempt-7.json",
+    "logs": "candidate/rep2/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 2,
+    "population": "B1",
+    "slot": 1,
+    "path": "candidate/rep2/b1-priority/raw/attempt-1.json",
+    "logs": "candidate/rep2/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 2,
+    "population": "B1",
+    "slot": 2,
+    "path": "candidate/rep2/b1-priority/raw/attempt-2.json",
+    "logs": "candidate/rep2/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 2,
+    "population": "B1",
+    "slot": 3,
+    "path": "candidate/rep2/b1-priority/raw/attempt-3.json",
+    "logs": "candidate/rep2/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 2,
+    "population": "B1",
+    "slot": 4,
+    "path": "candidate/rep2/b1-priority/raw/attempt-4.json",
+    "logs": "candidate/rep2/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 2,
+    "population": "B1",
+    "slot": 5,
+    "path": "candidate/rep2/b1-priority/raw/attempt-5.json",
+    "logs": "candidate/rep2/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 2,
+    "population": "B1",
+    "slot": 6,
+    "path": "candidate/rep2/b1-priority/raw/attempt-6.json",
+    "logs": "candidate/rep2/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 2,
+    "population": "B1",
+    "slot": 7,
+    "path": "candidate/rep2/b1-priority/raw/attempt-7.json",
+    "logs": "candidate/rep2/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 2,
+    "population": "B1",
+    "slot": 8,
+    "path": "candidate/rep2/b1-priority/raw/attempt-8.json",
+    "logs": "candidate/rep2/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 3,
+    "population": "B2_B3",
+    "slot": 1,
+    "path": "candidate/rep3/stateful/raw/provider-attempt-1.json",
+    "logs": "candidate/rep3/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 3,
+    "population": "B2_B3",
+    "slot": 2,
+    "path": "candidate/rep3/stateful/raw/provider-attempt-2.json",
+    "logs": "candidate/rep3/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 3,
+    "population": "B2_B3",
+    "slot": 3,
+    "path": "candidate/rep3/stateful/raw/provider-attempt-3.json",
+    "logs": "candidate/rep3/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 3,
+    "population": "B2_B3",
+    "slot": 4,
+    "path": "candidate/rep3/stateful/raw/provider-attempt-4.json",
+    "logs": "candidate/rep3/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 3,
+    "population": "B2_B3",
+    "slot": 5,
+    "path": "candidate/rep3/stateful/raw/provider-attempt-5.json",
+    "logs": "candidate/rep3/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 3,
+    "population": "B2_B3",
+    "slot": 6,
+    "path": "candidate/rep3/stateful/raw/provider-attempt-6.json",
+    "logs": "candidate/rep3/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 3,
+    "population": "B2_B3",
+    "slot": 7,
+    "path": "candidate/rep3/stateful/raw/provider-attempt-7.json",
+    "logs": "candidate/rep3/stateful/raw/provider-requests.jsonl"
+  },
+  {
+    "rep": 3,
+    "population": "B1",
+    "slot": 1,
+    "path": "candidate/rep3/b1-priority/raw/attempt-1.json",
+    "logs": "candidate/rep3/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 3,
+    "population": "B1",
+    "slot": 2,
+    "path": "candidate/rep3/b1-priority/raw/attempt-2.json",
+    "logs": "candidate/rep3/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 3,
+    "population": "B1",
+    "slot": 3,
+    "path": "candidate/rep3/b1-priority/raw/attempt-3.json",
+    "logs": "candidate/rep3/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 3,
+    "population": "B1",
+    "slot": 4,
+    "path": "candidate/rep3/b1-priority/raw/attempt-4.json",
+    "logs": "candidate/rep3/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 3,
+    "population": "B1",
+    "slot": 5,
+    "path": "candidate/rep3/b1-priority/raw/attempt-5.json",
+    "logs": "candidate/rep3/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 3,
+    "population": "B1",
+    "slot": 6,
+    "path": "candidate/rep3/b1-priority/raw/attempt-6.json",
+    "logs": "candidate/rep3/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 3,
+    "population": "B1",
+    "slot": 7,
+    "path": "candidate/rep3/b1-priority/raw/attempt-7.json",
+    "logs": "candidate/rep3/b1-priority/raw/requests.jsonl"
+  },
+  {
+    "rep": 3,
+    "population": "B1",
+    "slot": 8,
+    "path": "candidate/rep3/b1-priority/raw/attempt-8.json",
+    "logs": "candidate/rep3/b1-priority/raw/requests.jsonl"
+  }
+]

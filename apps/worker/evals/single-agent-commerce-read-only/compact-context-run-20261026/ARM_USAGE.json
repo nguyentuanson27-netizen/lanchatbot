@@ -1,0 +1,38 @@
+{
+  "A": {
+    "owner": {
+      "input": 41827,
+      "output": 12452,
+      "thinkingIncludedInOutput": 11767
+    },
+    "ownerRequestBytes": 198910,
+    "totalSlotLatencyMs": {
+      "samples": 8,
+      "p50": 20024.892399999997,
+      "p95": 33935.08859999999
+    },
+    "addedVerificationLatencyMs": {
+      "samples": 8,
+      "p50": 12838.011299999998,
+      "p95": 29445.828299999994
+    }
+  },
+  "B": {
+    "owner": {
+      "input": 42319,
+      "output": 10054,
+      "thinkingIncludedInOutput": 9457
+    },
+    "ownerRequestBytes": 200389,
+    "totalSlotLatencyMs": {
+      "samples": 8,
+      "p50": 13218.131699999998,
+      "p95": 24004.757299999997
+    },
+    "addedVerificationLatencyMs": {
+      "samples": 8,
+      "p50": 8908.9682,
+      "p95": 17761.486800000013
+    }
+  }
+}

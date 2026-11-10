@@ -1,0 +1,86 @@
+{
+  "b1": {
+    "attempts": 24,
+    "terminalCounts": {
+      "SEND_ELIGIBLE": 24
+    },
+    "generationRequests": 76,
+    "databaseDropped": null
+  },
+  "stateful": {
+    "attempts": 8,
+    "terminalCounts": {
+      "SEND_ELIGIBLE": 4,
+      "NO_SEND": 2,
+      "HANDOFF": 2
+    },
+    "generationRequests": 14,
+    "databaseDropped": true
+  },
+  "journey-openings": {
+    "attempts": 4,
+    "terminalCounts": {
+      "FALLBACK": 2,
+      "HANDOFF": 1,
+      "SEND_ELIGIBLE": 1
+    },
+    "generationRequests": 12,
+    "databaseDropped": true
+  },
+  "media-followup": {
+    "attempts": 7,
+    "terminalCounts": {
+      "SEND_ELIGIBLE": 6,
+      "HANDOFF": 1
+    },
+    "generationRequests": 22,
+    "databaseDropped": true
+  },
+  "negotiation": {
+    "attempts": 3,
+    "terminalCounts": {
+      "SEND_ELIGIBLE": 3
+    },
+    "generationRequests": 8,
+    "databaseDropped": true
+  },
+  "opening-quotes": {
+    "attempts": 5,
+    "terminalCounts": {
+      "SEND_ELIGIBLE": 5
+    },
+    "generationRequests": 14,
+    "databaseDropped": true
+  },
+  "total": {
+    "nativeAttempts": 51,
+    "controlAttempts": 17,
+    "nativeTerminalCounts": {
+      "SEND_ELIGIBLE": 43,
+      "NO_SEND": 2,
+      "HANDOFF": 4,
+      "FALLBACK": 2
+    },
+    "ownerGenerationRequests": 101,
+    "verifierGenerationRequests": 62,
+    "generationStatusCounts": {
+      "OK": 163
+    },
+    "httpStatusCounts": {
+      "200": 163
+    },
+    "automaticRetries": 0,
+    "inputTokensKnown": 968511,
+    "outputTokensKnown": 85949,
+    "cost": null,
+    "nativeAttemptLatencyP50Ms": 19024.589299999992,
+    "nativeVerifierStageP50Ms": 5796.8324999999895,
+    "nativeVerifierStageP95NearestRankMs": 10794.057,
+    "nativeVerifierSamples": 45,
+    "allVerifierProviderLatency": {
+      "samples": 62,
+      "p50Ms": 5900.0,
+      "p95NearestRankMs": 10194
+    }
+  }
+}

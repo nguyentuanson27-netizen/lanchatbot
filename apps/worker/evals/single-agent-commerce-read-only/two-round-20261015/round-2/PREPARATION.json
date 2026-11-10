@@ -1,0 +1,20 @@
+{
+  "status": "ROUND2_OWNER_ONLY_PREPARATION_PASS_PROVIDER_NOT_RUN",
+  "previousRunSourceSha": "9564b4a59871f1e096c72f8d50f60b41ee06577d",
+  "treatment": "replace owner decision/physical-result/policy-approval wording; same code/data/verifier/models/config/cases/bars/fallback/budget",
+  "promptHashes": {
+    "owner": "d6ba7b6c3a4705fcab140a0d74b527ce9b36ebb9639c1b7cf470eb48a3c02a67",
+    "verifier": "fe7e21965c6cc608c854b97f2513130c9d2f39cf5bec443f4a637f7d8e6f7957"
+  },
+  "nativeProtocolTestsPassed": 20,
+  "workerCodeUnchangedAfter1713Tests": true,
+  "selfReview": [
+    "ordinary styling/design confidence remains allowed without a physical test",
+    "do not infer a product-specific use result in unreported conditions from a material name",
+    "only read rules does not approve an individual exchange",
+    "known disqualifying customer action still denied directly",
+    "direct price/source partial-answer/size authority/receipt rules unchanged",
+    "no case-specific example/product/policy values or extra role/engine/retry"
+  ],
+  "limitation": "Clearer instructions change probabilities; no guarantee of model adherence or whole-population improvement. Stop after this second round."
+}

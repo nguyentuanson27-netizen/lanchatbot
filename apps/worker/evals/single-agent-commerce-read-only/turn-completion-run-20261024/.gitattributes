@@ -1,0 +1,6 @@
+/raw/** -text -whitespace
+/checks/** -text -whitespace
+/source/** -text -whitespace
+/frozen-inputs/** -text -whitespace
+/*.json -text -whitespace
+CONVERSATIONS.md -whitespace

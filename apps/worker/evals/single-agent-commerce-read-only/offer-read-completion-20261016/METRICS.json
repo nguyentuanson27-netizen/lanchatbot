@@ -1,0 +1,102 @@
+{
+  "sourceSha": "099ed3ab44a90602f9a2703cbdebaae25c6f1602",
+  "newOutcomes": 25,
+  "earlierOutcomes": 6,
+  "populationCoverage": 31,
+  "singleSourceFull31Run": false,
+  "b1": {
+    "recorded": 18,
+    "terminals": {
+      "SEND_ELIGIBLE": 18
+    },
+    "fallbackReasons": {},
+    "wholeTurnLatency": {
+      "n": 18,
+      "p50Ms": 10288.366500000004,
+      "p95Ms": 16335.387199999997
+    },
+    "addedVerificationLatency": {
+      "n": 18,
+      "p50Ms": 5559.0322000000015,
+      "p95Ms": 12058.005799999984
+    }
+  },
+  "stateful": {
+    "recorded": 7,
+    "terminals": {
+      "FALLBACK": 4,
+      "HANDOFF": 2,
+      "NO_SEND": 1
+    },
+    "fallbackReasons": {
+      "PROVIDER_ERROR": 1,
+      "BUDGET": 2,
+      "FAIL": 1
+    },
+    "wholeTurnLatency": {
+      "n": 7,
+      "p50Ms": 20233.885599999994,
+      "p95Ms": 45299.73229999999
+    },
+    "addedVerificationLatency": {
+      "n": 1,
+      "p50Ms": 18613.317200000005,
+      "p95Ms": 18613.317200000005
+    }
+  },
+  "generationInvocations": 70,
+  "maximumAdditionalGenerationInvocations": 96,
+  "roles": {
+    "owner": 51,
+    "verifier": 19
+  },
+  "generationHttpRequests": 70,
+  "unknownRequestAccounting": 0,
+  "httpStatuses": {
+    "200": 70
+  },
+  "automaticRetries": 0,
+  "generationErrors": 1,
+  "timeouts": 0,
+  "verifierErrors": 0,
+  "inputTokens": 261812,
+  "outputTokens": 20048,
+  "usageCoverage": {
+    "complete": 70,
+    "denominator": 70
+  },
+  "costEvidence": "NOT_EXPOSED_NO_ESTIMATE",
+  "verifierLatency": {
+    "n": 19,
+    "p50Ms": 5121.554400000023,
+    "p95Ms": 13647.138599999991
+  },
+  "ownerLatency": {
+    "n": 51,
+    "p50Ms": 1692.416899999982,
+    "p95Ms": 3830.4228000000003
+  },
+  "knownOwnerAuthRequests": 2,
+  "codexAuthRequests": null,
+  "finalOnlyRequests": 6,
+  "finalOnlyToolViolations": 2,
+  "testDatabaseDropped": true,
+  "sendEnabled": false,
+  "b1SourceCounters": {
+    "embeddingCalls": 0,
+    "policyReads": 12,
+    "catalogReads": 34,
+    "posReads": 24
+  },
+  "sourceCheckCounters": {
+    "embeddingCalls": 1,
+    "policyReads": 0,
+    "catalogReads": 1,
+    "posReads": 0
+  },
+  "statefulSourceCounters": {
+    "embedding": 0,
+    "owner": 13,
+    "verifier": 1
+  }
+}

@@ -1,0 +1,160 @@
+{
+  "round": 52,
+  "commands": [
+    {
+      "command": "git fetch origin main",
+      "exitCode": 0,
+      "result": "Refreshed before Round52 preparation;exact origin/main implementationBaseSha=296cdcfbf5759f5bf9cbb24acf3dc63005589361."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/round-52.test.mjs",
+      "exitCode": null,
+      "result": "Observed first RED before executable edits: 0 PASS / 8 FAIL. Exit code was not separately retained.",
+      "stage": "RED"
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/round-52.test.mjs",
+      "exitCode": 1,
+      "result": "First minimum GREEN attempt: 7 PASS / 1 FAIL; canonical/pretty manifest hash mismatch. Corrected before provider.",
+      "stage": "INTERMEDIATE"
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/round-52.test.mjs",
+      "exitCode": 0,
+      "result": "8/8 PASS;0 skip.",
+      "stage": "GREEN"
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1 node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs",
+      "exitCode": 0,
+      "result": "277/277 PASS;0 skip. Default R39 is the existing compatibility-test environment; R52 tests load and validate frozen R52 explicitly."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/run-a2.test.mjs apps/worker/evals/single-agent-semantic-verifier/run-a3.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-52.test.mjs",
+      "exitCode": 0,
+      "result": "48/48 PASS;0 skip. Local transport stubs:0 real provider generations."
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts",
+      "exitCode": 0,
+      "result": "79/79 PASS (45 boundary,34 Vertex)."
+    },
+    {
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts src/size-engine.test.ts",
+      "exitCode": 0,
+      "result": "41/41 PASS (7 protected-claims,14 reply-assembler,20 size-engine)."
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=52 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs",
+      "exitCode": 0,
+      "result": "FROZEN_PROTOCOL_VALID;163 A2 cases/42 A3 cases."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=52 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/round-52.test.mjs",
+      "exitCode": 0,
+      "result": "8/8 PASS;0 skip. Prior read-only inspectGemini reports expected route available;0 provider generations."
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "PASS; read-only inspectCodex CLI0.159.2/binary52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a;0 provider generations."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=52 A2_RUN_SOURCE_SHA=8e6e4f6b37a5f5b5a67b67c9946b509481ee0a3a node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2",
+      "exitCode": 0,
+      "result": "FROZEN_PROTOCOL_VALID;clean committed A2 source."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=52 A2_RUN_SOURCE_SHA=8e6e4f6b37a5f5b5a67b67c9946b509481ee0a3a node apps/worker/evals/single-agent-semantic-verifier/run-staged-round52.mjs --a2",
+      "exitCode": 0,
+      "result": "A2 PASS277/277;prefix90/90PASS;159UNSAFE0eligiblefalsePASS,118SAFE0failures;0unexecuted;no hidden retry."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=52 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2",
+      "exitCode": 0,
+      "result": "{\"round\":52,\"a2Cases\":163,\"a3Cases\":42}\n{\"status\":\"PASS\",\"registeredDenominator\":277,\"executedDenominator\":277,\"unsafeCount\":159,\"safeCount\":118,\"unsafeSendEligibleFalsePassCount\":0,\"safeFailures\":0,\"safeFailureRate\":0,\"unexecuted\":0}\nFROZEN_PROTOCOL_VALID"
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=52 A3_RUN_SOURCE_SHA=e40717eccf081a45e1d1f83a183914a00c8631ff A2_STATUS=PASS node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a3",
+      "exitCode": 0,
+      "result": "FROZEN_PROTOCOL_VALID;fresh clean A3 source,A2 PASS."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=52 A3_RUN_SOURCE_SHA=e40717eccf081a45e1d1f83a183914a00c8631ff C3_VERTEX_CREDENTIAL_FILE='<approved existing local route>' node apps/worker/evals/single-agent-semantic-verifier/run-staged-round52.mjs --a3-regression",
+      "exitCode": 0,
+      "result": "30/30 prefix attempts completed;25SEND_ELIGIBLE/5FALLBACK;full72registration retained with42unexecuted. No operational failures;AWAITING_REVIEW,not quality PASS."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=52 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3",
+      "exitCode": 0,
+      "result": "Evidence valid with contiguous30completed prefix/42unexecuted;quality remains BLOCKED/UNEXECUTED_REGISTERED_ATTEMPTS."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=52 node C:/Users/nguye/AppData/Local/Temp/c3-round52-primary-review.mjs",
+      "exitCode": 0,
+      "result": "30connected whole-turn assessments+300diagnostic ratings;25/30PASS,5/30FAIL;source/manifest/raw bound;authorizeA3Continuation rejects REGRESSION_NOT_PASS;42remaining not dispatched;720humanratings null."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=52 node C:/Users/nguye/AppData/Local/Temp/c3-round52-audit.mjs",
+      "exitCode": 0,
+      "result": "Captured body/binding/finalgate and source/raw/score identity audit;273A2+30owner+30verifier requests,max1/retry0;9byte-exactR51sidecars;historical tracked files unchanged;720humanratingsnull;42unexecuted undispached. Correct Vertex usage and observed-prefix rates from raw."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=52 node C:/Users/nguye/AppData/Local/Temp/c3-round52-final-readback.mjs",
+      "exitCode": 0,
+      "result": "19frozen executable/input hashes and all raw/primary hashes unchanged;JSON reports valid,A2PASS/A3prefixFAIL/42unexecuted/STOP;no repeated test suite."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=52 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2",
+      "exitCode": 0,
+      "result": "Final readback: evidence valid,A2PASS277/277."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=52 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a3",
+      "exitCode": 0,
+      "result": "Final readback: evidence valid,30executed/42unexecuted;full qualityBLOCKED,notPASS."
+    },
+    {
+      "command": "git push origin feat/c3-semantic-verifier-checkpoint-a-20261005",
+      "exitCode": 0,
+      "result": "Report8c597c32719cf4560ce3f739414bd18e0599b818 pushed."
+    },
+    {
+      "command": "gh pr edit 390 --repo nguyentuanson27-netizen/lanchatbot --title 'C3 Semantic-Verifier Checkpoint A — Round52 regression-first A3 FAIL / STOP' --body-file C:/Users/nguye/AppData/Local/Temp/c3-round52-pr-body.md",
+      "exitCode": 0,
+      "result": "Existing OPEN draft PR390 updated;Checkpoint A only,prefix/remainder and unknowns explicit."
+    },
+    {
+      "command": "gh pr view 390 --repo nguyentuanson27-netizen/lanchatbot --json title,headRefName,baseRefName,isDraft,state,url,headRefOid,statusCheckRollup",
+      "exitCode": 0,
+      "result": "Reporthead8c597c32719cf4560ce3f739414bd18e0599b818/base main/correctbranch/draft OPEN;statusCheckRollup[];no remoteCIresult observed."
+    },
+    {
+      "command": "gh pr view 390 --repo nguyentuanson27-netizen/lanchatbot --json title,body,headRefOid,headRefName,baseRefName,isDraft,state,statusCheckRollup,url",
+      "exitCode": 0,
+      "result": "Exact desired body/pushedHEAD/branch/base/draft/open/clean verified by Node readback;pnpm check nowQUEUED,notPASS (first readback empty)."
+    }
+  ],
+  "notRun": [
+    {
+      "command": "node apps/worker/evals/single-agent-semantic-verifier/run-staged-round52.mjs --a3-remaining",
+      "reason": "PrefixFAIL;42registrations unexecuted."
+    }
+  ],
+  "redExitCodeLimit": "First observedRED exit not separately retained;counts0PASS/8FAIL observed."
+}

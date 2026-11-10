@@ -1,0 +1,104 @@
+{
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "preparationBaseSha": "75f075b151d6537acdb251287e4960414f716e96",
+  "specBlobs": {
+    "docs/specs/c3-single-agent-commerce-architecture-20261004.md": "7e0265e3b6b3d556d8fb0f3c7267abccef5de86a",
+    "docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md": "4a09b55d2f3a972a65697738876cc5eab21e7a2b",
+    "docs/specs/c3-phase-b-read-only-integration-plan-20261014.md": "d79f015cec765af1211ed613ac9d56143bfe9a6d"
+  },
+  "surface": "POST_READ_OWNER_DIAGNOSTIC",
+  "registered": 10,
+  "maximumGenerationRequests": 20,
+  "promptSourceSha": "75f075b151d6537acdb251287e4960414f716e96",
+  "frozenFiles": {
+    "apps/worker/evals/single-agent-commerce-read-only/owner-task-prompt-run-20261015/manifest.json": "9c6e8f6b11c360e82170db684e32237d5e8a83dff19215e82f0df86704011adb",
+    "apps/worker/evals/single-agent-commerce-read-only/owner-task-prompt-run-20261015/SCOPE.md": "23e9b7d3f22ae3abdb175f046a28b69e392027d9550658d9bf460b8ba73a5d3e",
+    "apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt": "c6cddd33a50e09c69c50bf50ea83574c6d931578552778231b92bc1614983d82",
+    "apps/worker/evals/single-agent-commerce-read-only/prompts/verifier.vi.txt": "fe7e21965c6cc608c854b97f2513130c9d2f39cf5bec443f4a637f7d8e6f7957",
+    "apps/worker/evals/single-agent-commerce-read-only/cases.b1.json": "a5c2f5e6f1af91acb84ea5ebe865536dfa5a5148360e004a25d22551b7582059",
+    "apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json": "5ca8dc68da2a11d6a29bb9d03617686f3116a3e43b8c646da0b012212bcefb6e"
+  },
+  "red": {
+    "command": "node --test apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs",
+    "pass": 7,
+    "fail": 1,
+    "exitCode": 1,
+    "logSha256": "1198d9156379b11715e54f8f37d3de1db9d789ef26976d9b8d06b1cd797da6ed"
+  },
+  "green": {
+    "pass": 8,
+    "fail": 0,
+    "exitCode": 0,
+    "logSha256": "1154e5e3da45a6c754ed58ab8c875445a7a902fd32c189c16d9d8390b112ae6f"
+  },
+  "readinessResults": {
+    "focusedNode": {
+      "pass": 38,
+      "optionalSkip": 1
+    },
+    "fullEvals": {
+      "pass": 468,
+      "optionalSkip": 2
+    },
+    "boundaryStateEffects": 122,
+    "protectedReply": 21,
+    "workerTypecheck": "PASS",
+    "workerBuild": "PASS",
+    "workerLint": "PASS"
+  },
+  "commands": [
+    {
+      "log": "focused-node.log",
+      "durationSeconds": 1.8982021,
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs",
+      "exitCode": 0,
+      "logSha256": "284e7479c70374cb5cd7515e6fd000d10a2238195c2642981ccd14f7da83da5b"
+    },
+    {
+      "log": "full-evals.log",
+      "durationSeconds": 113.7690062,
+      "command": "pnpm --filter @lana/worker test:evals",
+      "exitCode": 0,
+      "logSha256": "4f7b034ac367cff6a9a87c32ee772da7d704e2362264418f31c0fb5ff986bdb6"
+    },
+    {
+      "log": "focused-boundary.log",
+      "durationSeconds": 4.9566316,
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/single-agent-commerce-read-only.test.ts src/single-agent-commerce-read-only-context.test.ts src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-read-only-sources.test.ts src/single-agent-commerce-state.test.ts src/single-agent-commerce-effects.test.ts",
+      "exitCode": 0,
+      "logSha256": "a713aafa096b749ba801ca809e7ed6d7add67289959230ecc491a6ae80ffc81a"
+    },
+    {
+      "log": "protected-reply.log",
+      "durationSeconds": 2.8841417,
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts",
+      "exitCode": 0,
+      "logSha256": "0105d13cbc9852c393013cce5d43172c693e4328871bef50fd4b5e12a72be64a"
+    },
+    {
+      "log": "worker-typecheck.log",
+      "durationSeconds": 40.1722685,
+      "command": "pnpm --filter @lana/worker typecheck",
+      "exitCode": 0,
+      "logSha256": "8fd12c93e9dfe6ff1a53168d0229d0c5173dccd47047c9a123b1aa95b7ce115c"
+    },
+    {
+      "log": "worker-build.log",
+      "durationSeconds": 37.2833446,
+      "command": "pnpm --filter @lana/worker build",
+      "exitCode": 0,
+      "logSha256": "4c0dcd8669947e8e221f4268092c3f83842543424abc3f1e98377ac9beeac7c5"
+    },
+    {
+      "log": "worker-lint.log",
+      "durationSeconds": 5.2264915,
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0,
+      "logSha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415"
+    }
+  ],
+  "selfReview": "Only eval registration and actual slot counting changed; request projection/transports/mandatory verifier/current gate and prompt c6cddd33 unchanged. Existing unknown/ref/state/receipt/firewall/no-retry tests remain green. Legacy registration remains valid under its own frozen source; no runtime parser/router/role added. Five existing LIVE cases support code-preloaded source scope; no search/component/fault case added to tools-off surface.",
+  "providerGenerationsBeforeSeal": 0,
+  "fullWorkerSrcSuiteRerun": false,
+  "limits": "N1 diagnostic, not statistical stability or native Sol tool evidence. TypeScript/runtime/shared source untouched; full focused B boundary tests and full evals run, not full worker src. No provider quality or safety result yet."
+}

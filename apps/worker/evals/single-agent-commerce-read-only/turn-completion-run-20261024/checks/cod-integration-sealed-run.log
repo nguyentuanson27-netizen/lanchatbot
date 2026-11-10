@@ -1,0 +1,15 @@
+error: handoff_events is append-only
+    at C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\node_modules\.pnpm\pg-pool@3.14.0_pg@8.22.0\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs:447:32
+    at async check (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs:44:6)
+    at async file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs:427:130
+B composed existing clarification migration rolls back exactly before new events: PASS
+B composed snapshot invalidation source-refresh discards draft and captures only committed holding reply: PASS
+B composed snapshot invalidation stock-change discards draft and captures only committed holding reply: PASS
+B composed snapshot invalidation expired discards draft and captures only committed holding reply: PASS
+B composed dependency holding delivery unchanged uses committed policy and actual capture: PASS
+B composed dependency holding delivery before-commit uses committed policy and actual capture: PASS
+B composed dependency holding delivery after-commit uses committed policy and actual capture: PASS
+B composed dependency holding delivery restart uses committed policy and actual capture: PASS
+B composed dependency holding delivery cached-allowed uses committed policy and actual capture: PASS

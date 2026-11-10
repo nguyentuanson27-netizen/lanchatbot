@@ -1,0 +1,171 @@
+{
+  "mode": "READ_ONLY_PUBLIC_DIAGNOSTIC_ZERO_GENERATIONS",
+  "policyShopId": "LANA_DESIGN",
+  "policyBundleHash": "sha256:ac27cd83d13e939e4388948119fcccef45ee3e0c6df96c027c0af865e3290808",
+  "policyVersionReferences": [
+    {
+      "artifactKey": "lana.closing-strategy",
+      "artifactKind": "CLOSING_STRATEGY",
+      "versionId": "805931e1-0363-4cb2-a66d-de9058982af5",
+      "lifecycle": "PUBLISHED",
+      "versionNumber": 3,
+      "contentHash": "sha256:e151e450efe47cfe9a48b7a55ea714ff2e1413399090fbd45d928816ecd067df",
+      "pointerId": "cefcecd6-2619-4ba9-bd54-ac43b25f5abd",
+      "pointerRevision": 4
+    },
+    {
+      "artifactKey": "lana.offer-policy",
+      "artifactKind": "OFFER_POLICY",
+      "versionId": "81320141-8221-4009-8282-df430eed8946",
+      "lifecycle": "PUBLISHED",
+      "versionNumber": 2,
+      "contentHash": "sha256:c12f58eb1ba869fd72c25b97fbfba08725a9532689275cdcfa5fc76d6e5fdbbc",
+      "pointerId": "e66d76d5-99d7-442b-92c0-f6030c60533f",
+      "pointerRevision": 0
+    },
+    {
+      "artifactKey": "lana.payment-policy",
+      "artifactKind": "PAYMENT_POLICY",
+      "versionId": "962dcbfc-22cd-48b3-a11c-f09875580133",
+      "lifecycle": "PUBLISHED",
+      "versionNumber": 1,
+      "contentHash": "sha256:59c24c7cbf19f9c3ed654b57dfa49860960ebb0d1187a981e3c44aa77aa4a1cc",
+      "pointerId": "3097609e-7dcf-4b07-8e6c-3382be2b33db",
+      "pointerRevision": 0
+    },
+    {
+      "artifactKey": "lana.shop-policy",
+      "artifactKind": "SHOP_POLICY",
+      "versionId": "24400b36-6d12-4e3c-b0ca-cf41014ed0d8",
+      "lifecycle": "PUBLISHED",
+      "versionNumber": 2,
+      "contentHash": "sha256:666362842822d653d1914494be4d9858504951e3fe77acd830997f3c086dc4b7",
+      "pointerId": "b4bd9fe3-cff1-4e01-bee0-12bdafe7ad28",
+      "pointerRevision": 1
+    },
+    {
+      "artifactKey": "size-chart:SD276",
+      "artifactKind": "SIZE_CHART",
+      "versionId": "1311b497-c041-4433-899d-130d6c658961",
+      "lifecycle": "PUBLISHED",
+      "versionNumber": 2,
+      "contentHash": "sha256:4dc553a16e69a3773ce8e791a0766b01f9fa4c932561f09da3f9fda9c4893e70",
+      "pointerId": "19c15fdd-c61d-4088-b607-77de76dabbfb",
+      "pointerRevision": 0
+    },
+    {
+      "artifactKey": "size-chart:SD365",
+      "artifactKind": "SIZE_CHART",
+      "versionId": "53855377-5f06-4185-9ff8-b7f12a245d3e",
+      "lifecycle": "PUBLISHED",
+      "versionNumber": 2,
+      "contentHash": "sha256:50fbd936582d219c7765e8347b3deb441a40c4ff370b63c55b19bc1f9389f2e5",
+      "pointerId": "05cfdf19-f387-441c-a95c-aa0306308181",
+      "pointerRevision": 0
+    },
+    {
+      "artifactKey": "size-chart:SD375",
+      "artifactKind": "SIZE_CHART",
+      "versionId": "bf0db5cc-2d75-45a9-99fc-11f90bd853c8",
+      "lifecycle": "PUBLISHED",
+      "versionNumber": 2,
+      "contentHash": "sha256:6ed8c85a4e9c7b4e22c84c529a1220f46cd33e533f12ad51125bbd1955f3fdfe",
+      "pointerId": "09bca4f5-9a27-41e3-bc6e-ce879c0b1c7e",
+      "pointerRevision": 0
+    },
+    {
+      "artifactKey": "size-chart:SD396",
+      "artifactKind": "SIZE_CHART",
+      "versionId": "64126160-44b7-4aad-8adc-f775f1c329ed",
+      "lifecycle": "PUBLISHED",
+      "versionNumber": 2,
+      "contentHash": "sha256:536f393b1a4f4605275e9aa74889091640b4aebb1612108ae56d8436ea2f97bf",
+      "pointerId": "3cd09b26-6b27-44c8-9477-37accd5e48fd",
+      "pointerRevision": 0
+    },
+    {
+      "artifactKey": "size-chart:SD398",
+      "artifactKind": "SIZE_CHART",
+      "versionId": "2d2c4a39-00e2-4abc-a122-6e907b5dceda",
+      "lifecycle": "PUBLISHED",
+      "versionNumber": 2,
+      "contentHash": "sha256:158395f5d9c659b840cf66f7e8bd62762ace9b3cf035ad1ed869b1801c6187f6",
+      "pointerId": "6b89e712-35e8-4e10-8ddb-88da9cdb311d",
+      "pointerRevision": 0
+    },
+    {
+      "artifactKey": "size-chart:SQ2447",
+      "artifactKind": "SIZE_CHART",
+      "versionId": "46d135cf-cb17-49ad-85a9-3ba4a2ab790d",
+      "lifecycle": "PUBLISHED",
+      "versionNumber": 2,
+      "contentHash": "sha256:139fe2874e56add9a1c2dcc7cfa06c988000a8b796d78314d76c44daf6bf584e",
+      "pointerId": "a8962654-329f-4d14-8ed0-7a563858a2f0",
+      "pointerRevision": 0
+    },
+    {
+      "artifactKey": "size-chart:SQ520",
+      "artifactKind": "SIZE_CHART",
+      "versionId": "3392bd5c-353c-488d-84ba-943bf743446c",
+      "lifecycle": "PUBLISHED",
+      "versionNumber": 3,
+      "contentHash": "sha256:6ea0b28acbef238c046e7aa6ed14f6c87519c796545e50b1f2bb64da8e6385ef",
+      "pointerId": "cf472602-8cfc-434e-aa72-33ca1844b353",
+      "pointerRevision": 0
+    }
+  ],
+  "selection": {
+    "status": "READY",
+    "line": {
+      "lineId": "50000000-0000-4000-8000-000000000001",
+      "parentProductId": "SV2447",
+      "offerId": "AO",
+      "offerKind": "DIRECT",
+      "quantity": 2,
+      "components": [
+        {
+          "componentProductId": "SV2447_AO",
+          "componentSku": "SV2447_AO",
+          "componentRole": "TOP",
+          "color": "BE",
+          "size": "L",
+          "quantity": 1
+        }
+      ],
+      "allowMixedSizes": false,
+      "allowComponentSale": false,
+      "posUnitPriceVnd": 499000,
+      "priceAuthority": {
+        "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+        "shopId": "LANA",
+        "parentProductId": "SV2447",
+        "offerId": "AO",
+        "offerPriceKind": "DIRECT",
+        "componentProductId": null,
+        "metadata": {
+          "authority": "PANCAKE_POS",
+          "sourceVersion": "p2-default",
+          "observedAt": "2026-10-15T13:32:36.697Z",
+          "expiresAt": "2026-10-17T13:32:36.697Z",
+          "freshForSeconds": 172800,
+          "freshnessState": "FRESH"
+        }
+      },
+      "lineTotalVnd": 998000
+    },
+    "shopId": "LANA",
+    "versions": {
+      "price": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+      "inventory": "inventory:sha256:e53263e31a2ab6538e666221dda54d60f1b57e9667f8194a512d08d2587d62ce",
+      "size": "size:sha256:1e07728f677b88d767e7b0af5f4ac2e23a827beac1872152a019c0e1b3714d78",
+      "eta": null
+    },
+    "eta": null,
+    "etaExpiresAt": null,
+    "sourceAuthority": "POS_SNAPSHOT",
+    "stockStatus": "PRE_ORDER",
+    "stockAvailableQuantity": 0,
+    "sourceObservedAt": "2026-10-15T13:32:36.697Z",
+    "sourceExpiresAt": "2026-10-17T13:32:36.697Z"
+  }
+}

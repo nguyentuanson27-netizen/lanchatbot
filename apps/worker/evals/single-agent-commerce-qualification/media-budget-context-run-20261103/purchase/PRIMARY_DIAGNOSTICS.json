@@ -1,0 +1,300 @@
+[
+  {
+    "caseId": "c-20261028-s09",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, áo tơ thêu bên em ưu tiên giặt tay để giữ form dáng và độ bền cho chất vải cũng như họa tiết thêu chị nhé. Nếu giặt máy, chị nhớ cho áo vào túi giặt và chọn chế độ nhẹ (gentle cycle) giúp em ạ."
+      ],
+      "images": []
+    },
+    "nativeReason": "PASS",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "normalToolCalls": 3,
+    "toolResults": [
+      {
+        "name": "read_policy",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": []
+  },
+  {
+    "caseId": "c-20261028-s10",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "EXCHANGE"
+    },
+    "nativeReason": "EXCHANGE",
+    "recovery": null,
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "EXCHANGE"
+    },
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "normalToolCalls": 1,
+    "toolResults": [
+      {
+        "name": "read_policy",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": []
+  },
+  {
+    "caseId": "c-20261028-s12",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEFECT"
+    },
+    "nativeReason": "DEFECT",
+    "recovery": null,
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEFECT"
+    },
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "normalToolCalls": 1,
+    "toolResults": [
+      {
+        "name": "read_policy",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": []
+  },
+  {
+    "caseId": "c-20261028-s14",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ vâng, chị cứ xem thêm nhé ạ! Khi nào cần chị cứ nhắn em hỗ trợ nha chị."
+      ],
+      "images": []
+    },
+    "nativeReason": "PASS",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "normalToolCalls": 0,
+    "toolResults": [],
+    "diagnosticErrors": []
+  },
+  {
+    "caseId": "c-20261028-s15",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "nativeReason": "DEPENDENCY_FAILURE",
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "PROVIDER_ERROR"
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "normalToolCalls": 5,
+    "toolResults": [
+      {
+        "name": "apply_customer_state",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": []
+  },
+  {
+    "caseId": "c-20261028-j2",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "SIZE_RULE_UNAVAILABLE"
+    },
+    "nativeReason": "SIZE_RULE_UNAVAILABLE",
+    "recovery": null,
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "SIZE_RULE_UNAVAILABLE"
+    },
+    "openingMediaWork": {
+      "status": "READY",
+      "requiredProducts": [
+        "SV2447"
+      ],
+      "chargedUnits": 1
+    },
+    "normalToolCalls": 3,
+    "toolResults": [],
+    "diagnosticErrors": []
+  },
+  {
+    "caseId": "c-20261028-j2",
+    "turnIndex": 1,
+    "actualTerminal": {
+      "disposition": "NO_SEND",
+      "messages": [],
+      "images": [],
+      "reason": "HUMAN_OWNS_CONVERSATION"
+    },
+    "nativeReason": "HUMAN_OWNS_CONVERSATION",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": null,
+    "normalToolCalls": null,
+    "toolResults": [],
+    "diagnosticErrors": []
+  },
+  {
+    "caseId": "c-20261028-j2",
+    "turnIndex": 2,
+    "actualTerminal": {
+      "disposition": "NO_SEND",
+      "messages": [],
+      "images": [],
+      "reason": "HUMAN_OWNS_CONVERSATION"
+    },
+    "nativeReason": "HUMAN_OWNS_CONVERSATION",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": null,
+    "normalToolCalls": null,
+    "toolResults": [],
+    "diagnosticErrors": []
+  },
+  {
+    "caseId": "c-20261028-j6",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. \n\nTổng giỏ hàng hiện tại là 799.000đ (phí ship 30.000đ, tổng thanh toán 829.000đ). Chị sẵn sàng chốt đơn thì báo em nhé ạ!"
+      ],
+      "images": [
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+        }
+      ]
+    },
+    "nativeReason": "PASS",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": {
+      "status": "READY",
+      "requiredProducts": [
+        "SV2447"
+      ],
+      "chargedUnits": 1
+    },
+    "normalToolCalls": 3,
+    "toolResults": [
+      {
+        "name": "add_to_cart",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": []
+  },
+  {
+    "caseId": "c-20261028-j6",
+    "turnIndex": 1,
+    "actualTerminal": {
+      "disposition": "CODE_OWNED_SEND",
+      "messages": [
+        "Chị cho em tên người nhận nhé."
+      ],
+      "images": []
+    },
+    "nativeReason": "CHECKOUT_DETAILS_MISSING",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "normalToolCalls": 2,
+    "toolResults": [],
+    "diagnosticErrors": []
+  },
+  {
+    "caseId": "c-20261028-j6",
+    "turnIndex": 2,
+    "actualTerminal": {
+      "disposition": "CODE_OWNED_SEND",
+      "messages": [
+        "Chị cho em tên người nhận nhé."
+      ],
+      "images": []
+    },
+    "nativeReason": "PRIVATE_CHECKOUT_COMMITTED",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": null,
+    "normalToolCalls": 0,
+    "toolResults": [],
+    "diagnosticErrors": []
+  }
+]

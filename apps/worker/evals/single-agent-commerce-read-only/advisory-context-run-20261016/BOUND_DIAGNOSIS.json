@@ -1,0 +1,99 @@
+{
+  "mode": "OFFLINE_CAPTURED_BOUND_DIAGNOSIS_NO_GENERATION",
+  "candidateSourceSha": "c7105bd1cb3ac955a99df589faa1aef4aaef5fd3",
+  "primarySavepoint": "4c01efbf8419b9a088ac8aabd0e96160dff13a02",
+  "boundBytes": 32768,
+  "failedRequestExactWireBytes": null,
+  "failedRequestWasDispatched": false,
+  "providerErrorCode": "OWNER_REQUEST_BOUND",
+  "newStateful2FinalQuantity": 1,
+  "newStateful3FinalQuantity": 2,
+  "autoRetry": false,
+  "interpretation": "Native signature increased 4704 characters in the first variant-change response versus the previous measured run, plus longer instructions/history. Existing size guard refused continuation before dispatch. Exact failed wire bytes were not captured; do not assign the failure solely to prompt growth or invent a counterfactual outcome.",
+  "rows": [
+    {
+      "population": "advisory-full-run-20261016",
+      "id": "4fab42f6-4451-4f05-9585-e83b6f660214:owner:1",
+      "phase": "OWNER_REQUEST",
+      "bodyBytes": 19668,
+      "trustedBytes": 2233,
+      "nativeHistoryBytes": 336,
+      "instructionsBytes": 11085,
+      "toolSchemaBytes": 5754
+    },
+    {
+      "population": "advisory-full-run-20261016",
+      "id": "4fab42f6-4451-4f05-9585-e83b6f660214:owner:1",
+      "phase": "OWNER_RESULT",
+      "kind": "TOOLS",
+      "nativeContentBytes": 6925,
+      "signatureChars": 6660
+    },
+    {
+      "population": "advisory-full-run-20261016",
+      "id": "4fab42f6-4451-4f05-9585-e83b6f660214:owner:2",
+      "phase": "OWNER_REQUEST",
+      "bodyBytes": 30348,
+      "trustedBytes": 4447,
+      "nativeHistoryBytes": 8802,
+      "instructionsBytes": 11085,
+      "toolSchemaBytes": 5754
+    },
+    {
+      "population": "advisory-full-run-20261016",
+      "id": "4fab42f6-4451-4f05-9585-e83b6f660214:owner:2",
+      "phase": "OWNER_RESULT",
+      "kind": "TOOLS",
+      "nativeContentBytes": 1263,
+      "signatureChars": 1052
+    },
+    {
+      "population": "advisory-full-run-20261016",
+      "id": "4fab42f6-4451-4f05-9585-e83b6f660214:owner:3",
+      "phase": "OWNER_REQUEST",
+      "bodyBytes": 27603,
+      "trustedBytes": 4262,
+      "nativeHistoryBytes": 11994,
+      "instructionsBytes": 11085,
+      "toolSchemaBytes": 2
+    },
+    {
+      "population": "advisory-full-run-20261016",
+      "id": "4fab42f6-4451-4f05-9585-e83b6f660214:owner:3",
+      "phase": "OWNER_RESULT",
+      "kind": "FINAL",
+      "nativeContentBytes": 2,
+      "signatureChars": 0
+    },
+    {
+      "population": "advisory-context-run-20261016",
+      "id": "d96f0ecc-a1e4-45ec-a571-41b5a5b56b1e:owner:1",
+      "phase": "OWNER_REQUEST",
+      "bodyBytes": 20485,
+      "trustedBytes": 2233,
+      "nativeHistoryBytes": 420,
+      "instructionsBytes": 11818,
+      "toolSchemaBytes": 5754
+    },
+    {
+      "population": "advisory-context-run-20261016",
+      "id": "d96f0ecc-a1e4-45ec-a571-41b5a5b56b1e:owner:1",
+      "phase": "OWNER_RESULT",
+      "kind": "TOOLS",
+      "nativeContentBytes": 11630,
+      "signatureChars": 11364
+    },
+    {
+      "population": "advisory-context-run-20261016",
+      "id": "d96f0ecc-a1e4-45ec-a571-41b5a5b56b1e:owner:2",
+      "phase": "OWNER_ERROR",
+      "code": "OWNER_REQUEST_BOUND",
+      "telemetry": {
+        "generationId": "d96f0ecc-a1e4-45ec-a571-41b5a5b56b1e:owner:2",
+        "providerRequests": 0,
+        "httpStatus": null,
+        "stage": "BEFORE_PROVIDER_DISPATCH"
+      }
+    }
+  ]
+}

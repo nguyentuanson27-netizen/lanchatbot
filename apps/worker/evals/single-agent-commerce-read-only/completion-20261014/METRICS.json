@@ -1,0 +1,60 @@
+{
+  "registered": 8,
+  "recorded": 8,
+  "repetitions": 1,
+  "maximumGenerationRequests": 32,
+  "generationRequests": 28,
+  "ownerRequests": 21,
+  "verifierRequests": 7,
+  "generationRetries": 0,
+  "providerErrors": 0,
+  "providerTimeouts": 0,
+  "providerErrorRate": 0,
+  "providerTimeoutRate": 0,
+  "dispositions": {
+    "FALLBACK": 3,
+    "SEND_ELIGIBLE": 5
+  },
+  "fallbackRate": 0.375,
+  "handoffRate": 0,
+  "noSendRate": 0,
+  "verifierLatencyMs": {
+    "n": 7,
+    "p50": 8864.275500000018,
+    "p95": 13957.946599999996
+  },
+  "addedVerificationLatencyMs": {
+    "n": 7,
+    "p50": 9482.988400000002,
+    "p95": 14603.787799999991
+  },
+  "toolLatencyMs": {
+    "n": 8,
+    "p50": 535.8959000000032,
+    "p95": 3052.88979999999
+  },
+  "endToEndLatencyMs": {
+    "n": 8,
+    "p50": 14108.954799999992,
+    "p95": 23997.266799999998
+  },
+  "ownerInputTokens": 69651,
+  "ownerOutputTokensIncludingThinking": 8175,
+  "ownerThinkingTokens": 7413,
+  "verifierInputTokens": 23526,
+  "verifierOutputTokensIncludingReasoning": 674,
+  "cost": null,
+  "costAvailability": "NOT_EXPOSED",
+  "domainCounters": {
+    "embeddingCalls": 1,
+    "policyReads": 4,
+    "catalogReads": 20,
+    "posReads": 15
+  },
+  "sourceProbeEmbeddingCalls": 1,
+  "totalEmbeddingCalls": 2,
+  "quantilePolicy": "nearest rank; conditional verifier latency over seven invoked cases, not all eight",
+  "ownerAuthRequests": 1,
+  "verifierAuthRequests": null,
+  "maximumUpstreamRequestsPerGeneration": 1
+}

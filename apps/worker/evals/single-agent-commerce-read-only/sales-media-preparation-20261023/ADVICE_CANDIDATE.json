@@ -1,0 +1,12 @@
+{
+  "status": "PREPARED_NOT_PROMOTED_NOT_RUN",
+  "hypothesis": "Generic material praise substitutes for resolving the actual buying concern; replace two overlapping choice bullets with relevance and decision instructions. No confirmed causal result.",
+  "baselinePath": "../prompts/owner.vi.txt",
+  "baselineHash": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
+  "candidatePath": "owner-advice.candidate.vi.txt",
+  "candidateHash": "a17b74dc6368841e3ed6e89621b562500dae5648d41ca8a9a02615321acc961a",
+  "baselineBytes": 14248,
+  "candidateBytes": 14413,
+  "arms": "Same text diagnostic context/clock/model/verifier, toolsOFF; no media efficacy claim.",
+  "controls": "Existing four frozen advice inputs; no case-specific answers."
+}

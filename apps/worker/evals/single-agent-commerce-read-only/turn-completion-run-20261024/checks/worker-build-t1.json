@@ -1,0 +1,10 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@lana/worker",
+    "build"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 200.7119517326355
+}

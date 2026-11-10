@@ -1,0 +1,728 @@
+{
+  "kind": "PRE_PROVIDER_ISOLATED_AGREED_FIXES",
+  "intakeHead": "8a3c89efa453807396a0491bbc0429fc11a3504c",
+  "returnBranch": "feat/c3-phase-b-commerce-20261014",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "repetitions": 3,
+  "maximumOutcomes": 66,
+  "maximumGenerationRequests": 240,
+  "concurrency": 2,
+  "retry": 0,
+  "selectedB1CaseIds": [
+    "b1-changed-occasion",
+    "b1-partial-source-v2",
+    "b1-buying-concern",
+    "b1-search-read"
+  ],
+  "b1CasesPath": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-isolated-agreed-20261018-b1-cases.json",
+  "b1CasesHash": "901c0d41c122599502840b4a05dac5edaba1932a42c39f0e8317f04d734c996f",
+  "arms": [
+    {
+      "id": "checkout-checklist",
+      "sourceSha": "1bb6632544e1ff9a66dba6109068e12bc965400a",
+      "population": "stateful",
+      "outcomes": 21,
+      "maximumGenerationRequests": 72,
+      "gitBlobFiles": {
+        "manifest.json": "1d6996d304d640ab14e2e19c27800fc67e6b61e7d229302bfa922b899c06cedf",
+        "prompts/owner.vi.txt": "d5ce738518816d3fabc4c6d0dd13ab362b2cea0deba0e0b71afae2b02ba0cbde",
+        "prompts/verifier.vi.txt": "5d35e5de46030ea7e1ad10e6a4bde3bdf28a968ee48c8eb6825543ec0b61dbfd",
+        "protocol.mjs": "573384ff10035f0d288a4bd0d498f6e87c7bc880dcf9275ea0f8a3d05258aafe",
+        "gemini-inference.mjs": "990d0b126bd88a8e10ee0760c552cd49c6d4399d681cc80631ad63a2563afac1",
+        "run.mjs": "5c5e64cb816643512fcdd7901af1939fb7e18e1a9aec624558efe4b417f85527",
+        "stateful-provider.mjs": "16e4e605b4f35d0f67e5487f6d98aafcbadd22e0483588fbd7b252572c2ef666",
+        "isolated-integration.mjs": "e1db6e0ffd9e57ab1a1c7ec2f2e816f2fe3eb89527be63aa37f61bade1979458",
+        "source-config.b1.json": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+        "stateful-cases.json": "51d53b26a9d85ee37786a269df1700cbbe9b4b2fd16ec243bc4a2bce56f3a749"
+      },
+      "manifest": {
+        "schemaVersion": 1,
+        "status": "IMPLEMENTATION_PROTOCOL_NOT_A_PROVIDER_RUN",
+        "sendEnabled": false,
+        "ownerGenerations": 3,
+        "toolRounds": 2,
+        "toolCalls": 6,
+        "verifierGenerations": 1,
+        "requestBounds": {
+          "ownerWireBytes": 65536,
+          "verifierWireBytes": 32768
+        },
+        "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+        "candidateFoundationSha": "dd5c9d46f41f1514982210034f551a95cd356f68",
+        "models": {
+          "conversation": {
+            "provider": "VERTEX_AI",
+            "model": "gemini-3.5-flash-lite",
+            "version": "gemini-3.5-flash-lite",
+            "effort": "high",
+            "location": "global",
+            "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+            "generationConfig": {
+              "candidateCount": 1,
+              "responseMimeType": "text/plain",
+              "maxOutputTokens": 8192,
+              "thinkingConfig": {
+                "thinkingLevel": "HIGH",
+                "includeThoughts": false
+              },
+              "temperature": "OMITTED_PROVIDER_DEFAULT",
+              "topP": "OMITTED_PROVIDER_DEFAULT",
+              "retry": 0,
+              "timeoutMs": 90000
+            }
+          },
+          "verifier": {
+            "provider": "OPENAI",
+            "model": "gpt-6.1-sol",
+            "version": "gpt-6.1-sol",
+            "effort": "high",
+            "credentialRoute": "CODEX_CHATGPT_LOGIN",
+            "generationConfig": {
+              "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+              "cliVersion": "0.159.2",
+              "wireApi": "responses",
+              "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+              "tools": [],
+              "tool_choice": "none",
+              "parallel_tool_calls": false,
+              "store": false,
+              "stream": true,
+              "reasoningEffort": "high",
+              "temperature": "OMITTED_PROVIDER_DEFAULT",
+              "topP": "OMITTED_PROVIDER_DEFAULT",
+              "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+              "timeoutMs": 90000,
+              "maxResponseBytes": 1048576,
+              "relayUpstreamRequestsPerAttempt": 1,
+              "retry": 0,
+              "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+              "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+            }
+          }
+        },
+        "promptHashes": {
+          "owner": "d5ce738518816d3fabc4c6d0dd13ab362b2cea0deba0e0b71afae2b02ba0cbde",
+          "verifier": "5d35e5de46030ea7e1ad10e6a4bde3bdf28a968ee48c8eb6825543ec0b61dbfd"
+        },
+        "verdictSchema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "verdict",
+            "violations"
+          ],
+          "properties": {
+            "verdict": {
+              "type": "string",
+              "enum": [
+                "PASS",
+                "FAIL",
+                "UNCERTAIN"
+              ]
+            },
+            "violations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "protectedRef"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "UNSUPPORTED_PROTECTED_ASSERTION",
+                      "SUBJECT_MISMATCH",
+                      "CONTRADICTION_OR_NEGATION",
+                      "MATERIAL_CONDITION_LOSS",
+                      "POLICY_OR_BENEFIT_STRENGTHENING",
+                      "EFFECT_WITHOUT_RECEIPT",
+                      "STALE_OR_SUPERSEDED_MEANING",
+                      "OTHER_PROTECTED_SEMANTIC_RISK"
+                    ]
+                  },
+                  "protectedRef": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+        "providerBatch": {
+          "scenarios": 24,
+          "repetitions": 1,
+          "maximumGenerationRequests": 96,
+          "status": "OWNER_AUTHORIZED_24_CASE_CORPUS_PREPARED_NOT_RUN"
+        },
+        "terminalMap": {
+          "PASS": "SEND_ELIGIBLE_SEND_DISABLED",
+          "FAIL": "STATIC_FALLBACK",
+          "UNCERTAIN": "STATIC_FALLBACK",
+          "MALFORMED": "STATIC_FALLBACK",
+          "TIMEOUT": "STATIC_FALLBACK",
+          "PROVIDER_ERROR": "STATIC_FALLBACK",
+          "STALE": "HANDOFF_NO_SEND_CAPABILITY",
+          "PERMISSION": "NO_SEND",
+          "PRIVACY": "NO_SEND",
+          "RECIPIENT": "NO_SEND"
+        },
+        "fallback": {
+          "id": "C3_A_NONPROTECTED_V2",
+          "text": "Phần này em chưa trả lời được, chị nhé.",
+          "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+        }
+      }
+    },
+    {
+      "id": "checkout-no-checklist",
+      "sourceSha": "e8c9aae4d05a8d54568e189f096b752e3d4b634f",
+      "population": "stateful",
+      "outcomes": 21,
+      "maximumGenerationRequests": 72,
+      "gitBlobFiles": {
+        "manifest.json": "1d6996d304d640ab14e2e19c27800fc67e6b61e7d229302bfa922b899c06cedf",
+        "prompts/owner.vi.txt": "d5ce738518816d3fabc4c6d0dd13ab362b2cea0deba0e0b71afae2b02ba0cbde",
+        "prompts/verifier.vi.txt": "5d35e5de46030ea7e1ad10e6a4bde3bdf28a968ee48c8eb6825543ec0b61dbfd",
+        "protocol.mjs": "573384ff10035f0d288a4bd0d498f6e87c7bc880dcf9275ea0f8a3d05258aafe",
+        "gemini-inference.mjs": "2285f8bb1a4ba9a752bac1569693dd03ee7c8acd55bf5948895b9eb2c64d198c",
+        "run.mjs": "5c5e64cb816643512fcdd7901af1939fb7e18e1a9aec624558efe4b417f85527",
+        "stateful-provider.mjs": "16e4e605b4f35d0f67e5487f6d98aafcbadd22e0483588fbd7b252572c2ef666",
+        "isolated-integration.mjs": "e1db6e0ffd9e57ab1a1c7ec2f2e816f2fe3eb89527be63aa37f61bade1979458",
+        "source-config.b1.json": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+        "stateful-cases.json": "51d53b26a9d85ee37786a269df1700cbbe9b4b2fd16ec243bc4a2bce56f3a749"
+      },
+      "manifest": {
+        "schemaVersion": 1,
+        "status": "IMPLEMENTATION_PROTOCOL_NOT_A_PROVIDER_RUN",
+        "sendEnabled": false,
+        "ownerGenerations": 3,
+        "toolRounds": 2,
+        "toolCalls": 6,
+        "verifierGenerations": 1,
+        "requestBounds": {
+          "ownerWireBytes": 65536,
+          "verifierWireBytes": 32768
+        },
+        "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+        "candidateFoundationSha": "dd5c9d46f41f1514982210034f551a95cd356f68",
+        "models": {
+          "conversation": {
+            "provider": "VERTEX_AI",
+            "model": "gemini-3.5-flash-lite",
+            "version": "gemini-3.5-flash-lite",
+            "effort": "high",
+            "location": "global",
+            "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+            "generationConfig": {
+              "candidateCount": 1,
+              "responseMimeType": "text/plain",
+              "maxOutputTokens": 8192,
+              "thinkingConfig": {
+                "thinkingLevel": "HIGH",
+                "includeThoughts": false
+              },
+              "temperature": "OMITTED_PROVIDER_DEFAULT",
+              "topP": "OMITTED_PROVIDER_DEFAULT",
+              "retry": 0,
+              "timeoutMs": 90000
+            }
+          },
+          "verifier": {
+            "provider": "OPENAI",
+            "model": "gpt-6.1-sol",
+            "version": "gpt-6.1-sol",
+            "effort": "high",
+            "credentialRoute": "CODEX_CHATGPT_LOGIN",
+            "generationConfig": {
+              "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+              "cliVersion": "0.159.2",
+              "wireApi": "responses",
+              "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+              "tools": [],
+              "tool_choice": "none",
+              "parallel_tool_calls": false,
+              "store": false,
+              "stream": true,
+              "reasoningEffort": "high",
+              "temperature": "OMITTED_PROVIDER_DEFAULT",
+              "topP": "OMITTED_PROVIDER_DEFAULT",
+              "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+              "timeoutMs": 90000,
+              "maxResponseBytes": 1048576,
+              "relayUpstreamRequestsPerAttempt": 1,
+              "retry": 0,
+              "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+              "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+            }
+          }
+        },
+        "promptHashes": {
+          "owner": "d5ce738518816d3fabc4c6d0dd13ab362b2cea0deba0e0b71afae2b02ba0cbde",
+          "verifier": "5d35e5de46030ea7e1ad10e6a4bde3bdf28a968ee48c8eb6825543ec0b61dbfd"
+        },
+        "verdictSchema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "verdict",
+            "violations"
+          ],
+          "properties": {
+            "verdict": {
+              "type": "string",
+              "enum": [
+                "PASS",
+                "FAIL",
+                "UNCERTAIN"
+              ]
+            },
+            "violations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "protectedRef"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "UNSUPPORTED_PROTECTED_ASSERTION",
+                      "SUBJECT_MISMATCH",
+                      "CONTRADICTION_OR_NEGATION",
+                      "MATERIAL_CONDITION_LOSS",
+                      "POLICY_OR_BENEFIT_STRENGTHENING",
+                      "EFFECT_WITHOUT_RECEIPT",
+                      "STALE_OR_SUPERSEDED_MEANING",
+                      "OTHER_PROTECTED_SEMANTIC_RISK"
+                    ]
+                  },
+                  "protectedRef": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+        "providerBatch": {
+          "scenarios": 24,
+          "repetitions": 1,
+          "maximumGenerationRequests": 96,
+          "status": "OWNER_AUTHORIZED_24_CASE_CORPUS_PREPARED_NOT_RUN"
+        },
+        "terminalMap": {
+          "PASS": "SEND_ELIGIBLE_SEND_DISABLED",
+          "FAIL": "STATIC_FALLBACK",
+          "UNCERTAIN": "STATIC_FALLBACK",
+          "MALFORMED": "STATIC_FALLBACK",
+          "TIMEOUT": "STATIC_FALLBACK",
+          "PROVIDER_ERROR": "STATIC_FALLBACK",
+          "STALE": "HANDOFF_NO_SEND_CAPABILITY",
+          "PERMISSION": "NO_SEND",
+          "PRIVACY": "NO_SEND",
+          "RECIPIENT": "NO_SEND"
+        },
+        "fallback": {
+          "id": "C3_A_NONPROTECTED_V2",
+          "text": "Phần này em chưa trả lời được, chị nhé.",
+          "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+        }
+      }
+    },
+    {
+      "id": "search-exact",
+      "sourceSha": "bd086b78db1199455572cd3893621353f888958b",
+      "population": "b1",
+      "outcomes": 12,
+      "maximumGenerationRequests": 48,
+      "gitBlobFiles": {
+        "manifest.json": "1d6996d304d640ab14e2e19c27800fc67e6b61e7d229302bfa922b899c06cedf",
+        "prompts/owner.vi.txt": "d5ce738518816d3fabc4c6d0dd13ab362b2cea0deba0e0b71afae2b02ba0cbde",
+        "prompts/verifier.vi.txt": "5d35e5de46030ea7e1ad10e6a4bde3bdf28a968ee48c8eb6825543ec0b61dbfd",
+        "protocol.mjs": "573384ff10035f0d288a4bd0d498f6e87c7bc880dcf9275ea0f8a3d05258aafe",
+        "gemini-inference.mjs": "2285f8bb1a4ba9a752bac1569693dd03ee7c8acd55bf5948895b9eb2c64d198c",
+        "run.mjs": "5c5e64cb816643512fcdd7901af1939fb7e18e1a9aec624558efe4b417f85527",
+        "stateful-provider.mjs": "16e4e605b4f35d0f67e5487f6d98aafcbadd22e0483588fbd7b252572c2ef666",
+        "isolated-integration.mjs": "e1db6e0ffd9e57ab1a1c7ec2f2e816f2fe3eb89527be63aa37f61bade1979458",
+        "source-config.b1.json": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+        "stateful-cases.json": "51d53b26a9d85ee37786a269df1700cbbe9b4b2fd16ec243bc4a2bce56f3a749"
+      },
+      "manifest": {
+        "schemaVersion": 1,
+        "status": "IMPLEMENTATION_PROTOCOL_NOT_A_PROVIDER_RUN",
+        "sendEnabled": false,
+        "ownerGenerations": 3,
+        "toolRounds": 2,
+        "toolCalls": 6,
+        "verifierGenerations": 1,
+        "requestBounds": {
+          "ownerWireBytes": 65536,
+          "verifierWireBytes": 32768
+        },
+        "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+        "candidateFoundationSha": "dd5c9d46f41f1514982210034f551a95cd356f68",
+        "models": {
+          "conversation": {
+            "provider": "VERTEX_AI",
+            "model": "gemini-3.5-flash-lite",
+            "version": "gemini-3.5-flash-lite",
+            "effort": "high",
+            "location": "global",
+            "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+            "generationConfig": {
+              "candidateCount": 1,
+              "responseMimeType": "text/plain",
+              "maxOutputTokens": 8192,
+              "thinkingConfig": {
+                "thinkingLevel": "HIGH",
+                "includeThoughts": false
+              },
+              "temperature": "OMITTED_PROVIDER_DEFAULT",
+              "topP": "OMITTED_PROVIDER_DEFAULT",
+              "retry": 0,
+              "timeoutMs": 90000
+            }
+          },
+          "verifier": {
+            "provider": "OPENAI",
+            "model": "gpt-6.1-sol",
+            "version": "gpt-6.1-sol",
+            "effort": "high",
+            "credentialRoute": "CODEX_CHATGPT_LOGIN",
+            "generationConfig": {
+              "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+              "cliVersion": "0.159.2",
+              "wireApi": "responses",
+              "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+              "tools": [],
+              "tool_choice": "none",
+              "parallel_tool_calls": false,
+              "store": false,
+              "stream": true,
+              "reasoningEffort": "high",
+              "temperature": "OMITTED_PROVIDER_DEFAULT",
+              "topP": "OMITTED_PROVIDER_DEFAULT",
+              "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+              "timeoutMs": 90000,
+              "maxResponseBytes": 1048576,
+              "relayUpstreamRequestsPerAttempt": 1,
+              "retry": 0,
+              "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+              "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+            }
+          }
+        },
+        "promptHashes": {
+          "owner": "d5ce738518816d3fabc4c6d0dd13ab362b2cea0deba0e0b71afae2b02ba0cbde",
+          "verifier": "5d35e5de46030ea7e1ad10e6a4bde3bdf28a968ee48c8eb6825543ec0b61dbfd"
+        },
+        "verdictSchema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "verdict",
+            "violations"
+          ],
+          "properties": {
+            "verdict": {
+              "type": "string",
+              "enum": [
+                "PASS",
+                "FAIL",
+                "UNCERTAIN"
+              ]
+            },
+            "violations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "protectedRef"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "UNSUPPORTED_PROTECTED_ASSERTION",
+                      "SUBJECT_MISMATCH",
+                      "CONTRADICTION_OR_NEGATION",
+                      "MATERIAL_CONDITION_LOSS",
+                      "POLICY_OR_BENEFIT_STRENGTHENING",
+                      "EFFECT_WITHOUT_RECEIPT",
+                      "STALE_OR_SUPERSEDED_MEANING",
+                      "OTHER_PROTECTED_SEMANTIC_RISK"
+                    ]
+                  },
+                  "protectedRef": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+        "providerBatch": {
+          "scenarios": 24,
+          "repetitions": 1,
+          "maximumGenerationRequests": 96,
+          "status": "OWNER_AUTHORIZED_24_CASE_CORPUS_PREPARED_NOT_RUN"
+        },
+        "terminalMap": {
+          "PASS": "SEND_ELIGIBLE_SEND_DISABLED",
+          "FAIL": "STATIC_FALLBACK",
+          "UNCERTAIN": "STATIC_FALLBACK",
+          "MALFORMED": "STATIC_FALLBACK",
+          "TIMEOUT": "STATIC_FALLBACK",
+          "PROVIDER_ERROR": "STATIC_FALLBACK",
+          "STALE": "HANDOFF_NO_SEND_CAPABILITY",
+          "PERMISSION": "NO_SEND",
+          "PRIVACY": "NO_SEND",
+          "RECIPIENT": "NO_SEND"
+        },
+        "fallback": {
+          "id": "C3_A_NONPROTECTED_V2",
+          "text": "Phần này em chưa trả lời được, chị nhé.",
+          "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+        }
+      }
+    },
+    {
+      "id": "search-discovery",
+      "sourceSha": "a43c19448d6937680f4c9b83a504bb45f86ac063",
+      "population": "b1",
+      "outcomes": 12,
+      "maximumGenerationRequests": 48,
+      "gitBlobFiles": {
+        "manifest.json": "7b42380dcec43efbd7c5cf54c28b343fd070abd05591bd276749c38beb3a9b93",
+        "prompts/owner.vi.txt": "21721d55b68f4ec23b378c59e367dd5a08053b5932a8966e08a4810423865b6d",
+        "prompts/verifier.vi.txt": "5d35e5de46030ea7e1ad10e6a4bde3bdf28a968ee48c8eb6825543ec0b61dbfd",
+        "protocol.mjs": "573384ff10035f0d288a4bd0d498f6e87c7bc880dcf9275ea0f8a3d05258aafe",
+        "gemini-inference.mjs": "2285f8bb1a4ba9a752bac1569693dd03ee7c8acd55bf5948895b9eb2c64d198c",
+        "run.mjs": "5c5e64cb816643512fcdd7901af1939fb7e18e1a9aec624558efe4b417f85527",
+        "stateful-provider.mjs": "16e4e605b4f35d0f67e5487f6d98aafcbadd22e0483588fbd7b252572c2ef666",
+        "isolated-integration.mjs": "e1db6e0ffd9e57ab1a1c7ec2f2e816f2fe3eb89527be63aa37f61bade1979458",
+        "source-config.b1.json": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+        "stateful-cases.json": "51d53b26a9d85ee37786a269df1700cbbe9b4b2fd16ec243bc4a2bce56f3a749"
+      },
+      "manifest": {
+        "schemaVersion": 1,
+        "status": "IMPLEMENTATION_PROTOCOL_NOT_A_PROVIDER_RUN",
+        "sendEnabled": false,
+        "ownerGenerations": 3,
+        "toolRounds": 2,
+        "toolCalls": 6,
+        "verifierGenerations": 1,
+        "requestBounds": {
+          "ownerWireBytes": 65536,
+          "verifierWireBytes": 32768
+        },
+        "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+        "candidateFoundationSha": "dd5c9d46f41f1514982210034f551a95cd356f68",
+        "models": {
+          "conversation": {
+            "provider": "VERTEX_AI",
+            "model": "gemini-3.5-flash-lite",
+            "version": "gemini-3.5-flash-lite",
+            "effort": "high",
+            "location": "global",
+            "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+            "generationConfig": {
+              "candidateCount": 1,
+              "responseMimeType": "text/plain",
+              "maxOutputTokens": 8192,
+              "thinkingConfig": {
+                "thinkingLevel": "HIGH",
+                "includeThoughts": false
+              },
+              "temperature": "OMITTED_PROVIDER_DEFAULT",
+              "topP": "OMITTED_PROVIDER_DEFAULT",
+              "retry": 0,
+              "timeoutMs": 90000
+            }
+          },
+          "verifier": {
+            "provider": "OPENAI",
+            "model": "gpt-6.1-sol",
+            "version": "gpt-6.1-sol",
+            "effort": "high",
+            "credentialRoute": "CODEX_CHATGPT_LOGIN",
+            "generationConfig": {
+              "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+              "cliVersion": "0.159.2",
+              "wireApi": "responses",
+              "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+              "tools": [],
+              "tool_choice": "none",
+              "parallel_tool_calls": false,
+              "store": false,
+              "stream": true,
+              "reasoningEffort": "high",
+              "temperature": "OMITTED_PROVIDER_DEFAULT",
+              "topP": "OMITTED_PROVIDER_DEFAULT",
+              "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+              "timeoutMs": 90000,
+              "maxResponseBytes": 1048576,
+              "relayUpstreamRequestsPerAttempt": 1,
+              "retry": 0,
+              "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+              "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+            }
+          }
+        },
+        "promptHashes": {
+          "owner": "21721d55b68f4ec23b378c59e367dd5a08053b5932a8966e08a4810423865b6d",
+          "verifier": "5d35e5de46030ea7e1ad10e6a4bde3bdf28a968ee48c8eb6825543ec0b61dbfd"
+        },
+        "verdictSchema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "verdict",
+            "violations"
+          ],
+          "properties": {
+            "verdict": {
+              "type": "string",
+              "enum": [
+                "PASS",
+                "FAIL",
+                "UNCERTAIN"
+              ]
+            },
+            "violations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "protectedRef"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "UNSUPPORTED_PROTECTED_ASSERTION",
+                      "SUBJECT_MISMATCH",
+                      "CONTRADICTION_OR_NEGATION",
+                      "MATERIAL_CONDITION_LOSS",
+                      "POLICY_OR_BENEFIT_STRENGTHENING",
+                      "EFFECT_WITHOUT_RECEIPT",
+                      "STALE_OR_SUPERSEDED_MEANING",
+                      "OTHER_PROTECTED_SEMANTIC_RISK"
+                    ]
+                  },
+                  "protectedRef": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+        "providerBatch": {
+          "scenarios": 24,
+          "repetitions": 1,
+          "maximumGenerationRequests": 96,
+          "status": "OWNER_AUTHORIZED_24_CASE_CORPUS_PREPARED_NOT_RUN"
+        },
+        "terminalMap": {
+          "PASS": "SEND_ELIGIBLE_SEND_DISABLED",
+          "FAIL": "STATIC_FALLBACK",
+          "UNCERTAIN": "STATIC_FALLBACK",
+          "MALFORMED": "STATIC_FALLBACK",
+          "TIMEOUT": "STATIC_FALLBACK",
+          "PROVIDER_ERROR": "STATIC_FALLBACK",
+          "STALE": "HANDOFF_NO_SEND_CAPABILITY",
+          "PERMISSION": "NO_SEND",
+          "PRIVACY": "NO_SEND",
+          "RECIPIENT": "NO_SEND"
+        },
+        "fallback": {
+          "id": "C3_A_NONPROTECTED_V2",
+          "text": "Phần này em chưa trả lời được, chị nhé.",
+          "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+        }
+      }
+    }
+  ],
+  "helpers": {
+    "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-isolated-agreed-20261018-run.py": "3915dd9def881552a0f1d42aa65fc4a99aba369137eb39e27a1998237bcde259",
+    "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-offer-replay-session-20261016.py": "875724a9b92ecc677a0549a41b701edbd49d3831fe9be69506bc12ffd6c5e218",
+    "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-session.py": "4d6140a6240f71874cde08d3579f31cf5b8562e3f042a24341104de1695b30c7"
+  }
+}

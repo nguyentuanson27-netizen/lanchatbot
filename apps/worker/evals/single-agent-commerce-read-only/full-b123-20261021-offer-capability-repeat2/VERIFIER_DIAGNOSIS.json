@@ -1,0 +1,236 @@
+[
+  {
+    "run": "stateful-1",
+    "id": "983d084d-d3ee-4626-a9a4-9272e8ed5b2e:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "stateful-1",
+    "id": "4921a306-e674-434b-afc1-c2d1c2c88ef5:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "stateful-1",
+    "id": "e42e92ad-8b82-4d26-9aab-c27d30110c97:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "stateful-1",
+    "id": "8db4439d-c2dd-49b1-a16e-3893f020ea39:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "b1dfa3793324cef9b969b8fffc63b0eabff0b60898ca49b2041f4bea3202e601:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "c920bbb937bb1e300661083401bee0fd5d1c4238f1a367edf612090cf86d3e09:verifier:1",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "MATERIAL_CONDITION_LOSS",
+          "protectedRef": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+        }
+      ]
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "cd17bacc272cc7faf564b3b0caa18bd8c98f6c85093ca72f357eec345a902fc8:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "47f67911fc54dca52858725264f6c7887472378c27cb30afc41ec1d891445e43:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "885a484b73f19128411c8b23d777eca09dd7fe94616539f547ea03d621baba02:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "d51c6c915cc2b6636b7fc84e0e4ee081554497d3b12b2ea74efd43c51f55afd2:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "24b0fbf2fe111a6ada85f73fa054abaa8fccee71df163295359a109c6ee865ae:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "306e2e26a24a7b01161d1ecb7a52482f28fe9728486db9bbf421d7adf154a721:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "6ed7da093ca7bae6107da4d14a921e384fd328b6e76a5175aa43e28927ec2478:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "2d5317410bc52a52585ce1432495b49aa8ae04467a47992300a78474aa70fabd:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "706901bb89c8034baadbdfc69c5e95536570307a2e178517eb168eb3e37b7a90:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "0b4bae97f8a4888d71560ac0f5ecf98c25a1a13b2cd964abe81962777f6b5d0d:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "f858159e3edae9d8d27a81788a5edb4ee35ee4c8b746a95024488e342cd2b15e:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "69fd6191eb343d904f0e511ab6db3befac083f47ec77b8d74282b6af16a0c26d:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "2aafdfa01bf8da877dfe7baa8a2c3f6bb66d864c5aef1687a38649cfe4fdb898:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "c8096d2423493f5b696d70a8fd527c8164a2402e373f724ae17fb24b97287dd5:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "3d627dc4691477d90d0168b3c0eadf95930dae061e5b2ab5084b9d0ca3b10db0:verifier:1",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+          "protectedRef": "product:SV2447"
+        }
+      ]
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "1f6fb61bf896be11421f1c6a7c6f45b9f1f076391809705d479392bf95891783:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "d52b25aa2ef77f07eef2558d9456034c402b78edffd61d2a122528efe316c7a6:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "aa4dba25dbb98160a828ace770540b64a55c572be1f9335b983239852bee8991:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "7e8a0c4ff32db74d8606218f110b37c8a18c5af7c32872f9ea630b7b37c3571f:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "814a1946ca76f86277a83a6e2e5ff2b599f7b09e9fffa96db065b1c3b2cce941:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "e324883ecfad6587e015cded5778d4765ad77fe274ce1b2be7903d4ef10bd623:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "b1-1",
+    "id": "cc75bfc920e403ebc300655da6fe8f383e18977a1a846ceb75a04e981adfde21:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  }
+]

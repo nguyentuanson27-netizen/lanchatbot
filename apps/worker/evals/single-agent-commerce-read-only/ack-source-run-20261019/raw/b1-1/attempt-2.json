@@ -1,0 +1,29 @@
+{
+  "caseId": "b1-partial-source-v2",
+  "sourceMode": "POS_UNAVAILABLE",
+  "elapsedMs": 7176.261500000022,
+  "runtime": {
+    "latest": "Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé.",
+    "history": [],
+    "initialProductCodes": [
+      "SV2447"
+    ]
+  },
+  "result": {
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "SOURCE_OR_ATTEMPT_UNAVAILABLE",
+      "text": null,
+      "fallbackId": null
+    },
+    "errorType": "QdrantSearchError",
+    "errorCode": "QDRANT_NETWORK_ERROR",
+    "sendEnabled": false
+  },
+  "counters": {
+    "embeddingCalls": 1,
+    "policyReads": 0,
+    "catalogReads": 9,
+    "posReads": 6
+  }
+}

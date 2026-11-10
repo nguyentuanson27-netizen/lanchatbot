@@ -1,0 +1,15 @@
+{
+  "runSourceSha": "e2474d0df2f24e1600d3815e4baf8b926f02b703",
+  "primaryReviewLockSha": "01fa3d4b4cc7fe7073b0563299d36ea3e2834394",
+  "childSourceAndPromptRegistrationsMatched": 18,
+  "verifierBindingsRecomputed": 18,
+  "ownerExactPromptCaptures": 34,
+  "wireBodiesChecked": 52,
+  "evaluatorLabelLeaks": 0,
+  "exactEligibleTextMatches": 17,
+  "publishedArtifactHashesMatched": 95,
+  "databaseMutation": false,
+  "sendEnabled": false,
+  "frozenFilesUnchanged": 14,
+  "gitRawBlobHashesMatched": 95
+}

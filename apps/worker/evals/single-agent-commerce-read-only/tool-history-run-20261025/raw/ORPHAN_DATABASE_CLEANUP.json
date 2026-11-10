@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "targets": [
+    {
+      "database": "c3_b_test_5044f94030530326",
+      "versionId": "16401432-8f53-404c-bb47-4efb2fe1902f",
+      "status": "DROPPED_VERIFIED_TEST_DATABASE"
+    }
+  ],
+  "postgresContainer": "0 2026-10-16T14:33:18.378324695Z running"
+}

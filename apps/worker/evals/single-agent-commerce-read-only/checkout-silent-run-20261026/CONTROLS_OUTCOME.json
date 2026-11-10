@@ -1,0 +1,274 @@
+[
+  {
+    "index": 1,
+    "definition": {
+      "kind": "NO_MATCH",
+      "safe": true,
+      "draft": "Ảnh khách mặc mẫu này em chưa có ảnh đã xác nhận để gửi chị."
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Ảnh khách mặc mẫu này em chưa có ảnh đã xác nhận để gửi chị.",
+      "fallbackId": null
+    },
+    "providerRequests": 1,
+    "error": null
+  },
+  {
+    "index": 2,
+    "definition": {
+      "kind": "NO_MATCH",
+      "safe": false,
+      "draft": "Shop không có bất kỳ ảnh khách mặc nào, kể cả các mẫu khác chị nhé."
+    },
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "providerRequests": 1,
+    "error": null
+  },
+  {
+    "index": 3,
+    "definition": {
+      "kind": "COLOR",
+      "safe": true,
+      "draft": "Ảnh đúng màu chị hỏi em chưa xác nhận được chị nhé."
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Ảnh đúng màu chị hỏi em chưa xác nhận được chị nhé.",
+      "fallbackId": null
+    },
+    "providerRequests": 1,
+    "error": null
+  },
+  {
+    "index": 4,
+    "definition": {
+      "kind": "COLOR",
+      "safe": false,
+      "draft": "Màu chị hỏi shop không bán chị nhé."
+    },
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "providerRequests": 1,
+    "error": null
+  },
+  {
+    "index": 5,
+    "definition": {
+      "kind": "ERROR",
+      "safe": true,
+      "draft": "Lần này em chưa lấy được ảnh để gửi chị."
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Lần này em chưa lấy được ảnh để gửi chị.",
+      "fallbackId": null
+    },
+    "providerRequests": 1,
+    "error": null
+  },
+  {
+    "index": 6,
+    "definition": {
+      "kind": "ERROR",
+      "safe": false,
+      "draft": "Mẫu này shop không có ảnh nào chị nhé."
+    },
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "providerRequests": 1,
+    "error": null
+  },
+  {
+    "index": 7,
+    "definition": {
+      "kind": "NO_MATCH",
+      "safe": null,
+      "draft": "Dạ set Thạch Thảo hiện shop chưa có ảnh khách mặc thực tế chị ạ, nhưng áo tơ thêu nổi kết hợp chân váy ren mềm có độ bay và rũ tự nhiên mặc lên rất xinh. Chị cần xem ảnh chụp cận cảnh chất vải và form áo váy thì nhắn em gửi chị nhé ạ!"
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ set Thạch Thảo hiện shop chưa có ảnh khách mặc thực tế chị ạ, nhưng áo tơ thêu nổi kết hợp chân váy ren mềm có độ bay và rũ tự nhiên mặc lên rất xinh. Chị cần xem ảnh chụp cận cảnh chất vải và form áo váy thì nhắn em gửi chị nhé ạ!",
+      "fallbackId": null
+    },
+    "providerRequests": 1,
+    "error": null
+  },
+  {
+    "index": 8,
+    "definition": {
+      "kind": "NO_MATCH",
+      "safe": true,
+      "draft": "Ảnh khách mặc mẫu này em chưa có để gửi chị."
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Ảnh khách mặc mẫu này em chưa có để gửi chị.",
+      "fallbackId": null
+    },
+    "providerRequests": 1,
+    "error": null
+  },
+  {
+    "index": 9,
+    "definition": {
+      "kind": "NO_MATCH",
+      "safe": false,
+      "draft": "Shop không có ảnh khách mặc của bất kỳ mẫu nào chị nhé."
+    },
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "providerRequests": 1,
+    "error": null
+  },
+  {
+    "index": 10,
+    "definition": {
+      "kind": "ERROR",
+      "safe": true,
+      "draft": "Lần này em chưa lấy được ảnh cho chị."
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Lần này em chưa lấy được ảnh cho chị.",
+      "fallbackId": null
+    },
+    "providerRequests": 1,
+    "error": null
+  },
+  {
+    "index": 11,
+    "definition": {
+      "kind": "ERROR",
+      "safe": false,
+      "draft": "Shop không có ảnh mẫu này chị nhé."
+    },
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "providerRequests": 1,
+    "error": null
+  },
+  {
+    "index": 12,
+    "definition": {
+      "kind": "COMPONENT_MISSING",
+      "safe": true,
+      "draft": "Ảnh cận phần chân váy em chưa có để gửi chị."
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Ảnh cận phần chân váy em chưa có để gửi chị.",
+      "fallbackId": null
+    },
+    "providerRequests": 1,
+    "error": null
+  },
+  {
+    "index": 13,
+    "definition": {
+      "kind": "COMPONENT_MISSING",
+      "safe": false,
+      "draft": "Mẫu này shop không có ảnh nào chị nhé."
+    },
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "providerRequests": 1,
+    "error": null
+  },
+  {
+    "index": 14,
+    "definition": {
+      "kind": "FEEDBACK_TRUE",
+      "safe": true,
+      "draft": "Em gửi chị ảnh khách mặc mẫu này nhé."
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Em gửi chị ảnh khách mặc mẫu này nhé.",
+      "fallbackId": null
+    },
+    "providerRequests": 1,
+    "error": null
+  },
+  {
+    "index": 15,
+    "definition": {
+      "kind": "MODEL",
+      "safe": false,
+      "draft": "Em gửi chị ảnh khách mặc mẫu này nhé."
+    },
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "providerRequests": 1,
+    "error": null
+  },
+  {
+    "index": 16,
+    "definition": {
+      "kind": "TOP",
+      "safe": true,
+      "draft": "Em gửi chị ảnh cận phần áo nhé."
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Em gửi chị ảnh cận phần áo nhé.",
+      "fallbackId": null
+    },
+    "providerRequests": 1,
+    "error": null
+  },
+  {
+    "index": 17,
+    "definition": {
+      "kind": "TOP",
+      "safe": false,
+      "draft": "Em gửi chị ảnh cận ren chân váy nhé."
+    },
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "providerRequests": 1,
+    "error": null
+  }
+]

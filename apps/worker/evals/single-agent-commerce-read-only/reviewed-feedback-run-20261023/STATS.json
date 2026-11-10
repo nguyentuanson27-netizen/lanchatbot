@@ -1,0 +1,64 @@
+{
+  "sourceSha": "362876e83be4014c28fae60abcaf2e5a3243adb1",
+  "registeredOutcomes": 67,
+  "executedOutcomes": 35,
+  "notRunOutcomes": 32,
+  "controls": {
+    "registered": 17,
+    "completed": 17,
+    "safeEligible": 8,
+    "unsafeEligible": 0,
+    "probeEligible": 1
+  },
+  "visual": {
+    "completed": 4,
+    "terminalCounts": {
+      "SEND_ELIGIBLE": 3,
+      "FALLBACK": 1
+    },
+    "promoted": false
+  },
+  "native": {
+    "registered": 46,
+    "completed": 14,
+    "notRun": 32,
+    "terminalCounts": {
+      "SEND_ELIGIBLE": 10,
+      "FALLBACK": 3,
+      "HANDOFF": 1
+    },
+    "eligibilityOnly": 10,
+    "capturedIngress": 4,
+    "captureIntegrity": "PASS",
+    "testDatabaseDropped": true
+  },
+  "generationRequests": 66,
+  "generationEvents": 66,
+  "byStageRole": {
+    "controls:verifier": 17,
+    "visual:owner": 4,
+    "visual:verifier": 4,
+    "native:owner": 29,
+    "native:verifier": 12
+  },
+  "generationContractErrors": 1,
+  "httpErrors": 0,
+  "retry": 0,
+  "tokens": {
+    "input": 364341,
+    "output": 35759,
+    "thinkingIncluded": 32222
+  },
+  "cost": null,
+  "verifierLatency": {
+    "n": 33,
+    "p50Ms": 9844,
+    "p95Ms": 15922
+  },
+  "nativeAddedVerificationLatency": {
+    "n": 12,
+    "p50Ms": 10742.956899999997,
+    "p95Ms": 17944.542700000005
+  },
+  "percentilePolicy": "nearest rank, measured entries only"
+}

@@ -1,0 +1,881 @@
+{
+  "implementationSha": "950d05b4d3279089b8c9a91d09e700f59731cdbb",
+  "population": "3 full observations ×24B1+8stateful =96 registered outcomes; all retained, not best-of",
+  "registeredOutcomes": 96,
+  "generationRequests": 262,
+  "providerErrors": 4,
+  "retry": 0,
+  "b1Primary": {
+    "USABLE": 63,
+    "NEEDS_EDIT": 4,
+    "UNUSABLE": 5
+  },
+  "statefulPrimary": {
+    "USABLE": 18,
+    "UNUSABLE": 1,
+    "BLOCKED_DEPENDENCY": 2,
+    "OWNERSHIP_CONTROL": 3
+  },
+  "runs": [
+    {
+      "directory": "full-b123-20261021-offer-capability",
+      "runSourceSha": "76d821bb3dce1ee335d2210203e9ff8750762755",
+      "counts": {
+        "b1-1": {
+          "USABLE": 23,
+          "NEEDS_EDIT": 1
+        },
+        "stateful-1": {
+          "USABLE": 4,
+          "UNUSABLE": 1,
+          "BLOCKED_DEPENDENCY": 2,
+          "OWNERSHIP_CONTROL": 1
+        }
+      },
+      "requests": 88,
+      "providerErrors": 1
+    },
+    {
+      "directory": "full-b123-20261021-offer-capability-repeat",
+      "runSourceSha": "89c6965c6a76ceab52380a5c8167c0b946bc06dd",
+      "counts": {
+        "b1-1": {
+          "USABLE": 20,
+          "NEEDS_EDIT": 1,
+          "UNUSABLE": 3
+        },
+        "stateful-1": {
+          "USABLE": 7,
+          "OWNERSHIP_CONTROL": 1
+        }
+      },
+      "requests": 85,
+      "providerErrors": 3
+    },
+    {
+      "directory": "full-b123-20261021-offer-capability-repeat2",
+      "runSourceSha": "a4e393e7c3084ac6ad29595c50f5925442c2f58c",
+      "counts": {
+        "b1-1": {
+          "USABLE": 20,
+          "UNUSABLE": 2,
+          "NEEDS_EDIT": 2
+        },
+        "stateful-1": {
+          "USABLE": 7,
+          "OWNERSHIP_CONTROL": 1
+        }
+      },
+      "requests": 89,
+      "providerErrors": 0
+    }
+  ],
+  "caseSeries": [
+    {
+      "caseId": "stateful-open",
+      "population": "stateful-1",
+      "slot": 1,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "stateful-variant-quantity",
+      "population": "stateful-1",
+      "slot": 2,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "RECEIPT_BACKED_CART_SUMMARY"
+        }
+      ]
+    },
+    {
+      "caseId": "stateful-quote",
+      "population": "stateful-1",
+      "slot": 3,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "stateful-correction",
+      "population": "stateful-1",
+      "slot": 4,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "stateful-request-checkout",
+      "population": "stateful-1",
+      "slot": 5,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "UNUSABLE",
+          "terminal": "NO_SEND",
+          "reason": "EGRESS_WORLD_CHANGED"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "NO_SEND",
+          "reason": "CHECKOUT_DETAILS_MISSING"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "NO_SEND",
+          "reason": "CHECKOUT_DETAILS_MISSING"
+        }
+      ]
+    },
+    {
+      "caseId": "stateful-private-checkout",
+      "population": "stateful-1",
+      "slot": 6,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "BLOCKED_DEPENDENCY",
+          "terminal": "NO_SEND",
+          "reason": "CHECKOUT_INVITATION_NOT_COMPLETED"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "NO_SEND",
+          "reason": "PRIVATE_CHECKOUT_COMMITTED"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "NO_SEND",
+          "reason": "PRIVATE_CHECKOUT_COMMITTED"
+        }
+      ]
+    },
+    {
+      "caseId": "stateful-confirm",
+      "population": "stateful-1",
+      "slot": 7,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "BLOCKED_DEPENDENCY",
+          "terminal": "NO_SEND",
+          "reason": "CHECKOUT_INVITATION_NOT_COMPLETED"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "HANDOFF",
+          "reason": "PURCHASE_CONFIRMED"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "HANDOFF",
+          "reason": "PURCHASE_CONFIRMED"
+        }
+      ]
+    },
+    {
+      "caseId": "stateful-human-request",
+      "population": "stateful-1",
+      "slot": 8,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "OWNERSHIP_CONTROL",
+          "terminal": "HANDOFF",
+          "reason": "CUSTOMER_REQUESTED_HUMAN"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "OWNERSHIP_CONTROL",
+          "terminal": "HANDOFF",
+          "reason": "CUSTOMER_REQUESTED_HUMAN"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "OWNERSHIP_CONTROL",
+          "terminal": "HANDOFF",
+          "reason": "CUSTOMER_REQUESTED_HUMAN"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-changed-occasion",
+      "population": "b1-1",
+      "slot": 1,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-current-policy",
+      "population": "b1-1",
+      "slot": 2,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "UNUSABLE",
+          "terminal": "FALLBACK",
+          "reason": "FAIL"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-partial-source",
+      "population": "b1-1",
+      "slot": 3,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-price",
+      "population": "b1-1",
+      "slot": 4,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-component-stock",
+      "population": "b1-1",
+      "slot": 5,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-search-read",
+      "population": "b1-1",
+      "slot": 6,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-buying-concern",
+      "population": "b1-1",
+      "slot": 7,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-policy-used",
+      "population": "b1-1",
+      "slot": 8,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-changed-occasion-v2",
+      "population": "b1-1",
+      "slot": 9,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "NEEDS_EDIT",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "NEEDS_EDIT",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-current-policy-v2",
+      "population": "b1-1",
+      "slot": 10,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-partial-source-v2",
+      "population": "b1-1",
+      "slot": 11,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "UNUSABLE",
+          "terminal": "FALLBACK",
+          "reason": "PROVIDER_ERROR"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-price-v2",
+      "population": "b1-1",
+      "slot": 12,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-component-stock-v2",
+      "population": "b1-1",
+      "slot": 13,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "UNUSABLE",
+          "terminal": "FALLBACK",
+          "reason": "PROVIDER_ERROR"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-search-read-v2",
+      "population": "b1-1",
+      "slot": 14,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "UNUSABLE",
+          "terminal": "FALLBACK",
+          "reason": "PROVIDER_ERROR"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-buying-concern-v2",
+      "population": "b1-1",
+      "slot": 15,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "NEEDS_EDIT",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-policy-used-v2",
+      "population": "b1-1",
+      "slot": 16,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-changed-occasion-v3",
+      "population": "b1-1",
+      "slot": 17,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "UNUSABLE",
+          "terminal": "FALLBACK",
+          "reason": "FAIL"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-current-policy-v3",
+      "population": "b1-1",
+      "slot": 18,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-partial-source-v3",
+      "population": "b1-1",
+      "slot": 19,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-price-v3",
+      "population": "b1-1",
+      "slot": 20,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-component-stock-v3",
+      "population": "b1-1",
+      "slot": 21,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-search-read-v3",
+      "population": "b1-1",
+      "slot": 22,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-buying-concern-v3",
+      "population": "b1-1",
+      "slot": 23,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "NEEDS_EDIT",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "b1-policy-used-v3",
+      "population": "b1-1",
+      "slot": 24,
+      "observations": [
+        {
+          "run": "full-b123-20261021-offer-capability",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        },
+        {
+          "run": "full-b123-20261021-offer-capability-repeat2",
+          "primary": "USABLE",
+          "terminal": "SEND_ELIGIBLE",
+          "reason": "PASS"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Few samples; live source reads can differ",
+    "Subjective same-agent review; no blind/human adjudication",
+    "Dependent stateful slots are retained, not independent model generations",
+    "No stability, safety-proof or live GO conclusion"
+  ]
+}

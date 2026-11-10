@@ -1,0 +1,83 @@
+{
+  "caseId": "b1-partial-source-v2",
+  "sourceMode": "POS_UNAVAILABLE",
+  "elapsedMs": 25514.6981,
+  "runtime": {
+    "latest": "Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé.",
+    "history": [],
+    "initialProductCodes": [
+      "SV2447"
+    ]
+  },
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "PROVIDER_ERROR",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "recovery": null,
+    "sendEnabled": false,
+    "ownerGenerations": 2,
+    "verifierGenerations": 0,
+    "toolRounds": 1,
+    "toolCalls": 2,
+    "generations": [
+      {
+        "id": "af357118d55cde0ee52c8598fe00dbfc8e79cb6118d4102c3070ad423f8916a8:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 4949.546900000001,
+        "telemetry": {
+          "generationId": "af357118d55cde0ee52c8598fe00dbfc8e79cb6118d4102c3070ad423f8916a8:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3469,
+          "outputTokens": 727,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 17748,
+          "requestHash": "80527924a9e0b68d00bb44ac40fb0418720cfa3932588f64d41366dfaeb04419",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 695,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "af357118d55cde0ee52c8598fe00dbfc8e79cb6118d4102c3070ad423f8916a8:owner:2",
+        "role": "owner",
+        "status": "PROVIDER_ERROR",
+        "latencyMs": 19029.957000000002,
+        "telemetry": {
+          "generationId": "af357118d55cde0ee52c8598fe00dbfc8e79cb6118d4102c3070ad423f8916a8:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": null,
+          "modelVersion": null,
+          "inputTokens": null,
+          "outputTokens": null,
+          "cost": null,
+          "finishReason": null,
+          "requestBytes": 21986,
+          "requestHash": "cae582f45e0270d8685099e45b98236bc71022713401952422e0f86ceb916362",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "failureStage": "GENERATION",
+          "failureCode": "TRANSPORT_ERROR"
+        }
+      }
+    ],
+    "toolLatencyMs": 878.028999999995,
+    "verificationLatencyMs": null
+  },
+  "counters": {
+    "embeddingCalls": 0,
+    "policyReads": 2,
+    "catalogReads": 3,
+    "posReads": 2
+  }
+}

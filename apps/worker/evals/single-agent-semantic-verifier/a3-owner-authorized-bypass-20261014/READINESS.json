@@ -1,0 +1,150 @@
+{
+  "status": "DETERMINISTIC_READINESS_PASS_DIAGNOSTIC_ONLY",
+  "runId": "C3_A3_DIAGNOSTIC_BYPASS_20261014_01",
+  "checkedAt": "2026-10-14T07:24:55.714Z",
+  "freezeSavepoint": "a1a2006a5ec249c915cd477650391d1efc93faab",
+  "providerGenerationsBeforeSeal": 0,
+  "fullCheckpointQualification": false,
+  "freshCommands": [
+    {
+      "command": "node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/a3-owner-authorized-bypass-20261014.test.mjs",
+      "environment": {
+        "C3_CHECKPOINT_A_ROUND": "39",
+        "C3_TEST_CODEX_TRANSPORT": "1"
+      },
+      "exitCode": 1,
+      "tests": 1,
+      "passCount": 0,
+      "skipped": 0,
+      "result": "Observed RED: missing diagnostic entrypoint",
+      "stdout": "C:/Users/nguye/AppData/Local/Temp/c3-a3-bypass-red.stdout.log"
+    },
+    {
+      "command": "node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/a3-owner-authorized-bypass-20261014.test.mjs",
+      "environment": {
+        "C3_CHECKPOINT_A_ROUND": "39",
+        "C3_TEST_CODEX_TRANSPORT": "1"
+      },
+      "exitCode": 0,
+      "tests": 1,
+      "passCount": 1,
+      "skipped": 0,
+      "stdout": "C:/Users/nguye/AppData/Local/Temp/c3-a3-bypass-green.stdout.log"
+    },
+    {
+      "command": "node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/size-input-context.test.mjs apps/worker/evals/single-agent-semantic-verifier/size-input-context-decision.test.mjs apps/worker/evals/single-agent-semantic-verifier/preparation-20261012.test.mjs apps/worker/evals/single-agent-semantic-verifier/clear-boundaries-run-20261014.test.mjs apps/worker/evals/single-agent-semantic-verifier/a3-owner-authorized-bypass-20261014.test.mjs",
+      "environment": {
+        "C3_CHECKPOINT_A_ROUND": "39",
+        "C3_TEST_CODEX_TRANSPORT": "1"
+      },
+      "exitCode": 0,
+      "tests": 47,
+      "passCount": 47,
+      "skipped": 0,
+      "stdout": "C:/Users/nguye/AppData/Local/Temp/c3-a3-bypass-focused.stdout.log"
+    },
+    {
+      "finishedAt": "2026-10-14T07:24:31.4899194Z",
+      "startedAt": "2026-10-14T07:22:41.2706028Z",
+      "environment": {
+        "C3_TEST_CODEX_TRANSPORT": "1",
+        "C3_CHECKPOINT_A_ROUND": "39"
+      },
+      "command": "node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs",
+      "exitCode": 0,
+      "tests": 441,
+      "passCount": 441,
+      "skipped": 0,
+      "stdout": "C:/Users/nguye/AppData/Local/Temp/c3-a3-bypass-full.stdout.log"
+    },
+    {
+      "command": "loadBypass(); inspectCodex(); inspectGemini(manifest)",
+      "kind": "Read-only Node procedure; no generation",
+      "exitCode": 0,
+      "providerGenerations": 0,
+      "stdout": "C:/Users/nguye/AppData/Local/Temp/c3-a3-bypass-routes.json"
+    },
+    {
+      "command": "git diff --quiet 247278807017889f95a472487f101e80988dcc3b -- apps/worker/src packages pnpm-lock.yaml apps/worker/evals/single-agent-semantic-verifier/prompts apps/worker/evals/single-agent-semantic-verifier/round-68 apps/worker/evals/single-agent-semantic-verifier/clear-boundaries-run-20261014 apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs apps/worker/evals/single-agent-semantic-verifier/protocol.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.mjs",
+      "exitCode": 0
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-a3-bypass-readiness.mjs C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005",
+      "exitCode": 0,
+      "result": "Source/config/compiled helper hashes, routes, RED/GREEN/focused/full log assertions"
+    }
+  ],
+  "reusedChecks": {
+    "source": "a3-full-followup-20261014/READINESS.json",
+    "meaning": "Same-day actually executed checks reused for unchanged worker/shared/helper source, not rerun for this fixed Node entrypoint. Fresh focused/full checks cover new loader/dispatcher composition.",
+    "commands": [
+      {
+        "exitCode": 0,
+        "finishedAt": "2026-10-14T03:32:57.0606003+00:00",
+        "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts",
+        "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-worker-boundary.stdout.log",
+        "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-worker-boundary.stderr.log",
+        "tests": 79,
+        "passCount": 79,
+        "skipped": 0
+      },
+      {
+        "exitCode": 0,
+        "finishedAt": "2026-10-14T03:32:55.7874415+00:00",
+        "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts",
+        "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-protected.stdout.log",
+        "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-protected.stderr.log",
+        "tests": 21,
+        "passCount": 21,
+        "skipped": 0
+      },
+      {
+        "command": "pnpm --filter @lana/worker typecheck",
+        "finishedAt": "2026-10-14T03:35:52.7551383+00:00",
+        "exitCode": 0,
+        "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-typecheck.stdout.log",
+        "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-typecheck.stderr.log"
+      },
+      {
+        "command": "pnpm --filter @lana/worker build",
+        "finishedAt": "2026-10-14T03:36:36.4906694+00:00",
+        "exitCode": 0,
+        "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-build.stdout.log",
+        "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-build.stderr.log"
+      },
+      {
+        "command": "pnpm --filter @lana/worker lint",
+        "exitCode": 0,
+        "finishedAt": "2026-10-14T03:34:58.6647179+00:00",
+        "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-lint.stdout.log",
+        "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-lint.stderr.log"
+      }
+    ]
+  },
+  "routes": {
+    "runId": "C3_A3_DIAGNOSTIC_BYPASS_20261014_01",
+    "codex": {
+      "version": "codex-cli 0.159.2",
+      "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+    },
+    "vertex": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "projectId": "project-388db62b-f5a4-4e76-a2b",
+      "location": "global",
+      "transport": "NODE_FETCH_NO_RETRY",
+      "credentialRoute": "EXISTING_LOCAL_VERTEX_SERVICE_ACCOUNT",
+      "credentialAvailable": true,
+      "nodeVersion": "v24.19.0",
+      "helperExecutableHash": "fb2054f3b82da64be777ba6b3accde769000864e7c8fa7a8346db973f79390fe"
+    },
+    "providerGenerations": 0
+  },
+  "selfReview": [
+    "Only new fixed diagnostic entrypoint and one mechanical test; no existing executable/prompt/provider API or corpus change.",
+    "Explicit owner override affects A2 admission only. Qualified requireFreshA2 still rejects the failed source. No fake PASS/preflight.",
+    "Reuse all-42 exact-surface mandatory-verifier, early-save, binding/firewall and no-retry coverage.",
+    "A2 evidence and normal Checkpoint A acceptance remain unchanged; diagnostic cannot qualify GO.",
+    "Raw before whole-terminal primary commit before rejected diagnostics; no new online role/parser/repair or post-A."
+  ]
+}

@@ -1,0 +1,143 @@
+[
+  {
+    "condition": "current-source",
+    "caseId": "media-overview-next:ask",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?",
+      "fallbackId": "C3_B_MEDIA_NEXT_STEP_V1"
+    },
+    "images": [],
+    "calls": [
+      "select_product_media",
+      "select_product_media",
+      "select_product_media"
+    ]
+  },
+  {
+    "condition": "current-source",
+    "caseId": "media-overview-next:continue",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Em gửi chị ảnh mặc cả bộ set Thạch Thảo nhé ạ!",
+      "fallbackId": null
+    },
+    "images": [
+      {
+        "sequence": 1,
+        "type": "image",
+        "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+      },
+      {
+        "sequence": 2,
+        "type": "image",
+        "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg"
+      }
+    ],
+    "calls": [
+      "select_product_media"
+    ]
+  },
+  {
+    "condition": "current-source",
+    "caseId": "media-detail-next:ask",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?",
+      "fallbackId": "C3_B_MEDIA_NEXT_STEP_V1"
+    },
+    "images": [],
+    "calls": [
+      "select_product_media"
+    ]
+  },
+  {
+    "condition": "current-source",
+    "caseId": "media-detail-next:continue",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ em gửi chị ảnh cận cảnh chi tiết thêu trên áo ạ.",
+      "fallbackId": null
+    },
+    "images": [
+      {
+        "sequence": 1,
+        "type": "image",
+        "url": "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg"
+      }
+    ],
+    "calls": [
+      "select_product_media"
+    ]
+  },
+  {
+    "condition": "current-source",
+    "caseId": "media-and-price:ask",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ áo lẻ set Thạch Thảo giá 499.000đ chị nhé. Em gửi chị ảnh mẫu mặc set để mình dễ nhìn form áo:",
+      "fallbackId": null
+    },
+    "images": [
+      {
+        "sequence": 1,
+        "type": "image",
+        "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+      },
+      {
+        "sequence": 2,
+        "type": "image",
+        "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg"
+      }
+    ],
+    "calls": [
+      "select_product_media",
+      "read_product",
+      "select_product_media",
+      "read_product",
+      "select_product_media"
+    ]
+  },
+  {
+    "condition": "current-source",
+    "caseId": "media-and-size:ask",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?",
+      "fallbackId": "C3_B_MEDIA_NEXT_STEP_V1"
+    },
+    "images": [],
+    "calls": [
+      "select_product_media",
+      "apply_customer_state",
+      "read_product",
+      "select_product_media",
+      "apply_customer_state",
+      "read_product",
+      "apply_customer_state",
+      "recommend_size"
+    ]
+  },
+  {
+    "condition": "current-source",
+    "caseId": "media-decision:ask",
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "EGRESS_WORLD_CHANGED",
+      "text": null,
+      "fallbackId": null
+    },
+    "images": [],
+    "calls": [
+      "read_product",
+      "read_product",
+      "select_product_media"
+    ]
+  }
+]

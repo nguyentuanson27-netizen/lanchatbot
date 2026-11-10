@@ -1,0 +1,12 @@
+{
+  "status": "STOP",
+  "runSourceSha": "9887c21743f2183cf475c70bf27bfb9fe93fe723",
+  "registeredOutcomes": 77,
+  "executedOutcomes": 52,
+  "notRun": 25,
+  "providerRequests": 103,
+  "retry": 0,
+  "advice": "NOT_PROMOTED",
+  "nativeRest": "NOT_RUN_PREFIX_NOT_APPROVED",
+  "testDatabasesDropped": true
+}

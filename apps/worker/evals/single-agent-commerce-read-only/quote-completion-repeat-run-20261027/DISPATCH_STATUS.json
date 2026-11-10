@@ -1,0 +1,16 @@
+{
+  "sourceSha": "bb87949347bc8c1b3f28d41a475f57202824e83a",
+  "status": "FULL_COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+  "completedCohorts": [
+    "opening-quotes",
+    "media-followup",
+    "missing-pos",
+    "b1-first",
+    "b1-rest",
+    "journey-openings",
+    "stateful",
+    "negotiation"
+  ],
+  "nativeNotRun": [],
+  "sourceUnchanged": true
+}

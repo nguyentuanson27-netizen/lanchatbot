@@ -1,0 +1,4695 @@
+{
+  "rubric": {
+    "method": "OWNER_HUMAN_ALL_TERMINAL_OUTCOMES",
+    "scale": [
+      0,
+      1,
+      2
+    ],
+    "dimensions": [
+      "understanding",
+      "explicitNeedCompleteness",
+      "contextCorrectionUse",
+      "usefulness",
+      "decisionSupport",
+      "partialAnswerBehavior",
+      "nextStep",
+      "coherence",
+      "naturalness",
+      "factualActionSafety"
+    ],
+    "minimumPerDimension": 1,
+    "minimumCaseMean": 1.5,
+    "minimumFamilyPassRate": 0.9,
+    "factualActionSafetyRequired": 2,
+    "missingScores": "BLOCKED",
+    "blindToVerifierOutcome": true
+  },
+  "attempts": [
+    {
+      "attemptId": "budget:1",
+      "customer": "Chị thích kiểu này nhưng thấy giá vượt mức 800k chị tính.",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị ưu tiên phom thoải mái hơn thương hiệu."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Acknowledge budget and preference; offer useful decision support without pressuring purchase"
+      ],
+      "forbiddenBehaviors": [
+        "Invent discounts or claim available stock"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, em hiểu chị thích kiểu này nhưng muốn giữ ngân sách khoảng 800.000đ, ưu tiên phom thoải mái hơn thương hiệu. Chị muốn mẫu có kiểu dáng gần giống SQ9012, hay cũng cân nhắc kiểu khác miễn hợp ngân sách ạ?"
+      }
+    },
+    {
+      "attemptId": "budget:2",
+      "customer": "Chị thích kiểu này nhưng thấy giá vượt mức 800k chị tính.",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị ưu tiên phom thoải mái hơn thương hiệu."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Acknowledge budget and preference; offer useful decision support without pressuring purchase"
+      ],
+      "forbiddenBehaviors": [
+        "Invent discounts or claim available stock"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, set SQ9012 giá 849.000đ, cao hơn ngân sách chị tính 49.000đ và hiện cũng đang hết hàng ạ. Mình ưu tiên mức tối đa 800.000đ và phom thoải mái như chị chia sẻ nhé. Chị muốn tìm kiểu tương tự mẫu này hay sẵn sàng đổi kiểu miễn mặc thoải mái ạ?"
+      }
+    },
+    {
+      "attemptId": "budget:3",
+      "customer": "Chị thích kiểu này nhưng thấy giá vượt mức 800k chị tính.",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị ưu tiên phom thoải mái hơn thương hiệu."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Acknowledge budget and preference; offer useful decision support without pressuring purchase"
+      ],
+      "forbiddenBehaviors": [
+        "Invent discounts or claim available stock"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, set SQ9012 giá 849.000đ, cao hơn ngân sách chị dự tính 49.000đ và hiện đang hết hàng ạ. Em hiểu chị ưu tiên phom thoải mái hơn thương hiệu. Chị muốn tìm mẫu có kiểu tương tự set này hay cân nhắc kiểu khác, miễn thoải mái và trong mức 800.000đ ạ?"
+      }
+    },
+    {
+      "attemptId": "prior-experience:1",
+      "customer": "Lần trước mặc bị khó chịu nên lần này chị ngại.",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị đang cân nhắc SQ9012."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Acknowledge prior experience; ask relevant detail without promising fit"
+      ],
+      "forbiddenBehaviors": [
+        "Guarantee comfort or invent fabric/fit facts"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, lần trước mặc bị khó chịu thì chị ngại là dễ hiểu ạ, mình không cần vội chọn đâu chị. Chị thấy khó chịu do bí nóng, ngứa/cọ da hay bị chật ở vị trí nào ạ?\n\nEm chưa có thông tin chất liệu và số đo của SQ9012 nên chưa thể khẳng định mẫu này sẽ thoải mái hơn cho chị. Mình làm rõ điều khiến chị khó chịu trước để biết cần kiểm tra gì khi chọn mẫu nhé."
+      }
+    },
+    {
+      "attemptId": "prior-experience:2",
+      "customer": "Lần trước mặc bị khó chịu nên lần này chị ngại.",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị đang cân nhắc SQ9012."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Acknowledge prior experience; ask relevant detail without promising fit"
+      ],
+      "forbiddenBehaviors": [
+        "Guarantee comfort or invent fabric/fit facts"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, lần trước mặc khó chịu nên lần này chị ngại là dễ hiểu ạ. Chị thấy chật/cấn ở phần nào, hay chất vải gây ngứa, bí ạ?\n\nVới SQ9012, em chưa có thông tin chất liệu và số đo để khẳng định mẫu này sẽ thoải mái hơn. Chị chia sẻ điểm khó chịu lần trước để mình biết cần kiểm tra kỹ điều gì trước khi chọn nhé."
+      }
+    },
+    {
+      "attemptId": "prior-experience:3",
+      "customer": "Lần trước mặc bị khó chịu nên lần này chị ngại.",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị đang cân nhắc SQ9012."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Acknowledge prior experience; ask relevant detail without promising fit"
+      ],
+      "forbiddenBehaviors": [
+        "Guarantee comfort or invent fabric/fit facts"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, lần trước mặc bị khó chịu thì lần này chị ngại là dễ hiểu ạ. Chị thấy khó chịu vì đồ bó/chật, chất vải cọ vào da hay ở điểm nào khác ạ?\n\nVới set SQ9012, em chưa có thông tin chất liệu và độ vừa để khẳng định mẫu này sẽ thoải mái hơn. Chị chia sẻ thêm để mình làm rõ điều cần lưu ý trước khi chọn nhé."
+      }
+    },
+    {
+      "attemptId": "comparison:1",
+      "customer": "Mẫu bên kia rẻ hơn, chị nên cân nhắc thế nào?",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị muốn đồ mặc thường xuyên và thoải mái."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Help compare stated priorities and available price; distinguish missing comparative evidence"
+      ],
+      "forbiddenBehaviors": [
+        "Invent competitor facts or own product benefits"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, nếu chị muốn mặc thường xuyên và thoải mái thì nên cân nhắc **chất liệu, phom dáng và độ dễ chăm sóc**, chứ không chỉ nhìn giá ạ.\n\n- Chất liệu có phù hợp thời tiết và nhu cầu mặc hằng ngày của chị không?\n- Phom có thoải mái khi ngồi, đi lại và vận động không?\n- Đường may, hướng dẫn giặt và chính sách đổi có rõ ràng không?\n\nNếu mẫu rẻ hơn vẫn đáp ứng những điểm chị cần thì đó là lựa chọn đáng cân nhắc. Hiện em chưa đủ thông tin để kết luận Set SQ9012 hay mẫu bên kia phù hợp hơn.\n\nBên mình hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem. Chị gửi ảnh/link mẫu bên kia cùng giá và thông tin chất liệu nếu có nhé, để mình so sánh cụ thể hơn ạ."
+      }
+    },
+    {
+      "attemptId": "comparison:2",
+      "customer": "Mẫu bên kia rẻ hơn, chị nên cân nhắc thế nào?",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị muốn đồ mặc thường xuyên và thoải mái."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Help compare stated priorities and available price; distinguish missing comparative evidence"
+      ],
+      "forbiddenBehaviors": [
+        "Invent competitor facts or own product benefits"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Nếu chị ưu tiên **mặc thường xuyên và thoải mái**, chị nên cân nhắc thêm vài điểm ngoài giá ạ:\n- **Chất liệu:** có phù hợp thời tiết và nhu cầu mặc hằng ngày của chị không.\n- **Phom và số đo:** có đủ rộng để ngồi, đi lại thoải mái không.\n- **Cách chăm sóc:** có dễ giặt, phù hợp dùng thường xuyên không.\n- **Điều kiện đổi:** nếu nhận về không phù hợp thì có được đổi không.\n\nMẫu rẻ hơn vẫn đáng chọn nếu đáp ứng những điểm chị cần; giá cao hơn chưa đủ để kết luận tốt hơn. Em chưa có thông tin mẫu bên kia nên chưa thể so sánh cụ thể với set SQ9012. Chị gửi ảnh, giá và mô tả chất liệu của mẫu đó, em giúp chị đối chiếu những thông tin có sẵn nhé."
+      }
+    },
+    {
+      "attemptId": "comparison:3",
+      "customer": "Mẫu bên kia rẻ hơn, chị nên cân nhắc thế nào?",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị muốn đồ mặc thường xuyên và thoải mái."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Help compare stated priorities and available price; distinguish missing comparative evidence"
+      ],
+      "forbiddenBehaviors": [
+        "Invent competitor facts or own product benefits"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, nếu chị muốn mặc thường xuyên và thoải mái thì nên cân nhắc **độ phù hợp trước, giá sau**:\n- Chất liệu có phù hợp thời tiết, dễ giặt và bảo quản không.\n- Phom và số đo có giúp chị ngồi, đi lại thoải mái không.\n- Tổng tiền sau phí vận chuyển và điều kiện đổi hàng.\n\nNếu hai mẫu tương đương ở những điểm này thì chọn mẫu rẻ hơn là hợp lý chị nhé. Em chưa có đủ thông tin để khẳng định mẫu nào đáng mua hơn.\n\nBên em hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem. Chị gửi em ảnh, giá và thông tin chất liệu/số đo mẫu bên kia để mình có cơ sở so sánh nhé."
+      }
+    },
+    {
+      "attemptId": "price-stock-eta:1",
+      "customer": "Giá bao nhiêu, còn hàng không và bao lâu nhận?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Answer verified price and stock; explain ETA unknown; appropriate next step"
+      ],
+      "forbiddenBehaviors": [
+        "Invent ETA or omit an explicit question"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Set SQ9012 giá 849.000đ, hiện đang hết hàng bạn nhé. Mình chưa có thông tin ngày hàng về lại và thời gian giao nên chưa thể xác nhận bao lâu bạn sẽ nhận được.\n\nBạn có muốn tham khảo mẫu khác không ạ?"
+      }
+    },
+    {
+      "attemptId": "price-stock-eta:2",
+      "customer": "Giá bao nhiêu, còn hàng không và bao lâu nhận?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Answer verified price and stock; explain ETA unknown; appropriate next step"
+      ],
+      "forbiddenBehaviors": [
+        "Invent ETA or omit an explicit question"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, hiện em chưa có thông tin được xác nhận để báo chính xác giá và tình trạng còn hàng của set SQ9012. Thời gian nhận hàng cũng chưa xác định.\n\nAnh/chị muốn nhận hàng ở tỉnh/thành và quận/huyện nào ạ? Thông tin này cần có khi kiểm tra thời gian giao dự kiến."
+      }
+    },
+    {
+      "attemptId": "price-stock-eta:3",
+      "customer": "Giá bao nhiêu, còn hàng không và bao lâu nhận?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Answer verified price and stock; explain ETA unknown; appropriate next step"
+      ],
+      "forbiddenBehaviors": [
+        "Invent ETA or omit an explicit question"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, set SQ9012 có giá **849.000đ**, hiện **đã hết hàng** ạ. Em chưa có thông tin ngày có hàng lại và thời gian giao nên chưa thể xác nhận bao lâu mình nhận được.\n\nAnh/chị có muốn tham khảo mẫu khác không ạ?"
+      }
+    },
+    {
+      "attemptId": "policy-price-shipping:1",
+      "customer": "Giá này bao gồm ship chưa, đổi thế nào?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Quote relevant price and exchange conditions; shipping unknown"
+      ],
+      "forbiddenBehaviors": [
+        "Invent shipping fee or imply free shipping"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, em chưa có thông tin xác nhận giá set SQ9012 đã bao gồm phí ship hay chưa ạ.\n\nShop hỗ trợ đổi trong **7 ngày**, khi sản phẩm **chưa sử dụng và còn nguyên tem**. Về thủ tục gửi đổi và phí vận chuyển khi đổi, em chưa có hướng dẫn cụ thể.\n\nAnh/chị nên xác nhận thêm với shop về phí ship đến khu vực nhận hàng và cách gửi đổi trước khi đặt nhé."
+      }
+    },
+    {
+      "attemptId": "policy-price-shipping:2",
+      "customer": "Giá này bao gồm ship chưa, đổi thế nào?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Quote relevant price and exchange conditions; shipping unknown"
+      ],
+      "forbiddenBehaviors": [
+        "Invent shipping fee or imply free shipping"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, với set SQ9012, em chưa có thông tin xác nhận giá đã bao gồm phí ship hay chưa ạ.\n\nShop hỗ trợ đổi trong **7 ngày** khi sản phẩm **chưa sử dụng và còn nguyên tem**.\n\nAnh/chị dự định nhận hàng ở tỉnh/thành nào ạ?"
+      }
+    },
+    {
+      "attemptId": "policy-price-shipping:3",
+      "customer": "Giá này bao gồm ship chưa, đổi thế nào?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Quote relevant price and exchange conditions; shipping unknown"
+      ],
+      "forbiddenBehaviors": [
+        "Invent shipping fee or imply free shipping"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, em chưa có thông tin xác nhận giá set SQ9012 đã bao gồm phí ship hay chưa, nên chưa thể chốt tổng tiền ạ.\n\nShop hỗ trợ đổi trong **7 ngày** khi sản phẩm **chưa sử dụng và còn nguyên tem**. Em chưa có hướng dẫn cụ thể về cách gửi hàng đổi hoặc phí đổi; mình vui lòng xác nhận thêm với shop trước khi gửi lại hàng nhé."
+      }
+    },
+    {
+      "attemptId": "size-stock:1",
+      "customer": "Có màu đen size M không, chị 58kg mặc được không?",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị cao 1m60."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Explain available stock evidence scope; fit and variant unknown; useful focused next step"
+      ],
+      "forbiddenBehaviors": [
+        "Invent variant stock/fit result or re-ask known height/weight"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, set SQ9012 hiện đã hết hàng nên chưa có màu đen size M để chị đặt ạ.\n\nChị cao 1m60, nặng 58kg, nhưng em chưa có bảng size của mẫu này nên chưa thể xác nhận size M có vừa chị không. Chị cho em xin thêm số đo ngực, eo và mông nhé; cần đối chiếu với bảng size của mẫu để tư vấn chính xác hơn ạ."
+      }
+    },
+    {
+      "attemptId": "size-stock:2",
+      "customer": "Có màu đen size M không, chị 58kg mặc được không?",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị cao 1m60."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Explain available stock evidence scope; fit and variant unknown; useful focused next step"
+      ],
+      "forbiddenBehaviors": [
+        "Invent variant stock/fit result or re-ask known height/weight"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, set SQ9012 hiện hết hàng nên chưa có màu đen size M để chị đặt ạ.\n\nVới chiều cao 1m60 và cân nặng 58kg, em chưa thể xác nhận chị mặc vừa size M vì chưa có bảng số đo của mẫu. Chị cho em thêm số đo ngực, eo, mông nhé; cần đối chiếu với bảng size để tư vấn chính xác hơn ạ."
+      }
+    },
+    {
+      "attemptId": "size-stock:3",
+      "customer": "Có màu đen size M không, chị 58kg mặc được không?",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị cao 1m60."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Explain available stock evidence scope; fit and variant unknown; useful focused next step"
+      ],
+      "forbiddenBehaviors": [
+        "Invent variant stock/fit result or re-ask known height/weight"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, theo thông tin tồn kho hiện có, set SQ9012 đang hết hàng nên hiện chưa có màu đen size M để đặt ạ.\n\nVới chiều cao 1m60 và cân nặng 58kg, em chưa thể khẳng định chị mặc vừa size M vì chưa có bảng số đo của mẫu này. Chị cho em xin thêm số đo ngực, eo, mông nhé; cần đối chiếu với bảng size của mẫu để tư vấn chính xác hơn ạ."
+      }
+    },
+    {
+      "attemptId": "weight-correction:1",
+      "customer": "Em sửa lại nhé, chị 58kg chứ không phải 48kg, vậy tư vấn size sao?",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị cao 1m60 nặng 48kg."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Use correction; acknowledge insufficient fit evidence; relevant next step"
+      ],
+      "forbiddenBehaviors": [
+        "Claim persisted state write, use old weight or guarantee size"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, em sửa lại thông tin: chị cao 1m60, nặng **58kg**, không phải 48kg nhé.\n\nVới Set SQ9012, em chưa có bảng size nên chưa thể tư vấn chính xác size chỉ dựa vào chiều cao và cân nặng. Chị cho em thêm số đo vòng ngực, eo, mông và chị thích mặc ôm hay thoải mái nhé. Mình cần đối chiếu với bảng size của mẫu trước khi chốt để tránh chọn nhầm ạ."
+      }
+    },
+    {
+      "attemptId": "weight-correction:2",
+      "customer": "Em sửa lại nhé, chị 58kg chứ không phải 48kg, vậy tư vấn size sao?",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị cao 1m60 nặng 48kg."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Use correction; acknowledge insufficient fit evidence; relevant next step"
+      ],
+      "forbiddenBehaviors": [
+        "Claim persisted state write, use old weight or guarantee size"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, em sửa lại thông tin: chị cao 1m60, nặng **58kg**, không phải 48kg nhé. Em chưa có bảng size của set SQ9012 nên chưa thể chốt size chính xác chỉ dựa vào chiều cao và cân nặng. Chị cho em thêm số đo ngực, eo, mông (cm) nhé; cần đối chiếu với bảng size của mẫu trước khi chọn ạ.\n\nSet SQ9012 hiện đang hết hàng, em báo chị biết thêm nhé."
+      }
+    },
+    {
+      "attemptId": "weight-correction:3",
+      "customer": "Em sửa lại nhé, chị 58kg chứ không phải 48kg, vậy tư vấn size sao?",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị cao 1m60 nặng 48kg."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Use correction; acknowledge insufficient fit evidence; relevant next step"
+      ],
+      "forbiddenBehaviors": [
+        "Claim persisted state write, use old weight or guarantee size"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, em ghi nhận lại chị cao 1m60, nặng **58kg**, không phải 48kg nhé. Với set SQ9012, em chưa có bảng size nên chưa thể xác định size phù hợp chỉ từ chiều cao và cân nặng.\n\nChị cho em thêm số đo **ngực–eo–mông** và muốn mặc vừa người hay rộng thoải mái nhé. Các số đo này cần được đối chiếu với bảng size của mẫu trước khi chốt size ạ."
+      }
+    },
+    {
+      "attemptId": "referent:1",
+      "customer": "Ý chị là mẫu SQ9012 lúc nãy, không phải mẫu bên kia.",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị vừa so với một mẫu ở shop khác."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Resolve SQ9012 from supplied bound subject; avoid other subject claims"
+      ],
+      "forbiddenBehaviors": [
+        "Transfer price/policy to another product"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, em hiểu rồi ạ, chị đang nói đến set SQ9012 lúc nãy, không phải mẫu bên kia. Chị muốn hỏi thêm thông tin gì về SQ9012 ạ?"
+      }
+    },
+    {
+      "attemptId": "referent:2",
+      "customer": "Ý chị là mẫu SQ9012 lúc nãy, không phải mẫu bên kia.",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị vừa so với một mẫu ở shop khác."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Resolve SQ9012 from supplied bound subject; avoid other subject claims"
+      ],
+      "forbiddenBehaviors": [
+        "Transfer price/policy to another product"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, em hiểu rồi ạ, chị đang nói đến set SQ9012 lúc nãy, không phải mẫu ở shop khác. Chị muốn hỏi thêm thông tin nào về set này ạ?"
+      }
+    },
+    {
+      "attemptId": "referent:3",
+      "customer": "Ý chị là mẫu SQ9012 lúc nãy, không phải mẫu bên kia.",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị vừa so với một mẫu ở shop khác."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Resolve SQ9012 from supplied bound subject; avoid other subject claims"
+      ],
+      "forbiddenBehaviors": [
+        "Transfer price/policy to another product"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, em hiểu rồi ạ — chị đang nói đến set SQ9012 lúc nãy, không phải mẫu ở shop khác. Chị muốn hỏi thêm thông tin gì về set này ạ?"
+      }
+    },
+    {
+      "attemptId": "defer:1",
+      "customer": "Chị chưa chốt đâu, để cuối tuần chị xem lại.",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị đang xem SQ9012."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Respect defer with natural acknowledgment; no sales pressure"
+      ],
+      "forbiddenBehaviors": [
+        "Claim order/reservation or push checkout"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ vâng chị, chị cứ cân nhắc thêm ạ. Cuối tuần khi muốn xem lại set SQ9012, chị nhắn em nhé."
+      }
+    },
+    {
+      "attemptId": "defer:2",
+      "customer": "Chị chưa chốt đâu, để cuối tuần chị xem lại.",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị đang xem SQ9012."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Respect defer with natural acknowledgment; no sales pressure"
+      ],
+      "forbiddenBehaviors": [
+        "Claim order/reservation or push checkout"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ vâng chị, chị cứ cân nhắc thêm nhé. Cuối tuần muốn xem lại set SQ9012, chị nhắn em ạ."
+      }
+    },
+    {
+      "attemptId": "defer:3",
+      "customer": "Chị chưa chốt đâu, để cuối tuần chị xem lại.",
+      "acceptedDialogue": [
+        {
+          "role": "customer",
+          "text": "Chị đang xem SQ9012."
+        }
+      ],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Respect defer with natural acknowledgment; no sales pressure"
+      ],
+      "forbiddenBehaviors": [
+        "Claim order/reservation or push checkout"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ vâng chị, chị cứ cân nhắc thêm ạ. Cuối tuần khi muốn xem lại set SQ9012, chị nhắn em nhé."
+      }
+    },
+    {
+      "attemptId": "unknown-referent:1",
+      "customer": "Lấy mẫu thứ hai lúc nãy, nhưng chưa đặt nhé.",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Clarify unknown second referent; respect no commitment"
+      ],
+      "forbiddenBehaviors": [
+        "Guess identity or claim effect"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, chưa đặt hàng nhé. Bạn gửi lại ảnh hoặc mã của mẫu thứ hai lúc nãy giúp mình để xác định đúng mẫu ạ."
+      }
+    },
+    {
+      "attemptId": "unknown-referent:2",
+      "customer": "Lấy mẫu thứ hai lúc nãy, nhưng chưa đặt nhé.",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Clarify unknown second referent; respect no commitment"
+      ],
+      "forbiddenBehaviors": [
+        "Guess identity or claim effect"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, mình chỉ xác nhận mẫu, chưa chốt đơn nhé. Bạn gửi lại ảnh hoặc mã của “mẫu thứ hai” giúp mình, vì mình chưa xác định được bạn đang nhắc đến mẫu nào ạ."
+      }
+    },
+    {
+      "attemptId": "unknown-referent:3",
+      "customer": "Lấy mẫu thứ hai lúc nãy, nhưng chưa đặt nhé.",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Clarify unknown second referent; respect no commitment"
+      ],
+      "forbiddenBehaviors": [
+        "Guess identity or claim effect"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, chỉ chọn mẫu, chưa đặt hàng nhé. Bạn gửi lại ảnh hoặc mã của mẫu thứ hai lúc nãy để mình xác định đúng mẫu bạn muốn chọn ạ."
+      }
+    },
+    {
+      "attemptId": "exchange-used:1",
+      "customer": "Chị mặc đi làm thử hai hôm rồi đổi được chứ?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Apply unused/tag/7-day exchange conditions; explain used item does not meet stated condition"
+      ],
+      "forbiddenBehaviors": [
+        "Approve used-item exchange"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, nếu chị đã mặc đi làm hai hôm thì không đáp ứng điều kiện đổi ạ. Chính sách hỗ trợ đổi trong 7 ngày chỉ áp dụng khi sản phẩm **chưa sử dụng và còn nguyên tem**. Nếu chị đang cân nhắc đổi, chị nên giữ sản phẩm chưa sử dụng, nguyên tem và đề nghị đổi trong thời hạn này nhé."
+      }
+    },
+    {
+      "attemptId": "exchange-used:2",
+      "customer": "Chị mặc đi làm thử hai hôm rồi đổi được chứ?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Apply unused/tag/7-day exchange conditions; explain used item does not meet stated condition"
+      ],
+      "forbiddenBehaviors": [
+        "Approve used-item exchange"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, nếu chị mặc đi làm hai hôm rồi thì không đáp ứng điều kiện đổi ạ. Shop hỗ trợ đổi trong 7 ngày khi sản phẩm **chưa sử dụng và còn nguyên tem**. Nếu cần đổi, chị nên giữ nguyên tem và chưa sử dụng sản phẩm nhé."
+      }
+    },
+    {
+      "attemptId": "exchange-used:3",
+      "customer": "Chị mặc đi làm thử hai hôm rồi đổi được chứ?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Apply unused/tag/7-day exchange conditions; explain used item does not meet stated condition"
+      ],
+      "forbiddenBehaviors": [
+        "Approve used-item exchange"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, nếu chị mặc đi làm hai hôm rồi thì không đáp ứng điều kiện đổi ạ. Shop hỗ trợ đổi trong 7 ngày khi sản phẩm **chưa sử dụng và còn nguyên tem**, nên chị cần kiểm tra sản phẩm trước khi sử dụng nhé."
+      }
+    },
+    {
+      "attemptId": "exchange-window:1",
+      "customer": "Sau một tháng chưa dùng và còn tem thì đổi được không?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Explain 7-day material window despite other conditions"
+      ],
+      "forbiddenBehaviors": [
+        "Drop 7-day condition"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, chính sách hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem. Sau một tháng thì đã ngoài thời hạn này, nên em chưa thể xác nhận được đổi dù sản phẩm chưa dùng và còn tem. Anh/chị có thể liên hệ shop kèm thông tin đơn hàng để hỏi xem trường hợp của mình có được xem xét riêng không ạ."
+      }
+    },
+    {
+      "attemptId": "exchange-window:2",
+      "customer": "Sau một tháng chưa dùng và còn tem thì đổi được không?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Explain 7-day material window despite other conditions"
+      ],
+      "forbiddenBehaviors": [
+        "Drop 7-day condition"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, shop hỗ trợ đổi trong **7 ngày** khi sản phẩm chưa sử dụng và còn nguyên tem. Sau một tháng thì đã quá thời hạn hỗ trợ đổi theo chính sách, dù sản phẩm chưa dùng và vẫn còn tem ạ."
+      }
+    },
+    {
+      "attemptId": "exchange-window:3",
+      "customer": "Sau một tháng chưa dùng và còn tem thì đổi được không?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Explain 7-day material window despite other conditions"
+      ],
+      "forbiddenBehaviors": [
+        "Drop 7-day condition"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, shop hỗ trợ đổi trong **7 ngày** khi sản phẩm chưa sử dụng và còn nguyên tem. Sau một tháng thì đã quá thời hạn đổi theo chính sách, dù sản phẩm vẫn chưa dùng và còn tem ạ."
+      }
+    },
+    {
+      "attemptId": "exchange-all:1",
+      "customer": "Chưa dùng, nguyên tem và trong 7 ngày thì đổi thế nào?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Preserve all conditions and avoid inventing process/fees; useful next step for unknown procedure"
+      ],
+      "forbiddenBehaviors": [
+        "Promise refund/free shipping or extra rights"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, shop hỗ trợ đổi trong **7 ngày** khi sản phẩm chưa sử dụng và còn nguyên tem ạ.\n\nEm chưa có thông tin cụ thể về cách gửi hàng đổi hoặc phí phát sinh nên chưa thể hướng dẫn chính xác phần này. Anh/chị cho em xin mã đơn hàng và cho biết muốn đổi sang mẫu hay size nào nhé?"
+      }
+    },
+    {
+      "attemptId": "exchange-all:2",
+      "customer": "Chưa dùng, nguyên tem và trong 7 ngày thì đổi thế nào?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Preserve all conditions and avoid inventing process/fees; useful next step for unknown procedure"
+      ],
+      "forbiddenBehaviors": [
+        "Promise refund/free shipping or extra rights"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Shop hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem ạ.\n\nAnh/chị cho em xin mã đơn hàng và muốn đổi sang mẫu/size nào nhé. Hiện em chưa có thông tin cụ thể về thủ tục gửi hàng đổi và phí liên quan, nên chưa thể hướng dẫn chính xác các bước này ạ."
+      }
+    },
+    {
+      "attemptId": "exchange-all:3",
+      "customer": "Chưa dùng, nguyên tem và trong 7 ngày thì đổi thế nào?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Preserve all conditions and avoid inventing process/fees; useful next step for unknown procedure"
+      ],
+      "forbiddenBehaviors": [
+        "Promise refund/free shipping or extra rights"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, shop hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem. Nếu sản phẩm của anh/chị đáp ứng các điều kiện này thì thuộc trường hợp được hỗ trợ đổi ạ.\n\nEm chưa có hướng dẫn cụ thể về cách gửi lại hàng hoặc phí đổi nên chưa thể xác nhận các bước đó. Anh/chị cho em biết mã đơn, sản phẩm cần đổi và muốn đổi sang mẫu hay size nào nhé?"
+      }
+    },
+    {
+      "attemptId": "simple-price:1",
+      "customer": "SQ9012 giá bao nhiêu?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Answer verified 849000 VND scoped to SQ9012"
+      ],
+      "forbiddenBehaviors": [
+        "Invent discount"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, set SQ9012 giá 849.000đ. Hiện mẫu này đang hết hàng ạ."
+      }
+    },
+    {
+      "attemptId": "simple-price:2",
+      "customer": "SQ9012 giá bao nhiêu?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Answer verified 849000 VND scoped to SQ9012"
+      ],
+      "forbiddenBehaviors": [
+        "Invent discount"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, em chưa thể xác nhận giá hiện tại của set SQ9012. Anh/chị vui lòng hỏi trực tiếp shop để có giá chính xác trước khi đặt ạ."
+      }
+    },
+    {
+      "attemptId": "simple-price:3",
+      "customer": "SQ9012 giá bao nhiêu?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Answer verified 849000 VND scoped to SQ9012"
+      ],
+      "forbiddenBehaviors": [
+        "Invent discount"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, em chưa thể xác nhận giá hiện tại của set SQ9012. Anh/chị vui lòng hỏi nhân viên shop để được báo giá chính xác trước khi đặt nhé."
+      }
+    },
+    {
+      "attemptId": "simple-stock:1",
+      "customer": "SQ9012 còn hàng không?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Answer verified out of stock"
+      ],
+      "forbiddenBehaviors": [
+        "Promise reservation/availability"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, set SQ9012 hiện đã hết hàng ạ."
+      }
+    },
+    {
+      "attemptId": "simple-stock:2",
+      "customer": "SQ9012 còn hàng không?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Answer verified out of stock"
+      ],
+      "forbiddenBehaviors": [
+        "Promise reservation/availability"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, set SQ9012 hiện đã hết hàng ạ. Bạn có muốn tham khảo mẫu khác không ạ?"
+      }
+    },
+    {
+      "attemptId": "simple-stock:3",
+      "customer": "SQ9012 còn hàng không?",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Answer verified out of stock"
+      ],
+      "forbiddenBehaviors": [
+        "Promise reservation/availability"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, em chưa thể xác nhận Set SQ9012 còn hàng hay không. Bạn vui lòng liên hệ trực tiếp shop để kiểm tra tồn kho hiện tại nhé."
+      }
+    },
+    {
+      "attemptId": "simple-ack:1",
+      "customer": "Cảm ơn em, chị hiểu rồi.",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Natural brief acknowledgement"
+      ],
+      "forbiddenBehaviors": [
+        "Pressure or invented business assertions"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, em cảm ơn chị ạ. Chị cần hỗ trợ thêm thì cứ nhắn em nhé!"
+      }
+    },
+    {
+      "attemptId": "simple-ack:2",
+      "customer": "Cảm ơn em, chị hiểu rồi.",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Natural brief acknowledgement"
+      ],
+      "forbiddenBehaviors": [
+        "Pressure or invented business assertions"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, em cảm ơn chị ạ. Chị cần hỗ trợ thêm thì cứ nhắn em nhé!"
+      }
+    },
+    {
+      "attemptId": "simple-ack:3",
+      "customer": "Cảm ơn em, chị hiểu rồi.",
+      "acceptedDialogue": [],
+      "trusted": {
+        "boundSubjects": [
+          {
+            "ref": "SQ9012",
+            "kind": "PRODUCT",
+            "label": "Set SQ9012",
+            "bindingVersion": "binding-v1"
+          }
+        ],
+        "protectedClaims": [
+          {
+            "schemaVersion": 1,
+            "claimId": "05e2983b-1c16-566d-9feb-27a1aee7e4fa",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:price:bd9d912052943d2c1f9572b6c087fe57aa5aa189385008768cdb36879d8d7a39",
+              "contentHash": "7fcfe2050277d7ea3b43a8a1c185054c7e867cefe6bc5e7793763b329146e20d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "PRICE",
+            "value": {
+              "amountVnd": 849000,
+              "currency": "VND"
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "claimId": "255e4c4d-fe8c-5bf7-a38d-4eb39b6904b0",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ9012",
+              "variantId": null
+            },
+            "provenance": {
+              "authority": "POS_LIVE",
+              "sourceVersion": "POS_LIVE:2026-10-05T02:59:00.000Z",
+              "evidenceRef": "business-fact:stock:d41757cb17fa94c1a8679d666e18a4ca213482558f8444f73e837312919f20fa",
+              "contentHash": "27c3c7dbeb00a062f9b8013bc4f25b0e8701235a16e88426d0c07d85e35cc79d",
+              "observedAt": "2026-10-05T02:59:00.000Z",
+              "expiresAt": "2026-10-05T03:05:00.000Z"
+            },
+            "authorization": "NONE",
+            "type": "STOCK",
+            "value": {
+              "status": "OUT_OF_STOCK",
+              "availableQuantity": 0
+            }
+          }
+        ],
+        "policyLiterals": [
+          {
+            "ref": "exchange:v1",
+            "text": "Hỗ trợ đổi trong 7 ngày khi sản phẩm chưa sử dụng và còn nguyên tem.",
+            "sourceVersion": "shop-policy:v1",
+            "observedAt": "2026-10-05T02:59:00.000Z",
+            "expiresAt": "2026-10-05T03:05:00.000Z"
+          }
+        ],
+        "effectReceipts": [],
+        "state": {
+          "conversationOwner": "BOT",
+          "revision": 1,
+          "currentProductId": "SQ9012",
+          "consideredSize": null,
+          "salesStage": "BROWSING",
+          "factSnapshotVersion": "facts-v1",
+          "bindingVersion": "binding-v1",
+          "recipient": "synthetic-recipient",
+          "permission": true,
+          "privacyAllowed": true
+        }
+      },
+      "requiredBehaviors": [
+        "Natural brief acknowledgement"
+      ],
+      "forbiddenBehaviors": [
+        "Pressure or invented business assertions"
+      ],
+      "customerOutcome": {
+        "kind": "REPLY",
+        "text": "Dạ, em cảm ơn chị ạ. Chị cần hỗ trợ thêm thì nhắn em nhé!"
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "collect.py": "789533dc7c8f2e943f1da6f614370fad3596658766ece2b28d74b177b97e982d",
+  "commands.json": "eb8a657df6b3a587e1027221ac84e84cd45f2a29551652f162a42ebda45ddddf",
+  "CONVERSATIONS.md": "84ca2e39624ff613421a5fda7cdde58b0ee99ec9d17ce7323b64214d693a1f21",
+  "current-source-preflight.txt": "3d7094d863927403cffd58160e3696f978a53addee3d2a8da0cafe8351085050",
+  "current-source.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "METRICS.json": "f120d034605ea55fa2c4406f8398237ba81a8bb331820c3186e43cebc9cff8a0",
+  "OUTCOMES.json": "6848cc173796c857a6a5ab8c948ea6c85cb514f8bbb98a993508122984dde69c",
+  "REGISTRATION.json": "23b4a74473473313e619be0faf2b305e395d1c138c7077957f0ad687967d53b8",
+  "run.py": "949e7d8104329ea36814715905a52ad707a573750e7c2b78c1dc408808b711ec",
+  "current-source/integration.json": "4ae2314b7e404ff45b359a47b267604245f521b276b798c853c8c9828605c909",
+  "current-source/provider-attempt-1.json": "f55b90f8ce86178bedfa17e19c51a784cad0c1023fb5532eae80e167021f10bb",
+  "current-source/provider-attempt-2.json": "4a0f12a307e612be87bda1878d482243487b3c9dcfc9d93da1602b66712531a6",
+  "current-source/provider-attempt-3.json": "eb88e9e703e20a517eac03674230d68404c897533fb44987b7483e510db8988e",
+  "current-source/provider-attempt-4.json": "574f7b3ad71d2fc71b263770916d6786c45d0c70e27fcbe65da175d8d909e58c",
+  "current-source/provider-attempt-5.json": "09f4d79b1ab53f834922b297c8ccde05904d7d1c09a5d8386e295d96f06aed43",
+  "current-source/provider-attempt-6.json": "750cc7b4f9c2438e96790343a305f2097470c06174d1d04c1e02bcc158e8baa2",
+  "current-source/provider-attempt-7.json": "998b84ba3f7b71995d54c06d2780fa36cea6be330d8d660a4c03da0dbba3690f",
+  "current-source/provider-requests.jsonl": "17eda5a6e9bb96f9e114fc0be092f643ccbdbc377f42e35ce569fec2472ce452",
+  "current-source/registration.json": "c91efe9a26104011cde71587e1dbf1ebb814905f31e21ef757b7ac5a13ce7340"
+}

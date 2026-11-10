@@ -1,0 +1,324 @@
+{
+  "caseId": "sales-size-advice:height-weight",
+  "journeyId": "sales-size-advice",
+  "elapsedMs": 29424.406100000007,
+  "result": {
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "SIZE_RULE_UNAVAILABLE",
+      "text": "Em chuyển nhân viên chọn size cho chị nhé.",
+      "fallbackId": null
+    },
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "SIZE_RULE_UNAVAILABLE"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 2,
+    "verifierGenerations": 0,
+    "toolRounds": 2,
+    "toolCalls": 4,
+    "generations": [
+      {
+        "id": "b11b2068-a46d-4ff7-9137-44b5fd09d8a8:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 4179.926800000001,
+        "telemetry": {
+          "generationId": "b11b2068-a46d-4ff7-9137-44b5fd09d8a8:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5592,
+          "outputTokens": 1201,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 30229,
+          "requestHash": "540c5d65a432dab30c4cf4c5a4ed2cbc84fc3fbc29f3d4c1d6c9cb4d97b46c74",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 1056,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "b11b2068-a46d-4ff7-9137-44b5fd09d8a8:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1495.3136999999988,
+        "telemetry": {
+          "generationId": "b11b2068-a46d-4ff7-9137-44b5fd09d8a8:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 7557,
+          "outputTokens": 135,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 38324,
+          "requestHash": "e2ab2c0e00e0153cbc642f0d2216c22c8336c849b869cb16ecd7646bf39c6e39",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 114,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      }
+    ],
+    "toolLatencyMs": 4991.657399999996,
+    "verificationLatencyMs": null,
+    "enqueued": 1,
+    "commitStatus": "COMMITTED"
+  },
+  "owners": 2,
+  "verifiers": 0,
+  "batch": {
+    "pageId": "1198992073286645",
+    "conversationHash": "ae0c4dc1644744469297e82a13a473fd24b0fd47ad1e8294e6493df744462f13",
+    "generation": 3,
+    "leaseToken": "83916891-2008-4826-bcbe-f4b715bd0b38",
+    "inboxIds": [
+      "37bf1b7b-80c0-4145-ba1d-57a56c029ede"
+    ],
+    "evaluationGroupId": "b11b2068-a46d-4ff7-9137-44b5fd09d8a8",
+    "eventKind": "CUSTOMER",
+    "firstReceiveSequence": 3,
+    "lastReceiveSequence": 3,
+    "attemptCount": 1,
+    "items": [
+      {
+        "inboxId": "37bf1b7b-80c0-4145-ba1d-57a56c029ede",
+        "pageId": "1198992073286645",
+        "eventKey": "stateful-0caf67b0-5108-4b02-a9ac-3784309d315b:0",
+        "conversationHash": "ae0c4dc1644744469297e82a13a473fd24b0fd47ad1e8294e6493df744462f13",
+        "occurredAt": "2026-10-23T08:44:20.346Z",
+        "receivedAt": "2026-10-23T08:44:20.346Z",
+        "receiveSequence": 3,
+        "attemptCount": 1,
+        "leaseToken": "83916891-2008-4826-bcbe-f4b715bd0b38",
+        "eventKind": "CUSTOMER",
+        "envelope": {
+          "schemaVersion": 1,
+          "customerSendEnabled": false,
+          "routing": {
+            "owner": "APP"
+          },
+          "message": {
+            "schemaVersion": 1,
+            "traceId": "755aaafb-fa9d-4c06-8d9c-c50b2bec9414",
+            "eventKey": "stateful-0caf67b0-5108-4b02-a9ac-3784309d315b:0",
+            "pageId": "1198992073286645",
+            "messageId": "stateful-0caf67b0-5108-4b02-a9ac-3784309d315b:0",
+            "senderId": "synthetic-recipient-ae0c4dc1644744469297e82a13a473fd24b0fd47ad1e8294e6493df744462f13",
+            "conversationId": "synthetic-meta-conversation",
+            "occurredAt": "2026-10-23T08:44:20.346Z",
+            "isEcho": false,
+            "appId": null,
+            "text": "Chị cao 1m58, nặng 52kg, bộ Thạch Thảo mặc size nào em? Chị thích rộng một chút.",
+            "attachments": []
+          }
+        }
+      }
+    ]
+  },
+  "toolResponses": [
+    {
+      "name": "apply_customer_state",
+      "response": {
+        "status": "OK",
+        "data": {
+          "revision": 2,
+          "measurements": [
+            {
+              "kind": "HEIGHT_CM",
+              "value": 158
+            },
+            {
+              "kind": "WEIGHT_KG",
+              "value": 52
+            }
+          ]
+        }
+      },
+      "id": "call_1182470"
+    },
+    {
+      "name": "read_product",
+      "response": {
+        "status": "OK",
+        "data": {
+          "subjectRef": "SV2447",
+          "label": "Set váy Thạch Thảo",
+          "variantId": "offer:SV2447:SET_VAY",
+          "offerType": "SET_VAY",
+          "requestedOfferType": "SET_VAY",
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "sellingOptions": [
+            {
+              "offerType": "SET_VAY",
+              "variantId": "offer:SV2447:SET_VAY",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-23T08:34:28.461Z",
+              "expiresAt": "2026-10-23T10:34:28.461Z",
+              "facts": [
+                {
+                  "type": "PRICE",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SV2447",
+                    "variantId": "offer:SV2447:SET_VAY"
+                  },
+                  "value": {
+                    "amountVnd": 799000,
+                    "currency": "VND"
+                  }
+                },
+                {
+                  "type": "STOCK",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SV2447",
+                    "variantId": "offer:SV2447:SET_VAY"
+                  },
+                  "value": {
+                    "status": "IN_STOCK",
+                    "availableQuantity": 39
+                  }
+                }
+              ],
+              "availability": {
+                "price": {
+                  "status": "OK",
+                  "reason": null
+                },
+                "stock": {
+                  "status": "OK",
+                  "reason": null
+                }
+              }
+            }
+          ],
+          "attributes": null,
+          "sizeCharts": [],
+          "content": {
+            "productName": "Set váy Thạch Thảo",
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productUrl": null,
+            "metadata": {
+              "authority": "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+              "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98",
+              "observedAt": "2026-09-28T04:31:05.725Z",
+              "expiresAt": null,
+              "freshForSeconds": null,
+              "freshnessState": "FRESH"
+            }
+          },
+          "facts": [
+            {
+              "type": "PRICE",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:SET_VAY"
+              },
+              "value": {
+                "amountVnd": 799000,
+                "currency": "VND"
+              }
+            },
+            {
+              "type": "STOCK",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:SET_VAY"
+              },
+              "value": {
+                "status": "IN_STOCK",
+                "availableQuantity": 39
+              }
+            }
+          ],
+          "availability": {
+            "price": {
+              "status": "OK",
+              "reason": null
+            },
+            "stock": {
+              "status": "OK",
+              "reason": null
+            }
+          },
+          "missing": [
+            "ATTRIBUTES"
+          ]
+        }
+      },
+      "id": "call_1182471"
+    }
+  ],
+  "inboundMessages": [
+    {
+      "schemaVersion": 1,
+      "traceId": "755aaafb-fa9d-4c06-8d9c-c50b2bec9414",
+      "eventKey": "stateful-0caf67b0-5108-4b02-a9ac-3784309d315b:0",
+      "pageId": "1198992073286645",
+      "messageId": "stateful-0caf67b0-5108-4b02-a9ac-3784309d315b:0",
+      "senderId": "synthetic-recipient-ae0c4dc1644744469297e82a13a473fd24b0fd47ad1e8294e6493df744462f13",
+      "conversationId": "synthetic-meta-conversation",
+      "occurredAt": "2026-10-23T08:44:20.346Z",
+      "isEcho": false,
+      "appId": null,
+      "text": "Chị cao 1m58, nặng 52kg, bộ Thạch Thảo mặc size nào em? Chị thích rộng một chút.",
+      "attachments": []
+    }
+  ],
+  "actualCapturedMessages": [
+    "Em chuyển nhân viên chọn size cho chị nhé."
+  ],
+  "committedPublicState": {
+    "stage": "DISCOVERY",
+    "revision": 0,
+    "cart": null,
+    "measurements": [
+      {
+        "kind": "HEIGHT_CM",
+        "value": 158,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-23T08:44:20.346Z",
+          "sourceEventHash": "0be2ace16a91cc718c48fc267d6ea45e5acbd61a34b9d3b4945fbd0ed74f6cae"
+        }
+      },
+      {
+        "kind": "WEIGHT_KG",
+        "value": 52,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-23T08:44:20.346Z",
+          "sourceEventHash": "0be2ace16a91cc718c48fc267d6ea45e5acbd61a34b9d3b4945fbd0ed74f6cae"
+        }
+      }
+    ],
+    "customerProfileRevision": 2,
+    "negotiation": null
+  },
+  "counts": {
+    "embedding": 1,
+    "owner": 8,
+    "verifier": 2,
+    "catalogReads": 24,
+    "posReads": 10,
+    "selectorCalls": 0,
+    "readPolicyCalls": 0
+  }
+}

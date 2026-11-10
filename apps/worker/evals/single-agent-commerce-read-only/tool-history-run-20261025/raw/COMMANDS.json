@@ -1,0 +1,183 @@
+[
+  {
+    "name": "source-capture",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-session.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\feedback-source-capture.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-tool-history-model-20261025\\source"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 12.774562358856201
+  },
+  {
+    "name": "controls-preflight",
+    "command": [
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\feedback-controls-20261023.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-tool-history-model-20261025\\controls-preflight",
+      "--capture",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-tool-history-model-20261025\\source\\capture.json",
+      "--preflight"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.6695196628570557
+  },
+  {
+    "name": "controls",
+    "command": [
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\feedback-controls-20261023.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-tool-history-model-20261025\\controls",
+      "--capture",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-tool-history-model-20261025\\source\\capture.json",
+      "--prepared",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-tool-history-model-20261025\\controls-preflight\\prepared.json"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 122.94984364509583
+  },
+  {
+    "name": "prefix-controls-readiness",
+    "command": [
+      "node",
+      "--input-type=module",
+      "-e",
+      "import {readFeedbackRunIdentity,assertCleanFeedbackSource} from './apps/worker/evals/single-agent-commerce-read-only/feedback-run-identity.mjs'; import {requirePassingControls} from './apps/worker/evals/single-agent-commerce-read-only/feedback-native-gates.mjs';const i=readFeedbackRunIdentity();assertCleanFeedbackSource(i);console.log(JSON.stringify({identity:i,controlsHash:requirePassingControls(process.argv[1],i)}));",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-tool-history-model-20261025\\controls"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.8100934028625488
+  },
+  {
+    "name": "opening-quotes-preflight",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-tool-history-model-20261025\\opening-quotes-preflight",
+      "COD",
+      "--provider-run",
+      "--candidate-handoff",
+      "--opening-quotes",
+      "--provider-preflight"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 13.473181247711182
+  },
+  {
+    "name": "journey-openings-preflight",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-tool-history-model-20261025\\journey-openings-preflight",
+      "COD",
+      "--provider-run",
+      "--candidate-handoff",
+      "--journey-openings",
+      "--provider-preflight"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 13.8466637134552
+  },
+  {
+    "name": "opening-quotes",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-tool-history-model-20261025\\opening-quotes",
+      "COD",
+      "--provider-run",
+      "--candidate-handoff",
+      "--opening-quotes"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 232.70701909065247
+  },
+  {
+    "name": "journey-openings",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-tool-history-model-20261025\\journey-openings",
+      "COD",
+      "--provider-run",
+      "--candidate-handoff",
+      "--journey-openings"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 237.39160752296448
+  },
+  {
+    "name": "media-followup-preflight",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-tool-history-model-20261025\\media-followup-preflight",
+      "COD",
+      "--provider-run",
+      "--candidate-handoff",
+      "--media-followup",
+      "--provider-preflight"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 11.905128002166748
+  },
+  {
+    "name": "media-followup",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-tool-history-model-20261025\\media-followup",
+      "COD",
+      "--provider-run",
+      "--candidate-handoff",
+      "--media-followup"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 446.0183992385864
+  },
+  {
+    "name": "stateful-preflight",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-tool-history-model-20261025\\stateful-preflight",
+      "COD",
+      "--provider-run",
+      "--candidate-handoff",
+      "--provider-preflight"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 12.806710481643677
+  },
+  {
+    "name": "stateful",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-tool-history-model-20261025\\stateful",
+      "COD",
+      "--provider-run",
+      "--candidate-handoff"
+    ],
+    "exitCode": 4294967295,
+    "elapsedSeconds": 244.91624855995178
+  }
+]

@@ -1,0 +1,636 @@
+{
+  "reviewedExecutableSourceSha": "24a2ed1bf775592f20da8ea260d43c64e4e589fd",
+  "runtimeFixSha": "33e0fc14e3b683ab9299956a4a27fceacb461008",
+  "reviewVerdict": "APPROVE",
+  "providerGenerations": 0,
+  "runs": [
+    {
+      "id": "full-cod",
+      "rawReportPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-silent-fallback-review-fix-cod-20261028-r1\\integration.json",
+      "rawSha256": "8c39a601a5f1603cd10dbf481b6cf93dd145c24b11c0644ad06b2e6eb04af474",
+      "sourceSha": "e836de67e0be0b59bbd046f9b5d2cc1002bd2035",
+      "sourceDirty": true,
+      "status": "FAIL",
+      "paymentMethod": "COD",
+      "providerGenerations": 0,
+      "testDatabaseDropped": true,
+      "checks": [
+        {
+          "name": "B composed existing clarification migration rolls back exactly before new events",
+          "status": "PASS"
+        },
+        {
+          "name": "B2 real profile persists across turns and correction precedes dependent size",
+          "status": "PASS"
+        },
+        {
+          "name": "B2 stale writer loses CAS and CLEAR removes old fit",
+          "status": "PASS"
+        },
+        {
+          "name": "B2 preference replace and expired profile cannot be updated",
+          "status": "PASS"
+        },
+        {
+          "name": "B3 accepted prior stages persist through current inbox transaction",
+          "status": "PASS"
+        },
+        {
+          "name": "B3 native cart commits once; duplicate does not repeat database transaction",
+          "status": "PASS"
+        },
+        {
+          "name": "B3 native quantity change persists, unknown commit reconciles without replay",
+          "status": "PASS"
+        },
+        {
+          "name": "B3 newer inbox generation prevents an old tool from mutating the cart",
+          "status": "PASS"
+        },
+        {
+          "name": "B3 private checkout creates a persisted preview without exposing PII to the model",
+          "status": "PASS"
+        },
+        {
+          "name": "B3 COD native confirmation commits state and effect intents atomically",
+          "status": "PASS"
+        },
+        {
+          "name": "B handoff matrix drives atomic ownership/event/tag and same-instance replay does not duplicate",
+          "status": "PASS"
+        },
+        {
+          "name": "B handoff missing provider link rolls back ownership/event and never acknowledges acceptance",
+          "status": "PASS"
+        },
+        {
+          "name": "B handoff superseded inbound cannot commit using the earlier source lease",
+          "status": "PASS"
+        },
+        {
+          "name": "B handoff candidate EXCHANGE commits silently without a customer Outbox",
+          "status": "PASS"
+        },
+        {
+          "name": "B handoff candidate DEFECT commits silently without a customer Outbox",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed recovery accounting committed",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed recovery accounting conflict",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed recovery accounting commit-response-lost",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed recovery accounting rollback-response-lost",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed blocked fallback completes Inbox public without regeneration",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed blocked fallback completes Inbox private without regeneration",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial verified",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial owner-error",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial source-changed-before-delivery",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial commit-response-lost",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial rollback-response-lost",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial cart-receipt",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial cart-source-changed",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff existing cart unchanged",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff existing cart cart-changed",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed snapshot invalidation source-refresh preserves the exact verified reply without renewing evidence",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed snapshot invalidation stock-change discards draft and hands off without messages",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed snapshot invalidation expired discards draft and hands off without messages",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery unchanged uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery before-commit uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery after-commit uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery restart uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery cached-allowed uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery receipt-unavailable uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery lost-commit-reply uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed no-chart fallback hands off without text or images even under a holding policy",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media handoff source never leaves partial intents",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media handoff rollback never leaves partial intents",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media fallback remains silent after unchanged and restart",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media fallback remains silent after source and restart",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media fallback remains silent after revision and restart",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed N1 single-field private checkout keeps bare answers out of both models and public history",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed N4 sends exact text and selected image in one response group without replay duplicates",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed N5 image-first text-last handoff links the attachment history and retains encrypted source",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed N7 one negotiation event updates the persisted quote and cart reprice retains its evidence",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed generation failure preserves committed cart and silently hands off without replay",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed ingress commits an open cart, authorizes the exact reply and captures delivery once",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed two native mutations retain one source and next owner receives accepted history and current cart",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed committed profile correction carries its receipt through the effect bridge and final readback",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed private checkout bypasses both models and persists the existing guarded preview",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed confirmation uses existing revalidation and commits checkout handoff once",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed later failed mutation hands off the partial committed result, without replay",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed missing private checkout evidence commits a real handoff with zero model requests and completes the source",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed newer inbound between final readback and commit cancels eligibility without an Outbox",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed configured private dependency fallback overrides holding and commits silently",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed superseded source cannot persist customer measurements during generation",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed exact cart variant is checked again before Outbox even when price and quantity stay unchanged",
+          "status": "FAIL"
+        }
+      ],
+      "limitations": [
+        "Two blocked cases use pre-fix invalid matrix; use blocked-valid run instead.",
+        "Five candidate-only mixed-media check callbacks return without exercising their bodies in default mode.",
+        "Stopped at stale NO_SEND assertion in variant check; final two checks not run in this full process.",
+        "This is retained FAIL evidence, not a full PASS on reviewed head."
+      ],
+      "staleVariantAssertionFailure": true
+    },
+    {
+      "id": "full-bank",
+      "rawReportPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-silent-fallback-review-fix-bank-20261028-r1\\integration.json",
+      "rawSha256": "6ab3b886228a84247120aa685366950ee0548bb6c7f908988803be521745d9f1",
+      "sourceSha": "33e0fc14e3b683ab9299956a4a27fceacb461008",
+      "sourceDirty": false,
+      "status": "FAIL",
+      "paymentMethod": "BANK_TRANSFER",
+      "providerGenerations": 0,
+      "testDatabaseDropped": true,
+      "checks": [
+        {
+          "name": "B composed existing clarification migration rolls back exactly before new events",
+          "status": "PASS"
+        },
+        {
+          "name": "B2 real profile persists across turns and correction precedes dependent size",
+          "status": "PASS"
+        },
+        {
+          "name": "B2 stale writer loses CAS and CLEAR removes old fit",
+          "status": "PASS"
+        },
+        {
+          "name": "B2 preference replace and expired profile cannot be updated",
+          "status": "PASS"
+        },
+        {
+          "name": "B3 accepted prior stages persist through current inbox transaction",
+          "status": "PASS"
+        },
+        {
+          "name": "B3 native cart commits once; duplicate does not repeat database transaction",
+          "status": "PASS"
+        },
+        {
+          "name": "B3 native quantity change persists, unknown commit reconciles without replay",
+          "status": "PASS"
+        },
+        {
+          "name": "B3 newer inbox generation prevents an old tool from mutating the cart",
+          "status": "PASS"
+        },
+        {
+          "name": "B3 private checkout creates a persisted preview without exposing PII to the model",
+          "status": "PASS"
+        },
+        {
+          "name": "B3 BANK_TRANSFER native confirmation commits state and effect intents atomically",
+          "status": "PASS"
+        },
+        {
+          "name": "B handoff matrix drives atomic ownership/event/tag and same-instance replay does not duplicate",
+          "status": "PASS"
+        },
+        {
+          "name": "B handoff missing provider link rolls back ownership/event and never acknowledges acceptance",
+          "status": "PASS"
+        },
+        {
+          "name": "B handoff superseded inbound cannot commit using the earlier source lease",
+          "status": "PASS"
+        },
+        {
+          "name": "B handoff candidate EXCHANGE commits silently without a customer Outbox",
+          "status": "PASS"
+        },
+        {
+          "name": "B handoff candidate DEFECT commits silently without a customer Outbox",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed recovery accounting committed",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed recovery accounting conflict",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed recovery accounting commit-response-lost",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed recovery accounting rollback-response-lost",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed blocked fallback completes Inbox public without regeneration",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed blocked fallback completes Inbox private without regeneration",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial verified",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial owner-error",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial source-changed-before-delivery",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial commit-response-lost",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial rollback-response-lost",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial cart-receipt",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff partial cart-source-changed",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff existing cart unchanged",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed prepared handoff existing cart cart-changed",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed snapshot invalidation source-refresh preserves the exact verified reply without renewing evidence",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed snapshot invalidation stock-change discards draft and hands off without messages",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed snapshot invalidation expired discards draft and hands off without messages",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery unchanged uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery before-commit uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery after-commit uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery restart uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery cached-allowed uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery receipt-unavailable uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed dependency holding delivery lost-commit-reply uses committed policy and actual capture",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed no-chart fallback hands off without text or images even under a holding policy",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media handoff source never leaves partial intents",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media handoff rollback never leaves partial intents",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media fallback remains silent after unchanged and restart",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media fallback remains silent after source and restart",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed mixed media fallback remains silent after revision and restart",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed N1 single-field private checkout keeps bare answers out of both models and public history",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed N4 sends exact text and selected image in one response group without replay duplicates",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed N5 image-first text-last handoff links the attachment history and retains encrypted source",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed N7 one negotiation event updates the persisted quote and cart reprice retains its evidence",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed generation failure preserves committed cart and silently hands off without replay",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed ingress commits an open cart, authorizes the exact reply and captures delivery once",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed two native mutations retain one source and next owner receives accepted history and current cart",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed committed profile correction carries its receipt through the effect bridge and final readback",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed private checkout bypasses both models and persists the existing guarded preview",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed confirmation uses existing revalidation and commits checkout handoff once",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed later failed mutation hands off the partial committed result, without replay",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed missing private checkout evidence commits a real handoff with zero model requests and completes the source",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed newer inbound between final readback and commit cancels eligibility without an Outbox",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed configured private dependency fallback overrides holding and commits silently",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed superseded source cannot persist customer measurements during generation",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed exact cart variant is checked again before Outbox even when price and quantity stay unchanged",
+          "status": "FAIL"
+        }
+      ],
+      "limitations": [
+        "Two blocked cases use pre-fix invalid matrix; use blocked-valid run instead.",
+        "Five candidate-only mixed-media check callbacks return without exercising their bodies in default mode.",
+        "Stopped at stale NO_SEND assertion in variant check; final two checks not run in this full process.",
+        "This is retained FAIL evidence, not a full PASS on reviewed head."
+      ],
+      "staleVariantAssertionFailure": true
+    },
+    {
+      "id": "blocked-valid",
+      "rawReportPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-silent-fallback-blocked-valid-20261028-r2\\integration.json",
+      "rawSha256": "1c81b8087aaf9eb8aefa65b73ac94fe3a833898bfad4336d2a10d7a8f54f8b0a",
+      "sourceSha": "42b8b1a150cf07b761eb489b1b43a0c98a386660",
+      "sourceDirty": false,
+      "status": "PASS",
+      "paymentMethod": "COD",
+      "providerGenerations": 0,
+      "testDatabaseDropped": true,
+      "checks": [
+        {
+          "name": "B composed blocked fallback completes Inbox public without regeneration",
+          "status": "PASS"
+        },
+        {
+          "name": "B composed blocked fallback completes Inbox private without regeneration",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "no-chart-filter",
+      "rawReportPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-silent-fallback-no-chart-focused-20261028-r3\\integration.json",
+      "rawSha256": "dbc846fab0d5743f4a7c842c79406098eb576afbb4c3f8e23fd091a51c8f0536",
+      "sourceSha": "55caff8cf79d419add701bdb7ef709fe4a4f97f6",
+      "sourceDirty": false,
+      "status": "PASS",
+      "paymentMethod": "COD",
+      "providerGenerations": 0,
+      "testDatabaseDropped": true,
+      "checks": [
+        {
+          "name": "B composed no-chart fallback hands off without text or images even under a holding policy",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "variant",
+      "rawReportPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-silent-fallback-variant-20261028-r4\\integration.json",
+      "rawSha256": "af2f15427ba51714652231733b6f9d13214ac691f139ac3d5b328f843082cce7",
+      "sourceSha": "24a2ed1bf775592f20da8ea260d43c64e4e589fd",
+      "sourceDirty": false,
+      "status": "PASS",
+      "paymentMethod": "COD",
+      "providerGenerations": 0,
+      "testDatabaseDropped": true,
+      "checks": [
+        {
+          "name": "B composed exact cart variant is checked again before Outbox even when price and quantity stay unchanged",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "clarification",
+      "rawReportPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-silent-fallback-clarification-20261028-r4\\integration.json",
+      "rawSha256": "d59a7b56bdff36d7aa9b2db9ce849280cc6d245779b93a3454609703b38b1c75",
+      "sourceSha": "24a2ed1bf775592f20da8ea260d43c64e4e589fd",
+      "sourceDirty": false,
+      "status": "PASS",
+      "paymentMethod": "COD",
+      "providerGenerations": 0,
+      "testDatabaseDropped": true,
+      "checks": [
+        {
+          "name": "B composed clarification rollback refuses to destroy existing append-only events",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "qualification",
+      "rawReportPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-silent-fallback-qualification-20261028-r4\\integration.json",
+      "rawSha256": "abf1ab64294c61dabe2fe42ef1cb946f5dc65519c999edb03fdf0450fab2ed89",
+      "sourceSha": "24a2ed1bf775592f20da8ea260d43c64e4e589fd",
+      "sourceDirty": false,
+      "status": "PASS",
+      "paymentMethod": "COD",
+      "providerGenerations": 0,
+      "testDatabaseDropped": true,
+      "checks": [
+        {
+          "name": "B qualification shared queue preserves an invalid observed attempt without later dispatch",
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "runtimeUnchangedAfter33e": true,
+  "databasesDropped": 7,
+  "targetedPassedChecks": 6
+}

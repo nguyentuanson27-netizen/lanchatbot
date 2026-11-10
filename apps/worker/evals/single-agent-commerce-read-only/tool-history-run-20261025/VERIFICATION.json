@@ -1,0 +1,553 @@
+{
+  "modelRunSourceSha": "9e352f382e8915d6a1f1c080c75817065da42c63",
+  "postRunFixSha": "94cb6b089321d65cff57d810eb6ad2b3c74627ca",
+  "checks": [
+    {
+      "name": "bank-history-qualified",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "../c3-tool-history-checks-20261025/bank-history-qualified",
+        "BANK_TRANSFER",
+        "--candidate-handoff",
+        "--composed-only",
+        "--check-prefix",
+        "B composed N4"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 70.44652271270752
+    },
+    {
+      "name": "bank-integration",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "../c3-tool-history-checks-20261025/bank-integration",
+        "BANK_TRANSFER",
+        "--candidate-handoff",
+        "--composed-only"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1337.7115321159363
+    },
+    {
+      "name": "build-qualified",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 47.942590951919556
+    },
+    {
+      "name": "business-focused",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/business-tools",
+        "exec",
+        "vitest",
+        "run",
+        "src/protected-claims.test.ts",
+        "src/reply-assembler.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 20.04818820953369
+    },
+    {
+      "name": "cod-history-qualified",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "../c3-tool-history-checks-20261025/cod-history-qualified",
+        "COD",
+        "--candidate-handoff",
+        "--composed-only",
+        "--check-prefix",
+        "B composed N4"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 70.36088395118713
+    },
+    {
+      "name": "cod-integration",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "../c3-tool-history-checks-20261025/cod-integration",
+        "COD",
+        "--candidate-handoff",
+        "--composed-only"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1341.107614994049
+    },
+    {
+      "name": "database-focused",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/database",
+        "exec",
+        "vitest",
+        "run",
+        "src/realtime-runtime.test.ts",
+        "src/shadow-mirror.test.ts",
+        "src/chat-history.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 24.216590404510498
+    },
+    {
+      "name": "db-typecheck",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/database",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 25.82409429550171
+    },
+    {
+      "name": "history-unavailable-green",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "exec",
+        "vitest",
+        "run",
+        "src/single-agent-commerce-ingress.test.ts",
+        "src/single-agent-commerce-read-only-tools.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 10.891381740570068
+    },
+    {
+      "name": "ingress-final",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "exec",
+        "vitest",
+        "run",
+        "src/single-agent-commerce-ingress.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 26.931381225585938
+    },
+    {
+      "name": "lint-final",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "lint"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 23.446118116378784
+    },
+    {
+      "name": "node-focused",
+      "command": [
+        "node",
+        "--test",
+        "apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/delivery-capture.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/candidate-handoff.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/feedback-controls.test.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.195865869522095
+    },
+    {
+      "name": "post-stop-db-typecheck",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/database",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 11.603363752365112
+    },
+    {
+      "name": "post-stop-node-focused",
+      "command": [
+        "node",
+        "--test",
+        "apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/delivery-capture.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/candidate-handoff.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/feedback-controls.test.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.8232274055480957
+    },
+    {
+      "name": "post-stop-typecheck",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 41.93303847312927
+    },
+    {
+      "name": "post-stop-worker-build",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 38.69331622123718
+    },
+    {
+      "name": "privacy-correction-db",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/database",
+        "exec",
+        "vitest",
+        "run",
+        "src/shadow-mirror.test.ts",
+        "src/chat-history.test.ts",
+        "src/realtime-runtime.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.178848028182983
+    },
+    {
+      "name": "privacy-db-build-qualified",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/database",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 7.385453224182129
+    },
+    {
+      "name": "privacy-db-build",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/database",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 7.218862295150757
+    },
+    {
+      "name": "privacy-db-qualified",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/database",
+        "exec",
+        "vitest",
+        "run",
+        "src/shadow-mirror.test.ts",
+        "src/chat-history.test.ts",
+        "src/realtime-runtime.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.784049034118652
+    },
+    {
+      "name": "privacy-worker-focused",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "exec",
+        "vitest",
+        "run",
+        "src/single-agent-commerce-read-only-tools.test.ts",
+        "src/single-agent-commerce-read-only.test.ts",
+        "src/single-agent-commerce-ingress.test.ts",
+        "src/single-agent-commerce-media.test.ts",
+        "src/single-agent-commerce-media-delivery.test.ts",
+        "src/meta-outbox-dispatcher.test.ts",
+        "src/single-agent-commerce-handoff-delivery.test.ts",
+        "src/single-agent-semantic-verifier-boundary.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 8.30745530128479
+    },
+    {
+      "name": "privacy-worker-lint",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "lint"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 10.418420314788818
+    },
+    {
+      "name": "provider-preflight",
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "../c3-tool-history-checks-20261025/provider-preflight",
+        "COD",
+        "--provider-run",
+        "--candidate-handoff",
+        "--journey-openings",
+        "--provider-preflight"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 15.634114980697632
+    },
+    {
+      "name": "red-media-history-unavailable",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "exec",
+        "vitest",
+        "run",
+        "src/single-agent-commerce-ingress.test.ts",
+        "-t",
+        "unavailable delivery history"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 5.531030654907227
+    },
+    {
+      "name": "red-street-case-insensitive",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/database",
+        "exec",
+        "vitest",
+        "run",
+        "src/shadow-mirror.test.ts",
+        "-t",
+        "standalone street values"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 2.2497291564941406
+    },
+    {
+      "name": "stopped-stateful-cleanup",
+      "command": [
+        "python",
+        "..\\c3-tool-history-cleanup-20261025.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 6.307951211929321
+    },
+    {
+      "name": "typecheck-qualified",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "lint"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 11.660041809082031
+    },
+    {
+      "name": "worker-build-final",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 147.9370379447937
+    },
+    {
+      "name": "worker-build",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "build"
+      ],
+      "exitCode": 2,
+      "elapsedSeconds": 105.62209391593933
+    },
+    {
+      "name": "worker-final-affected",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "exec",
+        "vitest",
+        "run",
+        "src/single-agent-commerce-read-only-tools.test.ts",
+        "src/single-agent-commerce-ingress.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 12.481882572174072
+    },
+    {
+      "name": "worker-focused",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "exec",
+        "vitest",
+        "run",
+        "src/single-agent-commerce-read-only-tools.test.ts",
+        "src/single-agent-commerce-read-only.test.ts",
+        "src/single-agent-commerce-ingress.test.ts",
+        "src/single-agent-commerce-media.test.ts",
+        "src/single-agent-commerce-media-delivery.test.ts",
+        "src/meta-outbox-dispatcher.test.ts",
+        "src/single-agent-commerce-handoff-delivery.test.ts",
+        "src/single-agent-semantic-verifier-boundary.test.ts"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 33.300541162490845
+    },
+    {
+      "name": "worker-lint",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "lint"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 9.931065797805786
+    },
+    {
+      "name": "worker-typecheck-final",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 146.0211911201477
+    },
+    {
+      "name": "worker-typecheck",
+      "command": [
+        "cmd",
+        "/d",
+        "/c",
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "typecheck"
+      ],
+      "exitCode": 2,
+      "elapsedSeconds": 122.99941301345825
+    }
+  ],
+  "notes": [
+    "Failed RED/build/typecheck/lint commands retained, never called PASS.",
+    "COD36/BANK36 on00b28255; qualified N4 COD1/BANK1 on9e352f38; final privacy correction has DB71/worker291 and build/lint verification; no new model run.",
+    "Operator stopped the exact Node process after persisted attempt5; stateful raw report retains incomplete status. Exact artifact-identity orphan cleanup is separate."
+  ]
+}

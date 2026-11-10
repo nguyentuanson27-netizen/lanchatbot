@@ -1,0 +1,2 @@
+# Captured evidence must retain exact bytes, including provider text whitespace and Windows launcher EOLs.
+raw/** -text -whitespace

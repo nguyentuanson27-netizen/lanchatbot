@@ -1,0 +1,146 @@
+{
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "runSourceSha": "6477c840e5cd678d795d336a55b1ba95e287116f",
+  "rawSavepoint": "d6252104ef1fbcf0b55c27a444335f1b3f9d487d",
+  "primarySavepoint": "32fa82a15a0a500e1fab39ffed7270befe5f69e0",
+  "referenceBlobs": {
+    "docs/specs/c3-single-agent-commerce-architecture-20261004.md": "7e0265e3b6b3d556d8fb0f3c7267abccef5de86a",
+    "docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md": "4a09b55d2f3a972a65697738876cc5eab21e7a2b",
+    "docs/specs/c3-phase-b-execution-20261014.md": "c397034d68897c0ee96947dce39b1a550e940920",
+    "docs/specs/c3-phase-b-integration-audit-20261015.md": "ebabfde37d188d81028a65369a85952055079109",
+    "tasks/plan.md": "7a016baeee15433f078867858551aec70c77cfe8",
+    "tasks/todo.md": "9dfaad6b7b33644bb7a470d0a714f9e5426e8b16"
+  },
+  "commands": [
+    {
+      "command": "git fetch origin main; git rev-parse origin/main",
+      "exitCode": 0,
+      "result": "296cdcfbf5759f5bf9cbb24acf3dc63005589361"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-state.test.ts src/single-agent-commerce-session.test.ts src/single-agent-commerce-effects.test.ts src/single-agent-commerce-handoff.test.ts src/single-agent-commerce-persistence.test.ts src/single-agent-semantic-verifier-boundary.test.ts",
+      "exitCode": 0,
+      "result": "118PASS"
+    },
+    {
+      "command": "pnpm --filter @lana/database exec vitest run src/realtime-customer-profile-guard.test.ts src/realtime-runtime.test.ts",
+      "exitCode": 0,
+      "result": "48PASS"
+    },
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs",
+      "exitCode": 0,
+      "result": "26PASS"
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "exitCode": 0,
+      "result": "Canonical dependency and worker build PASS"
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs 'C:/Users/nguye/AppData/Local/Temp/c3-b23-replay-cod-20261016' COD --composed-only",
+      "exitCode": 0,
+      "result": "12groupsPASS;ownedDatabaseDropped=true"
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs 'C:/Users/nguye/AppData/Local/Temp/c3-b23-replay-bank-20261016' BANK_TRANSFER --composed-only",
+      "exitCode": 0,
+      "result": "12groupsPASS;ownedDatabaseDropped=true"
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs 'C:/Users/nguye/AppData/Local/Temp/c3-b23-replay-preflight-unused-20261016' COD --provider-preflight",
+      "exitCode": 0,
+      "result": "PREFLIGHT_PASS;0generations"
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs 'C:/Users/nguye/AppData/Local/Temp/c3-b23-replay-provider-20261016' COD --provider-run",
+      "exitCode": null,
+      "result": "HOST_TOOL_EXECUTION_ABORTED;6persisted terminals;7thOWNER_RESULT retained and handoff commit independently read back;original integration status/cleanup flag unchanged"
+    },
+    {
+      "command": "node 'C:/Users/nguye/AppData/Local/Temp/c3-b23-replay-preserve.mjs' 6477c840e5cd678d795d336a55b1ba95e287116f",
+      "exitCode": 0,
+      "result": "Raw before primary;13hashes/3ownedDatabasesDropped/0secretPatterns"
+    },
+    {
+      "command": "node 'C:/Users/nguye/AppData/Local/Temp/c3-b23-replay-primary-view.mjs' apps/worker/evals/single-agent-commerce-read-only/b2-b3-replay-20261016",
+      "exitCode": 0,
+      "result": "all7actual customer outcomes and public state;no rejected draft in primary"
+    },
+    {
+      "command": "node 'C:/Users/nguye/AppData/Local/Temp/c3-b23-replay-score.mjs' apps/worker/evals/single-agent-commerce-read-only/b2-b3-replay-20261016",
+      "exitCode": 0,
+      "result": {
+        "PARTIAL_REPLY_PURCHASE_NOT_EXECUTED": 1,
+        "UNUSABLE_NO_SEND": 1,
+        "UNUSABLE_FALLBACK": 1,
+        "PARTIAL_STATE_SUCCESS_REPLY_NEEDS_EDIT": 1,
+        "FUNCTIONAL_RECOVERY_CHECKOUT_INCOMPLETE": 1,
+        "FUNCTIONAL_AUTHORITY_STOP_PURCHASE_INCOMPLETE": 1,
+        "HANDOFF_COMMIT_OBSERVED_TERMINAL_UNRECORDED": 1
+      }
+    },
+    {
+      "command": "node 'C:/Users/nguye/AppData/Local/Temp/c3-b23-replay-audit.mjs' apps/worker/evals/single-agent-commerce-read-only/b2-b3-replay-20261016",
+      "exitCode": 0,
+      "result": "PARTIAL_BATCH_ACCOUNTING_AND_CLEANUP_VERIFIED"
+    },
+    {
+      "command": "python 'C:/Users/nguye/AppData/Local/Temp/c3-b23-replay-recover-cleanup.py'",
+      "exitCode": 0,
+      "result": "Targeted readback/cleanup exactly c3_b_test_18b0997926ff7a18;handoff commit/event/case/tag observed;database dropped;0provider generations;first helper invocation failed before any DB access because pg resolved from wrong directory, corrected to existing database package dependency"
+    },
+    {
+      "command": "node 'C:/Users/nguye/AppData/Local/Temp/c3-b23-replay-egress-coverage.mjs'",
+      "exitCode": 0,
+      "result": "Offline captured scope/coverage diagnosis;three unrelated searched products each lack PRICE/STOCK required by the existing outbound readiness rule;0provider generations"
+    }
+  ],
+  "logs": {
+    "c3-b23-replay-worker-20261016.log": {
+      "sha256": "360c99020a834b9dff68a75426d36da4aac8510de0c385dec7139a1954070059",
+      "bytes": 781
+    },
+    "c3-b23-replay-database-20261016.log": {
+      "sha256": "b46c0b5e891b4728fae4e2e3f28f9dcb5e805630931c0782a5ab5568009c2baa",
+      "bytes": 582
+    },
+    "c3-b23-replay-protocol-20261016.log": {
+      "sha256": "de235a1fd973cc135eb55abb46230dd80a3c5062e16a357c2356f2bd545ba8a5",
+      "bytes": 2653
+    },
+    "c3-b23-replay-build-20261016.log": {
+      "sha256": "df1a7472ccc1f0ac08f8d273ae9a30e7c033397e93de3d52c26220f3a6c5e77d",
+      "bytes": 5249
+    },
+    "c3-b23-replay-cod-20261016.log": {
+      "sha256": "9542fe082601f0c8ddc133c6da11a02ddad991f23020e0008ba74f3a62dd6da6",
+      "bytes": 1222
+    },
+    "c3-b23-replay-bank-20261016.log": {
+      "sha256": "9542fe082601f0c8ddc133c6da11a02ddad991f23020e0008ba74f3a62dd6da6",
+      "bytes": 1222
+    },
+    "c3-b23-replay-provider-20261016.log": {
+      "sha256": null,
+      "status": "NOT_CREATED_BEFORE_HOST_ABORT;source-session buffers child stdout;raw structured evidence retained"
+    },
+    "c3-b23-replay-preflight-20261016.json": {
+      "sha256": "0c0881a561330f4ef7edb7ad4ba59a155faf6c617dcf8e3d188999278dcefd04"
+    }
+  },
+  "analysisScripts": {
+    "c3-b23-replay-freeze.mjs": "78a25a5fa10662f8f2b06978b3ffa43b7c3a385ab3b4d9ba9a47234b9af23062",
+    "c3-b23-replay-preserve.mjs": "90467a8300f68028b589388d8d398438e8c3eee4d077302ff27879fdc8499597",
+    "c3-b23-replay-primary-view.mjs": "6e5c1c558168000935f8bbe00bc9cb542ac7124e843310a1e7a23eb5612135b2",
+    "c3-b23-replay-score.mjs": "57114fb3b9852536666b2590919dcddbb37a874a7fb64b4916e1c3765cbc5102",
+    "c3-b23-replay-diagnostic-view.mjs": "e78e999037373cd6552c789a963db64591d2709d417d76862e50ac7caedc04e1",
+    "c3-b23-replay-audit.mjs": "edc568cece989e34ed98c40f55b5dbf77fc12df20469a1af549992e2b96c3e80",
+    "c3-b23-replay-report.mjs": "c9c885b97a6688d9a9d51ce36d4524dc67ebb4d69f602ceb40a34f55f402d082",
+    "c3-b23-replay-recover-cleanup.py": "4e59bedc24c27530065f2c125e1b50e5a1dd8c91603b257d0912e147e4f83f26",
+    "c3-b23-replay-egress-coverage.mjs": "f23253bda422b05ba93a8bf43d367b1b7d12de19f332b94711c20fe96ad0ce28"
+  },
+  "ownedDatabasesDropped": 3,
+  "humanAcceptance": null,
+  "sendEnabled": false
+}

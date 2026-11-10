@@ -1,0 +1,76 @@
+{
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "startingHead": "9cd3f85e6450a381bc5140e47e64183048d6beae",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "9d477de09ea59dab2f02c3fb4e0c9b9f79a88de189d72267a25e2ef1387180fa",
+    "verifier": "e8ba5ab607518cda125600c59d3130c9b17d5fbf3e62da485945cd2ae1ec449d"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "manifestHash": "e15d390295a7466093c7367d1f2a32477f12491bd73ce835a229f5c8e2236984",
+  "toolSchemaHash": "56dd04548779a7997df3bc5b1e32e90f957bf2483a7cb7c5e0a532716d752d22",
+  "corpusHash": "51d53b26a9d85ee37786a269df1700cbbe9b4b2fd16ec243bc4a2bce56f3a749",
+  "sourceConfigHash": "5ca8dc68da2a11d6a29bb9d03617686f3116a3e43b8c646da0b012212bcefb6e",
+  "registeredOutcomes": 7,
+  "publicTurns": 6,
+  "privateCodeTurns": 1,
+  "repetitions": 1,
+  "maximumGenerationRequests": 24,
+  "retry": 0,
+  "fallback": {
+    "id": "C3_A_NONPROTECTED_V2",
+    "text": "Phần này em chưa trả lời được, chị nhé.",
+    "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+  },
+  "sendEnabled": false
+}

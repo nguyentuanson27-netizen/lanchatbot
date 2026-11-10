@@ -1,0 +1,349 @@
+{
+  "runSourceSha": "79bda1692667846e0a543a404812ab1daead35c7",
+  "files": [
+    {
+      "path": "b1-1/attempt-1.json",
+      "originalSha256": "99f93e87f954f4f739671978e0e9f1948125982c66274eed25bf76ec90583bb8",
+      "publishedSha256": "99f93e87f954f4f739671978e0e9f1948125982c66274eed25bf76ec90583bb8",
+      "bytes": 36936,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-10.json",
+      "originalSha256": "1d1e73e5adaed7ac2cfd4467db155538d91b8ac45884e9616be975ba19eca589",
+      "publishedSha256": "1d1e73e5adaed7ac2cfd4467db155538d91b8ac45884e9616be975ba19eca589",
+      "bytes": 22954,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-11.json",
+      "originalSha256": "56b28d0d7a9c547c1590deb02857601c82089ae92a785a027946176fd638ca9f",
+      "publishedSha256": "56b28d0d7a9c547c1590deb02857601c82089ae92a785a027946176fd638ca9f",
+      "bytes": 21473,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-12.json",
+      "originalSha256": "1fa41bc78246433d26ff832df58638cc84a0bc18a197ad6c195c17fae6f163e8",
+      "publishedSha256": "1fa41bc78246433d26ff832df58638cc84a0bc18a197ad6c195c17fae6f163e8",
+      "bytes": 22850,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-13.json",
+      "originalSha256": "c269c231c94c7356843b0baf9e6529365c20da538f1370f955e27bc62a9e53c3",
+      "publishedSha256": "c269c231c94c7356843b0baf9e6529365c20da538f1370f955e27bc62a9e53c3",
+      "bytes": 23484,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-14.json",
+      "originalSha256": "1fc346976d51a21cfdd452feb41d6a7f9cfe051cfae183072caef9f704e56388",
+      "publishedSha256": "1fc346976d51a21cfdd452feb41d6a7f9cfe051cfae183072caef9f704e56388",
+      "bytes": 28671,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-15.json",
+      "originalSha256": "ff013c7a2e0ce025d777242ea3f6166b40ed3f355481e78cfed7ddad64450cb7",
+      "publishedSha256": "ff013c7a2e0ce025d777242ea3f6166b40ed3f355481e78cfed7ddad64450cb7",
+      "bytes": 27448,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-16.json",
+      "originalSha256": "5912b4b0dc7be7e43d3e07350fcff4f2a5aca58be0d1e9226009160caa8611ec",
+      "publishedSha256": "5912b4b0dc7be7e43d3e07350fcff4f2a5aca58be0d1e9226009160caa8611ec",
+      "bytes": 23009,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-17.json",
+      "originalSha256": "bfa8ac2f977f8ae811603b0818f18a23b2cd65e1e91a2753ba7524fb564aed82",
+      "publishedSha256": "bfa8ac2f977f8ae811603b0818f18a23b2cd65e1e91a2753ba7524fb564aed82",
+      "bytes": 27039,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-18.json",
+      "originalSha256": "14c0408729995f6ff69a0393a8651579c2f32a9a45c34db49859ca717bb5e249",
+      "publishedSha256": "14c0408729995f6ff69a0393a8651579c2f32a9a45c34db49859ca717bb5e249",
+      "bytes": 23190,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-19.json",
+      "originalSha256": "9da76f14387d87531823c0b6f16f5347cbadeb755d3448c3ca96f39f2a790a2b",
+      "publishedSha256": "9da76f14387d87531823c0b6f16f5347cbadeb755d3448c3ca96f39f2a790a2b",
+      "bytes": 21483,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-2.json",
+      "originalSha256": "d92ef16e7fce1d27ac0dab3f51e05103b06cc1da2b7b0e083e733071afe87185",
+      "publishedSha256": "d92ef16e7fce1d27ac0dab3f51e05103b06cc1da2b7b0e083e733071afe87185",
+      "bytes": 23110,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-20.json",
+      "originalSha256": "ea90fa53470556440c8d13a7690b2226ae220014d652431e9376bcc078b28afb",
+      "publishedSha256": "ea90fa53470556440c8d13a7690b2226ae220014d652431e9376bcc078b28afb",
+      "bytes": 22655,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-21.json",
+      "originalSha256": "7cec27b0bc5fbda667b66ed90ea4a501c8bd50e05add129855a7e7cfcc56180e",
+      "publishedSha256": "7cec27b0bc5fbda667b66ed90ea4a501c8bd50e05add129855a7e7cfcc56180e",
+      "bytes": 23368,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-22.json",
+      "originalSha256": "9bc975def2aabd08084bae9ddca4e07b8259df25ab8c4f98fe17324c53599685",
+      "publishedSha256": "9bc975def2aabd08084bae9ddca4e07b8259df25ab8c4f98fe17324c53599685",
+      "bytes": 28905,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-23.json",
+      "originalSha256": "705ad96da9c3419703a15beeb1e5b11dc1f6025364c2748a351cab4908cf1d40",
+      "publishedSha256": "705ad96da9c3419703a15beeb1e5b11dc1f6025364c2748a351cab4908cf1d40",
+      "bytes": 27313,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-24.json",
+      "originalSha256": "9412d9d71a0440375f0f88247f1a6fee2e2a52ea57b3bf049308aa8c9cb9ac5a",
+      "publishedSha256": "9412d9d71a0440375f0f88247f1a6fee2e2a52ea57b3bf049308aa8c9cb9ac5a",
+      "bytes": 22991,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-3.json",
+      "originalSha256": "f5c1ccb62011301d93c3cbcabbe4681461afeed61e857c67266d77690a30cb59",
+      "publishedSha256": "f5c1ccb62011301d93c3cbcabbe4681461afeed61e857c67266d77690a30cb59",
+      "bytes": 21834,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-4.json",
+      "originalSha256": "3a043f3f849e50ccb4959e898b033de4354f7e9bca5ab501251a0ae663b3ae70",
+      "publishedSha256": "3a043f3f849e50ccb4959e898b033de4354f7e9bca5ab501251a0ae663b3ae70",
+      "bytes": 25879,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-5.json",
+      "originalSha256": "863f57957dc4cbae01caa748e2b67c13d3da625feafb7de424f818c1b6a5a6ff",
+      "publishedSha256": "863f57957dc4cbae01caa748e2b67c13d3da625feafb7de424f818c1b6a5a6ff",
+      "bytes": 23314,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-6.json",
+      "originalSha256": "9ac08abd778ab6a00a4bcc624b68e45911ed6b2c677057c3054b63c6f3493027",
+      "publishedSha256": "9ac08abd778ab6a00a4bcc624b68e45911ed6b2c677057c3054b63c6f3493027",
+      "bytes": 24433,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-7.json",
+      "originalSha256": "3a81c10f539effbab34e7f5e681113d66d5e321a72ea8e6eea094a9887804460",
+      "publishedSha256": "3a81c10f539effbab34e7f5e681113d66d5e321a72ea8e6eea094a9887804460",
+      "bytes": 26734,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-8.json",
+      "originalSha256": "a96a1e64945b431bdf610748d72455050b831af0cf49e1f267d0b9117e558827",
+      "publishedSha256": "a96a1e64945b431bdf610748d72455050b831af0cf49e1f267d0b9117e558827",
+      "bytes": 23287,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/attempt-9.json",
+      "originalSha256": "46f6b962076d1c536a22330cd49533f42e2d8d3771c41565000673ee7a905ad3",
+      "publishedSha256": "46f6b962076d1c536a22330cd49533f42e2d8d3771c41565000673ee7a905ad3",
+      "bytes": 21688,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/completion.json",
+      "originalSha256": "d8a919286921054a7510f2b45720764d1c2699ff015fc98ec4f2fd56f06cf45a",
+      "publishedSha256": "d8a919286921054a7510f2b45720764d1c2699ff015fc98ec4f2fd56f06cf45a",
+      "bytes": 271,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/registration.json",
+      "originalSha256": "f27b0fbbe53be40b15b7965ce5b422c2e1560b62ee03c576c4c248d53866b260",
+      "publishedSha256": "f27b0fbbe53be40b15b7965ce5b422c2e1560b62ee03c576c4c248d53866b260",
+      "bytes": 1812,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1/requests.jsonl",
+      "originalSha256": "29f1d12074f7f5d4f0d1ead6bf381c2480775a5d7068f37a804d16de8f6de8ce",
+      "publishedSha256": "29f1d12074f7f5d4f0d1ead6bf381c2480775a5d7068f37a804d16de8f6de8ce",
+      "bytes": 2129090,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "b1-1.log",
+      "originalSha256": "eb301f2911cc74507f66417703be0a4eca66cc1eea7c91b949ab45ab227f5ba2",
+      "publishedSha256": "eb301f2911cc74507f66417703be0a4eca66cc1eea7c91b949ab45ab227f5ba2",
+      "bytes": 1808,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "commands.json",
+      "originalSha256": "eab10c0b6c5c68caf4d0d582a48e980ce0e0cf9a86fb770459554fcdfc4f6531",
+      "publishedSha256": "eab10c0b6c5c68caf4d0d582a48e980ce0e0cf9a86fb770459554fcdfc4f6531",
+      "bytes": 4232,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "deterministic-bank/integration.json",
+      "originalSha256": "9a464c2c18e259250597e3760821766b1b0b2d3faf63e82d9355a8158f2e091b",
+      "publishedSha256": "9a464c2c18e259250597e3760821766b1b0b2d3faf63e82d9355a8158f2e091b",
+      "bytes": 10405,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "deterministic-bank.log",
+      "originalSha256": "59ff626b0557000c4eace9c439e220e13f4a70463438d7231f4e7c3cb4e1d65b",
+      "publishedSha256": "59ff626b0557000c4eace9c439e220e13f4a70463438d7231f4e7c3cb4e1d65b",
+      "bytes": 2597,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "deterministic-cod/integration.json",
+      "originalSha256": "929fbb21d3ef922dfc2ee2cc03a06f417c11fc49bfb59727ec4b8c80abdd09a7",
+      "publishedSha256": "929fbb21d3ef922dfc2ee2cc03a06f417c11fc49bfb59727ec4b8c80abdd09a7",
+      "bytes": 10385,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "deterministic-cod.log",
+      "originalSha256": "fe24681b122b77a33614ef53383e966ad9fec4f5d1df361c7a5c7782e6231ede",
+      "publishedSha256": "fe24681b122b77a33614ef53383e966ad9fec4f5d1df361c7a5c7782e6231ede",
+      "bytes": 2587,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "provider-preflight.log",
+      "originalSha256": "3f9294270f1c301bf73e36f2d69c4b891a8141b8860b21590fd9a489aca97682",
+      "publishedSha256": "3f9294270f1c301bf73e36f2d69c4b891a8141b8860b21590fd9a489aca97682",
+      "bytes": 2313,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "RUN_SOURCE.json",
+      "originalSha256": "26d8ac84a2879805e5f39c8961a97b3753a8662321f0b16c599d8ab8ac02225f",
+      "publishedSha256": "26d8ac84a2879805e5f39c8961a97b3753a8662321f0b16c599d8ab8ac02225f",
+      "bytes": 165,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "source-check/source-readback.json",
+      "originalSha256": "1d079e2f98f4216ceec498ff093a75125d6defc24cc1aefd246f37751d1cfb8a",
+      "publishedSha256": "1d079e2f98f4216ceec498ff093a75125d6defc24cc1aefd246f37751d1cfb8a",
+      "bytes": 28339,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "source-check.log",
+      "originalSha256": "5ed02f6f8118f4056646cc373ac808a69b430ed75216f6d47981c14e959b0615",
+      "publishedSha256": "5ed02f6f8118f4056646cc373ac808a69b430ed75216f6d47981c14e959b0615",
+      "bytes": 192,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "stateful-1/integration.json",
+      "originalSha256": "b1b7e9bb3075bce02043c492c5312a0f3c9a7f98c34a2551e4acd3f8dd60a1e8",
+      "publishedSha256": "b1b7e9bb3075bce02043c492c5312a0f3c9a7f98c34a2551e4acd3f8dd60a1e8",
+      "bytes": 7827,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "stateful-1/provider-attempt-1.json",
+      "originalSha256": "52771f27a819cca27ce6fa40ccfea87ba749f38f7390a77931a136d8f1f3dce5",
+      "publishedSha256": "074deffe86cdee7d3ce174e8eb22e48fc70e724755920d45c4c05be681defc9c",
+      "bytes": 34760,
+      "transformation": "REMOVE_SYNTHETIC_PRIVATE_INGRESS_BATCH_ONLY"
+    },
+    {
+      "path": "stateful-1/provider-attempt-2.json",
+      "originalSha256": "0ae581785ec6cdbc2e026d9d95f511c315b51694dfb3e9300dc11b2ee070eef5",
+      "publishedSha256": "21756c8ad72ec39fb175e69ca874046a5b4323465fcc1bdbd0d4386ac34072df",
+      "bytes": 38077,
+      "transformation": "REMOVE_SYNTHETIC_PRIVATE_INGRESS_BATCH_ONLY"
+    },
+    {
+      "path": "stateful-1/provider-attempt-3.json",
+      "originalSha256": "a5bff7696981ad713ff9f56020f542c12be4f17888879e394f3d7f3a017d390e",
+      "publishedSha256": "cbf4ad0cbabd0b93136264812d5de89543a0970f2c2a5ab88cf5a8e79ec82c5a",
+      "bytes": 27931,
+      "transformation": "REMOVE_SYNTHETIC_PRIVATE_INGRESS_BATCH_ONLY"
+    },
+    {
+      "path": "stateful-1/provider-attempt-4.json",
+      "originalSha256": "77d4525eb2f169adcd4cb5d6efc1db3bb2fb8e6cd8481c5560401e5a93c29e93",
+      "publishedSha256": "972be634d56c8bbde29c4784f87a128c0f5391adf76fd010c67cf8daacb0aecf",
+      "bytes": 30078,
+      "transformation": "REMOVE_SYNTHETIC_PRIVATE_INGRESS_BATCH_ONLY"
+    },
+    {
+      "path": "stateful-1/provider-attempt-5.json",
+      "originalSha256": "8c8e365a3812323bb36628563a06397a52c61aee5b6752948e7ed0c9857f945e",
+      "publishedSha256": "0cd45cdccf6d102258edceaf40dc1961ec8beb750c6e917909356eacdbf54e6d",
+      "bytes": 4983,
+      "transformation": "REMOVE_SYNTHETIC_PRIVATE_INGRESS_BATCH_ONLY"
+    },
+    {
+      "path": "stateful-1/provider-attempt-6.json",
+      "originalSha256": "b00de8958d6d2eeee7949069a8206e9a360c77499e5e52c81c9a04f1bc29abb2",
+      "publishedSha256": "055fb86b8a955cb1b07dd63222a4ed250a3a163f15a96b227ceec358c15cd802",
+      "bytes": 4213,
+      "transformation": "REMOVE_SYNTHETIC_PRIVATE_INGRESS_BATCH_ONLY"
+    },
+    {
+      "path": "stateful-1/provider-attempt-7.json",
+      "originalSha256": "7ab7bee69c1d5fc1bf4ac60fbcbedfaf36cd3f2b04d1423655ad4bc8c5ebf70e",
+      "publishedSha256": "a6e9d4589780bd2792c471251b35413750065e7e730cc619306c3cf5c37eb9a3",
+      "bytes": 5038,
+      "transformation": "REMOVE_SYNTHETIC_PRIVATE_INGRESS_BATCH_ONLY"
+    },
+    {
+      "path": "stateful-1/provider-attempt-8.json",
+      "originalSha256": "28c85bb3c3944abe520c990e6ec98de13dddffd05ea2444158d2d93d38c6d37a",
+      "publishedSha256": "ddcf4a2fd591a440f317f1122ff8dec55986429c6e09c075c067f37a5e8dc5d9",
+      "bytes": 1917,
+      "transformation": "REMOVE_SYNTHETIC_PRIVATE_INGRESS_BATCH_ONLY"
+    },
+    {
+      "path": "stateful-1/provider-requests.jsonl",
+      "originalSha256": "feebc9535a7f809df988e51ee55bc9d10cde64ef9762fe55626d82dc9ea9358c",
+      "publishedSha256": "feebc9535a7f809df988e51ee55bc9d10cde64ef9762fe55626d82dc9ea9358c",
+      "bytes": 553731,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "stateful-1/registration.json",
+      "originalSha256": "ae6ac673afb1ba8976e427bd42023d9bb3cca4c87214efd818d9477868bede19",
+      "publishedSha256": "ae6ac673afb1ba8976e427bd42023d9bb3cca4c87214efd818d9477868bede19",
+      "bytes": 2826,
+      "transformation": "EXACT_BYTES"
+    },
+    {
+      "path": "stateful-1.log",
+      "originalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publishedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "transformation": "EXACT_BYTES"
+    }
+  ],
+  "originalEvidence": "Task temp output retained; published provider wire/logs exact bytes, private ingress batch removed only from public attempt copies."
+}

@@ -1,0 +1,483 @@
+{
+  "status": "APPROVED_REPORT_EVIDENCE_DELIVERY_ONLY",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-05T12:50:37.570590+00:00",
+  "reviewedExecutableSha": "639aff103898ad9e6cad5119d27c08f4809f9896",
+  "reportPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\docs\\specs\\c3-phase-c-target-composition-continuation-implementation-20261105.md",
+  "reportSha256": "921c0f3f68f8e31c83a496ff4bf09e3d1587582adbae8abbeb962229940326b5",
+  "verificationSha256": "08d55a43447120f24a68c0857915a8fe37976d2efe660b47e76a3a2454a1f332",
+  "fileCount": 64,
+  "logInventoryCount": 48,
+  "checks": {
+    "reportMatchesApprovedScopeAndRawResults": true,
+    "all48LogInventoryHashesAndBytes": true,
+    "all15SourceManifestHashesUnchanged": true,
+    "engineeringReviewCopySemanticEqual": true,
+    "stagedJsonAndLogBytesExact": true,
+    "gitCachedDiffCheckPass": true,
+    "noRuntimeSourceChangesInDelivery": true,
+    "sourceAttributionC7VsFinal639Correct": true,
+    "fullNode856Pass2SkipAndAdapter103OverlapDisclosed": true,
+    "priorPrefixFailAnd21Cases31TurnsNotRunPreserved": true,
+    "S4UnknownProviderBehaviorNotClaimedFixed": true,
+    "syntheticTransportVsModelEvidenceDistinguished": true,
+    "knownCredentialTokenPrivateKeyPatternScanNoHits": true
+  },
+  "unresolvedMaterialFindings": [],
+  "scopeLimits": [
+    "Report/evidence accuracy approval only; no new tests/provider calls were made during thisdeliveryreview.",
+    "Engineeringapproval remains scoped639aff10, not model acceptance, stability, quality or PhaseCGO.",
+    "Sensitive-data check covered retained synthetic logs and knowncredential/token signatures; no claim of universal PII scanning.",
+    "Future report-approval copy may be added as exactsemantic copy and is not self-included in thismanifest."
+  ],
+  "manifest": [
+    {
+      "path": "docs/specs/c3-phase-c-target-composition-continuation-implementation-20261105.md",
+      "sha256": "921c0f3f68f8e31c83a496ff4bf09e3d1587582adbae8abbeb962229940326b5",
+      "stagedBlobSha256": "e3bc0ae0b2a7979eabdc09d658d42fe123f43a1690642a12ec3251322df98c62",
+      "exactByteParity": false,
+      "normalizedParity": true
+    },
+    {
+      "path": "tasks/plan.md",
+      "sha256": "f0b2e8905458ee40b873b6b4b21a7a1386928580de2a09df6d9e58dde83aa992",
+      "stagedBlobSha256": "09627f8b63279b5e000f803aad3aca545dc94f7401865e59240f6a3fc76fce5d",
+      "exactByteParity": false,
+      "normalizedParity": true
+    },
+    {
+      "path": "tasks/todo.md",
+      "sha256": "8dd9a38dd365b391d8d2ee3df8e419f21f930cb177f74f4139b971317f54960f",
+      "stagedBlobSha256": "ed1209ed6e71257869d1d52f9d752d8e9921707ac196045d037112adf76d803e",
+      "exactByteParity": false,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/.gitattributes",
+      "sha256": "042b3740a9448226f6ee5da8dcd0c9299e1de30e5f8f7a36523df5eab4abf559",
+      "stagedBlobSha256": "042b3740a9448226f6ee5da8dcd0c9299e1de30e5f8f7a36523df5eab4abf559",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/bc-replay-summary.json",
+      "sha256": "f13305129afe09d72dc9fd1d9af50fad03102f809d4978d7356ff44dc2d0eec4",
+      "stagedBlobSha256": "f13305129afe09d72dc9fd1d9af50fad03102f809d4978d7356ff44dc2d0eec4",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/composition-replay.json",
+      "sha256": "dfbfacfc48999b195abd52136661b8048b41edfecc42c8d32d0aa82583f6818d",
+      "stagedBlobSha256": "dfbfacfc48999b195abd52136661b8048b41edfecc42c8d32d0aa82583f6818d",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/independent-implementation-review.json",
+      "sha256": "4d0ff8c0badf96f061c415347070bb467bd9b93632c8ed6a5aaff2465d20c76b",
+      "stagedBlobSha256": "4d0ff8c0badf96f061c415347070bb467bd9b93632c8ed6a5aaff2465d20c76b",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/j1-wire-reconstruction.json",
+      "sha256": "c04d85111c3ab2a433d7dbfcaa12ec4a3469c6564348de0cb82dbfc17ef98691",
+      "stagedBlobSha256": "c04d85111c3ab2a433d7dbfcaa12ec4a3469c6564348de0cb82dbfc17ef98691",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-bc-clean-20261105.log",
+      "sha256": "064b2fec3a439d0bd0721beea281397aa6f92ab07d5501114ba706a45ad7dd1b",
+      "stagedBlobSha256": "064b2fec3a439d0bd0721beea281397aa6f92ab07d5501114ba706a45ad7dd1b",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-benchmark-20261105.log",
+      "sha256": "cd0720d3e6ea05e3770bb2c1355ecf6e53912dacbdb087b56e25ea74cf5a1e53",
+      "stagedBlobSha256": "cd0720d3e6ea05e3770bb2c1355ecf6e53912dacbdb087b56e25ea74cf5a1e53",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-bom-container-green-20261105.log",
+      "sha256": "224d7c3515cf567162646fb298d0e8ecf635ef8991a3888a52721f22b549ba57",
+      "stagedBlobSha256": "224d7c3515cf567162646fb298d0e8ecf635ef8991a3888a52721f22b549ba57",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-bom-container-red-20261105.log",
+      "sha256": "0ed5e4d48985f85ed31b3280fbaf1895439270469c4cd7672d171723a2eb3744",
+      "stagedBlobSha256": "0ed5e4d48985f85ed31b3280fbaf1895439270469c4cd7672d171723a2eb3744",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-build-20261105.log",
+      "sha256": "8015c21aa78574db2b9709e77b1a08f5487452d067d8e6967f475c4fad2d851a",
+      "stagedBlobSha256": "8015c21aa78574db2b9709e77b1a08f5487452d067d8e6967f475c4fad2d851a",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-business-focused-20261105.log",
+      "sha256": "6d5ea4701719f45abe739b91f22f17ac7f8aed65eb8104db212087e76bfd8019",
+      "stagedBlobSha256": "6d5ea4701719f45abe739b91f22f17ac7f8aed65eb8104db212087e76bfd8019",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-choice-green-20261105.log",
+      "sha256": "518ffa287fd90e8a8d0ed12c869c9ea08ae8e41d07f1f2c2383088bb2aa99529",
+      "stagedBlobSha256": "518ffa287fd90e8a8d0ed12c869c9ea08ae8e41d07f1f2c2383088bb2aa99529",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-choice-red-20261105.log",
+      "sha256": "16011f3e5a4fc3f9c17a768468d3a4980ddabdbf44da9433364c9df07b25f61e",
+      "stagedBlobSha256": "16011f3e5a4fc3f9c17a768468d3a4980ddabdbf44da9433364c9df07b25f61e",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-composition-replay-20261105.log",
+      "sha256": "99787fecfed18a338fbe278b115d048a374ec236bda8490d2ee7fdc59e772c8a",
+      "stagedBlobSha256": "99787fecfed18a338fbe278b115d048a374ec236bda8490d2ee7fdc59e772c8a",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-dangling-green-20261105-02.log",
+      "sha256": "3eed77b74efea92a5865ebb50c991c27aafda424f44465a5c424636ac1a660ba",
+      "stagedBlobSha256": "3eed77b74efea92a5865ebb50c991c27aafda424f44465a5c424636ac1a660ba",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-dangling-green-20261105.log",
+      "sha256": "be469a2bbb33cbc4d193dedaaf8b38271853760b96aaf4934c885bf2dfa95cb8",
+      "stagedBlobSha256": "be469a2bbb33cbc4d193dedaaf8b38271853760b96aaf4934c885bf2dfa95cb8",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-dangling-red-20261105.log",
+      "sha256": "4795eaf17b700f94266200f543e03f4332745b6bb557ab5e501b9c652bf569bc",
+      "stagedBlobSha256": "4795eaf17b700f94266200f543e03f4332745b6bb557ab5e501b9c652bf569bc",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-database-focused-20261105.log",
+      "sha256": "fa7893a343c94a6a02ebc447840300c37dd9dacfa091c0d80ef9cd89cf34aa71",
+      "stagedBlobSha256": "fa7893a343c94a6a02ebc447840300c37dd9dacfa091c0d80ef9cd89cf34aa71",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-diagnostic-compat-20261105.log",
+      "sha256": "06ea0e1bc9a03f23760d47daff5b2ec1978a7289c4ee151ef30258aa5aa08cd7",
+      "stagedBlobSha256": "06ea0e1bc9a03f23760d47daff5b2ec1978a7289c4ee151ef30258aa5aa08cd7",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-diagnostics-focused-20261105.log",
+      "sha256": "5d069ac055d8f669293ed749b2ea3e3f27398300f17a4eeec519d2a06ec4c1e6",
+      "stagedBlobSha256": "5d069ac055d8f669293ed749b2ea3e3f27398300f17a4eeec519d2a06ec4c1e6",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-dictionary-green-20261105.log",
+      "sha256": "b9647a25e271ae2c8dc8081dff617ba8a878f8acc49684d78e60e8879e0da123",
+      "stagedBlobSha256": "b9647a25e271ae2c8dc8081dff617ba8a878f8acc49684d78e60e8879e0da123",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-dictionary-red-20261105.log",
+      "sha256": "744d95ae4f6b6ccd077173c83c6653618f7347832a25cd846a80d8677acdf37b",
+      "stagedBlobSha256": "744d95ae4f6b6ccd077173c83c6653618f7347832a25cd846a80d8677acdf37b",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-evals-final-20261105.log",
+      "sha256": "af2cfdca2949f417c8138ea3efafe87390250329c60dc848613558edc7719bc3",
+      "stagedBlobSha256": "af2cfdca2949f417c8138ea3efafe87390250329c60dc848613558edc7719bc3",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-evals-full-20261105-02.log",
+      "sha256": "3e54898a0aa43f33f889e99ef0a15ac6b67c31970fb8f4b52b814b9061e2e361",
+      "stagedBlobSha256": "3e54898a0aa43f33f889e99ef0a15ac6b67c31970fb8f4b52b814b9061e2e361",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-evals-full-20261105.log",
+      "sha256": "76fa6a1ae1d0455260d0c02b35437e0dd0f298d8502567aec70d4bfb6c070964",
+      "stagedBlobSha256": "76fa6a1ae1d0455260d0c02b35437e0dd0f298d8502567aec70d4bfb6c070964",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-final-build-20261105.log",
+      "sha256": "2e2a7477d537b26a68ab3128a8c2a948c8fcc9c1201ee5f47cd9f59183f458a7",
+      "stagedBlobSha256": "2e2a7477d537b26a68ab3128a8c2a948c8fcc9c1201ee5f47cd9f59183f458a7",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-final-business-20261105.log",
+      "sha256": "3333868def9afe9b4c5ecc6803cd7da86599de45e5774ed721cb470e8e77ad5d",
+      "stagedBlobSha256": "3333868def9afe9b4c5ecc6803cd7da86599de45e5774ed721cb470e8e77ad5d",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-final-contracts-20261105.log",
+      "sha256": "1b7113c9a1e3ca485b1878418e0237fc26beddeea42b4f5d0205fe6510e7d7e8",
+      "stagedBlobSha256": "1b7113c9a1e3ca485b1878418e0237fc26beddeea42b4f5d0205fe6510e7d7e8",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-final-database-20261105.log",
+      "sha256": "fb22438eff46a7796dc43c7bb69c6b11a0bae5be99ce4c1ab983f268a38e560d",
+      "stagedBlobSha256": "fb22438eff46a7796dc43c7bb69c6b11a0bae5be99ce4c1ab983f268a38e560d",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-final-lint-20261105.log",
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "stagedBlobSha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-final-typecheck-20261105.log",
+      "sha256": "660b288930cd706bd031439efe7920e08301cf041e8dd18afcaba58c083306b5",
+      "stagedBlobSha256": "660b288930cd706bd031439efe7920e08301cf041e8dd18afcaba58c083306b5",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-j1-replay-20261105-final.log",
+      "sha256": "2118df0a8ea9b04155df29fb36cb0bda21b453b0c7330543909497c12683f445",
+      "stagedBlobSha256": "2118df0a8ea9b04155df29fb36cb0bda21b453b0c7330543909497c12683f445",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-j1-replay-20261105.log",
+      "sha256": "2118df0a8ea9b04155df29fb36cb0bda21b453b0c7330543909497c12683f445",
+      "stagedBlobSha256": "2118df0a8ea9b04155df29fb36cb0bda21b453b0c7330543909497c12683f445",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-node-focused-20261105.log",
+      "sha256": "4e12641c270de4a8af21ce7093959683b7e091cf99ec96c3fdffdf08c255a347",
+      "stagedBlobSha256": "4e12641c270de4a8af21ce7093959683b7e091cf99ec96c3fdffdf08c255a347",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-pg-20261105-01.log",
+      "sha256": "2a65a9c8da3958d588466c84c3d9cc18e8e712ac3265932e048c1a826d175f6b",
+      "stagedBlobSha256": "2a65a9c8da3958d588466c84c3d9cc18e8e712ac3265932e048c1a826d175f6b",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-pg-20261105-02.log",
+      "sha256": "480f80c442adcb5df764f81034a042be8d96a554730c676a22e5afebf8574982",
+      "stagedBlobSha256": "480f80c442adcb5df764f81034a042be8d96a554730c676a22e5afebf8574982",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-pg-20261105-03.log",
+      "sha256": "198f3735285c779747bd96773a123887e98ea669ea29ecfed1778d6de515229b",
+      "stagedBlobSha256": "198f3735285c779747bd96773a123887e98ea669ea29ecfed1778d6de515229b",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-pg-b-preserving-20261105-01.log",
+      "sha256": "42633d203fa2b1589468696bfb85d9b8daa56fb1016d0179e68a30409e7954fe",
+      "stagedBlobSha256": "42633d203fa2b1589468696bfb85d9b8daa56fb1016d0179e68a30409e7954fe",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-pg-clean-20261105-01.log",
+      "sha256": "4b58531fc1deda42ac9669249c7cbb0e9125380e00693d17ef523464291adb83",
+      "stagedBlobSha256": "4b58531fc1deda42ac9669249c7cbb0e9125380e00693d17ef523464291adb83",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-pg-final-20261105-01.log",
+      "sha256": "4b58531fc1deda42ac9669249c7cbb0e9125380e00693d17ef523464291adb83",
+      "stagedBlobSha256": "4b58531fc1deda42ac9669249c7cbb0e9125380e00693d17ef523464291adb83",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-photo-focused-20261105.log",
+      "sha256": "3fdc989504a98aaf6c0a12ce363334825927a637a97593db356276fb2295b8e1",
+      "stagedBlobSha256": "3fdc989504a98aaf6c0a12ce363334825927a637a97593db356276fb2295b8e1",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-plan-node-final-20261105.log",
+      "sha256": "4d61aae1ae97d5b4f9b538f5b687e96caea0ffc822df1e532f5adcc69bdf16ba",
+      "stagedBlobSha256": "4d61aae1ae97d5b4f9b538f5b687e96caea0ffc822df1e532f5adcc69bdf16ba",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-s1-green-20261105.log",
+      "sha256": "a06b4f88c6d8c611f75b5652fd4cb10fb006e175574efd01bd03b62912ce552b",
+      "stagedBlobSha256": "a06b4f88c6d8c611f75b5652fd4cb10fb006e175574efd01bd03b62912ce552b",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-s1-red-20261105.log",
+      "sha256": "176e57e348b23178d3129457d55d3b085babacceb23a0d839118edd9eca3aab1",
+      "stagedBlobSha256": "176e57e348b23178d3129457d55d3b085babacceb23a0d839118edd9eca3aab1",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-s2-green-20261105.log",
+      "sha256": "63b9c4e1f4caf39c08b57dfd53ee38d97ca8e8929e6e353177a3a1d87dce2a90",
+      "stagedBlobSha256": "63b9c4e1f4caf39c08b57dfd53ee38d97ca8e8929e6e353177a3a1d87dce2a90",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-s2-red-20261105.log",
+      "sha256": "b8a8294d87d8192d0d53b5352f96e20a158ac0f9c94adcf01c9b85ce38a84d82",
+      "stagedBlobSha256": "b8a8294d87d8192d0d53b5352f96e20a158ac0f9c94adcf01c9b85ce38a84d82",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-s3-green-20261105.log",
+      "sha256": "2d0681a4db1fc537f36fcec432292605bdf6aa49fa96f1abf05e1b5e30f91072",
+      "stagedBlobSha256": "2d0681a4db1fc537f36fcec432292605bdf6aa49fa96f1abf05e1b5e30f91072",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-s3-red-20261105.log",
+      "sha256": "2fffd5fc1cd1df3c85ec0bf69270bc713b29b77cf041a3417b2c5d9990a55618",
+      "stagedBlobSha256": "2fffd5fc1cd1df3c85ec0bf69270bc713b29b77cf041a3417b2c5d9990a55618",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-tsc-20261105-02.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stagedBlobSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-tsc-20261105.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stagedBlobSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-worker-focused-20261105.log",
+      "sha256": "472fe6a15b822268b7485edb8c01fad1a6985487433a0ed467c3df8fa89ab302",
+      "stagedBlobSha256": "472fe6a15b822268b7485edb8c01fad1a6985487433a0ed467c3df8fa89ab302",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-worker-full-20261105-02.log",
+      "sha256": "51019cd9c0045eacaa473ce0cb6b2cf9db91d778ef95e53cb2a689ac2545317d",
+      "stagedBlobSha256": "51019cd9c0045eacaa473ce0cb6b2cf9db91d778ef95e53cb2a689ac2545317d",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/logs/c3-target-repair-worker-full-20261105.log",
+      "sha256": "1b37817376a3469e4f018d097e2166ece0e0cb37f6e1d36fb7224f8afad1af48",
+      "stagedBlobSha256": "1b37817376a3469e4f018d097e2166ece0e0cb37f6e1d36fb7224f8afad1af48",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/pg-attempt-01.json",
+      "sha256": "f62d7d18cacb025d2617b68285149b941f0b373cd1f5af9b1b5ea9eaba9d2a90",
+      "stagedBlobSha256": "f62d7d18cacb025d2617b68285149b941f0b373cd1f5af9b1b5ea9eaba9d2a90",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/pg-attempt-02.json",
+      "sha256": "d71837eaa5acfa58655bd75d30550a3130d7f957cee79356106272b428554a44",
+      "stagedBlobSha256": "d71837eaa5acfa58655bd75d30550a3130d7f957cee79356106272b428554a44",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/pg-attempt-03.json",
+      "sha256": "20740604d10bcd74b739c6fbc4055f08502946655288d91d4e146ecc52ec4b6c",
+      "stagedBlobSha256": "20740604d10bcd74b739c6fbc4055f08502946655288d91d4e146ecc52ec4b6c",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/pg-b-preserving.json",
+      "sha256": "1db6775cc19343fa55970dcdb403991ef05ff1cd12d20853dbea2cf01ea9123f",
+      "stagedBlobSha256": "1db6775cc19343fa55970dcdb403991ef05ff1cd12d20853dbea2cf01ea9123f",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/pg-clean-intermediate.json",
+      "sha256": "0ce2be0a263434aab3b8f200cb1dee95f531f0dfcb9b54b146d1fe76f56d3850",
+      "stagedBlobSha256": "0ce2be0a263434aab3b8f200cb1dee95f531f0dfcb9b54b146d1fe76f56d3850",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/pg-final.json",
+      "sha256": "898cad6f1bddfae07fcc4a66669cb3954808a23326faeee6071875196f8bab6c",
+      "stagedBlobSha256": "898cad6f1bddfae07fcc4a66669cb3954808a23326faeee6071875196f8bab6c",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/source-manifest.json",
+      "sha256": "4d56b178701ac1b1597441908392644f5f36ebb0ff8f9bc7ba3402bbd1e28623",
+      "stagedBlobSha256": "4d56b178701ac1b1597441908392644f5f36ebb0ff8f9bc7ba3402bbd1e28623",
+      "exactByteParity": true,
+      "normalizedParity": true
+    },
+    {
+      "path": "docs/specs/evidence/c3-target-repair-implementation-20261105/verification.json",
+      "sha256": "08d55a43447120f24a68c0857915a8fe37976d2efe660b47e76a3a2454a1f332",
+      "stagedBlobSha256": "08d55a43447120f24a68c0857915a8fe37976d2efe660b47e76a3a2454a1f332",
+      "exactByteParity": true,
+      "normalizedParity": true
+    }
+  ]
+}

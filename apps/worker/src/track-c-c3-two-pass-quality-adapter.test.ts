@@ -15,7 +15,7 @@ import { runTrackCV5TwoPassBenchmarkCase } from "./track-c-c3-v5-benchmark-runne
 
 const MODEL_RESOURCE =
   "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite";
-const EVAL_ROOT = new URL("../evals/track-c-c3-v5/v4/", import.meta.url);
+const EVAL_ROOT = new URL("../evals/track-c-c2/v2/", import.meta.url);
 
 function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(new URL(name, EVAL_ROOT), "utf8")) as T;

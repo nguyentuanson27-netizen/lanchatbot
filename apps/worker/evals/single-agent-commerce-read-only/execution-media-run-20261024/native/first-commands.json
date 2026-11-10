@@ -1,0 +1,444 @@
+[
+  {
+    "job": "preflight-b1-3-3",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "3:3",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\preflight-b1-3-3",
+      "--preflight"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "b1-3-3",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "3:3",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\b1-3-3",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "preflight-b1-4-4",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "4:4",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\preflight-b1-4-4",
+      "--preflight"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "b1-4-4",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "4:4",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\b1-4-4",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "preflight-b1-5-5",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "5:5",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\preflight-b1-5-5",
+      "--preflight"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "b1-5-5",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "5:5",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\b1-5-5",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "preflight-b1-7-7",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "7:7",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\preflight-b1-7-7",
+      "--preflight"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "b1-7-7",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "7:7",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\b1-7-7",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "preflight-b1-8-8",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "8:8",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\preflight-b1-8-8",
+      "--preflight"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "b1-8-8",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "8:8",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\b1-8-8",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "preflight-b1-9-9",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "9:9",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\preflight-b1-9-9",
+      "--preflight"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "b1-9-9",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "9:9",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\b1-9-9",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "preflight-b1-11-11",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "11:11",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\preflight-b1-11-11",
+      "--preflight"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "b1-11-11",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "11:11",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\b1-11-11",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "preflight-b1-15-15",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "15:15",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\preflight-b1-15-15",
+      "--preflight"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "b1-15-15",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "15:15",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\b1-15-15",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "preflight-b1-17-17",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "17:17",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\preflight-b1-17-17",
+      "--preflight"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "b1-17-17",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "17:17",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\b1-17-17",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "preflight-b1-23-23",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "23:23",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\preflight-b1-23-23",
+      "--preflight"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "b1-23-23",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "23:23",
+      "--out",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\b1-23-23",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "preflight-openings",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\preflight-openings",
+      "COD",
+      "--provider-run",
+      "--candidate-handoff",
+      "--journey-openings",
+      "--provider-preflight"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "openings",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\openings",
+      "COD",
+      "--provider-run",
+      "--candidate-handoff",
+      "--journey-openings"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "preflight-media",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\preflight-media",
+      "COD",
+      "--provider-run",
+      "--candidate-handoff",
+      "--media-followup",
+      "--provider-preflight"
+    ],
+    "exitCode": 0
+  },
+  {
+    "job": "media",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-execution-media-run-20261024\\native\\media",
+      "COD",
+      "--provider-run",
+      "--candidate-handoff",
+      "--media-followup"
+    ],
+    "exitCode": 0
+  }
+]

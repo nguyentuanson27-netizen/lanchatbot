@@ -1,0 +1,18 @@
+{
+  "command": [
+    "cmd",
+    "/d",
+    "/c",
+    "pnpm",
+    "--filter",
+    "@lana/worker",
+    "exec",
+    "vitest",
+    "run",
+    "src/single-agent-commerce-ingress.test.ts",
+    "-t",
+    "unavailable delivery history"
+  ],
+  "exitCode": 1,
+  "elapsedSeconds": 5.531030654907227
+}

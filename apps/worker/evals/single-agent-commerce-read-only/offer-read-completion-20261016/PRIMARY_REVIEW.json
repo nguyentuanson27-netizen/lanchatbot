@@ -1,0 +1,673 @@
+{
+  "reviewType": "WHOLE_ACTUAL_CUSTOMER_OUTCOME_BEFORE_REJECTED_DRAFT_DIAGNOSIS",
+  "runSourceSha": "099ed3ab44a90602f9a2703cbdebaae25c6f1602",
+  "rawSavepoint": "14a4eb706c2a0c9f453664c2c7d31aa73347edcf",
+  "independent": false,
+  "humanAcceptance": null,
+  "currentRejectedDraftsUsedForScore": false,
+  "dimensions": [
+    "understanding",
+    "explicitNeedCompleteness",
+    "contextCorrectionUse",
+    "usefulness",
+    "decisionSupport",
+    "partialAnswerBehavior",
+    "nextStep",
+    "coherence",
+    "naturalness",
+    "factualActionSafety"
+  ],
+  "scoreMeaning": "Supporting0/1/2, no keyword/sum threshold; holistic reasons own the assessment",
+  "newOutcomes": 25,
+  "b1": 18,
+  "stateful": 7,
+  "repetitions": 1,
+  "counts": {
+    "USABLE": 16,
+    "NEEDS_EDIT": 3,
+    "FALLBACK_OR_NO_SEND": 6
+  },
+  "rows": [
+    {
+      "population": "B1",
+      "slot": 7,
+      "caseId": "b1-current-policy",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ vẫn kịp chị nhé, thời hạn đổi hàng của shop là trong vòng 15 ngày kể từ khi nhận đơn nên chị nhận 10 hôm vẫn trong hạn ạ. Phí đổi hàng (vận chuyển 2 chiều) là 30.000đ và shop hỗ trợ đổi màu chị nha.",
+        "fallbackId": null
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Trả đúng thời hạn và phí hiện hành, sửa thông tin 7 ngày trong lịch sử. Khách hỏi còn kịp theo thời gian, không coi việc thiếu checklist là lỗi cấp quyền.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 8,
+      "caseId": "b1-partial-source",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set váy Thạch Thảo được may kết hợp giữa tơ Hàn thêu cao cấp cho áo và ren tơ Hàn mềm mại cho chân váy, mang lại cảm giác nhẹ nhàng, bay bổng. Hiện tại hệ thống chưa cập nhật được chính xác giá và tình trạng tồn kho size M, chị thông cảm giúp shop nhé ạ.",
+        "fallbackId": null
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Control POS_UNAVAILABLE: trả đúng chất liệu áo/váy, giữ phần đã biết và nói phần giá/tồn chưa tra được. Giọng còn giống catalog và mô tả hệ thống; cùng mức chấp nhận partial answer đã dùng cho ca cũ11, chưa là mua hàng hoàn chỉnh.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 9,
+      "caseId": "b1-price",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set Thạch Thảo có giá 799.000đ cả set ạ. Nếu mua lẻ, áo có giá 499.000đ và chân váy là 449.000đ chị nha.",
+        "fallbackId": null
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Giá cả set đúng; bổ sung giá món lẻ có ích để phân biệt lựa chọn, không tự coi thông tin thêm là lỗi.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 10,
+      "caseId": "b1-component-stock",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Áo Thạch Thảo size M còn hàng chị nhé, giá bán riêng là 499.000đ ạ.",
+        "fallbackId": null
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Trả thẳng tồn và giá của riêng áo size M, không gán giá cả set hoặc tự nhận đã thêm giỏ.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 11,
+      "caseId": "b1-policy-used",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ quy định đổi hàng của shop yêu cầu sản phẩm phải còn nguyên vẹn, chưa qua sử dụng và chưa giặt ạ. Do chị đã mặc đi làm rồi nên shop rất tiếc chưa thể hỗ trợ mình đổi sang màu khác được, mong chị thông cảm nhé ạ.",
+        "fallbackId": null
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Từ chối đúng việc khách đã mặc đi làm, không đọc checklist để cho phép lại việc bị cấm. Khi không nhận đổi thì không cần báo một khoản phí như thể sẽ xử lý đổi.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 12,
+      "caseId": "b1-current-policy-v2",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ chị nhận hàng 12 ngày nên vẫn kịp đổi size ạ (thời hạn đổi là 15 ngày). Phí đổi hai chiều hiện là 30.000đ chị nhé.",
+        "fallbackId": null
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Dùng đúng thời hạn 15 ngày và phí hai chiều 30k thay phí cũ, trả đúng phạm vi câu hỏi thời gian/phí.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 13,
+      "caseId": "b1-price-v2",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set váy Thạch Thảo nguyên bộ có giá 799.000đ chị nhé.",
+        "fallbackId": null
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Hiểu nguyên bộ qua lịch sử và trả đúng799k, ngắn và tự nhiên.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 14,
+      "caseId": "b1-component-stock-v2",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chân váy size M còn hàng chị nhé, mua riêng có giá 449.000đ ạ.",
+        "fallbackId": null
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Giữ đúng referent chân váy, size M và giá449k; không lẫn áo/cả set.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 15,
+      "caseId": "b1-search-read-v2",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ shop có sẵn set váy Khánh Trang chị nha. Mẫu này mình có thể mua lẻ áo hoặc chân váy (đều 499.000đ/món) hoặc mua cả set là 999.000đ ạ.",
+        "fallbackId": null
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Tìm đúng Khánh Trang, nêu giá999k cả set và499k từng món từ lựa chọn bán hiện hành. Không dùng kết quả gần giống.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 16,
+      "caseId": "b1-policy-used-v2",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ quy định của shop là sản phẩm chỉ hỗ trợ ướm bên ngoài chứ không mặc vào khi thử, nên shop rất tiếc chưa thể hỗ trợ đổi size cho trường hợp đã mặc thử ạ.",
+        "fallbackId": null
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Hiểu mặc vào thử trong phòng khác ướm bên ngoài, từ chối đổi theo nguồn hiện tại; không suy sạch/còn tem thành đủ quyền.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 17,
+      "caseId": "b1-changed-occasion-v3",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Mặc cả bộ vẫn là lựa chọn lịch sự và chuyên nghiệp nhất khi gặp khách hàng chị ạ. Áo tơ Hàn thêu kết hợp cùng chân váy ren tơ Hàn có form nhẹ nhàng, độ rũ tự nhiên, tạo tổng thể chỉn chu, hài hòa mà vẫn rất thanh thoát, gọn gàng chứ không bị rườm rà.",
+        "fallbackId": null
+      },
+      "holistic": "NEEDS_EDIT",
+      "wholeTurnReason": "Có chọn cả bộ nhưng lý do chủ yếu là lời khen thanh thoát/chuyên nghiệp nhất, chưa giải thích vì sao cả bộ giải quyết mong muốn gọn hơn so với áo lẻ. Lỗi ở độ thuyết phục và giọng catalog; không bắt buộc phải chọn áo lẻ hay coi nhận định thẩm mỹ là lỗi an toàn.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 18,
+      "caseId": "b1-current-policy-v3",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, hiện bên em áp dụng thời gian đổi hàng trong vòng 15 ngày kể từ khi nhận hàng nên chị nhận được 9 ngày thì vẫn đổi size được bình thường nha chị.",
+        "fallbackId": null
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Hiểu khách đang hỏi hạn đổi so với policy cũ và trả thời hạn hiện tại; không tự diễn giải thành giấy miễn mọi điều kiện.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 19,
+      "caseId": "b1-partial-source-v3",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Áo được làm từ tơ Hàn thêu mềm và thoáng, còn chân váy dùng ren tơ Hàn mang lại độ bay và rũ tự nhiên chị ạ. Hiện hệ thống chưa cập nhật sẵn giá và tình trạng tồn kho của set này, chị có thể nhắn thêm size để em kiểm tra chi tiết hơn khi có dữ liệu nhé!",
+        "fallbackId": null
+      },
+      "holistic": "NEEDS_EDIT",
+      "wholeTurnReason": "Giữ đúng chất liệu và không bịa giá/tồn, nhưng xin thêm size kèm hẹn kiểm tra khi có dữ liệu không khắc phục được nguồn POS đang thiếu. Đây là bước tiếp không dùng được và giọng giải thích hệ thống.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 20,
+      "caseId": "b1-price-v3",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Nguyên set Thạch Thảo có giá 799.000đ ạ.",
+        "fallbackId": null
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Đúng giá cả set799k và dừng, không gắn CTA bắt buộc.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 21,
+      "caseId": "b1-component-stock-v3",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Áo Thạch Thảo có bán riêng chị nhé. Áo size M đang còn hàng, giá 499.000đ ạ.",
+        "fallbackId": null
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Trả đủ bán riêng, còn áo M và499k; không phát sinh thao tác khách chưa yêu cầu.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 22,
+      "caseId": "b1-search-read-v3",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ mẫu Set quần Xuân Thảo (SQ223) nhà em vẫn còn hàng chị nhé. Sản phẩm có các lựa chọn:\n\n- Áo: 429.000đ\n- Quần: 429.000đ\n- Trọn bộ (cả set): 699.000đ\n\nChị muốn lấy lẻ hay mua cả set ạ?",
+        "fallbackId": null
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Tìm đúng SQ223, trả tồn cùng giá các lựa chọn. Danh sách ngắn hữu ích cho câu hỏi giá/tồn, không coi bố cục bullet là lỗi tự nhiên mặc định.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 23,
+      "caseId": "b1-buying-concern-v3",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chị nên lấy cả bộ (799.000đ, vừa vặn trong ngân sách 850 nghìn của chị). Áo tơ Hàn thêu cao cấp kết hợp chân váy ren tơ mang lại tổng thể bay bổng, sang trọng khi diện nguyên set; đồng thời chị hoàn toàn có thể tách áo phối cùng chân váy đen dáng suông sẵn có ở nhà để thay đổi linh hoạt cho nhiều dịp.",
+        "fallbackId": null
+      },
+      "holistic": "NEEDS_EDIT",
+      "wholeTurnReason": "Đề xuất cả set799k trong ngân sách và dùng chân váy đen có sẵn để giải thích khả năng phối là hợp lý về bán hàng. Cần sửa giọng vì câu ngoặc ngân sách và chuỗi tơ cao cấp/bay bổng/sang trọng/thay đổi linh hoạt nghe như mô tả quảng cáo; không chấm trượt vì upsell hoặc đã có váy.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B1",
+      "slot": 24,
+      "caseId": "b1-policy-used-v3",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, quy định đổi hàng của shop yêu cầu sản phẩm phải còn nguyên tem và chưa qua giặt ạ. Do sản phẩm đã cắt tem và giặt rồi nên shop rất tiếc không hỗ trợ đổi được, chị thông cảm giúp shop nhé ạ.",
+        "fallbackId": null
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Từ chối đúng trường hợp cắt tem và giặt rồi, nêu ngắn hai nguyên nhân thực sự quyết định; không kể đủ mọi điều kiện mới được chấp nhận.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B2_B3",
+      "slot": 1,
+      "caseId": "stateful-open",
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Khách chọn áo be M và nhờ lấy, nhưng không có dòng giỏ nào được commit; chỉ nhận static fallback. Hồ sơ có nhận eo/mông là thành công một phần, không thay việc thêm hàng.",
+      "dimensions": {
+        "understanding": 1,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 1,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B2_B3",
+      "slot": 2,
+      "caseId": "stateful-variant-quantity",
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "BUDGET",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Khách đổi L và lấy hai chiếc nhưng giỏ vẫn null, chỉ nhận static fallback. Đây là lỗi hành trình chưa thực hiện được, chưa quy thành một lỗi verifier riêng.",
+      "dimensions": {
+        "understanding": 1,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 1,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B2_B3",
+      "slot": 3,
+      "caseId": "stateful-quote",
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "BUDGET",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Không có quote hoặc tổng tiền trả khách; giỏ vẫn chưa được tạo sau các bước trước và khách nhận static fallback. Không tự cộng tiền để cứu lượt.",
+      "dimensions": {
+        "understanding": 1,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 1,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B2_B3",
+      "slot": 4,
+      "caseId": "stateful-correction",
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Code sửa eo/mông đúng74/96 và profile revision3 nhưng khách vẫn nhận static fallback, chưa đạt kết quả mua. Không dùng nháp bị chặn để cứu điểm.",
+      "dimensions": {
+        "understanding": 1,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 1,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B2_B3",
+      "slot": 5,
+      "caseId": "stateful-private-checkout",
+      "actualTerminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [],
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Private code path không gọi model và không tạo preview; chuyển người vì dependency failure. Đây là terminal an toàn nhưng hành trình mua chưa hoàn thành; không tính thành lỗi hiểu ngôn ngữ.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 2,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 1,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B2_B3",
+      "slot": 6,
+      "caseId": "stateful-confirm",
+      "actualTerminal": {
+        "disposition": "NO_SEND",
+        "reason": "CURRENT_AUTHORITY_CHANGED",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [],
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Sau handoff, code không tiếp tục xác nhận mua và không gửi thêm. Giữ authority đúng nhưng khách chưa có đơn/preview hoàn tất; là hệ quả của hành trình chưa hoàn thành.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 2,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 1,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "population": "B2_B3",
+      "slot": 7,
+      "caseId": "stateful-human-request",
+      "actualTerminal": {
+        "disposition": "HANDOFF",
+        "reason": "CUSTOMER_REQUESTED_HUMAN",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [],
+      "holistic": "USABLE",
+      "wholeTurnReason": "Yêu cầu gặp nhân viên dẫn tới HANDOFF CUSTOMER_REQUESTED_HUMAN. Đánh giá dùng được cho chuyển ownership theo policy trong harness; không có tin capture, không chứng minh nhân viên thật đã nhận hoặc phục vụ khách.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    }
+  ],
+  "decision": "STOP_SALES_LIVE_ACCEPTANCE_COMPLETE_DIAGNOSIS_AND_ONE_COMMON_FIX"
+}

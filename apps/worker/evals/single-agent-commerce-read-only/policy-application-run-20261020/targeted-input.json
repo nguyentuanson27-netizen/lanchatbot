@@ -1,0 +1,362 @@
+[
+  {
+    "caseId": "policy-slot-1",
+    "evaluator": {
+      "purpose": "worn-original",
+      "sourceMode": "LIVE_POLICY_CAPTURE"
+    },
+    "runtime": {
+      "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+      "history": [],
+      "initialProductCodes": []
+    },
+    "requests": [
+      {
+        "generationId": "frozen-public-world",
+        "providerRequests": 1,
+        "toolsAllowed": false,
+        "capturedAt": "2026-10-20T05:14:34.738Z",
+        "context": {
+          "boundSubjects": [],
+          "effectReceipts": [],
+          "policyLiterals": [
+            {
+              "expiresAt": null,
+              "observedAt": "2026-07-23T07:42:07.382Z",
+              "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+              "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+              "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\",\"tryOnModeDescription\":\"Chỉ ướm bên ngoài, không mặc vào người.\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"payment\":{\"allowedMethods\":[\"COD\",\"BANK_TRANSFER\"]},\"shipping\":{\"defaultFeeVnd\":30000}}"
+            }
+          ],
+          "protectedClaims": [],
+          "runtimeProducts": [],
+          "state": {
+            "bindingVersion": "c3-b1-source-v1",
+            "conversationOwner": "BOT",
+            "currentProductId": null,
+            "factSnapshotVersion": "1840236538a291f8b4edec64ee534dab4c1712fdda820d49517c80a8291a7cd1",
+            "permission": true,
+            "privacyAllowed": true,
+            "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+            "revision": 1
+          }
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "policy-slot-2",
+    "evaluator": {
+      "purpose": "worn-original",
+      "sourceMode": "LIVE_POLICY_CAPTURE"
+    },
+    "runtime": {
+      "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+      "history": [],
+      "initialProductCodes": []
+    },
+    "requests": [
+      {
+        "generationId": "frozen-public-world",
+        "providerRequests": 1,
+        "toolsAllowed": false,
+        "capturedAt": "2026-10-20T05:14:34.738Z",
+        "context": {
+          "boundSubjects": [],
+          "effectReceipts": [],
+          "policyLiterals": [
+            {
+              "expiresAt": null,
+              "observedAt": "2026-07-23T07:42:07.382Z",
+              "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+              "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+              "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\",\"tryOnModeDescription\":\"Chỉ ướm bên ngoài, không mặc vào người.\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"payment\":{\"allowedMethods\":[\"COD\",\"BANK_TRANSFER\"]},\"shipping\":{\"defaultFeeVnd\":30000}}"
+            }
+          ],
+          "protectedClaims": [],
+          "runtimeProducts": [],
+          "state": {
+            "bindingVersion": "c3-b1-source-v1",
+            "conversationOwner": "BOT",
+            "currentProductId": null,
+            "factSnapshotVersion": "1840236538a291f8b4edec64ee534dab4c1712fdda820d49517c80a8291a7cd1",
+            "permission": true,
+            "privacyAllowed": true,
+            "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+            "revision": 1
+          }
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "policy-slot-3",
+    "evaluator": {
+      "purpose": "worn-original",
+      "sourceMode": "LIVE_POLICY_CAPTURE"
+    },
+    "runtime": {
+      "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+      "history": [],
+      "initialProductCodes": []
+    },
+    "requests": [
+      {
+        "generationId": "frozen-public-world",
+        "providerRequests": 1,
+        "toolsAllowed": false,
+        "capturedAt": "2026-10-20T05:14:34.738Z",
+        "context": {
+          "boundSubjects": [],
+          "effectReceipts": [],
+          "policyLiterals": [
+            {
+              "expiresAt": null,
+              "observedAt": "2026-07-23T07:42:07.382Z",
+              "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+              "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+              "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\",\"tryOnModeDescription\":\"Chỉ ướm bên ngoài, không mặc vào người.\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"payment\":{\"allowedMethods\":[\"COD\",\"BANK_TRANSFER\"]},\"shipping\":{\"defaultFeeVnd\":30000}}"
+            }
+          ],
+          "protectedClaims": [],
+          "runtimeProducts": [],
+          "state": {
+            "bindingVersion": "c3-b1-source-v1",
+            "conversationOwner": "BOT",
+            "currentProductId": null,
+            "factSnapshotVersion": "1840236538a291f8b4edec64ee534dab4c1712fdda820d49517c80a8291a7cd1",
+            "permission": true,
+            "privacyAllowed": true,
+            "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+            "revision": 1
+          }
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "policy-slot-4",
+    "evaluator": {
+      "purpose": "held-up-only",
+      "sourceMode": "LIVE_POLICY_CAPTURE"
+    },
+    "runtime": {
+      "latest": "Chị mới ướm bộ này bên ngoài thôi, chưa mặc vào. Muốn đổi sang size L thì được không em?",
+      "history": [],
+      "initialProductCodes": []
+    },
+    "requests": [
+      {
+        "generationId": "frozen-public-world",
+        "providerRequests": 1,
+        "toolsAllowed": false,
+        "capturedAt": "2026-10-20T05:14:34.738Z",
+        "context": {
+          "boundSubjects": [],
+          "effectReceipts": [],
+          "policyLiterals": [
+            {
+              "expiresAt": null,
+              "observedAt": "2026-07-23T07:42:07.382Z",
+              "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+              "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+              "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\",\"tryOnModeDescription\":\"Chỉ ướm bên ngoài, không mặc vào người.\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"payment\":{\"allowedMethods\":[\"COD\",\"BANK_TRANSFER\"]},\"shipping\":{\"defaultFeeVnd\":30000}}"
+            }
+          ],
+          "protectedClaims": [],
+          "runtimeProducts": [],
+          "state": {
+            "bindingVersion": "c3-b1-source-v1",
+            "conversationOwner": "BOT",
+            "currentProductId": null,
+            "factSnapshotVersion": "1840236538a291f8b4edec64ee534dab4c1712fdda820d49517c80a8291a7cd1",
+            "permission": true,
+            "privacyAllowed": true,
+            "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+            "revision": 1
+          }
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "policy-slot-5",
+    "evaluator": {
+      "purpose": "ambiguous-try",
+      "sourceMode": "LIVE_POLICY_CAPTURE"
+    },
+    "runtime": {
+      "latest": "Chị thử bộ này rồi, giờ muốn đổi size thì được không?",
+      "history": [],
+      "initialProductCodes": []
+    },
+    "requests": [
+      {
+        "generationId": "frozen-public-world",
+        "providerRequests": 1,
+        "toolsAllowed": false,
+        "capturedAt": "2026-10-20T05:14:34.738Z",
+        "context": {
+          "boundSubjects": [],
+          "effectReceipts": [],
+          "policyLiterals": [
+            {
+              "expiresAt": null,
+              "observedAt": "2026-07-23T07:42:07.382Z",
+              "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+              "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+              "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\",\"tryOnModeDescription\":\"Chỉ ướm bên ngoài, không mặc vào người.\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"payment\":{\"allowedMethods\":[\"COD\",\"BANK_TRANSFER\"]},\"shipping\":{\"defaultFeeVnd\":30000}}"
+            }
+          ],
+          "protectedClaims": [],
+          "runtimeProducts": [],
+          "state": {
+            "bindingVersion": "c3-b1-source-v1",
+            "conversationOwner": "BOT",
+            "currentProductId": null,
+            "factSnapshotVersion": "1840236538a291f8b4edec64ee534dab4c1712fdda820d49517c80a8291a7cd1",
+            "permission": true,
+            "privacyAllowed": true,
+            "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+            "revision": 1
+          }
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "policy-slot-6",
+    "evaluator": {
+      "purpose": "window-fee",
+      "sourceMode": "LIVE_POLICY_CAPTURE"
+    },
+    "runtime": {
+      "latest": "Shop cho đổi size trong mấy ngày, phí đổi bao nhiêu em?",
+      "history": [],
+      "initialProductCodes": []
+    },
+    "requests": [
+      {
+        "generationId": "frozen-public-world",
+        "providerRequests": 1,
+        "toolsAllowed": false,
+        "capturedAt": "2026-10-20T05:14:34.738Z",
+        "context": {
+          "boundSubjects": [],
+          "effectReceipts": [],
+          "policyLiterals": [
+            {
+              "expiresAt": null,
+              "observedAt": "2026-07-23T07:42:07.382Z",
+              "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+              "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+              "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\",\"tryOnModeDescription\":\"Chỉ ướm bên ngoài, không mặc vào người.\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"payment\":{\"allowedMethods\":[\"COD\",\"BANK_TRANSFER\"]},\"shipping\":{\"defaultFeeVnd\":30000}}"
+            }
+          ],
+          "protectedClaims": [],
+          "runtimeProducts": [],
+          "state": {
+            "bindingVersion": "c3-b1-source-v1",
+            "conversationOwner": "BOT",
+            "currentProductId": null,
+            "factSnapshotVersion": "1840236538a291f8b4edec64ee534dab4c1712fdda820d49517c80a8291a7cd1",
+            "permission": true,
+            "privacyAllowed": true,
+            "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+            "revision": 1
+          }
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "policy-slot-7",
+    "evaluator": {
+      "purpose": "manufacturing-defect",
+      "sourceMode": "LIVE_POLICY_CAPTURE"
+    },
+    "runtime": {
+      "latest": "Đường may ở nách áo bị lỗi, chị mặc vào mới thấy. Chị nhận hôm qua, giờ shop xử lý sao em?",
+      "history": [],
+      "initialProductCodes": []
+    },
+    "requests": [
+      {
+        "generationId": "frozen-public-world",
+        "providerRequests": 1,
+        "toolsAllowed": false,
+        "capturedAt": "2026-10-20T05:14:34.738Z",
+        "context": {
+          "boundSubjects": [],
+          "effectReceipts": [],
+          "policyLiterals": [
+            {
+              "expiresAt": null,
+              "observedAt": "2026-07-23T07:42:07.382Z",
+              "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+              "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+              "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\",\"tryOnModeDescription\":\"Chỉ ướm bên ngoài, không mặc vào người.\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"payment\":{\"allowedMethods\":[\"COD\",\"BANK_TRANSFER\"]},\"shipping\":{\"defaultFeeVnd\":30000}}"
+            }
+          ],
+          "protectedClaims": [],
+          "runtimeProducts": [],
+          "state": {
+            "bindingVersion": "c3-b1-source-v1",
+            "conversationOwner": "BOT",
+            "currentProductId": null,
+            "factSnapshotVersion": "1840236538a291f8b4edec64ee534dab4c1712fdda820d49517c80a8291a7cd1",
+            "permission": true,
+            "privacyAllowed": true,
+            "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+            "revision": 1
+          }
+        }
+      }
+    ]
+  },
+  {
+    "caseId": "policy-slot-8",
+    "evaluator": {
+      "purpose": "alternate-window-fee",
+      "sourceMode": "ISOLATED_SYNTHETIC_POLICY"
+    },
+    "runtime": {
+      "latest": "Shop cho đổi size trong mấy ngày, phí đổi bao nhiêu em?",
+      "history": [],
+      "initialProductCodes": []
+    },
+    "requests": [
+      {
+        "generationId": "frozen-public-world",
+        "providerRequests": 1,
+        "toolsAllowed": false,
+        "capturedAt": "2026-10-20T05:14:34.738Z",
+        "context": {
+          "boundSubjects": [],
+          "effectReceipts": [],
+          "policyLiterals": [
+            {
+              "expiresAt": null,
+              "observedAt": "2026-10-14T10:00:00.000Z",
+              "ref": "policy:4fae6f26ebcc379f7bfefc82a0290ab6c9f6c5ba7cf236287a7a06db1e7148bf",
+              "sourceVersion": "4fae6f26ebcc379f7bfefc82a0290ab6c9f6c5ba7cf236287a7a06db1e7148bf",
+              "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":25000,\"windowDaysFromReceipt\":7},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\",\"tryOnModeDescription\":\"Chỉ ướm bên ngoài, không mặc vào người.\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"payment\":{\"allowedMethods\":[\"COD\",\"BANK_TRANSFER\"]},\"shipping\":{\"defaultFeeVnd\":25000}}"
+            }
+          ],
+          "protectedClaims": [],
+          "runtimeProducts": [],
+          "state": {
+            "bindingVersion": "c3-b1-source-v1",
+            "conversationOwner": "BOT",
+            "currentProductId": null,
+            "factSnapshotVersion": "eb6365d1d2826f5b9dfb76101632ecec1134c6dd03959287c676b3fcc1517676",
+            "permission": true,
+            "privacyAllowed": true,
+            "recipient": "b27201293c0a1a7fe3a7c3a8db4c7278eee3ffd179b783ca948c9cf4027cd20f",
+            "revision": 1
+          }
+        }
+      }
+    ]
+  }
+]

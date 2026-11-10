@@ -1,0 +1,13 @@
+{
+  "baselineBytes": 12135,
+  "candidateBytes": 14870,
+  "addedExampleBytes": 2734,
+  "baselinePrefixByteIdentical": true,
+  "examplesSuffixByteIdentical": true,
+  "removedOrRewrittenInstructions": 0,
+  "baselineSha256": "2d138eadfc0de1d7c268f2d2f4bc876d635a85663539fdbcd3d0a8261f7c1bb1",
+  "candidateSha256": "a7fc3efe8ca821c16bbba4692ac04cb2d4f8748e26a36d5091bcd79ad51e38e6",
+  "exampleSuffixSha256": "bcdf5e7abc044630a381d2a806178757834d236ee6b3e756c441afdb75d0c448",
+  "previousCandidateSha256": "8ed038312c9bb28d6410818a34646148e4b3ac1ded061f071f13f06e29eb7b70",
+  "treatment": "Only append existing approved illustrative section to intact baseline; no other prompt change."
+}

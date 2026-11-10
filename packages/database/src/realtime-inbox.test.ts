@@ -18,6 +18,13 @@ function input(eventKind: "CUSTOMER" | "APP_ECHO" | "PAGE_ECHO" = "CUSTOMER") {
 }
 
 describe("PostgresRealtimeInboxStore debounce enqueue", () => {
+  it("reads the current scoped source generation even after its processing lease is completed", async () => {
+    const store = new PostgresRealtimeInboxStore("postgresql://unused:unused@localhost/unused", new LocalEnvelopeCipher("00".repeat(32), "test"));
+    const query = vi.fn(async () => ({ rows: [{ generation: "8" }] }));
+    (store as unknown as { pool: unknown }).pool = { query };
+    expect(await store.readGeneration("page", "customer")).toBe(8);
+    expect(query.mock.calls[0]).toBeDefined();
+  });
   it("restores the speculative ingress-head attempt when admission holds every Inbox row", async () => {
     const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
     const client = {

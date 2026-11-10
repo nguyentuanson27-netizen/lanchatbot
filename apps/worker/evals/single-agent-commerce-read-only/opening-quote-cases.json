@@ -1,0 +1,105 @@
+[
+  {
+    "caseId": "opening-ad",
+    "journeyId": "opening-ad",
+    "runtime": {
+      "latest": "Bộ này bao nhiêu em?",
+      "messages": [
+        {
+          "text": "Bộ này bao nhiêu em?",
+          "attachments": [],
+          "adsContext": {
+            "source": "ADS",
+            "adTitle": "Set Thạch Thảo SV2447",
+            "postId": null,
+            "adId": null,
+            "ref": null
+          }
+        }
+      ],
+      "initialProductCodes": []
+    },
+    "evaluator": {
+      "expected": "Xác định SV2447 từ ads rồi đọc giá đúng cả bộ; khối báo giá có nguồn, ảnh selector, bước size không hỏi thừa."
+    }
+  },
+  {
+    "caseId": "opening-ad-repeat",
+    "journeyId": "opening-ad",
+    "runtime": {
+      "latest": "Chị hỏi lại chút, cả bộ bao nhiêu nhỉ?",
+      "messages": [
+        {
+          "text": "Chị hỏi lại chút, cả bộ bao nhiêu nhỉ?",
+          "attachments": []
+        }
+      ],
+      "initialProductCodes": []
+    },
+    "evaluator": {
+      "expected": "Dùng lịch sử thực, trả giá gọn, không lặp khối chất liệu/form/size hoặc gửi lại ảnh."
+    }
+  },
+  {
+    "caseId": "opening-organic",
+    "journeyId": "opening-organic",
+    "runtime": {
+      "latest": "Set Thạch Thảo SV2447 bao nhiêu vậy shop?",
+      "messages": [
+        {
+          "text": "Set Thạch Thảo SV2447 bao nhiêu vậy shop?",
+          "attachments": []
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "evaluator": {
+      "expected": "Khách mới hỏi giá: đúng phần bán và khối có nguồn, bước tiếp theo hợp lý."
+    }
+  },
+  {
+    "caseId": "opening-unresolved",
+    "journeyId": "opening-unresolved",
+    "runtime": {
+      "latest": "Mẫu này giá sao em?",
+      "messages": [
+        {
+          "text": "Mẫu này giá sao em?",
+          "attachments": [],
+          "adsContext": {
+            "source": "ADS",
+            "adTitle": "Mẫu mới của shop",
+            "postId": null,
+            "adId": null,
+            "ref": null
+          }
+        }
+      ],
+      "initialProductCodes": []
+    },
+    "evaluator": {
+      "expected": "Không lấy sản phẩm cũ hoặc đoán giá; hỏi xác định mẫu."
+    }
+  },
+  {
+    "caseId": "opening-multipart",
+    "journeyId": "opening-multipart",
+    "runtime": {
+      "latest": "Set Thạch Thảo SV2447 giá bao nhiêu? Chị mua áo riêng được không?",
+      "messages": [
+        {
+          "text": "Set Thạch Thảo SV2447 giá bao nhiêu? Chị mua áo riêng được không?",
+          "attachments": []
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "evaluator": {
+      "expected": "Trả đủ giá cả bộ và lựa chọn áo lẻ đúng nguồn; mẫu báo giá không che câu hỏi bán lẻ."
+    }
+  }
+]

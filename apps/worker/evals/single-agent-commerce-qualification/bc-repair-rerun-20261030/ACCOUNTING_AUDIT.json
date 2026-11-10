@@ -1,0 +1,309 @@
+{
+  "kind": "BC_REPAIR_DEVELOPMENT_ACCOUNTING_CAPTURE_AUDIT_V1",
+  "verdict": "PASS",
+  "reviewer": "/root/bc_fix_review",
+  "reviewedAt": "2026-10-30T08:56:19.795Z",
+  "sourceSha": "fe4b82932137df01fea85e974c4a562e00e7204f",
+  "registrationHash": "bd772132abb04e9855f31535d3600c523f946d48cc9e98cdda9cdb38a104512b",
+  "evidenceHash": "79f7819250282c18e62febe58a83df5f2e521c3737565ea64815ec3b7ec19d95",
+  "integrationHash": "07b2a7344748c8d580f692eb89756fe8d409228ee673fb0610c4dd9c458c3d61",
+  "accountingHash": "3b17228b75ed54130fda980eb3e244fec72827c2165a89c813356c20e8c0b4aa",
+  "generationReconciliation": {
+    "journalUnique": 71,
+    "attemptSum": 71,
+    "rawTurnSum": 71,
+    "httpDispatches": 71,
+    "unexplainedExtra": [],
+    "missing": [],
+    "note": "Finalized journal, attempts, raw turns and dispatch records reconcile exactly; no prior-run generation count was adopted."
+  },
+  "counts": {
+    "cases": 22,
+    "turns": 34,
+    "generations": 71,
+    "owner": 56,
+    "verifier": 15,
+    "retries": 0,
+    "errors": 0,
+    "maximum": 136,
+    "messages": 17,
+    "images": 2,
+    "acceptedOutboxRows": 19,
+    "fallbackOutput": 0
+  },
+  "terminals": {
+    "HANDOFF": 13,
+    "SEND_ELIGIBLE": 15,
+    "NO_SEND": 4,
+    "CODE_OWNED_SEND": 2
+  },
+  "reasons": {
+    "DEPENDENCY_FAILURE": 5,
+    "RESPONSE_UNAVAILABLE": 2,
+    "EXCHANGE": 1,
+    "PRODUCT_AMBIGUOUS": 1,
+    "DEFECT": 1,
+    "UNSUPPORTED_REQUEST": 1,
+    "HUMAN_OWNS_CONVERSATION": 4,
+    "SIZE_RULE_UNAVAILABLE": 1,
+    "ORDER_STATUS": 1
+  },
+  "recoveries": {},
+  "verdicts": {
+    "PASS": 15
+  },
+  "codeOwnedWitnesses": [
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 1,
+      "owner": 1,
+      "verifier": 0,
+      "kind": "NATIVE_CHECKOUT_CLARIFICATION",
+      "paymentMethod": null,
+      "missingFields": [
+        "FULL_NAME"
+      ],
+      "confirmation": null
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 2,
+      "owner": 0,
+      "verifier": 0,
+      "kind": "NATIVE_CHECKOUT_CLARIFICATION",
+      "paymentMethod": "COD",
+      "missingFields": [
+        "FULL_NAME"
+      ],
+      "confirmation": null
+    }
+  ],
+  "actualMedia": [
+    {
+      "caseId": "c-20261028-j3",
+      "turnIndex": 0,
+      "imageCount": 2
+    }
+  ],
+  "finalGateWitnessChecks": [
+    {
+      "caseId": "c-20261028-s05",
+      "turnIndex": 0,
+      "verifierId": "40d1c64e-0e33-4e53-8786-5126a978c035:verifier:1",
+      "exactDraftHash": "73edf40f40b557e6f15bca96a09472b3480d5bc118cf5ef7fb64a6ecffa80e25",
+      "exactSnapshotHash": "92e859ad2bc759c24eb11940ab33557c81af72d682bd43c04f665319b0f5d4fb",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-s06",
+      "turnIndex": 0,
+      "verifierId": "e327d81a-8817-477c-8766-faf9793d238f:verifier:1",
+      "exactDraftHash": "1bfd4f1d34578f5b28ba2c92471868cc4a4e05a7726ae8078740b86d201d5e02",
+      "exactSnapshotHash": "c05ce082cdacc7d9a2b1412647241bca113a3b988f46a3f4b3366f4f5014c5ae",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "turnIndex": 0,
+      "verifierId": "4245a7f2-6206-4b4f-9918-596bf6050df0:verifier:1",
+      "exactDraftHash": "3dffd04b7e5c99e902ac0452a78b563ff5757982c1a0d7d810afcb61057b5387",
+      "exactSnapshotHash": "14603bc8cf1a78e0e59975114efc4e503213404aa328f6ebd49f25d014d31145",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-s09",
+      "turnIndex": 0,
+      "verifierId": "ffa56320-06e6-4b65-870e-8bd0ff9cb768:verifier:1",
+      "exactDraftHash": "c1bf5010baa913e52d81dae1fb19d5027b3eb87ba27203c48f75e2674bfd8f01",
+      "exactSnapshotHash": "67afe47a6f47b33df5d176b1ad2f33d93fe24e971f463051370932d96c54de8e",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-s14",
+      "turnIndex": 0,
+      "verifierId": "e2883a33-3ec6-4132-b38c-d666ac5d1c47:verifier:1",
+      "exactDraftHash": "a0dd38f0b1d9403a89272da9b801520d3f6f6f3b52f9c94058b815ec6c22e246",
+      "exactSnapshotHash": "53531ab59d13a22359f51968c92b5f8a1bea6ad4491ce5ae1878e6483e4618e8",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "turnIndex": 0,
+      "verifierId": "0df615df-eb1f-4c5b-8493-720e1521ff7b:verifier:1",
+      "exactDraftHash": "235136a9a6f3cfa0566872e4fe3fddc5053a60dca8b8bd590d82cad78ecd5f90",
+      "exactSnapshotHash": "73b8e0a5864648f4006b0ef7585e45b68a74908fa9fdae550ba5f1fa4128dd06",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 0,
+      "verifierId": "ce5a7f4f-5b9a-4a8a-a0da-6d5683431807:verifier:1",
+      "exactDraftHash": "d4b695b5e3c9736309bced580609a220a6f5855af8b7ff760ec6e431063df06e",
+      "exactSnapshotHash": "0ceb7df610958896047177789a68776313b4220d372db1306dba819983a5dc12",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 0,
+      "verifierId": "03daee20-9ae5-450e-8e4e-2bb73d610965:verifier:1",
+      "exactDraftHash": "fd3873654df0e28f6da935afac8a332f357c9008294c256cf0cee55d0d39b104",
+      "exactSnapshotHash": "26d52ff36a96afc6971c0c0f1800a65c963e5d9b83aa71477643eb6fa96db43e",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-j3",
+      "turnIndex": 0,
+      "verifierId": "200bd517-3b16-4c7c-8a1e-7778f0e806a8:verifier:1",
+      "exactDraftHash": "6b1b5133c79b28a3631cb34763ddba1bd0deaf77cf62961cd94e6e0626c172fa",
+      "exactSnapshotHash": "d0bd1ddedd73facfd953294604f0fcaaebb42792ae2d0aea3fd8f489b76d7d79",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-j3",
+      "turnIndex": 1,
+      "verifierId": "68bb2514-c50a-4f2d-97c6-0975869595cf:verifier:1",
+      "exactDraftHash": "07761abbc23c3dd688ed6da0703cc57dfefacc3fa82875bb018c666ed965c4c3",
+      "exactSnapshotHash": "216b789d67ad498c111c59cad1fdaa3cfe0fd23c1dc240428fe2d59b83e40b0d",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-j3",
+      "turnIndex": 2,
+      "verifierId": "5f99899d-84aa-40dc-bb76-510eac96f704:verifier:1",
+      "exactDraftHash": "e8fb9b19854b92e497cba5417dcf3705e91844ef936e77aa207ab88c44d914b8",
+      "exactSnapshotHash": "57fa0aedc714c1b527d19811ba04a8be0dfae706fb940a1a0ecac28b53a03f71",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 0,
+      "verifierId": "e2e50d94-4af5-4cd7-9874-f5f156f149ac:verifier:1",
+      "exactDraftHash": "c8f47a999e7634bdd9c300514a7fdb2b3e97f79ac849f0093b55a2c8664d7989",
+      "exactSnapshotHash": "8e4b43fd7e1a12948fa7e354292031c9c8372c4f2aeda0f1ba8f51a0711d98d9",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 1,
+      "verifierId": "4f3be391-aa19-4f48-bef9-1cc973e04ea9:verifier:1",
+      "exactDraftHash": "1b3f806434f4f30ecfa35b5ed0cb322fa3ed33c344f1d1edf4adec6f638dde53",
+      "exactSnapshotHash": "3afd3a60606cdc6d0642d018e418061b753546c418f6df4ac5b05b69fc77a29e",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 2,
+      "verifierId": "1c4d696f-3f12-4385-b024-76a213a2db50:verifier:1",
+      "exactDraftHash": "aa8a8e975502c374f41072cd4c6619134e067f0f43d0126f9ecee749b893c818",
+      "exactSnapshotHash": "6902fc7cd4c545470214679cdd37521aad4faa792b65fd8e21bea9e5c2cc4d6b",
+      "gate": "SEND_ELIGIBLE"
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 0,
+      "verifierId": "a39644a7-97fd-43dd-9e9c-229f77c51099:verifier:1",
+      "exactDraftHash": "54604366be18cbede3269d27c01d9a80175ae5ed2613405579f4c1f2173edd7b",
+      "exactSnapshotHash": "1f2eea3c75217e9010b34b72da98bc69d8b65d8e1ec5473bd64d6a777cb44c3e",
+      "gate": "SEND_ELIGIBLE"
+    }
+  ],
+  "privateBlindSeedRead": false,
+  "privateAssignmentsRead": false,
+  "diagnostics": {
+    "events": 1174,
+    "stages": {
+      "RESULT_PROJECTION": 384,
+      "CATALOG_READ": 380,
+      "POS_READ": 180,
+      "ARGUMENT_VALIDATION": 108,
+      "MEDIA_SELECT": 6,
+      "FINAL_GATE": 49,
+      "RESULT_BOUND": 27,
+      "CURRENT_READBACK": 30,
+      "POLICY_READ": 10
+    },
+    "reasons": {
+      "NO_VERIFIED_MATCHING_MEDIA": 4,
+      "DEPENDENCY_FAILURE": 10,
+      "SOURCE_ERROR": 6,
+      "PRODUCT_BOUND": 2,
+      "RESPONSE_UNAVAILABLE": 2,
+      "UNKNOWN_INTERNAL": 20,
+      "EXCHANGE": 1,
+      "PRODUCT_AMBIGUOUS": 1,
+      "DEFECT": 1,
+      "UNSUPPORTED_REQUEST": 1,
+      "SIZE_RULE_UNAVAILABLE": 1,
+      "ORDER_STATUS": 1
+    }
+  },
+  "auxiliaryHttp": [
+    {
+      "kind": "OAUTH",
+      "status": 200
+    },
+    {
+      "kind": "EMBEDDING",
+      "status": 200
+    },
+    {
+      "kind": "EMBEDDING",
+      "status": 200
+    },
+    {
+      "kind": "EMBEDDING",
+      "status": 200
+    },
+    {
+      "kind": "EMBEDDING",
+      "status": 200
+    },
+    {
+      "kind": "EMBEDDING",
+      "status": 200
+    }
+  ],
+  "verified": {
+    "rawCanonicalHashes": 34,
+    "artifactByteHashes": 40,
+    "requestFirewallAndNativeWire": 71,
+    "modelAndConfigBindings": 71,
+    "perTurnRoleCaps": true,
+    "receiptsAndOutboxCapture": true,
+    "sourceCleanAtExecution": true,
+    "testDatabaseDropped": true,
+    "sendEnabled": false,
+    "diagnosticStop": null,
+    "probeExecuted": 0,
+    "c3Executed": 0
+  },
+  "findings": [],
+  "qualityApproval": false,
+  "qualificationApproval": false,
+  "providerCallsDuringAudit": 0,
+  "actualModelEffortAndTransportChecks": {
+    "owner": 56,
+    "verifier": 15,
+    "ownerExactGenerationConfig": true,
+    "ownerActualSerializedByteHash": true,
+    "verifierExactHighNoToolsSchema": true,
+    "verifierRelayClientRequestsExactlyOne": true
+  },
+  "j1MutationNegative": {
+    "turn1CartOpenedReceipt": true,
+    "turn1CommittedCart": {
+      "lines": 1,
+      "size": "L",
+      "quantity": 1
+    },
+    "turn2Tool": "add_to_cart",
+    "turn2Outcome": "REJECTED_CLAIM_CONFLICT",
+    "turn2CartExactlyUnchanged": true,
+    "turn2SalesRevisionUnchanged": true,
+    "turn2NewSalesReceipts": 0,
+    "turn2Owner": "HUMAN",
+    "turn3CartRetained": true,
+    "underlyingClaimConflictCause": "NOT_DETERMINED_BY_ACCOUNTING_AUDIT"
+  },
+  "supplementalAuditProviderRequests": 0
+}

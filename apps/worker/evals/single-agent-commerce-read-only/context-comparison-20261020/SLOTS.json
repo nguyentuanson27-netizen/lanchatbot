@@ -1,0 +1,110 @@
+[
+  {
+    "slot": 1,
+    "caseId": "b1-changed-occasion:rep-1:control",
+    "family": "b1-changed-occasion",
+    "repetition": 1,
+    "arm": "control",
+    "descriptionProductsChanged": []
+  },
+  {
+    "slot": 2,
+    "caseId": "b1-changed-occasion:rep-1:candidate",
+    "family": "b1-changed-occasion",
+    "repetition": 1,
+    "arm": "candidate",
+    "descriptionProductsChanged": [
+      "SV1561",
+      "SV165",
+      "SV244"
+    ]
+  },
+  {
+    "slot": 3,
+    "caseId": "b1-buying-concern:rep-1:control",
+    "family": "b1-buying-concern",
+    "repetition": 1,
+    "arm": "control",
+    "descriptionProductsChanged": []
+  },
+  {
+    "slot": 4,
+    "caseId": "b1-buying-concern:rep-1:candidate",
+    "family": "b1-buying-concern",
+    "repetition": 1,
+    "arm": "candidate",
+    "descriptionProductsChanged": []
+  },
+  {
+    "slot": 5,
+    "caseId": "b1-changed-occasion:rep-2:candidate",
+    "family": "b1-changed-occasion",
+    "repetition": 2,
+    "arm": "candidate",
+    "descriptionProductsChanged": [
+      "SV1561",
+      "SV165",
+      "SV244"
+    ]
+  },
+  {
+    "slot": 6,
+    "caseId": "b1-changed-occasion:rep-2:control",
+    "family": "b1-changed-occasion",
+    "repetition": 2,
+    "arm": "control",
+    "descriptionProductsChanged": []
+  },
+  {
+    "slot": 7,
+    "caseId": "b1-buying-concern:rep-2:candidate",
+    "family": "b1-buying-concern",
+    "repetition": 2,
+    "arm": "candidate",
+    "descriptionProductsChanged": []
+  },
+  {
+    "slot": 8,
+    "caseId": "b1-buying-concern:rep-2:control",
+    "family": "b1-buying-concern",
+    "repetition": 2,
+    "arm": "control",
+    "descriptionProductsChanged": []
+  },
+  {
+    "slot": 9,
+    "caseId": "b1-changed-occasion:rep-3:control",
+    "family": "b1-changed-occasion",
+    "repetition": 3,
+    "arm": "control",
+    "descriptionProductsChanged": []
+  },
+  {
+    "slot": 10,
+    "caseId": "b1-changed-occasion:rep-3:candidate",
+    "family": "b1-changed-occasion",
+    "repetition": 3,
+    "arm": "candidate",
+    "descriptionProductsChanged": [
+      "SV1561",
+      "SV165",
+      "SV244"
+    ]
+  },
+  {
+    "slot": 11,
+    "caseId": "b1-buying-concern:rep-3:control",
+    "family": "b1-buying-concern",
+    "repetition": 3,
+    "arm": "control",
+    "descriptionProductsChanged": []
+  },
+  {
+    "slot": 12,
+    "caseId": "b1-buying-concern:rep-3:candidate",
+    "family": "b1-buying-concern",
+    "repetition": 3,
+    "arm": "candidate",
+    "descriptionProductsChanged": []
+  }
+]

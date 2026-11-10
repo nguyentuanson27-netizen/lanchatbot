@@ -1,0 +1,60 @@
+{
+  "bRunSourceSha": "9887c21743f2183cf475c70bf27bfb9fe93fe723",
+  "manifestHash": "ce0c324d363b1c43f28d1772750c788e5748c075ebe86609c21c512e35063d2a",
+  "sourceConfigHash": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+  "promptHashes": {
+    "owner": "ca12a250c6dd69f96946bf6f2d4657f5d99a1e94364a7f0892e7603c69bd38de",
+    "verifier": "50401b2704724bebd604e0da3b2155ebeade8629145a723153c24b5630fd1a2f"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "requestBounds": {
+    "ownerWireBytes": 65536,
+    "verifierWireBytes": 32768
+  },
+  "toolSchemaHash": "04a2afc8365756d2bb8b8c2cb281c6811a0f9aef5ca3f75b58603562249b21ad",
+  "inputHash": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+  "caseIds": [
+    "b1-changed-occasion",
+    "b1-current-policy",
+    "b1-partial-source",
+    "b1-price",
+    "b1-component-stock",
+    "b1-search-read",
+    "b1-buying-concern",
+    "b1-policy-used",
+    "b1-changed-occasion-v2",
+    "b1-current-policy-v2",
+    "b1-partial-source-v2",
+    "b1-price-v2",
+    "b1-component-stock-v2",
+    "b1-search-read-v2",
+    "b1-buying-concern-v2",
+    "b1-policy-used-v2",
+    "b1-changed-occasion-v3",
+    "b1-current-policy-v3",
+    "b1-partial-source-v3",
+    "b1-price-v3",
+    "b1-component-stock-v3",
+    "b1-search-read-v3",
+    "b1-buying-concern-v3",
+    "b1-policy-used-v3"
+  ],
+  "registered": 24,
+  "repetitions": 1,
+  "maximumGenerationRequests": 96,
+  "dispatch": {
+    "first": 17,
+    "last": 17
+  },
+  "effectiveOwnerPromptHash": "ca12a250c6dd69f96946bf6f2d4657f5d99a1e94364a7f0892e7603c69bd38de",
+  "ownerRegistrationHash": null,
+  "dispatchedCases": 1,
+  "dispatchedMaximumGenerationRequests": 4,
+  "catalogInputMode": "LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION",
+  "registeredAt": "2026-10-23T17:35:16.567Z",
+  "codex": {
+    "version": "codex-cli 0.159.2",
+    "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+  },
+  "sendEnabled": false
+}

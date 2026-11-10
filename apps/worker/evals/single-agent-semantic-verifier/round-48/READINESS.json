@@ -1,0 +1,146 @@
+{
+  "status": "READY",
+  "recordedAt": "2026-10-11T05:02:00Z",
+  "scope": "Owner-authorized single Round48 A2 then A3 only if PASS",
+  "preparedHead": "cbec2d3bac6383ce89ffc1562e48123b966d583a",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "specSha": "db2219a6ed779ac8f9677cfae4b12ee225478d2f",
+  "providerGenerationRequests": 0,
+  "observedRed": {
+    "tests": 1,
+    "fail": 1,
+    "exit": 1,
+    "reason": "Round48 native dialogue rejected by Gemini adapter before dispatch"
+  },
+  "minimumGreen": {
+    "focusedTests": 34,
+    "pass": 34,
+    "skip": 0,
+    "exit": 0
+  },
+  "nodeFull": {
+    "tests": 254,
+    "pass": 254,
+    "skip": 0,
+    "exit": 0,
+    "environment": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1; local stub, new child admission selects48",
+    "outputHash": "f0339887a56c390449603006499fba2b2ecccf401c0a26e7591f1c17ae3e2e35"
+  },
+  "reusedUnchangedSourceVerification": {
+    "source": "PREPARATION.md at cbec2d3b",
+    "boundaryVertexTests": 79,
+    "protectedClaimsReplyAssemblySizeTests": 41,
+    "workerTypecheckExit": 0,
+    "workerBuildExit": 0,
+    "workerLintExit": 0,
+    "rerun": false,
+    "reason": "Only evaluation adapter Round48 admission and tests/docs changed; TypeScript/shared/runtime sources unchanged"
+  },
+  "pinnedClient": {
+    "version": "codex-cli 0.159.2",
+    "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a",
+    "chatGPTLoginAvailable": true
+  },
+  "vertexCredentialRouteAvailable": true,
+  "clientLimits": {
+    "checkedAt": "2026-10-11T05:01:22.303Z",
+    "identity": {
+      "version": "codex-cli 0.159.2",
+      "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+    },
+    "methods": [
+      "initialize",
+      "initialized",
+      "account/rateLimits/read"
+    ],
+    "generationRequests": 0,
+    "status": "OK",
+    "rateLimits": {
+      "limitId": "codex",
+      "primary": {
+        "usedPercent": 26,
+        "windowDurationMins": 300,
+        "resetsAt": 1791711836,
+        "resetsAtUtc": "2026-10-11T09:43:56.000Z"
+      },
+      "secondary": {
+        "usedPercent": 4,
+        "windowDurationMins": 10080,
+        "resetsAt": 1792298636,
+        "resetsAtUtc": "2026-10-18T04:43:56.000Z"
+      },
+      "rateLimitReachedType": null,
+      "credits": {
+        "hasCredits": false,
+        "unlimited": false
+      }
+    },
+    "rateLimitsByLimitId": [
+      {
+        "limitId": "codex",
+        "primary": {
+          "usedPercent": 26,
+          "windowDurationMins": 300,
+          "resetsAt": 1791711836,
+          "resetsAtUtc": "2026-10-11T09:43:56.000Z"
+        },
+        "secondary": {
+          "usedPercent": 4,
+          "windowDurationMins": 10080,
+          "resetsAt": 1792298636,
+          "resetsAtUtc": "2026-10-18T04:43:56.000Z"
+        },
+        "rateLimitReachedType": null,
+        "credits": {
+          "hasCredits": false,
+          "unlimited": false
+        }
+      }
+    ],
+    "earlierRead": null
+  },
+  "frozenInputsUnchanged": true,
+  "structuralDelta": "One entry added to existing Gemini V4 round admission; no API/body/config/retry/role/layer change",
+  "preparationFailures": [
+    {
+      "action": "inline inspectGemini read-only command",
+      "error": "SyntaxError from extra closing parenthesis",
+      "corrected": true,
+      "generationRequests": 0
+    }
+  ],
+  "commands": [
+    {
+      "command": "git fetch origin main; git rev-parse origin/main",
+      "exit": 0
+    },
+    {
+      "command": "node --test --test-name-pattern=round48-native-dialogue round-48.test.mjs (actual argument: round48 native dialogue)",
+      "exit": 1,
+      "phase": "RED"
+    },
+    {
+      "command": "node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/round-48.test.mjs apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs",
+      "exit": 0,
+      "tests": 34
+    },
+    {
+      "command": "node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs",
+      "exit": 0,
+      "tests": 254
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=48 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs",
+      "exit": 0
+    },
+    {
+      "command": "git diff --check",
+      "exit": 0
+    }
+  ],
+  "limitations": [
+    "Read-only limits and credential inspection do not guarantee generation availability",
+    "Remote CI still queued; no remote PASS claim",
+    "All prepared labels/prompts/config unchanged; no provider results yet"
+  ]
+}

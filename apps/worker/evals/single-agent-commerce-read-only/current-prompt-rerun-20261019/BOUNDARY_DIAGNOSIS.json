@@ -1,0 +1,46 @@
+{
+  "runSourceSha": "ae093c5049de60c37b0f16985f64e6327c6e6544",
+  "primaryReviewLockSha": "cd035044",
+  "mode": "OFFLINE_DIAGNOSTIC_ONLY_NO_GENERATION_NO_SEND",
+  "malformed": {
+    "caseId": "b1-changed-occasion",
+    "surfaces": [
+      "integrated",
+      "advice replay"
+    ],
+    "runtimeProducts": 7,
+    "limit": 4,
+    "originalPrecheck": "MALFORMED",
+    "diagnosticOnlyDropToFour": null
+  },
+  "uncertain": {
+    "caseId": "b1-partial-source-v2",
+    "surface": "advice replay",
+    "observedVerdict": "UNCERTAIN",
+    "violations": [],
+    "reviewerFinding": "Draft says shop supports buying the skirt separately while current selling options remain unconfirmed. Verifier supplies no detailed rationale; this is source comparison, not a quoted provider explanation.",
+    "sourceClaimCount": 0,
+    "runtimeProducts": [
+      {
+        "content": {
+          "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+          "metadata": {
+            "authority": "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+            "expiresAt": null,
+            "freshForSeconds": null,
+            "freshnessState": "FRESH",
+            "observedAt": "2026-09-28T04:31:05.725Z",
+            "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98"
+          },
+          "productName": "Set váy Thạch Thảo",
+          "productUrl": null
+        },
+        "ref": "product:SV2447",
+        "subjectRef": "SV2447"
+      }
+    ],
+    "policyLiterals": [],
+    "ownerWireAvailableOffers": null,
+    "ownerWireEvidencePath": "trusted.products[0].availableOffers"
+  }
+}

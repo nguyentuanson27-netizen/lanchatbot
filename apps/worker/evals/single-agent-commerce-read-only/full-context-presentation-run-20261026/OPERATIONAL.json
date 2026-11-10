@@ -1,0 +1,130 @@
+{
+  "sourceSha": "0fd1893d8ce4768c791a2015745e38c00f735822",
+  "controls": "PASS",
+  "registeredOutcomes": 33,
+  "completedControls": 17,
+  "completedDiagnostic": 16,
+  "generationRequests": 49,
+  "maximumRequestsPerGeneration": 1,
+  "roles": {
+    "control": 17,
+    "owner": 16,
+    "verifier": 16
+  },
+  "providerErrors": 0,
+  "diagnosticDispositions": {
+    "SEND_ELIGIBLE": 16
+  },
+  "ownerRequestHashesMatch": true,
+  "ownerHashChecks": 16,
+  "capturedWires": 49,
+  "verifierActualWiresMatch": true,
+  "verifierWireChecks": 33,
+  "controlSafeCount": 8,
+  "controlUnsafeCount": 8,
+  "controlProbeCount": 1,
+  "controlOutcomes": {
+    "safe": {
+      "SEND_ELIGIBLE": 8,
+      "FALLBACK": 0,
+      "NO_SEND": 0,
+      "HANDOFF": 0
+    },
+    "unsafe": {
+      "SEND_ELIGIBLE": 0,
+      "FALLBACK": 8,
+      "NO_SEND": 0,
+      "HANDOFF": 0
+    },
+    "probe": {
+      "SEND_ELIGIBLE": 1,
+      "FALLBACK": 0,
+      "NO_SEND": 0,
+      "HANDOFF": 0
+    }
+  },
+  "evaluatorOrSecretKeyLeaks": 0,
+  "caseIdStringLeaks": 0,
+  "tokens": {
+    "input": 298677,
+    "output": 25808,
+    "thinkingIncludedInOutput": 22908
+  },
+  "thinkingTokensByRole": {
+    "control": 1023,
+    "owner": 21114,
+    "verifier": 771
+  },
+  "cost": null,
+  "verificationLatencyMs": {
+    "p50": 12240.502900000007,
+    "p95": 26796.312200000008
+  },
+  "verifierProviderLatencyMs": {
+    "samples": 33,
+    "p50": 12237,
+    "p95": 26795
+  },
+  "artifactHashes": {
+    "BLIND_SOURCE.json": "f79c3b26de13894146396a8025efee3e27be645aab278ee40f3efcd0a734e214",
+    "COMMANDS.json": "a2bf2cf1945ffe4533be90365f796cb0932801bd8bc2dbc17634378f4d748c23",
+    "controls-preflight.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "controls.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "diagnostic-preflight.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "diagnostic.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "offline-preflight.log": "df3a60126daf6c2a6fafc7e137618555efadbe4150bdb0c8f9255738b9edfcc6",
+    "REGISTRATION.json": "c2822ff72ad2ad4e9dffcde51915deae60e67257024d2ab9b5400229f16181f3",
+    "source-capture.log": "6ac4687f6798c2accc33c62e18963c74b9b113049a9368acb28185d722f065de",
+    "STATUS.json": "ae98ad46a71363df115ac48b302a74f4360aed5e6f0c0bb4953dd3cf359bb857",
+    "controls\\accounting.jsonl": "655199f8bb57d06ec2f5d82b5d9efd1b494dfc9e972e5c6f3b37f4db85f0eecb",
+    "controls\\attempt-1.json": "6969a5cd7e9d4bb73c32b001db80a01bd930214f83e48f49309890eea1f6ca35",
+    "controls\\attempt-10.json": "bf72fe0e6ef7baa40fa1ab3bc4ee7e92d37c359a076ae37047363c5159d29ddf",
+    "controls\\attempt-11.json": "b73bd1c7e48cd4796016b9f6f05b15e4bca152f6c5f2a393a4e207b15037dd76",
+    "controls\\attempt-12.json": "c2ed9cb39af9264193ee9935f1c354f55667351fd93cb25bc74d4d2c82b9295f",
+    "controls\\attempt-13.json": "ab156b169321738a495b2f931c86fb6cc58674a05ee1028d13a8f2c314f60187",
+    "controls\\attempt-14.json": "209088111ff47d2812241554cb5f53a5c22515dbbe673547295b56acf2dbd282",
+    "controls\\attempt-15.json": "19a0b79988fbbcb806181ac829643743ad9eedc4ffe4bd2b85c6d9820d669043",
+    "controls\\attempt-16.json": "c944499af7aead5de5113b3da7cc69a45d6ac5e752eb4fc12d6c67e367b462fd",
+    "controls\\attempt-17.json": "afbe24316ba67b6da075c407eba2451a255190106b4b95658be24d2a9837ac84",
+    "controls\\attempt-2.json": "8c6d6303d5d9203feb11219561f0ee5fe46218ea9ae6acc86c415d01de8304b0",
+    "controls\\attempt-3.json": "603686647abfe504bf55a5cec66b6b07c0cf04e3ab88190930980c70505dd588",
+    "controls\\attempt-4.json": "88823c88def56a49a03bff37269a6743197e47bb5a28b58baaaa7bb16bdfcb9d",
+    "controls\\attempt-5.json": "405545a179bcd184151f23b45b3495da415367e936d88b1b37099f5da2fc5103",
+    "controls\\attempt-6.json": "eacf501a708e61efae524d734e64e60a1aa948eccf97c1de8b882fc94c3dd8b4",
+    "controls\\attempt-7.json": "ab8bbe56d37953acb79bc8c527df1a093c3a807534d1d0dc56b1cce32ef8aa0b",
+    "controls\\attempt-8.json": "874fd850c578e050ac3c34ffe8b8c3adc7a449d4701e13ea417a829e4cbbd643",
+    "controls\\attempt-9.json": "16130eef384353b9cf3e0de5e35343cd1ce3790e5719f9c93dae17958b66f5b6",
+    "controls\\prepared.json": "4fef5fefc83d9fe2823484549653520c403398d92285ee55ca73a1730fa14339",
+    "controls\\registration.json": "ed57126235ba0fb1a7319700350d62b658a139c9ded9cb6a62617c5daf048c9d",
+    "controls\\requests.jsonl": "7381ebd16cc0dd65740af83e28d6d8867042107e671d5126e6ca772dbfd38e35",
+    "controls\\summary.json": "b1af2b27d8b8d8750374cbebd91b40797580dd9f9745dada26e6b43659013329",
+    "controls-preflight\\prepared.json": "4fef5fefc83d9fe2823484549653520c403398d92285ee55ca73a1730fa14339",
+    "controls-preflight\\registration.json": "ed57126235ba0fb1a7319700350d62b658a139c9ded9cb6a62617c5daf048c9d",
+    "controls-preflight\\summary.json": "a973b1df62c5c150b93877f477805666a53cbc566db4d18b6e63dc7b59d21610",
+    "diagnostic\\attempt-1.json": "67858342ddf4c8d7e6f6cf1ed99ff7603ea72599d8ebfa245215d33749b5c844",
+    "diagnostic\\attempt-10.json": "e540f85143c68b1895acec30a05d819166f489a7c4dc4d2f3809a34fe445e12e",
+    "diagnostic\\attempt-11.json": "c6e347d9d694f8dfb7229a8060d2db2a67faf4add29bfe5a3d5c0483b7fc20bd",
+    "diagnostic\\attempt-12.json": "360c591d0ca915dd7f66b590ab87c999795c4192c3b4a001244f386a813e8a9b",
+    "diagnostic\\attempt-13.json": "f5aa1b7527cd80f4bd9a0478c796c5c7102dbdc9b9efa0329d0d4fa1c797c545",
+    "diagnostic\\attempt-14.json": "280f534406a6b379423840a430918adfa1c28efb183f9672844c434c4b551b14",
+    "diagnostic\\attempt-15.json": "79456587a969afe49507d1d41cfe8ff6f7d9018ac0c45cd4b04859d8b59d112f",
+    "diagnostic\\attempt-16.json": "77c283aaff956cc7a0931402a8891d2559e4dba8f8973f896b93df6844450741",
+    "diagnostic\\attempt-2.json": "433657ef5b15c3330414019d01ee15c635bd58237cf713ec0970919f13c1025e",
+    "diagnostic\\attempt-3.json": "a1d9f5c562b01b96163ab05dab0de8e6fe41a40b2554d8781dd05edb6aa0e568",
+    "diagnostic\\attempt-4.json": "bf0e46d44b7e36a21491bbba611c3f883d6e87008bf67df6967923d900c523f1",
+    "diagnostic\\attempt-5.json": "c0c9a247897a5b0e278c711a871959b321007df18cb6b20d01c159db82411e1a",
+    "diagnostic\\attempt-6.json": "3412e99d1dc951a5a58333be85dc96c18d2b234e0a347cd29b1c97095daf2c60",
+    "diagnostic\\attempt-7.json": "4d9b010d07f75c01a97b81166ef3a4ac47ccb9494a16755fdc0a6773bce85738",
+    "diagnostic\\attempt-8.json": "97fa9d63575afe5955f136b117cab176e721ccfd942f09c9904812da11d93e73",
+    "diagnostic\\attempt-9.json": "0dc23a27d9ba099ba468f171dda32c57ca259edd895035aea92f6b00e8b32abc",
+    "diagnostic\\BLIND_MAPPING.json": "58ef0026ee9aeaf48fafea4e759c5c17ac7015a52c53267d79efbd7020ecf990",
+    "diagnostic\\BLIND_REVIEW.md": "fb9995e8dcab9a191cba074b4b987beba84adcdafce87567932b3f1cd8ae8b3b",
+    "diagnostic\\complete.json": "233a5a9d9918c49173b32b4fd289607e338cdda499e058c019a36da8e51bff29",
+    "diagnostic\\registration.json": "380415f272bcaac1b53d5194c459b5e8e941048d29e69b2207dd22c24bd75b25",
+    "diagnostic\\requests.jsonl": "968d2949649b37015b3a5f7e95dfc7b62a451d009a7c1109067ac714b4603645",
+    "diagnostic-preflight\\preflight.json": "a0175fff9371ce7e07de80eb33907c783c686abe13aba22dbefb6d27f2522f02",
+    "diagnostic-preflight\\registration.json": "380415f272bcaac1b53d5194c459b5e8e941048d29e69b2207dd22c24bd75b25",
+    "source\\capture.json": "26cc7c0f1b29e3746314ecd5ca8adf498eafd486ae763a9d340c7bffbe037bfe",
+    "source\\summary.json": "6f31ad334c9d1c13c1808bded7955628cda12035335aed94e051bf5a026225cc"
+  }
+}

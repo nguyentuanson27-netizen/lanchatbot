@@ -1,0 +1,11 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/packages/business-tools
+
+ ✓ src/reply-assembler.test.ts (14 tests) 129ms
+ ✓ src/protected-claims.test.ts (7 tests) 27ms
+
+ Test Files  2 passed (2)
+      Tests  21 passed (21)
+   Start at  22:21:49
+   Duration  2.86s (transform 1.08s, setup 0ms, collect 1.68s, tests 157ms, environment 1ms, prepare 1.23s)
+

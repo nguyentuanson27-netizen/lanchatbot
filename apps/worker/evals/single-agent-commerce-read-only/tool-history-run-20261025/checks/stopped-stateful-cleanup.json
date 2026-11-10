@@ -1,0 +1,8 @@
+{
+  "command": [
+    "python",
+    "..\\c3-tool-history-cleanup-20261025.py"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 6.307951211929321
+}

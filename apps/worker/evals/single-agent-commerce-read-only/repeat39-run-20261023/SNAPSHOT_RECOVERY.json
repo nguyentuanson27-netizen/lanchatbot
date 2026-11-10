@@ -1,0 +1,46 @@
+{
+  "status": "COMPARED",
+  "changes": [
+    {
+      "path": "/claims/0/source/expiresAt",
+      "before": "2026-10-24T22:04:26.644Z",
+      "after": "2026-10-24T22:34:26.671Z"
+    },
+    {
+      "path": "/claims/0/source/observedAt",
+      "before": "2026-10-22T22:04:26.644Z",
+      "after": "2026-10-22T22:34:26.671Z"
+    },
+    {
+      "path": "/claims/1/source/expiresAt",
+      "before": "2026-10-24T22:04:26.644Z",
+      "after": "2026-10-24T22:34:26.671Z"
+    },
+    {
+      "path": "/claims/1/source/observedAt",
+      "before": "2026-10-22T22:04:26.644Z",
+      "after": "2026-10-22T22:34:26.671Z"
+    },
+    {
+      "path": "/policies/offers:SV2447/expiresAt",
+      "before": "2026-10-23T00:04:26.644Z",
+      "after": "2026-10-23T00:34:26.671Z"
+    },
+    {
+      "path": "/policies/offers:SV2447/observedAt",
+      "before": "2026-10-22T22:04:26.644Z",
+      "after": "2026-10-22T22:34:26.671Z"
+    },
+    {
+      "path": "/policies/offers:SV2447/sourceVersion",
+      "before": "cc371fcd646a5c56f4fed600bcef9fb632b777eefd644c14c1d5bad88266605d",
+      "after": "d3cf2d82ec321ce2f44f0bec78a792d584147c439579810bdafab8cdc3a3257b"
+    },
+    {
+      "path": "/state/factSnapshotVersion",
+      "before": "80b5002d0efe34d6d975aee3d9e8c7009d5f551147c7e34ef89156d3ecdccb75",
+      "after": "77c5ca85e3bfb326e0931530b559f6feba4719dbc5c9a9b7ef28a88905873cbb"
+    }
+  ],
+  "truncated": false
+}

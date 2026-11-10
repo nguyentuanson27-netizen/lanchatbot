@@ -1,0 +1,780 @@
+{
+  "reviewType": "WHOLE_ACTUAL_CUSTOMER_OUTCOME_BEFORE_REJECTED_DRAFT_DIAGNOSIS",
+  "runSourceSha": "2529383d27372418b98a29d6e7be611cce388239",
+  "rawSavepoint": "0394a55e4a7e8a92a529290df7b2a71eb7cd2a47",
+  "registeredNewAttempts": 7,
+  "recorded": 7,
+  "reviewed": 7,
+  "repetitions": 1,
+  "previousFailuresOverwritten": false,
+  "independent": false,
+  "humanAcceptance": null,
+  "currentRejectedDraftsUsedForScore": false,
+  "currentVerdictDetailsUsedForScore": false,
+  "scoreMeaning": "Supporting0/1/2 only; whole reply and context; no keyword/ideal-answer matching or summed score.",
+  "counts": {
+    "USABLE": 5,
+    "NEEDS_EDIT": 1,
+    "FALLBACK_OR_NO_SEND": 1
+  },
+  "rows": [
+    {
+      "slot": 18,
+      "caseId": "b1-current-policy-v3",
+      "runtime": {
+        "latest": "Lần này chị nhận hàng được 9 ngày, chỉ mở ra xem rồi cất lại. Giờ chị đổi size còn được không em?",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Hồi trước chị nhớ bên mình chỉ cho đổi trong 7 ngày."
+          }
+        ],
+        "initialProductCodes": []
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ bên mình hiện cho phép đổi hàng trong vòng 15 ngày kể từ ngày nhận nên chị nhận hàng được 9 ngày và sản phẩm còn nguyên vẹn thì mình vẫn đổi size được bình thường nha chị.",
+        "fallbackId": null
+      },
+      "publicContext": {
+        "products": [],
+        "facts": [],
+        "policy": [
+          {
+            "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+            "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"payment\":{\"allowedMethods\":[\"COD\",\"BANK_TRANSFER\"]},\"shipping\":{\"defaultFeeVnd\":30000}}"
+          }
+        ],
+        "state": {
+          "currentProductId": null
+        }
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Dùng đúng thời hạn hiện hành 15 ngày thay ký ức 7 ngày, giải quyết câu hỏi nhận 9 ngày mới mở xem rồi cất. Không bắt câu trả lời về thời hạn lặp đủ mọi điều kiện hoặc tự giả định khách đã sử dụng/giặt.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "slot": 19,
+      "caseId": "b1-partial-source-v3",
+      "runtime": {
+        "latest": "Áo với váy là chất gì em? Cả set bao nhiêu, còn hàng không?",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Áo của set được làm từ tơ Hàn thêu cao cấp, còn chân váy là chất ren tơ Hàn mềm mại và bay bổng chị nhé. Hiện hệ thống chưa cập nhật được giá và tình trạng tồn kho nên em chưa báo chính xác mức giá cũng như số lượng hiện tại cho chị được ạ.",
+        "fallbackId": null
+      },
+      "publicContext": {
+        "products": [
+          {
+            "subjectRef": "SV2447",
+            "attributes": null,
+            "content": {
+              "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+              "metadata": {
+                "authority": "WEBSTORE_XML",
+                "expiresAt": null,
+                "freshForSeconds": null,
+                "freshnessState": "FRESH",
+                "observedAt": "2026-09-28T04:31:05.725Z",
+                "sourceVersion": "catalog-v2"
+              },
+              "productName": "Set váy Thạch Thảo",
+              "productUrl": null
+            },
+            "presentation": null,
+            "sizeCharts": []
+          }
+        ],
+        "facts": [],
+        "policy": [],
+        "state": {
+          "currentProductId": null
+        }
+      },
+      "holistic": "NEEDS_EDIT",
+      "wholeTurnReason": "Trả đúng chất liệu áo/váy và không bịa giá hay tồn khi phần nguồn đó thiếu. Nhưng tiếp tục dùng giọng hệ thống chưa cập nhật, chưa báo chính xác rồi dừng; chưa có cách xử lý dùng được cho câu hỏi mua. Cùng điểm yếu partial-source trước đó, không phải lỗi thiếu checklist hay phải tự tạo facts.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 0,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "slot": 20,
+      "caseId": "b1-price-v3",
+      "runtime": {
+        "latest": "Nguyên set Thạch Thảo bao nhiêu tiền em?",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Nguyên set Thạch Thảo có giá 799.000đ bạn nhé.",
+        "fallbackId": null
+      },
+      "publicContext": {
+        "products": [
+          {
+            "subjectRef": "SV2447",
+            "availableOffers": [
+              "AO",
+              "CV",
+              "SET_VAY"
+            ],
+            "attributes": null,
+            "content": {
+              "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+              "metadata": {
+                "authority": "WEBSTORE_XML",
+                "expiresAt": null,
+                "freshForSeconds": null,
+                "freshnessState": "FRESH",
+                "observedAt": "2026-09-28T04:31:05.725Z",
+                "sourceVersion": "catalog-v2"
+              },
+              "productName": "Set váy Thạch Thảo",
+              "productUrl": null
+            },
+            "presentation": null,
+            "sizeCharts": []
+          }
+        ],
+        "facts": [
+          {
+            "type": "PRICE",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:CV"
+            },
+            "value": {
+              "amountVnd": 449000,
+              "currency": "VND"
+            }
+          },
+          {
+            "type": "STOCK",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:CV"
+            },
+            "value": {
+              "availableQuantity": 64,
+              "status": "IN_STOCK"
+            }
+          },
+          {
+            "type": "STOCK",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:AO"
+            },
+            "value": {
+              "availableQuantity": 112,
+              "status": "IN_STOCK"
+            }
+          },
+          {
+            "type": "PRICE",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "value": {
+              "amountVnd": 799000,
+              "currency": "VND"
+            }
+          },
+          {
+            "type": "STOCK",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "value": {
+              "availableQuantity": 52,
+              "status": "IN_STOCK"
+            }
+          },
+          {
+            "type": "PRICE",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:AO"
+            },
+            "value": {
+              "amountVnd": 499000,
+              "currency": "VND"
+            }
+          }
+        ],
+        "policy": [],
+        "state": {
+          "currentProductId": null
+        }
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Trả ngay đúng giá nguyên set 799.000đ, không dư giải thích hoặc hỏi mua bắt buộc. Xưng bạn lệch cách khách đang xưng chị là điểm giọng nhỏ cần lưu ý, chưa làm câu trả lời giá không dùng được.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "slot": 21,
+      "caseId": "b1-component-stock-v3",
+      "runtime": {
+        "latest": "Áo Thạch Thảo có bán riêng không em? Chị lấy size M, còn thì báo chị giá luôn nhé.",
+        "history": [],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ áo Thạch Thảo bên em có bán riêng ạ. Áo size M hiện còn hàng, giá 499.000đ chị nhé!",
+        "fallbackId": null
+      },
+      "publicContext": {
+        "products": [
+          {
+            "subjectRef": "SV2447",
+            "availableOffers": [
+              "AO",
+              "CV",
+              "SET_VAY"
+            ],
+            "attributes": null,
+            "content": {
+              "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+              "metadata": {
+                "authority": "WEBSTORE_XML",
+                "expiresAt": null,
+                "freshForSeconds": null,
+                "freshnessState": "FRESH",
+                "observedAt": "2026-09-28T04:31:05.725Z",
+                "sourceVersion": "catalog-v2"
+              },
+              "productName": "Set váy Thạch Thảo",
+              "productUrl": null
+            },
+            "presentation": null,
+            "sizeCharts": []
+          }
+        ],
+        "facts": [
+          {
+            "type": "PRICE",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:CV"
+            },
+            "value": {
+              "amountVnd": 449000,
+              "currency": "VND"
+            }
+          },
+          {
+            "type": "PRICE",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "value": {
+              "amountVnd": 799000,
+              "currency": "VND"
+            }
+          },
+          {
+            "type": "STOCK",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:AO"
+            },
+            "value": {
+              "availableQuantity": 24,
+              "status": "IN_STOCK"
+            }
+          },
+          {
+            "type": "STOCK",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "value": {
+              "availableQuantity": 12,
+              "status": "IN_STOCK"
+            }
+          },
+          {
+            "type": "PRICE",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:AO"
+            },
+            "value": {
+              "amountVnd": 499000,
+              "currency": "VND"
+            }
+          },
+          {
+            "type": "STOCK",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:CV"
+            },
+            "value": {
+              "availableQuantity": 14,
+              "status": "IN_STOCK"
+            }
+          }
+        ],
+        "policy": [
+          {
+            "ref": "read:6294a8f5205aa656a2625f5684619a70d46a42a49e99db6c74a5a013c60d23ec",
+            "text": "{\"productId\":\"SV2447\",\"sellingOptions\":[{\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:AO\",\"offerType\":\"AO\",\"size\":\"M\",\"color\":null,\"priceClaimId\":\"c5cbd4ea-b360-56fe-8646-c00e23b1102f\",\"stockClaimId\":\"802190f3-a524-5799-85cb-b7037959386e\"},{\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:CV\",\"offerType\":\"CV\",\"size\":\"M\",\"color\":null,\"priceClaimId\":\"03dd5bee-7e55-5ac8-8fa8-59f74305104f\",\"stockClaimId\":\"e700e928-af6c-59e9-889c-bc95b7091916\"},{\"productId\":\"SV2447\",\"variantId\":\"offer:SV2447:SET_VAY\",\"offerType\":\"SET_VAY\",\"size\":\"M\",\"color\":null,\"priceClaimId\":\"6b075b4d-3ce2-5707-8731-f00e3cdb0a88\",\"stockClaimId\":\"a9a9fba0-ebc3-5a37-863e-9e9c860a3d05\"}]}"
+          }
+        ],
+        "state": {
+          "currentProductId": null
+        }
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Trả đủ áo có bán riêng, M còn và giá 499.000đ theo đúng selling option M. Ngắn, dễ hiểu, không nhầm tổng tồn/cả set thành áo riêng.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "slot": 22,
+      "caseId": "b1-search-read-v3",
+      "runtime": {
+        "latest": "Chị thấy mẫu SQ223 trên trang mà giờ tìm không ra. Em kiểm tra giúp chị mẫu đó còn không, giá bao nhiêu nhé.",
+        "history": [],
+        "initialProductCodes": []
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ mẫu Set quần Xuân Thảo (SQ223) nhà em vẫn còn hàng chị nhé! Mẫu này shop có bán cả set hoặc mua lẻ từng món, cụ thể:\n\n- **Cả set:** 699.000đ\n- **Áo rời:** 429.000đ\n- **Quần rời:** 429.000đ\n\nChị muốn lấy cả set hay chọn mua lẻ món nào thì báo em để em chuẩn bị size cho mình nha ạ!",
+        "fallbackId": null
+      },
+      "publicContext": {
+        "products": [
+          {
+            "subjectRef": "SQ223",
+            "availableOffers": [
+              "AO",
+              "QUAN",
+              "SET_QUAN"
+            ],
+            "attributes": null,
+            "content": {
+              "description": "Thiết kế trẻ trung và nữ tính với chất liệu vải thô đục lỗ in họa tiết hoa, mang lại cảm giác thoáng mát, nhẹ và đứng form đẹp khi mặc. Bề mặt vải được phối dây ren tinh tế, tạo điểm nhấn mềm mại và giúp tổng thể trang phục trở nên nổi bật hơn. Áo được thiết kế 1 lớp form gọn gàng, chất liệu đứng form giúp tôn dáng và mang lại vẻ ngoài thanh lịch nhưng vẫn trẻ trung. Họa tiết hoa kết hợp chi tiết ren tạo nên phong cách nhẹ nhàng và nữ tính. Phối cùng quần 2 lớp cạp chun, thiết kế thoải mái và dễ mặc, phù hợp với nhiều dáng người. Form quần gọn gàng giúp tổng thể set đồ trở nên năng động nhưng vẫn giữ được nét tinh tế.",
+              "metadata": {
+                "authority": "WEBSTORE_XML",
+                "expiresAt": null,
+                "freshForSeconds": null,
+                "freshnessState": "FRESH",
+                "observedAt": "2026-09-28T04:31:05.725Z",
+                "sourceVersion": "catalog-v2"
+              },
+              "productName": "Set quần Xuân Thảo",
+              "productUrl": null
+            },
+            "presentation": {
+              "displayName": "Set quần Xuân Thảo",
+              "productId": "SQ223",
+              "provenance": {
+                "content": {
+                  "authority": "WEBSTORE_XML",
+                  "expiresAt": null,
+                  "freshForSeconds": null,
+                  "freshnessState": "FRESH",
+                  "observedAt": "2026-09-28T04:31:05.725Z",
+                  "sourceVersion": "catalog-v2"
+                },
+                "contentHash": "20124a76ba90fb803a536142c908cd5cfd9249f8ed9ef7ef74b3ab5ff7b28998",
+                "freshnessState": "FRESH",
+                "identity": {
+                  "authority": "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+                  "expiresAt": null,
+                  "freshForSeconds": null,
+                  "freshnessState": "FRESH",
+                  "observedAt": "2026-09-28T04:31:05.725Z",
+                  "sourceVersion": "catalog-v2"
+                },
+                "inventory": {
+                  "authority": "PANCAKE_POS",
+                  "expiresAt": "2026-10-19T15:04:05.526Z",
+                  "freshForSeconds": 172800,
+                  "freshnessState": "FRESH",
+                  "observedAt": "2026-10-17T15:04:05.526Z",
+                  "sourceVersion": "p2-default"
+                }
+              },
+              "schemaVersion": 1,
+              "variants": [
+                {
+                  "color": "__NO_COLOR__",
+                  "size": "S",
+                  "variantId": "f47d37548ca3d7127ec625ed425d7b68"
+                },
+                {
+                  "color": "__NO_COLOR__",
+                  "size": "M",
+                  "variantId": "c1fe4db2ec4a6400eb7ac5c4cdb2072a"
+                },
+                {
+                  "color": "__NO_COLOR__",
+                  "size": "L",
+                  "variantId": "7d8cfdf21651579f40b7913d26790c18"
+                },
+                {
+                  "color": "__NO_COLOR__",
+                  "size": "XL",
+                  "variantId": "d652d4edd22361442a2d93e1b9f82d55"
+                }
+              ]
+            },
+            "sizeCharts": []
+          }
+        ],
+        "facts": [
+          {
+            "type": "PRICE",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ223",
+              "variantId": "offer:SQ223:AO"
+            },
+            "value": {
+              "amountVnd": 429000,
+              "currency": "VND"
+            }
+          },
+          {
+            "type": "STOCK",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ223",
+              "variantId": "offer:SQ223:QUAN"
+            },
+            "value": {
+              "availableQuantity": 54,
+              "status": "IN_STOCK"
+            }
+          },
+          {
+            "type": "PRICE",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ223",
+              "variantId": "offer:SQ223:SET_QUAN"
+            },
+            "value": {
+              "amountVnd": 699000,
+              "currency": "VND"
+            }
+          },
+          {
+            "type": "STOCK",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ223",
+              "variantId": "offer:SQ223:SET_QUAN"
+            },
+            "value": {
+              "availableQuantity": 46,
+              "status": "IN_STOCK"
+            }
+          },
+          {
+            "type": "PRICE",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ223",
+              "variantId": "offer:SQ223:QUAN"
+            },
+            "value": {
+              "amountVnd": 429000,
+              "currency": "VND"
+            }
+          },
+          {
+            "type": "STOCK",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SQ223",
+              "variantId": "offer:SQ223:AO"
+            },
+            "value": {
+              "availableQuantity": 50,
+              "status": "IN_STOCK"
+            }
+          }
+        ],
+        "policy": [],
+        "state": {
+          "currentProductId": null
+        }
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Tìm đúng SQ223 là Xuân Thảo, báo còn hàng và đúng cả set 699.000đ, áo/quần 429.000đ mỗi món. Ba giá là các lựa chọn mua liên quan, không phạt chỉ vì dạng list. Đoạn báo em để chuẩn bị size hơi dài và mơ hồ về bước thực hiện; không coi đó là receipt đã giữ hàng hay đã tạo đơn.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "slot": 23,
+      "caseId": "b1-buying-concern-v3",
+      "runtime": {
+        "latest": "Theo em chị mua riêng áo Thạch Thảo hay lấy cả bộ? Chị muốn mặc lại nhiều lần, ngân sách tầm 850 nghìn.",
+        "history": [
+          {
+            "role": "customer",
+            "text": "Chị có sẵn chân váy đen dáng suông rồi."
+          }
+        ],
+        "initialProductCodes": [
+          "SV2447"
+        ]
+      },
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "publicContext": {
+        "products": [
+          {
+            "subjectRef": "SV2447",
+            "availableOffers": [
+              "AO",
+              "CV",
+              "SET_VAY"
+            ],
+            "attributes": null,
+            "content": {
+              "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+              "metadata": {
+                "authority": "WEBSTORE_XML",
+                "expiresAt": null,
+                "freshForSeconds": null,
+                "freshnessState": "FRESH",
+                "observedAt": "2026-09-28T04:31:05.725Z",
+                "sourceVersion": "catalog-v2"
+              },
+              "productName": "Set váy Thạch Thảo",
+              "productUrl": null
+            },
+            "presentation": null,
+            "sizeCharts": []
+          }
+        ],
+        "facts": [
+          {
+            "type": "PRICE",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:CV"
+            },
+            "value": {
+              "amountVnd": 449000,
+              "currency": "VND"
+            }
+          },
+          {
+            "type": "STOCK",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:CV"
+            },
+            "value": {
+              "availableQuantity": 64,
+              "status": "IN_STOCK"
+            }
+          },
+          {
+            "type": "STOCK",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:AO"
+            },
+            "value": {
+              "availableQuantity": 112,
+              "status": "IN_STOCK"
+            }
+          },
+          {
+            "type": "PRICE",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "value": {
+              "amountVnd": 799000,
+              "currency": "VND"
+            }
+          },
+          {
+            "type": "STOCK",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:SET_VAY"
+            },
+            "value": {
+              "availableQuantity": 52,
+              "status": "IN_STOCK"
+            }
+          },
+          {
+            "type": "PRICE",
+            "scope": {
+              "kind": "PRODUCT",
+              "productId": "SV2447",
+              "variantId": "offer:SV2447:AO"
+            },
+            "value": {
+              "amountVnd": 499000,
+              "currency": "VND"
+            }
+          }
+        ],
+        "policy": [],
+        "state": {
+          "currentProductId": null
+        }
+      },
+      "holistic": "FALLBACK_OR_NO_SEND",
+      "wholeTurnReason": "Khách nhờ chọn áo hay cả bộ dựa trên chân váy đen đang có và ngân sách; actual outcome chỉ là không trả lời được, không có lời chọn mua. Chưa dùng nháp bị chặn hoặc chi tiết verdict để cứu/chỉnh điểm.",
+      "dimensions": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "slot": 24,
+      "caseId": "b1-policy-used-v3",
+      "runtime": {
+        "latest": "Chị nhận hàng hôm kia, đã cắt tem với giặt qua một lần nhưng chưa mặc ra ngoài. Chị đổi sang mẫu khác được không em?",
+        "history": [],
+        "initialProductCodes": []
+      },
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ quy định đổi hàng của shop là sản phẩm phải còn nguyên tem và chưa giặt ạ. Trường hợp của chị đã cắt tem và giặt rồi nên shop không hỗ trợ đổi được, chị thông cảm giúp em nhé.",
+        "fallbackId": null
+      },
+      "publicContext": {
+        "products": [],
+        "facts": [],
+        "policy": [
+          {
+            "ref": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86",
+            "text": "{\"customerCare\":{\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true},\"exchange\":{\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\",\"maxExchangesPerOrder\":1,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"requiredConditions\":{\"clean\":true,\"originalTags\":true,\"undamaged\":true,\"unused\":true,\"unwashed\":true},\"saleRestriction\":{\"allowedActions\":[\"SIZE\",\"COLOR\"],\"discountThresholdBps\":3000},\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"totalTwoWayShippingFeeVnd\":30000,\"windowDaysFromReceipt\":15},\"inspection\":{\"refusedParcelShippingFeeVnd\":30000,\"tryOnMode\":\"HOLD_UP_ONLY\"},\"marketplacePricing\":{\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\",\"shopeePriceMatch\":false},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"refundBusinessDaysMax\":3,\"refundBusinessDaysMin\":1,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\",\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100}},\"multiItemOffer\":{\"countingUnit\":\"PARENT_PRODUCT_UNIT\",\"discountBps\":500,\"minimumProductCount\":2,\"setAndComboCountAsOne\":true},\"payment\":{\"allowedMethods\":[\"COD\",\"BANK_TRANSFER\"]},\"shipping\":{\"defaultFeeVnd\":30000}}"
+          }
+        ],
+        "state": {
+          "currentProductId": null
+        }
+      },
+      "holistic": "USABLE",
+      "wholeTurnReason": "Hiểu cắt tem và giặt đã loại quyền đổi, từ chối rõ theo tình trạng khách nêu; không mở đầu cho đổi rồi mới phủ định, không bắt liệt kê điều kiện không còn liên quan. Hơi giọng quy định nhưng câu trả lời ngắn và dùng được.",
+      "dimensions": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    }
+  ]
+}

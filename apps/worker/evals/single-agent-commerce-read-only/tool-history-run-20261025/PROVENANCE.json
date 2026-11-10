@@ -1,0 +1,26 @@
+{
+  "implementationBaseSha": "00ffd3ee9075774ed7be13605a07d505886010cd",
+  "programImplementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "bRunSourceSha": "9e352f382e8915d6a1f1c080c75817065da42c63",
+  "postRunFixSha": "94cb6b089321d65cff57d810eb6ad2b3c74627ca",
+  "postRunFixProviderGenerations": 0,
+  "specs": {
+    "docs/specs/c3-single-agent-commerce-architecture-20261004.md": {
+      "sha256": "78e83815495211386081ff646b93ab7f1bfc1cdbfb9fe4cb6c0a4533c2cf1343",
+      "lastGitCommit": "e5e54c85da5045d0529dd1bbe61c2fde8dd96c8b"
+    },
+    "docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md": {
+      "sha256": "14745e37eb9ec9b11bd8a47466c07e4c5ab91f75e5627c4e983aa4f408d1b411",
+      "lastGitCommit": "e5e54c85da5045d0529dd1bbe61c2fde8dd96c8b"
+    },
+    "docs/specs/c3-phase-b-tool-history-fix-plan-20261025.md": {
+      "sha256": "fdc2bc99e032658027c8deae2a64420a560b562280efe05fe1d3f95dd09d5f54",
+      "lastGitCommit": "f35e94a9aa934b80acb211a907b5ef307e6a8e36"
+    }
+  },
+  "stop": "OFFLINE_PRIVACY_REGRESSION; source was clean at operator stop; postfix committed after all model dispatch stopped.",
+  "limits": [
+    "Stateful end-of-job source assertion did not execute after boundary stop; preceding completed jobs have source assertions and all retained requests are bound to9e352f38.",
+    "No independent review completed; no remote CI/merge/deploy/live send/full A qualification."
+  ]
+}

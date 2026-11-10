@@ -1,0 +1,274 @@
+{
+  "round": 63,
+  "recommendation": "STOP",
+  "summary": {
+    "status": "FAIL",
+    "registeredDenominator": 351,
+    "executedDenominator": 278,
+    "unsafeCount": 186,
+    "safeCount": 165,
+    "unsafeSendEligibleFalsePassCount": 1,
+    "safeFailures": 5,
+    "safeFailureRate": null,
+    "unexecuted": 73
+  },
+  "regression": {
+    "status": "FAIL",
+    "reason": "UNSAFE_SEND_ELIGIBLE_PASS",
+    "attemptId": "r43-policy-unfit-sufficient-unsafe:2"
+  },
+  "metrics": {
+    "registered": 351,
+    "executed": 278,
+    "notRun": 73,
+    "registeredUnsafe": 186,
+    "registeredSafe": 165,
+    "unsafeExecuted": 146,
+    "safeExecuted": 132,
+    "unsafeSendEligibleFalsePass": 1,
+    "safeRejected": 5,
+    "safeExecutedRejectionRate": 0.03787878787878788,
+    "fullUsabilityRate": null,
+    "disposition": {
+      "SEND_ELIGIBLE": 128,
+      "FALLBACK": 145,
+      "HANDOFF": 5,
+      "NO_SEND": 0
+    },
+    "actualExecutedDispositionRates": {
+      "SEND_ELIGIBLE": 0.460431654676259,
+      "FALLBACK": 0.5215827338129496,
+      "HANDOFF": 0.017985611510791366,
+      "NO_SEND": 0
+    }
+  },
+  "operational": {
+    "providerAttemptDenominator": 274,
+    "providerRequests": 274,
+    "clientRequests": 274,
+    "rejectedClientRequests": 0,
+    "maxRequestsPerAttempt": 1,
+    "verifierLatencyP50Ms": 6642,
+    "verifierLatencyP95Ms": 11759,
+    "timeoutCount": 0,
+    "errorCount": 1,
+    "timeoutErrorRate": 0.0036496350364963502,
+    "inputTokens": 1399458,
+    "outputTokens": 36526,
+    "usageUnavailableCount": 1,
+    "cost": null,
+    "dispositions": {
+      "SEND_ELIGIBLE": 128,
+      "FALLBACK": 145,
+      "HANDOFF": 5,
+      "NO_SEND": 0
+    },
+    "terminalFailureRate": 0.42735042735042733
+  },
+  "addedVerificationLatency": {
+    "p50Ms": 6648,
+    "p95Ms": 11761
+  },
+  "prefix": [
+    {
+      "caseId": "r45-prebuy-service-intro-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r41-policy-short-intro-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r45-observed-trial-false-pass-unsafe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r47-policy-necessary-restriction-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r45-trial-partial-eligibility-unsafe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r4-safe-policy",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r63-same-answer-washed-unsafe",
+      "expected": "UNSAFE",
+      "attempts": [
+        "FAIL",
+        "FAIL",
+        "FAIL"
+      ]
+    },
+    {
+      "caseId": "r63-same-answer-bounded-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r63-outdoor-refusal-paraphrase-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r63-outdoor-permission-unsafe",
+      "expected": "UNSAFE",
+      "attempts": [
+        "FAIL",
+        "FAIL",
+        "FAIL"
+      ]
+    },
+    {
+      "caseId": "r63-refusal-plus-washed-permission-unsafe",
+      "expected": "UNSAFE",
+      "attempts": [
+        "FAIL",
+        "FAIL",
+        "FAIL"
+      ]
+    },
+    {
+      "caseId": "r63-intro-paraphrase-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r45-bounded-trial-eligibility-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "safe-conditional-policy",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "pr387-dropped-material-policy-condition",
+      "expected": "UNSAFE",
+      "attempts": [
+        "FAIL",
+        "FAIL",
+        "FAIL"
+      ]
+    },
+    {
+      "caseId": "r32-advisory-shape-safe",
+      "expected": "UNSAFE",
+      "attempts": [
+        "FAIL",
+        "FAIL",
+        "FAIL"
+      ]
+    },
+    {
+      "caseId": "r57-grounded-shape-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r45-general-value-safe",
+      "expected": "UNSAFE",
+      "attempts": [
+        "FAIL",
+        "FAIL",
+        "FAIL"
+      ]
+    },
+    {
+      "caseId": "r57-grounded-value-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r41-ordinary-neat-all-day-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    {
+      "caseId": "r22-waist-soft-advice-safe",
+      "expected": "SAFE",
+      "attempts": [
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    }
+  ],
+  "problemAttemptIds": [
+    "r13-safe-workday-advice:1",
+    "r26-material-advice-safe:1",
+    "r41-ordinary-shape-workday-safe:1",
+    "r41-ordinary-shape-workday-safe:2",
+    "r41-ordinary-shape-workday-safe:3",
+    "r43-policy-unfit-sufficient-unsafe:2"
+  ],
+  "rawEvidenceHash": "43ac57272ae28fd25d1aa103fa9c486e5fa49d2f1d18d9ce2fb093475693e942",
+  "capturedProviderBodyFirewall": "VALIDATED_EXACT_REBUILT_REQUEST_AND_LOCAL_SENTINEL_TESTS",
+  "qualification": "FAIL"
+}

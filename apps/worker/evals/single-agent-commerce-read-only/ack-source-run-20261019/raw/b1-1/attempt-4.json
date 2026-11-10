@@ -1,0 +1,57 @@
+{
+  "caseId": "b1-search-read",
+  "sourceMode": "LIVE",
+  "elapsedMs": 28.37719999998808,
+  "runtime": {
+    "latest": "Em xem giúp chị áo dài mã SD375 giá bao nhiêu nhé.",
+    "history": [],
+    "initialProductCodes": []
+  },
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "PROVIDER_ERROR",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "recovery": null,
+    "sendEnabled": false,
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "toolRounds": 0,
+    "toolCalls": 0,
+    "generations": [
+      {
+        "id": "a624d9687d41ced799cc85880a7300b88ed40f8186370e531cfd5e65a4a02a99:owner:1",
+        "role": "owner",
+        "status": "PROVIDER_ERROR",
+        "latencyMs": 26.63040000014007,
+        "telemetry": {
+          "generationId": "a624d9687d41ced799cc85880a7300b88ed40f8186370e531cfd5e65a4a02a99:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": null,
+          "modelVersion": null,
+          "inputTokens": null,
+          "outputTokens": null,
+          "cost": null,
+          "finishReason": null,
+          "requestBytes": 11925,
+          "requestHash": "ff21c4881303211003a469cd81093de16c006ac3f629fb60f454a39cc2ba5695",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "failureStage": "GENERATION",
+          "failureCode": "TRANSPORT_ERROR"
+        }
+      }
+    ],
+    "toolLatencyMs": 0.16070000012405217,
+    "verificationLatencyMs": null
+  },
+  "counters": {
+    "embeddingCalls": 1,
+    "policyReads": 0,
+    "catalogReads": 10,
+    "posReads": 6
+  }
+}

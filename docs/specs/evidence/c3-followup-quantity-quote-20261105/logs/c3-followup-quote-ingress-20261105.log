@@ -1,0 +1,211 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+ ❯ src/single-agent-commerce-ingress.test.ts (178 tests | 1 failed) 18397ms
+   ✓ runs explicit main-C3 evaluation through the persisted egress without OWNER or verifier 116ms
+   ✓ runs pinned-main C3 builders, two passes and guard through shared ingress commit with local HTTP payloads  13859ms
+   ✓ keeps private fallback silent even with a holding policy (customer-image) 16ms
+   ✓ keeps private fallback silent even with a holding policy (private-text) 20ms
+   ✓ completes a definitely uncommitted blocked fallback so the same batch cannot regenerate (public) 23ms
+   ✓ completes a definitely uncommitted blocked fallback so the same batch cannot regenerate (private) 4ms
+   ✓ completes only definite no-commit and does not touch uncertain/already committed Inbox (rejected) 23ms
+   ✓ completes only definite no-commit and does not touch uncertain/already committed Inbox (unknown) 21ms
+   ✓ completes only definite no-commit and does not touch uncertain/already committed Inbox (readback) 24ms
+   ✓ uses current-generation completion without closing a superseding batch 25ms
+   ✓ does not close Inbox after an earlier unknown profile write even if handoff is definitely blocked 35ms
+   ✓ does not close Inbox after an earlier unknown cart write even if handoff is definitely blocked 57ms
+   ✓ does not complete Inbox twice after the checkout invitation transaction already completed it 43ms
+   ✓ commits the owner's relevant price-unavailable handoff and its customer message 23ms
+   ✓ atomically hands off unrecovered provider without another generation 21ms
+   ✓ atomically hands off unrecovered malformed-finish without another generation 27ms
+   ✓ atomically hands off unrecovered timeout without another generation 20ms
+   ✓ atomically hands off unrecovered fail without another generation 28ms
+   ✓ atomically hands off unrecovered uncertain without another generation 25ms
+   ✓ atomically hands off unrecovered malformed-verdict without another generation 29ms
+   ✓ fails closed if recovery commit readback becomes unavailable 15ms
+   ✓ keeps an automatic recovery handoff silent when current policy is silent 16ms
+   ✓ retains V2 executed counters after ingress recovery (normal read=false) 16ms
+   ✓ retains V2 executed counters after ingress recovery (normal read=true) 26ms
+   ✓ accounts V2 recovery attempt when commit is rejected 19ms
+   ✓ accounts V2 recovery attempt when commit is unknown 17ms
+   ✓ accounts V2 recovery attempt when commit is readback 20ms
+   ✓ does not acknowledge an automatic handoff after conflict 20ms
+   ✓ does not acknowledge an automatic handoff after ambiguous 18ms
+   ✓ does not acknowledge an automatic handoff after superseded 14ms
+   ✓ does not acknowledge an automatic handoff after missing-rule 16ms
+   ✓ does not manufacture durable product focus from unbound prose: Không lấy Thạch Thảo nữa, gửi chị mẫu kia. 29ms
+   ✓ does not manufacture durable product focus from unbound prose: Chị đang so Thạch Thảo với Diệp An. 30ms
+   ✓ does not manufacture durable product focus from unbound prose: Cho chị xem bộ Thạch Thảo. 24ms
+   ✓ does not manufacture durable product focus from unbound prose: Mẫu kia cơ em. 24ms
+   ✓ keeps verified closeup on PASS and silently hands off rejected captions (metadata-refresh) 44ms
+   ✓ keeps verified closeup on PASS and silently hands off rejected captions (rejected-caption) 34ms
+   ✓ preserves a benign caption through the shared history redactor 2ms
+   ✓ adds bounded actual image history without evicting customer corrections or exceeding eight entries 2ms
+   ✓ keeps an accepted-image conversation returning when the text history write was lost 23ms
+   ✓ does not call an unavailable delivery history an empty first contact 20ms
+   ✓ hands off rejected first-contact image captions without sending images (code) 31ms
+   ✓ hands off rejected first-contact image captions without sending images (source-title) 24ms
+   ✓ hands off rejected first-contact image captions without sending images (approved-group) 25ms
+   ✓ does not grant first-contact image recovery from not-requested 44ms
+   ✓ does not grant first-contact image recovery from two-titles 33ms
+   ✓ does not grant first-contact image recovery from unresolved-ad 10ms
+   ✓ does not grant first-contact image recovery from unresolved-code 51ms
+   ✓ does not grant first-contact image recovery from shortened-title 51ms
+   ✓ does not grant first-contact image recovery from ambiguous-group 63ms
+   ✓ hands off instead of sending selected images after rejected drafts (cart=false) 41ms
+   ✓ hands off instead of sending selected images after rejected drafts (cart=true) 58ms
+   ✓ does not recover images across a source failure 41ms
+   ✓ does not recover images across a human failure 36ms
+   ✓ does not recover images across a revision failure 43ms
+   ✓ does not recover images across a pending-state failure 37ms
+   ✓ does not recover images across a other-product failure 42ms
+   ✓ finishes mixed media and size intake after a corrected inline call within the unchanged budget 62ms
+   ✓ does not enqueue a partial mixed handoff group after source changes 32ms
+   ✓ does not enqueue a partial mixed handoff group after human changes 24ms
+   ✓ does not enqueue a partial mixed handoff group after revision changes 21ms
+   ✓ does not enqueue a partial mixed handoff group after inbox changes 29ms
+   ✓ does not enqueue a partial mixed handoff group after policy changes 26ms
+   ✓ does not enqueue a partial mixed handoff group after unknown-transaction changes 29ms
+   ✓ keeps customer-requested handoff free of images even when media was selected in an earlier round 61ms
+   ✓ keeps subsequent media requests silent after caption fallback handoff (GENERIC) 50ms
+   ✓ keeps subsequent media requests silent after caption fallback handoff (DETAIL) 42ms
+   ✓ keeps a mixed price/media reply only after whole-draft verification (PASS) 72ms
+   ✓ keeps a mixed price/media reply only after whole-draft verification (UNCERTAIN) 89ms
+   ✓ hands off missing requested feedback silently even when the price in the same batch is available 29ms
+   ✓ retains internal price coverage but a holding allowlist cannot send a partial reply on missing-shop-data handoff 30ms
+   ✓ preserves committed negotiation and silently hands off instead of sending a recovery summary 48ms
+   ✓ does not count the same objection again when a superseded batch gains a new tail 91ms
+   ✓ keeps receipt evidence private and passes the actual batch source guard (textAfter=false) 9ms
+   ✓ keeps receipt evidence private and passes the actual batch source guard (textAfter=true) 6ms
+   ✓ hands unknown customer media to staff with the first media message linkage and no provider exposure 6ms
+   ✓ does not fetch or expose hostile attachment URLs and preserves human ownership 2ms
+   ✓ enqueues approved media and exact final text in one protected response group (false/'SM613') 41ms
+   ✓ enqueues approved media and exact final text in one protected response group (true/'SM613') 59ms
+   ✓ enqueues approved media and exact final text in one protected response group (true/'OTHER1') 53ms
+   ✓ binds current context from verified explicit/ad/state sources without guessing from reads ('SM613') 18ms
+   ✓ binds current context from verified explicit/ad/state sources without guessing from reads ('OTHER1') 20ms
+   ✓ binds current context from verified explicit/ad/state sources without guessing from reads ('SM613') 24ms
+   ✓ binds current context from verified explicit/ad/state sources without guessing from reads (null) 9ms
+   ✓ fills the public history window after private rows without duplicating the latest batch 26ms
+   ✓ keeps detected checkout fields private before history or either model (Nguyễn Thị Lan) 19ms
+   ✓ keeps detected checkout fields private before history or either model (Tên: Nguyễn Thị Lan
+SĐT: 0900000001) 8ms
+   ✓ keeps detected checkout fields private before history or either model (0900000001) 11ms
+   ✓ keeps detected checkout fields private before history or either model (12 Đường Số 3, Quận 7, TP.HCM) 6ms
+   ✓ keeps detected checkout fields private before history or either model (COD) 6ms
+   ✓ allows a public product question during pending FULL_NAME without a private intake commit 38ms
+   ✓ allows a public product question during pending PHONE without a private intake commit 39ms
+   ✓ allows a public product question during pending ADDRESS without a private intake commit 29ms
+   ✓ allows a public product question during pending PAYMENT_METHOD without a private intake commit 29ms
+   ✓ keeps a mixed detected private/public inbound in one private path (Tên: Nguyễn Thị Lan, chị đổi sang áo lẻ nhé.) 6ms
+   ✓ keeps a mixed detected private/public inbound in one private path (Chị lấy thêm áo L. SĐT: 0900000001) 8ms
+   ✓ keeps a mixed detected private/public inbound in one private path (Đổi sang áo lẻ nhé. Địa chỉ: 12 Đường Số 3, Quận 7, TP.HCM) 7ms
+   ✓ keeps a mixed detected private/public inbound in one private path (Nguyễn Thị Lan
+Đổi sang áo lẻ cho chị.) 7ms
+   ✓ does not classify the public request's business intent to interrupt checkout: Chị đổi sang áo lẻ nhé. 2ms
+   ✓ does not classify the public request's business intent to interrupt checkout: Lấy thêm áo L navy cho chị. 2ms
+   ✓ does not classify the public request's business intent to interrupt checkout: Giá hơi cao, bớt cho chị được không? 2ms
+   ✓ does not classify the public request's business intent to interrupt checkout: Cảm ơn em nhé. 2ms
+   ✓ does not classify the public request's business intent to interrupt checkout: Chị muốn nhận hàng trước thứ Sáu, kịp không em? 2ms
+   ✓ keeps the entire inbound batch private when one separate fragment is private: Lan 7ms
+   ✓ keeps the entire inbound batch private when one separate fragment is private: 12 Đường Số 3 7ms
+   ✓ retains existing private field syntax and marker protection: Lan 2ms
+   ✓ retains existing private field syntax and marker protection: Nguyễn Thị Lan 2ms
+   ✓ retains existing private field syntax and marker protection: 0900000001 3ms
+   ✓ retains existing private field syntax and marker protection: 12 Đường Số 3, Quận 7, TP.HCM 2ms
+   ✓ retains existing private field syntax and marker protection: COD 2ms
+   ✓ retains existing private field syntax and marker protection: [PHONE] 2ms
+   ✓ does not resume the owner for a superseded pending checkout interruption 5ms
+   ✓ does not resume the owner after HUMAN takes over pending checkout 6ms
+   ✓ starts the independent generation read while current authority is being loaded 29ms
+   ✓ persisted ingress source and final revision > reaches the actual private preview without model or extra catalog reads (named=true, separate fields=false) 18ms
+   ✓ persisted ingress source and final revision > reaches the actual private preview without model or extra catalog reads (named=false, separate fields=false) 13ms
+   ✓ persisted ingress source and final revision > reaches the actual private preview without model or extra catalog reads (named=true, separate fields=true) 17ms
+   ✓ persisted ingress source and final revision > never sends a legacy cart-summary fallback regardless of current source (READY) 26ms
+   ✓ persisted ingress source and final revision > never sends a legacy cart-summary fallback regardless of current source (PRICE_CHANGED) 28ms
+   ✓ persisted ingress source and final revision > never sends a legacy cart-summary fallback regardless of current source (UNAVAILABLE) 26ms
+   ✓ persisted ingress source and final revision > does not send a static fallback when handoff is unavailable ([]) 8ms
+   ✓ persisted ingress source and final revision > does not send a static fallback when handoff is unavailable ([ 'SM613', 'OTHER1', 'OTHER2' ]) 26ms
+   ✓ persisted ingress source and final revision > enqueues a policy-only generated reply without a product and still verifies it 13ms
+   ✓ persisted ingress source and final revision > binds only products with actual verified claims after other candidates were loaded 53ms
+   ✓ persisted ingress source and final revision > does not send a static fallback or replay an existing unrefreshable cart 20ms
+   ✓ persisted ingress source and final revision > does not write customer state after a newer Inbox generation arrives during owner generation 18ms
+   ✓ persisted ingress source and final revision > does not rebase a verified reply onto a conversation revision changed after final tools readback 23ms
+   ✓ persisted ingress source and final revision > does not write customer state after authority transfers to a human during generation 14ms
+   ✓ persisted ingress source and final revision > enqueues an unchanged verified world with precisely its conversation revision 18ms
+   ✓ reports exact binding mismatch without sending when egress readback changes 22ms
+   ✓ provides opening context from actual ingress history: ad 22ms
+   ✓ provides opening context from actual ingress history: organic 22ms
+   ✓ provides opening context from actual ingress history: returning 25ms
+   ✓ provides opening context from actual ingress history: private-history 22ms
+   ✓ passes the opening card and chosen images through the existing verifier and egress group 53ms
+   ✓ composes ingress with the real scoped source adapter and no product seed: ad 49ms
+   ✓ composes ingress with the real scoped source adapter and no product seed: explicit 34ms
+   ✓ composes ingress with the real scoped source adapter and no product seed: missing-ad 9ms
+   ✓ explicit quote uses the real group egress before committing: unchanged 52ms
+   ✓ explicit quote uses the real group egress before committing: revision 51ms
+   ✓ explicit quote uses the real group egress before committing: media 46ms
+   ✓ opening rule attaches media to early FINAL through actual ingress: Dạ chị. 34ms
+   ✓ opening rule attaches media to early FINAL through actual ingress: Shop không hẹn sáng mai chị nhé. 33ms
+   ✓ opening rule attaches media to early FINAL through actual ingress: Áo 499.000đ chị nhé. 30ms
+   ✓ opening rule cannot send an early bare quote without a valid photo 24ms
+   ✓ opening private input cannot commit a code-only message without prior accepted shop output 9ms
+   ✓ CUSTOMER-only dialogue never substitutes for prior accepted shop output 33ms
+   ✓ durable returning proof keeps no-photo replies available 19ms
+   ✓ unknown prior-output source never authorizes a bare opening response 14ms
+   ✓ egress independently rejects an evaluation runner that bypasses mandatory preparation 19ms
+   ✓ prior-output cutoff precedes both source time and durable receipt time 28ms
+   ✓ opening checkout confirm commits the native missing-field question and photo in one group 40ms
+   ✓ source-proven unlabelled cart uses generic opening media without changing its tuple: FINAL 52ms
+   ✓ source-proven unlabelled cart uses generic opening media without changing its tuple: CONFIRM 40ms
+   ✓ source-proven unlabelled cart uses generic opening media without changing its tuple: PRIVATE 14ms
+   ✓ unlabelled source media proof cannot authorize changed or constrained cart: unavailable 20ms
+   ✓ unlabelled source media proof cannot authorize changed or constrained cart: physical-constraint 27ms
+   ✓ unlabelled source media proof cannot authorize changed or constrained cart: tuple-change 23ms
+   ✓ noncanonical source sentinel cannot prove unlabelled media: PUBLIC 24ms
+   ✓ noncanonical source sentinel cannot prove unlabelled media: PRIVATE 9ms
+   ✓ unknown cart component colour is not canonical unlabelled proof: PUBLIC 26ms
+   ✓ unknown cart component colour is not canonical unlabelled proof: PRIVATE 8ms
+   ✓ unlabelled private preparation cannot outlive current authority or evidence: source 13ms
+   ✓ unlabelled private preparation cannot outlive current authority or evidence: cart 8ms
+   ✓ unlabelled private preparation cannot outlive current authority or evidence: late-cart 12ms
+   ✓ unlabelled private preparation cannot outlive current authority or evidence: revision 11ms
+   ✓ unlabelled private preparation cannot outlive current authority or evidence: authority 10ms
+   ✓ opening private checkout asks the next missing field with product photo and zero models 16ms
+   ✓ opening checkout preparation fails before checkout commit: missing 9ms
+   ✓ opening checkout preparation fails before checkout commit: authority 8ms
+   ✓ opening checkout preparation fails before checkout commit: source 10ms
+   ✓ opening checkout preparation fails before checkout commit: policy 11ms
+   ✓ public checkout image preparation shares the already consumed six-call budget 42ms
+   ✓ opening private preview binds each same-product purchase variant to its own stock source: changed=false 23ms
+   ✓ opening private preview binds each same-product purchase variant to its own stock source: changed=true 19ms
+   ✓ expiry while preparing a code-owned preview is a known SOURCE failure before transaction dispatch 19ms
+   × returning total before colour selection reaches native egress without a cart or another image: unchanged 78ms
+     → expected undefined to be null
+   ✓ returning total before colour selection reaches native egress without a cart or another image: revision 51ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/single-agent-commerce-ingress.test.ts > returning total before colour selection reaches native egress without a cart or another image: unchanged
+AssertionError: expected undefined to be null
+
+- Expected: 
+null
+
++ Received: 
+undefined
+
+ ❯ src/single-agent-commerce-ingress.test.ts:1360:192
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 177 passed (178)
+   Start at  22:22:01
+   Duration  22.90s (transform 3.80s, setup 0ms, collect 3.56s, tests 18.40s, environment 0ms, prepare 248ms)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/single-agent-commerce-ingress.test.ts

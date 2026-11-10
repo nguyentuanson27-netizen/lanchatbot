@@ -1,0 +1,181 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+ ✓ src/vertex.test.ts (34 tests) 1434ms
+   ✓ Vertex shadow client > retries one transient Track C Judge V2 timeout before recording the case as failed  1014ms
+ ✓ src/track-c-c3-two-pass-candidate.test.ts (48 tests) 1090ms
+ ✓ src/realtime-sales-cycle.test.ts (75 tests) 2678ms
+ ✓ src/realtime-runner.test.ts (62 tests) 1373ms
+ ✓ src/gate-e-registration.test.ts (26 tests) 3363ms
+   ✓ Gate E immutable registration boundary > derives provenance, request bytes, scores, and atomic evidence inside one boundary  2058ms
+   ✓ Gate E immutable registration boundary > derives registration provenance from Git evidence instead of caller assertions  382ms
+ ✓ src/bf01-realtime-runner.integration.test.ts (24 tests) 1932ms
+   ✓ BF-01 runner reconciliation > runs the complete B3 corpus through one capture-only live-path adapter  1357ms
+ ✓ src/bf02-realtime-runner.test.ts (24 tests) 1205ms
+   ✓ BF-02 realtime context fallback > uses the initial schema fallback without a second grounding call  486ms
+ ✓ src/track-c-replay.test.ts (24 tests) 2456ms
+ ✓ src/track-b-commerce-authority-preprod-cli.test.ts (28 tests) 3798ms
+   ✓ Track B PREPROD V2/LKG operator boundary > can be imported in a production-like process without invoking the CLI main  2684ms
+   ✓ Track B PREPROD V2/LKG operator boundary > persists immutable startup artifacts read-only  945ms
+ ✓ src/df13-commerce-preprod-startup-authority.test.ts (8 tests) 6270ms
+   ✓ DF13 pre-production startup authority > accepts only the closed Commerce startup-package shape  495ms
+   ✓ DF13 pre-production startup authority > deep-freezes a copied Commerce startup package before authority validation  1098ms
+   ✓ DF13 pre-production startup authority > admits only an exact DATABASE Commerce identity bound to a validated immutable release package  2069ms
+   ✓ DF13 pre-production startup authority > rejects the active Track B bundle when paired with historical DF13 evidence  1581ms
+   ✓ DF13 pre-production startup authority > blocks a COMMERCE startup whose release source cannot prove the evidence revision  1009ms
+ ✓ src/realtime-media-recognition.test.ts (28 tests) 1145ms
+   ✓ V2 realtime recognition pipeline > aborts the reranker when the total deadline expires during earlier stages  1016ms
+ ✓ src/df13-release-candidate-evidence-cli.test.ts (2 tests) 714ms
+   ✓ DF13 release-candidate evidence CLI > reports stale historical Gate E evidence without an activation path  701ms
+ ✓ src/df13-release-candidate-evidence.test.ts (14 tests) 7153ms
+   ✓ DF13 release-candidate source evidence > fails closed when Track B source no longer matches the historical Gate E candidate  643ms
+   ✓ DF13 release-candidate source evidence > runtime-freezes the full evidence package rather than only its top level  486ms
+   ✓ DF13 release-candidate source evidence > fails closed when the trusted release ref moves during evidence derivation  694ms
+   ✓ DF13 release-candidate source evidence > returns a manifest mismatch instead of throwing when a required field is missing  947ms
+   ✓ DF13 release-candidate source evidence > blocks a semantically identical manifest whose exact blob/content identity changed  431ms
+   ✓ DF13 release-candidate source evidence > fails closed when any pending DF13 migration artifact cannot be re-derived  544ms
+   ✓ DF13 release-candidate source evidence > rejects self-hash substitution and rollback-contract substitution  647ms
+   ✓ DF13 release-candidate source evidence > rejects a substituted manifest field even when the package self-hash is recomputed  768ms
+   ✓ DF13 release-candidate source evidence > rejects substituted manifest blob identity even when hashes are well-shaped and self-hash is recomputed  461ms
+   ✓ DF13 release-candidate source evidence > rejects a substituted pending-migration identity even when the package self-hash is recomputed  497ms
+   ✓ DF13 release-candidate source evidence > returns MISMATCH instead of throwing for a malformed nested evidence object  1015ms
+ ✓ src/df13-commerce-cutover-evidence.integration.test.ts (2 tests) 1258ms
+   ✓ DF13 cutover release-evidence seam > fails closed before the cutover protocol when historical Gate E evidence is stale  517ms
+   ✓ DF13 cutover release-evidence seam > preserves a definitive manifest-integrity reason and never acquires the fence  737ms
+ ✓ src/track-b-release-candidate-evidence-cli.test.ts (10 tests) 1056ms
+   ✓ Track B release-candidate evidence CLI > emits a self-validating side-effect-free v22 release packet  965ms
+ ✓ src/track-b-release-candidate-evidence.test.ts (4 tests) 1125ms
+   ✓ Track B release candidate evidence > binds final v22 evidence and the exact V1-to-V2 authority mutation  1087ms
+ ✓ src/bf08-realtime-runner.integration.test.ts (73 tests) 990ms
+ ✓ src/single-agent-commerce-read-only.test.ts (23 tests) 978ms
+ ✓ src/single-agent-commerce-effects.test.ts (72 tests) 1933ms
+ ✓ src/df13-first-preprod-commerce-version-preparer-cli.test.ts (4 tests) 9646ms
+   ✓ DF13 first-PREPROD COMMERCE version preparer CLI > binds a prepared COMMERCE version into an immutable startup package without moving a pointer  1171ms
+   ✓ DF13 first-PREPROD COMMERCE version preparer CLI > attests one stable annotated tag object and rejects lightweight, branch, and moved refs  8433ms
+ ✓ src/p23c-publisher.test.ts (18 tests) 571ms
+ ✓ src/track-c-c3-journey-adapter.test.ts (9 tests) 827ms
+ ✓ src/bf07-realtime-runner.integration.test.ts (10 tests) 924ms
+   ✓ BF-07 realtime multi-product clarification > keeps omitted, explicit legacy, and shadow CLARIFY_V1 on the prior path  401ms
+ ✓ src/single-agent-commerce-read-only-tools.test.ts (47 tests) 1180ms
+ ✓ src/p23c-jobs.test.ts (5 tests) 548ms
+   ✓ P2.3C approved Qdrant jobs > publishes only explicit registry attributes with their own integrity identity  372ms
+ ✓ src/bf02-review-plan.test.ts (6 tests) 737ms
+   ✓ BF-02 review-plan regressions > does not treat customer measurements as explicit product IDs  435ms
+ ✓ src/media-recognition-v2-image-pipeline.test.ts (30 tests) 1845ms
+   ✓ decodes a real PNG through the installed ffmpeg with canonical input options  1626ms
+ ✓ src/vertex-baseline.test.ts (3 tests) 1475ms
+   ✓ baseline model capability > rejects Context V2 symbols even when imported through a workspace barrel  1176ms
+ ✓ src/single-agent-commerce-ingress.test.ts (30 tests) 1588ms
+   ✓ does not count the same objection again when a superseded batch gains a new tail  351ms
+ ✓ src/track-c-c3-two-pass-quality-adapter.test.ts (11 tests) 559ms
+ ✓ src/unbounded-multi-product-text.test.ts (14 tests) 475ms
+ ✓ src/track-c-c3-post-pr358-behavior.test.ts (10 tests) 364ms
+ ✓ src/realtime-golden-transcripts.test.ts (12 tests) 508ms
+ ✓ src/bf01-typed-intent-reconciliation.integration.test.ts (4 tests) 368ms
+ ✓ src/p23a-registry-sync.test.ts (13 tests) 510ms
+ ✓ src/customer-url-policy.test.ts (134 tests) 323ms
+ ✓ src/single-agent-commerce-persistence.test.ts (11 tests) 392ms
+ ✓ src/p23b-metadata-staging.test.ts (33 tests) 322ms
+ ✓ src/track-b-commerce-authority-activation.test.ts (33 tests) 219ms
+ ✓ src/single-agent-commerce.test.ts (2 tests) 324ms
+ ✓ src/gate-e-operational.test.ts (14 tests) 378ms
+ ✓ src/single-agent-commerce-handoff.test.ts (14 tests) 322ms
+ ✓ src/track-c-c2-journey-contract.test.ts (18 tests) 703ms
+ ✓ src/df13-runtime-authority-boundary.integration.test.ts (7 tests) 389ms
+   ✓ DF13 authority selection in the deployed BF01/BF02 RealtimeRunner path > bootstraps a pristine Commerce conversation through the held fence and captures its first Context V2 snapshot  302ms
+ ✓ src/delivery-health.test.ts (4 tests) 263ms
+ ✓ src/shadow-runner.test.ts (7 tests) 225ms
+ ✓ src/google-sheets-client.test.ts (2 tests) 331ms
+ ✓ src/track-c-quality-suite-gate.test.ts (6 tests) 374ms
+ ✓ src/foundation-runtime-boundary.test.ts (2 tests) 681ms
+   ✓ foundation-safe realtime entry > has no production import or runtime adapter for BF-03  669ms
+ ✓ src/single-agent-commerce-state.test.ts (31 tests) 497ms
+ ✓ src/gemini-embedding-2-client.test.ts (17 tests) 218ms
+ ✓ src/media-input-limit.test.ts (4 tests) 221ms
+ ✓ src/vertex-media-reranker.test.ts (20 tests) 185ms
+ ✓ src/track-b-commerce-authority-preprod-adapter.test.ts (21 tests) 382ms
+ ✓ src/single-agent-commerce-media.test.ts (12 tests) 408ms
+ ✓ src/track-c-offline-candidate.test.ts (15 tests) 258ms
+ ✓ src/image-recognition-qdrant.test.ts (22 tests) 207ms
+ ✓ src/single-agent-commerce-grounded-state.test.ts (20 tests) 333ms
+ ✓ src/single-agent-commerce-session.test.ts (10 tests) 329ms
+ ✓ src/context-v2-candidate.test.ts (18 tests) 189ms
+ ✓ src/single-agent-semantic-verifier-boundary.test.ts (53 tests) 256ms
+ ✓ src/p23c-hash-v3.test.ts (11 tests) 162ms
+ ✓ src/pre-sale-policy.test.ts (24 tests) 103ms
+ ✓ src/realtime-product-facts-v2.test.ts (11 tests) 159ms
+ ✓ src/context-v2-evaluation.test.ts (19 tests) 160ms
+ ✓ src/track-c-quality-v2-evaluator.test.ts (6 tests) 171ms
+ ✓ src/single-agent-commerce-read-only-sources.test.ts (7 tests) 200ms
+ ✓ src/track-b-protected-claim-boundary.test.ts (18 tests) 89ms
+ ✓ src/context-v2.test.ts (10 tests) 351ms
+ ✓ src/realtime-loop.test.ts (2 tests) 82ms
+ ✓ src/realtime-r32.2-compatibility-shield.test.ts (12 tests) 122ms
+ ✓ src/gate-e-output-interpreter.test.ts (9 tests) 103ms
+ ✓ src/p23c-recognition-publisher.test.ts (23 tests) 118ms
+ ✓ src/df13-commerce-cutover.test.ts (30 tests) 98ms
+ ✓ src/pos-snapshot-runner.test.ts (10 tests) 127ms
+ ✓ src/track-c-c3-sales-quality-candidate.test.ts (4 tests) 114ms
+ ✓ src/df13-commerce-runtime-composition.test.ts (6 tests) 52ms
+ ✓ src/df06-commerce-binding-architecture.test.ts (6 tests) 197ms
+ ✓ src/bf03-correction-containment.benchmark.test.ts (2 tests) 46ms
+ ✓ src/missing-commerce-signal.test.ts (19 tests) 73ms
+ ✓ src/track-c-quality-judge.test.ts (11 tests) 70ms
+ ✓ src/track-c-c3-v5-stage-judge.test.ts (3 tests) 88ms
+ ✓ src/track-b-live-path-replay.test.ts (6 tests) 188ms
+ ✓ src/messenger-canary-scenarios.test.ts (30 tests) 78ms
+ ✓ src/realtime-sales-catalog.test.ts (14 tests) 147ms
+ ✓ src/df13-first-preprod-behavior-writer.test.ts (9 tests) 44ms
+ ✓ src/df13-commerce-runtime-context.test.ts (6 tests) 36ms
+ ✓ src/track-c-must-pass.test.ts (15 tests) 38ms
+ ✓ src/canonical-buying-authority.test.ts (4 tests) 36ms
+ ✓ src/pos-snapshot-core.test.ts (19 tests) 74ms
+ ✓ src/decision-observability.test.ts (8 tests) 42ms
+ ✓ src/df13-commerce-runtime-finalization.test.ts (5 tests) 38ms
+ ✓ src/single-agent-commerce-read-only-context.test.ts (5 tests) 35ms
+ ✓ src/dataset-prelabel-runner.test.ts (6 tests) 34ms
+ ✓ src/df13-commerce-runtime-executor.test.ts (5 tests) 34ms
+ ✓ src/realtime-reply-differential.test.ts (8 tests) 43ms
+ ✓ src/size-chart-eligibility.test.ts (14 tests) 33ms
+ ✓ src/track-c-quality-suite.test.ts (2 tests) 35ms
+ ✓ src/commerce-authority-comparison.test.ts (20 tests) 33ms
+ ✓ src/meta-outbox-dispatcher.test.ts (9 tests) 37ms
+ ✓ src/df13-commerce-authority-fence.test.ts (7 tests) 27ms
+ ✓ src/track-b-post-generation-authority.test.ts (9 tests) 41ms
+ ✓ src/df13-runtime-authority-boundary.test.ts (3 tests) 17ms
+ ✓ src/verified-product-context.test.ts (13 tests) 27ms
+ ✓ src/track-c-quality-v2-gate.test.ts (11 tests) 29ms
+ ✓ src/media-resolution.test.ts (12 tests) 26ms
+ ✓ src/track-c-quality-v2-scoring.test.ts (6 tests) 23ms
+ ✓ src/df13-first-preprod-commerce-version-preparer.test.ts (3 tests) 29ms
+ ✓ src/confirmation-classifier.test.ts (11 tests) 28ms
+ ✓ src/single-agent-commerce-checkout.test.ts (3 tests) 31ms
+ ✓ src/media-recognition-v2-config.test.ts (7 tests) 21ms
+ ✓ src/bounded-concurrency.test.ts (5 tests) 23ms
+ ✓ src/ad-lead-qualification.test.ts (6 tests) 20ms
+ ✓ src/gate-e-git-reader.test.ts (3 tests) 20ms
+ ✓ src/df13-commerce-default-off-consumer.test.ts (4 tests) 18ms
+ ✓ src/bf07-multi-product-clarification.test.ts (5 tests) 23ms
+ ✓ src/df04-normalization-architecture.test.ts (4 tests) 20ms
+ ✓ src/size-chart-extractor.test.ts (4 tests) 19ms
+ ✓ src/bf01-direct-question-reconciliation.test.ts (19 tests) 25ms
+ ✓ src/df13-commerce-authority-contract.test.ts (4 tests) 15ms
+ ✓ src/pancake-tag-dispatcher.test.ts (2 tests) 18ms
+ ✓ src/df13-commerce-fresh-process-executor.test.ts (2 tests) 15ms
+ ✓ src/business-fact-intent-authorization.test.ts (6 tests) 15ms
+ ✓ src/df13-commerce-fence-postgres-provider.test.ts (5 tests) 20ms
+ ✓ src/meta-outbox-operator-validation.test.ts (5 tests) 10ms
+ ✓ src/media-clarification.test.ts (5 tests) 12ms
+ ✓ src/df13-commerce-fence-dispatcher.test.ts (6 tests) 14ms
+ ✓ src/df13-commerce-authority-bundle.test.ts (3 tests) 15ms
+ ✓ src/dataset-prelabel-prompt.test.ts (4 tests) 15ms
+ ✓ src/index.test.ts (2 tests) 11ms
+ ✓ src/bf01-realtime-runner.test.ts (6 tests) 11ms
+ ✓ src/redis-chat-history.test.ts (2 tests) 11ms
+ ✓ src/redis-business-facts.test.ts (2 tests) 11ms
+
+ Test Files  133 passed (133)
+      Tests  1954 passed (1954)
+   Start at  19:11:15
+   Duration  46.85s (transform 33.47s, setup 0ms, collect 190.78s, tests 77.16s, environment 161ms, prepare 86.82s)
+

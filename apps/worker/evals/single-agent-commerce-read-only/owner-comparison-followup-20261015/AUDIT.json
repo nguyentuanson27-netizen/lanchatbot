@@ -1,0 +1,92 @@
+{
+  "status": "PASS",
+  "executableAndFrozenConfigUnchangedSinceSeal": true,
+  "requestPromptHashesAndEffortMatch": true,
+  "runSourceSha": "08b98c2cab0351d4e90d294b51063e94012c45f4",
+  "rawCommit": "c550d950ffec5a1c1e40b27f1008cda7929f299f",
+  "primaryCommit": "a7b2b6584ba46b6e8fabc09da690e55cf2ffd20d",
+  "bindings": [
+    {
+      "slot": 1,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 2,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 3,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 4,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 5,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 6,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 7,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 8,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 9,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 10,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 11,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 12,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    }
+  ],
+  "rawDiskAndGitBlobsVerified": 18,
+  "historicalAEvidenceAndPriorBRoundsUnchanged": true,
+  "actualOwnerGenerations": 12,
+  "actualVerifierGenerations": 12,
+  "maxProviderRequestsPerGeneration": 1,
+  "allHttp200": true,
+  "runtimeToolRounds": 0,
+  "mode": "CODE_PRELOADED_LIVE_SOURCES",
+  "sendEnabled": false,
+  "limits": "Structural audit reuses code binding/readback and captured request records. It does not judge protected semantics or prove GPT native tool calling. Primary marked slots1/3/7 unsafe eligible (slot3 is a pragmatic eligibility implication). All remain failures; no post-result fix or generation."
+}

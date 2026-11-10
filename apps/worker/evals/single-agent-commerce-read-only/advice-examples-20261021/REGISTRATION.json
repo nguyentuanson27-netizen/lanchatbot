@@ -1,0 +1,158 @@
+{
+  "implementationBaseSha": "0a88766d857b77f048cce93ea528c309892992bb",
+  "surface": "NATIVE_B1_OWNER_APPROVED_DIALOGUE_EXAMPLES",
+  "registered": 12,
+  "repetitionsPerArm": 1,
+  "maximumGenerationRequests": 48,
+  "retry": 0,
+  "sendEnabled": false,
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "toolBudget": {
+    "ownerGenerations": 3,
+    "toolRounds": 2,
+    "toolCalls": 6,
+    "verifierGenerations": 1
+  },
+  "launcherHash": "84a43f0c8ba5c46a48db6552f61910d2e93e198f5b6807c4afc4de8d581eeab3",
+  "frozenFiles": {
+    "cases.b1.json": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+    "source-config.b1.json": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+    "manifest.json": "40e54d815bea5ddf9448363ca273c434be0aa14328556bb72a3bb6dfa8aa372d",
+    "prompts/owner.vi.txt": "2d138eadfc0de1d7c268f2d2f4bc876d635a85663539fdbcd3d0a8261f7c1bb1",
+    "prompts/owner-examples.vi.txt": "8ed038312c9bb28d6410818a34646148e4b3ac1ded061f071f13f06e29eb7b70",
+    "prompts/verifier.vi.txt": "8a75dec909a24acf8962b421a9a6cf1f1d208ec01b89401ce94c27ba1dc5299a",
+    "advice-examples-20261021/control.json": "912326e7a993b8fcc910707f50c998c614931968da09f83285283c91b06f8bb2",
+    "advice-examples-20261021/candidate.json": "e4a5d5c8dd5ae128173ea687d700690a12e3aa15ecc14b425a6767994a528b3a",
+    "run.mjs": "0321dc30c35a94e4cccc227a232c75cfdddfd48157201da4a7240cfed430ed5c",
+    "protocol.mjs": "cede7628accbdc34943d735ef45a62810473fd456da01f5ea4eb12ccb562654d",
+    "gemini-inference.mjs": "cce67be6fadaea98b13a26fc61929020dfc305d98c887f6c77fb95f2adbc83bd",
+    "advice-examples-20261021/SCOPE.md": "6aa6388936cf402356ee262e3fff9c750b3219a3857220e7a82cedb9e352dc87",
+    "advice-examples-20261021/run.py": "e7087697e12e966d942c3e4a1a6407c75cfde9be9caa8e9d68d48638c6000417"
+  },
+  "slots": [
+    {
+      "id": "s01",
+      "caseSlot": 7,
+      "caseId": "b1-buying-concern",
+      "arm": "control"
+    },
+    {
+      "id": "s02",
+      "caseSlot": 7,
+      "caseId": "b1-buying-concern",
+      "arm": "candidate"
+    },
+    {
+      "id": "s03",
+      "caseSlot": 15,
+      "caseId": "b1-buying-concern-v2",
+      "arm": "candidate"
+    },
+    {
+      "id": "s04",
+      "caseSlot": 15,
+      "caseId": "b1-buying-concern-v2",
+      "arm": "control"
+    },
+    {
+      "id": "s05",
+      "caseSlot": 23,
+      "caseId": "b1-buying-concern-v3",
+      "arm": "control"
+    },
+    {
+      "id": "s06",
+      "caseSlot": 23,
+      "caseId": "b1-buying-concern-v3",
+      "arm": "candidate"
+    },
+    {
+      "id": "s07",
+      "caseSlot": 17,
+      "caseId": "b1-changed-occasion-v3",
+      "arm": "candidate"
+    },
+    {
+      "id": "s08",
+      "caseSlot": 17,
+      "caseId": "b1-changed-occasion-v3",
+      "arm": "control"
+    },
+    {
+      "id": "s09",
+      "caseSlot": 3,
+      "caseId": "b1-partial-source",
+      "arm": "control"
+    },
+    {
+      "id": "s10",
+      "caseSlot": 3,
+      "caseId": "b1-partial-source",
+      "arm": "candidate"
+    },
+    {
+      "id": "s11",
+      "caseSlot": 12,
+      "caseId": "b1-price-v2",
+      "arm": "candidate"
+    },
+    {
+      "id": "s12",
+      "caseSlot": 12,
+      "caseId": "b1-price-v2",
+      "arm": "control"
+    }
+  ],
+  "reviewCriteria": "SCOPE.md",
+  "sourceComparison": "Initial evidence/source versions must be comparable; model-selected reads may differ. Keep errors and source drift in denominator; no replacements."
+}

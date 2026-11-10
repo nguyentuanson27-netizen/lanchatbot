@@ -1,0 +1,23 @@
+{
+  "command": [
+    "cmd",
+    "/d",
+    "/c",
+    "pnpm",
+    "--filter",
+    "@lana/worker",
+    "exec",
+    "vitest",
+    "run",
+    "src/single-agent-commerce-read-only-tools.test.ts",
+    "src/single-agent-commerce-read-only.test.ts",
+    "src/single-agent-commerce-ingress.test.ts",
+    "src/single-agent-commerce-media.test.ts",
+    "src/single-agent-commerce-media-delivery.test.ts",
+    "src/meta-outbox-dispatcher.test.ts",
+    "src/single-agent-commerce-handoff-delivery.test.ts",
+    "src/single-agent-semantic-verifier-boundary.test.ts"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 33.300541162490845
+}

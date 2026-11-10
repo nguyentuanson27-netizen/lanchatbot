@@ -1,0 +1,118 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+ ❯ src/single-agent-commerce-read-only-tools.test.ts (64 tests | 1 failed) 1178ms
+   ✓ read-only domain tools > makes source offer codes available after discovery before reading protected facts 143ms
+   ✓ read-only domain tools > uses checkout region priority for southern addresses and binds the resolved source key 41ms
+   ✓ read-only domain tools > keeps repeated reads stable but binds a new POS observation even when business values match 40ms
+   ✓ read-only domain tools > rejects search overflow before exposing or binding unretained product evidence 27ms
+   ✓ read-only domain tools > keeps concurrent searches within the same product budget without partial admission 10ms
+   ✓ read-only domain tools > does not leave bound subjects behind when a search candidate fails source validation 2ms
+   ✓ read-only domain tools > rejects a fifth product read without dropping earlier source or claims 12ms
+   ✓ read-only domain tools > uses the supplied product code for lookup even when a garment query accompanies it 6ms
+   ✓ read-only domain tools > does not overflow on readback when a previously empty search source gains content 20ms
+   ✓ read-only domain tools > does not bind a similar product as the requested code, or treat an empty code as discovery 3ms
+   ✓ read-only domain tools > withdraws attributes missing from the current preparation readback instead of retaining old evidence 5ms
+   ✓ read-only domain tools > prepares offers and content without price/stock variants or full-read dependencies 6ms
+   ✓ read-only domain tools > retains content and an explicit missing-offer status when POS is unavailable 5ms
+   ✓ read-only domain tools > reads all selling-option prices from one snapshot while keeping the top-level default price scoped 32ms
+   ✓ read-only domain tools > keeps an explicitly requested option isolated from another option with an unavailable price 9ms
+   ✓ read-only domain tools > retains a usable component and product content when the default offer cannot supply facts 9ms
+   ✓ read-only domain tools > binds each option's filters and ETA even when two offers share a source SKU 34ms
+   ✓ read-only domain tools > rejects option expansion beyond the existing subject bound without a partial list or partial context write 18ms
+   ✓ read-only domain tools > distinguishes confirmed empty selling options from absent or stale POS 4ms
+   ✓ read-only domain tools > preserves the existing claim bound across independently filtered multi-option reads 204ms
+   ✓ read-only domain tools > binds available selling options to the same current verifier snapshot and invalidates changed options 25ms
+   ✓ read-only domain tools > never represents unavailable or stale selling options as verified absence 12ms
+   ✓ read-only domain tools > keeps size-filtered stock attached to the code-read size when only an offer identity resolves 6ms
+   ✓ read-only domain tools > invalidates verified selling options when a fresh snapshot cannot resolve the product 12ms
+   ✓ read-only domain tools > keeps independent offer mappings when fulfillment policy or price is missing 4ms
+   ✓ read-only domain tools > binds delivery ETA to the requested region and invalidates a changed delivery source 32ms
+   × read-only domain tools > search supplies source-bound static evidence without hidden POS reads and revalidates it before eligibility 33ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received: 
+
+  1st spy call:
+
+    Array [
+      "SM613",
+    ]
+
+
+Number of calls: 1
+
+   ✓ read-only domain tools > policy lookup never represents a checked or approved individual exchange 20ms
+   ✓ read-only domain tools > exposes the source-approved payment methods without private payment or checkout data 7ms
+   ✓ read-only domain tools > search and the trusted verifier snapshot use the same existing product evidence after a full read 20ms
+   ✓ read-only domain tools > identifies the resolver's default selling offer and canonical aliases without losing price scope 23ms
+   ✓ read-only domain tools > distinguishes absent POS, stale POS and unavailable offer without deleting independent product content 13ms
+   ✓ read-only domain tools > uses the explicitly supplied source freshness bound and preserves content without POS 11ms
+   ✓ read-only domain tools > reads source policy, keeps missing customerCare explicit and never exposes negotiation internals 11ms
+   ✓ read-only domain tools > explains inspection and exchange together without changing source rules (15 days / 30000 VND / unused=true) 17ms
+   ✓ read-only domain tools > explains inspection and exchange together without changing source rules (7 days / 25000 VND / unused=true) 14ms
+   ✓ read-only domain tools > explains inspection and exchange together without changing source rules (15 days / 30000 VND / unused=false) 12ms
+   ✓ read-only domain tools > policy source changes invalidate old snapshots without changing prompt 8ms
+   ✓ read-only domain tools > does not treat last-known-good policy as a successful current-pointer readback 5ms
+   ✓ read-only domain tools > rejects invented refs and privileged arguments before I/O 1ms
+   ✓ read-only domain tools > turns a verified search match into an allowlisted ref, then reads price/stock 9ms
+   ✓ read-only domain tools > retains independent verified facts when another reader fails 5ms
+   ✓ read-only domain tools > does not erase a verified price because attributes are invalid 7ms
+   ✓ read-only domain tools > returns product evidence when POS is unavailable and marks price/stock missing 3ms
+   ✓ read-only domain tools > rejects cross-shop catalog data and loses old price eligibility on stale readback 14ms
+   ✓ read-only domain tools > keeps both allowed variant claims when comparing sizes of one product 32ms
+   ✓ read-only domain tools > retains current POS facts without inventing missing catalog timestamps or attributes 7ms
+   ✓ read-only domain tools > selects the requested selling offer and keeps its claims distinct from another offer 31ms
+   ✓ offers the existing price card only for first contact (true) 38ms
+   ✓ offers the existing price card only for first contact (false) 5ms
+   ✓ does not supply an opening price card for missing-price 2ms
+   ✓ does not supply an opening price card for stale 4ms
+   ✓ does not supply an opening price card for ambiguous-offer 5ms
+   ✓ keeps a component opening quote separate from the set price and set attributes 14ms
+   ✓ uses verified opening-quote attributes even when search fields disagree (empty=false) 8ms
+   ✓ uses verified opening-quote attributes even when search fields disagree (empty=true) 7ms
+   ✓ does not assign parent attributes to the only remaining AO offer 9ms
+   ✓ does not assign parent attributes to the only remaining CV offer 8ms
+   ✓ does not assign parent attributes to the only remaining QUAN offer 6ms
+   ✓ shares scoped positive-stock sizes with owner and verifier and invalidates a size-only source change 18ms
+   ✓ does not expand confirmed in-stock sizes from empty evidence 6ms
+   ✓ does not expand confirmed in-stock sizes from unknown evidence 4ms
+   ✓ does not expand confirmed in-stock sizes from size-filter evidence 4ms
+   ✓ does not expand confirmed in-stock sizes from stale evidence 3ms
+ ✓ src/single-agent-commerce-ingress.test.ts (69 tests) 2886ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/single-agent-commerce-read-only-tools.test.ts > read-only domain tools > search supplies source-bound static evidence without hidden POS reads and revalidates it before eligibility
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+
+Received: 
+
+  1st spy call:
+
+    Array [
+      "SM613",
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/single-agent-commerce-read-only-tools.test.ts:380:29
+    378|     expect(found.data).toMatchObject({products:[{subjectRef:"SM613",at…
+    379|       content:{description:"Áo cotton dáng suông."}}]});
+    380|     expect(readProduct).not.toHaveBeenCalled();
+       |                             ^
+    381|     expect(tools.snapshot().protectedClaims).toEqual([]);
+    382|     expect(tools.snapshot().runtimeProducts![0]!.content!.description)…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 132 passed (133)
+   Start at  02:14:42
+   Duration  9.48s (transform 4.09s, setup 0ms, collect 8.40s, tests 4.06s, environment 2ms, prepare 1.24s)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-ingress.test.ts

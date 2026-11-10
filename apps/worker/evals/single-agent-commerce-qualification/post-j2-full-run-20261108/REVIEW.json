@@ -1,0 +1,702 @@
+{
+  "reviewKind": "ONE_CONSOLIDATED_ROOT_MANUAL_WHOLE_CONVERSATION_REVIEW",
+  "reviewer": "/root",
+  "independent": false,
+  "blinded": false,
+  "formalQuality": "NOT_GRADED",
+  "sourceSha": "eb134d5d8ba5f3f4099929ba67ee019cad2ba0f4",
+  "worldHash": "878a8091ae59cec41ba0a6d7f1543fd4588ebf30edaa4b0fa48478270a9af236",
+  "caseStatusCounts": {
+    "TASK_OK": 22,
+    "MATERIAL_FAIL": 7,
+    "EXPECTED_HANDOFF": 5
+  },
+  "materialFailureMeaning": "Actual customer task incomplete, not necessarily an unsafe or incorrect draft. Includes1transport failure and1feedback-source/boundary adjudication case.",
+  "cases": [
+    {
+      "caseId": "c-po-20261031-p06",
+      "status": "TASK_OK",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Báo đúng giá ba món989.000đ từ COMPOSITE và gửi ảnh; không tạo combo hay thêm giỏ giả.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-3d38eff1269ee622d9231528d1be1c545b63f9155e64e2a52073799e3e4a9df2-turn-0.json",
+          "sha256": "658ec048aa90711c38911f8e58ddce1f6e1f655a39d44dbc40ad7709d3a0dcaf"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "status": "TASK_OK",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Đã gọi recommend_size riêng COMPONENT/TOP và COMPONENT/PANTS, đều raM; câu trả lời đúng hai scope. Cụm “hệ thống gợi ý” và việc đọc lại chiều cao/cân nặng còn máy móc.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-f22979371f151932f80a1a25c30fe69811668d9647c759bfe723f62d8457566e-turn-0.json",
+          "sha256": "64500ca879ba17ae930856f7dc3db16a631984ded893582728b81f73817c111f"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "status": "MATERIAL_FAIL",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "T2 change_cart_item chuyển SET_VAY→AO nhưng mang color=__NO_COLOR__ từ lựa chọn cũ; trả STOCK_UNAVAILABLE rồi handoff. AO/Trắng/M trong frozen snapshot còn5: không phải shop hết áoM. Thiếu lựa chọn màu khách cần được hỏi, không copy sentinel sang offer mới.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE",
+        "HANDOFF"
+      ],
+      "turns": 2,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-1215a5f5c8aa96f4e9de4d4a51d2d80f39edf23f1c873e5edb4e62512e50e41c-turn-0.json",
+          "sha256": "f1ec35a505031f644e73a91b8d99239a0ef5fa0037c70e1f32278dfa03fa823d"
+        },
+        {
+          "artifact": "native-1215a5f5c8aa96f4e9de4d4a51d2d80f39edf23f1c873e5edb4e62512e50e41c-turn-1.json",
+          "sha256": "2b13c757d62c1d79dcc14562556577c7c4517ed373efb8faad10c483457e19d7"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "status": "MATERIAL_FAIL",
+      "priorStatus": "MATERIAL_FAIL",
+      "reasonVi": "T3 đã chọn quote_product(AO,quantity2), draft tổng978.100đ đúng. Verifier lỗi UPSTREAM_TRANSPORT/GENERATION_TRANSPORT, HTTPstatusnull,1upstream/1client request; không có verdict. Actual terminal handoff, không gửi draft hoặc retry. Đây không phải lỗi cũ hỏi màu thay vì báo tổng.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "HANDOFF"
+      ],
+      "turns": 3,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-3126a2fb78f6ac6806dc16d5de377607afcd08ae6adc2cce4d8bf7002fcd5b9e-turn-0.json",
+          "sha256": "21bf0fd99df5ca64cf87296286e1953a78bdc1974a6ab1222c4052fdb759442a"
+        },
+        {
+          "artifact": "native-3126a2fb78f6ac6806dc16d5de377607afcd08ae6adc2cce4d8bf7002fcd5b9e-turn-1.json",
+          "sha256": "1c2f192ac48bcb26d7cbba07daf6af004dc89ea1fe4b0585024baf77da734a17"
+        },
+        {
+          "artifact": "native-3126a2fb78f6ac6806dc16d5de377607afcd08ae6adc2cce4d8bf7002fcd5b9e-turn-2.json",
+          "sha256": "b9dab95d544a4311c750f0674c0f5e3fa728e2f7528413fc769a9299c31a9089"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p04",
+      "status": "TASK_OK",
+      "priorStatus": "MATERIAL_FAIL",
+      "reasonVi": "ĐủH/W và preference, trảM rồi giữ đúng referent set váy/799.000đ ởT2; không còn malformed trong sample này. Giá được dùng từ context hiện hành.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 2,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-e27dd779ab435fa2e6934c148dbb5b2822a4436d334f245db67668bc6ecbc953-turn-0.json",
+          "sha256": "b9f1ef2122c68645cb49c2bd7077d65c63fff2ad6673ee881d258ba731030c61"
+        },
+        {
+          "artifact": "native-e27dd779ab435fa2e6934c148dbb5b2822a4436d334f245db67668bc6ecbc953-turn-1.json",
+          "sha256": "3b24d26906a4b6d89334023b95afb377ac78c12e94099f0ba16cb83d8c780492"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "status": "TASK_OK",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Lúc chưa rõ nêu đúng hai thiết kế/giá rồi hỏi; khi khách chọn bộ quần, trả đúng SQ2447/769.000đ và ảnh đúng mẫu.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 2,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-546cf854fd2110fc9e435a1cbcf5dae7d1de4c2238febb99e66aa0fe347dc380-turn-0.json",
+          "sha256": "d1812bef9584776a8935665e7548199a43c4ae3a55fcf467f0af03862b510cb5"
+        },
+        {
+          "artifact": "native-546cf854fd2110fc9e435a1cbcf5dae7d1de4c2238febb99e66aa0fe347dc380-turn-1.json",
+          "sha256": "a081e5e44e37127fbf964e62b385008c009c29b34fb124a2c007fc2d92ee907f"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s03",
+      "status": "EXPECTED_HANDOFF",
+      "priorStatus": "EXPECTED_HANDOFF",
+      "reasonVi": "Có DETAIL nhưng confirmedParts rỗng/componentKnown=false, chưa xác nhận phần ren. Draft khẳng định ảnh cận ren bị chặn; handoff có cơ sở theo rule thiếu dữ liệu shop. Chưa xác minh đúng-part/closeup capability.",
+      "actualTerminalByTurn": [
+        "HANDOFF"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-8b20457ab87a617e9a0847ff12c0f84e40f30300c8075f8d656ffb32427177ce-turn-0.json",
+          "sha256": "676acef9920dfa57495b02c351fca744231a3d2d8c4c30f3717a9c77d90dc37f"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s13",
+      "status": "TASK_OK",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Báo đúng499.000đ+30.000đ=529.000đ vềCầnThơ; có ảnh. Phần chất liệu/size thêm hơi dài nhưng không biến thành lỗi nghiêm trọng.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-08db791f6cf110a4ab1cab99268d02c9dec83e3afe9a072d022de16f671d9f74-turn-0.json",
+          "sha256": "89cb5751f7dd081c8639c0542ef459b4522ce06e42715462f97d9b514469cb2c"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "status": "MATERIAL_FAIL",
+      "priorStatus": "MATERIAL_FAIL",
+      "reasonVi": "Tin thích màu/cảm ơn vẫn gọi read_product(AO,be) và select_product_media(TOP,be,GENERIC); dependency failure trước verifier, không có lời ACK gửi khách. Lặp họ lỗi cũ; hai-ca diagnostic trước đã pass không chứng minh ổn định.",
+      "actualTerminalByTurn": [
+        "HANDOFF"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-c2813d5a4a8f57c97309d209923b6b81f5dd839e1ff5c518dacfdb02db0a8d9a-turn-0.json",
+          "sha256": "ab8603c44d86581eb8bad19d2294f4f3926c4b2f63b0a1b021ef89fd5e01d90f"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s16",
+      "status": "MATERIAL_FAIL",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Tool FEEDBACK trả nguồn nhưng verifier cho rằng DETAIL/CLOSEUP+feedback=true chưa chứng minh khách đang mặc. Không có ảnh/reply gửi khách. Cần làm rõ contract/projection và giả định ảnh feedback test; không kết luận verifier chặn sai hay thiếu ảnh toàn bộ. Đây là case chưa hoàn thành cần phân xử nguồn/boundary.",
+      "actualTerminalByTurn": [
+        "HANDOFF"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-6acd6e1b466c91ed1fbc0b2efd86039767aed0e5f23f0dd55b2c33bc68365200-turn-0.json",
+          "sha256": "c8d6137010a8697878c164d6eb7dd536be33b7d44c9630d6fc31b79554fe43d7"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "status": "TASK_OK",
+      "priorStatus": "MATERIAL_FAIL",
+      "reasonVi": "Đủ3reply,162/56→162/51+88/70/94→RELAXED; profile revisions3/4/5 và TOP sizeM hiện hành. Model gửi bốn sửa đổi đúng ngay, không exercise lại bad-HEIGHT5ops recovery. Lặp ba số đo/khẳng định thoải mái vẫn là limitation.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 3,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-ec91d5c047849d260541f9e2ab8bab4bc8cadf59a54a38aa8a4383c3f0fb5fb2-turn-0.json",
+          "sha256": "2a277343a03338e8381c2f1e8d0bf8ab0769517375f29c749a0552177bba8268"
+        },
+        {
+          "artifact": "native-ec91d5c047849d260541f9e2ab8bab4bc8cadf59a54a38aa8a4383c3f0fb5fb2-turn-1.json",
+          "sha256": "95e4c36375193b3ad7c1c88b7f41736e0769cff778cad3b2f9ca51d772dc2ad0"
+        },
+        {
+          "artifact": "native-ec91d5c047849d260541f9e2ab8bab4bc8cadf59a54a38aa8a4383c3f0fb5fb2-turn-2.json",
+          "sha256": "6831202175bf308e217c5f7d9f05cf0d3abbbcf4902be2b91d11d4c111272642"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "status": "MATERIAL_FAIL",
+      "priorStatus": "MATERIAL_FAIL",
+      "reasonVi": "T2 record_negotiation không có cart hợp lệ; draft tự nói “giá niêm yết của hãng/chưa có chương trình giảm thêm” từ unit price/current discount0. VerifierFAIL;T3no-send là hậu quảHUMAN, không là lỗi provider độc lập.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE",
+        "HANDOFF",
+        "NO_SEND"
+      ],
+      "turns": 3,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-38391cfa11f8cdf48480ab7658dbf677db2238f0a00c3e6bd9e59390050a7252-turn-0.json",
+          "sha256": "643872dbd67e826b4d4eb5c0f529dc8548aef2375c212204d4a5741b0668b2f6"
+        },
+        {
+          "artifact": "native-38391cfa11f8cdf48480ab7658dbf677db2238f0a00c3e6bd9e59390050a7252-turn-1.json",
+          "sha256": "798b630b109b47f35065d96617d7a5a9a8f4530979cad720aa73f1c60dfca32b"
+        },
+        {
+          "artifact": "native-38391cfa11f8cdf48480ab7658dbf677db2238f0a00c3e6bd9e59390050a7252-turn-2.json",
+          "sha256": "06d6ec5f10fc3c800fd6212938d1d0967f3eef7bfae315bbb8329a3e62b48890"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "status": "TASK_OK",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Thêm đúngSET_VAY/M với receipt, xin tên còn thiếu; khách nêuCOD được xử lý bởi code nhưng tên chưa có nên vẫn hỏi tên. Không đòi lại thông tin đã đủ hoặc giả hoàn tất checkout.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE",
+        "CODE_OWNED_SEND",
+        "CODE_OWNED_SEND"
+      ],
+      "turns": 3,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-2d8bd9ee311621358c6024e586371eda1c355381519aae686ec657742220a242-turn-0.json",
+          "sha256": "8f536b59d5cd4f657d3dbae96da884543e5fe05cbe8939e93ae6e802f50c9e59"
+        },
+        {
+          "artifact": "native-2d8bd9ee311621358c6024e586371eda1c355381519aae686ec657742220a242-turn-1.json",
+          "sha256": "6fdfd7ee3c7a3a232c3ca3d8c2bf1caa4f32f34313bf0ae268167649caf06651"
+        },
+        {
+          "artifact": "native-2d8bd9ee311621358c6024e586371eda1c355381519aae686ec657742220a242-turn-2.json",
+          "sha256": "76a90884ab3bed5e54e92a45cf586ce399b488cc5c79c0ece078404846b3256c"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p01",
+      "status": "TASK_OK",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Báo áo lẻ499.000đ và gửi ảnh, đúng lựa chọnAO. Mô tả chất liệu/size dài hơn nhu cầu hỏi giá.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-eee7b37b342a090d8c1fc9fd79e5afa665c23a2ca3ac92bf136fadcc05e26119-turn-0.json",
+          "sha256": "7a31e3683505d9c421c32d95b0aaf08cb03d252dcba502d65e40433872c62b0a"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p02",
+      "status": "TASK_OK",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Báo quần lẻ429.000đ đúng PANTS, có ảnh; không nhầm giá set. Câu mô tả và CTA còn chung chung.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-93993aea92b076a2c866fef38dcb5f812717dcc2d6dd6a7d76ca412a436ce917-turn-0.json",
+          "sha256": "46bc246e4d6068dafab71e6e26ddbcddae3ef64bd3c95cb8f3203aeafdfbdf11"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p03",
+      "status": "TASK_OK",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Trả chân váyM còn hàng/449.000đ và ảnh; không suy fit cơ thể từ tồnM.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-4f8d1dde3ad2ed2c65a637c55442f658f163a3201901cff10c76275fabf6daf9-turn-0.json",
+          "sha256": "b3d6960fc53eb1746595f9c26bb834db451ed36f02dd1acc2213aec5e6a7efc4"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-p10",
+      "status": "TASK_OK",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Không bịa mẫu hôm trước; đưa các mẫu từ search hiện có và hỏi khách xác định lại. Không handoff vì thiếu referent khách.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-c3e380a5ba37153adf944e2ebf813e27a3c5337acb29d27d60aaed423362003b-turn-0.json",
+          "sha256": "553b58b51c83628aaa7968f52c14e9c96b54d146a9d994b48fba96bb4faf8374"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-h01",
+      "status": "TASK_OK",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Nguồn test đã có màu áo được duyệt; hỏi chọn trắng/be cho áoL, không tự chọn. “áo lẻ size Thạch Thảo” là lỗi diễn đạt nhỏ; evaluator mục tiêu cũ thiếu màu được đọc theo readiness nguồn hiện hành.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-c235378ecbce0f26263f5d427c4418650017dfe6a704c5e600afb6aac01edfb6-turn-0.json",
+          "sha256": "593fb8529812dbad00638d7d7e806d985efd79cb9571e2bf35c867fdc3856b43"
+        }
+      ]
+    },
+    {
+      "caseId": "c-po-20261031-h02",
+      "status": "TASK_OK",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Ảnh GENERIC có proof hợp lệ, trả đúng999.000đ set KhánhTrang và lựa chọn mua lẻ; không dùng lại ảnh source bịINVALID hay gia hạn clock.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-142178b4527f9577af1f00a31fb75060be0b9379957df03c40ce19e96ee32c6f-turn-0.json",
+          "sha256": "ff30d273564a4bacb78f8bfc6479cc8bc32cbc2c0cca78f172962d3a1e854edc"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s05",
+      "status": "MATERIAL_FAIL",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Reply chỉ chọn SQ748 nhưng4ảnh gửi gồm2SQ748+2SQ675, không giới thiệu/giải thích SQ675. Lệch giữa mẫu tư vấn và ảnh thực gửi gây nhầm khi mua; không phải chỉ lỗi tính từ/giọng. Vòng trước giới thiệu2mẫu và ảnh đúng2mẫu đó. Câu CTA chọn size vẫn là limitation nhỏ riêng.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-73d65b098fbc663c35183d3ee43540c5831ccd27a89c4d8b4c0e5bc90eb4fccb-turn-0.json",
+          "sha256": "25971c14c6ca0bd94e48d81e138feb722d32f5f85ed2fed93957a622d51a232b"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s06",
+      "status": "TASK_OK",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Tư vấn phối trắng/be với quần nâu có sẵn hợp lý, không bịa tính năng. Nhiều tính từ và tên “áo tơ Hàn thảo” chưa tự nhiên.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-5d23bdf70f59bb1f2a9f01359614212ba54782058cc66b07043b69744ce6d8b0-turn-0.json",
+          "sha256": "cf312820214c5a7b65924904a673c35df39411986a021d9e7f5d36f82c1343b8"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "status": "MATERIAL_FAIL",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Đã chọn DiệpAn, nhưng từ nguồn “thiết kế2lớp” chuyển thành “lớp lót kín đáo”. Verifier chặn thêm cấu tạo chưa xác nhận; actual handoff nên chưa giúp khách quyết định. Không tự nới boundary hoặc giả có source lớp lót.",
+      "actualTerminalByTurn": [
+        "HANDOFF"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-c44f9ec23663422b20ca6ffa7f226a3d5141bf81b011149468c32eed0acb6019-turn-0.json",
+          "sha256": "08edd15fdef3959bbdd863168c1835be1d8ad37c61a81dd955f209b59ed09ae2"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s09",
+      "status": "TASK_OK",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Theo hướng dẫn giặt tay ưu tiên/giặt máy túi giặt chế độ nhẹ hiện có; trả được câu hỏi chăm sóc.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-a3c24d358ce68cefd57c7ceb361a4757ed083a4bebf940b23d2d7dae8d90cf96-turn-0.json",
+          "sha256": "984dd75f4eba83d6063a1338fec2b4f30cbc4a9a5493c0ce584af67e044b4aaa"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s10",
+      "status": "EXPECTED_HANDOFF",
+      "priorStatus": "EXPECTED_HANDOFF",
+      "reasonVi": "Yêu cầu đổi màu đơn cũ chưa có order access: handoffORDER_STATUS, không giả đã đổi.",
+      "actualTerminalByTurn": [
+        "HANDOFF"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-2fbe0b982c41023a25d50511d74938965ff0c3b802fcae7e77e025643bd8f382-turn-0.json",
+          "sha256": "5449d1aab7a89ba177ec318c516a8766440667e9814efef20fa5ff5523e95f2e"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s12",
+      "status": "EXPECTED_HANDOFF",
+      "priorStatus": "EXPECTED_HANDOFF",
+      "reasonVi": "Lỗi khóa sau mở hộp được chuyểnDEFECT im lặng theo matrix; không giả duyệt/đổi thành công.",
+      "actualTerminalByTurn": [
+        "HANDOFF"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-8c2c7b01fdfd8d1ae97e529f3b6c1c6669c3fd5a4ac34dc732368ca6ad734bc0-turn-0.json",
+          "sha256": "10678c867850d755e5d11231a8f0c86c3cc800d9891dd73d5324b708247d2694"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s14",
+      "status": "TASK_OK",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Tôn trọng khách trì hoãn; một câu ACK, không hỏi nối hoặc ép chốt.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-696338737e40bf135ebeab5d8b1fb3ec5cbb82ca63cd446d20a34de5c630239c-turn-0.json",
+          "sha256": "b6fa30ad59fd64e0cd805b9ff83c74a9703ce0d8e2ffb98cfb2c5098a552e9c7"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s01",
+      "status": "TASK_OK",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Giá set/món lẻ/tồn từng lựa chọn theo source và có ảnh; câu liệt kê khá dài, chưa coi là cải thiện thuyết phục.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-b077864a6295d49b8ce293f1254617a6432bea72cd4070cf54f9bae53b0fcc7c-turn-0.json",
+          "sha256": "512f5a667f6099f57bf1084dac45cb4dfef64593d735b758da3adb7c4754ada7"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s02",
+      "status": "TASK_OK",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Đúng499.000đ áo lẻ và ảnh; hỏi size tiếp, không tự thêm cả set vào giỏ.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-8913fd18acf7fd3f85f886e794479f3b7f48d53a7086b8e05e2680752f1fd6a9-turn-0.json",
+          "sha256": "c18b42041a0929a5abd8aad658025dacf317869e63590378a282e1ddeac35a6e"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s04",
+      "status": "TASK_OK",
+      "priorStatus": "MATERIAL_FAIL",
+      "reasonVi": "Trả hai màu trắng/be, tách trắng sẵn và be đặt trước đúng snapshot hiện tại; ca được phục vụ ở sample này, chưa chứng minh model ổn định về complete inventory.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-39f5e311a56cbac4cf57b63d2a38bfe06c7bbc9044d2e7dca8b59dbf689cf038-turn-0.json",
+          "sha256": "33d13512131af68858af85e91e63c1d5afefb56dec02948a74af88cccc78ff5e"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s07",
+      "status": "TASK_OK",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "H/W được bảng hỗ trợ, codeM với preference rộng; câu trảM gọn hơn, không tự tính fit từ tồn.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 1,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-eb79a7c02112469a4fdde4e7a2a2e252772b2390ef73192a33a4409fbdfaaa88-turn-0.json",
+          "sha256": "b52f960ce7dadda35215ac242048a6faa715c98314310a60c67aa96e036349a4"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-s11",
+      "status": "EXPECTED_HANDOFF",
+      "priorStatus": "CONTROL_NOT_REACHED",
+      "reasonVi": "Model đọc hai set rồi biến UNRECORDED thành “màu tự nhiên/không chia be”; verifier chặn, handoff đúng source-gap đã đăng ký. Đã chạm nhánh thiếu màu; chưa chứng minh đầy đủ quantity2 trên một tupleBE/L có identity xác định.",
+      "actualTerminalByTurn": [
+        "HANDOFF"
+      ],
+      "turns": 1,
+      "sourceCohort": "SOURCE_UNAVAILABLE",
+      "evidence": [
+        {
+          "artifact": "native-2c5850b52f347847f3f0157c1fc93e35ddbea73e44bad58aae8616ff1a3635de-turn-0.json",
+          "sha256": "81bc1ea4c8b91a22f3d6ec8b59ee98927305cc35e0c50ff31c98e104949012c6"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j3",
+      "status": "TASK_OK",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Tư vấn áo/khả năng phối lại váy và so799.000đ với unit499.000đ+449.000đ đúng; cuối tôn trọng chỉ lấy áo, không thêm váy/giỏ. So sánh948.000đ không phải payment quote mới; không dùng làm proof cho checkout total. Lời tư vấn dài và “em lưu...” dễ mơ hồ nhưng không nói “đã” tạo đơn/giữ hàng.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE"
+      ],
+      "turns": 3,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-99e414aada984b9d364bbe0207b5aedb351e319ebe63c8b41dd00fff76c81b98-turn-0.json",
+          "sha256": "c31e123855242d634e0bd256b9fe4bda26b6fe9a4cbffd8c957d7338fa1b23e6"
+        },
+        {
+          "artifact": "native-99e414aada984b9d364bbe0207b5aedb351e319ebe63c8b41dd00fff76c81b98-turn-1.json",
+          "sha256": "71ba30a5a3edf3c914633e73e70e799dfd88eddf6a47183642e299d0c607bbb1"
+        },
+        {
+          "artifact": "native-99e414aada984b9d364bbe0207b5aedb351e319ebe63c8b41dd00fff76c81b98-turn-2.json",
+          "sha256": "3de5b8bd09dcaa5851aba4897eef34b023646ea520f0ec7e0c99b5bd14aa64c6"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j5",
+      "status": "EXPECTED_HANDOFF",
+      "priorStatus": "EXPECTED_HANDOFF",
+      "reasonVi": "ORDER_STATUS handoff ởT1, hai tin sau giữHUMAN/no-send; không tự đổi owner hay gửi lời bot/nhân viên.",
+      "actualTerminalByTurn": [
+        "HANDOFF",
+        "NO_SEND",
+        "NO_SEND"
+      ],
+      "turns": 3,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-3012fe155724fd63e4ca630785f0d4374719561dc7f30f623641aa829732aa10-turn-0.json",
+          "sha256": "b3ff2dfcef9429985e60852c3bee20a38dc15f7f426bc1f7de0e96addc9b7cd3"
+        },
+        {
+          "artifact": "native-3012fe155724fd63e4ca630785f0d4374719561dc7f30f623641aa829732aa10-turn-1.json",
+          "sha256": "8301dad7e8f294ce744f60dc90f18295613d3d4777cff816fa26c910691dbe23"
+        },
+        {
+          "artifact": "native-3012fe155724fd63e4ca630785f0d4374719561dc7f30f623641aa829732aa10-turn-2.json",
+          "sha256": "19447ef767dc9b0b89cd9be536641e460d78c4e82bfe22685bebad2b57057046"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "status": "TASK_OK",
+      "priorStatus": "TASK_OK",
+      "reasonVi": "Đủ7lượt: cart/receipt, hỏi tên→phone→địa chỉ→COD, actual preview829.000đ trước xác nhận, receipt/current ownership rồi PURCHASE_CONFIRMED silent handoff. Private literals không xuất hiện trong upstream requests được audit; không có live order/send.",
+      "actualTerminalByTurn": [
+        "SEND_ELIGIBLE",
+        "CODE_OWNED_SEND",
+        "CODE_OWNED_SEND",
+        "CODE_OWNED_SEND",
+        "CODE_OWNED_SEND",
+        "CODE_OWNED_SEND",
+        "HANDOFF"
+      ],
+      "turns": 7,
+      "sourceCohort": "SALES_READY",
+      "evidence": [
+        {
+          "artifact": "native-4a9eb67bd38cc2ba05b26e7aa655dee79e68939017302bf9cf6b65353c17b02c-turn-0.json",
+          "sha256": "58cd8ff73676ba14c3f996e4d94544504862851d677bfeab110e8d12d6dadfec"
+        },
+        {
+          "artifact": "native-4a9eb67bd38cc2ba05b26e7aa655dee79e68939017302bf9cf6b65353c17b02c-turn-1.json",
+          "sha256": "a8d4cc5736b1945e7009183c23e2de05707b4632fdb83e6bde5e2232307f0e5f"
+        },
+        {
+          "artifact": "native-4a9eb67bd38cc2ba05b26e7aa655dee79e68939017302bf9cf6b65353c17b02c-turn-2.json",
+          "sha256": "83c8a190825080026c01bf07d8de57bb49e4dc32ad9816a2bd6393fdf8c00ddc"
+        },
+        {
+          "artifact": "native-4a9eb67bd38cc2ba05b26e7aa655dee79e68939017302bf9cf6b65353c17b02c-turn-3.json",
+          "sha256": "acbdc789141e7a1784ffb1c28ab2e6d80531c20411a837a0526489547800118c"
+        },
+        {
+          "artifact": "native-4a9eb67bd38cc2ba05b26e7aa655dee79e68939017302bf9cf6b65353c17b02c-turn-4.json",
+          "sha256": "c23e321fd543c42fd85b947dc40ab8672f8486f03ec3a6874ba729090f270e5f"
+        },
+        {
+          "artifact": "native-4a9eb67bd38cc2ba05b26e7aa655dee79e68939017302bf9cf6b65353c17b02c-turn-5.json",
+          "sha256": "b1c679bcb363d87234be22145416c33eaa4051fe43cec3fff85676922441b215"
+        },
+        {
+          "artifact": "native-4a9eb67bd38cc2ba05b26e7aa655dee79e68939017302bf9cf6b65353c17b02c-turn-6.json",
+          "sha256": "b1847cb5cb40c7d7952fd19f8fd51f6ecefc9cd0b7f6f06b2c5349a2a0c6c888"
+        }
+      ]
+    }
+  ],
+  "recommendation": "STOP_NO_PHASE_C_GO",
+  "falsePassClaim": "No exhaustive semantic false-PASS audit or deterministic semantic guarantee claimed."
+}

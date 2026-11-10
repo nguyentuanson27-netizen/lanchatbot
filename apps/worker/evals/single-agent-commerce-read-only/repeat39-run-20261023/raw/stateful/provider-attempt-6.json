@@ -1,0 +1,198 @@
+{
+  "caseId": "stateful-private-checkout",
+  "journeyId": "sales",
+  "elapsedMs": 8088.158399999986,
+  "result": {
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "PRIVATE_CHECKOUT_COMMITTED",
+      "text": null,
+      "fallbackId": null
+    },
+    "sendEnabled": false,
+    "enqueued": 1,
+    "mode": "PRIVATE_CODE_PATH"
+  },
+  "owners": 0,
+  "verifiers": 0,
+  "batch": {
+    "pageId": "1198992073286645",
+    "conversationHash": "92645b36548f69ce7636d0b036212523bcd00849b23a7cbf3e5dd070e3d6fdee",
+    "generation": 6,
+    "leaseToken": "4f296027-b155-4378-bf29-8895b8ab19e6",
+    "inboxIds": [
+      "fd6e019c-b8c7-4103-a0bd-de66a1072179"
+    ],
+    "evaluationGroupId": "eb0b361d-e0ce-440a-8401-1ebc64bc87cb",
+    "eventKind": "CUSTOMER",
+    "firstReceiveSequence": 6,
+    "lastReceiveSequence": 6,
+    "attemptCount": 1,
+    "items": [
+      {
+        "inboxId": "fd6e019c-b8c7-4103-a0bd-de66a1072179",
+        "pageId": "1198992073286645",
+        "eventKey": "stateful-2f087d20-cce1-4ff3-9b79-d1098d8e689d:0",
+        "conversationHash": "92645b36548f69ce7636d0b036212523bcd00849b23a7cbf3e5dd070e3d6fdee",
+        "occurredAt": "2026-10-22T22:30:06.646Z",
+        "receivedAt": "2026-10-22T22:30:06.646Z",
+        "receiveSequence": 6,
+        "attemptCount": 1,
+        "leaseToken": "4f296027-b155-4378-bf29-8895b8ab19e6",
+        "eventKind": "CUSTOMER",
+        "envelope": {
+          "schemaVersion": 1,
+          "customerSendEnabled": false,
+          "routing": {
+            "owner": "APP"
+          },
+          "message": {
+            "schemaVersion": 1,
+            "traceId": "5cd26c25-bb78-4e8b-b542-24bec9596b3e",
+            "eventKey": "stateful-2f087d20-cce1-4ff3-9b79-d1098d8e689d:0",
+            "pageId": "1198992073286645",
+            "messageId": "stateful-2f087d20-cce1-4ff3-9b79-d1098d8e689d:0",
+            "senderId": "synthetic-recipient-92645b36548f69ce7636d0b036212523bcd00849b23a7cbf3e5dd070e3d6fdee",
+            "conversationId": "synthetic-meta-conversation",
+            "occurredAt": "2026-10-22T22:30:06.646Z",
+            "isEcho": false,
+            "appId": null,
+            "text": "Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD",
+            "attachments": []
+          }
+        }
+      }
+    ]
+  },
+  "toolResponses": [],
+  "inboundMessages": [
+    {
+      "schemaVersion": 1,
+      "traceId": "5cd26c25-bb78-4e8b-b542-24bec9596b3e",
+      "eventKey": "stateful-2f087d20-cce1-4ff3-9b79-d1098d8e689d:0",
+      "pageId": "1198992073286645",
+      "messageId": "stateful-2f087d20-cce1-4ff3-9b79-d1098d8e689d:0",
+      "senderId": "synthetic-recipient-92645b36548f69ce7636d0b036212523bcd00849b23a7cbf3e5dd070e3d6fdee",
+      "conversationId": "synthetic-meta-conversation",
+      "occurredAt": "2026-10-22T22:30:06.646Z",
+      "isEcho": false,
+      "appId": null,
+      "text": "Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD",
+      "attachments": []
+    }
+  ],
+  "actualCapturedMessages": [
+    "2 áo (mẫu “Set váy Thạch Thảo”) màu be, size L: 998.000đ\nTạm tính: 998.000đ\nƯu đãi: -49.900đ\nPhí ship: 30.000đ\nTổng: 978.100đ\nSet váy Thạch Thảo: hàng đặt trước\nNgười nhận: Khách thử nghiệm - [PHONE]\n[ADDRESS]\nThanh toán: COD\nDự kiến nhận hàng: 8-14 ngày.\nChị xác nhận chốt đơn nhé."
+  ],
+  "committedPublicState": {
+    "stage": "ORDER_PREVIEW",
+    "revision": 11,
+    "cart": {
+      "schemaVersion": 1,
+      "cartId": "37bc1f10-49fe-5a69-8c57-b4fac4202301",
+      "salesEpisodeId": "d77fce07-191f-5c0c-8d86-028e100d5e32",
+      "customerProfileId": "e2034786-27e1-420d-b06b-a3fc68f3eef3",
+      "revision": 4,
+      "currency": "VND",
+      "status": "READY_FOR_CONFIRMATION",
+      "checkoutEligibility": "ELIGIBLE",
+      "lines": [
+        {
+          "lineId": "6cabd51b-52f9-5e05-8140-97647c006d72",
+          "parentProductId": "SV2447",
+          "offerId": "AO",
+          "offerKind": "DIRECT",
+          "quantity": 2,
+          "components": [
+            {
+              "componentProductId": "SV2447_AO",
+              "componentSku": "SV2447_AO",
+              "componentRole": "TOP",
+              "color": "BE",
+              "size": "L",
+              "quantity": 1
+            }
+          ],
+          "allowMixedSizes": false,
+          "allowComponentSale": false,
+          "posUnitPriceVnd": 499000,
+          "priceAuthority": {
+            "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+            "shopId": "LANA_DESIGN",
+            "parentProductId": "SV2447",
+            "offerId": "AO",
+            "offerPriceKind": "DIRECT",
+            "componentProductId": null,
+            "metadata": {
+              "authority": "PANCAKE_POS",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-22T22:04:26.644Z",
+              "expiresAt": "2026-10-24T22:04:26.644Z",
+              "freshForSeconds": 172800,
+              "freshnessState": "FRESH"
+            }
+          },
+          "lineTotalVnd": 998000
+        }
+      ],
+      "adjustments": [
+        {
+          "adjustmentId": "89e98459-fc5f-5269-a0e8-9ff9523b34fa",
+          "kind": "PERCENT_DISCOUNT",
+          "amountVnd": 49900,
+          "percentageBps": 500,
+          "policyAuthorization": {
+            "policyBundleId": "admin-policy:1198992073286645",
+            "policyBundleVersion": "94bd70677c6159b881094adb872c0a01",
+            "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+            "decisionId": "a3d9effb-79bf-560a-970f-9dd9f2518e64",
+            "authorizedAt": "2026-10-22T22:30:10.628Z"
+          }
+        }
+      ],
+      "shippingFeeVnd": 30000,
+      "subtotalVnd": 998000,
+      "discountTotalVnd": 49900,
+      "grandTotalVnd": 978100,
+      "createdAt": "2026-10-22T22:27:40.413Z",
+      "updatedAt": "2026-10-22T22:30:10.628Z"
+    },
+    "measurements": [
+      {
+        "kind": "WAIST_CM",
+        "value": 74,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-22T22:29:12.782Z",
+          "sourceEventHash": "b8a3eabefb7d465406414e95ae71ac95f96f669e992ae9138e6b965c81182a3b"
+        }
+      },
+      {
+        "kind": "HIPS_CM",
+        "value": 96,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-22T22:29:12.782Z",
+          "sourceEventHash": "b8a3eabefb7d465406414e95ae71ac95f96f669e992ae9138e6b965c81182a3b"
+        }
+      }
+    ],
+    "customerProfileRevision": 3,
+    "negotiation": {
+      "tier": "READY",
+      "version": 4,
+      "objectionEvidenceCount": 0
+    }
+  },
+  "counts": {
+    "embedding": 0,
+    "owner": 8,
+    "verifier": 4,
+    "catalogReads": 15,
+    "posReads": 14,
+    "selectorCalls": 26,
+    "readPolicyCalls": 0
+  }
+}

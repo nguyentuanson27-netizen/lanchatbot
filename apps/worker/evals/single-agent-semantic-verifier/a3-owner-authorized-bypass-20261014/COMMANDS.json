@@ -1,0 +1,198 @@
+{
+  "runId": "C3_A3_DIAGNOSTIC_BYPASS_20261014_01",
+  "freshReadinessCommands": [
+    {
+      "command": "node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/a3-owner-authorized-bypass-20261014.test.mjs",
+      "environment": {
+        "C3_CHECKPOINT_A_ROUND": "39",
+        "C3_TEST_CODEX_TRANSPORT": "1"
+      },
+      "exitCode": 1,
+      "tests": 1,
+      "passCount": 0,
+      "skipped": 0,
+      "result": "Observed RED: missing diagnostic entrypoint",
+      "stdout": "C:/Users/nguye/AppData/Local/Temp/c3-a3-bypass-red.stdout.log"
+    },
+    {
+      "command": "node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/a3-owner-authorized-bypass-20261014.test.mjs",
+      "environment": {
+        "C3_CHECKPOINT_A_ROUND": "39",
+        "C3_TEST_CODEX_TRANSPORT": "1"
+      },
+      "exitCode": 0,
+      "tests": 1,
+      "passCount": 1,
+      "skipped": 0,
+      "stdout": "C:/Users/nguye/AppData/Local/Temp/c3-a3-bypass-green.stdout.log"
+    },
+    {
+      "command": "node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/size-input-context.test.mjs apps/worker/evals/single-agent-semantic-verifier/size-input-context-decision.test.mjs apps/worker/evals/single-agent-semantic-verifier/preparation-20261012.test.mjs apps/worker/evals/single-agent-semantic-verifier/clear-boundaries-run-20261014.test.mjs apps/worker/evals/single-agent-semantic-verifier/a3-owner-authorized-bypass-20261014.test.mjs",
+      "environment": {
+        "C3_CHECKPOINT_A_ROUND": "39",
+        "C3_TEST_CODEX_TRANSPORT": "1"
+      },
+      "exitCode": 0,
+      "tests": 47,
+      "passCount": 47,
+      "skipped": 0,
+      "stdout": "C:/Users/nguye/AppData/Local/Temp/c3-a3-bypass-focused.stdout.log"
+    },
+    {
+      "finishedAt": "2026-10-14T07:24:31.4899194Z",
+      "startedAt": "2026-10-14T07:22:41.2706028Z",
+      "environment": {
+        "C3_TEST_CODEX_TRANSPORT": "1",
+        "C3_CHECKPOINT_A_ROUND": "39"
+      },
+      "command": "node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs",
+      "exitCode": 0,
+      "tests": 441,
+      "passCount": 441,
+      "skipped": 0,
+      "stdout": "C:/Users/nguye/AppData/Local/Temp/c3-a3-bypass-full.stdout.log"
+    },
+    {
+      "command": "loadBypass(); inspectCodex(); inspectGemini(manifest)",
+      "kind": "Read-only Node procedure; no generation",
+      "exitCode": 0,
+      "providerGenerations": 0,
+      "stdout": "C:/Users/nguye/AppData/Local/Temp/c3-a3-bypass-routes.json"
+    },
+    {
+      "command": "git diff --quiet 247278807017889f95a472487f101e80988dcc3b -- apps/worker/src packages pnpm-lock.yaml apps/worker/evals/single-agent-semantic-verifier/prompts apps/worker/evals/single-agent-semantic-verifier/round-68 apps/worker/evals/single-agent-semantic-verifier/clear-boundaries-run-20261014 apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs apps/worker/evals/single-agent-semantic-verifier/protocol.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.mjs",
+      "exitCode": 0
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-a3-bypass-readiness.mjs C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005",
+      "exitCode": 0,
+      "result": "Source/config/compiled helper hashes, routes, RED/GREEN/focused/full log assertions"
+    }
+  ],
+  "reusedChecks": {
+    "source": "a3-full-followup-20261014/READINESS.json",
+    "meaning": "Same-day actually executed checks reused for unchanged worker/shared/helper source, not rerun for this fixed Node entrypoint. Fresh focused/full checks cover new loader/dispatcher composition.",
+    "commands": [
+      {
+        "exitCode": 0,
+        "finishedAt": "2026-10-14T03:32:57.0606003+00:00",
+        "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts",
+        "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-worker-boundary.stdout.log",
+        "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-worker-boundary.stderr.log",
+        "tests": 79,
+        "passCount": 79,
+        "skipped": 0
+      },
+      {
+        "exitCode": 0,
+        "finishedAt": "2026-10-14T03:32:55.7874415+00:00",
+        "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts",
+        "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-protected.stdout.log",
+        "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-protected.stderr.log",
+        "tests": 21,
+        "passCount": 21,
+        "skipped": 0
+      },
+      {
+        "command": "pnpm --filter @lana/worker typecheck",
+        "finishedAt": "2026-10-14T03:35:52.7551383+00:00",
+        "exitCode": 0,
+        "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-typecheck.stdout.log",
+        "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-typecheck.stderr.log"
+      },
+      {
+        "command": "pnpm --filter @lana/worker build",
+        "finishedAt": "2026-10-14T03:36:36.4906694+00:00",
+        "exitCode": 0,
+        "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-build.stdout.log",
+        "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-build.stderr.log"
+      },
+      {
+        "command": "pnpm --filter @lana/worker lint",
+        "exitCode": 0,
+        "finishedAt": "2026-10-14T03:34:58.6647179+00:00",
+        "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-lint.stdout.log",
+        "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-lint.stderr.log"
+      }
+    ]
+  },
+  "runtimeCommands": [
+    {
+      "command": "node apps/worker/evals/single-agent-semantic-verifier/a3-owner-authorized-bypass-20261014/run.mjs --preflight",
+      "environment": {
+        "C3_CHECKPOINT_A_ROUND": "68",
+        "C3_TEST_CODEX_TRANSPORT": null,
+        "C3_VERTEX_CREDENTIAL_FILE": "C:/Users/nguye/Downloads/project-388db62b-f5a4-4e76-a2b-a15e8123f075.json",
+        "A3_RUN_SOURCE_SHA": "2a6de4360aad04c57e750a15d9c12f3b4f300f04"
+      },
+      "exitCode": 0
+    },
+    {
+      "preflightExitCode": 0,
+      "finishedAt": "2026-10-14T07:35:52.4402241Z",
+      "sourceSha": "2a6de4360aad04c57e750a15d9c12f3b4f300f04",
+      "startedAt": "2026-10-14T07:25:37.5505019Z",
+      "phase": "A3_DIAGNOSTIC_A2_BYPASS",
+      "exitCode": 0,
+      "stderrBytes": 0,
+      "command": "node apps/worker/evals/single-agent-semantic-verifier/a3-owner-authorized-bypass-20261014/run.mjs"
+    }
+  ],
+  "postRunCommands": [
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-a3-bypass-primary-packet.mjs C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005",
+      "exitCode": 0,
+      "result": "Actual-terminal-only primary packet after raw commit"
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-a3-bypass-manual-primary.mjs",
+      "exitCode": 0,
+      "result": "Saved manual per-conversation whole-turn judgments after all source/dialogue/actual-terminal reads, before rejected diagnostics"
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-a3-bypass-save-primary.mjs C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005",
+      "exitCode": 0,
+      "result": "Primary38/42; diagnosticA3FAIL; raw/primary savepoint order preserved"
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-a3-bypass-audit.mjs C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005",
+      "exitCode": 0,
+      "result": "Captured-body/accounting/firewall/bindings/gate/source/raw/primary auditPASS; qualification remainsSTOP"
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-a3-bypass-report.mjs C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005",
+      "exitCode": 0,
+      "result": "Diagnostic report only; A2FAIL unchanged"
+    }
+  ],
+  "finalChecks": [
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-a3-bypass-final-readback.mjs C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005",
+      "exitCode": 1,
+      "providerGenerations": 0,
+      "result": "Initial local readback checker falsely classified ProtectedClaim authorization=NONE field as a secret. Corrected only the temporary checker to inspect credential fields/token values; no runtime, raw, primary or frozen input change."
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 2,
+      "result": "Initial staged conversation report preserved eight trailing spaces from exact terminal text. Re-encoded only report outcome blocks as JSON strings to preserve all bytes/newlines without Markdown whitespace errors. Raw/primary/runtime unchanged."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-a3-bypass-final-readback.mjs C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005",
+      "exitCode": 0,
+      "providerGenerations": 0,
+      "result": "PASS: exact frozen loader/inputs/helper hashes; source/config/historical failed A2 unchanged; qualified A3 gate still rejects failed A2; 42 outcomes/84one-request generations; raw+primary exact Git blobs/hashes and order; report/family/source identities; JSON/local-link/secret-marker checks",
+      "files": 16,
+      "localLinks": 13
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 0
+    }
+  ],
+  "recommendation": "STOP"
+}

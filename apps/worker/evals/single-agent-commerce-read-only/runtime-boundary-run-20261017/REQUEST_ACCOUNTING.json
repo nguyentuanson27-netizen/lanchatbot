@@ -1,0 +1,20 @@
+{
+  "runSourceSha": "13e69d43dc3ae9f792140ba8d16e9ad3057fcbb7",
+  "registeredOutcomes": 7,
+  "completeOutcomes": 7,
+  "maximumGenerationInvocations": 24,
+  "invocations": 13,
+  "roles": {
+    "owner": 13,
+    "verifier": 0
+  },
+  "generationHttpRequests": 13,
+  "generationHttp200": 13,
+  "unknownAccounting": 0,
+  "automaticGenerationRetry": 0,
+  "ownerAuthRequests": 1,
+  "verifierAuthNetworkRequests": "NOT_MEASURED",
+  "generationErrors": 0,
+  "timeouts": 0,
+  "notes": "Each registered generation ID has exactly one measured upstream HTTP request. HTTP success is not task success. Private checkout and dependent confirm have zero model generations."
+}

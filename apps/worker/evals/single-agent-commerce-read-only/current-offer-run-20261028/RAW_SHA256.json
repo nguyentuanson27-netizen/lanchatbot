@@ -1,0 +1,74 @@
+{
+  "ANALYZE.mjs": {
+    "sha256": "4ab2a45a7deea5d9ed54b1db41a149a63f33849f77ea8d6a59020e9f05253707",
+    "bytes": 13709
+  },
+  "CHECKPOINT_B.md": {
+    "sha256": "447b0537141a5ca7055b864de1218829d820170926577c65e955b25ac3601f37",
+    "bytes": 4947
+  },
+  "CLI_IDENTITY.json": {
+    "sha256": "9d2b2806247ba714e005983588ba854f189e781bea91cce9d8e8e8213c790995",
+    "bytes": 125
+  },
+  "COMMANDS.json": {
+    "sha256": "e97b330c9a9e4e9f9b31d264254dd2f698005731eff162e8dd8c43bf952f4c65",
+    "bytes": 1317
+  },
+  "COMPARE.py": {
+    "sha256": "842cf0c12cebb6f62b7e7978af4a5f4c20e8e6195363314a54e816c60b7b5960",
+    "bytes": 1475
+  },
+  "controls-preflight/summary.json": {
+    "sha256": "0318e19dfa7fa389cfb5f481dc60e1afa29c6300e944f34ed8a67b7e586ab9d4",
+    "bytes": 102
+  },
+  "controls-preflight.log": {
+    "sha256": "4956141c2852e0fe3ece8791c390ed335f58d0d0982983a493f26fc5388fc9fd",
+    "bytes": 1030
+  },
+  "DISPATCH_DRIVER.py": {
+    "sha256": "3e32da5d23a73117ff6af9ce0b0698b3cc38250eb50ef33a4878ff0774b80063",
+    "bytes": 9705
+  },
+  "DISPATCH_STATUS.json": {
+    "sha256": "53ff95a9640b49b35eace4bdd74dfdfe9e277bd288d3ec78d0c4f776ad965727",
+    "bytes": 452
+  },
+  "LAUNCHER.py": {
+    "sha256": "5a8481b3f8a4596c117307f0882669689ae9792abf29b556dd4eee025d4a8d89",
+    "bytes": 2224
+  },
+  "PREFLIGHT_DIAGNOSTIC.json": {
+    "sha256": "1c35b2fd29e3acced0292d2f472477b43dc6bd6183a28b07fa7c7ad62ed29e80",
+    "bytes": 901
+  },
+  "REGISTRATION.json": {
+    "sha256": "45edcd685daed65f7db4acc47d8f0b443033ee0215ab6f23fd609335dc5971d3",
+    "bytes": 6561
+  },
+  "REVIEW_METRICS.json": {
+    "sha256": "5651f8edc7f319047184b247bbf274efbf47bacd6395ebc88fb54ad7b9857aa1",
+    "bytes": 690
+  },
+  "RUN_CONTEXT.json": {
+    "sha256": "248b28e61b22e239c4b1917b7dba6dc839faf412380d29d9ba4059b37b732362",
+    "bytes": 1267
+  },
+  "source/capture.json": {
+    "sha256": "23948c843730b1905290ae6676f9b170a52931d0179055ba05c67f3dce4d6acb",
+    "bytes": 25446
+  },
+  "source/summary.json": {
+    "sha256": "677bd1d08508d689da40bb7dbf540813b5c75df5d764f31eff4b5e765e375e4e",
+    "bytes": 213
+  },
+  "source-capture.log": {
+    "sha256": "d4cf35f6ba02f0d45747d20527d5222141bf509bd1440e146bb336a61d0c0ab7",
+    "bytes": 151
+  },
+  "SOURCE_CLEAN_AFTER_STOP.json": {
+    "sha256": "29eb77f145fb8fea633171ee9508c0c3d23f76005b228a34b48485da5bf31e67",
+    "bytes": 201
+  }
+}

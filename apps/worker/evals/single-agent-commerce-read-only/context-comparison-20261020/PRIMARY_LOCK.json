@@ -1,0 +1,8 @@
+{
+  "sha256": "62f494afc0ca10b7e4e4fb517924d7ab15696b405e8af01c746dcf9875ac951a",
+  "phase": "BEFORE_REJECTED_DRAFT_AND_VERIFIER_DIAGNOSIS",
+  "sourceSha": "13dea00c0ba7498edfe66a5b5067aa01d939d2e4",
+  "registeredSlots": 12,
+  "recordedSlots": 12,
+  "conditionalIntegratedSlotsExecuted": 0
+}

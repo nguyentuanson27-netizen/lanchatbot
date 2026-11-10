@@ -1,0 +1,11 @@
+{
+  "recordedAt": "2026-10-11T16:39:11.489Z",
+  "a3RunSourceSha": "bf871d30bc563deef77a5748447d56cd25cfe108",
+  "beforePrimaryReview": true,
+  "files": {
+    "a3-evidence.json": "75ed132ec38e35e1008ea593ad0145aa8c66f503108856bd5c5db2c324081075",
+    "a3-human-review.json": "66ebd1f13b17080f1d1050010876b2358c26146a79da6e1dc5462b9ff731aee0",
+    "a3-human-scores.json": "e7425d2da3a12e7fc47d8b41512e22038fd35fd01019d5d8744e4d458c287456",
+    "A3_HUMAN_REVIEW.md": "007c7ce81d7485f813c3725762b462119461bfaee694bf503e203766433a0988"
+  }
+}

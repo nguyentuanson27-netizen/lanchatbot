@@ -1,0 +1,45 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+ ❯ src/single-agent-commerce-persistence.test.ts (16 tests | 1 failed) 115ms
+   ✓ existing transaction owner for candidate commerce > prepares native open with fresh facts and exact replay evidence, independent of text classifiers 51ms
+   ✓ existing transaction owner for candidate commerce > prepares native variant with fresh facts and exact replay evidence, independent of text classifiers 8ms
+   ✓ existing transaction owner for candidate commerce > prepares native negotiation with fresh facts and exact replay evidence, independent of text classifiers 6ms
+   ✓ existing transaction owner for candidate commerce > commits ownership, handoff event and tag intent together and rolls back incomplete intents 8ms
+   ✓ existing transaction owner for candidate commerce > atomically enqueues the configured dependency holding reply when handoff completes the source 4ms
+   ✓ existing transaction owner for candidate commerce > keeps mixed media and ownership in one checked transaction (ready) 5ms
+   ✓ existing transaction owner for candidate commerce > keeps mixed media and ownership in one checked transaction (stale) 4ms
+   ✓ existing transaction owner for candidate commerce > keeps mixed media and ownership in one checked transaction (truncated) 4ms
+   ✓ existing transaction owner for candidate commerce > keeps mixed media and ownership in one checked transaction (wrong-asset) 3ms
+   ✓ existing transaction owner for candidate commerce > rolls back handoff when its holding reply outbox intent is TRUNCATED 3ms
+   ✓ existing transaction owner for candidate commerce > rolls back handoff when its holding reply outbox intent is ABSENT 2ms
+   ✓ existing transaction owner for candidate commerce > does not enqueue a stale policy/authority decision when validation fails inside the transaction 2ms
+   ✓ existing transaction owner for candidate commerce > keeps the default DEPENDENCY_FAILURE handoff silent without a published holding rule 2ms
+   ✓ existing transaction owner for candidate commerce > keeps the default CUSTOMER_REQUESTED_HUMAN handoff silent without a published holding rule 2ms
+   × existing transaction owner for candidate commerce > owns the holding reply atomically even when the public caller otherwise retains its source 10ms
+     → expected false not to be false // Object.is equality
+   ✓ existing transaction owner for candidate commerce > requires the exact prepared transition and current source lease before commit 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/single-agent-commerce-persistence.test.ts > existing transaction owner for candidate commerce > owns the holding reply atomically even when the public caller otherwise retains its source
+AssertionError: expected false not to be false // Object.is equality
+ ❯ src/single-agent-commerce-persistence.test.ts:165:45
+    163|     expect(await f.port.commit(f)).toBe(true);
+    164|     const prepared = f.commitWithinTransaction.mock.calls[0]![1];
+    165|     expect(prepared.completeInboxBatch).not.toBe(false);
+       |                                             ^
+    166|     expect(prepared.metaPlan?.messages).toEqual([{ kind: "TEXT", text:…
+    167|     expect(prepared.metaPlan?.handoffBinding).toMatchObject({ kind: "C…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 passed (16)
+   Start at  23:04:47
+   Duration  2.95s (transform 1.34s, setup 0ms, collect 2.08s, tests 115ms, environment 0ms, prepare 250ms)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/single-agent-commerce-persistence.test.ts

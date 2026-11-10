@@ -1,0 +1,9 @@
+# One serializer correction, then one stateful run
+
+1. Read current instructions/spec references; refresh main and retain exact implementationBaseSha. Reproduce loss of co-located native price/stock in captured HTTP bodies before changing runtime code.
+2. Remove only fact-array reuse. Keep current trusted view, other source normalization, native IDs/signatures, model/config/prompt/declaration/corpus/budgets, bound and its error accounting. Self-review the two-file executable/test diff; commit a savepoint.
+3. Use the existing read-only source session and resolver to check AO/be/M×1 and AO/be/L×2 on one current snapshot. If a complete choice still fails, investigate source/selection contract before generation. Do not treat missing colour as the sole cause of an earlier ambiguous result.
+4. Run focused provider/protocol/comparison checks, full Node eval and worker source suite, protected-claim/reply tests, worker build/typecheck/lint. Reuse prior domain controls for unchanged runtime boundaries; do not claim a fresh controlled checkout. Check prior captured inputs offline without generation. Preserve the known long-signature bound failure.
+5. Freeze inputs/config and this scope; commit, require clean executable/config, capture runtime bRunSourceSha. Existing config/stateful preflights and source readback precede provider collection. Exact prompts/models/declarations remain the prior registered identities.
+6. Collect the same seven outcomes once, in order, max24 invocations and no generation retry. Preserve raw and its hashes in a savepoint before primary whole-dialogue review, then diagnose detailed tool/verifier traces. Read current committed cart/profile/quote after each turn; no later-turn rescue of earlier incomplete effects.
+7. Record evidence, limitations and recommendation; update tasks and PR391. Stop. Seven outcomes do not prove stability, B1 conversational quality, A PASS or complete Phase B/live acceptance.

@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "sourceRounds": [
+    58,
+    59,
+    60
+  ],
+  "sourceEvidenceHash": "caabbf685d28b1ae87ec52a396ee27723111a2662537747c3f26838a78ba86f5",
+  "a2CaseIds": [
+    "r45-observed-trial-false-pass-unsafe",
+    "r45-bounded-trial-eligibility-safe",
+    "r45-prebuy-service-intro-safe",
+    "safe-conditional-policy",
+    "pr387-dropped-material-policy-condition",
+    "r32-advisory-shape-safe",
+    "r57-grounded-shape-safe",
+    "r45-general-value-safe",
+    "r57-grounded-value-safe",
+    "r41-ordinary-neat-all-day-safe",
+    "r22-waist-soft-advice-safe",
+    "r41-policy-short-intro-safe"
+  ],
+  "a3CaseIds": [
+    "r5-refund-distinction",
+    "r14-stage-light-change",
+    "r14-refund-before-buy",
+    "r15-color-final-confirm",
+    "r5-competitor-price",
+    "r7-opacity-context-change",
+    "r7-exchange-after-use",
+    "r14-price-repeat-wear",
+    "r15-value-use",
+    "r16-pants-color-alternative"
+  ],
+  "repetitions": 3,
+  "allAttemptsMustPass": true
+}

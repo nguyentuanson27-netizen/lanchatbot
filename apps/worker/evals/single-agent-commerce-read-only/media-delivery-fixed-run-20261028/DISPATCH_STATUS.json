@@ -1,0 +1,20 @@
+{
+  "sourceSha": "49731e77bba1b50f84185a0c06f2c1cfd9571755",
+  "status": "STOPPED_RETAIN_EVIDENCE",
+  "completedCohorts": [],
+  "nativeNotRun": [
+    "opening-quotes",
+    "media-followup",
+    "missing-pos",
+    "b1-first",
+    "b1-rest",
+    "journey-openings",
+    "stateful",
+    "negotiation"
+  ],
+  "processedCohorts": [],
+  "qualificationFailures": [],
+  "nativeSlotNotRun": {},
+  "sourceUnchanged": true,
+  "error": "COMMAND_FAILED_native-readiness"
+}

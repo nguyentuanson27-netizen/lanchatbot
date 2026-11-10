@@ -1,0 +1,204 @@
+{
+  "caseId": "policy-handoff-2",
+  "runtime": {
+    "latest": "Chị mới ướm bộ này bên ngoài thôi, chưa mặc vào. Muốn đổi sang size L thì được không em?",
+    "history": [],
+    "initialProductCodes": []
+  },
+  "result": {
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "EXCHANGE",
+      "text": "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ.",
+      "fallbackId": null
+    },
+    "recovery": {
+      "originalDisposition": "HANDOFF",
+      "originalReason": "EXCHANGE"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 2,
+    "verifierGenerations": 0,
+    "toolRounds": 2,
+    "toolCalls": 2,
+    "generations": [
+      {
+        "id": "handoff-21241144-8a3a-4387-807d-cb0f0ac64419:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2148.8426,
+        "telemetry": {
+          "generationId": "handoff-21241144-8a3a-4387-807d-cb0f0ac64419:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3020,
+          "outputTokens": 410,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 15717,
+          "requestHash": "60b240cbfceb7877905889ed49279d983c327c90a99881447dc0ca69d293089c",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 4,
+          "thinkingTokens": 400,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "handoff-21241144-8a3a-4387-807d-cb0f0ac64419:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 4644.751700000001,
+        "telemetry": {
+          "generationId": "handoff-21241144-8a3a-4387-807d-cb0f0ac64419:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4380,
+          "outputTokens": 1408,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 22155,
+          "requestHash": "050dd53c4a77463f7989a9e2fa5a0ebf296ee13bcb9ab55f7ed980f459543668",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 4,
+          "thinkingTokens": 1390,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      }
+    ],
+    "toolLatencyMs": 1640.6535999999978,
+    "verificationLatencyMs": null
+  },
+  "calls": [
+    {
+      "calls": [
+        {
+          "name": "read_policy",
+          "args": {},
+          "id": "call_429196"
+        }
+      ],
+      "results": [
+        {
+          "status": "OK",
+          "data": {
+            "scope": "SHOP_RULES",
+            "orderEligibility": null,
+            "policy": {
+              "customerCare": {
+                "customerFaq": {
+                  "discloseLightingAndDisplayColorVariance": true,
+                  "handWashPreferred": true,
+                  "machineWashAllowedWithLaundryBagAndGentleCycle": true
+                },
+                "exchange": {
+                  "customerPaysPositivePriceDifference": true,
+                  "fulfillmentMethod": "COURIER_SWAP",
+                  "maxExchangesPerOrder": 1,
+                  "modelExchangePricing": "NEW_PRODUCT_LIST_PRICE_NO_SALE",
+                  "requiredConditions": {
+                    "clean": true,
+                    "originalTags": true,
+                    "undamaged": true,
+                    "unused": true,
+                    "unwashed": true
+                  },
+                  "saleRestriction": {
+                    "allowedActions": [
+                      "SIZE",
+                      "COLOR"
+                    ],
+                    "discountThresholdBps": 3000
+                  },
+                  "supportedActions": [
+                    "SIZE",
+                    "COLOR",
+                    "MODEL"
+                  ],
+                  "totalTwoWayShippingFeeVnd": 30000,
+                  "windowDaysFromReceipt": 15
+                },
+                "inspection": {
+                  "refusedParcelShippingFeeVnd": 30000,
+                  "tryOnMode": "HOLD_UP_ONLY",
+                  "tryOnModeDescription": "Chỉ ướm bên ngoài, không mặc vào người. Với đổi hàng yêu cầu chưa sử dụng, mặc thử vào người không đáp ứng điều kiện này; còn tem, chưa giặt hay chưa mặc ra ngoài không thay đổi kết luận đó. Giới hạn này áp dụng cho đổi hàng theo exchange, không tự loại trừ trả hàng do lỗi theo returns."
+                },
+                "marketplacePricing": {
+                  "reason": "PLATFORM_SUBSIDY_AND_VOUCHERS",
+                  "shopeePriceMatch": false
+                },
+                "returns": {
+                  "eligibleReasons": [
+                    "MANUFACTURING_FABRIC_DEFECT",
+                    "MANUFACTURING_SEAM_DEFECT",
+                    "WRONG_PRODUCT_SENT"
+                  ],
+                  "refundBusinessDaysMax": 3,
+                  "refundBusinessDaysMin": 1,
+                  "refundStartsAfter": "SHOP_CONFIRMS_ELIGIBLE_ERROR",
+                  "reportingWindowDaysFromReceipt": 5,
+                  "shopShippingCoveragePercent": 100
+                }
+              },
+              "multiItemOffer": {
+                "countingUnit": "PARENT_PRODUCT_UNIT",
+                "discountBps": 500,
+                "minimumProductCount": 2,
+                "setAndComboCountAsOne": true
+              },
+              "payment": {
+                "allowedMethods": [
+                  "COD",
+                  "BANK_TRANSFER"
+                ]
+              },
+              "shipping": {
+                "defaultFeeVnd": 30000
+              }
+            },
+            "sourceVersion": "84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+          }
+        }
+      ]
+    },
+    {
+      "calls": [
+        {
+          "name": "request_handoff",
+          "args": {
+            "reason": "EXCHANGE"
+          },
+          "id": "call_379315"
+        }
+      ],
+      "results": [
+        {
+          "status": "OK",
+          "data": {
+            "handoffAccepted": true
+          }
+        }
+      ]
+    }
+  ],
+  "actualCapturedMessages": [
+    "Em đã chuyển bộ phận vận đơn kiểm tra và hỗ trợ mình ngay ạ."
+  ],
+  "eligibleText": null,
+  "committedPublicState": {
+    "conversationOwner": "HUMAN",
+    "revision": 1
+  },
+  "counts": {
+    "events": 1,
+    "tags": 1,
+    "messages": 1
+  },
+  "elapsedMs": 12213.451799999995,
+  "sendEnabled": false
+}

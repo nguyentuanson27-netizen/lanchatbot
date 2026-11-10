@@ -1,0 +1,28 @@
+{
+  "sourceSha": "a7adf18de6eb24ce6410205ba395d99346685d8e",
+  "sourceClean": true,
+  "reviewedExecutableSourceSha": "db6787e58f22dcd73808f627958e09e9a9d8ac5a",
+  "native51Scope": {
+    "persistedCapture": 30,
+    "eligibilityOnly": 21
+  },
+  "distHashes": {
+    "apps/worker/dist/single-agent-commerce-ingress.js": "007b83f032ee9391dbbf640754a099ed7fd8d13facb5156eb104d833b69db643",
+    "apps/worker/dist/single-agent-commerce-read-only.js": "1b4cfddaf2412d69f65ee43007a5e3bf127ddafc287e3ce256d2cf0b00efa339",
+    "apps/worker/dist/single-agent-commerce-handoff.js": "b521b8ad525fe231fce353422ca225e102f62b4ab706af9b3cf7f0189ab97d3e",
+    "apps/worker/dist/single-agent-commerce-session.js": "2daa0f6ffbcb62d2074532b2e3a8c00c1c1439ddb44b4bc7d585b899259188bb"
+  },
+  "cli": {
+    "version": "codex-cli 0.159.2",
+    "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+  },
+  "repeatPolicy": "N1_NO_RETRY_ALL_51_PLUS_17_CONTROLS",
+  "sendEnabled": false,
+  "liveSends": 0,
+  "sourceStoreWrites": 0,
+  "POSFailureClassification": "THREE_CONTROLLED_FAULTS_NOT_LIVE_DATA_GAP",
+  "fallbackDelivery": {
+    "persisted": "SILENT_HANDOFF_OR_NO_SEND",
+    "standaloneB1": "NO_SEND_IF_REJECTED_NO_HANDOFF_ADAPTER"
+  }
+}

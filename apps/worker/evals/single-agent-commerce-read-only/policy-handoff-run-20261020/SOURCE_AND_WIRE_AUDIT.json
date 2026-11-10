@@ -1,0 +1,19 @@
+{
+  "runSourceSha": "b1a58d2da288ff510972008b5a505f98ffaeb4b9",
+  "registeredSlots": 5,
+  "recordedSlots": 5,
+  "providerRequests": 12,
+  "retry": 0,
+  "ownerRequestsAndTelemetryHashes": 9,
+  "verifierBindings": 3,
+  "wireCaptures": 18,
+  "evaluatorLabelLeaks": 0,
+  "handoffsWithHumanStateEventTagIntentAndCapturedMessage": 2,
+  "codeOwnedHoldingTextMatches": 2,
+  "normalDraftsVerified": 3,
+  "rawBytesMatchGit": 10,
+  "sourceGitIdentitiesUnchanged": 14,
+  "primaryHashUnchanged": "065fdd7e74092957715071991ef55d5b453ec798381e20f09fdb9bbcbea99a83",
+  "testDatabaseDropped": true,
+  "liveSend": false
+}

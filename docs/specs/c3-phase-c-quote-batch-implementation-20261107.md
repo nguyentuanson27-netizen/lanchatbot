@@ -1,0 +1,50 @@
+# Phase C — quote batch repair implementation, 07/11/2026
+
+Base `5c623a2039aaee07b67f02a5d1797078da4c43ac`, executable savepoint `d9f4e55f` plus a test-only cross-parent regression. [Plan](c3-phase-c-quote-batch-repair-20261107.md). No new provider run.
+
+**Code review approved with no P1/P2 findings; required real PostgreSQL acceptance remains BLOCKED. This is not unconditional implementation acceptance or permission to claim model/Phase C GO.** [Review](evidence/c3-quote-batch-repair-20261107/code-review-pg-blocked.json).
+
+## Implemented
+
+- `EXPLICIT_QUOTE_V2` supports a batch of independent read operations containing at most two quote calls, each with its existing 1–2 offers (at most four offer targets). Reserve two primitive work units per quote and one per sibling, including existing opening preparation inside the unchanged six-unit/two-round limit. Native call IDs, order and signed contents remain intact; every submitted call gets its own result. No call folding, generation retry or repair loop.
+- Whole-batch checks reject mutations, handoff, `read_product.customerSelected:true`, overlapping parent/offer targets, unavailable functions and excess budget before execution. The same parent+offer cannot bypass the per-turn guard by changing array order, quantity, colour or region. Stop siblings after non-OK result, ownership/permission/privacy loss; do not continue reads/media after handoff.
+- Keep per-parent/offer quote requests and total-proof maps. Readback recomputes every proof separately against current policy and source; no merging prices, stock or charts. Returning quotes still need exactly one offer and explicit quantity and do not prepare another opening image.
+- Add exact local-result option derivation only when validated `selectionEvidence` expands to the identical `selectionOptions`. Existing exact-current omission runs first. Local mismatches and historical differences remain local; expansion rejects invalid/ambiguous references, invalid evidence or conflicting markers. Input and native model parts remain unchanged.
+- Clarify current owner instructions: replying to a product-disambiguation question resolves the enquiry, while an existing purchase request can continue after a missing choice is supplied. Do not recommend an unverified alternative size from the size the customer usually wears. Shared-component read targets are presented with a Vietnamese label and one source path can be read without asking customers to distinguish internal parents.
+- Replace repetitive technical paragraphs with equivalent shorter guidance, matching V2 batch behavior. Owner prompt is 19,991 bytes vs 21,910 at the base. Sales purpose/advice/voice paragraphs and customer-policy rules remain unchanged; the standalone component-fit paragraph is reworded with the technical guidance. Numeric fit fingerprints remain enforced by code; owner guidance retains correct target/current profile and code-authorized recommendation limits. No benchmark-specific examples, regex, parser, new online role or semantic routing.
+
+The instructions about inquiry versus purchase and shared-item use are model guidance, **not a deterministic proof of customer intent or newly observed owner behavior**. Existing code-only metadata selection without cart mutation remains covered by state tests. A new provider campaign is needed to assess p09, p07 and s02 behavior.
+
+## Evidence and limits
+
+New quote tests observed RED (two failures before runtime edits) then GREEN. They exercise original mixed native calls through the full turn/final gate, two independent totals, two parent sources, policy/readback changes, overlap across rounds, failed quote stopping siblings and six-unit acceptance/seven-unit rejection. Local option-derivation test also observed RED before implementation and GREEN after it.
+
+The initial local-option hypothesis did **not** explain p04: its exact-current options were already omitted. Integration was corrected to preserve that omission rather than adding references that enlarged the request. Local derivation improves different/historical evidence only; it is not credited as the cause of p04's measured improvement.
+
+Actual p04 frozen-source reconstruction at its original clock preserves captured signed model parts and matches the captured product read result. Captured public profile changes are applied only in memory, with no mutation replay. Its body fits at raw62,603/presented62,780 bytes. Since its reconstructed trusted frame is smaller than the recorded failure, an additional stress envelope preserves the actual signed parts/results and pads context to the **recorded9,393 trusted bytes /20,338 dialogue bytes**. That size-matched envelope fits at raw64,437/presented64,614 within65,536; the old-adapter/old-prompt counterfactual remains blocked at66,195. The helper recomputes callableTools with the runtime reachability rule at the recorded remaining budget. An earlier helper version omitted it, introducing166extra schema bytes; that attribution error was corrected. The old-adapter/old-prompt counterfactual now has the same14,208schema bytes and raw66,195 total as the recorded failure. Padding is synthetic, and the original failed request body was never captured: neither construction is claimed as the exact historical body or a new model result. The portable test additionally keeps all14 callable declarations and existing limit rejection.
+
+The older s13 request with its old instructions still exceeds the cap (67,821); no universal continuation-capacity claim. Exact photo-detail source for s03 and external verifier429 quota remain unresolved. s08 decision support and broad voice tuning are deferred. Historical model outcomes and all55-turn denominator remain unchanged.
+
+## Commands actually run
+
+- `pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-quote.test.ts`: RED2/38 before implementation; GREEN36 after first fix, expanded41 later. Final cross-parent test is included in the full worker run below.
+- `pnpm --filter @lana/worker exec vitest run src/single-agent-commerce`: final **944PASS /33files**, including42quote tests, fit, metadata-only selections, replacement, media, silent handoff, ingress and checkout.
+- `node --test apps/worker/evals/single-agent-commerce-read-only/selection-compact-wire.test.mjs`: observed local-derivation RED then2PASS.
+- `node --test apps/worker/evals/single-agent-commerce-read-only/selection-compact-wire.test.mjs apps/worker/evals/single-agent-commerce-read-only/task-path-repair.test.mjs apps/worker/evals/single-agent-commerce-read-only/continuation-structural.test.mjs apps/worker/evals/single-agent-commerce-read-only/quote-task.test.mjs apps/worker/evals/single-agent-commerce-read-only/owner-product-tables.test.mjs`: **38PASS**. Counts overlap with full Node.
+- `pnpm --filter @lana/worker test:evals`: final **870PASS /2existingSKIP /0FAIL**. Earlier full run retained one local-stub failure in round60; isolated `node --test apps/worker/evals/single-agent-semantic-verifier/round-60.test.mjs` passed7/7, then the full run passed. No historical test or threshold was weakened. Final run started on identical source before the executable commit and ended after it; no executable edit occurred during that run.
+- `pnpm --filter @lana/worker build`, `pnpm --filter @lana/worker typecheck`, `pnpm --filter @lana/worker lint`: **PASS**. Build/typecheck include dependency builds. Last source changes after build were test-only.
+- `node ../c3-quote-batch-reconstruct-20261107.mjs`: offline reconstruction,0provider/0network/0effects; limitations above.
+- `python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-quote-batch-pg-20261107-01 COD --check-prefix "C quote batch V2"`, then new output `-02`: both **BLOCKED** by SSH timeout before integration/database creation. No provider request. Docker Linux API was unavailable; attempted hidden startup did not make it available and the pending startup CLI was stopped. No local PostgreSQL acceptance executed.
+- `git diff --check`: PASS.
+
+New deterministic PostgreSQL fixture/check is implemented: original quote+image batch → verifier stub → accepted text/image group → restart → one delivery, cart unchanged. It has **not run**. Existing unit/mock evidence is not substituted for that requirement. Review/verification records and raw log hashes: [evidence directory](evidence/c3-quote-batch-repair-20261107/verification.json).
+
+Final report accuracy review approved the source/log attribution, cross-parent regression and reconstructed budgets; [review record](evidence/c3-quote-batch-repair-20261107/report-review-pg-blocked.json). Required PostgreSQL acceptance remains BLOCKED, and no new provider behavior/quality result is claimed.
+
+## Follow-up evidence — 08/11/2026
+
+The required realPG acceptance formerly BLOCKED is now complete on clean06b3901b:1/1PASS/droptrue/provider0, after correcting test-only setup/accounting. New model R1 completed4/7, integrityPASS/taskFAIL1 at j1T3; remaining30/48NOT_RUN. No unconditional quality/qualificationGO. [Result and independent audits](../../apps/worker/evals/single-agent-commerce-qualification/quote-batch-run-20261108/REPORT.md).
+
+## Complete continuation — 08/11/2026
+
+Owner requested all remaining30/48 afterR1FAIL, with one review after complete execution. All34/55 executed;33model+7code+10handoff+5no-send,120generationHTTP,119OK1malformed. Single review:23TASK_OK/6MATERIAL_FAIL/4EXPECTED_HANDOFF/1CONTROL_NOT_REACHED; STOP/noGO, no new runtime fix. [Complete results](../../apps/worker/evals/single-agent-commerce-qualification/quote-batch-run-20261108/FULL_REPORT.md).

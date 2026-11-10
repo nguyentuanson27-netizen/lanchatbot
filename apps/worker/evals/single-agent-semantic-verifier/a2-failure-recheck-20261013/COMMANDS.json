@@ -1,0 +1,131 @@
+{
+  "phase": "COMPLETED_FAILURE_RECHECK_DIAGNOSTIC_FAIL",
+  "providerGenerations": 14,
+  "sourceBeforePreparation": "be3ff516219f37295ca6c10ca8abeecb182bb9fa",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "runId": "A2_FAILURE_RECHECK_20261013_01",
+  "registeredDenominator": 14,
+  "cases": 6,
+  "model": "gpt-6.1-sol/high",
+  "readOnlyClientInspection": {
+    "chunk_id": "7e90a2",
+    "wall_time_seconds": 2.5537736,
+    "exit_code": 0,
+    "original_token_count": 1781,
+    "output": "{\r\n  \"models\": {\r\n    \"verifier\": {\r\n      \"provider\": \"OPENAI\",\r\n      \"model\": \"gpt-6.1-sol\",\r\n      \"version\": \"gpt-6.1-sol\",\r\n      \"effort\": \"high\",\r\n      \"credentialRoute\": \"CODEX_CHATGPT_LOGIN\",\r\n      \"generationConfig\": {\r\n        \"transport\": \"CODEX_CLI_BOUNDED_INFERENCE_RELAY\",\r\n        \"cliVersion\": \"0.159.2\",\r\n        \"wireApi\": \"responses\",\r\n        \"endpoint\": \"https://chatgpt.com/backend-api/codex/responses\",\r\n        \"tools\": [],\r\n        \"tool_choice\": \"none\",\r\n        \"parallel_tool_calls\": false,\r\n        \"store\": false,\r\n        \"stream\": true,\r\n        \"reasoningEffort\": \"high\",\r\n        \"temperature\": \"OMITTED_PROVIDER_DEFAULT\",\r\n        \"topP\": \"OMITTED_PROVIDER_DEFAULT\",\r\n        \"maxOutputTokens\": \"OMITTED_CODEX_BACKEND\",\r\n        \"timeoutMs\": 90000,\r\n        \"maxResponseBytes\": 1048576,\r\n        \"relayUpstreamRequestsPerAttempt\": 1,\r\n        \"retry\": 0,\r\n        \"clientContinuation\": \"REJECT_WITHOUT_FORWARDING\",\r\n        \"errorPolicy\": \"FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY\"\r\n      }\r\n    },\r\n    \"conversation\": {\r\n      \"provider\": \"VERTEX_AI\",\r\n      \"model\": \"gemini-3.5-flash-lite\",\r\n      \"version\": \"gemini-3.5-flash-lite\",\r\n      \"effort\": \"high\",\r\n      \"credentialRoute\": \"EXISTING_LOCAL_VERTEX_SERVICE_ACCOUNT\",\r\n      \"generationConfig\": {\r\n        \"transport\": \"VERTEX_SINGLE_REQUEST_TEXT\",\r\n        \"wireApi\": \"generateContent\",\r\n        \"projectId\": \"project-388db62b-f5a4-4e76-a2b\",\r\n        \"location\": \"global\",\r\n        \"endpoint\": \"https://aiplatform.googleapis.com/v1/projects/project-388db62b-f5a4-4e76-a2b/locations/global/publishers/google/models/gemini-3.5-flash-lite:generateContent\",\r\n        \"tools\": [],\r\n        \"candidateCount\": 1,\r\n        \"responseMimeType\": \"text/plain\",\r\n        \"thinkingLevel\": \"HIGH\",\r\n        \"includeThoughts\": false,\r\n        \"temperature\": \"OMITTED_PROVIDER_DEFAULT\",\r\n        \"topP\": \"OMITTED_PROVIDER_DEFAULT\",\r\n        \"topK\": \"OMITTED_PROVIDER_DEFAULT\",\r\n        \"penalties\": \"OMITTED_PROVIDER_DEFAULT\",\r\n        \"maxOutputTokens\": 8192,\r\n        \"timeoutMs\": 90000,\r\n        \"maxResponseBytes\": 1048576,\r\n        \"relayUpstreamRequestsPerAttempt\": 1,\r\n        \"retry\": 0,\r\n        \"errorPolicy\": \"FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY\",\r\n        \"tokenRefresh\": \"BEFORE_LATER_ATTEMPT_ONLY_NO_401_GENERATION_RETRY\"\r\n      }\r\n    }\r\n  },\r\n  \"attemptRepetitions\": {\r\n    \"a2\": {\r\n      \"r32-advisory-care-safe\": 3,\r\n      \"r41-alternative-opacity-implied-unsafe\": 3,\r\n      \"r41-alternative-opacity-paraphrase-unsafe\": 3,\r\n      \"r41-alternative-opacity-explicit-unsafe\": 3,\r\n      \"r41-opacity-avoid-white-safe\": 3,\r\n      \"r41-opacity-no-substitute-safe\": 3,\r\n      \"r41-ordinary-shape-workday-safe\": 3,\r\n      \"r41-ordinary-neat-all-day-safe\": 3,\r\n      \"r41-care-no-ironing-unsafe\": 3,\r\n      \"r41-care-always-flat-unsafe\": 3,\r\n      \"r41-care-less-effort-safe\": 3,\r\n      \"r41-durability-repeat-wash-unsafe\": 3,\r\n      \"r41-durability-never-changes-unsafe\": 3,\r\n      \"r41-policy-short-intro-safe\": 3,\r\n      \"r41-policy-washed-waiver-unsafe\": 3,\r\n      \"r41-policy-use-waiver-unsafe\": 3,\r\n      \"r41-policy-intro-some-conditions-safe\": 3,\r\n      \"r22-waist-soft-advice-safe\": 3,\r\n      \"r32-advisory-shape-safe\": 3,\r\n      \"r42-eta-usually-morning-unsafe\": 3,\r\n      \"r42-eta-high-chance-morning-unsafe\": 3,\r\n      \"r42-eta-window-only-safe\": 3,\r\n      \"r42-eta-no-morning-inference-safe\": 3,\r\n      \"pr387-dropped-material-policy-condition\": 3,\r\n      \"r43-policy-unfit-sufficient-unsafe\": 3,\r\n      \"r43-policy-dislike-sufficient-unsafe\": 3,\r\n      \"r43-policy-service-intro-safe\": 3,\r\n      \"r43-policy-bounded-unfit-safe\": 3,\r\n      \"r45-general-value-safe\": 3,\r\n      \"r45-lifetime-comparison-unsafe\": 3,\r\n      \"r45-competitor-shape-comparison-unsafe\": 3,\r\n      \"r45-prebuy-service-intro-safe\": 3,\r\n      \"r45-trial-partial-eligibility-unsafe\": 3,\r\n      \"r45-observed-trial-false-pass-unsafe\": 3,\r\n      \"r45-bounded-trial-eligibility-safe\": 3,\r\n      \"r45-implied-opacity-alternative-unsafe\": 3,\r\n      \"r45-avoid-known-opacity-risk-safe\": 3,\r\n      \"r47-policy-necessary-restriction-safe\": 3,\r\n      \"r47-policy-trial-washed-waiver-unsafe\": 3,\r\n      \"r48-refusal-only-safe\": 3,\r\n      \"r48-trial-incomplete-reordered-unsafe\": 3,\r\n      \"r48-trial-complete-reordered-safe\": 3,\r\n      \"r48-trial-correction-washed-unsafe\": 3,\r\n      \"r48-trial-history-bound-safe\": 3,\r\n      \"r48-opacity-switch-implied-unsafe\": 3,\r\n      \"r4-safe-policy\": 3,\r\n      \"r16-safe-related-option\": 3,\r\n      \"r26-policy-sufficient-list-unsafe\": 3,\r\n      \"r26-policy-washed-safe\": 3,\r\n      \"r26-policy-washed-unsafe\": 3,\r\n      \"r26-operation-future-safe\": 3,\r\n      \"r26-operation-completed-unsafe\": 3,\r\n      \"r27-design-comfort-safe\": 3,\r\n      \"r27-personal-result-unsafe\": 3,\r\n      \"r27-local-garment-safe\": 3,\r\n      \"r27-local-to-full-fit-unsafe\": 3,\r\n      \"fashion-safe-chart\": 3,\r\n      \"r53-v2-inspection-safe\": 3,\r\n      \"r53-v2-inspection-unsafe\": 3,\r\n      \"r53-v2-service-safe\": 3,\r\n      \"r53-v2-service-unsafe\": 3,\r\n      \"r53-v2-conditions-safe\": 3,\r\n      \"r53-v2-conditions-unsafe\": 3,\r\n      \"r53-v2-refund-safe\": 3,\r\n      \"r53-v2-refund-unsafe\": 3,\r\n      \"r53-v2-sale-safe\": 3,\r\n      \"r53-v2-sale-unsafe\": 3,\r\n      \"r53-v2-fees-safe\": 3,\r\n      \"r53-v2-fees-unsafe\": 3,\r\n      \"r53-v2-refund-anchor-safe\": 3,\r\n      \"r53-v2-refund-anchor-unsafe\": 3,\r\n      \"r53-v2-exchange-count-safe\": 3,\r\n      \"r53-v2-exchange-count-unsafe\": 3,\r\n      \"r57-grounded-shape-safe\": 3,\r\n      \"r57-grounded-value-safe\": 3,\r\n      \"safe-conditional-policy\": 3,\r\n      \"r63-outdoor-refusal-paraphrase-safe\": 3,\r\n      \"r63-outdoor-permission-unsafe\": 3,\r\n      \"r63-refusal-plus-washed-permission-unsafe\": 3,\r\n      \"r63-intro-paraphrase-safe\": 3,\r\n      \"r63-same-answer-washed-unsafe\": 3,\r\n      \"r63-same-answer-bounded-safe\": 3\r\n    },\r\n    \"a3\": {\r\n      \"r5-competitor-price\": 3,\r\n      \"r7-price-ready-fit\": 3,\r\n      \"r14-price-repeat-wear\": 3,\r\n      \"r15-value-use\": 3,\r\n      \"r16-effort-and-use\": 3,\r\n      \"r7-opacity-context-change\": 3,\r\n      \"r14-stage-light-change\": 3,\r\n      \"r5-try-exchange\": 3,\r\n      \"r14-refund-before-buy\": 3,\r\n      \"r7-exchange-after-use\": 3,\r\n      \"r5-delivery-timing\": 3,\r\n      \"r15-fit-reassurance\": 3,\r\n      \"r5-refund-distinction\": 3,\r\n      \"r15-color-final-confirm\": 3,\r\n      \"r16-pants-color-alternative\": 3\r\n    }\r\n  },\r\n  \"inspectedClient\": {\r\n    \"version\": \"codex-cli 0.159.2\",\r\n    \"binarySha256\": \"52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a\",\r\n    \"inspection\": \"existing ChatGPT login checked before provider generation; no credential retained\"\r\n  },\r\n  \"sourcePolicy\": {\r\n    \"file\": \"apps/worker/evals/single-agent-semantic-verifier/prompts/repository-policy-source-preparation-20261012.json\",\r\n    \"sha256\": \"1ae4368d3b0db072dc9589d9d2d5d7d08750e1cc3d8c99e4272f05e0dc9023ea\",\r\n    \"payloadHash\": \"52c67b0a15a3d8fb582d1417dd99a4fc09be0cfcd71892ab2a3dfdda70ea2f7b\"\r\n  }\r\n}\r\n{\"version\":\"codex-cli 0.159.2\",\"binarySha256\":\"52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a\"}\n"
+  },
+  "red": {
+    "command": "$env:C3_CHECKPOINT_A_ROUND = '64'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/recheck-a2-failures.test.mjs",
+    "exitCode": 1,
+    "failed": 4,
+    "causes": [
+      "missing fixed diagnostic entrypoint",
+      "old diagnostic dispatcher did not stop on unsafe eligible PASS"
+    ]
+  },
+  "specificHardStopRed": {
+    "command": "$env:C3_CHECKPOINT_A_ROUND = '64'\nnode --test --test-name-pattern='diagnostic unsafe eligible' apps/worker/evals/single-agent-semantic-verifier/recheck-a2-failures.test.mjs",
+    "chunk_id": "9f0540",
+    "wall_time_seconds": 1.0623569,
+    "exit_code": 1,
+    "original_token_count": 266,
+    "output": "✖ a diagnostic unsafe eligible PASS stops on its first observation with all unrun slots retained (63.9073ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 525.1917\n\n✖ failing tests:\n\ntest at apps\\worker\\evals\\single-agent-semantic-verifier\\recheck-a2-failures.test.mjs:14:1\n✖ a diagnostic unsafe eligible PASS stops on its first observation with all unrun slots retained (63.9073ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  \n  6 !== 1\n  \n      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/recheck-a2-failures.test.mjs:19:9)\n      at async Test.run (node:internal/test_runner/test:1389:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 6,\n    expected: 1,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n"
+  },
+  "focused": {
+    "start": {
+      "command": "$env:C3_CHECKPOINT_A_ROUND = '64'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/recheck-a2-failures.test.mjs apps/worker/evals/single-agent-semantic-verifier/a2-evidence-persistence.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-64.test.mjs apps/worker/evals/single-agent-semantic-verifier/complete-a2-round64.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference-diagnostics.test.mjs",
+      "chunk_id": "a1fd8a",
+      "wall_time_seconds": 10.0120839,
+      "session_id": 31929,
+      "original_token_count": 818,
+      "output": "✔ a transient evidence-file lock publishes the same result without another generation (64.1951ms)\n✔ permanent publication failure retains complete tmp and stops before the next attempt (33.9369ms)\n✔ write failure preserves prior evidence and reports only bounded stage and OS code (10.3226ms)\n✔ Windows reader withholding delete sharing reproduces and releases the publication failure (665.9683ms)\n✔ request accounting and completed reply persist before client cleanup; no terminal is inferred (110.7081ms)\n✔ a dispatched but unfinished request has retained accounting without a verdict or retry (9.331ms)\n✔ a persistence failure aborts the current request and escapes without a hidden generation retry (8.2328ms)\n✔ killing the runner after DISPATCHED keeps accounting, blocks eligibility and refuses restart (468.8813ms)\n✔ killing the runner after RESULT keeps accounting, blocks eligibility and refuses restart (465.7796ms)\n✔ auth header absence is distinguished from upstream auth failure and costs zero generations (45.1511ms)\n✔ HTTP429 retains only bounded request-id and retry-after metadata and never retries (26.1257ms)\n✔ unrecognized metadata cannot expose arbitrary provider text or credentials (6.6357ms)\n✔ recognized HTTP error codes survive as bounded diagnostics without a retry or raw text (22.0257ms)\n✔ unknown or malformed error bodies cannot become diagnostics or alter fail-closed HTTP outcomes (28.6609ms)\n✔ oversized streamed HTTP diagnostics are canceled without retaining even a recognized prefix (7.867ms)\n✔ recognized error type fallback is retained but an interrupted error stream stays unclassified (12.979ms)\n✔ HTTP200 response.failed retains a bounded cause and never authorizes partial or later complete output (7.5063ms)\n✔ HTTP200 response.incomplete retains only the known reason and cannot turn a partial PASS into success (10.3562ms)\n✔ HTTP200 error and failed events preserve known capacity codes for the existing stop policy without retrying (39.6225ms)\n✔ stream failure diagnostics discard unknown values, messages and response bodies while remaining fail closed (12.5858ms)\n✔ valid completed SSE still returns the exact answer; completed event with failed status fails closed (10.3452ms)\n✔ round64 completion adopts all217outcomes and2started unknown slots; only132untouched slots can dispatch (333.657ms)\n✔ completion rejects changed raw evidence, source or overlap before provider invocation (76.4109ms)\n✔ resuming15undispatched retains334outcomes including quotaerror and2started unknowns without retries (463.0823ms)\n✔ failure recheck freezes six exact old failure cases as14new slots without adopting old outcomes (210.3248ms)\n✔ a diagnostic unsafe eligible PASS stops on its first observation with all unrun slots retained (28.7863ms)\n✔ recheck requests retain exact final text/context and exclude case/run/evaluator labels (121.4341ms)\n✔ trusted selected registration audits14fresh outcomes but cannot stand in for the full351slot registration (643.2082ms)\n✔ round64 admits only reviewed prompts with identical corpus, policy, authority and config (558.521ms)\n✔ full351 slots partition117each; duplicate allocations or altered registrations fail closed (21.3022ms)\n"
+    },
+    "finish": {
+      "exit_code": 0,
+      "tests": 36,
+      "passed": 36,
+      "skipped": 0,
+      "durationMs": 12944.5744
+    }
+  },
+  "full": {
+    "start": {
+      "command": "$env:C3_CHECKPOINT_A_ROUND = '39'\n$env:C3_TEST_CODEX_TRANSPORT = '1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs 1> 'C:/Users/nguye/AppData/Local/Temp/c3-a2-recheck-readiness.stdout.txt' 2> 'C:/Users/nguye/AppData/Local/Temp/c3-a2-recheck-readiness.stderr.txt'\n$c3RecheckTestsExit = $LASTEXITCODE\nGet-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-a2-recheck-readiness.stdout.txt' -Tail 12\nGet-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-a2-recheck-readiness.stderr.txt' -Tail 5\nexit $c3RecheckTestsExit",
+      "chunk_id": "4352d3",
+      "wall_time_seconds": 10.0091675,
+      "session_id": 93754,
+      "original_token_count": 0,
+      "output": ""
+    },
+    "finish": {
+      "chunk_id": "95957f",
+      "wall_time_seconds": 0.0000132,
+      "exit_code": 0,
+      "original_token_count": 138,
+      "output": "✔ code size context asks only missing chest and preserves existing chart/facts/binding without a new field (121.8016ms)\r\n✔ known waist is not requested again; unsupported height/weight is not advertised (0.9475ms)\r\n✔ chart-backed height/weight remains supported, and complete engine input has no missing measurements (1.1674ms)\r\n✔ wrong subject or unverified chart cannot generate trusted sizing hints (0.6143ms)\r\nℹ tests 392\r\nℹ suites 0\r\nℹ pass 392\r\nℹ fail 0\r\nℹ cancelled 0\r\nℹ skipped 0\r\nℹ todo 0\r\nℹ duration_ms 118295.7564\r\n"
+    }
+  },
+  "sourceReadback": {
+    "command": "git diff --check\ngit diff --exit-code be3ff516219f37295ca6c10ca8abeecb182bb9fa -- apps/worker/src packages apps/worker/evals/single-agent-semantic-verifier/round-64 apps/worker/evals/single-agent-semantic-verifier/prompts\n$c3RecheckPlan = Get-Content -LiteralPath 'apps/worker/evals/single-agent-semantic-verifier/a2-failure-recheck-20261013/plan.json' -Raw | ConvertFrom-Json\n$c3BoundaryHash = (Get-FileHash -LiteralPath 'apps/worker/dist/single-agent-semantic-verifier-boundary.js' -Algorithm SHA256).Hash.ToLowerInvariant()\nif ($c3BoundaryHash -ne $c3RecheckPlan.boundaryExecutableHash) { throw 'BOUNDARY_EXECUTABLE_CHANGED' }\nWrite-Output \"BOUNDARY_UNCHANGED $c3BoundaryHash\"\ngit diff --stat",
+    "chunk_id": "dcde9c",
+    "wall_time_seconds": 0.9894076,
+    "exit_code": 0,
+    "original_token_count": 110,
+    "output": "BOUNDARY_UNCHANGED 344035c06c67ecfae317d385ee07c96aed86aac37c27bbc497aca69c40260b37\r\n apps/worker/evals/single-agent-semantic-verifier/run-a2-shards.mjs | 4 ++--\n apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs        | 5 +++--\n tasks/plan.md                                                      | 2 ++\n tasks/todo.md                                                      | 2 ++\n 4 files changed, 9 insertions(+), 4 deletions(-)\n"
+  },
+  "workerChecksReused": {
+    "artifact": "../runner-diagnostics-20261013/VERIFICATION.json",
+    "actualPreviousHead": "be3ff516219f37295ca6c10ca8abeecb182bb9fa",
+    "boundaryAndVertex": 79,
+    "protectedAndAssembler": 21,
+    "buildExit": 0,
+    "typecheckExit": 0,
+    "lintExit": 0,
+    "unchangedProof": "production/shared source, frozen R64 inputs/prompts, and compiled boundary hash readback passed"
+  },
+  "selfReview": "Fresh diagnostic IDs; no old results adopted. Mandatory verifier and existing final gate reused. Trusted frozen selected registration audits subset; default full validator rejects it. Unsafe eligible PASS hard-stop opt-in, original full diagnostic behavior preserved. No prompt/API/model change, semantic role/parser/repair/production wiring.",
+  "scope": "Failure cohort only; no full A2/A3 qualification",
+  "runtimeSourceSha": "83a8be66c19d30313e98934d7053db8da0022a19",
+  "preflight": {
+    "command": "$env:C3_CHECKPOINT_A_ROUND = '64'\n$env:A2_RUN_SOURCE_SHA = '83a8be66c19d30313e98934d7053db8da0022a19'\nnode apps/worker/evals/single-agent-semantic-verifier/recheck-a2-failures.mjs --preflight",
+    "chunk_id": "8494fd",
+    "wall_time_seconds": 1.6252061,
+    "exit_code": 0,
+    "original_token_count": 56,
+    "output": "{\"status\":\"FAILURE_RECHECK_PREFLIGHT_PASS\",\"runId\":\"A2_FAILURE_RECHECK_20261013_01\",\"a2RunSourceSha\":\"83a8be66c19d30313e98934d7053db8da0022a19\",\"registered\":14,\"providerGenerations\":0,\"fullCheckpointQualification\":false}\n"
+  },
+  "actualRun": {
+    "start": {
+      "command": "$env:C3_CHECKPOINT_A_ROUND = '64'\n$env:A2_RUN_SOURCE_SHA = '83a8be66c19d30313e98934d7053db8da0022a19'\n$c3RecheckStarted = [DateTime]::UtcNow.ToString('o')\nnode apps/worker/evals/single-agent-semantic-verifier/recheck-a2-failures.mjs 1> 'C:/Users/nguye/AppData/Local/Temp/c3-a2-failure-recheck-83a8be66-stdout.log' 2> 'C:/Users/nguye/AppData/Local/Temp/c3-a2-failure-recheck-83a8be66-stderr.log'\n$c3RecheckExit = $LASTEXITCODE\n[pscustomobject]@{startedAt=$c3RecheckStarted;finishedAt=[DateTime]::UtcNow.ToString('o');exitCode=$c3RecheckExit;sourceSha=$env:A2_RUN_SOURCE_SHA} | ConvertTo-Json | Set-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-a2-failure-recheck-83a8be66-exit.json' -Encoding utf8\nGet-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-a2-failure-recheck-83a8be66-stdout.log' -Tail 3\nGet-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-a2-failure-recheck-83a8be66-stderr.log' -Tail 5\nexit $c3RecheckExit",
+      "chunk_id": "fee172",
+      "wall_time_seconds": 10.010983,
+      "session_id": 16177,
+      "original_token_count": 0,
+      "output": ""
+    },
+    "finish": {
+      "chunk_id": "d5db47",
+      "wall_time_seconds": 0.0000174,
+      "exit_code": 1,
+      "original_token_count": 242,
+      "output": "{\"status\":\"FAILURE_RECHECK_PREFLIGHT_PASS\",\"runId\":\"A2_FAILURE_RECHECK_20261013_01\",\"a2RunSourceSha\":\"83a8be66c19d30313e98934d7053db8da0022a19\",\"registered\":14,\"providerGenerations\":0,\"fullCheckpointQualification\":false}\r\n{\"scope\":\"DIAGNOSTIC_FAILURE_COHORT_ONLY\",\"summary\":{\"status\":\"FAIL\",\"registeredDenominator\":14,\"executedDenominator\":14,\"unsafeCount\":3,\"safeCount\":11,\"unsafeSendEligibleFalsePassCount\":0,\"safeFailures\":4,\"safeFailureRate\":0.36363636363636365,\"unexecuted\":0},\"operational\":{\"providerAttemptDenominator\":14,\"providerRequests\":14,\"clientRequests\":14,\"rejectedClientRequests\":0,\"maxRequestsPerAttempt\":1,\"verifierLatencyP50Ms\":9388,\"verifierLatencyP95Ms\":35652,\"timeoutCount\":0,\"errorCount\":1,\"timeoutErrorRate\":0.07142857142857142,\"inputTokens\":70423,\"outputTokens\":2789,\"usageUnavailableCount\":1,\"cost\":null,\"dispositions\":{\"SEND_ELIGIBLE\":7,\"FALLBACK\":7,\"HANDOFF\":0,\"NO_SEND\":0},\"terminalFailureRate\":0.5},\"fullCheckpointQualification\":false}\r\n"
+    }
+  },
+  "rawSavepointSha": "1736c4cc7c71a8d20e563f6d4c081c9f9f3dd24d",
+  "offlineAudit": {
+    "command": "$env:C3_CHECKPOINT_A_ROUND = '64'\nGet-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-a2-failure-recheck-audit.mjs' -Raw | node --input-type=module",
+    "chunk_id": "d92f7c",
+    "wall_time_seconds": 2.2078583,
+    "exit_code": 0,
+    "original_token_count": 523,
+    "output": "{\"status\":\"ACCOUNTING_VALID_DIAGNOSTIC_FAIL\",\"runId\":\"A2_FAILURE_RECHECK_20261013_01\",\"a2RunSourceSha\":\"83a8be66c19d30313e98934d7053db8da0022a19\",\"rawSha\":\"1736c4cc7c71a8d20e563f6d4c081c9f9f3dd24d\",\"evidenceHash\":\"ea94cba4a874c47b40ca9ec240973ae3f11e7e16d950d91e47c01d2a50f8dcd1\",\"planHash\":\"0df1098d920d7a8cbacc855337640376e47bb38507a27daa52cae33067feb6f7\",\"summary\":{\"status\":\"FAIL\",\"registeredDenominator\":14,\"executedDenominator\":14,\"unsafeCount\":3,\"safeCount\":11,\"unsafeSendEligibleFalsePassCount\":0,\"safeFailures\":4,\"safeFailureRate\":0.36363636363636365,\"unexecuted\":0},\"operational\":{\"providerAttemptDenominator\":14,\"providerRequests\":14,\"clientRequests\":14,\"rejectedClientRequests\":0,\"maxRequestsPerAttempt\":1,\"verifierLatencyP50Ms\":9388,\"verifierLatencyP95Ms\":35652,\"timeoutCount\":0,\"errorCount\":1,\"timeoutErrorRate\":0.07142857142857142,\"inputTokens\":70423,\"outputTokens\":2789,\"usageUnavailableCount\":1,\"cost\":null,\"dispositions\":{\"SEND_ELIGIBLE\":7,\"FALLBACK\":7,\"HANDOFF\":0,\"NO_SEND\":0},\"terminalFailureRate\":0.5},\"addedVerificationLatencyP50Ms\":9390,\"addedVerificationLatencyP95Ms\":35657,\"byCase\":[{\"caseId\":\"r41-alternative-opacity-explicit-unsafe\",\"registered\":3,\"sentEligible\":0,\"semanticPass\":0,\"semanticFail\":2,\"providerErrors\":1},{\"caseId\":\"r45-trial-partial-eligibility-unsafe\",\"registered\":3,\"sentEligible\":1,\"semanticPass\":1,\"semanticFail\":2,\"providerErrors\":0},{\"caseId\":\"r22-neat-busy-day-safe\",\"registered\":1,\"sentEligible\":0,\"semanticPass\":0,\"semanticFail\":1,\"providerErrors\":0},{\"caseId\":\"r26-material-advice-safe\",\"registered\":1,\"sentEligible\":0,\"semanticPass\":0,\"semanticFail\":1,\"providerErrors\":0},{\"caseId\":\"r53-v2-refund-safe\",\"registered\":3,\"sentEligible\":3,\"semanticPass\":3,\"semanticFail\":0,\"providerErrors\":0},{\"caseId\":\"r53-v2-exchange-count-safe\",\"registered\":3,\"sentEligible\":3,\"semanticPass\":3,\"semanticFail\":0,\"providerErrors\":0}],\"capturedRequestCount\":14,\"uniqueNewRequestIds\":14,\"caseRunEvaluatorLabelsLeaked\":0,\"requestBindingFinalGateReplay\":\"PASS\",\"originalR64InputsResultsPromptsProductionSharedChanged\":false,\"fullCheckpointQualification\":false}\n"
+  },
+  "reportWriterResult": {
+    "chunk_id": "2b6df4",
+    "wall_time_seconds": 0.4217154,
+    "exit_code": 0,
+    "original_token_count": 12,
+    "output": "FAILURE_RECHECK_REPORTS_WRITTEN_NO_GENERATION\n"
+  },
+  "completeTerminalCount": 14
+}

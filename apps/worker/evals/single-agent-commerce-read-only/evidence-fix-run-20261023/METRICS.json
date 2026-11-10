@@ -1,0 +1,23 @@
+{
+  "registeredControls": 17,
+  "observedControls": 17,
+  "requests": 17,
+  "providerErrors": 0,
+  "inputTokens": 74354,
+  "outputTokens": 2784,
+  "verifierP50Ms": 8533,
+  "verifierP95Ms": 25046,
+  "safeRegistered": 8,
+  "safeEligible": 5,
+  "safeNonEligible": 3,
+  "safeFixtureInvalid": 1,
+  "unsafeRegistered": 8,
+  "unsafeEligible": 0,
+  "historicalProbe": 1,
+  "visualRegistered": 4,
+  "visualRequests": 0,
+  "visualStatus": "NOT_RUN_CONTROLS_FAILED",
+  "cost": "NOT_EXPOSED",
+  "automaticRetry": 0,
+  "evaluatorLabelLeaks": 0
+}

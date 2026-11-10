@@ -1,0 +1,89 @@
+{
+  "registeredAt": "2026-10-22T17:07:39.046636+00:00",
+  "runSourceSha": "540b8129e2e52062ad5bc96ffa44dd84d0591bd5",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
+    "verifier": "0b240599a04d9a86c25ed2b3b815c152e83106c85e61940efde15b020e4c2fde"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "inputAndRunnerHashes": {
+    "manifest.json": "5a543c6582c1080eda1bb3a6daa4a3be8ed4f59af20574ec5d6d11389eeb433f",
+    "source-config.b1.json": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+    "cases.b1.json": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+    "stateful-cases.json": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+    "sales-journeys.candidate.json": "4b888f6e44f5b4e144125da38d70bf175946dc5277eabb8d0ab5a6639077fbeb",
+    "handoff-matrix.candidate.json": "1fb7dd7cb5eab0e7685e0f3df1b1407d9bdea56dbe538034868b5189f9700c62",
+    "prompts/owner.vi.txt": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
+    "prompts/verifier.vi.txt": "0b240599a04d9a86c25ed2b3b815c152e83106c85e61940efde15b020e4c2fde",
+    "run.mjs": "0f7c59dfa9091781cac8f46ed41e36ec3f66ee171438a80ee4dcb362119b9688",
+    "protocol.mjs": "924dcddba243f2a0d58ea08b7a3b77d87781fb5c226791a805efdd1a738b5e59",
+    "gemini-inference.mjs": "18da54311240f1c1e3428428c0bb2a61d6ce8453394395144af141c725e743eb",
+    "stateful-provider.mjs": "d434b75efdf2cedd447461269185bd5cb77ef54d4776b22b9365b74402eec1f4",
+    "isolated-integration.mjs": "b9c0a7b16a20dbf2915fd7134a997d1cd446b4e6e0658bd9f3ed761cfe544af1",
+    "candidate-handoff.mjs": "8a8ea2a2a3931ead72e50e4df4ede41574b6530bfa49844f82c040d4f0410294",
+    "advice-diagnostic.mjs": "6d11c9124d5d93b4dbab9940fb52444db07b3da80f6c4d6286065ce162e3b64c",
+    "opening-advice-preparation-20261022/diagnostic-inputs.json": "13c3ba24b8e8acba56a592b65ed520bfc5ef0605d7c972575e8ec328c674bf34"
+  },
+  "orchestratorHash": "10e8105d4cfbdd2b428e670e9fdee915e71e7af0a8558596e4fc6dd436d1f959",
+  "diagnosticOutcomes": 4,
+  "nativeOutcomes": 39,
+  "nativePublicTurns": 38,
+  "privateCodeTurns": 1,
+  "repetitions": 1,
+  "maximumGenerationRequests": 160,
+  "retry": 0,
+  "sendEnabled": false,
+  "candidateHandoff": true,
+  "ownerInstruction": "After fixes run full cases; complete native39 even if diagnostic voice needs edits. Stop only on infrastructure/source identity/privacy blockers, never quality early stop. No repeat campaign."
+}

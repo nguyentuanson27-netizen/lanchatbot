@@ -1,0 +1,65 @@
+{
+  "status": "OFFLINE_WIRE_CHECK_PASS_NOT_PROVIDER_RESULT",
+  "providerGenerations": 0,
+  "registeredOutcomes": 8,
+  "maximumGenerationRequests": 16,
+  "inputHash": "74479f6f26d5d773c0596709123c1ca8507754353ccc964571feee201783f1a0",
+  "checks": [
+    {
+      "caseId": "b1-buying-concern:baseline",
+      "arm": "baseline",
+      "wireBytes": 17255,
+      "promptHash": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
+      "nonInstructionWireHash": "894a6d14603315eb403afe1852733be1b00bff1e734ea84e9faa51ac0fb87269"
+    },
+    {
+      "caseId": "b1-buying-concern:candidate",
+      "arm": "candidate",
+      "wireBytes": 17420,
+      "promptHash": "a17b74dc6368841e3ed6e89621b562500dae5648d41ca8a9a02615321acc961a",
+      "nonInstructionWireHash": "894a6d14603315eb403afe1852733be1b00bff1e734ea84e9faa51ac0fb87269"
+    },
+    {
+      "caseId": "b1-changed-occasion-v2:candidate",
+      "arm": "candidate",
+      "wireBytes": 16321,
+      "promptHash": "a17b74dc6368841e3ed6e89621b562500dae5648d41ca8a9a02615321acc961a",
+      "nonInstructionWireHash": "7af6022e6e4fa63a4cc71625dd855cc4387e6db94fe2bc6322e3b039845ca3ef"
+    },
+    {
+      "caseId": "b1-changed-occasion-v2:baseline",
+      "arm": "baseline",
+      "wireBytes": 16156,
+      "promptHash": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
+      "nonInstructionWireHash": "7af6022e6e4fa63a4cc71625dd855cc4387e6db94fe2bc6322e3b039845ca3ef"
+    },
+    {
+      "caseId": "b1-buying-concern-v2:baseline",
+      "arm": "baseline",
+      "wireBytes": 17321,
+      "promptHash": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
+      "nonInstructionWireHash": "fd0da569cf3bb2a03781db0a10140f8ba58abbcd4634923770539442af9805a6"
+    },
+    {
+      "caseId": "b1-buying-concern-v2:candidate",
+      "arm": "candidate",
+      "wireBytes": 17486,
+      "promptHash": "a17b74dc6368841e3ed6e89621b562500dae5648d41ca8a9a02615321acc961a",
+      "nonInstructionWireHash": "fd0da569cf3bb2a03781db0a10140f8ba58abbcd4634923770539442af9805a6"
+    },
+    {
+      "caseId": "b1-buying-concern-v3:candidate",
+      "arm": "candidate",
+      "wireBytes": 17477,
+      "promptHash": "a17b74dc6368841e3ed6e89621b562500dae5648d41ca8a9a02615321acc961a",
+      "nonInstructionWireHash": "223ed80245aa0b41a3394aa6b97def9a3ec2dea9f4386805cce00430dac0a57f"
+    },
+    {
+      "caseId": "b1-buying-concern-v3:baseline",
+      "arm": "baseline",
+      "wireBytes": 17312,
+      "promptHash": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
+      "nonInstructionWireHash": "223ed80245aa0b41a3394aa6b97def9a3ec2dea9f4386805cce00430dac0a57f"
+    }
+  ]
+}

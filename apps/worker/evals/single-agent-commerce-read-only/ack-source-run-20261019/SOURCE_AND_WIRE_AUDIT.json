@@ -1,0 +1,14 @@
+{
+  "runSourceSha": "1b6927849ba5339b0c06fc49940e15cb6bd25602",
+  "primaryReviewLockSha": "OPERATIONAL_TRIAGE_PRECEDED_PRIMARY",
+  "childSourceAndPromptRegistrationsMatched": 3,
+  "verifierBindingsRecomputed": 7,
+  "ownerExactPromptCaptures": 18,
+  "wireBodiesChecked": 31,
+  "evaluatorLabelLeaks": 0,
+  "exactEligibleTextMatches": 6,
+  "captureHashesMatched": 2,
+  "publishedArtifactHashesMatched": 34,
+  "testDatabaseDropped": true,
+  "sendEnabled": false
+}

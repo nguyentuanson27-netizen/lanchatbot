@@ -1,0 +1,219 @@
+{
+  "sourceSha": "b2448a5726f454668fb1bf1756eac73e1e9af309",
+  "sourceDirty": false,
+  "mode": "PROVIDER_REAL_POSTGRES_LIVE_PUBLIC_CATALOG_CURRENT_CAPTURED_POLICY_CAPTURE_DELIVERY",
+  "paymentMethod": "COD",
+  "sendEnabled": false,
+  "providerGenerations": 13,
+  "cases": [],
+  "testDatabaseDropped": true,
+  "schemaFiles": [
+    "0001_core.up.sql",
+    "0002_retention.up.sql",
+    "0003_shadow_evaluation.up.sql",
+    "0004_business_fact_audit.up.sql",
+    "0005_realtime_runtime.up.sql",
+    "0006_admin_read_models.up.sql",
+    "0007_admin_control_plane.up.sql",
+    "0008_admin_conversation_identity.up.sql",
+    "0009_chat_history_outreach.up.sql",
+    "0010_handoff_history.up.sql",
+    "0011_ads_media_analytics.up.sql",
+    "0012_batch_worker_catalog_status.up.sql",
+    "0013_inbound_debounce.up.sql",
+    "0014_admin_policy_control.up.sql",
+    "0015_runtime_policy_resolution.up.sql",
+    "0016_admin_simulation_worker.up.sql",
+    "0017_sales_cycle_runtime.up.sql",
+    "0018_shadow_verified_fact_payload.up.sql",
+    "0019_customer_profile_wave2.up.sql",
+    "0020_size_chart_extraction.up.sql",
+    "0021_dataset_review.up.sql",
+    "0022_dataset_review_acl.up.sql",
+    "0023_wave2_strategy_metrics.up.sql",
+    "0024_ad_acquisition_analytics.up.sql",
+    "0025_admin_frontend_operations.up.sql",
+    "0026_product_media_intake_dedupe.up.sql",
+    "0027_handoff_case_sla_default.up.sql",
+    "0028_meta_response_group_gate.up.sql",
+    "0029_meta_outbox_handoff_ordering.up.sql",
+    "0030_runtime_behavior_modes.up.sql",
+    "0031_admin_policy_safe_deletion.up.sql",
+    "0032_df_p1_decision_observability.up.sql",
+    "0033_df_readiness_observability.up.sql",
+    "0035_sales_cycle_clarification_commands.up.sql"
+  ],
+  "testDatabase": "c3_b_test_3b5077086d7f60e6",
+  "policyBundleHash": "sha256:0b5479c358d25b6782e5c6791f01e3e62dfb126d2801869e21bc8d82726b7168",
+  "policyVersionReferences": [
+    {
+      "lifecycle": "PUBLISHED",
+      "pointerId": "cefcecd6-2619-4ba9-bd54-ac43b25f5abd",
+      "versionId": "805931e1-0363-4cb2-a66d-de9058982af5",
+      "artifactKey": "lana.closing-strategy",
+      "contentHash": "sha256:e151e450efe47cfe9a48b7a55ea714ff2e1413399090fbd45d928816ecd067df",
+      "artifactKind": "CLOSING_STRATEGY",
+      "versionNumber": 3,
+      "pointerRevision": 4
+    },
+    {
+      "lifecycle": "PUBLISHED",
+      "pointerId": "e66d76d5-99d7-442b-92c0-f6030c60533f",
+      "versionId": "81320141-8221-4009-8282-df430eed8946",
+      "artifactKey": "lana.offer-policy",
+      "contentHash": "sha256:c12f58eb1ba869fd72c25b97fbfba08725a9532689275cdcfa5fc76d6e5fdbbc",
+      "artifactKind": "OFFER_POLICY",
+      "versionNumber": 2,
+      "pointerRevision": 0
+    },
+    {
+      "lifecycle": "PUBLISHED",
+      "pointerId": "3097609e-7dcf-4b07-8e6c-3382be2b33db",
+      "versionId": "962dcbfc-22cd-48b3-a11c-f09875580133",
+      "artifactKey": "lana.payment-policy",
+      "contentHash": "sha256:59c24c7cbf19f9c3ed654b57dfa49860960ebb0d1187a981e3c44aa77aa4a1cc",
+      "artifactKind": "PAYMENT_POLICY",
+      "versionNumber": 1,
+      "pointerRevision": 0
+    },
+    {
+      "lifecycle": "PUBLISHED",
+      "pointerId": "b4bd9fe3-cff1-4e01-bee0-12bdafe7ad28",
+      "versionId": "24400b36-6d12-4e3c-b0ca-cf41014ed0d8",
+      "artifactKey": "lana.shop-policy",
+      "contentHash": "sha256:666362842822d653d1914494be4d9858504951e3fe77acd830997f3c086dc4b7",
+      "artifactKind": "SHOP_POLICY",
+      "versionNumber": 2,
+      "pointerRevision": 1
+    },
+    {
+      "lifecycle": "PUBLISHED",
+      "pointerId": "19c15fdd-c61d-4088-b607-77de76dabbfb",
+      "versionId": "1311b497-c041-4433-899d-130d6c658961",
+      "artifactKey": "size-chart:SD276",
+      "contentHash": "sha256:4dc553a16e69a3773ce8e791a0766b01f9fa4c932561f09da3f9fda9c4893e70",
+      "artifactKind": "SIZE_CHART",
+      "versionNumber": 2,
+      "pointerRevision": 0
+    },
+    {
+      "lifecycle": "PUBLISHED",
+      "pointerId": "05cfdf19-f387-441c-a95c-aa0306308181",
+      "versionId": "53855377-5f06-4185-9ff8-b7f12a245d3e",
+      "artifactKey": "size-chart:SD365",
+      "contentHash": "sha256:50fbd936582d219c7765e8347b3deb441a40c4ff370b63c55b19bc1f9389f2e5",
+      "artifactKind": "SIZE_CHART",
+      "versionNumber": 2,
+      "pointerRevision": 0
+    },
+    {
+      "lifecycle": "PUBLISHED",
+      "pointerId": "09bca4f5-9a27-41e3-bc6e-ce879c0b1c7e",
+      "versionId": "bf0db5cc-2d75-45a9-99fc-11f90bd853c8",
+      "artifactKey": "size-chart:SD375",
+      "contentHash": "sha256:6ed8c85a4e9c7b4e22c84c529a1220f46cd33e533f12ad51125bbd1955f3fdfe",
+      "artifactKind": "SIZE_CHART",
+      "versionNumber": 2,
+      "pointerRevision": 0
+    },
+    {
+      "lifecycle": "PUBLISHED",
+      "pointerId": "3cd09b26-6b27-44c8-9477-37accd5e48fd",
+      "versionId": "64126160-44b7-4aad-8adc-f775f1c329ed",
+      "artifactKey": "size-chart:SD396",
+      "contentHash": "sha256:536f393b1a4f4605275e9aa74889091640b4aebb1612108ae56d8436ea2f97bf",
+      "artifactKind": "SIZE_CHART",
+      "versionNumber": 2,
+      "pointerRevision": 0
+    },
+    {
+      "lifecycle": "PUBLISHED",
+      "pointerId": "6b89e712-35e8-4e10-8ddb-88da9cdb311d",
+      "versionId": "2d2c4a39-00e2-4abc-a122-6e907b5dceda",
+      "artifactKey": "size-chart:SD398",
+      "contentHash": "sha256:158395f5d9c659b840cf66f7e8bd62762ace9b3cf035ad1ed869b1801c6187f6",
+      "artifactKind": "SIZE_CHART",
+      "versionNumber": 2,
+      "pointerRevision": 0
+    },
+    {
+      "lifecycle": "PUBLISHED",
+      "pointerId": "a8962654-329f-4d14-8ed0-7a563858a2f0",
+      "versionId": "46d135cf-cb17-49ad-85a9-3ba4a2ab790d",
+      "artifactKey": "size-chart:SQ2447",
+      "contentHash": "sha256:139fe2874e56add9a1c2dcc7cfa06c988000a8b796d78314d76c44daf6bf584e",
+      "artifactKind": "SIZE_CHART",
+      "versionNumber": 2,
+      "pointerRevision": 0
+    },
+    {
+      "lifecycle": "PUBLISHED",
+      "pointerId": "cf472602-8cfc-434e-aa72-33ca1844b353",
+      "versionId": "3392bd5c-353c-488d-84ba-943bf743446c",
+      "artifactKey": "size-chart:SQ520",
+      "contentHash": "sha256:6ea0b28acbef238c046e7aa6ed14f6c87519c796545e50b1f2bb64da8e6385ef",
+      "artifactKind": "SIZE_CHART",
+      "versionNumber": 3,
+      "pointerRevision": 0
+    }
+  ],
+  "outcomes": [
+    {
+      "caseId": "stateful-open",
+      "disposition": "FALLBACK",
+      "captured": 1,
+      "ownerRequests": 3,
+      "verifierRequests": 0
+    },
+    {
+      "caseId": "stateful-variant-quantity",
+      "disposition": "SEND_ELIGIBLE",
+      "captured": 1,
+      "ownerRequests": 3,
+      "verifierRequests": 1
+    },
+    {
+      "caseId": "stateful-quote",
+      "disposition": "SEND_ELIGIBLE",
+      "captured": 1,
+      "ownerRequests": 1,
+      "verifierRequests": 1
+    },
+    {
+      "caseId": "stateful-correction",
+      "disposition": "SEND_ELIGIBLE",
+      "captured": 1,
+      "ownerRequests": 2,
+      "verifierRequests": 1
+    },
+    {
+      "caseId": "stateful-private-checkout",
+      "disposition": "HANDOFF",
+      "captured": 0,
+      "ownerRequests": 0,
+      "verifierRequests": 0
+    },
+    {
+      "caseId": "stateful-confirm",
+      "disposition": "NO_SEND",
+      "captured": 0,
+      "ownerRequests": 0,
+      "verifierRequests": 0
+    },
+    {
+      "caseId": "stateful-human-request",
+      "disposition": "HANDOFF",
+      "captured": 0,
+      "ownerRequests": 1,
+      "verifierRequests": 0
+    }
+  ],
+  "providerCounts": {
+    "embedding": 0,
+    "owner": 10,
+    "verifier": 3
+  },
+  "registeredOutcomes": 7,
+  "completedOutcomes": 7,
+  "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW"
+}

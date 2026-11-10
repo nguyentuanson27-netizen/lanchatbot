@@ -1,0 +1,19 @@
+{
+  "outcomes": 5,
+  "eligible": 5,
+  "fallback": 0,
+  "noSend": 0,
+  "ownerInvocations": 9,
+  "verifierInvocations": 5,
+  "actualGenerationRequests": 14,
+  "automaticRetries": 0,
+  "timeouts": 0,
+  "generationErrors": 0,
+  "wholeAttemptP50Ms": 26323.691099999996,
+  "ownerGenerationP50Ms": 3410.761599999998,
+  "verifierLatencyP50Ms": 4596.363400000002,
+  "verifierLatencyP95NearestRankMs": 5578.690699999992,
+  "inputTokensKnown": 97904,
+  "outputTokensKnown": 7004,
+  "cost": null
+}

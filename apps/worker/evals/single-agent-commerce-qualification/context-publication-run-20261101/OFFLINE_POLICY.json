@@ -1,0 +1,45 @@
+{
+  "kind": "UNCHANGED_OLD_WORLD_CLOCK_POLICY_REPLAY_AFTER_FIX",
+  "sourceSha": "1427d2f17028e007df442c73a8d555990a3dc6ee",
+  "worldHash": "e3175ef4842819959a5dfa6fa5cb2f020c6bb1b48b32e87c26bad9404f8036ec",
+  "sourceClock": "2026-10-31T17:20:16.224Z",
+  "providerRequests": 0,
+  "networkReads": 0,
+  "effects": 0,
+  "prepared": [
+    {
+      "subjectRef": "SQ2447",
+      "charts": []
+    },
+    {
+      "subjectRef": "SV2447",
+      "charts": []
+    }
+  ],
+  "preVerifier": [
+    {
+      "subjectRef": "SQ2447",
+      "charts": [
+        "image_registry:42e42d5a-c407-5927-af69-0fe8ab21a8e4:SQ2447"
+      ]
+    },
+    {
+      "subjectRef": "SV2447",
+      "charts": []
+    }
+  ],
+  "readback": [
+    {
+      "subjectRef": "SQ2447",
+      "charts": [
+        "image_registry:42e42d5a-c407-5927-af69-0fe8ab21a8e4:SQ2447"
+      ]
+    },
+    {
+      "subjectRef": "SV2447",
+      "charts": []
+    }
+  ],
+  "snapshotUnchanged": true,
+  "limitation": "Offline fixed-clock attribution only, never send authorization or model-quality evidence."
+}

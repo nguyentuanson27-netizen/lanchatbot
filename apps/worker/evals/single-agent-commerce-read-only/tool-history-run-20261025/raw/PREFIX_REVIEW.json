@@ -1,0 +1,8 @@
+{
+  "sourceSha": "9e352f382e8915d6a1f1c080c75817065da42c63",
+  "reviewedNative": 21,
+  "technicalReady": false,
+  "recommendation": "STOP",
+  "primaryReviewSha256": "422e765ddce28fbc845a91e97677490d28af668b53464c24d33588f5934784c0",
+  "reason": "Privacy regression found offline; discovery actual fallback and requested gallery missing. Prefix interrupted at completed stateful attempt5; no remaining dispatch."
+}

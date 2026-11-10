@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "sourceSha": "e7765a71b7c9718a45fe591f7e20ab4649e6cc36",
+  "rawDiskAndGitBlobs": 10,
+  "requestEnvelopes": 15,
+  "uniqueGenerationIds": 15,
+  "exactVerifierBindings": 2,
+  "actualCodexRelayBodies": 2,
+  "evaluatorLeaks": 0,
+  "privateCheckoutLeaksInRequests": 0,
+  "providerRequestsPerGenerationAtMostOne": true,
+  "allOutcomesRetained": true,
+  "rawImmutable": true,
+  "geminiWireEvidence": "Prepared body plus adapter fake-HTTP capture tests; no independent live echo",
+  "humanAcceptance": null
+}

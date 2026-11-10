@@ -1,0 +1,71 @@
+{
+  "native": {
+    "startUtc": "2026-10-14T02:14:06.5494636Z",
+    "endUtc": "2026-10-14T02:14:57.6564447Z",
+    "exitCode": 0,
+    "sourceSha": "9cd8654ff30597122b58fe6777b43d2f8727f087"
+  },
+  "readiness": {
+    "red": {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'; node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/two-case-screen-20261014.test.mjs",
+      "exitCode": 1,
+      "pass": 0,
+      "fail": 2,
+      "reason": "Missing fixed entrypoint; mechanical RED, not semantic model RED"
+    },
+    "focused": {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'; $env:C3_TEST_CODEX_TRANSPORT='1'; node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/two-case-screen-20261014.test.mjs apps/worker/evals/single-agent-semantic-verifier/failure-recheck-20261014.test.mjs apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs",
+      "exitCode": 0,
+      "pass": 34,
+      "fail": 0,
+      "skip": 0,
+      "durationMs": 8794.7904
+    },
+    "priorChecksReused": {
+      "reference": "../whole-turn-preparation-20261014/README.md",
+      "fullEval": 422,
+      "workerBoundaryVertex": 79,
+      "protectedClaimsAssembler": 21,
+      "workerBuild": 0,
+      "workerTypecheck": 0,
+      "workerLint": 0,
+      "rerunThisTask": false,
+      "basis": "Core/worker/shared/adapter and compiled helpers unchanged; only candidate prompts/fixed loader/test/docs added"
+    }
+  },
+  "commands": [
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='67'; $env:C3_TEST_CODEX_TRANSPORT=$null; $env:DIAGNOSTIC_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim(); $env:C3_VERTEX_CREDENTIAL_FILE='C:/Users/nguye/Downloads/project-388db62b-f5a4-4e76-a2b-a15e8123f075.json'; node apps/worker/evals/single-agent-semantic-verifier/two-case-screen-20261014/run.mjs --preflight",
+      "exitCode": 0,
+      "generations": 0
+    },
+    {
+      "command": "node apps/worker/evals/single-agent-semantic-verifier/two-case-screen-20261014/run.mjs",
+      "exitCode": 0,
+      "registered": 2,
+      "completed": 2,
+      "actualGenerations": 4
+    },
+    {
+      "command": "Existing humanView and scoreWholeReplies for2actual outcomes; primary committed before new rejected drafts/verdict diagnostics",
+      "exitCode": 0,
+      "quality": "FAIL",
+      "passed": 0,
+      "denominator": 2
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='67'; node 'C:/Users/nguye/AppData/Local/Temp/c3-two-case-screen-audit.mjs' 'C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005'",
+      "exitCode": 0,
+      "capturedBodiesReconstructed": 4,
+      "note": "Audit role disposition fields corrected to use actual terminal attempts; raw/evaluator/source unchanged"
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 0
+    }
+  ],
+  "logs": "C:/Users/nguye/AppData/Local/Temp/c3-two-case-screen-{red,focused,preflight,run}.{stdout,stderr}.log",
+  "fullA2Command": "NOT_RUN",
+  "fullA3Command": "NOT_RUN",
+  "recommendation": "STOP"
+}

@@ -1,0 +1,258 @@
+{
+  "kind": "PHASE_C_REMEDIATION_IMPLEMENTATION_VERIFICATION_NOT_QUALIFICATION",
+  "implementationBaseSha": "df37d302446e41e825acc8dfca208dde5bb804fc",
+  "mainAndC3Reference": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "sourceSha": "430ee4fa0b42c0003267f7dd4e681d3da3418f06",
+  "executableInventory": {
+    "sourceSha": "430ee4fa0b42c0003267f7dd4e681d3da3418f06",
+    "files": [
+      {
+        "path": "apps/worker/evals/single-agent-commerce-qualification/bind-corpus.mjs",
+        "sha256": "c05d8eb98606c2f4e31c0605ebda1604ea053d5265f0785577e4813e0b969ef9"
+      },
+      {
+        "path": "apps/worker/evals/single-agent-commerce-qualification/bind-corpus.test.mjs",
+        "sha256": "3dbe07ea1f464a6860384a295dda573d45ca8500ca4a6e5655873838bcd121a9"
+      },
+      {
+        "path": "apps/worker/evals/single-agent-commerce-qualification/candidate-provider.mjs",
+        "sha256": "f5321a384d8b4690bbc0aa565bbb0fe53eae65aba1e5bdc1a1392205e485907b"
+      },
+      {
+        "path": "apps/worker/evals/single-agent-commerce-qualification/candidate-provider.test.mjs",
+        "sha256": "820fba9519f30b47d0358d66f374c89da2fc9ccb601fbf70f94d508d8a6b711d"
+      },
+      {
+        "path": "apps/worker/evals/single-agent-commerce-qualification/cli.mjs",
+        "sha256": "3b99c8886173e1ff5f01babb066e7dd3e0b0e0a80c86a5289ad8c8ee05ddaf46"
+      },
+      {
+        "path": "apps/worker/evals/single-agent-commerce-qualification/development-inventory.mjs",
+        "sha256": "0836f1ecf0f53be1b43c2a4f4b0ca91b6e83c7910467d3fad097d451d174e7c2"
+      },
+      {
+        "path": "apps/worker/evals/single-agent-commerce-qualification/development-inventory.test.mjs",
+        "sha256": "bb9ec521d07815cfbac6fd19ace365622a01536fdb5446b4e0ee5fc0aca64661"
+      },
+      {
+        "path": "apps/worker/evals/single-agent-commerce-qualification/evaluator-source.mjs",
+        "sha256": "c319060c3c47133ccf98ace9aea3ccfbd71bf99725317a4522775c83991df0a6"
+      },
+      {
+        "path": "apps/worker/evals/single-agent-commerce-qualification/evaluator-source.test.mjs",
+        "sha256": "215dc70c3e98b601416962a45c880c27a96497cb5a3149d9fb372f903ede7fb9"
+      },
+      {
+        "path": "apps/worker/evals/single-agent-commerce-qualification/native-population.mjs",
+        "sha256": "56a855595798d530b2ab4ed13b6d247b80dc4f6c93ef0184fe922b15639d6779"
+      },
+      {
+        "path": "apps/worker/evals/single-agent-commerce-qualification/native-snapshot.mjs",
+        "sha256": "15c0582cbc9364f0478a6df355173960f82e7a9e0cb0279f40def0a4485b2d3a"
+      },
+      {
+        "path": "apps/worker/evals/single-agent-commerce-qualification/native-terminal.mjs",
+        "sha256": "fcb7b6343044c5737d19015ef3532b9644654909044128ba724fab5adead1a2f"
+      },
+      {
+        "path": "apps/worker/evals/single-agent-commerce-qualification/native-terminal.test.mjs",
+        "sha256": "59282e21097c05425ccff956162ed04d41349dfc9aaec4e98beda600ca3cc6cc"
+      },
+      {
+        "path": "apps/worker/evals/single-agent-commerce-qualification/qualification.mjs",
+        "sha256": "12d3aaef60bd75fd9ed82b164e457503b14f0a5e77a3385c331525989990092d"
+      },
+      {
+        "path": "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs",
+        "sha256": "49155f4d7c06a9470f590202cf9a941059e1d307dd3c74cc1f36c661ee19fdc9"
+      },
+      {
+        "path": "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs",
+        "sha256": "cbb487d548834de8b6e0bca320a75771640c8e723d3dc5a46a973155a90ea1f2"
+      },
+      {
+        "path": "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "sha256": "c7ead0a0975888ad9bcda083c0ebc7744b91e081e7dbfe0f8e93e46d685308b3"
+      },
+      {
+        "path": "apps/worker/evals/single-agent-commerce-read-only/stateful-provider.mjs",
+        "sha256": "809221e8bae8e99d9bc49c1a38c393412f28c98860f89b19b0e5ff714b0e2347"
+      },
+      {
+        "path": "apps/worker/src/single-agent-commerce-effects.test.ts",
+        "sha256": "17ac6939f4ae4c5a17238065d9f3521ca94fbb1f73c3f0c920309d2311a168d1"
+      },
+      {
+        "path": "apps/worker/src/single-agent-commerce-effects.ts",
+        "sha256": "4673438264da5bac5bd77147c21b3ee2b37a95bde65fe1a9bf25e895b55b030d"
+      },
+      {
+        "path": "apps/worker/src/single-agent-commerce-ingress.ts",
+        "sha256": "2339e387d8735632f1eeecab48d5c00e6479ea02fd13778c081af47333eac776"
+      },
+      {
+        "path": "apps/worker/src/single-agent-commerce-public-history.test.ts",
+        "sha256": "555c7577c011100f034a9b991e64a0f83ce8089b7a57be7b3fc412b75d2eed00"
+      },
+      {
+        "path": "apps/worker/src/single-agent-commerce-public-history.ts",
+        "sha256": "672dee94fd531ce566f6384e1ac977c816226a97c5687b1aac3ec55d2a5e2b49"
+      },
+      {
+        "path": "apps/worker/src/single-agent-commerce-session.test.ts",
+        "sha256": "3a0566e7c8d4ba4cdeaa1a3b6ab7149fc8737555aa223e46f868abb67b0bd5d4"
+      },
+      {
+        "path": "apps/worker/src/single-agent-commerce-session.ts",
+        "sha256": "d9e7fb2944831b1e633ebbf5c2458b8a0be3cf22108d755b03d77ebd78eaeff7"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-read-only-context.test.ts src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-public-history.test.ts src/single-agent-semantic-verifier-boundary.test.ts src/single-agent-commerce-effects.test.ts src/single-agent-commerce-session.test.ts src/protected-claims.test.ts src/reply-assembler.test.ts",
+      "exitCode": 0,
+      "pass": 346,
+      "matchedFiles": 7,
+      "note": "Last two supplied paths do not exist under worker; their actual package tests are recorded separately below.",
+      "log": {
+        "path": "../c3-c-remediation-worker-final-03.log",
+        "sha256": "a1b628db4c495b15798f056914720324c710ece388e5c5cfcbd4a9e85c4bddc6"
+      }
+    },
+    {
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts",
+      "exitCode": 0,
+      "pass": 21,
+      "matchedFiles": 2,
+      "log": {
+        "path": "../c3-c-remediation-protected-03.log",
+        "sha256": "1f512bb30464c626d965bac505228345b025649a212cb74ad835705c605a9f78"
+      }
+    },
+    {
+      "command": "pnpm --filter @lana/worker test:evals",
+      "exitCode": 0,
+      "total": 752,
+      "pass": 750,
+      "fail": 0,
+      "skipped": 2,
+      "log": {
+        "path": "../c3-c-remediation-evals-03.log",
+        "sha256": "1ed9eec26ae91bb1d3a20ddd49c1d0b54dbf7d5da15a2f85961ba636499f3df2"
+      }
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "exitCode": 0,
+      "log": {
+        "path": "../c3-c-remediation-typecheck-03.log",
+        "sha256": "efb8ff4b727e712be744f25e4acbf1a35f84bef51992010a51775656a7c8e553"
+      }
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "exitCode": 0,
+      "log": {
+        "path": "../c3-c-remediation-build-03.log",
+        "sha256": "8d37ada283a434cc61877caf2636bbceaef8e0318e52ade7ef68ba8af0851f3c"
+      }
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0,
+      "log": {
+        "path": "../c3-c-remediation-lint-03.log",
+        "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415"
+      }
+    },
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-qualification/candidate-provider.test.mjs apps/worker/evals/single-agent-commerce-qualification/development-inventory.test.mjs",
+      "exitCode": 0,
+      "pass": 11,
+      "evidence": "Session output; independently repeated 11PASS at exact430ee4fa. Included in full750 above; not an additional population."
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-c-remediation-n4-causal-01 COD --check-prefix \"B composed N4\"",
+      "exitCode": 0,
+      "pass": 1,
+      "artifact": {
+        "path": "../c3-c-remediation-n4-causal-01/integration.json",
+        "sha256": "b4172894be1fe275acb8bf6a1f4d0c2fd80971b8770e9318c47d060d789e93f5"
+      }
+    },
+    {
+      "command": "node apps/worker/evals/single-agent-commerce-qualification/cli.mjs init --out ../c3-c-remediation-config-430ee4fa.json",
+      "exitCode": 0,
+      "note": "Real-adapter-only registration constructed from current HEAD + generated config + qualificationIdentity; not a model seal."
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-qualification/real-adapter-driver.mjs ../c3-c-remediation-real-registration-430ee4fa.json ../c3-c-remediation-real-pg-430ee4fa",
+      "exitCode": 0,
+      "pass": 68,
+      "invariants": 7,
+      "commandRecord": {
+        "path": "../c3-c-remediation-real-pg-430ee4fa/COMMAND.json",
+        "sha256": "00ed6a15d21b9985ab0b02309fe7cde0a38134459a75f5d8835772f47a763920"
+      },
+      "artifact": {
+        "path": "../c3-c-remediation-real-pg-430ee4fa/postgres/integration.json",
+        "sha256": "9b389006e615cae81118d1cba8ca95a9d400af1bf5953b56e8a539ede2b21f69"
+      },
+      "adapter": {
+        "path": "../c3-c-remediation-real-pg-430ee4fa/REAL_ADAPTER.json",
+        "sha256": "67f1435f8055a3469d57520512b4f745329d0e4bfed8f544cd13b879c4ffbb94"
+      }
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "evidence": "Root and independent reviewer at exact430ee4fa; repeat for report delivery."
+    }
+  ],
+  "realPostgres": {
+    "status": "PASS",
+    "sourceDirty": false,
+    "testDatabaseDropped": true,
+    "providerGenerations": 0,
+    "sendEnabled": false
+  },
+  "retainedFailures": [
+    {
+      "path": "../c3-c-remediation-real-pg-d5f35b1f/postgres/integration.json",
+      "sha256": "31b68363ab3009eb634e1e082a31190c1c0805c46a3be526bf80f4480b1ea1c4",
+      "sourceSha": "d5f35b1f7ad440d96c0cf265e9b4fbc3400ebfca",
+      "status": "FAIL",
+      "pass": 51,
+      "fail": [
+        {
+          "name": "B composed N4 sends exact text and selected image in one response group without replay duplicates",
+          "status": "FAIL",
+          "error": "The expression evaluated to a falsy value:\n\n  assert(JSON.stringify(seenHistory).includes('RECENT_SHOP_IMAGES_ACCEPTED'))\n"
+        }
+      ],
+      "testDatabaseDropped": true,
+      "providerGenerations": 0
+    },
+    {
+      "path": "../c3-c-remediation-n4-2810/integration.json",
+      "sha256": "d7ecc067b4fcc466ef354150c6657ae2f5443a8c22741b17f24ff97e395bfbc8",
+      "sourceSha": "a124d173e35f8e73cb8245c636d4c13e567e00fd",
+      "status": "FAIL",
+      "pass": 0,
+      "fail": [
+        {
+          "name": "B composed N4 sends exact text and selected image in one response group without replay duplicates",
+          "status": "FAIL",
+          "error": "N4_HISTORY_MISSING; see n4HistoryDiagnostic"
+        }
+      ],
+      "testDatabaseDropped": true,
+      "providerGenerations": 0
+    }
+  ],
+  "providerDiagnostics": "NOT_RUN",
+  "qualification": "BLOCKED",
+  "c3Comparison": "NOT_RUN",
+  "ci": "NOT_CLAIMED"
+}

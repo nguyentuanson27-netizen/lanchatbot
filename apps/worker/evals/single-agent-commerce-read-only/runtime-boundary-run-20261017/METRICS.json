@@ -1,0 +1,75 @@
+{
+  "runSourceSha": "13e69d43dc3ae9f792140ba8d16e9ad3057fcbb7",
+  "population": {
+    "stateful": 7,
+    "repetitions": 1,
+    "b1": 0,
+    "a2": 0,
+    "a3": 0
+  },
+  "measurementPolicy": "Nearest-rank p50/p95; whole turn includes source/database/capture overhead, invocation latency includes client/auth/parse.",
+  "terminalCounts": {
+    "FALLBACK": 4,
+    "HANDOFF": 2,
+    "NO_SEND": 1
+  },
+  "terminalRates": {
+    "staticFallback": 0.5714285714285714,
+    "handoff": 0.2857142857142857,
+    "noSend": 0.14285714285714285,
+    "sendEligible": 0
+  },
+  "wholeTurnReview": {
+    "USABLE": 1,
+    "NEEDS_EDIT": 0,
+    "FALLBACK_OR_NO_SEND": 6
+  },
+  "salesJourneyCompleted": false,
+  "modelFinalDrafts": 0,
+  "verifierInvocations": 0,
+  "verifierFinalGate": "NOT_EXERCISED_NO_MODEL_FINAL",
+  "verifierLatency": {
+    "n": 0,
+    "p50Ms": null,
+    "p95Ms": null
+  },
+  "addedEndToEndVerificationLatency": {
+    "n": 0,
+    "p50Ms": null,
+    "p95Ms": null
+  },
+  "ownerInvocationLatency": {
+    "n": 13,
+    "p50Ms": 2106.9217000000026,
+    "p95Ms": 4506.070300000007
+  },
+  "wholeTurnLatency": {
+    "n": 7,
+    "p50Ms": 19468.4344,
+    "p95Ms": 24719.670599999998
+  },
+  "providerErrors": 0,
+  "providerTimeouts": 0,
+  "providerErrorRate": 0,
+  "providerTimeoutRate": 0,
+  "tokens": {
+    "input": 65186,
+    "output": 7057,
+    "complete": 13,
+    "denominator": 13,
+    "outputIncludesOwnerThinking": true
+  },
+  "cost": null,
+  "costEvidence": "NOT_EXPOSED_NO_ESTIMATE",
+  "maxOwnerRequestBytes": 30799,
+  "ownerRequestBoundBytes": 32768,
+  "ownerBoundErrors": 0,
+  "finalOnlyRequests": 4,
+  "toolResponsesUnderNone": 4,
+  "providerCounts": {
+    "embedding": 0,
+    "owner": 13,
+    "verifier": 0
+  },
+  "testDatabaseDropped": true
+}

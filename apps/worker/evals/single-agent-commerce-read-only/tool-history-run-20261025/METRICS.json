@@ -1,0 +1,104 @@
+{
+  "sourceSha": "9e352f382e8915d6a1f1c080c75817065da42c63",
+  "jobs": {
+    "journey-openings": {
+      "attempts": 4,
+      "terminals": {
+        "FALLBACK": 1,
+        "SEND_ELIGIBLE": 3
+      },
+      "databaseDropped": true
+    },
+    "media-followup": {
+      "attempts": 7,
+      "terminals": {
+        "SEND_ELIGIBLE": 7
+      },
+      "databaseDropped": true
+    },
+    "opening-quotes": {
+      "attempts": 5,
+      "terminals": {
+        "SEND_ELIGIBLE": 5
+      },
+      "databaseDropped": true
+    },
+    "stateful": {
+      "attempts": 5,
+      "terminals": {
+        "SEND_ELIGIBLE": 4,
+        "NO_SEND": 1
+      },
+      "databaseDropped": false
+    }
+  },
+  "native": {
+    "registered": 51,
+    "attempted": 21,
+    "notRun": 30,
+    "sendEligibilityOnly": 0,
+    "captureTransport": 21,
+    "terminals": {
+      "FALLBACK": 1,
+      "SEND_ELIGIBLE": 19,
+      "NO_SEND": 1
+    },
+    "reasons": {
+      "FAIL": 1,
+      "PASS": 18,
+      "RECEIPT_BACKED_CART_SUMMARY": 1,
+      "CHECKOUT_DETAILS_MISSING": 1
+    },
+    "actualSilentCapturedTurns": 0
+  },
+  "controls": {
+    "registered": 17,
+    "attempts": 17,
+    "safe": 8,
+    "unsafe": 8,
+    "probe": 1,
+    "unsafeSendEligibleFalsePass": 0,
+    "safeRejected": 0
+  },
+  "operations": {
+    "generationAttempts": 81,
+    "actualGenerationRequests": 81,
+    "ownerRequests": 44,
+    "verifierRequests": 37,
+    "automaticGenerationRetries": 0,
+    "maximumProviderRequestsPerGeneration": 1,
+    "knownInputTokens": 557565,
+    "knownOutputTokens": 34086,
+    "requestsWithUnknownUsage": 0,
+    "cost": "NOT_EXPOSED",
+    "providerErrors": [],
+    "providerErrorCount": 0,
+    "providerTimeoutCount": 0,
+    "generationContractErrors": [],
+    "verifierLatency": {
+      "n": 37,
+      "p50Ms": 5842,
+      "p95Ms": 15049,
+      "policy": "nearest-rank"
+    },
+    "verificationStageLatency": {
+      "n": 20,
+      "p50Ms": 9890.363600000012,
+      "p95Ms": 24557.8718,
+      "policy": "nearest-rank"
+    },
+    "readOnlyAttemptLatency": {
+      "n": 0,
+      "p50Ms": null,
+      "p95Ms": null,
+      "policy": "nearest-rank"
+    },
+    "captureAttemptLatency": {
+      "n": 21,
+      "p50Ms": 47999.68519999999,
+      "p95Ms": 73801.11379999999,
+      "policy": "nearest-rank"
+    },
+    "measurementLimit": "Isolated DB/SSH/fake Meta transport; not production latency, first-token, controlled added-E2E latency, or conversion."
+  }
+}

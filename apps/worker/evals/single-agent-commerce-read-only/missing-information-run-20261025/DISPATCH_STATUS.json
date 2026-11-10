@@ -1,0 +1,12 @@
+{
+  "sourceSha": "2c4de47c5340c2b715d5b80a8787e0e89520e05b",
+  "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+  "completedNativeCohorts": [
+    "opening-quotes",
+    "media-probe",
+    "journey-openings",
+    "stateful"
+  ],
+  "nativeNotRun": [],
+  "sourceUnchanged": true
+}

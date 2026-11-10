@@ -1,0 +1,109 @@
+{
+  "caseId": "stateful-confirm",
+  "journeyId": "sales",
+  "elapsedMs": 10524.72589999999,
+  "result": {
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "CURRENT_AUTHORITY_CHANGED",
+      "text": null,
+      "fallbackId": null
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 0,
+    "verifierGenerations": 0,
+    "toolRounds": 0,
+    "toolCalls": 0,
+    "generations": [],
+    "toolLatencyMs": 0,
+    "verificationLatencyMs": null,
+    "enqueued": 0,
+    "commitStatus": "COMMITTED"
+  },
+  "owners": 0,
+  "verifiers": 0,
+  "batch": {
+    "pageId": "1198992073286645",
+    "conversationHash": "de0ec23746083e83aa328d28fd5d36cebc6f41a014083263e564268e7e6316c3",
+    "generation": 6,
+    "leaseToken": "46414b2a-5175-4f58-b9d5-ddd8b0522f08",
+    "inboxIds": [
+      "eac4fb24-b33a-444a-b944-9d2be6f9227b"
+    ],
+    "evaluationGroupId": "1859258d-ccda-4173-8e0a-f166d39108e8",
+    "eventKind": "CUSTOMER",
+    "firstReceiveSequence": 6,
+    "lastReceiveSequence": 6,
+    "attemptCount": 1,
+    "items": [
+      {
+        "inboxId": "eac4fb24-b33a-444a-b944-9d2be6f9227b",
+        "pageId": "1198992073286645",
+        "eventKey": "stateful-ca58e394-e6a5-4212-955d-b80ee52fafe1",
+        "conversationHash": "de0ec23746083e83aa328d28fd5d36cebc6f41a014083263e564268e7e6316c3",
+        "occurredAt": "2026-10-15T13:21:46.587Z",
+        "receivedAt": "2026-10-15T13:21:46.587Z",
+        "receiveSequence": 6,
+        "attemptCount": 1,
+        "leaseToken": "46414b2a-5175-4f58-b9d5-ddd8b0522f08",
+        "eventKind": "CUSTOMER",
+        "envelope": {
+          "schemaVersion": 1,
+          "customerSendEnabled": false,
+          "routing": {
+            "owner": "APP"
+          },
+          "message": {
+            "schemaVersion": 1,
+            "traceId": "ff9421dc-427e-42d3-b5a6-748ef44c4076",
+            "eventKey": "stateful-ca58e394-e6a5-4212-955d-b80ee52fafe1",
+            "pageId": "1198992073286645",
+            "messageId": "stateful-ca58e394-e6a5-4212-955d-b80ee52fafe1",
+            "senderId": "synthetic-recipient-de0ec23746083e83aa328d28fd5d36cebc6f41a014083263e564268e7e6316c3",
+            "conversationId": "synthetic-meta-conversation",
+            "occurredAt": "2026-10-15T13:21:46.587Z",
+            "isEcho": false,
+            "appId": null,
+            "text": "Chốt đơn cho chị nhé.",
+            "attachments": []
+          }
+        }
+      }
+    ]
+  },
+  "toolResponses": [],
+  "actualCapturedMessages": [],
+  "committedPublicState": {
+    "stage": "DISCOVERY",
+    "revision": 0,
+    "cart": null,
+    "measurements": [
+      {
+        "kind": "WAIST_CM",
+        "value": 74,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-15T13:21:04.627Z",
+          "sourceEventHash": "5f570018390b9e93ad8f2f29947883670e780d4a45a485716b23d5543865ef21"
+        }
+      },
+      {
+        "kind": "HIPS_CM",
+        "value": 96,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-15T13:21:04.627Z",
+          "sourceEventHash": "5f570018390b9e93ad8f2f29947883670e780d4a45a485716b23d5543865ef21"
+        }
+      }
+    ],
+    "customerProfileRevision": 3
+  },
+  "counts": {
+    "embedding": 0,
+    "owner": 12,
+    "verifier": 2
+  }
+}

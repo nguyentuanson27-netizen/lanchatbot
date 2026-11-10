@@ -1,0 +1,280 @@
+[
+  {
+    "caseId": "stateful-open",
+    "cohort": "checkout-prefix",
+    "artifactSha256": "faa9686bb4ee9db450a1ae032a9c7bb5d116c8a2d3501853388243aef58df16b",
+    "artifact": "checkout-prefix\\provider-attempt-1.json",
+    "latest": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Em thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ. Mẫu này là hàng đặt trước (pre-order) chị nhé. \n\nTổng đơn của chị hiện là 529.000đ (gồm 499.000đ tiền áo và 30.000đ phí vận chuyển). Chị cần em hỗ trợ thêm gì không ạ?",
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Em thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ. Mẫu này là hàng đặt trước (pre-order) chị nhé. \n\nTổng đơn của chị hiện là 529.000đ (gồm 499.000đ tiền áo và 30.000đ phí vận chuyển). Chị cần em hỗ trợ thêm gì không ạ?"
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "7cd042a3-d675-42ce-82c1-dd83da2fa6b0",
+          "group": "6d34c54d-0618-4b2c-9797-7e2055e48f08",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "committedStage": "CART_OPEN",
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 65299.6933,
+    "verificationLatencyMs": 31816.579300000005,
+    "enqueued": 1,
+    "generationFailures": []
+  },
+  {
+    "caseId": "stateful-variant-quantity",
+    "cohort": "checkout-prefix",
+    "artifactSha256": "e8a6bb5fb655c87470420423341f7b0a3fcac14afe2dd4135d2975ef2034c7d9",
+    "artifact": "checkout-prefix\\provider-attempt-2.json",
+    "latest": "Đổi áo sang L cho chị, lấy hai chiếc nhé.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Em đã đổi sang 2 chiếc áo Thạch Thảo màu be size L cho chị rồi ạ. \n\nTổng đơn của chị hiện là 978.100đ (đã gồm phí vận chuyển). Chị cần em hỗ trợ thêm gì không ạ?",
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Em đã đổi sang 2 chiếc áo Thạch Thảo màu be size L cho chị rồi ạ. \n\nTổng đơn của chị hiện là 978.100đ (đã gồm phí vận chuyển). Chị cần em hỗ trợ thêm gì không ạ?"
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "25e83f9b-e7de-4f2a-b821-4833dbcd4aa7",
+          "group": "46de16b2-233c-4113-ba8b-1aac5b90ee41",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "committedStage": "CART_OPEN",
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 41244.9286,
+    "verificationLatencyMs": 11058.187600000005,
+    "enqueued": 1,
+    "generationFailures": []
+  },
+  {
+    "caseId": "stateful-quote",
+    "cohort": "checkout-prefix",
+    "artifactSha256": "4d84e1b40015532508b098bca127e2b88d78d0cea0bab71781c5dd75593e36e2",
+    "artifact": "checkout-prefix\\provider-attempt-3.json",
+    "latest": "Hai áo cả phí ship là bao nhiêu em?",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, tổng đơn 2 áo của chị gồm phí vận chuyển là 978.100đ ạ (trong đó tiền hàng 998.000đ, ưu đãi 49.900đ và phí ship 30.000đ).",
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Dạ, tổng đơn 2 áo của chị gồm phí vận chuyển là 978.100đ ạ (trong đó tiền hàng 998.000đ, ưu đãi 49.900đ và phí ship 30.000đ)."
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "ee3a4b00-c022-4864-bbdb-8e9a7e430391",
+          "group": "97ec5bc4-d88c-4e06-a5e5-02d6c5567fca",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "committedStage": "CART_OPEN",
+    "ownerGenerations": 1,
+    "verifierGenerations": 1,
+    "elapsedMs": 24924.676299999992,
+    "verificationLatencyMs": 8454.86099999999,
+    "enqueued": 1,
+    "generationFailures": []
+  },
+  {
+    "caseId": "stateful-correction",
+    "cohort": "checkout-prefix",
+    "artifactSha256": "b2c314fa75269894bd1869af6be6df9153fda5cea73e965ebc856b92b49de968",
+    "artifact": "checkout-prefix\\provider-attempt-4.json",
+    "latest": "Số đo lúc nãy chị nhắn nhầm, eo 74, mông 96 nhé. Chị vẫn lấy size L.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ vâng, em ghi nhận số đo mới của chị ạ. Giỏ hàng 2 áo size L của chị được giữ nguyên nhé ạ!",
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Dạ vâng, em ghi nhận số đo mới của chị ạ. Giỏ hàng 2 áo size L của chị được giữ nguyên nhé ạ!"
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "5114a45e-de50-4c1f-a779-eb4eb5dcb243",
+          "group": "2559a258-06a9-4ed1-8292-dad1f5dae224",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "committedStage": "CART_OPEN",
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 31960.57330000002,
+    "verificationLatencyMs": 11307.14420000001,
+    "enqueued": 1,
+    "generationFailures": []
+  },
+  {
+    "caseId": "stateful-request-checkout",
+    "cohort": "checkout-prefix",
+    "artifactSha256": "722492d3161618cfab3c67720414ff573812fd22b204cefdf42ab2fb7c5b2943",
+    "artifact": "checkout-prefix\\provider-attempt-5.json",
+    "latest": "Chị đặt hai áo này nhé, lên đơn cho chị.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "CHECKOUT_DETAILS_MISSING",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Chị cho em [NAME]"
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "6fa9be52-d205-4d02-af9c-86f69f7e7f74",
+          "group": "21ce3818-3090-465d-aab1-53a669e6e48f",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "committedStage": "CART_OPEN",
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "elapsedMs": 19161.3021,
+    "verificationLatencyMs": null,
+    "enqueued": 1,
+    "generationFailures": []
+  },
+  {
+    "caseId": "stateful-private-checkout",
+    "cohort": "checkout-prefix",
+    "artifactSha256": "3659b4842658688bb1b2a74f8c28195eb13ac1c50c9b625a52be7e10640afaab",
+    "artifact": "checkout-prefix\\provider-attempt-6.json",
+    "latest": "[Thông tin nhận hàng qua luồng riêng]",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "PRIVATE_CHECKOUT_COMMITTED",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "[Nội dung checkout đã ẩn thông tin nhận hàng]"
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "03b80633-c53c-4c55-be6a-0e328f00a734",
+          "group": "9b30c5aa-b914-42fb-8648-4a123e0f5633",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "committedStage": "ORDER_PREVIEW",
+    "ownerGenerations": 0,
+    "verifierGenerations": 0,
+    "elapsedMs": 7287.841199999995,
+    "verificationLatencyMs": null,
+    "enqueued": 1,
+    "generationFailures": []
+  },
+  {
+    "caseId": "stateful-confirm",
+    "cohort": "checkout-prefix",
+    "artifactSha256": "0984bb27731a835760de68817106f86d44639f036ff813e35a0d0af9f83a74f9",
+    "artifact": "checkout-prefix\\provider-attempt-7.json",
+    "latest": "Chốt đơn cho chị nhé.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "PURCHASE_CONFIRMED",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": []
+    },
+    "handoffEvidence": {
+      "conversationOwner": "HUMAN",
+      "events": 1,
+      "tags": 1
+    },
+    "handoff": null,
+    "committedStage": "PURCHASE_CONFIRMED",
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "elapsedMs": 19871.50409999999,
+    "verificationLatencyMs": null,
+    "enqueued": 0,
+    "generationFailures": []
+  }
+]

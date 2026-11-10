@@ -1,0 +1,165 @@
+{
+  "status": "PASS_EVIDENCE_AUDIT_SELECTED_COHORT_NOT_QUALIFICATION",
+  "runId": "C3_A3_STREAM_RECHECK_20261014_01",
+  "registered": 3,
+  "executed": 3,
+  "notRun": 0,
+  "startedUnknown": 0,
+  "a3RunSourceSha": "59333da926639da5c5d7be0470b0be29fd5f43c0",
+  "rawSavepoint": "0cb27846ec84cbf3346084f73772f1506785b087",
+  "primarySavepoint": "6208c9431adfdd49b7399eef31c488cc43a6f4bc",
+  "planHash": "98e590f7e6dcd2f5d2f8269f4c795fdcdae1654e2a4b1487997e9fbdd7bb8747",
+  "manifestHash": "722b818421fa8b5ad2d48df40667274b890937830622a12dc4fb97f4c33e16a5",
+  "effectiveManifestHash": "6601c676ed7b9ee36559792075853c6848198796408778298ce4d931828e7f88",
+  "rawHash": "cbe75508f02b49f5df0b551e19b423acb5772439ad3cf82ffb9cf74b4d4b8c6b",
+  "primaryHash": "d9ea61f1521d5055e9fd9ded03eceef25f61609f9707dd548d539ee0d28bcee9",
+  "priorEvidenceHash": "9a2201bd005132a772292fb345fc3ff781d889739057e8d7e47f434dbd670849",
+  "promptHashes": {
+    "verifier": "755b6cad45d825be5089f45de7d7fe2de95c45157123fbdf4a0bad10c9710f5e",
+    "conversation": "0c954ff46a2b4f68ac62a7fcecc0ef783deecc0b892d039f94df58ed588a6ec1"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "corpusHashes": {
+    "a2": "76bfd2754d3382006a31d97fb5f5601138e8d696dd83f2ead7caeef7dec23a96",
+    "a3": "f016ddd801baddf707a294fe66f654d6a893ed5045a7b6ce6f117813433bf203"
+  },
+  "ownerRequests": 3,
+  "verifierRequests": 3,
+  "capturedBodyReconstruction": 6,
+  "evaluatorMetadataLeaks": 0,
+  "uniqueRequestIds": 6,
+  "maxGenerationRequestsPerRoleAttempt": 1,
+  "generationRetries": 0,
+  "dispositions": {
+    "SEND_ELIGIBLE": 3,
+    "FALLBACK": 0,
+    "HANDOFF": 0,
+    "NO_SEND": 0
+  },
+  "streamErrorAttemptIds": [],
+  "primary": {
+    "status": "PASS",
+    "denominator": 3,
+    "scored": 3,
+    "families": {
+      "correction": {
+        "denominator": 1,
+        "passed": 1,
+        "passRate": 1
+      },
+      "simple": {
+        "denominator": 1,
+        "passed": 1,
+        "passRate": 1
+      },
+      "concern": {
+        "denominator": 1,
+        "passed": 1,
+        "passRate": 1
+      }
+    },
+    "terminalFailureRate": 0,
+    "rows": [
+      {
+        "attemptId": "r5-referent-navy:1",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-simple-price:1",
+        "family": "simple",
+        "mean": 1.9,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r15-fit-reassurance:1",
+        "family": "concern",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      }
+    ]
+  },
+  "primaryMarkedEligibleUnsafeCount": 0,
+  "humanRatingsNull": 30,
+  "googleUsage": {
+    "inputTokens": 12681,
+    "outputTokens": 2912,
+    "thinkingTokens": 2808,
+    "candidateOutputTokens": 104,
+    "cachedInputTokens": 0,
+    "totalTokens": 15593
+  },
+  "operational": {
+    "conversation": {
+      "providerAttemptDenominator": 3,
+      "providerRequests": 3,
+      "clientRequests": 3,
+      "rejectedClientRequests": 0,
+      "maxRequestsPerAttempt": 1,
+      "verifierLatencyP50Ms": 4197,
+      "verifierLatencyP95Ms": 4725,
+      "timeoutCount": 0,
+      "errorCount": 0,
+      "timeoutErrorRate": 0,
+      "inputTokens": 12681,
+      "outputTokens": 2912,
+      "usageUnavailableCount": 0,
+      "cost": null,
+      "dispositions": {
+        "SEND_ELIGIBLE": 3,
+        "FALLBACK": 0,
+        "HANDOFF": 0,
+        "NO_SEND": 0
+      },
+      "terminalFailureRate": 0
+    },
+    "verifier": {
+      "providerAttemptDenominator": 3,
+      "providerRequests": 3,
+      "clientRequests": 3,
+      "rejectedClientRequests": 0,
+      "maxRequestsPerAttempt": 1,
+      "verifierLatencyP50Ms": 6984,
+      "verifierLatencyP95Ms": 11499,
+      "timeoutCount": 0,
+      "errorCount": 0,
+      "timeoutErrorRate": 0,
+      "inputTokens": 19538,
+      "outputTokens": 256,
+      "usageUnavailableCount": 0,
+      "cost": null,
+      "dispositions": {
+        "SEND_ELIGIBLE": 3,
+        "FALLBACK": 0,
+        "HANDOFF": 0,
+        "NO_SEND": 0
+      },
+      "terminalFailureRate": 0
+    },
+    "addedVerificationLatencyP50Ms": 7197,
+    "addedVerificationLatencyP95Ms": 11713,
+    "endToEndLatencyP50Ms": 11551,
+    "endToEndLatencyP95Ms": 16239
+  },
+  "native": {
+    "exitCode": 0,
+    "command": "node apps/worker/evals/single-agent-semantic-verifier/a3-stream-recheck-20261014/run.mjs",
+    "startedAt": "2026-10-14T08:08:07.0195336Z",
+    "phase": "A3_SELECTED_STREAM_RECHECK",
+    "preflightExitCode": 0,
+    "stderrBytes": 0,
+    "finishedAt": "2026-10-14T08:08:48.5613220Z",
+    "sourceSha": "59333da926639da5c5d7be0470b0be29fd5f43c0"
+  },
+  "bindingsAndFinalGateReplay": "PASS",
+  "sourceConfigHelpersUnchanged": true,
+  "historicalA2AndFull42Unchanged": true,
+  "a2Status": "FAIL",
+  "priorFullA3Status": "FAIL_38_OF_42",
+  "fullCheckpointQualification": false,
+  "recommendation": "STOP"
+}

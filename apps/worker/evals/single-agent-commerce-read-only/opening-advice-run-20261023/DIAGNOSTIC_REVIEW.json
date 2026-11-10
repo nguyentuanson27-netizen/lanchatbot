@@ -1,0 +1,11 @@
+{
+  "mode": "DIAGNOSTIC_ONLY_CAPTURED_PUBLIC_WORLD_REPLAY",
+  "protocol": "Manual whole reply; sales decision, relevance and voice, independent of verifier verdict. N1, non-blind, no causal A/B claim. No native tool/state/freshness eligibility inference.",
+  "rows": [
+    {"caseId":"b1-buying-concern","assessment":"USABLE","reason":"Có hướng lấy bộ đi tiệc ban ngày, giải quyết lo ren rườm rà và trả giá thật. Vẫn kể chất liệu cùng nhiều tính từ thanh thoát/nhẹ nhàng/bay bổng và nhắc lại ngân sách; chưa chứng minh giọng đã cải thiện."},
+    {"caseId":"b1-changed-occasion-v2","assessment":"NEEDS_EDIT","reason":"Trả bằng chuỗi thuộc tính chất liệu, chưa cân nhắc rõ hoàn cảnh khách dễ nóng và ở ngoài trời lâu. Cụm không bị giữ nhiệt mạnh hơn lời cảm nhận dự kiến từ vải thoáng; cần đối chiếu ranh giới claim, không coi verifier PASS là đủ."},
+    {"caseId":"b1-buying-concern-v2","assessment":"NEEDS_EDIT","reason":"Đưa cả bộ và áo lẻ rồi kết thúc chị cân nhắc lấy nguyên set hoặc mua lẻ áo. Khách hỏi có nên lấy nhưng shop trả lại chính quyết định đó; hai đoạn dài, nhiều lời khen và từ nối. Đây là lỗi cũ còn tồn tại."},
+    {"caseId":"b1-buying-concern-v3","assessment":"USABLE","reason":"Chọn cả bộ, lý do có ích là hai cách phối và giá so mua rời. Có hướng bán hàng rõ; còn dài và văn viết như đảm bảo tiêu chí/dễ ứng dụng. Không bắt buộc chọn áo lẻ để đạt."}
+  ],
+  "continuation": "Owner explicitly requested full cases after fixes; continue native39 independently and preserve this diagnostic failure. Do not label diagnostic PASS or change treatment mid-run."
+}

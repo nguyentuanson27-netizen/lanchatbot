@@ -1,0 +1,78 @@
+[
+  {
+    "slot": 11,
+    "latest": "Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé.",
+    "actual": {
+      "disposition": "FALLBACK",
+      "reason": "PROVIDER_ERROR",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "rejectedOrUnverifiedDraft": "Chân váy được làm từ chất liệu ren tơ Hàn mềm mại, form nhẹ và có độ rũ tự nhiên rất bay bổng, mặc thoải mái chị nhé. \n\nSet này bên em có bán lẻ phần chân váy, tuy nhiên hiện thông tin giá và tồn kho riêng của size M chưa cập nhật trên hệ thống nên em chưa tra được chính xác cho mình lúc này ạ.",
+    "verdicts": [
+      null
+    ],
+    "errors": [
+      {
+        "status": "PROVIDER_ERROR",
+        "error": "PROVIDER_STREAM_ERROR",
+        "errorStage": "GENERATION_STREAM",
+        "httpStatus": 200,
+        "providerRequests": 1,
+        "clientRequests": 1,
+        "providerTerminalEvent": "error",
+        "providerErrorCode": null
+      }
+    ]
+  },
+  {
+    "slot": 13,
+    "latest": "Chân váy size M còn không em, mua riêng là bao nhiêu?",
+    "actual": {
+      "disposition": "FALLBACK",
+      "reason": "PROVIDER_ERROR",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "rejectedOrUnverifiedDraft": "Dạ chân váy Thạch Thảo size M bên em hiện vẫn còn hàng, giá mua riêng là 449.000đ chị nhé.",
+    "verdicts": [
+      null
+    ],
+    "errors": [
+      {
+        "status": "PROVIDER_ERROR",
+        "error": "UPSTREAM_HTTP",
+        "errorStage": "GENERATION_HTTP",
+        "httpStatus": 504,
+        "providerRequests": 1,
+        "clientRequests": 1,
+        "providerTerminalEvent": null,
+        "providerErrorCode": null
+      }
+    ]
+  },
+  {
+    "slot": 14,
+    "latest": "Shop có set váy Khánh Trang không em? Em xem giúp chị mẫu đó giá bao nhiêu với.",
+    "actual": {
+      "disposition": "FALLBACK",
+      "reason": "PROVIDER_ERROR",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "rejectedOrUnverifiedDraft": null,
+    "verdicts": [],
+    "errors": [
+      {
+        "status": null,
+        "error": null,
+        "errorStage": null,
+        "httpStatus": 429,
+        "providerRequests": 1,
+        "clientRequests": null,
+        "providerTerminalEvent": null,
+        "providerErrorCode": null
+      }
+    ]
+  }
+]

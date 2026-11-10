@@ -1,0 +1,49 @@
+{
+  "status": "REVISE",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-05T10:00:04.090858+00:00",
+  "scope": "PLAN_ONLY_NO_IMPLEMENTATION_OR_PROVIDER",
+  "planningBaseSha": "21c497684040553fdd7faff395980a1ae61d1615",
+  "planPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\docs\\specs\\c3-phase-c-target-composition-continuation-repair-plan-20261105.md",
+  "planSha256": "3197386de928739b1a6fce0d3ecb35d339c224155c6baf73adc382dd302e25eb",
+  "planRevision": 1,
+  "findings": [
+    {
+      "id": "PLAN_R1_MULTIMODAL_BOUND",
+      "priority": "P1",
+      "section": "5.2 Gate",
+      "finding": "Plan requires final encoded request <=65536 universally, but current provider separates text raw/presented65536 from inline image constraints2x512KiB and finalwire1507328. This would silently tighten accepted vision path while S4 retains view_product_media.",
+      "sourceEvidence": [
+        "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs:28",
+        "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs:36",
+        "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs:302",
+        "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs:326"
+      ],
+      "requiredRevision": "Name and test text-only raw/presented bounds separately from final multimodal request/image bounds; retain current limits and valid image scenarios above65536 fullbytes."
+    },
+    {
+      "id": "PLAN_R1_LOGICAL_QUANTITY",
+      "priority": "P2",
+      "section": "4 S2 normalization and verification",
+      "finding": "Reuse-existing-BOM-parser wording is underspecified because existing parsers disagree: offerLiteral dropsquantity, realtime-sales-catalog positiveQuantity defaults malformed/missing to1, product-facts projection retains raw. This risks false composition claims when adding logicalquantity.",
+      "sourceEvidence": [
+        "apps/worker/src/single-agent-commerce-read-only-tools.ts:109",
+        "apps/worker/src/realtime-sales-catalog.ts:170",
+        "apps/worker/src/realtime-sales-catalog.ts:492",
+        "packages/business-tools/src/product-facts-v2-projection.ts:146"
+      ],
+      "requiredRevision": "Define valid logicalquantity authority/bounds and strict invalid handling, explicitlegacyfallbackonlyunderexistingcontract; preserve duplicateSKU multiplicity and sumquantities separately from arrayentrycount. Add duplicate1+1 versus quantity2 and malformed/unknownquantity tests without altering exactstock/cart semantics."
+    }
+  ],
+  "positiveAssessment": [
+    "S1 exacttarget conflict identity and nativePG/acceptedgroup checks address actual p07 downstream consumer failure.",
+    "S2 logical multiset is kept separate from exact variant/stock authority.",
+    "S3 missingcustomerchoice retained and no semantic router/parser/retry introduced.",
+    "R1/R2 split preserves prefix13/24 and total34/55 with conditionalSTOP.",
+    "Malformed causes appropriately remain unknown until precise evidence; no schema broadening by guess."
+  ],
+  "limits": [
+    "No code changed, no tests or provider executed for plan-only review.",
+    "Focused command filenames checked to exist; planned tests are not claimedPASS."
+  ]
+}

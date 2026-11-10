@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ProtectedClaimV1Schema, type ProtectedClaimV1 } from "@lana/contracts";
+import { buildProtectedMediaClaimsV1 } from "@lana/business-tools";
 import {
   authorizeRealtimeProtectedClaimProposal,
   bindRealtimeProtectedClaimProposal,
@@ -39,6 +40,19 @@ function productClaim(
 }
 
 describe("Track B B2.3a protected-claim boundary", () => {
+  it("allows parent product media alongside a selected variant without loosening price scope", () => {
+    const media = buildProtectedMediaClaimsV1({productId:"SKU-1", imageUrls:["https://content.pancake.vn/product.jpg"],
+      sourceVersion:"approved:1", observedAt:"2026-08-30T02:59:00.000Z", expiresAt:"2026-08-30T03:05:00.000Z"})[0]!;
+    const input = {declaredClaimIds:[media.claimId], observedClaimTypes:["PRODUCT_MEDIA" as const], availableClaims:[media],
+      expectedProductIds:["SKU-1"], expectedProductScopes:[{productId:"SKU-1",variantId:"SKU-1-M-BLACK"}], now:NOW};
+    expect(authorizeRealtimeProtectedClaimProposal(input).outcome).toBe("AUTHORIZED");
+    expect(authorizeRealtimeProtectedClaimProposal({...input, expectedProductIds:["SKU-2"]}).outcome).toBe("BLOCKED");
+    expect(authorizeRealtimeProtectedClaimProposal({...input, now:new Date("2026-08-30T03:06:00.000Z")}).outcome).toBe("BLOCKED");
+    expect(authorizeRealtimeProtectedClaimProposal({...input,availableClaims:[{...media,scope:{kind:"PRODUCT",productId:"SKU-1",variantId:"OTHER"}}]}).outcome).toBe("BLOCKED");
+    const price=productClaim("PRICE");
+    expect(authorizeRealtimeProtectedClaimProposal({...input, declaredClaimIds:[media.claimId,price.claimId],
+      observedClaimTypes:["PRODUCT_MEDIA","PRICE"], availableClaims:[media,price]}).reasonCodes).toContain(`PROTECTED_CLAIM_VARIANT_SCOPE_MISMATCH:${price.claimId}`);
+  });
   it("binds the existing structured fact request to exact current typed evidence", () => {
     const price = productClaim("PRICE");
     const stock = productClaim("STOCK");

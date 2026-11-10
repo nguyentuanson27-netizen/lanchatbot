@@ -1,0 +1,4031 @@
+[
+  {
+    "cohort": "b1",
+    "caseId": "b1-changed-occasion",
+    "raw": "b1-1/attempt-1.json",
+    "runtime": {
+      "latest": "Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé.",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị định lấy set Thạch Thảo mặc đi đám cưới."
+        },
+        {
+          "role": "shop",
+          "text": "Đi đám cưới mặc bộ này đẹp chị ạ."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Phần này em chưa trả lời được, chị nhé."
+    ],
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "OWNER_TOOL_MODE",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "recovery": null,
+    "elapsedMs": 14978.766499999998,
+    "generations": [
+      {
+        "id": "01b28b4029e152a5fe5ae2ddec38fb195b92478acda9993f828f1a98ee02a889:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 3955.7023000000045,
+        "telemetry": {
+          "generationId": "01b28b4029e152a5fe5ae2ddec38fb195b92478acda9993f828f1a98ee02a889:owner:1",
+          "providerRequests": 1,
+          "authRequests": 1,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3533,
+          "outputTokens": 1023,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 18069,
+          "requestHash": "c68ad9aaa276f94fe96fd24e6ea665df7a99e7774b2507975c8bf0a6dc89d6a0",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 1003,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "01b28b4029e152a5fe5ae2ddec38fb195b92478acda9993f828f1a98ee02a889:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 3788.980500000005,
+        "telemetry": {
+          "generationId": "01b28b4029e152a5fe5ae2ddec38fb195b92478acda9993f828f1a98ee02a889:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5270,
+          "outputTokens": 1163,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 27071,
+          "requestHash": "35bd0a33ea7ba8a4ba716ec75a4c7d95b091bbe5d3a646ebf820c92e3c166213",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 1113,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "01b28b4029e152a5fe5ae2ddec38fb195b92478acda9993f828f1a98ee02a889:owner:3",
+        "role": "owner",
+        "status": "PROVIDER_ERROR",
+        "latencyMs": 1149.6074999999983,
+        "telemetry": {
+          "generationId": "01b28b4029e152a5fe5ae2ddec38fb195b92478acda9993f828f1a98ee02a889:owner:3",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 7242,
+          "outputTokens": 155,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 35160,
+          "requestHash": "33dece99622877a954ca84398c84936a9def1dc82a522147dcced5ec2ca4c749",
+          "functionCallingMode": "NONE",
+          "declaredToolCount": 0,
+          "thinkingTokens": 124,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": true
+        }
+      }
+    ],
+    "verificationLatencyMs": null
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-current-policy",
+    "raw": "b1-2-8/attempt-2.json",
+    "runtime": {
+      "latest": "Đơn này chị nhận 10 hôm rồi, mới chỉ cầm lên ngắm trước gương, tem mác vẫn còn. Giờ đổi màu còn kịp không em? Phí đổi bao nhiêu?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Lần trước shop nói với chị là hàng chỉ đổi trong 7 ngày."
+        }
+      ],
+      "initialProductCodes": []
+    },
+    "actual": [
+      "Dạ thời hạn đổi hàng của shop là trong vòng 15 ngày kể từ khi nhận hàng, nên đơn nhận 10 hôm của chị vẫn kịp đổi ạ. Phí vận chuyển 2 chiều cho việc đổi hàng là 30.000đ chị nha."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ thời hạn đổi hàng của shop là trong vòng 15 ngày kể từ khi nhận hàng, nên đơn nhận 10 hôm của chị vẫn kịp đổi ạ. Phí vận chuyển 2 chiều cho việc đổi hàng là 30.000đ chị nha.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 20372.853199999998,
+    "generations": [
+      {
+        "id": "4b895ead581a12ea431cdd10fa29243104643073ef55e068363171fd2b4791b6:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 8830.418100000003,
+        "telemetry": {
+          "generationId": "4b895ead581a12ea431cdd10fa29243104643073ef55e068363171fd2b4791b6:owner:1",
+          "providerRequests": 1,
+          "authRequests": 1,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3314,
+          "outputTokens": 203,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 17128,
+          "requestHash": "6935f24dc5afb74e1ecc4264c164eecb00b37ef86d1a732c0b5b8438541e9985",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 193,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "4b895ead581a12ea431cdd10fa29243104643073ef55e068363171fd2b4791b6:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 4329.478600000002,
+        "telemetry": {
+          "generationId": "4b895ead581a12ea431cdd10fa29243104643073ef55e068363171fd2b4791b6:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4467,
+          "outputTokens": 1178,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 22438,
+          "requestHash": "033318e39e0183593be69e1c9a5b4ce30ea5fc9c6a4876cd3ddd34cc96305a67",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 1120,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "4b895ead581a12ea431cdd10fa29243104643073ef55e068363171fd2b4791b6:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 5695.267800000001,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_0a4e0f93bc5c2380016ada90196a1c8191a30572efe62d8be3",
+          "usage": {
+            "input_tokens": 3859,
+            "output_tokens": 84,
+            "total_tokens": 3943,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 60
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 5694
+        }
+      }
+    ],
+    "verificationLatencyMs": 6510.8313999999955
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-partial-source",
+    "raw": "b1-2-8/attempt-3.json",
+    "runtime": {
+      "latest": "Set Thạch Thảo may bằng vải gì vậy em? Chị muốn lấy size M, em xem giúp chị giá bao nhiêu và còn hàng không nhé.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Set váy Thạch Thảo có phần áo làm từ tơ Hàn thêu với họa tiết thêu nổi, chất vải mềm, thoáng và có độ bay tự nhiên; chân váy bằng ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên chị nhé. \n\nDạ hiện hệ thống bên em chưa tra cứu được chính xác giá bán và tình trạng tồn kho của size M ạ."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Set váy Thạch Thảo có phần áo làm từ tơ Hàn thêu với họa tiết thêu nổi, chất vải mềm, thoáng và có độ bay tự nhiên; chân váy bằng ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên chị nhé. \n\nDạ hiện hệ thống bên em chưa tra cứu được chính xác giá bán và tình trạng tồn kho của size M ạ.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 11798.9611,
+    "generations": [
+      {
+        "id": "c54ce4ec71fd116ef4b9e6f01540ab3169597f589ddda0629a42ffa817b4d3c4:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2393.009100000003,
+        "telemetry": {
+          "generationId": "c54ce4ec71fd116ef4b9e6f01540ab3169597f589ddda0629a42ffa817b4d3c4:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3473,
+          "outputTokens": 635,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 17761,
+          "requestHash": "4abde74622f973b38cba496f95b43f507be7f744d4bedec6fd8db47dcf8fd3cf",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 603,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "c54ce4ec71fd116ef4b9e6f01540ab3169597f589ddda0629a42ffa817b4d3c4:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2811.447,
+        "telemetry": {
+          "generationId": "c54ce4ec71fd116ef4b9e6f01540ab3169597f589ddda0629a42ffa817b4d3c4:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4298,
+          "outputTokens": 786,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 21773,
+          "requestHash": "9d704356f46df4be12fd63d489528e1b3a0b349baa042e48c207d4d8e6e69afe",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 703,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "c54ce4ec71fd116ef4b9e6f01540ab3169597f589ddda0629a42ffa817b4d3c4:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 4824.711799999997,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_07e29ffc4c13eb00016ada9025f4088191a0877a43146c84a6",
+          "usage": {
+            "input_tokens": 3566,
+            "output_tokens": 79,
+            "total_tokens": 3645,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 55
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 4824
+        }
+      }
+    ],
+    "verificationLatencyMs": 5486.056700000001
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-price",
+    "raw": "b1-2-8/attempt-4.json",
+    "runtime": {
+      "latest": "Set Thạch Thảo mã SV2447 giá bao nhiêu vậy em?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Dạ, set Thạch Thảo có giá 799.000đ cho cả bộ chị nhé. Nếu mình muốn mua lẻ thì áo giá 499.000đ và chân váy giá 449.000đ ạ."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, set Thạch Thảo có giá 799.000đ cho cả bộ chị nhé. Nếu mình muốn mua lẻ thì áo giá 499.000đ và chân váy giá 449.000đ ạ.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 11403.446100000001,
+    "generations": [
+      {
+        "id": "bff5ddfe87dc4bc964592aec25bccef86caea3d357b186de07858e998045653d:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2445.966499999995,
+        "telemetry": {
+          "generationId": "bff5ddfe87dc4bc964592aec25bccef86caea3d357b186de07858e998045653d:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3488,
+          "outputTokens": 580,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 17776,
+          "requestHash": "006433be3e44740ce4bd26a90c3094aa4edb9e5f79414b7d22c53fc52f7e78e7",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 554,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "bff5ddfe87dc4bc964592aec25bccef86caea3d357b186de07858e998045653d:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1851.6898000000074,
+        "telemetry": {
+          "generationId": "bff5ddfe87dc4bc964592aec25bccef86caea3d357b186de07858e998045653d:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5218,
+          "outputTokens": 483,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 24819,
+          "requestHash": "44b9b6ca16f553988ccf309bdc2aab43cde34109a2c471a1f69dbbf6f78387bd",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 426,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "bff5ddfe87dc4bc964592aec25bccef86caea3d357b186de07858e998045653d:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 5349.382400000002,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_02c67a7359d01acb016ada9031e04481918cdf5447d33e09bf",
+          "usage": {
+            "input_tokens": 5230,
+            "output_tokens": 22,
+            "total_tokens": 5252,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 5349
+        }
+      }
+    ],
+    "verificationLatencyMs": 6038.520799999998
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-component-stock",
+    "raw": "b1-2-8/attempt-5.json",
+    "runtime": {
+      "latest": "Áo của bộ Thạch Thảo size M còn không em? Áo bán riêng bao nhiêu?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Dạ áo Thạch Thảo size M bên em còn hàng chị nhé. Áo bán riêng có giá 499.000đ ạ."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ áo Thạch Thảo size M bên em còn hàng chị nhé. Áo bán riêng có giá 499.000đ ạ.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 8610.830699999991,
+    "generations": [
+      {
+        "id": "558a070ce1a3b7e887769b219e938bc4fb04983761e77148598675484047a183:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2155.2158000000054,
+        "telemetry": {
+          "generationId": "558a070ce1a3b7e887769b219e938bc4fb04983761e77148598675484047a183:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3492,
+          "outputTokens": 512,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 17801,
+          "requestHash": "f09030b027b7cfa06d840eafdda7ecfeed5a7c826984a32401a3d4643de727da",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 478,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "558a070ce1a3b7e887769b219e938bc4fb04983761e77148598675484047a183:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1444.8294000000024,
+        "telemetry": {
+          "generationId": "558a070ce1a3b7e887769b219e938bc4fb04983761e77148598675484047a183:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4544,
+          "outputTokens": 288,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 22097,
+          "requestHash": "6d22494e999256f9cf9701203a68c0494fb8d96f64d41207f7ccbe440ba2dd58",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 255,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "558a070ce1a3b7e887769b219e938bc4fb04983761e77148598675484047a183:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 3507.482600000003,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_00ec331159664d32016ada903b4bc081919d74a7707134b470",
+          "usage": {
+            "input_tokens": 4317,
+            "output_tokens": 22,
+            "total_tokens": 4339,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 3507
+        }
+      }
+    ],
+    "verificationLatencyMs": 4193.474600000001
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-search-read",
+    "raw": "b1-2-8/attempt-6.json",
+    "runtime": {
+      "latest": "Em xem giúp chị áo dài mã SD375 giá bao nhiêu nhé.",
+      "history": [],
+      "initialProductCodes": []
+    },
+    "actual": [
+      "Dạ, áo dài mã SD375 có giá 929.000đ cho áo lẻ và 1.065.000đ nếu chị lấy cả bộ ạ."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, áo dài mã SD375 có giá 929.000đ cho áo lẻ và 1.065.000đ nếu chị lấy cả bộ ạ.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 11638.126100000009,
+    "generations": [
+      {
+        "id": "65987ec2ae2ed560d8337948b3d74dc6a23bfefa66648e336fcc431d1336f79c:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1756.345100000006,
+        "telemetry": {
+          "generationId": "65987ec2ae2ed560d8337948b3d74dc6a23bfefa66648e336fcc431d1336f79c:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3273,
+          "outputTokens": 168,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 16904,
+          "requestHash": "c4e2c2b36ea4c4cd88609c768d846e5add35d2efc5e7834abfeca0bf20efc259",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 148,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "65987ec2ae2ed560d8337948b3d74dc6a23bfefa66648e336fcc431d1336f79c:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1521.5469000000012,
+        "telemetry": {
+          "generationId": "65987ec2ae2ed560d8337948b3d74dc6a23bfefa66648e336fcc431d1336f79c:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3492,
+          "outputTokens": 262,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 18244,
+          "requestHash": "25dc07ca11ada0612a55a29635dd7ff01d0bff3eca4decdc5b8f3c04136ca772",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 237,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "65987ec2ae2ed560d8337948b3d74dc6a23bfefa66648e336fcc431d1336f79c:owner:3",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1917.0116000000125,
+        "telemetry": {
+          "generationId": "65987ec2ae2ed560d8337948b3d74dc6a23bfefa66648e336fcc431d1336f79c:owner:3",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4168,
+          "outputTokens": 387,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 20758,
+          "requestHash": "74b89c463cf6b6dcd0b1612edcb29bb28b80ad3cfd9653f7252af0942ed8f855",
+          "functionCallingMode": "NONE",
+          "declaredToolCount": 0,
+          "thinkingTokens": 344,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "65987ec2ae2ed560d8337948b3d74dc6a23bfefa66648e336fcc431d1336f79c:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 5240.884699999995,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_08bb52a58541f274016ada9045cc108191bb89529aa8b3fc44",
+          "usage": {
+            "input_tokens": 4446,
+            "output_tokens": 62,
+            "total_tokens": 4508,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 38
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 5241
+        }
+      }
+    ],
+    "verificationLatencyMs": 5941.2935
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-buying-concern",
+    "raw": "b1-2-8/attempt-7.json",
+    "runtime": {
+      "latest": "Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Dạ set này mặc đi tiệc ban ngày rất hợp và không bị rườm rà đâu chị nhé, vì chất ren tơ Hàn mềm mại kết hợp form nhẹ nhàng và có độ rũ tự nhiên, tạo cảm giác thanh thoát, bay bổng. \n\nTrọn bộ có giá 799.000đ, hoàn toàn vừa vặn trong ngân sách 900 nghìn của mình ạ."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ set này mặc đi tiệc ban ngày rất hợp và không bị rườm rà đâu chị nhé, vì chất ren tơ Hàn mềm mại kết hợp form nhẹ nhàng và có độ rũ tự nhiên, tạo cảm giác thanh thoát, bay bổng. \n\nTrọn bộ có giá 799.000đ, hoàn toàn vừa vặn trong ngân sách 900 nghìn của mình ạ.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 11092.444500000012,
+    "generations": [
+      {
+        "id": "87b02b408b7eae02b4a05741e966f82a7e972362109d90cd2429fcc8f850efd6:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1904.8276999999944,
+        "telemetry": {
+          "generationId": "87b02b408b7eae02b4a05741e966f82a7e972362109d90cd2429fcc8f850efd6:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3514,
+          "outputTokens": 426,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 17887,
+          "requestHash": "2a37881723a23ae8d83126561eb4bf0fde5f5a5e9879783752a5d3eaf5f4f558",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 400,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "87b02b408b7eae02b4a05741e966f82a7e972362109d90cd2429fcc8f850efd6:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 3180.487399999998,
+        "telemetry": {
+          "generationId": "87b02b408b7eae02b4a05741e966f82a7e972362109d90cd2429fcc8f850efd6:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5090,
+          "outputTokens": 927,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 24182,
+          "requestHash": "546d5b7ce8c081425409be5f0633dae8eaf261c0d140215f2fc745bbed331d0d",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 837,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "87b02b408b7eae02b4a05741e966f82a7e972362109d90cd2429fcc8f850efd6:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 4313.637100000007,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_03171f2187ec74e8016ada90513d748191b22afef8e3920e66",
+          "usage": {
+            "input_tokens": 5298,
+            "output_tokens": 61,
+            "total_tokens": 5359,
+            "input_tokens_details": {
+              "cached_tokens": 2560,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 37
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 4313
+        }
+      }
+    ],
+    "verificationLatencyMs": 5033.1993000000075
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-policy-used",
+    "raw": "b1-2-8/attempt-8.json",
+    "runtime": {
+      "latest": "Chị đã mặc bộ này đi làm một buổi rồi nhưng về thấy không hợp. Giờ chị đổi sang màu khác được không em? Nếu đổi thì ai chịu phí ship?",
+      "history": [],
+      "initialProductCodes": []
+    },
+    "actual": [
+      "Dạ, sản phẩm mình đã mặc đi làm rồi nên không đủ điều kiện đổi hàng ạ, vì quy định đổi hàng yêu cầu sản phẩm chưa qua sử dụng. Nếu được đổi hợp lệ, tổng phí vận chuyển 2 chiều là 30.000đ chị nhé."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, sản phẩm mình đã mặc đi làm rồi nên không đủ điều kiện đổi hàng ạ, vì quy định đổi hàng yêu cầu sản phẩm chưa qua sử dụng. Nếu được đổi hợp lệ, tổng phí vận chuyển 2 chiều là 30.000đ chị nhé.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 13074.238400000002,
+    "generations": [
+      {
+        "id": "bf62dfec18b3749ad7ae645ce2defc142d4d5a052de9169329347d7419852d87:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1557.7667999999976,
+        "telemetry": {
+          "generationId": "bf62dfec18b3749ad7ae645ce2defc142d4d5a052de9169329347d7419852d87:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3293,
+          "outputTokens": 220,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 17026,
+          "requestHash": "41e22591e01d75b24a4073100ce7db5c9bdb222f1339425cf4324dbbdd83cd5b",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 210,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "bf62dfec18b3749ad7ae645ce2defc142d4d5a052de9169329347d7419852d87:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 3740.521999999997,
+        "telemetry": {
+          "generationId": "bf62dfec18b3749ad7ae645ce2defc142d4d5a052de9169329347d7419852d87:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4463,
+          "outputTokens": 1045,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 22588,
+          "requestHash": "e51b932e7ecfab741df5cfc365438a20c86f5a75d7e498b4e07b8a51b1d6a64a",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 986,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "bf62dfec18b3749ad7ae645ce2defc142d4d5a052de9169329347d7419852d87:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 6290.9869000000035,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_05377165a3b7db12016ada905d18948191aae6ea6ccb869cf4",
+          "usage": {
+            "input_tokens": 3836,
+            "output_tokens": 57,
+            "total_tokens": 3893,
+            "input_tokens_details": {
+              "cached_tokens": 2560,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 33
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 6291
+        }
+      }
+    ],
+    "verificationLatencyMs": 7115.136500000008
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-changed-occasion-v2",
+    "raw": "b1-9/attempt-9.json",
+    "runtime": {
+      "latest": "Mà tiệc chuyển ra sân vườn rồi em, chị phải ở ngoài trời khá lâu mà lại dễ nóng. Mặc bộ này có bí quá không?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị đang xem set Thạch Thảo để đi tiệc trưa."
+        },
+        {
+          "role": "shop",
+          "text": "Tiệc trưa mặc bộ này xinh chị ạ."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Áo dùng chất tơ Hàn mềm, thoáng cùng độ bay tự nhiên, kết hợp chân váy ren tơ mềm nhẹ nên mặc rất thoải mái, không bị hầm bí ở ngoài trời đâu chị ạ."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Áo dùng chất tơ Hàn mềm, thoáng cùng độ bay tự nhiên, kết hợp chân váy ren tơ mềm nhẹ nên mặc rất thoải mái, không bị hầm bí ở ngoài trời đâu chị ạ.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 14169.256399999998,
+    "generations": [
+      {
+        "id": "2a6affc2753fb74a5a8cb50464d6f15ef0b3ba152457165f1533189fc7676f10:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 5454.000499999995,
+        "telemetry": {
+          "generationId": "2a6affc2753fb74a5a8cb50464d6f15ef0b3ba152457165f1533189fc7676f10:owner:1",
+          "providerRequests": 1,
+          "authRequests": 1,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3529,
+          "outputTokens": 1546,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 18045,
+          "requestHash": "caa1df022e7ab54596fe612e4364e75a2da0c2bf577929757a66b35a584e567b",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 1503,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "2a6affc2753fb74a5a8cb50464d6f15ef0b3ba152457165f1533189fc7676f10:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 6724.7471000000005,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_0106878c2d3b5fdb016ada8d72d4708191916b3c4e83a05950",
+          "usage": {
+            "input_tokens": 3800,
+            "output_tokens": 137,
+            "total_tokens": 3937,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 113
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 6724
+        }
+      }
+    ],
+    "verificationLatencyMs": 7502.178500000002
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-current-policy-v2",
+    "raw": "b1-10-14/attempt-10.json",
+    "runtime": {
+      "latest": "Đơn này chị nhận 12 hôm rồi, chưa dùng. Giờ chị đổi size còn kịp không em? Phí ship tính thế nào?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Lần trước chị nhớ phí đổi là 25 nghìn."
+        }
+      ],
+      "initialProductCodes": []
+    },
+    "actual": [
+      "Dạ mình đổi size vẫn kịp chị nhé, vì thời hạn đổi hàng là trong vòng 15 ngày kể từ ngày nhận hàng. Phí vận chuyển 2 chiều cho việc đổi hàng là 30.000đ chị nha."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ mình đổi size vẫn kịp chị nhé, vì thời hạn đổi hàng là trong vòng 15 ngày kể từ ngày nhận hàng. Phí vận chuyển 2 chiều cho việc đổi hàng là 30.000đ chị nha.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 20744.3283,
+    "generations": [
+      {
+        "id": "9da7c48e984d96f09cfa50ada57d9233d83549eb523e6f6c00e1231a1391f829:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 11512.7555,
+        "telemetry": {
+          "generationId": "9da7c48e984d96f09cfa50ada57d9233d83549eb523e6f6c00e1231a1391f829:owner:1",
+          "providerRequests": 1,
+          "authRequests": 1,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3302,
+          "outputTokens": 234,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 17061,
+          "requestHash": "3b4c043d056adc9bce615b0b0abdb041113416acc1d847969471be27c4ce278d",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 224,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "9da7c48e984d96f09cfa50ada57d9233d83549eb523e6f6c00e1231a1391f829:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2827.7013000000006,
+        "telemetry": {
+          "generationId": "9da7c48e984d96f09cfa50ada57d9233d83549eb523e6f6c00e1231a1391f829:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4486,
+          "outputTokens": 785,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 22465,
+          "requestHash": "9334e6d5c4f1a02ec555c8af9f4f26f2345eec202349aa564d6f59671cbc7f73",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 734,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "9da7c48e984d96f09cfa50ada57d9233d83549eb523e6f6c00e1231a1391f829:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 5465.658199999998,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_0fcc33a1da719fa8016ada909b584881919eb326fa6c3ddcb2",
+          "usage": {
+            "input_tokens": 3845,
+            "output_tokens": 72,
+            "total_tokens": 3917,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 48
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 5465
+        }
+      }
+    ],
+    "verificationLatencyMs": 5614.932399999998
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-partial-source-v2",
+    "raw": "b1-10-14/attempt-11.json",
+    "runtime": {
+      "latest": "Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Chân váy được làm từ chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên chị ạ. Hiện thông tin giá và tình trạng tồn kho của size M chưa cập nhật nên em chưa báo chính xác được cho chị nhé."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Chân váy được làm từ chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên chị ạ. Hiện thông tin giá và tình trạng tồn kho của size M chưa cập nhật nên em chưa báo chính xác được cho chị nhé.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 15401.420100000003,
+    "generations": [
+      {
+        "id": "a71cea12467ef27d7d6937f8d5a8e94a7ad599624ec13c89344ca996b81954c7:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2233.7658999999985,
+        "telemetry": {
+          "generationId": "a71cea12467ef27d7d6937f8d5a8e94a7ad599624ec13c89344ca996b81954c7:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3469,
+          "outputTokens": 578,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 17748,
+          "requestHash": "ab93eac7664c54b76a54c14a513d31b05e427adf273e317895d354f7c422c9ac",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 546,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "a71cea12467ef27d7d6937f8d5a8e94a7ad599624ec13c89344ca996b81954c7:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 3800.0867,
+        "telemetry": {
+          "generationId": "a71cea12467ef27d7d6937f8d5a8e94a7ad599624ec13c89344ca996b81954c7:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4237,
+          "outputTokens": 1098,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 21478,
+          "requestHash": "53e243bc1f6a7cf0d19e9b984546ebc44667fdd3e13afdc42a87d11bd0dd664c",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 1046,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "a71cea12467ef27d7d6937f8d5a8e94a7ad599624ec13c89344ca996b81954c7:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 7678.626199999999,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_076fcc091abbcb38016ada90a787248191b90cb256aaf113a6",
+          "usage": {
+            "input_tokens": 3530,
+            "output_tokens": 113,
+            "total_tokens": 3643,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 89
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 7678
+        }
+      }
+    ],
+    "verificationLatencyMs": 8329.1339
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-price-v2",
+    "raw": "b1-10-14/attempt-12.json",
+    "runtime": {
+      "latest": "Cho chị xin giá cả bộ với em.",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị đang xem bộ Thạch Thảo bên mình."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Dạ, set váy Thạch Thảo có giá 799.000đ chị nhé."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, set váy Thạch Thảo có giá 799.000đ chị nhé.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 15564.155199999994,
+    "generations": [
+      {
+        "id": "3ab163376a2456e1f011960da30acdf94818423c9f4ee568d8f607bf5cbe08c4:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 4592.7641,
+        "telemetry": {
+          "generationId": "3ab163376a2456e1f011960da30acdf94818423c9f4ee568d8f607bf5cbe08c4:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3492,
+          "outputTokens": 565,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 17844,
+          "requestHash": "3b4d0ad6a79103a0444dcf8819daba0d169af591a2dfe85479bc1bfb81a5296b",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 534,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "3ab163376a2456e1f011960da30acdf94818423c9f4ee568d8f607bf5cbe08c4:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 3745.5694000000076,
+        "telemetry": {
+          "generationId": "3ab163376a2456e1f011960da30acdf94818423c9f4ee568d8f607bf5cbe08c4:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4456,
+          "outputTokens": 217,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 22127,
+          "requestHash": "af47a9274814afa10719d2d9b787c9d432c6125e04c3a190ca0f48d4bf0b0ecf",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 194,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "3ab163376a2456e1f011960da30acdf94818423c9f4ee568d8f607bf5cbe08c4:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 5085.558499999999,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_0dc3a833e0004b97016ada90bab1c8819184e2370875367cbe",
+          "usage": {
+            "input_tokens": 4144,
+            "output_tokens": 41,
+            "total_tokens": 4185,
+            "input_tokens_details": {
+              "cached_tokens": 2560,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 17
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 5085
+        }
+      }
+    ],
+    "verificationLatencyMs": 5789.8514
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-component-stock-v2",
+    "raw": "b1-10-14/attempt-13.json",
+    "runtime": {
+      "latest": "Chân váy size M còn không em, mua riêng là bao nhiêu?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị chỉ muốn lấy chân váy của set Thạch Thảo."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Dạ, chân váy size M set Thạch Thảo nhà em còn hàng chị nhé, mua riêng có giá 449.000đ ạ."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, chân váy size M set Thạch Thảo nhà em còn hàng chị nhé, mua riêng có giá 449.000đ ạ.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 11733.829800000007,
+    "generations": [
+      {
+        "id": "27f173e8dad1100cb14c15acda0c05913f0da181557fc3e930606d201f431494:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1705.7462000000087,
+        "telemetry": {
+          "generationId": "27f173e8dad1100cb14c15acda0c05913f0da181557fc3e930606d201f431494:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3500,
+          "outputTokens": 377,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 17880,
+          "requestHash": "0853e1e1fb8279e67d2df22fa4cbf68b8868cee593fc5430493b4be3513de2ca",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 343,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "27f173e8dad1100cb14c15acda0c05913f0da181557fc3e930606d201f431494:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1554.038499999995,
+        "telemetry": {
+          "generationId": "27f173e8dad1100cb14c15acda0c05913f0da181557fc3e930606d201f431494:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4423,
+          "outputTokens": 243,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 21512,
+          "requestHash": "ac0903701b43fe3c256c730afa83cba86f789f1e24c3be165f661158b95fadba",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 209,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "27f173e8dad1100cb14c15acda0c05913f0da181557fc3e930606d201f431494:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 6821.296599999987,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_079aaa3a05ac4fbc016ada90c5a37481919337b4ccc1faa64b",
+          "usage": {
+            "input_tokens": 4348,
+            "output_tokens": 22,
+            "total_tokens": 4370,
+            "input_tokens_details": {
+              "cached_tokens": 2560,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 6821
+        }
+      }
+    ],
+    "verificationLatencyMs": 7569.419699999999
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-search-read-v2",
+    "raw": "b1-10-14/attempt-14.json",
+    "runtime": {
+      "latest": "Shop có set váy Khánh Trang không em? Em xem giúp chị mẫu đó giá bao nhiêu với.",
+      "history": [],
+      "initialProductCodes": []
+    },
+    "actual": [
+      "Dạ, shop có set váy Khánh Trang chị nhé. Mẫu này có giá 999.000đ cho cả bộ, hoặc chị có thể mua lẻ áo và chân váy với giá 499.000đ mỗi món ạ. \n\nChị muốn lấy cả set hay mua lẻ món nào ạ?"
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, shop có set váy Khánh Trang chị nhé. Mẫu này có giá 999.000đ cho cả bộ, hoặc chị có thể mua lẻ áo và chân váy với giá 499.000đ mỗi món ạ. \n\nChị muốn lấy cả set hay mua lẻ món nào ạ?",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 12018.578499999989,
+    "generations": [
+      {
+        "id": "c9000fbfb99013ce79ff8f302ffd4cbd40a1b96a51bab2cb134b75b3ded06031:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1594.67809999999,
+        "telemetry": {
+          "generationId": "c9000fbfb99013ce79ff8f302ffd4cbd40a1b96a51bab2cb134b75b3ded06031:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3277,
+          "outputTokens": 220,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 16939,
+          "requestHash": "8e2ff3d4d07e8b4fc4a035a46bdad25d5c7401e2a0f4bb1c222f01cf6b775446",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 201,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "c9000fbfb99013ce79ff8f302ffd4cbd40a1b96a51bab2cb134b75b3ded06031:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1242.9403999999922,
+        "telemetry": {
+          "generationId": "c9000fbfb99013ce79ff8f302ffd4cbd40a1b96a51bab2cb134b75b3ded06031:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3786,
+          "outputTokens": 160,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 19766,
+          "requestHash": "137da984644e751b26abad703a15cc3bc5546d5b995577ff8693a71f7412d37f",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 134,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "c9000fbfb99013ce79ff8f302ffd4cbd40a1b96a51bab2cb134b75b3ded06031:owner:3",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2312.2890999999945,
+        "telemetry": {
+          "generationId": "c9000fbfb99013ce79ff8f302ffd4cbd40a1b96a51bab2cb134b75b3ded06031:owner:3",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5009,
+          "outputTokens": 346,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 23601,
+          "requestHash": "7335efca26700383bfb26af0015f405b1081b986300613e134af572e79607298",
+          "functionCallingMode": "NONE",
+          "declaredToolCount": 0,
+          "thinkingTokens": 276,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "c9000fbfb99013ce79ff8f302ffd4cbd40a1b96a51bab2cb134b75b3ded06031:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 4720.015700000004,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_0179cd43ab84c36e016ada90d2dfa08191b9c2bd4b80ec465a",
+          "usage": {
+            "input_tokens": 5743,
+            "output_tokens": 22,
+            "total_tokens": 5765,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 4720
+        }
+      }
+    ],
+    "verificationLatencyMs": 5416.069699999993
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-buying-concern-v2",
+    "raw": "b1-15/attempt-15.json",
+    "runtime": {
+      "latest": "Chị hay mặc đồ trơn, ít họa tiết. Set Thạch Thảo nhìn đẹp nhưng chị sợ lên người hơi điệu quá. Chị cần một bộ để đi ăn cưới ban ngày, em tư vấn thật là có nên lấy không?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Dạ, set Thạch Thảo rất hợp mặc đi ăn cưới ban ngày vì chất liệu tơ Hàn và ren mềm có độ bay, rũ tự nhiên, mang lại vẻ thanh lịch, nhã nhặn chứ không bị cứng hay quá cầu kỳ. \n\nTuy nhiên, vì áo có họa tiết thêu nổi và chân váy bằng ren, nếu chị quen mặc đồ trơn và sợ tổng thể hơi điệu, mình có thể chọn mua riêng áo lẻ hoặc chân váy lẻ để dễ phối hơn theo sở thích tối giản của mình chị nhé."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, set Thạch Thảo rất hợp mặc đi ăn cưới ban ngày vì chất liệu tơ Hàn và ren mềm có độ bay, rũ tự nhiên, mang lại vẻ thanh lịch, nhã nhặn chứ không bị cứng hay quá cầu kỳ. \n\nTuy nhiên, vì áo có họa tiết thêu nổi và chân váy bằng ren, nếu chị quen mặc đồ trơn và sợ tổng thể hơi điệu, mình có thể chọn mua riêng áo lẻ hoặc chân váy lẻ để dễ phối hơn theo sở thích tối giản của mình chị nhé.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 17776.2208,
+    "generations": [
+      {
+        "id": "61ef985d20a12874e2fdf3b9191c6b7638c2e69208ceb57e5fc4c75fcb185212:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 4350.2033999999985,
+        "telemetry": {
+          "generationId": "61ef985d20a12874e2fdf3b9191c6b7638c2e69208ceb57e5fc4c75fcb185212:owner:1",
+          "providerRequests": 1,
+          "authRequests": 1,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3522,
+          "outputTokens": 1160,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 17953,
+          "requestHash": "b61efabcda412aa432e8cda4ba8a786bd2e1da327e83a95f459de777aa0ed226",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 1129,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "61ef985d20a12874e2fdf3b9191c6b7638c2e69208ceb57e5fc4c75fcb185212:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 5745.575299999997,
+        "telemetry": {
+          "generationId": "61ef985d20a12874e2fdf3b9191c6b7638c2e69208ceb57e5fc4c75fcb185212:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5081,
+          "outputTokens": 1672,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 25414,
+          "requestHash": "1c35b4e06ad33057d8e7bb4602a0a0b1350c84e062a750fd7a83d0a0255c5fd7",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 1559,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "61ef985d20a12874e2fdf3b9191c6b7638c2e69208ceb57e5fc4c75fcb185212:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 4979.0285,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_0bdf97156dbdb4bd016ada8dafa3d88191ab4828646d45148a",
+          "usage": {
+            "input_tokens": 4286,
+            "output_tokens": 69,
+            "total_tokens": 4355,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 45
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 4978
+        }
+      }
+    ],
+    "verificationLatencyMs": 5726.285400000001
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-policy-used-v2",
+    "raw": "b1-16-24/attempt-16.json",
+    "runtime": {
+      "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+      "history": [],
+      "initialProductCodes": []
+    },
+    "actual": [
+      "Dạ, quy định đổi hàng của shop yêu cầu sản phẩm phải chỉ ướm bên ngoài chứ không mặc trực tiếp vào người. Vì mình đã mặc thử vào người rồi nên shop chưa thể hỗ trợ đổi size trong trường hợp này, mong chị thông cảm giúp em nhé."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, quy định đổi hàng của shop yêu cầu sản phẩm phải chỉ ướm bên ngoài chứ không mặc trực tiếp vào người. Vì mình đã mặc thử vào người rồi nên shop chưa thể hỗ trợ đổi size trong trường hợp này, mong chị thông cảm giúp em nhé.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 18433.0516,
+    "generations": [
+      {
+        "id": "266f610f57c1641a08ed3734651838289396b3821c6ac370e704891f128ed65d:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 5540.969499999999,
+        "telemetry": {
+          "generationId": "266f610f57c1641a08ed3734651838289396b3821c6ac370e704891f128ed65d:owner:1",
+          "providerRequests": 1,
+          "authRequests": 1,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3291,
+          "outputTokens": 150,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 17021,
+          "requestHash": "102733224818d1973ebd3192cca751a05faee09938603ac013a37a305dc4c4dd",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 140,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "266f610f57c1641a08ed3734651838289396b3821c6ac370e704891f128ed65d:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 6850.390800000001,
+        "telemetry": {
+          "generationId": "266f610f57c1641a08ed3734651838289396b3821c6ac370e704891f128ed65d:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4391,
+          "outputTokens": 1288,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 22169,
+          "requestHash": "2d916b46f6b6933e9e09d1957b7877bd7201888a3c8f19d52a5f096e41d864f1",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 1231,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "266f610f57c1641a08ed3734651838289396b3821c6ac370e704891f128ed65d:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 4675.707000000002,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_063a881401f29c8f016ada910d8574819183f53d2169df5ad3",
+          "usage": {
+            "input_tokens": 3829,
+            "output_tokens": 64,
+            "total_tokens": 3893,
+            "input_tokens_details": {
+              "cached_tokens": 2560,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 40
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 4675
+        }
+      }
+    ],
+    "verificationLatencyMs": 5345.654199999997
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-changed-occasion-v3",
+    "raw": "b1-16-24/attempt-17.json",
+    "runtime": {
+      "latest": "Mà lịch đổi rồi, sáng chị mặc đi gặp khách hàng. Chị muốn nhìn gọn hơn thì nên lấy cả bộ hay chỉ lấy áo thôi em?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị định lấy cả bộ Thạch Thảo đi tiệc tối."
+        },
+        {
+          "role": "shop",
+          "text": "Đi tiệc tối mặc cả bộ đẹp chị ạ."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Chị lấy áo lẻ (499.000đ) sẽ gọn gàng và phù hợp hơn cho buổi gặp khách hàng ạ. Áo có form nhẹ, tơ thêu nổi thanh lịch, khi phối cùng quần âu hoặc chân váy ôm sẵn có của mình sẽ tạo nét sắc sảo và chuyên nghiệp hơn. \n\nChân váy ren trong set có độ rũ và bay tự nhiên nên thiên về nét thướt tha, mềm mại nhiều hơn chị nhé."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Chị lấy áo lẻ (499.000đ) sẽ gọn gàng và phù hợp hơn cho buổi gặp khách hàng ạ. Áo có form nhẹ, tơ thêu nổi thanh lịch, khi phối cùng quần âu hoặc chân váy ôm sẵn có của mình sẽ tạo nét sắc sảo và chuyên nghiệp hơn. \n\nChân váy ren trong set có độ rũ và bay tự nhiên nên thiên về nét thướt tha, mềm mại nhiều hơn chị nhé.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 16403.844500000007,
+    "generations": [
+      {
+        "id": "0d1422ecadc2430354b63b8fbbb5ab9969d21fa06c038883d08e494db8e27ebd:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2003.883799999996,
+        "telemetry": {
+          "generationId": "0d1422ecadc2430354b63b8fbbb5ab9969d21fa06c038883d08e494db8e27ebd:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3528,
+          "outputTokens": 487,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 18062,
+          "requestHash": "4820d971f33feb9b229734231293ac513eb58ba694258f51d5db23d332ceaab3",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 461,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "0d1422ecadc2430354b63b8fbbb5ab9969d21fa06c038883d08e494db8e27ebd:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 5824.2033999999985,
+        "telemetry": {
+          "generationId": "0d1422ecadc2430354b63b8fbbb5ab9969d21fa06c038883d08e494db8e27ebd:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5165,
+          "outputTokens": 1683,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 24729,
+          "requestHash": "b0143bfdcca341aaa20573db05c5a03d657de08a36df97059ad622afdc71551c",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 1582,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "0d1422ecadc2430354b63b8fbbb5ab9969d21fa06c038883d08e494db8e27ebd:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 6409.269899999992,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_09c7d3499c1d08d9016ada911d20dc81919818071412eb4251",
+          "usage": {
+            "input_tokens": 5354,
+            "output_tokens": 86,
+            "total_tokens": 5440,
+            "input_tokens_details": {
+              "cached_tokens": 2560,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 62
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 6409
+        }
+      }
+    ],
+    "verificationLatencyMs": 7121.6276
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-current-policy-v3",
+    "raw": "b1-16-24/attempt-18.json",
+    "runtime": {
+      "latest": "Lần này chị nhận hàng được 9 ngày, chỉ mở ra xem rồi cất lại. Giờ chị đổi size còn được không em?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Hồi trước chị nhớ bên mình chỉ cho đổi trong 7 ngày."
+        }
+      ],
+      "initialProductCodes": []
+    },
+    "actual": [
+      "Dạ, chính sách của bên em hỗ trợ đổi hàng trong vòng 15 ngày kể từ ngày nhận nên mình vẫn đổi size được bình thường chị nhé."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, chính sách của bên em hỗ trợ đổi hàng trong vòng 15 ngày kể từ ngày nhận nên mình vẫn đổi size được bình thường chị nhé.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 13140.402000000002,
+    "generations": [
+      {
+        "id": "d91cb5a3cc89d600a9cea628d6fb9dda93e87da05d34b153e53cc2868cc0a253:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1518.4988000000012,
+        "telemetry": {
+          "generationId": "d91cb5a3cc89d600a9cea628d6fb9dda93e87da05d34b153e53cc2868cc0a253:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3302,
+          "outputTokens": 193,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 17085,
+          "requestHash": "7251a227dabd49ffa42cafe87ae30ce665d0d8e75038efa33d92e6407b54dd89",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 183,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "d91cb5a3cc89d600a9cea628d6fb9dda93e87da05d34b153e53cc2868cc0a253:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 3877.895900000003,
+        "telemetry": {
+          "generationId": "d91cb5a3cc89d600a9cea628d6fb9dda93e87da05d34b153e53cc2868cc0a253:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4445,
+          "outputTokens": 1074,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 22459,
+          "requestHash": "f05ef7d26091dd93eccb39580237a920812172a1523fc9b8b7fb7a985ae29346",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 1041,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "d91cb5a3cc89d600a9cea628d6fb9dda93e87da05d34b153e53cc2868cc0a253:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 6234.0429,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_03189aa268a09c56016ada91295c148191895b550ca7ccbf83",
+          "usage": {
+            "input_tokens": 3824,
+            "output_tokens": 114,
+            "total_tokens": 3938,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 90
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 6234
+        }
+      }
+    ],
+    "verificationLatencyMs": 7036.838499999998
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-partial-source-v3",
+    "raw": "b1-16-24/attempt-19.json",
+    "runtime": {
+      "latest": "Áo với váy là chất gì em? Cả set bao nhiêu, còn hàng không?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Dạ, áo của set làm từ tơ Hàn thêu với họa tiết thêu nổi, chất vải mềm, thoáng và có độ bay tự nhiên; chân váy bằng ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên chị nhé. \n\nHiện tại thông tin giá và tình trạng còn hàng của set này hệ thống bên em chưa cập nhật ạ."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, áo của set làm từ tơ Hàn thêu với họa tiết thêu nổi, chất vải mềm, thoáng và có độ bay tự nhiên; chân váy bằng ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên chị nhé. \n\nHiện tại thông tin giá và tình trạng còn hàng của set này hệ thống bên em chưa cập nhật ạ.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 12709.631599999993,
+    "generations": [
+      {
+        "id": "752446854578008d2bde1c23f397900b09d98c5df5af22662313ab94229ad896:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1945.6448000000091,
+        "telemetry": {
+          "generationId": "752446854578008d2bde1c23f397900b09d98c5df5af22662313ab94229ad896:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3460,
+          "outputTokens": 450,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 17695,
+          "requestHash": "88594bc0b59cbce4d007103ec7bcbd94bf1a6554b9b3596bb134e26386aedee7",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 424,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "752446854578008d2bde1c23f397900b09d98c5df5af22662313ab94229ad896:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2410.424800000008,
+        "telemetry": {
+          "generationId": "752446854578008d2bde1c23f397900b09d98c5df5af22662313ab94229ad896:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4104,
+          "outputTokens": 619,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 20826,
+          "requestHash": "dde94f41c4b70f7773d93581682e8d8ffda2d314b59b50b4fd74ac2a0ae6327e",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 542,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "752446854578008d2bde1c23f397900b09d98c5df5af22662313ab94229ad896:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 6627.3722000000125,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_0c130cab0998ae06016ada91363f68819195d1df422e866348",
+          "usage": {
+            "input_tokens": 3544,
+            "output_tokens": 121,
+            "total_tokens": 3665,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 97
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 6627
+        }
+      }
+    ],
+    "verificationLatencyMs": 7290.820300000007
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-price-v3",
+    "raw": "b1-16-24/attempt-20.json",
+    "runtime": {
+      "latest": "Nguyên set Thạch Thảo bao nhiêu tiền em?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Nguyên set Thạch Thảo có giá 799.000đ chị nhé, hiện set đang có sẵn hàng ạ."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Nguyên set Thạch Thảo có giá 799.000đ chị nhé, hiện set đang có sẵn hàng ạ.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 11388.603199999998,
+    "generations": [
+      {
+        "id": "2580804672e1a07ef2a33f7f6bab4ec8469af8ae8dcdc4e69f443159a38b912e:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2673.4253000000026,
+        "telemetry": {
+          "generationId": "2580804672e1a07ef2a33f7f6bab4ec8469af8ae8dcdc4e69f443159a38b912e:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3483,
+          "outputTokens": 650,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 17769,
+          "requestHash": "9e96d614f551dcea29cb46531a9aa5fb1edb000836f83ce5e2100b1b38b416f7",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 619,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "2580804672e1a07ef2a33f7f6bab4ec8469af8ae8dcdc4e69f443159a38b912e:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1852.3135000000038,
+        "telemetry": {
+          "generationId": "2580804672e1a07ef2a33f7f6bab4ec8469af8ae8dcdc4e69f443159a38b912e:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4532,
+          "outputTokens": 394,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 22484,
+          "requestHash": "8deb80fc54ffcb35d51eb94ab9d2c516bcd552b6d67bf3cb538a895da4a8a515",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 366,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "2580804672e1a07ef2a33f7f6bab4ec8469af8ae8dcdc4e69f443159a38b912e:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 5347.996200000009,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_07ac80d520f5d77e016ada9143c8e48191bb7c99b6ce7390b6",
+          "usage": {
+            "input_tokens": 4136,
+            "output_tokens": 22,
+            "total_tokens": 4158,
+            "input_tokens_details": {
+              "cached_tokens": 2560,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 5348
+        }
+      }
+    ],
+    "verificationLatencyMs": 6081.810399999988
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-component-stock-v3",
+    "raw": "b1-16-24/attempt-21.json",
+    "runtime": {
+      "latest": "Áo Thạch Thảo có bán riêng không em? Chị lấy size M, còn thì báo chị giá luôn nhé.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Dạ, áo Thạch Thảo có bán lẻ chị nha. Áo size M hiện có sẵn, giá 499.000đ ạ."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, áo Thạch Thảo có bán lẻ chị nha. Áo size M hiện có sẵn, giá 499.000đ ạ.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 13457.732799999998,
+    "generations": [
+      {
+        "id": "b01a31a0b1845633b44f97587500468857a2c2bac6d3791163d6da74cec91183:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2104.3546999999962,
+        "telemetry": {
+          "generationId": "b01a31a0b1845633b44f97587500468857a2c2bac6d3791163d6da74cec91183:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3497,
+          "outputTokens": 523,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 17824,
+          "requestHash": "ec5c0cce93ec1a87a6702378fdfbe93e254525912071ae5f5ad6d4696c1dd1aa",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 480,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "b01a31a0b1845633b44f97587500468857a2c2bac6d3791163d6da74cec91183:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1846.9568,
+        "telemetry": {
+          "generationId": "b01a31a0b1845633b44f97587500468857a2c2bac6d3791163d6da74cec91183:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4021,
+          "outputTokens": 379,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 20175,
+          "requestHash": "aaa032dd872ebd2e6a4ea21c7dc6ac87d4cce4a47e9a662f73177ae1a2915aa4",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 345,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "b01a31a0b1845633b44f97587500468857a2c2bac6d3791163d6da74cec91183:owner:3",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2302.3886000000057,
+        "telemetry": {
+          "generationId": "b01a31a0b1845633b44f97587500468857a2c2bac6d3791163d6da74cec91183:owner:3",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4620,
+          "outputTokens": 490,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 22130,
+          "requestHash": "59e5a2ebe31d990cbd26312b3d3ca55c6df7125b08afed0112e8221535c5b4fd",
+          "functionCallingMode": "NONE",
+          "declaredToolCount": 0,
+          "thinkingTokens": 456,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "b01a31a0b1845633b44f97587500468857a2c2bac6d3791163d6da74cec91183:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 5150.774399999995,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_0fafb81a28f2ea3f016ada915185808191bdea9435787f3648",
+          "usage": {
+            "input_tokens": 4328,
+            "output_tokens": 39,
+            "total_tokens": 4367,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 15
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 5151
+        }
+      }
+    ],
+    "verificationLatencyMs": 5884.880499999999
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-search-read-v3",
+    "raw": "b1-16-24/attempt-22.json",
+    "runtime": {
+      "latest": "Chị thấy mẫu SQ223 trên trang mà giờ tìm không ra. Em kiểm tra giúp chị mẫu đó còn không, giá bao nhiêu nhé.",
+      "history": [],
+      "initialProductCodes": []
+    },
+    "actual": [
+      "Dạ mẫu Set quần Xuân Thảo (SQ223) bên em hiện vẫn còn hàng chị nhé. Sản phẩm có giá 699.000đ cho nguyên bộ, hoặc chị có thể chọn mua lẻ áo hoặc quần với giá 429.000đ mỗi món ạ."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ mẫu Set quần Xuân Thảo (SQ223) bên em hiện vẫn còn hàng chị nhé. Sản phẩm có giá 699.000đ cho nguyên bộ, hoặc chị có thể chọn mua lẻ áo hoặc quần với giá 429.000đ mỗi món ạ.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 13281.065499999982,
+    "generations": [
+      {
+        "id": "30316a699c4dae93a4437e741e9a5e0f59637d832ae5a5b6116672bcc8b777ff:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1236.8750999999902,
+        "telemetry": {
+          "generationId": "30316a699c4dae93a4437e741e9a5e0f59637d832ae5a5b6116672bcc8b777ff:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3288,
+          "outputTokens": 182,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 16979,
+          "requestHash": "67a5cff8ec3f44f3acb14b8ec733bf0098d8020caf72bc98dc08bf98daf05182",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 162,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "30316a699c4dae93a4437e741e9a5e0f59637d832ae5a5b6116672bcc8b777ff:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1506.5163999999932,
+        "telemetry": {
+          "generationId": "30316a699c4dae93a4437e741e9a5e0f59637d832ae5a5b6116672bcc8b777ff:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3736,
+          "outputTokens": 264,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 19463,
+          "requestHash": "b73ffe1879af1ba6f3cb36e717c723d00db860eee5b3e195c0d6ffae48965925",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 239,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "30316a699c4dae93a4437e741e9a5e0f59637d832ae5a5b6116672bcc8b777ff:owner:3",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2826.250899999999,
+        "telemetry": {
+          "generationId": "30316a699c4dae93a4437e741e9a5e0f59637d832ae5a5b6116672bcc8b777ff:owner:3",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5045,
+          "outputTokens": 758,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 23946,
+          "requestHash": "947a230a26b7b424b912fa313253f76a1e3cbec54c353225d6eb5f154a74571a",
+          "functionCallingMode": "NONE",
+          "declaredToolCount": 0,
+          "thinkingTokens": 693,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "30316a699c4dae93a4437e741e9a5e0f59637d832ae5a5b6116672bcc8b777ff:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 6477.084699999992,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_09b92cbe0d9fadc3016ada915c503481919d9d743154ea6092",
+          "usage": {
+            "input_tokens": 5712,
+            "output_tokens": 75,
+            "total_tokens": 5787,
+            "input_tokens_details": {
+              "cached_tokens": 2560,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 51
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 6477
+        }
+      }
+    ],
+    "verificationLatencyMs": 7182.601100000014
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-buying-concern-v3",
+    "raw": "b1-16-24/attempt-23.json",
+    "runtime": {
+      "latest": "Theo em chị mua riêng áo Thạch Thảo hay lấy cả bộ? Chị muốn mặc lại nhiều lần, ngân sách tầm 850 nghìn.",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị có sẵn chân váy đen dáng suông rồi."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Chị lấy cả bộ Thạch Thảo (799.000đ) giúp em nhé, vừa khít với ngân sách 850 nghìn của chị ạ. \n\nMua cả bộ giúp chị có sẵn set áo tơ thêu và chân váy ren đồng bộ mặc rất nhã nhặn, sang trọng, đồng thời chiếc áo này chị vẫn dễ dàng phối linh hoạt với chân váy đen dáng suông sẵn có của mình để đổi mới phong cách cho nhiều dịp khác nhau."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Chị lấy cả bộ Thạch Thảo (799.000đ) giúp em nhé, vừa khít với ngân sách 850 nghìn của chị ạ. \n\nMua cả bộ giúp chị có sẵn set áo tơ thêu và chân váy ren đồng bộ mặc rất nhã nhặn, sang trọng, đồng thời chiếc áo này chị vẫn dễ dàng phối linh hoạt với chân váy đen dáng suông sẵn có của mình để đổi mới phong cách cho nhiều dịp khác nhau.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 13175.671300000016,
+    "generations": [
+      {
+        "id": "5a37b33513a02dc135ccb6777db3656184b09a6651489c9a7f8d18ad7ba53d3a:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2124.6658999999927,
+        "telemetry": {
+          "generationId": "5a37b33513a02dc135ccb6777db3656184b09a6651489c9a7f8d18ad7ba53d3a:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3516,
+          "outputTokens": 436,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 17944,
+          "requestHash": "d7ee98b24c0c7e00152eabe43341178ebcdd38755e3bc377a5f42e90818fb291",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 410,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "5a37b33513a02dc135ccb6777db3656184b09a6651489c9a7f8d18ad7ba53d3a:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 3962.5500000000175,
+        "telemetry": {
+          "generationId": "5a37b33513a02dc135ccb6777db3656184b09a6651489c9a7f8d18ad7ba53d3a:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5102,
+          "outputTokens": 1160,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 24361,
+          "requestHash": "62c9d0da1c31de66ed52633eddf404209c8cd525191859888356c510bb3a2834",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 1056,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "5a37b33513a02dc135ccb6777db3656184b09a6651489c9a7f8d18ad7ba53d3a:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 5498.023000000016,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_00613fbe0a585408016ada916a7380819195fbc3fd5d76b58b",
+          "usage": {
+            "input_tokens": 5336,
+            "output_tokens": 96,
+            "total_tokens": 5432,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 72
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 5498
+        }
+      }
+    ],
+    "verificationLatencyMs": 6190.750499999995
+  },
+  {
+    "cohort": "b1",
+    "caseId": "b1-policy-used-v3",
+    "raw": "b1-16-24/attempt-24.json",
+    "runtime": {
+      "latest": "Chị nhận hàng hôm kia, đã cắt tem với giặt qua một lần nhưng chưa mặc ra ngoài. Chị đổi sang mẫu khác được không em?",
+      "history": [],
+      "initialProductCodes": []
+    },
+    "actual": [
+      "Dạ, quy định đổi hàng bên em yêu cầu sản phẩm còn nguyên tem và chưa giặt ạ. Do sản phẩm của chị đã cắt tem và giặt rồi nên shop không hỗ trợ đổi sang mẫu khác được, chị thông cảm giúp em nhé."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, quy định đổi hàng bên em yêu cầu sản phẩm còn nguyên tem và chưa giặt ạ. Do sản phẩm của chị đã cắt tem và giặt rồi nên shop không hỗ trợ đổi sang mẫu khác được, chị thông cảm giúp em nhé.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 10428.877799999987,
+    "generations": [
+      {
+        "id": "390f0ae66d662b2da6ed5b47e5dae1235c94f537c66d187224b41db131ea0bd8:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1556.4716999999946,
+        "telemetry": {
+          "generationId": "390f0ae66d662b2da6ed5b47e5dae1235c94f537c66d187224b41db131ea0bd8:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3289,
+          "outputTokens": 264,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 16997,
+          "requestHash": "d1c1dddd9ee93a1adbeef5ba5a61eb8db5a3ea013d989c4625d81f2442a397de",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 254,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "390f0ae66d662b2da6ed5b47e5dae1235c94f537c66d187224b41db131ea0bd8:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 3910.6089999999967,
+        "telemetry": {
+          "generationId": "390f0ae66d662b2da6ed5b47e5dae1235c94f537c66d187224b41db131ea0bd8:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4503,
+          "outputTokens": 1212,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 22813,
+          "requestHash": "36f9a96c561d7b667a9ff17280db5961494b3530c218eca78ef425f7bea080c9",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 1161,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "390f0ae66d662b2da6ed5b47e5dae1235c94f537c66d187224b41db131ea0bd8:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 3928.8938999999955,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_06f6495e3ef1ae25016ada9176e26c81918f4edded7d5941fa",
+          "usage": {
+            "input_tokens": 3822,
+            "output_tokens": 43,
+            "total_tokens": 3865,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 19
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 3929
+        }
+      }
+    ],
+    "verificationLatencyMs": 4079.671800000011
+  },
+  {
+    "cohort": "stateful",
+    "caseId": "stateful-open",
+    "raw": "stateful/provider-attempt-1.json",
+    "runtime": {
+      "latest": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98.",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Em đã thêm áo Thạch Thảo màu be size M (hàng đặt trước) vào giỏ cho chị rồi ạ."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Em đã thêm áo Thạch Thảo màu be size M (hàng đặt trước) vào giỏ cho chị rồi ạ.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 43755.8532,
+    "generations": [
+      {
+        "id": "0ba6638d-7b1c-40dd-943d-9bfb8b059796:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 4953.984700000001,
+        "telemetry": {
+          "generationId": "0ba6638d-7b1c-40dd-943d-9bfb8b059796:owner:1",
+          "providerRequests": 1,
+          "authRequests": 1,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5254,
+          "outputTokens": 1615,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 28436,
+          "requestHash": "fe4de275deb493384576076f89aa68e6990c043a8ec3e2f26a59795412cfdaf1",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 1492,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "0ba6638d-7b1c-40dd-943d-9bfb8b059796:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2835.6993,
+        "telemetry": {
+          "generationId": "0ba6638d-7b1c-40dd-943d-9bfb8b059796:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 8796,
+          "outputTokens": 621,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 40786,
+          "requestHash": "feb11119f5c2005a34c937ba18274a63ba22adf54a47d9bf310933ef61f5d71a",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 595,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "0ba6638d-7b1c-40dd-943d-9bfb8b059796:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 5304.9721999999965,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_07b5b7060408f8d1016ada8de58f4081919b2b68160f80a237",
+          "usage": {
+            "input_tokens": 5951,
+            "output_tokens": 110,
+            "total_tokens": 6061,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 86
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 5303
+        }
+      }
+    ],
+    "verificationLatencyMs": 8617.679600000003
+  },
+  {
+    "cohort": "stateful",
+    "caseId": "stateful-variant-quantity",
+    "raw": "stateful/provider-attempt-2.json",
+    "runtime": {
+      "latest": "Đổi áo sang L cho chị, lấy hai chiếc nhé.",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Em đã đổi áo sang size L và cập nhật số lượng thành 2 chiếc (hàng đặt trước) trong giỏ cho chị rồi ạ."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Em đã đổi áo sang size L và cập nhật số lượng thành 2 chiếc (hàng đặt trước) trong giỏ cho chị rồi ạ.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 40731.738600000004,
+    "generations": [
+      {
+        "id": "42034094-9efd-4fdd-b59f-794c16ba558a:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 4153.474199999997,
+        "telemetry": {
+          "generationId": "42034094-9efd-4fdd-b59f-794c16ba558a:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5846,
+          "outputTokens": 1321,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 30005,
+          "requestHash": "6a40bd733d615bcfb042ff0729bf5b77bb1e5027388e3c3f80762e9f99ca18ae",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 1175,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "42034094-9efd-4fdd-b59f-794c16ba558a:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2047.4679999999935,
+        "telemetry": {
+          "generationId": "42034094-9efd-4fdd-b59f-794c16ba558a:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 8394,
+          "outputTokens": 222,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 39086,
+          "requestHash": "3d64065575e34e2c3c75b9f09041aae1495e39912c74b26272997d1c0c43da02",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 193,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "42034094-9efd-4fdd-b59f-794c16ba558a:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 4403.545500000007,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_04589fecde3abad1016ada8e0f54f88191a04ab76eb2fa5906",
+          "usage": {
+            "input_tokens": 5727,
+            "output_tokens": 59,
+            "total_tokens": 5786,
+            "input_tokens_details": {
+              "cached_tokens": 2560,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 35
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 4402
+        }
+      }
+    ],
+    "verificationLatencyMs": 7816.882400000002
+  },
+  {
+    "cohort": "stateful",
+    "caseId": "stateful-quote",
+    "raw": "stateful/provider-attempt-3.json",
+    "runtime": {
+      "latest": "Hai áo cả phí ship là bao nhiêu em?",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Dạ, 2 chiếc áo Thạch Thảo màu be size L của chị có tổng cộng 978.100đ (đã gồm 30.000đ phí ship và được giảm 49.900đ ưu đãi) chị nhé."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, 2 chiếc áo Thạch Thảo màu be size L của chị có tổng cộng 978.100đ (đã gồm 30.000đ phí ship và được giảm 49.900đ ưu đãi) chị nhé.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 27826.61110000001,
+    "generations": [
+      {
+        "id": "3ce3af5a-2b61-4f10-8a4d-7a26b3131588:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 5137.779600000009,
+        "telemetry": {
+          "generationId": "3ce3af5a-2b61-4f10-8a4d-7a26b3131588:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5890,
+          "outputTokens": 1726,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 30262,
+          "requestHash": "9ba8258f5ee330bb971158b37d7630222d970ecac23e59cc4a51e48740f05efe",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 1666,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "3ce3af5a-2b61-4f10-8a4d-7a26b3131588:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 4624.429299999989,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_06b739aacc0f8d9f016ada8e2b4fd08191897489e129cf299f",
+          "usage": {
+            "input_tokens": 5083,
+            "output_tokens": 60,
+            "total_tokens": 5143,
+            "input_tokens_details": {
+              "cached_tokens": 2560,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 36
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 4623
+        }
+      }
+    ],
+    "verificationLatencyMs": 8333.348299999998
+  },
+  {
+    "cohort": "stateful",
+    "caseId": "stateful-correction",
+    "raw": "stateful/provider-attempt-4.json",
+    "runtime": {
+      "latest": "Số đo lúc nãy chị nhắn nhầm, eo 74, mông 96 nhé. Chị vẫn lấy size L.",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Dạ vâng chị, giỏ hàng 2 áo size L của chị vẫn được giữ nguyên ạ."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ vâng chị, giỏ hàng 2 áo size L của chị vẫn được giữ nguyên ạ.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 31151.9323,
+    "generations": [
+      {
+        "id": "8a339101-df73-49a0-af8a-c8e327fd26e1:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 4219.282299999992,
+        "telemetry": {
+          "generationId": "8a339101-df73-49a0-af8a-c8e327fd26e1:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5979,
+          "outputTokens": 1305,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 30598,
+          "requestHash": "656b342070d00ae601a194a07561caeab69e081e192e9bfc1157385d02315b3a",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 1229,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "8a339101-df73-49a0-af8a-c8e327fd26e1:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2324.0065999999933,
+        "telemetry": {
+          "generationId": "8a339101-df73-49a0-af8a-c8e327fd26e1:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 7636,
+          "outputTokens": 521,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 37721,
+          "requestHash": "a0a9c40abcaade228de95ec408ebd33fc7eaf432045096ba579f38ebf7f598b8",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 499,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "8a339101-df73-49a0-af8a-c8e327fd26e1:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 5432.120200000005,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_0c4910e796bf75c0016ada8e4bcd788191b94a49f694a1a9b5",
+          "usage": {
+            "input_tokens": 5434,
+            "output_tokens": 65,
+            "total_tokens": 5499,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 41
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 5431
+        }
+      }
+    ],
+    "verificationLatencyMs": 7896.005000000005
+  },
+  {
+    "cohort": "stateful",
+    "caseId": "stateful-request-checkout",
+    "raw": "stateful/provider-attempt-5.json",
+    "runtime": {
+      "latest": "Chị đặt hai áo này nhé, lên đơn cho chị.",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Chị cho em [NAME]"
+    ],
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "CHECKOUT_DETAILS_MISSING",
+      "text": null,
+      "fallbackId": null
+    },
+    "recovery": {
+      "originalDisposition": "NO_SEND",
+      "originalReason": "CHECKOUT_DETAILS_MISSING"
+    },
+    "elapsedMs": 22706.751100000023,
+    "generations": [
+      {
+        "id": "f732a68d-eaad-4e43-9afb-42d6df817f06:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2888.7969000000157,
+        "telemetry": {
+          "generationId": "f732a68d-eaad-4e43-9afb-42d6df817f06:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 6014,
+          "outputTokens": 865,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 30816,
+          "requestHash": "9edf40c1763890d0df02215641ec88427d326e344706d98c38ee10a3b526a66d",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 855,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      }
+    ],
+    "verificationLatencyMs": null
+  },
+  {
+    "cohort": "stateful",
+    "caseId": "stateful-private-checkout",
+    "raw": "stateful/provider-attempt-6.json",
+    "runtime": {
+      "privateCheckoutFixture": "EXISTING_SYNTHETIC_COD_FORM"
+    },
+    "actual": [
+      "2 áo (mẫu “Set váy Thạch Thảo”) màu be, size L: 998.000đ\nTạm tính: 998.000đ\nƯu đãi: -49.900đ\nPhí ship: 30.000đ\nTổng: 978.100đ\nSet váy Thạch Thảo: hàng đặt trước\nNgười nhận: Khách thử nghiệm - [PHONE]\n[ADDRESS]\nThanh toán: COD\nDự kiến nhận hàng: 8-14 ngày.\nChị xác nhận chốt đơn nhé."
+    ],
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "PRIVATE_CHECKOUT_COMMITTED",
+      "text": null,
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 8088.158399999986,
+    "generations": [],
+    "verificationLatencyMs": null
+  },
+  {
+    "cohort": "stateful",
+    "caseId": "stateful-confirm",
+    "raw": "stateful/provider-attempt-7.json",
+    "runtime": {
+      "latest": "Chốt đơn cho chị nhé.",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Dạ, em chuyển nhân viên kiểm tra và lên đơn cho chị nhé."
+    ],
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "PURCHASE_CONFIRMED",
+      "text": null,
+      "fallbackId": null
+    },
+    "recovery": {
+      "originalDisposition": "HANDOFF",
+      "originalReason": "PURCHASE_CONFIRMED"
+    },
+    "elapsedMs": 23330.90520000001,
+    "generations": [
+      {
+        "id": "a939c05e-50d4-4ef5-868a-18c515f42c7f:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2052.4009999999835,
+        "telemetry": {
+          "generationId": "a939c05e-50d4-4ef5-868a-18c515f42c7f:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5994,
+          "outputTokens": 392,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 30765,
+          "requestHash": "aee6da066c9d4baae2cf5952053fa488ef4b09efd01882237c78fd2323567840",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 382,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      }
+    ],
+    "verificationLatencyMs": null
+  },
+  {
+    "cohort": "stateful",
+    "caseId": "stateful-human-request",
+    "raw": "stateful/provider-attempt-8.json",
+    "runtime": {
+      "latest": "Cho chị gặp nhân viên shop nhé.",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Em chuyển nhân viên hỗ trợ chị nhé."
+    ],
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "CUSTOMER_REQUESTED_HUMAN",
+      "text": "Em chuyển nhân viên hỗ trợ chị nhé.",
+      "fallbackId": null
+    },
+    "recovery": {
+      "originalDisposition": "HANDOFF",
+      "originalReason": "CUSTOMER_REQUESTED_HUMAN"
+    },
+    "elapsedMs": 21093.1354,
+    "generations": [
+      {
+        "id": "6b09f083-6a2d-47d0-882c-add76bc38a69:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1569.3318999999901,
+        "telemetry": {
+          "generationId": "6b09f083-6a2d-47d0-882c-add76bc38a69:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5234,
+          "outputTokens": 178,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 28392,
+          "requestHash": "11b6bfc76c6746832b2d574c5b23b73e8077847b8b8b8d3e38f4a629eb2077fc",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 155,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      }
+    ],
+    "verificationLatencyMs": null
+  },
+  {
+    "cohort": "openings",
+    "caseId": "sales-discovery-advice:need",
+    "raw": "openings/provider-attempt-1.json",
+    "runtime": {
+      "messages": [
+        {
+          "text": "Chị tìm bộ áo quần đi làm, dưới một triệu thôi, đừng bó bụng quá.",
+          "attachments": []
+        }
+      ],
+      "latest": "Chị tìm bộ áo quần đi làm, dưới một triệu thôi, đừng bó bụng quá.",
+      "history": [],
+      "initialProductCodes": []
+    },
+    "actual": [
+      "Phần này em chưa trả lời được, chị nhé."
+    ],
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "FAIL"
+    },
+    "elapsedMs": 52552.0852,
+    "generations": [
+      {
+        "id": "fd199210-d0ea-4ce5-b9f8-04484edf88c1:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 3895.911100000001,
+        "telemetry": {
+          "generationId": "fd199210-d0ea-4ce5-b9f8-04484edf88c1:owner:1",
+          "providerRequests": 1,
+          "authRequests": 1,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5002,
+          "outputTokens": 1004,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 27467,
+          "requestHash": "abc3a052f3f34edd71b1815cd661ee20fc29473a24435cfa3ddefc38b9a2716b",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 937,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "fd199210-d0ea-4ce5-b9f8-04484edf88c1:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1924.1621000000014,
+        "telemetry": {
+          "generationId": "fd199210-d0ea-4ce5-b9f8-04484edf88c1:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 7227,
+          "outputTokens": 334,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 36868,
+          "requestHash": "cbfe6ad14ab9ad2dda560cc526a9d8b7a420f4d58b01ae1b428ba34f1218862e",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 259,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "fd199210-d0ea-4ce5-b9f8-04484edf88c1:owner:3",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 4640.904300000002,
+        "telemetry": {
+          "generationId": "fd199210-d0ea-4ce5-b9f8-04484edf88c1:owner:3",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 7563,
+          "outputTokens": 1380,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 33519,
+          "requestHash": "1c97606167beed831e46925780804bf551e6b4335070c0ea4aa05b9bddb388c8",
+          "functionCallingMode": "NONE",
+          "declaredToolCount": 0,
+          "thinkingTokens": 1286,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "fd199210-d0ea-4ce5-b9f8-04484edf88c1:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 12262.880100000002,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_018de5bfd68ec5a4016ada8ed862908191b27f91a0b51ca1d2",
+          "usage": {
+            "input_tokens": 8097,
+            "output_tokens": 328,
+            "total_tokens": 8425,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 286
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 12260
+        }
+      }
+    ],
+    "verificationLatencyMs": 17568.2823
+  },
+  {
+    "cohort": "openings",
+    "caseId": "sales-product-gallery:overview",
+    "raw": "openings/provider-attempt-2.json",
+    "runtime": {
+      "messages": [
+        {
+          "text": "Cho chị xem ảnh set Thạch Thảo màu be nhé.",
+          "attachments": []
+        }
+      ],
+      "latest": "Cho chị xem ảnh set Thạch Thảo màu be nhé.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Dạ set Thạch Thảo hiện hệ thống chưa có phân loại màu riêng, em gửi chị ảnh chung của mẫu thiết kế này nhé ạ. Set gồm áo tơ Hàn thêu nổi và chân váy ren tơ Hàn mềm mại, giá 799.000đ và đang sẵn hàng ạ.",
+      "[CODE_IMAGE]",
+      "[CODE_IMAGE]"
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ set Thạch Thảo hiện hệ thống chưa có phân loại màu riêng, em gửi chị ảnh chung của mẫu thiết kế này nhé ạ. Set gồm áo tơ Hàn thêu nổi và chân váy ren tơ Hàn mềm mại, giá 799.000đ và đang sẵn hàng ạ.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 44386.5407,
+    "generations": [
+      {
+        "id": "5b92364f-65e8-4eec-9868-483d10d1fe6d:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 4035.5802000000112,
+        "telemetry": {
+          "generationId": "5b92364f-65e8-4eec-9868-483d10d1fe6d:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5238,
+          "outputTokens": 1149,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 28406,
+          "requestHash": "f24448f31ba9cc190c28bd6b667c81a0a3346868eb0dd5a5d1374ad968a9b5e3",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 1082,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "5b92364f-65e8-4eec-9868-483d10d1fe6d:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1925.944599999988,
+        "telemetry": {
+          "generationId": "5b92364f-65e8-4eec-9868-483d10d1fe6d:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 6815,
+          "outputTokens": 336,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 35573,
+          "requestHash": "0adb2efad278525a35d9fe00028f7e1dcda93031303709d1c6f88ce9086fe369",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 306,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "5b92364f-65e8-4eec-9868-483d10d1fe6d:owner:3",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 5690.526599999997,
+        "telemetry": {
+          "generationId": "5b92364f-65e8-4eec-9868-483d10d1fe6d:owner:3",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5904,
+          "outputTokens": 751,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 27276,
+          "requestHash": "fa346fbcd4a371c0c5a88ce289808139cb739c9af6c6ed7e844db606316c7555",
+          "functionCallingMode": "NONE",
+          "declaredToolCount": 0,
+          "thinkingTokens": 686,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "5b92364f-65e8-4eec-9868-483d10d1fe6d:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 7336.561799999996,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_032d49dfdaa04e27016ada8f083af48191b9a4a4fab0c963f9",
+          "usage": {
+            "input_tokens": 5260,
+            "output_tokens": 119,
+            "total_tokens": 5379,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 95
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 7335
+        }
+      }
+    ],
+    "verificationLatencyMs": 11069.588400000008
+  },
+  {
+    "cohort": "openings",
+    "caseId": "sales-size-advice:height-weight",
+    "raw": "openings/provider-attempt-3.json",
+    "runtime": {
+      "messages": [
+        {
+          "text": "Chị cao 1m58, nặng 52kg, bộ Thạch Thảo mặc size nào em? Chị thích rộng một chút.",
+          "attachments": []
+        }
+      ],
+      "latest": "Chị cao 1m58, nặng 52kg, bộ Thạch Thảo mặc size nào em? Chị thích rộng một chút.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Em chuyển nhân viên chọn size cho chị nhé."
+    ],
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "SIZE_RULE_UNAVAILABLE",
+      "text": "Em chuyển nhân viên chọn size cho chị nhé.",
+      "fallbackId": null
+    },
+    "recovery": {
+      "originalDisposition": "HANDOFF",
+      "originalReason": "SIZE_RULE_UNAVAILABLE"
+    },
+    "elapsedMs": 30411.005000000005,
+    "generations": [
+      {
+        "id": "c465b579-9dca-45bb-afe9-9dd873dc857a:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 5117.083899999998,
+        "telemetry": {
+          "generationId": "c465b579-9dca-45bb-afe9-9dd873dc857a:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5256,
+          "outputTokens": 1611,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 28455,
+          "requestHash": "0306b1eba79241ae1f750c0b71ce5f2c87b6dff20d74542e841b6b46f97b06d3",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 1445,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "c465b579-9dca-45bb-afe9-9dd873dc857a:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2481.348800000007,
+        "telemetry": {
+          "generationId": "c465b579-9dca-45bb-afe9-9dd873dc857a:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 7628,
+          "outputTokens": 536,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 38182,
+          "requestHash": "50f987f9c6f4dcd58c7f38b4bb468ba0976d23a64322077f39d3d2c47ecc7904",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 514,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      }
+    ],
+    "verificationLatencyMs": null
+  },
+  {
+    "cohort": "openings",
+    "caseId": "sales-southern-delivery:deadline",
+    "raw": "openings/provider-attempt-4.json",
+    "runtime": {
+      "messages": [
+        {
+          "text": "Chị cần bộ này sáng thứ Sáu, ship về Cần Thơ có kịp không em?",
+          "attachments": []
+        }
+      ],
+      "latest": "Chị cần bộ này sáng thứ Sáu, ship về Cần Thơ có kịp không em?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Phần này em chưa trả lời được, chị nhé."
+    ],
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "PROVIDER_ERROR",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "PROVIDER_ERROR"
+    },
+    "elapsedMs": 22791.9516,
+    "generations": [
+      {
+        "id": "02a7c2b1-d522-41e4-9c42-dcfd707b9386:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2604.4444999999832,
+        "telemetry": {
+          "generationId": "02a7c2b1-d522-41e4-9c42-dcfd707b9386:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5248,
+          "outputTokens": 683,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 28435,
+          "requestHash": "3b394702dfef5e0197935641db18653cc04248a4b12071003b562894f5b582d5",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 642,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "02a7c2b1-d522-41e4-9c42-dcfd707b9386:owner:2",
+        "role": "owner",
+        "status": "PROVIDER_ERROR",
+        "latencyMs": 2334.9115000000165,
+        "telemetry": {
+          "generationId": "02a7c2b1-d522-41e4-9c42-dcfd707b9386:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 6677,
+          "outputTokens": 514,
+          "cost": null,
+          "finishReason": "UNKNOWN",
+          "requestBytes": 34151,
+          "requestHash": "ac7e8536ce638275a5cf57f5734a612215692a9ec1fef5347bf8a83d38a9bcea",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 514,
+          "rawFinishReason": "MALFORMED_RESPONSE",
+          "failureStage": "COMPLETION",
+          "failureCode": "OWNER_FINISH_REASON"
+        }
+      }
+    ],
+    "verificationLatencyMs": null
+  },
+  {
+    "cohort": "negotiation",
+    "caseId": "negotiation-cart-setup",
+    "raw": "negotiation/provider-attempt-1.json",
+    "runtime": {
+      "latest": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98.",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Em đã thêm món chị chọn vào giỏ. Tổng 529.000đ, đã gồm phí giao hàng. Có món đặt trước, chị nhé."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "RECEIPT_BACKED_CART_SUMMARY",
+      "text": "Em đã thêm món chị chọn vào giỏ. Tổng 529.000đ, đã gồm phí giao hàng. Có món đặt trước, chị nhé.",
+      "fallbackId": null
+    },
+    "recovery": {
+      "originalDisposition": "HANDOFF",
+      "originalReason": "STALE",
+      "originalDiagnostic": {
+        "check": "CURRENT_SNAPSHOT",
+        "checkedAtMs": 1792708494449,
+        "expectedSnapshotId": "2a58c537f33a293b9383417d6add49e2971d79dee07eb5ebb0b75b706497f4a2",
+        "currentSnapshotId": "4e626023f4bf07de6a8e900f4991cebd88eb71fc90ff6b72885073b7919d3390",
+        "expectedRevision": 4,
+        "currentRevision": 4,
+        "reasonCodes": []
+      }
+    },
+    "elapsedMs": 50741.8737,
+    "generations": [
+      {
+        "id": "69726401-ba03-4946-ab51-69780327208e:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 5671.8966,
+        "telemetry": {
+          "generationId": "69726401-ba03-4946-ab51-69780327208e:owner:1",
+          "providerRequests": 1,
+          "authRequests": 1,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5249,
+          "outputTokens": 1852,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 28436,
+          "requestHash": "7ed3ea139974e5c6de41bcf675bd4a8249f8358a3b91d467a4ffa3346bcffbf5",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 1729,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "69726401-ba03-4946-ab51-69780327208e:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 3122.7520000000004,
+        "telemetry": {
+          "generationId": "69726401-ba03-4946-ab51-69780327208e:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 9037,
+          "outputTokens": 733,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 41526,
+          "requestHash": "4a553c34e139887e9fc3bc30856b4c35db991b61e3e07a1e5041ddd39e25a0c0",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 698,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "69726401-ba03-4946-ab51-69780327208e:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 6592.474099999999,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_0b4e305bb510a20b016ada8f85ef0c819195c4b517b30f31d5",
+          "usage": {
+            "input_tokens": 5951,
+            "output_tokens": 116,
+            "total_tokens": 6067,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 92
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 6591
+        }
+      }
+    ],
+    "verificationLatencyMs": 14283.5982
+  },
+  {
+    "cohort": "negotiation",
+    "caseId": "negotiation-price-objection",
+    "raw": "negotiation/provider-attempt-2.json",
+    "runtime": {
+      "latest": "Bớt cho chị chút được không?",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Dạ, em hỗ trợ mình giảm 30.000đ phí vận chuyển, tổng đơn của mình còn 499.000đ chị nhé."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, em hỗ trợ mình giảm 30.000đ phí vận chuyển, tổng đơn của mình còn 499.000đ chị nhé.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 39664.7541,
+    "generations": [
+      {
+        "id": "3ae7b038-c843-4e35-aab5-f53700f23b2d:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2651.3089000000036,
+        "telemetry": {
+          "generationId": "3ae7b038-c843-4e35-aab5-f53700f23b2d:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5857,
+          "outputTokens": 588,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 30015,
+          "requestHash": "d9d06cf7234a46711a6bad1011bca935afa791e3bcb300ecbbbfc1527da26785",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 554,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "3ae7b038-c843-4e35-aab5-f53700f23b2d:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 3083.6533999999956,
+        "telemetry": {
+          "generationId": "3ae7b038-c843-4e35-aab5-f53700f23b2d:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 7505,
+          "outputTokens": 754,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 36451,
+          "requestHash": "cbeb841544863ebcc8d534e559e8113539eba945c4339bd98271de59fbfc65c8",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 717,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "3ae7b038-c843-4e35-aab5-f53700f23b2d:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 7403.428100000005,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_033e8b45500a0850016ada8fb073608191b92600b1026a3e0a",
+          "usage": {
+            "input_tokens": 5722,
+            "output_tokens": 122,
+            "total_tokens": 5844,
+            "input_tokens_details": {
+              "cached_tokens": 2560,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 98
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 7401
+        }
+      }
+    ],
+    "verificationLatencyMs": 11726.307799999995
+  },
+  {
+    "cohort": "negotiation",
+    "caseId": "negotiation-total-control",
+    "raw": "negotiation/provider-attempt-3.json",
+    "runtime": {
+      "latest": "Thế một áo cả ship là bao nhiêu em?",
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "actual": [
+      "Dạ, áo giá 499.000đ, tính cả phí giao hàng sau khi được shop hỗ trợ 30.000đ tiền ship thì tổng đơn của mình là 499.000đ chị nhé."
+    ],
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, áo giá 499.000đ, tính cả phí giao hàng sau khi được shop hỗ trợ 30.000đ tiền ship thì tổng đơn của mình là 499.000đ chị nhé.",
+      "fallbackId": null
+    },
+    "recovery": null,
+    "elapsedMs": 27896.892300000007,
+    "generations": [
+      {
+        "id": "6b5f25fd-6cf2-442f-9c1e-5773f916df93:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 4024.0406000000075,
+        "telemetry": {
+          "generationId": "6b5f25fd-6cf2-442f-9c1e-5773f916df93:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5909,
+          "outputTokens": 1217,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 30254,
+          "requestHash": "f3d6d2beefd64b32e46330fe681e0662810a35378e1731712b7e7defe3c1108d",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 13,
+          "thinkingTokens": 1163,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "6b5f25fd-6cf2-442f-9c1e-5773f916df93:verifier:1",
+        "role": "verifier",
+        "status": "OK",
+        "latencyMs": 5457.631899999993,
+        "telemetry": {
+          "providerTerminalEvent": null,
+          "providerIncompleteReason": null,
+          "status": "OK",
+          "httpStatus": 200,
+          "modelVersion": "gpt-6.1-sol",
+          "responseId": "resp_03580ef1f78277a0016ada8fcf996c81918a6fbc280b6b3b2c",
+          "usage": {
+            "input_tokens": 5058,
+            "output_tokens": 102,
+            "total_tokens": 5160,
+            "input_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "output_tokens_details": {
+              "reasoning_tokens": 78
+            }
+          },
+          "cost": null,
+          "upstreamRequestId": null,
+          "retryAfterSeconds": null,
+          "providerErrorCode": null,
+          "providerRequests": 1,
+          "clientRequests": 1,
+          "rejectedClientRequests": 0,
+          "latencyMs": 5456
+        }
+      }
+    ],
+    "verificationLatencyMs": 9053.594100000002
+  }
+]

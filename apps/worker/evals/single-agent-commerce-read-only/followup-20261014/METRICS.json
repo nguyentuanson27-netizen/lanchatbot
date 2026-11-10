@@ -1,0 +1,60 @@
+{
+  "registered": 8,
+  "recorded": 8,
+  "repetitions": 1,
+  "maximumGenerationRequests": 32,
+  "generationRequests": 26,
+  "ownerRequests": 19,
+  "verifierRequests": 7,
+  "generationRetries": 0,
+  "maximumUpstreamRequestsPerGeneration": 1,
+  "providerErrors": 0,
+  "providerTimeouts": 0,
+  "providerErrorRate": 0,
+  "providerTimeoutRate": 0,
+  "dispositions": {
+    "SEND_ELIGIBLE": 5,
+    "FALLBACK": 3
+  },
+  "fallbackRate": 0.375,
+  "handoffRate": 0,
+  "noSendRate": 0,
+  "verifierLatencyMs": {
+    "n": 7,
+    "p50": 6292.244300000006,
+    "p95": 11843.4473
+  },
+  "addedVerificationLatencyMs": {
+    "n": 7,
+    "p50": 7009.547300000006,
+    "p95": 12532.044000000009
+  },
+  "toolLatencyMs": {
+    "n": 8,
+    "p50": 561.7181999999957,
+    "p95": 2914.2920000000013
+  },
+  "endToEndLatencyMs": {
+    "n": 8,
+    "p50": 11671.3165,
+    "p95": 19004.03989999999
+  },
+  "ownerInputTokens": 55921,
+  "ownerOutputTokensIncludingThinking": 6485,
+  "ownerThinkingTokens": 5750,
+  "verifierInputTokens": 23652,
+  "verifierOutputTokensIncludingReasoning": 727,
+  "ownerAuthRequests": 1,
+  "verifierAuthRequests": null,
+  "cost": null,
+  "costAvailability": "NOT_EXPOSED",
+  "domainCounters": {
+    "embeddingCalls": 1,
+    "policyReads": 4,
+    "catalogReads": 18,
+    "posReads": 13
+  },
+  "sourceProbeEmbeddingCalls": 1,
+  "totalEmbeddingCalls": 2,
+  "quantilePolicy": "nearest rank; verification-stage statistics conditional on seven invoked cases"
+}

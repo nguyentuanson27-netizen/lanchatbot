@@ -1,0 +1,102 @@
+{
+  "sourceSha": "a39e45affbd1a8171d8e13ffe2d741cc6624278d",
+  "mode": "PROVIDER_REAL_POSTGRES_LIVE_PUBLIC_CATALOG_CURRENT_CAPTURED_POLICY_CAPTURE_DELIVERY",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "434e5dc01326075c74b63ff705406b531ec5adc3b95214b55731bc52b8ce86f3",
+    "verifier": "0b240599a04d9a86c25ed2b3b815c152e83106c85e61940efde15b020e4c2fde"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "requestBounds": {
+    "ownerWireBytes": 65536,
+    "verifierWireBytes": 32768
+  },
+  "toolSchemaHash": "b60729986b362cb55442d2dc348de985062105e4b92749d966013ff2fdb3e17f",
+  "catalogInputMode": "LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION",
+  "catalogImageInput": {
+    "count": 2,
+    "maxBytes": 524288,
+    "maxRequestBytes": 1507328,
+    "mediaResolution": "MEDIA_RESOLUTION_MEDIUM",
+    "maxDimension": 1024,
+    "maxSourceBytes": 2097152,
+    "maxSourceDimension": 12000,
+    "maxSourcePixels": 50000000,
+    "sourceHashRequired": true,
+    "hashContract": "APPROVED_REGISTRY_REF_PLUS_DOWNLOAD_SHA256_PLUS_PREPARED_SHA256",
+    "resize": "EXISTING_FFMPEG_GEOMETRY_JPEG_Q3_OR_PNG"
+  },
+  "selection": {
+    "mode": "THREE_NEGOTIATION_COMPANION",
+    "registered": [
+      "negotiation-cart-setup",
+      "negotiation-price-objection",
+      "negotiation-total-control"
+    ],
+    "prerequisite": "Actual cart from setup, never synthetic provider completion."
+  },
+  "selectionHash": "c81b2fc7d5b602585e2d9b59bf67cb99b1c445004331bc1835c149fde493f07a",
+  "corpusHash": "4b888f6e44f5b4e144125da38d70bf175946dc5277eabb8d0ab5a6639077fbeb",
+  "sourceConfigHash": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+  "registeredOutcomes": 3,
+  "publicTurns": 3,
+  "privateCodeTurns": 0,
+  "repetitions": 1,
+  "maximumGenerationRequests": 12,
+  "retry": 0,
+  "codex": {
+    "version": "codex-cli 0.159.2",
+    "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+  },
+  "sendEnabled": false
+}

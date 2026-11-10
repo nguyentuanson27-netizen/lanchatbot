@@ -1,0 +1,14 @@
+{
+  "command": [
+    "python",
+    "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+    "node",
+    "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+    "../c3-tool-history-checks-20261025/cod-integration",
+    "COD",
+    "--candidate-handoff",
+    "--composed-only"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 1341.107614994049
+}

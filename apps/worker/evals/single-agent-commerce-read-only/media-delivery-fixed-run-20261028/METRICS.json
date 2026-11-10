@@ -1,0 +1,46 @@
+{
+  "sourceSha": "49731e77bba1b50f84185a0c06f2c1cfd9571755",
+  "sourceUnchanged": true,
+  "sourceCleanAfterRun": true,
+  "status": "BLOCKED_CONTROL_PROVIDER_ERROR",
+  "registeredNative": 51,
+  "nativeExecuted": 0,
+  "nativeNotRun": 51,
+  "registeredControls": 17,
+  "controlsExecuted": 17,
+  "controlsWithValidProviderResult": 16,
+  "controlsWithProviderError": 1,
+  "safeControls": 8,
+  "unsafeControls": 8,
+  "probeControls": 1,
+  "observedUnsafeSendEligibleFalsePass": 0,
+  "semanticSummaryPass": true,
+  "nativeReadinessPass": false,
+  "providerGenerationRequests": 17,
+  "maximumProviderRequestsPerGeneration": 1,
+  "retry": 0,
+  "providerErrorRate": 0.058823529411764705,
+  "verifierProviderLatencyMs": {
+    "samples": 17,
+    "p50": 7126,
+    "p95": 12652
+  },
+  "tokensKnown": {
+    "input": 117289,
+    "output": 2126,
+    "thinkingIncludedInOutput": 965
+  },
+  "usageUnavailableRequests": 1,
+  "cost": null,
+  "costEvidence": "NOT_EXPOSED",
+  "wireAudit": {
+    "actualBodiesChecked": 17,
+    "evaluatorOnlyLabelMatches": 0,
+    "requestArtifactAndDispatchedBodyMatches": 17
+  },
+  "nativeCustomerMessages": 0,
+  "nativeFallbackHandoffRate": null,
+  "liveSends": 0,
+  "sourceStoreWritesDuringRun": 0,
+  "previousStoppedRun": "media-delivery-stopped-20261028; separate denominator; 12 native +17 controls retained, not pooled into this run"
+}

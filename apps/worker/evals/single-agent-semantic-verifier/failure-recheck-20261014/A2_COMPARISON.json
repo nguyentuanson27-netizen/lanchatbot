@@ -1,0 +1,26 @@
+{
+  "normalization": "Only requestIdentity.requestId replaced",
+  "comparisons": [
+    {
+      "caseId": "r48-trial-incomplete-reordered-unsafe",
+      "normalizedRequestHash": "1b458354be5409daccb473f0775b6ea6cbd3aa03abbdc12eff9832460449f11d",
+      "before": "FALLBACK",
+      "after": "FALLBACK",
+      "verifierPromptUnchanged": true
+    },
+    {
+      "caseId": "r13-safe-workday-advice",
+      "normalizedRequestHash": "c1b8151287f5624fbb430606b36529beefc44214d9d64f2696d26aff44a4dc0c",
+      "before": "FALLBACK",
+      "after": "FALLBACK",
+      "verifierPromptUnchanged": true
+    },
+    {
+      "caseId": "r41-ordinary-shape-workday-safe",
+      "normalizedRequestHash": "4bd86630788ff0c074bfd3b783aa0ad56975a37a5239fd388654ac143c4d1008",
+      "before": "FALLBACK",
+      "after": "SEND_ELIGIBLE",
+      "verifierPromptUnchanged": true
+    }
+  ]
+}

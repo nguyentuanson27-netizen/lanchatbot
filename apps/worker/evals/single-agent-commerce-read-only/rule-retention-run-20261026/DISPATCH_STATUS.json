@@ -1,0 +1,19 @@
+{
+  "sourceSha": "1ebd4dcc50fce13f890085f6995b8ccb876b16fe",
+  "status": "TARGETED_REVIEW_FAIL_STOP",
+  "completedCohorts": [
+    "opening-quotes",
+    "media-followup",
+    "b1-first"
+  ],
+  "nativeNotRun": [
+    "b1-rest",
+    "journey-openings",
+    "stateful",
+    "negotiation"
+  ],
+  "sourceUnchanged": true,
+  "reviewedNativeOutcomes": 20,
+  "notRunNativeOutcomes": 31,
+  "reason": "Unsupported future followup in readonly B1 partial-source; no full dispatch."
+}

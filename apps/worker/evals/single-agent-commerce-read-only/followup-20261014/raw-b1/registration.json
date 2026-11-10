@@ -1,0 +1,31 @@
+{
+  "bRunSourceSha": "8bbea938bd947f02910b29976c75b47e8ce00c9c",
+  "manifestHash": "6e6b0405e55a7fbd69f9c9065d93980af3d12737715a2eac6b72ff978ed54cd8",
+  "sourceConfigHash": "5ca8dc68da2a11d6a29bb9d03617686f3116a3e43b8c646da0b012212bcefb6e",
+  "promptHashes": {
+    "owner": "36be248c69caa541071a8f65542ec6c1db2eb0a2d39224b4f80f7a5468b8a223",
+    "verifier": "fe7e21965c6cc608c854b97f2513130c9d2f39cf5bec443f4a637f7d8e6f7957"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "toolSchemaHash": "3a814aa7ca58344c7997f8d68b5890e98b664a89f8dff0a451e8100f78465b0a",
+  "inputHash": "48517f0d48680089f3aeb46f14ab8f5cf9ec309ffe2e005cbbebe317e3a16a7f",
+  "caseIds": [
+    "b1-price",
+    "b1-changed-occasion",
+    "b1-current-policy",
+    "b1-partial-source",
+    "b1-component-stock",
+    "b1-search-read",
+    "b1-buying-concern",
+    "b1-policy-used"
+  ],
+  "registered": 8,
+  "repetitions": 1,
+  "maximumGenerationRequests": 32,
+  "registeredAt": "2026-10-14T16:52:54.386Z",
+  "codex": {
+    "version": "codex-cli 0.159.2",
+    "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+  },
+  "sendEnabled": false
+}

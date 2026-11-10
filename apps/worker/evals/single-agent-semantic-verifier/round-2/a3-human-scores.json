@@ -1,0 +1,907 @@
+{
+  "scorer": null,
+  "scoredAt": null,
+  "a3RunSourceSha": "4647eaa2053ee796e6f8546b9ce289a64af27bcb",
+  "attempts": [
+    {
+      "attemptId": "budget:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "budget:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "budget:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "prior-experience:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "prior-experience:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "prior-experience:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "comparison:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "comparison:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "comparison:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "price-stock-eta:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "price-stock-eta:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "price-stock-eta:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "policy-price-shipping:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "policy-price-shipping:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "policy-price-shipping:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "size-stock:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "size-stock:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "size-stock:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "weight-correction:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "weight-correction:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "weight-correction:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "referent:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "referent:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "referent:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "defer:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "defer:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "defer:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "unknown-referent:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "unknown-referent:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "unknown-referent:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "exchange-used:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "exchange-used:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "exchange-used:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "exchange-window:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "exchange-window:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "exchange-window:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "exchange-all:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "exchange-all:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "exchange-all:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "simple-price:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "simple-price:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "simple-price:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "simple-stock:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "simple-stock:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "simple-stock:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "simple-ack:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "simple-ack:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "simple-ack:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "budget-new-product:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "budget-new-product:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "budget-new-product:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "price-stock-freeship-new:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "price-stock-freeship-new:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "price-stock-freeship-new:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "product-correction-with-question:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "product-correction-with-question:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "product-correction-with-question:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "tag-removed-within-window:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "tag-removed-within-window:2",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "tag-removed-within-window:3",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    }
+  ]
+}

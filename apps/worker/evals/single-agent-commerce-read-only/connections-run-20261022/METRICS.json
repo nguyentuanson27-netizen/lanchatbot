@@ -1,0 +1,65 @@
+{
+  "customerOutcomes": 7,
+  "cohorts": [
+    {
+      "sourceSha": "bce8538b75c15197515f75793ba5d038ee7392f2",
+      "outcomes": 4
+    },
+    {
+      "sourceSha": "67c78b2adb1cd6d67f418549088cfd6cd3231ba1",
+      "outcomes": 3
+    }
+  ],
+  "dispositions": {
+    "SEND_ELIGIBLE": 4,
+    "FALLBACK": 2,
+    "HANDOFF": 1,
+    "NO_SEND": 0
+  },
+  "roles": {
+    "owner": {
+      "generations": 15,
+      "providerRequests": 15,
+      "inputTokens": 88012,
+      "outputTokensIncludingReasoning": 11002,
+      "usageKnown": 15,
+      "latencyP50Ms": 2566.585400000011,
+      "latencyP95Ms": 7668.940000000002
+    },
+    "verifier": {
+      "generations": 5,
+      "providerRequests": 5,
+      "inputTokens": 25626,
+      "outputTokensIncludingReasoning": 802,
+      "usageKnown": 5,
+      "latencyP50Ms": 7401.6496999999945,
+      "latencyP95Ms": 14232.725700000003
+    }
+  },
+  "retry": 0,
+  "maximumRequestsPerGeneration": 1,
+  "cost": null,
+  "verificationAddedP50Ms": 10112.147399999994,
+  "verificationAddedP95Ms": 17566.3859,
+  "timeouts": 0,
+  "httpErrors": 0,
+  "ownerToolModeViolations": 1,
+  "imageApiSanity": {
+    "sourceSha": "22b6bea85f18a8a441e28f5631515405b197ea9f",
+    "status": "API_COMPATIBILITY_PASS",
+    "providerRequests": 1,
+    "usage": {
+      "inputTokens": 4833,
+      "outputTokens": 683,
+      "requestBytes": 276977
+    },
+    "customerOutcome": false
+  },
+  "audit": {
+    "customerCapturedRequests": 20,
+    "evaluatorLabelLeaks": 0,
+    "secretPatternHits": 0,
+    "rawFilesWithVerifiedHashes": 20,
+    "allSyntheticDatabasesDropped": true
+  }
+}

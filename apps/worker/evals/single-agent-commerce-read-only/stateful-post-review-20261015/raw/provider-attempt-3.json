@@ -1,0 +1,383 @@
+{
+  "caseId": "stateful-quote",
+  "journeyId": "sales",
+  "elapsedMs": 27967.067699999985,
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "BUDGET",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 3,
+    "verifierGenerations": 0,
+    "toolRounds": 2,
+    "toolCalls": 2,
+    "generations": [
+      {
+        "id": "0e63a168-911c-4aa7-acbf-4d05aa5afd63:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 3305.8812000000034,
+        "telemetry": {
+          "generationId": "0e63a168-911c-4aa7-acbf-4d05aa5afd63:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3421,
+          "outputTokens": 869,
+          "cost": null,
+          "thinkingTokens": 848
+        }
+      },
+      {
+        "id": "0e63a168-911c-4aa7-acbf-4d05aa5afd63:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1288.9437000000034,
+        "telemetry": {
+          "generationId": "0e63a168-911c-4aa7-acbf-4d05aa5afd63:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5260,
+          "outputTokens": 135,
+          "cost": null,
+          "thinkingTokens": 107
+        }
+      },
+      {
+        "id": "0e63a168-911c-4aa7-acbf-4d05aa5afd63:owner:3",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2772.6110000000044,
+        "telemetry": {
+          "generationId": "0e63a168-911c-4aa7-acbf-4d05aa5afd63:owner:3",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5042,
+          "outputTokens": 490,
+          "cost": null,
+          "thinkingTokens": 480
+        }
+      }
+    ],
+    "toolLatencyMs": 1035.49059999999,
+    "verificationLatencyMs": null,
+    "enqueued": 1,
+    "commitStatus": "COMMITTED"
+  },
+  "owners": 3,
+  "verifiers": 0,
+  "batch": {
+    "pageId": "1198992073286645",
+    "conversationHash": "e5a2738bdc05633f132f7c38f8c21e7e603fe81f96797e487622274bfe9a086a",
+    "generation": 3,
+    "leaseToken": "6f5ca317-da1a-45f5-a160-43c30b546534",
+    "inboxIds": [
+      "db7c339a-5d6f-46ec-9dab-d68aeb465c6e"
+    ],
+    "evaluationGroupId": "0e63a168-911c-4aa7-acbf-4d05aa5afd63",
+    "eventKind": "CUSTOMER",
+    "firstReceiveSequence": 3,
+    "lastReceiveSequence": 3,
+    "attemptCount": 1,
+    "items": [
+      {
+        "inboxId": "db7c339a-5d6f-46ec-9dab-d68aeb465c6e",
+        "pageId": "1198992073286645",
+        "eventKey": "stateful-eefe7cdc-e1c1-408d-9134-91f34099f51c",
+        "conversationHash": "e5a2738bdc05633f132f7c38f8c21e7e603fe81f96797e487622274bfe9a086a",
+        "occurredAt": "2026-10-15T15:57:44.118Z",
+        "receivedAt": "2026-10-15T15:57:44.118Z",
+        "receiveSequence": 3,
+        "attemptCount": 1,
+        "leaseToken": "6f5ca317-da1a-45f5-a160-43c30b546534",
+        "eventKind": "CUSTOMER",
+        "envelope": {
+          "schemaVersion": 1,
+          "customerSendEnabled": false,
+          "routing": {
+            "owner": "APP"
+          },
+          "message": {
+            "schemaVersion": 1,
+            "traceId": "2eafc28d-20b8-4826-9d20-b39fd516b445",
+            "eventKey": "stateful-eefe7cdc-e1c1-408d-9134-91f34099f51c",
+            "pageId": "1198992073286645",
+            "messageId": "stateful-eefe7cdc-e1c1-408d-9134-91f34099f51c",
+            "senderId": "synthetic-recipient-e5a2738bdc05633f132f7c38f8c21e7e603fe81f96797e487622274bfe9a086a",
+            "conversationId": "synthetic-meta-conversation",
+            "occurredAt": "2026-10-15T15:57:44.118Z",
+            "isEcho": false,
+            "appId": null,
+            "text": "Hai áo cả phí ship là bao nhiêu em?",
+            "attachments": []
+          }
+        }
+      }
+    ]
+  },
+  "toolResponses": [
+    {
+      "name": "read_product",
+      "response": {
+        "status": "OK",
+        "data": {
+          "subjectRef": "SV2447",
+          "label": "Set váy Thạch Thảo",
+          "variantId": "offer:SV2447:SET_VAY",
+          "offerType": "SET_VAY",
+          "requestedOfferType": null,
+          "availableOffers": [
+            "SET_VAY",
+            "AO",
+            "CV"
+          ],
+          "attributes": null,
+          "sizeCharts": [],
+          "content": {
+            "productName": "Set váy Thạch Thảo",
+            "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+            "productUrl": null,
+            "metadata": {
+              "authority": "WEBSTORE_XML",
+              "sourceVersion": "catalog-v2",
+              "observedAt": "2026-09-28T04:31:05.725Z",
+              "expiresAt": null,
+              "freshForSeconds": null,
+              "freshnessState": "FRESH"
+            }
+          },
+          "facts": [
+            {
+              "type": "PRICE",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:SET_VAY"
+              },
+              "value": {
+                "amountVnd": 799000,
+                "currency": "VND"
+              }
+            },
+            {
+              "type": "STOCK",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:SET_VAY"
+              },
+              "value": {
+                "status": "IN_STOCK",
+                "availableQuantity": 56
+              }
+            }
+          ],
+          "availability": {
+            "price": {
+              "status": "OK",
+              "reason": null
+            },
+            "stock": {
+              "status": "OK",
+              "reason": null
+            }
+          },
+          "missing": [
+            "ATTRIBUTES"
+          ]
+        }
+      },
+      "id": "call_976691"
+    },
+    {
+      "name": "read_product",
+      "response": {
+        "status": "OK",
+        "data": {
+          "subjectRef": "SV2447",
+          "label": "Set váy Thạch Thảo",
+          "variantId": "offer:SV2447:SET_VAY",
+          "offerType": "SET_VAY",
+          "requestedOfferType": null,
+          "availableOffers": [
+            "SET_VAY",
+            "AO",
+            "CV"
+          ],
+          "attributes": null,
+          "sizeCharts": [],
+          "content": {
+            "productName": "Set váy Thạch Thảo",
+            "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+            "productUrl": null,
+            "metadata": {
+              "authority": "WEBSTORE_XML",
+              "sourceVersion": "catalog-v2",
+              "observedAt": "2026-09-28T04:31:05.725Z",
+              "expiresAt": null,
+              "freshForSeconds": null,
+              "freshnessState": "FRESH"
+            }
+          },
+          "facts": [
+            {
+              "type": "PRICE",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:SET_VAY"
+              },
+              "value": {
+                "amountVnd": 799000,
+                "currency": "VND"
+              }
+            },
+            {
+              "type": "STOCK",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:SET_VAY"
+              },
+              "value": {
+                "status": "IN_STOCK",
+                "availableQuantity": 56
+              }
+            }
+          ],
+          "availability": {
+            "price": {
+              "status": "OK",
+              "reason": null
+            },
+            "stock": {
+              "status": "OK",
+              "reason": null
+            }
+          },
+          "missing": [
+            "ATTRIBUTES"
+          ]
+        }
+      },
+      "id": "call_976691"
+    },
+    {
+      "name": "read_product",
+      "response": {
+        "status": "OK",
+        "data": {
+          "subjectRef": "SV2447",
+          "label": "Set váy Thạch Thảo",
+          "variantId": "offer:SV2447:AO",
+          "offerType": "AO",
+          "requestedOfferType": "AO",
+          "availableOffers": [
+            "SET_VAY",
+            "AO",
+            "CV"
+          ],
+          "attributes": null,
+          "sizeCharts": [],
+          "content": {
+            "productName": "Set váy Thạch Thảo",
+            "description": "Thiết kế nữ tính và nổi bật với sự kết hợp giữa tơ Hàn thêu cao cấp và ren tơ Hàn mềm mại, mang lại cảm giác nhẹ nhàng, bay bổng và tinh tế khi mặc. Bề mặt vải được xử lý tỉ mỉ với các họa tiết thêu nổi, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế từ tơ Hàn thêu, form nhẹ nhàng giúp tôn dáng thanh thoát. Chất vải mềm, thoáng và có độ bay tự nhiên, mang lại sự thoải mái khi mặc. Các chi tiết thêu được hoàn thiện tinh xảo, giúp tổng thể trở nên nổi bật nhưng vẫn giữ được nét dịu dàng. Váy được làm từ ren tơ Hàn, tạo hiệu ứng mềm mại và nữ tính. Form váy nhẹ nhàng với độ rũ tự nhiên, giúp tôn dáng và tạo chuyển động uyển chuyển khi di chuyển. Sự kết hợp giữa áo thêu tinh tế và chân váy ren bay bổng mang đến tổng thể hài hòa, phù hợp cho nhiều phong cách từ nhẹ nhàng đến sang trọng.",
+            "productUrl": null,
+            "metadata": {
+              "authority": "WEBSTORE_XML",
+              "sourceVersion": "catalog-v2",
+              "observedAt": "2026-09-28T04:31:05.725Z",
+              "expiresAt": null,
+              "freshForSeconds": null,
+              "freshnessState": "FRESH"
+            }
+          },
+          "facts": [
+            {
+              "type": "PRICE",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:AO"
+              },
+              "value": {
+                "amountVnd": 499000,
+                "currency": "VND"
+              }
+            },
+            {
+              "type": "STOCK",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:AO"
+              },
+              "value": {
+                "status": "IN_STOCK",
+                "availableQuantity": 116
+              }
+            }
+          ],
+          "availability": {
+            "price": {
+              "status": "OK",
+              "reason": null
+            },
+            "stock": {
+              "status": "OK",
+              "reason": null
+            }
+          },
+          "missing": [
+            "ATTRIBUTES"
+          ]
+        }
+      },
+      "id": "call_1242724"
+    }
+  ],
+  "actualCapturedMessages": [
+    "Phần này em chưa trả lời được, chị nhé."
+  ],
+  "committedPublicState": {
+    "stage": "DISCOVERY",
+    "revision": 0,
+    "cart": null,
+    "measurements": [
+      {
+        "kind": "WAIST_CM",
+        "value": 76,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-15T15:55:59.851Z",
+          "sourceEventHash": "7e69b4192c547525a0ba725877174715519c2e26e6716733e7c62c5af3c74e9d"
+        }
+      },
+      {
+        "kind": "HIPS_CM",
+        "value": 98,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-15T15:55:59.851Z",
+          "sourceEventHash": "7e69b4192c547525a0ba725877174715519c2e26e6716733e7c62c5af3c74e9d"
+        }
+      }
+    ],
+    "customerProfileRevision": 2
+  },
+  "counts": {
+    "embedding": 0,
+    "owner": 9,
+    "verifier": 2
+  }
+}

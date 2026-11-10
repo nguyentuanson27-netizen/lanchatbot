@@ -1,0 +1,127 @@
+{
+  "runSourceSha": "1b6927849ba5339b0c06fc49940e15cb6bd25602",
+  "registeredSlots": 16,
+  "recordedSlots": 16,
+  "generationRequests": 25,
+  "retry": 0,
+  "families": {
+    "stateful": {
+      "slots": 8,
+      "terminal": {
+        "SEND_ELIGIBLE": 4,
+        "NO_SEND": 2,
+        "HANDOFF": 2
+      },
+      "reasons": {
+        "PASS": 4,
+        "CHECKOUT_DETAILS_MISSING": 1,
+        "PRIVATE_CHECKOUT_COMMITTED": 1,
+        "PURCHASE_CONFIRMED": 1,
+        "CUSTOMER_REQUESTED_HUMAN": 1
+      },
+      "providerRequests": 16,
+      "verifierLatencyMs": {
+        "n": 4,
+        "p50": 4863.164700000001,
+        "p95": 5994.185429999993
+      },
+      "addedVerificationLatencyMs": {
+        "n": 4,
+        "p50": 7321.066900000005,
+        "p95": 9087.84509
+      },
+      "providerErrors": 0
+    },
+    "b1": {
+      "slots": 4,
+      "terminal": {
+        "HANDOFF": 1,
+        "NO_SEND": 2,
+        "FALLBACK": 1
+      },
+      "reasons": {
+        "CURRENT_READBACK_UNAVAILABLE": 1,
+        "SOURCE_OR_ATTEMPT_UNAVAILABLE": 2,
+        "PROVIDER_ERROR": 1
+      },
+      "providerRequests": 5,
+      "verifierLatencyMs": {
+        "n": 1,
+        "p50": 9005.292499999996,
+        "p95": 9005.292499999996
+      },
+      "addedVerificationLatencyMs": {
+        "n": 1,
+        "p50": 1510036.5432999998,
+        "p95": 1510036.5432999998
+      },
+      "providerErrors": 1
+    },
+    "advice": {
+      "slots": 4,
+      "terminal": {
+        "SEND_ELIGIBLE": 2,
+        "BLOCKED": 2
+      },
+      "reasons": {
+        "PASS": 2,
+        "BLOCKED": 2
+      },
+      "providerRequests": 4,
+      "verifierLatencyMs": {
+        "n": 2,
+        "p50": 7871.0,
+        "p95": 9592.7
+      },
+      "addedVerificationLatencyMs": {
+        "n": 2,
+        "p50": 7880.855700000002,
+        "p95": 9609.100770000001
+      },
+      "providerErrors": 0
+    }
+  },
+  "roles": {
+    "owner": {
+      "requests": 18,
+      "inputTokens": 78338,
+      "outputTokens": 14828,
+      "missingUsage": 1,
+      "modelVersions": [
+        "gemini-3.5-flash-lite"
+      ]
+    },
+    "verifier": {
+      "requests": 7,
+      "inputTokens": 40075,
+      "outputTokens": 780,
+      "missingUsage": 0,
+      "modelVersions": [
+        "gpt-6.1-sol"
+      ]
+    }
+  },
+  "verdictCounts": {
+    "PASS": 6,
+    "FAIL": 1
+  },
+  "wireCapturesChecked": 38,
+  "leaks": [],
+  "cleanup": {
+    "stateful-1": {
+      "testDatabaseDropped": true,
+      "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+      "completedOutcomes": 8
+    }
+  },
+  "cost": "NOT_EXPOSED",
+  "requestCountDistribution": {
+    "1": 25
+  },
+  "providerErrors": 1,
+  "providerErrorRate": 0.04,
+  "timeoutCount": 0,
+  "errorAccountingCorrection": "Reused metrics helper originally ignored generation status PROVIDER_ERROR when httpStatus/providerStatus were null; supplemental scan of retained generation statuses/failureCode counts the TRANSPORT_ERROR as one error. No generation/result excluded.",
+  "outcomesRecorded": 14,
+  "blockedMissingCapture": 2
+}

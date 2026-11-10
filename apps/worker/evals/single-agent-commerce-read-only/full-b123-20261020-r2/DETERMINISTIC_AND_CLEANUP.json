@@ -1,0 +1,26 @@
+{
+  "deterministic-cod": {
+    "testDatabaseDropped": true,
+    "status": "PASS",
+    "checksPass": 28,
+    "checksFail": 0,
+    "providerRequests": 0,
+    "recordedOutcomes": null
+  },
+  "deterministic-bank": {
+    "testDatabaseDropped": true,
+    "status": "PASS",
+    "checksPass": 28,
+    "checksFail": 0,
+    "providerRequests": 0,
+    "recordedOutcomes": null
+  },
+  "stateful-1": {
+    "testDatabaseDropped": true,
+    "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+    "checksPass": 0,
+    "checksFail": 0,
+    "providerRequests": 14,
+    "recordedOutcomes": 8
+  }
+}

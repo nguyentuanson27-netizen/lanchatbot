@@ -1,0 +1,37 @@
+{
+  "historicalArtifactsUnchanged": 100,
+  "historicalAggregateHash": "980683b49faac1ba2c8c3de0f8fdb86e05a57f5bb0d399237f2238d3fa9babac",
+  "sealedExecutableFiles": 5,
+  "sealedFrozenFiles": 7,
+  "compiledBoundaryHash": "34ebcecdc6a7e4b4dfbe4a675b1df9141afeffcf7a8baf809590f37ae631c4df",
+  "manifestHash": "7bd79d56bd094c9d5475961fc7dcf989d8ef5b530ac10eeb362dcc0184ca322a",
+  "capturedProviderRecords": 62,
+  "providerRequests": 62,
+  "maxProviderRequestsPerSlot": 1,
+  "clientRequests": 62,
+  "rejectedClientRequests": 0,
+  "firewall": "PASS_ALL_CAPTURED_MODEL_REQUESTS",
+  "returnedModels": [
+    "gpt-6.1-sol"
+  ],
+  "returnedModelUnavailable": 0,
+  "usageUnavailable": 0,
+  "completeA2Denominator": 66,
+  "a2RunSourceSha": "2e783f213642d8d96ff4ac6fa8a6a2aa082164d3",
+  "a3RunSourceSha": null,
+  "a3PlannedCases": 24,
+  "a3Generations": 0,
+  "a3Disposition": "NOT_RUN_A2_FAILED",
+  "generationRetries": 0,
+  "frozenHashes": {
+    "verifier": "41b8ddffce072e326d7f66ff125c5accdfbee6e142187d53a2e39306cba2c2e2",
+    "conversation": "3de18ef4648549a18fbd181eb3bdf1b0663f31d3520966d816caba1bd395e345",
+    "schema": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+    "a2": "ef04c3aef7109ecbeed5cdc78e6766034a0f04e6cd0fb3b9ddfa76a6c7583fa3",
+    "a3": "960413d6cc4214a0b4eae757ab2ddb0c9e4c9796c12d78af86c2194a0495663c",
+    "profiles": "9aa9b9e967be5c56b1c24f7bea7c4cf1afe839c480fc1329b5f6cc71811bf9c5",
+    "sizeInputs": "08842633ec27afb2bc3aeb83ab52ba011a7966b26ca603e5e92e363f46380c1b",
+    "quotes": "a68933fba627d2b3df970f439c85ccf46ca23caa41cb23a199bcfb0f7466b36f",
+    "references": "c6c7cb46467ccc720be7ee54eae476f378687635c970c6ea8b9e33e306b55a79"
+  }
+}

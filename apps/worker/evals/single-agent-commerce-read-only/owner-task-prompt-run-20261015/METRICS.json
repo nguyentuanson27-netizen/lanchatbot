@@ -1,0 +1,173 @@
+{
+  "runSourceSha": "688a40cc33eff686c76039fda683587f1e81276f",
+  "surface": "POST_READ_OWNER_DIAGNOSTIC",
+  "all": {
+    "registered": 10,
+    "recorded": 10,
+    "terminalCounts": {
+      "FALLBACK": 2,
+      "SEND_ELIGIBLE": 8
+    },
+    "fallbackHandoffNoSendRate": 0.2,
+    "ownerLatency": {
+      "n": 10,
+      "p50Ms": 5690.93,
+      "p95Ms": 7193.57
+    },
+    "verifierLatency": {
+      "n": 10,
+      "p50Ms": 6590.61,
+      "p95Ms": 8281.64
+    },
+    "addedVerificationAndReadbackLatency": {
+      "n": 10,
+      "p50Ms": 7050.15,
+      "p95Ms": 8745.55
+    },
+    "endToEndAttemptLatency": {
+      "n": 10,
+      "p50Ms": 13017.75,
+      "p95Ms": 15819.55
+    },
+    "generationRequests": 20,
+    "errorGenerations": 0,
+    "timeoutGenerations": 0,
+    "errorRatePerGeneration": 0.0,
+    "timeoutRatePerGeneration": 0.0,
+    "tokens": {
+      "owner": {
+        "generations": 10,
+        "reportedInputRows": 10,
+        "reportedOutputRows": 10,
+        "inputTokens": 22022,
+        "outputTokens": 5918
+      },
+      "verifier": {
+        "generations": 10,
+        "reportedInputRows": 10,
+        "reportedOutputRows": 10,
+        "inputTokens": 34377,
+        "outputTokens": 1012
+      }
+    },
+    "cost": null
+  },
+  "owners": {
+    "gemini": {
+      "registered": 5,
+      "recorded": 5,
+      "terminalCounts": {
+        "FALLBACK": 2,
+        "SEND_ELIGIBLE": 3
+      },
+      "fallbackHandoffNoSendRate": 0.4,
+      "ownerLatency": {
+        "n": 5,
+        "p50Ms": 4932.28,
+        "p95Ms": 7134.48
+      },
+      "verifierLatency": {
+        "n": 5,
+        "p50Ms": 6589.56,
+        "p95Ms": 8446.74
+      },
+      "addedVerificationAndReadbackLatency": {
+        "n": 5,
+        "p50Ms": 7052.17,
+        "p95Ms": 8913.21
+      },
+      "endToEndAttemptLatency": {
+        "n": 5,
+        "p50Ms": 13037.47,
+        "p95Ms": 16623.85
+      },
+      "generationRequests": 10,
+      "errorGenerations": 0,
+      "timeoutGenerations": 0,
+      "errorRatePerGeneration": 0.0,
+      "timeoutRatePerGeneration": 0.0,
+      "tokens": {
+        "owner": {
+          "generations": 5,
+          "reportedInputRows": 5,
+          "reportedOutputRows": 5,
+          "inputTokens": 11046,
+          "outputTokens": 5355
+        },
+        "verifier": {
+          "generations": 5,
+          "reportedInputRows": 5,
+          "reportedOutputRows": 5,
+          "inputTokens": 17159,
+          "outputTokens": 594
+        }
+      },
+      "cost": null
+    },
+    "sol": {
+      "registered": 5,
+      "recorded": 5,
+      "terminalCounts": {
+        "SEND_ELIGIBLE": 5
+      },
+      "fallbackHandoffNoSendRate": 0.0,
+      "ownerLatency": {
+        "n": 5,
+        "p50Ms": 5961.69,
+        "p95Ms": 6596.8
+      },
+      "verifierLatency": {
+        "n": 5,
+        "p50Ms": 6591.65,
+        "p95Ms": 7334.62
+      },
+      "addedVerificationAndReadbackLatency": {
+        "n": 5,
+        "p50Ms": 7048.14,
+        "p95Ms": 7898.09
+      },
+      "endToEndAttemptLatency": {
+        "n": 5,
+        "p50Ms": 12998.04,
+        "p95Ms": 13863.89
+      },
+      "generationRequests": 10,
+      "errorGenerations": 0,
+      "timeoutGenerations": 0,
+      "errorRatePerGeneration": 0.0,
+      "timeoutRatePerGeneration": 0.0,
+      "tokens": {
+        "owner": {
+          "generations": 5,
+          "reportedInputRows": 5,
+          "reportedOutputRows": 5,
+          "inputTokens": 10976,
+          "outputTokens": 563
+        },
+        "verifier": {
+          "generations": 5,
+          "reportedInputRows": 5,
+          "reportedOutputRows": 5,
+          "inputTokens": 17218,
+          "outputTokens": 418
+        }
+      },
+      "cost": null
+    }
+  },
+  "sourceDomainCounters": {
+    "catalogReads": 18,
+    "posReads": 12,
+    "policyReads": 8
+  },
+  "ownerViewHashes": {
+    "b1-changed-occasion": "c6ee6784e995f7f6e661f58cfce5f73b5a4e7dbf303f016dc84b6eb964b958ae",
+    "b1-current-policy": "08575affea23f71b95409a0b542bddd2bb21eabb54734998f2b5546c1c4dc86a",
+    "b1-price": "d771f6b10019363aefe64d76898061ab486f756b1201287c4b4bdcfc72006397",
+    "b1-buying-concern": "2a9d260184f36c01a89bebd2cdbda5c178bef906a7865750e12fb06f19f2d017",
+    "b1-policy-used": "62814f671f2e588fe53df8612ef169bd42a34f617596b4704afb4b050723f10a"
+  },
+  "capturedBodiesAudited": 25,
+  "costEvidence": "Provider transports did not expose billed cost; no estimate.",
+  "latencyPolicy": "Linear-interpolated sample quantiles; owner/verifier includes local transport, authentication and API work. Attempt includes code preload; setup/compilation excluded. Added verification includes existing final readback. N is small; no statistical generalization."
+}

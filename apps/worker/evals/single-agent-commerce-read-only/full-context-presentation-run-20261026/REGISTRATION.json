@@ -1,0 +1,160 @@
+{
+  "identity": {
+    "sourceSha": "0fd1893d8ce4768c791a2015745e38c00f735822",
+    "manifestHash": "cf1db09a6390e8ddd06e7f61339e2a99e9a0c78d2373e022a18ad4225ec5eb92",
+    "sourceConfigHash": "b4c15f1823bf16d63a1ff67eb3a11711b28ed6592ec7bc1e65e0ceb3fbbc0d59",
+    "promptHashes": {
+      "owner": "71292eea99022f78c3ba5264eb4de6c8394dd2f345eb80bacb10a933c4e8e8db",
+      "verifier": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c"
+    },
+    "models": {
+      "conversation": {
+        "provider": "VERTEX_AI",
+        "model": "gemini-3.5-flash-lite",
+        "version": "gemini-3.5-flash-lite",
+        "effort": "high",
+        "location": "global",
+        "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+        "generationConfig": {
+          "candidateCount": 1,
+          "responseMimeType": "text/plain",
+          "maxOutputTokens": 8192,
+          "thinkingConfig": {
+            "thinkingLevel": "HIGH",
+            "includeThoughts": false
+          },
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "retry": 0,
+          "timeoutMs": 90000
+        }
+      },
+      "verifier": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      }
+    },
+    "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+    "corpusHashes": {
+      "cases.b1.json": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+      "stateful-cases.json": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+      "sales-journeys.candidate.json": "b2575660b7d412eb6a2d11befb04de75fd840789c7126026bb257ce60f183a93",
+      "sales-media-followup-cases.json": "dff5c57dff681f75ac35e484c014b0c62965bde2169941aa5b488ce879bba93a"
+    }
+  },
+  "inputHash": "7c5d962a6fccc9cbc82cfe5e17a35d629a3df50c10bf4f8093e68eea97557458",
+  "bundleHash": "b0f50b4c9e6fafbdd282b6a1ad7eb158a6d4499cd95de52b8d6a94f7c1cc46f4",
+  "controlsHash": "252b57287e47d3705d52914c2aec3792296373215438f88374cbff13b0b75c84",
+  "mode": "CAPTURED_WORLD_FULL_CONTEXT_PRESENTATION_NOT_LIVE_ELIGIBILITY",
+  "slots": [
+    {
+      "id": "765521c65eaacb9fc7f8b1d369c61bb7beaf38f239dddcafbb6c89371f1a759a",
+      "caseId": "b1-buying-concern-v2",
+      "arm": "A"
+    },
+    {
+      "id": "7e9a82aa875ddf1e78dd2b3c4f2ca442285a271b3bf1151f304a92336bd5cc45",
+      "caseId": "b1-buying-concern-v2",
+      "arm": "B"
+    },
+    {
+      "id": "c01b664841d2a6937fc6135959644fe79124c02ebc521daca2579e1faa048523",
+      "caseId": "b1-price",
+      "arm": "B"
+    },
+    {
+      "id": "36029b38d16c63409fbfe6ef3f67008f852aa35648e4361933984dd2d8be00e4",
+      "caseId": "b1-price",
+      "arm": "A"
+    },
+    {
+      "id": "c2530300ec85ef5b52a9ac997f73d4b3d67579420c507bb64ab61a2b04583096",
+      "caseId": "b1-price-v3",
+      "arm": "A"
+    },
+    {
+      "id": "65481734e74ce1f8526b27d17df5b27d0c2d029dc0428bf04e4820c7a363e2a4",
+      "caseId": "b1-price-v3",
+      "arm": "B"
+    },
+    {
+      "id": "5a15f2a30aed2389d197e0279eca18c519afbea252d9e12aba2e8cab24504094",
+      "caseId": "b1-buying-concern",
+      "arm": "B"
+    },
+    {
+      "id": "f91244d33a150eba262c1bc2619e08d55b89b0b7bbcfc493c1de9323d7ea9e73",
+      "caseId": "b1-buying-concern",
+      "arm": "A"
+    },
+    {
+      "id": "f2858fe5cba5962229f76c848d460118c5adc21484db7948e20120d782e0e381",
+      "caseId": "b1-buying-concern-v3",
+      "arm": "A"
+    },
+    {
+      "id": "c2c58def160c9e34a2f98566bfa16bf7eba4851778a648865ea380c6897a4e84",
+      "caseId": "b1-buying-concern-v3",
+      "arm": "B"
+    },
+    {
+      "id": "1d36cac9b0e4a2fa57d4c404ac41dfe61005dd58f536620aa4064d17d3b1ccea",
+      "caseId": "b1-price-v2",
+      "arm": "B"
+    },
+    {
+      "id": "6b9a3db41b7bb66ae21681e1ed2422f1f42333c1eed4a7067a225a836ccde508",
+      "caseId": "b1-price-v2",
+      "arm": "A"
+    },
+    {
+      "id": "da8b53da5ace70c2cfbb2d25eee5b76a50c663b9c4aef7f69211487975bc2ef3",
+      "caseId": "b1-current-policy",
+      "arm": "A"
+    },
+    {
+      "id": "89d6eeb7821c240d46066a8625837f799001fd2b08e59eb77510ad2bb6eaf48d",
+      "caseId": "b1-current-policy",
+      "arm": "B"
+    },
+    {
+      "id": "e83ffd68684f5b62a5d520ab14b7697deaedc63e255746ce9bd1a4a4e9717714",
+      "caseId": "b1-changed-occasion-v3",
+      "arm": "B"
+    },
+    {
+      "id": "1c3700434801f4e782447be068ae412534c496d0e0560b149383f356da9095c5",
+      "caseId": "b1-changed-occasion-v3",
+      "arm": "A"
+    }
+  ],
+  "registeredOutcomes": 16,
+  "maximumGenerationRequests": 32,
+  "repetitions": 1,
+  "retry": 0,
+  "sendEnabled": false
+}

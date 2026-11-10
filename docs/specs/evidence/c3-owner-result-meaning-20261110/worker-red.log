@@ -1,0 +1,152 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+x··············x
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/single-agent-commerce-quote-routing.test.ts > shows a pre-cart quote target after a proven missing-colour failure without pretending price or total is ready
+AssertionError: expected { status: 'UNAVAILABLE', …(3) } to match object { status: 'UNAVAILABLE', …(3) }
+(26 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "data": {
+      "effectCommitted": false,
+-     "preCartQuoteRequest": {
+-       "calculationStatus": "NOT_CALCULATED",
+-       "evidenceHash": "e437ac9905aa9d225ba5568c00b90960e8cdb3d7bfa32c2706620d7b9febcbab",
+-       "purchaseMissingField": "COLOR",
+-       "quantity": "FROM_CUSTOMER_REQUEST",
+-       "sourcePriceStatus": "REQUIRES_QUOTE_READ",
+-       "target": {
+-         "offerTypes": [
+-           "DIRECT",
+-         ],
+-         "subjectRef": "SM613",
+-       },
+-       "tool": "quote_product",
+-     },
+    },
+    "failureStage": "SOURCE",
+    "reason": "SELECTION_UNAVAILABLE",
+    "status": "UNAVAILABLE",
+  }
+
+ ❯ src/single-agent-commerce-quote-routing.test.ts:30:12
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/single-agent-commerce-quote-routing.test.ts > binds a replacement route to the new product/offer and current line quantity, never the old offer
+AssertionError: expected { status: 'UNAVAILABLE', …(3) } to match object { data: { …(1) } }
+(30 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "data": {
+-     "preCartQuoteRequest": {
+-       "target": {
+-         "offerTypes": [
+-           "DIRECT",
++     "availableColors": [],
++     "availableSizes": [],
++     "choiceResolution": {
++       "completeness": "FIRST_8_EXACT_TUPLES_NOT_COMPLETE_INVENTORY",
++       "evidenceHash": "e437ac9905aa9d225ba5568c00b90960e8cdb3d7bfa32c2706620d7b9febcbab",
++       "field": "COLOR",
++       "kind": "NEEDS_CUSTOMER_CHOICE",
++       "optionRefs": [
++         "481efcca3de4f923a48cbf0fa7640a4d87f54373638b1ef1f2929d58e985e0e1",
++         "5924ae0148e2c4235c07e405a7366e851b67cb0ba497f9b87708372266046ff5",
+        ],
+-         "subjectRef": "SM613",
++     },
++     "effectCommitted": false,
++     "reasonCode": "CART_COLOR_REQUIRED",
++     "selectionEvidence": {
++       "color": null,
++       "colorSemantics": "UNRECORDED_IS_NOT_A_PHYSICAL_COLOR",
++       "completeness": "FIRST_8_EXACT_TUPLES_NOT_COMPLETE_INVENTORY",
++       "contentHash": "e437ac9905aa9d225ba5568c00b90960e8cdb3d7bfa32c2706620d7b9febcbab",
++       "expiresAt": "2026-10-16T10:00:00.000Z",
++       "kind": "CANDIDATE_SELECTION_V2",
++       "observedAt": "2026-10-14T10:00:00.000Z",
++       "offerType": "DIRECT",
++       "options": [
++         {
++           "color": "navy",
++           "identityHash": "481efcca3de4f923a48cbf0fa7640a4d87f54373638b1ef1f2929d58e985e0e1",
++           "reasonCode": null,
++           "size": "M",
++           "status": "IN_STOCK",
++         },
++         {
++           "color": "be",
++           "identityHash": "5924ae0148e2c4235c07e405a7366e851b67cb0ba497f9b87708372266046ff5",
++           "reasonCode": null,
++           "size": "M",
++           "status": "IN_STOCK",
+          },
++       ],
++       "productId": "SM613",
++       "quantity": 1,
++       "size": "M",
++       "sourceHash": "5305723c3b3d13e8cecd9c9f548ecaafcb95f266d772cffd0270dc48f197a990",
++       "sourceVersion": "pos-v1",
+      },
++     "selectionOptions": [
++       {
++         "color": "navy",
++         "expiresAt": "2026-10-16T10:00:00.000Z",
++         "identityHash": "481efcca3de4f923a48cbf0fa7640a4d87f54373638b1ef1f2929d58e985e0e1",
++         "observedAt": "2026-10-14T10:00:00.000Z",
++         "offerType": "DIRECT",
++         "productId": "SM613",
++         "quantity": 1,
++         "reasonCode": null,
++         "size": "M",
++         "sourceVersion": "pos-v1",
++         "status": "IN_STOCK",
++       },
++       {
++         "color": "be",
++         "expiresAt": "2026-10-16T10:00:00.000Z",
++         "identityHash": "5924ae0148e2c4235c07e405a7366e851b67cb0ba497f9b87708372266046ff5",
++         "observedAt": "2026-10-14T10:00:00.000Z",
++         "offerType": "DIRECT",
++         "productId": "SM613",
++         "quantity": 1,
++         "reasonCode": null,
++         "size": "M",
++         "sourceVersion": "pos-v1",
++         "status": "IN_STOCK",
++       },
++     ],
++     "status": "COLOR_REQUIRED",
+    },
+  }
+
+ ❯ src/single-agent-commerce-quote-routing.test.ts:61:37
+     59|  c.boundSubjects.push({ref:"line",kind:"CART_LINE",label:"old set",bin…
+     60|  const call={name:"change_cart_item",args:{action:"REPLACE_LINE",subje…
+     61|  expect(await s.tools.invoke(call)).toMatchObject({data:{preCartQuoteR…
+       |                                     ^
+     62|  c.state.cartItems[0]!.quantity=2;s.setContext(c);
+     63|  expect((await s.tools.invoke(call)).data).not.toHaveProperty("preCart…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 14 passed (16)
+   Start at  10:51:29
+   Duration  3.22s (transform 1.37s, setup 0ms, collect 2.20s, tests 90ms, environment 0ms, prepare 288ms)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/single-agent-commerce-quote-routing.test.ts --reporter=dot

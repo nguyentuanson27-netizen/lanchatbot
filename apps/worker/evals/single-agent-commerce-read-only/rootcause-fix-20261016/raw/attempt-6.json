@@ -1,0 +1,84 @@
+{
+  "caseId": "b1-search-read",
+  "sourceMode": "LIVE",
+  "elapsedMs": 8729.141899999988,
+  "runtime": {
+    "latest": "Em xem giúp chị áo dài mã SD375 giá bao nhiêu nhé.",
+    "history": [],
+    "initialProductCodes": []
+  },
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "BUDGET",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 3,
+    "verifierGenerations": 0,
+    "toolRounds": 2,
+    "toolCalls": 2,
+    "generations": [
+      {
+        "id": "958ff514daec796a078769392e96fc20474be1eea9d047ce5efa422ed8071173:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1275.6322000000073,
+        "telemetry": {
+          "generationId": "958ff514daec796a078769392e96fc20474be1eea9d047ce5efa422ed8071173:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 2328,
+          "outputTokens": 123,
+          "cost": null,
+          "thinkingTokens": 104
+        }
+      },
+      {
+        "id": "958ff514daec796a078769392e96fc20474be1eea9d047ce5efa422ed8071173:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 4384.162100000001,
+        "telemetry": {
+          "generationId": "958ff514daec796a078769392e96fc20474be1eea9d047ce5efa422ed8071173:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 2497,
+          "outputTokens": 73,
+          "cost": null,
+          "thinkingTokens": 53
+        }
+      },
+      {
+        "id": "958ff514daec796a078769392e96fc20474be1eea9d047ce5efa422ed8071173:owner:3",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2123.4042000000045,
+        "telemetry": {
+          "generationId": "958ff514daec796a078769392e96fc20474be1eea9d047ce5efa422ed8071173:owner:3",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 2590,
+          "outputTokens": 470,
+          "cost": null,
+          "thinkingTokens": 442
+        }
+      }
+    ],
+    "toolLatencyMs": 944.1593000000139,
+    "verificationLatencyMs": null
+  },
+  "counters": {
+    "embeddingCalls": 1,
+    "policyReads": 2,
+    "catalogReads": 14,
+    "posReads": 10
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "runSourceSha": "6e38c54104010c7e137481a560b99da21e961e73",
+  "registeredOutcomes": 39,
+  "recordedOutcomes": 39,
+  "repetitions": 1,
+  "retry": 0,
+  "sendEnabled": false,
+  "terminalDispositions": {
+    "FALLBACK": 19,
+    "SEND_ELIGIBLE": 15,
+    "NO_SEND": 2,
+    "HANDOFF": 3
+  },
+  "wholeReplyReview": {
+    "FALLBACK": 19,
+    "USABLE": 15,
+    "NEEDS_EDIT": 3,
+    "OWNERSHIP_CONTROL": 1,
+    "SILENT_HANDOFF": 1
+  },
+  "roles": {
+    "owner": {
+      "generations": 76,
+      "requests": 76,
+      "errors": 0,
+      "timeouts": 0,
+      "inputTokens": 356281,
+      "outputTokens": 54022,
+      "thinkingTokens": 50305
+    },
+    "verifier": {
+      "generations": 34,
+      "requests": 34,
+      "errors": 21,
+      "timeouts": 0,
+      "inputTokens": 59748,
+      "outputTokens": 1639,
+      "thinkingTokens": 1290
+    }
+  },
+  "providerRequests": 110,
+  "capturedWireBodies": 110,
+  "evaluatorLabelLeaks": 0,
+  "maxRequestsPerGeneration": 1,
+  "uniqueGenerationIds": 110,
+  "verifierVerdicts": {
+    "FAIL": 2,
+    "PASS": 11
+  },
+  "verifierLatencyMs": {
+    "n": 34,
+    "p50": 6076.553899999999,
+    "p95": 17074.894100000005,
+    "method": "NEAREST_RANK_ALL_ATTEMPTS_INCLUDING_ERRORS"
+  },
+  "addedVerificationLatencyMs": {
+    "n": 34,
+    "p50": 8278.510600000009,
+    "p95": 21811.39880000001,
+    "method": "NEAREST_RANK_ALL_ATTEMPTS_INCLUDING_ERRORS"
+  },
+  "providerTimeouts": 0,
+  "providerHttpErrors": 21,
+  "errorCodes": {
+    "usage_limit_reached": 21
+  },
+  "cost": null,
+  "costReason": "NOT_EXPOSED",
+  "comparison": {
+    "status": "BLOCKED_VERIFIER_QUOTA",
+    "plannedOutcomes": 12,
+    "preRegisteredSlots": 12,
+    "sealedCampaignAttempts": 0,
+    "dispatchedAttempts": 0,
+    "recordedOutcomes": 0,
+    "runSourceSha": null,
+    "prerequisiteImages": "PASS_0_GENERATION"
+  },
+  "codeReceiptRecoveryCount": 4,
+  "cohorts": {
+    "b1": {
+      "registered": 24,
+      "recorded": 24,
+      "terminal": {
+        "FALLBACK": 15,
+        "SEND_ELIGIBLE": 9
+      }
+    },
+    "stateful": {
+      "registered": 8,
+      "recorded": 8,
+      "terminal": {
+        "SEND_ELIGIBLE": 2,
+        "FALLBACK": 2,
+        "NO_SEND": 2,
+        "HANDOFF": 2
+      }
+    },
+    "openings": {
+      "registered": 4,
+      "recorded": 4,
+      "terminal": {
+        "FALLBACK": 1,
+        "SEND_ELIGIBLE": 2,
+        "HANDOFF": 1
+      }
+    },
+    "negotiation": {
+      "registered": 3,
+      "recorded": 3,
+      "terminal": {
+        "SEND_ELIGIBLE": 2,
+        "FALLBACK": 1
+      }
+    }
+  },
+  "knownUsageCoverage": {
+    "owner": 76,
+    "verifier": 13
+  },
+  "verifierSuccessfulLatencyMs": {
+    "n": 13,
+    "p50": 7650.006800000003,
+    "p95": 21081.8398
+  },
+  "providerHttpErrorRate": 0.19090909090909092,
+  "verifierErrorRate": 0.6176470588235294,
+  "fallbackRate": 0.48717948717948717,
+  "handoffRate": 0.07692307692307693,
+  "rawNoSendRate": 0.05128205128205128,
+  "outcomesWithoutActualText": 2
+}

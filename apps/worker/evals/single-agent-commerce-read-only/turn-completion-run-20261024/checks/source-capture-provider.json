@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python",
+    "apps/worker/evals/single-agent-commerce-read-only/source-session.py",
+    "node",
+    "apps/worker/evals/single-agent-commerce-read-only/feedback-source-capture.mjs",
+    "C:/Users/nguye/Documents/S\u1ea3n ph\u1ea9m AI/c3-turn-completion-source-provider-20261024"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 11.620382070541382
+}

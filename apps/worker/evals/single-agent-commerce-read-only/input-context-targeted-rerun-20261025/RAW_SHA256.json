@@ -1,0 +1,220 @@
+{
+  "rawDirectory": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-phase-b-input-context-targeted-rerun-20261025",
+  "files": [
+    {
+      "path": "b1-error-17/attempt-17.json",
+      "bytes": 30550,
+      "sha256": "76248afc241ab2a2a2de5e91cf3098d8278f42172afedd121f45952ba6d630d5"
+    },
+    {
+      "path": "b1-error-17/completion.json",
+      "bytes": 279,
+      "sha256": "7965e99c3b71c6899ba1a73a6741e54b2fe2037c5a7de146c701e29f704bc3a5"
+    },
+    {
+      "path": "b1-error-17/registration.json",
+      "bytes": 2012,
+      "sha256": "4f609e266efd0f10dfdc12b003902d7a6dbf86f32ee33aaa492171582c0c05ca"
+    },
+    {
+      "path": "b1-error-17/requests.jsonl",
+      "bytes": 133533,
+      "sha256": "cb19496adfc3799ec6a5bccdd3ab8e22c11165ece9b829b850bb56eda912c257"
+    },
+    {
+      "path": "b1-error-17-command.json",
+      "bytes": 1158,
+      "sha256": "8bd7285c40174e589eb3b17c9bd88fc7cceb31fd21092e79802225cf8a3f8da2"
+    },
+    {
+      "path": "b1-error-17.log",
+      "bytes": 285,
+      "sha256": "1d5a1ecbec3e0549fa478e41191bedef9318f65ef658e0b0fbf4539efb4e4ab2"
+    },
+    {
+      "path": "b1-errors-11-13/attempt-11.json",
+      "bytes": 27016,
+      "sha256": "cddba68d52663776f3612c7ee1a1ef40d61984acd9e608437c40434903b1df46"
+    },
+    {
+      "path": "b1-errors-11-13/attempt-12.json",
+      "bytes": 27607,
+      "sha256": "a518473250131237992f1b4e6da3c5caf5d31faebd555fa1cd565211397ab7d5"
+    },
+    {
+      "path": "b1-errors-11-13/attempt-13.json",
+      "bytes": 27872,
+      "sha256": "742be7c2f731d47ea3b215a02e22b759f4e33e4fff5ae824147c241434dc5893"
+    },
+    {
+      "path": "b1-errors-11-13/completion.json",
+      "bytes": 281,
+      "sha256": "124f7c145fe44502f680c01086f46503120cee5aeeb020c0f47980abad38f291"
+    },
+    {
+      "path": "b1-errors-11-13/registration.json",
+      "bytes": 2013,
+      "sha256": "ddee5b7ef0a6f62976c43a831c9324e8b77ff580961d812076386721eede7274"
+    },
+    {
+      "path": "b1-errors-11-13/requests.jsonl",
+      "bytes": 349095,
+      "sha256": "6153fcda31a03670079506781110523fd7cc896970cfd01f3838f196b9efbdac"
+    },
+    {
+      "path": "b1-errors-11-13-command.json",
+      "bytes": 1166,
+      "sha256": "d4da5a1ad8a31da6e86b49aea8817a1b64273c16144eea8ffd50c834e9c1564b"
+    },
+    {
+      "path": "b1-errors-11-13.log",
+      "bytes": 425,
+      "sha256": "98a7ecf1089abd7c437d2d6ed5fd2c3c0a427fd0662e66ce02e05bbd93774097"
+    },
+    {
+      "path": "b1-preflight-command.json",
+      "bytes": 1136,
+      "sha256": "2c289d1c3013e92656102914e1a15e070c4dc341c492025a92c812484ea40da5"
+    },
+    {
+      "path": "b1-preflight.log",
+      "bytes": 293,
+      "sha256": "fdfef14a6285faac811260ad7b4364f0a122082a72397ef390a45cc817c5123b"
+    },
+    {
+      "path": "COMMANDS.json",
+      "bytes": 7098,
+      "sha256": "d428077cb182d30de18c209b63f4a46912eddccb8df86f17215b64f1111865f5"
+    },
+    {
+      "path": "DISPATCH_STATUS.json",
+      "bytes": 136,
+      "sha256": "c2f6918411006301273283bf69d16f9dd7a7ca8a33ae7edeba4e9e479b5948c9"
+    },
+    {
+      "path": "journey-openings/integration.json",
+      "bytes": 7948,
+      "sha256": "01403fff8e37bbf341fa313be581a0e55fff627d6b8a4838abfecd0979b7ae5b"
+    },
+    {
+      "path": "journey-openings/provider-attempt-1.json",
+      "bytes": 23874,
+      "sha256": "5d24b457d198ecfa2edc9f89eb172009991daf708cc851e0f01fb94f18345ac5"
+    },
+    {
+      "path": "journey-openings/provider-attempt-2.json",
+      "bytes": 40525,
+      "sha256": "55edbbd75bc678d370f73518ac36863c7dc1200bcc2bfbf8b79551407459ea94"
+    },
+    {
+      "path": "journey-openings/provider-requests.jsonl",
+      "bytes": 317958,
+      "sha256": "39a77b6384e127dd85fbb9d7c8c019d53125b822cff5588d1912222d2d8bf920"
+    },
+    {
+      "path": "journey-openings/registration.json",
+      "bytes": 9534,
+      "sha256": "38eca03f387a9a89b1cc62d3c50090a1046c47b0d4c11ceb84d32e2b44607fb5"
+    },
+    {
+      "path": "journey-openings-command.json",
+      "bytes": 872,
+      "sha256": "30a25b46923acf0f4a50123d71a678b1fc71fb496b0343dd6f4a0ab2c0423034"
+    },
+    {
+      "path": "journey-openings-preflight-command.json",
+      "bytes": 921,
+      "sha256": "33e484cebfcc75c03b6b720e21f07a27d3ebfd106073b9d3ec85cf7b57a09baa"
+    },
+    {
+      "path": "journey-openings-preflight.log",
+      "bytes": 7271,
+      "sha256": "5663daae7c2c120463f2cfdd6edec695f63b3b10416434854d7ebcb232746175"
+    },
+    {
+      "path": "journey-openings.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "REGISTRATION.json",
+      "bytes": 4005,
+      "sha256": "b462bfcf62d195f41fdbab3e85a6d4abfa07721feb2f4492b6d1f6484a1133b8"
+    },
+    {
+      "path": "stateful/integration.json",
+      "bytes": 8911,
+      "sha256": "80529aca56262909bb43b7d36ca3aaff1223e18bbd996e46c89cb4b48cdaf883"
+    },
+    {
+      "path": "stateful/provider-attempt-1.json",
+      "bytes": 42527,
+      "sha256": "6ad9eba7411eb3ad68140b642c9cf31a460431096373797f7aece0dc82e8b99a"
+    },
+    {
+      "path": "stateful/provider-attempt-2.json",
+      "bytes": 46158,
+      "sha256": "19893b066623577f5b72af4fe8adff5545442c79169f6d505f9efa0d52b71970"
+    },
+    {
+      "path": "stateful/provider-attempt-3.json",
+      "bytes": 35547,
+      "sha256": "574b1cbdc8a9b0e422913e6c3a58cee2e0b10edae184f6528f46ef3b0ff2d3f0"
+    },
+    {
+      "path": "stateful/provider-attempt-4.json",
+      "bytes": 37741,
+      "sha256": "a838ab30ba34f2e775d27279be921ac29d45804a7548bab193b8f4915167c463"
+    },
+    {
+      "path": "stateful/provider-attempt-5.json",
+      "bytes": 8186,
+      "sha256": "62bbe019842bc5ca2232b8f9ac427a2be74b9bfb77a92fc73fb88ca4cdaaf2fd"
+    },
+    {
+      "path": "stateful/provider-attempt-6.json",
+      "bytes": 7372,
+      "sha256": "1e1953617115273373a15103838a7cec9e041264283c45f2f3c443cab524afd3"
+    },
+    {
+      "path": "stateful/provider-attempt-7.json",
+      "bytes": 8234,
+      "sha256": "92afad9e511a05c9d9353c97c313182f231fe71ba7390578f5386e761f2cbc82"
+    },
+    {
+      "path": "stateful/provider-attempt-8.json",
+      "bytes": 5104,
+      "sha256": "a3f7b83bbb66ab8cdb0583b0433b713c8a4b22e6b8b2e0759ab3519118820af2"
+    },
+    {
+      "path": "stateful/provider-requests.jsonl",
+      "bytes": 746217,
+      "sha256": "67f923fd4b153c754fd6569baca44fa9ba731cc288afcb3a6df7f8fb44939022"
+    },
+    {
+      "path": "stateful/registration.json",
+      "bytes": 4047,
+      "sha256": "b5e6ce46e1735e06e75563ac5f0d3c47d2f53d7aa28ee2eb6614887e8f1c6c04"
+    },
+    {
+      "path": "stateful-command.json",
+      "bytes": 767,
+      "sha256": "a325e876c9da5db3981098a3c5f0aed010afbe9f32923d32eae7c2e921b91525"
+    },
+    {
+      "path": "stateful-preflight-command.json",
+      "bytes": 816,
+      "sha256": "7607c395012162fb262e7d18cf0ac7796cdcc46c7e7e2efc22ee876c07ba7092"
+    },
+    {
+      "path": "stateful-preflight.log",
+      "bytes": 3359,
+      "sha256": "8f67757d294973dbcf3c77c1c91766e6e90e7c13957197af1ca3279bb6126f72"
+    },
+    {
+      "path": "stateful.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

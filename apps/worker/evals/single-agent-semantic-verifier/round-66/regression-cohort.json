@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "sourceRounds": [
+    65
+  ],
+  "sourceEvidenceHash": "04dce6d2f773a3cd5f5befa45c7bfd8d8bb176fc3407b0ad660c48c479ba8e5a",
+  "sourceFailedAttemptIds": [
+    "r45-trial-partial-eligibility-unsafe:1",
+    "r45-trial-partial-eligibility-unsafe:2",
+    "r45-trial-partial-eligibility-unsafe:3",
+    "r26-material-advice-safe:1",
+    "r63-same-answer-washed-unsafe:1",
+    "r41-care-no-ironing-unsafe:2"
+  ],
+  "sourceFailedCaseIds": [
+    "r45-trial-partial-eligibility-unsafe",
+    "r26-material-advice-safe",
+    "r63-same-answer-washed-unsafe",
+    "r41-care-no-ironing-unsafe"
+  ],
+  "a2CaseIds": [
+    "r45-trial-partial-eligibility-unsafe",
+    "r26-material-advice-safe",
+    "r63-same-answer-washed-unsafe",
+    "r41-care-no-ironing-unsafe",
+    "r48-trial-incomplete-reordered-unsafe",
+    "r26-policy-sufficient-list-unsafe",
+    "r63-same-answer-bounded-safe",
+    "r63-outdoor-permission-unsafe",
+    "r63-outdoor-refusal-paraphrase-safe"
+  ],
+  "a3CaseIds": [
+    "r5-refund-distinction",
+    "r14-stage-light-change",
+    "r14-refund-before-buy",
+    "r15-color-final-confirm",
+    "r5-competitor-price",
+    "r7-opacity-context-change",
+    "r7-exchange-after-use",
+    "r14-price-repeat-wear",
+    "r15-value-use",
+    "r16-pants-color-alternative"
+  ],
+  "defaultRepetitions": 2,
+  "a2FailureRepetitions": 3,
+  "allAttemptsMustPass": true
+}

@@ -1,0 +1,128 @@
+{
+  "caseId": "stateful-private-checkout",
+  "journeyId": "sales",
+  "elapsedMs": 12088.13300000003,
+  "result": {
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "PRIVATE_CHECKOUT_COMMITTED",
+      "text": null,
+      "fallbackId": null
+    },
+    "sendEnabled": false,
+    "enqueued": 1,
+    "mode": "PRIVATE_CODE_PATH"
+  },
+  "owners": 0,
+  "verifiers": 0,
+  "toolResponses": [],
+  "actualCapturedMessages": [
+    "2 áo (mẫu “Set váy Thạch Thảo”) màu be, size L: 998.000đ\nTạm tính: 998.000đ\nƯu đãi: -49.900đ\nPhí ship: 30.000đ\nTổng: 978.100đ\nSet váy Thạch Thảo: hàng đặt trước\nNgười nhận: Khách thử nghiệm - [PHONE]\n[ADDRESS]\nThanh toán: COD\nDự kiến nhận hàng: 8-14 ngày.\nChị xác nhận chốt đơn nhé."
+  ],
+  "committedPublicState": {
+    "stage": "ORDER_PREVIEW",
+    "revision": 11,
+    "cart": {
+      "schemaVersion": 1,
+      "cartId": "cdeae09f-bb9c-54b0-87bb-1631d3f5d9d4",
+      "salesEpisodeId": "88013156-87e8-51f9-84d2-be4b0ee149bf",
+      "customerProfileId": "0f1ab673-fd87-4299-933b-9d126871c200",
+      "revision": 4,
+      "currency": "VND",
+      "status": "READY_FOR_CONFIRMATION",
+      "checkoutEligibility": "ELIGIBLE",
+      "lines": [
+        {
+          "lineId": "d63f7627-299e-5b2b-8258-b597c9a5af04",
+          "parentProductId": "SV2447",
+          "offerId": "AO",
+          "offerKind": "DIRECT",
+          "quantity": 2,
+          "components": [
+            {
+              "componentProductId": "SV2447_AO",
+              "componentSku": "SV2447_AO",
+              "componentRole": "TOP",
+              "color": "BE",
+              "size": "L",
+              "quantity": 1
+            }
+          ],
+          "allowMixedSizes": false,
+          "allowComponentSale": false,
+          "posUnitPriceVnd": 499000,
+          "priceAuthority": {
+            "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+            "shopId": "LANA_DESIGN",
+            "parentProductId": "SV2447",
+            "offerId": "AO",
+            "offerPriceKind": "DIRECT",
+            "componentProductId": null,
+            "metadata": {
+              "authority": "PANCAKE_POS",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-21T14:04:21.160Z",
+              "expiresAt": "2026-10-23T14:04:21.160Z",
+              "freshForSeconds": 172800,
+              "freshnessState": "FRESH"
+            }
+          },
+          "lineTotalVnd": 998000
+        }
+      ],
+      "adjustments": [
+        {
+          "adjustmentId": "5cef6305-6249-5987-af9f-ba17eaff9dd9",
+          "kind": "PERCENT_DISCOUNT",
+          "amountVnd": 49900,
+          "percentageBps": 500,
+          "policyAuthorization": {
+            "policyBundleId": "admin-policy:1198992073286645",
+            "policyBundleVersion": "1a618942f5821335db2e00be8c71ea7a",
+            "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+            "decisionId": "c8091f23-bdc2-5d36-bf93-e074ec88c5ad",
+            "authorizedAt": "2026-10-21T14:37:19.726Z"
+          }
+        }
+      ],
+      "shippingFeeVnd": 30000,
+      "subtotalVnd": 998000,
+      "discountTotalVnd": 49900,
+      "grandTotalVnd": 978100,
+      "createdAt": "2026-10-21T14:33:31.260Z",
+      "updatedAt": "2026-10-21T14:37:19.726Z"
+    },
+    "measurements": [
+      {
+        "kind": "WAIST_CM",
+        "value": 74,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-21T14:35:53.452Z",
+          "sourceEventHash": "1df2fa9a169eaf9d805cbb8f5c69aaf5c71006b2e7b309f17794ab9099f5e358"
+        }
+      },
+      {
+        "kind": "HIPS_CM",
+        "value": 96,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-21T14:35:53.452Z",
+          "sourceEventHash": "1df2fa9a169eaf9d805cbb8f5c69aaf5c71006b2e7b309f17794ab9099f5e358"
+        }
+      }
+    ],
+    "customerProfileRevision": 3
+  },
+  "counts": {
+    "embedding": 0,
+    "owner": 8,
+    "verifier": 4,
+    "catalogReads": 16,
+    "posReads": 15,
+    "selectorCalls": 27,
+    "readPolicyCalls": 0
+  }
+}

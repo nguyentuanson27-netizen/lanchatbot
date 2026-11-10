@@ -1,0 +1,74 @@
+{
+  "sourceSha": "9887c21743f2183cf475c70bf27bfb9fe93fe723",
+  "inputHash": "3f97f2630a175b296ff5bc0eafdc0850e6ee70e98133e42adc9557a6c44de6ce",
+  "registered": 8,
+  "maximumGenerationRequests": 16,
+  "mode": "CAPTURED_PUBLIC_WORLD_REPLAY_NOT_LIVE_ELIGIBILITY",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "ca12a250c6dd69f96946bf6f2d4657f5d99a1e94364a7f0892e7603c69bd38de",
+    "verifier": "50401b2704724bebd604e0da3b2155ebeade8629145a723153c24b5630fd1a2f"
+  },
+  "ownerPromptHashes": [
+    "ca12a250c6dd69f96946bf6f2d4657f5d99a1e94364a7f0892e7603c69bd38de",
+    "ca12a250c6dd69f96946bf6f2d4657f5d99a1e94364a7f0892e7603c69bd38de",
+    "ca12a250c6dd69f96946bf6f2d4657f5d99a1e94364a7f0892e7603c69bd38de",
+    "ca12a250c6dd69f96946bf6f2d4657f5d99a1e94364a7f0892e7603c69bd38de",
+    "ca12a250c6dd69f96946bf6f2d4657f5d99a1e94364a7f0892e7603c69bd38de",
+    "ca12a250c6dd69f96946bf6f2d4657f5d99a1e94364a7f0892e7603c69bd38de",
+    "ca12a250c6dd69f96946bf6f2d4657f5d99a1e94364a7f0892e7603c69bd38de",
+    "ca12a250c6dd69f96946bf6f2d4657f5d99a1e94364a7f0892e7603c69bd38de"
+  ],
+  "retry": 0,
+  "sendEnabled": false
+}

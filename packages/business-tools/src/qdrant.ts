@@ -1,3 +1,5 @@
+import {imageColorBindingFromPayload} from "./image-color-binding.js";
+import {readMediaRevalidation} from "./media-revalidation.js";
 import { normalizeProductCode } from "./inventory.js";
 import type {
   MultimodalEmbeddingPort,
@@ -94,6 +96,8 @@ function productImageFromPayload(payload: Record<string, unknown>): ProductImage
   const url = validImageUrls(payload.image_url)[0];
   if (!url) return null;
   const quality = Number(payload.image_quality_score);
+  const colorBinding=imageColorBindingFromPayload(payload);
+  const revalidation=readMediaRevalidation(payload);
   return {
     url,
     role: text(payload.image_role).toUpperCase() === "PRIMARY" ? "PRIMARY" : "ADDITIONAL",
@@ -107,6 +111,7 @@ function productImageFromPayload(payload: Record<string, unknown>): ProductImage
     qualityScore: Number.isFinite(quality) ? quality : null,
     feedback: payload.feedback_verified === true,
     observedAt: text(payload.published_at) || text(payload.ai_updated_at) || null,
+    ...(revalidation?{revalidation}:{}),
     sourceContentSha256: /^[a-f0-9]{64}$/u.test(text(payload.image_content_sha256).toLowerCase())
       ? text(payload.image_content_sha256).toLowerCase()
       : null,
@@ -114,6 +119,7 @@ function productImageFromPayload(payload: Record<string, unknown>): ProductImage
       ? "APPROVED"
       : null,
     metadataVerified: payload.metadata_verified === true,
+    ...(colorBinding?{colorBinding}:{}),
   };
 }
 
@@ -150,7 +156,7 @@ export function stableProductDocumentFromQdrantPayload(value: unknown): StablePr
     occasions: strings(payload.search_occasions ?? payload.occasions),
     imageUrls: [...new Set([...primaryImage, ...images])].slice(0, 20),
     catalogVersion: text(payload.catalog_version) || text(payload.ingestion_version) || "catalog-v2",
-    observedAt: text(payload.published_at) || text(payload.ai_updated_at) || null,
+    observedAt: text(payload.published_at) || text(payload.ai_updated_at) || text(payload.source_updated_at) || null,
   };
 }
 

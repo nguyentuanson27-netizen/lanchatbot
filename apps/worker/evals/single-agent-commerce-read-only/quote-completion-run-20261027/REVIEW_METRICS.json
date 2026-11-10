@@ -1,0 +1,106 @@
+{
+  "sourceSha": "342ef0cff2888908518872f707ea33ede0f9c290",
+  "nativeRegistered": 51,
+  "nativeExecuted": 51,
+  "nativeNotRun": 0,
+  "controlsExecuted": 17,
+  "completeDenominator": 68,
+  "nativeTerminals": {
+    "SEND_ELIGIBLE": 37,
+    "HANDOFF": 10,
+    "NO_SEND": 4
+  },
+  "providerGenerationRequests": 141,
+  "maximumUpstreamPerGeneration": 1,
+  "retry": 0,
+  "requestsByRole": {
+    "control-verifier": 17,
+    "owner": 87,
+    "verifier": 37
+  },
+  "observedModelVersions": {
+    "gpt-6.1-sol": 54,
+    "gemini-3.5-flash-lite": 87
+  },
+  "generationErrors": [],
+  "tokens": {
+    "input": 955122,
+    "output": 89030,
+    "thinkingIncludedInOutput": 82325
+  },
+  "tokensByRole": {
+    "owner": {
+      "input": 623068,
+      "output": 83544,
+      "thinkingIncludedInOutput": 78984
+    },
+    "verifier": {
+      "input": 206632,
+      "output": 3283,
+      "thinkingIncludedInOutput": 2399
+    },
+    "control-verifier": {
+      "input": 125422,
+      "output": 2203,
+      "thinkingIncludedInOutput": 942
+    }
+  },
+  "cost": null,
+  "verifierProviderLatencyMs": {
+    "samples": 37,
+    "p50": 5992,
+    "p95": 12227
+  },
+  "verificationWithReadbackMs": {
+    "samples": 37,
+    "p50": 7545.931700000001,
+    "p95": 15084.926600000006
+  },
+  "driverSlotLatencyMs": {
+    "samples": 51,
+    "p50": 20971.84580000001,
+    "p95": 44288.06969999999
+  },
+  "captureDisplayRestoredByHash": [],
+  "wireAudit": {
+    "capturedActualBodies": 141,
+    "ownerHashChecks": 87,
+    "ownerWireMatchChecks": 87,
+    "verifierWireChecks": 33,
+    "b1VerifierTelemetryChecks": 21,
+    "boundedEvaluatorOrSecretKeyMatches": 0,
+    "boundedCaseIdStringMatches": 0
+  },
+  "testDatabaseCleanup": [
+    {
+      "cohort": "opening-quotes",
+      "testDatabase": "c3_b_test_37e5dc57ea82bb86",
+      "dropped": true
+    },
+    {
+      "cohort": "media-followup",
+      "testDatabase": "c3_b_test_6c146447b79fa3ea",
+      "dropped": true
+    },
+    {
+      "cohort": "missing-pos",
+      "testDatabase": "c3_b_test_a883d0392eae39bd",
+      "dropped": true
+    },
+    {
+      "cohort": "journey-openings",
+      "testDatabase": "c3_b_test_a1f1f31f642bf776",
+      "dropped": true
+    },
+    {
+      "cohort": "stateful",
+      "testDatabase": "c3_b_test_76b1377b5040701e",
+      "dropped": true
+    },
+    {
+      "cohort": "negotiation",
+      "testDatabase": "c3_b_test_9a4c8141d69d210d",
+      "dropped": true
+    }
+  ]
+}

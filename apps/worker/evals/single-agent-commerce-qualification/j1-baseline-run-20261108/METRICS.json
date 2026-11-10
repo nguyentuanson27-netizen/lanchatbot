@@ -1,0 +1,48 @@
+{
+  "runSourceSha": "6ac0eb783a3dba2e5641d503cfc222d74f2b0f5f",
+  "worldHash": "551b7fc0ae29d7f87b66250e7c4d6f4c5b38495b8fb01589c5604f232efee3ba",
+  "registeredCases": 2,
+  "executedCases": 2,
+  "repetitions": 1,
+  "attemptDenominator": 6,
+  "generationHttp": 6,
+  "ownerGenerations": 4,
+  "verifierGenerations": 2,
+  "providerErrorRate": 0,
+  "timeoutRate": 0,
+  "unknownAttempts": 0,
+  "retry": 0,
+  "sendEligible": 2,
+  "fallback": 0,
+  "handoff": 0,
+  "noSend": 0,
+  "tokens": {
+    "owner": {
+      "input": 42258,
+      "output": 3652
+    },
+    "verifier": {
+      "input": 16205,
+      "output": 193
+    },
+    "total": {
+      "input": 58463,
+      "output": 3845
+    }
+  },
+  "ownerOAuthHttp": 1,
+  "verifierLatencyMs": {
+    "n": 2,
+    "p50": 5801.5,
+    "p95": 5897.35,
+    "scope": "N2 observed only; not a stability estimate"
+  },
+  "endToEndLatency": "NOT_MEASURED_AS_SEPARATE_WALL_CLOCK",
+  "cost": "NOT_EXPOSED",
+  "disposableDatabases": 1,
+  "databaseDropped": true,
+  "sourceShopWrites": 0,
+  "liveSends": 0,
+  "formalBlindQuality": "NOT_GRADED",
+  "phaseCGo": false
+}

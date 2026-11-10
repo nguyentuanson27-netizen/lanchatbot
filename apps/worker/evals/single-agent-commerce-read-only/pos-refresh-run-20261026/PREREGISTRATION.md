@@ -1,0 +1,15 @@
+# POS refresh + owner wire — 26/10/2026
+
+Base `106d0c341f1e5f2e47e8850916c33cfc063f666f`; source mới capture từ clean committed HEAD sau independent executable APPROVE. Không ghi source SHA ngược vào executable/frozen inputs. Driver/hash/config/corpus/prompt/model identities giữ trong external REGISTRATION.json. Executable/config thay đổi sau seal invalidates run identity.
+
+Giữ nguyên 51 native của campaign full trước: opening5, media7, POS unavailable3, B1 LIVE21, journey openings4, stateful8, negotiation3. Target22 gồm opening5+media7+POS3+B1first7; review exact artifacts trước full29. B1 eligibility-only tách persisted capture; một private checkout code-only vẫn trong denominator. Không thêm ca/đổi lời khách/nhãn/rubric, không lọc theo provider verdict.
+
+17 controls phải PASS trước native. Tổng68slots,50public model turns+1private native, cap217generationrequests, N1/retry0. Owner Vertex Gemini3.5FlashLiteHIGH/verifier GPT6.1SolHIGH Codex login, config/prompt/verifier unchanged. Mỗi generation tối đa1upstream;401/429/5xx/timeout/malformed giữ accounting/failclosed, không hiddenretry/substitute. Fail controls thì STOP, không chạy native. Targeted quality review không dùng keyword matching; actual terminal/capture/handoff mới là kết quả khách nhận.
+
+Change under test: request-local full POS observation pin bỏ duy nhất root synced_at khỏi full parsed fingerprint; original evidence expiry khôngrenew, current physicalsource fresh/nonfuture/monotonic; anyotherfield/error→stickyfailclosed. Không nới finalgate hoặc pin policy/catalog/state/receipt/cart/media. Hai mô tả tool trái silent handoff được sửa. Không đổi tư vấn prompt/receipt projection/lịch sử; không ablation thiếu căn cứ.
+
+Target review: không unsafe sent-eligible reply hoặc critical integrity/privacy/atomic-handoff failure. Những thiếu sót giọng nhẹ đã được owner tạm chấp nhận được ghi cụ thể và không tự mở styleloop; không đổi rubric sau result. Silent handoff có HUMAN/event/tag/zeroOutbox/capture là allowed. Biết giá nhưng thiếu ảnh cần thiết vẫn silent theo owner. Không coi empty capture là handoff thành công khi thiếu owner/event/tag.
+
+Whole-turn review cả51 sau collection: đáp đúng nhu cầu, chọn/mua thuận tiện, dùng context/correction, thực hiện đúng capability, lời khuyên hữu ích và tự nhiên; không chỉ đủ facts/keywords. Checkout confirm phải silent, hỏi/preview trước đó vẫn gửi. Không gọi một lần chạy là stable hoặc toànBGO. Fixed-source replay chứng minh timestamp path bằng deterministic DB; nếu live source không refresh trong run thì không claim modelrun tái hiện race.
+
+Commands: driver <newexternalraw> controls → targeted → review file chứa exact22caseIds/artifactSHA/safety/critical/reason → cùng driver/raw full. Một command attempted không được dispatch lại. Preserve toàn bộ denominator/raw lỗi, bounded diagnostic và requests. Không production/live send/source-store writes/merge/deploy. Full51sourcecũSTOP và focused7sourcecũPASS giữ nguyên, không relabel. Recommendation sau run theo evidence, không tựGO.

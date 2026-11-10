@@ -1,0 +1,75 @@
+{
+  "runSourceSha": "c6476301539988f134f0843a0e3f2a31fff0560e",
+  "population": {
+    "stateful": 7,
+    "repetitions": 1,
+    "b1": 0,
+    "a2": 0,
+    "a3": 0
+  },
+  "measurementPolicy": "Nearest-rank p50/p95. Whole turn includes source/DB/capture. Generation includes client/auth/parse; verification interval includes existing runner readback/gate overhead. N1, not paired E2E causal comparison.",
+  "terminalCounts": {
+    "SEND_ELIGIBLE": 4,
+    "HANDOFF": 2,
+    "NO_SEND": 1
+  },
+  "terminalRates": {
+    "staticFallback": 0,
+    "handoff": 0.2857142857142857,
+    "noSend": 0.14285714285714285,
+    "sendEligible": 0.5714285714285714
+  },
+  "wholeTurnReview": {
+    "USABLE": 5,
+    "NEEDS_EDIT": 0,
+    "FALLBACK_OR_NO_SEND": 2
+  },
+  "salesJourneyCompleted": false,
+  "modelFinalDrafts": 4,
+  "verifierInvocations": 4,
+  "verifierLatency": {
+    "n": 4,
+    "p50Ms": 4393.975200000001,
+    "p95Ms": 5721.681700000001
+  },
+  "addedEndToEndVerificationLatency": {
+    "n": 4,
+    "p50Ms": 6225.003800000006,
+    "p95Ms": 8686.161799999994
+  },
+  "addedVerificationMeasurement": "Recorded verification interval, not a counterfactual delta from running without verification.",
+  "ownerInvocationLatency": {
+    "n": 9,
+    "p50Ms": 2169.345399999991,
+    "p95Ms": 4854.3369999999995
+  },
+  "wholeTurnLatency": {
+    "n": 7,
+    "p50Ms": 21808.5613,
+    "p95Ms": 43235.754400000005
+  },
+  "providerErrors": 0,
+  "providerTimeouts": 0,
+  "providerErrorRate": 0,
+  "providerTimeoutRate": 0,
+  "tokens": {
+    "input": 68082,
+    "output": 6408,
+    "complete": 13,
+    "denominator": 13,
+    "outputIncludesOwnerThinking": true
+  },
+  "cost": null,
+  "costEvidence": "NOT_EXPOSED_NO_ESTIMATE",
+  "maxOwnerRequestBytes": 31877,
+  "ownerRequestBoundBytes": 32768,
+  "ownerBoundErrors": 0,
+  "finalOnlyRequests": 1,
+  "toolResponsesUnderNone": 0,
+  "providerCounts": {
+    "embedding": 0,
+    "owner": 9,
+    "verifier": 4
+  },
+  "testDatabaseDropped": true
+}

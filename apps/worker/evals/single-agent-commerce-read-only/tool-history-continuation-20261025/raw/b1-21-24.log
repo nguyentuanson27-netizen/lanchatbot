@@ -1,0 +1,5 @@
+{"slot":21,"recorded":1,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":22,"recorded":2,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":23,"recorded":3,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"slot":24,"recorded":4,"registered":24,"terminal":"SEND_ELIGIBLE"}
+{"status":"DISPATCH_RANGE_COMPLETE_REVIEW_PENDING","registered":24,"recorded":4,"out":"C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-tool-history-continuation-20261025\\b1-21-24","sendEnabled":false}

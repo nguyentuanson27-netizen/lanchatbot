@@ -1,0 +1,196 @@
+{
+  "j2SourceSha": "d9b8190703bee3f6838d73ac43992fa8e8c8af74",
+  "j1SourceSha": "4516f06c4cf8ef0372b77315381c3eb2909ec046",
+  "sameRuntimeAndPackagesAcrossPhases": true,
+  "exactSameSourceClaim": false,
+  "j2": {
+    "turns": 3,
+    "sendEligible": 3,
+    "handoff": 0,
+    "providerGenerations": 9,
+    "rawDirectory": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-01"
+  },
+  "j1": {
+    "primarySlots": 10,
+    "registeredCaseCounts": {
+      "j1-total": 6,
+      "cart-control": 2,
+      "ack-control": 2
+    },
+    "providerGenerations": 10,
+    "statuses": {
+      "OK": 10,
+      "providerError": 0
+    },
+    "gate": "NO_ADOPTION_EVIDENCE",
+    "directQuote": {
+      "A": 3,
+      "B": 2,
+      "denominatorPerArm": 3
+    },
+    "cartControl": {
+      "A": true,
+      "B": true
+    },
+    "ackControl": {
+      "A": false,
+      "B": false
+    },
+    "nativeAttempted": 0,
+    "nativeNotRun": 2,
+    "nativeReason": "NO_ADOPTION_EVIDENCE; also runner offline-assessment wait expired",
+    "rawDirectory": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-model-20261108-02"
+  },
+  "accounting": {
+    "actualGenerationAttempts": 19,
+    "actualGenerationHttpRequests": 19,
+    "owner": 16,
+    "verifier": 3,
+    "providerErrors": 0,
+    "providerTimeouts": 0,
+    "runnerErrors": 1,
+    "runnerError": "CAMPAIGN_OFFLINE_ASSESSMENT_MISSING",
+    "maxPermitted": 30,
+    "automaticRetry": 0,
+    "conditionalGenerationRequests": 0,
+    "unusedConditionalMaximum": 8
+  },
+  "usage": {
+    "OWNER": {
+      "attempts": 16,
+      "inputTokens": 154231,
+      "outputTokens": 19746,
+      "missingUsage": 0
+    },
+    "VERIFIER": {
+      "attempts": 3,
+      "inputTokens": 27149,
+      "outputTokens": 307,
+      "missingUsage": 0
+    }
+  },
+  "verifierLatencyMs": {
+    "count": 3,
+    "p50": 5799.0,
+    "p95": 7121.1
+  },
+  "cost": "NOT_EXPOSED",
+  "preparation": [
+    {
+      "directory": "c3-j2-j1-preparation-20261108-01",
+      "status": "FAIL",
+      "error": "Cannot read properties of null (reading 'm')",
+      "providerRequests": 0,
+      "databaseDropped": true,
+      "artifactSha256": "5b55e2e4838864290d3c8e4e9a8182ff5accb22eb24cb212572de62f4d997fc4"
+    },
+    {
+      "directory": "c3-j2-j1-preparation-20261108-02",
+      "status": "FAIL",
+      "error": "CAMPAIGN_REAL_CART_SEED",
+      "providerRequests": 0,
+      "databaseDropped": true,
+      "artifactSha256": "be97b156d6035351c6c122205268f64813f5459948ecd7662442e8b5d9c6bfef"
+    },
+    {
+      "directory": "c3-j2-j1-preparation-20261108-03",
+      "status": "FAIL",
+      "error": "CAMPAIGN_CAPTURE_MISSING",
+      "providerRequests": 0,
+      "databaseDropped": true,
+      "artifactSha256": "25f9bddc618d7f10ea3ffe04ce1b208aa4c0adf90413e46f98a1109bb37a2e10"
+    },
+    {
+      "directory": "c3-j2-j1-preparation-20261108-04",
+      "status": "FAIL",
+      "error": "CAMPAIGN_CAPTURE_MISSING",
+      "providerRequests": 0,
+      "databaseDropped": true,
+      "artifactSha256": "5d0baaaa58795ff95145b5bb86ca1fb440c87152a60b1f54b7c1bd9f7f0d7ba4"
+    },
+    {
+      "directory": "c3-j2-j1-preparation-20261108-05",
+      "status": "FAIL",
+      "error": "CAMPAIGN_CAPTURE_MISSING",
+      "providerRequests": 0,
+      "databaseDropped": true,
+      "artifactSha256": "ad39d0637c78c8e390794556ea98ed056b4c14feeb22abc243fbba477e0e4c0a"
+    },
+    {
+      "directory": "c3-j2-j1-preparation-20261108-06",
+      "status": "PASS",
+      "error": null,
+      "providerRequests": 0,
+      "databaseDropped": true,
+      "artifactSha256": "63e3a6519f84ad5b74d9b7af6c6a9dc241a30edec95d38720860f44aab330b20"
+    },
+    {
+      "directory": "c3-j2-j1-preparation-20261108-07",
+      "status": "PASS",
+      "error": null,
+      "providerRequests": 0,
+      "databaseDropped": true,
+      "artifactSha256": "1b26200d9fe3557edcaf9b8f3730b4503a70e447c3f259e0b7ace578394c8b3e"
+    }
+  ],
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "knownAttributionLimits": [
+    "J2 executed under d9b81907; J1 under4516f06c after eval-only returning-cart fixture correction, no runtime/package/prompt change. Do not call one exact-source campaign.",
+    "Original J1 control was incorrectly first-contact; it hit required cart image preparation before owner. Seven zero-provider preparations retained, final control had genuine earlier accepted output and real executor-seeded cart. No image-gate bypass.",
+    "J1 original NOT_RUN record remains in first phase; new primary registration preceded its first provider generation. No failed generation discarded/refilled.",
+    "Runner failed awaiting offline assessment. Two cart whole-output assessments were written late; gate scored offline afterwards without more generations. Raw failure preserved.",
+    "Primary only samples one owner decision; tools not executed and final texts not customer sends. Do not equate primary controls with terminal quality.",
+    "J2 N1, J1 N3/core/arm. No stability/causal proof or Phase C GO.",
+    "Do not infer old bad5ops HEIGHT recovery was exercised by model; inspect actual normalized calls. Deterministic/PG prior proof separate."
+  ]
+}

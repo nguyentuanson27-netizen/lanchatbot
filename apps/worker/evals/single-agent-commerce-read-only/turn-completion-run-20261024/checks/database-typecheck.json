@@ -1,0 +1,10 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@lana/database",
+    "typecheck"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 6.110310316085815
+}

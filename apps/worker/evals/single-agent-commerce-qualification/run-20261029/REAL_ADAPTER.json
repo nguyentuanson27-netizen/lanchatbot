@@ -1,0 +1,52 @@
+{
+  "status": "PASS",
+  "kind": "REAL_ADAPTER_SEND_DISABLED",
+  "candidateIdentity": "0e74f5e297bc8fa00cd5fcef0df2c1a4d052fe249f09e48b5a7f0042235c2fec",
+  "sendEnabled": false,
+  "checks": [
+    {
+      "name": "stale_revision",
+      "status": "PASS",
+      "artifactHash": "117b561039c624aaaafd7d0f9e70eced5569ff02b5b7e86e24034b0d823fc9c9",
+      "caseName": "B composed newer inbound between final readback and commit cancels eligibility without an Outbox"
+    },
+    {
+      "name": "duplicate_source",
+      "status": "PASS",
+      "artifactHash": "117b561039c624aaaafd7d0f9e70eced5569ff02b5b7e86e24034b0d823fc9c9",
+      "caseName": "B3 native cart commits once; duplicate does not repeat database transaction"
+    },
+    {
+      "name": "crash_after_commit",
+      "status": "PASS",
+      "artifactHash": "117b561039c624aaaafd7d0f9e70eced5569ff02b5b7e86e24034b0d823fc9c9",
+      "caseName": "B composed recovery accounting commit-response-lost"
+    },
+    {
+      "name": "ambiguous_reconciliation",
+      "status": "PASS",
+      "artifactHash": "117b561039c624aaaafd7d0f9e70eced5569ff02b5b7e86e24034b0d823fc9c9",
+      "caseName": "B3 native quantity change persists, unknown commit reconciles without replay"
+    },
+    {
+      "name": "operation_idempotency",
+      "status": "PASS",
+      "artifactHash": "117b561039c624aaaafd7d0f9e70eced5569ff02b5b7e86e24034b0d823fc9c9",
+      "caseName": "B composed ingress commits an open cart, authorizes the exact reply and captures delivery once"
+    },
+    {
+      "name": "history_outbox_recovery",
+      "status": "PASS",
+      "artifactHash": "117b561039c624aaaafd7d0f9e70eced5569ff02b5b7e86e24034b0d823fc9c9",
+      "caseName": "B composed two native mutations retain one source and next owner receives accepted history and current cart"
+    },
+    {
+      "name": "no_duplicate_effect",
+      "status": "PASS",
+      "artifactHash": "117b561039c624aaaafd7d0f9e70eced5569ff02b5b7e86e24034b0d823fc9c9",
+      "caseName": "B composed N4 sends exact text and selected image in one response group without replay duplicates"
+    }
+  ],
+  "providerRequests": 0,
+  "domainInputs": "SYNTHETIC_ACTUAL_PERSISTENCE_AND_CAPTURE"
+}

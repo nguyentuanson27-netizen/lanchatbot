@@ -1,0 +1,38 @@
+{
+  "status": "PASS_MECHANICAL_ONLY",
+  "providerGenerations": 0,
+  "modelBehavior": "NOT_TESTED",
+  "ownerBodies": 42,
+  "verifierBodies": 179,
+  "sameBoundRejections": 1,
+  "prompts": {
+    "conversation": {
+      "hash": "2deeed8d63bbc3343e7f6e2e4c0e9e74c25ebbf20ad9a24aa66281b88771227f",
+      "bytes": 8985
+    },
+    "verifier": {
+      "hash": "477cb8536055e25eda9bdff18eaec661b3db594805f7232488ee1c3a6bd5a02d",
+      "bytes": 9018
+    }
+  },
+  "frozenSourceChecks": [
+    {
+      "file": "round-67/a2-evidence.json",
+      "hash": "ae834e2edb61d6f568f397f8fd4973ba07d85a39abba80f0591508d9fc0a23bc"
+    },
+    {
+      "file": "round-67/a3-evidence.json",
+      "hash": "9d2b865b6c202810918ae86f8563c8a86cd839e596e6ae85d93e07f17beecd15"
+    },
+    {
+      "file": "round-67/a3-primary-scores.json",
+      "hash": "befd0e283e45e15371a3ea46e602026fb2b1cc4963d56b39e1aa429858ead0c7"
+    },
+    {
+      "file": "failure-recheck-20261014/evidence.json",
+      "hash": "412df1c792c9c92455c59202c6202c7c3c6820cd9d9c205ccf813d03e7f51b28"
+    }
+  ],
+  "worlds": "LEGACY_AND_V2_RETAINED",
+  "historicalOutcome": "R67_AND_TARGETED_RECHECK_STOP_UNCHANGED"
+}

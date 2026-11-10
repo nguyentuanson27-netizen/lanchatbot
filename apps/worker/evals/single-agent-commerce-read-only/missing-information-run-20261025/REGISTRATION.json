@@ -1,0 +1,113 @@
+{
+  "sourceSha": "2c4de47c5340c2b715d5b80a8787e0e89520e05b",
+  "implementationBaseSha": "2fa14323dd2edbaae429e5c737319949700027fa",
+  "mode": "SCOPED_PERSISTED_MISSING_INFORMATION_ACCEPTANCE",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "1ed3689ef904887fc87b27f272252d1de16f8ce883c7cfebc409f99ab2125817",
+    "verifier": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c"
+  },
+  "hashes": {
+    "manifest.json": "5043e532c888048b64b7b20bafe5d24556d56fa41cccc61a054231d638bbdd33",
+    "source-config.b1.json": "b4c15f1823bf16d63a1ff67eb3a11711b28ed6592ec7bc1e65e0ceb3fbbc0d59",
+    "opening-quote-cases.json": "d095fd2e7bcc4bbe82f107e0944741c4b7310d145846f6a7bda8cea70de0b8de",
+    "sales-media-cases.json": "5e20e6521b47cf4d0b1aed58f6d06cb3000d84fd16d64c7e46e70f028ae4134e",
+    "sales-journeys.candidate.json": "b2575660b7d412eb6a2d11befb04de75fd840789c7126026bb257ce60f183a93",
+    "stateful-cases.json": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+    "prompts/owner.vi.txt": "1ed3689ef904887fc87b27f272252d1de16f8ce883c7cfebc409f99ab2125817",
+    "prompts/verifier.vi.txt": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c",
+    "handoff-matrix.candidate.json": "c8cb700a54ea25d165fdabf04d4573ab4036637064a10784433327dc552c2a5a",
+    "isolated-integration.mjs": "d86e277ffb53d568334bc40105e7a1dc4f8a604c6147c86a2f58318321965611",
+    "stateful-provider.mjs": "943f287c7e6cbe42fe0ca156c517915106820430ac808d7520661cd0810fa0df",
+    "gemini-inference.mjs": "e38f0705b92eab51fba4f34e9bd2dece793ad7721b76b472d0dbd60412068dd4",
+    "protocol.mjs": "50d5dcaeda1c6e8a74303b61322d8779e0823549910b5f13c3396a7a066e5bd2",
+    "feedback-controls-20261023.mjs": "3b628313471b8fa33326e466c39c56defaea4c0d068154f6787cba7cf87ade3d",
+    "source-session.py": "94b6cac60dff03506badc1751ba4e8ea54cce278ec82ff448eeb0e8a6a44294d"
+  },
+  "driverSha256": "c61305efcae27aa5e1095de014f798cc8f1f982fd8704b77d754f48889574e96",
+  "registeredControls": 17,
+  "registeredNativeSlots": 21,
+  "registeredTotalSlots": 38,
+  "maximumGenerationRequests": 97,
+  "repetitions": 1,
+  "generationRetry": 0,
+  "sendEnabled": false,
+  "cohorts": [
+    {
+      "name": "opening-quotes",
+      "flags": [
+        "--opening-quotes"
+      ],
+      "slots": 5
+    },
+    {
+      "name": "media-probe",
+      "flags": [
+        "--media-probe"
+      ],
+      "slots": 4
+    },
+    {
+      "name": "journey-openings",
+      "flags": [
+        "--journey-openings"
+      ],
+      "slots": 4
+    },
+    {
+      "name": "stateful",
+      "flags": [],
+      "slots": 8
+    }
+  ]
+}

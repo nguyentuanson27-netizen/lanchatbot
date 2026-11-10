@@ -1,0 +1,11 @@
+{
+  "sourceSha": "362876e83be4014c28fae60abcaf2e5a3243adb1",
+  "reviewBaseSha": "bb4e284d9fe07409a096320337043ae7c22b9de4",
+  "correctionSha": "fb178f222998b67ec930b42bd8515402c31970ea",
+  "specBlobShas": {
+    "docs/specs/c3-single-agent-commerce-architecture-20261004.md": "7e0265e3b6b3d556d8fb0f3c7267abccef5de86a",
+    "docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md": "4a09b55d2f3a972a65697738876cc5eab21e7a2b",
+    "docs/specs/c3-phase-b-read-only-integration-plan-20261014.md": "12b9cdc66ad5bf98b66f8ea156df984b8de046f9",
+    "docs/specs/c3-phase-b-next-step-plan-20261023.md": "46d0cba9d5a6c148a24e5fadb5bc8441349847bd"
+  }
+}

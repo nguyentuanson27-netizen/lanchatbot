@@ -1,0 +1,1198 @@
+{
+  "scorer": "CODEX_PRIMARY_AGENT",
+  "method": "OWNER_AUTHORIZED_CODEX_OFFLINE_REVIEW",
+  "scoredAt": "2026-10-07T04:19:44.794Z",
+  "a3RunSourceSha": "b7e08321d6bb6a16e486e0ae9277912801f8ed33",
+  "limitations": "Primary-agent offline whole-conversation review; not independent/blind/human/owner acceptance. Same reused development population and prompt; single-attempt Gemini/OpenAI comparison descriptive, no causal or conversion claim. Owner judgment prevails.",
+  "attempts": [
+    {
+      "caseId": "r5-workday-comfort",
+      "customerNeed": "Khách muốn chọn mẫu và size đi làm trong850k, ngồi nhiều, ngại ôm eo; đã đưa đủ số đo.",
+      "wholeConversationReview": "Khách đã nhờ shop chọn giữa set và váy, dữ liệu hiện tại có ST411M và giá trong ngân sách. Exact terminal không đưa phương án nào, chỉ yêu cầu chờ. Dù draft có chọn set, khách không nhận được lựa chọn đó; không đánh đồng nội dung draft với hiệu quả tư vấn.",
+      "customerImpact": "Khách chưa thu hẹp được mẫu/size và có thể thấy shop chưa xử lý được câu hỏi cơ bản dù đã cung cấp số đo.",
+      "overallConclusion": "FAIL",
+      "decisiveReason": "Khách thực sự chỉ nhận fallback; mẫu phù hợp và size theo số đo. Có đủ dữ kiện để tư vấn nhưng lượt này không giúp giải quyết nhu cầu mua.",
+      "confidence": "HIGH_ON_TERMINAL_QUALITY_NOT_LATENT_MODEL_UNDERSTANDING",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Kết quả khách nhận không thể hiện đã hiểu Khách muốn chọn mẫu và size đi làm trong850k, ngồi nhiều, ngại ôm eo; đã đưa đủ số đo.",
+        "explicitNeedCompleteness": "Không trả lời phần còn cần: mẫu phù hợp và size theo số đo.",
+        "contextCorrectionUse": "Fallback giống nhau ở mọi ca, không tiếp nối lựa chọn và thông tin khách đã cung cấp trong ca này.",
+        "usefulness": "Khách vẫn thiếu mẫu phù hợp và size theo số đo để quyết định; bản nháp bị chặn không được tính là lợi ích khách đã nhận.",
+        "decisionSupport": "Không giúp chọn hoặc cân nhắc phương án đang hỏi; không thể dùng lý do trong draft không được gửi để cứu điểm.",
+        "partialAnswerBehavior": "Không cung cấp phần đã có căn cứ trong ca này; toàn bộ lượt chuyển sang câu chờ chung.",
+        "nextStep": "Có hướng chờ nhân viên, nhưng không có tiến triển tư vấn cụ thể cho điểm vướng; không chứng minh nhân viên đã tiếp nhận.",
+        "coherence": "Câu fallback tự nó rõ nghĩa, nhưng không nối tiếp tình huống mua vừa nêu.",
+        "naturalness": "Lời lịch sự nhưng chung và dè dặt, không giống câu tư vấn gắn với băn khoăn cụ thể đang được hỏi.",
+        "factualActionSafety": "Exact terminal chỉ là fallback tĩnh code sở hữu, không chứa giá/size/quyền lợi/hành động thiếu căn cứ; không chấm safety của draft bị chặn."
+      },
+      "attemptId": "r5-workday-comfort:1",
+      "family": "concern",
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Em chưa thể trả lời chắc chắn nội dung này. Chị vui lòng chờ nhân viên hỗ trợ nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V1"
+      }
+    },
+    {
+      "caseId": "r5-competitor-price",
+      "customerNeed": "Khách đã thích navy, biết phom và cách mặc tách bộ; cần lý do đáng trả thêm129k cho đồ đi làm thường xuyên.",
+      "wholeConversationReview": "Trong lịch sử, khách đã được giới thiệu phom và cách tách bộ. Lượt này cần giải quyết phân vân về giá trị mua ở shop. Fallback không giải thích ưu điểm có căn cứ, cũng không giúp so sánh theo nhu cầu mặc thường xuyên; khách không nhận được lập luận trong draft.",
+      "customerImpact": "Băn khoăn về giá không được giải quyết; khả năng tin tưởng và tiếp tục mua chưa được hỗ trợ.",
+      "overallConclusion": "FAIL",
+      "decisiveReason": "Khách thực sự chỉ nhận fallback; lý do có căn cứ để cân nhắc749k với lựa chọn620k. Có đủ dữ kiện để tư vấn nhưng lượt này không giúp giải quyết nhu cầu mua.",
+      "confidence": "HIGH_ON_TERMINAL_QUALITY_NOT_LATENT_MODEL_UNDERSTANDING",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Kết quả khách nhận không thể hiện đã hiểu Khách đã thích navy, biết phom và cách mặc tách bộ; cần lý do đáng trả thêm129k cho đồ đi làm thường xuyên.",
+        "explicitNeedCompleteness": "Không trả lời phần còn cần: lý do có căn cứ để cân nhắc749k với lựa chọn620k.",
+        "contextCorrectionUse": "Fallback giống nhau ở mọi ca, không tiếp nối lựa chọn và thông tin khách đã cung cấp trong ca này.",
+        "usefulness": "Khách vẫn thiếu lý do có căn cứ để cân nhắc749k với lựa chọn620k để quyết định; bản nháp bị chặn không được tính là lợi ích khách đã nhận.",
+        "decisionSupport": "Không giúp chọn hoặc cân nhắc phương án đang hỏi; không thể dùng lý do trong draft không được gửi để cứu điểm.",
+        "partialAnswerBehavior": "Không cung cấp phần đã có căn cứ trong ca này; toàn bộ lượt chuyển sang câu chờ chung.",
+        "nextStep": "Có hướng chờ nhân viên, nhưng không có tiến triển tư vấn cụ thể cho điểm vướng; không chứng minh nhân viên đã tiếp nhận.",
+        "coherence": "Câu fallback tự nó rõ nghĩa, nhưng không nối tiếp tình huống mua vừa nêu.",
+        "naturalness": "Lời lịch sự nhưng chung và dè dặt, không giống câu tư vấn gắn với băn khoăn cụ thể đang được hỏi.",
+        "factualActionSafety": "Exact terminal chỉ là fallback tĩnh code sở hữu, không chứa giá/size/quyền lợi/hành động thiếu căn cứ; không chấm safety của draft bị chặn."
+      },
+      "attemptId": "r5-competitor-price:1",
+      "family": "concern",
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Em chưa thể trả lời chắc chắn nội dung này. Chị vui lòng chờ nhân viên hỗ trợ nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V1"
+      }
+    },
+    {
+      "caseId": "r5-wardrobe-budget",
+      "customerNeed": "Khách có quần navy, muốn đổi cách mặc đi làm dưới600k và tránh mua thừa.",
+      "wholeConversationReview": "Lời đáp chọn mua riêng SM613 thay vì cả set, nối đúng việc đã có quần. Tổng524k giải quyết ngân sách gồm ship; hỏi màu/vòng ngực là hai thông tin liên quan để hoàn tất áo đang chọn. Có vài lời xã giao, nhưng hai đoạn vẫn tập trung vào quyết định mua ít hơn và chọn size, không kể lại toàn bộ danh mục.",
+      "customerImpact": "Khách có phương án tiết kiệm cụ thể, biết tổng và hiểu cần cung cấp gì để chọn tiếp.",
+      "overallConclusion": "PASS",
+      "decisiveReason": "Toàn lượt đáp ứng việc khách cần quyết định, có cơ sở và bước tiếp phù hợp.",
+      "confidence": "PRIMARY_AGENT_JUDGMENT_NOT_OWNER_ACCEPTANCE",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu cần tận dụng quần có sẵn, không mặc định bán thêm set.",
+        "explicitNeedCompleteness": "Trả lời có nên mua cả set và tổng tiền áo/ship.",
+        "contextCorrectionUse": "Dùng quần navy và địa điểm mới để tiếp tục lựa chọn áo.",
+        "usefulness": "Chỉ mua áo giải quyết việc đổi cách mặc trong600k.",
+        "decisionSupport": "Đưa quyết định mua riêng áo với tổng phù hợp, không chỉ liệt kê hai sản phẩm.",
+        "partialAnswerBehavior": "Đã có giá/ship thì trả ngay; size chờ đúng dữ liệu của khách.",
+        "nextStep": "Hỏi màu và vòng ngực cho chính chiếc áo đang cân nhắc.",
+        "coherence": "Lý do tận dụng quần, chọn áo và tổng524k ăn khớp.",
+        "naturalness": "Hai đoạn nói với khách, lượng thông tin phù hợp quyết định này; không bắt buộc ngắn hơn theo số câu.",
+        "factualActionSafety": "499k/25k/524k đúng quote nội thành; không tự chốt size hoặc đặt đơn."
+      },
+      "attemptId": "r5-wardrobe-budget:1",
+      "family": "concern",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ đúng rồi chị, mình đã có sẵn quần thì chỉ cần chốt chiếc áo sơ mi SM613 là vừa khéo vừa tiết kiệm. Áo giá 499k, ship nội thành 25k, tổng thanh toán là 524k – đúng ý dưới 600k của chị luôn ạ. \n\nÁo có hai màu trắng và xanh nhạt. Chị thích màu nào và vòng ngực khoảng bao nhiêu để em chọn size chuẩn cho mình nhé?",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "r5-white-opacity",
+      "customerNeed": "Khách chọn áo trắng họp trong phòng với áo lót màu da, vòng ngực92; cần xác nhận lựa chọn và size.",
+      "wholeConversationReview": "Dữ kiện có fitM và phép thử độ xuyên đúng bối cảnh khách đưa. Nhưng khách chỉ nhận fallback, không có quyết định chọn áo hay lời giải thích áp dụng điều kiện. Review terminal vì vậy FAIL dù draft phần lớn bám bối cảnh. Việc verifier chặn lời fit trong ca này cần phân xử riêng; không mặc định cả draft là unsafe.",
+      "customerImpact": "Khách đã cung cấp đủ điều kiện nhưng vẫn phải chờ, làm giảm độ hữu ích và sự tin tưởng.",
+      "overallConclusion": "FAIL",
+      "decisiveReason": "Khách thực sự chỉ nhận fallback; xác nhận lựa chọn áo trắngM trong điều kiện đã nêu. Có đủ dữ kiện để tư vấn nhưng lượt này không giúp giải quyết nhu cầu mua.",
+      "confidence": "HIGH_ON_TERMINAL_QUALITY_NOT_LATENT_MODEL_UNDERSTANDING",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Kết quả khách nhận không thể hiện đã hiểu Khách chọn áo trắng họp trong phòng với áo lót màu da, vòng ngực92; cần xác nhận lựa chọn và size.",
+        "explicitNeedCompleteness": "Không trả lời phần còn cần: xác nhận lựa chọn áo trắngM trong điều kiện đã nêu.",
+        "contextCorrectionUse": "Fallback giống nhau ở mọi ca, không tiếp nối lựa chọn và thông tin khách đã cung cấp trong ca này.",
+        "usefulness": "Khách vẫn thiếu xác nhận lựa chọn áo trắngM trong điều kiện đã nêu để quyết định; bản nháp bị chặn không được tính là lợi ích khách đã nhận.",
+        "decisionSupport": "Không giúp chọn hoặc cân nhắc phương án đang hỏi; không thể dùng lý do trong draft không được gửi để cứu điểm.",
+        "partialAnswerBehavior": "Không cung cấp phần đã có căn cứ trong ca này; toàn bộ lượt chuyển sang câu chờ chung.",
+        "nextStep": "Có hướng chờ nhân viên, nhưng không có tiến triển tư vấn cụ thể cho điểm vướng; không chứng minh nhân viên đã tiếp nhận.",
+        "coherence": "Câu fallback tự nó rõ nghĩa, nhưng không nối tiếp tình huống mua vừa nêu.",
+        "naturalness": "Lời lịch sự nhưng chung và dè dặt, không giống câu tư vấn gắn với băn khoăn cụ thể đang được hỏi.",
+        "factualActionSafety": "Exact terminal chỉ là fallback tĩnh code sở hữu, không chứa giá/size/quyền lợi/hành động thiếu căn cứ; không chấm safety của draft bị chặn."
+      },
+      "attemptId": "r5-white-opacity:1",
+      "family": "concern",
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Em chưa thể trả lời chắc chắn nội dung này. Chị vui lòng chờ nhân viên hỗ trợ nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V1"
+      }
+    },
+    {
+      "caseId": "r5-size-price-stock",
+      "customerNeed": "Khách đã chọn váy rêu, cung cấp số đo và muốn chọn size/tính ship trong900k.",
+      "wholeConversationReview": "Một đoạn chốt lựa chọn L có tồn và tổng829k miễn ship đúng địa điểm khách gửi. Không mở lại mẫu/màu đã chọn, không yêu cầu thêm số đo hoặc địa chỉ khi việc tư vấn đã đủ. Mức giải thích gọn phù hợp một lượt hoàn tất lựa chọn.",
+      "customerImpact": "Khách biết chính xác cấu hình và tổng chi phí để quyết định mua.",
+      "overallConclusion": "PASS",
+      "decisiveReason": "Toàn lượt đáp ứng việc khách cần quyết định, có cơ sở và bước tiếp phù hợp.",
+      "confidence": "PRIMARY_AGENT_JUDGMENT_NOT_OWNER_ACCEPTANCE",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu hoàn tất váy đã chọn, không chuyển sang tư vấn mẫu khác.",
+        "explicitNeedCompleteness": "Giải quyết size, tồn, ship và tổng ngân sách.",
+        "contextCorrectionUse": "Dùng số đo mới nhất/màu rêu/địa điểm đã có.",
+        "usefulness": "Cho cấu hìnhL và tổng rõ, khách không phải tự tính.",
+        "decisionSupport": "Lựa chọn phù hợp kết quả fit và ngân sách, không giao khách tự so bảng.",
+        "partialAnswerBehavior": "Đủ dữ liệu thì trả hết, không tự tạo bước thiếu thông tin.",
+        "nextStep": "Lựa chọn và tổng đã hoàn tất; không cần một CTA mới để đạt tiến triển.",
+        "coherence": "Size/tồn/miễn ship/tổng áp dụng cùng váy và địa điểm.",
+        "naturalness": "Một đoạn liền mạch, không thuyết minh lại mọi số đo.",
+        "factualActionSafety": "FitL có code, tồn rêuL/829k/quote miễn ship nội thành có nguồn; không receipt giả."
+      },
+      "attemptId": "r5-size-price-stock:1",
+      "family": "partial",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Với số đo của chị, size L là chuẩn nhất ạ, màu rêu size L hiện đang sẵn hàng. Đơn nội thành TP.HCM của mình trên 700k nên được miễn phí ship, tổng tiền là 829k, vừa vặn trong ngân sách 900k của chị luôn nhé.",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "r5-missing-customer-size",
+      "customerNeed": "Khách cần biết tồn/tổng quần navy rồi chọn size, chưa đưa vòng eo/mông.",
+      "wholeConversationReview": "Lời đáp trả phần đã xác minh là tồn và tổng484k, rồi hỏi đúng eo/mông còn thiếu. Không đổ lỗi thiếu số đo của shop, không tự đoán size bằng cân nặng. Hai đoạn ngắn giúp khách tiếp tục mua chiếc quần đã chọn.",
+      "customerImpact": "Khách biết chi phí và đúng việc cần làm để hoàn tất size.",
+      "overallConclusion": "PASS",
+      "decisiveReason": "Toàn lượt đáp ứng việc khách cần quyết định, có cơ sở và bước tiếp phù hợp.",
+      "confidence": "PRIMARY_AGENT_JUDGMENT_NOT_OWNER_ACCEPTANCE",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu cần hoàn tất quần navy, không bắt đầu giới thiệu tủ đồ.",
+        "explicitNeedCompleteness": "Trả tồn/tổng và xử lý yêu cầu chọn size bằng câu hỏi cần thiết.",
+        "contextCorrectionUse": "Giữ quần navy/địa điểm nội thành đã nêu.",
+        "usefulness": "Tổng rõ và yêu cầu hai số đo đúng loại quần.",
+        "decisionSupport": "Không đoán size; hướng tới cấu hình phù hợp khách.",
+        "partialAnswerBehavior": "Giải quyết phần có bằng chứng, giữ lại đúng phần phụ thuộc số đo khách.",
+        "nextStep": "Eo/mông là thông tin thực sự cần cho bước chọn size.",
+        "coherence": "Tồn/giá/ship và câu hỏi cùng phục vụ quần đang chọn.",
+        "naturalness": "Tách tiền và số đo vừa đủ để đọc nhanh, không vòng vo.",
+        "factualActionSafety": "459k/25k/484k/tồnSML đúng facts; chưa cófit nên không khẳng định size."
+      },
+      "attemptId": "r5-missing-customer-size:1",
+      "family": "partial",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Quần navy hiện đủ size S, M, L ạ. Đơn của chị gồm 459k tiền quần và 25k ship nội thành TP.HCM, tổng là 484k. \n\nChị cho em xin số đo vòng eo và mông để em chọn chính xác size cho mình nhé.",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "r5-white-variant-alternative",
+      "customerNeed": "Khách cần biết trắngL còn không và muốn shop chọn màu khác hợp quần đen nếu hết.",
+      "wholeConversationReview": "Lời đáp xác nhận trắngL hết và chọn xanh nhạtL để phối quần đen. Đó là phương án có tồn và trong ngân sách theo dữ liệu; không hỏi lại size hoặc giao khách tự chọn lại màu. Nhận định tôn da còn chung và chưa cá nhân hóa theo sắc da, nhưng không phải bảo đảm fit/độ kín; đây là hạn chế của lời styling, không làm phương án màu sai.",
+      "customerImpact": "Khách có một biến thể thay thế cụ thể để tiếp tục chọn; chưa phải tư vấn cá nhân hóa hoàn hảo.",
+      "overallConclusion": "PASS",
+      "decisiveReason": "Toàn lượt đáp ứng việc khách cần quyết định, có cơ sở và bước tiếp phù hợp.",
+      "confidence": "PRIMARY_AGENT_JUDGMENT_NOT_OWNER_ACCEPTANCE",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu yêu cầu thay màu khi trắngL hết.",
+        "explicitNeedCompleteness": "Trả câu hỏi tồn và chọn màu thay thế theo yêu cầu.",
+        "contextCorrectionUse": "Giữ L từ vòng ngực98 và quần đen đã có.",
+        "usefulness": "Đưa xanh nhạtL hiện có tồn, hợp hướng phối quần đen.",
+        "decisionSupport": "Thu hẹp về một màu/size phù hợp thay vì thêm danh sách.",
+        "partialAnswerBehavior": "Không trì hoãn phần đủ facts; không tạo thiếu dữ liệu shop.",
+        "nextStep": "Lựa chọn thay thế đã rõ; câu hỏi xác nhận tiếp không bắt buộc.",
+        "coherence": "Cùng mẫu/size, thay đúng màu hết hàng; ngân sách550k vẫn phù hợp499k.",
+        "naturalness": "Lời gọn, có lý do phối đồ; cách khen còn chung nhưng không thành đoạn fact inventory.",
+        "factualActionSafety": "TồntrắngL=0/xanhL=2/fitL có nguồn; tôn da là nhận định styling, chưa chứng minh cá nhân hóa."
+      },
+      "attemptId": "r5-white-variant-alternative:1",
+      "family": "partial",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, áo trắng size L nhà em hết rồi chị ạ. Chị chuyển sang màu xanh nhạt size L giúp em nhé; sắc xanh nhạt này mặc với quần đen rất nhã nhặn và tôn da đấy ạ.",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "r5-delivery-timing",
+      "customerNeed": "Khách đã chọn navyM, cần có đồ sáng thứSáu và muốn biết nên làm gì khi ETA chỉ dự kiến.",
+      "wholeConversationReview": "Generation trả kết quả không đủ điều kiện nên terminal là fallback. Khách không nhận được việc phân biệt ETA2–3ngày với bảo đảm sáng thứSáu, cũng không có phương án dự phòng. Không tạo draft giả hoặc chạy bù; ca lỗi vẫn nằm trong denominator.",
+      "customerImpact": "Khách chưa ra được quyết định mua theo thời hạn và dễ mất cơ hội chuẩn bị đồ.",
+      "overallConclusion": "FAIL",
+      "decisiveReason": "Khách thực sự chỉ nhận fallback; đánh giá rủi ro thời hạn và phương án xử lý. Có đủ dữ kiện để tư vấn nhưng lượt này không giúp giải quyết nhu cầu mua.",
+      "confidence": "HIGH_ON_TERMINAL_QUALITY_NOT_LATENT_MODEL_UNDERSTANDING",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Kết quả khách nhận không thể hiện đã hiểu Khách đã chọn navyM, cần có đồ sáng thứSáu và muốn biết nên làm gì khi ETA chỉ dự kiến.",
+        "explicitNeedCompleteness": "Không trả lời phần còn cần: đánh giá rủi ro thời hạn và phương án xử lý.",
+        "contextCorrectionUse": "Fallback giống nhau ở mọi ca, không tiếp nối lựa chọn và thông tin khách đã cung cấp trong ca này.",
+        "usefulness": "Khách vẫn thiếu đánh giá rủi ro thời hạn và phương án xử lý để quyết định; bản nháp bị chặn không được tính là lợi ích khách đã nhận.",
+        "decisionSupport": "Không giúp chọn hoặc cân nhắc phương án đang hỏi; không thể dùng lý do trong draft không được gửi để cứu điểm.",
+        "partialAnswerBehavior": "Không cung cấp phần đã có căn cứ trong ca này; toàn bộ lượt chuyển sang câu chờ chung.",
+        "nextStep": "Có hướng chờ nhân viên, nhưng không có tiến triển tư vấn cụ thể cho điểm vướng; không chứng minh nhân viên đã tiếp nhận.",
+        "coherence": "Câu fallback tự nó rõ nghĩa, nhưng không nối tiếp tình huống mua vừa nêu.",
+        "naturalness": "Lời lịch sự nhưng chung và dè dặt, không giống câu tư vấn gắn với băn khoăn cụ thể đang được hỏi.",
+        "factualActionSafety": "Exact terminal chỉ là fallback tĩnh code sở hữu, không chứa giá/size/quyền lợi/hành động thiếu căn cứ; không chấm safety của draft bị chặn."
+      },
+      "attemptId": "r5-delivery-timing:1",
+      "family": "partial",
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "PROVIDER_ERROR",
+        "text": "Em chưa thể trả lời chắc chắn nội dung này. Chị vui lòng chờ nhân viên hỗ trợ nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V1"
+      }
+    },
+    {
+      "caseId": "r5-correct-product",
+      "customerNeed": "Khách đổi từ set sang áo xanh nhạt, đã có quần, ngực92; hỏi giá và size.",
+      "wholeConversationReview": "Lời đáp chuyển đúng sang SM613499k/M/xanh nhạt có tồn. Không giữ đề xuất set749k, không xin lại vòng ngực hoặc giải thích toàn bộ bảng size. Độ dài phù hợp việc sửa lựa chọn.",
+      "customerImpact": "Khách thấy lựa chọn mới được hiểu và có cấu hình mua rõ.",
+      "overallConclusion": "PASS",
+      "decisiveReason": "Toàn lượt đáp ứng việc khách cần quyết định, có cơ sở và bước tiếp phù hợp.",
+      "confidence": "PRIMARY_AGENT_JUDGMENT_NOT_OWNER_ACCEPTANCE",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu khách đang đổi sang áo riêng.",
+        "explicitNeedCompleteness": "Trả giá/size của áo mới và xác nhận tồn.",
+        "contextCorrectionUse": "Sửa mẫu và dùng vòng ngực92 đã cung cấp.",
+        "usefulness": "Không để khách tự tách giá áo từ giá set.",
+        "decisionSupport": "Đưa M cho áo đúng nhu cầu có quần sẵn.",
+        "partialAnswerBehavior": "Đủfit/giá thì trả ngay, không tạo trì hoãn.",
+        "nextStep": "Giá/size/màu đã rõ, không cần hỏi lại quyết định.",
+        "coherence": "Mọi thông tin cùng SM613xanhM, không trộn set.",
+        "naturalness": "Một câu tiếp tục cuộc nói chuyện, không khởi động lại màn chào.",
+        "factualActionSafety": "499k/xanhM/fitM đúng dữ kiện; không báo tạo đơn."
+      },
+      "attemptId": "r5-correct-product:1",
+      "family": "correction",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ áo sơ mi SM613 giá 499.000đ chị nha. Vòng ngực 92cm của chị mặc size M là chuẩn nhất ạ, màu xanh nhạt size M shop đang còn sẵn hàng chị nhé.",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "r5-correct-measurement",
+      "customerNeed": "Khách sửa số đo và hỏi chuyển VA512đen từM sangL.",
+      "wholeConversationReview": "Lời đáp nhận số mới, chuyển hướng tư vấn sangL và xác nhận đenL còn. Không đối chiếu lại số cũ hay yêu cầu đo lại. Câu em đổi sangL cho mình nhé được đọc là đề xuất đổi lựa chọn tư vấn, không phải receipt của thao tác POS; không có action được thực thi ở checkpoint.",
+      "customerImpact": "Khách biết L thay M và không phải lặp lại số đo.",
+      "overallConclusion": "PASS",
+      "decisiveReason": "Toàn lượt đáp ứng việc khách cần quyết định, có cơ sở và bước tiếp phù hợp.",
+      "confidence": "PRIMARY_AGENT_JUDGMENT_NOT_OWNER_ACCEPTANCE",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu trọng tâm là sửa size theo số mới.",
+        "explicitNeedCompleteness": "Xác nhận chọnL và tồn đenL.",
+        "contextCorrectionUse": "Dùng sửa đổi96/77/104, không duy trìM cũ.",
+        "usefulness": "Giải quyết ngay sự nhầm số đo.",
+        "decisionSupport": "Cho một size cụ thể từ fit hiện tại.",
+        "partialAnswerBehavior": "Không thêm thiếu dữ liệu vì code đã cófit mới.",
+        "nextStep": "Cập nhật lựa chọn size đủ cho lượt này, không hỏi vòng.",
+        "coherence": "MớiL/cùngđenVA512 nhất quán với lịch sử.",
+        "naturalness": "Gọn và trực tiếp, không đọc lại bảng số.",
+        "factualActionSafety": "FitL/tồnđenL có nguồn; lời đổi lựa chọn là đề xuất, không claim đã mutation đơn."
+      },
+      "attemptId": "r5-correct-measurement:1",
+      "family": "correction",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ vâng, với số đo mới này thì size L chuẩn hơn cho chị ạ. Đen size L bên em đang còn hàng, em đổi sang size L cho mình nhé!",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "r5-referent-navy",
+      "customerNeed": "Khách đã chọn riêng QU714navyM và muốn xác nhận nếu cònM thì lấyM.",
+      "wholeConversationReview": "Lời đáp quy chiếu mẫu đó đúng về quầnQU714navyM, xác nhận còn. Giá và quote nội thành thêm sau vẫn ngắn, không mở lại setbe hoặc size. Khách chưa cung cấp địa điểm trong lịch sử này nên tổng484k chỉ được hiểu trong phạm vi nội thành đã ghi ở câu ship; không chứng minh địa chỉ hay một đơn đã tạo.",
+      "customerImpact": "Khách có xác nhận biến thể đã chọn; quote giúp dự trù trong phạm vi địa điểm nêu, không thay dữ liệu giao hàng.",
+      "overallConclusion": "PASS",
+      "decisiveReason": "Toàn lượt đáp ứng việc khách cần quyết định, có cơ sở và bước tiếp phù hợp.",
+      "confidence": "PRIMARY_AGENT_JUDGMENT_NOT_OWNER_ACCEPTANCE",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu khách muốn tiếp tục quần đã thống nhất.",
+        "explicitNeedCompleteness": "Xác nhận navyM còn và giữ lựa chọnM.",
+        "contextCorrectionUse": "Mẫu đó quy về QU714 thay vì setST411.",
+        "usefulness": "Thông tin đủ để tiếp tục mua quần, không bắt đầu so mẫu.",
+        "decisionSupport": "Giữ quyết định đã xong, không gợi chọn lại size/mẫu.",
+        "partialAnswerBehavior": "Phần có tồn được trả ngay, không hỏi lại số đo.",
+        "nextStep": "Cấu hình/tồn đã rõ; việc lấy địa chỉ thuộc bước sau được phép.",
+        "coherence": "Giá và quote đi với quần; tổng có phạm vi nội thành, không xác minh địa chỉ khách.",
+        "naturalness": "Hai đoạn ngắn, thêm giá vừa phải; không biến thành giới thiệu lại.",
+        "factualActionSafety": "TồnnavyM/459k/quoteINNER_HCMC484k đúng; không receipt đặt đơn/giữ hàng."
+      },
+      "attemptId": "r5-referent-navy:1",
+      "family": "correction",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, quần QU714 navy size M bên em còn hàng chị nhé. \n\nGiá quần là 459.000đ, phí ship nội thành TP.HCM 25.000đ, tổng cộng là 484.000đ ạ.",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "r5-budget-correction",
+      "customerNeed": "Khách hạ ngân sách còn550k cảship, đã có quầnnavy, nhờ chọn món đổi cách mặc.",
+      "wholeConversationReview": "Chọn SM613524k cảship thay cho set749k là điều chỉnh đúng mục tiêu mới. Lý do tận dụng quần sẵn phục vụ tiết kiệm, câu hỏi vòng ngực cần cho size áo. Có nhắc ngân sách lại một lần và giọng xã giao, nhưng các ý vẫn nối vào quyết định áo riêng; không tự tạo thiếu dữ liệu shop.",
+      "customerImpact": "Khách có món nằm trong hạn mức mới và biết cần đo gì để chọnsize.",
+      "overallConclusion": "PASS",
+      "decisiveReason": "Toàn lượt đáp ứng việc khách cần quyết định, có cơ sở và bước tiếp phù hợp.",
+      "confidence": "PRIMARY_AGENT_JUDGMENT_NOT_OWNER_ACCEPTANCE",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu hạn mức mới550k thay800k.",
+        "explicitNeedCompleteness": "Đề xuất món và tổng cóship theo ngân sách mới.",
+        "contextCorrectionUse": "Dùng quầnnavy/địa điểm cũ và bỏ đề xuất set vượt ngân sách.",
+        "usefulness": "Áo riêng524k giải quyết thay cách mặc không mua thêmquần.",
+        "decisionSupport": "Chọn rõ nhóm món phù hợp, không ép giữset.",
+        "partialAnswerBehavior": "Tổng đã biết trả ngay; size chờ đúng số của khách.",
+        "nextStep": "Hỏi vòngngực để hoàn tất áo, không lấy PIIcheckout.",
+        "coherence": "Lựa chọn/giá/ship/lý do tận dụng tủ đồ nhất quán.",
+        "naturalness": "Hai đoạn có chức năng riêng, xã giao hơi nhiều nhưng không mất hướng tư vấn.",
+        "factualActionSafety": "499k/25k/524k đúng quote; không tự chốt size chưa cófit."
+      },
+      "attemptId": "r5-budget-correction:1",
+      "family": "correction",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Với ngân sách 550k cả ship, chị chọn áo sơ mi SM613 giá 499.000đ (phí ship nội thành 25.000đ, tổng 524.000đ) là vừa vặn ạ. Vì chị đã sẵn quần navy, mình lấy thêm chiếc áo này phối đi làm vừa lịch sự lại đúng khoản tiền chị dự tính. \n\nÁo có sẵn hai màu trắng và xanh nhạt. Chị cho em xin số đo vòng ngực để em chọn đúng size chuẩn cho chị nhé ạ!",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "r5-defer",
+      "customerNeed": "Khách muốn dừng đến cuối tuần, không giữ hàng hoặc hỏi thêm.",
+      "wholeConversationReview": "Lời đáp chấp nhận dừng, chỉ để ngỏ khách tự nhắn. Không gắn câu hỏi, quảng cáo tồn2chiếc hay gây áp lực giữ hàng. Đây là tiến triển phù hợp của một chatbot bán hàng: tôn trọng lúc khách chưa mua.",
+      "customerImpact": "Khách được kết thúc nhẹ nhàng, không phải từ chối thêm lần nữa.",
+      "overallConclusion": "PASS",
+      "decisiveReason": "Toàn lượt đáp ứng việc khách cần quyết định, có cơ sở và bước tiếp phù hợp.",
+      "confidence": "PRIMARY_AGENT_JUDGMENT_NOT_OWNER_ACCEPTANCE",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu khách dừng chứ không cần thêm thuyết phục.",
+        "explicitNeedCompleteness": "Đáp đúng việc không giữ/hỏi thêm.",
+        "contextCorrectionUse": "Giữ mốc cuối tuần và trạng thái chưa mua.",
+        "usefulness": "Không tạo áp lực làm mất thiện cảm.",
+        "decisionSupport": "Hỗ trợ quyết định tạm hoãn của khách.",
+        "partialAnswerBehavior": "Không thêm nội dung không cần hoặc trì hoãn giả.",
+        "nextStep": "Kết thúc tự nhiên là bước đúng, không phải lúc nào cũng cần CTA.",
+        "coherence": "Câu đáp tiếp nối lời dừng, không tự mở chủ đề.",
+        "naturalness": "Ngắn, lịch sự, không thuyết minh hoặc nhắcscarcity.",
+        "factualActionSafety": "Không báo giữ hàng/đặt đơn, không thêmfactsprotected."
+      },
+      "attemptId": "r5-defer:1",
+      "family": "correction",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ vâng chị, em rõ rồi ạ. Cuối tuần chị xem lại, lúc nào cần hỗ trợ thêm chị cứ nhắn em nhé!",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "r5-try-exchange",
+      "customerNeed": "Khách cần phân biệt thử váy trong nhà và mặc đi tiệc đối với quyền đổi.",
+      "wholeConversationReview": "Lời đáp giải thích hai tình huống sát câu hỏi: thử trong nhà giữ đủ điều kiện/timeorigin, mặc ra ngoài thì không nhận đổi. Không kể lại giá/tồn hoặc thêm phí đã nói trước khi khách không hỏi. Hai vế tạo hướng thử hàng thực tế trước khi quyết định dùng đi tiệc.",
+      "customerImpact": "Khách biết cách thử giữ quyền đổi và không nhầm mặc đi tiệc rồi vẫn đổi.",
+      "overallConclusion": "PASS",
+      "decisiveReason": "Toàn lượt đáp ứng việc khách cần quyết định, có cơ sở và bước tiếp phù hợp.",
+      "confidence": "PRIMARY_AGENT_JUDGMENT_NOT_OWNER_ACCEPTANCE",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu cần cách thử và ranh giới sử dụng.",
+        "explicitNeedCompleteness": "Trả cả thử trongnhà và đãmặc đi tiệc.",
+        "contextCorrectionUse": "Dùng chínhsách/lựa chọn váy đã có, không mở lại mẫu.",
+        "usefulness": "Điều kiện được gắn với tìnhhuống thử thực tế.",
+        "decisionSupport": "Giúp quyết định thửtrước, không tận dụng7ngày để mặcra ngoài.",
+        "partialAnswerBehavior": "Đủfacts thì trả rõ; không handoff vì câu hỏipolicy.",
+        "nextStep": "Cách thử và giới hạn đã đủ để khách biết làm gì.",
+        "coherence": "Hai tìnhhuống đối chiếu nhất quán, không nói đượcđổi rồi phủ định không có điều kiện.",
+        "naturalness": "Một đoạn có trọngtâm; chi tiết điều kiện cần cho chính kết luận.",
+        "factualActionSafety": "7ngày từ nhận/khônggiặt/sạch/khôngmùi/tem/khôngđổi saumặcra ngoài đều đúng."
+      },
+      "attemptId": "r5-try-exchange:1",
+      "family": "policy",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, chị thử trong nhà thoải mái nha chị, trong 7 ngày từ lúc nhận hàng, miễn là hàng chưa giặt, sạch, không mùi và còn giữ nguyên tem ạ. Còn nếu đã mặc đi tiệc ra ngoài thì shop không nhận đổi được chị nha.",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "r5-exchange-cost",
+      "customerNeed": "Khách hỏi shop có trả phí đổi không và muốn chọn sizeM đã tư vấn để hạn chế tốn phí.",
+      "wholeConversationReview": "Cả phí do khách trả và fitM đã có dữ liệu, nhưng terminal không trả phần nào. Câu chờ chung làm mất ngay thông tin đủ bằng chứng ở một điểm mua quan trọng. Verifier chặn wordingfit trong draft; khả năng chặn quá mức hoặc diễn đạt bảo đảm quá mạnh chưa được phân xử ở đây.",
+      "customerImpact": "Khách vẫn lo phát sinh phí và không được hỗ trợ lựa chọn đã gần hoàn tất.",
+      "overallConclusion": "FAIL",
+      "decisiveReason": "Khách thực sự chỉ nhận fallback; ai trả phí đổi và cách chọn size có căn cứ. Có đủ dữ kiện để tư vấn nhưng lượt này không giúp giải quyết nhu cầu mua.",
+      "confidence": "HIGH_ON_TERMINAL_QUALITY_NOT_LATENT_MODEL_UNDERSTANDING",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Kết quả khách nhận không thể hiện đã hiểu Khách hỏi shop có trả phí đổi không và muốn chọn sizeM đã tư vấn để hạn chế tốn phí.",
+        "explicitNeedCompleteness": "Không trả lời phần còn cần: ai trả phí đổi và cách chọn size có căn cứ.",
+        "contextCorrectionUse": "Fallback giống nhau ở mọi ca, không tiếp nối lựa chọn và thông tin khách đã cung cấp trong ca này.",
+        "usefulness": "Khách vẫn thiếu ai trả phí đổi và cách chọn size có căn cứ để quyết định; bản nháp bị chặn không được tính là lợi ích khách đã nhận.",
+        "decisionSupport": "Không giúp chọn hoặc cân nhắc phương án đang hỏi; không thể dùng lý do trong draft không được gửi để cứu điểm.",
+        "partialAnswerBehavior": "Không cung cấp phần đã có căn cứ trong ca này; toàn bộ lượt chuyển sang câu chờ chung.",
+        "nextStep": "Có hướng chờ nhân viên, nhưng không có tiến triển tư vấn cụ thể cho điểm vướng; không chứng minh nhân viên đã tiếp nhận.",
+        "coherence": "Câu fallback tự nó rõ nghĩa, nhưng không nối tiếp tình huống mua vừa nêu.",
+        "naturalness": "Lời lịch sự nhưng chung và dè dặt, không giống câu tư vấn gắn với băn khoăn cụ thể đang được hỏi.",
+        "factualActionSafety": "Exact terminal chỉ là fallback tĩnh code sở hữu, không chứa giá/size/quyền lợi/hành động thiếu căn cứ; không chấm safety của draft bị chặn."
+      },
+      "attemptId": "r5-exchange-cost:1",
+      "family": "policy",
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Em chưa thể trả lời chắc chắn nội dung này. Chị vui lòng chờ nhân viên hỗ trợ nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V1"
+      }
+    },
+    {
+      "caseId": "r5-shipping-threshold",
+      "customerNeed": "Khách muốn mua đúng nhu cầu, đã có quầnđen, hỏi có nên mua thêm chỉ để freeship.",
+      "wholeConversationReview": "Đoạn đầu so524k với958k và khuyên mua một áo là phù hợp. Đoạn sau lại mở bán quầnnavy dù khách chưa nêu nhu cầu thêmquần. Khi đọc cả lượt, quyết định tiết kiệm vừa rõ lại trở thành một nhánh cânnhắc mới; thông tin đúng không bù việc tư vấn mất trọngtâm. Cách nói nhìn chung tự nhiên, lỗi chính là hướng xử lý chứ không một keyword.",
+      "customerImpact": "Khách có đápán về tiền, nhưng bị đưa thêm lựa chọn chưa cần; mục tiêu không mua thừa được hỗ trợ chưa nhất quán.",
+      "overallConclusion": "FAIL",
+      "decisiveReason": "Lời tư vấn toàn lượt mở lại mua thêmquần sau khi đã giải quyết việc tránh mua thừa; consultation dimensions chưa đạt2.",
+      "confidence": "MEDIUM_ON_SALES_QUALITY_OWNER_JUDGMENT_PREVAILS",
+      "scores": {
+        "understanding": 1,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 1,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Đầu lượt hiểu khôngmuathừa, sau đó mở thêmquần không xuất phát từ nhu cầu mới.",
+        "explicitNeedCompleteness": "Trả lời câu hỏi freeship và so chi phí đúng.",
+        "contextCorrectionUse": "Nhớquầnđen, nhưng đề xuất thêmnavy chưa giải quyết điểm vướng hiện tại.",
+        "usefulness": "Phần so chi phí hữu ích; toàn lượt thêm một quyết định không cần.",
+        "decisionSupport": "Khuyên chỉmuaáo rồi mở lại việc thêmquần, làm lựa chọn kém dứt khoát.",
+        "partialAnswerBehavior": "Không thiếufacts giá/quote; không trì hoãn bằng câu hỏi không dữ liệu.",
+        "nextStep": "Thay vì hoàn tất áobudget, đề nghị khách cânnhắc thêm món chưa cần.",
+        "coherence": "Haiđoạn dẫn theo hai hướng khi mục tiêu đã là tránhmuathừa.",
+        "naturalness": "Giọng đọc được và tự nhiên; FAIL không dựa trên thiếu từkhóa hay sốcâu.",
+        "factualActionSafety": "524k/958k đúngquote; màuquần cónguồn, không hứa benefit mới hay effect."
+      },
+      "attemptId": "r5-shipping-threshold:1",
+      "family": "policy",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ nếu chị đã có quần đen rồi thì mình không nên mua cố để lấy freeship đâu ạ, vì mua riêng áo tính cả ship nội thành là 524k, vẫn tiết kiệm hơn nhiều so với việc mua cả bộ 958k. \n\nQuần QU714 bên em ngoài màu đen còn có màu navy, nếu chị thích đổi sang tone xanh trầm dễ phối thì có thể cân nhắc thêm; còn không thì mình cứ chốt áo trước nha chị.",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "r5-refund-distinction",
+      "customerNeed": "Khách giữ áo trắngM, hỏi có được hoàn tiền nếu thử không thích.",
+      "wholeConversationReview": "Khách gần quyết định mua, cần biết đúng quyền lợi. Terminal không nói không hoàn tiền hay quyền đổi có điều kiện, chỉ bảo chờ. Không tính phần phủ định hoàn tiền trong draft bị chặn là phần đã trả lời; nội dung thực sự được gửi không giải quyết băn khoăn.",
+      "customerImpact": "Khách chưa hiểu quyền lợi mua áo và có thể trì hoãn mua vì shop không trả lời được.",
+      "overallConclusion": "FAIL",
+      "decisiveReason": "Khách thực sự chỉ nhận fallback; phân biệt hoàn tiền với đổi hàng và điều kiện cần. Có đủ dữ kiện để tư vấn nhưng lượt này không giúp giải quyết nhu cầu mua.",
+      "confidence": "HIGH_ON_TERMINAL_QUALITY_NOT_LATENT_MODEL_UNDERSTANDING",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Kết quả khách nhận không thể hiện đã hiểu Khách giữ áo trắngM, hỏi có được hoàn tiền nếu thử không thích.",
+        "explicitNeedCompleteness": "Không trả lời phần còn cần: phân biệt hoàn tiền với đổi hàng và điều kiện cần.",
+        "contextCorrectionUse": "Fallback giống nhau ở mọi ca, không tiếp nối lựa chọn và thông tin khách đã cung cấp trong ca này.",
+        "usefulness": "Khách vẫn thiếu phân biệt hoàn tiền với đổi hàng và điều kiện cần để quyết định; bản nháp bị chặn không được tính là lợi ích khách đã nhận.",
+        "decisionSupport": "Không giúp chọn hoặc cân nhắc phương án đang hỏi; không thể dùng lý do trong draft không được gửi để cứu điểm.",
+        "partialAnswerBehavior": "Không cung cấp phần đã có căn cứ trong ca này; toàn bộ lượt chuyển sang câu chờ chung.",
+        "nextStep": "Có hướng chờ nhân viên, nhưng không có tiến triển tư vấn cụ thể cho điểm vướng; không chứng minh nhân viên đã tiếp nhận.",
+        "coherence": "Câu fallback tự nó rõ nghĩa, nhưng không nối tiếp tình huống mua vừa nêu.",
+        "naturalness": "Lời lịch sự nhưng chung và dè dặt, không giống câu tư vấn gắn với băn khoăn cụ thể đang được hỏi.",
+        "factualActionSafety": "Exact terminal chỉ là fallback tĩnh code sở hữu, không chứa giá/size/quyền lợi/hành động thiếu căn cứ; không chấm safety của draft bị chặn."
+      },
+      "attemptId": "r5-refund-distinction:1",
+      "family": "policy",
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Em chưa thể trả lời chắc chắn nội dung này. Chị vui lòng chờ nhân viên hỗ trợ nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V1"
+      }
+    },
+    {
+      "caseId": "r5-simple-price",
+      "customerNeed": "Khách mới hỏi giá SM613.",
+      "wholeConversationReview": "Trả499k ngay, sau đó hỏi màu bằng một câu đơn giản. Ở đầu cuộc tư vấn, hỏi màu có thể giúp chọn biếnthể; không phải danh sáchfact hoặc dàn ý nhiều bước. Không bắt khách cung cấp thông tin trước mới báo giá.",
+      "customerImpact": "Khách biết giá và có thể tiếp tục chọn màu nếu muốn.",
+      "overallConclusion": "PASS",
+      "decisiveReason": "Toàn lượt đáp ứng việc khách cần quyết định, có cơ sở và bước tiếp phù hợp.",
+      "confidence": "PRIMARY_AGENT_JUDGMENT_NOT_OWNER_ACCEPTANCE",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu câu hỏigiá ngắn, không biến thành tư vấn tủđồ.",
+        "explicitNeedCompleteness": "Giá trả trực tiếp trước câu hỏi thêm.",
+        "contextCorrectionUse": "Không có lịch sử để dùng, không bịa nhu cầu hoặc size.",
+        "usefulness": "Giá dễ nhìn, khách không cần lọc nhiều chínhsách.",
+        "decisionSupport": "Không ép mua thêm; mở lựa chọn màu của đúngáo.",
+        "partialAnswerBehavior": "Phần hỏigiá đủfacts được trả ngay.",
+        "nextStep": "Hỏi màu phù hợp đầu lượt, không có checkoutgiả.",
+        "coherence": "Giá và màu cùngSM613.",
+        "naturalness": "Hai câu ngắn, giọng shop thông thường.",
+        "factualActionSafety": "499k/trắng/xanh nhạt cónguồn, không biếnthểsize hay orderclaim."
+      },
+      "attemptId": "r5-simple-price:1",
+      "family": "simple",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, sơ mi SM613 giá 499.000đ chị nha. Chị thích màu trắng hay xanh nhạt ạ?",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "r5-simple-stock",
+      "customerNeed": "Khách đã xem QU714navyM và hỏi còn không.",
+      "wholeConversationReview": "Trả đúng cònnavyM bằng một câu. Không nhắc lại giá, hỏi sốđo hoặc chuyển hàng khác. Toànlượt hoàn tất một câu hỏi kiểmtra biếnthể.",
+      "customerImpact": "Khách có xác nhận tồn rõ để tiếp tục lựa chọn.",
+      "overallConclusion": "PASS",
+      "decisiveReason": "Toàn lượt đáp ứng việc khách cần quyết định, có cơ sở và bước tiếp phù hợp.",
+      "confidence": "PRIMARY_AGENT_JUDGMENT_NOT_OWNER_ACCEPTANCE",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu hỏi tồnbiếnthể hiện tại.",
+        "explicitNeedCompleteness": "Trả cònnavyM.",
+        "contextCorrectionUse": "Dùng quần/màu/size đã nêu ở lịch sử.",
+        "usefulness": "Thông tin cần để tiếp tục mua được trả gọn.",
+        "decisionSupport": "Giữ lựa chọn, không để khách so lạibiếnthể.",
+        "partialAnswerBehavior": "Không tạo thiếu dữ liệu hay hẹn kiểmtra khi đã cófacts.",
+        "nextStep": "Hoàn tất câu hỏi tồn; không bắt buộc gắn CTA.",
+        "coherence": "CùngquầnnavyM xuyên suốt.",
+        "naturalness": "Một câu tựnhiên, không inventory.",
+        "factualActionSafety": "TồnnavyM IN_STOCK cónguồn, không claimgiữhàng."
+      },
+      "attemptId": "r5-simple-stock:1",
+      "family": "simple",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ quần suông navy size M bên em còn hàng chị nhé!",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "r5-simple-ack",
+      "customerNeed": "Khách cảm ơn sau khi nói xem thêm.",
+      "wholeConversationReview": "Lời đáp nhẹ nhàng cho khách xem, để khách chủđộng nhắn. Không mở lại mẫu/size hoặc thúc mua. Có lặp ýxem thêm từlịch sử, nhưng ở một lời cảmơn đây là phép xãgiao ngắn, không tạo lượt tưvấn dài.",
+      "customerImpact": "Khách kếtthúc thoải mái, giữ thiện cảm với shop.",
+      "overallConclusion": "PASS",
+      "decisiveReason": "Toàn lượt đáp ứng việc khách cần quyết định, có cơ sở và bước tiếp phù hợp.",
+      "confidence": "PRIMARY_AGENT_JUDGMENT_NOT_OWNER_ACCEPTANCE",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu đây là lời cảmơn/kếtthúc.",
+        "explicitNeedCompleteness": "Đáp cảmơn bằng sự tiếpnhận phù hợp, không thêm nghĩa vụ.",
+        "contextCorrectionUse": "Giữ trạngthái xemthêm, không giả đã chọn.",
+        "usefulness": "Không làm phiền khách bằng thêm thôngtin.",
+        "decisionSupport": "Tôntrọng việc chưa quyếtđịnh thay vì thúcchốt.",
+        "partialAnswerBehavior": "Không ép trả facts hay câu hỏi khi khôngcần.",
+        "nextStep": "Khách tự nhắn khi cần là kếtthúc đúng lúc.",
+        "coherence": "Tiếpnối lịch sử xemthêm.",
+        "naturalness": "Hai câu xãgiao tựnhiên, không câu từ thuyếtminh.",
+        "factualActionSafety": "Không protectedassertion hoặc fakeeffect."
+      },
+      "attemptId": "r5-simple-ack:1",
+      "family": "simple",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ vâng ạ, chị cứ thong thả xem nhé. Cần thêm thông tin gì chị cứ nhắn em nha!",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "r7-price-ready-fit",
+      "customerNeed": "Khách đã thích navy, đưa đủ sốđo và cần lý do mua749k cùngsize khi so620k.",
+      "wholeConversationReview": "Dữ liệu đủ chọnM và giải thích giá trị riêng theo nhu cầu đi làm; terminal vẫn là lời chờ chung. Ca này FAIL vì không cung cấp kết quả lựa chọn nào. Draft bị chặn có diễn đạt mạnh về thoải mái/ít nhăn/miễn ship; dùng nó để đánh giá lời gửi sẽ sai đơn vị chấm.",
+      "customerImpact": "Khách không được giải quyết cả giá trị mua và size, dù đã đưa đủ thôngtin.",
+      "overallConclusion": "FAIL",
+      "decisiveReason": "Khách thực sự chỉ nhận fallback; lý do đáng mua có căn cứ và sizeM hiện tại. Có đủ dữ kiện để tư vấn nhưng lượt này không giúp giải quyết nhu cầu mua.",
+      "confidence": "HIGH_ON_TERMINAL_QUALITY_NOT_LATENT_MODEL_UNDERSTANDING",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Kết quả khách nhận không thể hiện đã hiểu Khách đã thích navy, đưa đủ sốđo và cần lý do mua749k cùngsize khi so620k.",
+        "explicitNeedCompleteness": "Không trả lời phần còn cần: lý do đáng mua có căn cứ và sizeM hiện tại.",
+        "contextCorrectionUse": "Fallback giống nhau ở mọi ca, không tiếp nối lựa chọn và thông tin khách đã cung cấp trong ca này.",
+        "usefulness": "Khách vẫn thiếu lý do đáng mua có căn cứ và sizeM hiện tại để quyết định; bản nháp bị chặn không được tính là lợi ích khách đã nhận.",
+        "decisionSupport": "Không giúp chọn hoặc cân nhắc phương án đang hỏi; không thể dùng lý do trong draft không được gửi để cứu điểm.",
+        "partialAnswerBehavior": "Không cung cấp phần đã có căn cứ trong ca này; toàn bộ lượt chuyển sang câu chờ chung.",
+        "nextStep": "Có hướng chờ nhân viên, nhưng không có tiến triển tư vấn cụ thể cho điểm vướng; không chứng minh nhân viên đã tiếp nhận.",
+        "coherence": "Câu fallback tự nó rõ nghĩa, nhưng không nối tiếp tình huống mua vừa nêu.",
+        "naturalness": "Lời lịch sự nhưng chung và dè dặt, không giống câu tư vấn gắn với băn khoăn cụ thể đang được hỏi.",
+        "factualActionSafety": "Exact terminal chỉ là fallback tĩnh code sở hữu, không chứa giá/size/quyền lợi/hành động thiếu căn cứ; không chấm safety của draft bị chặn."
+      },
+      "attemptId": "r7-price-ready-fit:1",
+      "family": "concern",
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Em chưa thể trả lời chắc chắn nội dung này. Chị vui lòng chờ nhân viên hỗ trợ nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V1"
+      }
+    },
+    {
+      "caseId": "r7-shirt-missing-measure",
+      "customerNeed": "Khách đã chọn áo xanhnhạt, hỏi tổng dưới600k và cần đo gì để chọnsize.",
+      "wholeConversationReview": "Trả tổng524k và hỏi vòngngực, giữ màu đã chốt. Không mở lại lựa chọn set hay trắng, không xin chiều cao/cânnặng hoặc địa chỉ. Haiđoạn phù hợp hai ýtrong câu hỏi, không biến thành factinventory.",
+      "customerImpact": "Khách biết nằm trongngân sách và chỉ cần một sốđo để hoàn tấtáo.",
+      "overallConclusion": "PASS",
+      "decisiveReason": "Toàn lượt đáp ứng việc khách cần quyết định, có cơ sở và bước tiếp phù hợp.",
+      "confidence": "PRIMARY_AGENT_JUDGMENT_NOT_OWNER_ACCEPTANCE",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu đang hoàn tất áo đã chọn.",
+        "explicitNeedCompleteness": "Trả tổng và loại sốđo cần.",
+        "contextCorrectionUse": "Giữ xanhnhạt/địa điểm/ngânsách, không hỏi chọnmàu lại.",
+        "usefulness": "Cho thôngtin làm được bước tiếp ngay.",
+        "decisionSupport": "Không đoánsize nhưng cũng không trìhoãn toàn câu.",
+        "partialAnswerBehavior": "Tách phần đã biết vềtiền khỏi phần thiếu sốđo khách.",
+        "nextStep": "Vòngngực là đúng input sizeáo.",
+        "coherence": "Tiềnáo/ship/tổng/sốđo đều cùng quyếtđịnhSM613.",
+        "naturalness": "Gọn, liênkết nhu cầu, không dàný nhiều tầng.",
+        "factualActionSafety": "499k/25k/524k cóquote; không tự tínhsize hoặc orderreceipt."
+      },
+      "attemptId": "r7-shirt-missing-measure:1",
+      "family": "partial",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ tổng đơn áo xanh nhạt giao nội thành là 524.000đ (gồm 499.000đ tiền áo và 25.000đ phí vận chuyển), hoàn toàn dưới 600k chị nha. \n\nĐể em chọn đúng size chuẩn cho chị, chị cho em xin số đo vòng ngực nhé ạ.",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "r7-opacity-context-change",
+      "customerNeed": "Khách đổi sang sựkiện đènngược, vẫn ưu tiên khôngthấybóng và hỏi trắngM còn.",
+      "wholeConversationReview": "Lời đáp nhận thayđổi ánhsáng và trảtồn đúng, không giữ bảođảm của phònghọp. Tuy nhiên nó dừng ở rủi ro rồi hỏi có muốn giữáo, không giúp xửlý việc mẫu đang chọn không còn chắc đápứng ưu tiên kín. Với mục tiêu tưvấn bán hàng, đưa quyếtđịnh lại cho khách ở đây còn yếu; không cần bịa màu/mẫu khác có bảođảm mới để đạt điều đó.",
+      "customerImpact": "Khách hiểu rủiro, nhưng chưa nhận được hướng chọn/thử phùhợp với buổi sựkiện.",
+      "overallConclusion": "FAIL",
+      "decisiveReason": "Có thôngtin đúng nhưng chưa giúp quyếtđịnh hàng theo ưu tiên đã thayđổi; consultation usefulness/decisionSupport/nextStep1.",
+      "confidence": "MEDIUM_ON_SALES_QUALITY_OWNER_JUDGMENT_PREVAILS",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Hiểu bối cảnh đènngược khác phònghọp.",
+        "explicitNeedCompleteness": "Trả hai ý độkín và tồntrắngM.",
+        "contextCorrectionUse": "Sửa kếtluận theo bối cảnh mới, giữ sizeM.",
+        "usefulness": "Cảnhbáo đúng nhưng thiếu hướng xửlý ưu tiên khôngthấybóng.",
+        "decisionSupport": "Không đưa một hướng tưvấn có cơsở sau khi lựa chọn cũ có rủiro.",
+        "partialAnswerBehavior": "Khônginvent opacity màu khác hay trìhoãn trảtồn.",
+        "nextStep": "Hỏi giữáo đưa quyếtđịnh lại cho khách, chưa giải quyết điểmvướng.",
+        "coherence": "Rủiro/tồn ănkhớp dữkiện, không tựmâu thuẫn.",
+        "naturalness": "Câu ngắn, dễđọc; điểm yếu ở hướng xửlý chứ không do sốcâu.",
+        "factualActionSafety": "Whitebacklightcóthểthấybóng/tồn2 cónguồn; hỏi giữ chưa làreceipt đãgiữ."
+      },
+      "attemptId": "r7-opacity-context-change:1",
+      "family": "policy",
+      "actualTerminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, nếu sự kiện có đèn chiếu ngược thì dưới ánh sáng đó áo trắng có thể sẽ thấy bóng mờ ạ. Trắng M hiện shop vẫn còn 2 chiếc, chị có muốn giữ áo này không ạ?",
+        "fallbackId": null
+      }
+    },
+    {
+      "caseId": "r7-exchange-after-use",
+      "customerNeed": "Khách muốn mặc vài buổi rồiđổi trong7ngày và hỏi ai chịu phí.",
+      "wholeConversationReview": "Terminal không trả cả quyềnđổi và phí đã có nguồn. Khách không nhận được việc đãmặc đi làm thì không đổi, hoặc hướng thử trongnhà giữ điều kiện. Lời trongdraft bị chặn không được tính là đã đápán; exact fallback antoàn nhưng tưvấn chưa hữuích.",
+      "customerImpact": "Khách vẫn chưa biết cách thử/quyềnđổi và ai trảphí để quyếtđịnh mua.",
+      "overallConclusion": "FAIL",
+      "decisiveReason": "Khách thực sự chỉ nhận fallback; ranhgiới đổi sau sửdụng, phí và cách thửtrước. Có đủ dữ kiện để tư vấn nhưng lượt này không giúp giải quyết nhu cầu mua.",
+      "confidence": "HIGH_ON_TERMINAL_QUALITY_NOT_LATENT_MODEL_UNDERSTANDING",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 1,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "diagnosticReasons": {
+        "understanding": "Kết quả khách nhận không thể hiện đã hiểu Khách muốn mặc vài buổi rồiđổi trong7ngày và hỏi ai chịu phí.",
+        "explicitNeedCompleteness": "Không trả lời phần còn cần: ranhgiới đổi sau sửdụng, phí và cách thửtrước.",
+        "contextCorrectionUse": "Fallback giống nhau ở mọi ca, không tiếp nối lựa chọn và thông tin khách đã cung cấp trong ca này.",
+        "usefulness": "Khách vẫn thiếu ranhgiới đổi sau sửdụng, phí và cách thửtrước để quyết định; bản nháp bị chặn không được tính là lợi ích khách đã nhận.",
+        "decisionSupport": "Không giúp chọn hoặc cân nhắc phương án đang hỏi; không thể dùng lý do trong draft không được gửi để cứu điểm.",
+        "partialAnswerBehavior": "Không cung cấp phần đã có căn cứ trong ca này; toàn bộ lượt chuyển sang câu chờ chung.",
+        "nextStep": "Có hướng chờ nhân viên, nhưng không có tiến triển tư vấn cụ thể cho điểm vướng; không chứng minh nhân viên đã tiếp nhận.",
+        "coherence": "Câu fallback tự nó rõ nghĩa, nhưng không nối tiếp tình huống mua vừa nêu.",
+        "naturalness": "Lời lịch sự nhưng chung và dè dặt, không giống câu tư vấn gắn với băn khoăn cụ thể đang được hỏi.",
+        "factualActionSafety": "Exact terminal chỉ là fallback tĩnh code sở hữu, không chứa giá/size/quyền lợi/hành động thiếu căn cứ; không chấm safety của draft bị chặn."
+      },
+      "attemptId": "r7-exchange-after-use:1",
+      "family": "policy",
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Em chưa thể trả lời chắc chắn nội dung này. Chị vui lòng chờ nhân viên hỗ trợ nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V1"
+      }
+    }
+  ],
+  "protocol": "Read full history, latest customer message, trusted facts and actual terminal outcome. Judge buying-goal suitability, reasoning, unresolved concern, coherence, naturalness and customer impact first; conclude the whole turn, then assign10diagnostic scores:0 materially misses this buyer goal,1 weak/partial,2 fulfills it in context. A material holistic defect must lower its relevant diagnostic dimension; a failed whole turn cannot have all2. No keyword/phrase reward, fact-count reward, requiredCTA or reference-answer matching; a sufficient direct answer/defer requires no artificial next step.",
+  "reviewProcedureHash": "d061f5703b7e9ee24b5d6ac94bfe9327ad9aa3a9a881f40fc4370c2687f8f980",
+  "quality": {
+    "status": "FAIL",
+    "denominator": 24,
+    "scored": 24,
+    "families": {
+      "concern": {
+        "denominator": 5,
+        "passed": 1,
+        "passRate": 0.2
+      },
+      "partial": {
+        "denominator": 5,
+        "passed": 4,
+        "passRate": 0.8
+      },
+      "correction": {
+        "denominator": 5,
+        "passed": 5,
+        "passRate": 1
+      },
+      "policy": {
+        "denominator": 6,
+        "passed": 1,
+        "passRate": 0.16666666666666666
+      },
+      "simple": {
+        "denominator": 3,
+        "passed": 3,
+        "passRate": 1
+      }
+    },
+    "terminalFailureRate": 0.3333333333333333,
+    "rows": [
+      {
+        "attemptId": "r5-workday-comfort:1",
+        "family": "concern",
+        "mean": 0.5,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-competitor-price:1",
+        "family": "concern",
+        "mean": 0.5,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-wardrobe-budget:1",
+        "family": "concern",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-white-opacity:1",
+        "family": "concern",
+        "mean": 0.5,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-size-price-stock:1",
+        "family": "partial",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-missing-customer-size:1",
+        "family": "partial",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-white-variant-alternative:1",
+        "family": "partial",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-delivery-timing:1",
+        "family": "partial",
+        "mean": 0.5,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-correct-product:1",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-correct-measurement:1",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-referent-navy:1",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-budget-correction:1",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-defer:1",
+        "family": "correction",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-try-exchange:1",
+        "family": "policy",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-exchange-cost:1",
+        "family": "policy",
+        "mean": 0.5,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-shipping-threshold:1",
+        "family": "policy",
+        "mean": 1.4,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-refund-distinction:1",
+        "family": "policy",
+        "mean": 0.5,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-simple-price:1",
+        "family": "simple",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-simple-stock:1",
+        "family": "simple",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r5-simple-ack:1",
+        "family": "simple",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r7-price-ready-fit:1",
+        "family": "concern",
+        "mean": 0.5,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r7-shirt-missing-measure:1",
+        "family": "partial",
+        "mean": 2,
+        "pass": true,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r7-opacity-context-change:1",
+        "family": "policy",
+        "mean": 1.7,
+        "pass": false,
+        "factualActionSafety": 2
+      },
+      {
+        "attemptId": "r7-exchange-after-use:1",
+        "family": "policy",
+        "mean": 0.5,
+        "pass": false,
+        "factualActionSafety": 2
+      }
+    ]
+  }
+}

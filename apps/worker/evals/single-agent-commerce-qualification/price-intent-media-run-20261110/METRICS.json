@@ -1,0 +1,103 @@
+{
+  "kind": "CONTEXT_PUBLICATION_MODEL_ACCOUNTING_V1",
+  "runSourceSha": "5613e8b37784f8c2eb6be4ce3a115d8b13b7100e",
+  "casesRegistered": 13,
+  "turnsRegistered": 27,
+  "casesStatus": {
+    "EXECUTED": 13
+  },
+  "frames": 27,
+  "terminalCounts": {
+    "SEND_ELIGIBLE": 15,
+    "HANDOFF": 5,
+    "NO_SEND": 7
+  },
+  "actualTerminalCounts": {
+    "SEND_ELIGIBLE": 15,
+    "HANDOFF": 5,
+    "NO_SEND": 2,
+    "CODE_OWNED_SEND": 5
+  },
+  "generationCount": 59,
+  "roles": {
+    "OWNER": 42,
+    "VERIFIER": 17
+  },
+  "generationStatuses": {
+    "OK": 58,
+    "PROVIDER_ERROR": 1
+  },
+  "providerRequests": 58,
+  "verifierLatencyMs": {
+    "p50": 8594.687399999995,
+    "p95": 21713.18519999995
+  },
+  "tokenUsage": {
+    "inputObserved": 615920,
+    "outputObserved": 40649,
+    "usageRows": 58,
+    "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+  },
+  "cohorts": [
+    {
+      "caseId": "c-po-20261031-p06",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261028-s16",
+      "cohort": "SOURCE_GAP_CONTROL"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261028-s04",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261028-s09",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "cohort": "SALES_READY"
+    }
+  ],
+  "rawJournalSha256": "baa64eada7d2dc4e3fa761cfc618451cb6a72a74d3526cd761f5575eadb13bad",
+  "journalRows": 252,
+  "sourceWrites": 0,
+  "liveSends": 0,
+  "semanticRoles": [
+    "OWNER",
+    "VERIFIER"
+  ]
+}

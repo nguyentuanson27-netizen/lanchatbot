@@ -1,0 +1,200 @@
+{
+  "kind": "INDEPENDENT_POST_RUN_WHOLE_TERMINAL_REVIEW",
+  "reviewer": "/root/post_contract_input_review",
+  "reviewedAt": "2026-11-10T02:52:56.661Z",
+  "runSourceSha": "8b4e190c8c6e048b4412c45c254de1c75872cf1b",
+  "worldHash": "4eeaa30adc2252335387c677c76125d292332bdc35d1106fc87b42b9943dd4a4",
+  "reviewMode": "DEVELOPMENT_KNOWN_CASES_UNBLINDED_NOT_FORMAL_QUALIFICATION",
+  "newProviderRequests": 0,
+  "providerReruns": 0,
+  "reviewedCases": 13,
+  "reviewedNativeTurns": 27,
+  "materialFailureCases": [
+    "c-20261028-j1",
+    "c-20261028-j4",
+    "c-po-20261031-p07"
+  ],
+  "taskAdequateSalesCases": 9,
+  "salesDenominatorCases": 12,
+  "sourceGapCases": 1,
+  "adequacyCountIsFormalQualityGrade": false,
+  "recommendation": "STOP_SCREEN_NO_AUTOMATIC_FULL_REMAINDER",
+  "runtimeImplementationReview": "PREVIOUS_APPROVE_UNCHANGED_NO_NEW_RUNTIME_BLOCKER_IDENTIFIED_IN_THIS_REVIEW",
+  "independentMechanicalChecks": {
+    "status": "PASS",
+    "rawArtifactHashes": 27,
+    "uniqueGenerationIds": 62,
+    "httpRequests": 62,
+    "ownerGenerations": 42,
+    "verifierGenerations": 20,
+    "allStatuses": "OK",
+    "retries": 0,
+    "requestHashAndEvaluatorFirewall": "PASS",
+    "roleToolCaps": "PASS",
+    "exactVerifiedSentDrafts": 17,
+    "silentHandoffNoSendOutputs": "PASS",
+    "disposableDatabaseDropped": true
+  },
+  "actualTerminalCounts": {
+    "SEND_ELIGIBLE": 17,
+    "HANDOFF": 4,
+    "NO_SEND": 1,
+    "CODE_OWNED_SEND": 5
+  },
+  "caseReviews": [
+    {
+      "caseId": "c-po-20261031-p06",
+      "assessment": "TASK_ADEQUATE",
+      "reason": "Trả giá989k cho ba món, size có nguồn, gửi ảnh SD023; không tự đặt tên component chưa biết. Quote COMPOSITE và metadata structureKnown/labelsUNKNOWN xuất hiện trên actual wire. Câu hỏi size dùng được, chưa chứng minh đơn hàng đã tạo."
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "assessment": "TASK_ADEQUATE_WITH_STYLE_LIMIT",
+      "reason": "Preference be ghi bằng state op, không tạo giỏ/đơn hay nói đã commit mua. Hai AO đọc đúng schema flat và giá/preorder có nguồn. Khách cảm ơn nhưng bot lại kể giá và hỏi phân biệt hai set; chưa gọn, không coi là tiến bộ giọng văn. Không quote_product nên không phải W2native evidence và pool hai mẫu không tự cần ảnh."
+    },
+    {
+      "caseId": "c-20261028-s16",
+      "assessment": "SOURCE_GAP_CONTROL",
+      "reason": "Khách hỏi ảnh khách mặc; source chỉ DETAIL/feedback, customerWearingEvidence NOT_RECORDED. Owner vẫn xác nhận có ảnh đáp ứng ngầm; verifier chặn đúng và handoff im lặng. Terminal control đúng nhưng owner vẫn hiểu nguồn sai; không tính sales-quality PASS."
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "assessment": "TASK_ADEQUATE",
+      "reason": "State thực giữ cao162, thay56kg bằng51kg, thêm88/70/94 rồi RELAXED. Ba recommend_size đều đúng COMPONENT/TOP và M, reply theo engine; không lỗi freshness/state/transport trong lượt này. Văn phong lặp và máy móc còn hạn chế, không đánh đồng dữ liệu đúng với giọng tốt."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "assessment": "MATERIAL_TASK_FAIL",
+      "reason": "T1 thiếu màu nên giỏ chưa commit; câu Em thêm...nhé đặt cạnh hỏi màu được hiểu là dự định, chưa đủ kết luận false completion. T2 negotiation bị từ chối với supportAvailability UNKNOWN/NOT_EVALUATED nhưng owner biến thành chưa có giảm thêm; verifier chặn đúng. T3 HUMAN no-send theo handoff nên khách không nhận tổng. Quote continuation mới không được exercise; duplicate identical negotiation observation cùng id không chứng minh hai dispatch."
+    },
+    {
+      "caseId": "c-20261028-s04",
+      "assessment": "TASK_ADEQUATE",
+      "reason": "Đọc AO cả hai mã bằng offerTypes flat, trả Trắng/Be từ nguồn thực. Không cần ép hỏi phân biệt khi hai nguồn cùng trả lời được câu màu. Không có quote target hay unique target nên0ảnh không tự là lỗi gate."
+    },
+    {
+      "caseId": "c-20261028-s09",
+      "assessment": "TASK_ADEQUATE_WITH_STYLE_LIMIT",
+      "reason": "Đọc care policy và trả giặt tay hoặc máy nhẹ kèm túi giặt theo nguồn. English gentle cycle và câu dài chưa tự nhiên, nhưng không có thiếu sót tác vụ nặng cần sửa ngay. Native không gọi read_product trong ca này, nên không lấy nó làm bằng chứng nhánh DETAILS_ONLY của W1."
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "assessment": "MATERIAL_TASK_FAIL",
+      "reason": "Hai lượt đầu hỏi màu còn thiếu là đúng. Lượt3 khách hỏi tổng, quote_product đã được declared; owner vẫn add M/L không màu rồi quote_cart, cả chuỗi thất bại. Giỏ vẫnnull và không nói đã tạo, nhưng khách không được tổng tham khảo dù có đường pre-cart code-owned. Đây là chọn sai dependency/path, không phải chứng minh lỗi quote mới bị code chặn hay nguồn giá hết hạn."
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "assessment": "TASK_ADEQUATE_PENDING_CUSTOMER_CHOICE",
+      "reason": "T1 set có receipt/giỏ799k+ship30k=829k và ảnh. T2 replace sang AO trả COLOR_REQUIRED/effectCommittedfalse; bot hỏi Trắng/Be, không bịa đổi xong/giá mới. Giỏ vẫn set cũ hợp lệ trong lúc chờ màu, không phải chuyển offer đã hoàn tất. Chưa kiểm tiếp nhánh sau khách trả màu."
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "assessment": "MATERIAL_TASK_FAIL",
+      "reason": "Hai engine kết quả riêng TOP/PANTS đềuM, alternativeSizes[]. Owner vẫn đề xuất quầnL dựa thói quen khách và thoải mái; khách chưa yêu cầu muaL. Verifier chặn đúng, actual handoff làm mất cả phần size đã trả lời được. Context/engine đã đủ choM; chưa có evidence cần thêm source chỉ để hợp thứcL."
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "assessment": "TASK_ADEQUATE",
+      "reason": "T1 hỏi set quần/váy vì tên chưa rõ, T2 đọc đúng SQ2447 SET_QUAN sizeM và trả pre-order769k. Không gộp stock/giá hai mã. Lượt2 returning có prior accepted shop output; không tạo nghĩa vụ ảnh mở đầu mới."
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "assessment": "TASK_ADEQUATE",
+      "reason": "CART_OPENED receipt đúng799k+30k; sau đó năm code-owned prompt/preview thực rồi CONFIRM_PURCHASE receipt và HUMAN/PURCHASE_CONFIRMED silent. Không gọi phần code-owned gửi là NO_SEND chỉ vì terminal model wrapper textnull. Không copy synthetic private fields vào report."
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "assessment": "TASK_ADEQUATE_WITH_STYLE_LIMIT",
+      "reason": "Đề xuất Diệp An theo dịp lễ, có lý do cổ tròn/hai lớp và cảnh báo pre-order; Odette có sẵnS là đánh đổi thực. Đoạn dài, nhiều tính từ, quay lại hỏi chọn mẫu nên sức chốt chưa tốt. Trong phạm vi chấp nhận lỗi nhẹ của owner, chưa nâng thành lỗi nghiêm trọng hoặc whole-turn quality PASS formal."
+    }
+  ],
+  "nativeWorkItems": {
+    "W1": {
+      "status": "EXERCISED_PASS",
+      "scope": "Flat single-offer reads actually exercised in S04,S15,P09,S08; not evidence for every0/2/3 branch. S09 solved by read_policy."
+    },
+    "W2": {
+      "status": "NOT_EXERCISED",
+      "scope": "S15 state+read, J4 negotiation rejection+read; no writer+quote_product native sequence. Deterministic PG acceptance stays separate."
+    },
+    "W3": {
+      "status": "EXERCISED_PASS",
+      "scope": "P06 code opening-media preparation charged1 and explicit SD023 selection were observed; COMPOSITE quote work reserved1/readInvocations1/selectionInvocations0, final valid SD023 photo delivered. Multi-ref quote/price-colour-vs-media constraint native scenario not exercised here."
+    },
+    "W4_P06": {
+      "status": "EXERCISED_PASS",
+      "scope": "Wire has structureKnown true/labelsStatus UNKNOWN/opaque component refs, actual reply count3,total989k without invented labels."
+    },
+    "W4_S16": {
+      "status": "SOURCE_GAP",
+      "scope": "Correct silent terminal after verifier rejection, unsupported owner draft preserved. No wearer provenance/positive capability."
+    },
+    "W5": {
+      "status": "NOT_EXERCISED",
+      "scope": "No native transport failure in62successful requests; fault acceptance remains deterministic-only, no reliability inference."
+    },
+    "controls": {
+      "status": "EXERCISED_FAIL",
+      "scope": "J1/P07 unresolved; J2/P08/P09/fullcheckout/comparison controls have usable outcomes with stated limitations."
+    }
+  },
+  "findings": [
+    {
+      "id": "SR1",
+      "severity": "MATERIAL",
+      "caseId": "c-20261028-j1",
+      "rootCause": "Owner treats cart variant selection as prerequisite for all totals and repeats mutation path instead of using available pre-cart calculator.",
+      "evidence": "J1T3 quote_product declared in both owner requests; actual2add_to_cart COLOR_REQUIRED then quote_cart DEPENDENT_EFFECT_REJECTED;cartnull,noquote_product."
+    },
+    {
+      "id": "SR2",
+      "severity": "MATERIAL",
+      "caseId": "c-20261028-j4",
+      "rootCause": "Owner turns missing negotiation prerequisites/UNKNOWN into a negative offer-policy conclusion; then silent handoff transfers ownership and suppresses the next total request.",
+      "evidence": "record_negotiation known rejection supportUNKNOWN/NOT_EVALUATED/effectCommittedfalse; no no-discount source; verifierFAIL,thenHUMANNO_SEND."
+    },
+    {
+      "id": "SR3",
+      "severity": "MATERIAL",
+      "caseId": "c-po-20261031-p07",
+      "rootCause": "Owner conflates historical preferred size with a supported current fit alternative despite component results M and no alternatives.",
+      "evidence": "TOP/PANTS recommend_size RECOMMENDED M/alternativeSizes[]; draft offersL;verifierFAIL."
+    },
+    {
+      "id": "SR4",
+      "severity": "SOURCE_GAP_AND_OWNER_SEMANTICS",
+      "caseId": "c-20261028-s16",
+      "rootCause": "Feedback classification is still interpreted as customer-wearing provenance by owner; source truly lacks that facet.",
+      "evidence": "DETAIL/feedback with NOT_RECORDED; unsupported actual draft blocked, no customer text/images."
+    }
+  ],
+  "nonFailures": [
+    {
+      "caseId": "c-20261028-j4",
+      "turn": 1,
+      "note": "Prospective Em thêm...nhé is awkward/ambiguous, but contextual colour question does not establish completed action. No new hard falsecompletion finding."
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turn": 2,
+      "note": "Old set remains after uncommitted replacement because new colour not chosen; asking only missing colour is appropriate, not falsely completed offer change."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turn": 2,
+      "note": "Duplicate identical record_negotiation observation has same callid. Do not count two executed negotiations without independent dispatch witness."
+    }
+  ],
+  "limits": [
+    "No formal blind grading, nativeC3comparison,model stability or conversion evidence.9/12 is manual task-adequacy triage, not qualification score.",
+    "Whole raw provider/gate replay not performed; independently checked source/capture hashes and request/terminal binding, read state/receipt evidence.",
+    "No claim absence of every semantic risk; three observed unsupported drafts were blocked, no new sent hard-safety issue identified in this review.",
+    "No new runtime code changes/provider reruns/full remainder authorized by this review.",
+    "S15,S09,J2,S08 voice limitations remain; avoid returning to unmeasured prompt-polishing loops or keyword scoring."
+  ],
+  "evidenceHashes": {
+    "publicView": "5160c89f71e700fdec683dbbe7b66a56108c17cfe39ce2bfb8df615b6e9353b5",
+    "accounting": "6e2cc396efb3b5aa100a88948308062b3ea76e16e34be33cbf547093d799e0ea",
+    "integrity": "0f60c4f6ddc033ed9600e5ed1ae688c4561d0e2518e4b801c48fb9f7be689599"
+  }
+}

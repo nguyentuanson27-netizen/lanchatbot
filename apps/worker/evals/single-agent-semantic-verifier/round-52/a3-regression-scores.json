@@ -1,0 +1,500 @@
+{
+  "schemaVersion": 1,
+  "phase": "A3_REGRESSION",
+  "round": 52,
+  "scorer": "CODEX_PRIMARY_AGENT",
+  "scoredAt": "2026-10-11T18:32:41.033Z",
+  "a3RunSourceSha": "e40717eccf081a45e1d1f83a183914a00c8631ff",
+  "manifestHash": "a271378b4b765ee9f6451f2510ea341f1f856cfa5221a2b492cb8b330e053b3c",
+  "evidenceHash": "d5ac9624b13edfd28189b2349d2cb9fadd384514d4efbb0986fafcc1fb117f27",
+  "rawEvidenceCommit": "4de28e89fe6d2fc8e617ba0d4314f148177ccaed",
+  "reviewProtocol": "Read full accepted dialogue/latest/current trusted data and actual customer outcome; write connected buying assessment first, then ten diagnostic ratings. Rejected drafts/verdicts excluded from this primary packet.",
+  "limitations": [
+    "Subjective,nonblind CODEX_PRIMARY_AGENT assessment;not independent blind/human owner acceptance.",
+    "All25eligible replies judged adequate for their current buying goal;not a conversion/naturalness superiority measurement.",
+    "No keyword,quote,count or novel-fact/CTA matching. Minor phrasing and reuse of helpful known benefits alone do not fail.",
+    "Only30executed prefix outcomes scored. Remaining42registrations unexecuted;all720human ratings remain null."
+  ],
+  "attempts": [
+    {
+      "attemptId": "r5-refund-distinction:1",
+      "wholeTurnReview": "Khách đã chọn trắng M và cần phân biệt hoàn tiền với đổi hàng. Tin thực tế chỉ báo chưa trả lời được, nên không làm rõ quyền hoàn/đổi hoặc hỗ trợ tiếp quyết định mua dù shop có đủ chính sách. Fallback ngắn, tự nhiên và không hứa thao tác, nhưng mất cả phần có thể trả lời chắc chắn.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-refund-distinction:2",
+      "wholeTurnReview": "Khách vẫn lấy trắng M; điều còn vướng là thử không thích có được hoàn tiền không. Câu thực tế không trả nội dung nào của câu hỏi và không tận dụng chính sách đã cấp. Lời fallback an toàn và dễ hiểu nhưng không tạo tiến triển trong việc mua.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-refund-distinction:3",
+      "wholeTurnReview": "Trả thẳng không hoàn tiền, giới thiệu đổi mẫu/size trong 7 ngày và giới hạn hàng chưa sử dụng/nguyên tem/phí khách trả. Đây là giới thiệu dịch vụ có giới hạn, không xác nhận món đã thử cụ thể đủ mọi điều kiện. Không mở lại màu/size hoặc đọc số đo; giải quyết băn khoăn quyền lợi trong cuộc mua đang tiếp tục.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-stage-light-change:1",
+      "wholeTurnReview": "Khách đổi từ phòng họp sang sân khấu có đèn phía sau và hỏi còn nên lấy trắng không/tồn M. Reply trả tồn, đổi lập trường thành không khuyên trắng vì có thể thấy bóng, giữ đúng mức có thể của phép thử. Không bịa màu thay kín hơn hoặc bước ngoài khả năng; đủ ngắn và giải quyết quyết định mới.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-stage-light-change:2",
+      "wholeTurnReview": "Nhận đúng việc đổi hoàn cảnh, khuyên không chọn trắng cho dịp này trước khi xác nhận M còn hàng. Căn cứ đèn ngược được giữ đúng nghĩa có thể thấy bóng. Lời khuyên và tồn nhất quán, không cần một món thay chưa được kiểm chứng hoặc câu hỏi cuối để hoàn thành lượt.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-stage-light-change:3",
+      "wholeTurnReview": "Đáp đủ tồn M và điều chỉnh lời khuyên trước sang không chọn trắng dưới đèn phía sau. Dùng nguy cơ có thể thấy bóng để giải thích, không biến thử phòng họp thành bảo đảm sân khấu. Câu đời thường, có quyết định dùng được và không tự tạo next step.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-refund-before-buy:1",
+      "wholeTurnReview": "Khách chốt trắng M rồi hỏi hoàn tiền hay chỉ đổi mẫu khi thử không ưng. Tin thực tế chỉ nói chưa trả lời được; bỏ cả phân biệt hoàn/đổi đã được policy xác nhận. Không có bước mua hữu ích, dù bản thân lời fallback ngắn, an toàn và không giả handoff.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-refund-before-buy:2",
+      "wholeTurnReview": "Trả không hoàn tiền, giới thiệu đổi size/mẫu 7 ngày với hàng chưa sử dụng/nguyên tem và phí khách trả, giữ đúng áo trắng M/499k. Cụm ghi nhận lựa chọn hơi hành chính nhưng là ACK tư vấn, không báo đã ghi đơn/state; không làm mờ câu trả lời chính. Không dùng riêng một cách nói hơi gượng để làm hỏng đánh giá cả lượt.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-refund-before-buy:3",
+      "wholeTurnReview": "Làm rõ không hoàn tiền và dịch vụ đổi size/mẫu 7 ngày, nhắc giữ tem/thử trong nhà như hướng dẫn kèm giới thiệu; không nói hai điều này đủ xác lập quyền đổi cho mọi hàng đã thử. Khách hiểu đúng loại dịch vụ, lựa chọn trắng M không bị mở lại. Giúp em hơi thừa nhưng không tạo lỗi vật chất về giọng hoặc bước xử lý.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r15-color-final-confirm:1",
+      "wholeTurnReview": "Khách vừa đổi sang xanh nhạt M và chỉ hỏi giá có thay đổi không. Reply xác nhận 499k và tồn đúng biến thể, không đọc ngực, quay lại trắng hay nói đã đổi đơn. Tin ngắn, tự nhiên, đủ để tiếp tục lựa chọn đã chốt.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r15-color-final-confirm:2",
+      "wholeTurnReview": "Giữ đúng xanh nhạt M/499k/còn hàng, không đặt lại câu hỏi đã chốt. Giá vẫn và giữ nguyên giá hơi lặp trong một câu, nhưng nghĩa rõ và không cản việc mua; đánh giá cả lượt đạt thay vì bắt lỗi một cụm nhỏ.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r15-color-final-confirm:3",
+      "wholeTurnReview": "Trả đúng giá không đổi, xác nhận xanh nhạt M còn và nối với quần navy khách đã có. Đây là liên hệ phối màu có ích trong mạch chọn món, không suy thành công năng hoặc dịp mặc. Không cần CTA hoặc số đo để hoàn thành câu hỏi giá.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-competitor-price:1",
+      "wholeTurnReview": "Khách phân vân chênh 129k cho đồ đi làm thường xuyên. Shop đứng vào set của mình và nối việc mặc nguyên bộ/tách phối với sự tiện, linh hoạt; thông tin tồn không thay lời tư vấn. Dùng lại lợi ích đã biết là được khi phục vụ quyết định này; không cần fact mới, hạ giá hoặc suy chất lượng đối thủ. Mức thuyết phục vừa phải nhưng có hướng mua rõ.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-competitor-price:2",
+      "wholeTurnReview": "Đưa lựa chọn của shop, giải thích nhanh gọn khi mặc nguyên bộ và linh hoạt khi tách phối, thêm ít nhăn để gắn với vẻ ngoài chỉn chu khi đi làm. Đây là lợi ích tư vấn thông thường được owner cho phép, không nói miễn là ủi hay kết quả giữ form kiểm nghiệm cả ngày. Không tự chứng minh hơn hàng 620k hoặc bịa chi phí bên kia.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-competitor-price:3",
+      "wholeTurnReview": "Giữ lập trường mua set này bằng cách dùng nguyên bộ/tách phối tiện cho việc mặc thường xuyên. Không chỉ trả lại giá hay né sang xin số đo; không suy giá cao là tốt hơn và không ép món thay rẻ nhất. Lời ngắn, thân thiện, cho khách lý do chọn shop trên nhu cầu đã biết.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r7-opacity-context-change:1",
+      "wholeTurnReview": "Khách đổi từ họp trong phòng sang sự kiện đèn phía sau dù câu cuối chỉ hỏi độ kín/tồn. Reply chủ động rút lời chọn trắng trước, nói có thể thấy bóng và vẫn trả M còn. Đây là cập nhật quyết định mua đúng ưu tiên tránh lộ, không dừng ở liệt kê đặc tính hoặc bịa màu thay.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r7-opacity-context-change:2",
+      "wholeTurnReview": "Giữ tồn đúng rồi điều chỉnh lập trường không khuyên trắng ở sự kiện đèn ngược, giải thích bằng nguy cơ đã được cấp. Không nhắc lại ngực hay reset size, không khẳng định chắc chắn xuyên. Quyết định hiện tại đã được giải quyết dù chưa có áo thay đủ căn cứ.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r7-opacity-context-change:3",
+      "wholeTurnReview": "Không mắc lỗi chỉ báo nguy cơ rồi tiếp tục bán trắng: tin nói rõ không khuyên mẫu này trong hoàn cảnh mới và trả tồn M. Câu gọn, đúng mức có thể của profile và hợp ưu tiên khách; không tạo công năng màu khác hoặc bước ngoài khả năng.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r7-exchange-after-use:1",
+      "wholeTurnReview": "Khách muốn mặc đi làm vài buổi rồi đổi và hỏi phí. Actual fallback bỏ cả câu trả lời không nhận hàng mặc ra ngoài lẫn ai trả phí, mặc dù policy đủ. Câu an toàn/tự nhiên nhưng không giúp khách quyết định cách thử hoặc hiểu quyền đổi; không chấm draft mà khách không nhận.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r7-exchange-after-use:2",
+      "wholeTurnReview": "Trả đúng không đổi hàng đã mặc ra ngoài, giới thiệu giới hạn hàng chưa sử dụng/nguyên tem/7 ngày và phí khách trả. Hai câu hỏi thực tế đều được giải quyết, không hứa quyền đổi sau sử dụng. Không bắt nối thêm một quyền thử trong nhà khi đã giải thích rõ câu hỏi dịch vụ hiện tại.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r7-exchange-after-use:3",
+      "wholeTurnReview": "Khách hỏi trường hợp đã mặc ra ngoài và phí đổi, nhưng nhận tin chưa trả lời được. Không có phần giải thích chính sách, phần trả lời được hay bước dùng được để tiến tới mua. Lời fallback không bịa quyền/receipt và nghe tự nhiên, song toàn lượt vẫn không đáp nhu cầu.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-price-repeat-wear:1",
+      "wholeTurnReview": "Trả M đúng code-fit của khách và giữ lựa chọn set bằng lợi ích đi làm nguyên bộ/tách áo phối đồ đang có. Không đọc lại ba vòng hoặc né phản đối giá bằng hỏi size; lời dùng lại lợi ích có mục đích hỗ trợ quyết định, không phải bắt buộc thêm fact mới. Đủ tự tin, không suy chất lượng đối thủ.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-price-repeat-wear:2",
+      "wholeTurnReview": "Chọn M từ fit đã xác nhận, giải thích tính linh hoạt đi làm/tách phối và ít nhăn làm lý do đầu tư tủ đồ. Form chuẩn/vừa đẹp ở đây là tư vấn dáng/size thông thường, không lời kiểm nghiệm hay bảo đảm cảm giác. Không bịa độ bền, giá hay hàng đối thủ; câu đủ tự nhiên dù có màu sắc bán hàng.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-price-repeat-wear:3",
+      "wholeTurnReview": "Giữ M đúng người/món và 749k đúng giá, khuyên chọn set bằng hai cách dùng khách đã nêu. Không hỏi lại số đo, không cần lời chê đối thủ hay quyền lợi mới để xử lý chênh giá. Reply có lựa chọn, lý do và sự xác nhận dùng được, không bắt có CTA riêng.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r15-value-use:1",
+      "wholeTurnReview": "Đứng vào set của shop khi khách chê giá, gắn lợi ích nguyên bộ đi làm và tách phối cuối tuần với việc dùng được nhiều dịp. Những lợi ích đã biết được biến thành lý do chọn, không cần so chất lượng đối thủ. Chưa phải chứng minh conversion, nhưng đủ tư vấn mua và không tự áp ship/độ bền.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r15-value-use:2",
+      "wholeTurnReview": "Khuyên giữ set với lý do một bộ đi làm rồi tách áo dùng với đồ sẵn có cuối tuần. Điều còn vướng là giá trị sử dụng được trả bằng lợi ích đúng nhu cầu, không catalogue hoặc lảng sang lấy số đo. Lời gọn, có lập trường và không thêm quyền/capability.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r15-value-use:3",
+      "wholeTurnReview": "Giải thích chọn ST411 bằng ít nhăn hỗ trợ vẻ ngoài chỉn chu đi làm và tách phối các món đang có. Giữ phom dáng chỉn chu ở đây là tư vấn vẻ ngoài thông thường theo calibration đã freeze, không cam kết phẳng mọi lúc/no-ironing hay độ bền. Lời có ích để cân nhắc mua, không tự định giá trị hàng đối thủ.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r16-pants-color-alternative:1",
+      "wholeTurnReview": "Chọn QU714 navy để phối áo trắng thay cho màu đen, trả lựa chọn trước rồi chỉ hỏi eo/mông là inputs size đúng quần. Không xin ngực của áo trong cùng context, không dùng freeship để ép thêm hoặc suy size thiếu dữ liệu. Bước tiếp làm được và phù hợp tiếp cuộc mua.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r16-pants-color-alternative:2",
+      "wholeTurnReview": "Hiểu khách muốn thay màu, chọn navy với áo trắng và khác màu cũ; sau đó xin đúng eo/mông cho quần. Không đọc lại profile, ép mua thêm, thu địa chỉ hay tự chốt size. Lời chat ngắn và có quyết định rõ cùng bước hữu ích.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r16-pants-color-alternative:3",
+      "wholeTurnReview": "Đề xuất navy không trùng chiếc đen đã có, nối trực tiếp với áo trắng rồi hỏi eo/mông để chọn size quần. Việc nhắc món đang có là dẫn chứng cho lựa chọn, không liệt kê thông tin khách. Không có BUST_CM hoặc thao tác mua hàng chưa hỗ trợ; toàn lượt tự nhiên và dùng được.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    }
+  ]
+}

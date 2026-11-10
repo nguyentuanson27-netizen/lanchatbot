@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "kind": "PRE_PROVIDER_FROZEN_TWO_ADDITIONAL_REPETITIONS",
+  "intakeHead": "6cd8f5060d95381d14b9f6aec0bf40ba2933c02f",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "priorRepetition": {
+    "number": 1,
+    "dir": "bounded-source-run-20261018",
+    "runSourceSha": "487816d8c3f27299b62daaccca8bd861d81abee1",
+    "rawSavepoint": "17a74bf94ad0dd4d9a0f379e855c08b187be0079",
+    "primarySavepoint": "50d8f8a43f10abe1586a1fa581af231148ee71c8",
+    "frozenInputs": {
+      "sha256": "f5d01e2f83627f12cfb3f5276092043ef7791559041e7ce85c9ab876ad351979",
+      "bytes": 11150
+    },
+    "rawHashes": {
+      "sha256": "b08afbece58f495c00e31e549a632cb67665fbae7aeb21e8698e7e7e0713ee9a",
+      "bytes": 4250
+    }
+  },
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "ee4377287c3c07ba232574e4542a4a5f1988e8ee8277506fb4d26f17bd8cd3a6",
+    "verifier": "b3633274a8e34fa536f6e64dbd47b203c06da172e0336664244c6333bdab6e24"
+  },
+  "requestBounds": {
+    "ownerWireBytes": 65536,
+    "verifierWireBytes": 32768
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "verdictSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "verdict",
+      "violations"
+    ],
+    "properties": {
+      "verdict": {
+        "type": "string",
+        "enum": [
+          "PASS",
+          "FAIL",
+          "UNCERTAIN"
+        ]
+      },
+      "violations": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "protectedRef"
+          ],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "UNSUPPORTED_PROTECTED_ASSERTION",
+                "SUBJECT_MISMATCH",
+                "CONTRADICTION_OR_NEGATION",
+                "MATERIAL_CONDITION_LOSS",
+                "POLICY_OR_BENEFIT_STRENGTHENING",
+                "EFFECT_WITHOUT_RECEIPT",
+                "STALE_OR_SUPERSEDED_MEANING",
+                "OTHER_PROTECTED_SEMANTIC_RISK"
+              ]
+            },
+            "protectedRef": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "terminalMap": {
+    "PASS": "SEND_ELIGIBLE_SEND_DISABLED",
+    "FAIL": "STATIC_FALLBACK",
+    "UNCERTAIN": "STATIC_FALLBACK",
+    "MALFORMED": "STATIC_FALLBACK",
+    "TIMEOUT": "STATIC_FALLBACK",
+    "PROVIDER_ERROR": "STATIC_FALLBACK",
+    "STALE": "HANDOFF_NO_SEND_CAPABILITY",
+    "PERMISSION": "NO_SEND",
+    "PRIVACY": "NO_SEND",
+    "RECIPIENT": "NO_SEND"
+  },
+  "fallback": {
+    "id": "C3_A_NONPROTECTED_V2",
+    "text": "Phần này em chưa trả lời được, chị nhé.",
+    "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+  },
+  "nativeToolSchemaHashes": {
+    "b1": "23867cc18d8d7c1fb37d789960f4807b8129b20cd607551b09021292ed0b40f8",
+    "stateful": "ebe550ad5191a4a69021c55da1ccd0b1e60afa219ada9775211182360c0f7cb7"
+  },
+  "files": {
+    "manifest.json": {
+      "sha256": "871e36163d5157d3dcde1d5bd0e13f51842b967722ee7226b4c86005c6d3b8f5",
+      "bytes": 4305
+    },
+    "source-config.b1.json": {
+      "sha256": "dac8e541ed43770d641c60fbfd1ea7809c4c05b42932cd74278c0071ee55b60f",
+      "bytes": 873
+    },
+    "cases.b1.json": {
+      "sha256": "790a28e0415bf4b0bdf23c44993cbe78fe76415827a080e9bb09e777775dca67",
+      "bytes": 16225
+    },
+    "context-fix-20261016/cases.priority.json": {
+      "sha256": "8f858e80f27984008e5d29d87d421645ee1b3c53631e09b31c4c2ea7eb722267",
+      "bytes": 16825
+    },
+    "stateful-cases.json": {
+      "sha256": "51d53b26a9d85ee37786a269df1700cbbe9b4b2fd16ec243bc4a2bce56f3a749",
+      "bytes": 2075
+    },
+    "prompts/owner.vi.txt": {
+      "sha256": "ee4377287c3c07ba232574e4542a4a5f1988e8ee8277506fb4d26f17bd8cd3a6",
+      "bytes": 12414
+    },
+    "prompts/verifier.vi.txt": {
+      "sha256": "b3633274a8e34fa536f6e64dbd47b203c06da172e0336664244c6333bdab6e24",
+      "bytes": 11646
+    },
+    "run.mjs": {
+      "sha256": "946afe58baf93ef1ec73a3bae99de1cf72d60a6169eb6507cdf7e7f46b27162e",
+      "bytes": 11852
+    },
+    "stateful-provider.mjs": {
+      "sha256": "98b19957ce3fcda47127feb5cfcd2210cfb9b7716a00324705a974a34f8f62ec",
+      "bytes": 6457
+    },
+    "isolated-integration.mjs": {
+      "sha256": "becf356f28d72d165cc8dc2943367762d62e0fb7ef5743082ac271c3c8bb54d8",
+      "bytes": 53024
+    },
+    "gemini-inference.mjs": {
+      "sha256": "1f591d6b8bad6b53108c3dcb42deded42a4834ef232cd424aca6ddf85c471382",
+      "bytes": 18095
+    },
+    "protocol.mjs": {
+      "sha256": "573384ff10035f0d288a4bd0d498f6e87c7bc880dcf9275ea0f8a3d05258aafe",
+      "bytes": 6400
+    },
+    "source-session.py": {
+      "sha256": "4d6140a6240f71874cde08d3579f31cf5b8562e3f042a24341104de1695b30c7",
+      "bytes": 4378
+    }
+  },
+  "runtimeFiles": {
+    "single-agent-commerce-state.ts": {
+      "sha256": "40ad8a7cdc0311e6425f3d9a6889c6b7de55465b9717433925ad1e88c7fb6e2c",
+      "bytes": 20122
+    },
+    "single-agent-commerce-effects.ts": {
+      "sha256": "d559fdd5d6ab4cd9314b7663b41aecd783980ae3ca29341df12a7316969f946d",
+      "bytes": 28034
+    },
+    "single-agent-commerce-ingress.ts": {
+      "sha256": "4575e91e6b14c4fcc219f7bb8f4302542a0d789430029d0c296bc50a7910e30c",
+      "bytes": 20058
+    },
+    "single-agent-commerce-read-only-context.ts": {
+      "sha256": "a87dbfcaf6ce11826293d10eb6857707fe6e3dbc1b4d4da5a788a72efc5803f5",
+      "bytes": 4233
+    },
+    "single-agent-semantic-verifier-boundary.ts": {
+      "sha256": "9ecc2e41982aadb5d73ffe95bc60b28b1fe18536d47632fc5b101d8f22903d62",
+      "bytes": 17162
+    }
+  },
+  "credentialLauncher": {
+    "path": "C:/Users/nguye/AppData/Local/Temp/c3-offer-replay-session-20261016.py",
+    "sha256": "875724a9b92ecc677a0549a41b701edbd49d3831fe9be69506bc12ffd6c5e218",
+    "bytes": 3935
+  },
+  "numericGrounding": {
+    "quoteMaximumCharacters": 160,
+    "uniqueCurrentMessage": true,
+    "scalarCopyOnly": true,
+    "semanticsNotProven": [
+      "FIELD",
+      "REFERENT",
+      "NEGATION",
+      "OLD_NEW"
+    ],
+    "pendingStateField": "customerStateUpdatePending",
+    "sourceMessagesCodeOnly": true,
+    "modelPrivacyPrecheckUnchanged": true
+  },
+  "population": {
+    "additionalRepetitions": [
+      2,
+      3
+    ],
+    "b1PerRepetition": 24,
+    "statefulPerRepetition": 7,
+    "statefulPublicTurnsPerRepetition": 6,
+    "privateCodeTurnsPerRepetition": 1,
+    "newOutcomes": 62,
+    "priorOutcomes": 31,
+    "totalDescriptiveOutcomes": 93,
+    "maximumNewGenerationInvocations": 240
+  },
+  "perPublicAttempt": {
+    "ownerGenerations": 3,
+    "toolRounds": 2,
+    "toolCalls": 6,
+    "verifierGenerations": 1,
+    "upstreamRequestsPerGeneration": 1,
+    "retry": 0
+  },
+  "collectionOrder": "TWO_PARALLEL_AGENTS_EACH_ORDERED_7_STATEFUL_THEN_24_B1;BUILD_IMPORT_STARTUP_SERIALIZED_BY_PARENT",
+  "sourceSnapshots": "LIVE_PUBLIC_PER_READ_NOT_IDENTICAL_WORLD",
+  "sourceReadback": {
+    "sha256": "3d9ddc31b2d3218c1c2de8d32f919c25e38fd47de3a57ec4ce52de9116e947c7",
+    "bytes": 30874
+  },
+  "scopeSha256": "76deebd08df23b76dfae87b82759b6ed6d27788c13ee1ad06116984a15a9e107",
+  "referenceBlobs": {
+    "docs/specs/c3-single-agent-commerce-architecture-20261004.md": "7e0265e3b6b3d556d8fb0f3c7267abccef5de86a",
+    "docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md": "4a09b55d2f3a972a65697738876cc5eab21e7a2b",
+    "docs/specs/c3-phase-b-execution-20261014.md": "a452326d77e4493b88b02c0072cef808fecad2d8",
+    "docs/specs/c3-phase-b-advisory-and-chat-boundary-20261016.md": "5a531cfeb03fcc20e178517a47f5be5a234e1593",
+    "tasks/plan.md": "e63193a647368ac81d715d60648fab3402d24c0e",
+    "tasks/todo.md": "6a6133dfc70cb44208d3bd52980a9b11ac2e4b6c"
+  },
+  "reusedVerification": {
+    "sourceSha": "3514691de093be5595881d1e250dff9e1248cab3",
+    "report": "../bounded-source-run-20261018/IMPLEMENTATION.md",
+    "workerVitestPass": 1843,
+    "nodePass": 496,
+    "nodeOptionalSkip": 2,
+    "protectedProductSizePass": 52,
+    "workerTypecheckBuildLint": "EXIT0_PREVIOUSLY_RUN",
+    "isolatedCodControls": "25/25_PASS_PREVIOUSLY_RUN_NO_NEW_CONTROL"
+  },
+  "retry": 0,
+  "sendEnabled": false,
+  "humanAcceptance": null,
+  "stoppingRule": "STOP_AFTER_EXACTLY_TWO_ADDITIONAL_REPETITIONS_NO_REPAIR_OR_EXTRA_ATTEMPT",
+  "runSourceShaPolicy": "CAPTURE_CLEAN_COMMITTED_HEAD_AT_RUNTIME_PER_REPETITION_NO_SELF_WRITE",
+  "judging": "SAME_WHOLE_ACTUAL_OUTCOME_CRITERIA;ALL_RAW_BEFORE_PRIMARY_BEFORE_TRACE;NO_MAJORITY_OR_BEST_OF",
+  "generationResults": "NOT_RUN_AT_FREEZE"
+}

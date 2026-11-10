@@ -1,0 +1,12 @@
+{
+  "scopeCode": "APPROVED",
+  "inputReview": "APPROVED",
+  "postRunAudit": "NOT_COMPLETED_USAGE_LIMIT",
+  "quality": "NOT_GRADED",
+  "qualification": "BLOCKED",
+  "C3": "NOT_RUN",
+  "liveSend": false,
+  "reportAccuracy": "AUTHOR_REVIEW_ONLY",
+  "primaryAudit": "PASS",
+  "reviewer": "/root/phase_c_task_completion_implementation_review"
+}

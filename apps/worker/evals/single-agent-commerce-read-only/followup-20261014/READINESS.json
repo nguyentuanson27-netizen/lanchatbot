@@ -1,0 +1,132 @@
+{
+  "status": "READY_TO_COMMIT_CLEAN_AND_PREFLIGHT",
+  "preparationBaseSha": "0f4c4eba9be29d6033058ae1be3bebc9daafffbd",
+  "refreshedMainSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "36be248c69caa541071a8f65542ec6c1db2eb0a2d39224b4f80f7a5468b8a223",
+    "verifier": "fe7e21965c6cc608c854b97f2513130c9d2f39cf5bec443f4a637f7d8e6f7957"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "toolSchemaHash": "3a814aa7ca58344c7997f8d68b5890e98b664a89f8dff0a451e8100f78465b0a",
+  "manifestHash": "6e6b0405e55a7fbd69f9c9065d93980af3d12737715a2eac6b72ff978ed54cd8",
+  "corpusHash": "48517f0d48680089f3aeb46f14ab8f5cf9ec309ffe2e005cbbebe317e3a16a7f",
+  "sourceConfigHash": "5ca8dc68da2a11d6a29bb9d03617686f3116a3e43b8c646da0b012212bcefb6e",
+  "providerRequestsSoFar": 0,
+  "sendEnabled": false,
+  "controls": {
+    "sameEightWorldsAndExpectations": true,
+    "orderOnlyChange": true,
+    "verifierBytesUnchanged": true,
+    "generationConfigSchemaFallbackUnchanged": true,
+    "priorRawHashesIntact": true,
+    "windowsAliasRestored": true
+  },
+  "checks": {
+    "observedRed": {
+      "workerFailures": 3,
+      "nativeFailure": 1
+    },
+    "minimumGreen": {
+      "worker": 27,
+      "native": 11
+    },
+    "focused": {
+      "worker": 145,
+      "nativeProtocol": 18
+    },
+    "fullWorker": {
+      "exitCode": 0,
+      "vitestFiles": 126,
+      "vitestPassed": 1709,
+      "nodePassed": 458,
+      "nodeFailed": 0,
+      "nodeSkipped": 2,
+      "skips": "opt-in installed-login local-stub probes, not B required tests"
+    },
+    "typecheck": {
+      "exitCode": 0
+    },
+    "build": {
+      "exitCode": 0
+    },
+    "lint": {
+      "exitCode": 0
+    },
+    "syntaxCheck": {
+      "exitCode": 0
+    }
+  },
+  "logs": [
+    {
+      "name": "worker-full",
+      "path": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-followup-worker-full-20261014.txt",
+      "sha256": "df0f122807359ffc7bf9535f5b405e4b2880ac80ad83794776689975aceb8000"
+    },
+    {
+      "name": "typecheck",
+      "path": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-followup-typecheck-20261014.txt",
+      "sha256": "8f04574b076ebd39a7f9ba2c11d47f776b70fb0859cafb65eba02b710efbfeab"
+    },
+    {
+      "name": "build",
+      "path": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-followup-build-20261014.txt",
+      "sha256": "cee83447612b1719570111ffd5754a8f27c332c3eefe1fa4f68dd825216fd6df"
+    },
+    {
+      "name": "lint",
+      "path": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-followup-lint-20261014.txt",
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415"
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "planBaseSha": "b7dc99c9dbc1d87cd67f38dd3264b670eb5ffe66",
+  "records": [
+    {
+      "source": "c3-rootcause-independent-review-20261108.md",
+      "originalRawSha256": "ab8d2e301c063c6c5f604fb28b4ee2fc78f143acc67a44e6bdefc037f55af6d7",
+      "publication": "independent-rootcause-review.md",
+      "publicationSha256": "ab8d2e301c063c6c5f604fb28b4ee2fc78f143acc67a44e6bdefc037f55af6d7",
+      "normalization": "CRLF_TO_LF_ONLY"
+    },
+    {
+      "source": "c3-rootcause-independent-review-20261108.json",
+      "originalRawSha256": "7396cbc29fb1fec8fc089716aeb78821e422db4c172fdc14e222fcab85d28e43",
+      "publication": "independent-rootcause-review.json",
+      "publicationSha256": "7396cbc29fb1fec8fc089716aeb78821e422db4c172fdc14e222fcab85d28e43",
+      "normalization": "CRLF_TO_LF_ONLY"
+    },
+    {
+      "source": "c3-rootcause-state-probe-20261108.mjs",
+      "originalRawSha256": "7bffb9937e9394c25207b7dfa8a84842c13e3395c3ca5671d9ff162a87d17a9c",
+      "publication": "j2-pending-probe.mjs",
+      "publicationSha256": "7bffb9937e9394c25207b7dfa8a84842c13e3395c3ca5671d9ff162a87d17a9c",
+      "normalization": "CRLF_TO_LF_ONLY"
+    },
+    {
+      "source": "c3-rootcause-state-probe-20261108.json",
+      "originalRawSha256": "0e19b4c9b1f77479713c376ef50efc6744610296daf9f23e8747428eb386113a",
+      "publication": "j2-pending-probe.json",
+      "publicationSha256": "0e19b4c9b1f77479713c376ef50efc6744610296daf9f23e8747428eb386113a",
+      "normalization": "CRLF_TO_LF_ONLY"
+    },
+    {
+      "source": "c3-j2-j1-plan-independent-review-20261108.md",
+      "originalRawSha256": "96280814de2a7036225a3d1a364e1a27717b073ec25dd3b7f3a7d6d0f6389eaf",
+      "publication": "plan-review-r1.md",
+      "publicationSha256": "f314659330f9a2346134910ed544347b8e005fc8f6d6f9d24300d8b143bc8703",
+      "normalization": "CRLF_TO_LF_AND_SINGLE_FINAL_NEWLINE"
+    },
+    {
+      "source": "c3-j2-j1-plan-independent-review-20261108.json",
+      "originalRawSha256": "a91ad56f2daafd3ae6c79b269488a1766c9d592044650d6d7831707f43a4908e",
+      "publication": "plan-review-r1.json",
+      "publicationSha256": "fc83fa9fd2409f83b3307dd7777202ac056d92d4e68cda0a10ef218a660575cb",
+      "normalization": "CRLF_TO_LF_AND_SINGLE_FINAL_NEWLINE"
+    },
+    {
+      "source": "c3-j2-j1-plan-independent-review-20261108-r2.md",
+      "originalRawSha256": "e92a4af0f82de7c3ab32e8c6e210e874351a87e65e2f010b7e97614d212c8c26",
+      "publication": "plan-review-r2.md",
+      "publicationSha256": "9fd236d8d137ca4b4d477ef9fe3982fab29be0dab3a8aac16001e8c4ec29cc4c",
+      "normalization": "CRLF_TO_LF_AND_SINGLE_FINAL_NEWLINE"
+    },
+    {
+      "source": "c3-j2-j1-plan-independent-review-20261108-r2.json",
+      "originalRawSha256": "1b73d37e776b1d689cdd4021207b67f380925c63178df1531a346d12df4dda8f",
+      "publication": "plan-review-r2.json",
+      "publicationSha256": "143e24423ac9f0af5190b47dc28eaeaaf2e33157ecbddf476c62aa36b6732fac",
+      "normalization": "CRLF_TO_LF_AND_SINGLE_FINAL_NEWLINE"
+    }
+  ],
+  "probeScope": "Historical minimal PRODUCT/QU714 in-memory diagnostic, not full COMPONENT/PG acceptance; original task-local imports retained; do not run archive copy as a test.",
+  "newRuntimeChanges": false,
+  "newProviderRequests": 0,
+  "planApproval": {
+    "revision": 2,
+    "verdict": "APPROVE_PLAN",
+    "plan": "docs/specs/c3-phase-c-j2-recovery-j1-controlled-plan-20261108.md",
+    "planSha256": "2c617c4d6b467a92797a706279d37ee43bdc9ac38f47bdb8767b3539e71d0393",
+    "review": "plan-review-r2.json",
+    "sameReviewer": true,
+    "reviewRounds": 2,
+    "requiredFindingsClosed": [
+      "R1",
+      "R2",
+      "R3"
+    ],
+    "optionalFindingsAddressed": [
+      "O1",
+      "O2"
+    ],
+    "scope": "PLAN_ONLY",
+    "implementation": "NOT_IMPLEMENTED",
+    "providerRequests": 0,
+    "newRuntimeTests": 0
+  },
+  "documentationVerification": {
+    "scope": "documentation only",
+    "checks": [
+      "reviewed-plan SHA256 matches approval",
+      "all published evidence hashes match",
+      "JSON parse",
+      "plan/current task links exist",
+      "UTF-8/LF and single final newline for review publications",
+      "credential-pattern scan with token boundaries",
+      "git diff --check (including new files)"
+    ],
+    "runtimeTests": "NOT_RUN",
+    "providerRequests": 0
+  }
+}

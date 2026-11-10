@@ -1,0 +1,155 @@
+{
+  "supersedes": "PREFIX_DIAGNOSTICS.snapshotInterpretation: final currentPublicContext is retained. SNAPSHOT_DIAGNOSTICS positional claim rows must not be interpreted as quantity/offer changes without semantic alignment.",
+  "items": [
+    {
+      "caseId": "sales-size-advice:height-weight",
+      "claimMeaningSetsEqual": true,
+      "posObservedAt": {
+        "before": [],
+        "after": []
+      },
+      "positionalDiffWarning": "Canonical claim ordering can change after provenance refresh; index-aligned diff is not evidence that a price or quantity changed. Use the semantic set comparison above.",
+      "status": "COMPARED",
+      "changes": [
+        {
+          "path": "/policies/offers:SV2447/expiresAt",
+          "before": "2026-10-24T13:04:33.059Z",
+          "after": "2026-10-24T13:34:33.144Z"
+        },
+        {
+          "path": "/policies/offers:SV2447/observedAt",
+          "before": "2026-10-24T11:04:33.059Z",
+          "after": "2026-10-24T11:34:33.144Z"
+        },
+        {
+          "path": "/policies/offers:SV2447/sourceVersion",
+          "before": "27de0068a6db6140a36fb1ee365e29c4a8cbd9f1cd28eae19a467b3152ecfd23",
+          "after": "36d86b8bf827aef8006c2baf46f03553e391885b3e1b3c42df8c170b2ecd030b"
+        },
+        {
+          "path": "/state/factSnapshotVersion",
+          "before": "fe975db111846fed1b85ec79bd3c2d00ea93d2e6638a02342a8488e38c80c727",
+          "after": "5f7607c918062fa86e48962e3fa81c633008d13d9b7d4211b022e1ebf8176194"
+        }
+      ],
+      "truncated": false
+    },
+    {
+      "caseId": "media-detail-next:ask",
+      "claimMeaningSetsEqual": true,
+      "posObservedAt": {
+        "before": [
+          "2026-10-24T11:04:33.059Z"
+        ],
+        "after": [
+          "2026-10-24T11:34:33.144Z"
+        ]
+      },
+      "positionalDiffWarning": "Canonical claim ordering can change after provenance refresh; index-aligned diff is not evidence that a price or quantity changed. Use the semantic set comparison above.",
+      "status": "COMPARED",
+      "changes": [
+        {
+          "path": "/claims/0/scope/variantId",
+          "before": "offer:SV2447:CV",
+          "after": "offer:SV2447:AO"
+        },
+        {
+          "path": "/claims/0/source/contentHash",
+          "before": "ed414c4779b1cb6146952118e5d635f1f9f2b77e820e7c55be47305fbf8e956c",
+          "after": "972436099d2f2df0a8574eeaecb23c8e9351a4e486f6e684a84b856af3680b72"
+        },
+        {
+          "path": "/claims/0/source/evidenceRef",
+          "before": "business-fact:stock:4af9b72268cbd3eb726350e511cba9a9864f876b915ec4fdeaff297422e3af32",
+          "after": "business-fact:stock:fdeb005c8cf1fdadcc77dab2bfd476bb693b5d8e75c1d9e836c8dbda31bd3e19"
+        },
+        {
+          "path": "/claims/0/source/expiresAt",
+          "before": "2026-10-24T13:04:33.059Z",
+          "after": "2026-10-24T13:34:33.144Z"
+        },
+        {
+          "path": "/claims/0/source/observedAt",
+          "before": "2026-10-24T11:04:33.059Z",
+          "after": "2026-10-24T11:34:33.144Z"
+        },
+        {
+          "path": "/claims/0/source/sourceVersion",
+          "before": "POS_SNAPSHOT:2026-10-24T11:04:33.059Z",
+          "after": "POS_SNAPSHOT:2026-10-24T11:34:33.144Z"
+        },
+        {
+          "path": "/claims/0/value/availableQuantity",
+          "before": 50,
+          "after": 95
+        },
+        {
+          "path": "/claims/1/source/evidenceRef",
+          "before": "business-fact:price:823a5cb220b2a140ab8dab1c49e4eae4205463774c4ea8b62199f4ab058fc0d3",
+          "after": "business-fact:price:eea8cf7185a6b17362430b3e7560670c143dbc379ffa92c9f952da5648b0a34b"
+        },
+        {
+          "path": "/claims/1/source/expiresAt",
+          "before": "2026-10-24T13:04:33.059Z",
+          "after": "2026-10-24T13:34:33.144Z"
+        },
+        {
+          "path": "/claims/1/source/observedAt",
+          "before": "2026-10-24T11:04:33.059Z",
+          "after": "2026-10-24T11:34:33.144Z"
+        },
+        {
+          "path": "/claims/1/source/sourceVersion",
+          "before": "POS_SNAPSHOT:2026-10-24T11:04:33.059Z",
+          "after": "POS_SNAPSHOT:2026-10-24T11:34:33.144Z"
+        },
+        {
+          "path": "/claims/2/source/evidenceRef",
+          "before": "business-fact:price:2b259a76bdd3f4c6eb79a4122684902891ea0145f7f52763d0f93fc4c55fc86b",
+          "after": "business-fact:price:adb4c9e8a07eac5d03601d492f20d45ed36bbd1484008457feb2562cf05820b7"
+        },
+        {
+          "path": "/claims/2/source/expiresAt",
+          "before": "2026-10-24T13:04:33.059Z",
+          "after": "2026-10-24T13:34:33.144Z"
+        },
+        {
+          "path": "/claims/2/source/observedAt",
+          "before": "2026-10-24T11:04:33.059Z",
+          "after": "2026-10-24T11:34:33.144Z"
+        },
+        {
+          "path": "/claims/2/source/sourceVersion",
+          "before": "POS_SNAPSHOT:2026-10-24T11:04:33.059Z",
+          "after": "POS_SNAPSHOT:2026-10-24T11:34:33.144Z"
+        },
+        {
+          "path": "/claims/3/scope/variantId",
+          "before": null,
+          "after": "offer:SV2447:SET_VAY"
+        },
+        {
+          "path": "/claims/3/source/authority",
+          "before": "MEDIA_SELECTOR_V2",
+          "after": "POS_SNAPSHOT"
+        },
+        {
+          "path": "/claims/3/source/contentHash",
+          "before": "1d468b542cef730ec27e5adf3a1fcc4d4a8ff56a3660ac9c875a51b8fd5a8f77",
+          "after": "0e63c426c5021367ada8408ef2b632a2c5f718951ad0e2faaca8f5e5ed0f19a7"
+        },
+        {
+          "path": "/claims/3/source/evidenceRef",
+          "before": "media-selector:1d468b542cef730ec27e5adf3a1fcc4d4a8ff56a3660ac9c875a51b8fd5a8f77",
+          "after": "business-fact:price:704e5d7b9c65f2fa8042bb6600b8cc5769bfa5cd168522291eeeb53daa7f821a"
+        },
+        {
+          "path": "/claims/3/source/expiresAt",
+          "before": "2026-10-28T04:31:05.725Z",
+          "after": "2026-10-24T13:34:33.144Z"
+        }
+      ],
+      "truncated": true
+    }
+  ]
+}

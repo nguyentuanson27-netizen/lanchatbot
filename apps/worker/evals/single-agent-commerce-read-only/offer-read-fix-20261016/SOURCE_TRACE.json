@@ -1,0 +1,82 @@
+{
+  "mode": "OFFLINE_CAPTURED_REGISTRY_PRODUCER_CONSUMER_DIAGNOSIS",
+  "providerGenerations": 0,
+  "liveSourceReads": 0,
+  "sourceWrites": 0,
+  "inputs": [
+    {
+      "path": "context-fix-20261016/registry-read.json",
+      "sha256": "ce0e148d6c59cbb66101c43a81eb2e00a2d957e9ff6c02ccff54922963e2d551"
+    },
+    {
+      "path": "context-fix-20261016/source-diagnosis.json",
+      "sha256": "891bb745e800a1c7e31cbcdd5cac45e211c1f4b6c1f6058db87e03fd355eeeef"
+    }
+  ],
+  "registrySourceUpdatedAt": "2026-09-28T04:31:05.725Z",
+  "capturedIndexPoints": 11,
+  "capturedIndexPointsMissingAttributes": 11,
+  "proposal": {
+    "productId": "SV2447",
+    "product_attributes": {
+      "materials": [
+        "REN",
+        "TƠ"
+      ],
+      "materialComponents": {
+        "AO": [
+          "REN",
+          "TƠ"
+        ],
+        "CHAN_VAY": [
+          "REN",
+          "TƠ"
+        ],
+        "VAY": [
+          "REN",
+          "TƠ"
+        ]
+      },
+      "colors": [],
+      "styles": [
+        "NỮ TÍNH",
+        "THANH LỊCH"
+      ],
+      "silhouettes": [],
+      "occasions": [],
+      "designAttributes": {
+        "details": [
+          "THÊU NỔI"
+        ]
+      },
+      "careInstructions": null,
+      "wearProperties": {
+        "stretch": null,
+        "wrinkleResistance": null,
+        "opacity": null,
+        "lining": null,
+        "breathability": "PRESENT"
+      },
+      "backCoverage": null,
+      "designComplexity": null,
+      "schemaVersion": 1,
+      "productId": "SV2447",
+      "metadata": {
+        "authority": "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+        "sourceVersion": "product-registry-attributes:7bbc843a11ce027d44eac87eb00e0658bfd786703e3a8fcba27a45dc677be13a",
+        "observedAt": "2026-09-28T04:31:05.725Z",
+        "expiresAt": null,
+        "freshForSeconds": null,
+        "freshnessState": "FRESH",
+        "contentHash": "7bbc843a11ce027d44eac87eb00e0658bfd786703e3a8fcba27a45dc677be13a"
+      }
+    }
+  },
+  "consumerVerified": true,
+  "completePublicationInputs": false,
+  "xmlGroupForAttributeIsolation": "ID_ONLY_NOT_A_SOURCE_XML_READ",
+  "exactTargetPointIds": "NOT_IN_CAPTURED_DIAGNOSIS",
+  "existingPointHashes": "NOT_IN_CAPTURED_DIAGNOSIS",
+  "actualPublicationAction": "UNKNOWN_UNTIL_CURRENT_SOURCE_DRY_RUN",
+  "publicationExecuted": false
+}

@@ -1,0 +1,78 @@
+{
+  "runSourceSha": "48e8a42858061e16df60ffbd98f19c47fc3bbd80",
+  "logs": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-capture-20261105-01.log",
+      "sha256": "767444de8c2c91b75b08eea69bfb179969cc2d29fc1d784632ddef3ec85318d3",
+      "bytes": 138
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-finalize-20261105-01.log",
+      "sha256": "8c66a58c6385f55a6fe6f1a134874210cf89535bbfded822a5e946c92fd0853f",
+      "bytes": 3179
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-initial-20261105-01.log",
+      "sha256": "9836ebc8db3db372b1cec6eacaed6a16b02bc0972f3d4915c2be685f745e29da",
+      "bytes": 74
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-prepare-20261105-01.log",
+      "sha256": "55d708f309b0c5dbcfed8ae118b4aafe12b0c932d22cb6190f014b7eb3c4e9ba",
+      "bytes": 1350
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r1-run-20261105-01.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r1-sealed-20261105-01\\REGISTRATION.json",
+      "sha256": "1ccf60d3b0e4612f23056a6f0323e371b29ec2e59f5526a3e96ef1b63da783b3"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-sealed-20261105-01\\REGISTRATION.json",
+      "sha256": "75d9cf5946691c184b2bb62b9bbb3e2e1205749ed4fb18ad54367f11c8f3786c"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-remainder-sealed-20261105-01\\REGISTRATION.json",
+      "sha256": "33eb0df013d5ea3c1dd5f687031c324860dcc7d3c4eed80d07eb171a7244367d"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-checkout-sealed-20261105-01\\REGISTRATION.json",
+      "sha256": "2e69f4860219814193f6fc7baf30b5b782fb4d728ab420fd3e69fbbd34aa1c90"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r1-run-20261105-01\\CANDIDATE_EVIDENCE.partial.json",
+      "sha256": "b24f152510d9856675bab9f4d8e8f7c537cdf579493603e0ba1a492b0ad952e7"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r1-run-20261105-01\\NATIVE_REQUESTS.jsonl",
+      "sha256": "8ff763e3ab2948d1e3345fe9c13451999c5f98494de4bc3544a6ec6852a108c1"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\CANDIDATE_EVIDENCE.partial.json",
+      "sha256": "d073ede30ba921e5502572b653dd95d5e1796ba9be94cc007a826cd9026e0c29"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-r2-run-20261105-01\\NATIVE_REQUESTS.jsonl",
+      "sha256": "731b95f9afce826f5ce61148b572430f5d6641406ceb0f3c1d888c61a083616d"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-world-20261105-01\\WORLD.json",
+      "sha256": "d7b5be8cf9dc7b3c4269b29018d59c859519ec4ad4801a0a1f22769f4c89702c"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-followup-model-world-20261105-01\\PUBLIC_SOURCE_WORLD.json",
+      "sha256": "e3f52b30f8c91f6a7d863fe91fd13f1813c02e9b9b5ac85a1364e8e74157815b"
+    }
+  ],
+  "limits": "Local full worlds/registrations/journals remain outside repo; no blind seed or credentials published."
+}

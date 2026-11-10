@@ -1,0 +1,86 @@
+{
+  "caseId": "b1-price",
+  "sourceMode": "LIVE",
+  "elapsedMs": 6618.808799999999,
+  "runtime": {
+    "latest": "Set Thạch Thảo SV2447 bao nhiêu em?",
+    "history": [],
+    "initialProductCodes": [
+      "SV2447"
+    ]
+  },
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "BUDGET",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 3,
+    "verifierGenerations": 0,
+    "toolRounds": 2,
+    "toolCalls": 3,
+    "generations": [
+      {
+        "id": "42dade32b748cd2926b4c3423bbc3b54742920bb970d5913707a44f5be5046ca:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1617.2099999999991,
+        "telemetry": {
+          "generationId": "42dade32b748cd2926b4c3423bbc3b54742920bb970d5913707a44f5be5046ca:owner:1",
+          "providerRequests": 1,
+          "authRequests": 1,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 2593,
+          "outputTokens": 179,
+          "cost": null,
+          "thinkingTokens": 158
+        }
+      },
+      {
+        "id": "42dade32b748cd2926b4c3423bbc3b54742920bb970d5913707a44f5be5046ca:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1783.7301000000007,
+        "telemetry": {
+          "generationId": "42dade32b748cd2926b4c3423bbc3b54742920bb970d5913707a44f5be5046ca:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3564,
+          "outputTokens": 276,
+          "cost": null,
+          "thinkingTokens": 217
+        }
+      },
+      {
+        "id": "42dade32b748cd2926b4c3423bbc3b54742920bb970d5913707a44f5be5046ca:owner:3",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 996.2619999999952,
+        "telemetry": {
+          "generationId": "42dade32b748cd2926b4c3423bbc3b54742920bb970d5913707a44f5be5046ca:owner:3",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4819,
+          "outputTokens": 39,
+          "cost": null,
+          "thinkingTokens": 11
+        }
+      }
+    ],
+    "toolLatencyMs": 1481.0639999999985,
+    "verificationLatencyMs": null
+  },
+  "counters": {
+    "embeddingCalls": 0,
+    "policyReads": 0,
+    "catalogReads": 4,
+    "posReads": 3
+  }
+}

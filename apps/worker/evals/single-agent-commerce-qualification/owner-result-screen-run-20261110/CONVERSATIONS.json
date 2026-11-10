@@ -1,0 +1,792 @@
+[
+  {
+    "caseId": "c-po-20261031-p06",
+    "group": "screen",
+    "priorStatus": "TASK_OK",
+    "required": {
+      "customerGoal": "Đọc COMPOSITE đúng ba thành phần nguồn; không tạo combo/giá hoặc bỏ ảnh bắt buộc.",
+      "reviewMode": "WHOLE_TERMINAL_OUTCOME_NOT_KEYWORD_MATCH"
+    },
+    "sourceCohort": "SALES_READY",
+    "turns": [
+      {
+        "turn": 1,
+        "customer": "Em tính cả ba món cho chị bao nhiêu?",
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, set cả bộ 3 món có giá 989.000đ ạ (tổng gồm phí vận chuyển là 1.019.000đ). Sản phẩm hiện có sẵn các size S, M, L, chị lấy size nào ạ?"
+        ],
+        "images": [
+          {
+            "urlSha256": "e6578a94ca4736d38b65c4ae57795607748acc401f9767b8062fa0345071d469",
+            "sourceProducts": [
+              "SD023"
+            ]
+          }
+        ],
+        "reason": "PASS",
+        "recovery": null,
+        "draft": "Dạ, set cả bộ 3 món có giá 989.000đ ạ (tổng gồm phí vận chuyển là 1.019.000đ). Sản phẩm hiện có sẵn các size S, M, L, chị lấy size nào ạ?",
+        "verdict": {
+          "verdict": "PASS",
+          "violations": []
+        },
+        "errors": [],
+        "toolProposals": 2,
+        "artifact": "native-30be4370381eee5d728925ffbc8cc559135102abe8f33e59cadf2cd8dfe3f791-turn-0.json",
+        "artifactHash": "0d23a82560b4fc024e471f123978df5340f4351a90bb1263ff8e8a9a1f2601f3"
+      }
+    ]
+  },
+  {
+    "caseId": "c-20261028-s15",
+    "group": "screen",
+    "priorStatus": "TASK_OK_WITH_FRICTION",
+    "required": {
+      "requiredCustomerOutcomes": [
+        "ACK/preference đúng phạm vi; không coi lời thích màu là yêu cầu tạo giỏ hay tạo đơn; chỉ xác nhận ghi state nếu có receipt thực."
+      ],
+      "allowedTerminalKinds": [
+        "SEND_ELIGIBLE"
+      ],
+      "noExactProseRequired": true
+    },
+    "sourceCohort": "SALES_READY",
+    "turns": [
+      {
+        "turn": 1,
+        "customer": "Chị thích áo Thạch Thảo màu be, cảm ơn em nhé.",
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, mẫu áo Thạch Thảo màu be hiện có ở cả Set quần Thạch Thảo và Set váy Thạch Thảo với giá 499.000đ (hàng đặt trước). Chị thích mẫu áo mặc cùng quần hay áo mặc cùng váy hơn để em hỗ trợ mình ạ?"
+        ],
+        "images": [],
+        "reason": "PASS",
+        "recovery": null,
+        "draft": "Dạ, mẫu áo Thạch Thảo màu be hiện có ở cả Set quần Thạch Thảo và Set váy Thạch Thảo với giá 499.000đ (hàng đặt trước). Chị thích mẫu áo mặc cùng quần hay áo mặc cùng váy hơn để em hỗ trợ mình ạ?",
+        "verdict": {
+          "verdict": "PASS",
+          "violations": []
+        },
+        "errors": [],
+        "toolProposals": 3,
+        "artifact": "native-aea70c97a7fc0d7e21f5ea6a4c60f4acacba3de8be4fe3d4d4fb16786171d7ce-turn-0.json",
+        "artifactHash": "d677aed316b0d8ee4b14cc82da6f2a138c4525d8ca605cb97e776d1c3a56f8e9"
+      }
+    ]
+  },
+  {
+    "caseId": "c-20261028-s16",
+    "group": "screen",
+    "priorStatus": "SOURCE_GAP",
+    "required": {
+      "requiredCustomerOutcomes": [
+        "Trả lời/gửi ảnh theo provenance thật của áo Thạch Thảo; MODEL không phải FEEDBACK; nguồn thiếu ảnh hưởng nhu cầu thì handoff theo rule."
+      ],
+      "allowedTerminalKinds": [
+        "SEND_ELIGIBLE",
+        "HANDOFF",
+        "NO_SEND"
+      ],
+      "noExactProseRequired": true,
+      "prospectiveEvaluation": {
+        "cohort": "SOURCE_GAP_CONTROL",
+        "qualityDenominatorEligible": false,
+        "reason": "CUSTOMER_WEARING_PROVENANCE_NOT_RECORDED",
+        "expectedTerminal": "SILENT_HANDOFF",
+        "positiveWearingCapabilityImplemented": false,
+        "readinessScope": "Technical generic/feedback media availability only; no source fact establishes customer wearing. Not a sale-ready claim for this customer request.",
+        "historicalResultsUnchanged": true
+      }
+    },
+    "sourceCohort": "SOURCE_GAP_CONTROL",
+    "turns": [
+      {
+        "turn": 1,
+        "customer": "Shop có ảnh khách mặc áo Thạch Thảo không em?",
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, em gửi chị ảnh feedback áo Thạch Thảo ạ!"
+        ],
+        "images": [
+          {
+            "urlSha256": "849ee132c0ff632766db586ba5fc9fd6176ad016031602962975471e48137a03",
+            "sourceProducts": [
+              "SQ2447",
+              "SV2447"
+            ]
+          },
+          {
+            "urlSha256": "849ee132c0ff632766db586ba5fc9fd6176ad016031602962975471e48137a03",
+            "sourceProducts": [
+              "SQ2447",
+              "SV2447"
+            ]
+          }
+        ],
+        "reason": "PASS",
+        "recovery": null,
+        "draft": "Dạ, em gửi chị ảnh feedback áo Thạch Thảo ạ!",
+        "verdict": {
+          "verdict": "PASS",
+          "violations": []
+        },
+        "errors": [],
+        "toolProposals": 4,
+        "artifact": "native-6380dd2c14f2541401294241ce90dbd4f32c9b6df65c97176a3157496ddca4f5-turn-0.json",
+        "artifactHash": "9fa97a93ec5ed699f9ad496101603a5b9c4dd93d6bbdd1407454e10b871a9849"
+      }
+    ]
+  },
+  {
+    "caseId": "c-20261028-j2",
+    "group": "screen",
+    "priorStatus": "TASK_OK_WITH_FRICTION",
+    "required": {
+      "requiredCustomerOutcomes": [
+        "51kg thay thế56kg, giữ chiều cao162 và ba số đo khách đưa khi có proof/commit; không dùng cân nặng cũ để recommend.",
+        "Preference thoải mái phải được dùng; size chỉ theo actual engine status và đúng customer/state; nếu chart không quyết được thì handoff, không ép một size mong đợi."
+      ],
+      "noExactProseRequired": true
+    },
+    "sourceCohort": "SALES_READY",
+    "turns": [
+      {
+        "turn": 1,
+        "customer": "Chị muốn chọn size áo của bộ váy Thạch Thảo, cao 1m62 nặng 56kg.",
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ với chiều cao 1m62 và cân nặng 56kg, em tư vấn mình chọn size M áo set váy Thạch Thảo nhé ạ."
+        ],
+        "images": [
+          {
+            "urlSha256": "1fe0770fc6ca6ef2ad18531ce5bb53060a415f59b0719eb74c1b117f319bebb4",
+            "sourceProducts": [
+              "SV2447"
+            ]
+          }
+        ],
+        "reason": "PASS",
+        "recovery": null,
+        "draft": "Dạ với chiều cao 1m62 và cân nặng 56kg, em tư vấn mình chọn size M áo set váy Thạch Thảo nhé ạ.",
+        "verdict": {
+          "verdict": "PASS",
+          "violations": []
+        },
+        "errors": [],
+        "toolProposals": 2,
+        "artifact": "native-fc2e97b6a6bb2f15408fb4df5e47c58d2b9a861a90a022eee4b0095e6007fc45-turn-0.json",
+        "artifactHash": "31322dc3c600c3ce746b6b178b7e3a2dcb9bfb4252d8356d21ae36d5655d797a"
+      },
+      {
+        "turn": 2,
+        "customer": "Chị nhắn nhầm cân nặng, 51kg thôi em nhé. Ngực 88, eo 70, mông 94.",
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ với cân nặng 51kg và số đo 88-70-94, em tư vấn mình vẫn chọn size M áo set váy Thạch Thảo là vừa vặn và đẹp chị nhé ạ!"
+        ],
+        "images": [],
+        "reason": "PASS",
+        "recovery": null,
+        "draft": "Dạ với cân nặng 51kg và số đo 88-70-94, em tư vấn mình vẫn chọn size M áo set váy Thạch Thảo là vừa vặn và đẹp chị nhé ạ!",
+        "verdict": {
+          "verdict": "PASS",
+          "violations": []
+        },
+        "errors": [],
+        "toolProposals": 2,
+        "artifact": "native-fc2e97b6a6bb2f15408fb4df5e47c58d2b9a861a90a022eee4b0095e6007fc45-turn-1.json",
+        "artifactHash": "ea3c7de91f2070e04524ab906a22c06ce6d94fa4d8d6f5d075a2f9a896a51ef9"
+      },
+      {
+        "turn": 3,
+        "customer": "Chị thích mặc thoải mái một chút, em chọn size giúp chị nhé.",
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ với sở thích mặc thoải mái và số đo của mình, em tư vấn chị vẫn chọn size M áo set váy Thạch Thảo nhé ạ. Áo có form thiết kế nhẹ nhàng, mặc vừa vặn, dễ chịu và rất thoải mái ạ."
+        ],
+        "images": [],
+        "reason": "PASS",
+        "recovery": null,
+        "draft": "Dạ với sở thích mặc thoải mái và số đo của mình, em tư vấn chị vẫn chọn size M áo set váy Thạch Thảo nhé ạ. Áo có form thiết kế nhẹ nhàng, mặc vừa vặn, dễ chịu và rất thoải mái ạ.",
+        "verdict": {
+          "verdict": "PASS",
+          "violations": []
+        },
+        "errors": [],
+        "toolProposals": 1,
+        "artifact": "native-fc2e97b6a6bb2f15408fb4df5e47c58d2b9a861a90a022eee4b0095e6007fc45-turn-2.json",
+        "artifactHash": "c037fe5a1907ea87493fa13a8bf6137ddc8fbf3913aef804f7007162a5b85185"
+      }
+    ]
+  },
+  {
+    "caseId": "c-20261028-j4",
+    "group": "screen",
+    "priorStatus": "MATERIAL_FAIL",
+    "required": {
+      "requiredCustomerOutcomes": [
+        "Concession chỉ theo code-owned offer/negotiation receipt và quantity một áo; không tự giảm tiền, tự freeship hay dùng concession lịch sử chưa có receipt.",
+        "Tính tổng gửi Cần Thơ từ actual variant/price/shipping; không giả khách đã thanh toán hoặc quote chưa từng gửi."
+      ],
+      "noExactProseRequired": true
+    },
+    "sourceCohort": "SALES_READY",
+    "turns": [
+      {
+        "turn": 1,
+        "customer": "Chị lấy áo của bộ váy Thạch Thảo size M.",
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, áo Thạch Thảo size M có hai màu Trắng và Be, chị lấy màu nào ạ?"
+        ],
+        "images": [
+          {
+            "urlSha256": "1fe0770fc6ca6ef2ad18531ce5bb53060a415f59b0719eb74c1b117f319bebb4",
+            "sourceProducts": [
+              "SV2447"
+            ]
+          }
+        ],
+        "reason": "PASS",
+        "recovery": null,
+        "draft": "Dạ, áo Thạch Thảo size M có hai màu Trắng và Be, chị lấy màu nào ạ?",
+        "verdict": {
+          "verdict": "PASS",
+          "violations": []
+        },
+        "errors": [],
+        "toolProposals": 1,
+        "artifact": "native-b64d885cfd2388be8dd4edd0e79840d5ca201149b25fb396b875ba9cea89e5b5-turn-0.json",
+        "artifactHash": "c5d3f64d9c58bb7a79270622b52bc69bd044f8214cb61db8e2eb30113af483ae"
+      },
+      {
+        "turn": 2,
+        "customer": "Shop hỗ trợ thêm cho chị được chút nào không?",
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "RESPONSE_UNAVAILABLE",
+        "recovery": "FAIL",
+        "draft": "Dạ, áo lẻ giá 499.000đ ạ. Giá này shop để tốt nhất rồi, nếu chị lấy từ 2 sản phẩm (như mua cả bộ hoặc thêm chân váy) sẽ được giảm thêm 5%. Áo size M có màu Trắng và Be, chị lấy màu nào ạ?",
+        "verdict": {
+          "verdict": "FAIL",
+          "violations": [
+            {
+              "kind": "POLICY_OR_BENEFIT_STRENGTHENING",
+              "protectedRef": "transaction-policy:497bac5f596fb040462e9e24695d59290366bea98b2c4064fdc5c863272789b3",
+              "excerpt": "nếu chị lấy từ 2 sản phẩm (như mua cả bộ hoặc thêm chân váy) sẽ được giảm thêm 5%",
+              "basis": "Chính sách giảm 5% yêu cầu ít nhất 2 đơn vị sản phẩm cha và quy định cả set/combo chỉ tính là 1. Draft đưa mua cả bộ làm ví dụ đủ điều kiện giảm, cấp ưu đãi cho trường hợp chưa đạt ngưỡng."
+            }
+          ]
+        },
+        "errors": [],
+        "toolProposals": 3,
+        "artifact": "native-b64d885cfd2388be8dd4edd0e79840d5ca201149b25fb396b875ba9cea89e5b5-turn-1.json",
+        "artifactHash": "73aa56034aaede5fa0735bb27fd1a32fdae690c410028783c4465254129b953a"
+      },
+      {
+        "turn": 3,
+        "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+        "disposition": "NO_SEND",
+        "messages": [],
+        "images": [],
+        "reason": "HUMAN_OWNS_CONVERSATION",
+        "recovery": null,
+        "draft": null,
+        "verdict": null,
+        "errors": [],
+        "toolProposals": null,
+        "artifact": "native-b64d885cfd2388be8dd4edd0e79840d5ca201149b25fb396b875ba9cea89e5b5-turn-2.json",
+        "artifactHash": "0f4104326efd86556561826ab5770040d35a5ee485e2c71c209b7a7b2ef0b91b"
+      }
+    ]
+  },
+  {
+    "caseId": "c-20261028-s04",
+    "group": "screen",
+    "priorStatus": "TASK_OK",
+    "required": {
+      "requiredCustomerOutcomes": [
+        "Màu từ tồn/nguồn hiện hành; referent qua history thật được kiểm thêm trong JOURNEY."
+      ],
+      "allowedTerminalKinds": [
+        "SEND_ELIGIBLE"
+      ],
+      "noExactProseRequired": true
+    },
+    "sourceCohort": "SALES_READY",
+    "turns": [
+      {
+        "turn": 1,
+        "customer": "Áo Thạch Thảo có thêm màu khác nữa không em?",
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, áo Thạch Thảo bên em có 2 màu là Trắng và Be chị nhé ạ!"
+        ],
+        "images": [],
+        "reason": "PASS",
+        "recovery": null,
+        "draft": "Dạ, áo Thạch Thảo bên em có 2 màu là Trắng và Be chị nhé ạ!",
+        "verdict": {
+          "verdict": "PASS",
+          "violations": []
+        },
+        "errors": [],
+        "toolProposals": 2,
+        "artifact": "native-b4fd52fa34679ee4b91ec18fe65cadacb5d2f84f5398c9c6f5a1b42ada328489-turn-0.json",
+        "artifactHash": "3c22fabf76b0e50c98ab378b79422b2bba068dc1ed6c34ddaa91dd830ff18001"
+      }
+    ]
+  },
+  {
+    "caseId": "c-20261028-s09",
+    "group": "screen",
+    "priorStatus": "TASK_OK_WITH_FRICTION",
+    "required": {
+      "requiredCustomerOutcomes": [
+        "Theo care source; thiếu dữ liệu shop ảnh hưởng câu trả lời thì handoff im lặng."
+      ],
+      "allowedTerminalKinds": [
+        "SEND_ELIGIBLE",
+        "HANDOFF",
+        "NO_SEND"
+      ],
+      "noExactProseRequired": true
+    },
+    "sourceCohort": "SALES_READY",
+    "turns": [
+      {
+        "turn": 1,
+        "customer": "Áo Thạch Thảo này có cần giặt tay không hay cho máy được em?",
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, áo ưu tiên giặt tay chị ạ, nhưng mình vẫn có thể giặt máy bằng túi giặt ở chế độ nhẹ nha chị."
+        ],
+        "images": [],
+        "reason": "PASS",
+        "recovery": null,
+        "draft": "Dạ, áo ưu tiên giặt tay chị ạ, nhưng mình vẫn có thể giặt máy bằng túi giặt ở chế độ nhẹ nha chị.",
+        "verdict": {
+          "verdict": "PASS",
+          "violations": []
+        },
+        "errors": [],
+        "toolProposals": 1,
+        "artifact": "native-db08a324aee9dcc4c5666ff1df0dcc691aa49dd4a33b3ed5d7665bf26631ed77-turn-0.json",
+        "artifactHash": "b82075c53998f965761f6575507303f4849c3f4165599a51033e1074ea2d5eee"
+      }
+    ]
+  },
+  {
+    "caseId": "c-20261028-j1",
+    "group": "screen",
+    "priorStatus": "MATERIAL_FAIL",
+    "required": {
+      "requiredCustomerOutcomes": [
+        "Giữ đúng tổng số lượng2, một M một L, không cộng thành3 khi khách sửa. Dùng AO của SV2447 với actual NO_COLOR variant; không tự thêm màu be.",
+        "Cart chỉ thay khi tool/commit cho phép; tổng gồm phí từ policy/source; thiếu dữ liệu shop thì committed handoff im lặng hợp lệ, không tự báo đặt hàng xong."
+      ],
+      "noExactProseRequired": true
+    },
+    "sourceCohort": "SALES_READY",
+    "turns": [
+      {
+        "turn": 1,
+        "customer": "Chị lấy áo của bộ váy Thạch Thảo size L nhé.",
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Áo lẻ Set váy Thạch Thảo size L có hai màu Trắng (sẵn hàng) và Be (đặt trước). Chị lấy màu nào ạ?"
+        ],
+        "images": [
+          {
+            "urlSha256": "1fe0770fc6ca6ef2ad18531ce5bb53060a415f59b0719eb74c1b117f319bebb4",
+            "sourceProducts": [
+              "SV2447"
+            ]
+          }
+        ],
+        "reason": "PASS",
+        "recovery": null,
+        "draft": "Áo lẻ Set váy Thạch Thảo size L có hai màu Trắng (sẵn hàng) và Be (đặt trước). Chị lấy màu nào ạ?",
+        "verdict": {
+          "verdict": "PASS",
+          "violations": []
+        },
+        "errors": [],
+        "toolProposals": 1,
+        "artifact": "native-da0176582b9a2f2f072720cf74ec3e1555164d7034434f20dac40f8cbb1098f6-turn-0.json",
+        "artifactHash": "1dabd4533115cb1efa4ccfca7bd1fb999f9b64c230172decca0e204572aef66a"
+      },
+      {
+        "turn": 2,
+        "customer": "Lấy hai chiếc cho chị, một M một L.",
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ áo lẻ Thạch Thảo size M và L đều có hai màu Trắng (sẵn hàng) và Be (đặt trước). Chị chọn màu nào cho áo size M và size L ạ?"
+        ],
+        "images": [],
+        "reason": "PASS",
+        "recovery": null,
+        "draft": "Dạ áo lẻ Thạch Thảo size M và L đều có hai màu Trắng (sẵn hàng) và Be (đặt trước). Chị chọn màu nào cho áo size M và size L ạ?",
+        "verdict": {
+          "verdict": "PASS",
+          "violations": []
+        },
+        "errors": [],
+        "toolProposals": 2,
+        "artifact": "native-da0176582b9a2f2f072720cf74ec3e1555164d7034434f20dac40f8cbb1098f6-turn-1.json",
+        "artifactHash": "e5dc851b6cff69d6bad34c923cbf0003cb3350c6e42bef4e48d99640ed70cd1b"
+      },
+      {
+        "turn": 3,
+        "customer": "Em báo lại tổng cả phí ship cho chị nhé.",
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ 2 áo lẻ size M và L có tổng tiền 998.000đ, ưu đãi 49.900đ, phí ship 30.000đ, tổng thanh toán là 978.100đ chị ạ. \n\nChị chọn màu Trắng (sẵn hàng) hay Be (đặt trước) cho áo size M và L để em ghi nhận nhé ạ?"
+        ],
+        "images": [],
+        "reason": "PASS",
+        "recovery": null,
+        "draft": "Dạ 2 áo lẻ size M và L có tổng tiền 998.000đ, ưu đãi 49.900đ, phí ship 30.000đ, tổng thanh toán là 978.100đ chị ạ. \n\nChị chọn màu Trắng (sẵn hàng) hay Be (đặt trước) cho áo size M và L để em ghi nhận nhé ạ?",
+        "verdict": {
+          "verdict": "PASS",
+          "violations": []
+        },
+        "errors": [],
+        "toolProposals": 1,
+        "artifact": "native-da0176582b9a2f2f072720cf74ec3e1555164d7034434f20dac40f8cbb1098f6-turn-2.json",
+        "artifactHash": "93653d0641b77a9a81cedba42f4e18deac8803257240f36d894095faad7ce0cd"
+      }
+    ]
+  },
+  {
+    "caseId": "c-po-20261031-p08",
+    "group": "screen",
+    "priorStatus": "TASK_OK_CUSTOMER_INPUT",
+    "required": {
+      "customerGoal": "Đổi set sang áo riêng: không giữ sai offer/tổng hoặc giả hoàn tất; không đoán màu nguồn còn thiếu.",
+      "reviewMode": "WHOLE_TERMINAL_OUTCOME_NOT_KEYWORD_MATCH"
+    },
+    "sourceCohort": "SALES_READY",
+    "turns": [
+      {
+        "turn": 1,
+        "customer": "Chị lấy cả bộ size M nhé.",
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. Tổng thanh toán hiện tại là 829.000đ (bao gồm 799.000đ tiền sản phẩm và 30.000đ phí ship). Chị có muốn chốt đơn luôn không ạ?"
+        ],
+        "images": [
+          {
+            "urlSha256": "1fe0770fc6ca6ef2ad18531ce5bb53060a415f59b0719eb74c1b117f319bebb4",
+            "sourceProducts": [
+              "SV2447"
+            ]
+          }
+        ],
+        "reason": "PASS",
+        "recovery": null,
+        "draft": "Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. Tổng thanh toán hiện tại là 829.000đ (bao gồm 799.000đ tiền sản phẩm và 30.000đ phí ship). Chị có muốn chốt đơn luôn không ạ?",
+        "verdict": {
+          "verdict": "PASS",
+          "violations": []
+        },
+        "errors": [],
+        "toolProposals": 1,
+        "artifact": "native-4b2be6cc12870f93a37aff5e6077a6dff01a5f2e067841ce296179c1d7b05e58-turn-0.json",
+        "artifactHash": "f897724c4ddd8d42c4ab725f27f6da4adb3822bb3a362c91e1cd3227f79b70eb"
+      },
+      {
+        "turn": 2,
+        "customer": "Thôi chị lấy mỗi áo thôi, em đổi lại nhé.",
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Áo thêu Thạch Thảo size M nhà em có 2 màu Trắng và Be. Chị lấy màu nào ạ?"
+        ],
+        "images": [],
+        "reason": "PASS",
+        "recovery": null,
+        "draft": "Áo thêu Thạch Thảo size M nhà em có 2 màu Trắng và Be. Chị lấy màu nào ạ?",
+        "verdict": {
+          "verdict": "PASS",
+          "violations": []
+        },
+        "errors": [],
+        "toolProposals": 1,
+        "artifact": "native-4b2be6cc12870f93a37aff5e6077a6dff01a5f2e067841ce296179c1d7b05e58-turn-1.json",
+        "artifactHash": "a13c5dd70e40d14a1785c15041b57493a7b69a23ff0ee73b93fbcd26cbea8a50"
+      }
+    ]
+  },
+  {
+    "caseId": "c-po-20261031-p07",
+    "group": "screen",
+    "priorStatus": "MATERIAL_FAIL",
+    "required": {
+      "customerGoal": "Không dùng fit cấp sản phẩm thành fit từng component khi thiếu target/chart; thiếu dữ liệu shop handoff.",
+      "reviewMode": "WHOLE_TERMINAL_OUTCOME_NOT_KEYWORD_MATCH"
+    },
+    "sourceCohort": "SALES_READY",
+    "turns": [
+      {
+        "turn": 1,
+        "customer": "Chị cao 1m60, nặng 55kg. Áo chị hay mặc M mà quần lại hay lấy L, em chọn size từng phần giúp chị nhé.",
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Với chiều cao 1m60 và cân nặng 55kg, áo và quần Set Thạch Thảo đều vừa size M nha chị. Chị lấy set này hay mua lẻ món nào cứ báo em nhé ạ!"
+        ],
+        "images": [
+          {
+            "urlSha256": "6dcba53ad128fe765f9be74223adfa69d29caea6f7b177d353af8d0cee08540b",
+            "sourceProducts": [
+              "SQ2447"
+            ]
+          }
+        ],
+        "reason": "PASS",
+        "recovery": null,
+        "draft": "Với chiều cao 1m60 và cân nặng 55kg, áo và quần Set Thạch Thảo đều vừa size M nha chị. Chị lấy set này hay mua lẻ món nào cứ báo em nhé ạ!",
+        "verdict": {
+          "verdict": "PASS",
+          "violations": []
+        },
+        "errors": [],
+        "toolProposals": 2,
+        "artifact": "native-c9aee0aecf84ad9a836be77c0ce3acf4f53cca009cc702314ba940608a236731-turn-0.json",
+        "artifactHash": "ad51c1399906c875146bab80817dc5808452b48ded95ae92c80e08e36574d427"
+      }
+    ]
+  },
+  {
+    "caseId": "c-po-20261031-p09",
+    "group": "screen",
+    "priorStatus": "TASK_OK",
+    "required": {
+      "customerGoal": "Hai mã theo mapping đã duyệt; chỉ hỏi phân biệt khi cần, không gộp stock/price/chart theo tên.",
+      "reviewMode": "WHOLE_TERMINAL_OUTCOME_NOT_KEYWORD_MATCH"
+    },
+    "sourceCohort": "SALES_READY",
+    "turns": [
+      {
+        "turn": 1,
+        "customer": "Set Thạch Thảo còn size M không em?",
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, Set váy Thạch Thảo hiện còn sẵn size M, còn Set quần Thạch Thảo size M là hàng đặt trước chị ạ. Chị quan tâm mẫu set váy hay set quần ạ?"
+        ],
+        "images": [],
+        "reason": "PASS",
+        "recovery": null,
+        "draft": "Dạ, Set váy Thạch Thảo hiện còn sẵn size M, còn Set quần Thạch Thảo size M là hàng đặt trước chị ạ. Chị quan tâm mẫu set váy hay set quần ạ?",
+        "verdict": {
+          "verdict": "PASS",
+          "violations": []
+        },
+        "errors": [],
+        "toolProposals": 2,
+        "artifact": "native-6b5c06f7da282d33e248f4e220b10c80c6a18c128d4f8c3988bac99e442026cd-turn-0.json",
+        "artifactHash": "dc9f4bb000c99030cc786bae3adda22445dfb6c9bc01bf99644750696b68f175"
+      },
+      {
+        "turn": 2,
+        "customer": "Bộ quần nhé.",
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Dạ, em đã thêm set quần Thạch Thảo size M (hàng đặt trước) vào giỏ cho chị rồi ạ!"
+        ],
+        "images": [],
+        "reason": "PASS",
+        "recovery": null,
+        "draft": "Dạ, em đã thêm set quần Thạch Thảo size M (hàng đặt trước) vào giỏ cho chị rồi ạ!",
+        "verdict": {
+          "verdict": "PASS",
+          "violations": []
+        },
+        "errors": [],
+        "toolProposals": 1,
+        "artifact": "native-6b5c06f7da282d33e248f4e220b10c80c6a18c128d4f8c3988bac99e442026cd-turn-1.json",
+        "artifactHash": "d37732b098447acc3292d9184e1c60a479e580b44d3c100a6632e678411a628e"
+      }
+    ]
+  },
+  {
+    "caseId": "c-20261104-checkout-complete",
+    "group": "screen",
+    "priorStatus": "TASK_OK",
+    "required": {
+      "requiredCustomerOutcomes": [
+        "Đúng lựa chọn mua/set/size khách, actual cart receipt; thiếu dữ liệu shop phải handoff, thiếu thông tin khách chỉ hỏi field còn thiếu.",
+        "Synthetic private inputs chỉ vào code intake, preview thực trước xác nhận, confirmation receipt/current ownership và không duplicate; chấm actual terminal, không stage label."
+      ],
+      "noExactProseRequired": true
+    },
+    "sourceCohort": "SALES_READY",
+    "turns": [
+      {
+        "turn": 1,
+        "customer": "Chị lấy set váy Thạch Thảo size M nhé.",
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. Tổng giá trị đơn hàng là 829.000đ (gồm 799.000đ tiền sản phẩm và 30.000đ phí vận chuyển). \n\nChị muốn chốt đơn luôn hay cần em hỗ trợ thêm gì không ạ?"
+        ],
+        "images": [
+          {
+            "urlSha256": "1fe0770fc6ca6ef2ad18531ce5bb53060a415f59b0719eb74c1b117f319bebb4",
+            "sourceProducts": [
+              "SV2447"
+            ]
+          }
+        ],
+        "reason": "PASS",
+        "recovery": null,
+        "draft": "Em đã thêm set váy Thạch Thảo size M vào giỏ hàng cho chị rồi ạ. Tổng giá trị đơn hàng là 829.000đ (gồm 799.000đ tiền sản phẩm và 30.000đ phí vận chuyển). \n\nChị muốn chốt đơn luôn hay cần em hỗ trợ thêm gì không ạ?",
+        "verdict": {
+          "verdict": "PASS",
+          "violations": []
+        },
+        "errors": [],
+        "toolProposals": 1,
+        "artifact": "native-edba7d1d550ce50fc72bc46088d4fc2208721f7177aafe300b9a6f9a399a3d23-turn-0.json",
+        "artifactHash": "8801ad71981ddb4e3b7958b153755896f4607d4c30a544cd1c05ff8fe12d26ae"
+      },
+      {
+        "turn": 2,
+        "customer": "Em lên đơn cho chị nhé.",
+        "disposition": "CODE_OWNED_SEND",
+        "messages": [
+          "Chị cho em tên người nhận nhé."
+        ],
+        "images": [],
+        "reason": "CHECKOUT_DETAILS_MISSING",
+        "recovery": null,
+        "draft": null,
+        "verdict": null,
+        "errors": [],
+        "toolProposals": 1,
+        "artifact": "native-edba7d1d550ce50fc72bc46088d4fc2208721f7177aafe300b9a6f9a399a3d23-turn-1.json",
+        "artifactHash": "1509c3375e8a1db5170738f9c240e6da2b0a85f24bdab0192053bd7fb5a134d0"
+      },
+      {
+        "turn": 3,
+        "customer": "[FULL_NAME: dữ liệu giả lập đã ẩn]",
+        "disposition": "CODE_OWNED_SEND",
+        "messages": [
+          "Chị cho em số điện thoại nhé."
+        ],
+        "images": [],
+        "reason": "PRIVATE_CHECKOUT_COMMITTED",
+        "recovery": null,
+        "draft": null,
+        "verdict": null,
+        "errors": [],
+        "toolProposals": null,
+        "artifact": "native-edba7d1d550ce50fc72bc46088d4fc2208721f7177aafe300b9a6f9a399a3d23-turn-2.json",
+        "artifactHash": "395e7145e0791f9c50469137cb5d6387bfb407e157c35d109ef845cade2fcb51"
+      },
+      {
+        "turn": 4,
+        "customer": "[PHONE: dữ liệu giả lập đã ẩn]",
+        "disposition": "CODE_OWNED_SEND",
+        "messages": [
+          "Chị cho em địa chỉ nhé."
+        ],
+        "images": [],
+        "reason": "PRIVATE_CHECKOUT_COMMITTED",
+        "recovery": null,
+        "draft": null,
+        "verdict": null,
+        "errors": [],
+        "toolProposals": null,
+        "artifact": "native-edba7d1d550ce50fc72bc46088d4fc2208721f7177aafe300b9a6f9a399a3d23-turn-3.json",
+        "artifactHash": "24322100f383467aa7eddd0b91f2cc44a0268639e1fd54180f59eb8caa649283"
+      },
+      {
+        "turn": 5,
+        "customer": "[ADDRESS: dữ liệu giả lập đã ẩn]",
+        "disposition": "CODE_OWNED_SEND",
+        "messages": [
+          "Chị cho em COD hoặc chuyển khoản nhé."
+        ],
+        "images": [],
+        "reason": "PRIVATE_CHECKOUT_COMMITTED",
+        "recovery": null,
+        "draft": null,
+        "verdict": null,
+        "errors": [],
+        "toolProposals": null,
+        "artifact": "native-edba7d1d550ce50fc72bc46088d4fc2208721f7177aafe300b9a6f9a399a3d23-turn-4.json",
+        "artifactHash": "d1e808ac8d8f1dd20b978089bf12114884dfbdeae79c507e49c9df442fb3ac59"
+      },
+      {
+        "turn": 6,
+        "customer": "Chị trả tiền khi nhận hàng nhé.",
+        "disposition": "CODE_OWNED_SEND",
+        "messages": [
+          "1 bộ (mẫu “Set váy Thạch Thảo”) (áo, size M; chân váy, size M): 799.000đ\nTạm tính: 799.000đ\nPhí ship: 30.000đ\nTổng: 829.000đ\nNgười nhận: [ĐÃ ẨN]\nĐịa chỉ: [ĐÃ ẨN]\nThanh toán: COD\nDự kiến nhận hàng: 4-8 ngày.\nChị xác nhận chốt đơn nhé."
+        ],
+        "images": [],
+        "reason": "PRIVATE_CHECKOUT_COMMITTED",
+        "recovery": null,
+        "draft": null,
+        "verdict": null,
+        "errors": [],
+        "toolProposals": null,
+        "artifact": "native-edba7d1d550ce50fc72bc46088d4fc2208721f7177aafe300b9a6f9a399a3d23-turn-5.json",
+        "artifactHash": "78da2868d30b31635d913ed115b2e8c98aea39650fb59e05361afe0ed20d6d7b"
+      },
+      {
+        "turn": 7,
+        "customer": "Đúng rồi, chốt đơn cho chị nhé.",
+        "disposition": "HANDOFF",
+        "messages": [],
+        "images": [],
+        "reason": "PURCHASE_CONFIRMED",
+        "recovery": null,
+        "draft": null,
+        "verdict": null,
+        "errors": [],
+        "toolProposals": 1,
+        "artifact": "native-edba7d1d550ce50fc72bc46088d4fc2208721f7177aafe300b9a6f9a399a3d23-turn-6.json",
+        "artifactHash": "cf24ecd0ab5d1b5107619ea70089a8e4ee70a3a6b0760ce947f4e35a3b267e21"
+      }
+    ]
+  },
+  {
+    "caseId": "c-20261028-s08",
+    "group": "screen",
+    "priorStatus": "TASK_OK_WITH_FRICTION",
+    "required": {
+      "requiredCustomerOutcomes": [
+        "Xét đúng dịp và dữ liệu thiết kế; không gán tính năng chưa có."
+      ],
+      "allowedTerminalKinds": [
+        "SEND_ELIGIBLE"
+      ],
+      "noExactProseRequired": true
+    },
+    "sourceCohort": "SALES_READY",
+    "turns": [
+      {
+        "turn": 1,
+        "customer": "Váy Odette với Diệp An, em chọn giúp chị một mẫu mặc đi lễ nhé.",
+        "disposition": "SEND_ELIGIBLE",
+        "messages": [
+          "Chị đi lễ thì em gợi ý mẫu **Váy Diệp An (V168)** rất phù hợp ạ. Mẫu này có thiết kế 2 lớp kín đáo, trang nhã và thanh lịch, giúp chị thoải mái và yên tâm khi mặc đến những nơi trang nghiêm, giá **699.000đ** (hàng đặt trước). \n\nCòn nếu chị cần gấp để mặc liền và vừa size S, **Váy Odette (V039)** (799.000đ) với chất liệu ren phối tơ Hàn nhẹ nhàng, bay bổng cũng rất sang trọng và hiện đang có sẵn. \n\nChị thích mẫu Diệp An đặt trước hay mẫu Odette có sẵn hơn ạ?"
+        ],
+        "images": [],
+        "reason": "PASS",
+        "recovery": null,
+        "draft": "Chị đi lễ thì em gợi ý mẫu **Váy Diệp An (V168)** rất phù hợp ạ. Mẫu này có thiết kế 2 lớp kín đáo, trang nhã và thanh lịch, giúp chị thoải mái và yên tâm khi mặc đến những nơi trang nghiêm, giá **699.000đ** (hàng đặt trước). \n\nCòn nếu chị cần gấp để mặc liền và vừa size S, **Váy Odette (V039)** (799.000đ) với chất liệu ren phối tơ Hàn nhẹ nhàng, bay bổng cũng rất sang trọng và hiện đang có sẵn. \n\nChị thích mẫu Diệp An đặt trước hay mẫu Odette có sẵn hơn ạ?",
+        "verdict": {
+          "verdict": "PASS",
+          "violations": []
+        },
+        "errors": [],
+        "toolProposals": 2,
+        "artifact": "native-b040a2e0678324b687904bdde34da0548e8fe0a10c20284c47c79aa44d840a52-turn-0.json",
+        "artifactHash": "66d4297de438316f3cf9573336949873791ad0004a7529707c441c830b29ac27"
+      }
+    ]
+  }
+]

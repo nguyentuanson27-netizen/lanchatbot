@@ -1,0 +1,60 @@
+{
+  "sourceBeforeCompletion": "8c7e251a1c62ef134fd95475a3949b1b2f9bb475",
+  "authorization": "Complete only132undispatched original Round64 slots, no retry of2unknown started slots; native verifier and completion agents gpt-6.1-sol/high",
+  "red": {
+    "chunk_id": "d044d3",
+    "wall_time_seconds": 1.5110025,
+    "exit_code": 1,
+    "original_token_count": 867,
+    "output": "✖ round64 completion adopts all217outcomes and2started unknown slots; only132untouched slots can dispatch (3.6667ms)\n✖ completion rejects changed raw evidence, source or overlap before provider invocation (1.6355ms)\nℹ tests 2\nℹ suites 0\nℹ pass 0\nℹ fail 2\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 689.5533\n\n✖ failing tests:\n\ntest at apps\\worker\\evals\\single-agent-semantic-verifier\\complete-a2-round64.test.mjs:4:1\n✖ round64 completion adopts all217outcomes and2started unknown slots; only132untouched slots can dispatch (3.6667ms)\n  Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-semantic-verifier\\complete-a2-round64.mjs' imported from C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-semantic-verifier\\complete-a2-round64.test.mjs\n      at finalizeResolution (node:internal/modules/esm/resolve:271:11)\n      at moduleResolve (node:internal/modules/esm/resolve:865:10)\n      at defaultResolve (node:internal/modules/esm/resolve:992:11)\n      at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)\n      at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)\n      at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)\n      at #resolve (node:internal/modules/esm/loader:683:17)\n      at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)\n      at node:internal/modules/esm/loader:632:32\n      at TracingChannel.tracePromise (node:diagnostics_channel:362:14) {\n    code: 'ERR_MODULE_NOT_FOUND',\n    url: 'file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/complete-a2-round64.mjs'\n  }\n\ntest at apps\\worker\\evals\\single-agent-semantic-verifier\\complete-a2-round64.test.mjs:11:1\n✖ completion rejects changed raw evidence, source or overlap before provider invocation (1.6355ms)\n  Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-semantic-verifier\\complete-a2-round64.mjs' imported from C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-semantic-verifier\\complete-a2-round64.test.mjs\n      at finalizeResolution (node:internal/modules/esm/resolve:271:11)\n      at moduleResolve (node:internal/modules/esm/resolve:865:10)\n      at defaultResolve (node:internal/modules/esm/resolve:992:11)\n      at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)\n      at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)\n      at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)\n      at #resolve (node:internal/modules/esm/loader:683:17)\n      at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)\n      at node:internal/modules/esm/loader:632:32\n      at TracingChannel.tracePromise (node:diagnostics_channel:362:14) {\n    code: 'ERR_MODULE_NOT_FOUND',\n    url: 'file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/complete-a2-round64.mjs'\n  }\n"
+  },
+  "green2": {
+    "chunk_id": "af10e4",
+    "wall_time_seconds": 2.0554962,
+    "exit_code": 0,
+    "original_token_count": 85,
+    "output": "✔ round64 completion adopts all217outcomes and2started unknown slots; only132untouched slots can dispatch (454.9484ms)\n✔ completion rejects changed raw evidence, source or overlap before provider invocation (91.6701ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1258.9201\n"
+  },
+  "fullInitial": {
+    "command": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs 1> 'C:/Users/nguye/AppData/Local/Temp/c3-r64-completion-readiness.stdout.txt' 2> 'C:/Users/nguye/AppData/Local/Temp/c3-r64-completion-readiness.stderr.txt'\n$c3TestExit=$LASTEXITCODE\nGet-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-r64-completion-readiness.stdout.txt' -Tail 12\nGet-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-r64-completion-readiness.stderr.txt' -Tail 8\nexit $c3TestExit",
+    "exitCode": 1,
+    "tests": 378,
+    "pass": 377,
+    "failure": "local test CLIENT vs AUTH_HEADER"
+  },
+  "fullFinal": {
+    "command": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs 1> 'C:/Users/nguye/AppData/Local/Temp/c3-r64-completion-final.stdout.txt' 2> 'C:/Users/nguye/AppData/Local/Temp/c3-r64-completion-final.stderr.txt'\n$c3TestExit=$LASTEXITCODE\nGet-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-r64-completion-final.stdout.txt' -Tail 12\nGet-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-r64-completion-final.stderr.txt' -Tail 8\nexit $c3TestExit",
+    "exitCode": 0,
+    "tests": 378,
+    "pass": 378,
+    "durationMs": 102201.7004
+  },
+  "workerChecks": "Reuse actual Round64 workerbuild/typecheck/lint/boundary79/protected21 PASS onlywith git diff proof of unchanged worker/shared/oldprojection/adapter/gate inputs.",
+  "unknowns": {
+    "shard0": {
+      "exitCode": 1,
+      "mainCompleted": 64,
+      "tempCompleted": 65,
+      "remainingUndispatched": 52,
+      "observedError": "A2_SHARD_FAILED_CLOSED; retain dispatched evidence"
+    },
+    "shard1": {
+      "exitCode": null,
+      "mainCompleted": 76,
+      "startedWithoutResult": "pending",
+      "remainingUndispatched": 40,
+      "sessionUnknown": true
+    },
+    "shard2": {
+      "exitCode": null,
+      "mainCompleted": 76,
+      "startedWithoutResult": "pending",
+      "remainingUndispatched": 40,
+      "sessionUnknown": true
+    },
+    "noRetryOfStartedSlots": true,
+    "orchestrationModelHandoffOccurred": true,
+    "cause": "UNKNOWN; agent-lifecycle interruption suspected; valid tmp indicates publication failure on shard0"
+  },
+  "metadataCorrection": "Recovered view uses closedObservedAt, not invented finishedAt. All provider outcomes remain exact."
+}

@@ -1,0 +1,107 @@
+{
+  "b1-partial-source": [
+    "NEEDS_EDIT",
+    false,
+    "Giữ phần vải đã biết nhưng tự diễn giải chưa cập nhật trên hệ thống; cùng lỗi giải thích nội bộ cũ, không phải tiến bộ giọng."
+  ],
+  "b1-price": [
+    "USABLE",
+    false,
+    "Giá cả bộ và hai món lẻ đúng nguồn. Danh sách giá giúp phân biệt lựa chọn, không fail chỉ vì có danh sách."
+  ],
+  "b1-component-stock": [
+    "USABLE",
+    false,
+    "Đáp đúng áo lẻ size M, giá 499k và tồn; gọn, không tự khẳng định khách mặc vừa."
+  ],
+  "b1-buying-concern": [
+    "NEEDS_EDIT",
+    true,
+    "Chọn cả bộ trong budget hợp lệ nhưng trấn an bằng nhiều lời khen; CTA lên đơn vượt capability read-only B1, khác reply vòng trước không có CTA này."
+  ],
+  "b1-policy-used": [
+    "USABLE_WITH_STYLE_NOTE",
+    false,
+    "Từ chối vì đã mặc đi làm, đúng việc khách hỏi. Không ép đọc lại điều kiện khác; phí đổi không phát sinh trong tình huống đã từ chối. Còn giọng quy định/thông cảm."
+  ],
+  "b1-changed-occasion-v2": [
+    "NEEDS_EDIT",
+    true,
+    "Khách dễ nóng ngoài trời nhưng reply đưa áo lẻ hoặc cả bộ, không quyết định rõ. Vòng trước có món thay Uyển Hoa; đây là thoái lui về giải quyết nhu cầu, không quy kết nguyên nhân cho code chỉ từ N1."
+  ],
+  "b1-partial-source-v2": [
+    "NEEDS_EDIT",
+    false,
+    "Vẫn trả vải nhưng kể hệ thống chưa có giá/tồn, cùng lỗi nội bộ cũ; không xin lại số đo hoặc bịa giá."
+  ],
+  "b1-buying-concern-v2": [
+    "NEEDS_EDIT",
+    false,
+    "Chọn set nhưng đoạn dài dùng nhiều lời khen tương đương, lặp gu khách; chưa giải thích thuyết phục chuyện nhiều ren. Lỗi chất lượng cũ."
+  ],
+  "b1-changed-occasion-v3": [
+    "USABLE_WITH_STYLE_NOTE",
+    false,
+    "Chọn áo lẻ cho cuộc gặp buổi sáng. So sánh với cả bộ/tiệc tối có liên quan, không fail vì nhắc hoàn cảnh cũ trong phép so sánh. Không còn gán đồ sẵn có cho khách."
+  ],
+  "b1-buying-concern-v3": [
+    "NEEDS_EDIT",
+    true,
+    "Áo lẻ là hướng mua hợp lý tận dụng váy đen; không fail vì không upsell. Nhưng lại mở cả hai hướng và hỏi khách chọn lại, làm yếu lời khuyên so với reply đã chọn rõ vòng trước."
+  ],
+  "sales-discovery-advice:need": [
+    "FALLBACK",
+    false,
+    "Lượt cuối tuân thủ FINAL_REPLY, không còn OWNER_TOOL_MODE trong N1 này. Verifier FAIL product:SQ748; draft có lưng chun co giãn/không lo bó bụng. Source có quần short lưng chun, thô đũi; verdict không span nên chưa cô lập khẳng định gây FAIL hoặc kết luận chặn đúng. Tính phù hợp quần short đi làm cũng cần xem. Actual vẫn fallback."
+  ],
+  "sales-product-gallery:overview": [
+    "FALLBACK",
+    false,
+    "Color-free selection đã OK sau color binding failure; tiến bộ ở thao tác so với chưa chọn ảnh chung. Draft vẫn nói chưa có ảnh be riêng và verifier FAIL media-lookup; không có span nên không khẳng định duy nhất clause gây lỗi. Actual không có ảnh, hỏi lại không hữu ích."
+  ],
+  "sales-size-advice:height-weight": [
+    "EXPECTED_HANDOFF",
+    false,
+    "Code chuyển nhân viên vì không có chart đúng authority/scope, capture và receipt giữ đúng. Không gọi đây là đã tự động chọn size."
+  ],
+  "sales-southern-delivery:deadline": [
+    "USABLE",
+    false,
+    "Đã trả ETA 4–8 ngày và từ chối hẹn sáng mai, actual được capture. Câu hỏi mới sáng mai rõ hơn thứ Sáu; cả prompt lẫn fixture đổi nên không quy toàn bộ cải thiện riêng cho verifier."
+  ],
+  "media-overview-next:ask": [
+    "FALLBACK",
+    false,
+    "NO_MATCH feedback rồi chọn DETAIL hai ảnh CLOSEUP, một AO và một UNKNOWN. Draft nói chi tiết tơ thêu và ren; verifier FAIL selected media ref. Chưa chứng minh ảnh UNKNOWN là phần ren. Không coi đây mặc định là chặn câu thiếu feedback; actual hỏi lại, không ảnh."
+  ],
+  "media-overview-next:continue": [
+    "USABLE",
+    false,
+    "Khách đồng ý xem, capture hai ảnh cả bộ và lời dẫn gọn; kiểm actual attachments/accepted Outbox."
+  ],
+  "media-detail-next:ask": [
+    "USABLE",
+    false,
+    "Báo chưa có ảnh khách mặc và đề nghị ảnh chi tiết, không nói đã gửi khi chưa chuẩn bị attachment. PASS không đồng nghĩa mọi câu thiếu feedback đều được miễn kiểm tra."
+  ],
+  "media-detail-next:continue": [
+    "USABLE",
+    false,
+    "Capture một ảnh cận áo, lời dẫn đúng TOP/detail và không lặp mô tả dài."
+  ],
+  "media-and-price:ask": [
+    "USABLE",
+    false,
+    "Giữ giá áo 499k và gửi một ảnh sản phẩm thay feedback, actual đủ hai phần; không mất giá do câu ảnh."
+  ],
+  "media-and-size:ask": [
+    "FALLBACK",
+    true,
+    "sourceQuote ban đầu chứa cả hai số đo trong từng op nên STATE write bị MEASUREMENT_SOURCE_INVALID; recommend_size tiếp đó STATE_OR_REF. Model sửa quote ở generation sau nhưng 2 calls vượt 1 call còn lại vì preparation tính trong cap6; BUDGET trước execution. Không verifier, actual chỉ hỏi ảnh, khác expected handoff vòng trước. Đây là lỗi lập chuỗi/state/budget, không phải verifier."
+  ],
+  "media-decision:ask": [
+    "NEEDS_EDIT",
+    false,
+    "Đúng giá, có đề xuất áo lẻ nhưng lại mở cả bộ và hỏi lại lựa chọn; nhiều lời khen, chưa xử lý dứt điểm nỗi lo ren. Không ảnh actual ở ca này; không claim đã dùng ảnh để thuyết phục."
+  ]
+}

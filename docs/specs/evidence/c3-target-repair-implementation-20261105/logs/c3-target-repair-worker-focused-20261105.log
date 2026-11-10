@@ -1,0 +1,20 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+ ✓ src/single-agent-commerce-media-delivery.test.ts (22 tests) 158ms
+ ✓ src/single-agent-semantic-verifier-boundary.test.ts (57 tests) 128ms
+ ✓ src/single-agent-commerce-product-groups.test.ts (27 tests) 181ms
+ ✓ src/single-agent-commerce-media.test.ts (46 tests) 684ms
+ ✓ src/single-agent-commerce-read-only-tools.test.ts (98 tests) 1219ms
+ ✓ src/single-agent-commerce-state.test.ts (55 tests) 1327ms
+   ✓ accepted effective state before dependent tools > keeps correction→size through actual runtime and native declarations  711ms
+ ✓ src/single-agent-commerce-effects.test.ts (113 tests) 2001ms
+   ✓ code-owned commerce effects and recovery > retains add→confirm in the actual runtime/native wire before a cart exists  622ms
+ ✓ src/single-agent-commerce-ingress.test.ts (176 tests) 19583ms
+   ✓ runs pinned-main C3 builders, two passes and guard through shared ingress commit with local HTTP payloads  16076ms
+
+ Test Files  8 passed (8)
+      Tests  594 passed (594)
+   Start at  17:17:22
+   Duration  25.37s (transform 7.64s, setup 0ms, collect 26.06s, tests 25.28s, environment 4ms, prepare 4.35s)
+

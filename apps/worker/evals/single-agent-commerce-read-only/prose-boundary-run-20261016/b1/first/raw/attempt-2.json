@@ -1,0 +1,103 @@
+{
+  "caseId": "b1-search-read",
+  "sourceMode": "LIVE",
+  "elapsedMs": 3864.8945999999996,
+  "runtime": {
+    "latest": "Em xem giúp chị áo dài mã SD375 giá bao nhiêu nhé.",
+    "history": [],
+    "initialProductCodes": []
+  },
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "BUDGET",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "recovery": null,
+    "sendEnabled": false,
+    "ownerGenerations": 3,
+    "verifierGenerations": 0,
+    "toolRounds": 2,
+    "toolCalls": 2,
+    "generations": [
+      {
+        "id": "e01f64972e1c4fc6e81e57ba4af2bab3a3f325889b1f139ef0d8ab42d5a90b92:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1082.1328999999969,
+        "telemetry": {
+          "generationId": "e01f64972e1c4fc6e81e57ba4af2bab3a3f325889b1f139ef0d8ab42d5a90b92:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 2423,
+          "outputTokens": 99,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 12630,
+          "requestHash": "599b730a1176db4956fb40b43f9a1589e058d89149a58306a4e026d94f6e997f",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 80,
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "e01f64972e1c4fc6e81e57ba4af2bab3a3f325889b1f139ef0d8ab42d5a90b92:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1026.9333999999944,
+        "telemetry": {
+          "generationId": "e01f64972e1c4fc6e81e57ba4af2bab3a3f325889b1f139ef0d8ab42d5a90b92:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 2573,
+          "outputTokens": 137,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 13574,
+          "requestHash": "f2d3a8a24f8dfccf5543f26bdb9cd3d017a5d0a64b9ee1da291100ec58289579",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 117,
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "e01f64972e1c4fc6e81e57ba4af2bab3a3f325889b1f139ef0d8ab42d5a90b92:owner:3",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1190.5062000000034,
+        "telemetry": {
+          "generationId": "e01f64972e1c4fc6e81e57ba4af2bab3a3f325889b1f139ef0d8ab42d5a90b92:owner:3",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 2729,
+          "outputTokens": 138,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 14093,
+          "requestHash": "008ed0efe81978d4e6daf39eec121c796abd0423de906e8e330a3a882d20cfdd",
+          "functionCallingMode": "NONE",
+          "declaredToolCount": 0,
+          "thinkingTokens": 111,
+          "unexpectedToolCall": true
+        }
+      }
+    ],
+    "toolLatencyMs": 562.6337000000058,
+    "verificationLatencyMs": null
+  },
+  "counters": {
+    "embeddingCalls": 0,
+    "policyReads": 0,
+    "catalogReads": 4,
+    "posReads": 3
+  }
+}

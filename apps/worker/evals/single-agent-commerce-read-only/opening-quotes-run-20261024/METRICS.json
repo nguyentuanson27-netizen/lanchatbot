@@ -1,0 +1,25 @@
+{
+  "registeredOutcomes": 5,
+  "completedOutcomes": 5,
+  "sendEligible": 3,
+  "fallback": 2,
+  "fallbackRate": 0.4,
+  "noSend": 0,
+  "ownerInvocations": 10,
+  "actualOwnerGenerationRequests": 9,
+  "verifierGenerationRequests": 3,
+  "actualGenerationRequests": 12,
+  "preDispatchBoundFailure": 1,
+  "generationTimeouts": 1,
+  "generationTimeoutRate": 0.08333333333333333,
+  "automaticRetries": 0,
+  "verifierLatencyMs": {
+    "sampleCount": 3,
+    "p50": 4811.993000000002,
+    "p95NearestRank": 5933.358600000007
+  },
+  "inputTokensExcludingUnknownTimeout": 70023,
+  "outputTokensExcludingUnknownTimeout": 16578,
+  "cost": null,
+  "tokenCaveat": "Timeout usage not exposed; Gemini output telemetry reported as supplied by adapter; no cost exposed."
+}

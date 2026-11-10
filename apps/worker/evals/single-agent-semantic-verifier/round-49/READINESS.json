@@ -1,0 +1,146 @@
+{
+  "status": "PASS",
+  "checkedAt": "2026-10-11T10:22:20.403Z",
+  "testedHead": "b3ee97d50937a8612aa6bc13c0965ca70a0cb3c4",
+  "T1Commit": "73dd5efd",
+  "T2Commit": "b3ee97d5",
+  "commands": [
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/round-49.test.mjs",
+      "exitCode": 1,
+      "result": "Observed RED:5 tests,1PASS/4FAIL;fixed registration missing."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1 node --test --test-name-pattern='owner policy display|round49 native conversation' apps/worker/evals/single-agent-semantic-verifier/round-49.test.mjs",
+      "exitCode": 1,
+      "result": "Observed independent formatter/adapter RED:2tests/2FAIL."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/round-49.test.mjs",
+      "exitCode": 0,
+      "result": "GREEN:5tests/5PASS,0skip."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1 node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs",
+      "exitCode": 0,
+      "result": "259tests/259PASS,0skip."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=39 C3_TEST_CODEX_TRANSPORT=1 node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-49.test.mjs apps/worker/evals/single-agent-semantic-verifier/conversation-context.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/run-a2.test.mjs apps/worker/evals/single-agent-semantic-verifier/run-a3.test.mjs",
+      "exitCode": 0,
+      "result": "54tests/54PASS,0skip;local transport stubs,zero provider generations."
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts",
+      "exitCode": 0,
+      "result": "79tests/79PASS,0skip."
+    },
+    {
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts src/size-engine.test.ts",
+      "exitCode": 0,
+      "result": "41tests/41PASS,0skip."
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "exitCode": 0,
+      "result": "PASS;unchanged dependency builds included by package script."
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "exitCode": 0,
+      "result": "PASS;unchanged dependency builds included by package script."
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0,
+      "result": "PASS (repository script runs tsc --noEmit)."
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "PASS;line-ending advisory only."
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-round49-read-limits.mjs",
+      "exitCode": 0,
+      "result": "Read-only account/rateLimits/read OK;0generations;CLI0.159.2/hash/login verified;31%primary/5%secondary,credits present. Availability not guaranteed."
+    },
+    {
+      "command": "C3_CHECKPOINT_A_ROUND=49 C3_VERTEX_CREDENTIAL_FILE=<approved existing local route> node -e inspectGemini(manifest)",
+      "exitCode": 0,
+      "result": "Credential available/project matches,global narrow adapter/helper identity checked without generation. No secret retained."
+    }
+  ],
+  "providerGenerationRequests": 0,
+  "selfReview": {
+    "result": "PASS_WITH_LIMITATIONS",
+    "scope": "Two existing eval executables:fixed round admission and4-line exact-source policy display. Zero worker/shared source changes,functions/roles/layers/gates/parsers/repair/output templates added.",
+    "evidence": "Canonical snapshot/original policy/verifier bodies unchanged;unknown source retains literal;allconditions/quotes/facts/order preserved;actual stub-captured requests exclude evaluator sentinel;all surviving drafts mandatory verifier;all32prospective dialogue edits audited.",
+    "limitations": [
+      "Multiple owner/presentation/dialogue treatments cannot isolate R48→R49 causal difference.",
+      "Frozen population is development synthetic shop evidence,not real catalog/promotion holdout/conversion.",
+      "Subjective/nonblind primary scoring,not independent/human/owner acceptance.",
+      "One existing SAFE value-advice variance remains;no verifier loosening.",
+      "Existing raw Gemini usage uses camelCase while runner aggregate uses snake_case;final audit must report provider usage including thinking,not claim aggregate zero tokens.",
+      "No actual checkout/handoff or verified alternative delivery/opacity capability."
+    ]
+  },
+  "readOnlyLimits": {
+    "checkedAt": "2026-10-11T10:20:30.887Z",
+    "identity": {
+      "version": "codex-cli 0.159.2",
+      "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+    },
+    "methods": [
+      "initialize",
+      "initialized",
+      "account/rateLimits/read"
+    ],
+    "generationRequests": 0,
+    "status": "OK",
+    "rateLimits": {
+      "limitId": "codex",
+      "primary": {
+        "usedPercent": 31,
+        "windowDurationMins": 300,
+        "resetsAt": 1791727800,
+        "resetsAtUtc": "2026-10-11T14:10:00.000Z"
+      },
+      "secondary": {
+        "usedPercent": 5,
+        "windowDurationMins": 10080,
+        "resetsAt": 1792296142,
+        "resetsAtUtc": "2026-10-18T04:02:22.000Z"
+      },
+      "rateLimitReachedType": null,
+      "credits": {
+        "hasCredits": true,
+        "unlimited": false
+      }
+    },
+    "rateLimitsByLimitId": [
+      {
+        "limitId": "codex",
+        "primary": {
+          "usedPercent": 31,
+          "windowDurationMins": 300,
+          "resetsAt": 1791727800,
+          "resetsAtUtc": "2026-10-11T14:10:00.000Z"
+        },
+        "secondary": {
+          "usedPercent": 5,
+          "windowDurationMins": 10080,
+          "resetsAt": 1792296142,
+          "resetsAtUtc": "2026-10-18T04:02:22.000Z"
+        },
+        "rateLimitReachedType": null,
+        "credits": {
+          "hasCredits": true,
+          "unlimited": false
+        }
+      }
+    ],
+    "earlierRead": null
+  },
+  "boundaryExecutableHash": "344035c06c67ecfae317d385ee07c96aed86aac37c27bbc497aca69c40260b37"
+}

@@ -1,0 +1,58 @@
+{
+  "b1-partial-source": {
+    "quality": "NEEDS_EDIT",
+    "finding": "Giữ phần chất liệu đã biết nhưng vẫn gọi hệ thống và dừng ở chưa tra được giá/tồn; cùng lỗi giọng/dead-end ở full-phase-b-run trước, chưa regression rõ."
+  },
+  "b1-price": {
+    "quality": "USABLE",
+    "finding": "Trả giá nguyên set trước, thêm giá bán lẻ/tồn gọn. Không tự gọi đó là lỗi vì nhiều hơn một fact; giá/tồn cần đối chiếu source trong whole-turn review."
+  },
+  "b1-component-stock": {
+    "quality": "USABLE",
+    "finding": "Trả đúng áo lẻ, size khách hỏi, giá và tồn; ngắn, tự nhiên, không tự kết luận fit."
+  },
+  "b1-buying-concern": {
+    "quality": "USABLE_WITH_STYLE_NOTE",
+    "finding": "Trả thẳng nên mặc dịp ban ngày và đủ ngân sách, không lạc sang lựa chọn thứ hai. Lý do còn dựa chủ yếu mô tả vải/tính từ; chưa chứng minh cải thiện thuyết phục ổn định."
+  },
+  "b1-policy-used": {
+    "quality": "USABLE_WITH_STYLE_NOTE",
+    "finding": "Từ chối đổi vì đã mặc đi làm, không mở đầu bằng cấp quyền rồi phủ định. Phí30k hai chiều khớp customerCare.exchange.totalTwoWayShippingFeeVnd trong policy hiện tại. Giọng còn theo quy định nhưng không có policy contradiction."
+  },
+  "b1-partial-source-v2": {
+    "quality": "USABLE_WITH_STYLE_NOTE",
+    "finding": "Giữ câu trả lời về chân váy và báo rõ chưa có giá/tồn trong fault POS. Gọn hơn ca partial đầu, không tự hỏi lại khách để chữa lỗi nguồn. Chưa có next-step thực trong B1 read-only; không hứa handoff chưa có."
+  },
+  "b1-buying-concern-v2": {
+    "quality": "NEEDS_EDIT",
+    "finding": "Chọn cả bộ tự tin nhưng nhiều tính từ và phủ định sến/bồng bềnh; lý do chưa đi sâu đánh đổi với khách vốn thích trơn. Lỗi giọng/thuyết phục cũ, không phải phát hiện protected false PASS."
+  },
+  "b1-changed-occasion-v2": {
+    "quality": "USABLE_WITH_STYLE_NOTE",
+    "finding": "Đã đưa món thay Uyển Hoa từ catalog để ưu tiên mát khi bối cảnh đổi; cần kiểm source sản phẩm/material và có thể nói quyết định gọn hơn. Không ép phải có phép thử riêng cho so sánh cảm nhận định tính."
+  },
+  "b1-changed-occasion-v3": {
+    "quality": "USABLE_WITH_STYLE_NOTE",
+    "finding": "Đã đổi quyết định sang áo lẻ cho cuộc gặp buổi sáng, giải thích so với cả bộ và báo499k. Nhắc tiệc tối ở đây có liên quan tới so sánh hai lựa chọn khách hỏi, không tự fail chỉ vì có cụm đó; vẫn hơi dài và dùng đồ sẵn có chưa xác nhận."
+  },
+  "b1-buying-concern-v3": {
+    "quality": "USABLE_WITH_STYLE_NOTE",
+    "finding": "Upsell cả bộ799k trong850k, giải thích mặc tách nhiều lần và dùng chân váy đen khách đã nói có. Không chấm mua thêm là lỗi chỉ vì áo lẻ rẻ hơn; câu còn dài/giọng quảng cáo."
+  },
+  "sales-discovery-advice:need": {
+    "quality": "FALLBACK",
+    "finding": "Search rồi đọc3món đã đủ2toolrounds; lượt cuối NONE/0declarations vẫn phát search_products query khoảng trắng. HTTP200 nhưng vi phạm tool mode, không phải auth/quota hoặc lỗi APIHTTP. Code capture staticfallback đúng; customer không nhận được lựa chọn."
+  },
+  "sales-product-gallery:overview": {
+    "quality": "FALLBACK",
+    "finding": "Select ảnh be chỉ trả COLOR_BINDING_UNVERIFIED. Model dừng luôn và nói gửi ảnh chung nhưng chưa có Generic selection thành công. Verifier báo unsupported theo media-lookup. Cần phân biệt câu thiếu ảnh màu có thể là cách nói availability với việc thực tế chưa chuẩn bị ảnh chung; không thể chữa thiếu selection chỉ bằng nới verify."
+  },
+  "sales-size-advice:height-weight": {
+    "quality": "EXPECTED_HANDOFF",
+    "finding": "Thiếu chart đúng authority/scope, code commit handoff và capture đúng holding reply. Đây là gap nguồn chart đã biết, không phải lỗi model hiểu số đo hoặc mất message."
+  },
+  "sales-southern-delivery:deadline": {
+    "quality": "FALLBACK",
+    "finding": "Draft dùng đúng ETA4–8ngày và trả lời gọn. Owner từng chấp nhận báo không kịp khi shop không thể nhận hẹn chắc lịch, nên không tự kết luận owner nói sai chỉ từ cụm không kịp. Verifier chỉ báo unsupported/ETA, không có span/reason: có khả năng chặn nặng cách nói từ chối nhận hẹn. Đồng thời câu hỏi thứSáu chưa có ngày tháng, processingAt là tối thứSáu; cần tách cách hiểu cam kết dịch vụ với dự đoán giao thực tế. Actual customer outcome vẫn là fallback, chưa dùng draft để chấm PASS."
+  }
+}

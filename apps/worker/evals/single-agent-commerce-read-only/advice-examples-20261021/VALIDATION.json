@@ -1,0 +1,23 @@
+{
+  "status": "LOCAL_CHECKS_PASS_PROVIDER_NOT_RUN",
+  "checks": [
+    {"command": "node --test apps/worker/evals/single-agent-commerce-read-only/b1-owner-prompt.test.mjs apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs", "exitCode": 0, "passed": 62, "failed": 0},
+    {"command": "pnpm --filter @lana/worker build", "exitCode": 0},
+    {"command": "node --input-type=module (readB1OwnerPrompt against candidate.json)", "exitCode": 0, "bytes": 13386, "sha256": "8ed038312c9bb28d6410818a34646148e4b3ac1ded061f071f13f06e29eb7b70"},
+    {"command": "python ast.parse(advice-examples-20261021/run.py)", "exitCode": 0},
+    {"command": "git diff --check", "exitCode": 0}
+  ],
+  "selfReview": {
+    "protectedSectionsUnchanged": true,
+    "approvedExampleRepliesVerbatim": true,
+    "exampleDataNotRuntimeAuthority": true,
+    "imageCapabilityPremiseAdded": true,
+    "receiptPremiseExplicit": true,
+    "frozenCasesUnchanged": true,
+    "usesNativeB1ToolsAndHistory": true,
+    "newRuntimeCode": false,
+    "limitations": ["Examples plus instruction reduction are one combined treatment", "Known development cases mostly one product", "No stateful, image or competitor-price coverage", "One sample per arm does not establish stability"]
+  },
+  "notRun": ["separate worker lint", "separate worker typecheck", "full repository tests", "B2/B3 provider run"],
+  "tdd": "No new production logic or automated language-quality test; reuse tested prompt registration and runner. No RED-to-GREEN claim for a prompt edit."
+}

@@ -1,0 +1,13 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@lana/database",
+    "exec",
+    "vitest",
+    "run",
+    "src/realtime-runtime.test.ts"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 23.945860624313354
+}

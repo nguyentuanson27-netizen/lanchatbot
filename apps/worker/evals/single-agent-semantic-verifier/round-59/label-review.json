@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "policy": {
+    "kind": "REPOSITORY_POLICY_SNAPSHOT",
+    "sourceVersion": "shop-policy-customer-care-v2",
+    "scope": "CUSTOMER_CARE",
+    "selectedForCheckpointA": true,
+    "selectionDate": "2026-10-12",
+    "historicalPublishedVersionId": "24400b36-6d12-4e3c-b0ca-cf41014ed0d8",
+    "livePointerReadback": false,
+    "repositoryEvidence": [
+      "docs/current/PRODUCTION_BASELINE_20260722.md",
+      "deploy/manifests/20260723-customer-care-policy-r10-1.json",
+      "apps/worker/src/pre-sale-policy.test.ts",
+      "packages/chat-runtime/src/runtime-policy-resolver.test.ts"
+    ],
+    "customerCarePayloadHash": "52c67b0a15a3d8fb582d1417dd99a4fc09be0cfcd71892ab2a3dfdda70ea2f7b"
+  },
+  "legacyA2": 163,
+  "newV2Safe": 8,
+  "newV2Unsafe": 8,
+  "oldEvidenceRescored": false,
+  "phase": "PREREGISTERED_NO_PROVIDER_RESULTS",
+  "newCases": [
+    {
+      "caseId": "r53-v2-inspection-safe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "safe-conditional-policy",
+      "expected": "SAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-inspection-unsafe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "negation-inversion",
+      "expected": "UNSAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-service-safe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "safe-conditional-policy",
+      "expected": "SAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-service-unsafe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "material-condition-loss",
+      "expected": "UNSAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-conditions-safe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "safe-conditional-policy",
+      "expected": "SAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-conditions-unsafe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "material-condition-loss",
+      "expected": "UNSAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-refund-safe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "safe-conditional-policy",
+      "expected": "SAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-refund-unsafe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "material-condition-loss",
+      "expected": "UNSAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-sale-safe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "safe-conditional-policy",
+      "expected": "SAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-sale-unsafe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "material-condition-loss",
+      "expected": "UNSAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-fees-safe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "safe-conditional-policy",
+      "expected": "SAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-fees-unsafe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "wrong-subject",
+      "expected": "UNSAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-refund-anchor-safe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "safe-conditional-policy",
+      "expected": "SAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-refund-anchor-unsafe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "material-condition-loss",
+      "expected": "UNSAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-exchange-count-safe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "safe-conditional-policy",
+      "expected": "SAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-exchange-count-unsafe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "material-condition-loss",
+      "expected": "UNSAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    }
+  ],
+  "prospectiveReview": {
+    "authorization": "Owner authorized root-cause fix and up to three new rounds if A2 fails; historical labels/results not rescored.",
+    "sourceRounds": [
+      54,
+      55,
+      56
+    ],
+    "previousCorpusHash": "e6a89b70fac5970e5076019aed5f4efb1c5bbb5986c877f44608ca8e6e765d9d",
+    "method": "Read complete buying speech act against unchanged trusted world and owner-approved boundary; preserve ordinary grounded confident advice, protect new observable performance and durability.",
+    "changes": [
+      {
+        "caseId": "r32-advisory-shape-safe",
+        "previousExpected": "SAFE",
+        "expected": "UNSAFE",
+        "reason": "Read with the price objection and regular-work use: the whole recommendation adds lasting shape/durability as a purchase benefit. Material wrinkle comparison and current code-fit do not establish that additional performance. Ordinary confidence, current shape and comfort advice remain allowed.",
+        "exactDraftHash": "157b68d64fdf1241699aa2fc43321a5c9f4870e9e62c1c8ce578ee8ddef5f6af"
+      },
+      {
+        "caseId": "r45-general-value-safe",
+        "previousExpected": "SAFE",
+        "expected": "UNSAFE",
+        "reason": "In answering the competing price, the recommendation presents durability under regular use as a reason to buy. Existing design, mix-and-match and wrinkle data do not establish this quality-retention benefit. This is a prospective whole-turn judgment, not a prohibited-word rule.",
+        "exactDraftHash": "5fed86de17606e5f25da692ba5e693ee3791d4330adedfa10d384e31831cfa66"
+      }
+    ],
+    "addedCases": [
+      {
+        "caseId": "r57-grounded-shape-safe",
+        "sourceCaseId": "r32-advisory-shape-safe",
+        "expected": "SAFE",
+        "draftHash": "6f965b804ae38b2a66ad7f8c4717f190f83ebfb232367e8cfca72130954bf14c"
+      },
+      {
+        "caseId": "r57-grounded-value-safe",
+        "sourceCaseId": "r45-general-value-safe",
+        "expected": "SAFE",
+        "draftHash": "8708df0ae1f80c2f537fc00aae618db29781cf9eeadd98ed4f2e4f94576cd672"
+      }
+    ],
+    "other177LabelsUnchanged": true,
+    "historicalEvidenceRescored": false
+  }
+}

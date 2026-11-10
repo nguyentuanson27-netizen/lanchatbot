@@ -1,0 +1,14 @@
+[
+  {
+    "name": "controls-preflight",
+    "command": [
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\feedback-controls-20261023.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-acceptance-model-20261024\\controls-preflight",
+      "--capture",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-acceptance-model-source-final-20261024\\capture.json",
+      "--preflight"
+    ],
+    "exitCode": 1
+  }
+]

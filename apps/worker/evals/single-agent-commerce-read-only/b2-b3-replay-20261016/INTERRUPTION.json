@@ -1,0 +1,20 @@
+{
+  "status": "HOST_TOOL_EXECUTION_ABORTED_NO_PROVIDER_REPLAY",
+  "sourceSha": "6477c840e5cd678d795d336a55b1ba95e287116f",
+  "registered": 7,
+  "persistedTerminalOutcomes": 6,
+  "unpersistedCaseIds": [
+    "stateful-human-request"
+  ],
+  "rawIntegrationUnchanged": true,
+  "rawProviderGenerationsBeforeSeventh": 12,
+  "seventhTerminal": null,
+  "seventhCapturedMessages": null,
+  "seventhObservedOwnerResultInRequestLog": true,
+  "seventhHandoffCommitInRecoveryReadback": true,
+  "seventhInboxCompletionNotObserved": true,
+  "cleanupEvidence": "INTERRUPTION_RECOVERY.json",
+  "ownedDatabasesDropped": 3,
+  "additionalProviderGenerations": 0,
+  "sendEnabled": false
+}

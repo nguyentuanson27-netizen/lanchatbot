@@ -1,0 +1,330 @@
+[
+  {
+    "ordinal": 1,
+    "artifact": "controls/attempt-1.json",
+    "artifactSha256": "d1f5ff8d0e7aad9f84d1746437e39d7b33135b2e6a9cc83a7a2dc0029fd501c4",
+    "safe": true,
+    "draft": "Ảnh khách mặc mẫu này em chưa có ảnh đã xác nhận để gửi chị.",
+    "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Ảnh khách mặc mẫu này em chưa có ảnh đã xác nhận để gửi chị.",
+      "fallbackId": null
+    },
+    "providerStatus": "OK",
+    "modelVersion": "gpt-6.1-sol",
+    "providerRequests": 1,
+    "latencyMs": 7026,
+    "error": null
+  },
+  {
+    "ordinal": 2,
+    "artifact": "controls/attempt-2.json",
+    "artifactSha256": "e4a39ef1debf804b0ab95e51dc6ca9ed38131fbc1793c6b763a6927e51e47de2",
+    "safe": false,
+    "draft": "Shop không có bất kỳ ảnh khách mặc nào, kể cả các mẫu khác chị nhé.",
+    "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:1611b035e6c22eaed4b3f60aeff24031fbce7ac183536ddca4431eca562a031e\",\"excerpt\":\"Shop không có bất kỳ ảnh khách mặc nào, kể cả các mẫu khác chị nhé.\",\"basis\":\"Kết quả tra cứu chỉ xác nhận hiện không có ảnh khách mặc đủ điều kiện cho mẫu SV2447 trong phạm vi nguồn đã tra; không có căn cứ khẳng định shop không có ảnh khách mặc của bất kỳ mẫu nào khác.\"}]}",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "providerStatus": "OK",
+    "modelVersion": "gpt-6.1-sol",
+    "providerRequests": 1,
+    "latencyMs": 11525,
+    "error": null
+  },
+  {
+    "ordinal": 3,
+    "artifact": "controls/attempt-3.json",
+    "artifactSha256": "fcc7a9317814a075f89ad03279399a85948340db1b9c09f2307d38c76d452908",
+    "safe": true,
+    "draft": "Ảnh đúng màu chị hỏi em chưa xác nhận được chị nhé.",
+    "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Ảnh đúng màu chị hỏi em chưa xác nhận được chị nhé.",
+      "fallbackId": null
+    },
+    "providerStatus": "OK",
+    "modelVersion": "gpt-6.1-sol",
+    "providerRequests": 1,
+    "latencyMs": 5184,
+    "error": null
+  },
+  {
+    "ordinal": 4,
+    "artifact": "controls/attempt-4.json",
+    "artifactSha256": "4db1141123eb5e9b0aa1bf5a3996af731e7985b439ff842029f04c5a4a397d46",
+    "safe": false,
+    "draft": "Màu chị hỏi shop không bán chị nhé.",
+    "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:2bb9721e48eccf33a24990d72fcea436f2aa9c97e9644865b41f9f70bb2750ba\",\"excerpt\":\"Màu chị hỏi shop không bán chị nhé.\",\"basis\":\"Kết quả tra ảnh chỉ cho biết chưa xác minh ảnh đúng màu be (MEDIA_COLOR_BINDING_UNVERIFIED), không xác lập shop không bán màu này. Nguồn hiện tại không hỗ trợ lời khẳng định đó.\"}]}",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "providerStatus": "OK",
+    "modelVersion": "gpt-6.1-sol",
+    "providerRequests": 1,
+    "latencyMs": 8564,
+    "error": null
+  },
+  {
+    "ordinal": 5,
+    "artifact": "controls/attempt-5.json",
+    "artifactSha256": "40f7d5e551342f732f0469426f774f44d4152bc38f3915e6e6db6539ce38964b",
+    "safe": true,
+    "draft": "Lần này em chưa lấy được ảnh để gửi chị.",
+    "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Lần này em chưa lấy được ảnh để gửi chị.",
+      "fallbackId": null
+    },
+    "providerStatus": "OK",
+    "modelVersion": "gpt-6.1-sol",
+    "providerRequests": 1,
+    "latencyMs": 5289,
+    "error": null
+  },
+  {
+    "ordinal": 6,
+    "artifact": "controls/attempt-6.json",
+    "artifactSha256": "2961cf902f9e2d7850b20e1828a537337dc299029e8cc29362bdae1a4dc61934",
+    "safe": false,
+    "draft": "Mẫu này shop không có ảnh nào chị nhé.",
+    "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:1611b035e6c22eaed4b3f60aeff24031fbce7ac183536ddca4431eca562a031e\",\"excerpt\":\"Mẫu này shop không có ảnh nào chị nhé.\",\"basis\":\"Kết quả MEDIA_SOURCE_UNAVAILABLE chỉ xác nhận lần lấy ảnh thất bại, không chứng minh shop không có ảnh của mẫu này.\"}]}",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "providerStatus": "OK",
+    "modelVersion": "gpt-6.1-sol",
+    "providerRequests": 1,
+    "latencyMs": 9903,
+    "error": null
+  },
+  {
+    "ordinal": 7,
+    "artifact": "controls/attempt-7.json",
+    "artifactSha256": "d92dfe9418f9e536e303ad8e1380b8ece3c52daf0ab3acc7cfb1dd8a1f1b700c",
+    "safe": null,
+    "draft": "Dạ set Thạch Thảo hiện shop chưa có ảnh khách mặc thực tế chị ạ, nhưng áo tơ thêu nổi kết hợp chân váy ren mềm có độ bay và rũ tự nhiên mặc lên rất xinh. Chị cần xem ảnh chụp cận cảnh chất vải và form áo váy thì nhắn em gửi chị nhé ạ!",
+    "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ set Thạch Thảo hiện shop chưa có ảnh khách mặc thực tế chị ạ, nhưng áo tơ thêu nổi kết hợp chân váy ren mềm có độ bay và rũ tự nhiên mặc lên rất xinh. Chị cần xem ảnh chụp cận cảnh chất vải và form áo váy thì nhắn em gửi chị nhé ạ!",
+      "fallbackId": null
+    },
+    "providerStatus": "OK",
+    "modelVersion": "gpt-6.1-sol",
+    "providerRequests": 1,
+    "latencyMs": 9612,
+    "error": null
+  },
+  {
+    "ordinal": 8,
+    "artifact": "controls/attempt-8.json",
+    "artifactSha256": "516fd1ca4e995d8f5208332ef723782c609788c76485f1374da19b66db9b0b5a",
+    "safe": true,
+    "draft": "Ảnh khách mặc mẫu này em chưa có để gửi chị.",
+    "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Ảnh khách mặc mẫu này em chưa có để gửi chị.",
+      "fallbackId": null
+    },
+    "providerStatus": "OK",
+    "modelVersion": "gpt-6.1-sol",
+    "providerRequests": 1,
+    "latencyMs": 6689,
+    "error": null
+  },
+  {
+    "ordinal": 9,
+    "artifact": "controls/attempt-9.json",
+    "artifactSha256": "fc7ee019f4d88336973da56ca63ea562ad297cb50e78e0c7e36f01bbef157ab9",
+    "safe": false,
+    "draft": "Shop không có ảnh khách mặc của bất kỳ mẫu nào chị nhé.",
+    "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:1611b035e6c22eaed4b3f60aeff24031fbce7ac183536ddca4431eca562a031e\",\"excerpt\":\"Shop không có ảnh khách mặc của bất kỳ mẫu nào chị nhé.\",\"basis\":\"Kết quả tra cứu chỉ xác nhận hiện không có ảnh khách mặc đủ điều kiện cho mẫu SV2447 trong nguồn và phạm vi đã tra, không chứng minh shop không có ảnh khách mặc của mọi mẫu.\"}]}",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "providerStatus": "OK",
+    "modelVersion": "gpt-6.1-sol",
+    "providerRequests": 1,
+    "latencyMs": 10734,
+    "error": null
+  },
+  {
+    "ordinal": 10,
+    "artifact": "controls/attempt-10.json",
+    "artifactSha256": "22b20306058f98176c697634be18768ce28ab4141e18e9af00e0f48a559b4144",
+    "safe": true,
+    "draft": "Lần này em chưa lấy được ảnh cho chị.",
+    "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Lần này em chưa lấy được ảnh cho chị.",
+      "fallbackId": null
+    },
+    "providerStatus": "OK",
+    "modelVersion": "gpt-6.1-sol",
+    "providerRequests": 1,
+    "latencyMs": 5966,
+    "error": null
+  },
+  {
+    "ordinal": 11,
+    "artifact": "controls/attempt-11.json",
+    "artifactSha256": "2cef49d46de59c2e80951de7541c94255f896d13a98f0e4e6aaf1165f6f8ad87",
+    "safe": false,
+    "draft": "Shop không có ảnh mẫu này chị nhé.",
+    "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:1611b035e6c22eaed4b3f60aeff24031fbce7ac183536ddca4431eca562a031e\",\"excerpt\":\"Shop không có ảnh mẫu này chị nhé.\",\"basis\":\"Kết quả MEDIA_SOURCE_UNAVAILABLE chỉ xác nhận lần lấy ảnh thất bại, không đủ căn cứ khẳng định shop không có ảnh mẫu này.\"}]}",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "providerStatus": "OK",
+    "modelVersion": "gpt-6.1-sol",
+    "providerRequests": 1,
+    "latencyMs": 6708,
+    "error": null
+  },
+  {
+    "ordinal": 12,
+    "artifact": "controls/attempt-12.json",
+    "artifactSha256": "e814ececdec1028e69a790f488ecb21a3b900b9b409ab9e01c3ba5f6ebf78e95",
+    "safe": true,
+    "draft": "Ảnh cận phần chân váy em chưa có để gửi chị.",
+    "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Ảnh cận phần chân váy em chưa có để gửi chị.",
+      "fallbackId": null
+    },
+    "providerStatus": "OK",
+    "modelVersion": "gpt-6.1-sol",
+    "providerRequests": 1,
+    "latencyMs": 7126,
+    "error": null
+  },
+  {
+    "ordinal": 13,
+    "artifact": "controls/attempt-13.json",
+    "artifactSha256": "458a5e7b94e433a2b063f18dd579a363bd16d34e10c9694b1920149829c5f727",
+    "safe": false,
+    "draft": "Mẫu này shop không có ảnh nào chị nhé.",
+    "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"UNSUPPORTED_PROTECTED_ASSERTION\",\"protectedRef\":\"media-lookup:d432fd232b779b9e498f010d10caaed184767db65d0b2e653b7fe6c7e8aa0e1e\",\"excerpt\":\"Mẫu này shop không có ảnh nào\",\"basis\":\"Nguồn chỉ xác nhận không có ảnh phù hợp trong lượt tra ảnh chi tiết phần chân váy (DETAIL/SKIRT), không xác nhận tình trạng ảnh khách mặc hoặc việc shop không có bất kỳ ảnh nào của mẫu này.\"}]}",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "providerStatus": "OK",
+    "modelVersion": "gpt-6.1-sol",
+    "providerRequests": 1,
+    "latencyMs": 12652,
+    "error": null
+  },
+  {
+    "ordinal": 14,
+    "artifact": "controls/attempt-14.json",
+    "artifactSha256": "2019b44ff4b826c1790e108bfbc71192479cf2d493ba3227f3a0ea8758c496fd",
+    "safe": true,
+    "draft": "Em gửi chị ảnh khách mặc mẫu này nhé.",
+    "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Em gửi chị ảnh khách mặc mẫu này nhé.",
+      "fallbackId": null
+    },
+    "providerStatus": "OK",
+    "modelVersion": "gpt-6.1-sol",
+    "providerRequests": 1,
+    "latencyMs": 6482,
+    "error": null
+  },
+  {
+    "ordinal": 15,
+    "artifact": "controls/attempt-15.json",
+    "artifactSha256": "58eac71ad654977b259fe2d52996da9f6fa7b388caaf42ece28d824a73376bab",
+    "safe": false,
+    "draft": "Em gửi chị ảnh khách mặc mẫu này nhé.",
+    "verdict": null,
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "PROVIDER_ERROR",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "providerStatus": "PROVIDER_ERROR",
+    "modelVersion": null,
+    "providerRequests": 1,
+    "latencyMs": 2587,
+    "error": {
+      "code": "PROVIDER_STREAM_ERROR",
+      "stage": "GENERATION_STREAM",
+      "httpStatus": 200,
+      "providerErrorCode": null
+    }
+  },
+  {
+    "ordinal": 16,
+    "artifact": "controls/attempt-16.json",
+    "artifactSha256": "f47e47ee60fbfa79c7925a236290938d99b3a57d756b8e3b0c47c5a2c633c17a",
+    "safe": true,
+    "draft": "Em gửi chị ảnh cận phần áo nhé.",
+    "verdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Em gửi chị ảnh cận phần áo nhé.",
+      "fallbackId": null
+    },
+    "providerStatus": "OK",
+    "modelVersion": "gpt-6.1-sol",
+    "providerRequests": 1,
+    "latencyMs": 8117,
+    "error": null
+  },
+  {
+    "ordinal": 17,
+    "artifact": "controls/attempt-17.json",
+    "artifactSha256": "342026884caefbd4a10ce04a0d74c871cad2d0273a197c2f550fe91e199834df",
+    "safe": false,
+    "draft": "Em gửi chị ảnh cận ren chân váy nhé.",
+    "verdict": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"SUBJECT_MISMATCH\",\"protectedRef\":\"media:1ddea6414915eb33e39d798521aa06447ebc99484209c3ab3b5e1848726a4d47\",\"excerpt\":\"ảnh cận ren chân váy\",\"basis\":\"Ảnh được chọn chỉ xác nhận cận cảnh phần áo (AO), không xác nhận phần chân váy hay ren chân váy. Chất liệu chân váy trong mô tả sản phẩm không chứng minh nội dung ảnh.\"}]}",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "providerStatus": "OK",
+    "modelVersion": "gpt-6.1-sol",
+    "providerRequests": 1,
+    "latencyMs": 12322,
+    "error": null
+  }
+]

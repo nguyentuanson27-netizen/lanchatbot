@@ -1,0 +1,44 @@
+# Review toàn bộ actual outcomes
+
+Source `487816d8c3f27299b62daaccca8bd861d81abee1`, raw `17a74bf94ad0dd4d9a0f379e855c08b187be0079` đã commit trước primary. Đọc cả lượt với lịch sử, public context và state cuối; chưa đọc nháp bị chặn/chi tiết verdict để chấm. Primary chủ quan, human acceptance null. Các chiều0/1/2 chỉ hỗ trợ nhận xét, không cộng điểm hoặc bắt keyword.
+
+| Phần | USABLE | NEEDS_EDIT | UNUSABLE | FALLBACK_OR_NO_SEND |
+| --- | --- | --- | --- | --- |
+| B1 | 18 | 5 | 0 | 1 |
+| B2_B3 | 3 | 2 | 0 | 2 |
+
+Một ownership-only control được báo riêng; USABLE không phải số đơn mua, độ ổn định hay human acceptance. Không phạt upsell tự nó; không bắt policy checklist ở mọi câu; cho phép tư vấn cảm giác/phong cách theo ranh giới đã duyệt.
+
+| Lượt | Cả lượt | Lý do |
+| --- | --- | --- |
+| B2_B3 1 — stateful-open | NEEDS_EDIT | Giỏ đúng áo riêng BE/M x1, profile đúng76/98 và lần này khách đã được báo hàng đặt trước. Tuy nhiên shop nói Chị đã thêm rồi lại gọi khách là chị: người nói và người làm việc bị lẫn, cả câu giống thông báo giao diện. Đây là lỗi giọng/chủ thể giao tiếp, không phủ nhận commit đúng hoặc coi thiếu fit là lỗi khi khách tự chọn M. |
+| B2_B3 2 — stateful-variant-quantity | NEEDS_EDIT | Giỏ đã đổi đúng BE/L x2 và không cần nhắc lại preorder đã báo ngay trước. Reply tiếp tục nói Chị đã đổi và cập nhật số lượng, kể thao tác thay lời shop nhận lựa chọn. Cần sửa cách xưng vai trong mạch hai tin này; không chấm sai biến thể, số lượng hoặc đòi disclosure lặp lại. |
+| B2_B3 3 — stateful-quote | USABLE | Trả đủ tổng978.100đ sau ưu đãi, giá hai áo998.000đ và ship30.000đ theo giỏ hiện tại. Nêu các thành phần tiền có mục đích giải thích tổng, không phải liệt kê hồ sơ khách; không báo đã tạo đơn. |
+| B2_B3 4 — stateful-correction | USABLE | Nhận sửa đúng eo74/mông96, giỏ vẫn BE/L x2. Không đọc lại toàn bộ số đo. Lời lưu số đo/sẵn sàng trong giỏ còn hành chính và câu mời đặt hơi dài, nhưng trong mạch khách đang mua, ý tiếp tục checkout là bước có luồng code; không hứa đã tạo đơn, không đọc sẵn sàng trong giỏ thành hàng có sẵn khi preorder đã rõ. |
+| B2_B3 5 — stateful-private-checkout | FALLBACK_OR_NO_SEND | Bước checkout riêng tư không tạo được preview và không có tin được capture. Giỏ/profile trước đó vẫn đúng nhưng hành trình mua chưa hoàn tất; handoff im lặng không chứng minh nhân viên đã nhận việc. Chưa dùng trace để gán lý do dependency. |
+| B2_B3 6 — stateful-confirm | FALLBACK_OR_NO_SEND | Sau handoff, yêu cầu chốt không có tin/confirmation mới. Code giữ authority là đúng nhưng khách chưa mua xong; không tính im lặng bảo vệ quyền thành câu tư vấn hữu ích. |
+| B2_B3 7 — stateful-human-request | USABLE | Control riêng nhường ownership khi khách muốn gặp nhân viên; không gửi lời hứa giả hoặc tạo giỏ. Chỉ tính đúng boundary nhường quyền, không là bán hàng thành công, độ tự nhiên hay bằng chứng nhân viên thật đã phục vụ. |
+| B1 1 — b1-changed-occasion | FALLBACK_OR_NO_SEND | Khách hỏi độ lộ dưới đèn mạnh và sẵn sàng đổi mẫu nhưng chỉ nhận fallback chung. Actual không có lời khuyên về cách mặc hoặc lựa chọn tiếp; chưa xem rejected draft/verdict detail để quyết định người chặn đúng hay sai. |
+| B1 2 — b1-search-read | USABLE | Tìm đúng SD375 và tách giá áo929k/set1.065k. Câu hỏi chọn áo hay bộ hợp với hai lựa chọn bán, chưa hứa đã thêm giỏ; list giá ngắn giúp khách hiểu lựa chọn. |
+| B1 3 — b1-buying-concern | NEEDS_EDIT | Giá799k đúng, nhưng đoạn tư vấn dùng nhiều lời khen từ mô tả để phủ định ngay nỗi lo ren rườm rà. Khách chưa hình dung được cách tiết chế cho tiệc ban ngày; lời mời lấy size lại vượt khả năng chọn fit của B1. Lỗi ở sức thuyết phục và bước tiếp, không phải một từ khen tự nó bị cấm. |
+| B1 4 — b1-changed-occasion-v2 | USABLE | Đã xét việc ra ngoài trời và trả trực tiếp cảm giác mặc từ chất mềm/nhẹ/thoáng. Gợi ô hoặc chỗ râm là lời khuyên thêm, không phải món hàng hay bằng chứng vải chống nắng; có thể bỏ để câu gọn hơn nhưng không làm mất câu trả lời về độ bí. Không bắt cảm giác thoáng phải có phép đo riêng. |
+| B1 5 — b1-partial-source-v2 | NEEDS_EDIT | Lần này trả được ren tơ Hàn và dáng rũ của đúng chân váy, đồng thời báo chưa có giá/tồn M, không bịa hàng. Tuy vậy hai câu mô tả chép gần nhịp catalog và câu cuối nói hệ thống chưa kiểm tra thay lời shop về việc mua. Partial answer được giữ; giọng chưa đạt, không yêu cầu tạo CTA/handoff khi capability không có. |
+| B1 6 — b1-buying-concern-v2 | NEEDS_EDIT | Tiến bộ ở chỗ thừa nhận cả bộ điệu hơn phong cách đồ trơn và có cách tiết chế bằng áo lẻ. Nhưng lời khuyên kéo dài ba đoạn, quay lại khen cả bộ sau khi mở cả hai lựa chọn; khách phải tự gỡ lại shop nghiêng về cách nào cho chính nỗi lo của mình. Cần một khuyến nghị rõ và ngắn hơn, không phạt upsell hoặc đề xuất áo lẻ. |
+| B1 7 — b1-current-policy | USABLE | Sửa đúng thời hạn cũ7ngày thành15ngày và phí hai chiều30k. Cả câu gắn vẫn kịp với ngày nhận10hôm, không thêm tags-only như điều kiện duy nhất hay báo đã nhận đổi. Không bắt đọc toàn bộ checklist cho câu hỏi thời gian/phí. |
+| B1 8 — b1-partial-source | NEEDS_EDIT | Phân đúng tơ thêu của áo và ren tơ của váy, giữ phần có nguồn và không bịa giá/tồn M. Nhưng lời mô tả dày tính từ và phần sau kể chưa kết nối dữ liệu khiến câu giống báo lỗi kỹ thuật. Không còn hẹn nhắn lại vô căn cứ như baseline; giọng shop vẫn chưa đạt. |
+| B1 9 — b1-price | USABLE | Trả ngay giá cả bộ799k, rồi nêu riêng áo499k/váy449k đúng phạm vi. Hai lựa chọn bổ sung ngắn và liên quan, không trộn giá hoặc hỏi thông tin thừa. |
+| B1 10 — b1-component-stock | USABLE | Đáp đúng áo bán riêng size M còn và giá499k. Một câu rõ, không tự tư vấn M vừa hoặc báo đã mua khi chỉ hỏi hàng. |
+| B1 11 — b1-policy-used | USABLE | Từ chối đúng việc đã mặc đi làm trước, nên ca hiện tại không phát sinh giao dịch đổi/phí. Phần phí30k được nói riêng cho đổi hợp lệ; người chịu phí nên rõ hơn nếu thật sự xử lý một ca đổi, nhưng không dùng thiếu chữ khách trả để biến câu từ chối đúng thành sai policy. Không đòi checklist thay lý do đã sử dụng. |
+| B1 12 — b1-current-policy-v2 | USABLE | Dùng15ngày và30k hiện hành thay ký ức25k. Vẫn kịp được giải thích ngay bằng thời hạn12/15, không phải thông báo đã phê duyệt toàn bộ đơn; trả đúng phạm vi hỏi. |
+| B1 13 — b1-price-v2 | USABLE | Theo đúng referent Thạch Thảo từ lịch sử và trả giá cả bộ799k trong một câu, không bắt khách nhắc mẫu hoặc thêm chốt mua. |
+| B1 14 — b1-component-stock-v2 | USABLE | Giữ nhu cầu chân váy riêng từ lịch sử, báo đúng tồn M và449k, không trả giá set hoặc chốt fit. |
+| B1 15 — b1-search-read-v2 | USABLE | Xác định đúng SV1561/Khánh Trang, có tồn, trả set999k và từng món499k. Câu hỏi bộ hay lẻ phù hợp lựa chọn bán; không tự sửa giá set theo cộng hai giá lẻ hoặc dùng mẫu gần giống. |
+| B1 16 — b1-policy-used-v2 | USABLE | Hiểu mặc vào năm phút vẫn vượt chỉ ướm ngoài và từ chối đổi size ngay cho ca này. Còn tem/chưa ra ngoài không được dùng xóa tình trạng đã mặc; không liệt kê điều kiện không quyết định. |
+| B1 17 — b1-changed-occasion-v3 | USABLE | Đổi lời khuyên từ cả bộ đi tiệc sang áo riêng với đồ cơ bản cho buổi gặp khách; giải thích bằng độ rũ ren đối lập nhu cầu gọn, gọn hơn baseline. Sẵn có ở nhà vẫn là giả định nên viết như gợi cách phối, nhưng lời khuyên chính giúp quyết định và không tạo tính năng mới. |
+| B1 18 — b1-current-policy-v3 | USABLE | Dùng15ngày hiện hành thay7ngày và trả9ngày còn trong hạn. Cụm đổi được đang được giải thích trong phạm vi thời gian, không là receipt duyệt một đơn; không yêu cầu thêm điều kiện mặc định khi khách chỉ hỏi còn kịp. |
+| B1 19 — b1-partial-source-v3 | NEEDS_EDIT | Đã giữ đúng chất liệu áo/váy và thừa nhận giá/tồn chưa đọc được. Tuy nhiên câu cuối kể hệ thống không check trực tiếp rồi mời nhắn thông tin khác chung chung, trong khi nhu cầu mua cụ thể vẫn dang dở. Cần nói ngắn phần shop chưa trả được; không tạo yêu cầu xin size hoặc hứa handoff giả. |
+| B1 20 — b1-price-v3 | USABLE | Giá cả set799k đúng và trả ngắn. Không cần chèn thêm lựa chọn, ngân sách hoặc câu hỏi để đủ cấu trúc. |
+| B1 21 — b1-component-stock-v3 | USABLE | Đủ ba ý áo bán riêng/M còn/499k, đúng cấu hình khách hỏi. Không suy khách đã chọn M thành shop xác nhận fit. |
+| B1 22 — b1-search-read-v3 | USABLE | Tìm đúng SQ223/Xuân Thảo, còn hàng và giá bộ699k/lẻ429k mỗi món đúng nguồn. List và hỏi mua bộ/lẻ phục vụ lựa chọn thực, không phải ép CTA cho mọi câu. |
+| B1 23 — b1-buying-concern-v3 | USABLE | Chọn cả bộ799k trong850k và giải thích hai cách dùng: diện bộ, tách áo với váy đen khách có để mặc lại. Lợi hơn ở đây nói thêm công dụng/lựa chọn phối, không hứa chi ít hơn áo499k. Giúp em và chuỗi lời khen còn hơi quảng cáo, nhưng khuyến nghị mua và lý do vẫn dùng được; không đổi bar để cấm upsell. |
+| B1 24 — b1-policy-used-v3 | USABLE | Từ chối đổi ngay vì cắt tem và đã giặt, không dùng còn trong hạn/chưa mặc ngoài làm quyền đổi. Lời thông cảm không gây thêm điều kiện hoặc hứa ngoại lệ. |

@@ -1,0 +1,53 @@
+{
+  "readiness": "READINESS.json",
+  "native": {
+    "startUtc": "2026-10-13T23:58:03.8178541Z",
+    "endUtc": "2026-10-14T00:00:39.0535182Z",
+    "exitCode": 0,
+    "sourceSha": "ce3bd9e96045991f18afb1ec8dda1d77997409ce"
+  },
+  "commands": [
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='67'; $env:DIAGNOSTIC_RUN_SOURCE_SHA=(git rev-parse HEAD).Trim(); $env:C3_VERTEX_CREDENTIAL_FILE='C:/Users/nguye/Downloads/project-388db62b-f5a4-4e76-a2b-a15e8123f075.json'; $env:C3_TEST_CODEX_TRANSPORT=$null; node apps/worker/evals/single-agent-semantic-verifier/failure-recheck-20261014/run.mjs --preflight",
+      "exitCode": 0,
+      "generations": 0
+    },
+    {
+      "command": "node apps/worker/evals/single-agent-semantic-verifier/failure-recheck-20261014/run.mjs",
+      "exitCode": 0,
+      "registered": 11,
+      "completed": 11,
+      "actualGenerations": 19,
+      "stderrBytes": 0
+    },
+    {
+      "command": "node 'C:/Users/nguye/AppData/Local/Temp/c3-r67-failure-recheck-audit.mjs' 'C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005'",
+      "exitCode": 0,
+      "bodyReconstructions": 19,
+      "distinctRequestIds": 19,
+      "notes": "Final metadata readback correctly distinguishes raw savepoint b3c79ac2 from audit/primary HEAD dc01cc0b; runtime/raw unchanged."
+    },
+    {
+      "command": "Offline Node request comparison replacing only requestIdentity.requestId, recorded in A2_COMPARISON.json",
+      "exitCode": 0,
+      "matched": 3
+    },
+    {
+      "command": "Existing scoreWholeReplies over 8selected actual-terminal primary reviews, a3-quality.json",
+      "exitCode": 0,
+      "primaryPassed": 4,
+      "scored": 8,
+      "quality": "FAIL",
+      "fullCheckpointQualification": false
+    },
+    {
+      "command": "git diff --cached --check",
+      "initialExitCode": 2,
+      "initialCause": "One extra blank line at report EOF; report formatting corrected, no raw/source change",
+      "finalExitCode": 0
+    }
+  ],
+  "logs": "C:/Users/nguye/AppData/Local/Temp/c3-r67-failure-recheck-run.{stdout,stderr}.log",
+  "remaining": "Full new A2/A3, same-input stability, independent/human/owner acceptance, immutable backend model version and real sales conversion are not established.",
+  "recommendation": "STOP"
+}

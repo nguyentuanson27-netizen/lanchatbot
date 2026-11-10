@@ -1,0 +1,14 @@
+{
+  "result": "PASS",
+  "rawAll3UnchangedAfterSavepoint": true,
+  "rawSourceCommitsPresent": true,
+  "historicalRounds1to59Unchanged": true,
+  "productionSharedNormativeSpecsUnchanged": true,
+  "modelsNoSubstitution": true,
+  "maxRequests1Retry0": true,
+  "a3NotRun": true,
+  "boundedSecretScan": "PASS",
+  "semanticQualification": "NOT_ACHIEVED",
+  "recommendation": "STOP",
+  "newProviderGenerations": 0
+}

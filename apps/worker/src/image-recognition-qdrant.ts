@@ -92,6 +92,7 @@ export interface ImageRecognitionPublisherPort {
   getPoint(pointId: string, signal: AbortSignal): Promise<ImageRecognitionPointState | null>;
   upsertPoint(point: ImageRecognitionPoint, signal: AbortSignal): Promise<void>;
   deletePoint(pointId: string, signal: AbortSignal): Promise<void>;
+  overwritePayload?(pointId:string,payload:Readonly<Record<string,unknown>>,signal:AbortSignal):Promise<void>;
   /** Fail closed when the collection is not `image_cutout` / 3072 / Cosine. */
   validateCollectionContract(signal: AbortSignal): Promise<void>;
 }
@@ -380,6 +381,10 @@ export class QdrantImageRecognitionAdapter
       },
       signal,
     );
+  }
+
+  async overwritePayload(pointId:string,payload:Readonly<Record<string,unknown>>,signal:AbortSignal):Promise<void>{
+    await this.request(this.path("/points/payload?wait=true"),"PUT",{points:[pointId],payload},signal);
   }
 
   async deletePoint(pointId: string, signal: AbortSignal): Promise<void> {

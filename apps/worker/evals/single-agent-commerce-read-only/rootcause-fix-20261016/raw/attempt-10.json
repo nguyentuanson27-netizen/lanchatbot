@@ -1,0 +1,71 @@
+{
+  "caseId": "b1-current-policy-v2",
+  "sourceMode": "LIVE",
+  "elapsedMs": 22256.128500000006,
+  "runtime": {
+    "latest": "Đơn này chị nhận 12 hôm rồi, chưa dùng. Giờ chị đổi size còn kịp không em? Phí ship tính thế nào?",
+    "history": [
+      {
+        "role": "customer",
+        "text": "Lần trước chị nhớ phí đổi là 25 nghìn."
+      }
+    ],
+    "initialProductCodes": []
+  },
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "PROVIDER_ERROR",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 2,
+    "verifierGenerations": 0,
+    "toolRounds": 1,
+    "toolCalls": 1,
+    "generations": [
+      {
+        "id": "54b10e83a6d089bb1758487ff79af61f1afb9ef08ab4d1969345dc61120f6631:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2553.7214999999997,
+        "telemetry": {
+          "generationId": "54b10e83a6d089bb1758487ff79af61f1afb9ef08ab4d1969345dc61120f6631:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 2357,
+          "outputTokens": 183,
+          "cost": null,
+          "thinkingTokens": 173
+        }
+      },
+      {
+        "id": "54b10e83a6d089bb1758487ff79af61f1afb9ef08ab4d1969345dc61120f6631:owner:2",
+        "role": "owner",
+        "status": "PROVIDER_ERROR",
+        "latencyMs": 19038.327199999985,
+        "telemetry": {
+          "generationId": "54b10e83a6d089bb1758487ff79af61f1afb9ef08ab4d1969345dc61120f6631:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": null,
+          "modelVersion": null,
+          "inputTokens": null,
+          "outputTokens": null,
+          "cost": null
+        }
+      }
+    ],
+    "toolLatencyMs": 663.2498999999953,
+    "verificationLatencyMs": null
+  },
+  "counters": {
+    "embeddingCalls": 1,
+    "policyReads": 4,
+    "catalogReads": 20,
+    "posReads": 14
+  }
+}

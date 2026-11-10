@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "targets": 19,
+  "prerequisites": 4,
+  "generationRequests": 70,
+  "capturedRequestBodies": 70,
+  "oneRequestPerGeneration": true,
+  "evaluatorLabelLeaks": 0,
+  "sameModelsAndFrozenInputs": true,
+  "statefulCartProfileReadback": "PASS",
+  "negotiationEvidenceUnchanged": "PASS",
+  "databasesDropped": 3,
+  "scope": "SOURCE_EVAL_CAPTURE_ONLY_NOT_QUALITY_QUALIFICATION"
+}

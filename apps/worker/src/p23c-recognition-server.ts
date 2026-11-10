@@ -177,7 +177,7 @@ async function main(): Promise<void> {
           })(),
           sheets.batchGetValues(
             sheetId,
-            ["product_registry!A:AZ", "image_registry!A:AP"],
+            ["product_registry!A:AZ", "image_registry!A:AR"],
             "UNFORMATTED_VALUE",
           ),
         ]);

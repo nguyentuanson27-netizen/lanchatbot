@@ -1,0 +1,33 @@
+{
+  "caseId": "c-20261028-s05",
+  "sentText": [
+    "Em gợi ý cho chị set quần Uyển Hoa (SQ748) nhé. Set có giá 799.000đ, làm từ chất liệu thô đũi cao cấp mềm mại và thoáng mát. Thiết kế áo kết hợp quần short lưng chun thoải mái với tông kem phối họa tiết thổ cẩm hồng pastel nhẹ nhàng, thanh lịch, rất thích hợp mặc đi ăn hay dạo phố cùng gia đình ạ. Set hiện có sẵn các size S và L, chị xem có vừa vặn không nhé!"
+  ],
+  "capturedImageSourceProducts": [
+    {
+      "urlSha256": "7c3c7ae23de077d9cdb0111e0d381f04a2d31cd3079e3216ffddc48c7cb0d38d",
+      "sourceProducts": [
+        "SQ748"
+      ]
+    },
+    {
+      "urlSha256": "c0ec26241508e7460991fc8d948a11e7379bc462b33142c76da27b49ab5a9302",
+      "sourceProducts": [
+        "SQ748"
+      ]
+    },
+    {
+      "urlSha256": "b6169efd47221ce0595cb457a71d405fd1afc0136b85e3eb5f622d1f5f337bab",
+      "sourceProducts": [
+        "SQ675"
+      ]
+    },
+    {
+      "urlSha256": "fa929723e75a580f5b8121d213437391d1579479bdfe7bb6eca3a63cb15e434d",
+      "sourceProducts": [
+        "SQ675"
+      ]
+    }
+  ],
+  "finding": "Only SQ748 introduced; two SQ675 images included without introduction. This is customer-facing text/media coherence, not a failed raw image source hash."
+}

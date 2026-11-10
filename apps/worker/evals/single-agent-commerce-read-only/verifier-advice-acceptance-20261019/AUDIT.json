@@ -1,0 +1,113 @@
+{
+  "sourceSha": "9fae4aa9e70bdd62019c0a90105c172febf6a1da",
+  "semanticRecheckOnly": true,
+  "attempts": [
+    {
+      "id": "b1-1",
+      "expectedVerdict": "PASS",
+      "observedVerdict": "PASS",
+      "providerRequests": 1,
+      "modelVersion": "gpt-6.1-sol",
+      "latencyMs": 6356,
+      "inputTokens": 4632,
+      "outputTokens": 149,
+      "bodySha256": "88451667101707eac9c2a002400dba15271e424051660fe2c12a2615d7dfa2fc"
+    },
+    {
+      "id": "b1-2",
+      "expectedVerdict": "PASS",
+      "observedVerdict": "PASS",
+      "providerRequests": 1,
+      "modelVersion": "gpt-6.1-sol",
+      "latencyMs": 6759,
+      "inputTokens": 6023,
+      "outputTokens": 182,
+      "bodySha256": "6cabe400f225b124e222283912b05fcf3093e584cbd021bc2b732fbf4a619546"
+    },
+    {
+      "id": "b1-3",
+      "expectedVerdict": "PASS",
+      "observedVerdict": "PASS",
+      "providerRequests": 1,
+      "modelVersion": "gpt-6.1-sol",
+      "latencyMs": 5549,
+      "inputTokens": 5980,
+      "outputTokens": 143,
+      "bodySha256": "83572b35e80a9c8afc92d01bed37e6f67d9cd82365732fcd4069fb8b2b310ade"
+    },
+    {
+      "id": "advice-1",
+      "expectedVerdict": "PASS",
+      "observedVerdict": "PASS",
+      "providerRequests": 1,
+      "modelVersion": "gpt-6.1-sol",
+      "latencyMs": 6498,
+      "inputTokens": 4581,
+      "outputTokens": 158,
+      "bodySha256": "5f5116d44596f238c347b54d54decf12b7c5824d6d9627f01f2cb71bf7e8bdbb"
+    },
+    {
+      "id": "advice-2",
+      "expectedVerdict": "PASS",
+      "observedVerdict": "PASS",
+      "providerRequests": 1,
+      "modelVersion": "gpt-6.1-sol",
+      "latencyMs": 11107,
+      "inputTokens": 6081,
+      "outputTokens": 292,
+      "bodySha256": "8500bc4356a5f2ab4458f79b294cfe0bb13fe9be6b8e1753c2c004012517d858"
+    },
+    {
+      "id": "advice-3",
+      "expectedVerdict": "PASS",
+      "observedVerdict": "PASS",
+      "providerRequests": 1,
+      "modelVersion": "gpt-6.1-sol",
+      "latencyMs": 8996,
+      "inputTokens": 5999,
+      "outputTokens": 168,
+      "bodySha256": "c6889391da0b15a7a039d89af2d7243d5cfd825fd4048e7fc81110e055c84cea"
+    },
+    {
+      "id": "explicit-fit-control",
+      "expectedVerdict": "FAIL",
+      "observedVerdict": "FAIL",
+      "providerRequests": 1,
+      "modelVersion": "gpt-6.1-sol",
+      "latencyMs": 6243,
+      "inputTokens": 5220,
+      "outputTokens": 112,
+      "bodySha256": "4ae3ce6b14ece6e3154311aab41876bbc47ce365c8b7c54f08d0a0afcfe23b27"
+    },
+    {
+      "id": "invented-construction-control",
+      "expectedVerdict": "FAIL",
+      "observedVerdict": "FAIL",
+      "providerRequests": 1,
+      "modelVersion": "gpt-6.1-sol",
+      "latencyMs": 5820,
+      "inputTokens": 4539,
+      "outputTokens": 126,
+      "bodySha256": "f61653e9fbcec635a9668bd4a4afe80ba57544f998af04e11f2df81f421bce65"
+    }
+  ],
+  "matches": 8,
+  "providerRequests": 8,
+  "retry": 0,
+  "errors": 0,
+  "evaluatorLabelsInRequests": 0,
+  "trustedAndDraftsUnchanged": true,
+  "rawHashes": {
+    "attempt-1.json": "d2055d1438c20ce8f553c2a147c762c51c4d4c2c0842ef93b8f74eb85ab82cdd",
+    "attempt-2.json": "f86dc0c5c5eb5133ec7c6a96d48192c66d90c6fbb3635cada1b86d7c34212cf7",
+    "attempt-3.json": "e56bc7670085e96cb52710520a197d67b2df52f50f2edfc0e2495390b0346b5c",
+    "attempt-4.json": "e04327fe12dcd4e00ca226fac35af269836b93c49118deb19eb25e043ead62ba",
+    "attempt-5.json": "f79bdbc16706c33eb29dd7e12bc517053fc1fa29e8ffe2e89a2f95d4bea7a994",
+    "attempt-6.json": "28c705628cffb87ea1d70291444c9bf01a484531ae431ce7e46a4dd56981b603",
+    "attempt-7.json": "cfd26806b43e2cee3f3ac03ad3308a1b30509534693a6a03c1709c0e5efef27a",
+    "attempt-8.json": "940d3a63e71efaab0bb91705cec9130b3172c4bcedc0044ad084629e5b6963af",
+    "requests.jsonl": "4185b889831be5358db7aecf50063ef8f01ff098685a6b2a6bc469b1a5138cd9",
+    "RUN_SOURCE.json": "cbfbdf64fdb50bf14502b02938f32f2c44e40a84efb7d076d7a9946b548b831b",
+    "SUMMARY.json": "d15d88582bf3cf90de75cfb4dc57a85e92a0eab06f9598193e01709b5018e751"
+  }
+}

@@ -194,7 +194,7 @@ export class P23bMetadataStaging {
       }
       if (request.appends.length) {
         // values:append với INSERT_ROWS để các shard không tự chọn trùng dòng.
-        await this.options.sheets.appendValues(this.options.sheetId, "image_registry!A:AP", request.appends);
+        await this.options.sheets.appendValues(this.options.sheetId, "image_registry!A:AR", request.appends);
       }
       return { updated: request.existing_update_count, appended: request.new_append_count, ok: true };
     } catch (error) {
@@ -359,7 +359,7 @@ export class P23bMetadataStaging {
 
         const ranges = await this.options.sheets.batchGetValues(
           this.options.sheetId,
-          ["product_registry!A:AZ", "image_registry!A:AP", "manual_image_intake!A:P"],
+          ["product_registry!A:AZ", "image_registry!A:AR", "manual_image_intake!A:P"],
           "UNFORMATTED_VALUE",
         );
         const registryResult = buildRegistryMap(sheetRowsFromValues(ranges[0]?.values));

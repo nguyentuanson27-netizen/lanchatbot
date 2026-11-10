@@ -240,6 +240,7 @@ interface RunnerInboundBatch extends ClaimedInboundBatch<InboundEnvelopeV1> {
 
 type BatchCommitStatus =
   | "COMMITTED"
+  | "RETAINED"
   | "SUPERSEDED"
   | "NOT_REQUESTED"
   | "INBOX_ONLY";

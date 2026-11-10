@@ -1,0 +1,117 @@
+[
+  {
+    "run": "targeted",
+    "id": "12e01a29-ad7a-4a3f-8474-c76b8660ff1c:verifier:1",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+          "protectedRef": "product:SV2447"
+        },
+        {
+          "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+          "protectedRef": "product:SV244"
+        }
+      ]
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "723f2ced-3710-43d4-81e0-8289cb4d53f4:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "a8320eee-047a-4db8-bbad-dddfd628bcb8:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "8ebd86dc-a4a3-425d-a1e6-f266f22e57ac:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "0ad3eff2-d8b6-4381-8be9-9d5de5f2cf8a:verifier:1",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+          "protectedRef": "product:SV165"
+        }
+      ]
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "78482728-38e8-4b32-8af0-c38480dc4864:verifier:1",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+          "protectedRef": "product:SV165"
+        }
+      ]
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "e4933b2b-98cd-4e5b-b02a-9ca6bf8cad55:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "776c512f-9ee7-4846-bda7-eac117808970:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "b62203a1-ed9f-45ac-aa0b-e4806cba48ee:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "6cf2780a-4f85-4ed6-9523-a89fa6caf517:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "ce2eeea1-5b26-4de1-a216-9808f6ac429c:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "1e10311f-e074-48de-9ad6-d58483e0c871:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  }
+]

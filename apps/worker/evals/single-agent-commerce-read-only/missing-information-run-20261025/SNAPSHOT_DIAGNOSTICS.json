@@ -1,0 +1,37 @@
+[
+  {
+    "caseId": "stateful-open",
+    "reason": "STALE",
+    "comparison": {
+      "status": "COMPARED",
+      "changes": [
+        {
+          "path": "/claims/0/source/expiresAt",
+          "before": "2026-10-27T16:04:38.032Z",
+          "after": "2026-10-27T16:34:38.138Z"
+        },
+        {
+          "path": "/claims/0/source/observedAt",
+          "before": "2026-10-25T16:04:38.032Z",
+          "after": "2026-10-25T16:34:38.138Z"
+        },
+        {
+          "path": "/claims/1/source/expiresAt",
+          "before": "2026-10-27T16:04:38.032Z",
+          "after": "2026-10-27T16:34:38.138Z"
+        },
+        {
+          "path": "/claims/1/source/observedAt",
+          "before": "2026-10-25T16:04:38.032Z",
+          "after": "2026-10-25T16:34:38.138Z"
+        },
+        {
+          "path": "/state/factSnapshotVersion",
+          "before": "b24c223fcb9da314f6c65050247f44ce3d8537214517206204252a52ebe20dd6",
+          "after": "03d9f3fa270c15a9ba0d7363b6d2ee156204dca02dbec2b90b4264e033ff7f17"
+        }
+      ],
+      "truncated": false
+    }
+  }
+]

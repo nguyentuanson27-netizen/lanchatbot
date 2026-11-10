@@ -1,0 +1,24 @@
+{
+  "mode": "AUDITED_READ_ONLY_REGISTRY_DIAGNOSIS",
+  "productId": "SV2447",
+  "matchingRows": 1,
+  "providerGenerations": 0,
+  "writes": 0,
+  "fields": {
+    "ma_sp": "SV2447",
+    "material_override": "REN | TƠ",
+    "active": true,
+    "source_updated_at": "2026-09-28T04:31:05.725Z",
+    "color_override": "",
+    "style_override": "NỮ TÍNH | THANH LỊCH",
+    "material_components_override": "ÁO: REN | TƠ; CHÂN VÁY: REN | TƠ; VÁY: REN | TƠ",
+    "silhouette_override": "",
+    "occasion_override": "",
+    "design_attributes_json": "{\"details\":[\"THÊU NỔI\"]}",
+    "care_instructions": "",
+    "wear_properties_json": "{\"stretch\":\"UNKNOWN\",\"wrinkleResistance\":\"UNKNOWN\",\"opacity\":\"UNKNOWN\",\"lining\":\"UNKNOWN\",\"breathability\":\"PRESENT\"}",
+    "back_coverage": "UNKNOWN",
+    "design_complexity": "UNKNOWN"
+  },
+  "hasDescriptionOverride": true
+}

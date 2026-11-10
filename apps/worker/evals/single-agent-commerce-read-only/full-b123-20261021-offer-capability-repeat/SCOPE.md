@@ -1,0 +1,7 @@
+# Repeat full B1/B2/B3 with unchanged current implementation
+
+2026-10-21. Owner yêu cầu “chạy lại 1 lần nữa”. Chạy24B1+8stateful, một mẫu/ca, full populations không quality early stop; giữ lỗi và dependent blocks, không retry/thay mẫu. Tối đa124 generation requests, models/prompt/verifier/corpus/config giữ nguyên vòng offer-capability trước. Implementation950d05b4; preparation basef5f111e1. Không điều chỉnh prompt theo kết quả cũ.
+
+Fresh provider/source preflight và fresh isolated PostgreSQL stateful provider journey, B1 live read-only source. Reuse deterministic COD28/28+BANK28/28 của run76d821bb: runtime/adapter/inputs/config chưa đổi, không lặp thêm hai job chỉ để chạy lại model. Worker build vẫn do entrypoint thực hiện. Delivery capture-only, không deploy/live send/promotion. Nếu lỗi provider, giữ outcome và dependent blocks, không chạy bù.
+
+Clean commit → runtimeHEAD ngoài source → preflight → stateful8x1 → B124x1 → rawcommit → đọc toàn bộ actual/history/public state và khóa primary → verdict/error diagnosis/audit/report. Review theo rubric cũ: sales decision/relevance/usefulness/natural Vietnamese; inference thẩm mỹ/chất liệu và upsell hợp lý được phép; minor polish không tự fail, không chấm keyword/câu mẫu. Không nhìn rejected draft trước primary. So với run76d821bb từng ca, giữ historical primary; N1 mới chỉ là một mẫu độc lập, hai vòng vẫn chưa chứng minh ổn định. STOP owner sau đúng một vòng mới.

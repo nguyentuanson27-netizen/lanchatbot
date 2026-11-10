@@ -1,0 +1,291 @@
+{
+  "native": {
+    "recorded": 46,
+    "terminalDispositions": {
+      "SEND_ELIGIBLE": 36,
+      "FALLBACK": 4,
+      "NO_SEND": 2,
+      "HANDOFF": 4
+    },
+    "roles": {
+      "owner": {
+        "generations": 92,
+        "requests": 92,
+        "errors": 0,
+        "usageAvailable": 92,
+        "inputTokens": 478175,
+        "outputTokens": 63218,
+        "thinkingTokens": 58546,
+        "latencyMs": {
+          "n": 92,
+          "p50": 2790.2874999999767,
+          "p95": 7588.4179,
+          "method": "NEAREST_RANK"
+        }
+      },
+      "verifier": {
+        "generations": 40,
+        "requests": 40,
+        "errors": 0,
+        "usageAvailable": 40,
+        "inputTokens": 194379,
+        "outputTokens": 4378,
+        "thinkingTokens": 3255,
+        "latencyMs": {
+          "n": 40,
+          "p50": 6776.631699999998,
+          "p95": 14528.099400000006,
+          "method": "NEAREST_RANK"
+        }
+      }
+    },
+    "verificationStageLatencyMs": {
+      "n": 40,
+      "p50": 8446.331200000015,
+      "p95": 17874.518299999996,
+      "method": "NEAREST_RANK"
+    },
+    "turnLatencyMs": {
+      "n": 46,
+      "p50": 19480.1403,
+      "p95": 44882.03580000001,
+      "method": "NEAREST_RANK"
+    },
+    "receiptRecoveries": 0,
+    "recoveryMetadataPresent": 8,
+    "actualNoReply": 0,
+    "cost": null,
+    "costReason": "NOT_EXPOSED"
+  },
+  "diagnostic": {
+    "recorded": 0,
+    "terminalDispositions": {},
+    "roles": {
+      "owner": {
+        "generations": 0,
+        "requests": 0,
+        "errors": 0,
+        "usageAvailable": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "thinkingTokens": 0,
+        "latencyMs": {
+          "n": 0,
+          "p50": null,
+          "p95": null,
+          "method": "NEAREST_RANK"
+        }
+      },
+      "verifier": {
+        "generations": 0,
+        "requests": 0,
+        "errors": 0,
+        "usageAvailable": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "thinkingTokens": 0,
+        "latencyMs": {
+          "n": 0,
+          "p50": null,
+          "p95": null,
+          "method": "NEAREST_RANK"
+        }
+      }
+    },
+    "verificationStageLatencyMs": {
+      "n": 0,
+      "p50": null,
+      "p95": null,
+      "method": "NEAREST_RANK"
+    },
+    "turnLatencyMs": {
+      "n": 0,
+      "p50": null,
+      "p95": null,
+      "method": "NEAREST_RANK"
+    },
+    "receiptRecoveries": 0,
+    "recoveryMetadataPresent": 0,
+    "actualNoReply": 0,
+    "cost": null,
+    "costReason": "NOT_EXPOSED"
+  },
+  "core": {
+    "recorded": 39,
+    "terminalDispositions": {
+      "SEND_ELIGIBLE": 33,
+      "FALLBACK": 1,
+      "NO_SEND": 2,
+      "HANDOFF": 3
+    },
+    "roles": {
+      "owner": {
+        "generations": 76,
+        "requests": 76,
+        "errors": 0,
+        "usageAvailable": 76,
+        "inputTokens": 378212,
+        "outputTokens": 52976,
+        "thinkingTokens": 49037,
+        "latencyMs": {
+          "n": 76,
+          "p50": 2597.3731999999727,
+          "p95": 7791.6791000000085,
+          "method": "NEAREST_RANK"
+        }
+      },
+      "verifier": {
+        "generations": 34,
+        "requests": 34,
+        "errors": 0,
+        "usageAvailable": 34,
+        "inputTokens": 163726,
+        "outputTokens": 3583,
+        "thinkingTokens": 2760,
+        "latencyMs": {
+          "n": 34,
+          "p50": 6767.474999999991,
+          "p95": 17520.235999999975,
+          "method": "NEAREST_RANK"
+        }
+      }
+    },
+    "verificationStageLatencyMs": {
+      "n": 34,
+      "p50": 8023.362099999969,
+      "p95": 18263.033999999985,
+      "method": "NEAREST_RANK"
+    },
+    "turnLatencyMs": {
+      "n": 39,
+      "p50": 17524.28170000002,
+      "p95": 49721.147899999996,
+      "method": "NEAREST_RANK"
+    },
+    "receiptRecoveries": 0,
+    "recoveryMetadataPresent": 4,
+    "actualNoReply": 0,
+    "cost": null,
+    "costReason": "NOT_EXPOSED",
+    "manualReview": {
+      "USABLE": 25,
+      "NEEDS_EDIT": 8,
+      "FALLBACK": 1,
+      "CODE_CHECKOUT": 2,
+      "HANDOFF": 3
+    }
+  },
+  "media": {
+    "recorded": 7,
+    "terminalDispositions": {
+      "FALLBACK": 3,
+      "SEND_ELIGIBLE": 3,
+      "HANDOFF": 1
+    },
+    "roles": {
+      "owner": {
+        "generations": 16,
+        "requests": 16,
+        "errors": 0,
+        "usageAvailable": 16,
+        "inputTokens": 99963,
+        "outputTokens": 10242,
+        "thinkingTokens": 9509,
+        "latencyMs": {
+          "n": 16,
+          "p50": 2790.2874999999767,
+          "p95": 5050.025200000004,
+          "method": "NEAREST_RANK"
+        }
+      },
+      "verifier": {
+        "generations": 6,
+        "requests": 6,
+        "errors": 0,
+        "usageAvailable": 6,
+        "inputTokens": 30653,
+        "outputTokens": 795,
+        "thinkingTokens": 495,
+        "latencyMs": {
+          "n": 6,
+          "p50": 7651.136900000012,
+          "p95": 13977.108499999973,
+          "method": "NEAREST_RANK"
+        }
+      }
+    },
+    "verificationStageLatencyMs": {
+      "n": 6,
+      "p50": 11938.830000000002,
+      "p95": 17874.518299999996,
+      "method": "NEAREST_RANK"
+    },
+    "turnLatencyMs": {
+      "n": 7,
+      "p50": 30644.376099999994,
+      "p95": 44882.03580000001,
+      "method": "NEAREST_RANK"
+    },
+    "receiptRecoveries": 0,
+    "recoveryMetadataPresent": 4,
+    "actualNoReply": 0,
+    "cost": null,
+    "costReason": "NOT_EXPOSED",
+    "manualReview": {
+      "FALLBACK": 3,
+      "USABLE": 3,
+      "HANDOFF": 1
+    }
+  },
+  "uniqueWireIds": 132,
+  "evaluatorLabelLeaks": 0,
+  "maxRequestsPerGeneration": 1,
+  "verifierVerdictsAll": {
+    "PASS": 36,
+    "FAIL": 4
+  },
+  "sourceSha": "e1a81192c9b4f5894c5d6aff6098df7d856fa381",
+  "sendEnabled": false,
+  "cohorts": {
+    "b1": {
+      "SEND_ELIGIBLE": 23,
+      "FALLBACK": 1
+    },
+    "stateful": {
+      "SEND_ELIGIBLE": 4,
+      "NO_SEND": 2,
+      "HANDOFF": 2
+    },
+    "openings": {
+      "SEND_ELIGIBLE": 3,
+      "HANDOFF": 1
+    },
+    "negotiation": {
+      "SEND_ELIGIBLE": 3
+    },
+    "media": {
+      "FALLBACK": 3,
+      "SEND_ELIGIBLE": 3,
+      "HANDOFF": 1
+    }
+  },
+  "isolatedDatabases": [
+    {
+      "cohort": "stateful",
+      "dropped": true
+    },
+    {
+      "cohort": "openings",
+      "dropped": true
+    },
+    {
+      "cohort": "negotiation",
+      "dropped": true
+    },
+    {
+      "cohort": "media",
+      "dropped": true
+    }
+  ],
+  "automaticRetries": 0
+}

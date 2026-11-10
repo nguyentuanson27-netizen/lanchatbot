@@ -1,0 +1,79 @@
+{
+  "identity": {
+    "sourceSha": "9887c21743f2183cf475c70bf27bfb9fe93fe723",
+    "manifestHash": "fa20a66249b92cd95fc91d68291f2bf6b84c2bd1ec2e18095cffbdeb924bca3b",
+    "sourceConfigHash": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+    "promptHashes": {
+      "owner": "ca12a250c6dd69f96946bf6f2d4657f5d99a1e94364a7f0892e7603c69bd38de",
+      "verifier": "50401b2704724bebd604e0da3b2155ebeade8629145a723153c24b5630fd1a2f"
+    },
+    "models": {
+      "conversation": {
+        "provider": "VERTEX_AI",
+        "model": "gemini-3.5-flash-lite",
+        "version": "gemini-3.5-flash-lite",
+        "effort": "high",
+        "location": "global",
+        "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+        "generationConfig": {
+          "candidateCount": 1,
+          "responseMimeType": "text/plain",
+          "maxOutputTokens": 8192,
+          "thinkingConfig": {
+            "thinkingLevel": "HIGH",
+            "includeThoughts": false
+          },
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "retry": 0,
+          "timeoutMs": 90000
+        }
+      },
+      "verifier": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      }
+    },
+    "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+    "corpusHashes": {
+      "cases.b1.json": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+      "stateful-cases.json": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+      "sales-journeys.candidate.json": "b2575660b7d412eb6a2d11befb04de75fd840789c7126026bb257ce60f183a93",
+      "sales-media-followup-cases.json": "dff5c57dff681f75ac35e484c014b0c62965bde2169941aa5b488ce879bba93a"
+    }
+  },
+  "bundleHash": "04ad1b06c4885b2342a06290ae0c8322128c7d88dcbe06f0c9ff29c37a58c65d",
+  "captureHash": "994d74e05411702e5e937739d1d56a65a3163e726ef09c30b948f1b913a42f9d",
+  "mode": "NEW_CAPTURED_WORLD_CONTROLS",
+  "registeredOutcomes": 17,
+  "safe": 8,
+  "unsafe": 8,
+  "probe": 1,
+  "maximumGenerationRequests": 17,
+  "retry": 0,
+  "sendEnabled": false
+}

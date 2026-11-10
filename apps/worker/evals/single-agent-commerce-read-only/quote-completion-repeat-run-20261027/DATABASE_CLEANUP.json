@@ -1,0 +1,32 @@
+[
+  {
+    "cohort": "opening-quotes",
+    "testDatabase": "c3_b_test_31cf172b1ec1694a",
+    "dropped": true
+  },
+  {
+    "cohort": "media-followup",
+    "testDatabase": "c3_b_test_2b417bb5d95cca22",
+    "dropped": true
+  },
+  {
+    "cohort": "missing-pos",
+    "testDatabase": "c3_b_test_6dc31e2a65f44047",
+    "dropped": true
+  },
+  {
+    "cohort": "journey-openings",
+    "testDatabase": "c3_b_test_c17a288a1af36dd3",
+    "dropped": true
+  },
+  {
+    "cohort": "stateful",
+    "testDatabase": "c3_b_test_70c6189673ba7545",
+    "dropped": true
+  },
+  {
+    "cohort": "negotiation",
+    "testDatabase": "c3_b_test_e94281697ca56c44",
+    "dropped": true
+  }
+]

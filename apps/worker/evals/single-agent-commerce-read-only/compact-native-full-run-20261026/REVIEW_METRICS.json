@@ -1,0 +1,105 @@
+{
+  "sourceSha": "50753ec7aab3d7365fdabc2e2c71152c448719ea",
+  "nativeRegistered": 51,
+  "nativeExecuted": 51,
+  "nativeNotRun": 0,
+  "controlsExecuted": 17,
+  "completeDenominator": 68,
+  "nativeTerminals": {
+    "SEND_ELIGIBLE": 36,
+    "HANDOFF": 11,
+    "NO_SEND": 4
+  },
+  "providerGenerationRequests": 140,
+  "maximumUpstreamPerGeneration": 1,
+  "retry": 0,
+  "requestsByRole": {
+    "control-verifier": 17,
+    "owner": 86,
+    "verifier": 37
+  },
+  "observedModelVersions": {
+    "gpt-6.1-sol": 54,
+    "gemini-3.5-flash-lite": 86
+  },
+  "generationErrors": [],
+  "tokens": {
+    "input": 910216,
+    "output": 84758,
+    "thinkingIncludedInOutput": 77729
+  },
+  "tokensByRole": {
+    "owner": {
+      "input": 572699,
+      "output": 78962,
+      "thinkingIncludedInOutput": 74189
+    },
+    "verifier": {
+      "input": 211801,
+      "output": 3547,
+      "thinkingIncludedInOutput": 2555
+    },
+    "control-verifier": {
+      "input": 125716,
+      "output": 2249,
+      "thinkingIncludedInOutput": 985
+    }
+  },
+  "cost": null,
+  "verifierProviderLatencyMs": {
+    "samples": 37,
+    "p50": 7036,
+    "p95": 13651
+  },
+  "verificationWithReadbackMs": {
+    "samples": 37,
+    "p50": 8477.488599999997,
+    "p95": 18105.32280000001
+  },
+  "driverSlotLatencyMs": {
+    "samples": 51,
+    "p50": 24037.698700000008,
+    "p95": 49472.4684
+  },
+  "wireAudit": {
+    "capturedActualBodies": 140,
+    "ownerHashChecks": 86,
+    "ownerWireMatchChecks": 86,
+    "verifierWireChecks": 33,
+    "b1VerifierTelemetryChecks": 21,
+    "boundedEvaluatorOrSecretKeyMatches": 0,
+    "boundedCaseIdStringMatches": 0
+  },
+  "testDatabaseCleanup": [
+    {
+      "cohort": "opening-quotes",
+      "testDatabase": "c3_b_test_0b32fa2d78cf95a3",
+      "dropped": true
+    },
+    {
+      "cohort": "media-followup",
+      "testDatabase": "c3_b_test_8aaed0c911d95669",
+      "dropped": true
+    },
+    {
+      "cohort": "missing-pos",
+      "testDatabase": "c3_b_test_4953a184cb4aa827",
+      "dropped": true
+    },
+    {
+      "cohort": "journey-openings",
+      "testDatabase": "c3_b_test_7d3fb70aedcbb746",
+      "dropped": true
+    },
+    {
+      "cohort": "stateful",
+      "testDatabase": "c3_b_test_a5dd6f6c42b6d048",
+      "dropped": true
+    },
+    {
+      "cohort": "negotiation",
+      "testDatabase": "c3_b_test_f2f95db7e09831a0",
+      "dropped": true
+    }
+  ]
+}

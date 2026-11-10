@@ -1,0 +1,237 @@
+# Context comparison — 12 actual conversations and primary review
+
+Whole actual terminal/source review before rejected-draft/verifier diagnosis. Markdown display trims trailing line spaces; PRIMARY_REVIEW.json and raw preserve exact text bytes. Two captured contexts, not12live journeys. Supplemental T1 interpretation used consistently; historical labels unchanged.
+
+## 1
+
+History:
+
+- customer: Chị định lấy set Thạch Thảo mặc đi đám cưới.
+- shop: Đi đám cưới mặc bộ này đẹp chị ạ.
+
+Customer: Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé.
+
+Actual customer text:
+
+```text
+Ngồi xe 3 tiếng thì set Thạch Thảo với chất tơ mềm sẽ dễ bị hằn nếp gấp chị ạ.
+
+Chị chuyển sang set Thanh Vũ giúp em nhé; áo ren dệt cotton kết hợp chân váy tơ crep đứng dáng hơn và ít bị nhăn khi ngồi lâu. Mẫu này mặc đi đám cưới vừa thanh lịch vừa giữ form gọn gàng suốt chuyến đi ạ.
+```
+
+Primary: **USABLE** — Chọn Thanh Vũ cụ thể và so sánh tơ crep/ren cotton cho ưu tiên đi xe. Lời giữ form là nhận xét định tính theo mốc T1, ghi lưu ý phạm vi; không kết luận unsafe chỉ do suốt chuyến đi.
+
+Voice / decision finding: Chị chuyển sang…giúp em gượng; hai câu lý do/khen dài; vẫn nhắc cả hoàn cảnh.
+
+## 2
+
+History:
+
+- customer: Chị định lấy set Thạch Thảo mặc đi đám cưới.
+- shop: Đi đám cưới mặc bộ này đẹp chị ạ.
+
+Customer: Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé.
+
+Actual customer text:
+
+```text
+Set Thạch Thảo dùng chất tơ và ren tơ nên ngồi ô tô 3 tiếng đi đường dài sẽ dễ bị hằn nếp và nhăn nhẹ chị ạ.
+
+Em đổi sang **set Diễm Hoa** giúp chị nhé. Áo ren lưới 2 lớp cùng chân váy tơ mềm giữ phom tốt hơn, ít bị lộ nếp gấp khi ngồi xe lâu, mặc đi đám cưới vừa sang trọng lại vừa gọn gàng ạ.
+```
+
+Primary: **USABLE** — Chọn Diễm Hoa rõ, giữ đúng áo ren lưới hai lớp và váy tơ; lời ít lộ nếp/giữ phom là so sánh định tính được phép.
+
+Voice / decision finding: Trực tiếp hơn ở em đổi sang nhưng lời lý do vẫn chuỗi chất liệu→giữ phom→sang/gọn; chưa chứng minh hơn control.
+
+## 3
+
+History:
+
+
+Customer: Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.
+
+Actual customer text:
+
+```text
+Set váy Thạch Thảo dùng ren tơ Hàn mềm cùng độ rũ tự nhiên, kết hợp áo tơ thêu nhẹ nhàng và bay bổng nên mặc đi tiệc ban ngày rất sang và thanh thoát, không hề bị rườm rà hay nặng nề đâu chị nhé.
+
+Giá trọn bộ là 799.000đ, hoàn toàn vừa vặn với ngân sách 900 nghìn của chị. Chị lấy trọn bộ này luôn không ạ?
+```
+
+Primary: **USABLE** — Trả lo đi tiệc ban ngày bằng nhận định thẩm mỹ, giá799k đúng; không báo đã tạo đơn.
+
+Voice / decision finding: Lời mềm/rũ/bay/sang chưa thuyết phục mạnh về lượng ren; lặp ngân sách và CTA hơi gấp.
+
+## 4
+
+History:
+
+
+Customer: Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.
+
+Actual customer text:
+
+```text
+Em thấy set này mặc đi tiệc ban ngày rất hợp và không hề rườm rà đâu chị nhé. Chân váy dùng ren tơ Hàn mềm có độ rũ tự nhiên, kết hợp cùng áo tơ thêu form nhẹ tạo nét bay bổng, thanh lịch chứ không bị nặng nề. Ngân sách 900 nghìn của chị thoải mái chọn trọn bộ luôn vì giá set hiện tại là 799.000đ ạ.
+```
+
+Primary: **USABLE** — Nêu nhận định cho tiệc ban ngày và giá799k đúng.
+
+Voice / decision finding: Vẫn mềm/rũ/bay/thanh lịch và nhắc ngân sách; không có thay đổi input nên không quy khác biệt cho treatment.
+
+## 5
+
+History:
+
+- customer: Chị định lấy set Thạch Thảo mặc đi đám cưới.
+- shop: Đi đám cưới mặc bộ này đẹp chị ạ.
+
+Customer: Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé.
+
+Actual customer text:
+
+```text
+Phần này em chưa trả lời được, chị nhé.
+```
+
+Primary: **UNUSABLE** — Actual chỉ là fallback, không giúp khách chọn món đi cưới sau chuyến xe. Chưa dùng rejected draft hoặc verdict để chấm.
+
+Voice / decision finding: Không có lời tư vấn gửi khách để đánh giá giọng.
+
+## 6
+
+History:
+
+- customer: Chị định lấy set Thạch Thảo mặc đi đám cưới.
+- shop: Đi đám cưới mặc bộ này đẹp chị ạ.
+
+Customer: Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé.
+
+Actual customer text:
+
+```text
+Dạ, set Thạch Thảo dùng chất tơ Hàn và ren tơ mềm mịn nên đi ô tô gần 3 tiếng có thể sẽ hơi hằn nếp gấp khi ngồi lâu chị ạ.
+
+Nếu chị ngại việc này, em đổi sang **Set Diễm Hoa** giúp chị nhé. Mẫu này dùng ren lưới đính hoa 3D giữ form tốt hơn và ít bị hằn nếp khi di chuyển đường dài, mặc lên vẫn rất sang trọng và nổi bật cho dịp đám cưới.
+```
+
+Primary: **USABLE** — Chọn Diễm Hoa cụ thể bằng thiết kế ren lưới/hoa3D; so sánh giữ phom/ít hằn tương đối trong phạm vi tư vấn hiện hành.
+
+Voice / decision finding: Nếu chị ngại việc này lặp nhu cầu đã rõ; kết nhiều lời khen.
+
+## 7
+
+History:
+
+
+Customer: Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.
+
+Actual customer text:
+
+```text
+Dạ set này mặc đi tiệc ban ngày rất hợp và không bị rườm rà đâu chị nhé. Chất tơ Hàn thêu và ren mềm có form nhẹ, độ bay và rũ tự nhiên nên lên dáng rất thanh thoát và nhẹ nhàng.
+
+Ngân sách 900 nghìn của chị chọn trọn bộ giá 799.000đ là vừa đẹp luôn ạ.
+```
+
+Primary: **USABLE** — Giải đáp bằng nhận định thẩm mỹ và giá bộ799k đúng.
+
+Voice / decision finding: Vẫn lặp mềm/nhẹ/bay/rũ rồi ngân sách; không tự fail chỉ do các tính từ này.
+
+## 8
+
+History:
+
+
+Customer: Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.
+
+Actual customer text:
+
+```text
+Dạ, set này dùng chất liệu tơ Hàn và ren tơ mềm, form nhẹ có độ rũ tự nhiên nên mặc đi tiệc ban ngày rất thanh thoát, không bị rườm rà đâu chị nhé.
+
+Giá trọn bộ là 799.000đ, vừa vặn với ngân sách 900 nghìn của chị luôn ạ. Chị có muốn em hỗ trợ lên đơn set này luôn không ạ?
+```
+
+Primary: **USABLE** — Nhận định thẩm mỹ/giá bộ đúng; mời lên đơn là câu hỏi, không báo thao tác đã hoàn tất.
+
+Voice / decision finding: Hỗ trợ lên đơn…luôn còn khuôn và lặp luôn; lý do mềm/rũ chưa mạnh.
+
+## 9
+
+History:
+
+- customer: Chị định lấy set Thạch Thảo mặc đi đám cưới.
+- shop: Đi đám cưới mặc bộ này đẹp chị ạ.
+
+Customer: Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé.
+
+Actual customer text:
+
+```text
+Đi ô tô 3 tiếng ngồi lâu thì set Thạch Thảo với chất tơ Hàn và ren tơ mềm sẽ có độ nhăn nhẹ ở phần áo tơ ạ.
+
+Chị đổi sang set váy Diễm Hoa giúp em nhé. Bộ này dùng ren lưới đính hoa 3D kết hợp chân váy tơ mềm mịn 2 lớp, ít nhăn hơn và giữ form bồng bềnh rất đẹp sau khi xuống xe.
+```
+
+Primary: **USABLE** — Chọn Diễm Hoa, mô tả đúng ren lưới/hoa3D/váy tơ2lớp. Trong toàn đoạn, giữ form bồng bềnh đẹp là kỳ vọng thẩm mỹ từ thiết kế, không công bố nếp nhăn biến mất/phục hồi; ghi lưu ý phạm vi thay vì tự kết luận unsafe từ sau khi xuống xe.
+
+Voice / decision finding: Chị đổi sang…giúp em gượng; nhắc hoàn cảnh và khen dài.
+
+## 10
+
+History:
+
+- customer: Chị định lấy set Thạch Thảo mặc đi đám cưới.
+- shop: Đi đám cưới mặc bộ này đẹp chị ạ.
+
+Customer: Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé.
+
+Actual customer text:
+
+```text
+Phần này em chưa trả lời được, chị nhé.
+```
+
+Primary: **UNUSABLE** — Actual chỉ fallback nên yêu cầu chọn món vẫn chưa được giải quyết. Chưa chấm rejected draft.
+
+Voice / decision finding: Không có lời tư vấn gửi khách để đánh giá giọng.
+
+## 11
+
+History:
+
+
+Customer: Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.
+
+Actual customer text:
+
+```text
+Dạ set này dùng tơ Hàn và ren mềm, form nhẹ nhàng với độ bay và rũ tự nhiên nên mặc đi tiệc ban ngày rất thanh thoát, không bị rườm rà đâu chị nhé.
+
+Cả bộ có giá 799.000đ, hoàn toàn vừa vặn với ngân sách 900 nghìn của mình ạ.
+```
+
+Primary: **USABLE** — Nhận định thẩm mỹ và giá799k đúng.
+
+Voice / decision finding: Khuôn mềm/nhẹ/bay/rũ/thanh thoát/ngân sách chưa cải thiện.
+
+## 12
+
+History:
+
+
+Customer: Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.
+
+Actual customer text:
+
+```text
+Dạ chị yên tâm, chân váy dùng chất ren tơ Hàn mềm với form nhẹ và độ rũ tự nhiên, kết hợp cùng áo tơ thêu thanh thoát nên tổng thể rất nhã nhặn, mặc đi tiệc ban ngày sang trọng mà không bị rườm rà đâu ạ.
+
+Trọn bộ này giá 799.000đ, vừa vặn trong ngân sách 900 nghìn của chị nhé ạ.
+```
+
+Primary: **USABLE** — Trả lo rườm rà bằng nhận định tổng thể và giá799k đúng.
+
+Voice / decision finding: Chuỗi mềm/nhẹ/rũ/nhã/sang dài; chị nhé ạ khuôn; input nguyên nên không kết luận regression do context.

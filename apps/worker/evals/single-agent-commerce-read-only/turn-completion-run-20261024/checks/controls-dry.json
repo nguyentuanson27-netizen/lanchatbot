@@ -1,0 +1,12 @@
+{
+  "command": [
+    "node",
+    "apps/worker/evals/single-agent-commerce-read-only/feedback-controls-20261023.mjs",
+    "C:/Users/nguye/Documents/S\u1ea3n ph\u1ea9m AI/c3-turn-completion-controls-dry-20261024",
+    "--capture",
+    "C:/Users/nguye/Documents/S\u1ea3n ph\u1ea9m AI/c3-turn-completion-source-20261024/capture.json",
+    "--preflight"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 0.9363467693328857
+}

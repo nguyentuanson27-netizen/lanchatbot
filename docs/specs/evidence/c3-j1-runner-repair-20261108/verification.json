@@ -1,0 +1,99 @@
+{
+  "implementationBaseSha": "b70dd7202fe2624b7a9f6e5531c17f6864dfe164",
+  "scope": "EVAL_ONLY_RUNNER_AND_BASELINE_DIAGNOSTIC",
+  "providerGenerationsAdded": 0,
+  "nativePostgresAcceptance": "NOT_RUN",
+  "modelAcceptance": "NOT_RUN",
+  "phaseCGo": false,
+  "approvedPriorPlanSha256": "2c617c4d6b467a92797a706279d37ee43bdc9ac38f47bdb8767b3539e71d0393",
+  "selfReview": "Completed: absent-assessment tests strengthened; observed empty-ledger RED then exclusive-create initialization prevents ledger reset. Final focused32PASS and full evals898PASS/2existingSKIP. No independent review performed in this turn.",
+  "checks": [
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-qualification/j2-j1-campaign.test.mjs apps/worker/evals/single-agent-commerce-qualification/j1-operation-control.test.mjs apps/worker/evals/single-agent-commerce-read-only/attempt-evidence.test.mjs",
+      "pass": 32,
+      "fail": 0,
+      "log": "focused-final32.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker test:evals",
+      "pass": 898,
+      "fail": 0,
+      "skip": 2,
+      "log": "evals-final.log",
+      "attribution": "Final executable/test sources; working-edit focused verification, not remote exact-head CI."
+    },
+    {
+      "command": "node --check apps/worker/evals/single-agent-commerce-qualification/j2-j1-stages.mjs",
+      "result": "PASS"
+    },
+    {
+      "command": "node --check apps/worker/evals/single-agent-commerce-qualification/j2-j1-campaign.mjs",
+      "result": "PASS"
+    },
+    {
+      "command": "node --check apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    },
+    {
+      "command": "collectJ1ForScoring + scoreCollectedJ1 on retained 20261108-02 inputs and outputs; new outside-repo artifacts only",
+      "result": "NO_ADOPTION_EVIDENCE",
+      "providerRequestsAdded": 0,
+      "priorPrimaryRequestsRetained": 10,
+      "log": "historical-offline.log"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/j1-operation-control.mjs",
+      "sha256": "33d35b1918451ecb488a227135ca7916ce2346af456608bfc46bb9512f7a15f3"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/j2-j1-campaign.mjs",
+      "sha256": "8be9e97ebe802a87db34f9801e6824c58a471c14ad3bcd17cb1f0b4666f126ca"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/j2-j1-stages.mjs",
+      "sha256": "0351a778cf4dfdd865e6cdf2b8e2cea02b350630a1a465e3f5fd1e5372194c5b"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/j2-j1-campaign.test.mjs",
+      "sha256": "ddc8daddb49e7de6ca7999046765d2e030bbfedf663083b95b75d62b55e28baf"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "sha256": "c0ba541534c39e63d66ddd3f15880146aaffccb869586516708ebc06e3445669"
+    }
+  ],
+  "logs": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-runner-fix-20261108-01\\focused-final32.log",
+      "sha256": "4c385f57281e041025b470af8791df3c3ec0746caaa5bccc1ed76251a82a369c"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-runner-fix-20261108-01\\evals.log",
+      "sha256": "8480f22bcf2d50261775840f6e8f31355a8f72e15e004615010ce693cf40e668"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-runner-fix-20261108-01\\empty-ledger-red.log",
+      "sha256": "63a22fc2b7a97f30bdd049c2487d6bac0181dd301662b46493b208c1e2f252c8"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-runner-fix-20261108-01\\historical-offline.log",
+      "sha256": "505877f8a70ec5ecb2236064dfde29f94351d9a346535c0e1b5de9ff6f3b42c0"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-j2-j1-runner-fix-20261108-01\\evals-final.log",
+      "sha256": "4379143fbc20a180b4947fda69212be2ee31590aa4655b9050081bd0ff239058"
+    }
+  ],
+  "notRun": [
+    "Fresh model/native PG acceptance",
+    "Worker build/typecheck/lint (eval-only change; prior evidence remains separate)",
+    "Remote exact-head CI",
+    "Merge/deploy/live send"
+  ]
+}

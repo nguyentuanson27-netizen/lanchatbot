@@ -1,0 +1,47 @@
+{
+  "mode": "OFFLINE_CAPTURED_CLAIM_COVERAGE_DIAGNOSIS",
+  "caseId": "stateful-variant-quantity",
+  "sourceRequestId": "89144241-91d5-411c-805c-c5b4aa3266a0:owner:3",
+  "codeBoundary": "single-agent-commerce-ingress.ts selects all bound PRODUCT subjects; validateEffectClaimSemanticsV1 requires each protected type for every productId",
+  "boundProductIds": [
+    "SQ675",
+    "SQ748",
+    "SV2447",
+    "V406"
+  ],
+  "protectedTypes": [
+    "STOCK",
+    "PRICE"
+  ],
+  "missingCoverage": [
+    {
+      "productId": "SQ675",
+      "type": "STOCK"
+    },
+    {
+      "productId": "SQ675",
+      "type": "PRICE"
+    },
+    {
+      "productId": "SQ748",
+      "type": "STOCK"
+    },
+    {
+      "productId": "SQ748",
+      "type": "PRICE"
+    },
+    {
+      "productId": "V406",
+      "type": "STOCK"
+    },
+    {
+      "productId": "V406",
+      "type": "PRICE"
+    }
+  ],
+  "missingConditionMatchesExistingReadinessRule": true,
+  "fullReadinessReplayed": false,
+  "noSyntheticProvenanceOrClaims": true,
+  "providerGenerations": 0,
+  "sendEnabled": false
+}

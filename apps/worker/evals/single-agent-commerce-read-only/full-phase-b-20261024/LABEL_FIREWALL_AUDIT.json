@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "wireCount": 163,
+  "leaks": [],
+  "byJob": {
+    "b1": 76,
+    "stateful": 14,
+    "journey-openings": 12,
+    "media-followup": 22,
+    "negotiation": 8,
+    "opening-quotes": 14,
+    "controls": 17
+  },
+  "scope": "Actual request values plus parsed JSON text; B1 verifier body from retained generation telemetry.requestBody; accounting wrappers excluded."
+}

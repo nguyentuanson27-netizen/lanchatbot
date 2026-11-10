@@ -1,0 +1,75 @@
+{
+  "registered": 8,
+  "executed": 3,
+  "unexecuted": 5,
+  "unexecutedCaseIds": [
+    "b1-price",
+    "b1-component-stock",
+    "b1-search-read",
+    "b1-buying-concern",
+    "b1-policy-used"
+  ],
+  "usage": {
+    "owner": {
+      "generations": 6,
+      "providerRequests": 6,
+      "inputTokens": 17569,
+      "outputTokens": 2942,
+      "modelVersions": [
+        "gemini-3.5-flash-lite"
+      ]
+    },
+    "verifier": {
+      "generations": 3,
+      "providerRequests": 3,
+      "inputTokens": 9840,
+      "outputTokens": 592,
+      "modelVersions": [
+        "gpt-6.1-sol"
+      ]
+    }
+  },
+  "providerRequests": 9,
+  "generationSlots": 9,
+  "generationRetries": 0,
+  "providerErrors": 0,
+  "providerTimeouts": 0,
+  "providerErrorTimeoutRate": 0.0,
+  "cost": null,
+  "costReason": "provider does not expose monetary cost",
+  "dispositions": {
+    "FALLBACK": 2,
+    "SEND_ELIGIBLE": 1
+  },
+  "fallbackRate": 0.6666666666666666,
+  "handoffRate": 0.0,
+  "noSendRate": 0.0,
+  "verifierLatencyMs": {
+    "n": 3,
+    "p50": 6081.4272000000055,
+    "p95": 8858.58789,
+    "method": "linear interpolation on observed samples"
+  },
+  "addedVerificationLatencyMs": {
+    "n": 3,
+    "p50": 6827.905899999998,
+    "p95": 9673.624179999999,
+    "method": "linear interpolation on observed samples"
+  },
+  "endToEndMs": {
+    "n": 3,
+    "p50": 14239.0968,
+    "p95": 15250.101540000001,
+    "method": "linear interpolation on observed samples"
+  },
+  "sourceDomainCounters": {
+    "embeddingCalls": 0,
+    "policyReads": 2,
+    "catalogReads": 6,
+    "posReads": 4
+  },
+  "modelToolCalls": {
+    "read_product": 2,
+    "read_policy": 1
+  }
+}

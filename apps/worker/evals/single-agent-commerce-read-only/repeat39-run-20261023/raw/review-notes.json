@@ -1,0 +1,158 @@
+{
+  "negotiation-cart-setup": {
+    "assessment": "USABLE",
+    "reason": "Actual code receipt summary xác nhận thêm giỏ/tổng529k/đặt trước. Verifier đã trả verdict nhưng final gate phát hiện snapshotSTALE; code phục hồi có receipt/currentquote, không dùng draft cũ làm actual. Không gọi đây providererror."
+  },
+  "sales-southern-delivery:deadline": {
+    "assessment": "FALLBACK",
+    "reason": "Actual static fallback PROVIDER_ERROR, khác lượt trước verifierFAIL. Chưa có cơ sở coi deadline boundary đã được sửa hoặc lại chặn cùng draft; kiểm lỗi generation riêng."
+  },
+  "sales-product-gallery:overview": {
+    "assessment": "NEEDS_EDIT",
+    "reason": "Gửi hai ảnh chung hợp lệ nhưng vẫn nói hệ thống chưa có phân loại màu riêng và chèn mô tả/giá. Cùng lỗi dùng ngôn ngữ dữ liệu nội bộ, không đi thẳng việc xin ảnh. Không gọi media authority hỏng."
+  },
+  "sales-size-advice:height-weight": {
+    "assessment": "USABLE",
+    "reason": "Handoff chọn size có lời xác nhận, giữ đúng giới hạn thiếu chart đúng sản phẩm; không đoán fit hoặc xin đủ ba vòng vô ích. Source gap vẫn chưa đóng."
+  },
+  "sales-discovery-advice:need": {
+    "assessment": "FALLBACK",
+    "reason": "Actual static fallback sau verifier FAIL, cùng scenario lỗi lượt trước. Chưa gọi là thiếu source hoặc chặn quá tay trước khi đối chiếu draft/reads; actual không giúp chọn bộ đi làm."
+  },
+  "b1-changed-occasion": {
+    "assessment": "FALLBACK",
+    "reason": "Actual static fallback, OWNER_TOOL_MODE. Sau2toolrounds, owner generation3 vẫn trả functionCall khi modeNONE. Lượt trước gửi được; không có finaldraft hợp lệ để chấm giọng."
+  },
+  "b1-changed-occasion-v2": {
+    "assessment": "USABLE",
+    "reason": "Trả trực tiếp về cảm giác mặc từ nguồn vải thoáng/nhẹ và ren mềm, ngắn hơn lượt trước. Cụm không hầm bí ngoài trời khá mạnh nhưng nằm vùng ordinary material inference đã được chấp nhận; không tự chấm thiếu labtest là lỗi. Chưa chứng minh ổn định từ một lượt."
+  },
+  "b1-buying-concern-v2": {
+    "assessment": "NEEDS_EDIT",
+    "reason": "Vẫn khen cả bộ rồi mở mua riêng áo hoặc váy; khách hỏi nên lấy không nhưng chưa có hướng mua rõ. Câu dài và nhắc lại thói quen đồtrơn. Cùng lỗi lựa chọn ở lượt trước, dù verifier PASS."
+  },
+  "stateful-open": {
+    "assessment": "USABLE",
+    "reason": "Nhận đúng áo be M khách chọn, nói hàng đặt trước; gọn, không đọc lại số đo hoặc tự khẳng định fit. Khách chưa hỏi tổng nên không bắt buộc chèn quote."
+  },
+  "stateful-variant-quantity": {
+    "assessment": "USABLE",
+    "reason": "Xác nhận đúng đổi L và2chiếc, giữ đặt trước. Cụm cập nhật số lượng hơi văn hệ thống nhưng có ích sau tác vụ khách vừa nhờ; không đánh lỗi chỉ do từ cập nhật."
+  },
+  "stateful-quote": {
+    "assessment": "USABLE",
+    "reason": "Trả đúng tổng978.100đ gồm ship30k/ưuđãi49.900đ. Ngoặc giúp phân biệt tiền, không đọc lại hồ sơ hoặc chốt fit."
+  },
+  "stateful-correction": {
+    "assessment": "USABLE",
+    "reason": "Nhận lời và xác nhận giữ hai áo L, không đọc lại eo/mông hay báo cáo cập nhật hồ sơ. Lượt trước malformed fallback, nay dùng được với cùng prompt/code; đây là repeat variation, không treatment improvement."
+  },
+  "stateful-request-checkout": {
+    "assessment": "USABLE",
+    "reason": "Code mở bước xin thông tin đặt hàng, có capture thực; raw NO_SEND không phải im lặng. Bản capture đã redacted thành Chị cho em [NAME], không đủ để chấm toàn bộ wording riêng tư; lượt sau thực đi vào private intake. Actual text giống lượt trước; đã đối chiếu lại lượt này."
+  },
+  "stateful-private-checkout": {
+    "assessment": "USABLE",
+    "reason": "Private intake code-only tạo preview hai áo L, đúng tổng978.100đ/discount49.900đ/ship30k, trạng thái đặt trước, ETA8–14ngày và xin xác nhận. Danh sách trong preview có ích; identity mẫu set kèm áo còn hơi hệ thống nhưng không nhầm món. Actual text giống lượt trước; đã đối chiếu lại lượt này."
+  },
+  "stateful-confirm": {
+    "assessment": "USABLE",
+    "reason": "Chốt preview đi qua PURCHASE_CONFIRMED và tin chuyển nhân viên kiểm tra/lên đơn, không tuyên bố đã tạo đơn POS. Có phản hồi thực sau commit. Actual text giống lượt trước; đã đối chiếu lại lượt này."
+  },
+  "stateful-human-request": {
+    "assessment": "USABLE",
+    "reason": "First handoff theo yêu cầu khách có tin Em chuyển nhân viên hỗ trợ chị nhé sau commit. Đã cải thiện rõ so ca32 trước vốn silent; vẫn không phải receipt nhân viên đã nhận hay xử lý. Actual text giống lượt trước; đã đối chiếu lại lượt này."
+  },
+  "negotiation-price-objection": {
+    "assessment": "USABLE",
+    "reason": "Trả ngay hỗ trợ30k và tổng499k cho giỏ hiện tại, không ép mua2 như lượt trước. Dùng được với cùng prompt/code; cần giữ là repeat variation, không nhận treatment đã chữa root cause."
+  },
+  "negotiation-total-control": {
+    "assessment": "USABLE",
+    "reason": "Trả đúng tổng499k gồm ship sau ưuđãi30k. Nói ưuđãi dưới dạng hỗ trợship, không tự cấp quyền giảm thêm. Đối chiếu ledger version/evidence không tăng để kiểm ordinarytotalcontrol."
+  },
+  "b1-current-policy": {
+    "assessment": "USABLE",
+    "reason": "Trả đúng15ngày và phíship2chiều30k cho mốc10ngày; không đọc checklist hoặc tự dùng policy lịch sử."
+  },
+  "b1-partial-source": {
+    "assessment": "USABLE",
+    "reason": "FaultPOS_UNAVAILABLE: trả được chất liệu, không bịa giá/tồn M. Còn câu mô tả dài và chữ hệ thống, cùng polish/source limitation lượt trước; không đổi chuẩn chấm."
+  },
+  "b1-price": {
+    "assessment": "USABLE",
+    "reason": "Giá bộ799k trước, thêm giá mua lẻ499/449k ngắn và đúng; không mở lại quyết định khách đang nhờ chọn."
+  },
+  "b1-component-stock": {
+    "assessment": "USABLE",
+    "reason": "Đúng áo M còn hàng,499k; gọn và không khẳng định fit."
+  },
+  "b1-search-read": {
+    "assessment": "USABLE",
+    "reason": "Đúng SD375, giááo929k/bộ1.065k, phân biệt hai cách mua rõ và ngắn."
+  },
+  "b1-buying-concern": {
+    "assessment": "USABLE",
+    "reason": "Có hướng lấy bộ cho tiệc ban ngày, đúng giá799k. Vẫn gom mềm/nhẹ/rũ/thanhthoát/baybổng và lặp ngân sách; cùng mức dùngđược/cầnpolish như lượt trước, chưa cải thiện giọng rõ."
+  },
+  "b1-policy-used": {
+    "assessment": "USABLE",
+    "reason": "Từ chối đổi đúng vì đã mặc đi làm, tách phí cho trường hợp đổi hợp lệ. Không cho phép trước rồi phủ định sau, không thiếu checklist làm sai quyết định."
+  },
+  "b1-current-policy-v2": {
+    "assessment": "USABLE",
+    "reason": "Trả còn trong15ngày và phíshiphai chiều30k, không checklist thừa hay policy cũ."
+  },
+  "b1-partial-source-v2": {
+    "assessment": "USABLE",
+    "reason": "Lượt này trả phần chânváyren/mềm/phom nhẹ và nói chưa báo giá/tồn M trong faultPOS_UNAVAILABLE. Dùngđược với cùng source mode; lỗi transport lượt trước không lặp, không coi prompt đã sửa."
+  },
+  "b1-price-v2": {
+    "assessment": "USABLE",
+    "reason": "Đúng giá bộ799k, gọn đúng câu hỏi."
+  },
+  "b1-component-stock-v2": {
+    "assessment": "USABLE",
+    "reason": "Đúng chânváy M còn và giá449k, không lẫn áo/cảbộ."
+  },
+  "b1-search-read-v2": {
+    "assessment": "USABLE",
+    "reason": "Tìm đúng KhánhTrang, báo bộ999k và áo/váy499k mỗi món. Câu hỏi chốt dư nhẹ nhưng chưa làm mất câu trả lời; giữ tiêu chí như lượt trước."
+  },
+  "b1-policy-used-v2": {
+    "assessment": "USABLE",
+    "reason": "Từ chối đổi vì đã mặc thử, không nhầm chỉướm hay cho phép thử trongnhà. Lời xin thông cảm hơi dài nhưng đúng nghĩa policy."
+  },
+  "b1-changed-occasion-v3": {
+    "assessment": "USABLE",
+    "reason": "Chọn áo lẻ499k theo dịp gặp khách và nhu cầu gọn. Dài hơn lượt trước, nhiều tính từ sắc sảo/chuyênnghiệp/thướttha; lời khuyên dùng được nhưng giọng chưa ổn định."
+  },
+  "b1-current-policy-v3": {
+    "assessment": "USABLE",
+    "reason": "Đúng15ngày cho mốc9ngày/khách chỉmởxem, không tự giả định khách giặt/mặc rồi chặn."
+  },
+  "b1-partial-source-v3": {
+    "assessment": "USABLE",
+    "reason": "Đủ phần chất liệu khi POS_UNAVAILABLE, không bịa giá/tồn. Vẫn chép mô tả dài và nói hệ thống chưa cập nhật; cùng mức polish như ca sourcefault trước."
+  },
+  "b1-price-v3": {
+    "assessment": "USABLE",
+    "reason": "Đúng giá799k/có sẵn ở scope cảbộ chưa chọn biến thể, gọn hơn lượt trước."
+  },
+  "b1-component-stock-v3": {
+    "assessment": "USABLE",
+    "reason": "Trả đúng có áo lẻM/có sẵn/499k, gọn đúng nhu cầu."
+  },
+  "b1-search-read-v3": {
+    "assessment": "USABLE",
+    "reason": "ĐúngSQ223còn và giá699k/bộ,429k/mónlẻ; không có list dài hoặc hỏi lại vô ích."
+  },
+  "b1-buying-concern-v3": {
+    "assessment": "USABLE",
+    "reason": "Chọn cảbộ799k, giải thích có thêm cách diện đồngbộ và vẫn phối áo với váyđen đã có. Khác lượt trước chọn áo, vẫn hợp lệ vì có lý do mua thêm; còn giúpem/vừakhítngânsách và quảngcáo dài. Không ép đáp án muaáo duy nhất."
+  },
+  "b1-policy-used-v3": {
+    "assessment": "USABLE",
+    "reason": "Từ chối đúng vì cắt tem/giặt; không lấy chưa mặc ngoài làm đủ điều kiện. Còn dẫn quy định/thôngcảm nhưng không sai chính sách."
+  }
+}

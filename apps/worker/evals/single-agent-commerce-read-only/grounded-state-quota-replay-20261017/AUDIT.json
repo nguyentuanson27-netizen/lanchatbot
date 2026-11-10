@@ -1,0 +1,19 @@
+{
+  "status": "ACCOUNTING_BINDINGS_AND_PROJECTION_VERIFIED",
+  "runSourceSha": "2529383d27372418b98a29d6e7be611cce388239",
+  "rawSavepoint": "0394a55e4a7e8a92a529290df7b2a71eb7cd2a47",
+  "rawHashesDiskAndGit": 14,
+  "unchangedInputRuntimeHashes": 18,
+  "ownerDispatchHashes": 15,
+  "verifierExactBindings": 7,
+  "everyGeneratedFinalSubmittedToVerifier": true,
+  "eligibleExactDraftMatches": 6,
+  "evaluatorLabelLeaks": 0,
+  "privateFixtureLeaksInRequests": 0,
+  "allSevenOutcomesRetained": true,
+  "oldFailuresPreserved": true,
+  "atMostOneRequestPerKnownGeneration": true,
+  "providerEcho": "Adapter prepared/dispatched capture and hashes; no independent provider-side echo",
+  "humanAcceptance": null,
+  "offlineAuditScriptSha256": "9d9990fe40ea5c94c3fb10a4ab1d91da1f20d62730570df613df22d7eb91da24"
+}

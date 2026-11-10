@@ -1,0 +1,223 @@
+[
+  {
+    "number": 1,
+    "artifactHash": "6969a5cd7e9d4bb73c32b001db80a01bd930214f83e48f49309890eea1f6ca35",
+    "safe": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Ảnh khách mặc mẫu này em chưa có ảnh đã xác nhận để gửi chị.",
+      "fallbackId": null
+    },
+    "error": null,
+    "providerRequests": 1
+  },
+  {
+    "number": 2,
+    "artifactHash": "8c6d6303d5d9203feb11219561f0ee5fe46218ea9ae6acc86c415d01de8304b0",
+    "safe": false,
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "error": null,
+    "providerRequests": 1
+  },
+  {
+    "number": 3,
+    "artifactHash": "603686647abfe504bf55a5cec66b6b07c0cf04e3ab88190930980c70505dd588",
+    "safe": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Ảnh đúng màu chị hỏi em chưa xác nhận được chị nhé.",
+      "fallbackId": null
+    },
+    "error": null,
+    "providerRequests": 1
+  },
+  {
+    "number": 4,
+    "artifactHash": "88823c88def56a49a03bff37269a6743197e47bb5a28b58baaaa7bb16bdfcb9d",
+    "safe": false,
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "error": null,
+    "providerRequests": 1
+  },
+  {
+    "number": 5,
+    "artifactHash": "405545a179bcd184151f23b45b3495da415367e936d88b1b37099f5da2fc5103",
+    "safe": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Lần này em chưa lấy được ảnh để gửi chị.",
+      "fallbackId": null
+    },
+    "error": null,
+    "providerRequests": 1
+  },
+  {
+    "number": 6,
+    "artifactHash": "eacf501a708e61efae524d734e64e60a1aa948eccf97c1de8b882fc94c3dd8b4",
+    "safe": false,
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "error": null,
+    "providerRequests": 1
+  },
+  {
+    "number": 7,
+    "artifactHash": "ab8bbe56d37953acb79bc8c527df1a093c3a807534d1d0dc56b1cce32ef8aa0b",
+    "safe": null,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ set Thạch Thảo hiện shop chưa có ảnh khách mặc thực tế chị ạ, nhưng áo tơ thêu nổi kết hợp chân váy ren mềm có độ bay và rũ tự nhiên mặc lên rất xinh. Chị cần xem ảnh chụp cận cảnh chất vải và form áo váy thì nhắn em gửi chị nhé ạ!",
+      "fallbackId": null
+    },
+    "error": null,
+    "providerRequests": 1
+  },
+  {
+    "number": 8,
+    "artifactHash": "874fd850c578e050ac3c34ffe8b8c3adc7a449d4701e13ea417a829e4cbbd643",
+    "safe": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Ảnh khách mặc mẫu này em chưa có để gửi chị.",
+      "fallbackId": null
+    },
+    "error": null,
+    "providerRequests": 1
+  },
+  {
+    "number": 9,
+    "artifactHash": "16130eef384353b9cf3e0de5e35343cd1ce3790e5719f9c93dae17958b66f5b6",
+    "safe": false,
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "error": null,
+    "providerRequests": 1
+  },
+  {
+    "number": 10,
+    "artifactHash": "bf72fe0e6ef7baa40fa1ab3bc4ee7e92d37c359a076ae37047363c5159d29ddf",
+    "safe": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Lần này em chưa lấy được ảnh cho chị.",
+      "fallbackId": null
+    },
+    "error": null,
+    "providerRequests": 1
+  },
+  {
+    "number": 11,
+    "artifactHash": "b73bd1c7e48cd4796016b9f6f05b15e4bca152f6c5f2a393a4e207b15037dd76",
+    "safe": false,
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "error": null,
+    "providerRequests": 1
+  },
+  {
+    "number": 12,
+    "artifactHash": "c2ed9cb39af9264193ee9935f1c354f55667351fd93cb25bc74d4d2c82b9295f",
+    "safe": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Ảnh cận phần chân váy em chưa có để gửi chị.",
+      "fallbackId": null
+    },
+    "error": null,
+    "providerRequests": 1
+  },
+  {
+    "number": 13,
+    "artifactHash": "ab156b169321738a495b2f931c86fb6cc58674a05ee1028d13a8f2c314f60187",
+    "safe": false,
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "error": null,
+    "providerRequests": 1
+  },
+  {
+    "number": 14,
+    "artifactHash": "209088111ff47d2812241554cb5f53a5c22515dbbe673547295b56acf2dbd282",
+    "safe": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Em gửi chị ảnh khách mặc mẫu này nhé.",
+      "fallbackId": null
+    },
+    "error": null,
+    "providerRequests": 1
+  },
+  {
+    "number": 15,
+    "artifactHash": "19a0b79988fbbcb806181ac829643743ad9eedc4ffe4bd2b85c6d9820d669043",
+    "safe": false,
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "error": null,
+    "providerRequests": 1
+  },
+  {
+    "number": 16,
+    "artifactHash": "c944499af7aead5de5113b3da7cc69a45d6ac5e752eb4fc12d6c67e367b462fd",
+    "safe": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Em gửi chị ảnh cận phần áo nhé.",
+      "fallbackId": null
+    },
+    "error": null,
+    "providerRequests": 1
+  },
+  {
+    "number": 17,
+    "artifactHash": "afbe24316ba67b6da075c407eba2451a255190106b4b95658be24d2a9837ac84",
+    "safe": false,
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "error": null,
+    "providerRequests": 1
+  }
+]

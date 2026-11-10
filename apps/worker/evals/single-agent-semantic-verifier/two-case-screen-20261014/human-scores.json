@@ -1,0 +1,35 @@
+{
+  "scorer": null,
+  "attempts": [
+    {
+      "attemptId": "C3_TWO_CASE_SCREEN_20261014_01/r5-competitor-price:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    },
+    {
+      "attemptId": "C3_TWO_CASE_SCREEN_20261014_01/r14-stage-light-change:1",
+      "scores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "registered": 32,
+  "recorded": 32,
+  "runSourceSha": "2bc7d5d27a9d1f14c30e5911501263c4ca070ca4",
+  "primaryCounts": {
+    "b1-1": {
+      "USABLE": 20,
+      "NEEDS_EDIT": 4
+    },
+    "stateful-1": {
+      "USABLE": 7,
+      "OWNERSHIP_CONTROL": 1
+    }
+  },
+  "recommendation": "STOP_AT_OWNER_REVIEW",
+  "providerRequests": 89,
+  "retry": 0,
+  "sendEnabled": false,
+  "limitations": [
+    "N1 per case",
+    "Agent review, no independent human scoring",
+    "No stability or live GO claim"
+  ]
+}

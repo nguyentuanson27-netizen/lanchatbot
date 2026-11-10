@@ -1,0 +1,108 @@
+[
+  {
+    "run": "targeted",
+    "id": "6941385d-7bc9-4f88-b143-66141787ea91:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "9e16a4db-83fe-416a-802b-d6e989c07ede:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "65090d52-793f-4791-9b46-44e8a9f5441b:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "14f345a5-eff4-457c-b81a-7c7094fc0169:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "e6e89a39-56db-47f6-8629-7eb0b727524e:verifier:1",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+          "protectedRef": "product:SV165"
+        }
+      ]
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "8209c44a-9936-4da3-ab0c-d50eec5c9d07:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "22d5fb4b-6c77-489d-87ce-8d0edc665298:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "db7e7017-d634-4267-9d48-e30f959d0b9e:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "1ca46376-bf4d-4812-ade1-dbca7dfe3ef0:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "06966b91-947f-4f83-9401-94f6ce175554:verifier:1",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+          "protectedRef": "product:SV2447"
+        }
+      ]
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "d0cd1f8a-02fc-4382-bd4d-7c985138a699:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "targeted",
+    "id": "daae23c1-4eda-4311-89e5-ffd1a0b27ae2:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  }
+]

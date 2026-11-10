@@ -1,0 +1,978 @@
+{
+  "runSourceSha": "f2289491ccbf88ad58692060160f29aa1bf6133b",
+  "primaryReviewSavepoint": "3672936cdfa651abbe55a8eb24ea7cbbc0602ff2",
+  "phase": "POST_PRIMARY_OFFLINE_DIAGNOSIS",
+  "newProviderGenerations": 0,
+  "stateful": [
+    {
+      "slot": 1,
+      "caseId": "stateful-open",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "BUDGET",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "executedToolRounds": 2,
+      "executedToolCalls": 3,
+      "generatedCalls": [
+        {
+          "generationId": "eb5cc29b-573b-4a5e-a46a-073d795034f9:owner:1",
+          "calls": [
+            {
+              "name": "apply_customer_state",
+              "args": {
+                "ops": [
+                  {
+                    "field": "measurements.WAIST_CM",
+                    "op": "SET",
+                    "value": 76
+                  },
+                  {
+                    "value": 98,
+                    "op": "SET",
+                    "field": "measurements.HIPS_CM"
+                  }
+                ]
+              },
+              "id": "call_1451971"
+            },
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_1451972"
+            }
+          ]
+        },
+        {
+          "generationId": "eb5cc29b-573b-4a5e-a46a-073d795034f9:owner:2",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "quantity": 1,
+                "subjectRef": "SV2447",
+                "size": "M",
+                "offerType": "AO"
+              },
+              "id": "call_3862488"
+            }
+          ]
+        },
+        {
+          "generationId": "eb5cc29b-573b-4a5e-a46a-073d795034f9:owner:3",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "subjectRef": "SV2447",
+                "size": "M",
+                "color": "BE",
+                "offerType": "AO",
+                "quantity": 1
+              },
+              "id": "call_1847881"
+            }
+          ]
+        }
+      ],
+      "toolResponses": [
+        {
+          "name": "apply_customer_state",
+          "status": "OK",
+          "reason": null,
+          "data": {}
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            },
+            "availableOffers": [
+              "AO",
+              "CV",
+              "SET_VAY"
+            ]
+          },
+          "sellingOptions": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ]
+        },
+        {
+          "name": "apply_customer_state",
+          "status": "OK",
+          "reason": null,
+          "data": {}
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            },
+            "availableOffers": [
+              "AO",
+              "CV",
+              "SET_VAY"
+            ]
+          },
+          "sellingOptions": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ]
+        },
+        {
+          "name": "add_to_cart",
+          "status": "UNAVAILABLE",
+          "reason": "SELECTION_UNAVAILABLE",
+          "data": {
+            "status": "INVALID",
+            "reasonCode": "CART_VARIANT_AMBIGUOUS",
+            "availableSizes": [
+              "M"
+            ],
+            "availableColors": [
+              "BE"
+            ]
+          }
+        }
+      ],
+      "finalOnly": [
+        {
+          "generationId": "eb5cc29b-573b-4a5e-a46a-073d795034f9:owner:3",
+          "declaredTools": [],
+          "mode": "NONE",
+          "returnedToolCall": true
+        }
+      ],
+      "cartIsNull": true,
+      "publicStateKeys": [
+        "stage",
+        "revision",
+        "cart",
+        "measurements",
+        "customerProfileRevision"
+      ],
+      "privateCheckoutFailure": null
+    },
+    {
+      "slot": 2,
+      "caseId": "stateful-variant-quantity",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "BUDGET",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "executedToolRounds": 2,
+      "executedToolCalls": 3,
+      "generatedCalls": [
+        {
+          "generationId": "3f6e65b2-c4cd-4a5e-a3dd-1aa369b5bc9f:owner:1",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_2108754"
+            }
+          ]
+        },
+        {
+          "generationId": "3f6e65b2-c4cd-4a5e-a3dd-1aa369b5bc9f:owner:2",
+          "calls": [
+            {
+              "name": "apply_customer_state",
+              "args": {
+                "ops": [
+                  {
+                    "field": "measurements.WAIST_CM",
+                    "value": 76,
+                    "op": "SET"
+                  },
+                  {
+                    "op": "SET",
+                    "value": 98,
+                    "field": "measurements.HIPS_CM"
+                  }
+                ]
+              },
+              "id": "call_2051586"
+            },
+            {
+              "name": "add_to_cart",
+              "args": {
+                "subjectRef": "SV2447",
+                "quantity": 2,
+                "size": "L",
+                "offerType": "AO"
+              },
+              "id": "call_2051587"
+            }
+          ]
+        },
+        {
+          "generationId": "3f6e65b2-c4cd-4a5e-a3dd-1aa369b5bc9f:owner:3",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "offerType": "AO",
+                "quantity": 2,
+                "color": "BE",
+                "size": "L",
+                "subjectRef": "SV2447"
+              },
+              "id": "call_65700"
+            }
+          ]
+        }
+      ],
+      "toolResponses": [
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            },
+            "availableOffers": [
+              "AO",
+              "CV",
+              "SET_VAY"
+            ]
+          },
+          "sellingOptions": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ]
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            },
+            "availableOffers": [
+              "AO",
+              "CV",
+              "SET_VAY"
+            ]
+          },
+          "sellingOptions": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ]
+        },
+        {
+          "name": "apply_customer_state",
+          "status": "OK",
+          "reason": null,
+          "data": {}
+        },
+        {
+          "name": "add_to_cart",
+          "status": "UNAVAILABLE",
+          "reason": "SELECTION_UNAVAILABLE",
+          "data": {
+            "status": "INVALID",
+            "reasonCode": "CART_VARIANT_AMBIGUOUS",
+            "availableSizes": [
+              "L"
+            ],
+            "availableColors": [
+              "BE"
+            ]
+          }
+        }
+      ],
+      "finalOnly": [
+        {
+          "generationId": "3f6e65b2-c4cd-4a5e-a3dd-1aa369b5bc9f:owner:3",
+          "declaredTools": [],
+          "mode": "NONE",
+          "returnedToolCall": true
+        }
+      ],
+      "cartIsNull": true,
+      "publicStateKeys": [
+        "stage",
+        "revision",
+        "cart",
+        "measurements",
+        "customerProfileRevision"
+      ],
+      "privateCheckoutFailure": null
+    },
+    {
+      "slot": 3,
+      "caseId": "stateful-quote",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "BUDGET",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "executedToolRounds": 2,
+      "executedToolCalls": 3,
+      "generatedCalls": [
+        {
+          "generationId": "e0b5adb9-cb62-40f8-82db-a548ed53c493:owner:1",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_4093391"
+            }
+          ]
+        },
+        {
+          "generationId": "e0b5adb9-cb62-40f8-82db-a548ed53c493:owner:2",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "quantity": 2,
+                "offerType": "AO",
+                "subjectRef": "SV2447",
+                "size": "L"
+              },
+              "id": "call_4102874"
+            },
+            {
+              "name": "quote_cart",
+              "args": {},
+              "id": "call_4102875"
+            }
+          ]
+        },
+        {
+          "generationId": "e0b5adb9-cb62-40f8-82db-a548ed53c493:owner:3",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "color": "BE",
+                "quantity": 2,
+                "size": "L",
+                "subjectRef": "SV2447",
+                "offerType": "AO"
+              },
+              "id": "call_3726919"
+            },
+            {
+              "name": "quote_cart",
+              "args": {},
+              "id": "call_3726920"
+            }
+          ]
+        }
+      ],
+      "toolResponses": [
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            },
+            "availableOffers": [
+              "AO",
+              "CV",
+              "SET_VAY"
+            ]
+          },
+          "sellingOptions": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ]
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            },
+            "availableOffers": [
+              "AO",
+              "CV",
+              "SET_VAY"
+            ]
+          },
+          "sellingOptions": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ]
+        },
+        {
+          "name": "add_to_cart",
+          "status": "UNAVAILABLE",
+          "reason": "SELECTION_UNAVAILABLE",
+          "data": {
+            "status": "INVALID",
+            "reasonCode": "CART_VARIANT_AMBIGUOUS",
+            "availableSizes": [
+              "L"
+            ],
+            "availableColors": [
+              "BE"
+            ]
+          }
+        },
+        {
+          "name": "quote_cart",
+          "status": "REJECTED",
+          "reason": "DEPENDENT_EFFECT_REJECTED",
+          "data": {}
+        }
+      ],
+      "finalOnly": [
+        {
+          "generationId": "e0b5adb9-cb62-40f8-82db-a548ed53c493:owner:3",
+          "declaredTools": [],
+          "mode": "NONE",
+          "returnedToolCall": true
+        }
+      ],
+      "cartIsNull": true,
+      "publicStateKeys": [
+        "stage",
+        "revision",
+        "cart",
+        "measurements",
+        "customerProfileRevision"
+      ],
+      "privateCheckoutFailure": null
+    },
+    {
+      "slot": 4,
+      "caseId": "stateful-correction",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "BUDGET",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "executedToolRounds": 2,
+      "executedToolCalls": 4,
+      "generatedCalls": [
+        {
+          "generationId": "2f1ed94b-650e-4fdb-99ca-193280d4d89f:owner:1",
+          "calls": [
+            {
+              "name": "apply_customer_state",
+              "args": {
+                "ops": [
+                  {
+                    "field": "measurements.WAIST_CM",
+                    "op": "SET",
+                    "value": 74
+                  },
+                  {
+                    "op": "SET",
+                    "field": "measurements.HIPS_CM",
+                    "value": 96
+                  }
+                ]
+              },
+              "id": "call_2666050"
+            },
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_2666051"
+            }
+          ]
+        },
+        {
+          "generationId": "2f1ed94b-650e-4fdb-99ca-193280d4d89f:owner:2",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "size": "L",
+                "subjectRef": "SV2447",
+                "quantity": 2,
+                "offerType": "AO"
+              },
+              "id": "call_4231928"
+            },
+            {
+              "name": "quote_cart",
+              "args": {},
+              "id": "call_4231929"
+            }
+          ]
+        },
+        {
+          "generationId": "2f1ed94b-650e-4fdb-99ca-193280d4d89f:owner:3",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "quantity": 2,
+                "offerType": "AO",
+                "size": "L",
+                "subjectRef": "SV2447",
+                "color": "BE"
+              },
+              "id": "call_1348053"
+            },
+            {
+              "name": "quote_cart",
+              "args": {},
+              "id": "call_1348054"
+            }
+          ]
+        }
+      ],
+      "toolResponses": [
+        {
+          "name": "apply_customer_state",
+          "status": "OK",
+          "reason": null,
+          "data": {}
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            },
+            "availableOffers": [
+              "AO",
+              "CV",
+              "SET_VAY"
+            ]
+          },
+          "sellingOptions": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ]
+        },
+        {
+          "name": "apply_customer_state",
+          "status": "OK",
+          "reason": null,
+          "data": {}
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            },
+            "availableOffers": [
+              "AO",
+              "CV",
+              "SET_VAY"
+            ]
+          },
+          "sellingOptions": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ]
+        },
+        {
+          "name": "add_to_cart",
+          "status": "UNAVAILABLE",
+          "reason": "SELECTION_UNAVAILABLE",
+          "data": {
+            "status": "INVALID",
+            "reasonCode": "CART_VARIANT_AMBIGUOUS",
+            "availableSizes": [
+              "L"
+            ],
+            "availableColors": [
+              "BE"
+            ]
+          }
+        },
+        {
+          "name": "quote_cart",
+          "status": "REJECTED",
+          "reason": "DEPENDENT_EFFECT_REJECTED",
+          "data": {}
+        }
+      ],
+      "finalOnly": [
+        {
+          "generationId": "2f1ed94b-650e-4fdb-99ca-193280d4d89f:owner:3",
+          "declaredTools": [],
+          "mode": "NONE",
+          "returnedToolCall": true
+        }
+      ],
+      "cartIsNull": true,
+      "publicStateKeys": [
+        "stage",
+        "revision",
+        "cart",
+        "measurements",
+        "customerProfileRevision"
+      ],
+      "privateCheckoutFailure": null
+    },
+    {
+      "slot": 5,
+      "caseId": "stateful-private-checkout",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "executedToolRounds": null,
+      "executedToolCalls": null,
+      "generatedCalls": [],
+      "toolResponses": [],
+      "finalOnly": [],
+      "cartIsNull": true,
+      "publicStateKeys": [
+        "stage",
+        "revision",
+        "cart",
+        "measurements",
+        "customerProfileRevision"
+      ],
+      "privateCheckoutFailure": {
+        "stage": "PLANNER",
+        "reasonCode": "NO_TRANSITION_PLAN",
+        "readinessReasons": []
+      }
+    },
+    {
+      "slot": 6,
+      "caseId": "stateful-confirm",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "CURRENT_AUTHORITY_CHANGED",
+        "text": null,
+        "fallbackId": null
+      },
+      "executedToolRounds": 0,
+      "executedToolCalls": 0,
+      "generatedCalls": [],
+      "toolResponses": [],
+      "finalOnly": [],
+      "cartIsNull": true,
+      "publicStateKeys": [
+        "stage",
+        "revision",
+        "cart",
+        "measurements",
+        "customerProfileRevision"
+      ],
+      "privateCheckoutFailure": null
+    },
+    {
+      "slot": 7,
+      "caseId": "stateful-human-request",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "CUSTOMER_REQUESTED_HUMAN",
+        "text": null,
+        "fallbackId": null
+      },
+      "executedToolRounds": 1,
+      "executedToolCalls": 1,
+      "generatedCalls": [
+        {
+          "generationId": "17b97733-f363-4cd4-88ac-9c4a77cbab6b:owner:1",
+          "calls": [
+            {
+              "name": "request_handoff",
+              "args": {
+                "reason": "CUSTOMER_REQUESTED_HUMAN"
+              },
+              "id": "call_2357328"
+            }
+          ]
+        }
+      ],
+      "toolResponses": [],
+      "finalOnly": [],
+      "cartIsNull": true,
+      "publicStateKeys": [
+        "stage",
+        "revision",
+        "cart",
+        "measurements",
+        "customerProfileRevision"
+      ],
+      "privateCheckoutFailure": null
+    }
+  ],
+  "b1RejectedDrafts": [
+    {
+      "slot": 1,
+      "caseId": "b1-changed-occasion",
+      "latest": "Mà chị vừa được xếp lên sân khấu, đèn rọi khá mạnh. Áo có dễ lộ bên trong không em? Nếu có thì chị đổi mẫu khác.",
+      "rejectedDraftNotSent": "Áo làm từ tơ Hàn thêu nhẹ và thoáng, nên dưới ánh đèn sân khấu mạnh sẽ hơi thấu sáng chị ạ. Chị có thể mặc kèm một chiếc áo hai dây tone nude bên trong vừa giữ nguyên nét bay bổng của set vừa yên tâm hoàn toàn khi lên đèn nhé.",
+      "verdict": {
+        "verdict": "FAIL",
+        "violations": [
+          {
+            "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+            "protectedRef": "product:SV2447"
+          }
+        ]
+      },
+      "matchingClaimFacts": [],
+      "toolResponses": [
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            },
+            "availableOffers": [
+              "AO",
+              "CV",
+              "SET_VAY"
+            ]
+          },
+          "sellingOptions": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ]
+        }
+      ],
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "exactReasonBeyondSchemaExposed": false
+    },
+    {
+      "slot": 5,
+      "caseId": "b1-partial-source-v2",
+      "latest": "Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé.",
+      "rejectedDraftNotSent": "Chân váy làm từ chất liệu ren tơ Hàn mềm mại, nữ tính, form nhẹ nhàng với độ rũ tự nhiên giúp tôn dáng và chuyển động uyển chuyển lắm chị nhé. Mẫu này là thiết kế nguyên set nên shop hiện chưa bán rời chân váy riêng ạ.",
+      "verdict": {
+        "verdict": "FAIL",
+        "violations": [
+          {
+            "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+            "protectedRef": "product:SV2447"
+          }
+        ]
+      },
+      "matchingClaimFacts": [],
+      "toolResponses": [
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "availability": {
+              "price": {
+                "status": "UNAVAILABLE",
+                "reason": "POS_SNAPSHOT_UNAVAILABLE"
+              },
+              "stock": {
+                "status": "UNAVAILABLE",
+                "reason": "POS_SNAPSHOT_UNAVAILABLE"
+              }
+            },
+            "availableOffers": null
+          },
+          "sellingOptions": "UNKNOWN_NULL"
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "availability": {
+              "price": {
+                "status": "UNAVAILABLE",
+                "reason": "POS_SNAPSHOT_UNAVAILABLE"
+              },
+              "stock": {
+                "status": "UNAVAILABLE",
+                "reason": "POS_SNAPSHOT_UNAVAILABLE"
+              }
+            },
+            "availableOffers": null
+          },
+          "sellingOptions": "UNKNOWN_NULL"
+        }
+      ],
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "exactReasonBeyondSchemaExposed": false
+    },
+    {
+      "slot": 23,
+      "caseId": "b1-buying-concern-v3",
+      "latest": "Theo em chị mua riêng áo Thạch Thảo hay lấy cả bộ? Chị muốn mặc lại nhiều lần, ngân sách tầm 850 nghìn.",
+      "rejectedDraftNotSent": "Chị lấy cả bộ Thạch Thảo luôn đi ạ! \n\nVới ngân sách tầm 850 nghìn, bộ này giá 799.000đ hoàn toàn nằm trong khoản chị dự trù và kinh tế hơn hẳn so với mua lẻ áo (499.000đ). \n\nMua cả bộ chị vừa có chiếc áo tơ thêu tinh tế để phối linh hoạt với chân váy đen dáng suông sẵn có, lại vừa sở hữu nguyên set ren tơ bay bổng để diện đi tiệc hoặc đi chơi rất sang và nữ tính ạ.",
+      "verdict": {
+        "verdict": "FAIL",
+        "violations": [
+          {
+            "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+            "protectedRef": "2d559bb5-533d-53d4-8b29-3de538ef30cd"
+          }
+        ]
+      },
+      "matchingClaimFacts": [
+        {
+          "claimId": "2d559bb5-533d-53d4-8b29-3de538ef30cd",
+          "type": "PRICE",
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "offer:SV2447:SET_VAY"
+          },
+          "value": {
+            "amountVnd": 799000,
+            "currency": "VND"
+          }
+        }
+      ],
+      "toolResponses": [
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            },
+            "availableOffers": [
+              "AO",
+              "CV",
+              "SET_VAY"
+            ]
+          },
+          "sellingOptions": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ]
+        }
+      ],
+      "actualTerminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "exactReasonBeyondSchemaExposed": false
+    }
+  ],
+  "causalLimit": "Observed tool sequence is established. Native description/prompt effects are not isolated by this N1 combined treatment.",
+  "noPostResultRuntimeOrPromptChange": true
+}

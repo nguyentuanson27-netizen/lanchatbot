@@ -1,0 +1,19 @@
+[
+  {"caseId":"media-overview-next","initialProductCodes":["SV2447"],"turns":[
+    {"turnId":"ask","runtime":{"messages":[{"text":"Em có ảnh khách mặc bộ Thạch Thảo không?","attachments":[]}]},"evaluator":{"purpose":"Tra feedback trong cùng nguồn ảnh","expected":"Gửi đúng feedback đã duyệt khi có. Nếu chưa có, đề nghị loại ảnh thực sự có ích từ nguồn; không gọi ảnh catalog là feedback."}},
+    {"turnId":"continue","runtime":{"messages":[{"text":"Gửi chị ảnh cả bộ nhé.","attachments":[]}]},"evaluator":{"purpose":"Tiếp nối ảnh tổng thể","expected":"Dùng lịch sử terminal thật và sản phẩm đang xem, gửi ảnh cả bộ hiện có. Không hỏi lại loại ảnh hoặc mẫu; không dựng lịch sử PASS/fallback."}}
+  ]},
+  {"caseId":"media-detail-next","initialProductCodes":["SV2447"],"turns":[
+    {"turnId":"ask","runtime":{"messages":[{"text":"Bộ Thạch Thảo có ảnh khách mặc chưa em?","attachments":[]}]},"evaluator":{"purpose":"Tra feedback trước lượt cận chi tiết","expected":"Như điều kiện nguồn thực tế; không ép fallback. Giữ actual terminal cho lượt tiếp theo."}},
+    {"turnId":"continue","runtime":{"messages":[{"text":"Cho chị xem cận phần thêu ở áo nhé.","attachments":[]}]},"evaluator":{"purpose":"Tiếp nối ảnh chi tiết","expected":"Đúng phần áo, đúng ảnh chi tiết hoặc báo thiếu đúng phạm vi; không hỏi lại hoặc gửi cả bộ thay ảnh cận."}}
+  ]},
+  {"caseId":"media-and-price","initialProductCodes":["SV2447"],"turns":[
+    {"turnId":"ask","runtime":{"messages":[{"text":"Em gửi chị ảnh khách mặc bộ Thạch Thảo với. Lấy riêng áo thì bao nhiêu?","attachments":[]}]},"evaluator":{"purpose":"Ảnh và giá món lẻ","expected":"Giá đúng áo lẻ từ nguồn; thiếu feedback không bỏ câu hỏi giá. Chỉ gửi ảnh được chọn và cả draft qua verifier. Nếu bị chặn, ghi actual fallback là chưa giải quyết đủ, không chấm draft chưa gửi."}}
+  ]},
+  {"caseId":"media-and-size","initialProductCodes":["SV2447"],"turns":[
+    {"turnId":"ask","runtime":{"messages":[{"text":"Cho chị xem gần phần thêu áo Thạch Thảo nhé. Chị cao 1m58, nặng 52kg thì lấy size nào?","attachments":[]}]},"evaluator":{"purpose":"Ảnh và tư vấn size","expected":"Ảnh đúng phần áo. Size từ engine, đủ đầu vào thì tư vấn; thiếu thì hỏi đúng phần thiếu. Không tự ép ba vòng, không đoán size hoặc bỏ việc tư vấn size vì tool ảnh."}}
+  ]},
+  {"caseId":"media-decision","initialProductCodes":["SV2447"],"turns":[
+    {"turnId":"ask","runtime":{"messages":[{"text":"Chị thích bộ Thạch Thảo mà sợ phần ren trông hơi nhiều. Chị mặc đi ăn cưới buổi trưa thôi.","attachments":[]}]},"evaluator":{"purpose":"Ảnh hỗ trợ quyết định mua","expected":"Đánh giá toàn lượt: lời khuyên có giải quyết phân vân và giúp chọn mua không, lý do có liên quan không, giọng có tự nhiên không. Nếu dùng ảnh, xem đúng phần cần đối chiếu; không bắt gọi view hoặc chỉ có một phương án. Không suy công năng kiểm nghiệm từ ảnh hay đánh đồng ảnh gửi với model đã xem. Không cộng điểm vì nhắc từ khóa."}}
+  ]}
+]

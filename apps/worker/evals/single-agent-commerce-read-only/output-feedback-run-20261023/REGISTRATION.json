@@ -1,0 +1,71 @@
+{
+  "sourceSha": "95cbaf55798e284d521d33ec0a562b085616256c",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "hashes": {
+    "chart-resolution-audit-20261023.mjs": "8280999aed9fca50c2a9da6654153a985dddc4e0b497fa280df636eb0ec73912",
+    "feedback-controls-20261023.mjs": "1c96af6cd9458cf42ea47045773d2404a210e2218bd1d91742b91736630e8bd8",
+    "advice-visual-diagnostic.mjs": "c8e229227a1dfba4992e4f51070ddb34a31161aa7eec917932b26b50bf4e9a64",
+    "manifest.json": "e586e8ad015d1353bfd3ed3cd666e4175424772727a44b12a69d3dc9a09451b1",
+    "prompts/owner.vi.txt": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
+    "prompts/verifier.vi.txt": "02a727ab7b188c11b15fc74ee46744d7027d63c016f7a34f163a1517ae722800",
+    "isolated-integration.mjs": "7cf39e461b82746f248f8e85cd6318d1f9da4079d1eddb594122768fd72b28be",
+    "gemini-inference.mjs": "6d63e042f80f94da07a2d4bc5cd73afdb9fca7993a7ae5b28cdd24ca226814b0"
+  },
+  "registeredControls": 17,
+  "labeledControls": 16,
+  "probe": 1,
+  "registeredVisualOutcomes": 4,
+  "maximumGenerationRequests": 25,
+  "retry": 0,
+  "sendEnabled": false
+}

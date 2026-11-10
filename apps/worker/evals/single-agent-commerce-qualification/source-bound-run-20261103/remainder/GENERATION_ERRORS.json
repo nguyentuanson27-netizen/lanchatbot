@@ -1,0 +1,107 @@
+[
+  {
+    "caseId": "c-20261028-s02",
+    "generationId": "f99ddf86-463d-401a-8d34-020b3b26d3a2:owner:2",
+    "role": "OWNER",
+    "status": "PROVIDER_ERROR",
+    "providerRequests": 0,
+    "failureLayer": "PRE_DISPATCH",
+    "errorCode": "OWNER_REQUEST_BOUND",
+    "telemetry": {
+      "httpStatus": null,
+      "failureStage": "BUILD",
+      "failureCode": "OWNER_REQUEST_BOUND",
+      "providerErrorCode": null,
+      "requestBytes": 68081,
+      "requestBudget": {
+        "textFrameBytes": 68081,
+        "systemBytes": 22000,
+        "toolSchemaBytes": 18690,
+        "trustedFrameBytes": 14643,
+        "dialogueBytes": 12488,
+        "textLimitBytes": 65536
+      },
+      "toolOutputDiagnostic": null
+    }
+  },
+  {
+    "caseId": "c-20261028-s04",
+    "generationId": "9cb737b6-74e3-4aeb-a1be-a4953bc4bb41:owner:2",
+    "role": "OWNER",
+    "status": "MALFORMED",
+    "providerRequests": 1,
+    "failureLayer": "MODEL_OUTPUT",
+    "errorCode": "PROVIDER_ERROR",
+    "telemetry": {
+      "httpStatus": 200,
+      "failureStage": "COMPLETION",
+      "failureCode": "OWNER_TOOL_OUTPUT",
+      "providerErrorCode": null,
+      "requestBytes": 54999,
+      "requestBudget": {
+        "textFrameBytes": 53160,
+        "systemBytes": 22000,
+        "toolSchemaBytes": 18690,
+        "trustedFrameBytes": 7542,
+        "dialogueBytes": 4668,
+        "textLimitBytes": 65536,
+        "presentedTextFrameBytes": 53337,
+        "basePresentedFrameBytes": 53337,
+        "inlineImageBytes": 0,
+        "frameLimitBytes": 65536
+      },
+      "toolOutputDiagnostic": {
+        "schemaCode": "OWNER_TOOL_OUTPUT",
+        "tool": "read_product",
+        "field": "selection",
+        "selection": "DETAILS_ONLY",
+        "fieldPresent": true,
+        "fieldType": "STRING",
+        "valueType": "OBJECT"
+      }
+    }
+  },
+  {
+    "caseId": "c-20261028-s13",
+    "generationId": "1c3e8a1b-e775-4f36-b033-9d3a4ae2de1d:owner:2",
+    "role": "OWNER",
+    "status": "PROVIDER_ERROR",
+    "providerRequests": 0,
+    "failureLayer": "PRE_DISPATCH",
+    "errorCode": "OWNER_REQUEST_BOUND",
+    "telemetry": {
+      "httpStatus": null,
+      "failureStage": "BUILD",
+      "failureCode": "OWNER_REQUEST_BOUND",
+      "providerErrorCode": null,
+      "requestBytes": 68073,
+      "requestBudget": {
+        "textFrameBytes": 68073,
+        "systemBytes": 22000,
+        "toolSchemaBytes": 18690,
+        "trustedFrameBytes": 15633,
+        "dialogueBytes": 11490,
+        "textLimitBytes": 65536
+      },
+      "toolOutputDiagnostic": null
+    }
+  },
+  {
+    "caseId": "c-20261028-j3",
+    "generationId": "657a1ae5-8936-430e-825d-787d47f499c0:verifier:1",
+    "role": "VERIFIER",
+    "status": "PROVIDER_ERROR",
+    "providerRequests": 1,
+    "failureLayer": "PROVIDER",
+    "errorCode": "PROVIDER_ERROR",
+    "telemetry": {
+      "httpStatus": 429,
+      "failureStage": null,
+      "failureCode": null,
+      "providerErrorCode": "usage_limit_reached",
+      "requestBytes": null,
+      "requestBudget": null,
+      "toolOutputDiagnostic": null
+    }
+  }
+]

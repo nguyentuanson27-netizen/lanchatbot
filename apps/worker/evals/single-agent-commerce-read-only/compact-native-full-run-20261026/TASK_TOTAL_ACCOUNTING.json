@@ -1,0 +1,21 @@
+{
+  "validCampaignRequests": 140,
+  "blockedEarlierCampaignRequests": 17,
+  "allRequestsInOwnerTask": 157,
+  "validNativeOutcomes": 51,
+  "blockedNativeOutcomes": 0,
+  "blockedRegisteredNativeNotRun": 51,
+  "validControls": 17,
+  "blockedControlsRetainedNotQualification": 17,
+  "blockedCampaignTokens": {
+    "input": 125606,
+    "output": 2378
+  },
+  "validCampaignTokens": {
+    "input": 910216,
+    "output": 84758,
+    "thinkingIncludedInOutput": 77729
+  },
+  "excludedFromAccounting": 0,
+  "reason": "CLI identity mismatch detected before native; prior controls retained, valid campaign starts after exact original 0.159.2 binary/hash/login checked."
+}

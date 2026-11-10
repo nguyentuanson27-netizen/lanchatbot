@@ -1,0 +1,84 @@
+{
+  "status": "PASS",
+  "runSourceSha": "5cbcde984c9594272b5ea905c3afd0f60dccef00",
+  "executableAndFrozenConfigUnchangedSinceSeal": true,
+  "rawDiskAndGitBlobsVerified": 16,
+  "decodedEvaluatorFirewallPass": true,
+  "requestEnvelopesAudited": 29,
+  "initialSourceHistoryLatestEqualAcrossOwners": true,
+  "solRelayBodyEqualsProjection": true,
+  "auditAssumptionCorrection": "PREPARATION.json documentation has Windows CRLF in worktree and Git LF; compared normalized text, no frozen file or provider result edited",
+  "geminiBodyEvidence": "Planned dispatch projection plus captured fake-HTTP adapter tests; no independent live Gemini HTTP body echo",
+  "maxUpstreamRequestsPerGeneration": 1,
+  "registeredOutcomes": 10,
+  "recordedOutcomes": 10,
+  "actualGenerationRequests": 23,
+  "finalDrafts": 10,
+  "bindings": [
+    {
+      "slot": 1,
+      "exactDraftBound": true,
+      "trustedSnapshotBound": true,
+      "currentReadbackUnchanged": true
+    },
+    {
+      "slot": 2,
+      "exactDraftBound": true,
+      "trustedSnapshotBound": true,
+      "currentReadbackUnchanged": true
+    },
+    {
+      "slot": 3,
+      "exactDraftBound": true,
+      "trustedSnapshotBound": true,
+      "currentReadbackUnchanged": true
+    },
+    {
+      "slot": 4,
+      "exactDraftBound": true,
+      "trustedSnapshotBound": true,
+      "currentReadbackUnchanged": true
+    },
+    {
+      "slot": 5,
+      "exactDraftBound": true,
+      "trustedSnapshotBound": true,
+      "currentReadbackUnchanged": true
+    },
+    {
+      "slot": 6,
+      "exactDraftBound": true,
+      "trustedSnapshotBound": true,
+      "currentReadbackUnchanged": true
+    },
+    {
+      "slot": 7,
+      "exactDraftBound": true,
+      "trustedSnapshotBound": true,
+      "currentReadbackUnchanged": true
+    },
+    {
+      "slot": 8,
+      "exactDraftBound": true,
+      "trustedSnapshotBound": true,
+      "currentReadbackUnchanged": true
+    },
+    {
+      "slot": 9,
+      "exactDraftBound": true,
+      "trustedSnapshotBound": true,
+      "currentReadbackUnchanged": true
+    },
+    {
+      "slot": 10,
+      "exactDraftBound": true,
+      "trustedSnapshotBound": true,
+      "currentReadbackUnchanged": true
+    }
+  ],
+  "toolRounds": 3,
+  "toolCalls": 4,
+  "sendEnabled": false,
+  "historicalFrozenRunsUnchanged": true,
+  "limits": "Structural evidence only, no semantic proof or sales acceptance. B1 read-only comparison; no state/effect/live entrypoint changes."
+}

@@ -1,0 +1,78 @@
+{
+  "kind": "AUTOMATED_NATIVE_ACCOUNTING_REQUEST_CAPTURE_HISTORY_CHECKS_NOT_FULL_GATE_REPLAY",
+  "sourceSha": "205cd497eedad3bebe8a2a0fe4a98c7c49ced838",
+  "worldHash": "8e03669f4f4af02021f98b1f87bd39140cfbde5cbf3d6bcfba24963c704506ca",
+  "cases": 13,
+  "turns": 27,
+  "generationAttempts": 66,
+  "generationHttp": 66,
+  "roles": {
+    "OWNER": 46,
+    "VERIFIER": 20
+  },
+  "generationStatuses": {
+    "OK": 66
+  },
+  "allGroupsSameSourceAndWorld": true,
+  "allRequestHashesMatch": true,
+  "evaluatorFirewall": "PASS",
+  "metadataBPresent": false,
+  "perTurnRoleAndToolCaps": "PASS",
+  "acceptedTextOutboxHashes": "PASS",
+  "historyHashes": "PASS",
+  "exactFinalDraftToCapturedText": 19,
+  "nativeWitnessRowsObserved": 20,
+  "knownSyntheticPrivateInputValuesAbsentFromProviderRequests": true,
+  "privateValueTypesChecked": [
+    "FULL_NAME",
+    "PHONE",
+    "ADDRESS_FRAGMENT"
+  ],
+  "privateValueCount": 3,
+  "disposableModelDatabasesDropped": 1,
+  "initialStateDatabaseDropped": true,
+  "providerGenerationRetry": 0,
+  "ownerOAuthHttp": 1,
+  "liveSends": 0,
+  "sourceShopWrites": 0,
+  "observedModelVersionUnavailable": [],
+  "formalBlindQuality": "NOT_GRADED",
+  "fullFinalGateReplay": "NOT_PERFORMED",
+  "verifierProviderLatencyMs": {
+    "n": 20,
+    "p50": 6817,
+    "p95": 12420
+  },
+  "verifierAdapterWindowMs": {
+    "n": 20,
+    "p50": 7713.060899999924,
+    "p95": 13462.745500000077
+  },
+  "tokenUsage": {
+    "inputObserved": 692075,
+    "outputObserved": 48539,
+    "usageRows": 66,
+    "totalRows": 66,
+    "cost": "NOT_EXPOSED"
+  },
+  "groups": [
+    {
+      "group": "screen",
+      "cases": 13,
+      "turns": 27,
+      "sourceSha": "205cd497eedad3bebe8a2a0fe4a98c7c49ced838",
+      "worldHash": "8e03669f4f4af02021f98b1f87bd39140cfbde5cbf3d6bcfba24963c704506ca",
+      "registrationHash": "b26ac937097751b78af3b7e342f28132248bb7751f65c47e63adbf70788b861f",
+      "corpusHash": "113b2a850abf27d461f28a0952788a1a3a1b6dc0940e8ed7fdd51c3ce0d23d01",
+      "maximumGenerations": 108,
+      "actualTerminalCounts": {
+        "SEND_ELIGIBLE": 19,
+        "HANDOFF": 2,
+        "NO_SEND": 1,
+        "CODE_OWNED_SEND": 5
+      },
+      "attempts": 66,
+      "http": 66
+    }
+  ]
+}

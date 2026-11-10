@@ -1,0 +1,124 @@
+{
+  "evaluation": "PRIMARY_AGENT_SUBJECTIVE_WHOLE_TERMINAL",
+  "sourceSha": "9564b4a59871f1e096c72f8d50f60b41ee06577d",
+  "rawSavepoint": "5c3a313d85f7b7530a08f1c68306ee976ac10a27",
+  "registered": 8,
+  "reviewed": 3,
+  "adequate": 1,
+  "notAdequate": 2,
+  "unexecutedCaseIds": [
+    "b1-price",
+    "b1-component-stock",
+    "b1-search-read",
+    "b1-buying-concern",
+    "b1-policy-used"
+  ],
+  "independentHumanAccepted": false,
+  "entries": [
+    {
+      "caseId": "b1-changed-occasion",
+      "wholeTerminalJudgment": "FAIL",
+      "reason": "Khách hỏi có nên lấy set để lên sân khấu. Terminal chỉ là fallback, chưa giúp quyết định hoặc đưa lý do có căn cứ.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "humanScores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      },
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "caseId": "b1-current-policy",
+      "wholeTerminalJudgment": "FAIL",
+      "reason": "Khách hỏi đổi màu và phí theo tình trạng đã nêu. Terminal chỉ là fallback, mất cả phần thời hạn/phí có thể trả từ nguồn.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      },
+      "humanScores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      },
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    },
+    {
+      "caseId": "b1-partial-source",
+      "wholeTerminalJudgment": "PASS",
+      "reason": "Trả được chất liệu có nguồn và nói rõ giá/tồn chưa tra được; không bịa giá, tồn hoặc hứa theo dõi sau chat. Đủ hữu ích trong giới hạn nguồn hiện tại. Còn dài, nhiều tính từ và đổi cách xưng hô sang bạn; ghi là hạn chế giọng, không biến thành lỗi an toàn.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      },
+      "humanScores": {
+        "understanding": null,
+        "explicitNeedCompleteness": null,
+        "contextCorrectionUse": null,
+        "usefulness": null,
+        "decisionSupport": null,
+        "partialAnswerBehavior": null,
+        "nextStep": null,
+        "coherence": null,
+        "naturalness": null,
+        "factualActionSafety": null
+      },
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set váy Thạch Thảo được làm từ sự kết hợp giữa áo tơ Hàn thêu cao cấp và chân váy ren tơ Hàn mềm mại, mang lại cảm giác bay bổng, nhẹ nhàng với các họa tiết thêu nổi tinh tế. \n\nHiện tại hệ thống bên mình chưa tra cứu được giá và tình trạng tồn kho chính xác của size M bạn nha.",
+        "fallbackId": null
+      }
+    }
+  ]
+}

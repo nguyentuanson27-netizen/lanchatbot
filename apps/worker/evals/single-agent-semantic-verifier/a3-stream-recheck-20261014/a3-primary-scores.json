@@ -1,0 +1,63 @@
+{
+  "scorer": "CODEX_PRIMARY_AGENT",
+  "method": "OWNER_AUTHORIZED_CODEX_OFFLINE_REVIEW",
+  "scoredAt": "2026-10-14T08:11:51.042Z",
+  "a3RunSourceSha": "59333da926639da5c5d7be0470b0be29fd5f43c0",
+  "manifestHash": "722b818421fa8b5ad2d48df40667274b890937830622a12dc4fb97f4c33e16a5",
+  "effectiveManifestHash": "6601c676ed7b9ee36559792075853c6848198796408778298ce4d931828e7f88",
+  "planHash": "98e590f7e6dcd2f5d2f8269f4c795fdcdae1654e2a4b1487997e9fbdd7bb8747",
+  "evidenceHash": "cbe75508f02b49f5df0b551e19b423acb5772439ad3cf82ffb9cf74b4d4b8c6b",
+  "rawSavepoint": "0cb27846ec84cbf3346084f73772f1506785b087",
+  "fullCheckpointQualification": false,
+  "limitations": "Subjective nonblind offline whole-terminal review; accepted dialogue/current trusted source profiles/policies/claims and actual outcomes read before ratings, before rejected diagnostics. Human scores remain null. No keyword/fact-count or forcedCTA rule, no post-diagnostic rescore. Three selected fresh cases cannot replace historical full42 outcomes or qualify Checkpoint A.",
+  "attempts": [
+    {
+      "attemptId": "r5-referent-navy:1",
+      "wholeTurnReview": "Hiểu mẫu đó là quầnQU714navy thay vì set, xác nhận đúng tồnM và lựa chọn khách vừa đồng ý. Không hỏi lại số đo hoặc mở lựa chọn mới, không báo đã tạođơn/giữhàng khi thiếu receipt. Một câu ngắn, dùng được để tiếp tục lựa chọn đã thống nhất; không bắt kể đúng số tồn2 khi khách chỉ hỏi cònkhông.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-simple-price:1",
+      "wholeTurnReview": "Trả trực tiếp giá499k đúng áoSM613 ngay đầu, câu rõ và không bịa size/khuyến mãi. Phần hỏi màu và vòngngực chưa cần để hoàn thành câu hỏi giá đơn giản, làm bước tiếp nặng hơn mức cần; ghi nextStep1 thay vì coi phải cóCTA mới tốt. Toàn lời vẫn ngắn/dễ hiểu và hữu ích, không FAIL chỉ vì có thông tin thêm. Ca simple không thuộc nhóm consultation bắt4chiều bằng2; đây là đạt sàn frozen, không nói câu tối ưu.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r15-fit-reassurance:1",
+      "wholeTurnReview": "Xác nhận đúng setbeM theo fit hiện tại, trấn an cạp bằng lưngchun toànvòng và nhu cầu ngồi nhiều. Đây là expected-comfort có thiết kế+fit được owner cho phép, không phép thử mới/bảo đảm mọi điều kiện. Câu ngắn, tựtin, không đọc lại ba vòng hoặc độkéo chun, không disclaimer hay bước ngoài khả năng. Giải quyết đúng điểm khách còn ngại trước khi lấyM.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    }
+  ]
+}

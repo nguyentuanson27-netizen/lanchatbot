@@ -1,0 +1,115 @@
+{
+  "reviewer": "PRIMARY_CODING_AGENT_NONBLIND_NOT_HUMAN_ACCEPTANCE",
+  "rawCommit": "e8a5504fc2d5ee194fc99e25f53748854cf06479",
+  "runSourceSha": "e7765a71b7c9718a45fe591f7e20ab4649e6cc36",
+  "basis": "Read all seven actual terminal outcomes and committed public state before rejected draft/tool diagnostics. Judge whole-turn purchase progress, not keyword presence. No numerical acceptance bar invented after results.",
+  "salesJourneyCompleted": false,
+  "entries": [
+    {
+      "caseId": "stateful-open",
+      "ordinal": 1,
+      "label": "UNUSABLE",
+      "reasonVi": "Khách đã chọn áo/màu/size rõ, nhưng chỉ nhận fallback; chưa tạo được giỏ. Số đo đã lưu là tiến bộ nội bộ, chưa hoàn thành yêu cầu mua.",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-variant-quantity",
+      "ordinal": 2,
+      "label": "UNUSABLE",
+      "reasonVi": "Khách đổi size và số lượng nhưng vẫn nhận fallback, không có giỏ hiện tại hoặc bước xử lý dùng được.",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-quote",
+      "ordinal": 3,
+      "label": "UNUSABLE",
+      "reasonVi": "Khách hỏi tổng hai áo cả ship nhưng không nhận được giá hoặc bước giải quyết cụ thể; giỏ vẫn chưa tồn tại.",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "BUDGET",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-correction",
+      "ordinal": 4,
+      "label": "UNUSABLE_PARTIAL_STATE_SUCCESS",
+      "reasonVi": "Code đã sửa eo/mông đúng, nhưng khách chỉ nhận fallback, lựa chọn size L và giao dịch chưa tiến lên.",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "BUDGET",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "actualCapturedMessages": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-private-checkout",
+      "ordinal": 5,
+      "label": "FUNCTIONAL_RECOVERY_JOURNEY_INCOMPLETE",
+      "reasonVi": "Đã chuyển quyền xử lý khi checkout không thực hiện được; cả hai model nhận0request. Đây là recovery đúng, không phải hoàn tất mua hàng.",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [],
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-confirm",
+      "ordinal": 6,
+      "label": "FUNCTIONAL_STOP_AFTER_HANDOFF",
+      "reasonVi": "Quyền đã chuyển HUMAN nên không tiếp tục gọi model/gửi bot. Đúng quyền sở hữu; yêu cầu chốt vẫn chờ nhân viên.",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "CURRENT_AUTHORITY_CHANGED",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [],
+      "humanReview": null
+    },
+    {
+      "caseId": "stateful-human-request",
+      "ordinal": 7,
+      "label": "FUNCTIONAL_HANDOFF",
+      "reasonVi": "Yêu cầu gặp nhân viên được chuyển quyền xử lý theo policy; không có chat reply trong capture. Chưa chứng minh nhân viên đã nhận/xử lý ngoài hệ thống thử.",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "CUSTOMER_REQUESTED_HUMAN",
+        "text": null,
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [],
+      "humanReview": null
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "primaryReviewLockSha": "01fa3d4b4cc7fe7073b0563299d36ea3e2834394",
+  "sha256": "643e2eb57aff8121c94b38ec3f17779586b8242a6c4c73b6d545f1c60d8cc3e6",
+  "runSourceSha": "e2474d0df2f24e1600d3815e4baf8b926f02b703",
+  "protocol": "Actual whole-turn primary committed before verdict/stale diagnostics. Only PUBLIC_CONTEXT_CAPTURE for SQ748 was read to check material source before primary."
+}

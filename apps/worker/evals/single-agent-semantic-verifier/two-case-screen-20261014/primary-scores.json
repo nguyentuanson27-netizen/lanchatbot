@@ -1,0 +1,44 @@
+{
+  "scorer": "CODEX_PRIMARY_AGENT",
+  "method": "OWNER_AUTHORIZED_CODEX_OFFLINE_REVIEW",
+  "scoredAt": "2026-10-14T02:16:16.288761+00:00",
+  "runSourceSha": "9cd8654ff30597122b58fe6777b43d2f8727f087",
+  "rawSavepoint": "8d4e46f84ecf70726ea62e6366db6927653a54ec",
+  "evidenceHash": "932031da1a7984c2343cfc56ed5419a072680ec8635c94720a38f96c46a1b188",
+  "fullCheckpointQualification": false,
+  "limitations": "Primary subjective/nonblind actual-terminal review before reading new rejected drafts/verdict diagnostics; human20scores remain null. No keyword/fact-count grading or independent/human/owner acceptance.",
+  "attempts": [
+    {
+      "attemptId": "C3_TWO_CASE_SCREEN_20261014_01/r5-competitor-price:1",
+      "wholeTurnReview": "Khách đang so giá để quyết định mua set. Actual terminal chỉ nói chưa trả lời được, không đưa giá trị sử dụng từ chất liệu/thiết kế đã có hoặc giúp cân nhắc. An toàn nhưng không xử lý điểm cản mua.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "C3_TWO_CASE_SCREEN_20261014_01/r14-stage-light-change:1",
+      "wholeTurnReview": "Khách đổi sang sân khấu đèn ngược, hỏi có nên lấy trắng và size M còn không. Actual fallback không trả tồn, không khuyên chọn/tránh theo ưu tiên và không dùng evidence độ xuyên đã có. An toàn nhưng không giải quyết quyết định hiện tại.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    }
+  ]
+}

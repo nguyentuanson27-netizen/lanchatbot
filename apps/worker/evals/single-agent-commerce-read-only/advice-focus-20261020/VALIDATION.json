@@ -1,0 +1,22 @@
+{
+  "tdd": {
+    "redPass": 4,
+    "redFail": 2,
+    "greenPass": 6,
+    "greenFail": 0
+  },
+  "focusedTests": {
+    "pass": 65,
+    "fail": 0,
+    "skip": 0
+  },
+  "workerBuildExitCode": 0,
+  "workerTypecheck": "NOT_RUN_NO_TYPESCRIPT_CHANGE",
+  "workerLint": "NOT_RUN_NO_RUNTIME_TYPESCRIPT_CHANGE",
+  "rawGitBlobHashesMatched": 18,
+  "runSourceExecutableConfigBlobsUnchanged": 11,
+  "primaryReviewHashUnchanged": true,
+  "preProviderCorrection": "Frozen byte check first found CRLF differences for PREPARATION.json and .gitattributes; normalized before seal, no provider dispatched with mismatched frozen inputs.",
+  "diffCheck": "PASS_FINAL_WORKTREE_AND_STAGED_REPORT_CHECK",
+  "sendEnabled": false
+}

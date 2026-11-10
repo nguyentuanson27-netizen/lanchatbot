@@ -1,0 +1,287 @@
+{
+  "sourceSha": "235d570a90f792a096e37d4094e6feaf3c7eee95",
+  "mode": "PROVIDER_REAL_POSTGRES_LIVE_PUBLIC_CATALOG_CURRENT_CAPTURED_POLICY_CAPTURE_DELIVERY",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "72a044fe15aaa2ff7471b0e93beae27ec630e7adbfd0a261c9bca1860ab39cbc",
+    "verifier": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c"
+  },
+  "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+  "requestBounds": {
+    "ownerWireBytes": 65536,
+    "verifierWireBytes": 32768
+  },
+  "toolSchemaHash": "0ea9bcd407b360915028476ae80eca2932f3fff9fd505a6d369258abffc288db",
+  "assumedFeedback": null,
+  "fallbackCatalog": {
+    "default": {
+      "id": "C3_A_NONPROTECTED_V2",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+    },
+    "mediaUnavailable": {
+      "id": "C3_B_MEDIA_NEXT_STEP_V1",
+      "text": "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?",
+      "sha256": "c1330d313ad88ccd89abb65f60f42fd29cac3e277d2cd33b0e4a0e49b44d78ee"
+    }
+  },
+  "catalogInputMode": "LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION",
+  "candidateHandoffFileHash": "79b2efa24a82f19ea03f30a9c10dcc594e033cd3232867ace7b6fcc5afdd5e68",
+  "catalogImageInput": {
+    "count": 2,
+    "maxBytes": 524288,
+    "maxRequestBytes": 1507328,
+    "mediaResolution": "MEDIA_RESOLUTION_MEDIUM",
+    "maxDimension": 1024,
+    "maxSourceBytes": 2097152,
+    "maxSourceDimension": 12000,
+    "maxSourcePixels": 50000000,
+    "sourceHashRequired": true,
+    "hashContract": "APPROVED_REGISTRY_REF_PLUS_DOWNLOAD_SHA256_PLUS_PREPARED_SHA256",
+    "resize": "EXISTING_FFMPEG_GEOMETRY_JPEG_Q3_OR_PNG"
+  },
+  "selection": {
+    "mode": "FOUR_OPENINGS_ONLY",
+    "registered": [
+      "sales-discovery-advice:need",
+      "sales-product-gallery:overview",
+      "sales-size-advice:height-weight",
+      "sales-southern-delivery:deadline"
+    ],
+    "deferred": [
+      {
+        "caseId": "sales-ad-focus",
+        "turnId": "ad-price",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-ad-focus",
+        "turnId": "compare",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-ad-focus",
+        "turnId": "chosen-variant",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-discovery-advice",
+        "turnId": "mix",
+        "status": "NOT_REGISTERED",
+        "reason": "DEPENDENT_TURN_REQUIRES_ACCEPTED_OUTPUT_REVIEW"
+      },
+      {
+        "caseId": "sales-discovery-advice",
+        "turnId": "care",
+        "status": "NOT_REGISTERED",
+        "reason": "DEPENDENT_TURN_REQUIRES_ACCEPTED_OUTPUT_REVIEW"
+      },
+      {
+        "caseId": "sales-product-gallery",
+        "turnId": "detail",
+        "status": "NOT_REGISTERED",
+        "reason": "DEPENDENT_TURN_REQUIRES_ACCEPTED_OUTPUT_REVIEW"
+      },
+      {
+        "caseId": "sales-product-gallery",
+        "turnId": "stock",
+        "status": "NOT_REGISTERED",
+        "reason": "DEPENDENT_TURN_REQUIRES_ACCEPTED_OUTPUT_REVIEW"
+      },
+      {
+        "caseId": "sales-incoming-product-photo",
+        "turnId": "find",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-incoming-product-photo",
+        "turnId": "separate-top",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-size-advice",
+        "turnId": "chosen-color",
+        "status": "NOT_REGISTERED",
+        "reason": "DEPENDENT_TURN_REQUIRES_ACCEPTED_OUTPUT_REVIEW"
+      },
+      {
+        "caseId": "sales-two-item-cart",
+        "turnId": "set",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-two-item-cart",
+        "turnId": "extra-top",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-two-item-cart",
+        "turnId": "total",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-negotiation-reprice",
+        "turnId": "objection",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-negotiation-reprice",
+        "turnId": "size-change",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-negotiation-reprice",
+        "turnId": "ready",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-southern-delivery",
+        "turnId": "same-region",
+        "status": "NOT_REGISTERED",
+        "reason": "DEPENDENT_TURN_REQUIRES_ACCEPTED_OUTPUT_REVIEW"
+      },
+      {
+        "caseId": "sales-private-cod",
+        "turnId": "request",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-private-cod",
+        "turnId": "name",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-private-cod",
+        "turnId": "phone",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-private-cod",
+        "turnId": "address",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-private-cod",
+        "turnId": "address-correction",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-private-cod",
+        "turnId": "confirm",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-bank-receipt-batch",
+        "turnId": "bank-confirm",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-bank-receipt-batch",
+        "turnId": "receipt-batch",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-defect-photo-handoff",
+        "turnId": "defect",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-defect-photo-handoff",
+        "turnId": "after-handoff",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      },
+      {
+        "caseId": "sales-order-status-handoff",
+        "turnId": "tracking",
+        "status": "NOT_REGISTERED",
+        "reason": "PREREQUISITE_OR_SETUP_NOT_REGISTERED"
+      }
+    ],
+    "day": "2026-10-24"
+  },
+  "selectionHash": "dafc453e79003e8f01f361434c82ddcaf9a93b4dd54cf1182ba5e42778fb05ac",
+  "corpusHash": "b2575660b7d412eb6a2d11befb04de75fd840789c7126026bb257ce60f183a93",
+  "sourceConfigHash": "b4c15f1823bf16d63a1ff67eb3a11711b28ed6592ec7bc1e65e0ceb3fbbc0d59",
+  "registeredOutcomes": 4,
+  "publicTurns": 4,
+  "privateCodeTurns": 0,
+  "repetitions": 1,
+  "maximumGenerationRequests": 16,
+  "retry": 0,
+  "codex": {
+    "version": "codex-cli 0.159.2",
+    "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+  },
+  "sendEnabled": false
+}

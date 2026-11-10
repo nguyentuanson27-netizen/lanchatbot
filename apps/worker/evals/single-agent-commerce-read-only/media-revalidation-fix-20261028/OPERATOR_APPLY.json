@@ -1,0 +1,162 @@
+{
+  "phase": "apply",
+  "status": "COMPLETE",
+  "apply": true,
+  "productId": "SV2447",
+  "results": [
+    {
+      "pointId": "01322724-71e3-5876-ba5d-2498efb5a67d",
+      "status": "VERIFIED",
+      "reason": "VERIFIED",
+      "proof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:25.509Z",
+        "metadataSha256": "63707e9b469cbc0053205129d56763c1ac143cb0fbc06d88d09d9659c130d664"
+      }
+    },
+    {
+      "pointId": "09e5b6fd-8df1-5f96-8ed2-f6ef185af774",
+      "status": "VERIFIED",
+      "reason": "VERIFIED",
+      "proof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:28.240Z",
+        "metadataSha256": "7a4f790b777e937357826b54c53c08c48336358f96405c0ea30f46f77db10cf8"
+      }
+    },
+    {
+      "pointId": "2b04d7e6-0dea-5791-b457-a31e99f9d1f4",
+      "status": "BLOCKED",
+      "reason": "SOURCE_NOT_APPROVED",
+      "proof": {
+        "version": 1,
+        "status": "INVALID",
+        "checkedAt": "2026-10-28T07:28:30.396Z",
+        "metadataSha256": "cf9770f2313ba9f82b10320cc21177cf6892fbb753ea203f9aa3f816c0f6dd15"
+      }
+    },
+    {
+      "pointId": "2dbf7b1d-222e-530c-b7d7-fe7896bdbcd4",
+      "status": "VERIFIED",
+      "reason": "VERIFIED",
+      "proof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:33.482Z",
+        "metadataSha256": "2e9b4813a41558f362ab576d279cf2aa4cf6e121292265e80398125b0f703947"
+      }
+    },
+    {
+      "pointId": "4f82b664-91b4-532b-9879-34b53fa2e4e0",
+      "status": "VERIFIED",
+      "reason": "VERIFIED",
+      "proof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:36.566Z",
+        "metadataSha256": "6057985d7b716c0737e6672491f97cc83e6d2cf747f1ec7f44c51d3be7137e90"
+      }
+    },
+    {
+      "pointId": "67822a93-e439-5680-be98-b4b7d01c18b5",
+      "status": "VERIFIED",
+      "reason": "VERIFIED",
+      "proof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:39.399Z",
+        "metadataSha256": "1a47238c53ab0132828392dda07e4fd015f8654208127a2b4712f44b9b1ef44f"
+      }
+    },
+    {
+      "pointId": "99aee371-bc23-5cb6-bee7-62b28b303e66",
+      "status": "VERIFIED",
+      "reason": "VERIFIED",
+      "proof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:42.186Z",
+        "metadataSha256": "c051ed4a85b7f78c358ea346097f20dd1106c2afd43f107b1f40f9514e3c14b8"
+      }
+    },
+    {
+      "pointId": "ab43da3b-70d7-516a-a808-2dccba185cde",
+      "status": "VERIFIED",
+      "reason": "VERIFIED",
+      "proof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:44.650Z",
+        "metadataSha256": "7d6e701f78e4e062af3356c6044caccd8bd6a72a1fd94429489c1886e1154238"
+      }
+    },
+    {
+      "pointId": "c08e1198-518e-52d6-94ac-0e9e24b7c84b",
+      "status": "VERIFIED",
+      "reason": "VERIFIED",
+      "proof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:46.917Z",
+        "metadataSha256": "f1a8742c72d8f314de15f66f960be54651d002365cb49f47784691c4833946ed"
+      }
+    },
+    {
+      "pointId": "c841808c-fa26-55da-9d25-7fdf3d5a4f1f",
+      "status": "VERIFIED",
+      "reason": "VERIFIED",
+      "proof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:49.384Z",
+        "metadataSha256": "afc8c6f62695a5fa301084350adc9e5e61a3669e22663e2770cd2e14f2fb89f5"
+      }
+    },
+    {
+      "pointId": "ec064329-be93-54ca-b891-b8343d5010ec",
+      "status": "VERIFIED",
+      "reason": "VERIFIED",
+      "proof": {
+        "version": 1,
+        "status": "VERIFIED",
+        "checkedAt": "2026-10-28T07:28:52.064Z",
+        "metadataSha256": "40a52963721343b3060b17d95192dc89e6d29d89aa5fe836ce77b3ab58192a4c"
+      }
+    }
+  ],
+  "writesDispatched": 11,
+  "semanticFieldsUnchanged": true,
+  "notRun": [],
+  "providerRequests": 0,
+  "embeddingRequests": 0,
+  "sheetsWrites": 0,
+  "vectorUpserts": 0,
+  "sourceSha": "57fb9f320655f15d43af2300682b5c3923c90066",
+  "worktreeDirty": false,
+  "bundleSha256": "b8f779dce6f060c1d8932c8d851c460d4f2cd5829ccc0d674731eff4aa00ec5a",
+  "targets": {
+    "runId": "c3-b-media-revalidation-20261028",
+    "productId": "SV2447",
+    "pointIds": [
+      "01322724-71e3-5876-ba5d-2498efb5a67d",
+      "09e5b6fd-8df1-5f96-8ed2-f6ef185af774",
+      "2b04d7e6-0dea-5791-b457-a31e99f9d1f4",
+      "2dbf7b1d-222e-530c-b7d7-fe7896bdbcd4",
+      "4f82b664-91b4-532b-9879-34b53fa2e4e0",
+      "67822a93-e439-5680-be98-b4b7d01c18b5",
+      "99aee371-bc23-5cb6-bee7-62b28b303e66",
+      "ab43da3b-70d7-516a-a808-2dccba185cde",
+      "c08e1198-518e-52d6-94ac-0e9e24b7c84b",
+      "c841808c-fa26-55da-9d25-7fdf3d5a4f1f",
+      "ec064329-be93-54ca-b891-b8343d5010ec"
+    ]
+  },
+  "confirm_sensitive_read": true,
+  "confirm_write": true,
+  "attempt": "r7",
+  "exitCode": 0,
+  "stdoutSha256": "f32985657d51df501fa4575601016b5230d8722ec09dad28df41e10f5bcf9c32",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

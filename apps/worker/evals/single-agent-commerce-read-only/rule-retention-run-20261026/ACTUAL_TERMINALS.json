@@ -1,0 +1,457 @@
+[
+  {
+    "caseId": "opening-ad",
+    "cohort": "opening-quotes",
+    "customer": [
+      "Bộ này bao nhiêu em?"
+    ],
+    "evidenceMode": "PERSISTED_CAPTURE",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, set váy Thạch Thảo có giá 799.000đ chị nha. Set gồm áo tơ Hàn thêu nổi phối chân váy ren tơ Hàn mềm, form nhẹ bay tự nhiên ạ. Mẫu này có sẵn các size S, M, L, XL chị nhé.",
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [
+      "Dạ, set váy Thạch Thảo có giá 799.000đ chị nha. Set gồm áo tơ Hàn thêu nổi phối chân váy ren tơ Hàn mềm, form nhẹ bay tự nhiên ạ. Mẫu này có sẵn các size S, M, L, XL chị nhé.",
+      "[CODE_IMAGE]",
+      "[CODE_IMAGE]"
+    ],
+    "owner": 2,
+    "verifier": 1,
+    "handoff": null,
+    "review": "Giá799k, size có tồn và mô tả đúng nguồn; actual capture có2ảnh. Optional ATTRIBUTES thiếu không làm mất báo giá.",
+    "criticalFailure": false
+  },
+  {
+    "caseId": "opening-ad-repeat",
+    "cohort": "opening-quotes",
+    "customer": [
+      "Chị hỏi lại chút, cả bộ bao nhiêu nhỉ?"
+    ],
+    "evidenceMode": "PERSISTED_CAPTURE",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, set váy Thạch Thảo có giá 799.000đ chị nha. Set gồm áo tơ Hàn thêu nổi phối chân váy ren tơ Hàn mềm, form nhẹ bay tự nhiên ạ. Mẫu này có sẵn các size S, M, L, XL chị nhé.",
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [
+      "Dạ, set váy Thạch Thảo có giá 799.000đ chị nha. Set gồm áo tơ Hàn thêu nổi phối chân váy ren tơ Hàn mềm, form nhẹ bay tự nhiên ạ. Mẫu này có sẵn các size S, M, L, XL chị nhé."
+    ],
+    "owner": 2,
+    "verifier": 1,
+    "handoff": null,
+    "review": "Giá đúng và không gửi ảnh lặp. Lặp nguyên đoạn mô tả là minor, chưa sửa giọng trong vòng này.",
+    "criticalFailure": false
+  },
+  {
+    "caseId": "opening-organic",
+    "cohort": "opening-quotes",
+    "customer": [
+      "Set Thạch Thảo SV2447 bao nhiêu vậy shop?"
+    ],
+    "evidenceMode": "PERSISTED_CAPTURE",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, set váy Thạch Thảo có giá 799.000đ ạ. Set gồm áo tơ Hàn thêu và chân váy ren tơ Hàn mềm, form nhẹ, hiện sẵn các size S, M, L, XL chị nhé.",
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [
+      "Dạ, set váy Thạch Thảo có giá 799.000đ ạ. Set gồm áo tơ Hàn thêu và chân váy ren tơ Hàn mềm, form nhẹ, hiện sẵn các size S, M, L, XL chị nhé.",
+      "[CODE_IMAGE]",
+      "[CODE_IMAGE]"
+    ],
+    "owner": 2,
+    "verifier": 1,
+    "handoff": null,
+    "review": "Đúng set799k, các size có tồn và2ảnh; không cần mã nguồn ads để trả mẫu khách gọi tên.",
+    "criticalFailure": false
+  },
+  {
+    "caseId": "opening-unresolved",
+    "cohort": "opening-quotes",
+    "customer": [
+      "Mẫu này giá sao em?"
+    ],
+    "evidenceMode": "PERSISTED_CAPTURE",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, chị gửi hình ảnh hoặc tên mẫu giúp em để em kiểm tra giá chính xác cho mình nhé ạ!",
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [
+      "Dạ, chị gửi hình ảnh hoặc tên mẫu giúp em để em kiểm tra giá chính xác cho mình nhé ạ!"
+    ],
+    "owner": 1,
+    "verifier": 1,
+    "handoff": null,
+    "review": "Chưa xác định món nên hỏi khách ảnh/tên; không lấy giá một món mặc định.",
+    "criticalFailure": false
+  },
+  {
+    "caseId": "opening-multipart",
+    "cohort": "opening-quotes",
+    "customer": [
+      "Set Thạch Thảo SV2447 giá bao nhiêu? Chị mua áo riêng được không?"
+    ],
+    "evidenceMode": "PERSISTED_CAPTURE",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, set váy Thạch Thảo có giá 799.000đ ạ. Chị hoàn toàn có thể mua áo riêng được nhé, áo lẻ có giá 499.000đ ạ.",
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [
+      "Dạ, set váy Thạch Thảo có giá 799.000đ ạ. Chị hoàn toàn có thể mua áo riêng được nhé, áo lẻ có giá 499.000đ ạ."
+    ],
+    "owner": 2,
+    "verifier": 1,
+    "handoff": null,
+    "review": "Trả đủ cả bộ799k và áo499k theo đúng2offer; không ép card/ảnh nguyên set cho câu hỏi nhiều phần.",
+    "criticalFailure": false
+  },
+  {
+    "caseId": "media-overview-next:ask",
+    "cohort": "media-followup",
+    "customer": [
+      "Em có ảnh khách mặc bộ Thạch Thảo không?"
+    ],
+    "evidenceMode": "PERSISTED_CAPTURE",
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "text": "Dạ, set Thạch Thảo hiện em chưa có sẵn ảnh khách mặc thực tế ạ.\n\nEm chưa tra được thông tin này ngay. Shop sẽ kiểm tra lại rồi trả lời chị nhé.",
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [
+      "Dạ, set Thạch Thảo hiện em chưa có sẵn ảnh khách mặc thực tế ạ.\n\nEm chưa tra được thông tin này ngay. Shop sẽ kiểm tra lại rồi trả lời chị nhé."
+    ],
+    "owner": 2,
+    "verifier": 1,
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "review": "Nguồn thiếu feedback đã xác nhận: handoff thật và có capture, không gọi catalog là ảnh khách mặc.",
+    "criticalFailure": false
+  },
+  {
+    "caseId": "media-overview-next:continue",
+    "cohort": "media-followup",
+    "customer": [
+      "Gửi chị ảnh cả bộ nhé."
+    ],
+    "evidenceMode": "PERSISTED_CAPTURE",
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "HUMAN_OWNS_CONVERSATION",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [],
+    "owner": 0,
+    "verifier": 0,
+    "handoff": null,
+    "review": "NO_SEND vì lượt trước đã chuyển HUMAN;0owner/0verifier. Đây là dependent code outcome, chưa có phản hồi người nhận handoff.",
+    "criticalFailure": false
+  },
+  {
+    "caseId": "media-detail-next:ask",
+    "cohort": "media-followup",
+    "customer": [
+      "Bộ Thạch Thảo có ảnh khách mặc chưa em?"
+    ],
+    "evidenceMode": "PERSISTED_CAPTURE",
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "text": "Dạ, set Thạch Thảo hiện em chưa có sẵn ảnh khách mặc ạ. Chị chờ em xíu để em kiểm tra và gửi thêm ảnh cho mình nha!\n\nEm chưa tra được thông tin này ngay. Shop sẽ kiểm tra lại rồi trả lời chị nhé.",
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [
+      "Dạ, set Thạch Thảo hiện em chưa có sẵn ảnh khách mặc ạ. Chị chờ em xíu để em kiểm tra và gửi thêm ảnh cho mình nha!\n\nEm chưa tra được thông tin này ngay. Shop sẽ kiểm tra lại rồi trả lời chị nhé."
+    ],
+    "owner": 2,
+    "verifier": 1,
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "review": "Handoff thật khi thiếu feedback. Câu chờ/gửi ảnh hơi hứa trước và trùng holding; ghi minor vì workflow kiểm tra đã được chuyển thật, chưa báo ảnh tồn tại hay đã gửi.",
+    "criticalFailure": false
+  },
+  {
+    "caseId": "media-detail-next:continue",
+    "cohort": "media-followup",
+    "customer": [
+      "Cho chị xem cận phần thêu ở áo nhé."
+    ],
+    "evidenceMode": "PERSISTED_CAPTURE",
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "HUMAN_OWNS_CONVERSATION",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [],
+    "owner": 0,
+    "verifier": 0,
+    "handoff": null,
+    "review": "NO_SEND đúng ownership HUMAN sau handoff; không giả một lượt tư vấn mới hoặc history đã gửi ảnh.",
+    "criticalFailure": false
+  },
+  {
+    "caseId": "media-and-price:ask",
+    "cohort": "media-followup",
+    "customer": [
+      "Em gửi chị ảnh khách mặc bộ Thạch Thảo với. Lấy riêng áo thì bao nhiêu?"
+    ],
+    "evidenceMode": "PERSISTED_CAPTURE",
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "text": "Dạ, áo lẻ set Thạch Thảo có giá 499.000đ, hiện shop sẵn các size S, M, L, XL chị nha.\n\nEm chưa tra được thông tin này ngay. Shop sẽ kiểm tra lại rồi trả lời chị nhé.",
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [
+      "Dạ, áo lẻ set Thạch Thảo có giá 499.000đ, hiện shop sẵn các size S, M, L, XL chị nha.\n\nEm chưa tra được thông tin này ngay. Shop sẽ kiểm tra lại rồi trả lời chị nhé."
+    ],
+    "owner": 2,
+    "verifier": 1,
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "review": "Actual handoff group giữ giá áo499k và size có tồn; phần ảnh thiếu được chuyển thật. Không bị thay cả tin bằng holding.",
+    "criticalFailure": false
+  },
+  {
+    "caseId": "media-and-size:ask",
+    "cohort": "media-followup",
+    "customer": [
+      "Cho chị xem gần phần thêu áo Thạch Thảo nhé. Chị cao 1m58, nặng 52kg thì lấy size nào?"
+    ],
+    "evidenceMode": "PERSISTED_CAPTURE",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ em gửi chị xem ảnh cận cảnh chi tiết thêu của áo ạ. Với chiều cao 1m58 và nặng 52kg, chị mặc size M là vừa đẹp nha chị.",
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [
+      "Dạ em gửi chị xem ảnh cận cảnh chi tiết thêu của áo ạ. Với chiều cao 1m58 và nặng 52kg, chị mặc size M là vừa đẹp nha chị.",
+      "[CODE_IMAGE]"
+    ],
+    "owner": 2,
+    "verifier": 1,
+    "handoff": null,
+    "review": "Engine trả M từ đầu vào đủ; gửi ảnh DETAIL/CLOSEUP có confirmedParts AO. Nhắc chiều cao/cân nặng là minor, không suy fit ngoài engine.",
+    "criticalFailure": false
+  },
+  {
+    "caseId": "media-decision:ask",
+    "cohort": "media-followup",
+    "customer": [
+      "Chị thích bộ Thạch Thảo mà sợ phần ren trông hơi nhiều. Chị mặc đi ăn cưới buổi trưa thôi."
+    ],
+    "evidenceMode": "PERSISTED_CAPTURE",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Chân váy của set là ren tơ Hàn mềm với form nhẹ và độ rũ tự nhiên, mặc lên rất thanh thoát chứ không bị rườm rà hay quá cầu kỳ đâu ạ, rất hợp để chị mặc đi ăn cưới buổi trưa nhẹ nhàng và sang trọng. \n\nEm gửi chị xem ảnh chi tiết chất liệu nha. Nếu chị vẫn lăn tăn về phần ren, mình có thể chọn mua áo lẻ tơ thêu nổi (499.000đ) để phối với chân váy hoặc quần khác, hoặc lấy nguyên set cả bộ (799.000đ) để tổng thể bay bổng và đồng điệu nhất ạ.",
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [
+      "Chân váy của set là ren tơ Hàn mềm với form nhẹ và độ rũ tự nhiên, mặc lên rất thanh thoát chứ không bị rườm rà hay quá cầu kỳ đâu ạ, rất hợp để chị mặc đi ăn cưới buổi trưa nhẹ nhàng và sang trọng. \n\nEm gửi chị xem ảnh chi tiết chất liệu nha. Nếu chị vẫn lăn tăn về phần ren, mình có thể chọn mua áo lẻ tơ thêu nổi (499.000đ) để phối với chân váy hoặc quần khác, hoặc lấy nguyên set cả bộ (799.000đ) để tổng thể bay bổng và đồng điệu nhất ạ.",
+      "[CODE_IMAGE]",
+      "[CODE_IMAGE]"
+    ],
+    "owner": 2,
+    "verifier": 1,
+    "handoff": null,
+    "review": "Giải quyết lo ren cầu kỳ bằng nhận xét phong cách được phép, ảnh chi tiết và phương án áo lẻ499k/cả set799k đúng nguồn. Còn dài, nhiều tính từ và chia lựa chọn; chấp nhận minor theo owner.",
+    "criticalFailure": false
+  },
+  {
+    "caseId": "b1-changed-occasion",
+    "cohort": "b1-first",
+    "customer": [
+      "Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé."
+    ],
+    "evidenceMode": "B1_SEND_ELIGIBILITY_ONLY",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, set Thạch Thảo dùng chất liệu tơ Hàn và ren tơ mềm mại nên khi ngồi ô tô di chuyển 3 tiếng sẽ dễ bị hằn nếp nhăn ạ. \n\nNếu chị cần mẫu giữ form tốt và hạn chế nhăn hơn cho chuyến đi dài, em gợi ý sang **Set quần SQ675** (chất thô ướt cao cấp phối thô hoa laze, có lót habutai bên trong đứng dáng). Mẫu này là hàng đặt trước, chị xem thời gian chuẩn bị có kịp không nhé ạ. \n\nHoặc nếu chị muốn chọn mẫu có sẵn để diện luôn, **Váy Ngọc Trâm (V406)** với chất ren hoa nổi và tơ ống mềm sang trọng cũng rất phù hợp đi đám cưới ạ.",
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [
+      "Dạ, set Thạch Thảo dùng chất liệu tơ Hàn và ren tơ mềm mại nên khi ngồi ô tô di chuyển 3 tiếng sẽ dễ bị hằn nếp nhăn ạ. \n\nNếu chị cần mẫu giữ form tốt và hạn chế nhăn hơn cho chuyến đi dài, em gợi ý sang **Set quần SQ675** (chất thô ướt cao cấp phối thô hoa laze, có lót habutai bên trong đứng dáng). Mẫu này là hàng đặt trước, chị xem thời gian chuẩn bị có kịp không nhé ạ. \n\nHoặc nếu chị muốn chọn mẫu có sẵn để diện luôn, **Váy Ngọc Trâm (V406)** với chất ren hoa nổi và tơ ống mềm sang trọng cũng rất phù hợp đi đám cưới ạ."
+    ],
+    "owner": 3,
+    "verifier": 1,
+    "handoff": null,
+    "review": "Đọc lại hoàn cảnh và tìm2món; SQ675 PRE_ORDER/V406 có tồn đúng source. So sánh định tính vật liệu/form thuộc phạm vi đã duyệt; còn dài và đẩy khách tự xét thời gian chuẩn bị. Không coi đây là cam kết không nhăn hoặc hiệu quả3giờ.",
+    "criticalFailure": false
+  },
+  {
+    "caseId": "b1-current-policy",
+    "cohort": "b1-first",
+    "customer": [
+      "Đơn này chị nhận 10 hôm rồi, mới chỉ cầm lên ngắm trước gương, tem mác vẫn còn. Giờ đổi màu còn kịp không em? Phí đổi bao nhiêu?"
+    ],
+    "evidenceMode": "B1_SEND_ELIGIBILITY_ONLY",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ đơn nhận 10 hôm thì vẫn trong thời hạn đổi hàng 15 ngày của shop chị nhé. Phí đổi hàng là 30.000đ tiền vận chuyển 2 chiều ạ.",
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [
+      "Dạ đơn nhận 10 hôm thì vẫn trong thời hạn đổi hàng 15 ngày của shop chị nhé. Phí đổi hàng là 30.000đ tiền vận chuyển 2 chiều ạ."
+    ],
+    "owner": 2,
+    "verifier": 1,
+    "handoff": null,
+    "review": "Đúng nguồn hiện hành:15ngày/30k, trả trong phạm vi thời hạn/phí; không cần lặp mọi điều kiện.",
+    "criticalFailure": false
+  },
+  {
+    "caseId": "b1-partial-source",
+    "cohort": "b1-first",
+    "customer": [
+      "Set Thạch Thảo may bằng vải gì vậy em? Chị muốn lấy size M, em xem giúp chị giá bao nhiêu và còn hàng không nhé."
+    ],
+    "evidenceMode": "B1_SEND_ELIGIBILITY_ONLY",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Set Thạch Thảo có phần áo làm từ tơ Hàn thêu, họa tiết thêu nổi, form nhẹ, vải mềm thoáng và có độ bay tự nhiên; chân váy bằng ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên chị nhé. \n\nDạ hiện tại hệ thống bên em đang tạm chưa load được dữ liệu giá và tồn kho chi tiết của size M, chị đợi em kiểm tra lại rồi báo chị mức giá chính xác và tình trạng còn hàng của size này nha ạ!",
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [
+      "Set Thạch Thảo có phần áo làm từ tơ Hàn thêu, họa tiết thêu nổi, form nhẹ, vải mềm thoáng và có độ bay tự nhiên; chân váy bằng ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên chị nhé. \n\nDạ hiện tại hệ thống bên em đang tạm chưa load được dữ liệu giá và tồn kho chi tiết của size M, chị đợi em kiểm tra lại rồi báo chị mức giá chính xác và tình trạng còn hàng của size này nha ạ!"
+    ],
+    "owner": 2,
+    "verifier": 1,
+    "handoff": null,
+    "review": "Trả đúng chất liệu, không bịa giá/tồn, nhưng hứa đợi kiểm tra rồi báo khi B1 chỉ có read tools, không handoff/callback. Vi phạm expected trước run. Verifier PASS không chứng minh bước theo dõi tồn tại. Lỗi owner/capability communication trong B1, chưa phải lỗi atomic handoff B2.",
+    "criticalFailure": true
+  },
+  {
+    "caseId": "b1-price",
+    "cohort": "b1-first",
+    "customer": [
+      "Set Thạch Thảo mã SV2447 giá bao nhiêu vậy em?"
+    ],
+    "evidenceMode": "B1_SEND_ELIGIBILITY_ONLY",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Set váy Thạch Thảo có giá 799.000đ chị nhé. Thiết kế gồm áo tơ Hàn thêu họa tiết nổi form nhẹ và chân váy ren tơ Hàn mềm mại, có độ rũ tự nhiên. Sản phẩm hiện có sẵn các size S, M, L, XL ạ.",
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [
+      "Set váy Thạch Thảo có giá 799.000đ chị nhé. Thiết kế gồm áo tơ Hàn thêu họa tiết nổi form nhẹ và chân váy ren tơ Hàn mềm mại, có độ rũ tự nhiên. Sản phẩm hiện có sẵn các size S, M, L, XL ạ."
+    ],
+    "owner": 2,
+    "verifier": 1,
+    "handoff": null,
+    "review": "Đúng giá799k và các size có tồn. Mô tả thêm khi chỉ hỏi giá là minor.",
+    "criticalFailure": false
+  },
+  {
+    "caseId": "b1-component-stock",
+    "cohort": "b1-first",
+    "customer": [
+      "Áo của bộ Thạch Thảo size M còn không em? Áo bán riêng bao nhiêu?"
+    ],
+    "evidenceMode": "B1_SEND_ELIGIBILITY_ONLY",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, áo của set Thạch Thảo size M hiện còn hàng chị nha, áo bán riêng có giá 499.000đ ạ.",
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [
+      "Dạ, áo của set Thạch Thảo size M hiện còn hàng chị nha, áo bán riêng có giá 499.000đ ạ."
+    ],
+    "owner": 2,
+    "verifier": 1,
+    "handoff": null,
+    "review": "Đúng áo lẻ499k và M có tồn; không nhầm nguyên set.",
+    "criticalFailure": false
+  },
+  {
+    "caseId": "b1-search-read",
+    "cohort": "b1-first",
+    "customer": [
+      "Em xem giúp chị áo dài mã SD375 giá bao nhiêu nhé."
+    ],
+    "evidenceMode": "B1_SEND_ELIGIBILITY_ONLY",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, áo dài mã SD375 có giá theo từng phần bán như sau ạ:\n- Áo lẻ: 929.000đ\n- Cả bộ: 1.065.000đ\n\nMẫu này hiện có sẵn các size S, M, L chị nha.",
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [
+      "Dạ, áo dài mã SD375 có giá theo từng phần bán như sau ạ:\n- Áo lẻ: 929.000đ\n- Cả bộ: 1.065.000đ\n\nMẫu này hiện có sẵn các size S, M, L chị nha."
+    ],
+    "owner": 3,
+    "verifier": 1,
+    "handoff": null,
+    "review": "Tìm đúng SD375, giá áo929k/cả bộ1065k và các size được xác nhận; chưa dùng mã gợi ý khác thay món khách hỏi.",
+    "criticalFailure": false
+  },
+  {
+    "caseId": "b1-buying-concern",
+    "cohort": "b1-first",
+    "customer": [
+      "Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn."
+    ],
+    "evidenceMode": "B1_SEND_ELIGIBILITY_ONLY",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ set váy Thạch Thảo có giá 799.000đ, hoàn toàn vừa vặn với ngân sách 900.000đ của mình ạ. \n\nChân váy sử dụng chất ren tơ Hàn mềm, form nhẹ có độ rũ tự nhiên kết hợp cùng áo tơ Hàn thêu họa tiết nổi thanh thoát. Thiết kế tạo nét bay bổng, nhẹ nhàng chứ không bị rườm rà, rất hợp để diện đi tiệc ban ngày ạ. \n\nMẫu này hiện có sẵn các size S, M, L, XL.",
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [
+      "Dạ set váy Thạch Thảo có giá 799.000đ, hoàn toàn vừa vặn với ngân sách 900.000đ của mình ạ. \n\nChân váy sử dụng chất ren tơ Hàn mềm, form nhẹ có độ rũ tự nhiên kết hợp cùng áo tơ Hàn thêu họa tiết nổi thanh thoát. Thiết kế tạo nét bay bổng, nhẹ nhàng chứ không bị rườm rà, rất hợp để diện đi tiệc ban ngày ạ. \n\nMẫu này hiện có sẵn các size S, M, L, XL."
+    ],
+    "owner": 2,
+    "verifier": 1,
+    "handoff": null,
+    "review": "Set799k trong900k, trả nỗi lo ren theo phong cách được phép. Lời khuyên còn thiên mô tả và nhắc budget nhưng không sai dữ kiện; minor theo scope.",
+    "criticalFailure": false
+  },
+  {
+    "caseId": "b1-policy-used",
+    "cohort": "b1-first",
+    "customer": [
+      "Chị đã mặc bộ này đi làm một buổi rồi nhưng về thấy không hợp. Giờ chị đổi sang màu khác được không em? Nếu đổi thì ai chịu phí ship?"
+    ],
+    "evidenceMode": "B1_SEND_ELIGIBILITY_ONLY",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, chính sách đổi hàng của shop áp dụng cho sản phẩm còn mới và chưa qua sử dụng ạ. Do chị đã mặc đi làm rồi nên sản phẩm không đủ điều kiện đổi sang màu khác. Nếu sản phẩm đủ điều kiện đổi hợp lệ, phí ship 2 chiều là 30.000đ do khách chịu ạ.",
+      "fallbackId": null
+    },
+    "actualCustomerOutcome": [
+      "Dạ, chính sách đổi hàng của shop áp dụng cho sản phẩm còn mới và chưa qua sử dụng ạ. Do chị đã mặc đi làm rồi nên sản phẩm không đủ điều kiện đổi sang màu khác. Nếu sản phẩm đủ điều kiện đổi hợp lệ, phí ship 2 chiều là 30.000đ do khách chịu ạ."
+    ],
+    "owner": 2,
+    "verifier": 1,
+    "handoff": null,
+    "review": "Đọc tình huống đã mặc đi làm rồi, kết luận không đủ điều kiện đổi trước; phí30k chỉ nêu cho hồ sơ hợp lệ. Không mở đầu bằng cho đổi rồi mới đính chính.",
+    "criticalFailure": false
+  }
+]

@@ -1,0 +1,54 @@
+{
+  "caseId": "sales-discovery-advice:need",
+  "scope": "OFFLINE_EXACT_CURRENT_DRAFT_CONTEXT_REVIEW_NO_RETRY",
+  "artifact": "journey-openings/provider-attempt-1.json",
+  "artifactSha256": "5f114619b03c6f7a069da6b55b2100fe7c4192a25123c775d7311e76f4415f55",
+  "observedVerdict": "{\"verdict\":\"PASS\",\"violations\":[]}",
+  "observedTerminal": {
+    "disposition": "SEND_ELIGIBLE",
+    "reason": "PASS",
+    "text": "Em gợi ý chị 2 mẫu set quần đi làm dưới 1 triệu, thiết kế thoải mái không lo bó bụng ạ:\n\n1. **Set quần Thạch Thảo (SQ2447)** – 769.000đ\n- **Chất liệu & form dáng:** Tơ Hàn thêu cao cấp mềm mại, có độ rũ nhẹ bay bổng; thiết kế thanh lịch, hiện đại, quần dễ mặc và thoải mái.\n- **Size:** S, M, L, XL.\n\n2. **SET QUẦN UYỂN HOA (SQ748)** – 799.000đ\n- **Chất liệu & form dáng:** Thô đũi cao cấp mềm mịn, thoáng khí, thấm hút tốt; quần short form suông có thiết kế lưng chun đồng bộ giúp vận động thoải mái, không bị bó bụng.\n- **Size:** S, L.\n\nChị ưng mẫu nào có thể nhắn em chiều cao cân nặng hoặc size chị hay mặc để em tư vấn chuẩn hơn nhé ạ!",
+    "fallbackId": null
+  },
+  "actualLatest": "Chị tìm bộ áo quần đi làm, dưới một triệu thôi, đừng bó bụng quá.",
+  "draft": "Em gợi ý chị 2 mẫu set quần đi làm dưới 1 triệu, thiết kế thoải mái không lo bó bụng ạ:\n\n1. **Set quần Thạch Thảo (SQ2447)** – 769.000đ\n- **Chất liệu & form dáng:** Tơ Hàn thêu cao cấp mềm mại, có độ rũ nhẹ bay bổng; thiết kế thanh lịch, hiện đại, quần dễ mặc và thoải mái.\n- **Size:** S, M, L, XL.\n\n2. **SET QUẦN UYỂN HOA (SQ748)** – 799.000đ\n- **Chất liệu & form dáng:** Thô đũi cao cấp mềm mịn, thoáng khí, thấm hút tốt; quần short form suông có thiết kế lưng chun đồng bộ giúp vận động thoải mái, không bị bó bụng.\n- **Size:** S, L.\n\nChị ưng mẫu nào có thể nhắn em chiều cao cân nặng hoặc size chị hay mặc để em tư vấn chuẩn hơn nhé ạ!",
+  "sizeFitCount": 0,
+  "sources": [
+    {
+      "subjectRef": "SQ2447",
+      "content": {
+        "description": "Thiết kế đồng bộ, tinh tế với chất liệu tơ Hàn thêu cao cấp cho cả áo và quần, mang lại cảm giác nhẹ nhàng, mềm mại và bay bổng khi mặc. Bề mặt vải được thêu họa tiết tinh xảo, tạo điểm nhấn sang trọng và cuốn hút. Áo được thiết kế form nhẹ nhàng, giúp tôn dáng thanh thoát nhưng vẫn đảm bảo sự thoải mái. Các chi tiết thêu được xử lý tỉ mỉ, tạo hiệu ứng nổi bật nhưng không quá cầu kỳ, giữ được nét dịu dàng và thanh lịch. Quần được làm từ tơ Hàn thêu đồng bộ, mềm mịn, có độ rũ nhẹ giúp tổng thể trang phục hài hòa và tinh tế hơn. Thiết kế quần dễ mặc, phù hợp với nhiều vóc dáng. Tổng thể set đồ mang phong cách nữ tính – thanh lịch – hiện đại, dễ ứng dụng trong nhiều hoàn cảnh khác nhau.",
+        "metadata": {
+          "authority": "WEBSTORE_XML",
+          "expiresAt": null,
+          "freshForSeconds": null,
+          "freshnessState": "FRESH",
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "sourceVersion": "catalog-v2"
+        },
+        "productName": "Set quần Thạch Thảo",
+        "productUrl": null
+      }
+    },
+    {
+      "subjectRef": "SQ748",
+      "content": {
+        "description": "Màu sắc Tone kem phối họa tiết thổ cẩm hồng pastel và be nhạt, mang đến tổng thể ngọt ngào, thanh lịch và nữ tính. Set được may từ vải thô đũi cao cấp với bề mặt mềm mịn, thoáng khí và thấm hút tốt, mang lại cảm giác nhẹ nhàng, dễ chịu khi mặc Set gồm á kết hợp quần short lưng chun đồng bộ, chi tiết bèo xếp tầng ở gấu áo giúp tôn vòng eo và tạo hiệu ứng mềm mại, nữ tính. Quần short form suông, chiều dài vừa vặn giúp tôn dáng và tạo sự thoải mái khi vận động.",
+        "metadata": {
+          "authority": "WEBSTORE_XML",
+          "expiresAt": null,
+          "freshForSeconds": null,
+          "freshnessState": "FRESH",
+          "observedAt": "2026-09-28T04:31:05.725Z",
+          "sourceVersion": "catalog-v2"
+        },
+        "productName": "SET QUẦN UYỂN HOA",
+        "productUrl": null
+      }
+    }
+  ],
+  "diagnosis": "Batch decision improved: actual second generation read SQ748+SQ2447, both below budget. The reply still applies no-tight-waist reassurance to two models, while SQ2447 source only provides generic design/comfort and no bound personal fit. Distinguish allowed qualitative advice from personal fit assurance; PASS is observed, native semantic classification requires owner review, not asserted zero native false PASS.",
+  "counterHypothesis": "Wording describes design rather than selected personal size and ends with a size-input request. Whole reply/source scope matters; absence of SIZE_FIT alone does not prove every generic comfort remark unsafe.",
+  "status": "REVIEW_REQUIRED_FIT_SCOPE_NOT_A_VERIFIER_STABILITY_PROOF",
+  "verifierPromptSha256": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c"
+}

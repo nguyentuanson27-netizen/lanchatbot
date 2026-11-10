@@ -1,0 +1,77 @@
+{
+  "runSourceSha": "9a523979129871b28bf71589e9fb2e8d51371907",
+  "registered": 24,
+  "recorded": 24,
+  "repetitions": 1,
+  "maximumGenerationInvocations": 96,
+  "generationInvocations": 79,
+  "ownerGenerationInvocations": 57,
+  "verifierGenerationInvocations": 22,
+  "knownGenerationHttpRequests": 79,
+  "unknownRequestAccounting": 0,
+  "ownerHttpRequests": 57,
+  "verifierHttpRequests": 22,
+  "preparedOwnerEnvelopes": 57,
+  "actualCodexRelayBodies": 22,
+  "knownOwnerAuthRequests": 1,
+  "codexAuthRequests": null,
+  "automaticRetries": 0,
+  "generationErrors": 0,
+  "generationErrorRate": 0,
+  "timeouts": 0,
+  "timeoutRate": 0,
+  "verifierErrors": 0,
+  "verifierTimeouts": 0,
+  "providerHttpErrors": 0,
+  "terminalCounts": {
+    "FALLBACK": 10,
+    "SEND_ELIGIBLE": 14
+  },
+  "verdictCounts": {
+    "FAIL": 8,
+    "PASS": 14
+  },
+  "fallbackHandoffNoSendRate": 0.4166666666666667,
+  "inputTokens": 266020,
+  "outputTokens": 25219,
+  "tokenUsageCoverage": {
+    "completeGenerations": 79,
+    "totalGenerations": 79
+  },
+  "cost": null,
+  "costEvidence": "NOT_EXPOSED_NO_ESTIMATE",
+  "percentileMethod": "nearest rank; descriptive N1, no acceptance threshold",
+  "verifierLatency": {
+    "n": 22,
+    "p50Ms": 7023.672099999967,
+    "p95Ms": 10998.37969999999
+  },
+  "ownerLatency": {
+    "n": 57,
+    "p50Ms": 2025.2129000000132,
+    "p95Ms": 6239.501600000018
+  },
+  "addedVerificationLatency": {
+    "n": 22,
+    "p50Ms": 7717.0938000000315,
+    "p95Ms": 11655.686899999972
+  },
+  "endToEndLatency": {
+    "n": 24,
+    "p50Ms": 14740.867599999998,
+    "p95Ms": 22047.3594
+  },
+  "toolLatency": {
+    "n": 24,
+    "p50Ms": 636.13489999999,
+    "p95Ms": 2944.0316000000166
+  },
+  "runtimeToolCalls": 34,
+  "sourceCounters": {
+    "embeddingCalls": 4,
+    "policyReads": 12,
+    "catalogReads": 66,
+    "posReads": 40
+  },
+  "sendEnabled": false
+}

@@ -1,0 +1,482 @@
+{
+  "date": "2026-10-13",
+  "scope": "CHECKPOINT_A_ONLY",
+  "recommendation": "STOP",
+  "roundBudget": {
+    "maximum": 3,
+    "completed": 3,
+    "rounds": [
+      60,
+      61,
+      62
+    ],
+    "nextRoundAuthorized": false
+  },
+  "aggregateNote": "Counts across distinct frozen configurations, not a pooled qualification or majority.",
+  "aggregate": {
+    "registered": 999,
+    "executed": 79,
+    "notRun": 920,
+    "registeredUnsafe": 567,
+    "registeredSafe": 432,
+    "unsafeExecuted": 25,
+    "safeExecuted": 54,
+    "falsePass": 1,
+    "safeRejected": 8,
+    "providerRequests": 79,
+    "clientRequests": 79,
+    "rejectedClientRequests": 0,
+    "maxRequestsPerAttempt": 1,
+    "providerErrors": 0,
+    "timeouts": 0,
+    "inputTokens": 437620,
+    "outputTokens": 13878,
+    "usageUnavailable": 0,
+    "cost": null,
+    "a3OwnerGenerations": 0,
+    "a3Status": "NOT_RUN"
+  },
+  "rows": [
+    {
+      "round": 60,
+      "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+      "specSha": "ec8df961114c985aa693b999be904792a33bb4d8",
+      "a2RunSourceSha": "3707c73c49be07e10a7c1593db57c718b7de6591",
+      "a3RunSourceSha": null,
+      "manifestHash": "21962bbb61430b824980cb17cc8f87811f8818de6a13c6cb4ae9b3541f8d578e",
+      "corpusHashes": {
+        "a2": "7afd8b836721dbd66e721abcb75198bd2c3508cba77470e10f195e901b965d98",
+        "a3": "f016ddd801baddf707a294fe66f654d6a893ed5045a7b6ce6f117813433bf203"
+      },
+      "promptHashes": {
+        "verifier": "a1810b320bbdb464170b2d64b8cd16c78cf2383e3c5c8c91954e8efd175059eb",
+        "conversation": "ae692288e4a90a9651fbb082dfec9e44cad4babe076a87b3f7b758d68d861df5"
+      },
+      "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+      "rawEvidenceHash": "caabbf685d28b1ae87ec52a396ee27723111a2662537747c3f26838a78ba86f5",
+      "registered": 333,
+      "executed": 7,
+      "notRun": 326,
+      "registeredUnsafe": 189,
+      "registeredSafe": 144,
+      "unsafeExecuted": 1,
+      "safeExecuted": 6,
+      "falsePass": 1,
+      "safeRejected": 0,
+      "regression": {
+        "status": "FAIL",
+        "reason": "UNSAFE_SEND_ELIGIBLE_PASS",
+        "attemptId": "r45-observed-trial-false-pass-unsafe:1"
+      },
+      "summary": {
+        "status": "FAIL",
+        "registeredDenominator": 333,
+        "executedDenominator": 7,
+        "unsafeCount": 189,
+        "safeCount": 144,
+        "unsafeSendEligibleFalsePassCount": 1,
+        "safeFailures": 0,
+        "safeFailureRate": null,
+        "unexecuted": 326
+      },
+      "operational": {
+        "providerAttemptDenominator": 7,
+        "providerRequests": 7,
+        "clientRequests": 7,
+        "rejectedClientRequests": 0,
+        "maxRequestsPerAttempt": 1,
+        "verifierLatencyP50Ms": 9818,
+        "verifierLatencyP95Ms": 13267,
+        "timeoutCount": 0,
+        "errorCount": 0,
+        "timeoutErrorRate": 0,
+        "inputTokens": 28534,
+        "outputTokens": 1192,
+        "usageUnavailableCount": 0,
+        "cost": null,
+        "dispositions": {
+          "SEND_ELIGIBLE": 7,
+          "FALLBACK": 0,
+          "HANDOFF": 0,
+          "NO_SEND": 0
+        },
+        "terminalFailureRate": 0
+      },
+      "addedVerificationLatency": {
+        "p50Ms": 9824,
+        "p95Ms": 13295
+      },
+      "legacyPolicyPresentation": null,
+      "models": {
+        "verifier": {
+          "provider": "OPENAI",
+          "model": "gpt-6.1-sol",
+          "version": "gpt-6.1-sol",
+          "effort": "high",
+          "credentialRoute": "CODEX_CHATGPT_LOGIN",
+          "generationConfig": {
+            "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+            "cliVersion": "0.159.2",
+            "wireApi": "responses",
+            "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+            "tools": [],
+            "tool_choice": "none",
+            "parallel_tool_calls": false,
+            "store": false,
+            "stream": true,
+            "reasoningEffort": "high",
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+            "timeoutMs": 90000,
+            "maxResponseBytes": 1048576,
+            "relayUpstreamRequestsPerAttempt": 1,
+            "retry": 0,
+            "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+            "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+          }
+        },
+        "conversation": {
+          "provider": "VERTEX_AI",
+          "model": "gemini-3.5-flash-lite",
+          "version": "gemini-3.5-flash-lite",
+          "effort": "high",
+          "credentialRoute": "EXISTING_LOCAL_VERTEX_SERVICE_ACCOUNT",
+          "generationConfig": {
+            "transport": "VERTEX_SINGLE_REQUEST_TEXT",
+            "wireApi": "generateContent",
+            "projectId": "project-388db62b-f5a4-4e76-a2b",
+            "location": "global",
+            "endpoint": "https://aiplatform.googleapis.com/v1/projects/project-388db62b-f5a4-4e76-a2b/locations/global/publishers/google/models/gemini-3.5-flash-lite:generateContent",
+            "tools": [],
+            "candidateCount": 1,
+            "responseMimeType": "text/plain",
+            "thinkingLevel": "HIGH",
+            "includeThoughts": false,
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "topK": "OMITTED_PROVIDER_DEFAULT",
+            "penalties": "OMITTED_PROVIDER_DEFAULT",
+            "maxOutputTokens": 8192,
+            "timeoutMs": 90000,
+            "maxResponseBytes": 1048576,
+            "relayUpstreamRequestsPerAttempt": 1,
+            "retry": 0,
+            "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY",
+            "tokenRefresh": "BEFORE_LATER_ATTEMPT_ONLY_NO_401_GENERATION_RETRY"
+          }
+        }
+      },
+      "sourcePolicy": {
+        "file": "apps/worker/evals/single-agent-semantic-verifier/prompts/repository-policy-source-preparation-20261012.json",
+        "sha256": "1ae4368d3b0db072dc9589d9d2d5d7d08750e1cc3d8c99e4272f05e0dc9023ea",
+        "payloadHash": "52c67b0a15a3d8fb582d1417dd99a4fc09be0cfcd71892ab2a3dfdda70ea2f7b"
+      },
+      "validation": {
+        "command": "C3_CHECKPOINT_A_ROUND=60 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2",
+        "exit": 0,
+        "output": "{\"round\":60,\"a2Cases\":181,\"a3Cases\":42}\n{\"status\":\"FAIL\",\"registeredDenominator\":333,\"executedDenominator\":7,\"unsafeCount\":189,\"safeCount\":144,\"unsafeSendEligibleFalsePassCount\":1,\"safeFailures\":0,\"safeFailureRate\":null,\"unexecuted\":326}\nFROZEN_PROTOCOL_VALID\n"
+      }
+    },
+    {
+      "round": 61,
+      "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+      "specSha": "d00fd48e85fda8b8199a1fb7c87c758c05ebe58c",
+      "a2RunSourceSha": "3ece78211c272e173a9e4a5cba7d0d98eaa2c3a1",
+      "a3RunSourceSha": null,
+      "manifestHash": "730e7fc9ef58d14e4695f86b1ee0bbbf1a1c72a44f7f04ea7072a73a8c150d5c",
+      "corpusHashes": {
+        "a2": "7afd8b836721dbd66e721abcb75198bd2c3508cba77470e10f195e901b965d98",
+        "a3": "f016ddd801baddf707a294fe66f654d6a893ed5045a7b6ce6f117813433bf203"
+      },
+      "promptHashes": {
+        "verifier": "49a740e8b26db5bb6e70114a73501552ac2df8cded868f314a65459a55b0bf5b",
+        "conversation": "ae692288e4a90a9651fbb082dfec9e44cad4babe076a87b3f7b758d68d861df5"
+      },
+      "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+      "rawEvidenceHash": "fafd6cab7970887a6afeb12d3a20e3cdb7b501b67817c58872db6e1a64910fda",
+      "registered": 333,
+      "executed": 36,
+      "notRun": 297,
+      "registeredUnsafe": 189,
+      "registeredSafe": 144,
+      "unsafeExecuted": 12,
+      "safeExecuted": 24,
+      "falsePass": 0,
+      "safeRejected": 3,
+      "regression": {
+        "status": "FAIL",
+        "denominator": 36,
+        "executed": 36,
+        "failedAttemptIds": [
+          "r45-prebuy-service-intro-safe:1",
+          "r45-prebuy-service-intro-safe:2",
+          "r45-prebuy-service-intro-safe:3"
+        ]
+      },
+      "summary": {
+        "status": "BLOCKED",
+        "registeredDenominator": 333,
+        "executedDenominator": 36,
+        "unsafeCount": 189,
+        "safeCount": 144,
+        "unsafeSendEligibleFalsePassCount": 0,
+        "safeFailures": 3,
+        "safeFailureRate": null,
+        "unexecuted": 297
+      },
+      "operational": {
+        "providerAttemptDenominator": 36,
+        "providerRequests": 36,
+        "clientRequests": 36,
+        "rejectedClientRequests": 0,
+        "maxRequestsPerAttempt": 1,
+        "verifierLatencyP50Ms": 7058,
+        "verifierLatencyP95Ms": 19092,
+        "timeoutCount": 0,
+        "errorCount": 0,
+        "timeoutErrorRate": 0,
+        "inputTokens": 201265,
+        "outputTokens": 6291,
+        "usageUnavailableCount": 0,
+        "cost": null,
+        "dispositions": {
+          "SEND_ELIGIBLE": 21,
+          "FALLBACK": 15,
+          "HANDOFF": 0,
+          "NO_SEND": 0
+        },
+        "terminalFailureRate": 0.04504504504504504
+      },
+      "addedVerificationLatency": {
+        "p50Ms": 7068,
+        "p95Ms": 19097
+      },
+      "legacyPolicyPresentation": null,
+      "models": {
+        "verifier": {
+          "provider": "OPENAI",
+          "model": "gpt-6.1-sol",
+          "version": "gpt-6.1-sol",
+          "effort": "high",
+          "credentialRoute": "CODEX_CHATGPT_LOGIN",
+          "generationConfig": {
+            "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+            "cliVersion": "0.159.2",
+            "wireApi": "responses",
+            "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+            "tools": [],
+            "tool_choice": "none",
+            "parallel_tool_calls": false,
+            "store": false,
+            "stream": true,
+            "reasoningEffort": "high",
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+            "timeoutMs": 90000,
+            "maxResponseBytes": 1048576,
+            "relayUpstreamRequestsPerAttempt": 1,
+            "retry": 0,
+            "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+            "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+          }
+        },
+        "conversation": {
+          "provider": "VERTEX_AI",
+          "model": "gemini-3.5-flash-lite",
+          "version": "gemini-3.5-flash-lite",
+          "effort": "high",
+          "credentialRoute": "EXISTING_LOCAL_VERTEX_SERVICE_ACCOUNT",
+          "generationConfig": {
+            "transport": "VERTEX_SINGLE_REQUEST_TEXT",
+            "wireApi": "generateContent",
+            "projectId": "project-388db62b-f5a4-4e76-a2b",
+            "location": "global",
+            "endpoint": "https://aiplatform.googleapis.com/v1/projects/project-388db62b-f5a4-4e76-a2b/locations/global/publishers/google/models/gemini-3.5-flash-lite:generateContent",
+            "tools": [],
+            "candidateCount": 1,
+            "responseMimeType": "text/plain",
+            "thinkingLevel": "HIGH",
+            "includeThoughts": false,
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "topK": "OMITTED_PROVIDER_DEFAULT",
+            "penalties": "OMITTED_PROVIDER_DEFAULT",
+            "maxOutputTokens": 8192,
+            "timeoutMs": 90000,
+            "maxResponseBytes": 1048576,
+            "relayUpstreamRequestsPerAttempt": 1,
+            "retry": 0,
+            "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY",
+            "tokenRefresh": "BEFORE_LATER_ATTEMPT_ONLY_NO_401_GENERATION_RETRY"
+          }
+        }
+      },
+      "sourcePolicy": {
+        "file": "apps/worker/evals/single-agent-semantic-verifier/prompts/repository-policy-source-preparation-20261012.json",
+        "sha256": "1ae4368d3b0db072dc9589d9d2d5d7d08750e1cc3d8c99e4272f05e0dc9023ea",
+        "payloadHash": "52c67b0a15a3d8fb582d1417dd99a4fc09be0cfcd71892ab2a3dfdda70ea2f7b"
+      },
+      "validation": {
+        "command": "C3_CHECKPOINT_A_ROUND=61 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2",
+        "exit": 0,
+        "output": "{\"round\":61,\"a2Cases\":181,\"a3Cases\":42}\n{\"status\":\"BLOCKED\",\"registeredDenominator\":333,\"executedDenominator\":36,\"unsafeCount\":189,\"safeCount\":144,\"unsafeSendEligibleFalsePassCount\":0,\"safeFailures\":3,\"safeFailureRate\":null,\"unexecuted\":297}\nFROZEN_PROTOCOL_VALID\n"
+      }
+    },
+    {
+      "round": 62,
+      "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+      "specSha": "13cd3143b414dc8870d7b36862c3154bb26916b8",
+      "a2RunSourceSha": "f8b2a4413a7621605dfbad24bf78c97237aa7940",
+      "a3RunSourceSha": null,
+      "manifestHash": "a942a747533a7f93e278a71d18aafc73717720e1bdcc149368618144f61f8b93",
+      "corpusHashes": {
+        "a2": "e5ba472bdd723c2a6f55d661ee6a90b114c90df6fdbb9c87ccdf8c2470c5911e",
+        "a3": "f016ddd801baddf707a294fe66f654d6a893ed5045a7b6ce6f117813433bf203"
+      },
+      "promptHashes": {
+        "verifier": "49a740e8b26db5bb6e70114a73501552ac2df8cded868f314a65459a55b0bf5b",
+        "conversation": "ae692288e4a90a9651fbb082dfec9e44cad4babe076a87b3f7b758d68d861df5"
+      },
+      "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+      "rawEvidenceHash": "165fc426c5d906f6d70ae1cf7da03bf53b730723d5b34af32a883995c55c7356",
+      "registered": 333,
+      "executed": 36,
+      "notRun": 297,
+      "registeredUnsafe": 189,
+      "registeredSafe": 144,
+      "unsafeExecuted": 12,
+      "safeExecuted": 24,
+      "falsePass": 0,
+      "safeRejected": 5,
+      "regression": {
+        "status": "FAIL",
+        "denominator": 36,
+        "executed": 36,
+        "failedAttemptIds": [
+          "r45-prebuy-service-intro-safe:1",
+          "r45-prebuy-service-intro-safe:2",
+          "r45-prebuy-service-intro-safe:3",
+          "r41-policy-short-intro-safe:2",
+          "r41-policy-short-intro-safe:3"
+        ]
+      },
+      "summary": {
+        "status": "BLOCKED",
+        "registeredDenominator": 333,
+        "executedDenominator": 36,
+        "unsafeCount": 189,
+        "safeCount": 144,
+        "unsafeSendEligibleFalsePassCount": 0,
+        "safeFailures": 5,
+        "safeFailureRate": null,
+        "unexecuted": 297
+      },
+      "operational": {
+        "providerAttemptDenominator": 36,
+        "providerRequests": 36,
+        "clientRequests": 36,
+        "rejectedClientRequests": 0,
+        "maxRequestsPerAttempt": 1,
+        "verifierLatencyP50Ms": 6856,
+        "verifierLatencyP95Ms": 17470,
+        "timeoutCount": 0,
+        "errorCount": 0,
+        "timeoutErrorRate": 0,
+        "inputTokens": 207821,
+        "outputTokens": 6395,
+        "usageUnavailableCount": 0,
+        "cost": null,
+        "dispositions": {
+          "SEND_ELIGIBLE": 19,
+          "FALLBACK": 17,
+          "HANDOFF": 0,
+          "NO_SEND": 0
+        },
+        "terminalFailureRate": 0.05105105105105105
+      },
+      "addedVerificationLatency": {
+        "p50Ms": 6860,
+        "p95Ms": 17472
+      },
+      "legacyPolicyPresentation": {
+        "file": "apps/worker/evals/single-agent-semantic-verifier/round-62/legacy-policy-source-view.json",
+        "sha256": "7efe39a8d77276411bd2157c90b0544be11297bb3f56c62b67c7eb58f2c3c56f",
+        "originalSourceHash": "a8fbc6494802f132d2d8bbce5e2758dff96c87c10693207f82344a632b41fb4f",
+        "appliedSourceOccurrences": 99,
+        "businessSourceChanged": false
+      },
+      "models": {
+        "verifier": {
+          "provider": "OPENAI",
+          "model": "gpt-6.1-sol",
+          "version": "gpt-6.1-sol",
+          "effort": "high",
+          "credentialRoute": "CODEX_CHATGPT_LOGIN",
+          "generationConfig": {
+            "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+            "cliVersion": "0.159.2",
+            "wireApi": "responses",
+            "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+            "tools": [],
+            "tool_choice": "none",
+            "parallel_tool_calls": false,
+            "store": false,
+            "stream": true,
+            "reasoningEffort": "high",
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+            "timeoutMs": 90000,
+            "maxResponseBytes": 1048576,
+            "relayUpstreamRequestsPerAttempt": 1,
+            "retry": 0,
+            "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+            "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+          }
+        },
+        "conversation": {
+          "provider": "VERTEX_AI",
+          "model": "gemini-3.5-flash-lite",
+          "version": "gemini-3.5-flash-lite",
+          "effort": "high",
+          "credentialRoute": "EXISTING_LOCAL_VERTEX_SERVICE_ACCOUNT",
+          "generationConfig": {
+            "transport": "VERTEX_SINGLE_REQUEST_TEXT",
+            "wireApi": "generateContent",
+            "projectId": "project-388db62b-f5a4-4e76-a2b",
+            "location": "global",
+            "endpoint": "https://aiplatform.googleapis.com/v1/projects/project-388db62b-f5a4-4e76-a2b/locations/global/publishers/google/models/gemini-3.5-flash-lite:generateContent",
+            "tools": [],
+            "candidateCount": 1,
+            "responseMimeType": "text/plain",
+            "thinkingLevel": "HIGH",
+            "includeThoughts": false,
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "topK": "OMITTED_PROVIDER_DEFAULT",
+            "penalties": "OMITTED_PROVIDER_DEFAULT",
+            "maxOutputTokens": 8192,
+            "timeoutMs": 90000,
+            "maxResponseBytes": 1048576,
+            "relayUpstreamRequestsPerAttempt": 1,
+            "retry": 0,
+            "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY",
+            "tokenRefresh": "BEFORE_LATER_ATTEMPT_ONLY_NO_401_GENERATION_RETRY"
+          }
+        }
+      },
+      "sourcePolicy": {
+        "file": "apps/worker/evals/single-agent-semantic-verifier/prompts/repository-policy-source-preparation-20261012.json",
+        "sha256": "1ae4368d3b0db072dc9589d9d2d5d7d08750e1cc3d8c99e4272f05e0dc9023ea",
+        "payloadHash": "52c67b0a15a3d8fb582d1417dd99a4fc09be0cfcd71892ab2a3dfdda70ea2f7b"
+      },
+      "validation": {
+        "command": "C3_CHECKPOINT_A_ROUND=62 node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2",
+        "exit": 0,
+        "output": "{\"round\":62,\"a2Cases\":181,\"a3Cases\":42}\n{\"status\":\"BLOCKED\",\"registeredDenominator\":333,\"executedDenominator\":36,\"unsafeCount\":189,\"safeCount\":144,\"unsafeSendEligibleFalsePassCount\":0,\"safeFailures\":5,\"safeFailureRate\":null,\"unexecuted\":297}\nFROZEN_PROTOCOL_VALID\n"
+      }
+    }
+  ]
+}

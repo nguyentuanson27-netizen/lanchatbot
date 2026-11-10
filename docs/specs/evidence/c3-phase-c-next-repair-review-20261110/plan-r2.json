@@ -1,0 +1,58 @@
+{
+  "kind": "INDEPENDENT_FIX_PLAN_REVIEW",
+  "revision": 2,
+  "reviewer": "/root/post_contract_input_review",
+  "reviewedAt": "2026-11-10T06:51:37.480Z",
+  "reviewedSourceSha": "f405a6f6a714b845e2723d14b53a08b5fc1c0588",
+  "reviewedPlanPath": "docs/specs/c3-phase-c-price-intent-media-repair-plan-20261110.md",
+  "reviewedPlanSha256": "ed3ab16d5b5126af271df04f1c3c01267be74b33cfb590d433487b119604b632",
+  "status": "APPROVE",
+  "findings": [],
+  "remainingBlockingFindings": 0,
+  "closedFindings": [
+    {
+      "id": "NR1_J4_NO_NEW_NEGOTIATION_ENGINE",
+      "resolution": "P1 explicitly reuses quote_product/evaluateShopPolicy/read_policy, derives count-unit presentation from existing bound policy/result, separates standard promotion from unevaluated negotiation and defers pre-cart concessions. Optional unchanged-prerequisite suppression is not required and must be dropped if it breaks currently valid writer/add→negotiation reachability."
+    },
+    {
+      "id": "NR1_P09_NO_MECHANICAL_CONSENT_PROOF",
+      "resolution": "P2 removes the competing declaration, uses read/selection for informational referents and preserves explicit-buy fast path. It explicitly rejects owner enum/sourceQuote-as-proof and post-effect verifier role expansion. Paired-history acceptance inspects actual cart CAS/events/receipts; residual semantic intent risk and separate confirmation-design decision are stated."
+    },
+    {
+      "id": "NR1_S16_REQUIREMENT_IS_NOT_SOURCE",
+      "resolution": "P3 adds one narrow worker requirement, implements only absence-of-proof negative path with committed silent handoff/no-send and no text/images, keeps ordinary FEEDBACK behavior and declares positive wearer capability not implemented. Wrong/omitted requirement remains verifier semantic risk; changed verifier configuration needs newly frozen safety evidence before wider sales run."
+    },
+    {
+      "id": "NR1_MEDIA_DEDUP_KEEP_ALL_PROOFS",
+      "resolution": "P4 separates physical attachments from complete selectedMedia source proof union, requires exact current URL+content hash identity, blocks conflicts and retains all parent source versions for opening claims/delivery/restart revalidation."
+    }
+  ],
+  "implementationAcceptanceConditions": [
+    "P1 does not auto-create cart/negotiation state, simulate objection/concession ledger or label UNKNOWN as no-support/best-price; existing price/policy proof/readback authority is retained.",
+    "Any optional repeated-NOT_EVALUATED suppression must be tied to code-owned current prerequisites/source/binding, recomputed before invocation and not cached across new customer input; if valid same-batch flows cannot be retained, omit the optimization.",
+    "P2 is measured semantic behavior improvement, not deterministic purchase-intent authorization. Tests using a stub that already chooses correct tools cannot satisfy the behavioral acceptance; real paired histories/actual state effects must be reviewed in a later authorized model run.",
+    "P3 explicit unmet stronger requirement must remain an unmet request-level constraint through subsequent selection/replacement/final gate, so later generic media or a verifier PASS cannot erase the negative requirement path. Do not generalize an incidental VIEW failure into all-media failure; implement the explicit requirement contract consistently.",
+    "P3 cannot claim all wearer requests safe because owner may omit the requirement. Keep that omission as a real preregistered semantic test with actual latest customer/final draft/trusted media evidence. No synthetic positive shop provenance.",
+    "P4 dedup may reduce physical sends but cannot discard the second parent/source proof. Either source revocation/hash/scope/permission change after restart must block the complete group before sequence0.",
+    "Keep observed RED→GREEN, actual native/final wire and byte/firewall/signature controls, changed transaction/delivery behavior actual disposable-PG restart acceptance and exact-head independent review before provider.",
+    "No model run is authorized by this plan review. Future run needs clean source/fresh input/config review, preregistered population and safety-first gate when verifier changes; no automatic full/rerun."
+  ],
+  "preservationChecks": [
+    "J1 correct pre-cart quote path",
+    "P07 component-fit engine result authority",
+    "J2 correction/RELAXED state",
+    "P08 atomic replacement pending colour",
+    "Private checkout preview/confirmation/silent handoff",
+    "1owner+max1verifier,caps6/2/3/1,retry0,no new parser/router/semantic role"
+  ],
+  "newProviderRequests": 0,
+  "executableEdits": 0,
+  "testsExecutedForThisPlanReview": 0,
+  "limits": [
+    "Plan approval only; code and behavioral evidence remain required.",
+    "Original prior repair plan/amendment and all failed-run evidence unchanged.",
+    "No positive wearer source, pre-cart concession semantics or hard deterministic consent guarantee approved.",
+    "No deployment/live send/merge/full qualification/C3 parity approval.",
+    "Standard-price handling does not preserve/consume a previous price-objection event across later colour clarification. record_negotiation remains current-source-bound; no automatic application of the old objection or full J4 negotiation completion is claimed. Deferred ledger/business semantics cover that limitation."
+  ]
+}

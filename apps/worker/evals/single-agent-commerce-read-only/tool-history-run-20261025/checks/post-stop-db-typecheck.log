@@ -1,0 +1,16 @@
+
+> @lana/database@0.1.0 pretypecheck C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\database
+> pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build
+
+
+> @lana/contracts@0.4.0 build C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\contracts
+> tsc -p tsconfig.json
+
+
+> @lana/commerce-kernel@0.1.0 build C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\commerce-kernel
+> tsc -p tsconfig.json
+
+
+> @lana/database@0.1.0 typecheck C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\database
+> tsc -p tsconfig.json --noEmit
+

@@ -1,0 +1,418 @@
+{
+  "sourceSha": "342ef0cff2888908518872f707ea33ede0f9c290",
+  "reviewer": "primary agent self-review",
+  "independent": false,
+  "method": "WHOLE_CUSTOMER_EXCHANGE_AND_ACTUAL_TERMINAL; no keyword scoring, added judge or new quality threshold",
+  "reviewedOutcomes": 51,
+  "protocolSha256": "5e2c351139ed7994d1fbad450a99ade7f9873e9f4013c9d4069d7349ad1ac7fb",
+  "entries": [
+    {
+      "caseId": "opening-ad",
+      "artifactSha256": "51e131d9b6c39f92abcc5b7e751474f5de2b6a37627d40880e6f180d2f6f2fc6",
+      "assessment": "USABLE",
+      "domain": "QUOTE_COMPLETION",
+      "reason": "Báo đúng giá bộ799k, thành phần và size; gọi quote_product một lần và capture có hai ảnh. Đây là hoàn tất tác vụ trong một attempt, chưa chứng minh owner luôn chọn đúng tool.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "opening-ad-repeat",
+      "artifactSha256": "df7448aabf900a0adc529438f406db7ae5269e3dd7783e99426072bf4d48c56b",
+      "assessment": "USABLE",
+      "domain": "HISTORY",
+      "reason": "Trả đúng giá799k khi khách hỏi lại; không gọi tác vụ báo giá mở đầu hoặc lặp ảnh.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "opening-organic",
+      "artifactSha256": "2867cdc69382bf12326165acaadabba1c37a5287af84824d7f93b2a37f185840",
+      "assessment": "USABLE",
+      "domain": "QUOTE_COMPLETION",
+      "reason": "Xác định đúng SV2447, trả799k/thành phần/size; quote_product đọc một lần, chọn ảnh một lần và capture hai ảnh. Omission của R2 không xuất hiện trong attempt này.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "opening-unresolved",
+      "artifactSha256": "bd289d0ad6de51fb2bd53c9dd56c5e8036bdd6aaf5076aee975751600d49b929",
+      "assessment": "USABLE",
+      "domain": "CUSTOMER_INPUT",
+      "reason": "Chưa biết mẫu nên xin ảnh hoặc tên; không đoán giá hay chọn một mẫu gần nghĩa để báo.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "opening-multipart",
+      "artifactSha256": "7c11e007b0b56577a5090fd7a1792424270245d41184d5706c81178446d06307",
+      "assessment": "USABLE",
+      "domain": "QUOTE_COMPLETION",
+      "reason": "Trả đủ giá cả bộ799k và áo499k, kèm hai ảnh qua quote_product; không mở thêm giá chân váy. Mô tả còn dài nhưng là hạn chế nhỏ đã chấp nhận.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "media-overview-next:ask",
+      "artifactSha256": "64a22812aba8034b803ffd97dfff6ee4a0d5709dc4db2c6c57ca8122f532e12e",
+      "assessment": "CORRECT_HANDOFF_MEDIA_EVIDENCE_GAP",
+      "domain": "MEDIA_SOURCE",
+      "reason": "Nguồn trong phạm vi đã đọc chưa có ảnh feedback được xác nhận; handoff im lặng/HUMAN, không tự đổi sang ảnh chung hoặc trả giá một phần. Nhu cầu còn chờ sau bàn giao; không lỗi provider.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "media-overview-next:continue",
+      "artifactSha256": "8a1c12da479d01590558052a8d890e2ab94f625b9895f8831fb881d620b13600",
+      "assessment": "CORRECT_NO_SEND_AFTER_HANDOFF",
+      "domain": "OWNERSHIP",
+      "reason": "Đã chuyển HUMAN từ lượt trước nên bot không tự trả tiếp dù khách đổi sang ảnh chung/cận áo. Đây là ownership policy, không lỗi tra ảnh hoặc provider mới.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "media-detail-next:ask",
+      "artifactSha256": "36e6991c6b63714a3f36db957fcf82dc3eb37c3ae4587a81d07c54c4000aba1e",
+      "assessment": "CORRECT_HANDOFF_MEDIA_EVIDENCE_GAP",
+      "domain": "MEDIA_SOURCE",
+      "reason": "Nguồn trong phạm vi đã đọc chưa có ảnh feedback được xác nhận; handoff im lặng/HUMAN, không tự đổi sang ảnh chung hoặc trả giá một phần. Nhu cầu còn chờ sau bàn giao; không lỗi provider.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "media-detail-next:continue",
+      "artifactSha256": "edd4fb909f4585ffe046995c3ad05fd96a2821b94e0e3423ef636c84e14c1ff7",
+      "assessment": "CORRECT_NO_SEND_AFTER_HANDOFF",
+      "domain": "OWNERSHIP",
+      "reason": "Đã chuyển HUMAN từ lượt trước nên bot không tự trả tiếp dù khách đổi sang ảnh chung/cận áo. Đây là ownership policy, không lỗi tra ảnh hoặc provider mới.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "media-and-price:ask",
+      "artifactSha256": "f0ed2749063305964643b17211c37b99de4a640d8df728cf777be672d3b915f0",
+      "assessment": "CORRECT_HANDOFF_MEDIA_EVIDENCE_GAP",
+      "domain": "MEDIA_SOURCE",
+      "reason": "Nguồn trong phạm vi đã đọc chưa có ảnh feedback được xác nhận; handoff im lặng/HUMAN, không tự đổi sang ảnh chung hoặc trả giá một phần. Nhu cầu còn chờ sau bàn giao; không lỗi provider.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "media-and-size:ask",
+      "artifactSha256": "4a7d7dd037393e5243a8cd86e422f5a73b2fdb0925fc3d82ef8118b133ed6ebb",
+      "assessment": "USABLE",
+      "domain": "MEDIA_SIZE",
+      "reason": "Gửi một ảnh cận phần thêu áo và chọnM từ kết quả code, giải quyết đủ hai ý. Lặp chiều cao/cân nặng là hạn chế giọng nhỏ; không dùng quote_product sai ngữ cảnh.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "media-decision:ask",
+      "artifactSha256": "9af6135772d257e6a71ba696d94bc4810d3db91a67fb630bf7400cfcfac3a1a5",
+      "assessment": "MINOR_LIMITATION",
+      "domain": "SALES_ADVICE",
+      "reason": "Có hai ảnh chung giúp khách xem tổng thể, không tạo phụ thuộc DETAIL/SKIRT thiếu. Tuy nhiên lời khuyên vẫn chủ yếu lấy mềm/rũ/thanh thoát để phủ nhận rườm rà; chưa có cách phối cụ thể. Có ảnh không tự là quality PASS.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-partial-source",
+      "artifactSha256": "d050a946582b2f7c00c6ae1a9f5ab76b3e65365ad037ec1886f6e93dee0b8898",
+      "assessment": "CORRECT_HANDOFF_CONTROLLED_SOURCE_FAILURE",
+      "domain": "CONTROLLED_POS_FAULT",
+      "reason": "POS_UNAVAILABLE là fault injection đã đăng ký, không chứng minh POS shop thật thiếu dữ liệu. Actual committed silent handoff; không đoán giá/tồn hoặc dùng mô tả để lấp phần nguồn bị vô hiệu hóa.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-partial-source-v2",
+      "artifactSha256": "2870a5191f690220f8a8aaf50bc32ab000830288ab905e72de30400a2310d3d7",
+      "assessment": "CORRECT_HANDOFF_CONTROLLED_SOURCE_FAILURE",
+      "domain": "CONTROLLED_POS_FAULT",
+      "reason": "POS_UNAVAILABLE là fault injection đã đăng ký, không chứng minh POS shop thật thiếu dữ liệu. Actual committed silent handoff; không đoán giá/tồn hoặc dùng mô tả để lấp phần nguồn bị vô hiệu hóa.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-partial-source-v3",
+      "artifactSha256": "75a447e74a6e9519afa94a27d6c477a50a7f3638e7700d30e115128f98272dea",
+      "assessment": "CORRECT_HANDOFF_CONTROLLED_SOURCE_FAILURE",
+      "domain": "CONTROLLED_POS_FAULT",
+      "reason": "POS_UNAVAILABLE là fault injection đã đăng ký, không chứng minh POS shop thật thiếu dữ liệu. Actual committed silent handoff; không đoán giá/tồn hoặc dùng mô tả để lấp phần nguồn bị vô hiệu hóa.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-changed-occasion",
+      "artifactSha256": "cd1cef73341430465b8f184dffb643c6ed9d57805aedd50685b6e1f65f9f71bc",
+      "assessment": "USABLE",
+      "domain": "CHOICE_CHANGED_CONTEXT",
+      "reason": "Đổi sang set Thanh Vũ và giải thích từ chất liệu ren/cotton/tơcrep khi khách lo ngồi xe lâu. Đọc theo ranh giới advisory đã duyệt; không coi PASS là phép thử xe ba giờ hoặc bắt chọn cùng mẫu với vòng trước.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-current-policy",
+      "artifactSha256": "0a1f58e38c1257f4ef5ed2b202079ba72118936318834c8d15fd12227baf69a7",
+      "assessment": "USABLE",
+      "domain": "CURRENT_POLICY",
+      "reason": "Trả còn kịp theo hạn15ngày và phí30k hiện hành thay ký ức7ngày; không yêu cầu khách nhắc lại thông tin.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-price",
+      "artifactSha256": "325f01759d77d93f9e8aceed69cac42f68d92d00bf35eea93fed607e2996719d",
+      "assessment": "USABLE",
+      "domain": "PRICE",
+      "reason": "Giá bộ799k/áo499k/váy449k và thành phần/size đúng. Giá lẻ trong ngoặc hơi dư. B1 chỉ kiểm eligibility và không có tool ảnh, nên không đánh omission ảnh như persisted quote.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-component-stock",
+      "artifactSha256": "af7a94ce948e0dfd495dbd4a2e8cb2061bf5cf96d1bcf4e1718349656d0e9a80",
+      "assessment": "USABLE",
+      "domain": "STOCK_PRICE",
+      "reason": "Trả thẳng áo riêngM còn hàng,499k; không đưa mô tả dài thay cho câu hỏi tồn.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-search-read",
+      "artifactSha256": "bbf3c908b2ffe6add04fa5492fae5204786148beb8b83f63537b8c8648d4443d",
+      "assessment": "USABLE",
+      "domain": "PRODUCT_SEARCH",
+      "reason": "Tìm đúng SD375, phân biệt áo929k/cả bộ1065k và size được xác nhận; danh sách giúp phân biệt cách mua.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-buying-concern",
+      "artifactSha256": "ecd599535b2a579bde91b468ba42a5816382516a5c4f3b88c30cb54988227a34",
+      "assessment": "MINOR_LIMITATION",
+      "domain": "SALES_ADVICE",
+      "reason": "Giá799k đúng nhưng lý do chủ yếu mềm/rũ/thanh thoát để phủ nhận cảm giác rườm rà, rồi nhắc lại ngân sách. Đây là hạn chế tư vấn cũ, không phải lỗi giá/fit hoặc bằng chứng thiếu context.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-policy-used",
+      "artifactSha256": "cc77a0b6aaa3597241a325bd379bdb9ae06214a12c7ae18b95b852fc5ca71649",
+      "assessment": "USABLE",
+      "domain": "POLICY_CONTEXT",
+      "reason": "Nhận ra đã mặc đi làm nên từ chối đổi, không đồng ý trước rồi đọc checklist. Phí30k chỉ dành cho trường hợp hợp lệ, không cấp quyền đổi cho tình huống bị từ chối.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-changed-occasion-v2",
+      "artifactSha256": "0cc8b6554c40ed5bf65f47a14fb092e198511f7859ed1b619a0f35d5afdaf262",
+      "assessment": "USABLE",
+      "domain": "CHOICE_CHANGED_CONTEXT",
+      "reason": "Không chỉ trấn an thoáng mát: chỉ ra đánh đổi và gợi áo lẻ để phối thoáng hơn. Chưa chỉ rõ món phối nhưng lời khuyên xử lý được băn khoăn; không bắt có phép thử riêng cho advisory thông thường.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-current-policy-v2",
+      "artifactSha256": "0e4bdcb54d21646c0291450f32ca769d8a2bf24043b91fc9cb5ded24742b73a2",
+      "assessment": "USABLE",
+      "domain": "CURRENT_POLICY",
+      "reason": "Trả còn kịp sau12ngày theo hạn15ngày, phí30k hiện hành thay25k trong history.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-price-v2",
+      "artifactSha256": "94b66eaa135198e39a758bc1c12fcaa2afcb81f8b0d939331defb953642bfaa8",
+      "assessment": "USABLE",
+      "domain": "PRICE_HISTORY",
+      "reason": "Hiểu mẫu trong history, báo đúng799k/thành phần/size; không hỏi lại tên. B1 không có surface ảnh nên không gán omission ảnh.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-component-stock-v2",
+      "artifactSha256": "6c2b717eebc66b85341568127b0dd269de073706509efc34864b89923207d93c",
+      "assessment": "USABLE",
+      "domain": "STOCK_PRICE",
+      "reason": "Trả đúng chân váyM còn hàng và449k, giữ phạm vi khách chỉ mua chân váy.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-search-read-v2",
+      "artifactSha256": "125b51408427d1009fe423035098b3b6350e8a1a7d6c0f3089319037106ac3aa",
+      "assessment": "USABLE",
+      "domain": "PRODUCT_SEARCH",
+      "reason": "Tìm đúng Khánh Trang; giá/size từng cách bán rõ. Mô tả mở hơi dài nhưng không bỏ thông tin chính.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-buying-concern-v2",
+      "artifactSha256": "8d843c7346f7f7b911bc64046f8e68cd6a58cad0c5f89b1107f1a96dafeae1c7",
+      "assessment": "MINOR_LIMITATION",
+      "domain": "SALES_ADVICE",
+      "reason": "Có phương án chân váy ren phối áo trơn để tiết chế họa tiết. Tuy nhiên vẫn nhiều tính từ và đưa cả bộ lẫn phương án khác thay vì giúp chọn rõ. Không coi upsell tự là lỗi.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-policy-used-v2",
+      "artifactSha256": "0215cc281eee8dfae88ce13af747a3e6690d031a8bb2399563926758ff6c533c",
+      "assessment": "USABLE",
+      "domain": "POLICY_CONTEXT",
+      "reason": "Phân biệt mặc thử vào người năm phút với chỉ ướm; từ chối đổi dù còn tem/chưa ra ngoài, không cấp quyền rồi đọc điều kiện.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-changed-occasion-v3",
+      "artifactSha256": "d3627e6bc7c8fb06532b2abee06e0c7b6433b3a8af4ec8f5ee0ef9218ca25efd",
+      "assessment": "MINOR_LIMITATION",
+      "domain": "CHOICE_CHANGED_CONTEXT",
+      "reason": "Chọn cả bộ cho buổi gặp khách có thể hợp lý; không bắt buộc chọn áo lẻ. Nhưng lý do vẫn khen chung và đưa tiệc tối trở lại dù lịch đã đổi, chưa so đúng tiêu chí nhìn gọn.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-current-policy-v3",
+      "artifactSha256": "965778701f046fddbbc5f8c14289066730124e9a630e4256c96cf699f40699ae",
+      "assessment": "USABLE",
+      "domain": "CURRENT_POLICY",
+      "reason": "Dùng hạn15ngày hiện hành thay7ngày trong history và trả còn đổi sau9ngày; không ép nhắc toàn bộ policy.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-price-v3",
+      "artifactSha256": "c2a913c0a75046b6d45f05b3586c12439387b70fe5dbdee1786dc8c1902f40c3",
+      "assessment": "USABLE",
+      "domain": "PRICE",
+      "reason": "Báo đúng799k, thành phần và size hiện có; không dùng giá cũ hoặc tự thêm quyền lợi.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-component-stock-v3",
+      "artifactSha256": "9f0f0b0fd1d4670fb06b77b3065d6afe065e21dfa74a384cd4f691859a3552ca",
+      "assessment": "USABLE",
+      "domain": "STOCK_PRICE",
+      "reason": "Trả đủ áo có bán riêng, sizeM còn,499k. Mô tả thêm nhẹ nhưng không che câu trả lời chính.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-search-read-v3",
+      "artifactSha256": "fd10a33cfcb7a48e1f66075048f86b42653236b99ea3097cefcc13f826eedf6d",
+      "assessment": "USABLE",
+      "domain": "PRODUCT_SEARCH",
+      "reason": "Tìm đúng Xuân Thảo SQ223; giá/tồn/size từng offer đúng. Phần mô tả sau còn dài nhưng các thông tin mua cần thiết đều có.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-buying-concern-v3",
+      "artifactSha256": "dcee254e5ee7a97b51815218977f4ac3b667a8b244e5cc6e0a1e544845104b41",
+      "assessment": "MINOR_LIMITATION",
+      "domain": "BUYING_DECISION",
+      "reason": "Có chọn cả bộ799k và lý do tách phối để mặc lại nên upsell không tự là lỗi. Tuy nhiên tin dài, mở lại áo lẻ và giao cùng quyết định về khách; lời mời chuẩn bị size chưa rõ bước khả thi trong B1 chỉ đọc.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "b1-policy-used-v3",
+      "artifactSha256": "f62ede6cf6fb0baf3f305e2ef2a945dfd60a3addef762a1fa1f6f39560f6ac28",
+      "assessment": "USABLE",
+      "domain": "POLICY_CONTEXT",
+      "reason": "Từ chối vì đã cắt tem và giặt; không lấy mới nhận hai ngày/chưa ra ngoài để cấp quyền đổi.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "sales-discovery-advice:need",
+      "artifactSha256": "1ae613d66b962fe66e8e3cf08e3ad7ae791dc7a91db46ca7f528148598510f5e",
+      "assessment": "NEEDS_FIX",
+      "domain": "OWNER_SOURCE_ASSESSMENT",
+      "reason": "Đọc SQ675 có PRICE1279000 và STOCK PRE_ORDER, vượt ngân sách dưới một triệu; chưa đọc giá các ứng viên còn lại rồi yêu cầu PRICE_UNAVAILABLE. Không có final draft/verifier hoặc generation error. Chưa đủ bằng chứng gọi shop thiếu giá; owner còn yếu ở chọn/đọc phương án phù hợp và đánh giá kết quả tool. Handoff commit đúng nhưng nhu cầu mua chưa được giải quyết.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "sales-product-gallery:overview",
+      "artifactSha256": "99008b82d30ca3db07ca54e293fbd5d63bc82fdab8d722f65080e9085bc8297a",
+      "assessment": "CORRECT_HANDOFF_MEDIA_EVIDENCE_GAP",
+      "domain": "MEDIA_COLOR",
+      "reason": "Ảnh màu be chưa có binding đủ điều kiện trong nguồn đã đọc; selector và handoff giữ fail-closed, không dùng ảnh chung thay yêu cầu màu hoặc kết luận shop không bán màu be.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "sales-size-advice:height-weight",
+      "artifactSha256": "bbb07d6b3c7e3e2d0ce91be58a4b301c44ef5a73ddb1069cafca6de2809d9ec5",
+      "assessment": "USABLE",
+      "domain": "SIZE",
+      "reason": "ChọnM theo SIZE_FIT hiện tại và RELAXED, không tự thêmL. Còn đọc lại chiều cao/cân nặng/sở thích, là hạn chế giọng đã tạm chấp nhận.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "sales-southern-delivery:deadline",
+      "artifactSha256": "b4c620a5e21159e734d6f84db829dc6e0e823e7dbfe3e7b6018d2f808b3ab261",
+      "assessment": "USABLE",
+      "domain": "ETA",
+      "reason": "Dùng ETA Cần Thơ4–8ngày để từ chối nhận hẹn sáng mai; không bịa giao nhanh hoặc yêu cầu khách chuẩn bị đồ khác.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "stateful-open",
+      "artifactSha256": "8f92614419a454201c9b8a04f77015c6d6a774c2de6b5cf88d5b63a79b0c8774",
+      "assessment": "USABLE",
+      "domain": "CART_EFFECT",
+      "reason": "Có receipt thêm đúng áo lẻ beM và báo hàng đặt trước; không biến thành đã tạo đơn POS hoặc kết luận fit.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "stateful-variant-quantity",
+      "artifactSha256": "5a0c8a4db6faf46c1d23add517c693861a118397cd2a563e4b101f46fa7f99a5",
+      "assessment": "USABLE",
+      "domain": "CART_EFFECT",
+      "reason": "ĐổiL/hai chiếc đúng lựa chọn khách và readback; xác nhận khớp commit. Nhắc lại preorder hơi dư nhưng không sai thao tác.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "stateful-quote",
+      "artifactSha256": "a8a09b9476766b7ac364d6def09d7f4273f792c53d8b6f9de4f6e44c1121f915",
+      "assessment": "USABLE",
+      "domain": "CART_QUOTE",
+      "reason": "Tổng998000−49900+30000=978100 đúng cả ship, không nhầm đơn giá hoặc cấp thêm ưu đãi mới.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "stateful-correction",
+      "artifactSha256": "31b31d1b3f0e3d27819fba8e04151d6db900769065a93107bbfc6716dcf13520",
+      "assessment": "MINOR_LIMITATION",
+      "domain": "STATE_ACK",
+      "reason": "Ghi đúng hồ sơ74/96 và giữL khách chọn, không đọc lại đủ số đo. Câu ghi nhận và hỏi lại giữL vẫn máy móc nhưng không lỗi state/fit.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "stateful-request-checkout",
+      "artifactSha256": "b4e1dccfad354581aad6c329ffd00e8dd869dacd318198733c84f6b2ba534b64",
+      "assessment": "CODE_OWNED_OUTPUT",
+      "domain": "PRIVATE_CHECKOUT",
+      "reason": "Owner NO_SEND nhưng code có câu hỏi bổ sung thông tin nhận hàng; NAME trong artifact là masking, không literal customer text.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "stateful-private-checkout",
+      "artifactSha256": "21d92d69a1199440bf42129b1086c929147a39b1ec1586627e0f7d8523836255",
+      "assessment": "CODE_OWNED_OUTPUT",
+      "domain": "PRIVATE_CHECKOUT",
+      "reason": "Intake/preview do code thực hiện, owners0/verifiers0, ORDER_PREVIEW và tổng978100 đúng; public artifact mask số điện thoại/địa chỉ, không coi NO_SEND là không có preview.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "stateful-confirm",
+      "artifactSha256": "cbae5730d5bf33ed0c6a874eab76222b87c78f93cd2d050138f1e8d65291aa8e",
+      "assessment": "USABLE",
+      "domain": "SILENT_BUSINESS_HANDOFF",
+      "reason": "Commit PURCHASE_CONFIRMED/HUMAN/event/tag và không reply mới theo silent policy; không ACK giả hoặc báo đã tạo đơn ngoài khả năng.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "stateful-human-request",
+      "artifactSha256": "afea056e4e604d5919d5edf6af1aee39d477b2aadf4611eb9705cd61b9962fd5",
+      "assessment": "USABLE",
+      "domain": "SILENT_BUSINESS_HANDOFF",
+      "reason": "Khách muốn shop tiếp nhận thì chuyển HUMAN/event/tag, không kèm lời chờ hoặc kể vai trò nội bộ.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "negotiation-cart-setup",
+      "artifactSha256": "f3999f8361c7f11f5d5b4e82043f30e094a1b13c01e8846c3ef3c36ef2311813",
+      "assessment": "USABLE",
+      "domain": "CART_EFFECT",
+      "reason": "Thêm đúng áo beM/hàng đặt trước, có committed receipt; không dùng tác vụ báo giá mở đầu cho yêu cầu mua.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "negotiation-price-objection",
+      "artifactSha256": "4a00aec557544a9a1bc78a5138b52bf6e9fc916c7170a4220079f2aac6e0a2cb",
+      "assessment": "MINOR_LIMITATION",
+      "domain": "NEGOTIATION",
+      "reason": "Kết quả thương lượng đã cho hỗ trợ ship30k, nhưng reply chỉ nói chưa có thêm chương trình giảm giá và nhắc hệ thống; chưa dùng lợi ích đã cấp để thuyết phục. Không phải sai tổng hoặc yêu cầu verifier chấm sức bán.",
+      "generationFailures": []
+    },
+    {
+      "caseId": "negotiation-total-control",
+      "artifactSha256": "755723a3d80b42608efd4512c290ff89cd97a63ae4662fc880072c63391b914a",
+      "assessment": "USABLE",
+      "domain": "NEGOTIATION_QUOTE",
+      "reason": "Trả đúng áo499k+ship30k−hỗ trợ30k=tổng499k; giải thích ưu đãi khi khách hỏi tổng, không giảm đơn giá hoặc giảm hai lần.",
+      "generationFailures": []
+    }
+  ]
+}

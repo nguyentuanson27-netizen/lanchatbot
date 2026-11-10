@@ -1,0 +1,766 @@
+
+> @lana/worker@0.1.0 pretest C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker
+> pnpm -r --filter "@lana/worker^..." build
+
+Scope: 12 of 21 workspace projects
+../../packages/contracts build$ tsc -p tsconfig.json
+../../packages/contracts build: Done
+../../packages/commerce-kernel build$ tsc -p tsconfig.json
+../../packages/conversation-engine build$ tsc -p tsconfig.json
+../../packages/meta-delivery build$ tsc -p tsconfig.json
+../../packages/durable-messaging build$ tsc -p tsconfig.json
+../../packages/commerce-kernel build: Done
+../../packages/meta-webhook build$ tsc -p tsconfig.json
+../../packages/meta-delivery build: Done
+../../packages/pancake-handoff build$ tsc -p tsconfig.json
+../../packages/durable-messaging build: Done
+../../packages/conversation-engine build: Done
+../../packages/pancake-handoff build: Done
+../../packages/meta-webhook build: Done
+../../packages/business-tools build$ tsc -p tsconfig.json
+../../packages/database prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build
+../../packages/database prebuild: > @lana/contracts@0.4.0 build C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\contracts
+../../packages/database prebuild: > tsc -p tsconfig.json
+../../packages/business-tools build: Done
+../../packages/database prebuild: > @lana/commerce-kernel@0.1.0 build C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\commerce-kernel
+../../packages/database prebuild: > tsc -p tsconfig.json
+../../packages/database prebuild: Done
+../../packages/database build$ tsc -p tsconfig.json
+../../packages/database build: Done
+../../packages/chat-runtime build$ tsc -p tsconfig.json
+../../packages/dataset-review prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build
+../../packages/dataset-review prebuild: > @lana/contracts@0.4.0 build C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\contracts
+../../packages/dataset-review prebuild: > tsc -p tsconfig.json
+../../packages/chat-runtime build: Done
+../../packages/dataset-review prebuild: > @lana/business-tools@0.3.0 build C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\business-tools
+../../packages/dataset-review prebuild: > tsc -p tsconfig.json
+../../packages/dataset-review prebuild: Done
+../../packages/dataset-review build$ tsc -p tsconfig.json
+../../packages/dataset-review build: Done
+../../packages/dataset-store prebuild$ pnpm --filter @lana/contracts --filter @lana/dataset-review --filter @lana/database build
+../../packages/dataset-store prebuild: Scope: 3 of 21 workspace projects
+../../packages/dataset-store prebuild: ../contracts build$ tsc -p tsconfig.json
+../../packages/dataset-store prebuild: ../contracts build: Done
+../../packages/dataset-store prebuild: ../database prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build
+../../packages/dataset-store prebuild: ../dataset-review prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build
+../../packages/dataset-store prebuild: ../database prebuild: > @lana/contracts@0.4.0 build C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\contracts
+../../packages/dataset-store prebuild: ../database prebuild: > tsc -p tsconfig.json
+../../packages/dataset-store prebuild: ../dataset-review prebuild: > @lana/contracts@0.4.0 build C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\contracts
+../../packages/dataset-store prebuild: ../dataset-review prebuild: > tsc -p tsconfig.json
+../../packages/dataset-store prebuild: ../database prebuild: > @lana/commerce-kernel@0.1.0 build C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\commerce-kernel
+../../packages/dataset-store prebuild: ../database prebuild: > tsc -p tsconfig.json
+../../packages/dataset-store prebuild: ../dataset-review prebuild: > @lana/business-tools@0.3.0 build C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\business-tools
+../../packages/dataset-store prebuild: ../dataset-review prebuild: > tsc -p tsconfig.json
+../../packages/dataset-store prebuild: ../database prebuild: Done
+../../packages/dataset-store prebuild: ../database build$ tsc -p tsconfig.json
+../../packages/dataset-store prebuild: ../dataset-review prebuild: Done
+../../packages/dataset-store prebuild: ../dataset-review build$ tsc -p tsconfig.json
+../../packages/dataset-store prebuild: ../database build: Done
+../../packages/dataset-store prebuild: ../dataset-review build: Done
+../../packages/dataset-store prebuild: Done
+../../packages/dataset-store build$ tsc -p tsconfig.json
+../../packages/dataset-store build: Done
+
+> @lana/worker@0.1.0 test C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker
+> pnpm benchmark:c2:validate && vitest run src && pnpm test:evals
+
+
+> @lana/worker@0.1.0 benchmark:c2:validate C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker
+> node evals/track-c-c2/v2/validate-benchmark.mjs && node evals/track-c-c2/v2/validate-quality-harness.mjs && node evals/track-c-c2/v2/validate-journeys.mjs
+
+{
+  "ok": true,
+  "cases": 100,
+  "split": {
+    "DEV": 70,
+    "HOLDOUT": 30
+  },
+  "production": {
+    "BLOCKED_BY_CONTRACT": 53,
+    "SUPPORTED": 47
+  },
+  "ownerSafety": {
+    "cases": 15,
+    "expandedProbes": 29
+  },
+  "nextSteps": {
+    "OPTIONAL": 28,
+    "REQUIRED": 12,
+    "NONE": 60
+  },
+  "domains": {
+    "CONVERSATION_CONTROL": 15,
+    "PRICE_VALUE": 22,
+    "LOGISTICS": 11,
+    "FIT_SIZE": 12,
+    "INVENTORY": 7,
+    "PRODUCT_EVIDENCE": 18,
+    "POLICY_SERVICE": 9,
+    "TRANSACTION_STATE": 6
+  },
+  "hashes": {
+    "dev_70_expanded_sha256": "714d803526d38993b0504997feea01590db1ce3b636c32efb6fc4b92f849d37f",
+    "holdout_30_expanded_sha256": "ef5ca6d4ce14eb0d518610c786601cb3eac1a3de17ef471d25dc6523fa0b43f8",
+    "owner_safety_15_sha256": "cded9ca5c536c952894a6acda7d575118fb2149d6840ba48e4be6564aca20a1e",
+    "bundle_fingerprint_sha256": "da35300db23928512c23c44a80484f230e5db31d1d488c1d6dca23df335f7a24"
+  }
+}
+{
+  "ok": true,
+  "coreBundleFingerprint": "da35300db23928512c23c44a80484f230e5db31d1d488c1d6dca23df335f7a24",
+  "qualityHarnessFingerprint": "2fb8f8fb8cbccc35a05116d1bee36358c1515eaa81a5765861c0be4177c0192a",
+  "components": {
+    "scoringGitSha1": "88d674ad19385a15f9a7dae29221257f9664eba0",
+    "evaluatorGitSha1": "ba253eaa77cc5abb1c88f4f18d6fe56c21030a91",
+    "gateGitSha1": "bee90e7e088c1593088aadc10b62f21e34760b30"
+  }
+}
+{
+  "ok": true,
+  "supplemental": true,
+  "evidenceClass": "MANUAL_REVIEW_ONLY",
+  "qualityPopulationDelta": 0,
+  "journeys": 6,
+  "customerTurns": 18,
+  "themes": [
+    "AD_LEAD_QUALIFICATION_COMMITMENT",
+    "PRICE_OBJECTION_VALUE_COMMITMENT",
+    "OUT_OF_STOCK_ALTERNATIVE_DISCOVERY",
+    "COMPARE_SELECT_PRESERVE_REFERENT",
+    "DELIVERY_DEADLINE_FEASIBILITY_DECISION",
+    "CHECKOUT_CORRECTION_STOP"
+  ]
+}
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+ ✓ src/realtime-media-recognition.test.ts (28 tests) 1067ms
+   ✓ V2 realtime recognition pipeline > aborts the reranker when the total deadline expires during earlier stages  1014ms
+ ✓ src/vertex.test.ts (34 tests) 1172ms
+   ✓ Vertex shadow client > retries one transient Track C Judge V2 timeout before recording the case as failed  1012ms
+ ✓ src/track-c-c3-two-pass-candidate.test.ts (48 tests) 881ms
+ ✓ src/df13-commerce-preprod-startup-authority.test.ts (8 tests) 1460ms
+   ✓ DF13 pre-production startup authority > admits only an exact DATABASE Commerce identity bound to a validated immutable release package  330ms
+   ✓ DF13 pre-production startup authority > rejects the active Track B bundle when paired with historical DF13 evidence  317ms
+   ✓ DF13 pre-production startup authority > blocks a COMMERCE startup whose release source cannot prove the evidence revision  346ms
+ ✓ src/bf08-realtime-runner.integration.test.ts (73 tests) 846ms
+ ✓ src/track-b-commerce-authority-preprod-cli.test.ts (28 tests) 1141ms
+   ✓ Track B PREPROD V2/LKG operator boundary > can be imported in a production-like process without invoking the CLI main  994ms
+ ✓ src/track-c-replay.test.ts (24 tests) 1425ms
+ ✓ src/realtime-runner.test.ts (62 tests) 634ms
+ ✓ src/bf01-realtime-runner.integration.test.ts (24 tests) 1257ms
+   ✓ BF-01 runner reconciliation > runs the complete B3 corpus through one capture-only live-path adapter  912ms
+ ✓ src/gate-e-registration.test.ts (26 tests) 2282ms
+   ✓ Gate E immutable registration boundary > derives provenance, request bytes, scores, and atomic evidence inside one boundary  1488ms
+ ✓ src/bf02-realtime-runner.test.ts (24 tests) 609ms
+ ✓ src/p23c-publisher.test.ts (18 tests) 394ms
+ ✓ src/df13-release-candidate-evidence.test.ts (14 tests) 3987ms
+   ✓ DF13 release-candidate source evidence > returns a manifest mismatch instead of throwing when a required field is missing  463ms
+   ✓ DF13 release-candidate source evidence > blocks a semantically identical manifest whose exact blob/content identity changed  348ms
+   ✓ DF13 release-candidate source evidence > fails closed when any pending DF13 migration artifact cannot be re-derived  310ms
+   ✓ DF13 release-candidate source evidence > rejects self-hash substitution and rollback-contract substitution  561ms
+   ✓ DF13 release-candidate source evidence > rejects a substituted manifest field even when the package self-hash is recomputed  497ms
+   ✓ DF13 release-candidate source evidence > rejects substituted manifest blob identity even when hashes are well-shaped and self-hash is recomputed  311ms
+   ✓ DF13 release-candidate source evidence > rejects a substituted pending-migration identity even when the package self-hash is recomputed  534ms
+   ✓ DF13 release-candidate source evidence > returns MISMATCH instead of throwing for a malformed nested evidence object  376ms
+ ✓ src/p23c-jobs.test.ts (5 tests) 313ms
+ ✓ src/track-c-c3-journey-adapter.test.ts (9 tests) 379ms
+ ✓ src/df13-first-preprod-commerce-version-preparer-cli.test.ts (4 tests) 3882ms
+   ✓ DF13 first-PREPROD COMMERCE version preparer CLI > attests one stable annotated tag object and rejects lightweight, branch, and moved refs  3597ms
+ ✓ src/df13-commerce-cutover-evidence.integration.test.ts (2 tests) 893ms
+   ✓ DF13 cutover release-evidence seam > fails closed before the cutover protocol when historical Gate E evidence is stale  433ms
+   ✓ DF13 cutover release-evidence seam > preserves a definitive manifest-integrity reason and never acquires the fence  457ms
+ ✓ src/track-b-release-candidate-evidence-cli.test.ts (10 tests) 486ms
+   ✓ Track B release-candidate evidence CLI > emits a self-validating side-effect-free v22 release packet  430ms
+ ✓ src/bf02-review-plan.test.ts (6 tests) 425ms
+   ✓ BF-02 review-plan regressions > does not treat customer measurements as explicit product IDs  305ms
+ ✓ src/df13-release-candidate-evidence-cli.test.ts (2 tests) 332ms
+   ✓ DF13 release-candidate evidence CLI > reports stale historical Gate E evidence without an activation path  324ms
+ ✓ src/realtime-sales-cycle.test.ts (62 tests) 1666ms
+ ✓ src/google-sheets-client.test.ts (2 tests) 164ms
+ ✓ src/bf07-realtime-runner.integration.test.ts (10 tests) 387ms
+ ✓ src/vertex-baseline.test.ts (3 tests) 378ms
+   ✓ baseline model capability > rejects Context V2 symbols even when imported through a workspace barrel  303ms
+ ✓ src/p23a-registry-sync.test.ts (13 tests) 367ms
+ ✓ src/track-b-release-candidate-evidence.test.ts (4 tests) 565ms
+   ✓ Track B release candidate evidence > binds final v22 evidence and the exact V1-to-V2 authority mutation  542ms
+ ✓ src/realtime-golden-transcripts.test.ts (12 tests) 386ms
+ ✓ src/track-c-c3-two-pass-quality-adapter.test.ts (11 tests) 268ms
+ ✓ src/df13-runtime-authority-boundary.integration.test.ts (7 tests) 266ms
+ ✓ src/p23b-metadata-staging.test.ts (33 tests) 296ms
+ ✓ src/unbounded-multi-product-text.test.ts (14 tests) 356ms
+ ✓ src/customer-url-policy.test.ts (134 tests) 218ms
+ ✓ src/track-c-c3-post-pr358-behavior.test.ts (10 tests) 252ms
+ ✓ src/bf01-typed-intent-reconciliation.integration.test.ts (4 tests) 202ms
+ ✓ src/foundation-runtime-boundary.test.ts (2 tests) 167ms
+ ✓ src/gemini-embedding-2-client.test.ts (17 tests) 172ms
+ ✓ src/track-c-quality-suite-gate.test.ts (6 tests) 162ms
+ ✓ src/vertex-media-reranker.test.ts (20 tests) 120ms
+ ✓ src/gate-e-operational.test.ts (14 tests) 235ms
+ ✓ src/track-b-commerce-authority-preprod-adapter.test.ts (21 tests) 165ms
+ ✓ src/track-c-offline-candidate.test.ts (15 tests) 150ms
+ ✓ src/track-c-c2-journey-contract.test.ts (18 tests) 180ms
+ ✓ src/media-recognition-v2-image-pipeline.test.ts (29 tests) 131ms
+ ✓ src/delivery-health.test.ts (4 tests) 166ms
+ ✓ src/shadow-runner.test.ts (7 tests) 145ms
+ ✓ src/single-agent-commerce-read-only-tools.test.ts (13 tests) 311ms
+ ✓ src/context-v2-candidate.test.ts (18 tests) 149ms
+ ✓ src/image-recognition-qdrant.test.ts (22 tests) 143ms
+ ✓ src/context-v2-evaluation.test.ts (19 tests) 82ms
+ ✓ src/track-c-quality-v2-evaluator.test.ts (6 tests) 92ms
+ ✓ src/single-agent-commerce-state.test.ts (11 tests) 181ms
+ ✓ src/track-b-commerce-authority-activation.test.ts (33 tests) 128ms
+ ✓ src/gate-e-output-interpreter.test.ts (9 tests) 75ms
+ ✓ src/pre-sale-policy.test.ts (24 tests) 49ms
+ ✓ src/media-input-limit.test.ts (4 tests) 126ms
+ ✓ src/context-v2.test.ts (10 tests) 81ms
+ ✓ src/single-agent-commerce-effects.test.ts (20 tests) 362ms
+ ✓ src/single-agent-commerce-read-only.test.ts (11 tests) 233ms
+ ✓ src/p23c-hash-v3.test.ts (11 tests) 56ms
+ ✓ src/p23c-recognition-publisher.test.ts (23 tests) 75ms
+ ✓ src/pos-snapshot-runner.test.ts (10 tests) 60ms
+ ✓ src/single-agent-semantic-verifier-boundary.test.ts (48 tests) 118ms
+ ✓ src/track-c-c3-sales-quality-candidate.test.ts (4 tests) 57ms
+ ✓ src/df06-commerce-binding-architecture.test.ts (6 tests) 37ms
+ ✓ src/missing-commerce-signal.test.ts (19 tests) 66ms
+ ✓ src/realtime-r32.2-compatibility-shield.test.ts (12 tests) 75ms
+ ✓ src/track-c-quality-judge.test.ts (11 tests) 50ms
+ ✓ src/realtime-product-facts-v2.test.ts (11 tests) 97ms
+ ✓ src/df13-commerce-cutover.test.ts (30 tests) 57ms
+ ✓ src/messenger-canary-scenarios.test.ts (30 tests) 50ms
+ ✓ src/bf03-correction-containment.benchmark.test.ts (2 tests) 33ms
+ ✓ src/track-b-live-path-replay.test.ts (6 tests) 42ms
+ ✓ src/pos-snapshot-core.test.ts (19 tests) 31ms
+ ✓ src/decision-observability.test.ts (8 tests) 28ms
+ ✓ src/track-c-c3-v5-stage-judge.test.ts (3 tests) 38ms
+ ✓ src/df13-commerce-runtime-context.test.ts (6 tests) 27ms
+ ✓ src/realtime-loop.test.ts (2 tests) 87ms
+ ✓ src/df13-first-preprod-behavior-writer.test.ts (9 tests) 32ms
+ ✓ src/df13-commerce-runtime-composition.test.ts (6 tests) 34ms
+ ✓ src/track-c-must-pass.test.ts (15 tests) 25ms
+ ✓ src/df13-commerce-runtime-finalization.test.ts (5 tests) 23ms
+ ✓ src/dataset-prelabel-runner.test.ts (6 tests) 23ms
+ ✓ src/single-agent-commerce-read-only-sources.test.ts (4 tests) 46ms
+ ✓ src/realtime-reply-differential.test.ts (8 tests) 27ms
+ ✓ src/meta-outbox-dispatcher.test.ts (9 tests) 24ms
+ ✓ src/track-c-quality-suite.test.ts (2 tests) 23ms
+ ✓ src/canonical-buying-authority.test.ts (4 tests) 20ms
+ ✓ src/commerce-authority-comparison.test.ts (20 tests) 23ms
+ ✓ src/track-b-protected-claim-boundary.test.ts (17 tests) 59ms
+ ✓ src/df13-commerce-runtime-executor.test.ts (5 tests) 24ms
+ ✓ src/track-c-quality-v2-gate.test.ts (11 tests) 19ms
+ ✓ src/confirmation-classifier.test.ts (11 tests) 20ms
+ ✓ src/size-chart-eligibility.test.ts (14 tests) 27ms
+ ✓ src/verified-product-context.test.ts (13 tests) 21ms
+ ✓ src/df13-first-preprod-commerce-version-preparer.test.ts (3 tests) 20ms
+ ✓ src/track-b-post-generation-authority.test.ts (9 tests) 21ms
+ ✓ src/bounded-concurrency.test.ts (5 tests) 17ms
+ ✓ src/df13-commerce-authority-fence.test.ts (7 tests) 16ms
+ ✓ src/track-c-quality-v2-scoring.test.ts (6 tests) 15ms
+ ✓ src/media-resolution.test.ts (12 tests) 15ms
+ ✓ src/df04-normalization-architecture.test.ts (4 tests) 19ms
+ ✓ src/ad-lead-qualification.test.ts (6 tests) 16ms
+ ✓ src/gate-e-git-reader.test.ts (3 tests) 13ms
+ ✓ src/bf07-multi-product-clarification.test.ts (5 tests) 15ms
+ ✓ src/df13-commerce-default-off-consumer.test.ts (4 tests) 12ms
+ ✓ src/bf01-direct-question-reconciliation.test.ts (19 tests) 16ms
+ ✓ src/pancake-tag-dispatcher.test.ts (2 tests) 12ms
+ ✓ src/media-recognition-v2-config.test.ts (7 tests) 16ms
+ ✓ src/df13-commerce-fence-postgres-provider.test.ts (5 tests) 14ms
+ ✓ src/business-fact-intent-authorization.test.ts (6 tests) 10ms
+ ✓ src/single-agent-commerce-read-only-context.test.ts (5 tests) 27ms
+ ✓ src/size-chart-extractor.test.ts (4 tests) 17ms
+ ✓ src/df13-commerce-authority-bundle.test.ts (3 tests) 11ms
+ ✓ src/df13-commerce-fresh-process-executor.test.ts (2 tests) 11ms
+ ✓ src/realtime-sales-catalog.test.ts (7 tests) 37ms
+ ✓ src/dataset-prelabel-prompt.test.ts (4 tests) 12ms
+ ✓ src/meta-outbox-operator-validation.test.ts (5 tests) 8ms
+ ✓ src/index.test.ts (2 tests) 7ms
+ ✓ src/df13-commerce-fence-dispatcher.test.ts (6 tests) 10ms
+ ✓ src/df13-commerce-authority-contract.test.ts (4 tests) 10ms
+ ✓ src/df13-runtime-authority-boundary.test.ts (3 tests) 9ms
+ ✓ src/media-clarification.test.ts (5 tests) 5ms
+ ✓ src/single-agent-commerce-persistence.test.ts (1 test) 13ms
+ ✓ src/bf01-realtime-runner.test.ts (6 tests) 6ms
+ ✓ src/redis-chat-history.test.ts (2 tests) 4ms
+ ✓ src/redis-business-facts.test.ts (2 tests) 3ms
+
+ Test Files  126 passed (126)
+      Tests  1705 passed (1705)
+   Start at  21:34:25
+   Duration  23.26s (transform 11.93s, setup 0ms, collect 100.24s, tests 35.43s, environment 67ms, prepare 47.74s)
+
+
+> @lana/worker@0.1.0 test:evals C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker
+> node --test --test-concurrency=1 "evals/single-agent-semantic-verifier/*.test.mjs" "evals/single-agent-commerce-read-only/*.test.mjs"
+
+✔ native function content keeps opaque signatures for the next invocation (1.9877ms)
+✔ final customer text excludes thought parts but preserves exact visible bytes (0.3798ms)
+✔ each failed generation has one upstream request and is never retried (20.3595ms)
+✔ auth failure stays in accounting without a generation request (0.4171ms)
+✔ only runtime request fields reach the captured HTTP body; usage is retained (2.354ms)
+✔ state/effect capabilities are explicit and the accepted quote reaches the owner (0.4076ms)
+✔ native call identity remains paired with its function response (0.1987ms)
+✔ a different or absent model version is not accepted as the approved model (0.9426ms)
+✔ unsupported visible media/code is rejected instead of silently discarded (0.2593ms)
+✔ captured continuation HTTP requests still exclude evaluator labels (1.3714ms)
+✔ protocol identity is fixed before any provider invocation (2.8589ms)
+✔ runtime projection and captured verifier request exclude all evaluator fields (2.1151ms)
+✔ failed verifier generation has retained accounting and no retry (1.1978ms)
+✔ oversized or undeclared runtime inputs fail before generation (0.2671ms)
+✔ source preflight reports missing names only without constructing adapters (0.2825ms)
+✔ registered cases bind the exact bytes loaded once, without later file edits changing in-memory inputs (5.7769ms)
+✔ source fault mode is registered outside runtime input and rejects unrecognized modes (6.705ms)
+✔ a transient evidence-file lock publishes the same result without another generation (46.881ms)
+✔ permanent publication failure retains complete tmp and stops before the next attempt (21.4675ms)
+✔ write failure preserves prior evidence and reports only bounded stage and OS code (8.0293ms)
+✔ Windows reader withholding delete sharing reproduces and releases the publication failure (539.4817ms)
+✔ request accounting and completed reply persist before client cleanup; no terminal is inferred (63.2184ms)
+✔ a dispatched but unfinished request has retained accounting without a verdict or retry (6.8532ms)
+✔ a persistence failure aborts the current request and escapes without a hidden generation retry (4.9967ms)
+✔ killing the runner after DISPATCHED keeps accounting, blocks eligibility and refuses restart (336.3092ms)
+✔ killing the runner after RESULT keeps accounting, blocks eligibility and refuses restart (336.088ms)
+✔ full A2 rerun admits exact current inputs and 142 fresh slots without changing models, prompts or repetition policy (206.6986ms)
+✔ report-only prefix executes every remaining case after malformed/refusal errors but retains prefix FAIL and early accounting (3.532ms)
+✔ historical default still holds a failed prefix; report-only mode preserves unsafe and auth/capacity hard stops (2.2592ms)
+✔ all hard-precheck survivors still invoke current verifier with exact runtime and no poisoned evaluator labels (268.2188ms)
+✔ fixed full A3 consumes the exact completed A2 PASS rather than incomplete R68 and retains all42 fresh registrations (708.693ms)
+✔ all42 exact final-text owner generations are saved before mandatory verifier; poisoned evaluator labels never enter either role (436.2452ms)
+✔ provider availability failure retains failed actual terminal and every missing registration without another generation (3.7202ms)
+✔ explicit diagnostic admits exactly 42 unchanged cases from failed A2 while qualified admission remains closed (418.0601ms)
+✔ stream recheck registers only three observed provider-stream failures as fresh N1 without adopting historical outcomes (844.5758ms)
+✔ clear-boundaries run admits only the frozen prompt delta and unchanged full populations/configuration (185.0456ms)
+✔ A3 rejects inherited or incomplete A2 qualification and accepts only new identity with all 142 fresh outcomes (1215.2127ms)
+✔ all 42 current owner outputs persist before mandatory verification, exact texts and poisoned-label firewall remain intact (300.6044ms)
+✔ auth header absence is distinguished from upstream auth failure and costs zero generations (36.2314ms)
+✔ HTTP429 retains only bounded request-id and retry-after metadata and never retries (16.0156ms)
+✔ unrecognized metadata cannot expose arbitrary provider text or credentials (5.2461ms)
+✔ recognized HTTP error codes survive as bounded diagnostics without a retry or raw text (16.0045ms)
+✔ unknown or malformed error bodies cannot become diagnostics or alter fail-closed HTTP outcomes (20.6319ms)
+✔ oversized streamed HTTP diagnostics are canceled without retaining even a recognized prefix (4.9251ms)
+✔ recognized error type fallback is retained but an interrupted error stream stays unclassified (7.5483ms)
+✔ HTTP200 response.failed retains a bounded cause and never authorizes partial or later complete output (4.3862ms)
+✔ HTTP200 response.incomplete retains only the known reason and cannot turn a partial PASS into success (7.0467ms)
+✔ HTTP200 error and failed events preserve known capacity codes for the existing stop policy without retrying (27.6313ms)
+✔ stream failure diagnostics discard unknown values, messages and response bodies while remaining fail closed (9.8671ms)
+✔ valid completed SSE still returns the exact answer; completed event with failed status fails closed (6.9348ms)
+✔ actual forwarded body equals frozen runtime request and excludes CLI tools/context/evaluator labels (50.649ms)
+✔ CLI retry/continuation never forwards a second upstream generation (18.0658ms)
+✔ upstream 401 is retained without generation retry (18.4066ms)
+✔ upstream 429 is retained without generation retry (12.1969ms)
+✔ upstream 500 is retained without generation retry (9.9149ms)
+✔ upstream 503 is retained without generation retry (11.0473ms)
+✔ missing login acquisition fails closed with zero upstream generations (5.9856ms)
+✔ wrong returned model and malformed response fail closed (10.815ms)
+✔ Codex streaming final item owns the reply; completed event may contain metadata only (6.5052ms)
+✔ timeout after one request is retained; no retry (1006.8161ms)
+﹣ installed Codex login reaches relay; upstream is a local stub, no provider generation (0.5229ms) # SKIP
+✔ completion adopts all 168 observations unchanged and freezes exactly the 67 slots without retained outcomes (106.0844ms)
+✔ a recorded dispatch is never treated as a fresh missing invocation (77.3284ms)
+✔ missing-slot completion invokes the unchanged verifier at most once, never retries old errors, and retains all outcomes (212.024ms)
+✔ a send-eligible unsafe observation stops missing-slot generation immediately (33.2883ms)
+✔ explicit63diagnostic plan adopts278unchanged outcomes and only73undispatched slots while preserving FAIL (202.7159ms)
+✔ a staged dispatch without outcome cannot be adopted as a new completion slot (92.5112ms)
+✔ diagnostic loop collects every remaining result after extra unsafePASS without rerunning old errors or authorizing PASS (317.5848ms)
+✔ already dispatched completion is never retried and provider-capacity failure retains all remaining NOT_RUN (97.1392ms)
+✔ three fixed shards cover73slots once and merge old278outcomes only once even after extra unsafePASS (1922.304ms)
+✔ shard selection/merge reject invalid allocation, duplicates and wrong source without starting new model calls (1149.7605ms)
+✔ resume adopts all308outcomes including errors and unsafePASS; only43unstarted registrations form15/14/14shards (264.9085ms)
+✔ resume merges43new samples once with all308unchanged prior observations; errors stay counted and FAIL cannot become PASS (1988.0925ms)
+✔ resumed capacity failure consumes only its freshslot; remaining42stay undispatched and no old or fresh error is retried (67.7243ms)
+✔ round64 completion adopts all217outcomes and2started unknown slots; only132untouched slots can dispatch (305.1076ms)
+✔ completion rejects changed raw evidence, source or overlap before provider invocation (59.2418ms)
+✔ resuming15undispatched retains334outcomes including quotaerror and2started unknowns without retries (331.8162ms)
+✔ readable conversation requests retain every fact, condition, binding and dialogue in all42 control cases (63.3111ms)
+✔ captured local request excludes evaluator/private labels and preserves instruction-like text only as data (3.2027ms)
+✔ default conversation and opt-in verifier stay byte-equivalent to all42 historical provider requests (51.3777ms)
+✔ receipt and minimal/no-profile projections are preserved without synthesizing product data (0.6809ms)
+✔ bounds apply to actual encoded readable provider body, never truncate authoritative data (1.6432ms)
+✔ a historical frozen protocol cannot authorize this unregistered context treatment (81.4456ms)
+✔ unknown presentation identity rejects instead of silently using the control request (0.6679ms)
+✔ readable attempt reuses its existing requestId telemetry for exact evidence readback without parsing prose (33.1017ms)
+✔ existing Gemini adapter transmits readable context unchanged with local HTTP stubs (40.0169ms)
+✔ reduced future corpus partitions the original and changes only the previously reviewed evaluator record (43.9119ms)
+✔ all mandatory attacks, paraphrases, source-policy controls and the new adjudication stay in the subset (0.7824ms)
+✔ every removal has an exact matched successful observation, while all recent failures and started unknowns remain (2579.6412ms)
+✔ selection labels cannot enter requests or inherit frozen admission/results; proposed slots are counted exactly (218.1874ms)
+✔ second failure recheck freezes the same eleven cases with both newly prepared prompts and fresh registrations (294.0895ms)
+✔ reused dispatcher uses the new instructions on all nineteen role requests without leaking evaluation labels or retrying (276.9171ms)
+✔ R67 diagnostic registers exactly three prior SAFE failures and eight prior A3 failures as fresh N1 slots (349.0538ms)
+✔ all 11 diagnostic slots survive a non-capacity error without retry; every A3 draft invokes verifier and requests exclude registration labels (223.4378ms)
+✔ owner result is saved before a verifier interruption; a capacity block retains every later registration untouched (317.5456ms)
+✔ actual captured Gemini request preserves exact final text and usage without evaluator/secret leakage (102.0743ms)
+✔ Gemini HTTP401 terminates current slot with one generation, no retry (2.8383ms)
+✔ Gemini HTTP429 terminates current slot with one generation, no retry (2.5224ms)
+✔ Gemini HTTP500 terminates current slot with one generation, no retry (2.3682ms)
+✔ failed OAuth is retained without generation or hidden auth retry (2.2748ms)
+✔ 401 permits token refresh only before later registered slot, never current-slot retry (4.406ms)
+✔ timeout and network error each terminate without generation retry (8.6049ms)
+✔ malformed/model/tool/truncation/oversize responses fail closed with one generation and no rewrite (14.6969ms)
+✔ response byte bound aborts at1MiB and cache reuses token for subsequent successful slot (6.1574ms)
+✔ owner one-pass amendment selects isolated inputs and preserves unchanged model/population/quality bars (36.1783ms)
+✔ one-pass registrations adopt all92completed results/errors and execute only35 untouched cases (17.1941ms)
+✔ operational totals retain both adapters usage without losing failed attempts or double counting (1.0246ms)
+✔ whole-reply operational report keeps owner and verifier token totals separate, including actual zero usage (0.3628ms)
+✔ prospective label adjudication changes one evaluator record without altering any runtime world or PR387 attack (60.4571ms)
+✔ every candidate verifier body preserves exact runtime inputs/config/schema and excludes evaluator corrections (322.0736ms)
+✔ changed preparation prompt or labels cannot inherit frozen Round66 protocol qualification (155.0377ms)
+✔ original Round66 unsafe eligible PASS and every unrun slot remain untouched by prospective review (9.6718ms)
+✔ preparation retains every business fact, profile qualifier and policy across all 42 native histories (62.9905ms)
+✔ same prompts take conflicting policies and ETA anchors exclusively from current source data (3.4359ms)
+✔ unseen products, multiple profiles and unbound source facts survive without SKU/ref-specific overrides (1.6769ms)
+✔ code size inputs stay with their product and complete size charts remain available without deriving fit (0.8758ms)
+✔ verifier schema, exact draft, canonical snapshot and generation envelope stay unchanged except instructions (1.4774ms)
+✔ captured preparation bodies exclude evaluator labels and non-allowlisted private state (49.8097ms)
+✔ all historical envelopes fit frozen bounds and oversized preparation fails rather than truncating source (46.6096ms)
+✔ draft corpora contain exact seeds, required A2 families and whole-reply A3 coverage (9.1954ms)
+✔ each exact PR387 segment/literal input remains pinned independently of new cases (1.1644ms)
+✔ captured conversation and verifier request bodies exclude evaluator-only data (0.9502ms)
+✔ projection binds exact draft and allowlisted trusted snapshot, excludes draft from conversation input (0.4712ms)
+✔ frozen bounds reject oversized input instead of silently truncating authoritative truth (0.8357ms)
+✔ owner decisions and bounded Codex inference configuration are frozen (12.0637ms)
+✔ A2 and A3 preflight reject missing or mismatched runtime source SHA (0.4058ms)
+✔ fallback text/hash, terminal map and corpus tampering invalidate protocol inputs (0.4762ms)
+✔ CLI validates retained A2 evidence without a circular top-level await (322.3727ms)
+✔ failure recheck freezes six exact old failure cases as14new slots without adopting old outcomes (156.6897ms)
+✔ a diagnostic unsafe eligible PASS stops on its first observation with all unrun slots retained (21.11ms)
+✔ recheck requests retain exact final text/context and exclude case/run/evaluator labels (87.9351ms)
+✔ trusted selected registration audits14fresh outcomes but cannot stand in for the full351slot registration (425.2824ms)
+✔ Round10 preserves exact seven seeds and unsafe drafts, fixed models/bars; freezes reviewed context/prompts (165.6233ms)
+✔ Round10 context survives existing bounds/authority with exact claims and meaningful snapshot changes (750.432ms)
+✔ Round10 captured requests exclude evaluation labels; every surviving draft still invokes verifier then gate (5.9527ms)
+✔ Round11 keeps exact attacks, both prompts/config/bars and the complete registered population (160.3166ms)
+✔ Round11 exact context reaches both roles within bounds without losing size authority or admitting unbound quotes (754.2148ms)
+✔ Round11 captured requests exclude evaluator/preparation labels; every surviving text takes verifier and final gate (7.2ms)
+✔ Round12 selects its sealed population, retaining exact attacks and24anchors with unchanged safety contracts (199.2955ms)
+✔ Round12 preserves exact trusted context for both roles, fits bounds and does not infer size from a partial customer measurement (868.863ms)
+✔ Round12 captured provider requests exclude evaluator labels and verify every surviving final text (7.6877ms)
+✔ Round13 selects the preregistered calibration population without changing any old A2 attack or A3 runtime (218.6215ms)
+✔ Round13 preserves authoritative fit/customer bindings and maximum-draft envelopes under the revised prompts (851.665ms)
+✔ Round13 captured provider requests exclude scoring annotations and require the verifier for every surviving reply (4.9289ms)
+✔ Round14 retains every attack and anchor while registering the six new development continuations before results (218.947ms)
+✔ Round14 carries the same authority/fit bindings to both models under maximum final-draft bounds (1014.8884ms)
+✔ Round14 captured requests omit evaluator-only judgments and every surviving draft invokes the verifier (9.0354ms)
+✔ Round15 freezes retained attacks and customer contracts before explicit executable selection (235.5686ms)
+✔ Round15 keeps price stock fit and underlying catalog data while carrying new scope to both roles (1140.0291ms)
+✔ Round15 reconstructed captured requests exclude evaluator and preparation markers and always verify survivors (5.6603ms)
+✔ Round16 selects frozen source and retains prior attacks and runtime contexts (252.844ms)
+✔ Round16 carries approved instructions with bound facts and exact allowed context (1297.6915ms)
+✔ Round16 captured provider requests exclude evaluator labels and verify every survivor (8.701ms)
+✔ Round17 permits only approved owner medium and retains every frozen input and quality bar (289.6383ms)
+✔ Round17 both role requests remain within bounds with current fit bindings intact (1264.5885ms)
+✔ Round17 captured requests exclude evaluator labels and verify every surviving owner draft (7.2696ms)
+✔ Codex launch and forwarded body use the frozen effort independently for both roles (62.9463ms)
+✔ Codex rejects a request or generation config with effort different from the frozen role (0.9524ms)
+﹣ installed Codex owner medium forwards the exact request to local stub without generation (0.0947ms) # SKIP
+✔ Round18 indoor dress decision carries a reproducible VA512 fit bound to current customer (8.6187ms)
+✔ Round18 retains all attacks, contracts, other41 runtime inputs and numeric bars (309.0384ms)
+✔ Round18 bounded requests preserve trusted binding and captured requests exclude evaluation labels (1263.5061ms)
+✔ Round19 selects its own frozen population and rejects changed runtime even with a new corpus hash (295.6756ms)
+✔ Round19 preserves generation, safety and numeric bars while revising only two offline sales contracts (82.7913ms)
+✔ Round19 evaluator correction cannot change model bodies and injected offline labels never reach captured providers (101.7639ms)
+✔ conversation sees the selected code clock without changing protected truth or verifier binding (1.7011ms)
+✔ round-2 captured requests contain runtime data and code-clock, never evaluation instructions (0.5652ms)
+✔ explicit round selector validates separate frozen inputs; cannot overwrite round-1 outcomes (169.2104ms)
+✔ Round20 selects its frozen inputs and cannot alter retained attack labels or A3 contracts (346.0465ms)
+✔ Round20 adds six same-context contrast pairs while retaining provider config, authority and quality bars (17.9585ms)
+✔ Round20 captured owner/verifier requests omit injected evaluator labels and require verifier plus final gate (20.2714ms)
+✔ Round21 selects frozen inputs and rejects changed retained labels and A3 contracts despite recomputed hashes (344.9878ms)
+✔ Round21 retains all corpora, owner prompt, configuration, authority and quality bars; only verifier policy section differs (29.357ms)
+✔ Round21 captured owner/verifier requests omit injected evaluator labels and require verifier plus final gate (21.9943ms)
+✔ Round22 selects frozen 108-case inputs and rejects retained-label or A3-contract tampering despite recomputed hashes (369.533ms)
+✔ Round22 retains all96 attacks/labels and all42 histories; prompts match owner-reviewed identities, authority/config/quality bars unchanged (36.6551ms)
+✔ Round22 captured owner/verifier requests omit all evaluator labels and require mandatory verification plus final gate (98.6609ms)
+✔ Round23 selects fixed108/42 inputs, retains attacks/history/evaluators and rejects relabeling (328.3714ms)
+✔ all61 code sizing admissions match engine, fit/policy identity retained; changing hint invalidates oldPASS binding (145.9597ms)
+✔ captured requests omit evaluator/admission labels and every surviving reply invokes owner+verifier+finalgate (50.3194ms)
+✔ Round24 selects fixed108/42 inputs; owner prompt treatment retains verifier, data and bars (258.6643ms)
+✔ Round24 rejects changed retained evaluator, customer history or prepared size context (217.5013ms)
+✔ Round24 captured requests exclude evaluator/admission labels; every surviving final draft gets verifier and gate (45.8431ms)
+✔ fixed25 protocol retains all108 A2 and exact42 histories/evaluators/facts; only summary representation changes (304.6952ms)
+✔ changed evaluator or invented summary/fact is rejected; changed current status invalidates old PASS (142.3699ms)
+✔ captured status-context requests omit evaluator/admission labels and still mandate verifier (44.4607ms)
+✔ fixed26 selects frozen116 A2, retains108 labels/runtime and all42 A3 runtime with only two evaluator clarifications (297.2616ms)
+✔ recomputed corpus hashes cannot authorize changed retained truth, an unrelated evaluator change or a relabelled new contrast (216.8459ms)
+✔ new semantic controls and whole-turn evaluator data never enter captured requests; surviving A3 draft still mandates verifier (68.2856ms)
+✔ fixed27 selects120A2, retains116 labels/runtime and all42A3 runtime/evaluators/config/bars (281.7462ms)
+✔ recomputed hashes cannot authorize changed retained truth/evaluator or a relabelled new contrast (206.9423ms)
+✔ new contrast/review labels stay outside captured requests and all surviving A3 drafts invoke verifier (65.2074ms)
+✔ fixed28 selects120A2 and retains every runtime/evaluator/config/bar from27 (279.6728ms)
+✔ recomputed input hashes cannot authorize changed retained truth or evaluator (263.7746ms)
+✔ review/evaluator labels never enter captured requests and every surviving draft uses verifier (63.5797ms)
+✔ fixed29 selects120A2 and retains every runtime/evaluator/config/bar from28 (284.7399ms)
+✔ recomputed input hashes cannot authorize changed retained truth or evaluator (272.8918ms)
+✔ review/evaluator labels never enter captured requests and every surviving draft uses verifier (65.3001ms)
+✔ Round3 preserves34/20 earlier cases exactly and adds preregistered bounded histories (22.4391ms)
+✔ bounded profile projection supplies hashed data and code clock, strips nested evaluator fields (1.1714ms)
+✔ new trusted profile affects exact snapshot; record/count bounds reject without truncation (0.9796ms)
+✔ captured requests from both owner and verifier exclude evaluator-only anchors/cohort/rubric (18.4323ms)
+✔ stricter consultation cannot pass on high mean; simple/closing turns need no invented step (2.5992ms)
+✔ explicit Round3 folder selection cannot overwrite older evidence (167.237ms)
+✔ fixed30 registers only readable owner presentation and retains the complete round28 control (254.8015ms)
+✔ recomputed hashes cannot authorize changing retained truth, history or evaluation labels (237.1857ms)
+✔ the one-variable run cannot accept a second prompt, fallback or quality-bar treatment (261.8454ms)
+✔ all42 readable captures exclude evaluator labels and every surviving owner draft reaches unchanged verifier (195.6291ms)
+✔ fixed31 admits only the frozen existing29 owner prompt with exact30 readable inputs (260.1146ms)
+✔ rehashing inputs,another prompt or changed bars cannot expand the registered31 treatment (414.613ms)
+✔ all42 captured31 requests exclude evaluator labels and require verifier even for nonprotected drafts (171.6482ms)
+✔ fixed32 admits exact122 safety controls and42 unchanged consultations with frozen bars (295.8524ms)
+✔ rehashing labels,inputs or bars cannot expand fixed32 treatment (424.719ms)
+✔ V2 price labels preserve all42 JSON data,bindings and unchanged verifier serialization (67.5296ms)
+✔ all42 captured V2 attempts exclude evaluator labels and always call verifier,retaining requestId (175.0503ms)
+✔ fixed33 admits a fresh exact32 rerun without adopting prior observations (248.589ms)
+✔ rehashing a new treatment cannot authorize this exact rerun (338.2271ms)
+✔ all42 fresh requests equal32 runtime bodies and exclude evaluator labels;verifier mandatory (240.9614ms)
+✔ fixed34 activates only prepared owner prompt with all33 populations/config retained (257.2864ms)
+✔ rehashing an unregistered prompt/population/config or adopting old attempts cannot authorize34 (420.5954ms)
+✔ all42 captured requests change only owner instructions;no evaluator labels and verifier always mandatory (248.0572ms)
+✔ fixed35 registers only native owner context/prompt and preserves all34 populations/config (251.3659ms)
+✔ all42 native requests preserve exact dialogue order/current message/every fact/binding and unchanged verifier (780.7661ms)
+✔ all42 captured role requests exclude evaluator labels and every surviving owner text is verified (319.7354ms)
+✔ native adapter sends bounded text-only history unchanged with one generation and no credential disclosure (10.1607ms)
+✔ native generation HTTP failures retain current attempt and refresh only before a later401 attempt (7.8755ms)
+✔ existing bounds reject full encoded native bodies and oversized history rather than truncate (1.2397ms)
+✔ rehashing changed corpus/config/prompt or adopting native presentation into34 cannot authorize35 (257.5089ms)
+✔ fixed36 registers the exact35 semantic population/prompts/config and fresh provenance (297.0883ms)
+✔ all42 round36 captured requests preserve exact native35 bodies and exclude evaluator-only labels (210.6385ms)
+✔ fixed36 native adapter preserves one request and current HTTP failure without generation retry (15.0949ms)
+✔ rehashing changed frozen semantics or adopting results cannot authorize36 (314.5319ms)
+✔ fixed37 admits the presented preparation and unchanged authority/configuration (278.6888ms)
+✔ all42 captured native/provider requests exclude evaluator labels and bind unchanged snapshots (199.4362ms)
+✔ fixed37 native adapter retains exactly one generation on HTTP429 without retry (40.8006ms)
+✔ rehashing world/labels/prompt/bars or adopting historical results cannot qualify37 (405.543ms)
+✔ fixed38 freezes identical populations, authority and bars; rejects rehashed changes (482.1056ms)
+✔ all42 captured V4 requests retain sales facts and native turns, omit charts/labels, leave verifier and snapshot exact (214.4565ms)
+✔ V4 presents only machine size decisions and missing inputs and enforces encoded bounds (2.3539ms)
+✔ fixed38 native adapter forwards one request on HTTP429 without generation retry (79.8337ms)
+✔ fixed39 seals one evaluator correction without changing runtime facts, authority or numeric bars (437.7276ms)
+✔ all42 captured requests preserve V4, exact native context and mandatory verifier without evaluator labels (194.8318ms)
+✔ capacity stop requires an explicit error code, preserves generic429 semantics and leaves old rounds unchanged (0.314ms)
+✔ A3 capacity-blocked prefix retains all42 slots and cannot fabricate terminal outcomes or score unexecuted slots (21.4917ms)
+✔ A2 capacity-blocked prefix preserves the full denominator and validates the stopping provider evidence (8.4448ms)
+✔ fixed39 native Gemini adapter makes one generation on429 and never retries (41.2752ms)
+✔ Round4 fixed selector validates frozen58/20 and preserves all46 old attacks/controls (142.1124ms)
+✔ Round4 profile and supplied SIZE_FIT/variant values survive only the fixed allowlist (1.7267ms)
+✔ all frozen supplied size claims are reproducible using existing engine before generation (10.4335ms)
+✔ SIZE_FIT requires exact current customer profile/revision/measurement binding at precheck (19.4618ms)
+✔ old PASS cannot authorize changed current size/variant facts or expired size claim (3.9134ms)
+✔ captured owner/verifier requests exclude evaluator labels and all six manual references (6.9994ms)
+✔ naturalness1 fails even a simple turn with high mean; no artificial closing CTA (1.928ms)
+✔ fixed40 protocol freezes prospective review without changing canonical world, verifier, configuration or numeric bars (404.624ms)
+✔ owner sees bounded product evidence presentation; canonical verifier and all other business values remain exact (77.7978ms)
+✔ changed source never receives the old product presentation (1.0316ms)
+✔ all42 captured provider requests exclude evaluator labels and every surviving draft still invokes verifier (130.0239ms)
+✔ fixed40 native Gemini request makes one generation on429 without retry or altered history (89.8585ms)
+✔ fixed41 admits only its frozen claim-scope, terminal and complete repetition policy (387.2507ms)
+✔ A2 registers all172 frozen slots, keeping every unsafe and safe repetition (2.9216ms)
+✔ A3 scores all62 actual outcomes, no majority vote or best-of-three (2.0577ms)
+✔ captured provider requests contain runtime only, including repeated attempts and new regression fixtures (157.6051ms)
+✔ every surviving final text invokes verifier, including ordinary unprotected text (20.9633ms)
+✔ semantic and provider failures use exact staticV2 without preserving protected clauses (14.2082ms)
+✔ V2 cannot authorize arbitrary unverified fallback, old40 still emits unchangedV1 (4.1462ms)
+✔ fixed41 Gemini native request records exactly one generation401, with token refresh only on later attempt (57.5047ms)
+✔ fixed42 admission binds the prospective configuration and preserves historical populations (389.7276ms)
+✔ A2 keeps all188 independent unsafe and safe slots, including the previous safe rejects (60.6944ms)
+✔ A3 retains all66 terminal outcomes without voting away an unsafe or fallback sample (60.5027ms)
+✔ product observation presentation changes neither canonical truth nor fallback behavior for different source text (2.0887ms)
+✔ captured request bodies exclude all evaluator-only labels from both roles and every new ETA contrast (172.8477ms)
+✔ ordinary unprotected final text still invokes verifier and errors terminate at frozen staticV2 (21.6579ms)
+✔ fixed42 Gemini makes one generation401 per slot and refreshes token only before a later attempt (70.0957ms)
+✔ fixed43 admits the sealed policy treatment while retaining owner, facts and approved safety/usability controls (340.8797ms)
+✔ registered policy contrasts count every sample and preserve the mandatory unsafe and whole-terminal denominators (64.0693ms)
+✔ captured fixed43 request bodies exclude evaluator labels and preserve the exact trusted snapshot for both roles (190.2327ms)
+✔ fixed44 admits the sealed owner/review treatment without changing protected truth or verifier qualification population (388.5608ms)
+✔ fixed44 preserves all registered samples, mandatory unsafe rule and whole-terminal denominator (62.9807ms)
+✔ fixed44 captured request projections exclude review/evaluator labels and preserve canonical trusted snapshots (272.9161ms)
+✔ fixed45 admits frozen prompt scope and contrasts while preserving existing world and quality contracts (410.2203ms)
+✔ fixed45 registers every repeated contrast and preserves the full terminal outcome denominator (102.9862ms)
+✔ fixed45 captured requests exclude all evaluator/source labels and preserve canonical snapshots (258.6274ms)
+✔ fixed46 admits verifier-only treatment while preserving owner, complete populations and world contracts (394.3817ms)
+✔ fixed46 retains every repetition, contrast label and actual terminal outcome denominator (76.036ms)
+✔ fixed46 captured requests exclude evaluator/source labels and preserve canonical trusted snapshots (256.7531ms)
+✔ fixed47 admits bounded owner/verifier treatment and scope contrasts while preserving historical populations/world (390.1131ms)
+✔ fixed47 retains every repetition, contrast label and actual terminal outcome denominator (91.6168ms)
+✔ fixed47 captured requests exclude evaluator/source labels and preserve canonical trusted snapshots (261.3946ms)
+✔ availability stop retains the failed attempt without changing historical transport policy (3.7801ms)
+✔ round48 seals a prospective policy correction with owner, facts, bars and A3 held constant (442.7977ms)
+✔ prospective adjudications preserve every old draft/world and expose every denominator change (39.7418ms)
+✔ new label review stays evaluator-only in actual stub-captured verifier requests (46.7925ms)
+✔ round48 native dialogue reaches the conversation adapter in one generation without retry (33.3797ms)
+✔ round49 admits only its sealed inputs and keeps authority/configuration controls (327.4768ms)
+✔ owner policy display keeps independent conditions while canonical/verifier text and binding stay exact (189.4411ms)
+✔ all A2 slots and A3 facts/evaluators survive prospective dialogue edits with an exact audit (37.372ms)
+✔ actual stub-captured owner and mandatory verifier requests exclude evaluator-only labels (163.9041ms)
+✔ round49 native conversation adapter forwards the exact frozen request once without retry (93.8002ms)
+✔ Round5 selector and protocol retain all58 frozen attacks/controls, add4 pairs and20 new histories (153.0764ms)
+✔ Round5 projection preserves current size authority and exact concrete source conditions (16.1234ms)
+✔ prepared size recommendations are reproducible using the existing Size Engine (10.0388ms)
+✔ conditional quotes preserve their arithmetic and source prices; accepted history has no bogus browsing default (0.7582ms)
+✔ captured requests keep buyer goals, score labels and manual references behind the evaluator firewall (7.9841ms)
+✔ misunderstood buying motivation fails consultation even when facts, style and mean are good (1.7733ms)
+✔ offline review packet carries the frozen buyer goal and obstacle without needing rejected draft or verdict (0.3016ms)
+✔ round50 admits its sealed input only and retains all authority/configuration bars (328.2732ms)
+✔ round50 forwards identical trusted context and verifier request with unchanged exact binding (66.6569ms)
+✔ round50 preserves every A2/A3 fixture and registered repetition including seven PR387 attacks (35.681ms)
+✔ round50 actual captured owner and mandatory verifier bodies exclude evaluator-only labels (132.8017ms)
+✔ round50 native adapter forwards its exact final text request once without retry (35.4291ms)
+✔ round51 admits its sealed input only and retains all authority/configuration bars (330.7192ms)
+✔ round51 forwards identical trusted/verifier data and changes only the source-matched material-care display with unchanged exact binding (66.7895ms)
+✔ round51 preserves every A2/A3 fixture and registered repetition including seven PR387 attacks (35.462ms)
+✔ round51 actual captured owner and mandatory verifier bodies exclude evaluator-only labels (136.335ms)
+✔ round51 native adapter forwards its exact final text request once without retry (16.521ms)
+warning: in the working copy of 'manifest.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'manifest.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'source.mjs', LF will be replaced by CRLF the next time Git touches it
+✔ round52 admits its frozen protocol, rejects changed cohort and keeps all prior worlds and safety configuration (378.3743ms)
+✔ V5 associates inputs, fit and facts with their exact product and retains all V4 owner data and native dialogue (92.833ms)
+✔ all prior failures receive exactly three registrations before remaining attempts with no duplicates or denominator loss (2.2817ms)
+✔ regression admission rejects one failing repetition, missing scores and stale raw evidence without dispatching a remaining slot (13.7981ms)
+✔ interrupted dispatched slot is never generated again (2.4847ms)
+✔ source seal accepts evidence-only commits for a staged run and rejects executable or frozen-input changes (1162.7288ms)
+✔ captured V5 owner and mandatory verifier bodies exclude all evaluator and regression labels (119.6721ms)
+✔ native V5 provider adapter forwards exact request once and keeps errors fail-closed (78.4485ms)
+✔ round53 freezes its new mixed-source population and config before any result; all legacy fixtures are exact (337.3154ms)
+✔ V6 provider envelope reuses exact prepared source presentation, native history and canonical verifier for all42 (68.9383ms)
+✔ all42 A3 worlds use v2 source and revised policy contracts/history never inherit indoor-wear permission (228.3296ms)
+✔ new-policyN3 and all prior repetitions remain in one fixed schedule, unsafe send-eligible PASS stops remainder (8.016ms)
+✔ captured native owner and mandatory verifier requests exclude evaluator/policy/cohort audit labels (133.5642ms)
+✔ V6 actual encoded input remains bounded at max draft and keeps product-specific missing size inputs (41.1776ms)
+✔ round54 admits only the frozen verifier treatment; all population, owner, sources and numeric bars remain exact (350.5616ms)
+✔ the four observed prior failures lead the 325attempt denominator; a failed repetition stops all313remaining (37.786ms)
+✔ passing all12opens existing remainder once, but any unsafe send-eligible outcome still stops the run (1.6656ms)
+✔ all42native owner bodies stay exact and verifier bodies change instructions only; evaluator failure labels never enter either role (222.7022ms)
+✔ round55 admits only the frozen verifier treatment; all population, owner, sources and numeric bars remain exact (334.2559ms)
+✔ the four observed prior failures lead the 325attempt denominator; a failed repetition stops all313remaining (3.7137ms)
+✔ passing all12opens existing remainder once, but any unsafe send-eligible outcome still stops the run (1.5361ms)
+✔ all42native owner bodies stay exact and verifier bodies change instructions only; evaluator failure labels never enter either role (220.4097ms)
+✔ round56 is pinned before results and retains all nine inputs, labels, configurations and numerical bars (377.8899ms)
+✔ opt-in unpacking preserves every source value and canonical world across all42histories; default V6 remains exact (102.0725ms)
+✔ canonical unknown policy objects are reversible while noncanonical, duplicated, malformed or plain literals remain exact text (1.4336ms)
+✔ all42 actual local provider request bodies exclude evaluator labels and preserve mandatory one verifier/gate with zero live generations (465.0778ms)
+✔ same four N3prefix controls remain inside325; one failed repetition prevents all313remaining (3.3275ms)
+✔ all12pass opens the existing remainder once, while any unsafe send-eligible PASS stops immediately (1.9289ms)
+✔ existing V6 native53–55 bodies reach the current adapter once without changing historical requests (128.8745ms)
+✔ round57 freeze admits only pinned inputs and retains approved model/schema/bars and A3 controls (370.7092ms)
+✔ exact two legacy runtime drafts remain; prospective labels and paired controls are auditable without rescoring history (24.8454ms)
+✔ canonical runtime requests of all179retained cases remain exact apart from verifier instructions (100.628ms)
+✔ eight actual local verifier wire captures hide evaluator-only correction labels and keep one generation with code gate (136.7309ms)
+✔ unchanged V7owner conversation reaches adapter once for new identity, with no extra source facts (53.6979ms)
+✔ mixed24prefix remains within331; any failed SAFE repetition holds all307remaining without majority (2.7363ms)
+✔ any unsafe send-eligible PASS ends mixed regression immediately and all matching outcomes open remainder once (4.4562ms)
+✔ round58 freeze admits only pinned inputs and retains approved model/schema/bars and A3 controls (380.0598ms)
+✔ round58 preserves all181worlds and labels, including exact original PR387 attack and prospective57controls (20.5178ms)
+✔ canonical runtime requests of all181retained cases remain exact apart from verifier instructions (105.3017ms)
+✔ ten actual local verifier wire captures hide evaluator-only correction labels and keep one generation with code gate (152.3715ms)
+✔ unchanged V7owner conversation reaches adapter once for new identity, with no extra source facts (69.0545ms)
+✔ mixed30prefix remains within333; any failed SAFE repetition holds all303remaining without majority (2.8049ms)
+✔ any unsafe send-eligible PASS ends mixed regression immediately and all matching outcomes open remainder once (4.4467ms)
+✔ round59 freeze admits only pinned inputs and retains approved model/schema/bars and A3 controls (368.2226ms)
+✔ round59 preserves all181worlds and labels, including exact original PR387 attack and prospective57controls (22.2079ms)
+✔ canonical runtime requests of all181retained cases remain exact apart from verifier instructions (107.2189ms)
+✔ twelve actual local verifier wire captures hide evaluator-only correction labels and keep one generation with code gate (126.0718ms)
+✔ unchanged V7owner conversation reaches adapter once for new identity, with no extra source facts (89.6345ms)
+✔ mixed36prefix remains within333; any failed SAFE repetition holds all297remaining without majority (2.809ms)
+✔ any unsafe send-eligible PASS ends mixed regression immediately and all matching outcomes open remainder once (4.6913ms)
+✔ Round6 selects its own frozen inputs and registers every retained case fresh exactly once (162.9311ms)
+✔ Round6 retains code-derived current size/profile/policy authority in both role projections (3.5539ms)
+✔ Round6 captured owner and mandatory verifier requests exclude evaluator-only labels and references (24.7914ms)
+✔ round60 freeze admits only pinned inputs and retains approved model/schema/bars and A3 controls (380.7386ms)
+✔ round60 preserves all181worlds and labels, including exact original PR387 attack and prospective57controls (21.8259ms)
+✔ canonical runtime requests of all181retained cases remain exact apart from verifier instructions (105.9152ms)
+✔ twelve actual local verifier wire captures hide evaluator-only correction labels and keep one generation with code gate (164.4833ms)
+✔ unchanged V7owner conversation reaches adapter once for new identity, with no extra source facts (61.4442ms)
+✔ mixed36prefix remains within333; any failed SAFE repetition holds all297remaining without majority (2.7925ms)
+✔ any unsafe send-eligible PASS ends mixed regression immediately and all matching outcomes open remainder once (4.4933ms)
+✔ round61 freeze admits only pinned inputs and retains approved model/schema/bars and A3 controls (369.0635ms)
+✔ round61 preserves all181worlds and labels, including exact original PR387 attack and prospective57controls (20.3955ms)
+✔ canonical runtime requests of all181retained cases remain exact apart from verifier instructions (104.3591ms)
+✔ twelve actual local verifier wire captures hide evaluator-only correction labels and keep one generation with code gate (165.161ms)
+✔ unchanged V7owner conversation reaches adapter once for new identity, with no extra source facts (83.7602ms)
+✔ mixed36prefix remains within333; any failed SAFE repetition holds all297remaining without majority (2.8401ms)
+✔ any unsafe send-eligible PASS ends mixed regression immediately and all matching outcomes open remainder once (4.4629ms)
+✔ round62 freeze admits only pinned inputs and retains approved model/schema/bars and A3 controls (374.9436ms)
+✔ round62 lossless source transcription preserves all181worlds/labels and exact7PR387fixtures (26.2182ms)
+✔ source presentation changes snapshot binding only where source bytes change and retains all other runtime data (61.5918ms)
+✔ twelve actual local verifier wire captures hide evaluator-only correction labels and keep one generation with code gate (157.8417ms)
+✔ unchanged V7owner conversation reaches adapter once for new identity, with no extra source facts (66.3446ms)
+✔ mixed36prefix remains within333; any failed SAFE repetition holds all297remaining without majority (2.6714ms)
+✔ any unsafe send-eligible PASS ends mixed regression immediately and all matching outcomes open remainder once (4.5034ms)
+✔ round63 admits pinned new contract without changing models/schema/bars/authority sources (363.6426ms)
+✔ four prospective labels do not rewrite181old runtimes, original7attacks or historical A3 inputs (42.5131ms)
+✔ context contrasts keep identical draft and source but different customer situation; labels stay evaluation-only (0.4077ms)
+✔ twenty-one local verifier wire captures exclude evaluator labels and preserve exact customer/draft input (217.2532ms)
+✔ new owner policy instruction reaches unchanged Gemini V7adapter exactly once with unchanged facts (26.3879ms)
+✔ all63prefix slots must match before288remaining; one rejected SAFE repetition stops full continuation (3.5401ms)
+✔ unsafe eligible PASS still immediately stops; correct outcomes dispatch all351 once without retry/majority (4.7569ms)
+✔ round64 admits only reviewed prompts with identical corpus, policy, authority and config (415.4977ms)
+✔ full351 slots partition117each; duplicate allocations or altered registrations fail closed (17.5064ms)
+✔ all surviving fixture wire captures exclude evaluator labels and preserve exact draft and sources (997.3846ms)
+✔ round64 owner native context retains existing one-request Gemini adapter semantics (128.2127ms)
+✔ dispatch start persists before generation, full diagnostic retains unsafe PASS and never retries (878.3545ms)
+✔ capacity outcome remains in denominator and stops peer dispatch without extra generation (5.9786ms)
+✔ three complete shards merge every slot once, reject altered peer slots and preserve FAIL (1973.6735ms)
+✔ interleaved capacity evidence validates its own prefix and merges retained error without global-prefix assumption (362.31ms)
+✔ round65 freezes one verifier treatment and retains all original worlds/labels/model/authority/quality bars (365.7927ms)
+✔ all three old semantic controls N3 precede nine N3 safety contrasts and retain complete355registration (2.5236ms)
+✔ all42owner requests remain exact64 and the admitted native Gemini adapter issues one generation (82.8328ms)
+✔ every surviving captured verifier request changes only instructions; evaluator-only poison never leaks (462.7349ms)
+✔ staged runner persists dispatched provider/result checkpoint before client cleanup and clears it only on terminal (106.6463ms)
+✔ SAFE regression refusal withholds every remaining slot; an unsafe eligible PASS stops immediately (3.4632ms)
+✔ Round65 direct A3 entry refuses bypassing the registered regression schedule before any generation (353.5161ms)
+✔ Round66 admits exact N2/N3 contract and only policy prompt changes with all worlds/labels/authority/bar values retained (288.5856ms)
+✔ 378fresh A2 slots include exactly four failed/error groups N3; all other A2/A3 cases N2 (13.2926ms)
+✔ mixed N3/N2 A2 prefix stops at22 before356remainder, counts errors, and unsafe eligible PASS stops at7 (3.732ms)
+✔ A3 N2 prefix generates exactly20 outcomes before review, never silently reaching30 (0.6084ms)
+✔ all surviving actual verifier request captures preserve exact context/draft and exclude private evaluator labels (388.1845ms)
+✔ native owner projection remains exact65 and admitted Gemini adapter makes one generation per slot (123.5083ms)
+✔ Round67 admits only frozen reduced population and reviewed policy prompt without altering authority, owner or other inputs (571.8669ms)
+✔ 142 fresh slots use two R66 failed groups x3 first; every other case and all42 A3 exactly once (2.0175ms)
+✔ six-slot prefix rejects malformed outcomes before remainder, unsafe eligible PASS stops at once, and early checkpoint is retained (6.7386ms)
+✔ every hard-precheck survivor invokes verifier with exact unchanged runtime and no evaluator labels; native owner adapter stays compatible (325.0726ms)
+✔ Round68 freezes current prompt pair and full retained population without changing authority or other controls (588.7049ms)
+✔ 142 fresh slots use two historical regression groups x3 first; every other case and all42 A3 exactly once (2.0234ms)
+✔ six-slot prefix rejects malformed outcomes before remainder, unsafe eligible PASS stops at once, and early checkpoint is retained (5.596ms)
+✔ every hard-precheck survivor invokes verifier with exact unchanged runtime and no evaluator labels; native owner adapter stays compatible (374.5334ms)
+✔ Round7 preserves prior cases and safety bars, registers66 fresh slots and all24 new-round outcomes (183.7975ms)
+✔ Round7 current size binding and material policy survive both role projections (1.2575ms)
+✔ Round7 actual captured owner/verifier envelopes exclude every evaluator label and reference (25.5286ms)
+✔ Gemini comparison preserves exact Round8 inputs/prompts/review/bars; only owner provider changes (198.8195ms)
+✔ Gemini captured final-text owner and mandatory Codex verifier exclude evaluator context (23.0223ms)
+✔ Gemini owner receives full unchanged trusted sizing/policy/context within frozen byte bound (10.6598ms)
+✔ Round8 registers66 fresh attempts, preserves48unsafe and24A3, freezes reviewed voice and only declared SAFE corrections (184.9269ms)
+✔ Round8 preserves current size binding, complete policy and profiles in both role projections (1.2632ms)
+✔ Round8 captured owner/verifier requests exclude evaluator labels, review procedure and references (23.6342ms)
+✔ Round9 preserves exact seven seeds and unsafe drafts, fixed models/bars; freezes reviewed context/prompts (167.0368ms)
+✔ Round9 context survives existing bounds/authority with exact claims and meaningful snapshot changes (736.2968ms)
+✔ Round9 captured requests exclude evaluation labels; every surviving draft still invokes verifier then gate (5.938ms)
+✔ every hard-precheck survivor including nonprotected safe control invokes verifier exactly once (18.4033ms)
+✔ known legacy authority and expired/oversized input stop mechanically without verifier (1.3572ms)
+✔ stale binding scenarios still invoke mandatory verifier, then cannot send (2.7109ms)
+✔ one unsafe send-eligible PASS fails A2 even when other repetitions reject (0.5628ms)
+✔ provider errors remain in safe denominator and all missing registered attempts block acceptance (0.2757ms)
+✔ conversation owns exact final customer text; every surviving draft invokes one verifier (19.4863ms)
+✔ human scores actual frozen fallback, never rejected candidate or verifier status (1.7ms)
+✔ generation error remains a terminal outcome and cannot cause generation retry (0.4567ms)
+✔ PII hard precheck terminates before verifier, using no-send (0.5752ms)
+✔ missing human scores cannot yield quality PASS; complete all-generation denominator required (0.6892ms)
+✔ whole-reply quality uses frozen per-dimension, mean, family and factual/action safety bars (1.5363ms)
+✔ both role projections retain clarified policy/profile sources and exact code-bound size without changing other business values (970.9526ms)
+✔ captured candidate request bodies remain bounded and exclude evaluator/review/private annotations for every history (32.8782ms)
+✔ waist-only context explicitly has no recommendation and presents missing hips before ranges (9.8073ms)
+✔ complete inputs expose engine status without creating a fit claim, size or permission (5.2296ms)
+✔ no missing inputs in an out-of-range result cannot be presented as a recommendation (4.3822ms)
+✔ code size context asks only missing chest and preserves existing chart/facts/binding without a new field (125.2299ms)
+✔ known waist is not requested again; unsupported height/weight is not advertised (0.9739ms)
+✔ chart-backed height/weight remains supported, and complete engine input has no missing measurements (1.3185ms)
+✔ wrong subject or unverified chart cannot generate trusted sizing hints (0.6777ms)
+✔ principles screen freezes exactly the two failed whole turns, N1, with no adopted outcome or new cases (139.2952ms)
+✔ both screened final drafts take the verifier with new instructions, no labels or generation retry (137.5872ms)
+ℹ tests 459
+ℹ suites 0
+ℹ pass 457
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 2
+ℹ todo 0
+ℹ duration_ms 106384.6023

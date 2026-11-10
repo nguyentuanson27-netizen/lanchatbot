@@ -1,0 +1,84 @@
+{
+  "sourceSha": "4efbea67356f1e3e4f7fa886dec48d58c4ab1474",
+  "allRegisteredOutcomes": 68,
+  "nativeOutcomes": 51,
+  "controlOutcomes": 17,
+  "generationAttemptsIncludingErrors": 143,
+  "providerGenerationRequests": 143,
+  "generationErrors": [],
+  "errorCounts": {},
+  "nativeVerifierVerdicts": {
+    "PASS": 37,
+    "FAIL": 1
+  },
+  "handoffs": [
+    {
+      "caseId": "media-overview-next:ask",
+      "reason": "RESPONSE_UNAVAILABLE",
+      "silentCommitted": true
+    },
+    {
+      "caseId": "media-detail-next:ask",
+      "reason": "RESPONSE_UNAVAILABLE",
+      "silentCommitted": true
+    },
+    {
+      "caseId": "media-and-price:ask",
+      "reason": "RESPONSE_UNAVAILABLE",
+      "silentCommitted": true
+    },
+    {
+      "caseId": "b1-partial-source",
+      "reason": "PRICE_UNAVAILABLE",
+      "silentCommitted": true
+    },
+    {
+      "caseId": "b1-partial-source-v2",
+      "reason": "PRICE_UNAVAILABLE",
+      "silentCommitted": true
+    },
+    {
+      "caseId": "b1-partial-source-v3",
+      "reason": "PRICE_UNAVAILABLE",
+      "silentCommitted": true
+    },
+    {
+      "caseId": "sales-discovery-advice:need",
+      "reason": "RESPONSE_UNAVAILABLE",
+      "silentCommitted": true
+    },
+    {
+      "caseId": "sales-product-gallery:overview",
+      "reason": "DEPENDENCY_FAILURE",
+      "silentCommitted": true
+    },
+    {
+      "caseId": "stateful-confirm",
+      "reason": "PURCHASE_CONFIRMED",
+      "silentCommitted": true
+    },
+    {
+      "caseId": "stateful-human-request",
+      "reason": "CUSTOMER_REQUESTED_HUMAN",
+      "silentCommitted": true
+    }
+  ],
+  "handoffRate": 0.19607843137254902,
+  "noSendRate": 0.0784313725490196,
+  "fallbackTextRate": 0.0,
+  "preparedBodiesScanned": 143,
+  "knownSyntheticPrivateCanaryMatches": 0,
+  "privateCodeOnlyCases": [
+    "stateful-private-checkout"
+  ],
+  "sourceWrites": 0,
+  "liveSends": 0,
+  "retry": 0,
+  "notes": [
+    "All failed generations and tokens remain in denominator. No rerun/best-of selection.",
+    "HTTP200 output-contract failures are distinct from HTTP/auth/timeout failures.",
+    "Exact malformed argument may be unavailable; do not infer its field without captured evidence.",
+    "Prepared-body scan is scoped; actual request/wire accounting is in REVIEW_METRICS.",
+    "Public private-checkout text is masked and is not literal customer text."
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "runSourceSha": "9a523979129871b28bf71589e9fb2e8d51371907",
+  "lastExecutableCorrection": "0bbabeafa8bea8b024a05af6d8893a3c1c502a8f",
+  "rawSavepoint": "cf49effe7ec024476e2804cb9694d1a811f34772",
+  "primarySavepoint": "616be825d02200eb1b6aaffd4a25fa107f65552a",
+  "referenceBlobs": {
+    "docs/specs/c3-single-agent-commerce-architecture-20261004.md": "7e0265e3b6b3d556d8fb0f3c7267abccef5de86a",
+    "docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md": "4a09b55d2f3a972a65697738876cc5eab21e7a2b",
+    "docs/specs/c3-phase-b-execution-20261014.md": "c397034d68897c0ee96947dce39b1a550e940920",
+    "docs/specs/c3-phase-b-integration-audit-20261015.md": "ebabfde37d188d81028a65369a85952055079109",
+    "tasks/plan.md": "c1eda7eebf922be3d8fbee3be4691d735e2bddab",
+    "tasks/todo.md": "dac9ea2ce65c2507bb86af6db1978a50cfc945bc"
+  },
+  "commands": [
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/run.mjs --preflight --config apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json --cases apps/worker/evals/single-agent-commerce-read-only/cases.b1.json",
+      "sourceSha": "d24b18122ea714a7e78ed3f3ade9abfb50a39203",
+      "exitCode": 0,
+      "result": "CONFIG_READY_CONNECTIONS_UNVERIFIED, 24 cases, 0 generations"
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/run.mjs --source-check --config apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json --cases apps/worker/evals/single-agent-commerce-read-only/cases.b1.json --out C:/Users/nguye/AppData/Local/Temp/c3-b24-post-review-source-9a52397",
+      "sourceSha": "9a523979129871b28bf71589e9fb2e8d51371907",
+      "exitCode": 0,
+      "result": "SOURCE_ADAPTERS_READ_BACK, 0 generations; canonical worker build executed by runner"
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/run.mjs --run --config apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json --cases apps/worker/evals/single-agent-commerce-read-only/cases.b1.json --out C:/Users/nguye/AppData/Local/Temp/c3-b24-post-review-provider-9a52397",
+      "sourceSha": "9a523979129871b28bf71589e9fb2e8d51371907",
+      "exitCode": 0,
+      "result": "AWAITING_WHOLE_REPLY_REVIEW, 24/24 retained; canonical worker build executed by runner"
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-b24-post-review-preserve.mjs C:/Users/nguye/AppData/Local/Temp/c3-b24-post-review-provider-9a52397",
+      "exitCode": 0,
+      "result": "27 raw files + source readback, 28 byte hashes, 0 secret-pattern matches"
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-b24-post-review-primary-view.mjs apps/worker/evals/single-agent-commerce-read-only/b1-24-post-review-20261015",
+      "exitCode": 0,
+      "result": "All 24 actual terminal conversations; no current rejected draft shown"
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-b24-post-review-score.mjs apps/worker/evals/single-agent-commerce-read-only/b1-24-post-review-20261015",
+      "exitCode": 0,
+      "result": "10 USABLE, 4 NEEDS_EDIT, 10 FALLBACK_OR_NO_SEND; primary saved before diagnosis"
+    },
+    {
+      "command": "node C:/Users/nguye/AppData/Local/Temp/c3-b24-post-review-audit.mjs apps/worker/evals/single-agent-commerce-read-only/b1-24-post-review-20261015",
+      "exitCode": 0,
+      "result": "PASS raw disk/Git identity, complete accounting, nested projection and all 22 exact verifier bindings; repeated only after adding the generated-final coverage check"
+    }
+  ],
+  "logs": {
+    "c3-b24-post-review-preflight-initial.log": {
+      "sha256": "ce85161caeef3ce20cbfb6ebafe5c608384db6f1a8288c6a245a6df6206c9404",
+      "bytes": 227
+    },
+    "c3-b24-post-review-source-check.log": {
+      "sha256": "d31bcdc844a2b94b4f756b6aefd83703efb64ae309d5d1e7c6b605150d26f959",
+      "bytes": 188
+    },
+    "c3-b24-post-review-provider-run.log": {
+      "sha256": "e88f2e50dc661b61302691d94cfc27bd36b0cc88888854aef9872d3c2bc5a219",
+      "bytes": 1788
+    }
+  },
+  "analysisScripts": {
+    "C:/Users/nguye/AppData/Local/Temp/c3-b24-post-review-preserve.mjs": "35ae96502652389ab54a90c71902a10553d6e199fe592a53cbfb6628188138af",
+    "C:/Users/nguye/AppData/Local/Temp/c3-b24-post-review-primary-view.mjs": "0d6d18b9c5b615bf9fd6cc9281a3f6f58c0468ba341a20f8956b2e4bf3853d26",
+    "C:/Users/nguye/AppData/Local/Temp/c3-b24-post-review-score.mjs": "60ce1e0a4be8286421a00e448fd75f9d654d0feb3460df3c9c75b34ab5998698",
+    "C:/Users/nguye/AppData/Local/Temp/c3-b24-post-review-audit.mjs": "ceebff4aed7f0a40c29da7e4f2d03049c785e9f3bc78e7f42593c28e3123fec0",
+    "C:/Users/nguye/AppData/Local/Temp/c3-b24-post-review-report.mjs": "4570a53a8a7d7cf3cd88883f0de7f609411f69c548986dd03fef9132dc4f50cb"
+  },
+  "credentialRoute": "Approved C3_VERTEX_CREDENTIAL_FILE path; actual secret never captured; C3_TEST_CODEX_TRANSPORT removed",
+  "canonicalBuild": "pnpm --filter @lana/worker build called synchronously by existing runner, source-check and run both exit 0",
+  "reusedVerification": "Unchanged executable 0bbabea: worker1756PASS/database246PASS+30optionalSKIP, protected/reply21PASS, build/typecheck/lintPASS; post-review focused worker118/database48/protocol-provider23 and isolated COD/bank12/12 each. These suites are NOT_RERUN for this evidence-only replay.",
+  "sendEnabled": false,
+  "documentationValidation": "Initial transcript diff-check failed on preserved trailing spaces; display-only whitespace removed, raw bytes unchanged; final git diff --cached --check passed before delivery."
+}

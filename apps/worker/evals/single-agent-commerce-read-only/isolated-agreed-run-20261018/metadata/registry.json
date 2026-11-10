@@ -1,0 +1,99 @@
+{
+  "kind": "PRE_PROVIDER_ISOLATED_AGREED_FIXES",
+  "intakeHead": "8a3c89efa453807396a0491bbc0429fc11a3504c",
+  "returnBranch": "feat/c3-phase-b-commerce-20261014",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "repetitions": 3,
+  "maximumOutcomes": 66,
+  "maximumGenerationRequests": 240,
+  "concurrency": 2,
+  "retry": 0,
+  "selectedB1CaseIds": [
+    "b1-changed-occasion",
+    "b1-partial-source-v2",
+    "b1-buying-concern",
+    "b1-search-read"
+  ],
+  "b1CasesPath": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-isolated-agreed-20261018-b1-cases.json",
+  "b1CasesHash": "901c0d41c122599502840b4a05dac5edaba1932a42c39f0e8317f04d734c996f",
+  "arms": [
+    {
+      "id": "checkout-checklist",
+      "sourceSha": "1bb6632544e1ff9a66dba6109068e12bc965400a",
+      "population": "stateful",
+      "outcomes": 21,
+      "maximumGenerationRequests": 72
+    },
+    {
+      "id": "checkout-no-checklist",
+      "sourceSha": "e8c9aae4d05a8d54568e189f096b752e3d4b634f",
+      "population": "stateful",
+      "outcomes": 21,
+      "maximumGenerationRequests": 72
+    },
+    {
+      "id": "search-exact",
+      "sourceSha": "bd086b78db1199455572cd3893621353f888958b",
+      "population": "b1",
+      "outcomes": 12,
+      "maximumGenerationRequests": 48
+    },
+    {
+      "id": "search-discovery",
+      "sourceSha": "a43c19448d6937680f4c9b83a504bb45f86ac063",
+      "population": "b1",
+      "outcomes": 12,
+      "maximumGenerationRequests": 48
+    }
+  ]
+}

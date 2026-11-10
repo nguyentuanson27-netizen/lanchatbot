@@ -1,0 +1,21 @@
+{
+  "status": "ALL_32_RECORDED_FULL_RUN_COMPLETE_REPLY_QUALITY_NOT_COMPLETE",
+  "runSourceSha": "79bda1692667846e0a543a404812ab1daead35c7",
+  "primaryLockCommit": "fd097e1298887ece75953f9e09b44e60577d9dba",
+  "primaryLockHashPreserved": true,
+  "allSixChildJobsExitZero": true,
+  "rawGitBlobHashesMatched": 49,
+  "exactByteCopies": 41,
+  "privateBatchRemovedCopies": 8,
+  "originalTempHashesMatched": 49,
+  "runSourceRelevantBlobsUnchanged": 18,
+  "allThreeIsolatedDatabasesDropped": true,
+  "deterministicCodPass": 28,
+  "deterministicBankPass": 28,
+  "artifactCredentialScan": "PASS",
+  "workerBuild": "Existing source-check and B1 entrypoints compiled current worker before source imports; exit0",
+  "typecheckLintFullUnitSuite": "NOT_RERUN_NO_EXECUTABLE_BEHAVIOR_CHANGE",
+  "newProtocolUnitRun": "NOT_RERUN_PRIOR_FOCUSED_VERIFICATION_REUSED",
+  "rawPreservation": "Local .gitattributes disables EOL/whitespace normalization only for captured raw artifacts; logs force-added from the explicit index",
+  "sendEnabled": false
+}

@@ -1,0 +1,25 @@
+{
+  "status": "FOCUS18_COMPLETE_STOP_BEFORE_FULL",
+  "runSourceSha": "219d77371936511419c3978afe424316bed91be1",
+  "primaryCounts": {
+    "USABLE": 13,
+    "NEEDS_EDIT": 5
+  },
+  "needsEdit": [
+    "r1-case04",
+    "r2-case04",
+    "r2-case15",
+    "r3-case15",
+    "r1-case17"
+  ],
+  "registeredAttempts": 18,
+  "recordedAttempts": 18,
+  "generationRequests": 55,
+  "verifierPass": 18,
+  "providerErrors": 0,
+  "retry": 0,
+  "sendEnabled": false,
+  "fullB123Run": false,
+  "checkpointA": "OWNER_BYPASS",
+  "recommendation": "STOP_BEFORE_FULL"
+}

@@ -1,0 +1,156 @@
+{
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "preparationBaseSha": "6897d0a81b3202b65a26229b00bcc6563c736819",
+  "implementationCommit": "3d5544e3a680a43a07b7e688880d913588738f45",
+  "surface": "NATIVE_READ_ONLY_OWNER_COMPARISON",
+  "registered": 10,
+  "maximumGenerationRequests": 40,
+  "specBlobs": {
+    "docs/specs/c3-single-agent-commerce-architecture-20261004.md": "7e0265e3b6b3d556d8fb0f3c7267abccef5de86a",
+    "docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md": "4a09b55d2f3a972a65697738876cc5eab21e7a2b",
+    "docs/specs/c3-phase-b-read-only-integration-plan-20261014.md": "d79f015cec765af1211ed613ac9d56143bfe9a6d"
+  },
+  "frozenFiles": {
+    "apps/worker/evals/single-agent-commerce-read-only/owner-tools-run-20261015/manifest.json": "d69a9247f035642c9d5fc444d0e50d6d698aa4ac901769842d1eecd496c83fdc",
+    "apps/worker/evals/single-agent-commerce-read-only/owner-tools-run-20261015/SCOPE.md": "d6035b4cea59637184d91a4e9dc799f00167f7413228c92454832584e1a5400a",
+    "apps/worker/evals/single-agent-commerce-read-only/owner-tools-run-20261015/SELF_REVIEW.md": "a4ce2e84cc170572ad1b2bd6533ff8135e8ea935daf3f8962d84c36cc21eaa74",
+    "apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt": "82964a2a1874652b6c872372bce043f960734aa4c1a42cc910f59b7e2ef47e0f",
+    "apps/worker/evals/single-agent-commerce-read-only/prompts/verifier.vi.txt": "fe7e21965c6cc608c854b97f2513130c9d2f39cf5bec443f4a637f7d8e6f7957",
+    "apps/worker/evals/single-agent-commerce-read-only/cases.b1.json": "a5c2f5e6f1af91acb84ea5ebe865536dfa5a5148360e004a25d22551b7582059",
+    "apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json": "5ca8dc68da2a11d6a29bb9d03617686f3116a3e43b8c646da0b012212bcefb6e"
+  },
+  "logs": {
+    "red-transport": {
+      "sha256": "bebbf083f7fd3309a7daa8b20db6eac9304ebabda0bb17a99bca625dc6451ecb",
+      "tests": 13,
+      "pass": 11,
+      "fail": 1,
+      "skipped": 1
+    },
+    "green-transport": {
+      "sha256": "34683ca9f8aa3e53bcf3e8225af083e4c6d2de7d41d15daa0faa8d18013f71ba",
+      "tests": 13,
+      "pass": 12,
+      "fail": 0,
+      "skipped": 1
+    },
+    "red-native-owner": {
+      "sha256": "b9cbbe83bae48f19774803ed1b73f88c98569f1190ebed11ee07620c9f36cf15",
+      "tests": 10,
+      "pass": 8,
+      "fail": 2,
+      "skipped": 0
+    },
+    "green-native-owner": {
+      "sha256": "55731e1b86dfc2eacd33bd307dc374cb8091861006b49853d02bce8377584d26",
+      "tests": 10,
+      "pass": 10,
+      "fail": 0,
+      "skipped": 0
+    },
+    "red-native-registration": {
+      "sha256": "ce5a2183c4f19b33b11d86a863db9811f5839838519dd53c07c0e70d415e89a6",
+      "tests": 11,
+      "pass": 10,
+      "fail": 1,
+      "skipped": 0
+    },
+    "green-native-registration": {
+      "sha256": "fe385ff2057ea98bb380a367b4669a2320157c5c887497a3f6f2a94439c73ebc",
+      "tests": 24,
+      "pass": 23,
+      "fail": 0,
+      "skipped": 1
+    },
+    "focused-node-final": {
+      "sha256": "b7f43c30740e1e2e448f9c0a96d940cc0ffd72e27a00c2efd63208703519db6c",
+      "tests": 45,
+      "pass": 44,
+      "fail": 0,
+      "skipped": 1
+    },
+    "full-evals": {
+      "sha256": "62c3d756eb94298c0489beb80164f08db1c8f3a156b0b31fb1aeaec41ccef2ae",
+      "tests": 476,
+      "pass": 474,
+      "fail": 0,
+      "skipped": 2
+    },
+    "focused-boundary": {
+      "sha256": "1ca6529f604dac4bc9567a02bc299ac3470e5781c4952e3d62797efbc03c56e0",
+      "tests": 2
+    },
+    "protected-reply": {
+      "sha256": "f77bbdf7fec6c8fb759a7efd009f4f4af25f832784bb840426fcd1eff5f5f765"
+    },
+    "worker-typecheck": {
+      "sha256": "bfc7531d9935b2196dbfc21a1758db0f7ab44ab8fc93ff1bb1134bf41fc7a2a0"
+    },
+    "worker-build": {
+      "sha256": "67d5957a177b735730794cf101208a736e27a84504bb7e11422fc0d1829ebd17"
+    },
+    "worker-lint": {
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415"
+    }
+  },
+  "commands": [
+    {
+      "durationSeconds": 198.8148966,
+      "log": "full-evals.log",
+      "command": "pnpm --filter @lana/worker test:evals",
+      "exitCode": 0,
+      "logSha256": "62c3d756eb94298c0489beb80164f08db1c8f3a156b0b31fb1aeaec41ccef2ae"
+    },
+    {
+      "durationSeconds": 8.3782825,
+      "log": "focused-boundary.log",
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/single-agent-commerce-read-only.test.ts src/single-agent-commerce-read-only-context.test.ts src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-read-only-sources.test.ts src/single-agent-commerce-state.test.ts src/single-agent-commerce-effects.test.ts",
+      "exitCode": 0,
+      "logSha256": "1ca6529f604dac4bc9567a02bc299ac3470e5781c4952e3d62797efbc03c56e0"
+    },
+    {
+      "durationSeconds": 4.0442069,
+      "log": "protected-reply.log",
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts",
+      "exitCode": 0,
+      "logSha256": "f77bbdf7fec6c8fb759a7efd009f4f4af25f832784bb840426fcd1eff5f5f765"
+    },
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs",
+      "exitCode": 0,
+      "log": "focused-node-final.log",
+      "logSha256": "b7f43c30740e1e2e448f9c0a96d940cc0ffd72e27a00c2efd63208703519db6c"
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "exitCode": 0,
+      "log": "worker-typecheck.log",
+      "logSha256": "bfc7531d9935b2196dbfc21a1758db0f7ab44ab8fc93ff1bb1134bf41fc7a2a0"
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "exitCode": 0,
+      "log": "worker-build.log",
+      "logSha256": "67d5957a177b735730794cf101208a736e27a84504bb7e11422fc0d1829ebd17"
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0,
+      "log": "worker-lint.log",
+      "logSha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415"
+    }
+  ],
+  "frozenToolAdmission": {
+    "command": "node owner-comparison.mjs --manifest <native manifest with invalid Gemini tool schema hash> --preflight --out <must-not-dispatch>",
+    "expectedExitCode": 1,
+    "actualExitCode": 1,
+    "rejection": "COMPARISON_FROZEN_INPUT",
+    "outputCreated": false,
+    "generations": 0
+  },
+  "windowsAlias": "tracked 16-byte link-text temporarily replaced with test junction; finally restored byte-exact",
+  "fullWorkerSrcSuiteRerun": false,
+  "providerGenerationsSoFar": 0,
+  "selfReview": "SELF_REVIEW.md; focused/full-eval/typecheck/build/lint green",
+  "sourceSeal": "capture HEAD at runtime after committing this registration, do not write SHA back into frozen source"
+}

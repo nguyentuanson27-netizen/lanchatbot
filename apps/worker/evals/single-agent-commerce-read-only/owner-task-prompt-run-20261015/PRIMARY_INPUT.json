@@ -1,0 +1,212 @@
+[
+  {
+    "slot": 1,
+    "owner": "gemini",
+    "repetition": 1,
+    "caseId": "b1-changed-occasion",
+    "runtime": {
+      "latest": "Chị phải lên sân khấu có đèn rọi thẳng, chị ngại thấy bóng áo lót. Vậy còn nên lấy set này không?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị đang xem set Thạch Thảo SV2447 để đi tiệc trong nhà."
+        },
+        {
+          "role": "shop",
+          "text": "Set này có thể mặc đi tiệc chị nhé."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    }
+  },
+  {
+    "slot": 2,
+    "owner": "sol",
+    "repetition": 1,
+    "caseId": "b1-changed-occasion",
+    "runtime": {
+      "latest": "Chị phải lên sân khấu có đèn rọi thẳng, chị ngại thấy bóng áo lót. Vậy còn nên lấy set này không?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị đang xem set Thạch Thảo SV2447 để đi tiệc trong nhà."
+        },
+        {
+          "role": "shop",
+          "text": "Set này có thể mặc đi tiệc chị nhé."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Nếu lên sân khấu có đèn rọi thẳng và chị ngại lộ bóng áo lót thì em **chưa khuyên chị lấy set Thạch Thảo cho dịp này** ạ. Set có áo tơ Hàn thêu, nhưng thông tin hiện có chưa xác nhận độ che phủ hay lớp lót của áo dưới ánh đèn mạnh, nên lời em tư vấn đi tiệc lúc trước chưa đủ sát hoàn cảnh này.\n\nVới buổi này, chị nên ưu tiên mẫu có lớp lót và độ che phủ dưới đèn được xác minh rõ, để lên sân khấu yên tâm hơn nhé.",
+      "fallbackId": null
+    }
+  },
+  {
+    "slot": 3,
+    "owner": "gemini",
+    "repetition": 1,
+    "caseId": "b1-current-policy",
+    "runtime": {
+      "latest": "Giờ chị nhận được 10 ngày, mới ướm bên ngoài người, chưa mặc hay giặt, còn nguyên tem và sạch. Đổi màu được không em? Phí đổi bao nhiêu?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Trước đây chị nhớ shop nói đổi trong 7 ngày."
+        }
+      ],
+      "initialProductCodes": []
+    },
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    }
+  },
+  {
+    "slot": 4,
+    "owner": "sol",
+    "repetition": 1,
+    "caseId": "b1-current-policy",
+    "runtime": {
+      "latest": "Giờ chị nhận được 10 ngày, mới ướm bên ngoài người, chưa mặc hay giặt, còn nguyên tem và sạch. Đổi màu được không em? Phí đổi bao nhiêu?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Trước đây chị nhớ shop nói đổi trong 7 ngày."
+        }
+      ],
+      "initialProductCodes": []
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ hiện chính sách shop cho đổi trong **15 ngày từ khi nhận hàng**, nên chị nhận được 10 ngày vẫn còn trong hạn, không phải mốc 7 ngày chị nhớ trước đây ạ.\n\nChị mới ướm bên ngoài, chưa mặc hay giặt, còn nguyên tem và sạch thì phù hợp các điều kiện này. Đổi màu được nếu sản phẩm không hư hỏng và đơn chưa đổi lần nào, vì mỗi đơn được đổi tối đa 1 lần.\n\n**Phí vận chuyển hai chiều là 30.000đ**, bên vận chuyển giao món mới và nhận lại món cũ. Chị cho em biết món còn nguyên vẹn và đơn này đã từng đổi lần nào chưa nhé?",
+      "fallbackId": null
+    }
+  },
+  {
+    "slot": 5,
+    "owner": "gemini",
+    "repetition": 1,
+    "caseId": "b1-price",
+    "runtime": {
+      "latest": "Set Thạch Thảo SV2447 bao nhiêu em?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, set váy Thạch Thảo có giá 799.000đ ạ. Sản phẩm hiện sẵn hàng, mình có cần em hỗ trợ tư vấn thêm về size không ạ?",
+      "fallbackId": null
+    }
+  },
+  {
+    "slot": 6,
+    "owner": "sol",
+    "repetition": 1,
+    "caseId": "b1-price",
+    "runtime": {
+      "latest": "Set Thạch Thảo SV2447 bao nhiêu em?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, set Thạch Thảo SV2447 giá **799.000đ cho cả bộ áo và chân váy** chị nhé. Hiện set còn hàng ạ.",
+      "fallbackId": null
+    }
+  },
+  {
+    "slot": 7,
+    "owner": "gemini",
+    "repetition": 1,
+    "caseId": "b1-buying-concern",
+    "runtime": {
+      "latest": "Chị định mặc set Thạch Thảo SV2447 đi tiệc ban ngày, nhìn ảnh hơi nhiều ren. Mặc có bị rườm rà quá không em? Chị mua tầm dưới 900k thôi.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ set Thạch Thảo không bị rườm rà đâu chị nhé! Thiết kế kết hợp giữa áo tơ Hàn thêu tinh tế và chân váy ren mềm có độ rũ tự nhiên, tạo cảm giác rất bay bổng, nhẹ nhàng và thanh thoát. Mặc đi tiệc ban ngày sẽ rất nhã nhặn, sang trọng mà không bị nặng nề hay quá đà đâu ạ. \n\nGiá set này là 799.000đ, vừa vặn trong ngân sách dưới 900k của chị luôn đó ạ.",
+      "fallbackId": null
+    }
+  },
+  {
+    "slot": 8,
+    "owner": "sol",
+    "repetition": 1,
+    "caseId": "b1-buying-concern",
+    "runtime": {
+      "latest": "Chị định mặc set Thạch Thảo SV2447 đi tiệc ban ngày, nhìn ảnh hơi nhiều ren. Mặc có bị rườm rà quá không em? Chị mua tầm dưới 900k thôi.",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Em nghiêng về **set Thạch Thảo cho tiệc ban ngày** chị nhé. Áo tơ Hàn thêu kết hợp chân váy ren nên có nhiều chi tiết, nhưng form nhẹ và váy rũ tự nhiên giúp tổng thể thiên về nữ tính, bay bổng hơn là cầu kỳ nặng nề.\n\nĐể không bị rườm rà, chị phối cùng **giày và túi trơn màu trung tính**, đeo khuyên tai nhỏ, bỏ qua vòng cổ là vừa đủ điểm nhấn rồi ạ.\n\n**Giá cả set là 799.000đ**, đang còn hàng, nằm trong mức dưới 900k chị dự tính. Nếu chị thích nổi bật nhẹ nhàng thay vì tối giản hoàn toàn thì em chọn set này ạ.",
+      "fallbackId": null
+    }
+  },
+  {
+    "slot": 9,
+    "owner": "gemini",
+    "repetition": 1,
+    "caseId": "b1-policy-used",
+    "runtime": {
+      "latest": "Chị mặc đi làm một buổi, không ưng thì đổi lại được chứ? Phí đổi bên nào trả?",
+      "history": [],
+      "initialProductCodes": []
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, quy định của shop là sản phẩm đổi phải chưa qua sử dụng, chưa giặt, còn nguyên tem mác và chế độ thử đồ là chỉ ướm bên ngoài người. Nên nếu chị mặc đi làm một buổi thì sẽ không đủ điều kiện để đổi hàng ạ. \n\nTrường hợp đổi hàng bình thường thì phí vận chuyển 2 chiều là 30.000đ chị nha.",
+      "fallbackId": null
+    }
+  },
+  {
+    "slot": 10,
+    "owner": "sol",
+    "repetition": 1,
+    "caseId": "b1-policy-used",
+    "runtime": {
+      "latest": "Chị mặc đi làm một buổi, không ưng thì đổi lại được chứ? Phí đổi bên nào trả?",
+      "history": [],
+      "initialProductCodes": []
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ nếu chị đã mặc đi làm một buổi thì shop không hỗ trợ đổi vì hàng đổi cần chưa qua sử dụng, dù vẫn sạch và còn tag chị nhé.\n\nVới hàng đủ điều kiện đổi, phí vận chuyển hai chiều là **30.000đ, chị thanh toán** ạ.",
+      "fallbackId": null
+    }
+  }
+]

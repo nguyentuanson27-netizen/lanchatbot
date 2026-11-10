@@ -1,0 +1,91 @@
+{
+  "sourceSha": "342ef0cff2888908518872f707ea33ede0f9c290",
+  "scope": "OFFLINE_EXACT_FINAL_OWNER_REQUESTS_NO_PROVIDER",
+  "discovery": {
+    "caseId": "sales-discovery-advice:need",
+    "customer": "Chị tìm bộ áo quần đi làm, dưới một triệu thôi, đừng bó bụng quá.",
+    "terminal": "HANDOFF",
+    "reason": "PRICE_UNAVAILABLE",
+    "ownerGenerations": 3,
+    "verifierGenerations": 0,
+    "actualSourceMode": "LIVE",
+    "finalWirePriceFacts": [
+      {
+        "type": "PRICE",
+        "scope": {
+          "kind": "PRODUCT",
+          "productId": "SQ675",
+          "variantId": "offer:SQ675:SET_QUAN"
+        },
+        "value": {
+          "amountVnd": 1279000,
+          "currency": "VND"
+        }
+      }
+    ],
+    "toolProposalSequence": [
+      {
+        "generationId": "f1ef9373-6f26-4aac-a26b-b6c27bdbc2f6:owner:1",
+        "calls": [
+          {
+            "name": "apply_customer_state",
+            "args": {
+              "ops": [
+                {
+                  "value": "RELAXED",
+                  "field": "fitPreference",
+                  "op": "SET",
+                  "sourceQuote": "đừng bó bụng quá"
+                }
+              ]
+            }
+          },
+          {
+            "name": "search_products",
+            "args": {
+              "query": "bộ công sở đi làm"
+            }
+          }
+        ]
+      },
+      {
+        "generationId": "f1ef9373-6f26-4aac-a26b-b6c27bdbc2f6:owner:2",
+        "calls": [
+          {
+            "name": "read_product",
+            "args": {
+              "offerType": "SET_QUAN",
+              "subjectRef": "SQ675"
+            }
+          }
+        ]
+      },
+      {
+        "generationId": "f1ef9373-6f26-4aac-a26b-b6c27bdbc2f6:owner:3",
+        "calls": [
+          {
+            "name": "request_handoff",
+            "args": {
+              "reason": "PRICE_UNAVAILABLE"
+            }
+          }
+        ]
+      }
+    ],
+    "diagnosis": "Owner read a 1279000VND candidate above the under-1-million budget, then requested PRICE_UNAVAILABLE instead of completing a suitable choice. Current-price evidence exists for that read product; prices for other candidates were not read. Do not call this a proven missing-price source incident or a fixed fit-claim case.",
+    "unknowns": "Model internal reason for handoff is not available; no causal attribution to quote_product from this N1 campaign."
+  },
+  "negotiation": {
+    "caseId": "negotiation-price-objection",
+    "currentQuote": {
+      "cartId": "b50b8c80-6f35-55b9-88f4-c93e26f25e4d",
+      "cartVersion": 2,
+      "discountTotalVnd": 30000,
+      "grandTotalVnd": 499000,
+      "shippingFeeVnd": 30000,
+      "subtotalVnd": 499000
+    },
+    "actualFinalText": "Dạ áo tơ Hàn thêu giá 499k, hiện tại hệ thống chưa có thêm chương trình giảm giá cho món lẻ này chị nha. Chị lấy áo thì chốt đơn giúp em nhé ạ!",
+    "diagnosis": "Receipt-backed shipping support is available; owner omits that benefit in objection reply and only explains it in the following total question. Verifier PASS is semantic eligibility, not sales-quality approval."
+  }
+}

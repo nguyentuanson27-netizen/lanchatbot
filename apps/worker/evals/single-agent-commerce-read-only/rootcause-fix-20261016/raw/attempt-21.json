@@ -1,0 +1,86 @@
+{
+  "caseId": "b1-component-stock-v3",
+  "sourceMode": "LIVE",
+  "elapsedMs": 7403.668000000005,
+  "runtime": {
+    "latest": "Áo Thạch Thảo có bán riêng không em? Chị lấy size M, còn thì báo chị giá luôn nhé.",
+    "history": [],
+    "initialProductCodes": [
+      "SV2447"
+    ]
+  },
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "BUDGET",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 3,
+    "verifierGenerations": 0,
+    "toolRounds": 2,
+    "toolCalls": 2,
+    "generations": [
+      {
+        "id": "2feeaa77044534a86f9093ef2dd2b30e947da1522e1e6720b9126d2db197e42f:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1587.9881000000169,
+        "telemetry": {
+          "generationId": "2feeaa77044534a86f9093ef2dd2b30e947da1522e1e6720b9126d2db197e42f:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 2360,
+          "outputTokens": 340,
+          "cost": null,
+          "thinkingTokens": 319
+        }
+      },
+      {
+        "id": "2feeaa77044534a86f9093ef2dd2b30e947da1522e1e6720b9126d2db197e42f:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1233.510799999989,
+        "telemetry": {
+          "generationId": "2feeaa77044534a86f9093ef2dd2b30e947da1522e1e6720b9126d2db197e42f:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3686,
+          "outputTokens": 135,
+          "cost": null,
+          "thinkingTokens": 114
+        }
+      },
+      {
+        "id": "2feeaa77044534a86f9093ef2dd2b30e947da1522e1e6720b9126d2db197e42f:owner:3",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1410.7901999999885,
+        "telemetry": {
+          "generationId": "2feeaa77044534a86f9093ef2dd2b30e947da1522e1e6720b9126d2db197e42f:owner:3",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4194,
+          "outputTokens": 207,
+          "cost": null,
+          "thinkingTokens": 182
+        }
+      }
+    ],
+    "toolLatencyMs": 2947.5746999999974,
+    "verificationLatencyMs": null
+  },
+  "counters": {
+    "embeddingCalls": 3,
+    "policyReads": 8,
+    "catalogReads": 48,
+    "posReads": 31
+  }
+}

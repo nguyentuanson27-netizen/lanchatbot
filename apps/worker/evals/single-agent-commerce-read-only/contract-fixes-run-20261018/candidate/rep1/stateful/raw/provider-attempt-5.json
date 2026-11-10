@@ -1,0 +1,173 @@
+{
+  "caseId": "stateful-private-checkout",
+  "journeyId": "sales",
+  "elapsedMs": 8253.454999999987,
+  "result": {
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "PRIVATE_CHECKOUT_COMMITTED",
+      "text": null,
+      "fallbackId": null
+    },
+    "sendEnabled": false,
+    "enqueued": 1,
+    "mode": "PRIVATE_CODE_PATH"
+  },
+  "owners": 0,
+  "verifiers": 0,
+  "batch": {
+    "pageId": "1198992073286645",
+    "conversationHash": "8ccc27707acfa23c71c8827f824009114c26d33303b025708b8cb0e0f4668d62",
+    "generation": 5,
+    "leaseToken": "423e9cb2-6d68-4801-bdce-c68b976b7454",
+    "inboxIds": [
+      "2c435bcd-a355-4023-80eb-fbdd3e5079f1"
+    ],
+    "evaluationGroupId": "c51d9915-c1fd-41d4-aceb-d11c07ef2895",
+    "eventKind": "CUSTOMER",
+    "firstReceiveSequence": 5,
+    "lastReceiveSequence": 5,
+    "attemptCount": 1,
+    "items": [
+      {
+        "inboxId": "2c435bcd-a355-4023-80eb-fbdd3e5079f1",
+        "pageId": "1198992073286645",
+        "eventKey": "stateful-b41d74f2-adc7-4bec-8851-3326c690987e",
+        "conversationHash": "8ccc27707acfa23c71c8827f824009114c26d33303b025708b8cb0e0f4668d62",
+        "occurredAt": "2026-10-18T10:21:23.877Z",
+        "receivedAt": "2026-10-18T10:21:23.877Z",
+        "receiveSequence": 5,
+        "attemptCount": 1,
+        "leaseToken": "423e9cb2-6d68-4801-bdce-c68b976b7454",
+        "eventKind": "CUSTOMER",
+        "envelope": {
+          "schemaVersion": 1,
+          "customerSendEnabled": false,
+          "routing": {
+            "owner": "APP"
+          },
+          "message": {
+            "schemaVersion": 1,
+            "traceId": "7bc12011-4653-4b40-afe2-8f4dbc111dd9",
+            "eventKey": "stateful-b41d74f2-adc7-4bec-8851-3326c690987e",
+            "pageId": "1198992073286645",
+            "messageId": "stateful-b41d74f2-adc7-4bec-8851-3326c690987e",
+            "senderId": "synthetic-recipient-8ccc27707acfa23c71c8827f824009114c26d33303b025708b8cb0e0f4668d62",
+            "conversationId": "synthetic-meta-conversation",
+            "occurredAt": "2026-10-18T10:21:23.877Z",
+            "isEcho": false,
+            "appId": null,
+            "text": "Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD",
+            "attachments": []
+          }
+        }
+      }
+    ]
+  },
+  "toolResponses": [],
+  "actualCapturedMessages": [
+    "SV2447 size L ×2: 998.000đ\nTạm tính: 998.000đ\nƯu đãi: -49.900đ\nPhí ship: 30.000đ\nTổng: 978.100đ\nSV2447: hàng đặt trước\nNgười nhận: Khách thử nghiệm - [PHONE]\n[ADDRESS]\nThanh toán: COD\nDự kiến nhận hàng: 8-14 ngày.\nChị xác nhận chốt đơn nhé."
+  ],
+  "committedPublicState": {
+    "stage": "ORDER_PREVIEW",
+    "revision": 9,
+    "cart": {
+      "schemaVersion": 1,
+      "cartId": "5459d976-1ea9-586a-83bb-11cf89fae665",
+      "salesEpisodeId": "900fe9e1-78e8-5d7e-8476-ff65f31c7418",
+      "customerProfileId": "150d0913-2f99-4ad9-92d6-963e21be86d3",
+      "revision": 4,
+      "currency": "VND",
+      "status": "READY_FOR_CONFIRMATION",
+      "checkoutEligibility": "ELIGIBLE",
+      "lines": [
+        {
+          "lineId": "a0c4d7e5-828f-5c8e-8730-7fc4c8e0f6e5",
+          "parentProductId": "SV2447",
+          "offerId": "AO",
+          "offerKind": "DIRECT",
+          "quantity": 2,
+          "components": [
+            {
+              "componentProductId": "SV2447_AO",
+              "componentSku": "SV2447_AO",
+              "componentRole": "TOP",
+              "color": "BE",
+              "size": "L",
+              "quantity": 1
+            }
+          ],
+          "allowMixedSizes": false,
+          "allowComponentSale": false,
+          "posUnitPriceVnd": 499000,
+          "priceAuthority": {
+            "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+            "shopId": "LANA_DESIGN",
+            "parentProductId": "SV2447",
+            "offerId": "AO",
+            "offerPriceKind": "DIRECT",
+            "componentProductId": null,
+            "metadata": {
+              "authority": "PANCAKE_POS",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-18T10:04:08.737Z",
+              "expiresAt": "2026-10-20T10:04:08.737Z",
+              "freshForSeconds": 172800,
+              "freshnessState": "FRESH"
+            }
+          },
+          "lineTotalVnd": 998000
+        }
+      ],
+      "adjustments": [
+        {
+          "adjustmentId": "3ae2341a-5e99-5882-af4a-ade750c6458e",
+          "kind": "PERCENT_DISCOUNT",
+          "amountVnd": 49900,
+          "percentageBps": 500,
+          "policyAuthorization": {
+            "policyBundleId": "admin-policy:1198992073286645",
+            "policyBundleVersion": "1a618942f5821335db2e00be8c71ea7a",
+            "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+            "decisionId": "d07a7687-293a-5161-89be-7f32d721e475",
+            "authorizedAt": "2026-10-18T10:21:28.099Z"
+          }
+        }
+      ],
+      "shippingFeeVnd": 30000,
+      "subtotalVnd": 998000,
+      "discountTotalVnd": 49900,
+      "grandTotalVnd": 978100,
+      "createdAt": "2026-10-18T10:19:33.437Z",
+      "updatedAt": "2026-10-18T10:21:28.099Z"
+    },
+    "measurements": [
+      {
+        "kind": "WAIST_CM",
+        "value": 74,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-18T10:20:55.688Z",
+          "sourceEventHash": "56cdcf3fa475a1f187823c2d225bfaf90e2daecfde3512651e49fdc2cdadf341"
+        }
+      },
+      {
+        "kind": "HIPS_CM",
+        "value": 96,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-18T10:20:55.688Z",
+          "sourceEventHash": "56cdcf3fa475a1f187823c2d225bfaf90e2daecfde3512651e49fdc2cdadf341"
+        }
+      }
+    ],
+    "customerProfileRevision": 3
+  },
+  "counts": {
+    "embedding": 0,
+    "owner": 9,
+    "verifier": 3
+  }
+}

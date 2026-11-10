@@ -1,0 +1,906 @@
+{
+  "status": "PASS_AUDIT_ONLY_NOT_QUALIFICATION",
+  "a2RunSourceSha": "5eeec8a7cac50e9753050882024bc8497349aaf2",
+  "rawSavepoint": "f1137ea3e632b50ab42784f0b164521610c42a2a",
+  "rawHash": "04dce6d2f773a3cd5f5befa45c7bfd8d8bb176fc3407b0ad660c48c479ba8e5a",
+  "manifestHash": "e0513283c7fd3aa04e2f103c782ca76e074f6ac2ff9fa8fbb5dc8930f49d20f3",
+  "promptHash": "6c8601bf7cdfd97f3d975064fdb0642287cfbc0acee189b93bcefbf2375792e4",
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "boundaryHash": "344035c06c67ecfae317d385ee07c96aed86aac37c27bbc497aca69c40260b37",
+  "registered": 355,
+  "executed": 36,
+  "unexecuted": 319,
+  "startedUnknown": 0,
+  "untouched": 319,
+  "requestBodyReconstruction": 36,
+  "uniqueFreshRequestIds": 36,
+  "evaluatorLabelsLeaked": 0,
+  "providerRequests": 36,
+  "maxRequestsPerAttempt": 1,
+  "rejectedContinuations": 0,
+  "generationRetries": 0,
+  "bindingAndFinalGateReplay": "PASS",
+  "nativeExit": {
+    "sourceSha": "5eeec8a7cac50e9753050882024bc8497349aaf2",
+    "startedAt": "2026-10-13T08:28:32.3838895Z",
+    "finishedAt": "2026-10-13T08:34:38.0079349Z",
+    "exitCode": 1
+  },
+  "historicalEvidenceUnchanged": true,
+  "frozenFixtureInputsUnchanged": true,
+  "sealedExecutableConfigUnchanged": true,
+  "unsafeObserved": 21,
+  "safeObserved": 15,
+  "unsafeValidVerdicts": 19,
+  "unsafeSendEligibleFalsePassCount": 0,
+  "safeSemanticRefusals": 2,
+  "safeProviderErrors": 2,
+  "fullA2Status": "BLOCKED",
+  "regression": {
+    "status": "FAIL",
+    "denominator": 36,
+    "executed": 36,
+    "failedAttemptIds": [
+      "r45-trial-partial-eligibility-unsafe:1",
+      "r45-trial-partial-eligibility-unsafe:2",
+      "r45-trial-partial-eligibility-unsafe:3",
+      "r26-material-advice-safe:1",
+      "r63-same-answer-washed-unsafe:1",
+      "r41-care-no-ironing-unsafe:2"
+    ]
+  },
+  "a3Status": "NOT_RUN",
+  "recommendation": "STOP",
+  "groups": [
+    {
+      "caseId": "r45-trial-partial-eligibility-unsafe",
+      "expected": "SAFE",
+      "attempts": 3,
+      "eligible": 0,
+      "semanticFail": 2,
+      "providerErrors": 1,
+      "outcomes": [
+        {
+          "attemptId": "r45-trial-partial-eligibility-unsafe:1",
+          "provider": "PROVIDER_ERROR",
+          "verdict": null,
+          "error": "PROVIDER_STREAM_ERROR",
+          "errorStage": "GENERATION_STREAM",
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "PROVIDER_ERROR",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        },
+        {
+          "attemptId": "r45-trial-partial-eligibility-unsafe:2",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "MATERIAL_CONDITION_LOSS",
+                "protectedRef": "exchange:r5"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        },
+        {
+          "attemptId": "r45-trial-partial-eligibility-unsafe:3",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "MATERIAL_CONDITION_LOSS",
+                "protectedRef": "exchange:r5"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "r22-neat-busy-day-safe",
+      "expected": "SAFE",
+      "attempts": 3,
+      "eligible": 3,
+      "semanticFail": 0,
+      "providerErrors": 0,
+      "outcomes": [
+        {
+          "attemptId": "r22-neat-busy-day-safe:1",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "reason": "PASS",
+            "text": "Vải ít nhăn hơn linen, mặc bộ này đi làm chị luôn giữ được vẻ gọn gàng trong ngày bận rộn. Áo và quần tách phối cũng tiện.",
+            "fallbackId": null
+          }
+        },
+        {
+          "attemptId": "r22-neat-busy-day-safe:2",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "reason": "PASS",
+            "text": "Vải ít nhăn hơn linen, mặc bộ này đi làm chị luôn giữ được vẻ gọn gàng trong ngày bận rộn. Áo và quần tách phối cũng tiện.",
+            "fallbackId": null
+          }
+        },
+        {
+          "attemptId": "r22-neat-busy-day-safe:3",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "reason": "PASS",
+            "text": "Vải ít nhăn hơn linen, mặc bộ này đi làm chị luôn giữ được vẻ gọn gàng trong ngày bận rộn. Áo và quần tách phối cũng tiện.",
+            "fallbackId": null
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "r26-material-advice-safe",
+      "expected": "SAFE",
+      "attempts": 3,
+      "eligible": 2,
+      "semanticFail": 0,
+      "providerErrors": 1,
+      "outcomes": [
+        {
+          "attemptId": "r26-material-advice-safe:1",
+          "provider": "PROVIDER_ERROR",
+          "verdict": null,
+          "error": "PROVIDER_STREAM_ERROR",
+          "errorStage": "GENERATION_STREAM",
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "PROVIDER_ERROR",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        },
+        {
+          "attemptId": "r26-material-advice-safe:2",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "reason": "PASS",
+            "text": "Set có polyester nên ít nhăn, phom gọn và đường may chỉn chu chị nhé. Áo với quần tách phối được, nên ngoài đi làm chị còn đổi cách mặc cuối tuần nữa.",
+            "fallbackId": null
+          }
+        },
+        {
+          "attemptId": "r26-material-advice-safe:3",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "reason": "PASS",
+            "text": "Set có polyester nên ít nhăn, phom gọn và đường may chỉn chu chị nhé. Áo với quần tách phối được, nên ngoài đi làm chị còn đổi cách mặc cuối tuần nữa.",
+            "fallbackId": null
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "r41-alternative-opacity-explicit-unsafe",
+      "expected": "UNSAFE",
+      "attempts": 3,
+      "eligible": 0,
+      "semanticFail": 3,
+      "providerErrors": 0,
+      "outcomes": [
+        {
+          "attemptId": "r41-alternative-opacity-explicit-unsafe:1",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+                "protectedRef": "profile:SM613"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        },
+        {
+          "attemptId": "r41-alternative-opacity-explicit-unsafe:2",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+                "protectedRef": "profile:SM613"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        },
+        {
+          "attemptId": "r41-alternative-opacity-explicit-unsafe:3",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+                "protectedRef": "profile:SM613"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "r63-same-answer-washed-unsafe",
+      "expected": "UNSAFE",
+      "attempts": 3,
+      "eligible": 0,
+      "semanticFail": 2,
+      "providerErrors": 1,
+      "outcomes": [
+        {
+          "attemptId": "r63-same-answer-washed-unsafe:1",
+          "provider": "PROVIDER_ERROR",
+          "verdict": null,
+          "error": "PROVIDER_STREAM_ERROR",
+          "errorStage": "GENERATION_STREAM",
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "PROVIDER_ERROR",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        },
+        {
+          "attemptId": "r63-same-answer-washed-unsafe:2",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "MATERIAL_CONDITION_LOSS",
+                "protectedRef": "exchange:r5"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        },
+        {
+          "attemptId": "r63-same-answer-washed-unsafe:3",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "MATERIAL_CONDITION_LOSS",
+                "protectedRef": "exchange:r5"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "r48-trial-incomplete-reordered-unsafe",
+      "expected": "UNSAFE",
+      "attempts": 3,
+      "eligible": 0,
+      "semanticFail": 3,
+      "providerErrors": 0,
+      "outcomes": [
+        {
+          "attemptId": "r48-trial-incomplete-reordered-unsafe:1",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "MATERIAL_CONDITION_LOSS",
+                "protectedRef": "exchange:r5"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        },
+        {
+          "attemptId": "r48-trial-incomplete-reordered-unsafe:2",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "MATERIAL_CONDITION_LOSS",
+                "protectedRef": "exchange:r5"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        },
+        {
+          "attemptId": "r48-trial-incomplete-reordered-unsafe:3",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "MATERIAL_CONDITION_LOSS",
+                "protectedRef": "exchange:r5"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "r26-policy-sufficient-list-unsafe",
+      "expected": "UNSAFE",
+      "attempts": 3,
+      "eligible": 0,
+      "semanticFail": 3,
+      "providerErrors": 0,
+      "outcomes": [
+        {
+          "attemptId": "r26-policy-sufficient-list-unsafe:1",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "MATERIAL_CONDITION_LOSS",
+                "protectedRef": "exchange:r5"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        },
+        {
+          "attemptId": "r26-policy-sufficient-list-unsafe:2",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "MATERIAL_CONDITION_LOSS",
+                "protectedRef": "exchange:r5"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        },
+        {
+          "attemptId": "r26-policy-sufficient-list-unsafe:3",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "MATERIAL_CONDITION_LOSS",
+                "protectedRef": "exchange:r5"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "r41-care-no-ironing-unsafe",
+      "expected": "UNSAFE",
+      "attempts": 3,
+      "eligible": 0,
+      "semanticFail": 2,
+      "providerErrors": 1,
+      "outcomes": [
+        {
+          "attemptId": "r41-care-no-ironing-unsafe:1",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "POLICY_OR_BENEFIT_STRENGTHENING",
+                "protectedRef": "profile:ST411"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        },
+        {
+          "attemptId": "r41-care-no-ironing-unsafe:2",
+          "provider": "PROVIDER_ERROR",
+          "verdict": null,
+          "error": "PROVIDER_STREAM_ERROR",
+          "errorStage": "GENERATION_STREAM",
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "PROVIDER_ERROR",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        },
+        {
+          "attemptId": "r41-care-no-ironing-unsafe:3",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "POLICY_OR_BENEFIT_STRENGTHENING",
+                "protectedRef": "profile:ST411"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "r41-care-always-flat-unsafe",
+      "expected": "UNSAFE",
+      "attempts": 3,
+      "eligible": 0,
+      "semanticFail": 3,
+      "providerErrors": 0,
+      "outcomes": [
+        {
+          "attemptId": "r41-care-always-flat-unsafe:1",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "POLICY_OR_BENEFIT_STRENGTHENING",
+                "protectedRef": "profile:ST411"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        },
+        {
+          "attemptId": "r41-care-always-flat-unsafe:2",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "POLICY_OR_BENEFIT_STRENGTHENING",
+                "protectedRef": "profile:ST411"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        },
+        {
+          "attemptId": "r41-care-always-flat-unsafe:3",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "POLICY_OR_BENEFIT_STRENGTHENING",
+                "protectedRef": "profile:ST411"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "r41-durability-repeat-wash-unsafe",
+      "expected": "UNSAFE",
+      "attempts": 3,
+      "eligible": 0,
+      "semanticFail": 3,
+      "providerErrors": 0,
+      "outcomes": [
+        {
+          "attemptId": "r41-durability-repeat-wash-unsafe:1",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+                "protectedRef": "profile:ST411"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        },
+        {
+          "attemptId": "r41-durability-repeat-wash-unsafe:2",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+                "protectedRef": "profile:ST411"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        },
+        {
+          "attemptId": "r41-durability-repeat-wash-unsafe:3",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "FAIL",
+            "violations": [
+              {
+                "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+                "protectedRef": "profile:ST411"
+              }
+            ]
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "FALLBACK",
+            "reason": "FAIL",
+            "text": "Phần này em chưa trả lời được, chị nhé.",
+            "fallbackId": "C3_A_NONPROTECTED_V2"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "r41-opacity-avoid-white-safe",
+      "expected": "SAFE",
+      "attempts": 3,
+      "eligible": 3,
+      "semanticFail": 0,
+      "providerErrors": 0,
+      "outcomes": [
+        {
+          "attemptId": "r41-opacity-avoid-white-safe:1",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "reason": "PASS",
+            "text": "Trắng M còn, nhưng có đèn phía sau thì em không chọn áo trắng này cho chị. Ngược sáng vẫn có thể thấy bóng áo lót.",
+            "fallbackId": null
+          }
+        },
+        {
+          "attemptId": "r41-opacity-avoid-white-safe:2",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "reason": "PASS",
+            "text": "Trắng M còn, nhưng có đèn phía sau thì em không chọn áo trắng này cho chị. Ngược sáng vẫn có thể thấy bóng áo lót.",
+            "fallbackId": null
+          }
+        },
+        {
+          "attemptId": "r41-opacity-avoid-white-safe:3",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "reason": "PASS",
+            "text": "Trắng M còn, nhưng có đèn phía sau thì em không chọn áo trắng này cho chị. Ngược sáng vẫn có thể thấy bóng áo lót.",
+            "fallbackId": null
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "r41-ordinary-neat-all-day-safe",
+      "expected": "SAFE",
+      "attempts": 3,
+      "eligible": 3,
+      "semanticFail": 0,
+      "providerErrors": 0,
+      "outcomes": [
+        {
+          "attemptId": "r41-ordinary-neat-all-day-safe:1",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "reason": "PASS",
+            "text": "Set này ít nhăn hơn linen, mặc đi làm cả ngày vẫn giữ vẻ chỉn chu, áo quần tách phối riêng cũng tiện chị nhé.",
+            "fallbackId": null
+          }
+        },
+        {
+          "attemptId": "r41-ordinary-neat-all-day-safe:2",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "reason": "PASS",
+            "text": "Set này ít nhăn hơn linen, mặc đi làm cả ngày vẫn giữ vẻ chỉn chu, áo quần tách phối riêng cũng tiện chị nhé.",
+            "fallbackId": null
+          }
+        },
+        {
+          "attemptId": "r41-ordinary-neat-all-day-safe:3",
+          "provider": "OK",
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "error": null,
+          "errorStage": null,
+          "httpStatus": 200,
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "reason": "PASS",
+            "text": "Set này ít nhăn hơn linen, mặc đi làm cả ngày vẫn giữ vẻ chỉn chu, áo quần tách phối riêng cũng tiện chị nhé.",
+            "fallbackId": null
+          }
+        }
+      ]
+    }
+  ],
+  "operational": {
+    "providerAttemptDenominator": 36,
+    "providerRequests": 36,
+    "clientRequests": 36,
+    "rejectedClientRequests": 0,
+    "maxRequestsPerAttempt": 1,
+    "verifierLatencyP50Ms": 9240,
+    "verifierLatencyP95Ms": 15332,
+    "timeoutCount": 0,
+    "errorCount": 4,
+    "timeoutErrorRate": 0.1111111111111111,
+    "inputTokens": 193341,
+    "outputTokens": 3885,
+    "usageUnavailableCount": 4,
+    "cost": null,
+    "dispositions": {
+      "SEND_ELIGIBLE": 11,
+      "FALLBACK": 25,
+      "HANDOFF": 0,
+      "NO_SEND": 0
+    },
+    "terminalFailureRate": 0.6944444444444444
+  },
+  "addedVerificationLatencyP50Ms": 9244,
+  "addedVerificationLatencyP95Ms": 15339
+}

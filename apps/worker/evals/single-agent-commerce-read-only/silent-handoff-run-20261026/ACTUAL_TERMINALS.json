@@ -1,0 +1,1727 @@
+[
+  {
+    "caseId": "opening-ad",
+    "cohort": "opening-quotes",
+    "artifactSha256": "2c68c03a829f7cf8ab26352a4b848cff69dca52847c08c3af9746844c57a4cfb",
+    "artifact": "opening-quotes\\provider-attempt-1.json",
+    "latest": "Bộ này bao nhiêu em?",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, set váy Thạch Thảo có giá 799.000đ chị nhé. \n\nThiết kế gồm áo tơ Hàn thêu nổi form nhẹ kết hợp chân váy ren tơ mềm mại, có độ bay và rũ tự nhiên ạ. Mẫu này hiện đủ size S, M, L, XL chị nha.",
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Dạ, set váy Thạch Thảo có giá 799.000đ chị nhé. \n\nThiết kế gồm áo tơ Hàn thêu nổi form nhẹ kết hợp chân váy ren tơ mềm mại, có độ bay và rũ tự nhiên ạ. Mẫu này hiện đủ size S, M, L, XL chị nha.",
+      "[CODE_IMAGE]",
+      "[CODE_IMAGE]"
+    ],
+    "imageCount": 2,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "e6f86332-f26a-4a7a-bba2-f4cea61fbc42",
+          "group": "ed001c2a-6af6-4284-a19f-bb8f0fb62d7f",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        },
+        {
+          "id": "cde05301-704c-4939-bcdf-a078a442831a",
+          "group": "ed001c2a-6af6-4284-a19f-bb8f0fb62d7f",
+          "sequence": 1,
+          "status": "SENT_ACCEPTED"
+        },
+        {
+          "id": "2da594be-7f19-4665-a997-11864ff86b8c",
+          "group": "ed001c2a-6af6-4284-a19f-bb8f0fb62d7f",
+          "sequence": 2,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 35552.8229,
+    "verificationLatencyMs": 9640.9234,
+    "enqueued": 3,
+    "generationFailures": []
+  },
+  {
+    "caseId": "opening-ad-repeat",
+    "cohort": "opening-quotes",
+    "artifactSha256": "bff3e8ea97355efffd518cabda76bd86cb68537a3f56f2282f1eef469dd500f9",
+    "artifact": "opening-quotes\\provider-attempt-2.json",
+    "latest": "Chị hỏi lại chút, cả bộ bao nhiêu nhỉ?",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, set váy Thạch Thảo (cả bộ gồm áo và chân váy) có giá 799.000đ chị nhé.",
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Dạ, set váy Thạch Thảo (cả bộ gồm áo và chân váy) có giá 799.000đ chị nhé."
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "f042fcfb-f997-4597-ae10-a639fc41ad39",
+          "group": "214dd49d-b5fe-4ebc-8c0c-6bc9ed16c542",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 21860.060400000002,
+    "verificationLatencyMs": 5871.938400000006,
+    "enqueued": 1,
+    "generationFailures": []
+  },
+  {
+    "caseId": "opening-organic",
+    "cohort": "opening-quotes",
+    "artifactSha256": "9621c351ebc899d11f6528678938773b9c310ed0109f8dcd90427115062bd380",
+    "artifact": "opening-quotes\\provider-attempt-3.json",
+    "latest": "Set Thạch Thảo SV2447 bao nhiêu vậy shop?",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Set váy Thạch Thảo có giá 799.000đ chị nha. Set gồm áo tơ Hàn thêu nổi form nhẹ mềm thoáng và chân váy ren tơ Hàn mềm có độ rũ tự nhiên, hiện sẵn các size S, M, L, XL ạ.",
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Set váy Thạch Thảo có giá 799.000đ chị nha. Set gồm áo tơ Hàn thêu nổi form nhẹ mềm thoáng và chân váy ren tơ Hàn mềm có độ rũ tự nhiên, hiện sẵn các size S, M, L, XL ạ.",
+      "[CODE_IMAGE]",
+      "[CODE_IMAGE]"
+    ],
+    "imageCount": 2,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "101e0503-219c-409f-b55e-2d072f896571",
+          "group": "02e0882c-880f-42b0-80dd-258a3bf323da",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        },
+        {
+          "id": "60a48558-89fa-4e95-92f9-89846a9ed5b1",
+          "group": "02e0882c-880f-42b0-80dd-258a3bf323da",
+          "sequence": 1,
+          "status": "SENT_ACCEPTED"
+        },
+        {
+          "id": "7ef760cc-74a9-4b96-a42e-d96276535a03",
+          "group": "02e0882c-880f-42b0-80dd-258a3bf323da",
+          "sequence": 2,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 29329.8704,
+    "verificationLatencyMs": 7301.975699999995,
+    "enqueued": 3,
+    "generationFailures": []
+  },
+  {
+    "caseId": "opening-unresolved",
+    "cohort": "opening-quotes",
+    "artifactSha256": "390820c366287250af7295e9b4266b7f0558f0a049f6c469115fa85448bfb208",
+    "artifact": "opening-quotes\\provider-attempt-4.json",
+    "latest": "Mẫu này giá sao em?",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, chị gửi giúp em hình ảnh hoặc tên mẫu để em kiểm tra giá chính xác cho mình nha ạ!",
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Dạ, chị gửi giúp em hình ảnh hoặc tên mẫu để em kiểm tra giá chính xác cho mình nha ạ!"
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "6a571a67-e332-418d-934a-8f002c1f542c",
+          "group": "14fdeb16-0e5f-46e6-aa13-5f3ee2c80dbd",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "ownerGenerations": 1,
+    "verifierGenerations": 1,
+    "elapsedMs": 20373.839500000002,
+    "verificationLatencyMs": 5941.689599999998,
+    "enqueued": 1,
+    "generationFailures": []
+  },
+  {
+    "caseId": "opening-multipart",
+    "cohort": "opening-quotes",
+    "artifactSha256": "b5c7848d52903dbb3d77934015fbc30485b725e407311bff200c0ebc33817d0b",
+    "artifact": "opening-quotes\\provider-attempt-5.json",
+    "latest": "Set Thạch Thảo SV2447 giá bao nhiêu? Chị mua áo riêng được không?",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, set váy Thạch Thảo có giá 799.000đ ạ. \n\nChị hoàn toàn có thể mua áo riêng được nha chị, áo lẻ có giá 499.000đ ạ.\n\nSet gồm áo tơ Hàn thêu nổi form nhẹ (vải mềm, thoáng, bay tự nhiên) và chân váy ren tơ Hàn mềm form nhẹ rũ tự nhiên. Sản phẩm hiện có sẵn các size S, M, L, XL ạ.",
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Dạ, set váy Thạch Thảo có giá 799.000đ ạ. \n\nChị hoàn toàn có thể mua áo riêng được nha chị, áo lẻ có giá 499.000đ ạ.\n\nSet gồm áo tơ Hàn thêu nổi form nhẹ (vải mềm, thoáng, bay tự nhiên) và chân váy ren tơ Hàn mềm form nhẹ rũ tự nhiên. Sản phẩm hiện có sẵn các size S, M, L, XL ạ.",
+      "[CODE_IMAGE]",
+      "[CODE_IMAGE]"
+    ],
+    "imageCount": 2,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "f88879a4-1543-4d33-b297-239a66663e2c",
+          "group": "63c41610-b794-4fcc-8c55-928689e4fb15",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        },
+        {
+          "id": "62f80172-d1e3-48ab-a8db-ef69177bb606",
+          "group": "63c41610-b794-4fcc-8c55-928689e4fb15",
+          "sequence": 1,
+          "status": "SENT_ACCEPTED"
+        },
+        {
+          "id": "afe3e38d-4609-4002-997b-1042722ff92c",
+          "group": "63c41610-b794-4fcc-8c55-928689e4fb15",
+          "sequence": 2,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 30240.681299999997,
+    "verificationLatencyMs": 7240.838400000008,
+    "enqueued": 3,
+    "generationFailures": []
+  },
+  {
+    "caseId": "media-overview-next:ask",
+    "cohort": "media-followup",
+    "artifactSha256": "1c5ff2a5941cbc2b85d7953b0141127d0a2182b72d62dcb820a7cf47fe394c90",
+    "artifact": "media-followup\\provider-attempt-1.json",
+    "latest": "Em có ảnh khách mặc bộ Thạch Thảo không?",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": []
+    },
+    "handoffEvidence": {
+      "conversationOwner": "HUMAN",
+      "events": 1,
+      "tags": 1
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "elapsedMs": 20673.5979,
+    "verificationLatencyMs": null,
+    "enqueued": 0,
+    "generationFailures": []
+  },
+  {
+    "caseId": "media-overview-next:continue",
+    "cohort": "media-followup",
+    "artifactSha256": "992c41641f3c60b99fb7b2cc121d573ee193c68f03cf8e9b94098b26f74d0634",
+    "artifact": "media-followup\\provider-attempt-2.json",
+    "latest": "Gửi chị ảnh cả bộ nhé.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "HUMAN_OWNS_CONVERSATION",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": []
+    },
+    "handoffEvidence": {
+      "conversationOwner": "HUMAN",
+      "events": 1,
+      "tags": 1
+    },
+    "handoff": null,
+    "ownerGenerations": 0,
+    "verifierGenerations": 0,
+    "elapsedMs": 3989.3171999999977,
+    "verificationLatencyMs": null,
+    "enqueued": 0,
+    "generationFailures": []
+  },
+  {
+    "caseId": "media-detail-next:ask",
+    "cohort": "media-followup",
+    "artifactSha256": "048f9877282fa0d4ce177447667b518303f2945e867ba3ea70c0c56b41fb62c4",
+    "artifact": "media-followup\\provider-attempt-3.json",
+    "latest": "Bộ Thạch Thảo có ảnh khách mặc chưa em?",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": []
+    },
+    "handoffEvidence": {
+      "conversationOwner": "HUMAN",
+      "events": 1,
+      "tags": 1
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "elapsedMs": 21545.304799999998,
+    "verificationLatencyMs": null,
+    "enqueued": 0,
+    "generationFailures": []
+  },
+  {
+    "caseId": "media-detail-next:continue",
+    "cohort": "media-followup",
+    "artifactSha256": "9eca3af45a6c6b32561d2c961ecac2c98bdd369b8ea4a6561574a95ab012416a",
+    "artifact": "media-followup\\provider-attempt-4.json",
+    "latest": "Cho chị xem cận phần thêu ở áo nhé.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "HUMAN_OWNS_CONVERSATION",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": []
+    },
+    "handoffEvidence": {
+      "conversationOwner": "HUMAN",
+      "events": 1,
+      "tags": 1
+    },
+    "handoff": null,
+    "ownerGenerations": 0,
+    "verifierGenerations": 0,
+    "elapsedMs": 4034.2162000000026,
+    "verificationLatencyMs": null,
+    "enqueued": 0,
+    "generationFailures": []
+  },
+  {
+    "caseId": "media-and-price:ask",
+    "cohort": "media-followup",
+    "artifactSha256": "692cdc76760145788a929ca32821c0a189c79cd72883c82a255100b5c6567884",
+    "artifact": "media-followup\\provider-attempt-5.json",
+    "latest": "Em gửi chị ảnh khách mặc bộ Thạch Thảo với. Lấy riêng áo thì bao nhiêu?",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": []
+    },
+    "handoffEvidence": {
+      "conversationOwner": "HUMAN",
+      "events": 1,
+      "tags": 1
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "elapsedMs": 21897.413400000005,
+    "verificationLatencyMs": null,
+    "enqueued": 0,
+    "generationFailures": []
+  },
+  {
+    "caseId": "media-and-size:ask",
+    "cohort": "media-followup",
+    "artifactSha256": "07558cd6479d57a7ca74a37d7f61e93e4e6fbaa26b9f25871dab68b3bb71c908",
+    "artifact": "media-followup\\provider-attempt-6.json",
+    "latest": "Cho chị xem gần phần thêu áo Thạch Thảo nhé. Chị cao 1m58, nặng 52kg thì lấy size nào?",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, em gửi chị ảnh cận cảnh phần thêu của áo Thạch Thảo ạ. Với chiều cao 1m58 và nặng 52kg, chị lấy size M giúp em nhé!",
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Dạ, em gửi chị ảnh cận cảnh phần thêu của áo Thạch Thảo ạ. Với chiều cao 1m58 và nặng 52kg, chị lấy size M giúp em nhé!",
+      "[CODE_IMAGE]"
+    ],
+    "imageCount": 1,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "5d1aaaaf-73e8-4c71-b80a-db5b8f9b61cd",
+          "group": "da535154-72fa-4f0d-9a7b-5a90511ef9b9",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        },
+        {
+          "id": "3d0b87b0-310f-4341-b775-c4394d3b9d35",
+          "group": "da535154-72fa-4f0d-9a7b-5a90511ef9b9",
+          "sequence": 1,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "ownerGenerations": 3,
+    "verifierGenerations": 1,
+    "elapsedMs": 48613.62779999999,
+    "verificationLatencyMs": 16336.587199999994,
+    "enqueued": 2,
+    "generationFailures": []
+  },
+  {
+    "caseId": "media-decision:ask",
+    "cohort": "media-followup",
+    "artifactSha256": "a74c467a9163d57ff948db04fe1391ff439dc154f9e68e2d45852945ff489212",
+    "artifact": "media-followup\\provider-attempt-7.json",
+    "latest": "Chị thích bộ Thạch Thảo mà sợ phần ren trông hơi nhiều. Chị mặc đi ăn cưới buổi trưa thôi.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Chân váy của set Thạch Thảo dùng chất ren mềm và có độ rũ tự nhiên nên khi mặc lên form khá thanh thoát, bay bổng chứ không bị cứng hay quá nặng nề đâu ạ. \n\nNếu chị muốn mặc đi tiệc trưa vừa điệu đà vừa sang trọng thì chọn nguyên bộ (799k) rất hợp lý. Còn nếu chị thích sự gọn gàng, nhã nhặn hơn, mình có thể lấy riêng áo thêu (499k) rồi kết hợp với chân váy trơn hoặc quần suông sẵn có trong tủ cũng rất lịch sự để đi cưới đó ạ.",
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Chân váy của set Thạch Thảo dùng chất ren mềm và có độ rũ tự nhiên nên khi mặc lên form khá thanh thoát, bay bổng chứ không bị cứng hay quá nặng nề đâu ạ. \n\nNếu chị muốn mặc đi tiệc trưa vừa điệu đà vừa sang trọng thì chọn nguyên bộ (799k) rất hợp lý. Còn nếu chị thích sự gọn gàng, nhã nhặn hơn, mình có thể lấy riêng áo thêu (499k) rồi kết hợp với chân váy trơn hoặc quần suông sẵn có trong tủ cũng rất lịch sự để đi cưới đó ạ."
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "c1533c41-922f-40f2-967a-dad1d228ce01",
+          "group": "794d3e40-8762-4e97-a753-8c480f05bb5d",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 34417.00309999997,
+    "verificationLatencyMs": 10426.151899999997,
+    "enqueued": 1,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-partial-source",
+    "cohort": "missing-pos",
+    "artifactSha256": "0632172aeef9012da96babc3898ed6eb44d41f4b0af9b35f516fb9da411dc8ce",
+    "artifact": "missing-pos\\provider-attempt-1.json",
+    "latest": "Set Thạch Thảo may bằng vải gì vậy em? Chị muốn lấy size M, em xem giúp chị giá bao nhiêu và còn hàng không nhé.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "PRICE_UNAVAILABLE",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": []
+    },
+    "handoffEvidence": {
+      "conversationOwner": "HUMAN",
+      "events": 1,
+      "tags": 1
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "PRICE_UNAVAILABLE"
+    },
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "elapsedMs": 23634.450099999995,
+    "verificationLatencyMs": null,
+    "enqueued": 0,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-partial-source-v2",
+    "cohort": "missing-pos",
+    "artifactSha256": "494d94cbff833fefa093377c67dcb3fba16d41ea732b40dea2ffda457788b7f5",
+    "artifact": "missing-pos\\provider-attempt-2.json",
+    "latest": "Chị muốn lấy riêng chân váy thôi. Vải với dáng váy thế nào em? Size M còn thì báo chị giá luôn nhé.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "PRICE_UNAVAILABLE",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": []
+    },
+    "handoffEvidence": {
+      "conversationOwner": "HUMAN",
+      "events": 1,
+      "tags": 1
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "PRICE_UNAVAILABLE"
+    },
+    "ownerGenerations": 2,
+    "verifierGenerations": 0,
+    "elapsedMs": 26060.420100000003,
+    "verificationLatencyMs": null,
+    "enqueued": 0,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-partial-source-v3",
+    "cohort": "missing-pos",
+    "artifactSha256": "92cb62e7ebc4822dc1ba4207c8e4d34f4c1cf47e469da6c269d7d4d8d0dea2c2",
+    "artifact": "missing-pos\\provider-attempt-3.json",
+    "latest": "Áo với váy là chất gì em? Cả set bao nhiêu, còn hàng không?",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "PRICE_UNAVAILABLE",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": []
+    },
+    "handoffEvidence": {
+      "conversationOwner": "HUMAN",
+      "events": 1,
+      "tags": 1
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "PRICE_UNAVAILABLE"
+    },
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "elapsedMs": 22113.751000000004,
+    "verificationLatencyMs": null,
+    "enqueued": 0,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-changed-occasion",
+    "cohort": "b1-first",
+    "artifactSha256": "7affc3fb08d6d28faee3df13d12fbded6fd0a6d26c2ed4de96650b15217549e1",
+    "artifact": "b1-first\\attempt-1.json",
+    "latest": "Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé.",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, set Thạch Thảo dùng chất tơ và ren tơ nên khi ngồi ô tô di chuyển gần 3 tiếng sẽ dễ bị hằn nếp nhăn ở tơ và ren ạ. \n\nNếu mình đi xe lâu mà ngại nhăn, chị chuyển sang **SET QUẦN SQ675** giúp em nhé. Set này dùng chất thô hoa laze phối thô ướt cao cấp kèm lót habutai, ít nhăn hơn và giữ form rất đứng dáng, ngồi xe thoải mái mà vẫn lịch sự, thanh lịch đi đám cưới ạ.",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 29888.179599999996,
+    "verificationLatencyMs": 13150.556599999996,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-current-policy",
+    "cohort": "b1-first",
+    "artifactSha256": "d4b761e98909da2ee1c90e5559da98818d3a5999da48558966dfb83c4fd2c21e",
+    "artifact": "b1-first\\attempt-2.json",
+    "latest": "Đơn này chị nhận 10 hôm rồi, mới chỉ cầm lên ngắm trước gương, tem mác vẫn còn. Giờ đổi màu còn kịp không em? Phí đổi bao nhiêu?",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, đơn nhận 10 hôm là vẫn còn trong thời hạn đổi 15 ngày chị nhé. Phí đổi hàng (vận chuyển 2 chiều) là 30.000đ ạ.",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 13036.293000000005,
+    "verificationLatencyMs": 6717.674299999999,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-price",
+    "cohort": "b1-first",
+    "artifactSha256": "dfd523c5fcf46c451609e16bfaff73105e5738b8ea618b123239d06c9983f3a7",
+    "artifact": "b1-first\\attempt-4.json",
+    "latest": "Set Thạch Thảo mã SV2447 giá bao nhiêu vậy em?",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Set váy Thạch Thảo có giá 799.000đ chị nhé. \n\nMẫu gồm áo tơ Hàn thêu nổi họa tiết và chân váy ren mềm, form nhẹ có độ bay và rũ tự nhiên. Sản phẩm hiện sẵn các size S, M, L, XL ạ.",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 19211.08309999999,
+    "verificationLatencyMs": 9016.448300000004,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-component-stock",
+    "cohort": "b1-first",
+    "artifactSha256": "4ddb4be790727da868eca52d65abc601df1f8f99662b8067a4ad1a795cce08c4",
+    "artifact": "b1-first\\attempt-5.json",
+    "latest": "Áo của bộ Thạch Thảo size M còn không em? Áo bán riêng bao nhiêu?",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, áo Thạch Thảo size M hiện còn hàng chị nhé. Áo bán riêng có giá 499.000đ ạ.",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 11345.946800000005,
+    "verificationLatencyMs": 5839.213300000003,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-search-read",
+    "cohort": "b1-first",
+    "artifactSha256": "fd8cc4ad70f981e7101de543ba77581f3fa8dc1debe707f55552a135519fd9ed",
+    "artifact": "b1-first\\attempt-6.json",
+    "latest": "Em xem giúp chị áo dài mã SD375 giá bao nhiêu nhé.",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, mẫu áo dài SD375 có giá áo lẻ là 929.000đ và cả bộ là 1.065.000đ chị nhé.",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 3,
+    "verifierGenerations": 1,
+    "elapsedMs": 13124.743900000001,
+    "verificationLatencyMs": 5305.4228,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-buying-concern",
+    "cohort": "b1-first",
+    "artifactSha256": "9b4a1368d0cda969dee05e659b2574646c2455cd6de25d2d6035442e44165ef8",
+    "artifact": "b1-first\\attempt-7.json",
+    "latest": "Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ set này diện đi tiệc ban ngày rất sang và hợp dáng đó chị ạ. Chất ren tơ Hàn mềm có độ rũ tự nhiên kết hợp áo tơ thêu nổi nhẹ nhàng tạo cảm giác bay bổng, thanh thoát chứ không hề bị rườm rà hay nặng nề đâu ạ. \n\nGiá nguyên set là 799.000đ, vừa vặn trong ngân sách của mình luôn chị nhé. Chị mặc size nào để em kiểm tra tư vấn thêm cho mình ạ?",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 15680.88469999998,
+    "verificationLatencyMs": 9437.053999999975,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-policy-used",
+    "cohort": "b1-first",
+    "artifactSha256": "3d6c8c3eea1b114f855a2fc74fa4bf1161f0a3ee57cbdd2dd26cdda143d78001",
+    "artifact": "b1-first\\attempt-8.json",
+    "latest": "Chị đã mặc bộ này đi làm một buổi rồi nhưng về thấy không hợp. Giờ chị đổi sang màu khác được không em? Nếu đổi thì ai chịu phí ship?",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, quy định đổi hàng của shop yêu cầu sản phẩm phải chưa qua sử dụng và chưa giặt (chỉ ướm thử bên ngoài). Do chị đã mặc đi làm một buổi rồi nên sản phẩm không đủ điều kiện đổi sang màu khác ạ. \n\nTrường hợp đổi hàng hợp lệ, phí vận chuyển 2 chiều là 30.000đ chị nhé.",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 14629.711100000015,
+    "verificationLatencyMs": 7276.7517000000225,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-changed-occasion-v2",
+    "cohort": "b1-rest",
+    "artifactSha256": "13b81f64c31d64d63c7f03b2f81524b9dd22a2b21aaaca7db8fde60c3ab4f3d0",
+    "artifact": "b1-rest\\attempt-9.json",
+    "latest": "Mà tiệc chuyển ra sân vườn rồi em, chị phải ở ngoài trời khá lâu mà lại dễ nóng. Mặc bộ này có bí quá không?",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Áo làm từ tơ Hàn mềm, thoáng, form nhẹ và chân váy ren tơ Hàn có độ rũ tự nhiên, form nhẹ nhàng giúp mình thoải mái khi ở ngoài trời ạ.",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 1,
+    "verifierGenerations": 1,
+    "elapsedMs": 16846.410799999998,
+    "verificationLatencyMs": 7442.7063999999955,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-current-policy-v2",
+    "cohort": "b1-rest",
+    "artifactSha256": "a8763d3e6bc3cf3c9524be91912e25f36eebc3ce45bc5b7f72289bc73fa9e423",
+    "artifact": "b1-rest\\attempt-10.json",
+    "latest": "Đơn này chị nhận 12 hôm rồi, chưa dùng. Giờ chị đổi size còn kịp không em? Phí ship tính thế nào?",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ mình vẫn kịp đổi size vì thời hạn đổi là 15 ngày kể từ khi nhận đơn chị nha. Phí vận chuyển 2 chiều cho việc đổi hàng là 30.000đ ạ.",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 11899.254099999998,
+    "verificationLatencyMs": 6209.567499999997,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-price-v2",
+    "cohort": "b1-rest",
+    "artifactSha256": "897c6257473dc2ab7e93b8e870c42b1d0e7e18994010de2221f74857ab60edb0",
+    "artifact": "b1-rest\\attempt-12.json",
+    "latest": "Cho chị xin giá cả bộ với em.",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, set váy Thạch Thảo có giá 799.000đ, gồm áo tơ Hàn thêu nổi và chân váy ren tơ Hàn mềm, form nhẹ có độ bay tự nhiên ạ. Mẫu này hiện sẵn các size S, M, L, XL chị nhé.",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 14255.181499999992,
+    "verificationLatencyMs": 7234.131799999988,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-component-stock-v2",
+    "cohort": "b1-rest",
+    "artifactSha256": "85030d4c3f74a27afc89a6d7e3addece6ac5f6b99439105b2a9c22f742125531",
+    "artifact": "b1-rest\\attempt-13.json",
+    "latest": "Chân váy size M còn không em, mua riêng là bao nhiêu?",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "STALE",
+      "text": null,
+      "fallbackId": null,
+      "diagnostic": {
+        "check": "CURRENT_SNAPSHOT",
+        "checkedAtMs": 1792994715211,
+        "expectedSnapshotId": "3bf9f8842b69fa1c2c815fced23319fc666febebdac28358118fdb1037044615",
+        "currentSnapshotId": "022e1ec8bca6b2821839f1c16902b6bce6ca1ca4391623334f5a77748e07ee50",
+        "expectedRevision": 1,
+        "currentRevision": 1,
+        "reasonCodes": []
+      }
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 12994.055600000007,
+    "verificationLatencyMs": 7439.3092999999935,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-search-read-v2",
+    "cohort": "b1-rest",
+    "artifactSha256": "638d5575019caaf6ac26736d6bcfab2a651ce70628fbd7a5a2d088341c286674",
+    "artifact": "b1-rest\\attempt-14.json",
+    "latest": "Shop có set váy Khánh Trang không em? Em xem giúp chị mẫu đó giá bao nhiêu với.",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ shop có sẵn set váy Khánh Trang chị nhé. Giá cụ thể từng phần:\n\n- Nguyên set: 999.000đ (có sẵn size S, M, L)\n- Áo lẻ: 499.000đ (size S, M, L)\n- Chân váy lẻ: 499.000đ (size S, M, L, XL)\n\nMẫu này làm từ chất liệu thô boi phối ren nhẹ nhàng, thoáng mát, áo form suông nhẹ và chân váy cạp chun thoải mái dễ mặc ạ. Chị muốn lấy cả set hay mua rời món nào ạ?",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 3,
+    "verifierGenerations": 1,
+    "elapsedMs": 16957.396099999998,
+    "verificationLatencyMs": 5615.080400000006,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-buying-concern-v2",
+    "cohort": "b1-rest",
+    "artifactSha256": "8b15cd074bc1cae72673dada5f9be38731d2beec34ee6caad7ca8619e8c10e35",
+    "artifact": "b1-rest\\attempt-15.json",
+    "latest": "Chị hay mặc đồ trơn, ít họa tiết. Set Thạch Thảo nhìn đẹp nhưng chị sợ lên người hơi điệu quá. Chị cần một bộ để đi ăn cưới ban ngày, em tư vấn thật là có nên lấy không?",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, nếu chị quen mặc đồ trơn và sợ set này bị điệu quá thì hoàn toàn yên tâm nha chị. Set Thạch Thảo có form áo và chân váy nhẹ nhàng, chất tơ và ren mềm tạo độ rũ cùng độ bay tự nhiên, không bị phồng cứng hay rườm rà. Đi ăn cưới ban ngày, set này mang lại cảm giác trang nhã, sang trọng và lịch sự vừa đủ, không bị quá sến hay lấn át phong cách thường ngày của chị đâu ạ. \n\nMẫu này hiện có giá 799.000đ (đủ size S đến XL), chị lấy diện đi ăn cưới rất hợp đấy ạ.",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 18830.189400000003,
+    "verificationLatencyMs": 7893.184699999998,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-policy-used-v2",
+    "cohort": "b1-rest",
+    "artifactSha256": "cfda4b27e27156f423055aafb97964ab67b9d6ae73c3784276968e7258f84f65",
+    "artifact": "b1-rest\\attempt-16.json",
+    "latest": "Chị vừa mặc thử bộ này trong phòng khoảng năm phút, vẫn còn tem và chưa mang ra ngoài. Nếu không vừa thì shop đổi size cho chị được không?",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, quy định của shop là sản phẩm đổi cần chưa qua sử dụng và chỉ ướm bên ngoài chứ không mặc thử vào người. Vì vậy, nếu mình đã mặc thử vào người thì rất tiếc không đủ điều kiện để shop hỗ trợ đổi size ạ.",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 18530.106000000014,
+    "verificationLatencyMs": 10520.970299999986,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-changed-occasion-v3",
+    "cohort": "b1-rest",
+    "artifactSha256": "1118231264f32d76041bf389d334858f70b89365ba4d3c992c6c49d013e5d18a",
+    "artifact": "b1-rest\\attempt-17.json",
+    "latest": "Mà lịch đổi rồi, sáng chị mặc đi gặp khách hàng. Chị muốn nhìn gọn hơn thì nên lấy cả bộ hay chỉ lấy áo thôi em?",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Chị lấy cả bộ mặc đi gặp khách hàng vẫn đẹp và hợp lý hơn chị ạ. Set có phom dáng nhẹ nhàng cùng độ rũ tự nhiên, diện ban ngày rất nhã nhặn, lịch sự và tạo cảm giác chỉn chu, chuyên nghiệp trước đối tác mà không bị quá lồng lộn.",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 1,
+    "verifierGenerations": 1,
+    "elapsedMs": 17179.40339999998,
+    "verificationLatencyMs": 6867.841600000014,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-current-policy-v3",
+    "cohort": "b1-rest",
+    "artifactSha256": "822501fe42ae79c2f753fa73a0958598f56320f578264e9e932ca556565534ad",
+    "artifact": "b1-rest\\attempt-18.json",
+    "latest": "Lần này chị nhận hàng được 9 ngày, chỉ mở ra xem rồi cất lại. Giờ chị đổi size còn được không em?",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, chính sách bên em hỗ trợ đổi hàng trong 15 ngày nên nhận hàng 9 ngày mình vẫn đổi size được chị nha.",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 15302.558300000004,
+    "verificationLatencyMs": 8325.836099999986,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-price-v3",
+    "cohort": "b1-rest",
+    "artifactSha256": "1a19237d3b1ba032a87800af3342084b87d992c7f7f5bbe5ad98ed6282f56861",
+    "artifact": "b1-rest\\attempt-20.json",
+    "latest": "Nguyên set Thạch Thảo bao nhiêu tiền em?",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Nguyên set Thạch Thảo có giá 799.000đ chị nhé. Set gồm áo tơ Hàn thêu họa tiết nổi kết hợp chân váy ren tơ Hàn mềm, form nhẹ và có độ bay, rũ tự nhiên, hiện đủ các size S, M, L, XL ạ.",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 15955.602600000013,
+    "verificationLatencyMs": 9222.758399999992,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-component-stock-v3",
+    "cohort": "b1-rest",
+    "artifactSha256": "ab103f5d110466dfe4a1b50fef7afb76cb8da095f25488bc8f19d0097ae881b8",
+    "artifact": "b1-rest\\attempt-21.json",
+    "latest": "Áo Thạch Thảo có bán riêng không em? Chị lấy size M, còn thì báo chị giá luôn nhé.",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, áo Thạch Thảo có bán lẻ chị nhé. Áo lẻ size M hiện còn hàng, giá 499.000đ ạ. \n\nÁo làm từ chất liệu tơ Hàn thêu, họa tiết thêu nổi với form nhẹ, vải mềm, thoáng và có độ bay tự nhiên. Chị lấy áo size M này em lên đơn luôn cho chị nhé ạ?",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 14837.141999999993,
+    "verificationLatencyMs": 8048.326499999996,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-search-read-v3",
+    "cohort": "b1-rest",
+    "artifactSha256": "5bf1b3d2ca7258f3810c6c869781bcb9ebe8dae7552f563c08b5306c6857c490",
+    "artifact": "b1-rest\\attempt-22.json",
+    "latest": "Chị thấy mẫu SQ223 trên trang mà giờ tìm không ra. Em kiểm tra giúp chị mẫu đó còn không, giá bao nhiêu nhé.",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Set quần Xuân Thảo hiện có giá 699.000đ, chất liệu vải thô đục lỗ in họa tiết hoa thoáng mát và đứng form. Sản phẩm hiện còn các size S, M, L chị nhé ạ.",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 3,
+    "verifierGenerations": 1,
+    "elapsedMs": 15690.319299999974,
+    "verificationLatencyMs": 5538.520900000003,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-buying-concern-v3",
+    "cohort": "b1-rest",
+    "artifactSha256": "16bc29198be857ada16802d8f94327f6ef72f03f971ea06dfbaf613dfd29cd84",
+    "artifact": "b1-rest\\attempt-23.json",
+    "latest": "Theo em chị mua riêng áo Thạch Thảo hay lấy cả bộ? Chị muốn mặc lại nhiều lần, ngân sách tầm 850 nghìn.",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Chị lấy riêng áo Thạch Thảo (499.000đ) là hợp lý nhất ạ. Áo form nhẹ, chất tơ thêu mềm mại và thoáng, khi phối cùng chân váy đen sẵn có của chị sẽ tạo set đồ rất thanh lịch. \n\nKiểu áo này cũng dễ mix&match linh hoạt với các quần hoặc chân váy khác để chị thoải mái mặc lại nhiều lần mà vẫn mới mẻ, lại rất vừa vặn với ngân sách của mình ạ.",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 16995.76139999999,
+    "verificationLatencyMs": 6591.318999999989,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "b1-policy-used-v3",
+    "cohort": "b1-rest",
+    "artifactSha256": "c8fb85761c2237bc86c27627eec7af62f2198db2fd6692f093ef1dee43243261",
+    "artifact": "b1-rest\\attempt-24.json",
+    "latest": "Chị nhận hàng hôm kia, đã cắt tem với giặt qua một lần nhưng chưa mặc ra ngoài. Chị đổi sang mẫu khác được không em?",
+    "persistedCapture": false,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, quy định đổi hàng của bên em áp dụng trong vòng 15 ngày kể từ khi nhận và sản phẩm cần còn nguyên tem, chưa qua sử dụng hay giặt ủi ạ. Trường hợp của chị đã cắt tem và giặt rồi nên không đủ điều kiện để đổi sang mẫu khác, chị thông cảm giúp em nhé ạ.",
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": null,
+    "handoffEvidence": null,
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 13618.136100000003,
+    "verificationLatencyMs": 7417.642699999997,
+    "enqueued": null,
+    "generationFailures": []
+  },
+  {
+    "caseId": "sales-discovery-advice:need",
+    "cohort": "journey-openings",
+    "artifactSha256": "2c8eb6a4ceebc7e3b12847390e5447da98cec0b9d20a24488699a5a9e27c5e7e",
+    "artifact": "journey-openings\\provider-attempt-1.json",
+    "latest": "Chị tìm bộ áo quần đi làm, dưới một triệu thôi, đừng bó bụng quá.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "RESPONSE_UNAVAILABLE",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": []
+    },
+    "handoffEvidence": {
+      "conversationOwner": "HUMAN",
+      "events": 1,
+      "tags": 1
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "RESPONSE_UNAVAILABLE"
+    },
+    "ownerGenerations": 3,
+    "verifierGenerations": 1,
+    "elapsedMs": 72081.5967,
+    "verificationLatencyMs": 36373.2744,
+    "enqueued": 0,
+    "generationFailures": []
+  },
+  {
+    "caseId": "sales-product-gallery:overview",
+    "cohort": "journey-openings",
+    "artifactSha256": "dc3249239a12d0e98c9aa64c76041ab6843720f6f8c97d51568d8cfa6536e0e9",
+    "artifact": "journey-openings\\provider-attempt-2.json",
+    "latest": "Cho chị xem ảnh set Thạch Thảo màu be nhé.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": []
+    },
+    "handoffEvidence": {
+      "conversationOwner": "HUMAN",
+      "events": 1,
+      "tags": 1
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "elapsedMs": 17055.9985,
+    "verificationLatencyMs": null,
+    "enqueued": 0,
+    "generationFailures": []
+  },
+  {
+    "caseId": "sales-size-advice:height-weight",
+    "cohort": "journey-openings",
+    "artifactSha256": "b222f4150bd8117706e9dae5277edd078a24fcb0bd481cd7f101157d6b4855cb",
+    "artifact": "journey-openings\\provider-attempt-3.json",
+    "latest": "Chị cao 1m58, nặng 52kg, bộ Thạch Thảo mặc size nào em? Chị thích rộng một chút.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ với chiều cao 1m58 và cân nặng 52kg cùng sở thích mặc thoải mái, em tư vấn mình mặc **size M** set Thạch Thảo nhé ạ. Size M sẽ mang lại độ rộng vừa vặn, bay bổng và thoải mái đúng ý chị ạ.",
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Dạ với chiều cao 1m58 và cân nặng 52kg cùng sở thích mặc thoải mái, em tư vấn mình mặc **size M** set Thạch Thảo nhé ạ. Size M sẽ mang lại độ rộng vừa vặn, bay bổng và thoải mái đúng ý chị ạ."
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "527ffeeb-5655-4aae-ba6a-1c2c9b79b3f9",
+          "group": "9aac4b45-798d-4693-a558-c3d4d05bb243",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 35406.643200000006,
+    "verificationLatencyMs": 11362.3082,
+    "enqueued": 1,
+    "generationFailures": []
+  },
+  {
+    "caseId": "sales-southern-delivery:deadline",
+    "cohort": "journey-openings",
+    "artifactSha256": "28095f1cd3876a10f57d9b4fa8e478a350a4780801c576c6acccad13455674a0",
+    "artifact": "journey-openings\\provider-attempt-4.json",
+    "latest": "Chị cần bộ này sáng mai, ship về Cần Thơ có kịp không em?",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": []
+    },
+    "handoffEvidence": {
+      "conversationOwner": "HUMAN",
+      "events": 1,
+      "tags": 1
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "ownerGenerations": 2,
+    "verifierGenerations": 0,
+    "elapsedMs": 18734.175900000002,
+    "verificationLatencyMs": null,
+    "enqueued": 0,
+    "generationFailures": [
+      {
+        "role": "owner",
+        "status": "PROVIDER_ERROR"
+      }
+    ]
+  },
+  {
+    "caseId": "stateful-open",
+    "cohort": "stateful",
+    "artifactSha256": "f07f423d4c6be134bdb753e01c75b26ff0f64c47fa6b0bfd6e8f38b8a1811708",
+    "artifact": "stateful\\provider-attempt-1.json",
+    "latest": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "RECEIPT_BACKED_CART_SUMMARY",
+      "text": "Em đã thêm món chị chọn vào giỏ. Tổng 529.000đ, đã gồm phí giao hàng. Có món đặt trước, chị nhé.",
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Em đã thêm món chị chọn vào giỏ. Tổng 529.000đ, đã gồm phí giao hàng. Có món đặt trước, chị nhé."
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "fc115d8e-bde8-4684-aedc-8680f3f66086",
+          "group": "ea594ab0-e7dd-4393-a148-a482e80386c7",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 0,
+    "elapsedMs": 32505.379900000004,
+    "verificationLatencyMs": null,
+    "enqueued": 1,
+    "generationFailures": [
+      {
+        "role": "owner",
+        "status": "PROVIDER_ERROR"
+      }
+    ]
+  },
+  {
+    "caseId": "stateful-variant-quantity",
+    "cohort": "stateful",
+    "artifactSha256": "0095bff1f47f0a615dcb2d068c7480a3bfe7116df90090fb693a8fdf6e3b202e",
+    "artifact": "stateful\\provider-attempt-2.json",
+    "latest": "Đổi áo sang L cho chị, lấy hai chiếc nhé.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Em đã đổi sang 2 áo size L cho chị rồi ạ. Tổng cộng 978.100đ, đã gồm phí giao hàng, hàng đặt trước chị nhé.",
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Em đã đổi sang 2 áo size L cho chị rồi ạ. Tổng cộng 978.100đ, đã gồm phí giao hàng, hàng đặt trước chị nhé."
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "5280e3d5-0199-4d06-8508-073c4d6bde04",
+          "group": "51286168-b28d-4cd6-a1ff-259054936b8d",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 37577.881799999996,
+    "verificationLatencyMs": 9203.0628,
+    "enqueued": 1,
+    "generationFailures": []
+  },
+  {
+    "caseId": "stateful-quote",
+    "cohort": "stateful",
+    "artifactSha256": "8de46fd5716f748c7d1cf0b15aa08b045d4181154ac87d5312ca6d70515668bf",
+    "artifact": "stateful\\provider-attempt-3.json",
+    "latest": "Hai áo cả phí ship là bao nhiêu em?",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, 2 áo là 998.000đ (có ưu đãi 49.900đ), cộng 30.000đ phí ship, tổng thanh toán là 978.100đ chị nhé.",
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Dạ, 2 áo là 998.000đ (có ưu đãi 49.900đ), cộng 30.000đ phí ship, tổng thanh toán là 978.100đ chị nhé."
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "998338e0-3c1c-4d28-8bba-ff1f7c0c9c7d",
+          "group": "f452a9e5-2ef7-4544-bcad-b11ce31dd509",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "ownerGenerations": 1,
+    "verifierGenerations": 1,
+    "elapsedMs": 22245.579299999998,
+    "verificationLatencyMs": 7237.532600000006,
+    "enqueued": 1,
+    "generationFailures": []
+  },
+  {
+    "caseId": "stateful-correction",
+    "cohort": "stateful",
+    "artifactSha256": "bf45dd5e64457d3bc40c194142429e2768cee83d27d38d29f209dc3c639c04f9",
+    "artifact": "stateful\\provider-attempt-4.json",
+    "latest": "Số đo lúc nãy chị nhắn nhầm, eo 74, mông 96 nhé. Chị vẫn lấy size L.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ vâng chị, em ghi nhận lại số đo mới của chị nhé. Hai áo size L của chị vẫn được giữ nguyên ạ.",
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Dạ vâng chị, em ghi nhận lại số đo mới của chị nhé. Hai áo size L của chị vẫn được giữ nguyên ạ."
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "643c3189-3a93-457b-84d7-6026866d0085",
+          "group": "964c406c-4285-4efc-91ca-585707f93669",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 30505.907999999996,
+    "verificationLatencyMs": 10383.708800000008,
+    "enqueued": 1,
+    "generationFailures": []
+  },
+  {
+    "caseId": "stateful-request-checkout",
+    "cohort": "stateful",
+    "artifactSha256": "b33f811d988766d03effe2b6446e28b117297633e4cc38314cb12606c4e9a349",
+    "artifact": "stateful\\provider-attempt-5.json",
+    "latest": "Chị đặt hai áo này nhé, lên đơn cho chị.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "CHECKOUT_DETAILS_MISSING",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Chị cho em [NAME]"
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "00bbe46a-b901-4bb5-9432-8f30d4ba11a3",
+          "group": "3caa5e4f-4ba1-457a-9dad-cd830e197b00",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "elapsedMs": 17325.424900000013,
+    "verificationLatencyMs": null,
+    "enqueued": 1,
+    "generationFailures": []
+  },
+  {
+    "caseId": "stateful-private-checkout",
+    "cohort": "stateful",
+    "artifactSha256": "035ed53f93d3d69d80f19956ccbab03a1e9841763a9a8fb0bb87114edbb04d53",
+    "artifact": "stateful\\provider-attempt-6.json",
+    "latest": "[Thông tin nhận hàng qua luồng riêng]",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "PRIVATE_CHECKOUT_COMMITTED",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "[Nội dung checkout đã ẩn thông tin nhận hàng]"
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "c33a5e3d-719a-4989-aa52-7a33aca29035",
+          "group": "78c5052a-9cca-493d-ba94-0bb687cc4a90",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "ownerGenerations": 0,
+    "verifierGenerations": 0,
+    "elapsedMs": 6333.658900000009,
+    "verificationLatencyMs": null,
+    "enqueued": 1,
+    "generationFailures": []
+  },
+  {
+    "caseId": "stateful-confirm",
+    "cohort": "stateful",
+    "artifactSha256": "87c713ee0f57f205f3de821d09d98721c199631847fc557f0d24a8a09901837a",
+    "artifact": "stateful\\provider-attempt-7.json",
+    "latest": "Chốt đơn cho chị nhé.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "PURCHASE_CONFIRMED",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Dạ, shop đã nhận yêu cầu đặt hàng của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé."
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "c1539e9e-34c5-42e5-978b-da7692a619c0",
+          "group": "a6380505-d371-44a4-b5c5-15c2bff5c8be",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "HUMAN",
+      "events": 1,
+      "tags": 1
+    },
+    "handoff": null,
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "elapsedMs": 21567.8652,
+    "verificationLatencyMs": null,
+    "enqueued": 1,
+    "generationFailures": []
+  },
+  {
+    "caseId": "stateful-human-request",
+    "cohort": "stateful",
+    "artifactSha256": "40e4155c7bbb6e2be8a6f04c9452a73f94f04dd6f1d2f5495cdea1e203ffd249",
+    "artifact": "stateful\\provider-attempt-8.json",
+    "latest": "Cho chị gặp nhân viên shop nhé.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "CUSTOMER_REQUESTED_HUMAN",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": []
+    },
+    "handoffEvidence": {
+      "conversationOwner": "HUMAN",
+      "events": 1,
+      "tags": 1
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "CUSTOMER_REQUESTED_HUMAN"
+    },
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "elapsedMs": 16044.96550000002,
+    "verificationLatencyMs": null,
+    "enqueued": 0,
+    "generationFailures": []
+  },
+  {
+    "caseId": "negotiation-cart-setup",
+    "cohort": "negotiation",
+    "artifactSha256": "64a1496d3f392fa98724a25afed34826e73b9910e7dbbd68868d403b47af4ad4",
+    "artifact": "negotiation\\provider-attempt-1.json",
+    "latest": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98.",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Em đã thêm áo lẻ Thạch Thảo màu be size M vào giỏ cho chị rồi ạ. Mẫu này là hàng đặt trước chị nha.",
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Em đã thêm áo lẻ Thạch Thảo màu be size M vào giỏ cho chị rồi ạ. Mẫu này là hàng đặt trước chị nha."
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "24163c10-6b83-494b-9e9c-bc7795e6e13c",
+          "group": "ec671e1d-73e0-4893-a21c-21700c41ff84",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 44519.9271,
+    "verificationLatencyMs": 12357.6391,
+    "enqueued": 1,
+    "generationFailures": []
+  },
+  {
+    "caseId": "negotiation-price-objection",
+    "cohort": "negotiation",
+    "artifactSha256": "4576f26f5f8257db1c303d5135be991b50442ba424cb03565fb8ab8661eeeb3a",
+    "artifact": "negotiation\\provider-attempt-2.json",
+    "latest": "Bớt cho chị chút được không?",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ giá áo lẻ là 499k, mức giá này em không bớt thêm được nữa ạ. Chị ủng hộ em nha!",
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Dạ giá áo lẻ là 499k, mức giá này em không bớt thêm được nữa ạ. Chị ủng hộ em nha!"
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "9eba097c-5b84-4a4d-ba1f-ed2f7134af72",
+          "group": "97a694b7-a8f8-4286-a1b5-14593dbbb71e",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "ownerGenerations": 2,
+    "verifierGenerations": 1,
+    "elapsedMs": 34070.979799999994,
+    "verificationLatencyMs": 11673.056299999997,
+    "enqueued": 1,
+    "generationFailures": []
+  },
+  {
+    "caseId": "negotiation-total-control",
+    "cohort": "negotiation",
+    "artifactSha256": "adb62093cda1dbbba7fc919c45d60098ef8b25d2a0ba04f26c6db7a0b9badd17",
+    "artifact": "negotiation\\provider-attempt-3.json",
+    "latest": "Thế một áo cả ship là bao nhiêu em?",
+    "persistedCapture": true,
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ tổng đơn áo và phí ship của mình là 499k chị nhé.",
+      "fallbackId": null
+    },
+    "actualMessages": [
+      "Dạ tổng đơn áo và phí ship của mình là 499k chị nhé."
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "ee879d32-d322-4350-9b85-4852e9ede7d9",
+          "group": "74752c7d-2ee7-4455-b946-72ad1d19e790",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "handoff": null,
+    "ownerGenerations": 1,
+    "verifierGenerations": 1,
+    "elapsedMs": 25840.511999999988,
+    "verificationLatencyMs": 10860.688200000004,
+    "enqueued": 1,
+    "generationFailures": []
+  }
+]

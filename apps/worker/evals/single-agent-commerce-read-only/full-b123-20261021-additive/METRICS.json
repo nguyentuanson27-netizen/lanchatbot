@@ -1,0 +1,124 @@
+{
+  "runSourceSha": "a3c0411781bd9ee11d424b7ec019d2bccb02c279",
+  "registeredSlots": 32,
+  "recordedSlots": 32,
+  "generationRequests": 88,
+  "retry": 0,
+  "families": {
+    "stateful": {
+      "slots": 8,
+      "terminal": {
+        "SEND_ELIGIBLE": 4,
+        "NO_SEND": 2,
+        "HANDOFF": 2
+      },
+      "reasons": {
+        "PASS": 4,
+        "CHECKOUT_DETAILS_MISSING": 1,
+        "PRIVATE_CHECKOUT_COMMITTED": 1,
+        "PURCHASE_CONFIRMED": 1,
+        "CUSTOMER_REQUESTED_HUMAN": 1
+      },
+      "providerRequests": 14,
+      "verifierLatencyMs": {
+        "n": 4,
+        "p50": 6566.683750000007,
+        "p95": 8739.943500000007
+      },
+      "addedVerificationLatencyMs": {
+        "n": 4,
+        "p50": 9183.597250000003,
+        "p95": 11554.636835
+      },
+      "providerErrors": 0
+    },
+    "b1": {
+      "slots": 24,
+      "terminal": {
+        "SEND_ELIGIBLE": 22,
+        "FALLBACK": 2
+      },
+      "reasons": {
+        "PASS": 22,
+        "FAIL": 1,
+        "PROVIDER_ERROR": 1
+      },
+      "providerRequests": 74,
+      "verifierLatencyMs": {
+        "n": 24,
+        "p50": 5955.595750000008,
+        "p95": 12340.407700000005
+      },
+      "addedVerificationLatencyMs": {
+        "n": 24,
+        "p50": 6688.11369999998,
+        "p95": 13660.636009999997
+      },
+      "providerErrors": 1
+    }
+  },
+  "roles": {
+    "owner": {
+      "requests": 60,
+      "inputTokens": 265945,
+      "outputTokens": 39325,
+      "missingUsage": 0,
+      "modelVersions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "latencyMs": {
+        "n": 60,
+        "p50": 2336.113649999985,
+        "p95": 6120.262244999999
+      }
+    },
+    "verifier": {
+      "requests": 28,
+      "inputTokens": 120927,
+      "outputTokens": 1991,
+      "missingUsage": 1,
+      "modelVersions": [
+        "gpt-6.1-sol"
+      ],
+      "latencyMs": {
+        "n": 28,
+        "p50": 6092.821000000007,
+        "p95": 12279.1773
+      }
+    }
+  },
+  "verdictCounts": {
+    "PASS": 26,
+    "FAIL": 1
+  },
+  "wireCapturesChecked": 120,
+  "leaks": [],
+  "cleanup": {
+    "stateful-1": {
+      "testDatabaseDropped": true,
+      "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+      "completedOutcomes": 8
+    }
+  },
+  "cost": "NOT_EXPOSED",
+  "requestCountDistribution": {
+    "1": 88
+  },
+  "addedVerificationLatencyMs": {
+    "n": 28,
+    "p50": 6918.04389999999,
+    "p95": 13471.614289999992
+  },
+  "sourceEmbeddingCalls": {
+    "sourceCheck": 1,
+    "stateful": 0,
+    "b1": 1
+  },
+  "providerErrors": 1,
+  "providerTimeouts": 0,
+  "providerErrorRate": 0.011363636363636364,
+  "fallbackRateAllSlots": 0.0625,
+  "fallbackRateB1": 0.08333333333333333,
+  "noSendInterpretation": "Two stateful NO_SEND model terminals have actual code-generated invitation/preview. Two HANDOFF include one captured purchase-confirmation message and one deliberate silence. They are not four missing customer replies.",
+  "sourceEmbeddingCounterPolicy": "B1 counters are cumulative across24cases; use completion counter once, not sum attempt snapshots. Total embeddings2: sourcecheck1+B1one+stateful0."
+}

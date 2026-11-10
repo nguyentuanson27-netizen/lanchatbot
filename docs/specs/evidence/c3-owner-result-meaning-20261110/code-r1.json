@@ -1,0 +1,57 @@
+{
+  "kind": "INDEPENDENT_IMPLEMENTATION_REVIEW",
+  "revision": 1,
+  "reviewer": "/root/post_contract_input_review",
+  "status": "REQUEST_CHANGES",
+  "reviewedAt": "2026-11-10T03:59:25.232Z",
+  "reviewScope": "WORKING_DIFF_NOT_EXACT_COMMITTED_HEAD",
+  "implementationBaseSha": "de6579ec5f3be29ed12271e19bafacd1f7eba0c2",
+  "approvedPlanSha256": "4729fb560fb0f8eddca7f9d7d0fd61c0ac1e11543ccb554dbd18657c17567a3e",
+  "workingFileHashes": {
+    "apps/worker/src/single-agent-commerce-quote.ts": "0eb86e6264e797d9ae5a5cf25e3a56bb33af4f1538ba4a27583fd4d91c48a3ee",
+    "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs": "b36bc2cfa7f103993324050338f1db6c421d983f49e25db3390bb54fcfa68144",
+    "apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt": "3a87cd28f46e1a59c4cf2e085e4eb698dda848afa5e46f4c8c5a4104bf06cb7a"
+  },
+  "findings": [
+    {
+      "id": "IR1_CURRENT_FIT_HISTORY",
+      "priority": "P1",
+      "file": "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs",
+      "line": 253,
+      "issue": "Every historical recommend_size response is relabeled currentFit and described as hồ sơ hiện tại without current snapshot proof. An earlier same-target result can be stale after later profile/preference/chart change, yet both remain explicitly current in native and final traces.",
+      "evidence": "Independent provider0 repro: oldM/sourceA/inputPreference null followed by currentL/sourceB/RELAXED, trusted sizeFitTargets pointsB. Both native and final output two currentFit groups with current-profile meaning.",
+      "requiredFix": "Do not certify historical results as current. Either use per-call evaluation name/meaning and keep current trusted claims authoritative, or prove current exact target/source/result/profile against current state/claims and distinguish superseded results. Source hash alone is not a profile fingerprint. Test native+final old/new results; scope UNKNOWN negotiation meaning to that call too."
+    },
+    {
+      "id": "IR1_QUOTE_PUBLIC_FIELD",
+      "priority": "P2",
+      "file": "apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt",
+      "line": 33,
+      "issue": "The total-before-cart instruction still names singular offerType for quote_product, while public schema requires offerTypes array and rejects singular field.",
+      "evidence": "Current prompt: dùng quote_product với một offerType và quantity. quoteDeclarations requires subjectRef+offerTypes.",
+      "requiredFix": "Use offerTypes containing exactly one code for totals; retain singular offerType where cart tools actually require it. Add focused active-prompt/contract assertion without broad style rewrite."
+    },
+    {
+      "id": "IR1_UNCERTAIN_HINT",
+      "priority": "P2",
+      "file": "apps/worker/src/single-agent-commerce-quote.ts",
+      "line": 193,
+      "issue": "Hint decoration checks returned failure+snapshot but not effects private uncertainty. A known missing-choice result from earlier in a batch can be decorated after a later effect becomes unknown. Outer terminal gate prevents next-owner send, but the stronger preregistered no-hint-on-unknown guarantee is not proved by current checks.",
+      "evidence": "Current wrapper decorates all base.invokeBatch results after completion, relying on status SOURCE/effectCommittedfalse and public snapshot. Effects uncertainty lives separately; existing unknowncommit negative only changes current result reason/effectCommitted.",
+      "requiredFix": "Use small code-only known-uncommitted-selection proof port patterned after existing negotiation proof, requiring original branded result and no later uncertainty/state-authority change, or explicitly revise guarantee with justified reliance on terminal gate before any owner publication. Do not call terminalOutcome inside decorator if that adds read I/O. Test earlier missing choice then later unknowncommit, forged/cloned result and no hidden I/O."
+    }
+  ],
+  "remainingBlockingFindings": 3,
+  "positiveFindings": [
+    "Quote hint no longer needs exact completed price-read proof; status remains UNAVAILABLE/effectCommittedfalse and target hint is explicitly NOT_CALCULATED/FROM_CUSTOMER_REQUEST.",
+    "REPLACE uses targetSubjectRef and current line quantity rather than old offer. Exact fresh code source selection evidence is required; no new calculation/I/O/redirect observed.",
+    "Removed obsolete SINGLE/COMPARE/DETAILS_ONLY, two-unit quote/self-media/blanket-writer instructions; verifier/model/caps unchanged.",
+    "Owner-only projection retains raw request contents/trusted context and signed native parts. Current tests cover both native and final projection."
+  ],
+  "testsStatus": "AUTHOR_TESTS_STILL_RUNNING_NOT_INDEPENDENTLY_REEXECUTED; independent native/final stale-label repro observed",
+  "newProviderRequests": 0,
+  "limits": [
+    "No code edits by reviewer.",
+    "No code/model/qualification approval; require updated diff and exact head after blockers and focused checks."
+  ]
+}

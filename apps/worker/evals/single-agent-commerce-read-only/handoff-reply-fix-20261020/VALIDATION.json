@@ -1,0 +1,46 @@
+{
+  "status": "LOCAL_CONFIG_AND_INTEGRATION_VERIFIED_PROVIDER_NOT_RUN",
+  "implementationBaseSha": "71941ab59f5145bf38282b7dab5e76f0090c1c37",
+  "testedWorkingTree": true,
+  "providerGenerations": 0,
+  "unitTests": {
+    "protocolAdapterCandidate": 62,
+    "workerHandoffPersistenceRunner": 47
+  },
+  "redGreen": {
+    "redFailed": 2,
+    "redPassed": 1,
+    "greenPassed": 3
+  },
+  "postgresIntegration": {
+    "passed": 28,
+    "failed": 0,
+    "paymentMethod": "COD",
+    "disposableDatabaseDropped": true,
+    "deliveryTransport": "CAPTURE_ONLY",
+    "liveSend": false
+  },
+  "executableConfigSha256": {
+    "handoff-matrix.candidate.json": "21b17d820f85fcfe21e717e712a2c5388ded03196d6c02b1c387380b71a3dd48",
+    "handoff-matrix.test.mjs": "d49bb706aa023061b3236dc6268f6534df64ac31ae3ff7bbc01e81143fe5f585",
+    "manifest.json": "40e54d815bea5ddf9448363ca273c434be0aa14328556bb72a3bb6dfa8aa372d",
+    "prompts/owner.vi.txt": "2d138eadfc0de1d7c268f2d2f4bc876d635a85663539fdbcd3d0a8261f7c1bb1",
+    "prompts/verifier.vi.txt": "8a75dec909a24acf8962b421a9a6cf1f1d208ec01b89401ce94c27ba1dc5299a",
+    "isolated-integration.mjs": "d1822dcc553102c1e71f3110991d11f678f852fffc5d035f3a3b1f953c4f1129",
+    "policy-handoff-run-20261020/prepare.mjs": "2db3cc68049bbfb1b936180d9452aad072285c945abdbd99becf36b655416dc2",
+    "policy-handoff-run-20261020/run.mjs": "2e0248ee360693f6f1feb7af57f3170008c5222ad9546f727ebd13d9f4ab3a36"
+  },
+  "notRun": [
+    "provider model round",
+    "worker typecheck",
+    "worker build",
+    "worker lint",
+    "full worker suite",
+    "BANK_TRANSFER integration repeat"
+  ],
+  "failedIntegrationChecksRetained": [
+    "integration-first-failure.json",
+    "integration-cleanup-failure.json"
+  ],
+  "implementationFixSha": "30e6aa654b2b37ac8edf204dcba817b93a7d4649"
+}

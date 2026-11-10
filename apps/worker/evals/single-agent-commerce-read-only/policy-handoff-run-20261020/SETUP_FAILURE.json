@@ -1,0 +1,14 @@
+{
+  "sourceSha": "8bee957f4b35be086a60e4deba4a088593f2eb51",
+  "registeredSlots": 5,
+  "maximumGenerationRequests": 20,
+  "mode": "REAL_POSTGRES_TEMP_DATABASE_CURRENT_POLICY_CAPTURE_TRANSPORT",
+  "sendEnabled": false,
+  "providerGenerations": 0,
+  "completedSlots": 0,
+  "testDatabaseCreated": false,
+  "testDatabaseDropped": false,
+  "outcomes": [],
+  "status": "BLOCKED",
+  "errorCode": "C3_B_TEST_ADMIN_DATABASE_URL"
+}

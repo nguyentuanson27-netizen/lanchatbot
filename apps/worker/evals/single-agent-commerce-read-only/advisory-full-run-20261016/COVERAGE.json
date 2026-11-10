@@ -1,0 +1,205 @@
+{
+  "runSourceSha": "0d5a1d14916f9bcb587af37722dcf7cedd1c33c2",
+  "registered": 31,
+  "recorded": 31,
+  "notRun": 0,
+  "b1": {
+    "registered": 24,
+    "recorded": 24
+  },
+  "stateful": {
+    "registered": 7,
+    "recorded": 7
+  },
+  "repetitions": 1,
+  "singleSourceFull31Run": true,
+  "historicalOutcomesAdopted": 0,
+  "outcomes": [
+    {
+      "caseId": "b1-changed-occasion",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 1
+    },
+    {
+      "caseId": "b1-search-read",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 2
+    },
+    {
+      "caseId": "b1-buying-concern",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 3
+    },
+    {
+      "caseId": "b1-changed-occasion-v2",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 4
+    },
+    {
+      "caseId": "b1-partial-source-v2",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 5
+    },
+    {
+      "caseId": "b1-buying-concern-v2",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 6
+    },
+    {
+      "caseId": "b1-current-policy",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 7
+    },
+    {
+      "caseId": "b1-partial-source",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 8
+    },
+    {
+      "caseId": "b1-price",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 9
+    },
+    {
+      "caseId": "b1-component-stock",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 10
+    },
+    {
+      "caseId": "b1-policy-used",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 11
+    },
+    {
+      "caseId": "b1-current-policy-v2",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 12
+    },
+    {
+      "caseId": "b1-price-v2",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 13
+    },
+    {
+      "caseId": "b1-component-stock-v2",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 14
+    },
+    {
+      "caseId": "b1-search-read-v2",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 15
+    },
+    {
+      "caseId": "b1-policy-used-v2",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 16
+    },
+    {
+      "caseId": "b1-changed-occasion-v3",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 17
+    },
+    {
+      "caseId": "b1-current-policy-v3",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 18
+    },
+    {
+      "caseId": "b1-partial-source-v3",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 19
+    },
+    {
+      "caseId": "b1-price-v3",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 20
+    },
+    {
+      "caseId": "b1-component-stock-v3",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 21
+    },
+    {
+      "caseId": "b1-search-read-v3",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 22
+    },
+    {
+      "caseId": "b1-buying-concern-v3",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 23
+    },
+    {
+      "caseId": "b1-policy-used-v3",
+      "population": "B1",
+      "execution": "RECORDED",
+      "slot": 24
+    },
+    {
+      "caseId": "stateful-open",
+      "population": "B2_B3",
+      "execution": "RECORDED",
+      "slot": 1
+    },
+    {
+      "caseId": "stateful-variant-quantity",
+      "population": "B2_B3",
+      "execution": "RECORDED",
+      "slot": 2
+    },
+    {
+      "caseId": "stateful-quote",
+      "population": "B2_B3",
+      "execution": "RECORDED",
+      "slot": 3
+    },
+    {
+      "caseId": "stateful-correction",
+      "population": "B2_B3",
+      "execution": "RECORDED",
+      "slot": 4
+    },
+    {
+      "caseId": "stateful-private-checkout",
+      "population": "B2_B3",
+      "execution": "RECORDED",
+      "slot": 5
+    },
+    {
+      "caseId": "stateful-confirm",
+      "population": "B2_B3",
+      "execution": "RECORDED",
+      "slot": 6
+    },
+    {
+      "caseId": "stateful-human-request",
+      "population": "B2_B3",
+      "execution": "RECORDED",
+      "slot": 7
+    }
+  ]
+}

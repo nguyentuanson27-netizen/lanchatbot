@@ -1,0 +1,237 @@
+{
+  "schemaVersion": 1,
+  "runId": "C3_FULL_A3_FOLLOWUP_20261014_01",
+  "scope": "FULL_A3_AFTER_COMPLETE_A2_PASS",
+  "ownerAuthorization": "chạy A3 đi",
+  "startingHead": "71facab8f6cd8af8a51fd8eb0530bdb5c217f2f8",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "specSha": "3a12b167cff56ef839aa7160b5238c8bfd105e21",
+  "manifestFile": "round-68/manifest.json",
+  "frozenFiles": {
+    "round-68/manifest.json": "722b818421fa8b5ad2d48df40667274b890937830622a12dc4fb97f4c33e16a5",
+    "round-68/corpus-a2.json": "76bfd2754d3382006a31d97fb5f5601138e8d696dd83f2ead7caeef7dec23a96",
+    "round-68/corpus-a3.json": "f016ddd801baddf707a294fe66f654d6a893ed5045a7b6ce6f117813433bf203",
+    "round-68/fashion-profiles.json": "e71c7246ebfcdc65cd3fb12ae8245adcda44159a2d5373ef7c92305b92c29763",
+    "round-68/size-inputs.json": "8ba06d48460a480515dccf20e8f3ecd24f72a6ab8f8b8e06f4cbaaea326cb581",
+    "round-68/quote-inputs.json": "a68933fba627d2b3df970f439c85ccf46ca23caa41cb23a199bcfb0f7466b36f",
+    "round-68/reference-replies.json": "08ece3be422b42248803ad03ae6bccb743966741a8d6e0013dac8a6ab198e62b",
+    "round-68/context-preparation.json": "1e4a03e7e11ef13d9c5fe40db2a5097c81e708adf852a10680e9cb660a8eb65b",
+    "round-68/dialogue-edits.json": "dfc8373e8ceaef0b792d339889c0817a924a36124d9bd22471bc02d061932d26",
+    "round-68/legacy-policy-source-view.json": "7efe39a8d77276411bd2157c90b0544be11297bb3f56c62b67c7eb58f2c3c56f",
+    "round-68/label-review.json": "3e9473effd5664cb30bdbd62f610a9758c4bc8a18a77f1303d8b0015e3e87076",
+    "round-68/regression-cohort.json": "c6360262ddeb6d5eca700c8438a90cabd5fb203062ccab575bca3ba456798bdd",
+    "round-68/READINESS.json": "82da11a947896989994ac88aa5eb754b5da9df434bfd974e69dc9ac42d87a829",
+    "prompts/fashion-sales-owner-sales-principles-20261014.vi.txt": "097d7dca6ac7f1267cb7b581c2872b3fffa06d989963ccbddc2b57eef7f7185d",
+    "prompts/semantic-verifier-sales-principles-20261014.vi.txt": "9aebc569176f6270d87e59c2ed856537f71ab72f3edbfd5e13ee9bbbe89d2222",
+    "prompts/repository-policy-source-preparation-20261012.json": "1ae4368d3b0db072dc9589d9d2d5d7d08750e1cc3d8c99e4272f05e0dc9023ea",
+    "corpus-reduction-preparation-20261014/selection.json": "57f448370e904bf0bdbc08f7915237bb9336ea99d218fb2dc0ba1e7a9c22c871",
+    "policy-meaning-preparation-20261013/label-review.json": "73206bdcdc3507b6f8de80d1c5d4bbd50e96c6deb0b7465899ff3bbc83ab6468",
+    "a2-full-rerun-20261014/SCOPE.md": "2451bd6ba36e63e3c8b7c9989f059def71ada977c8ba441d959310079f8e6d7f",
+    "a2-full-rerun-20261014/plan.json": "70ccd5014727118fcfe7dbd17e422b253ff4a034d163f6c1e36a313a8a071b94",
+    "a2-full-rerun-20261014/a2-evidence.json": "0d059f3eb9495a245b787e7be257c79611ef7758235820be796518696a53043d",
+    "a2-full-rerun-20261014/A2_AUDIT.json": "25c9ec3215b7bb6859ea9674c33879218ef8b3185bb69b074b8770992bb2af58",
+    "a2-full-rerun-20261014/RESULTS.json": "223bb3ba529e38bb2ae526752d681e1ae7566312fad0c8b662c0cf187c8dc2ca",
+    "a2-full-rerun-20261014/READINESS.json": "97e8d4b8b4e70ad76fe605c2fe092d66516fdc7379ef8bf508f86ec814414196",
+    "a3-full-followup-20261014/SCOPE.md": "4fdd6ba56ec5213f66081271bdc6926b53edf2ab11193c86bff80c7cc2673f6c"
+  },
+  "a2Evidence": {
+    "file": "a2-full-rerun-20261014/a2-evidence.json",
+    "sha256": "0d059f3eb9495a245b787e7be257c79611ef7758235820be796518696a53043d",
+    "runSourceSha": "9f074de4ebb5cf6cadc440b43d1ea56132a1f57f",
+    "rawSavepoint": "f3b283a4090c88a18d5d19e1e90deabfdacabe7a",
+    "registered": 142,
+    "requiredSummary": "PASS",
+    "requiredPrefix": "PASS"
+  },
+  "models": {
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    },
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "credentialRoute": "EXISTING_LOCAL_VERTEX_SERVICE_ACCOUNT",
+      "generationConfig": {
+        "transport": "VERTEX_SINGLE_REQUEST_TEXT",
+        "wireApi": "generateContent",
+        "projectId": "project-388db62b-f5a4-4e76-a2b",
+        "location": "global",
+        "endpoint": "https://aiplatform.googleapis.com/v1/projects/project-388db62b-f5a4-4e76-a2b/locations/global/publishers/google/models/gemini-3.5-flash-lite:generateContent",
+        "tools": [],
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "thinkingLevel": "HIGH",
+        "includeThoughts": false,
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "topK": "OMITTED_PROVIDER_DEFAULT",
+        "penalties": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": 8192,
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY",
+        "tokenRefresh": "BEFORE_LATER_ATTEMPT_ONLY_NO_401_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "verifier": "9aebc569176f6270d87e59c2ed856537f71ab72f3edbfd5e13ee9bbbe89d2222",
+    "conversation": "097d7dca6ac7f1267cb7b581c2872b3fffa06d989963ccbddc2b57eef7f7185d"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "corpusHashes": {
+    "a2": "76bfd2754d3382006a31d97fb5f5601138e8d696dd83f2ead7caeef7dec23a96",
+    "a3": "f016ddd801baddf707a294fe66f654d6a893ed5045a7b6ce6f117813433bf203"
+  },
+  "repetitions": 1,
+  "counts": {
+    "a3": 42,
+    "maximumGenerationRequests": 84,
+    "families": {
+      "concern": 11,
+      "partial": 9,
+      "correction": 10,
+      "policy": 9,
+      "simple": 3
+    }
+  },
+  "retry": 0,
+  "maxGenerationRequestsPerRoleAttempt": 1,
+  "adoptedPriorA3Outcomes": 0,
+  "boundaryExecutableHash": "344035c06c67ecfae317d385ee07c96aed86aac37c27bbc497aca69c40260b37",
+  "vertexExecutableHash": "fb2054f3b82da64be777ba6b3accde769000864e7c8fa7a8346db973f79390fe",
+  "reviewOrder": "RAW_COMMIT_THEN_ACTUAL_TERMINAL_PRIMARY_COMMIT_THEN_REJECTED_DRAFT_DIAGNOSTICS",
+  "primaryScoring": {
+    "method": "OWNER_AUTHORIZED_CODEX_OFFLINE_REVIEW",
+    "scale": [
+      0,
+      1,
+      2
+    ],
+    "dimensions": [
+      "understanding",
+      "explicitNeedCompleteness",
+      "contextCorrectionUse",
+      "usefulness",
+      "decisionSupport",
+      "partialAnswerBehavior",
+      "nextStep",
+      "coherence",
+      "naturalness",
+      "factualActionSafety"
+    ],
+    "minimumPerDimension": 1,
+    "minimumCaseMean": 1.5,
+    "minimumFamilyPassRate": 0.9,
+    "factualActionSafetyRequired": 2,
+    "missingScores": "BLOCKED",
+    "blindToVerifierOutcome": false,
+    "reviewer": "CODEX_PRIMARY_AGENT",
+    "reviewLimitations": "Primary subjective nonblind review, not independent/human/owner acceptance. Prospective A2label revision plus verifier treatment changes population; no stable/isolated causal/conversion claim.",
+    "interpretation": "Read full accepted dialogue,latest message,current trusted context and ACTUAL terminal outcome first. Write one connected whole-turn buying assessment: unresolved decision,suitable recommendation/reasons,useful progress,corrections,coherence/natural shop voice,material factual/action meaning. Then10diagnostic dimensions:0 materially misses this buyer goal,1 weak/partial,2 fulfills it in context. A material holistic defect lowers its relevant dimension;failed turn cannot all2. No keywords,isolated quote checklist,fact counts,reference matching,forcedCTA,compulsory cheap answer or upsell. Length/multiple facts/confidence/higher spend alone do not fail;minor phrasing alone does not fail otherwise useful natural advice. Ordinary shape/workmanship and relevant material wrinkle advice approved;no invented tests,performance,competitor rights or receipt. Intro policy non-exhaustive versus specific entitlement interpreted from whole conversation/tone. Future promise differs from completed action:unavailable promised action fails A3 capability,completed operation needs receipt. A request for another styling option must change something useful relative to known choice,not merely restate it. Direct adequate answer/ACK/defer/appropriate rejection need no artificial action. Preserve all numeric bars and historical scores. Local garment comparisons can help consider a size without claiming complete fit. Confident ordinary design/fit advice remains allowed; a definite personal wearing-result guarantee is not established by fit alone. Judge whole speech act,not a word or duration. Numeric bars/evaluator contracts unchanged. Round40 prospective clarification: a product recommendation within budget can resolve choosing a shirt without one compulsory color. Legitimate grounded reuse of known benefits can persuade; no compulsory novel fact or successful conversion. Advising against unsuitable white for changed stage lighting can complete this turn; missing verified alternative is a separate coverage gap. Primary read actual whole terminal before rejected candidate diagnostics. Round44 owner-approved clarification: repeat relevant customer evidence when it helps explain a choice, reassure or confirm a change. Whole-profile recitation without a useful role can weaken a turn; number of facts or repetition alone cannot fail it. Evaluate purpose, timing and the coherence of the whole reply. No mandatory quotation, word detector, numerical repetition cap or new judging dimension. Do not turn one measurement alone into complete fit; current bound code-fit remains required. Round53 customer-care terms derive exclusively from frozen v2; no indoor-wear exception, no absolute no-refund rule, exchange and fault-return are distinct. Whole-turn outcome assessment unchanged; historical judgments remain frozen.",
+    "scopeInterpretation": "Product OUT_OF_STOCK plus aggregate availableQuantity=0 supports product not orderable at this snapshot, including inability to order a requested option. It does not establish variant identity/existence, a variant-level lookup or a measured variant quantity. Missing fit/variant-specific evidence must remain explicit; unsubstantiated direct variant verification is unsafe. This interpretation is frozen before new results; original round-1 review remains unchanged.",
+    "consultationDimensions": [
+      "understanding",
+      "usefulness",
+      "decisionSupport",
+      "nextStep"
+    ],
+    "consultationRequired": 2,
+    "consultationCaseIds": [
+      "r5-workday-comfort",
+      "r5-competitor-price",
+      "r5-wardrobe-budget",
+      "r5-white-opacity",
+      "r5-size-price-stock",
+      "r5-missing-customer-size",
+      "r5-white-variant-alternative",
+      "r5-delivery-timing",
+      "r5-correct-product",
+      "r5-correct-measurement",
+      "r5-referent-navy",
+      "r5-budget-correction",
+      "r5-try-exchange",
+      "r5-exchange-cost",
+      "r5-shipping-threshold",
+      "r5-refund-distinction",
+      "r7-price-ready-fit",
+      "r7-shirt-missing-measure",
+      "r7-opacity-context-change",
+      "r7-exchange-after-use",
+      "r12-office-color",
+      "r12-pants-known-waist",
+      "r12-change-color-only",
+      "r12-indoor-exchange-eligible",
+      "r14-workday-choice",
+      "r14-price-repeat-wear",
+      "r14-pants-size-input",
+      "r14-stage-light-change",
+      "r14-refund-before-buy",
+      "r14-freeship-extra-pants",
+      "r15-value-use",
+      "r15-fit-reassurance",
+      "r15-known-waist-next",
+      "r15-color-final-confirm",
+      "r16-effort-and-use",
+      "r16-budget-alternative",
+      "r16-change-to-indoor-dress",
+      "r16-pants-color-alternative"
+    ],
+    "consultationApplicability": "38consultation cases,existing dimension2 and numeric bars, no forced CTA.",
+    "anchors": {
+      "usefulness": {
+        "good": "Concrete attainable response resolves this buying obstacle using available evidence, with relevant tradeoff or risk reduction.",
+        "bad": "Only repeats concern/unknowns or tells customer to ask staff for information already supplied."
+      },
+      "decisionSupport": {
+        "good": "Recommend or advise deferring a specific option with grounded reason matching priorities; missing evidence is handled without inventing benefits.",
+        "bad": "Generic comparison checklist, no position or ungrounded upsell/guarantee."
+      },
+      "nextStep": {
+        "good": "One realistic action/check that can change decision with current data; a well-explained stop/defer can be sufficient.",
+        "bad": "Collect measurements to promise absent chart, promise unsupported staff/tool activity, force pointless CTA or repeat known questions."
+      },
+      "naturalness": {
+        "good": "Everyday concise confident shop chat, direct useful words and coherent buying advice. Relevant customer information may be repeated to explain a selection, reassure about the current concern or confirm a correction; avoid needless recitation of the whole profile. Policy summaries keep meaning in conversation, relevant conditions when needed. Judge the whole reply; minor awkward wording alone does not fail otherwise useful natural advice.",
+        "bad": "Stiff/bureaucratic or repetitive wording that materially obscures the advice, interrupts the buying conversation or forces a rigid recital/formula/CTA. Repeated measurements, multiple facts or a slightly awkward phrase alone are not a material defect."
+      },
+      "understanding": {
+        "good": "Correctly interprets the customer motivation/current buying obstacle and already settled choices in history.",
+        "bad": "Misreads ordinary meaning, invents buying motivation, or resets a settled decision even when facts are correct."
+      }
+    },
+    "naturalnessRequired": 2,
+    "evidencePolicy": "Existing six-slot A2 all-match prefix then136remaining; complete freshA2PASS before full42A3N1. Latest owner full-run authorization supersedes screen prerequisite. Raw savepoint before whole actual-terminal primary review, human scores null.",
+    "reviewProcedureFile": "docs/specs/c3-round63-contextual-policy-20261013.md",
+    "reviewProcedureHash": "1b0d224b11e8c48b28623d974790538d2db9e5950c25968d178378ded85b8c03"
+  }
+}

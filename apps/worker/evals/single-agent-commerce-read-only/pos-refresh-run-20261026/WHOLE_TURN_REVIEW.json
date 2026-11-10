@@ -1,0 +1,315 @@
+{
+  "sourceSha": "468d85ea6577c428cf2f6f155c9774926537364b",
+  "reviewedOutcomes": 51,
+  "recommendation": "B_NOT_GO",
+  "scopedFixEvidence": "APPROVED",
+  "voiceGoalMet": false,
+  "entries": [
+    {
+      "caseId": "opening-ad",
+      "artifactSha256": "e928f6696c0dc2759750518486723a6d6e288986b219442ab79bafd1d0b989f3",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Đúng form đầu: set 799k, size và 2 ảnh đúng mẫu. Không có claim thao tác đã hoàn tất."
+    },
+    {
+      "caseId": "opening-ad-repeat",
+      "artifactSha256": "09cad372d16026036bd599d9b63384ab7ac083b109f24b7fb19a072d22d3ce2f",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Đúng giá 799k, không lặp ảnh/form, dùng đúng lịch sử."
+    },
+    {
+      "caseId": "opening-organic",
+      "artifactSha256": "d4763fc5902816a3ed00944f62a66dd0a22b4ac36de5c054c52a58b56ba7932c",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Đúng form 799k, size và 2 ảnh. Còn phần mô tả dài nhẹ."
+    },
+    {
+      "caseId": "opening-unresolved",
+      "artifactSha256": "849f6793060a3a98120f99066b7a775ceb892c5eb6c50576a282424f340c29ca",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Xin ảnh hoặc tên để phân biệt mẫu, không đoán giá."
+    },
+    {
+      "caseId": "opening-multipart",
+      "artifactSha256": "2157a1d83d4f58f011dec38f461fcd8d1844edc0e4dcb36222c15859c0ca5e33",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Đủ set 799k và áo lẻ 499k, size/ảnh. Mô tả còn dài nhưng không lỗi nghiêm trọng."
+    },
+    {
+      "caseId": "media-overview-next:ask",
+      "artifactSha256": "c97b2d6ddb1e719178c85d6d68cfc7cfecfb305d653dd84995053263f456a3fe",
+      "actualDisposition": "HANDOFF",
+      "reason": "Thiếu feedback cần thiết: HUMAN, event/tag và không Outbox/capture mới."
+    },
+    {
+      "caseId": "media-overview-next:continue",
+      "artifactSha256": "b9536bee52a1ee37de9a233d978efe2432cfb2ab12c7fbf66390ae17451e5203",
+      "actualDisposition": "NO_SEND",
+      "reason": "Đã HUMAN thì không gọi owner/verifier hoặc gửi thêm; không giả đã gửi ảnh."
+    },
+    {
+      "caseId": "media-detail-next:ask",
+      "artifactSha256": "7b3957a3d865d446a2849b8b96a2ef4f67563f4acf71af45cdfcaf64895ec786",
+      "actualDisposition": "HANDOFF",
+      "reason": "Thiếu feedback: handoff thật và im lặng theo yêu cầu owner."
+    },
+    {
+      "caseId": "media-detail-next:continue",
+      "artifactSha256": "529672316c1d64680f30c1ebde6ad34658d2f749e07cdf7a28fdbaf3dd7bd42c",
+      "actualDisposition": "NO_SEND",
+      "reason": "Giữ HUMAN, không phát tin mới sau bàn giao."
+    },
+    {
+      "caseId": "media-and-price:ask",
+      "artifactSha256": "83697ea5cec450dcbc75be6d55f70ad49b6e0208e30dc708f9a7d575c3628d03",
+      "actualDisposition": "HANDOFF",
+      "reason": "Đã biết giá cũng không trả partial khi ảnh cần thiết thiếu; handoff thật, im lặng."
+    },
+    {
+      "caseId": "media-and-size:ask",
+      "artifactSha256": "7ed682556706bf62ce2c7c83999e6b7c267642ce84dbadfd615479e973e13985",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Ảnh DETAIL đúng yêu cầu và M do SizeEngine. Nhắc lại chiều cao/cân nặng là điểm giọng còn yếu."
+    },
+    {
+      "caseId": "media-decision:ask",
+      "artifactSha256": "16b1976a58397540ddfc456442ad6cb4c041ea98803996528aca4621c8e3667a",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Cách phối áo lẻ với váy trơn có ích, nhưng trấn an bằng nhiều tính từ và đưa hai phương án. Giọng chưa đạt; minor đã được tạm chấp nhận trước run."
+    },
+    {
+      "caseId": "b1-partial-source",
+      "artifactSha256": "aa0bba4275ced000aa621fa8c069ab2fa1bbcf1db226df4da1c6bec0d3bc3322",
+      "actualDisposition": "HANDOFF",
+      "reason": "Exact POS unavailable input qua ingress: HUMAN/event/tag; không hứa callback hoặc gửi partial."
+    },
+    {
+      "caseId": "b1-partial-source-v2",
+      "artifactSha256": "4dac7c342b8754049c03b3920ce15abb52547cb550a1c67d9fb3f7e55898532d",
+      "actualDisposition": "HANDOFF",
+      "reason": "POS thiếu: handoff thật, không tin/ảnh; không lái sang món khác."
+    },
+    {
+      "caseId": "b1-partial-source-v3",
+      "artifactSha256": "0b7a500d88957ba4de02ea94849ecc65ba2d0f7ab86202b59c5f078818920963",
+      "actualDisposition": "HANDOFF",
+      "reason": "POS thiếu: handoff thật, không tin/ảnh; vẫn giữ trong denominator."
+    },
+    {
+      "caseId": "b1-changed-occasion",
+      "artifactSha256": "f69508a9cf59079ea6a5bd082785124d9322a36019532f0c700adb0986f97e56",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Đã đọc mẫu V7840 và giá 799k. Nguồn có ren Hàn, lót habutai và giữ form tốt hơn; lời khuyên chất liệu định tính theo ranh giới owner, không cam kết không nhăn. CTA/câu dài vẫn yếu; chưa đạt sales quality."
+    },
+    {
+      "caseId": "b1-current-policy",
+      "artifactSha256": "0930f4fe67c9f73d3e7af7475e3eca9cefd45568512d05f58cf064d00fbbc74f",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Đúng hạn 15 ngày và phí 30k; xét hành vi chỉ cầm lên ngắm, trả đúng phạm vi thời hạn/phí khách hỏi."
+    },
+    {
+      "caseId": "b1-price",
+      "artifactSha256": "09efa3dc933af7930c02490fe6e53c0528ce9b87f0cd7a0ec734589e36a04b4f",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Đúng giá 799k, nguồn mẫu, size và form. B1 chỉ đo eligibility."
+    },
+    {
+      "caseId": "b1-component-stock",
+      "artifactSha256": "89331056832a71a28f32af7637d119bc01b918d871b1e8a98169340d6f8e32d8",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Đúng áo lẻ M còn hàng, giá 499k; ngắn gọn. B1 chỉ đo eligibility."
+    },
+    {
+      "caseId": "b1-search-read",
+      "artifactSha256": "5cb44a9ea455609f7295d8a1180407ca180699dace00ec549354add7b476783b",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Đúng mẫu SD375: áo 929k, cả bộ 1.065k, size từ nguồn; không tự tính."
+    },
+    {
+      "caseId": "b1-buying-concern",
+      "artifactSha256": "31387729ac9fb113610626878ef7756d55db4e7242564bc9e83fdd5a8a76227b",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Vẫn lặp ngân sách và trấn an bằng lời khen; chưa giúp quyết định rõ. Minor giọng đã được tạm chấp nhận, không coi là bán hàng tốt."
+    },
+    {
+      "caseId": "b1-policy-used",
+      "artifactSha256": "1335d4d427f460301704e02566064702c5523383c66e1f4af6028ff803e9f2dd",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Từ chối đổi vì đã mặc đi làm; không cấp quyền bằng điều kiện phụ hoặc đọc lại toàn policy."
+    },
+    {
+      "caseId": "b1-changed-occasion-v2",
+      "artifactSha256": "c7f22adeeade679f005d21d4efbe9ba75c3061865ad3195bc6cef7c58e1ca96d",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Nguồn có mô tả thoáng/nhẹ; lời trấn an không bí và mẹo che nắng chưa giải quyết lựa chọn trang phục. Giữ như hạn chế tư vấn theo ranh giới qualitative đã chốt, không sửa rubric sau result."
+    },
+    {
+      "caseId": "b1-current-policy-v2",
+      "artifactSha256": "611a802a668802813dfa522f6ddc01589eb66ee72838cbd8ba4b0ea6ff8a1f04",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Đúng 12 ngày trong hạn15 ngày và phí30k. Không cấp quyền cho hành vi bị loại trừ."
+    },
+    {
+      "caseId": "b1-price-v2",
+      "artifactSha256": "424c08d9cb780f79fb9f5c3f09287ac1c93c94ee1a0218f497d879fd3793c0d9",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Đúng set799k và thông tin size/form theo nguồn; B1 eligibility-only."
+    },
+    {
+      "caseId": "b1-component-stock-v2",
+      "artifactSha256": "fc7726dd5ff94cb794270bbc771817c2003aff8af9862e6fc55788e84d1e57e8",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Đúng chân váy M còn/449k, không còn STALE trong run này. Không có proof refresh thực đã xảy ra để quy PASS cho codefix."
+    },
+    {
+      "caseId": "b1-search-read-v2",
+      "artifactSha256": "874819d0fb946963fbdf17f1cc7fd23657bae1e4c636656f007950b1e6fda72c",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Đúng mẫu Khánh Trang/set999k và size, không nhầm nguồn sản phẩm."
+    },
+    {
+      "caseId": "b1-buying-concern-v2",
+      "artifactSha256": "144fce735533367a54a8980d6db2d7a81e27d9d5e492b60d726ee3ad2448232a",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Nhiều tính từ, phủ nhận do dự và thuyết phục mỏng. Đúng facts nhưng sales/voice chưa đạt; không coi verifier PASS là quality PASS."
+    },
+    {
+      "caseId": "b1-policy-used-v2",
+      "artifactSha256": "87f256b09c6fb53fd3eefdc70891596d81087c0137dcf4c8b9c012d527a61d4d",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Hiểu mặc thử trong nhà khác ướm bên ngoài; từ chối đổi đúng source hiện tại."
+    },
+    {
+      "caseId": "b1-changed-occasion-v3",
+      "artifactSha256": "9efb53418ea4380881b2f4af89955233271ae6fd4a03025281d2a24d0171b932",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Đổi từ cả bộ sang áo để phối đồ cơ bản cho buổi gặp khách. Lý do dùng được, vẫn nhiều tính từ nhưng không giữ lập trường cũ máy móc."
+    },
+    {
+      "caseId": "b1-current-policy-v3",
+      "artifactSha256": "40fdbbaffc9b3f8e3ce72d20b55f1508d19d425ca38e08a86e229d1c2a3a32ac",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Đúng9 ngày trong hạn15 và phạm vi chưa sử dụng theo tình huống khách nói; trả quyền hỏi chứ không báo đã duyệt hồ sơ."
+    },
+    {
+      "caseId": "b1-price-v3",
+      "artifactSha256": "40100b45d6b6a94a3c1d6c432ec7afc68bfc2324c342cbf9b9c339e1fbd77617",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Đúng giá799k/size từ nguồn; còn mô tả chung dù khách chỉ hỏi giá."
+    },
+    {
+      "caseId": "b1-component-stock-v3",
+      "artifactSha256": "be423b52c644fc03d8436fa332d9a0ca09ecee7bea925fd9501bbcf0b628ae99",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Áo lẻ M499k đúng; không mời lên đơn ngoài capability như run trước. Có thêm mô tả áo hơi thừa."
+    },
+    {
+      "caseId": "b1-search-read-v3",
+      "artifactSha256": "81554bf576c343aa1ed020b0e49bfc1f2a45991a5c9870a5b3e95daa5a9b28d9",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Đúng SQ223/giá429k429k699k và size. Dài, CTA hỗ trợ chọn size trong harness chỉ đọc là giới hạn capability cần ghi; không báo đã làm thao tác."
+    },
+    {
+      "caseId": "b1-buying-concern-v3",
+      "artifactSha256": "7a9269b5768bbb85421d75dc62b71e599036c7eb17cb6d4697e4f93e3620cc84",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Chọn áo499k dùng đúng chân váy đen trong history; lại mở option cả bộ/ngân sách không cần. Sales quality chưa đạt rõ."
+    },
+    {
+      "caseId": "b1-policy-used-v3",
+      "artifactSha256": "4268e9b261636ab411ff786ddc3f23c49a9a18fbfc10388e0cd36b20404b3a4e",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Đúng lý do cắt tem/giặt loại trừ đổi; không đồng ý rồi liệt kê điều kiện trái hành vi."
+    },
+    {
+      "caseId": "sales-discovery-advice:need",
+      "artifactSha256": "cf1d485b595e2008e8f5eb9fb59608017c7259b1991077a600953cb305caf476",
+      "actualDisposition": "HANDOFF",
+      "reason": "Owner tự bảo đảm không bó/cấn bụng khi chưa có fit. Verifier FAIL đúng; khách nhận handoff im lặng thực, không nhận draft lỗi. Thiếu khả năng tư vấn chọn đồ vẫn nghiêm trọng về hữu ích."
+    },
+    {
+      "caseId": "sales-product-gallery:overview",
+      "artifactSha256": "c83c5030241fa2b3a4df2cdd14d088fc396d0d455eadc524f86d0b3d31fd9fed",
+      "actualDisposition": "HANDOFF",
+      "reason": "Ảnh đúng màu be chưa được xác nhận: handoff thật, không thay ảnh chung. Final tool response chưa export riêng, không nói shop chắc chắn không có ảnh."
+    },
+    {
+      "caseId": "sales-size-advice:height-weight",
+      "artifactSha256": "3edccbbd02828ee5f417173924b5f0f653cbd3200e18314cb11021c5dd30f9f2",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "SizeEngine M đúng, đã dùng height/weight và preference. Nhắc lại toàn đầu vào/giọng công thức vẫn là điểm yếu."
+    },
+    {
+      "caseId": "sales-southern-delivery:deadline",
+      "artifactSha256": "9d49b6741081d003b7c913bbc30f65b1a65603d827c712694327fe5d913a2d99",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Dùng ETA4–8 ngày để từ chối nhận hẹn sáng mai; không lỗi completion lần này. Không bắt khách tự chuẩn bị đồ khác."
+    },
+    {
+      "caseId": "stateful-open",
+      "artifactSha256": "524d0a21600bb6ea00a2df97fef1f6c55cf0422e738980ec936f90847227f412",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Receipt thêm áo beM và PRE_ORDER có thật; câu xác nhận gọn, không cần hỏi chung thêm."
+    },
+    {
+      "caseId": "stateful-variant-quantity",
+      "artifactSha256": "7e86218baf6a81fa5effa6fff7b72ce59aea1893c6877432c15b063dfd9ec618",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Receipt đổiL/số lượng2 có thật và đúng cart hiện tại, câu ngắn."
+    },
+    {
+      "caseId": "stateful-quote",
+      "artifactSha256": "6798bc2849d0b8b51436ea7c4b46724774663d58db927488be16f822be81b890",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Tổng978100 gồm ship30000 đúng currentquote; không lấy số lịch sử hoặc tự tính."
+    },
+    {
+      "caseId": "stateful-correction",
+      "artifactSha256": "cc3f79bcdbf2158a9c15d3e98d3bba08b21583ad8ed9678caa2c480fcb25d9f4",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Profile update đúng, giữ2beL. Giọng ghi nhận số đo/giữ nguyên vẫn báo cáo; không mở vòng sửa giọng tiếp."
+    },
+    {
+      "caseId": "stateful-request-checkout",
+      "artifactSha256": "55d195d6bf6f5210e9cdd7fdbaf4ad3dacc044431c2f84f55c9069015afbab2d",
+      "actualDisposition": "NO_SEND",
+      "reason": "Code hỏi thông tin thiếu và actual1OutboxSENT_ACCEPTED. NO_SEND terminal không đồng nghĩa im lặng."
+    },
+    {
+      "caseId": "stateful-private-checkout",
+      "artifactSha256": "28b1a0da5b0a348b5c9a1227762a36af955e784fd5e502081d9e03477ce23e0c",
+      "actualDisposition": "NO_SEND",
+      "reason": "Private code-only tới ORDER_PREVIEW,1previewcapture; thông tin nhận hàng đã ẩn trong report, không có trong model requests."
+    },
+    {
+      "caseId": "stateful-confirm",
+      "artifactSha256": "bdddd6afde4489969cb9db1b033d940a9e350ddc62f1da1c4a69f640f1e1557f",
+      "actualDisposition": "HANDOFF",
+      "reason": "PURCHASE_CONFIRMED/HUMAN/event1tag1/enqueued0/newOutbox0/capture0. Không đọc riêng confirmationobject từ artifact public."
+    },
+    {
+      "caseId": "stateful-human-request",
+      "artifactSha256": "5e2ba6a0a53158de335b91d6f180365e2283c0a1d11481bac16a90643e4f899f",
+      "actualDisposition": "HANDOFF",
+      "reason": "Journey handoff riêng, chuyểnHUMAN/event1tag1/0Outboxcapture. Không kế thừa ownership từ journey sales."
+    },
+    {
+      "caseId": "negotiation-cart-setup",
+      "artifactSha256": "69ec5310bc77b7b7454783e44653effee95ddefe4b8c721cd683fee717df3f40",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Áo beM PRE_ORDER và cart529k đúng receipt/currentquote."
+    },
+    {
+      "caseId": "negotiation-price-objection",
+      "artifactSha256": "e2c04094b925870df10f3ad52a012d9a05f6e4d66e8c7e011fda3a014ab5bcd8",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Code record_negotiation áp hỗ trợ ship30k, currentquote499k; có giá trị giao dịch thật. Lời mời chốt còn hơi công thức nhưng capability tồn tại."
+    },
+    {
+      "caseId": "negotiation-total-control",
+      "artifactSha256": "879c407e8e56bf0dd8f6af0e9362ad3dd6db7499b19e963ec30a34761a755cb0",
+      "actualDisposition": "SEND_ELIGIBLE",
+      "reason": "Tổng499k sau ưu đãi30k đúng nguồn. Giải thích phí bị dài, không phải sai tổng hoặc tự cấp ưu đãi."
+    }
+  ]
+}

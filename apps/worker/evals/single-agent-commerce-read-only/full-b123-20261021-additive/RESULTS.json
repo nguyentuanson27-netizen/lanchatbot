@@ -1,0 +1,45 @@
+{
+  "registered": 32,
+  "recorded": 32,
+  "primaryCounts": {
+    "b1-1": {
+      "USABLE": 18,
+      "NEEDS_EDIT": 4,
+      "UNUSABLE": 2
+    },
+    "stateful-1": {
+      "USABLE": 6,
+      "NEEDS_EDIT": 1,
+      "OWNERSHIP_CONTROL": 1
+    }
+  },
+  "commands": [
+    {
+      "name": "provider-preflight",
+      "exitCode": 0
+    },
+    {
+      "name": "source-check",
+      "exitCode": 0
+    },
+    {
+      "name": "deterministic-cod",
+      "exitCode": 0
+    },
+    {
+      "name": "deterministic-bank",
+      "exitCode": 0
+    },
+    {
+      "name": "stateful-1",
+      "exitCode": 0
+    },
+    {
+      "name": "b1-1",
+      "exitCode": 0
+    }
+  ],
+  "recommendation": "STOP_AFTER_FULL_KEEP_BASELINE",
+  "reason": "Two actual fallbacks, advice/voice/capability findings remain; one sample/case, no stability or live GO.",
+  "sendEnabled": false
+}

@@ -1,0 +1,172 @@
+{
+  "newRunSourceSha": "099ed3ab44a90602f9a2703cbdebaae25c6f1602",
+  "newRecorded": 25,
+  "newB1": 18,
+  "newStateful": 7,
+  "newNotRun": 0,
+  "earlierMeasured": {
+    "count": 6,
+    "sourceSha": "10040a9d99718a305cdd9d380e519c1e6e150101",
+    "path": "../offer-read-run-20261016",
+    "unchanged": true
+  },
+  "totalPopulationCoverage": 31,
+  "singleSourceFull31Run": false,
+  "outcomes": [
+    {
+      "caseId": "b1-changed-occasion",
+      "population": "B1",
+      "execution": "PRIOR_RECORDED"
+    },
+    {
+      "caseId": "b1-search-read",
+      "population": "B1",
+      "execution": "PRIOR_RECORDED"
+    },
+    {
+      "caseId": "b1-buying-concern",
+      "population": "B1",
+      "execution": "PRIOR_RECORDED"
+    },
+    {
+      "caseId": "b1-changed-occasion-v2",
+      "population": "B1",
+      "execution": "PRIOR_RECORDED"
+    },
+    {
+      "caseId": "b1-partial-source-v2",
+      "population": "B1",
+      "execution": "PRIOR_RECORDED"
+    },
+    {
+      "caseId": "b1-buying-concern-v2",
+      "population": "B1",
+      "execution": "PRIOR_RECORDED"
+    },
+    {
+      "caseId": "b1-current-policy",
+      "population": "B1",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "b1-partial-source",
+      "population": "B1",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "b1-price",
+      "population": "B1",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "b1-component-stock",
+      "population": "B1",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "b1-policy-used",
+      "population": "B1",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "b1-current-policy-v2",
+      "population": "B1",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "b1-price-v2",
+      "population": "B1",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "b1-component-stock-v2",
+      "population": "B1",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "b1-search-read-v2",
+      "population": "B1",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "b1-policy-used-v2",
+      "population": "B1",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "b1-changed-occasion-v3",
+      "population": "B1",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "b1-current-policy-v3",
+      "population": "B1",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "b1-partial-source-v3",
+      "population": "B1",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "b1-price-v3",
+      "population": "B1",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "b1-component-stock-v3",
+      "population": "B1",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "b1-search-read-v3",
+      "population": "B1",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "b1-buying-concern-v3",
+      "population": "B1",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "b1-policy-used-v3",
+      "population": "B1",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "stateful-open",
+      "population": "B2_B3",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "stateful-variant-quantity",
+      "population": "B2_B3",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "stateful-quote",
+      "population": "B2_B3",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "stateful-correction",
+      "population": "B2_B3",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "stateful-private-checkout",
+      "population": "B2_B3",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "stateful-confirm",
+      "population": "B2_B3",
+      "execution": "NEW_RECORDED"
+    },
+    {
+      "caseId": "stateful-human-request",
+      "population": "B2_B3",
+      "execution": "NEW_RECORDED"
+    }
+  ]
+}

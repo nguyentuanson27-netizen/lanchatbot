@@ -1,0 +1,224 @@
+{
+  "native": {
+    "recorded": 39,
+    "terminalDispositions": {
+      "FALLBACK": 3,
+      "SEND_ELIGIBLE": 31,
+      "NO_SEND": 2,
+      "HANDOFF": 3
+    },
+    "roles": {
+      "owner": {
+        "generations": 77,
+        "requests": 77,
+        "errors": 2,
+        "usageAvailable": 77,
+        "inputTokens": 372671,
+        "outputTokens": 54506,
+        "thinkingTokens": 50984,
+        "latencyMs": {
+          "n": 77,
+          "p50": 2651.3089000000036,
+          "p95": 5824.2033999999985,
+          "method": "NEAREST_RANK"
+        }
+      },
+      "verifier": {
+        "generations": 32,
+        "requests": 32,
+        "errors": 0,
+        "usageAvailable": 32,
+        "inputTokens": 152416,
+        "outputTokens": 2604,
+        "thinkingTokens": 1828,
+        "latencyMs": {
+          "n": 32,
+          "p50": 5432.120200000005,
+          "p95": 7678.626199999999,
+          "method": "NEAREST_RANK"
+        }
+      }
+    },
+    "verificationStageLatencyMs": {
+      "n": 32,
+      "p50": 7036.838499999998,
+      "p95": 14283.5982,
+      "method": "NEAREST_RANK"
+    },
+    "turnLatencyMs": {
+      "n": 39,
+      "p50": 15564.155199999994,
+      "p95": 50741.8737,
+      "method": "NEAREST_RANK"
+    },
+    "receiptRecoveries": 1,
+    "recoveryMetadataPresent": 7,
+    "actualNoReply": 0,
+    "cost": null,
+    "costReason": "NOT_EXPOSED",
+    "manualReview": {
+      "FALLBACK": 3,
+      "USABLE": 34,
+      "NEEDS_EDIT": 2
+    },
+    "reviewed": 39
+  },
+  "diagnostic": {
+    "recorded": 0,
+    "terminalDispositions": {},
+    "roles": {
+      "owner": {
+        "generations": 0,
+        "requests": 0,
+        "errors": 0,
+        "usageAvailable": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "thinkingTokens": 0,
+        "latencyMs": {
+          "n": 0,
+          "p50": null,
+          "p95": null,
+          "method": "NEAREST_RANK"
+        }
+      },
+      "verifier": {
+        "generations": 0,
+        "requests": 0,
+        "errors": 0,
+        "usageAvailable": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "thinkingTokens": 0,
+        "latencyMs": {
+          "n": 0,
+          "p50": null,
+          "p95": null,
+          "method": "NEAREST_RANK"
+        }
+      }
+    },
+    "verificationStageLatencyMs": {
+      "n": 0,
+      "p50": null,
+      "p95": null,
+      "method": "NEAREST_RANK"
+    },
+    "turnLatencyMs": {
+      "n": 0,
+      "p50": null,
+      "p95": null,
+      "method": "NEAREST_RANK"
+    },
+    "receiptRecoveries": 0,
+    "recoveryMetadataPresent": 0,
+    "actualNoReply": 0,
+    "cost": null,
+    "costReason": "NOT_EXPOSED"
+  },
+  "uniqueWireIds": 109,
+  "evaluatorLabelLeaks": 0,
+  "maxRequestsPerGeneration": 1,
+  "verifierVerdictsAll": {
+    "PASS": 31,
+    "FAIL": 1
+  },
+  "sourceSha": "01e689b4c4f002cfd085b4038837901a14256a3e",
+  "sendEnabled": false,
+  "cohorts": {
+    "b1": {
+      "recorded": 24,
+      "terminals": {
+        "FALLBACK": 1,
+        "SEND_ELIGIBLE": 23
+      }
+    },
+    "stateful": {
+      "recorded": 8,
+      "terminals": {
+        "SEND_ELIGIBLE": 4,
+        "NO_SEND": 2,
+        "HANDOFF": 2
+      }
+    },
+    "openings": {
+      "recorded": 4,
+      "terminals": {
+        "FALLBACK": 2,
+        "SEND_ELIGIBLE": 1,
+        "HANDOFF": 1
+      }
+    },
+    "negotiation": {
+      "recorded": 3,
+      "terminals": {
+        "SEND_ELIGIBLE": 3
+      }
+    }
+  },
+  "isolatedDatabases": [
+    {
+      "cohort": "stateful",
+      "dropped": true,
+      "candidateHandoff": {
+        "upstreamHash": null,
+        "candidateHash": "sha256:5dd55027ff47ee0124e26f82eda3490a0c09febc22a7d2e478eb065e6089b749",
+        "versionId": "4cf3dbee-3ab8-4a2b-a9f7-ff35c7c549c5",
+        "versionReferences": [
+          {
+            "lifecycle": "PUBLISHED",
+            "pointerId": "adbf5f64-d57c-4ffb-a0ab-73a40e0e9389",
+            "versionId": "4cf3dbee-3ab8-4a2b-a9f7-ff35c7c549c5",
+            "artifactKey": "handoff-matrix:c3-opening-candidate",
+            "contentHash": "sha256:5dd55027ff47ee0124e26f82eda3490a0c09febc22a7d2e478eb065e6089b749",
+            "artifactKind": "HANDOFF_MATRIX",
+            "versionNumber": 1,
+            "pointerRevision": 1
+          }
+        ]
+      }
+    },
+    {
+      "cohort": "openings",
+      "dropped": true,
+      "candidateHandoff": {
+        "upstreamHash": null,
+        "candidateHash": "sha256:5dd55027ff47ee0124e26f82eda3490a0c09febc22a7d2e478eb065e6089b749",
+        "versionId": "4b665e86-0ea4-45f9-87bb-cd5ecb64af24",
+        "versionReferences": [
+          {
+            "lifecycle": "PUBLISHED",
+            "pointerId": "116e8b6e-11d9-4745-913b-7320a3a1f909",
+            "versionId": "4b665e86-0ea4-45f9-87bb-cd5ecb64af24",
+            "artifactKey": "handoff-matrix:c3-opening-candidate",
+            "contentHash": "sha256:5dd55027ff47ee0124e26f82eda3490a0c09febc22a7d2e478eb065e6089b749",
+            "artifactKind": "HANDOFF_MATRIX",
+            "versionNumber": 1,
+            "pointerRevision": 1
+          }
+        ]
+      }
+    },
+    {
+      "cohort": "negotiation",
+      "dropped": true,
+      "candidateHandoff": {
+        "upstreamHash": null,
+        "candidateHash": "sha256:5dd55027ff47ee0124e26f82eda3490a0c09febc22a7d2e478eb065e6089b749",
+        "versionId": "82e7f4f5-3696-4686-b3d1-f13d54d58460",
+        "versionReferences": [
+          {
+            "lifecycle": "PUBLISHED",
+            "pointerId": "467a49ad-c2a2-4b78-b7d4-fd12679ce4c4",
+            "versionId": "82e7f4f5-3696-4686-b3d1-f13d54d58460",
+            "artifactKey": "handoff-matrix:c3-opening-candidate",
+            "contentHash": "sha256:5dd55027ff47ee0124e26f82eda3490a0c09febc22a7d2e478eb065e6089b749",
+            "artifactKind": "HANDOFF_MATRIX",
+            "versionNumber": 1,
+            "pointerRevision": 1
+          }
+        ]
+      }
+    }
+  ]
+}

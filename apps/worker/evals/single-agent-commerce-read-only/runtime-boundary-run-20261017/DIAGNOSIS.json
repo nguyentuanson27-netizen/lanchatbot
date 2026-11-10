@@ -1,0 +1,643 @@
+{
+  "runSourceSha": "13e69d43dc3ae9f792140ba8d16e9ad3057fcbb7",
+  "primaryReviewSavepoint": "a8b74138e82dde0c4f1fd5259154b3c5db8ba7dc",
+  "newProviderGenerations": 0,
+  "causes": {
+    "confirmed": [
+      "Redundant reads consume both tool rounds before add in slots1/2.",
+      "Slots3/4 omit color in the allowed add; code reports CART_VARIANT_AMBIGUOUS and rejects dependent quote.",
+      "All four last generations return non-thought function calls despite an actual NONE/tools[] request; runtime does not execute them.",
+      "No cart exists for private checkout, which fails at PLANNER/NO_TRANSITION_PLAN; this run does not reach ETA-region resolution."
+    ],
+    "hypothesis": [
+      "Moving identical product facts out of tool results into the first trusted message may affect owner use; this is the one owner-input treatment, not a proven causal explanation."
+    ],
+    "unknown": [
+      "No paired fixed-source baseline for the new fact-array presentation.",
+      "Underlying provider/mode reason for function calls under NONE."
+    ],
+    "notCausesOfObservedFallback": [
+      "semantic verifier refusal (zero verifier invocations)",
+      "HTTP/auth/timeout failure (all13 generation HTTP200)",
+      "32KB bound (max measured request below bound)"
+    ]
+  },
+  "outcomes": [
+    {
+      "slot": 1,
+      "caseId": "stateful-open",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "BUDGET",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "privateCheckoutFailure": null,
+      "executedToolRounds": 2,
+      "executedToolCalls": 3,
+      "ownerOutputs": [
+        {
+          "id": "773ba9bd-c48d-4942-86c0-2abf34264ffd:owner:1",
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "apply_customer_state",
+              "args": {
+                "ops": [
+                  {
+                    "op": "SET",
+                    "value": 76,
+                    "field": "measurements.WAIST_CM"
+                  },
+                  {
+                    "op": "SET",
+                    "value": 98,
+                    "field": "measurements.HIPS_CM"
+                  }
+                ]
+              },
+              "id": "call_2412887"
+            },
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_2412888"
+            }
+          ],
+          "mode": "AUTO",
+          "toolBudget": {
+            "roundsRemaining": 2,
+            "callsRemaining": 6
+          },
+          "requestBytes": 19002,
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "773ba9bd-c48d-4942-86c0-2abf34264ffd:owner:2",
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "offerType": "AO",
+                "subjectRef": "SV2447"
+              },
+              "id": "call_283249"
+            }
+          ],
+          "mode": "AUTO",
+          "toolBudget": {
+            "roundsRemaining": 1,
+            "callsRemaining": 4
+          },
+          "requestBytes": 29662,
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "773ba9bd-c48d-4942-86c0-2abf34264ffd:owner:3",
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "offerType": "AO",
+                "quantity": 1,
+                "size": "M",
+                "subjectRef": "SV2447",
+                "color": "be"
+              },
+              "id": "call_358328"
+            }
+          ],
+          "mode": "NONE",
+          "toolBudget": {
+            "roundsRemaining": 0,
+            "callsRemaining": 3
+          },
+          "requestBytes": 26819,
+          "unexpectedToolCall": true
+        }
+      ],
+      "toolResults": [
+        {
+          "name": "apply_customer_state",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null,
+          "availableSizes": null,
+          "availableColors": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null,
+          "availableSizes": null,
+          "availableColors": null
+        },
+        {
+          "name": "apply_customer_state",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null,
+          "availableSizes": null,
+          "availableColors": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null,
+          "availableSizes": null,
+          "availableColors": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null,
+          "availableSizes": null,
+          "availableColors": null
+        }
+      ],
+      "note": "toolResponses includes duplicated bridge bookkeeping for independent calls; do not sum it as executed network/tool requests."
+    },
+    {
+      "slot": 2,
+      "caseId": "stateful-variant-quantity",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "BUDGET",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "privateCheckoutFailure": null,
+      "executedToolRounds": 2,
+      "executedToolCalls": 2,
+      "ownerOutputs": [
+        {
+          "id": "7a9eb7c7-c048-4513-aebe-ddd5d1c47e08:owner:1",
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_4398986"
+            }
+          ],
+          "mode": "AUTO",
+          "toolBudget": {
+            "roundsRemaining": 2,
+            "callsRemaining": 6
+          },
+          "requestBytes": 19285,
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "7a9eb7c7-c048-4513-aebe-ddd5d1c47e08:owner:2",
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "offerType": "AO",
+                "subjectRef": "SV2447"
+              },
+              "id": "call_200260"
+            }
+          ],
+          "mode": "AUTO",
+          "toolBudget": {
+            "roundsRemaining": 1,
+            "callsRemaining": 5
+          },
+          "requestBytes": 26330,
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "7a9eb7c7-c048-4513-aebe-ddd5d1c47e08:owner:3",
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "subjectRef": "SV2447",
+                "quantity": 2,
+                "offerType": "AO",
+                "size": "L"
+              },
+              "id": "call_165138"
+            }
+          ],
+          "mode": "NONE",
+          "toolBudget": {
+            "roundsRemaining": 0,
+            "callsRemaining": 4
+          },
+          "requestBytes": 22163,
+          "unexpectedToolCall": true
+        }
+      ],
+      "toolResults": [
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null,
+          "availableSizes": null,
+          "availableColors": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null,
+          "availableSizes": null,
+          "availableColors": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null,
+          "availableSizes": null,
+          "availableColors": null
+        }
+      ],
+      "note": "toolResponses includes duplicated bridge bookkeeping for independent calls; do not sum it as executed network/tool requests."
+    },
+    {
+      "slot": 3,
+      "caseId": "stateful-quote",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "BUDGET",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "privateCheckoutFailure": null,
+      "executedToolRounds": 2,
+      "executedToolCalls": 3,
+      "ownerOutputs": [
+        {
+          "id": "06d8b526-4f09-4ae5-afa8-c65732cafc73:owner:1",
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_274324"
+            }
+          ],
+          "mode": "AUTO",
+          "toolBudget": {
+            "roundsRemaining": 2,
+            "callsRemaining": 6
+          },
+          "requestBytes": 19457,
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "06d8b526-4f09-4ae5-afa8-c65732cafc73:owner:2",
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "quantity": 2,
+                "subjectRef": "SV2447",
+                "size": "L",
+                "offerType": "AO"
+              },
+              "id": "call_334372"
+            },
+            {
+              "name": "quote_cart",
+              "args": {},
+              "id": "call_334373"
+            }
+          ],
+          "mode": "AUTO",
+          "toolBudget": {
+            "roundsRemaining": 1,
+            "callsRemaining": 5
+          },
+          "requestBytes": 26924,
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "06d8b526-4f09-4ae5-afa8-c65732cafc73:owner:3",
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "subjectRef": "SV2447",
+                "offerType": "AO",
+                "size": "L",
+                "quantity": 2,
+                "color": "BE"
+              },
+              "id": "call_16404"
+            },
+            {
+              "name": "quote_cart",
+              "args": {},
+              "id": "call_16405"
+            }
+          ],
+          "mode": "NONE",
+          "toolBudget": {
+            "roundsRemaining": 0,
+            "callsRemaining": 3
+          },
+          "requestBytes": 25289,
+          "unexpectedToolCall": true
+        }
+      ],
+      "toolResults": [
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null,
+          "availableSizes": null,
+          "availableColors": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null,
+          "availableSizes": null,
+          "availableColors": null
+        },
+        {
+          "name": "add_to_cart",
+          "status": "UNAVAILABLE",
+          "reason": "SELECTION_UNAVAILABLE",
+          "selectionReason": "CART_VARIANT_AMBIGUOUS",
+          "availableSizes": [
+            "L"
+          ],
+          "availableColors": [
+            "BE"
+          ]
+        },
+        {
+          "name": "quote_cart",
+          "status": "REJECTED",
+          "reason": "DEPENDENT_EFFECT_REJECTED",
+          "selectionReason": null,
+          "availableSizes": null,
+          "availableColors": null
+        }
+      ],
+      "note": "toolResponses includes duplicated bridge bookkeeping for independent calls; do not sum it as executed network/tool requests."
+    },
+    {
+      "slot": 4,
+      "caseId": "stateful-correction",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "BUDGET",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "privateCheckoutFailure": null,
+      "executedToolRounds": 2,
+      "executedToolCalls": 4,
+      "ownerOutputs": [
+        {
+          "id": "e8fed551-c587-4bda-9c96-e5426e7f4457:owner:1",
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "apply_customer_state",
+              "args": {
+                "ops": [
+                  {
+                    "op": "SET",
+                    "value": 74,
+                    "field": "measurements.WAIST_CM"
+                  },
+                  {
+                    "field": "measurements.HIPS_CM",
+                    "op": "SET",
+                    "value": 96
+                  }
+                ]
+              },
+              "id": "call_203935"
+            },
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_203936"
+            }
+          ],
+          "mode": "AUTO",
+          "toolBudget": {
+            "roundsRemaining": 2,
+            "callsRemaining": 6
+          },
+          "requestBytes": 19675,
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "e8fed551-c587-4bda-9c96-e5426e7f4457:owner:2",
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "size": "L",
+                "offerType": "AO",
+                "subjectRef": "SV2447",
+                "quantity": 2
+              },
+              "id": "call_201471"
+            },
+            {
+              "name": "quote_cart",
+              "args": {},
+              "id": "call_201472"
+            }
+          ],
+          "mode": "AUTO",
+          "toolBudget": {
+            "roundsRemaining": 1,
+            "callsRemaining": 4
+          },
+          "requestBytes": 30799,
+          "unexpectedToolCall": false
+        },
+        {
+          "id": "e8fed551-c587-4bda-9c96-e5426e7f4457:owner:3",
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "color": "BE",
+                "subjectRef": "SV2447",
+                "offerType": "AO",
+                "size": "L",
+                "quantity": 2
+              },
+              "id": "call_187103"
+            },
+            {
+              "name": "quote_cart",
+              "args": {},
+              "id": "call_187104"
+            }
+          ],
+          "mode": "NONE",
+          "toolBudget": {
+            "roundsRemaining": 0,
+            "callsRemaining": 2
+          },
+          "requestBytes": 29748,
+          "unexpectedToolCall": true
+        }
+      ],
+      "toolResults": [
+        {
+          "name": "apply_customer_state",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null,
+          "availableSizes": null,
+          "availableColors": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null,
+          "availableSizes": null,
+          "availableColors": null
+        },
+        {
+          "name": "apply_customer_state",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null,
+          "availableSizes": null,
+          "availableColors": null
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "selectionReason": null,
+          "availableSizes": null,
+          "availableColors": null
+        },
+        {
+          "name": "add_to_cart",
+          "status": "UNAVAILABLE",
+          "reason": "SELECTION_UNAVAILABLE",
+          "selectionReason": "CART_VARIANT_AMBIGUOUS",
+          "availableSizes": [
+            "L"
+          ],
+          "availableColors": [
+            "BE"
+          ]
+        },
+        {
+          "name": "quote_cart",
+          "status": "REJECTED",
+          "reason": "DEPENDENT_EFFECT_REJECTED",
+          "selectionReason": null,
+          "availableSizes": null,
+          "availableColors": null
+        }
+      ],
+      "note": "toolResponses includes duplicated bridge bookkeeping for independent calls; do not sum it as executed network/tool requests."
+    },
+    {
+      "slot": 5,
+      "caseId": "stateful-private-checkout",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "privateCheckoutFailure": {
+        "stage": "PLANNER",
+        "reasonCode": "NO_TRANSITION_PLAN",
+        "readinessReasons": []
+      },
+      "executedToolRounds": 0,
+      "executedToolCalls": 0,
+      "ownerOutputs": [],
+      "toolResults": [],
+      "note": "toolResponses includes duplicated bridge bookkeeping for independent calls; do not sum it as executed network/tool requests."
+    },
+    {
+      "slot": 6,
+      "caseId": "stateful-confirm",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "CURRENT_AUTHORITY_CHANGED",
+        "text": null,
+        "fallbackId": null
+      },
+      "privateCheckoutFailure": null,
+      "executedToolRounds": 0,
+      "executedToolCalls": 0,
+      "ownerOutputs": [],
+      "toolResults": [],
+      "note": "toolResponses includes duplicated bridge bookkeeping for independent calls; do not sum it as executed network/tool requests."
+    },
+    {
+      "slot": 7,
+      "caseId": "stateful-human-request",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "CUSTOMER_REQUESTED_HUMAN",
+        "text": null,
+        "fallbackId": null
+      },
+      "privateCheckoutFailure": null,
+      "executedToolRounds": 1,
+      "executedToolCalls": 1,
+      "ownerOutputs": [
+        {
+          "id": "96251c9c-15ae-455d-b30f-4f28f758d8c1:owner:1",
+          "kind": "TOOLS",
+          "calls": [
+            {
+              "name": "request_handoff",
+              "args": {
+                "reason": "CUSTOMER_REQUESTED_HUMAN"
+              },
+              "id": "call_5333853"
+            }
+          ],
+          "mode": "AUTO",
+          "toolBudget": {
+            "roundsRemaining": 2,
+            "callsRemaining": 6
+          },
+          "requestBytes": 18958,
+          "unexpectedToolCall": false
+        }
+      ],
+      "toolResults": [],
+      "note": "toolResponses includes duplicated bridge bookkeeping for independent calls; do not sum it as executed network/tool requests."
+    }
+  ]
+}

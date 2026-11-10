@@ -1,0 +1,59 @@
+{
+  "primaryLockCommit": "9f7e0cba",
+  "readAfterPrimaryLock": true,
+  "verdicts": [
+    {
+      "slot": "s01",
+      "answer": "{\"verdict\":\"PASS\",\"violations\":[]}"
+    },
+    {
+      "slot": "s02",
+      "answer": "{\"verdict\":\"PASS\",\"violations\":[]}"
+    },
+    {
+      "slot": "s03",
+      "answer": "{\"verdict\":\"PASS\",\"violations\":[]}"
+    },
+    {
+      "slot": "s04",
+      "answer": "{\"verdict\":\"PASS\",\"violations\":[]}"
+    },
+    {
+      "slot": "s05",
+      "answer": "{\"verdict\":\"PASS\",\"violations\":[]}"
+    },
+    {
+      "slot": "s06",
+      "answer": "{\"verdict\":\"PASS\",\"violations\":[]}"
+    },
+    {
+      "slot": "s07",
+      "answer": "{\"verdict\":\"FAIL\",\"violations\":[{\"kind\":\"CONTRADICTION_OR_NEGATION\",\"protectedRef\":\"e43a7b5a-9038-5178-8874-51d0df51a0f2\"}]}"
+    },
+    {
+      "slot": "s08",
+      "answer": "{\"verdict\":\"PASS\",\"violations\":[]}"
+    }
+  ],
+  "fallbacks": [
+    {
+      "slot": "s07",
+      "draft": "Đi gặp khách hàng buổi sáng, em khuyên chị lấy cả bộ luôn nhé ạ. Set có thiết kế form nhẹ, chất tơ và ren mềm với độ rũ tự nhiên nên mặc lên vừa sang trọng, lịch sự lại rất gọn gàng chứ không hề bị rườm rà. \n\nHơn nữa, mua cả bộ (799.000đ) sẽ tiết kiệm hơn rất nhiều so với mua riêng áo lẻ (499.000đ) ạ.",
+      "actual": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    }
+  ],
+  "finding": "s07 explicitly compares set799k as cheaper than shirt499k; verifier contradiction rejection is appropriate. This is not the permitted set-discount-vs-separate-pieces comparison.",
+  "ownerFindings": [
+    "Both prompts still use material adjectives instead of explaining the visual decoration concern.",
+    "Candidate s02 proposes holding stock although B1 exposes only reads; future invitation is not a false completed receipt but is an unusable next step.",
+    "Both s05 and s06 make a valid upsell choice; do not penalize choosing799k merely because shirt499k exists.",
+    "Candidate s07 and control s08 do not prioritize the changed morning/work requirement clearly."
+  ],
+  "attribution": "Initial evidence and final source versions match per pair. One sample each cannot establish causal effect or stability. Removing the selected unavailable-tool instructions did not produce the preregistered improvement; do not claim all possible instruction changes ineffective.",
+  "decision": "STOP_NO_FULL_RUN"
+}

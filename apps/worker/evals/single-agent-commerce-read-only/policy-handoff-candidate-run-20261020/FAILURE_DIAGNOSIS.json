@@ -1,0 +1,45 @@
+{
+  "runSourceSha": "05be90e8ef73cb09aa82c8f6e3a6e627b0933e81",
+  "primaryLockedAtCommit": "9fe9a504",
+  "humanAdjudication": false,
+  "codeOwnedTerminal": {
+    "observedReason": "DEFECT",
+    "matchedFrozenMatrix": true,
+    "humanState": true,
+    "events": 1,
+    "tagIntents": 1,
+    "capturedMessages": 1,
+    "notModelFinal": true
+  },
+  "exchangeCandidate": {
+    "deterministicallyVerifiedEarlier": true,
+    "modelHandoffObservedThisRun": false,
+    "actualOutcome": "SEND_ELIGIBLE_CLARIFICATION",
+    "reason": "Owner asks receipt date and condition facts; no handoff call occurred. Candidate configuration selects text after a call; it cannot force the owner to make that call."
+  },
+  "remainingOwnerFindings": [
+    {
+      "slot": 2,
+      "kind": "OPENING_AND_QUESTION_ORDER",
+      "finding": "Personal-sounding initial agreement followed by a bundle of missing-condition questions. Those questions are relevant, so no premature eligibility approval is conclusively established; the customer-facing reply still needs editing."
+    },
+    {
+      "slot": 3,
+      "kind": "UNREQUESTED_POLICY_BEFORE_DECISIVE_QUESTION",
+      "finding": "Owner repeats period/tags/unwashed/hold-up conditions before distinguishing hold-up from wearing, despite the revised ask-first bullet. This repeats the previous quality finding."
+    }
+  ],
+  "verifier": {
+    "requests": 4,
+    "pass": 4,
+    "violations": 0,
+    "qualityIsOutsideVerifierScope": true
+  },
+  "additionalRequestsVsPrevious": {
+    "previous": 12,
+    "current": 14,
+    "retry": 0,
+    "explanation": "Exchange clarification now has a verifier request; defect uses separate read_policy then handoff owner generations instead of a same-batch call."
+  },
+  "claimLimit": "One sample per existing question; both prompt and candidate message source differ. No stable model-quality improvement or B GO is inferred. No automatic patch or follow-up generation in this run."
+}

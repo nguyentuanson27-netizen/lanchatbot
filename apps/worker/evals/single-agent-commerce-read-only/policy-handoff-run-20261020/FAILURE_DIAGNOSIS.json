@@ -1,0 +1,38 @@
+{
+  "primaryCommit": "a2493950",
+  "runSourceSha": "b1a58d2da288ff510972008b5a505f98ffaeb4b9",
+  "providerVerdicts": {
+    "PASS": 3
+  },
+  "processCorrectObserved": 5,
+  "replyUsable": 2,
+  "replyNeedsEdit": 3,
+  "findings": [
+    {
+      "slots": [
+        2,
+        5
+      ],
+      "owner": "Selected correct EXCHANGE/DEFECT handoff; no final reply generated after terminal handoff.",
+      "codeOrSource": "No matrix in current source; default AFTER_SALES_HOLDING_REPLY_V2 becomes exact actual customer message.",
+      "verifier": "Not called for these code-owned terminal messages; no free final draft was skipped.",
+      "rootCause": "Source-owned holding content does not carry the desired answer/procedure; prompt edits alone cannot change it.",
+      "nextDirection": "Use existing reason-specific holdingReply configuration for useful process guidance, preserving code authority and source policy. No model-authored effect acknowledgement."
+    },
+    {
+      "slots": [
+        3
+      ],
+      "owner": "Clarifies the right action but precedes it with unrequested conditions/window/fee.",
+      "verifier": "PASS; no protected semantic error established. Brevity is owner/reviewer scope.",
+      "rootCause": "Selection/ordering of policy detail in final language, not missing data or verifier rejection.",
+      "nextDirection": "Keep useful clarification central; do not solve by keyword/length rules or more policy facts."
+    }
+  ],
+  "limits": [
+    "Five selected cases once each, not a stability estimate or full B1/B2/B3 run.",
+    "Normal model replies recorded SEND_ELIGIBLE, handoff text captured by dispatcher; no live provider send or staff response.",
+    "Small new handoff-enabled population cannot be scored as a direct rate comparison to previous tools-OFF replay."
+  ],
+  "recommendation": "STOP_REPLY_QUALITY_NOT_COMPLETE_MECHANISM_VERIFIED_ON_TWO_CASES"
+}

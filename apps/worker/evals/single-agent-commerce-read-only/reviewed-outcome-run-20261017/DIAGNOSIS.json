@@ -1,0 +1,303 @@
+{
+  "runSourceSha": "c5921632f0fab677e370a1cfcc2eb766e09343c9",
+  "primarySavepoint": "204a98a88aad7f0ce214a073ca099fc6519c9301",
+  "providerGenerationsAdded": 0,
+  "nativeSummaryProjection": {
+    "actualOwnerRequestsWithEffectSummaryOccurrences": 2,
+    "fullCartDuplicatesWithSummary": 0,
+    "statement": "Captured dispatched continuations preserve per-action cartItems and omit full cart; not independent provider echo."
+  },
+  "maximumCapturedDispatchedWire": {
+    "id": "f12ca1b3-a43a-46ec-a5d8-6c5dded727fb:owner:2",
+    "bytes": 32022,
+    "systemInstructionJsonBytes": 12476,
+    "trustedTextBytes": 4194,
+    "toolsJsonBytes": 6338,
+    "nativeSignatureCharacters": 5164,
+    "componentMeasuresNotAdditive": true,
+    "wireSha256": "d0ef3cc6355be4bfaee666266c8e1b808154cad89fc7b02a173319bdb547ec95"
+  },
+  "statefulOpen": {
+    "calls": [
+      {
+        "id": "f12ca1b3-a43a-46ec-a5d8-6c5dded727fb:owner:1",
+        "kind": "TOOLS",
+        "calls": [
+          {
+            "name": "apply_customer_state",
+            "args": {
+              "ops": [
+                {
+                  "op": "SET",
+                  "field": "measurements.WAIST_CM",
+                  "value": 76,
+                  "sourceQuote": "Eo chị 76"
+                },
+                {
+                  "sourceQuote": "mông 98",
+                  "field": "measurements.HIPS_CM",
+                  "op": "SET",
+                  "value": 98
+                }
+              ]
+            }
+          },
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "SV2447"
+            }
+          }
+        ],
+        "telemetry": {
+          "generationId": "f12ca1b3-a43a-46ec-a5d8-6c5dded727fb:owner:1",
+          "providerRequests": 1,
+          "authRequests": 1,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3910,
+          "outputTokens": 1243,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 20172,
+          "requestHash": "d8ac03e686b7a6a32dbc8c129b679532c5528b5dbcc60b0421622a2fbfb39100",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 10,
+          "thinkingTokens": 1139,
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "f12ca1b3-a43a-46ec-a5d8-6c5dded727fb:owner:2",
+        "kind": "TOOLS",
+        "calls": [
+          {
+            "name": "add_to_cart",
+            "args": {
+              "color": "be",
+              "offerType": "AO",
+              "subjectRef": "SV2447",
+              "size": "M",
+              "quantity": 1
+            }
+          }
+        ],
+        "telemetry": {
+          "generationId": "f12ca1b3-a43a-46ec-a5d8-6c5dded727fb:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 6899,
+          "outputTokens": 1018,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 32022,
+          "requestHash": "d0ef3cc6355be4bfaee666266c8e1b808154cad89fc7b02a173319bdb547ec95",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 10,
+          "thinkingTokens": 972,
+          "unexpectedToolCall": false
+        }
+      }
+    ],
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "PROVIDER_ERROR"
+    },
+    "lastGeneration": {
+      "id": "f12ca1b3-a43a-46ec-a5d8-6c5dded727fb:owner:3",
+      "role": "owner",
+      "status": "PROVIDER_ERROR",
+      "latencyMs": 1.9072999999989406,
+      "telemetry": {
+        "generationId": "f12ca1b3-a43a-46ec-a5d8-6c5dded727fb:owner:3",
+        "providerRequests": 0,
+        "httpStatus": null,
+        "stage": "BEFORE_PROVIDER_DISPATCH",
+        "requestBytes": 33430
+      }
+    },
+    "nativeAddSummary": [
+      {
+        "subjectRef": "80e5430d-96d0-5919-89fc-69b9e937746f",
+        "productRef": "SV2447",
+        "offerType": "AO",
+        "quantity": 1,
+        "components": [
+          {
+            "componentRole": "TOP",
+            "size": "M",
+            "color": "BE"
+          }
+        ],
+        "stockStatus": "PRE_ORDER",
+        "stockAvailableQuantity": 0
+      }
+    ],
+    "cause": "Post-commit third owner request33430bytes rejected before dispatch against32768bound; code receipt ACK omits preorder. Owner did not receive a final-generation opportunity after this add; cannot call this an observed refusal to disclose in that generation."
+  },
+  "partialSourceBudget": {
+    "calls": [
+      {
+        "id": "06c49d7de4a4dfac52a731678b91757dc5f5cea9c611713e440376f0bc92daea:owner:1",
+        "kind": "TOOLS",
+        "calls": [
+          {
+            "name": "read_product",
+            "args": {
+              "size": "M",
+              "subjectRef": "SV2447"
+            }
+          }
+        ],
+        "telemetry": {
+          "generationId": "06c49d7de4a4dfac52a731678b91757dc5f5cea9c611713e440376f0bc92daea:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 2886,
+          "outputTokens": 323,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 14876,
+          "requestHash": "70f2dcc537c02bf1b76e4ba0490c41a8f5b9735f9a77e598684afb8899ac3401",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 296,
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "06c49d7de4a4dfac52a731678b91757dc5f5cea9c611713e440376f0bc92daea:owner:2",
+        "kind": "TOOLS",
+        "calls": [
+          {
+            "name": "search_products",
+            "args": {
+              "query": "chân váy Thạch Thảo"
+            }
+          }
+        ],
+        "telemetry": {
+          "generationId": "06c49d7de4a4dfac52a731678b91757dc5f5cea9c611713e440376f0bc92daea:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3587,
+          "outputTokens": 469,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 18354,
+          "requestHash": "038fdab956aa4a0ba2b497261c9516c22bdf71db5caf54a472d144d69b42f759",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 447,
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "06c49d7de4a4dfac52a731678b91757dc5f5cea9c611713e440376f0bc92daea:owner:3",
+        "kind": "TOOLS",
+        "calls": [
+          {
+            "name": "read_policy",
+            "args": {}
+          }
+        ],
+        "telemetry": {
+          "generationId": "06c49d7de4a4dfac52a731678b91757dc5f5cea9c611713e440376f0bc92daea:owner:3",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4657,
+          "outputTokens": 327,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 23456,
+          "requestHash": "01e0c166a49f13df3e0865eb3679318d781df38e06fe433c006cf80db05aaffa",
+          "functionCallingMode": "NONE",
+          "declaredToolCount": 0,
+          "thinkingTokens": 317,
+          "unexpectedToolCall": true
+        }
+      }
+    ],
+    "toolLimit": "NONE and tools[] on third request; read_policy call rejected, not executed",
+    "cause": "Known Thach Thao read lacks POS; owner searches component as a new product, then emits a tool call in final-only mode. Static fallback loses independent known description; no verifier draft."
+  },
+  "completionError": {
+    "lastGeneration": {
+      "id": "15aac80c49cc04d887d738f8bee6b08fce32e5a0024d447f8f694054030aa32a:owner:2",
+      "role": "owner",
+      "status": "PROVIDER_ERROR",
+      "latencyMs": 1890.5264000000025,
+      "telemetry": {
+        "generationId": "15aac80c49cc04d887d738f8bee6b08fce32e5a0024d447f8f694054030aa32a:owner:2",
+        "providerRequests": 1,
+        "authRequests": 0,
+        "httpStatus": 200,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "inputTokens": 3836,
+        "outputTokens": 416,
+        "cost": null,
+        "finishReason": "UNKNOWN",
+        "requestBytes": 19294,
+        "requestHash": "0927f87c556e4b074ce7154dee5e6d12952def9ebf9ed8acd08fd62d24c8142a",
+        "functionCallingMode": "AUTO",
+        "declaredToolCount": 3,
+        "thinkingTokens": 416,
+        "failureStage": "COMPLETION",
+        "failureCode": "OWNER_FINISH_REASON"
+      }
+    },
+    "cause": "HTTP200 but finish reason normalized UNKNOWN; OWNER_FINISH_REASON, no final draft/verifier. Exact original unrecognized enum/reason is not available; do not infer outage or semantic failure."
+  },
+  "privateCheckout": {
+    "stage": "PLANNER",
+    "reasonCode": "CART_ETA_REGION_UNRESOLVED",
+    "readinessReasons": []
+  },
+  "remainingQuality": {
+    "needsEdit": [
+      [
+        "B1",
+        3
+      ],
+      [
+        "B1",
+        6
+      ],
+      [
+        "B1",
+        7
+      ],
+      [
+        "B1",
+        8
+      ],
+      [
+        "B1",
+        19
+      ],
+      [
+        "B2_B3",
+        1
+      ]
+    ],
+    "policy7": "Scope ambiguity noted before trace, not a demand to recite every condition; no order-specific violation proven.",
+    "stage1AndHeat4": "Apply already-frozen20261016 owner-approved sensory/layering boundary; do not turn ordinary reassurance into a failed physical test claim by keyword.",
+    "upsell23": "Value/versatility argument, not lower total spending. Usable with minor ad-like wording; no ban on larger purchase."
+  },
+  "uncertainty": [
+    "N1/no causal isolation",
+    "Human acceptance null",
+    "Provider NONE violation cause unknown",
+    "Exact unsupported finish reason unknown",
+    "No source-backed checkout completion",
+    "Attributes publication cause not proven"
+  ]
+}

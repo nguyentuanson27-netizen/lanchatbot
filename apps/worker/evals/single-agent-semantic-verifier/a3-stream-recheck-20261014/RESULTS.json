@@ -1,0 +1,73 @@
+{
+  "runId": "C3_A3_STREAM_RECHECK_20261014_01",
+  "registered": 3,
+  "executed": 3,
+  "passed": 3,
+  "cohortQuality": "PASS",
+  "dispositions": {
+    "SEND_ELIGIBLE": 3,
+    "FALLBACK": 0,
+    "HANDOFF": 0,
+    "NO_SEND": 0
+  },
+  "streamErrors": 0,
+  "operational": {
+    "conversation": {
+      "providerAttemptDenominator": 3,
+      "providerRequests": 3,
+      "clientRequests": 3,
+      "rejectedClientRequests": 0,
+      "maxRequestsPerAttempt": 1,
+      "verifierLatencyP50Ms": 4197,
+      "verifierLatencyP95Ms": 4725,
+      "timeoutCount": 0,
+      "errorCount": 0,
+      "timeoutErrorRate": 0,
+      "inputTokens": 12681,
+      "outputTokens": 2912,
+      "usageUnavailableCount": 0,
+      "cost": null,
+      "dispositions": {
+        "SEND_ELIGIBLE": 3,
+        "FALLBACK": 0,
+        "HANDOFF": 0,
+        "NO_SEND": 0
+      },
+      "terminalFailureRate": 0
+    },
+    "verifier": {
+      "providerAttemptDenominator": 3,
+      "providerRequests": 3,
+      "clientRequests": 3,
+      "rejectedClientRequests": 0,
+      "maxRequestsPerAttempt": 1,
+      "verifierLatencyP50Ms": 6984,
+      "verifierLatencyP95Ms": 11499,
+      "timeoutCount": 0,
+      "errorCount": 0,
+      "timeoutErrorRate": 0,
+      "inputTokens": 19538,
+      "outputTokens": 256,
+      "usageUnavailableCount": 0,
+      "cost": null,
+      "dispositions": {
+        "SEND_ELIGIBLE": 3,
+        "FALLBACK": 0,
+        "HANDOFF": 0,
+        "NO_SEND": 0
+      },
+      "terminalFailureRate": 0
+    },
+    "addedVerificationLatencyP50Ms": 7197,
+    "addedVerificationLatencyP95Ms": 11713,
+    "endToEndLatencyP50Ms": 11551,
+    "endToEndLatencyP95Ms": 16239
+  },
+  "a2Status": "FAIL",
+  "priorFullA3": "FAIL_38_OF_42_UNCHANGED",
+  "fullCheckpointQualification": false,
+  "recommendation": "STOP",
+  "a3RunSourceSha": "59333da926639da5c5d7be0470b0be29fd5f43c0",
+  "rawSavepoint": "0cb27846ec84cbf3346084f73772f1506785b087",
+  "primarySavepoint": "6208c9431adfdd49b7399eef31c488cc43a6f4bc"
+}

@@ -1,0 +1,102 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/packages/contracts
+
+ ❯ src/v2/canonical-evidence-readiness.test.ts (63 tests | 1 failed) 76ms
+   ✓ allows until-replaced expiry only for protected media, never price or stock 6ms
+   ✓ DF05 canonical evidence contracts > keeps dialogue evidence observational and separate from buying intent 1ms
+   ✓ DF05 canonical evidence contracts > makes canonical buying intent observational rather than effect authority 1ms
+   ✓ DF05 canonical evidence contracts > requires exact action, product, and quantity binding for cart mutations 1ms
+   ✓ DF05 canonical evidence contracts > does not allow non-committed intent to carry action, quantity, or product scope 0ms
+   ✓ DF05 canonical evidence contracts > keeps committed intent observable when product scope is unresolved 0ms
+   ✓ DF05 canonical evidence contracts > accepts typed PRICE provenance 0ms
+   ✓ DF05 canonical evidence contracts > accepts typed STOCK provenance 0ms
+   ✓ DF05 canonical evidence contracts > accepts typed SIZE_FIT provenance 0ms
+   ✓ DF05 canonical evidence contracts > accepts typed ETA provenance 0ms
+   ✓ DF05 canonical evidence contracts > accepts typed SHIPPING_FEE provenance 0ms
+   ✓ DF05 canonical evidence contracts > accepts typed FREESHIP provenance 0ms
+   ✓ DF05 canonical evidence contracts > accepts typed PROMOTION_OFFER provenance 0ms
+   ✓ DF05 canonical evidence contracts > accepts typed PRODUCT_MEDIA provenance 0ms
+   ✓ DF05 canonical evidence contracts > rejects model provenance for a protected claim 0ms
+   ✓ DF06 deterministic readiness contract > classifies readiness window 2026-08-13T05:00:00.000Z -> 2026-08-13T05:01:00.000Z as VALID 0ms
+   ✓ DF06 deterministic readiness contract > classifies readiness window 2026-08-13T05:00:00.000Z -> 2026-08-13T05:01:00.001Z as LIFETIME_EXCEEDED 0ms
+   ✓ DF06 deterministic readiness contract > classifies readiness window 2026-08-13T05:05:00.001Z -> 2026-08-13T05:06:00.000Z as FUTURE 0ms
+   ✓ DF06 deterministic readiness contract > classifies readiness window 2026-08-13T04:59:00.000Z -> 2026-08-13T05:00:00.000Z as STALE 0ms
+   ✓ DF06 deterministic readiness contract > classifies readiness window 2026-08-13T05:00:01.000Z -> 2026-08-13T05:00:00.001Z as INVALID_INTERVAL 0ms
+   ✓ DF06 deterministic readiness contract > classifies readiness window not-a-time -> 2026-08-13T05:01:00.000Z as INVALID_TIMESTAMP 0ms
+   ✓ DF06 deterministic readiness contract > keeps the technical readiness envelope separate from cart capacity 0ms
+   ✓ DF06 deterministic readiness contract > canonicalizes product count 0 without applying cart-capacity policy 2ms
+   ✓ DF06 deterministic readiness contract > canonicalizes product count 1 without applying cart-capacity policy 0ms
+   ✓ DF06 deterministic readiness contract > canonicalizes product count 3 without applying cart-capacity policy 1ms
+   ✓ DF06 deterministic readiness contract > canonicalizes product count 4 without applying cart-capacity policy 0ms
+   ✓ DF06 deterministic readiness contract > canonicalizes product count 10 without applying cart-capacity policy 0ms
+   ✓ DF06 deterministic readiness contract > canonicalizes product count 11 without applying cart-capacity policy 0ms
+   ✓ DF06 deterministic readiness contract > canonicalizes product count 49 without applying cart-capacity policy 1ms
+   ✓ DF06 deterministic readiness contract > canonicalizes product count 50 without applying cart-capacity policy 2ms
+   ✓ DF06 deterministic readiness contract > canonicalizes product count 51 without applying cart-capacity policy 2ms
+   ✓ DF06 deterministic readiness contract > blocks malformed, normalized, or duplicate product IDs at the choke point 1ms
+   ✓ DF06 deterministic readiness contract > blocks malformed, normalized, or duplicate product IDs at the choke point 0ms
+   ✓ DF06 deterministic readiness contract > blocks malformed, normalized, or duplicate product IDs at the choke point 1ms
+   ✓ DF06 deterministic readiness contract > blocks malformed, normalized, or duplicate product IDs at the choke point 0ms
+   ✓ DF06 deterministic readiness contract > blocks malformed, normalized, or duplicate product IDs at the choke point 1ms
+   ✓ DF06 deterministic readiness contract > blocks malformed, normalized, or duplicate product IDs at the choke point 0ms
+   ✓ DF06 deterministic readiness contract > blocks malformed, normalized, or duplicate product IDs at the choke point 0ms
+   ✓ DF06 deterministic readiness contract > turns a malformed product-ID container into bounded unresolved input 0ms
+   ✓ DF06 deterministic readiness contract > turns a malformed product-ID container into bounded unresolved input 0ms
+   ✓ DF06 deterministic readiness contract > turns a malformed product-ID container into bounded unresolved input 0ms
+   ✓ DF06 deterministic readiness contract > turns a malformed product-ID container into bounded unresolved input 0ms
+   ✓ DF06 deterministic readiness contract > turns a malformed product-ID container into bounded unresolved input 0ms
+   ✓ DF06 deterministic readiness contract > stays bounded and deterministic across broad cardinalities and malformed mixtures 24ms
+   ✓ DF06 deterministic readiness contract > rejects an oversized hostile product scope before reading individual entries 1ms
+   ✓ DF06 deterministic readiness contract > enforces complete per-product claim coverage for CART_OPEN 1ms
+   ✓ DF06 deterministic readiness contract > enforces complete per-product claim coverage for CART_MUTATION 0ms
+   ✓ DF06 deterministic readiness contract > enforces complete per-product claim coverage for ORDER_PREVIEW 0ms
+   ✓ DF06 deterministic readiness contract > enforces complete per-product claim coverage for PURCHASE_CONFIRMATION 0ms
+   ✓ DF06 deterministic readiness contract > detects conflicting protected claims through the shared semantic guard 0ms
+   ✓ DF06 deterministic readiness contract > uses each outbound claim's actual subject rather than requiring a product-by-type matrix 0ms
+   ✓ DF06 deterministic readiness contract > requires exact offer-scoped cart claims with matching price and orderable stock 2ms
+   ✓ DF06 deterministic readiness contract > checks parent catalog media once for outbound without requiring it per cart offer 1ms
+   ✓ DF06 deterministic readiness contract > keeps purchase confirmation evidence deterministic, typed, and non-authorizing 0ms
+   ✓ DF06 deterministic readiness contract > binds a ready effect to message, state, product, cart and claim revisions 1ms
+   ✓ DF06 deterministic readiness contract > rejects READY cart effects without an exact final-cart state hash 0ms
+   ✓ DF06 deterministic readiness contract > accepts only deterministic typed cart-mutation evidence 0ms
+   ✓ DF06 deterministic readiness contract > supports payload-only protected outbound readiness with product scope [ 'SP-001' ] 0ms
+   ✓ DF06 deterministic readiness contract > supports payload-only protected outbound readiness with product scope [] 0ms
+   ✓ DF06 deterministic readiness contract > requires order bindings for purchase confirmation 0ms
+   ✓ DF06 deterministic readiness contract > requires blocked readiness to carry bounded deterministic reasons 0ms
+   × component fit conflict identity > allows independent targets but still conflicts on the same target 13ms
+     → expected { missing: false, conflict: true } to deeply equal { missing: false, conflict: false }
+   ✓ component fit conflict identity > rejects a forged component parent at the contract boundary 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/v2/canonical-evidence-readiness.test.ts > component fit conflict identity > allows independent targets but still conflicts on the same target
+AssertionError: expected { missing: false, conflict: true } to deeply equal { missing: false, conflict: false }
+
+- Expected
++ Received
+
+  {
+-   "conflict": false,
++   "conflict": true,
+    "missing": false,
+  }
+
+ ❯ src/v2/canonical-evidence-readiness.test.ts:747:51
+    745|  const check=(claims:ProtectedClaimV1[])=>validateEffectClaimSemantics…
+    746|  it("allows independent targets but still conflicts on the same target…
+    747|   expect(check([fit(top),fit(pants,OTHER_HASH)])).toEqual({missing:fal…
+       |                                                   ^
+    748|   expect(check([fit(top),fit(top,OTHER_HASH)]).conflict).toBe(true);
+    749|   expect(check([fit(undefined),fit({kind:"PRODUCT",productId:"P-001"},…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 62 passed (63)
+   Start at  17:08:03
+   Duration  2.02s (transform 442ms, setup 0ms, collect 647ms, tests 76ms, environment 0ms, prepare 651ms)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\packages\contracts:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/v2/canonical-evidence-readiness.test.ts

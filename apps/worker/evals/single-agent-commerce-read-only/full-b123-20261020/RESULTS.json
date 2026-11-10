@@ -1,0 +1,100 @@
+{
+  "runSourceSha": "68694ce209baf953a338e16f37853ce3e63af110",
+  "families": {
+    "stateful-1": {
+      "outcomes": 8,
+      "primary": {
+        "USABLE": 7,
+        "OWNERSHIP_CONTROL": 1
+      },
+      "terminal": {
+        "SEND_ELIGIBLE": 4,
+        "NO_SEND": 2,
+        "HANDOFF": 2
+      }
+    },
+    "b1-1": {
+      "outcomes": 24,
+      "primary": {
+        "USABLE": 19,
+        "NEEDS_EDIT": 4,
+        "UNUSABLE": 1
+      },
+      "terminal": {
+        "SEND_ELIGIBLE": 23,
+        "FALLBACK": 1
+      }
+    }
+  },
+  "failures": [
+    {
+      "run": "b1-1",
+      "slot": 3,
+      "caseId": "b1-partial-source",
+      "classification": "NEEDS_EDIT",
+      "actual": [
+        "Set Thạch Thảo có phần áo làm từ tơ Hàn thêu nổi, mềm thoáng và bay bổng, kết hợp cùng chân váy ren tơ Hàn mềm có độ rũ tự nhiên rất đẹp chị ạ. \n\nHiện tại thông tin giá và tình trạng size M của mẫu này em chưa tra được dữ liệu để báo chính xác cho chị ngay lúc này."
+      ],
+      "reason": "Trả được chất liệu và không bịa giá/tồn do fixture nguồn thiếu; phần chưa trả được lại diễn đạt thành báo cáo tra dữ liệu, kèm đoạn mô tả kéo dài. Cần viết lại phần này trước khi gửi như tư vấn bán hàng.",
+      "voiceFindings": [
+        "Thiếu giá/tồn là source fault đã đăng ký, không phải model làm mất fact. Lỗi ở cách trình bày cả đoạn, không cấm một chữ cụ thể."
+      ]
+    },
+    {
+      "run": "b1-1",
+      "slot": 7,
+      "caseId": "b1-buying-concern",
+      "classification": "NEEDS_EDIT",
+      "actual": [
+        "Set Thạch Thảo mặc đi tiệc ban ngày rất sang và không bị rườm rà đâu chị nhé. Mẫu này dùng chất tơ Hàn thêu kết hợp chân váy ren tơ Hàn mềm, form nhẹ và có độ bay, rũ tự nhiên nên lên người rất thanh thoát, nhẹ nhàng ạ. \n\nTrọn bộ set váy có giá 799.000đ, hoàn toàn vừa vặn trong ngân sách 900.000đ của chị nha. Chị muốn lấy size nào để em kiểm tra độ vừa cho mình ạ?"
+      ],
+      "reason": "Có nhận định về ren và giá nhưng lời khuyên vẫn khen nhiều; câu hỏi size khách muốn lấy để kiểm tra độ vừa chưa thu đúng dữ kiện phục vụ tư vấn fit. Cần sửa bước tiếp theo theo khả năng recommend_size/hồ sơ, không suy fit từ size mong muốn.",
+      "voiceFindings": [
+        "Khách đang băn khoăn về kiểu dáng; bước xin size chuyển hướng sớm và chưa có số đo. Không đề xuất thêm câu hỏi bắt buộc cho mọi case."
+      ]
+    },
+    {
+      "run": "b1-1",
+      "slot": 15,
+      "caseId": "b1-buying-concern-v2",
+      "classification": "NEEDS_EDIT",
+      "actual": [
+        "Chị hay mặc đồ trơn thì diện set Thạch Thảo đi ăn cưới ban ngày rất hợp lý ạ, không bị điệu quá đâu chị nhé. \n\nChất liệu tơ Hàn và ren mềm của set có form nhẹ cùng độ bay tự nhiên, tạo cảm giác thanh thoát, nhã nhặn chứ không phồng cứng hay rườm rà. \n\nNếu chị vẫn ngại mặc cả bộ nguyên set, mình có thể chọn mua lẻ áo thêu (499.000đ) phối cùng quần hoặc chân váy trơn tối giản sẵn có trong tủ, hoặc lấy chân váy ren (449.000đ) kết hợp với một chiếc áo trơn. Giá trọn bộ là 799.000đ ạ. Chị muốn lấy nguyên set hay mình thử chọn mua lẻ một món cho quen phong cách mặc hằng ngày ạ?"
+      ],
+      "reason": "Khách muốn quyết định có nên mua khi quen đồ trơn; đoạn mở khuyên cả set rồi mở thêm áo lẻ/váy lẻ và trả việc chọn lại. Lý do dựa nhiều vào mềm/nhẹ/nhã nhặn, chưa làm rõ shop ưu tiên phương án nào cho sự ngại điệu.",
+      "voiceFindings": [
+        "Cần viết lại lời khuyên cả đoạn; không ép mua lẻ hoặc giá thấp, không phạt việc shop bán cả bộ."
+      ]
+    },
+    {
+      "run": "b1-1",
+      "slot": 16,
+      "caseId": "b1-policy-used-v2",
+      "classification": "UNUSABLE",
+      "actual": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "reason": "Khách hỏi thử trong phòng có đổi size được không nhưng chỉ nhận fallback chưa trả lời được.",
+      "voiceFindings": [
+        "Chưa đọc draft/verdict khi chấm; không bù credit từ nội dung chưa gửi."
+      ]
+    },
+    {
+      "run": "b1-1",
+      "slot": 17,
+      "caseId": "b1-changed-occasion-v3",
+      "classification": "NEEDS_EDIT",
+      "actual": [
+        "Đi gặp khách hàng buổi sáng mà mặc nguyên cả bộ Thạch Thảo vẫn rất lịch sự và gọn gàng chị ạ. Chân váy ren tơ Hàn có form nhẹ và độ rũ tự nhiên chứ không bị phồng hay rườm rà, kết hợp cùng áo thêu trông rất thanh lịch và trang nhã. \n\nNếu chị thích sự linh hoạt để phối cùng quần sẵn có thì có thể lấy áo lẻ (499.000đ), còn lấy cả bộ (799.000đ) vừa đồng bộ, sang trọng lại vừa nhã nhặn, đi gặp khách hàng hay đi tiệc tối đều rất đẹp ạ."
+      ],
+      "reason": "Đổi mục đích từ tiệc tối sang gặp khách, khách nhờ chọn bộ hay áo. Đoạn chỉ khen cả bộ gọn/đẹp và đưa hai hướng với giá, chưa làm rõ căn cứ ưu tiên cho mục tiêu gọn trong hoàn cảnh mới.",
+      "voiceFindings": [
+        "Cần lời lựa chọn và giải thích sát nhu cầu, không bắt chọn áo lẻ hay công thức một câu nhất định."
+      ]
+    }
+  ],
+  "recommendation": "STOP_SALES_READINESS_NO_LIVE_GO",
+  "registeredOutcomes": 32,
+  "recordedOutcomes": 32,
+  "newRuntimeChanges": false
+}

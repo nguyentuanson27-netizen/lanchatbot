@@ -1,0 +1,88 @@
+{
+  "scope": "OFFLINE_FROZEN_RUN_INPUTS_ONLY_NO_LIVE_READ_OR_NEW_SOURCE_AUTHORIZATION",
+  "sourceCaptureSha256": "3a7c532aaf18311df65dfcb9bf1dd5b32022ea7129f76309dcaed8b0a69ba7fe",
+  "media": {
+    "productId": "SV2447",
+    "images": 11,
+    "currentValidRevalidation": 10,
+    "invalidRevalidation": 1,
+    "productColors": [],
+    "absentColorBindings": 11,
+    "feedbackMarked": 0
+  },
+  "discovery": {
+    "actualFinalOwnerRequestHash": "27cc01b716f8eff7d087dfe8fb5a6394ce5e45f98e8d7905dc482f985e8ad533",
+    "actualFinalRequestLog": "journey-openings/provider-requests.jsonl",
+    "verifiedClaims": [
+      {
+        "type": "PRICE",
+        "scope": {
+          "kind": "PRODUCT",
+          "productId": "SQ675",
+          "variantId": "offer:SQ675:SET_QUAN"
+        },
+        "value": {
+          "amountVnd": 1279000,
+          "currency": "VND"
+        }
+      },
+      {
+        "type": "STOCK",
+        "scope": {
+          "kind": "PRODUCT",
+          "productId": "SQ675",
+          "variantId": "offer:SQ675:SET_QUAN"
+        },
+        "value": {
+          "availableQuantity": 0,
+          "status": "PRE_ORDER"
+        }
+      },
+      {
+        "type": "PRICE",
+        "scope": {
+          "kind": "PRODUCT",
+          "productId": "SQ748",
+          "variantId": "offer:SQ748:SET_QUAN"
+        },
+        "value": {
+          "amountVnd": 799000,
+          "currency": "VND"
+        }
+      },
+      {
+        "type": "STOCK",
+        "scope": {
+          "kind": "PRODUCT",
+          "productId": "SQ748",
+          "variantId": "offer:SQ748:SET_QUAN"
+        },
+        "value": {
+          "availableQuantity": 6,
+          "status": "IN_STOCK"
+        }
+      }
+    ],
+    "candidates": [
+      {
+        "productId": "SQ675",
+        "name": "SET QUẦN SQ675",
+        "description": "Màu sắc: Be dịu dàng và thanh lịch, mang đến vẻ đẹp nhẹ nhàng, tinh khôi nhưng vẫn đủ nổi bật nhờ những điểm nhấn nâu đất ấm áp. Thiết kế: Set gồm áo dáng suông tay lửng phối ren hoa laze nổi bật ở thân trước và tay áo, kết hợp dây buộc cổ mềm mại tạo nét nữ tính và duyên dáng. Quần dài ống rộng cạp chun nhún bèo nhẹ giúp tôn dáng tự nhiên, mang lại sự thoải mái và thanh thoát trong từng chuyển động. Chất liệu: Thô hoa laze phối thô ướt cao cấp, bề mặt mềm mại, thoáng mát và có độ rủ nhẹ tự nhiên. Lót habutai kem ngà bên trong giúp trang phục lên form đẹp, dễ chịu và kín đáo khi mặc. Điểm nhấn: Chi tiết ren thang kem được phối tinh tế tạo hiệu ứng thủ công nhẹ nhàng, kết hợp dây tua đính hạt ngọc loang tông nâu nhạt và nâu đậm mang đến nét mộc mạc nhưng sang trọng. Thiết kế phù hợp cho những chuyến du lịch, dạo phố, café cuối tuần hoặc những dịp cần sự thanh lịch và thoải mái.",
+        "attributes": null
+      },
+      {
+        "productId": "SQ748",
+        "name": "SET QUẦN UYỂN HOA",
+        "description": "Màu sắc Tone kem phối họa tiết thổ cẩm hồng pastel và be nhạt, mang đến tổng thể ngọt ngào, thanh lịch và nữ tính. Set được may từ vải thô đũi cao cấp với bề mặt mềm mịn, thoáng khí và thấm hút tốt, mang lại cảm giác nhẹ nhàng, dễ chịu khi mặc Set gồm á kết hợp quần short lưng chun đồng bộ, chi tiết bèo xếp tầng ở gấu áo giúp tôn vòng eo và tạo hiệu ứng mềm mại, nữ tính. Quần short form suông, chiều dài vừa vặn giúp tôn dáng và tạo sự thoải mái khi vận động.",
+        "attributes": null
+      },
+      {
+        "productId": "V406",
+        "name": "Váy Ngọc Trâm",
+        "description": "Thiết kế nữ tính, thanh lịch với sự kết hợp giữa ren hoa nổi sang trọng và tơ ống mềm nhẹ, tạo cảm giác mềm mại, thoáng mát và bay nhẹ khi mặc. Chất liệu mịn, rũ tự nhiên giúp tôn lên vẻ dịu dàng và tinh tế cho người mặc. Phần váy yếm 2 lớp tơ ống được thiết kế form nhẹ nhàng, tạo độ rủ mềm và giúp dáng váy đứng form đẹp. Đi kèm là khăn choàng ren hoa nổi 1 lớp, tạo điểm nhấn duyên dáng, tăng thêm nét sang trọng và nữ tính cho tổng thể trang phục. Sự kết hợp giữa váy yếm và khăn ren giúp set đồ trở nên nổi bật, vừa mềm mại vừa thanh lịch.",
+        "attributes": null
+      }
+    ]
+  },
+  "limits": "Photo physical contents not classified; metadata absence is not proof shop lacks photos. Discovery candidate facts explain this run, not a catalogue-wide absence. No exact gallery native exception recovered."
+}

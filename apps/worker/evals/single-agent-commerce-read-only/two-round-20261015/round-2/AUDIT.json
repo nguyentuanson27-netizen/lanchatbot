@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "bRunSourceSha": "22457e0a9e7722187e9bedf9bae0ff0551f4aeb6",
+  "rawSavepoint": "111c78bd12dc652c85e06793d660e54d3897ad01",
+  "capturedProviderBodies": 9,
+  "ownerBodies": 6,
+  "verifierBodies": 3,
+  "bindingMatches": 3,
+  "evaluatorLabelLeaks": [],
+  "maximumCapturedRequestBytes": 17961,
+  "rawHashFilesVerified": 7,
+  "rawDiagnosticsPreserved": true,
+  "ownerAvailabilityOmitsInternalReasonCodes": true,
+  "sameFrozenSegmentIdentity": true,
+  "allDispatchedSlotsAccounted": true,
+  "generationRequestsPerInvocationMaximum": 1,
+  "limitations": [
+    "five conditional slots are unexecuted if prefix did not pass",
+    "no independent human acceptance",
+    "current final-gate readback snapshots not separately retained; source readback and actual gate outcome plus focused tests are retained",
+    "small development sample, no semantic proof or sales qualification"
+  ],
+  "primarySavepoint": "b3b26c19a3f10145378c8be4abe9b7aed8c9719f"
+}

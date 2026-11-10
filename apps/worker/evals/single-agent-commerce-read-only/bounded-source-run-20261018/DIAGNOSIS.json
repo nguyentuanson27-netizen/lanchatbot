@@ -1,0 +1,261 @@
+{
+  "runSourceSha": "487816d8c3f27299b62daaccca8bd861d81abee1",
+  "rawSavepoint": "17a74bf94ad0dd4d9a0f379e855c08b187be0079",
+  "primarySavepoint": "50d8f8a43f10abe1586a1fa581af231148ee71c8",
+  "providerGenerationsAdded": 0,
+  "nativeModelPartsPreservedOccurrences": 35,
+  "ownerWire": {
+    "limitBytes": 65536,
+    "previousLimitBytes": 32768,
+    "maximumPreparedBytes": 29840,
+    "maximumDispatchedBytes": 29840,
+    "dispatchedOverPreviousLimit": 0,
+    "localBoundRejections": 0,
+    "interpretation": "Boundary corrected/tested at65536/65537; this provider population stayed below32768, so it did not exercise the new headroom. Do not attribute its lack of bound errors to the larger cap."
+  },
+  "statefulOpen": {
+    "generations": [
+      {
+        "id": "c15f662e-9b25-4335-9c1c-67886427ccd3:owner:1",
+        "kind": "TOOLS",
+        "calls": [
+          {
+            "name": "apply_customer_state",
+            "args": {
+              "ops": [
+                {
+                  "sourceQuote": "Eo chị 76",
+                  "field": "measurements.WAIST_CM",
+                  "op": "SET",
+                  "value": 76
+                },
+                {
+                  "sourceQuote": "mông 98",
+                  "field": "measurements.HIPS_CM",
+                  "op": "SET",
+                  "value": 98
+                }
+              ]
+            }
+          },
+          {
+            "name": "read_product",
+            "args": {
+              "subjectRef": "SV2447"
+            }
+          }
+        ],
+        "requestBytes": 20172,
+        "nativeSignatureCharacters": 0
+      },
+      {
+        "id": "c15f662e-9b25-4335-9c1c-67886427ccd3:owner:2",
+        "kind": "TOOLS",
+        "calls": [
+          {
+            "name": "add_to_cart",
+            "args": {
+              "color": "be",
+              "offerType": "AO",
+              "quantity": 1,
+              "subjectRef": "SV2447",
+              "size": "M"
+            }
+          }
+        ],
+        "requestBytes": 29558,
+        "nativeSignatureCharacters": 2700
+      },
+      {
+        "id": "c15f662e-9b25-4335-9c1c-67886427ccd3:owner:3",
+        "kind": "FINAL",
+        "calls": [],
+        "requestBytes": 27626,
+        "nativeSignatureCharacters": 3540
+      }
+    ],
+    "firstDisclosure": true,
+    "actualReply": "Chị đã thêm áo Thạch Thảo màu be size M vào giỏ hàng, mẫu này là hàng đặt trước (pre-order) chị nhé.",
+    "interpretation": "Same state/read then add then final sequence as baseline; shorter opaque signatures contribute to the smaller body. Disclosure reached actual captured reply, voice/speaker is still NEEDS_EDIT; recovery was not exercised."
+  },
+  "partialReadLocality": {
+    "occurrences": 3,
+    "localEvidenceEqualsTrusted": true,
+    "occurrencesDetail": [
+      {
+        "caseId": "b1-partial-source-v2",
+        "slot": 5,
+        "generationId": "644edd660cdd62f5f051325da5298f7f1786a6aaf8acdb2293fc062c021cf03a:owner:2",
+        "callId": "call_12475",
+        "localKeys": [
+          "content",
+          "sizeCharts"
+        ],
+        "contentEqualsTrusted": true,
+        "availability": {
+          "price": {
+            "status": "UNAVAILABLE",
+            "reason": "POS_SNAPSHOT_UNAVAILABLE"
+          },
+          "stock": {
+            "status": "UNAVAILABLE",
+            "reason": "POS_SNAPSHOT_UNAVAILABLE"
+          }
+        }
+      },
+      {
+        "caseId": "b1-partial-source",
+        "slot": 8,
+        "generationId": "e7a110ce27075baba6493037c9fde0a83a00c860e16a83a3b6ee9de9b8502370:owner:2",
+        "callId": "call_576993",
+        "localKeys": [
+          "content",
+          "sizeCharts"
+        ],
+        "contentEqualsTrusted": true,
+        "availability": {
+          "price": {
+            "status": "UNAVAILABLE",
+            "reason": "POS_SNAPSHOT_UNAVAILABLE"
+          },
+          "stock": {
+            "status": "UNAVAILABLE",
+            "reason": "POS_SNAPSHOT_UNAVAILABLE"
+          }
+        }
+      },
+      {
+        "caseId": "b1-partial-source-v3",
+        "slot": 19,
+        "generationId": "579e45fe266df3a28f4d6ca8f4a0eaa78abe81921962a27e6bee1c5cbe30b685:owner:2",
+        "callId": "call_461922",
+        "localKeys": [
+          "content",
+          "sizeCharts"
+        ],
+        "contentEqualsTrusted": true,
+        "availability": {
+          "price": {
+            "status": "UNAVAILABLE",
+            "reason": "POS_SNAPSHOT_UNAVAILABLE"
+          },
+          "stock": {
+            "status": "UNAVAILABLE",
+            "reason": "POS_SNAPSHOT_UNAVAILABLE"
+          }
+        }
+      }
+    ],
+    "observedOutcome": "All three partial cases read_product then FINAL, no component search or NONE violation. Former slot5 fallback now has the known material/cut answer but remains NEEDS_EDIT for catalog/system voice.",
+    "interpretation": "Actual request evidence confirms locality restoration; N1/two code changes/live per-read data do not prove behavioral causality or stability."
+  },
+  "fallback": {
+    "caseId": "b1-changed-occasion",
+    "actualTerminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "rejectedDraft": "Áo dùng chất tơ Hàn thêu nên dưới ánh đèn sân khấu rọi mạnh sẽ có độ thấu quang nhất định. Để yên tâm tuyệt đối khi lên hình hay biểu diễn, chị diện thêm một chiếc áo quây hoặc áo lót màu nude bên trong là rất gọn gàng và tinh tế ạ.",
+    "draftSha256": "c78467c069105a15902c061d8eeca8570edb02cf793ae55089d42528219788f1",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+          "protectedRef": "product:SV2447"
+        }
+      ]
+    },
+    "diagnostic": "Reply states a definite optical result under stage lights then recommends an inner with absolute reassurance. Source has material/design, not optical test. The approved boundary permits ordinary risk/layering/reassurance; enum-only verdict does not identify the exact clause. Retain FAIL and flag whole-meaning adjudication before any prospective verifier edit, not a keyword-based tightening/loosening."
+  },
+  "privateCheckout": {
+    "failure": {
+      "stage": "PLANNER",
+      "reasonCode": "CART_ETA_REGION_UNRESOLVED",
+      "readinessReasons": []
+    },
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "text": null,
+      "fallbackId": null
+    },
+    "providerGenerations": 0,
+    "interpretation": "Authoritative address-region resolution still missing; shipping durations exist. Following confirmation stays NO_SEND after handoff. No guessed geography/source write."
+  },
+  "wholeOutcome": {
+    "baselineSource": "c5921632f0fab677e370a1cfcc2eb766e09343c9",
+    "baseline": {
+      "NEEDS_EDIT": 6,
+      "USABLE": 21,
+      "FALLBACK_OR_NO_SEND": 4
+    },
+    "current": {
+      "NEEDS_EDIT": 7,
+      "USABLE": 21,
+      "FALLBACK_OR_NO_SEND": 3
+    },
+    "changedOutcomes": [
+      {
+        "population": "B2_B3",
+        "slot": 2,
+        "caseId": "stateful-variant-quantity",
+        "previous": "USABLE",
+        "current": "NEEDS_EDIT"
+      },
+      {
+        "population": "B1",
+        "slot": 1,
+        "caseId": "b1-changed-occasion",
+        "previous": "USABLE",
+        "current": "FALLBACK_OR_NO_SEND"
+      },
+      {
+        "population": "B1",
+        "slot": 5,
+        "caseId": "b1-partial-source-v2",
+        "previous": "FALLBACK_OR_NO_SEND",
+        "current": "NEEDS_EDIT"
+      },
+      {
+        "population": "B1",
+        "slot": 7,
+        "caseId": "b1-current-policy",
+        "previous": "NEEDS_EDIT",
+        "current": "USABLE"
+      },
+      {
+        "population": "B1",
+        "slot": 18,
+        "caseId": "b1-current-policy-v3",
+        "previous": "FALLBACK_OR_NO_SEND",
+        "current": "USABLE"
+      }
+    ],
+    "interpretation": "Eligible replies rise26->27 and unfinished4->3, but whole usable remains21. Owner voice, next-step and decisions remain; not overall sales-quality improvement or A/B acceptance."
+  },
+  "remaining": {
+    "owner": [
+      "two stateful replies address the customer as the actor of shop operations",
+      "two concern replies remain wordy/weakly decisive",
+      "three partial replies keep catalog/system voice"
+    ],
+    "verifier": [
+      "one stage-light FAIL is a protected-meaning boundary diagnostic, not proof of broad false rejection"
+    ],
+    "source": [
+      "structured attributes/sizeCharts unavailable forSV2447",
+      "approved private address-region mapping missing"
+    ],
+    "notProven": [
+      "future signature headroom",
+      "provider NONE/UNKNOWN root cause",
+      "receipt recovery preorder disclosure",
+      "live send/employee service",
+      "human acceptance",
+      "causal or stability improvement"
+    ]
+  }
+}

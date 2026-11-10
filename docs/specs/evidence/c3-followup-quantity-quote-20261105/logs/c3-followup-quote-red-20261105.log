@@ -1,0 +1,114 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+ ❯ src/single-agent-commerce-quote.test.ts (32 tests | 6 failed) 487ms
+   ✓ explicit quote operation > blocks an old verifier pass on changed policy or expired quote, firstContact=true 156ms
+   × explicit quote operation > blocks an old verifier pass on changed policy or expired quote, firstContact=false 22ms
+     → expected undefined not to be undefined // Object.is equality
+   ✓ explicit quote operation > quotes quantity plus shipping before a cart and invalidates the total on a price change 26ms
+   ✓ explicit quote operation > opt-in completes price and selected media before exact final verification 36ms
+   ✓ explicit quote operation > rejects mixed quote+read_product before any sibling I/O 2ms
+   ✓ explicit quote operation > rejects mixed quote+select_product_media before any sibling I/O 2ms
+   ✓ explicit quote operation > rejects mixed quote+apply_customer_state before any sibling I/O 2ms
+   ✓ explicit quote operation > rejects mixed quote+add_to_cart before any sibling I/O 1ms
+   ✓ explicit quote operation > rejects mixed quote+request_handoff before any sibling I/O 2ms
+   ✓ explicit quote operation > rejects mixed quote+quote_product before any sibling I/O 1ms
+   ✓ explicit quote operation > legacy does not expose the operation 1ms
+   ✓ explicit quote operation > rejects unbound/unknown/duplicate/extra inputs before source I/O 8ms
+   ✓ explicit quote operation > rejects unbound/unknown/duplicate/extra inputs before source I/O 8ms
+   ✓ explicit quote operation > rejects unbound/unknown/duplicate/extra inputs before source I/O 10ms
+   ✓ explicit quote operation > rejects unbound/unknown/duplicate/extra inputs before source I/O 8ms
+   ✓ explicit quote operation > rejects unbound/unknown/duplicate/extra inputs before source I/O 8ms
+   ✓ explicit quote operation > does not expose quote when prior contact is unknown 1ms
+   × explicit quote operation > returning customer can obtain a quantity total without colour, cart or another image 7ms
+     → expected [ 'search_products', …(5) ] to include 'quote_product'
+   × explicit quote operation > follow-up quantity quote reaches final verifier with current total and no mutation or image 14ms
+     → expected { terminal: { …(4) }, …(19) } to match object { …(5) }
+(27 matching properties omitted from actual)
+   × explicit quote operation > returning quotes require explicit quantity and exactly one offer before reading: {"subjectRef":"SM613","offerTypes":["DIRECT"]} 7ms
+     → expected 'CAPABILITY_UNAVAILABLE' to be 'QUOTE_ARGUMENTS_OR_REF' // Object.is equality
+   × explicit quote operation > returning quotes require explicit quantity and exactly one offer before reading: {"subjectRef":"SM613","offerTypes":["DIRECT"],"deliveryRegion":"MIEN-NAM"} 7ms
+     → expected 'CAPABILITY_UNAVAILABLE' to be 'QUOTE_ARGUMENTS_OR_REF' // Object.is equality
+   × explicit quote operation > returning quotes require explicit quantity and exactly one offer before reading: {"subjectRef":"SM613","offerTypes":["DIRECT","AO"],"quantity":2} 6ms
+     → expected 'CAPABILITY_UNAVAILABLE' to be 'QUOTE_ARGUMENTS_OR_REF' // Object.is equality
+   ✓ explicit quote operation > hands off silently on required price failure and accounts partial execution 8ms
+   ✓ explicit quote operation > hands off silently on required media failure and accounts partial execution 17ms
+   ✓ explicit quote operation > preserves two exact requested offers without extra raw copies 23ms
+   ✓ explicit quote operation > does not execute quote twice 13ms
+   ✓ explicit quote operation > charges prepare and reserves two units with 3 previous primitive calls 34ms
+   ✓ explicit quote operation > charges prepare and reserves two units with 4 previous primitive calls 18ms
+   ✓ explicit quote operation > leaves an early FINAL untouched: first contact alone cannot select images 8ms
+   ✓ explicit quote operation > separates consumed units from admitted dispatch when not_a_capability is rejected 7ms
+   ✓ explicit quote operation > separates consumed units from admitted dispatch when read_product is rejected 11ms
+   ✓ explicit quote operation > separates consumed units from admitted dispatch when quote_product is rejected 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/single-agent-commerce-quote.test.ts > explicit quote operation > blocks an old verifier pass on changed policy or expired quote, firstContact=false
+AssertionError: expected undefined not to be undefined // Object.is equality
+ ❯ src/single-agent-commerce-quote.test.ts:34:124
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/single-agent-commerce-quote.test.ts > explicit quote operation > returning customer can obtain a quantity total without colour, cart or another image
+AssertionError: expected [ 'search_products', …(5) ] to include 'quote_product'
+ ❯ src/single-agent-commerce-quote.test.ts:70:34
+     68|  it("returning customer can obtain a quantity total without colour, ca…
+     69|   const s=await setup(true,false);s.f.product.images=[];await s.tools.…
+     70|   expect(s.tools.availableTools).toContain("quote_product");
+       |                                  ^
+     71|   const before=s.tools.snapshot(),r=await s.tools.invoke({...quote,arg…
+     72|   expect(r).toMatchObject({status:"OK",data:{preCartQuote:{quantity:2,…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/single-agent-commerce-quote.test.ts > explicit quote operation > follow-up quantity quote reaches final verifier with current total and no mutation or image
+AssertionError: expected { terminal: { …(4) }, …(19) } to match object { …(5) }
+(27 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "executedNormalToolInvocations": 2,
+-   "normalToolCalls": 3,
+-   "ownerGenerations": 2,
++   "executedNormalToolInvocations": 1,
++   "normalToolCalls": 1,
++   "ownerGenerations": 1,
+    "terminal": {
+-     "disposition": "SEND_ELIGIBLE",
++     "disposition": "HANDOFF",
+    },
+-   "verifierGenerations": 1,
++   "verifierGenerations": 0,
+  }
+
+ ❯ src/single-agent-commerce-quote.test.ts:83:13
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/single-agent-commerce-quote.test.ts > explicit quote operation > returning quotes require explicit quantity and exactly one offer before reading: {"subjectRef":"SM613","offerTypes":["DIRECT"]}
+ FAIL  src/single-agent-commerce-quote.test.ts > explicit quote operation > returning quotes require explicit quantity and exactly one offer before reading: {"subjectRef":"SM613","offerTypes":["DIRECT"],"deliveryRegion":"MIEN-NAM"}
+ FAIL  src/single-agent-commerce-quote.test.ts > explicit quote operation > returning quotes require explicit quantity and exactly one offer before reading: {"subjectRef":"SM613","offerTypes":["DIRECT","AO"],"quantity":2}
+AssertionError: expected 'CAPABILITY_UNAVAILABLE' to be 'QUOTE_ARGUMENTS_OR_REF' // Object.is equality
+
+Expected: "QUOTE_ARGUMENTS_OR_REF"
+Received: "CAPABILITY_UNAVAILABLE"
+
+ ❯ src/single-agent-commerce-quote.test.ts:89:70
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 26 passed (32)
+   Start at  22:18:01
+   Duration  4.34s (transform 2.01s, setup 0ms, collect 2.89s, tests 487ms, environment 0ms, prepare 397ms)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/single-agent-commerce-quote.test.ts

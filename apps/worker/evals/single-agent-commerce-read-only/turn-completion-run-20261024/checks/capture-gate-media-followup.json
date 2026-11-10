@@ -1,0 +1,10 @@
+{
+  "command": [
+    "node",
+    "apps/worker/evals/single-agent-commerce-read-only/feedback-native-gates.mjs",
+    "--job",
+    "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-turn-completion-model-20261024\\media-followup"
+  ],
+  "exitCode": 1,
+  "elapsedSeconds": 1.0727179050445557
+}

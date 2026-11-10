@@ -1,0 +1,6 @@
+{
+  "status": "PASS",
+  "wireCount": 12,
+  "leaks": [],
+  "scope": "Actual request value only; audit caseId wrapper is evaluator accounting."
+}

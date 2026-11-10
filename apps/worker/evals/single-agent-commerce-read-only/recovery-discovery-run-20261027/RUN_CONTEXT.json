@@ -1,0 +1,24 @@
+{
+  "sourceSha": "574ef87db95b8109bf39689c30f7c33b9dc0112d",
+  "sourceClean": true,
+  "approvedWorkerInventory": "764302c9713189639be1f91388aa40fa2d83ee81da25fec33222baecebb41cac",
+  "native51Scope": {
+    "persistedCapture": 30,
+    "eligibilityOnly": 21
+  },
+  "distHashes": {
+    "apps/worker/dist/single-agent-commerce-ingress.js": "a81c81344cad4a4b850e4acc293d2298c2eca70d4beb399554d2e97b13429385",
+    "apps/worker/dist/single-agent-commerce-read-only.js": "8758374edba3ccabf1d32682ff0092e7a3e5aeba398427aa4089dc15dd8ab8e4",
+    "apps/worker/dist/single-agent-commerce.js": "6cd03d93d2114254e661a46be2634da0364a1d598b648f463761a53707f634b6",
+    "apps/worker/dist/single-agent-commerce-quote.js": "1aab5ebb3d926158fc32b45a8526bb96eea28cffa7dc4ef31ac7792d09b9bf37"
+  },
+  "cli": {
+    "version": "codex-cli 0.159.2",
+    "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+  },
+  "repeatPolicy": "N1_NO_RETRY_ALL_51_PLUS_17_CONTROLS",
+  "sendEnabled": false,
+  "liveSends": 0,
+  "sourceStoreWrites": 0,
+  "POSFailureClassification": "THREE_CONTROLLED_FAULTS_NOT_LIVE_DATA_GAP"
+}

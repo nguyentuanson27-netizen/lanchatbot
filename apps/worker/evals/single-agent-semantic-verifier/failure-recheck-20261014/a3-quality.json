@@ -1,0 +1,87 @@
+{
+  "status": "FAIL",
+  "denominator": 8,
+  "scored": 8,
+  "families": {
+    "policy": {
+      "denominator": 1,
+      "passed": 0,
+      "passRate": 0
+    },
+    "concern": {
+      "denominator": 3,
+      "passed": 1,
+      "passRate": 0.3333333333333333
+    },
+    "partial": {
+      "denominator": 3,
+      "passed": 2,
+      "passRate": 0.6666666666666666
+    },
+    "correction": {
+      "denominator": 1,
+      "passed": 1,
+      "passRate": 1
+    }
+  },
+  "terminalFailureRate": 0.375,
+  "rows": [
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r5-try-exchange:1",
+      "family": "policy",
+      "mean": 1.2,
+      "pass": false,
+      "factualActionSafety": 0
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r5-competitor-price:1",
+      "family": "concern",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r5-delivery-timing:1",
+      "family": "partial",
+      "mean": 0.4,
+      "pass": false,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r12-pants-known-waist:1",
+      "family": "partial",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r14-workday-choice:1",
+      "family": "concern",
+      "mean": 0.4,
+      "pass": false,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r14-stage-light-change:1",
+      "family": "correction",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r15-fit-reassurance:1",
+      "family": "concern",
+      "mean": 0.4,
+      "pass": false,
+      "factualActionSafety": 2
+    },
+    {
+      "attemptId": "R67_FAILURE_RECHECK_20261014_01/A3/r15-known-waist-next:1",
+      "family": "partial",
+      "mean": 2,
+      "pass": true,
+      "factualActionSafety": 2
+    }
+  ],
+  "fullCheckpointQualification": false
+}

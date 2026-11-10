@@ -1,0 +1,19 @@
+{
+  "status": "COMPLETE_REVIEW_PENDING",
+  "registered": 10,
+  "recorded": 10,
+  "counters": {
+    "catalogReads": 27,
+    "posReads": 18,
+    "policyReads": 8,
+    "embeddingCalls": 1
+  },
+  "ownerViewHashes": {
+    "b1-changed-occasion": "d5790ee4e84c7e7dcfde772245d895083dc9ea70a6508f93be3e6385bff20483",
+    "b1-current-policy": "f87448fe0d68225b8e788ccad442196bbe2a849b1deebe075261a89a6e57b7e9",
+    "b1-price": "c80adbd4e768175725ccffb5ce7e9b8c7fd93ea25cd8cf233a6a309270277d57",
+    "b1-buying-concern": "25e28434da209ec8232701eee622441ceb66a202bfe6fb11112dfccceea83ad0",
+    "b1-policy-used": "f4f662d831ebd6c8702591b09b395bcc8f0259de41d74becf9ec9c01268e92e3"
+  },
+  "sendEnabled": false
+}

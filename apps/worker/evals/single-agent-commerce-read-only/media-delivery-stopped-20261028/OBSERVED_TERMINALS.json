@@ -1,0 +1,395 @@
+[
+  {
+    "caseId": "opening-ad",
+    "cohort": "opening-quotes",
+    "artifact": "opening-quotes/provider-attempt-1.json",
+    "sha256": "2aa67c8dca7d89fe3f08df3acdca8fcbf969ab1674cb125feb90015d46c0c138",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Set váy Thạch Thảo có giá 799.000đ ạ. \n\nThiết kế gồm áo tơ Hàn thêu họa tiết nổi và chân váy ren tơ Hàn mềm mại, form nhẹ có độ rũ tự nhiên. Sản phẩm hiện có sẵn các size S, M, L, XL chị nhé!",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "9047cf42-37e0-42ac-ae00-099cb0ac98ed",
+          "group": "9324182c-64b8-4e44-8f45-680fdea93adc",
+          "sequence": 0,
+          "status": "MANUAL_REVIEW"
+        },
+        {
+          "id": "7debf635-ad0a-40a2-8dac-a3352b291872",
+          "group": "9324182c-64b8-4e44-8f45-680fdea93adc",
+          "sequence": 1,
+          "status": "MANUAL_REVIEW"
+        },
+        {
+          "id": "b39e7380-83a8-4c85-a14f-f1def19deccd",
+          "group": "9324182c-64b8-4e44-8f45-680fdea93adc",
+          "sequence": 2,
+          "status": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "enqueued": 3
+  },
+  {
+    "caseId": "opening-ad-repeat",
+    "cohort": "opening-quotes",
+    "artifact": "opening-quotes/provider-attempt-2.json",
+    "sha256": "1d9268d4438a476643eadaaeeab835379742f3e06a8caa38291d979331b6bb91",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, set váy Thạch Thảo cả bộ có giá 799.000đ chị nhé ạ!",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "6e4e573d-9f38-4c5f-8554-b74e6b45efde",
+          "group": "e49ba9bd-8202-4355-9d57-994b6095a447",
+          "sequence": 0,
+          "status": "MANUAL_REVIEW"
+        },
+        {
+          "id": "226cacd2-4155-43a6-b708-251548131917",
+          "group": "e49ba9bd-8202-4355-9d57-994b6095a447",
+          "sequence": 1,
+          "status": "MANUAL_REVIEW"
+        },
+        {
+          "id": "220fb26b-552d-4a4a-8147-2a9645bee61a",
+          "group": "e49ba9bd-8202-4355-9d57-994b6095a447",
+          "sequence": 2,
+          "status": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "enqueued": 3
+  },
+  {
+    "caseId": "opening-organic",
+    "cohort": "opening-quotes",
+    "artifact": "opening-quotes/provider-attempt-3.json",
+    "sha256": "cb4eca00ec3f910d114d7423c5b517be1471aa622c901ec677a37d44de0ba32a",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Set váy Thạch Thảo có giá 799.000đ, gồm áo tơ Hàn thêu nổi và chân váy ren mềm form rũ tự nhiên. Set có sẵn các size S, M, L, XL chị nha.",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "a692af2a-4749-4602-b6fd-f065dca371e4",
+          "group": "277438e2-84f3-4e35-ab0e-69bf07360075",
+          "sequence": 0,
+          "status": "MANUAL_REVIEW"
+        },
+        {
+          "id": "562ba29a-0fef-4879-8370-7505f570bb29",
+          "group": "277438e2-84f3-4e35-ab0e-69bf07360075",
+          "sequence": 1,
+          "status": "MANUAL_REVIEW"
+        },
+        {
+          "id": "38e5aff5-bf05-4248-809d-bfd234f4ae88",
+          "group": "277438e2-84f3-4e35-ab0e-69bf07360075",
+          "sequence": 2,
+          "status": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "enqueued": 3
+  },
+  {
+    "caseId": "opening-unresolved",
+    "cohort": "opening-quotes",
+    "artifact": "opening-quotes/provider-attempt-4.json",
+    "sha256": "8a2a89c5995d9f7af595eed02be54e2dc18c5019a0275dc103120427a0f15fc6",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ chị gửi giúp em hình ảnh hoặc tên mẫu để em báo giá chính xác cho mình nhé ạ!",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": [
+      "Dạ chị gửi giúp em hình ảnh hoặc tên mẫu để em báo giá chính xác cho mình nhé ạ!"
+    ],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "fa746bd3-8957-453d-87b3-ce317b54f998",
+          "group": "8ecc7b85-ff21-4b1d-a460-d6c069726076",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "enqueued": 1
+  },
+  {
+    "caseId": "opening-multipart",
+    "cohort": "opening-quotes",
+    "artifact": "opening-quotes/provider-attempt-5.json",
+    "sha256": "ec7eb54de6340d3caa5e87bbad308454f0316d657e53f3f3fafdedac288740b9",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Set váy Thạch Thảo có giá 799.000đ ạ. Chị hoàn toàn có thể mua áo riêng được, giá áo lẻ là 499.000đ. \n\nMẫu này thiết kế áo tơ Hàn thêu nổi kết hợp chân váy ren tơ Hàn mềm nhẹ, có độ bay và rũ tự nhiên, sẵn các size S, M, L, XL chị nhé!",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "ac874979-9446-4cf4-84bc-9d843013d312",
+          "group": "f1f637a2-61d3-4af3-b9a5-8fa8af48b960",
+          "sequence": 0,
+          "status": "MANUAL_REVIEW"
+        },
+        {
+          "id": "da70ebad-7c45-48ad-ab82-39f14df2e54a",
+          "group": "f1f637a2-61d3-4af3-b9a5-8fa8af48b960",
+          "sequence": 1,
+          "status": "MANUAL_REVIEW"
+        },
+        {
+          "id": "02ec6e4c-4d55-4da5-bee4-f32368cbc301",
+          "group": "f1f637a2-61d3-4af3-b9a5-8fa8af48b960",
+          "sequence": 2,
+          "status": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "enqueued": 3
+  },
+  {
+    "caseId": "media-overview-next:ask",
+    "cohort": "media-followup",
+    "artifact": "media-followup/provider-attempt-1.json",
+    "sha256": "8614e8404a970f2c3458c86515954674e9498c07c097e595ad72694e4712b1fa",
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "RESPONSE_UNAVAILABLE",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualCapturedMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": []
+    },
+    "handoffEvidence": {
+      "conversationOwner": "HUMAN",
+      "events": 1,
+      "tags": 1
+    },
+    "enqueued": 0
+  },
+  {
+    "caseId": "media-overview-next:continue",
+    "cohort": "media-followup",
+    "artifact": "media-followup/provider-attempt-2.json",
+    "sha256": "f0df855595e638300a9539c36db869c855e311e4ec668be01523b0477f79364d",
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "HUMAN_OWNS_CONVERSATION",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualCapturedMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": []
+    },
+    "handoffEvidence": {
+      "conversationOwner": "HUMAN",
+      "events": 1,
+      "tags": 1
+    },
+    "enqueued": 0
+  },
+  {
+    "caseId": "media-detail-next:ask",
+    "cohort": "media-followup",
+    "artifact": "media-followup/provider-attempt-3.json",
+    "sha256": "0f01a67a738d61d2c62c41d16f2f37faa7771c057f1ab90131026f6651e46b94",
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualCapturedMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": []
+    },
+    "handoffEvidence": {
+      "conversationOwner": "HUMAN",
+      "events": 1,
+      "tags": 1
+    },
+    "enqueued": 0
+  },
+  {
+    "caseId": "media-detail-next:continue",
+    "cohort": "media-followup",
+    "artifact": "media-followup/provider-attempt-4.json",
+    "sha256": "ead50f7eb6ac4bc3e1d471a2a36a8df9dbe098445b4300e46810b5747c05d417",
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "HUMAN_OWNS_CONVERSATION",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualCapturedMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": []
+    },
+    "handoffEvidence": {
+      "conversationOwner": "HUMAN",
+      "events": 1,
+      "tags": 1
+    },
+    "enqueued": 0
+  },
+  {
+    "caseId": "media-and-price:ask",
+    "cohort": "media-followup",
+    "artifact": "media-followup/provider-attempt-5.json",
+    "sha256": "63f63a55c8efa1cd27a013f5857951c8caa120ac7657d01e17b59032a0fa14df",
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "RESPONSE_UNAVAILABLE",
+      "text": null,
+      "fallbackId": null
+    },
+    "actualCapturedMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": []
+    },
+    "handoffEvidence": {
+      "conversationOwner": "HUMAN",
+      "events": 1,
+      "tags": 1
+    },
+    "enqueued": 0
+  },
+  {
+    "caseId": "media-and-size:ask",
+    "cohort": "media-followup",
+    "artifact": "media-followup/provider-attempt-6.json",
+    "sha256": "485d65acc2614f925f37dd00cd423f5f8c9e7c930253ff9cf2cb77f0a53945d8",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Em gửi chị ảnh cận cảnh phần thêu áo Thạch Thảo ạ. \n\n![Ảnh cận cảnh phần thêu áo Thạch Thảo](media:1ddea6414915eb33e39d798521aa06447ebc99484209c3ab3b5e1848726a4d47)\n\nVới chiều cao 1m58 và cân nặng 52kg, chị lấy size M mặc là vừa đẹp chị nhé!",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "d794f30c-62c0-41d5-8570-64eb6c1bade0",
+          "group": "f97b847d-d45f-443b-8958-70e5c79a874c",
+          "sequence": 0,
+          "status": "MANUAL_REVIEW"
+        },
+        {
+          "id": "053d5563-2b35-4402-81e5-fe8cc68ef84c",
+          "group": "f97b847d-d45f-443b-8958-70e5c79a874c",
+          "sequence": 1,
+          "status": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "enqueued": 2
+  },
+  {
+    "caseId": "media-decision:ask",
+    "cohort": "media-followup",
+    "artifact": "media-followup/provider-attempt-7.json",
+    "sha256": "4ef8cf546dc7e5ba4dc84b62ea875b8d73c0faf98ad9fb7bf65f23ebf1f49c79",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Chân váy của set Thạch Thảo dùng chất ren tơ Hàn mềm mại, có độ rũ tự nhiên nên lên form rất thanh thoát, không bị đanh cứng hay rườm rà đâu chị ạ. Kết hợp cùng áo tơ thêu nổi nhẹ nhàng, tổng thể rất trang nhã và lịch sự, mặc đi ăn cưới buổi trưa vừa đẹp, vừa thoải mái mà không lo bị quá lồng lộn chị nha. \n\nEm gửi chị xem hình ảnh tổng quan của mẫu ạ.",
+      "fallbackId": null
+    },
+    "actualCapturedMessages": [],
+    "imageCount": 0,
+    "deliveryEvidence": {
+      "outboxRows": [
+        {
+          "id": "da915101-eea4-45b9-8c86-2fad3dc5f746",
+          "group": "5cf15abf-74d1-4cf0-a678-c40138e5cd8a",
+          "sequence": 0,
+          "status": "MANUAL_REVIEW"
+        },
+        {
+          "id": "656336a3-9c96-47b6-bdae-02169ef77fa1",
+          "group": "5cf15abf-74d1-4cf0-a678-c40138e5cd8a",
+          "sequence": 1,
+          "status": "MANUAL_REVIEW"
+        },
+        {
+          "id": "12a47cb4-68bb-46bc-a5f0-27deb7f66f97",
+          "group": "5cf15abf-74d1-4cf0-a678-c40138e5cd8a",
+          "sequence": 2,
+          "status": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    "handoffEvidence": {
+      "conversationOwner": "BOT",
+      "events": 0,
+      "tags": 0
+    },
+    "enqueued": 3
+  }
+]

@@ -1,0 +1,57 @@
+{
+  "caseId": "b1-search-read-v2",
+  "sourceMode": "LIVE",
+  "elapsedMs": 22883.800800000026,
+  "runtime": {
+    "latest": "Shop có set váy Khánh Trang không em? Em xem giúp chị mẫu đó giá bao nhiêu với.",
+    "history": [],
+    "initialProductCodes": []
+  },
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "PROVIDER_ERROR",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "recovery": null,
+    "sendEnabled": false,
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "toolRounds": 0,
+    "toolCalls": 0,
+    "generations": [
+      {
+        "id": "6ecc815d3c37a03f2e1732ea648c30f7fe7b5bba1c3727b1575ecebddef7b84f:owner:1",
+        "role": "owner",
+        "status": "PROVIDER_ERROR",
+        "latencyMs": 22883.112900000007,
+        "telemetry": {
+          "generationId": "6ecc815d3c37a03f2e1732ea648c30f7fe7b5bba1c3727b1575ecebddef7b84f:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 429,
+          "modelVersion": null,
+          "inputTokens": null,
+          "outputTokens": null,
+          "cost": null,
+          "finishReason": null,
+          "requestBytes": 16192,
+          "requestHash": "69237ad6db8d70b620c4c9649ab49f391eb33f7e0352e1afce22d8ec482cd74a",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "failureStage": "GENERATION",
+          "failureCode": "GENERATION_HTTP"
+        }
+      }
+    ],
+    "toolLatencyMs": 0.06039999995846301,
+    "verificationLatencyMs": null
+  },
+  "counters": {
+    "embeddingCalls": 1,
+    "policyReads": 6,
+    "catalogReads": 39,
+    "posReads": 27
+  }
+}

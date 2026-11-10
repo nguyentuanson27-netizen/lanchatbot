@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "artifactByteParityBeforeRecord": 113,
+  "rawHashParityFiles": 86,
+  "secretPatternMatches": 0,
+  "gitDiffCachedCheck": "PASS after setting archive -text/-whitespace and renormalizing the index; raw/model whitespace preserved",
+  "initialValidationFailures": [
+    "Default Git line-ending normalization caused staged byte mismatch for generated MD and CRLF raw files; initial cached whitespace check flagged preserved raw whitespace. Corrected archive attributes and restaged; all113 exact byte comparisons passed."
+  ],
+  "sourceUnchangedDuringModelRun": true,
+  "newRuntimeOrPromptChanges": false,
+  "remoteCI": "NOT_VERIFIED",
+  "commands": [
+    "python c3-tool-history-continuation-20261025.py",
+    "python c3-tool-history-continuation-review-input.py",
+    "python c3-tool-history-continuation-metrics.py",
+    "node c3-tool-history-continuation-firewall.mjs",
+    "python c3-tool-history-continuation-lock-review.py",
+    "python c3-tool-history-continuation-validate.py",
+    "python c3-tool-history-continuation-archive.py",
+    "git diff --cached --check",
+    "staged bytes compared using git show :path for every artifact file"
+  ],
+  "providerCommands": "raw/COMMANDS.json, 8preflight+8run with exact argv, exit codes and durations"
+}

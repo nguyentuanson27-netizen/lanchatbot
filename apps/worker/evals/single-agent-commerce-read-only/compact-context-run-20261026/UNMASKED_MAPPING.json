@@ -1,0 +1,82 @@
+[
+  {
+    "pair": 1,
+    "caseId": "b1-buying-concern-v2",
+    "mapping": {
+      "X": "A",
+      "Y": "B"
+    },
+    "decision": "NEITHER",
+    "winner": "NEITHER"
+  },
+  {
+    "pair": 2,
+    "caseId": "b1-price",
+    "mapping": {
+      "X": "A",
+      "Y": "B"
+    },
+    "decision": "TIE",
+    "winner": "TIE"
+  },
+  {
+    "pair": 3,
+    "caseId": "b1-price-v3",
+    "mapping": {
+      "X": "A",
+      "Y": "B"
+    },
+    "decision": "TIE",
+    "winner": "TIE"
+  },
+  {
+    "pair": 4,
+    "caseId": "b1-buying-concern",
+    "mapping": {
+      "X": "B",
+      "Y": "A"
+    },
+    "decision": "NEITHER",
+    "winner": "NEITHER"
+  },
+  {
+    "pair": 5,
+    "caseId": "b1-buying-concern-v3",
+    "mapping": {
+      "X": "B",
+      "Y": "A"
+    },
+    "decision": "Y",
+    "winner": "A"
+  },
+  {
+    "pair": 6,
+    "caseId": "b1-price-v2",
+    "mapping": {
+      "X": "A",
+      "Y": "B"
+    },
+    "decision": "TIE",
+    "winner": "TIE"
+  },
+  {
+    "pair": 7,
+    "caseId": "b1-current-policy",
+    "mapping": {
+      "X": "A",
+      "Y": "B"
+    },
+    "decision": "TIE",
+    "winner": "TIE"
+  },
+  {
+    "pair": 8,
+    "caseId": "b1-changed-occasion-v3",
+    "mapping": {
+      "X": "A",
+      "Y": "B"
+    },
+    "decision": "Y",
+    "winner": "B"
+  }
+]

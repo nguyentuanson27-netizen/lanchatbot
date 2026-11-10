@@ -1,0 +1,30 @@
+{
+  "runSourceSha": "c6476301539988f134f0843a0e3f2a31fff0560e",
+  "newProviderGenerations": 0,
+  "completeOutcomes": 7,
+  "rawDiskAndGitHashMatches": 16,
+  "frozenInputAndRuntimeFileHashes": 16,
+  "referenceBlobsAtRunSourceChecked": 6,
+  "actualOwnerWireHashMatches": 9,
+  "actualVerifierWireMatches": 4,
+  "verifierRequestBindingsChecked": 4,
+  "actualCapturedTerminalMatches": 4,
+  "allSurvivingFinalsVerified": true,
+  "observedEvaluatorOrPrivateFixtureLeaks": 0,
+  "privateCheckoutModelInvocations": 0,
+  "dependentConfirmModelInvocations": 0,
+  "finalOnlyViolations": 0,
+  "runtimeStaleDiagnostics": "NOT_EXERCISED_UNIT_AND_CONTROL_EVIDENCE_ONLY",
+  "runtimeRegionUnresolvedBranch": "EXERCISED_PLANNER_CART_ETA_REGION_UNRESOLVED",
+  "executableSourceChangedDuringCollection": false,
+  "testDatabaseDropped": true,
+  "structuralDelta": {
+    "runtimeLinesInserted": 3,
+    "runtimeLinesDeleted": 7,
+    "semanticRolesAdded": 0,
+    "layersAdded": 0,
+    "gatesAdded": 0,
+    "durableStoresAdded": 0
+  },
+  "humanAcceptance": null
+}

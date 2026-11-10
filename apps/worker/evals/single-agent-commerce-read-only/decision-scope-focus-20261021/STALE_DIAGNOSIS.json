@@ -1,0 +1,37 @@
+{
+  "attempt": "r3-case09",
+  "terminal": {
+    "disposition": "HANDOFF",
+    "reason": "STALE",
+    "text": null,
+    "fallbackId": null,
+    "diagnostic": {
+      "check": "CURRENT_SNAPSHOT",
+      "checkedAtMs": 1792596901382,
+      "expectedSnapshotId": "45411df1087476af5d54b69d5af16fcacf98b432c44d979fa45cf897fcdfb462",
+      "currentSnapshotId": "abca25b7548e177173464e25c408a03f8002342fc5f2922cf554dc92ecaf07f0",
+      "expectedRevision": 1,
+      "currentRevision": 1,
+      "reasonCodes": []
+    }
+  },
+  "unverifiedDraft": "Chất liệu áo tơ Hàn thêu và chân váy ren tơ Hàn đều rất mềm, thoáng và có độ bay, form nhẹ nhàng nên mặc thoải mái, không bị bí nóng hay gò bó khi chị ở ngoài trời lâu đâu ạ.",
+  "verifierVerdict": "PASS",
+  "protectedClaimBusinessValuesEqual": true,
+  "boundSubjectsEqual": true,
+  "runtimeProductsEqual": true,
+  "stateExcludingFactSnapshotVersionEqual": true,
+  "factSnapshotVersions": {
+    "before": "d52c1d136341964267acde441087eb0f8fa04a260376347c471068d6c269271e",
+    "after": "14d6ba8d8deb642d714081885952683dbbcef9864dd35b42c9e469d44bf3f88c"
+  },
+  "claimObservedAt": {
+    "before": [
+      "2026-10-21T15:04:21.342Z"
+    ],
+    "after": [
+      "2026-10-21T15:34:21.428Z"
+    ]
+  },
+  "limitation": "No actual customer text. Rejected at current snapshot identity after PASS, not by semantic verifier; no generation retry. Values comparison does not authorize sending under the existing exact-snapshot contract."
+}

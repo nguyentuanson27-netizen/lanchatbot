@@ -1,0 +1,104 @@
+{
+  "identity": {
+    "sourceSha": "362876e83be4014c28fae60abcaf2e5a3243adb1",
+    "manifestHash": "652116f4e8a3050ae6a51bf88a288f95275c3b0dfdae47c9bf2a4b3a1c655532",
+    "sourceConfigHash": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+    "promptHashes": {
+      "owner": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
+      "verifier": "02a727ab7b188c11b15fc74ee46744d7027d63c016f7a34f163a1517ae722800"
+    },
+    "models": {
+      "conversation": {
+        "provider": "VERTEX_AI",
+        "model": "gemini-3.5-flash-lite",
+        "version": "gemini-3.5-flash-lite",
+        "effort": "high",
+        "location": "global",
+        "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+        "generationConfig": {
+          "candidateCount": 1,
+          "responseMimeType": "text/plain",
+          "maxOutputTokens": 8192,
+          "thinkingConfig": {
+            "thinkingLevel": "HIGH",
+            "includeThoughts": false
+          },
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "retry": 0,
+          "timeoutMs": 90000
+        }
+      },
+      "verifier": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      }
+    },
+    "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+    "corpusHashes": {
+      "cases.b1.json": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+      "stateful-cases.json": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+      "sales-journeys.candidate.json": "4b888f6e44f5b4e144125da38d70bf175946dc5277eabb8d0ab5a6639077fbeb",
+      "sales-media-followup-cases.json": "dff5c57dff681f75ac35e484c014b0c62965bde2169941aa5b488ce879bba93a"
+    }
+  },
+  "controlsHash": "a9408bc317dd649d070271b53f0bd92d33963905ae47aeef2d75f153dfa58e16",
+  "nativeOutcomes": 46,
+  "first": 21,
+  "rest": 25,
+  "maximumGenerationRequests": 180,
+  "repetitions": 1,
+  "retry": 0,
+  "b1First": [
+    "b1-partial-source",
+    "b1-price",
+    "b1-component-stock",
+    "b1-buying-concern",
+    "b1-policy-used",
+    "b1-changed-occasion-v2",
+    "b1-partial-source-v2",
+    "b1-buying-concern-v2",
+    "b1-changed-occasion-v3",
+    "b1-buying-concern-v3"
+  ],
+  "b1Rest": [
+    "b1-changed-occasion",
+    "b1-current-policy",
+    "b1-search-read",
+    "b1-current-policy-v2",
+    "b1-price-v2",
+    "b1-component-stock-v2",
+    "b1-search-read-v2",
+    "b1-policy-used-v2",
+    "b1-current-policy-v3",
+    "b1-partial-source-v3",
+    "b1-price-v3",
+    "b1-component-stock-v3",
+    "b1-search-read-v3",
+    "b1-policy-used-v3"
+  ]
+}

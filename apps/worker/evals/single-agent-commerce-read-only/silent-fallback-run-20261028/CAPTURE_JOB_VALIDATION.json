@@ -1,0 +1,32 @@
+[
+  {
+    "cohort": "opening-quotes",
+    "exitCode": 0,
+    "output": "CAPTURE_JOB_PASS"
+  },
+  {
+    "cohort": "media-followup",
+    "exitCode": 0,
+    "output": "CAPTURE_JOB_PASS"
+  },
+  {
+    "cohort": "missing-pos",
+    "exitCode": 0,
+    "output": "CAPTURE_JOB_PASS"
+  },
+  {
+    "cohort": "journey-openings",
+    "exitCode": 0,
+    "output": "CAPTURE_JOB_PASS"
+  },
+  {
+    "cohort": "stateful",
+    "exitCode": 0,
+    "output": "CAPTURE_JOB_PASS"
+  },
+  {
+    "cohort": "negotiation",
+    "exitCode": 0,
+    "output": "CAPTURE_JOB_PASS"
+  }
+]

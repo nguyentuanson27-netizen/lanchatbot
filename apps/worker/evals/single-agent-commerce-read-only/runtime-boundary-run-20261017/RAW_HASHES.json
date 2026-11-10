@@ -1,0 +1,16 @@
+{
+  "stateful/raw/integration.json": "c09d389b4afaf5b090bc673dbef4273909f576647d840aa7ace1db859502c744",
+  "stateful/raw/provider-attempt-1.json": "4225e09de1b4d77802286890b9289ac921a2d6238e3a23991ada09dafbba12b4",
+  "stateful/raw/provider-attempt-2.json": "6883bda3669d3a0454e4eeebf1ead207b098382f974fc752048a47c3007fe0fa",
+  "stateful/raw/provider-attempt-3.json": "ef07c68752f13f41da22dc591228873358fba9a9dc7cc548f515d1d7fc833d1c",
+  "stateful/raw/provider-attempt-4.json": "99f1fdbd41f06a4c7b92800f50e6b23c0f2c7137ffbb2815b177210dd0e091be",
+  "stateful/raw/provider-attempt-5.json": "ad538732722b43a5c0450abcb697e0b04b16f693511cff5e69f45b9f8d829945",
+  "stateful/raw/provider-attempt-6.json": "3164ce66f7af62358e08f6345a06fdad764281f016c1efead71439abf318c3e6",
+  "stateful/raw/provider-attempt-7.json": "1a96dd6e54c33b036291a882b6371678c8eb514594f2ac315cfb10491f9e71e9",
+  "stateful/raw/provider-requests.jsonl": "7d1d208bcb653f8fc9a3302bac56ca7b3cb18c3f3cc05cc14a62e6de6f266d05",
+  "stateful/raw/registration.json": "03581f113dec435286de55e24738f7094c97990f115bb04f2d08419d17a3bd74",
+  "config-preflight.json": "07312e969c80abd70a79a35c925bcfc7860da859b337cfb3714f88c734c21b01",
+  "stateful-preflight.json": "59a3864b9c4a64da625af9ccac10bdfebeefce585adfbfff607813b6c0ec80a5",
+  "source-readback.json": "e8cc994bdafe30a3d96662ef15b97bcf43359ecda086a205fbf858decafa0cf6",
+  "controls/cod.json": "592c5b5941c8f64cd6aab97b95404527c87494e77d28c3cf3dde631b0ce2c031"
+}

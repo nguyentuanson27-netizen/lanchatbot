@@ -1,0 +1,71 @@
+{
+  "status": "OFFLINE_READBACK_PASS_NOT_MODEL_QUALIFICATION",
+  "preparationBaseSha": "342fbc1133e0551da00510fc943af83575a9ed28",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "specSha": "3a12b167cff56ef839aa7160b5238c8bfd105e21",
+  "providerGenerationRequests": 0,
+  "registeredRun": false,
+  "newSemanticGreenObserved": false,
+  "counts": {
+    "conversationBuilt": 42,
+    "verifierBuilt": 179,
+    "unchangedBoundRejected": 1
+  },
+  "maximumBytes": {
+    "conversation": 19359,
+    "verifier": 28334
+  },
+  "frozenBoundBytes": 32768,
+  "promptIdentity": {
+    "conversation": {
+      "file": "prompts/fashion-sales-owner-clear-boundaries-20261014.vi.txt",
+      "sha256": "0c954ff46a2b4f68ac62a7fcecc0ef783deecc0b892d039f94df58ed588a6ec1",
+      "bytes": 9844,
+      "previousBytes": 9120,
+      "deltaBytes": 724
+    },
+    "verifier": {
+      "file": "prompts/semantic-verifier-clear-boundaries-20261014.vi.txt",
+      "sha256": "755b6cad45d825be5089f45de7d7fe2de95c45157123fbdf4a0bad10c9710f5e",
+      "bytes": 9269,
+      "previousBytes": 9084,
+      "deltaBytes": 185
+    }
+  },
+  "preservedOwnerSections": [
+    "Công việc",
+    "Đọc dữ liệu và cuộc trò chuyện",
+    "Giọng shop",
+    "Khả năng tại Checkpoint A"
+  ],
+  "preservedVerifierSections": [
+    "Việc của bạn",
+    "Đọc nguồn và hội thoại",
+    "Xác nhận lựa chọn và thao tác",
+    "Kết quả"
+  ],
+  "preservedPriceAndEta": true,
+  "canonicalProjectionAndBindingUnchanged": true,
+  "onlyProviderInstructionsChanged": true,
+  "evaluatorPoisonLeakCount": 0,
+  "unchangedHistoricalFiles": [
+    "round-68/manifest.json",
+    "round-68/corpus-a2.json",
+    "round-68/corpus-a3.json",
+    "round-68/fashion-profiles.json",
+    "round-68/size-inputs.json",
+    "round-68/quote-inputs.json",
+    "prompts/fashion-sales-owner-sales-principles-20261014.vi.txt",
+    "prompts/semantic-verifier-sales-principles-20261014.vi.txt",
+    "a2-full-rerun-20261014/a2-evidence.json",
+    "a2-full-rerun-20261014/RESULTS.json",
+    "a3-full-followup-20261014/a3-evidence.json",
+    "a3-full-followup-20261014/a3-primary-scores.json",
+    "a3-full-followup-20261014/a3-quality.json",
+    "a3-full-followup-20261014/a3-human-scores.json"
+  ],
+  "historicalA3Status": "FAIL",
+  "frozenQualificationNotInherited": "ROUND68_CONTROL",
+  "unchangedWorkerSharedAdaptersBoundaryAndSerializer": true,
+  "limits": "Constructed offline request bodies, not captured new provider requests or proof of semantics/quality. Existing historical A2PASS/A3FAIL and STOP remain. Changed verifier requires new preregistered A2 before A3."
+}

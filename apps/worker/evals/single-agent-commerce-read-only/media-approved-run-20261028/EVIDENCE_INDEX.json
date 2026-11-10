@@ -1,0 +1,35 @@
+{
+  "sourceSha": "0487b7bbe08f179bffafc8c0b44af9463feeb2c4",
+  "rawRoot": "c3-b-media-approved-model-20261028",
+  "rawRetained": true,
+  "files": {
+    "REGISTRATION.json": "9fb5775cd46030c057fbf7da1c33cefdec4576aa55e53d40b836a3196ab6dfa5",
+    "RUN_CONTEXT.json": "503607caab4416814a88922b5b29b2a65826aba7475c234f73d41b994e3c0316",
+    "CLI_IDENTITY.json": "9d2b2806247ba714e005983588ba854f189e781bea91cce9d8e8e8213c790995",
+    "COMMANDS.json": "9c9037c2e1196cf0551c033d5719ad3fc54f37499d491dc1ca87a65ae12e2020",
+    "DISPATCH_STATUS.json": "bbd5b4245725326e78e68dc805f4fab5ec633ccb38ceba6cdd2439ae08c1aeb8",
+    "REVIEW_METRICS.json": "6bbbd0fa922dfaf15bdce70ae3004f33d42e59744a4c471df6d3d23277fea1f5",
+    "DATABASE_CLEANUP.json": "2a3c284f56b7ca93a7cc03b0f4772ea56dafcdbc0c74c45be80edc35e0c9967b",
+    "ACTUAL_TERMINALS.json": "13b7b91d30f9afdec92922fb35ff90d8ba129c82afa16972f7ab20a95f9ba81d",
+    "CONVERSATIONS.md": "1872e9c35f359032a6ba4b94bc4dcf24437197d8cec65d613b6ed11aa8adde38",
+    "DELIVERY_AUDIT.json": "01a6b4bc70c41e37f56286b11af2096908b7866259229b5414f335a20c279198",
+    "PRIOR_COMPARISON.json": "5c453dc78742bb66c117e59e0cbdf6387f0d1c5fa7baefcc405a02cbdeedb91e",
+    "GALLERY_CAPTURE_DIAGNOSTIC.json": "9b30a9fb794d957ae3fd28673910d1f8b47d2108d05ed2bfd2139397e1a9d67f"
+  },
+  "postRunScripts": {
+    "ANALYZE.mjs": "9afe959ae415b6be4b275c6f1d0446761f8b58642a3351b9731ea53abee42232",
+    "COMPARE.py": "197a84e1aa7c3a98cb1067b2548c7507066504dd835809fc8cac06bcdbe02232",
+    "AUDIT_DELIVERY.py": "bfabc9056da40d7da6ccb8c81965f8251190fd670ff4504955a10e6f09fee3e6",
+    "CURATE.py": "c41322cee62c825d9a4cea8ed72c7164c63f19439680a6bc073a4de766308b8c"
+  },
+  "externalDriverSha256": "aaaf567ebba9a1329158f0fd919b43ea0fc103abf0f3974e783eb36c3b719fe8",
+  "sourceChangesDuringRun": false,
+  "liveSends": 0,
+  "sourceStoreWrites": 0,
+  "generationRetry": 0,
+  "earlierStoppedOrBlockedRunsPreserved": [
+    "media-delivery-stopped-20261028",
+    "media-delivery-fixed-run-20261028"
+  ],
+  "noPoolingOfEarlierDenominators": true
+}

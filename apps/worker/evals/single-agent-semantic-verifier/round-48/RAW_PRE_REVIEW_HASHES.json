@@ -1,0 +1,30 @@
+{
+  "purpose": "Immutable raw evidence and human-null packet retained before primary review",
+  "a3RunSourceSha": "8ff95329023125bf3901e5a427ffaeda230a7a0e",
+  "finishedAt": "2026-10-11T05:49:44.151Z",
+  "registered": 66,
+  "executed": 66,
+  "humanRatingsNull": 660,
+  "files": {
+    "a3-evidence.json": {
+      "sha256": "8a58b146f54e925a627a2a625d02cacb677ec03d5aaa092f0397b1ede5244c4e",
+      "bytes": 2822503,
+      "gitBlobSha": "f0ac8997a4f65e334a8f6a76b2954763e4e293d6"
+    },
+    "a3-human-review.json": {
+      "sha256": "d44377c1cb32ba311106d00777a7894bb4b2215f0b042d57ae1c31ea083bcb7e",
+      "bytes": 1189454,
+      "gitBlobSha": "82411f7976b12665e61c258f1bcec98f154fcbe4"
+    },
+    "a3-human-scores.json": {
+      "sha256": "abd75fa99878224edcf49a1610c96cd00aa4ae24999a1e51c509713a1c16e4be",
+      "bytes": 27351,
+      "gitBlobSha": "2f1e1f0a837891bfb373725d7d4b8badf74cf73b"
+    },
+    "A3_HUMAN_REVIEW.md": {
+      "sha256": "b0cec3c0369c21a8c32faeb5c64fcf8b051946bb7098213effbe513daf023eb4",
+      "bytes": 43132,
+      "gitBlobSha": "d7d8b046932604a44dc7d5c9ae44478c7f86ffff"
+    }
+  }
+}

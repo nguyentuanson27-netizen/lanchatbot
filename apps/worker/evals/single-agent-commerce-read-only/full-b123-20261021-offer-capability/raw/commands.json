@@ -1,0 +1,86 @@
+[
+  {
+    "name": "provider-preflight",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "unused",
+      "COD",
+      "--provider-preflight"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "source-check",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-full-b123-20261021-offer-capability\\source-check",
+      "--source-check"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "deterministic-cod",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-full-b123-20261021-offer-capability\\deterministic-cod",
+      "COD"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "deterministic-bank",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-full-b123-20261021-offer-capability\\deterministic-bank",
+      "BANK_TRANSFER"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "stateful-1",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-full-b123-20261021-offer-capability\\stateful-1",
+      "COD",
+      "--provider-run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "b1-1",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-full-b123-20261021-offer-capability\\b1-1",
+      "--run"
+    ],
+    "exitCode": 0
+  }
+]

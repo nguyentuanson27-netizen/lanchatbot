@@ -1,0 +1,41 @@
+{
+  "scope": "FIXED_DIAGNOSTIC_BEFORE_PROVIDER",
+  "providerGenerationsAtReadiness": 0,
+  "observedRed": {
+    "command": "$env:C3_CHECKPOINT_A_ROUND='39'; node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/failure-recheck-20261014-02.test.mjs",
+    "exitCode": 1,
+    "pass": 0,
+    "fail": 2,
+    "reason": "New fixed entrypoint absent; mechanical registration/request test RED, not model semantics"
+  },
+  "focused": {
+    "command": "$env:C3_CHECKPOINT_A_ROUND='39'; $env:C3_TEST_CODEX_TRANSPORT='1'; node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/failure-recheck-20261014-02.test.mjs apps/worker/evals/single-agent-semantic-verifier/failure-recheck-20261014.test.mjs apps/worker/evals/single-agent-semantic-verifier/operational-usage.test.mjs apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs",
+    "exitCode": 0,
+    "pass": 36,
+    "fail": 0,
+    "skipped": 0,
+    "newTestsGreen": 2,
+    "durationMs": 5165.6921
+  },
+  "unchangedSourceReadback": {
+    "baseSha": "e062b3b582804467ee5b6e3917d80d71d0d4ba5f",
+    "exitCode": 0,
+    "paths": "apps/worker/src packages protocol.mjs run-a2.mjs run-a3.mjs codex-inference.mjs gemini-inference.mjs failure-recheck-20261014"
+  },
+  "reusedLocalVerification": {
+    "sourceSavepoint": "189291a35e85fa076e8f1493fed7b4122b0fffb4",
+    "reference": "../whole-turn-preparation-20261014/README.md",
+    "fullEvalTests": 422,
+    "workerBoundaryVertexTests": 79,
+    "protectedClaimsAssemblerTests": 21,
+    "workerBuildExit": 0,
+    "workerTypecheckExit": 0,
+    "workerLintExit": 0,
+    "rerunThisTask": false,
+    "basis": "Only new fixed entrypoint/plan/tests/docs; inherited dispatcher/evaluators/core/worker/shared/transport and compiled helpers unchanged. Do not claim these prior checks as freshly run."
+  },
+  "credentialInspection": "Existing Codex CLI/login/binary and Vertex project/credential route inspected read-only; no token or credential contents logged",
+  "apiImplementation": "No provider API/auth/retry change; reuse existing adapters and same-day official-doc inspection recorded in diagnostic01 SCOPE.md",
+  "selfReview": "Fixed eleven registrations/new pair; old worlds/results immutable, one generation per role, mandatory verifier after precheck, early persistence/source checks reused; no added online role or production source",
+  "logs": "C:/Users/nguye/AppData/Local/Temp/c3-failure-recheck-02-{red,focused}.{stdout,stderr}.log"
+}

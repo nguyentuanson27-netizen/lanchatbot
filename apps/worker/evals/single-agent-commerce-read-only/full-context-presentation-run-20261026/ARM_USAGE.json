@@ -1,0 +1,19 @@
+{
+  "A": {
+    "outcomes": 8,
+    "ownerInputTokens": 41827,
+    "ownerOutputTokens": 11790,
+    "ownerThinkingTokensIncluded": 11152,
+    "ownerRequestBytes": 198910,
+    "medianTotalSlotElapsedMs": 17274.03
+  },
+  "B": {
+    "outcomes": 8,
+    "ownerInputTokens": 50066,
+    "ownerOutputTokens": 10574,
+    "ownerThinkingTokensIncluded": 9962,
+    "ownerRequestBytes": 235886,
+    "medianTotalSlotElapsedMs": 18571.2773
+  },
+  "ownerInputIncreasePercent": 19.697802854615443
+}

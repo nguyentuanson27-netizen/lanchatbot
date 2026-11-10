@@ -1,0 +1,89 @@
+{
+  "kind": "PRE_PROVIDER_REGISTRATION",
+  "candidateRunSourceSha": "CAPTURE_AT_RUNTIME_AFTER_CLEAN_SEAL_DO_NOT_WRITE_BACK",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "9a68252275b1414937d6558c3ade211c6e3579ac298f4143ca5b80404175e841",
+    "verifier": "5d35e5de46030ea7e1ad10e6a4bde3bdf28a968ee48c8eb6825543ec0b61dbfd"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "inputHash": "b9126ab8d5f289ceaa68ebc0df09b069ef82c67d9913f98622df7a7c37e9eb08",
+  "statefulCorpusHash": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+  "selectedB1CaseIds": [
+    "b1-changed-occasion",
+    "b1-partial-source-v2",
+    "b1-buying-concern",
+    "b1-search-read"
+  ],
+  "dispatch": "1:4",
+  "repetitions": 3,
+  "registeredSlots": 48,
+  "maximumGenerationRequests": 156,
+  "retry": 0,
+  "runOrder": [
+    "candidate stateful8x3",
+    "integrated B1 4x3",
+    "captured advice 4x3"
+  ],
+  "sourceMode": "LIVE_PUBLIC_READERS_DESCRIPTIVE_NOT_PAIRED_CAUSAL",
+  "adviceMode": "CAPTURED_WORLD_REPLAY_NOT_LIVE_ELIGIBILITY",
+  "captureRule": "first dispatched final-only request, else last dispatched request of same attempt; providerRequests>0; no capture => BLOCKED",
+  "rubric": "whole customer turn, USABLE/NEEDS_EDIT/UNUSABLE/OWNERSHIP_CONTROL locked before verifier diagnosis; subjective advice allowed; no keyword scoring; draft/replay/integrated tables separate",
+  "acceptance": "case3of3USABLE within tested population, all errors and blocked slots retained; any observed protected falsePASS STOP; no auto expansion",
+  "sendEnabled": false,
+  "launcherHash": "84a43f0c8ba5c46a48db6552f61910d2e93e198f5b6807c4afc4de8d581eeab3",
+  "launcher": "task temp copy of existing credential helper; only repository override added; source-session unchanged",
+  "comparisonRun": "model-code-division-run-20261019",
+  "change": "Owner goal, sales explanation and natural voice only; same candidate runtime/verifier/config/corpora",
+  "baselineReuse": "Historical results only; no new baseline generations. Live source comparison is descriptive, not paired causal."
+}

@@ -1,0 +1,15 @@
+{
+  "reviewSha256": "99e918432fec750d874c1806fc39b0900649a62102c395edcec571ecccf7ef86",
+  "decisions": [
+    "NEITHER",
+    "TIE",
+    "TIE",
+    "NEITHER",
+    "Y",
+    "TIE",
+    "TIE",
+    "Y"
+  ],
+  "mappingReadBeforeFreeze": false,
+  "independent": false
+}

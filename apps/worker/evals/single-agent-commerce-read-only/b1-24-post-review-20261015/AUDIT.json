@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "runSourceSha": "9a523979129871b28bf71589e9fb2e8d51371907",
+  "rawDiskAndGitBlobs": 28,
+  "all24OutcomesRetained": true,
+  "uniqueGenerationIds": 79,
+  "evaluatorLabelLeaks": 0,
+  "nestedJsonStringProjectionChecked": true,
+  "ownerPreparedEnvelopes": 57,
+  "verifierExactBindings": 22,
+  "sendEligibleExactDraftMatches": 14,
+  "actualCodexRelayBodies": 22,
+  "knownGenerationHttpRequests": 79,
+  "unknownRequestAccounting": 0,
+  "atMostOneRequestPerKnownGeneration": true,
+  "noGenerationRetry": true,
+  "sourceIdentityPreserved": true,
+  "sourceFaultControls": [
+    "b1-partial-source",
+    "b1-partial-source-v2",
+    "b1-partial-source-v3"
+  ],
+  "models": {
+    "owner": [
+      "gemini-3.5-flash-lite"
+    ],
+    "verifier": [
+      "gpt-6.1-sol"
+    ]
+  },
+  "geminiWireEvidence": "Prepared exact body and adapter fake-HTTP capture tests; no independent live HTTP echo",
+  "humanAcceptance": null,
+  "sendEnabled": false,
+  "generatedFinalDrafts": 22,
+  "allGeneratedFinalDraftsVerified": true
+}

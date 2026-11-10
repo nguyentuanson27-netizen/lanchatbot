@@ -1,0 +1,17 @@
+{
+  "command": [
+    "cmd",
+    "/d",
+    "/c",
+    "pnpm",
+    "--filter",
+    "@lana/worker",
+    "exec",
+    "vitest",
+    "run",
+    "src/single-agent-commerce-ingress.test.ts",
+    "src/single-agent-commerce-read-only-tools.test.ts"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 10.891381740570068
+}

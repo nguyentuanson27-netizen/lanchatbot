@@ -1,0 +1,50 @@
+{
+  "slot": "stateful-1:5",
+  "actualTerminal": {
+    "disposition": "NO_SEND",
+    "reason": "EGRESS_WORLD_CHANGED",
+    "text": null,
+    "fallbackId": null
+  },
+  "recovery": {
+    "originalDisposition": "FALLBACK",
+    "originalReason": "PROVIDER_ERROR"
+  },
+  "generations": [
+    {
+      "id": "7c1171dc-5c11-427f-80af-1eb31e93f567:owner:1",
+      "role": "owner",
+      "status": "PROVIDER_ERROR",
+      "latencyMs": 6651.03389999998,
+      "telemetry": {
+        "generationId": "7c1171dc-5c11-427f-80af-1eb31e93f567:owner:1",
+        "providerRequests": 1,
+        "authRequests": 0,
+        "httpStatus": 429,
+        "modelVersion": null,
+        "inputTokens": null,
+        "outputTokens": null,
+        "cost": null,
+        "finishReason": null,
+        "requestBytes": 25441,
+        "requestHash": "d45df19d6f29f1d0c23c5902626f8be80c625487022ee228481504dff3fea5a0",
+        "functionCallingMode": "AUTO",
+        "declaredToolCount": 10,
+        "failureStage": "GENERATION",
+        "failureCode": "GENERATION_HTTP"
+      }
+    }
+  ],
+  "dependentBlockedSlots": [
+    6,
+    7
+  ],
+  "rootCause": "Owner generation HTTP429 before verifier; no generation retry. Final egress readback closes with EGRESS_WORLD_CHANGED, so no checkout invitation is delivered. Exact mismatch field is not recorded and remains unknown; reason alone does not establish a new customer message or changed catalog.",
+  "notEstablished": [
+    "Not an observed semantic verifier rejection",
+    "No evidence of prompt-induced generation failure",
+    "HTTP429 capacity versus quota root cause not distinguished",
+    "Exact egress binding/revision mismatch field not exposed"
+  ],
+  "treatment": "Preserve failed attempt and downstream blocks; no rerun in this registered N1 round. Separate provider availability/recovery-path investigation from sales-prompt quality."
+}

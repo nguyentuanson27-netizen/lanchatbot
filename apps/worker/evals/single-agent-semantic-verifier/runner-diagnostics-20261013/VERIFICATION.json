@@ -1,0 +1,167 @@
+{
+  "purpose": "Recurring A2 runner evidence persistence diagnosis; local source preparation only",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "sourceBeforeFix": "24ccbc8c4affb7be79fa1e414e37864f338184a8",
+  "sourceFixCommit": "eefcbe5671373e89f1c441b572701dcb7cb21e8a",
+  "providerGenerations": 0,
+  "newRound": null,
+  "a3RunSourceSha": null,
+  "red": {
+    "command": "$env:C3_CHECKPOINT_A_ROUND = '64'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/a2-evidence-persistence.test.mjs",
+    "chunk_id": "0ab1e8",
+    "wall_time_seconds": 1.6971269,
+    "exit_code": 1,
+    "original_token_count": 1807,
+    "output": "✖ a transient evidence-file lock publishes the same result without another generation (58.2691ms)\n✖ permanent publication failure retains complete tmp and stops before the next attempt (41.754ms)\n✖ write failure preserves prior evidence and reports only bounded stage and OS code (5.1639ms)\n✖ Windows reader withholding delete sharing reproduces and releases the publication failure (466.8398ms)\n✖ request accounting and completed reply persist before client cleanup; no terminal is inferred (90.6885ms)\n✖ a dispatched but unfinished request has retained accounting without a verdict or retry (12.4079ms)\nℹ tests 6\nℹ suites 0\nℹ pass 0\nℹ fail 6\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1224.7349\n\n✖ failing tests:\n\ntest at apps\\worker\\evals\\single-agent-semantic-verifier\\a2-evidence-persistence.test.mjs:29:1\n✖ a transient evidence-file lock publishes the same result without another generation (58.2691ms)\n  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n  \n    assert.ok(renames>=2)\n  \n      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/a2-evidence-persistence.test.mjs:37:37)\n      at async Test.run (node:internal/test_runner/test:1389:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: false,\n    expected: true,\n    operator: '==',\n    diff: 'simple'\n  }\n\ntest at apps\\worker\\evals\\single-agent-semantic-verifier\\a2-evidence-persistence.test.mjs:41:1\n✖ permanent publication failure retains complete tmp and stops before the next attempt (41.754ms)\n  AssertionError [ERR_ASSERTION]: Missing expected rejection.\n      at async TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/a2-evidence-persistence.test.mjs:44:2)\n      at async Test.run (node:internal/test_runner/test:1389:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: undefined,\n    operator: 'rejects',\n    diff: 'simple'\n  }\n\ntest at apps\\worker\\evals\\single-agent-semantic-verifier\\a2-evidence-persistence.test.mjs:55:1\n✖ write failure preserves prior evidence and reports only bounded stage and OS code (5.1639ms)\n  AssertionError [ERR_ASSERTION]: Missing expected exception.\n      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/a2-evidence-persistence.test.mjs:57:9)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1382:25)\n      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)\n      at Test.postRun (node:internal/test_runner/test:1522:19)\n      at Test.run (node:internal/test_runner/test:1447:12)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: undefined,\n    operator: 'throws',\n    diff: 'simple'\n  }\n\ntest at apps\\worker\\evals\\single-agent-semantic-verifier\\a2-evidence-persistence.test.mjs:63:1\n✖ Windows reader withholding delete sharing reproduces and releases the publication failure (466.8398ms)\n  AssertionError [ERR_ASSERTION]: Got unwanted exception.\n  Actual message: \"EPERM: operation not permitted, rename 'C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-a2-persistence-tiIIXT\\evidence.json.tmp' -> 'C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-a2-persistence-tiIIXT\\evidence.json'\"\n      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/a2-evidence-persistence.test.mjs:72:9)\n      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n      at async Test.run (node:internal/test_runner/test:1389:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: Error: EPERM: operation not permitted, rename 'C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-a2-persistence-tiIIXT\\evidence.json.tmp' -> 'C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-a2-persistence-tiIIXT\\evidence.json'\n        at renameSync (node:fs:1074:11)\n        at publishA2Evidence (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/run-a2-shards.mjs:10:75)\n        at file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/a2-evidence-persistence.test.mjs:72:26\n        at getActual (node:assert:611:5)\n        at strict.doesNotThrow (node:assert:779:32)\n        at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/a2-evidence-persistence.test.mjs:72:9)\n        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n        at async Test.run (node:internal/test_runner/test:1389:7)\n        at async Test.processPendingSubtests (node:internal/test_runner/test:960:7),\n    expected: undefined,\n    operator: 'doesNotThrow',\n    diff: 'simple'\n  }\n\ntest at apps\\worker\\evals\\single-agent-semantic-verifier\\a2-evidence-persistence.test.mjs:76:1\n✖ request accounting and completed reply persist before client cleanup; no terminal is inferred (90.6885ms)\n  TypeError: Cannot read properties of undefined (reading 'phase')\n      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/a2-evidence-persistence.test.mjs:85:43)\n      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n      at async Test.run (node:internal/test_runner/test:1389:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)\n\ntest at apps\\worker\\evals\\single-agent-semantic-verifier\\a2-evidence-persistence.test.mjs:92:1\n✖ a dispatched but unfinished request has retained accounting without a verdict or retry (12.4079ms)\n  TypeError: Cannot read properties of undefined (reading 'provider')\n      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/a2-evidence-persistence.test.mjs:99:52)\n      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n      at async Test.run (node:internal/test_runner/test:1389:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)\n"
+  },
+  "greenFocused": {
+    "start": {
+      "command": "$env:C3_CHECKPOINT_A_ROUND = '64'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/a2-evidence-persistence.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-64.test.mjs apps/worker/evals/single-agent-semantic-verifier/complete-a2-round64.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference-diagnostics.test.mjs",
+      "chunk_id": "966aed",
+      "wall_time_seconds": 10.0089064,
+      "session_id": 69841,
+      "original_token_count": 625,
+      "output": "✔ a transient evidence-file lock publishes the same result without another generation (117.7887ms)\n✔ permanent publication failure retains complete tmp and stops before the next attempt (29.2013ms)\n✔ write failure preserves prior evidence and reports only bounded stage and OS code (13.2524ms)\n✔ Windows reader withholding delete sharing reproduces and releases the publication failure (972.0262ms)\n✔ request accounting and completed reply persist before client cleanup; no terminal is inferred (119.7562ms)\n✔ a dispatched but unfinished request has retained accounting without a verdict or retry (14.2765ms)\n✔ auth header absence is distinguished from upstream auth failure and costs zero generations (54.7688ms)\n✔ HTTP429 retains only bounded request-id and retry-after metadata and never retries (23.9512ms)\n✔ unrecognized metadata cannot expose arbitrary provider text or credentials (10.9661ms)\n✔ recognized HTTP error codes survive as bounded diagnostics without a retry or raw text (24.4447ms)\n✔ unknown or malformed error bodies cannot become diagnostics or alter fail-closed HTTP outcomes (31.1577ms)\n✔ oversized streamed HTTP diagnostics are canceled without retaining even a recognized prefix (9.0702ms)\n✔ recognized error type fallback is retained but an interrupted error stream stays unclassified (13.4966ms)\n✔ HTTP200 response.failed retains a bounded cause and never authorizes partial or later complete output (7.5233ms)\n✔ HTTP200 response.incomplete retains only the known reason and cannot turn a partial PASS into success (10.2946ms)\n✔ HTTP200 error and failed events preserve known capacity codes for the existing stop policy without retrying (41.8803ms)\n✔ stream failure diagnostics discard unknown values, messages and response bodies while remaining fail closed (18.6979ms)\n✔ valid completed SSE still returns the exact answer; completed event with failed status fails closed (11.5617ms)\n✔ round64 completion adopts all217outcomes and2started unknown slots; only132untouched slots can dispatch (342.6272ms)\n✔ completion rejects changed raw evidence, source or overlap before provider invocation (97.2022ms)\n✔ resuming15undispatched retains334outcomes including quotaerror and2started unknowns without retries (540.665ms)\n✔ round64 admits only reviewed prompts with identical corpus, policy, authority and config (607.3872ms)\n✔ full351 slots partition117each; duplicate allocations or altered registrations fail closed (25.1848ms)\n"
+    },
+    "finish": {
+      "chunk_id": "7a07df",
+      "wall_time_seconds": 0.0000189,
+      "exit_code": 0,
+      "original_token_count": 198,
+      "output": "✔ all surviving fixture wire captures exclude evaluator labels and preserve exact draft and sources (1636.0758ms)\n✔ round64 owner native context retains existing one-request Gemini adapter semantics (22.533ms)\n✔ dispatch start persists before generation, full diagnostic retains unsafe PASS and never retries (1918.0326ms)\n✔ capacity outcome remains in denominator and stops peer dispatch without extra generation (17.6305ms)\n✔ three complete shards merge every slot once, reject altered peer slots and preserve FAIL (4971.6345ms)\n✔ interleaved capacity evidence validates its own prefix and merges retained error without global-prefix assumption (448.0977ms)\nℹ tests 29\nℹ suites 0\nℹ pass 29\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 14192.9826\n"
+    }
+  },
+  "finalPersistenceFocused": {
+    "command": "$env:C3_CHECKPOINT_A_ROUND = '64'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/a2-evidence-persistence.test.mjs",
+    "result": {
+      "chunk_id": "d1ecd6",
+      "wall_time_seconds": 2.5821949,
+      "exit_code": 0,
+      "original_token_count": 264,
+      "output": "✔ a transient evidence-file lock publishes the same result without another generation (65.4928ms)\n✔ permanent publication failure retains complete tmp and stops before the next attempt (29.4518ms)\n✔ write failure preserves prior evidence and reports only bounded stage and OS code (6.6737ms)\n✔ Windows reader withholding delete sharing reproduces and releases the publication failure (627.4096ms)\n✔ request accounting and completed reply persist before client cleanup; no terminal is inferred (73.5841ms)\n✔ a dispatched but unfinished request has retained accounting without a verdict or retry (9.0442ms)\n✔ a persistence failure aborts the current request and escapes without a hidden generation retry (5.9495ms)\n✔ killing the runner after DISPATCHED keeps accounting, blocks eligibility and refuses restart (383.034ms)\n✔ killing the runner after RESULT keeps accounting, blocks eligibility and refuses restart (416.0072ms)\nℹ tests 9\nℹ suites 0\nℹ pass 9\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 2031.2064\n"
+    }
+  },
+  "fullEval": {
+    "start": {
+      "command": "$env:C3_CHECKPOINT_A_ROUND = '39'\n$env:C3_TEST_CODEX_TRANSPORT = '1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs 1> 'C:/Users/nguye/AppData/Local/Temp/c3-r64-persistence-full.stdout.txt' 2> 'C:/Users/nguye/AppData/Local/Temp/c3-r64-persistence-full.stderr.txt'\n$c3PersistenceTestsExit = $LASTEXITCODE\nGet-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-r64-persistence-full.stdout.txt' -Tail 14\nGet-Content -LiteralPath 'C:/Users/nguye/AppData/Local/Temp/c3-r64-persistence-full.stderr.txt' -Tail 8\nexit $c3PersistenceTestsExit",
+      "chunk_id": "82742e",
+      "wall_time_seconds": 10.0089028,
+      "session_id": 60964,
+      "original_token_count": 0,
+      "output": ""
+    },
+    "finish": {
+      "chunk_id": "3bf2dc",
+      "wall_time_seconds": 0.0000102,
+      "exit_code": 0,
+      "original_token_count": 188,
+      "output": "✔ complete inputs expose engine status without creating a fit claim, size or permission (7.8387ms)\r\n✔ no missing inputs in an out-of-range result cannot be presented as a recommendation (7.0696ms)\r\n✔ code size context asks only missing chest and preserves existing chart/facts/binding without a new field (152.4146ms)\r\n✔ known waist is not requested again; unsupported height/weight is not advertised (1.1169ms)\r\n✔ chart-backed height/weight remains supported, and complete engine input has no missing measurements (1.6847ms)\r\n✔ wrong subject or unverified chart cannot generate trusted sizing hints (0.9952ms)\r\nℹ tests 388\r\nℹ suites 0\r\nℹ pass 388\r\nℹ fail 0\r\nℹ cancelled 0\r\nℹ skipped 0\r\nℹ todo 0\r\nℹ duration_ms 115786.8837\r\n"
+    }
+  },
+  "workerBoundary": {
+    "start": {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts",
+      "chunk_id": "37a6af",
+      "wall_time_seconds": 10.0069499,
+      "session_id": 16948,
+      "original_token_count": 31,
+      "output": "\n RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker\n\n"
+    },
+    "finish": {
+      "chunk_id": "7cdbed",
+      "wall_time_seconds": 0.0000172,
+      "exit_code": 0,
+      "original_token_count": 106,
+      "output": " ✓ src/vertex.test.ts (34 tests) 1460ms\n   ✓ Vertex shadow client > retries one transient Track C Judge V2 timeout before recording the case as failed  1024ms\n ✓ src/single-agent-semantic-verifier-boundary.test.ts (45 tests) 99ms\n\n Test Files  2 passed (2)\n      Tests  79 passed (79)\n   Start at  12:27:53\n   Duration  7.08s (transform 4.18s, setup 0ms, collect 6.76s, tests 1.56s, environment 1ms, prepare 2.64s)\n\n"
+    }
+  },
+  "protectedClaimsAndAssembler": {
+    "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts",
+    "chunk_id": "730ab4",
+    "wall_time_seconds": 9.2012317,
+    "exit_code": 0,
+    "original_token_count": 105,
+    "output": "\n RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/packages/business-tools\n\n ✓ src/reply-assembler.test.ts (14 tests) 192ms\n ✓ src/protected-claims.test.ts (7 tests) 79ms\n\n Test Files  2 passed (2)\n      Tests  21 passed (21)\n   Start at  12:27:53\n   Duration  4.43s (transform 2.36s, setup 0ms, collect 2.89s, tests 271ms, environment 1ms, prepare 2.58s)\n\n"
+  },
+  "workerBuild": {
+    "command": "pnpm --filter @lana/worker build",
+    "start": {
+      "chunk_id": "b1560a",
+      "wall_time_seconds": 10.0113599,
+      "session_id": 77425,
+      "original_token_count": 210,
+      "output": "\n> @lana/worker@0.1.0 prebuild C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\n> pnpm -r --filter \"@lana/worker^...\" build\n\nScope: 12 of 21 workspace projects\n../../packages/contracts build$ tsc -p tsconfig.json\n../../packages/contracts build: Done\n../../packages/conversation-engine build$ tsc -p tsconfig.json\n../../packages/commerce-kernel build$ tsc -p tsconfig.json\n../../packages/durable-messaging build$ tsc -p tsconfig.json\n../../packages/meta-delivery build$ tsc -p tsconfig.json\n../../packages/commerce-kernel build: Done\n../../packages/meta-webhook build$ tsc -p tsconfig.json\n../../packages/meta-delivery build: Done\n../../packages/pancake-handoff build$ tsc -p tsconfig.json\n../../packages/durable-messaging build: Done\n../../packages/conversation-engine build: Done\n"
+    },
+    "progress": {
+      "chunk_id": "df995c",
+      "wall_time_seconds": 5.0037665,
+      "session_id": 77425,
+      "original_token_count": 1086,
+      "output": "../../packages/meta-webhook build: Done\n../../packages/pancake-handoff build: Done\n../../packages/database prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build\n../../packages/business-tools build$ tsc -p tsconfig.json\n../../packages/database prebuild: > @lana/contracts@0.4.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\contracts\n../../packages/database prebuild: > tsc -p tsconfig.json\n../../packages/business-tools build: Done\n../../packages/database prebuild: > @lana/commerce-kernel@0.1.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\commerce-kernel\n../../packages/database prebuild: > tsc -p tsconfig.json\n../../packages/database prebuild: Done\n../../packages/database build$ tsc -p tsconfig.json\n../../packages/database build: Done\n../../packages/dataset-review prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build\n../../packages/chat-runtime build$ tsc -p tsconfig.json\n../../packages/dataset-review prebuild: > @lana/contracts@0.4.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\contracts\n../../packages/dataset-review prebuild: > tsc -p tsconfig.json\n../../packages/chat-runtime build: Done\n../../packages/dataset-review prebuild: > @lana/business-tools@0.3.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\business-tools\n../../packages/dataset-review prebuild: > tsc -p tsconfig.json\n../../packages/dataset-review prebuild: Done\n../../packages/dataset-review build$ tsc -p tsconfig.json\n../../packages/dataset-review build: Done\n../../packages/dataset-store prebuild$ pnpm --filter @lana/contracts --filter @lana/dataset-review --filter @lana/database build\n../../packages/dataset-store prebuild: Scope: 3 of 21 workspace projects\n../../packages/dataset-store prebuild: ../contracts build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../contracts build: Done\n../../packages/dataset-store prebuild: ../database prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build\n../../packages/dataset-store prebuild: ../dataset-review prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build\n../../packages/dataset-store prebuild: ../database prebuild: > @lana/contracts@0.4.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\contracts\n../../packages/dataset-store prebuild: ../database prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > @lana/contracts@0.4.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\contracts\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > @lana/business-tools@0.3.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\business-tools\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../database prebuild: > @lana/commerce-kernel@0.1.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\commerce-kernel\n../../packages/dataset-store prebuild: ../database prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../database prebuild: Done\n../../packages/dataset-store prebuild: ../database build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../dataset-review prebuild: Done\n../../packages/dataset-store prebuild: ../dataset-review build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../dataset-review build: Done\n../../packages/dataset-store prebuild: ../database build: Done\n../../packages/dataset-store prebuild: Done\n../../packages/dataset-store build$ tsc -p tsconfig.json\n../../packages/dataset-store build: Done\n\n> @lana/worker@0.1.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\n> tsc -p tsconfig.json\n\n"
+    },
+    "finish": {
+      "chunk_id": "b39d6e",
+      "wall_time_seconds": 0.0000188,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    }
+  },
+  "workerTypecheck": {
+    "start": {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "chunk_id": "ea043f",
+      "wall_time_seconds": 10.007865,
+      "session_id": 83841,
+      "original_token_count": 138,
+      "output": "\n> @lana/worker@0.1.0 pretypecheck C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\n> pnpm -r --filter \"@lana/worker^...\" build\n\nScope: 12 of 21 workspace projects\n../../packages/contracts build$ tsc -p tsconfig.json\n../../packages/contracts build: Done\n../../packages/conversation-engine build$ tsc -p tsconfig.json\n../../packages/commerce-kernel build$ tsc -p tsconfig.json\n../../packages/meta-delivery build$ tsc -p tsconfig.json\n../../packages/durable-messaging build$ tsc -p tsconfig.json\n"
+    },
+    "finish": {
+      "chunk_id": "c675e8",
+      "wall_time_seconds": 0.0000165,
+      "exit_code": 0,
+      "original_token_count": 1162,
+      "output": "Warning: truncated output (original token count: 1162)\nTotal output lines: 55\n\n../../packages/durable-messaging build: Done\n../../packages/meta-webhook build$ tsc -p tsconfig.json\n../../packages/meta-delivery build: Done\n../../packages/pancake-handoff build$ tsc -p tsconfig.json\n../../packages/commerce-kernel build: Done\n../../packages/conversation-engine build: Done\n../../packages/meta-webhook build: Done\n../../packages/pancake-handoff build: Done\n../../packages/database prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build\n../../packages/business-tools build$ tsc -p tsconfig.json\n../../packages/database prebuild: > @lana/contracts@0.4.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\contracts\n../../packages/database prebuild: > tsc -p tsconfig.json\n../../packages/business-tools build: Done\n../../packages/database prebuild: > @lana/commerce-kernel@0.1.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\commerce-kernel\n../../packages/database prebuild: > tsc -p tsconfig.json\n../../packages/database prebuild: Done\n../../packages/database build$ tsc -p tsconfig.json\n../../packages/database build: Done\n../../packages/dataset-review prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/bus…512 tokens truncated…build: > @lana/business-tools@0.3.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\business-tools\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../database prebuild: > @lana/commerce-kernel@0.1.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\commerce-kernel\n../../packages/dataset-store prebuild: ../database prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../database prebuild: Done\n../../packages/dataset-store prebuild: ../database build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../dataset-review prebuild: Done\n../../packages/dataset-store prebuild: ../dataset-review build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../dataset-review build: Done\n../../packages/dataset-store prebuild: ../database build: Done\n../../packages/dataset-store prebuild: Done\n../../packages/dataset-store build$ tsc -p tsconfig.json\n../../packages/dataset-store build: Done\n\n> @lana/worker@0.1.0 typecheck C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\n> tsc -p tsconfig.json --noEmit\n\n"
+    }
+  },
+  "workerLint": {
+    "command": "pnpm --filter @lana/worker lint",
+    "chunk_id": "0ce5c4",
+    "wall_time_seconds": 7.3975276,
+    "exit_code": 0,
+    "original_token_count": 42,
+    "output": "\n> @lana/worker@0.1.0 lint C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\n> tsc -p tsconfig.json --noEmit\n\n"
+  },
+  "historicalEvidenceAccounting": {
+    "command": "$env:C3_CHECKPOINT_A_ROUND = '64'\nnode apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2",
+    "result": {
+      "chunk_id": "51303d",
+      "wall_time_seconds": 4.3673567,
+      "exit_code": 0,
+      "original_token_count": 66,
+      "output": "{\"round\":64,\"a2Cases\":187,\"a3Cases\":42}\n{\"status\":\"BLOCKED\",\"registeredDenominator\":351,\"executedDenominator\":349,\"unsafeCount\":186,\"safeCount\":165,\"unsafeSendEligibleFalsePassCount\":0,\"safeFailures\":6,\"safeFailureRate\":null,\"unexecuted\":2}\nFROZEN_PROTOCOL_VALID\n"
+    },
+    "interpretation": "Accounting valid, qualification BLOCKED; not a new A2 run"
+  },
+  "sourceReadback": {
+    "commands": [
+      "git diff --check",
+      "git diff --exit-code 24ccbc8c4affb7be79fa1e414e37864f338184a8 -- apps/worker/src packages apps/worker/evals/single-agent-semantic-verifier/round-64 apps/worker/evals/single-agent-semantic-verifier/prompts",
+      "Compare SHA-256 apps/worker/dist/single-agent-semantic-verifier-boundary.js to frozen round64 a2-shard-plan.json boundaryExecutableHash"
+    ],
+    "result": {
+      "chunk_id": "15db63",
+      "wall_time_seconds": 0.756754,
+      "exit_code": 0,
+      "original_token_count": 23,
+      "output": "BUILT_BOUNDARY_UNCHANGED 344035c06c67ecfae317d385ee07c96aed86aac37c27bbc497aca69c40260b37\r\n"
+    }
+  },
+  "limitations": [
+    "Native file-lock EPERM reproduced; historical shard0 OS code discarded by generic logger, not recovered",
+    "R64 process1/2 termination cause not certified",
+    "No new semantic quality/safety outcome, actual provider latency/cost or qualification evidence",
+    "R64 frozen reports/evidence/prompt/config remain unchanged; 349 terminal and 2 started UNKNOWN"
+  ],
+  "selfReview": "Existing final gate/source guard/capacity policy reused. Checkpoint telemetry is not a terminal or send authority. Bounded same-byte publication retries, max1 generation unchanged. Full suite and native hard-kill tests passed. No new semantic role/parser/framework/production wiring."
+}

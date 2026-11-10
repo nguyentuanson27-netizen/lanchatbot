@@ -1,0 +1,687 @@
+{
+  "scorer": "CODEX_PRIMARY_AGENT_OFFLINE_WHOLE_CONVERSATION_REVIEW",
+  "scoredAt": "2026-10-10T01:33:22.380Z",
+  "rawEvidenceCommitSha": "86e893a33e8c9915fdf9743b4c10b23dd0831080",
+  "rawFingerprintFile": "RAW_PRE_REVIEW_HASHES.json",
+  "preReviewByteIdentityAvailable": true,
+  "a3RunSourceSha": "451093c88a576f51cf17f0f8d8ccc4702d6cab29",
+  "reviewProcedureHash": "0c26a54c778629a81927b3ff51d41b63133c6c42c05d574e645717131eea24e7",
+  "independent": false,
+  "humanAcceptance": false,
+  "ownerAcceptance": false,
+  "interpretation": "Every whole-turn actual terminal outcome reviewed before ten explicit diagnostic scores;no default all2,no keyword/isolated quote matching.",
+  "attempts": [
+    {
+      "attemptId": "r5-workday-comfort:1",
+      "review": "Bot chọn đúng set ST411 size M trong ngân sách, nối lý do lưng chun và quần suông với nhu cầu ngồi làm việc. Phần quyết định hữu ích và có fit đã xác nhận; nhận định mặc thoải mái ở đây là tư vấn thiết kế trong ngữ cảnh, không tự coi mọi chữ 'cả ngày' là bảo đảm. Nhưng cả đoạn cuối đọc lại đủ ngực, eo, mông để chứng minh size dù khách chỉ nhờ chọn, khiến lời tư vấn quay lại kiểu giải thích bảng số đo. Đây là lỗi giọng còn lặp qua nhiều vòng; không thiếu context hoặc dữ liệu size.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-competitor-price:1",
+      "review": "Khách muốn biết thêm129k có đáng cho việc mặc đi làm thường xuyên, và context đủ để giải thích giá trị set mà không đoán chất lượng đối thủ. Kết quả thực tế chỉ yêu cầu chờ nhân viên, không trả lời băn khoăn giá, không giúp cân nhắc hay tiến tới lựa chọn. Fallback giữ an toàn nhưng lượt bán hàng thất bại. Chấm lời khách nhận, chưa dùng candidate bị chặn để thay kết quả hoặc suy nguyên nhân verifier.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-wardrobe-budget:1",
+      "review": "Lời đáp hiểu 'phí' là mua thừa, dùng quần navy và trần600k để khuyên áo riêng thay vì set. Tổng524k đúng quote, phối được với đồ đã có và chỉ hỏi vòng ngực mà code áo cần. Các đoạn giải thích hơi nhiều nhưng đi cùng một quyết định mua hợp lý, không kể catalogue hay ép upsell. Khách có phương án trong ngân sách và bước chọn size thực hiện được.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-white-opacity:1",
+      "review": "Bot đồng ý chọn trắng size M và gắn câu trả lời độ kín đúng ánh sáng phòng/áo lót màu da khách vừa xác nhận. Không đẩy khách đổi màu hay thêm lo ngại mới; câu trả lời ngắn, tự tin và giúp chốt lựa chọn. Một lần nhắc ngực92 là thừa, nhưng toàn lượt vẫn gọn, tự nhiên và không thành bài đọc số đo để chứng minh. Ghi nhận điểm cần gọt mà không chấm FAIL chỉ vì xuất hiện một con số.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-size-price-stock:1",
+      "review": "Khách đã chốt váy rêu và chỉ cần size cùng tổng tiền. Bot chọn L theo code, giữ đúng mẫu/màu, trả tổng829k miễn ship phù hợp nơi nhận và ngân sách. Không mở lại việc tư vấn dáng, hỏi lại thông tin hay nói đã đặt đơn. Lời đáp hoàn tất lựa chọn hiện có và đủ gọn; không cần thêm CTA để được coi là tiến triển.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-missing-customer-size:1",
+      "review": "Bot trả ngay tồn navy và tổng484k đã có quote, rồi xin đúng eo/mông để chọn quần. Không bỏ phần có thể trả lời vì chưa chọn size, không xin ngực hoặc hỏi lại dữ liệu shop. Lượt này rõ, tự nhiên và đưa khách tới bước có thể dùng bằng đầu vào code hiện có; dữ liệu thiếu là số đo khách chứ không phải shop thiếu bảng.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-white-variant-alternative:1",
+      "review": "Bot báo trắng L hết, chủ động chọn xanh nhạt L đang có và giải thích phối với quần đen theo ý kiến thời trang. Giá499k giữ trong ngân sách, không lặp việc chọn size đã giải quyết hoặc hứa restock. 'Em đổi sang' ở đây là đề xuất lựa chọn trong chat, không khẳng định ghi state/đặt đơn hoàn tất. Khách có phương án thay thế rõ và tự nhiên.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-delivery-timing:1",
+      "review": "Bot giữ đúng ETA dự kiến và không bịa giao gấp hay bảo khách chuẩn bị đồ khác. Tuy nhiên khách cần quyết định mua cho sáng thứSáu, còn lời đáp chỉ nói không dám khẳng định tuyệt đối và có chút rủi ro, chưa đưa một kết luận rõ về việc shop không thể hẹn kịp dịp này. Giọng dài và dè dặt làm giảm ích lợi của thông tin đúng. Context không có phương án giao chắc kịp, nhưng vẫn đủ để trả lời dứt khoát, gọn về giới hạn hiện có; không bắt buộc bịa một món thay thế hay CTA.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 1,
+        "contextCorrectionUse": 2,
+        "usefulness": 1,
+        "decisionSupport": 1,
+        "partialAnswerBehavior": 1,
+        "nextStep": 1,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-correct-product:1",
+      "review": "Bot theo đúng việc khách bỏ set để chọn riêng SM613 xanh nhạt, dùng giá499k và fit M của áo thay vì bám currentProductId ST411 cũ. Trả đủ giá, size và tồn, không hỏi lại hoặc giả chốt đơn. Một cụm vòng ngực92 còn thừa nhưng toàn lời đáp ngắn và trực tiếp; đây là điểm gọt giọng nhỏ, không tương đương bài đọc số đo dài. Lựa chọn mới được giải quyết rõ.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-correct-measurement:1",
+      "review": "Lượt này tiếp nhận số mới, bỏ M và xác nhận L đúng fit revision2, đồng thời báo đen L còn hàng. Việc nêu lại bộ số đo nằm trong tình huống khách đang sửa số đo và xin xác nhận chuyển size, nên có tác dụng đối chiếu bản sửa, không chấm như recitation khi khách chỉ nhờ tư vấn. Lời đáp đủ gọn và tự tin, không nói đã ghi state hay tạo đơn.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-referent-navy:1",
+      "review": "Bot hiểu 'mẫu đó' là quần QU714 navy đã thống nhất, xác nhận M còn và giá riêng quần. Không kéo set quay lại, hỏi khách chọn M lần nữa, xin địa chỉ hoặc nói đã đặt/giữ hàng. Một ACK ngắn hoàn tất đúng mục đích của lượt này; không cần ép thêm bước bán hàng.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-budget-correction:1",
+      "review": "Bot dùng trần550k mới, bỏ set và chọn áo SM613 với tổng524k đúng quote. Phối với quần navy đã có và chỉ xin vòng ngực còn thiếu giúp thực hiện bước chọn size. Có thể gọn phần nhắc lại ngân sách và chọn một màu để lời tư vấn sắc hơn; tuy vậy khách đang giao việc chọn món, và bot đã chọn được món phù hợp, không trả lại toàn bộ quyết định cho khách. Toàn lượt có ích và tự nhiên ở mức đạt, không chấm theo việc đủ một từ chỉ màu.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-defer:1",
+      "review": "Khách nói rõ chưa mua, không giữ hàng hay hỏi thêm. Bot đáp thân thiện rồi dừng, không khan hiếm, không hứa tồn cuối tuần và không kéo khách quay lại tư vấn. Với lượt trì hoãn, như vậy đã hoàn tất mục đích; không buộc phải có bước mua tiếp để đạt.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-try-exchange:1",
+      "review": "Bot phân biệt thử trong nhà với mặc đi tiệc, nêu đúng tình trạng cần giữ khi thử và chặn đổi sau mặc ra ngoài. Mốc7ngày và phí đã nằm trong lịch sử nên không cần đọc lại; phần hiện tại đủ để khách thử đúng cách và quyết định trước tiệc. Lời đáp rõ và tự nhiên, không mở rộng quyền lợi hay buộc khách chốt.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-exchange-cost:1",
+      "review": "Bot trả đúng khách chịu phí vận chuyển đổi, rồi dùng fit M đã xác nhận để trấn an về lựa chọn đang xem. Không tự gán khách muốn L, kể lại số đo hoặc giới thiệu một quyền miễn phí không có. Nhận định mặc thoải mái/chuẩn dáng trong ngữ cảnh chọn M có thiết kế và fit là tư vấn thông thường được duyệt, không cần coi như lời bảo đảm tuyệt đối. Lượt này giải quyết cả phí và lo chọn size bằng lời gọn.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-shipping-threshold:1",
+      "review": "Bot giải thích rõ mua chỉ để tiết kiệm25k không giảm tổng chi, đồng thời đề xuất navy thay cho quần đen đã có nếu khách muốn đổi cách phối. Tổng958k minh bạch, không có trần ngân sách hay lệnh dừng bị vi phạm và không chốt size thiếu fit. Đây là bán thêm có căn cứ, không phải lỗi vì chi nhiều hơn hoặc vì khách ngại mua thừa; câu hỏi về nhu cầu navy giúp chọn giữa hai phương án thực tế. Đoạn hơi dài nhưng lập luận liền mạch và dùng được cho việc bán hàng.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-refund-distinction:1",
+      "review": "Bot sửa nhầm lẫn hoàn tiền với đổi size/mẫu, giữ đúng quyền đổi và lựa chọn trắng M đang chốt. Không kéo độ kín hay size quay lại, không xin chấp thuận hoặc nói đã tạo đơn. ACK 'ghi nhận' hơi hành chính nhưng ngắn và không làm toàn lượt máy móc hay vô ích; nội dung chính giải quyết đúng lo ngại trước mua. Không chấm FAIL chỉ bởi một từ ACK.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-simple-price:1",
+      "review": "Bot trả ngay giá499k của áo, rồi hỏi màu trong một câu ngắn với hai màu có dữ liệu. Không kéo chính sách, disclaimer hay hàng loạt câu hỏi vào yêu cầu đơn giản. Câu hỏi màu không bắt buộc nhưng ở đây tự nhiên và mở được bước tư vấn mà không làm loãng đáp án giá.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-simple-stock:1",
+      "review": "Bot xác nhận trực tiếp navy M còn hàng, đúng biến thể khách hỏi. Không cần đọc số lượng, chứng minh đã kiểm tra, hỏi lại size hoặc báo giữ hàng. Lời đáp ngắn này hoàn tất nhu cầu và hợp giọng chat của shop.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r5-simple-ack:1",
+      "review": "Khách chỉ cảm ơn sau khi muốn xem thêm. Bot đáp thân thiện, để khách tự xem và không đặt câu hỏi hay bán thêm. Lời mời nhắn khi cần không phải ép tiếp tục hoặc hứa thao tác hệ thống; lượt kết thúc được tôn trọng.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r7-price-ready-fit:1",
+      "review": "Khách nhờ thuyết phục chọn shop đồng thời chọn size, và context đã có fit M cùng thiết kế/chất liệu. Kết quả thực tế là fallback chung, nên cả băn khoăn chênh giá và lựa chọn size đều chưa được xử lý dù dữ kiện đủ. Không chấm candidate chưa được gửi như một lượt tư vấn thành công; fallback an toàn nhưng không giúp quyết định mua và không có bước tiến dùng được.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r7-shirt-missing-measure:1",
+      "review": "Bot giữ lựa chọn áo đã thống nhất, trả đúng tổng524k dưới600k và chỉ xin vòng ngực. Không quay lại set, màu, nơi nhận hay xin cả ba số đo cho áo. Lời đáp gọn và rõ, hoàn thành phần tiền rồi mở đúng bước chọn size còn thiếu; không cần nhắc mã áo/màu đã chốt để chứng minh hiểu lịch sử.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r7-opacity-context-change:1",
+      "review": "Khách hỏi lại độ kín dưới đèn ngược và tồn trắng M. Bot sửa kết luận theo ánh sáng mới, nói rõ có thể thấy bóng rồi trả tồn đúng. Cả đoạn ngắn giúp khách hiểu áo không bảo đảm ưu tiên tránh bóng trong dịp này, không bịa độ kín xanh nhạt hoặc chọn lại size. Một lời khuyên không chọn trắng có thể sắc hơn, nhưng không chấm thiếu ích lợi chỉ vì thiếu câu 'không nên mua' khi hai câu hỏi và giới hạn quyết định đã rõ trong ngữ cảnh.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r7-exchange-after-use:1",
+      "review": "Bot bác rõ việc đổi sau khi mặc đi làm, nêu cửa sổ7ngày/hàng chưa dùng/nguyên tem và khách trả phí đổi. Cách thử trong nhà được đặt trong điều kiện hàng chưa sử dụng, không thành quyền đổi mọi trạng thái hàng. Câu trả lời đủ để khách điều chỉnh cách thử trước mua và giữ đúng băn khoăn hiện tại; không ép liệt kê toàn bộ policy khi chưa có tình huống giặt/bẩn/mùi trong hội thoại.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r12-office-color:1",
+      "review": "Bot chọn riêng áo trắng để phối quần navy, giải thích sáng và thanh lịch hợp gu nhẹ nhàng, rồi trả tổng524k và chỉ xin vòng ngực. Không bán thêm quần/set hay hỏi lại nơi nhận. Phần nhắc ngân sách hơi dư nhưng cả lượt gọn, lựa chọn rõ và bước chọn size dùng được; không phải bài đọc thông số hoặc trả quyết định về khách.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r12-pants-known-waist:1",
+      "review": "Bot trả đúng tổng484k, dùng eo đã biết để nhận xét cục bộ khoảngM rồi xin đúng vòng mông còn thiếu. Đọc cả lượt, đây chưa phải khẳng định khách mặc vừaM hay chốt size: câu sau giữ việc chọn size phụ thuộc số đo mông. Khoảng cơ thểM70–76 hỗ trợ đối chiếu eo74, phù hợp phạm vi so sánh một chiều đã freeze; không phán lỗi từ chữM riêng lẻ hoặc đánh đồng với fit hoàn chỉnh. Khách biết tiền và cần bổ sung gì, không bị hỏi lại eo/ngực.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r12-change-color-only:1",
+      "review": "Bot dùng đúng màu mới xanh nhạt và giữM có code-fit, báo tồn và giá499k. Lý do phối navy hợp tone, gọn gàng là nhận định thời trang phù hợp chứ không tự tạo thử nghiệm. Không quay lại độ kín áo trắng, xin ngực hoặc hứa đổi đơn thành công; lượt xác nhận ngắn đã hoàn thành việc mua đang mở, không cần thêmCTA.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r12-indoor-exchange-eligible:1",
+      "review": "Khách đã nêu đủ thời hạn và trạng thái hàng để xác nhận đổi mẫu cùng phí, nhưng kết quả thực tế chỉ là fallback chung do generation lỗi. Không có câu tư vấn được gửi để giải quyết băn khoăn hoặc tạo tin tưởng trước mua dù context đủ quyền/điều kiện. Giữ lỗi dịch vụ trong mẫu số, không quy nó thành thiếu context hay verifier chặn; fallback an toàn nhưng không đạt mục tiêu lượt này.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-workday-choice:1",
+      "review": "Bot chọn rõST411M749k, dùng lưng chun và code-fit để trấn an nhu cầu ngồi nhiều, không bắt khách tự so hai mẫu. Lời về dễ chịu/cấn bụng được đọc như giải thích thiết kế phù hợp trong lượt tư vấn, không tự biến từ tự tin thành bảo đảm mọi tư thế. Tuy nhiên đoạn sau đọc lại đầy đủ ngực/eo/mông dù khách chỉ cần chọn giúp; nó làm lượt ngắn vẫn giống đối chiếu bảng hơn nói chuyện bán hàng. Quyết định đúng và dùng được, nhưng giọng chưa đạt yêu cầu không đọc lại số đo khi không cần.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-price-repeat-wear:1",
+      "review": "Bot có lập trường đáng mua cho hai cách dùng, giải thích mặc cả bộ/tách phối, chọnM đúng code và báo navyM còn. Nhận định gọn gàng/chỉn chu được hiểu trong lời tư vấn phong cách có căn cứ ít nhăn hơn linen, không coi riêng cụm suốt ngày là báo phép thử giữ form hoặc không cần là. Điểm yếu của cả lượt là đọc lại trọn bộ số đo ngay trước chọnM, thêm một đoạn đối chiếu không phục vụ băn khoăn chênh giá; khả năng thuyết phục và lựa chọn vẫn tốt nhưng giọng còn máy móc.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-pants-size-input:1",
+      "review": "Bot trả tổng484k từ tiền quần và phí nội thành, rồi xin đúng eo+mông để chọn quần. Không yêu cầu ngực, không suy size từ tồn và không bắt khách tìm bảng shop. Hai câu trực tiếp hoàn thành tiền và mở đúng bước thiếu, giữ nhu cầu quần navy trong lịch sử mà không cần đọc lại toàn bộ lựa chọn.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-stage-light-change:1",
+      "review": "Khách cần lời khuyên theo sân khấu có đèn ngược và biết tồn trắngM, nhưng generation lỗi khiến terminal chỉ còn fallback chung. Lượt không xử lý được thay đổi hoàn cảnh hay cho biết tồn dù dữ liệu áo hiện tại đủ để khuyên tránh rủi ro. Context cũng thiếu áo thay thế được xác nhận độ kín dưới đèn này; đó là giới hạn riêng, không phải nguyên nhân generation thất bại và không được bịa thay thế để chấm đạt.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-refund-before-buy:1",
+      "review": "Bot nhận lựa chọn trắngM trong chat rồi phân biệt rõ không hoàn tiền với đổi size/mẫu trong7ngày, nêu giữ tem/chưa giặt/thử trong nhà. Cả đoạn là giới thiệu quyền trước mua, không xác nhận hàng thực tế đã đủ mọi điều kiện hoặc hoàn tất đơn. Tóm tắt không bắt liệt kê sạch/không mùi khi khách chưa nêu trạng thái đó; câu trả lời ngắn đủ để quyết định mua, không chuyển nhân viên vô ích.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r14-freeship-extra-pants:1",
+      "review": "Bot khuyên mua áo thôi vì khách đã có nhiều quần, giải thích rõ lợi25k ship nhỏ so với chi459k thêm. Đây là quyết định có lý với băn khoăn trùng đồ, không bắt buộc bán thêm cũng không coi mua đắt hơn luôn sai. Câu hỏi lấySM613 hơi thừa vì món áo đã định, nhưng không làm reset lựa chọn hay kéo dài thành kịch bản checkout; whole-turn vẫn tự nhiên, minh bạch và giúp khách quyết định.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r15-value-use:1",
+      "review": "Bot đứng về lựa chọn hàng shop bằng khả năng mặc cả bộ đi làm và tách áo phối jean/chân váy cuối tuần, đúng hai cách dùng khách đang cân nhắc. Lời về quần chun thoải mái là tư vấn thiết kế, không so chất lượng đối thủ hay tự tạo thử nghiệm/miễn ship. Đoạn hơi dài nhưng các ý liên kết quanh giá trị sử dụng cụ thể, không chỉ liệt kê catalogue hoặc né bằng xin số đo; lượt giúp cân nhắc khoản chênh và không cầnCTA.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r15-fit-reassurance:1",
+      "review": "Khách đã chọnM và muốn được trấn an về cạp khi ngồi nhiều; code-fit và thiết kế hiện có đủ cho tư vấn thông thường. Terminal thực tế là fallback, nên nỗi lo và quyết định mua không được xử lý. Không tính candidate bị chặn thành thành công hoặc tự gọi thiếu thông tin khi context đủ; fallback giữ an toàn nhưng không đạt chất lượng mua hàng và bước tiến ở lượt này.",
+      "scores": {
+        "understanding": 0,
+        "explicitNeedCompleteness": 0,
+        "contextCorrectionUse": 0,
+        "usefulness": 0,
+        "decisionSupport": 0,
+        "partialAnswerBehavior": 0,
+        "nextStep": 0,
+        "coherence": 1,
+        "naturalness": 1,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r15-known-waist-next:1",
+      "review": "Bot giữ eo đã biết và chỉ xin mông còn thiếu, đồng thời trả đúng tổng484k. Không đoánM từ một chiều, hỏi lại eo hoặc đòi cao/cân nặng. Đáp án trực tiếp giúp khách bổ sung đúng thứ có thể dùng để chọn quần, dùng ngôn ngữ tự nhiên và không kéo sang bán hàng/checkout chưa có khả năng.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r15-color-final-confirm:1",
+      "review": "Bot xác nhận xanh nhạtM theo lựa chọn cuối, trả rõ giá vẫn499k và giải thích phối quần navy ngắn. Câu em chốt ở đây là ACK khách vừa chọn màu trong chat, không nói đơn đã được sửa/giữ/gửi. Không mở lại màu trắng hay xin số đo, cả lượt giải quyết lo đổi màu đổi giá; một ý phối thêm nhỏ không làm lời đáp thành catalogue.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r16-effort-and-use:1",
+      "review": "Bot có lập trường chọn setnavy cho hai dịp và liên hệ kiểu áo/quần với đi làm lịch sự, lưng chun với dùng thoải mái cuối tuần; ít nhăn có nguồn chất liệu/phép thử so linen. Không báo phép thử giữ form hay tự chốt fit. Lượt còn có thể gọn hơn và tận dụng tách phối sâu hơn, nhưng không chỉ trả thông số rời: lý do nhất quán quanh cách dùng khách nhờ thuyết phục, giá749k phù hợp và số đo được xin đúng đầu vào để tiến tới mua. Không hạ điểm chỉ vì đoạn dài hoặc thiếu chữ tách phối khi mục tiêu hai dịp đã được đáp có ích.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r16-budget-alternative:1",
+      "review": "Bot giữ áo và tổng524k trong ngân sách600k, tận dụng quần đen ở nhà bằng hai cách mặc sơvin/thảsuông cho công sở/dạo phố. Đó là thay đổi phối có ích so với chỉ nhắc áo trắng+quần đen; không ép phải đổi xanh nhạt để đạt rubric. Sau khi trả phần phối/tiền, xin đúng ngực thiếu cho áo, không bán quần vượt ngân sách hay hỏi lại nơi giao. Cả lượt giúp chọn mua mà vẫn có phương án mới thực sự.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r16-change-to-indoor-dress:1",
+      "review": "Bot theo việc đổi sang váy, chọnVA512đenM và trả829k trong850k; lý do sang/gọn phù hợp dự tiệc. Có nhắc rêu trước khi chọn đen nhưng không trả quyết định về khách, và lời về số đo không đọc lại bộ số. Từ tiệc tối thêm một giả định nhỏ khi khách chỉ nói trong nhà; nó không tạo tính năng thử nghiệm hoặc thay đổi khuyến nghị váy đen phù hợp. Lượt vẫn hoàn tất mẫu/màu/size/giá tự nhiên, không kéo khách về set hay tự áp ship.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    },
+    {
+      "attemptId": "r16-pants-color-alternative:1",
+      "review": "Bot chọnQU714navy thay quần đen, giải thích phối áo trắng sáng và nhã nhặn, trả459k rồi xin eo+mông đúng phần thiếu cho quần. Giữ động cơ đổi màu để phối đồ thay vì thêm chỉ đểfreeship, không tự chốt size hay tạo thao tác bán hàng. Cách nói hơi nhiều tính từ nhưng các ý vẫn liên kết với món đang chọn, không đọc bảng hoặc thông tin cơ thể và có bước tiếp dùng được.",
+      "scores": {
+        "understanding": 2,
+        "explicitNeedCompleteness": 2,
+        "contextCorrectionUse": 2,
+        "usefulness": 2,
+        "decisionSupport": 2,
+        "partialAnswerBehavior": 2,
+        "nextStep": 2,
+        "coherence": 2,
+        "naturalness": 2,
+        "factualActionSafety": 2
+      }
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "priceStockDescriptionValuesUnchanged": true,
+  "publicPolicyValuesUnchanged": true,
+  "note": "compares source-check projections; operational timestamps/read provenance can differ across cases"
+}

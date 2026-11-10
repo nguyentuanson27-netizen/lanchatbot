@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "runId": "C3_A3_STREAM_RECHECK_20261014_01",
+  "ownerAuthorization": "chạy lại 3 case lỗi stream",
+  "startingHead": "72a8e70a5dd4a3987221bf501701f03c41490273",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "specSha": "3a12b167cff56ef839aa7160b5238c8bfd105e21",
+  "fullCheckpointQualification": false,
+  "a2BypassOwnerAuthorized": true,
+  "parentPlanHash": "f8bcff9230687d56842d682d31d564f5d85fb8bc65a23961ee751a73c33deca1",
+  "priorEvidence": {
+    "file": "a3-owner-authorized-bypass-20261014/a3-evidence.json",
+    "sha256": "9a2201bd005132a772292fb345fc3ff781d889739057e8d7e47f434dbd670849",
+    "runSourceSha": "2a6de4360aad04c57e750a15d9c12f3b4f300f04"
+  },
+  "scopeHash": "7ae993327ee6662fd733894e1fb42d3b00b96b39ee512e768cf4df604312c2ae",
+  "effectiveManifestHash": "6601c676ed7b9ee36559792075853c6848198796408778298ce4d931828e7f88",
+  "caseIds": [
+    "r5-referent-navy",
+    "r5-simple-price",
+    "r15-fit-reassurance"
+  ],
+  "priorAttemptIds": [
+    "r5-referent-navy:1",
+    "r5-simple-price:1",
+    "r15-fit-reassurance:1"
+  ],
+  "registered": 3,
+  "repetitions": 1,
+  "generationRetries": 0,
+  "maxGenerationRequestsPerRoleAttempt": 1,
+  "maximumGenerationRequests": 6,
+  "adoptedOutcomes": 0,
+  "execution": "FRESH_END_TO_END_OWNER_AND_VERIFIER",
+  "boundaryExecutableHash": "344035c06c67ecfae317d385ee07c96aed86aac37c27bbc497aca69c40260b37",
+  "vertexExecutableHash": "fb2054f3b82da64be777ba6b3accde769000864e7c8fa7a8346db973f79390fe"
+}

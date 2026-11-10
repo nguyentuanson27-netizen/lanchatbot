@@ -1,0 +1,118 @@
+{
+  "runSourceSha": "24d8ec62457f95865c80719a2e0c08fea697c657",
+  "targetRegistered": 19,
+  "targetRecorded": 19,
+  "targetTerminalDispositions": {
+    "SEND_ELIGIBLE": 18,
+    "FALLBACK": 1
+  },
+  "prerequisiteRegistered": 4,
+  "prerequisiteRecorded": 4,
+  "prerequisiteTerminalDispositions": {
+    "SEND_ELIGIBLE": 4
+  },
+  "totalRegistered": 23,
+  "totalRecorded": 23,
+  "allTerminalDispositions": {
+    "SEND_ELIGIBLE": 22,
+    "FALLBACK": 1
+  },
+  "providerRequests": 70,
+  "roles": {
+    "owner": {
+      "generations": 47,
+      "requests": 47,
+      "errors": 0,
+      "inputTokens": 225339,
+      "outputTokens": 38938,
+      "thinkingTokens": 36365,
+      "modelVersions": [
+        "gemini-3.5-flash-lite"
+      ]
+    },
+    "verifier": {
+      "generations": 23,
+      "requests": 23,
+      "errors": 0,
+      "inputTokens": 112893,
+      "outputTokens": 1852,
+      "thinkingTokens": 1264,
+      "modelVersions": [
+        "gpt-6.1-sol"
+      ]
+    }
+  },
+  "capturedWireBodies": 70,
+  "uniqueGenerationIds": 70,
+  "maxRequestsPerGeneration": 1,
+  "evaluatorLabelLeaks": 0,
+  "verifierVerdicts": {
+    "PASS": 21,
+    "FAIL": 2
+  },
+  "verifierLatencyMs": {
+    "n": 23,
+    "p50": 7327,
+    "p95": 15242,
+    "method": "NEAREST_RANK_ALL_ATTEMPTS_INCLUDING_ERRORS"
+  },
+  "addedVerificationLatencyMs": {
+    "n": 23,
+    "p50": 8902.801699999982,
+    "p95": 20716.107599999996,
+    "method": "NEAREST_RANK_ALL_ATTEMPTS_INCLUDING_ERRORS"
+  },
+  "providerHttpErrors": 0,
+  "providerErrorCodes": {},
+  "timeouts": 0,
+  "cost": null,
+  "costReason": "NOT_EXPOSED",
+  "retry": 0,
+  "repetitions": 1,
+  "sendEnabled": false,
+  "databases": {
+    "openings": {
+      "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+      "testDatabaseDropped": true,
+      "registeredOutcomes": 1,
+      "completedOutcomes": 1
+    },
+    "stateful": {
+      "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+      "testDatabaseDropped": true,
+      "registeredOutcomes": 4,
+      "completedOutcomes": 4
+    },
+    "negotiation": {
+      "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+      "testDatabaseDropped": true,
+      "registeredOutcomes": 3,
+      "completedOutcomes": 3
+    }
+  },
+  "verifierVerdictsByScope": {
+    "TARGET": {
+      "PASS": 18,
+      "FAIL": 1
+    },
+    "PREREQUISITE": {
+      "PASS": 3,
+      "FAIL": 1
+    }
+  },
+  "providerRequestsByScope": {
+    "TARGET": 58,
+    "PREREQUISITE": 12
+  },
+  "codeReceiptRecoveries": [
+    {
+      "caseId": "negotiation-price-objection",
+      "scope": "PREREQUISITE",
+      "terminalReason": "RECEIPT_BACKED_CART_SUMMARY",
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "FAIL"
+      }
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "registeredAt": "2026-10-23T02:34:52.708217+00:00",
+  "runSourceSha": "6cd998c0c0003a0e6f30068cb2941bb8d2dd7b73",
+  "sourceBaseSha": "a402e94b",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
+    "verifier": "0b240599a04d9a86c25ed2b3b815c152e83106c85e61940efde15b020e4c2fde"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "inputAndRunnerHashes": {
+    "manifest.json": "5a543c6582c1080eda1bb3a6daa4a3be8ed4f59af20574ec5d6d11389eeb433f",
+    "source-config.b1.json": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+    "prompts/owner.vi.txt": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
+    "prompts/verifier.vi.txt": "0b240599a04d9a86c25ed2b3b815c152e83106c85e61940efde15b020e4c2fde",
+    "sales-media-cases.json": "5e20e6521b47cf4d0b1aed58f6d06cb3000d84fd16d64c7e46e70f028ae4134e",
+    "sales-journeys-registration.mjs": "06fc31c7042bcf86af8b859045146c63dfa2cdd01d0bd3dc534dcfdac0af07ac",
+    "delivery-capture.mjs": "fa1ba775047e278d0af4038a6af6fbc7cc2e8f43112538d01d1051a9ace348cf",
+    "stateful-provider.mjs": "04aee57bc91cbaae26b88d01fdafb06a91d77770dc5a99c7aae686c185959f1c",
+    "isolated-integration.mjs": "75f567915c7cdbaa632ba9dc1103e2fff99f7e4a826fa2c4fcc5c6733a990f07",
+    "gemini-inference.mjs": "71bd19b0fff67eab4df8f209a1e38bef77b3525d60bdaf7af3640813795f6bda",
+    "protocol.mjs": "924dcddba243f2a0d58ea08b7a3b77d87781fb5c226791a805efdd1a738b5e59",
+    "advice-diagnostic.mjs": "6d11c9124d5d93b4dbab9940fb52444db07b3da80f6c4d6286065ce162e3b64c",
+    "handoff-matrix.candidate.json": "1fb7dd7cb5eab0e7685e0f3df1b1407d9bdea56dbe538034868b5189f9700c62",
+    "sales-media-preparation-20261023/advice-paired-inputs.json": "74479f6f26d5d773c0596709123c1ca8507754353ccc964571feee201783f1a0",
+    "sales-media-preparation-20261023/owner-advice.candidate.vi.txt": "a17b74dc6368841e3ed6e89621b562500dae5648d41ca8a9a02615321acc961a"
+  },
+  "sharedSelectorHash": "2bc9c4dac77e37bed5026db42e23f3033d92b7a4fb11422c65afe0c0ab8555c4",
+  "sharedSelectorBuiltHash": "0633bbdc821a4398cb8133c728621f7df6040673070962c518e01871d4f8d97e",
+  "orchestratorHash": "2820db7e83b11f66807e68f9fcd5a121fd1f3a2407a431391828b1edeb99b319",
+  "sourceAuditHash": "5ffce7f844535f130e89f752e61ccf2317636704d1cb9ea2f98882fb58516064",
+  "adviceDiagnosticOutcomes": 8,
+  "nativeMediaOutcomes": 4,
+  "repetitions": 1,
+  "maximumGenerationRequests": 32,
+  "adviceMaxRequests": 16,
+  "mediaMaxRequests": 16,
+  "generationRetry": 0,
+  "sendEnabled": false,
+  "scope": "Owner requested fix and model rerun; advice text pairs and four independent media ingress cases only. No full39, automatic repeats or promotion."
+}

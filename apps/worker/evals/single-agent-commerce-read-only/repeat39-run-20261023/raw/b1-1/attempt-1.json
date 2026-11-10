@@ -1,0 +1,117 @@
+{
+  "caseId": "b1-changed-occasion",
+  "sourceMode": "LIVE",
+  "elapsedMs": 14978.766499999998,
+  "runtime": {
+    "latest": "Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé.",
+    "history": [
+      {
+        "role": "customer",
+        "text": "Chị định lấy set Thạch Thảo mặc đi đám cưới."
+      },
+      {
+        "role": "shop",
+        "text": "Đi đám cưới mặc bộ này đẹp chị ạ."
+      }
+    ],
+    "initialProductCodes": [
+      "SV2447"
+    ]
+  },
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "OWNER_TOOL_MODE",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "recovery": null,
+    "sendEnabled": false,
+    "ownerGenerations": 3,
+    "verifierGenerations": 0,
+    "toolRounds": 2,
+    "toolCalls": 4,
+    "generations": [
+      {
+        "id": "01b28b4029e152a5fe5ae2ddec38fb195b92478acda9993f828f1a98ee02a889:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 3955.7023000000045,
+        "telemetry": {
+          "generationId": "01b28b4029e152a5fe5ae2ddec38fb195b92478acda9993f828f1a98ee02a889:owner:1",
+          "providerRequests": 1,
+          "authRequests": 1,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3533,
+          "outputTokens": 1023,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 18069,
+          "requestHash": "c68ad9aaa276f94fe96fd24e6ea665df7a99e7774b2507975c8bf0a6dc89d6a0",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 1003,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "01b28b4029e152a5fe5ae2ddec38fb195b92478acda9993f828f1a98ee02a889:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 3788.980500000005,
+        "telemetry": {
+          "generationId": "01b28b4029e152a5fe5ae2ddec38fb195b92478acda9993f828f1a98ee02a889:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 5270,
+          "outputTokens": 1163,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 27071,
+          "requestHash": "35bd0a33ea7ba8a4ba716ec75a4c7d95b091bbe5d3a646ebf820c92e3c166213",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 3,
+          "thinkingTokens": 1113,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "01b28b4029e152a5fe5ae2ddec38fb195b92478acda9993f828f1a98ee02a889:owner:3",
+        "role": "owner",
+        "status": "PROVIDER_ERROR",
+        "latencyMs": 1149.6074999999983,
+        "telemetry": {
+          "generationId": "01b28b4029e152a5fe5ae2ddec38fb195b92478acda9993f828f1a98ee02a889:owner:3",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 7242,
+          "outputTokens": 155,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 35160,
+          "requestHash": "33dece99622877a954ca84398c84936a9def1dc82a522147dcced5ec2ca4c749",
+          "functionCallingMode": "NONE",
+          "declaredToolCount": 0,
+          "thinkingTokens": 124,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": true
+        }
+      }
+    ],
+    "toolLatencyMs": 5358.749400000001,
+    "verificationLatencyMs": null
+  },
+  "counters": {
+    "embeddingCalls": 1,
+    "policyReads": 0,
+    "catalogReads": 4,
+    "posReads": 3
+  }
+}

@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
+import { CommerceMediaDeliveryBindingV1Schema, CommercePublicCartSummaryV1Schema, type CommercePublicCartEventV1 } from "@lana/contracts";
 import {
   canonicalBuyingIntentAuthorizesCartOpenV1,
   canonicalBuyingIntentAuthorizesCartMutationV1,
@@ -54,6 +55,7 @@ import {
   applyCanonicalCartDecisionV2,
   applyCheckoutDetailsTransitionV1,
   applySalesClarificationTransitionV1,
+  clarificationAfterCheckoutCaptureV1,
   canonicalCartPolicyLinesV2,
   canonicalNegotiationEventFingerprintV1,
   createCanonicalCartV2,
@@ -135,6 +137,10 @@ export interface RealtimeMetaPlan {
   readonly sourceMessageIdHash?: string;
   readonly effectReadiness?: DeterministicEffectReadinessV1;
   readonly protectedClaims?: readonly import("@lana/contracts").ProtectedClaimV1[];
+  /** Candidate-specific immutable gate input, encrypted with each Outbox unit. */
+  readonly mediaBinding?: unknown;
+  readonly handoffBinding?: unknown;
+  readonly publicCartSummary?: unknown;
 }
 
 export interface RealtimePancakeTagPlan {
@@ -168,7 +174,7 @@ export interface RealtimeSalesCycleEventPlan {
   readonly cartId: string | null;
   readonly cartVersion: number | null;
   readonly reasonCode: string | null;
-  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | null;
+  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | "SET_COMPONENT_VARIANT" | "REPLACE_LINE" | null;
   readonly mutationPayloadHash?: string | null;
   readonly negotiationTransitionEvidence?: import("@lana/contracts").NegotiationTransitionEvidenceV1;
   readonly checkoutDetailsTransitionEvidence?: import("@lana/contracts").CheckoutDetailsTransitionEvidenceV1;
@@ -412,6 +418,8 @@ export interface RealtimeCommitInput<TState, TSalesState = unknown> {
    * no-op, so a stale model result can never be published.
    */
   readonly inboxBatchGuard?: RealtimeInboxBatchGuard;
+  /** Bounded native tool turns commit effects separately and acknowledge their source at the terminal commit. */
+  readonly completeInboxBatch?: boolean;
 }
 
 export interface RealtimeCommitResult {
@@ -426,7 +434,7 @@ export interface RealtimeCommitResult {
     | null;
   readonly sendAuthorized: boolean;
   readonly reasonCodes: readonly string[];
-  readonly inboxBatchStatus?: "NOT_REQUESTED" | "COMMITTED" | "SUPERSEDED";
+  readonly inboxBatchStatus?: "NOT_REQUESTED" | "COMMITTED" | "SUPERSEDED" | "RETAINED";
 }
 
 function sha256CanonicalV1(value: unknown): string {
@@ -564,7 +572,7 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     if (claims.some((claim) =>
       Date.parse(claim.provenance.observedAt) >
         now.getTime() + MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1 ||
-      Date.parse(claim.provenance.expiresAt) <= now.getTime()
+      (claim.provenance.expiresAt !== null && Date.parse(claim.provenance.expiresAt) <= now.getTime())
     )) {
       throw new Error("EFFECT_READINESS_CLAIM_STALE");
     }
@@ -592,12 +600,13 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     if (cart !== undefined && (
       readiness.effect !== "PROTECTED_OUTBOUND" || readiness.cartId !== null
     )) {
-      const lines = (cart.lines ?? []).map((line) => ({
+      const lines = CartV1Schema.parse(cart).lines.map((line) => ({
         parentProductId: line.parentProductId,
         offerId: line.offerId,
         quantity: line.quantity,
         posUnitPriceVnd: line.posUnitPriceVnd,
         priceFactRef: line.priceAuthority?.priceFactRef ?? null,
+        components: line.components,
       }));
       if (lines.some((line) =>
         typeof line.parentProductId !== "string" ||
@@ -606,6 +615,7 @@ function validateSalesEffectReadiness<TState, TSalesState>(
         (typeof line.posUnitPriceVnd !== "number" && line.posUnitPriceVnd !== null)
       )) throw new Error("EFFECT_READINESS_CART_LINE_INVALID");
       const cartClaimSemantics = validateCartEffectClaimSemanticsV1({
+        variantHash: sha256TextV1,
         effect: readiness.effect,
         lines: lines as readonly {
           parentProductId: string;
@@ -613,6 +623,7 @@ function validateSalesEffectReadiness<TState, TSalesState>(
           quantity: number;
           posUnitPriceVnd: number | null;
           priceFactRef: string | null;
+          components: import("@lana/contracts").CartLineV1["components"];
         }[],
         claims,
         cartId: readiness.cartId,
@@ -716,11 +727,15 @@ function validateSalesEffectReadiness<TState, TSalesState>(
       Date.parse(receipt.evaluatedAt) > now.getTime() + MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1) {
       throw new Error("CART_MUTATION_RECEIPT_MISMATCH");
     }
-    if (receipt.mutation.kind === "ADD_LINE" && (
+    if ((receipt.mutation.kind === "ADD_LINE" || receipt.mutation.kind === "REPLACE_LINE") && (
       receipt.authority.productId !== receipt.mutation.line.parentProductId ||
       receipt.authority.offerId !== receipt.mutation.line.offerId
     )) throw new Error("CART_MUTATION_AUTHORITY_SCOPE_MISMATCH");
-    if (receipt.authority.action === "REMOVE_LINE") {
+    const native = receipt.authority.authorityKind === "NATIVE_TOOL_PERMISSION";
+    if (native !== buyingIntent.contributors.includes("NATIVE_TOOL_PERMISSION") || (native && buyingIntent.evidenceHash !== sha256CanonicalV1([
+      "NATIVE_COMMERCE_PERMISSION_V1", currentSourceMessageIdHash, receipt.commandIdHash, receipt.mutationPayloadHash,
+    ]))) throw new Error("NATIVE_COMMAND_BINDING_MISMATCH");
+    if (receipt.authority.authorityKind === "DETERMINISTIC_REMOVE_CLASSIFIER") {
       const removalAuthority = sha256CanonicalV1([
         "DETERMINISTIC_REMOVE_CLASSIFIER_V1",
         receipt.authority.sourceMessageIdHash,
@@ -735,7 +750,7 @@ function validateSalesEffectReadiness<TState, TSalesState>(
         buyingIntent,
         receipt.authority.action,
         receipt.authority.productId,
-        receipt.mutation.kind === "ADD_LINE"
+        receipt.mutation.kind === "ADD_LINE" || receipt.mutation.kind === "REPLACE_LINE"
           ? receipt.mutation.line.quantity
           : receipt.mutation.kind === "SET_QUANTITY"
             ? receipt.mutation.quantity
@@ -839,7 +854,16 @@ function validateLockedCartMutationTransitionV1(
       throw new Error("CART_MUTATION_BEFORE_STATE_MISMATCH");
     }
     let authorityLine: CartV1["lines"][number] | undefined;
-    if (receipt.mutation.kind === "ADD_LINE") {
+    if (receipt.mutation.kind === "REPLACE_LINE") {
+      const lineId = receipt.mutation.lineId;
+      const old = replayedCart.lines.find(l => l.lineId === lineId);
+      const bound = receipt.authority.replacedLine;
+      if (!old || !bound || bound.lineId !== old.lineId || bound.productId !== old.parentProductId ||
+        bound.offerId !== old.offerId || bound.beforeLineHash !== sha256CanonicalV1(old)) {
+        throw new Error("CART_MUTATION_OLD_LINE_MISMATCH");
+      }
+      authorityLine = receipt.mutation.line;
+    } else if (receipt.mutation.kind === "ADD_LINE") {
       authorityLine = receipt.mutation.line;
     } else {
       const mutationLineId = receipt.mutation.lineId;
@@ -1121,7 +1145,7 @@ function validateLockedProtectedSalesStateTransitionV1(
         break;
       case "CHECKOUT_DETAILS_CAPTURED":
         if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
-        ["checkoutDraft", "preview"].forEach((key) => ownedFields.add(key));
+        ["checkoutDraft", "preview", "clarification"].forEach((key) => ownedFields.add(key));
         break;
       case "CLARIFICATION_REQUESTED":
       case "CLARIFICATION_RESOLVED":
@@ -1131,6 +1155,7 @@ function validateLockedProtectedSalesStateTransitionV1(
       case "PREVIEW_CREATED":
         if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
         ownedFields.add("preview");
+        ownedFields.add("clarification");
         break;
       case "CONFIRM_PURCHASE":
         ownedFields.add(event.outcome === "HANDOFF" ? "preview" : "confirmation");
@@ -1221,6 +1246,7 @@ function validateLockedProtectedSalesArtifactsV1(
         )) {
         throw new Error("CHECKOUT_DETAILS_TRANSITION_REPLAY_MISMATCH");
       }
+      clarification = clarificationAfterCheckoutCaptureV1(clarification, checkoutDraft, transition.draft, evidence.details);
       checkoutDraft = transition.draft;
       preview = null;
       break;
@@ -1237,6 +1263,8 @@ function validateLockedProtectedSalesArtifactsV1(
       const evidence = ClarificationTransitionEvidenceV1Schema.parse(
         event.clarificationTransitionEvidence,
       );
+      if (clarification?.missingFields.length === 1 && clarification.missingFields[0] === "ORDER_PREVIEW" &&
+        evidence.transition.kind === "RESOLVED") throw new Error("PAYMENT_RECAPTURE_PREVIEW_REQUIRED");
       const beforeHash = sha256TextV1(
         canonicalClarificationStateHashPreimageV1(clarification),
       );
@@ -1259,6 +1287,10 @@ function validateLockedProtectedSalesArtifactsV1(
         transition: evidence.transition,
         appliedAt: event.occurredAt,
       });
+      if(clarification?.missingFields.length===1&&clarification.missingFields[0]==="ORDER_PREVIEW"&&
+        (evidence.transition.kind!=="REQUESTED"||evidence.transition.missingFields.length!==1||evidence.transition.missingFields[0]!=="PAYMENT_METHOD"))throw new Error("PAYMENT_RECAPTURE_PREVIEW_REQUIRED");
+      if(clarification?.reasonCode==="CHECKOUT_DETAILS_MISSING"&&clarification.missingFields.length===1&&clarification.missingFields[0]==="PAYMENT_METHOD"&&
+        (evidence.transition.kind==="RESOLVED"||evidence.transition.reasonCode!=="CHECKOUT_DETAILS_MISSING"||evidence.transition.missingFields.length!==1||evidence.transition.missingFields[0]!=="PAYMENT_METHOD"))throw new Error("PAYMENT_CHOICE_UNRESOLVED");
       if (transition.status !== "APPLIED" ||
         evidence.afterClarificationHash !== sha256TextV1(
           canonicalClarificationStateHashPreimageV1(transition.clarification),
@@ -1275,6 +1307,7 @@ function validateLockedProtectedSalesArtifactsV1(
       preview = null;
       break;
     case "PREVIEW_CREATED": {
+      if(clarification?.missingFields.length===1&&clarification.missingFields[0]==="PAYMENT_METHOD")throw new Error("PAYMENT_CHOICE_UNRESOLVED");
       if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
       if (finalCart === null) throw new Error("PREVIEW_TRANSITION_CART_REQUIRED");
       const candidate = OrderPreviewV1Schema.parse(event.previewArtifact);
@@ -1291,9 +1324,12 @@ function validateLockedProtectedSalesArtifactsV1(
         throw new Error("ORDER_PREVIEW_TRANSITION_REPLAY_MISMATCH");
       }
       preview = transition.preview;
+      if (clarification?.missingFields.length === 1 && clarification.missingFields[0] === "ORDER_PREVIEW") clarification = null;
       break;
     }
     case "CONFIRM_PURCHASE": {
+      if(clarification?.missingFields.length===1&&clarification.missingFields[0]==="ORDER_PREVIEW")throw new Error("PAYMENT_RECAPTURE_PREVIEW_REQUIRED");
+      if(clarification?.missingFields.length===1&&clarification.missingFields[0]==="PAYMENT_METHOD")throw new Error("PAYMENT_CHOICE_UNRESOLVED");
       if (event.outcome === "HANDOFF") {
         preview = null;
         break;
@@ -1496,6 +1532,9 @@ async function validateLockedCartOpenTransitionV1(
   const evidence = CartOpenEvidenceV1Schema.parse(plan.cartOpenEvidence);
   const buyingIntent = CanonicalBuyingIntentV1Schema.parse(plan.canonicalBuyingIntent);
   const seedLine = evidence.draft.lines[0]!;
+  if (buyingIntent.contributors.includes("NATIVE_TOOL_PERMISSION") && buyingIntent.evidenceHash !== sha256CanonicalV1([
+    "NATIVE_COMMERCE_PERMISSION_V1", evidence.sourceMessageIdHash, evidence.commandIdHash, evidence.cartDraftRef.contentHash.replace(/^sha256:/u, ""),
+  ])) throw new Error("NATIVE_COMMAND_BINDING_MISMATCH");
   if (evidence.sourceMessageIdHash !== plan.sourceMessageIdHash ||
     evidence.commandIdHash !== sha256TextV1(event.commandId) ||
     evidence.createdAt !== event.occurredAt.toISOString() ||
@@ -1544,7 +1583,6 @@ async function validateLockedCartOpenTransitionV1(
   const next = salesStateRecordV1(plan.state);
   const nextCart = cartFromSalesStateV1(next);
   if (event.cartId !== nextCart.cartId || event.cartVersion !== nextCart.revision ||
-    event.stateRevisionBefore !== plan.expectedRevision ||
     event.stateRevisionAfter !== Number(next.revision)) {
     throw new Error("CART_OPEN_EVENT_BINDING_MISMATCH");
   }
@@ -1740,7 +1778,7 @@ function validateMetaEffectReadiness<TState, TSalesState>(
   if (claims.some((claim) =>
     Date.parse(claim.provenance.observedAt) >
       now.getTime() + MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1 ||
-    Date.parse(claim.provenance.expiresAt) <= now.getTime()
+    (claim.provenance.expiresAt !== null && Date.parse(claim.provenance.expiresAt) <= now.getTime())
   )) {
     throw new Error("PROTECTED_OUTBOUND_CLAIM_STALE");
   }
@@ -1765,6 +1803,7 @@ function validateMetaEffectReadiness<TState, TSalesState>(
     const cartEnvelope = state?.cart as { value?: unknown } | null | undefined;
     const cart = CartV1Schema.parse(cartEnvelope?.value);
     const cartSemantics = validateCartEffectClaimSemanticsV1({
+      variantHash: sha256TextV1,
       effect: "PROTECTED_OUTBOUND",
       lines: cart.lines.map((line) => ({
         parentProductId: line.parentProductId,
@@ -1772,6 +1811,7 @@ function validateMetaEffectReadiness<TState, TSalesState>(
         quantity: line.quantity,
         posUnitPriceVnd: line.posUnitPriceVnd,
         priceFactRef: line.priceAuthority?.priceFactRef ?? null,
+        components: line.components,
       })),
       claims,
       cartId: readiness.cartId,
@@ -1825,6 +1865,8 @@ export interface ClaimedMetaOutbox {
   readonly pancakeConversationId: string | null;
   readonly message: RealtimeMetaMessageUnit;
   readonly attemptCount: number;
+  readonly mediaBinding?: unknown;
+  readonly handoffBinding?: unknown;
 }
 
 export interface ClaimedPancakeTagOutbox {
@@ -2129,6 +2171,10 @@ export class PostgresRealtimeRuntimeStore {
       readonly fieldEvidence: TEvidence;
     },
     now = new Date(),
+    guard?: Pick<RealtimeCommitInput<unknown>, "conversationId" | "expectedStateVersion"> & {
+      readonly inboxBatchGuard: RealtimeInboxBatchGuard;
+      readonly sourceMessageIdHash: string;
+    },
   ): Promise<boolean> {
     if (
       !pageId.trim() ||
@@ -2141,30 +2187,42 @@ export class PostgresRealtimeRuntimeStore {
     ) {
       throw new Error("CUSTOMER_PROFILE_CAS_INPUT_INVALID");
     }
-    const expiresAt = new Date(now.getTime() + 48 * 60 * 60 * 1_000);
-    const result = await this.pool.query(
-      `UPDATE realtime_customer_profiles
-       SET revision = $4,
-           profile_snapshot = $5::jsonb,
-           field_evidence = $6::jsonb,
-           expires_at = $7,
-           updated_at = $8
-       WHERE page_id = $1
-         AND customer_hash = $2
-         AND revision = $3
-         AND expires_at > $8`,
-      [
-        pageId,
-        customerHash,
-        expectedRevision,
-        next.revision,
-        JSON.stringify(next.profile),
-        JSON.stringify(next.fieldEvidence),
-        expiresAt,
-        now,
-      ],
-    );
-    return result.rowCount === 1;
+    const update = async (client: Pool | PoolClient, writeNow: Date): Promise<boolean> => {
+      const expiresAt = new Date(writeNow.getTime() + 48 * 60 * 60 * 1_000);
+      const result = await client.query(
+        `UPDATE realtime_customer_profiles
+         SET revision = $4,
+             profile_snapshot = $5::jsonb,
+             field_evidence = $6::jsonb,
+             expires_at = $7,
+             updated_at = $8
+         WHERE page_id = $1
+           AND customer_hash = $2
+           AND revision = $3
+           AND expires_at > $8`,
+        [pageId, customerHash, expectedRevision, next.revision, JSON.stringify(next.profile),
+          JSON.stringify(next.fieldEvidence), expiresAt, writeNow],
+      );
+      return result.rowCount === 1;
+    };
+    if (!guard) return update(this.pool, now);
+    return withTransaction(this.pool, async client => {
+      // Same lock order as Inbox enqueue and the existing conversation/effect commit.
+      const route = await client.query<{ routing_owner: string; kill_switch: boolean; transaction_now: Date }>(
+        `SELECT routing_owner, kill_switch, clock_timestamp() AS transaction_now
+         FROM pages WHERE page_id = $1 FOR UPDATE`, [pageId]);
+      const page = route.rows[0];
+      if (!page || page.routing_owner !== "APP" || page.kill_switch) return false;
+      if (!(page.transaction_now instanceof Date) || !Number.isFinite(page.transaction_now.getTime())) throw new Error("REALTIME_TRANSACTION_CLOCK_INVALID");
+      const source = await this.lockCurrentInboxBatch(client, { pageId, customerHash }, guard.inboxBatchGuard);
+      if (!source.current || source.sourceMessageIdHash !== guard.sourceMessageIdHash) return false;
+      const authority = await client.query<{ conversation_owner: string }>(
+        `SELECT conversation_owner FROM conversations
+         WHERE conversation_id = $1 AND page_id = $2 AND customer_hash = $3 AND state_version = $4
+         FOR UPDATE`, [guard.conversationId, pageId, customerHash, guard.expectedStateVersion]);
+      if (authority.rows[0]?.conversation_owner !== "BOT") return false;
+      return update(client, page.transaction_now);
+    });
   }
 
   async loadOrCreateSalesCycle<TState>(
@@ -2280,6 +2338,21 @@ export class PostgresRealtimeRuntimeStore {
     return result.rowCount === 1;
   }
 
+  /** PII-free readback of an effect committed by the existing transaction owner. Never infer it from dialogue. */
+  async readCommittedSalesCycleEvent(pageId: string, conversationId: string, commandId: string): Promise<
+    Pick<RealtimeSalesCycleEventPlan, "commandKind" | "stateRevisionAfter" | "cartId" | "occurredAt"> | null
+  > {
+    const result = await this.pool.query<{
+      command_kind: RealtimeSalesCycleEventPlan["commandKind"]; state_revision_after: string; cart_id: string | null; occurred_at: Date;
+    }>(`SELECT command_kind, state_revision_after, cart_id, occurred_at
+        FROM sales_cycle_events
+        WHERE page_id = $1 AND conversation_id = $2 AND command_id_hash = $3 AND outcome = 'APPLIED'`,
+      [pageId, conversationId, this.cipher.fingerprint(commandId, "sales-cycle-command:v1")]);
+    const row = result.rows[0];
+    return row ? { commandKind: row.command_kind, stateRevisionAfter: Number(row.state_revision_after), cartId: row.cart_id,
+      occurredAt: row.occurred_at } : null;
+  }
+
   async commit<TState, TSalesState = unknown>(
     input: RealtimeCommitInput<TState, TSalesState>,
     now = new Date(),
@@ -2300,6 +2373,9 @@ export class PostgresRealtimeRuntimeStore {
     input: RealtimeCommitInput<TState, TSalesState>,
     now = new Date(),
   ): Promise<RealtimeCommitResult> {
+      if (input.completeInboxBatch === false && (!input.inboxBatchGuard || input.metaPlan)) {
+        throw new Error("CURRENT_SOURCE_LEASE");
+      }
       // Keep the same lock order as webhook enqueue: pages -> ingress head.
       // Reversing these two locks allows an enqueue and a model commit for the
       // same page/conversation to deadlock under load.
@@ -2521,7 +2597,7 @@ export class PostgresRealtimeRuntimeStore {
         throw new Error("CONTEXT_V2_CAPTURE_REQUIRED");
       }
 
-      if (input.inboxBatchGuard) {
+      if (input.inboxBatchGuard && input.completeInboxBatch !== false) {
         await this.completeInboxBatch(
           client,
           input,
@@ -2541,7 +2617,7 @@ export class PostgresRealtimeRuntimeStore {
         sendAuthorized,
         reasonCodes,
         inboxBatchStatus: input.inboxBatchGuard
-          ? "COMMITTED"
+          ? input.completeInboxBatch === false ? "RETAINED" : "COMMITTED"
           : "NOT_REQUESTED",
       };
   }
@@ -2671,7 +2747,7 @@ export class PostgresRealtimeRuntimeStore {
       },
       this.metaRecipientAad(row.page_id, row.outbox_id),
     );
-    const payload = this.cipher.decryptJson<RealtimeMetaMessageUnit>(
+    const { commerceMediaBinding, commerceHandoffBinding, commercePublicCartSummary: _publicSummary, ...payload } = this.cipher.decryptJson<RealtimeMetaMessageUnit & { commerceMediaBinding?: unknown; commerceHandoffBinding?: unknown; commercePublicCartSummary?: unknown }>(
       this.bundleFromMetaRow(row),
       this.metaPayloadAad(row.page_id, row.outbox_id),
     );
@@ -2704,7 +2780,92 @@ export class PostgresRealtimeRuntimeStore {
       pancakeConversationId,
       message: payload,
       attemptCount: row.attempt_count,
+      ...(commerceMediaBinding === undefined ? {} : { mediaBinding: commerceMediaBinding }),
+      ...(commerceHandoffBinding === undefined ? {} : { handoffBinding: commerceHandoffBinding }),
     };
+  }
+
+  /** Numeric communication history only. Never returns plaintext, effect authority or checkout fields. */
+  async readAcceptedCommerceCartSummaries(input:{pageId:string;conversationId:string;customerHash:string;recipientHash:string;before:Date}):Promise<CommercePublicCartEventV1[]> {
+    const result=await this.pool.query<MetaOutboxRow & {status:string;accepted_at:Date;meta_message_id:string}>(
+      `SELECT o.* FROM meta_outbox o JOIN conversations c ON c.conversation_id=o.conversation_id AND c.page_id=o.page_id
+       WHERE o.page_id=$1 AND o.conversation_id=$2 AND c.customer_hash=$3
+         AND o.status IN ('SENT_ACCEPTED','DELIVERED','READ') AND o.meta_message_id IS NOT NULL
+         AND o.accepted_at IS NOT NULL AND o.accepted_at<$4 AND o.payload_expires_at>now() AND o.sequence_no=0
+       ORDER BY o.accepted_at DESC,o.sequence_no DESC,o.outbox_id DESC LIMIT 30`,
+      [input.pageId,input.conversationId,input.customerHash,input.before]);
+    const events:CommercePublicCartEventV1[]=[];
+    const hash=(v:unknown)=>createHash("sha256").update(canonicalJsonV1(v)).digest("hex");
+    for(const row of result.rows){
+      if(events.length>=2)break;
+      try {
+        if(!["SENT_ACCEPTED","DELIVERED","READ"].includes(row.status)||!row.meta_message_id||row.page_id!==input.pageId||row.conversation_id!==input.conversationId||
+          !row.accepted_at||row.accepted_at>=input.before||row.payload_expires_at<=new Date())continue;
+        const {commercePublicCartSummary,commerceMediaBinding:_media,commerceHandoffBinding:_handoff,...message}=this.cipher.decryptJson<
+          RealtimeMetaMessageUnit & {commercePublicCartSummary?:unknown;commerceMediaBinding?:unknown;commerceHandoffBinding?:unknown}>(this.bundleFromMetaRow(row),this.metaPayloadAad(row.page_id,row.outbox_id));
+        const parsed=CommercePublicCartSummaryV1Schema.safeParse(commercePublicCartSummary);
+        if(!parsed.success||message.kind!=="TEXT")continue;
+        const b=parsed.data;
+        if(b.pageId!==input.pageId||b.conversationId!==input.conversationId||b.customerHash!==input.customerHash||b.recipientHash!==input.recipientHash||
+          b.responseGroupId!==row.response_group_id||b.sequence!==row.sequence_no||b.messageHash!==hash(message))continue;
+        const event={type:"ACCEPTED_PUBLIC_CART_SUMMARY" as const,eventId:hash([b.responseGroupId,b.sequence,b.messageHash]),messageHash:b.messageHash,
+          acceptedAt:row.accepted_at.toISOString(),cartId:b.cartId,cartVersion:b.cartVersion,
+          ...(b.discountTotalVnd===undefined?{}:{discountTotalVnd:b.discountTotalVnd}),grandTotalVnd:b.grandTotalVnd};
+        if(!events.some(e=>e.eventId===event.eventId))events.push(event);
+      }catch{/* Legacy/unreadable payloads supply no inferred public history. */}
+    }
+    return events.reverse();
+  }
+
+  /** Bounded read-only delivery memory. Reloadable from durable accepted Outbox,
+   * including when the best-effort chat history write failed after acceptance.
+   * No URL, recipient, payload or private binding crosses this projection. */
+  async readAcceptedCommerceMedia(input: { pageId: string; conversationId: string; customerHash: string;
+    recipientHash: string; before: Date }): Promise<{ productId: string; assetRef: string; status: string; occurredAt: string }[]> {
+    const result = await this.pool.query<MetaOutboxRow & { status: string; accepted_at: Date }>(
+      `SELECT o.* FROM meta_outbox o JOIN conversations c ON c.conversation_id=o.conversation_id AND c.page_id=o.page_id
+       WHERE o.page_id=$1 AND o.conversation_id=$2 AND c.customer_hash=$3
+         AND o.status IN ('SENT_ACCEPTED','DELIVERED','READ') AND o.meta_message_id IS NOT NULL
+         AND o.accepted_at IS NOT NULL AND o.accepted_at<$4 AND o.payload_expires_at>now()
+       ORDER BY o.accepted_at DESC,o.sequence_no DESC,o.outbox_id DESC LIMIT 30`,
+      [input.pageId, input.conversationId, input.customerHash, input.before]);
+    const media: { productId: string; assetRef: string; status: string; occurredAt: string }[] = [];
+    for (const row of result.rows) {
+      if (media.length >= 6) break;
+      try {
+        if (!["SENT_ACCEPTED", "DELIVERED", "READ"].includes(row.status) || row.page_id !== input.pageId ||
+          row.conversation_id !== input.conversationId || !row.accepted_at || row.accepted_at >= input.before) continue;
+        const { commerceMediaBinding, commerceHandoffBinding: _handoff, ...message } = this.cipher.decryptJson<
+          RealtimeMetaMessageUnit & { commerceMediaBinding?: unknown; commerceHandoffBinding?: unknown }>(
+          this.bundleFromMetaRow(row), this.metaPayloadAad(row.page_id, row.outbox_id));
+        const parsed = CommerceMediaDeliveryBindingV1Schema.safeParse(commerceMediaBinding);
+        if (!parsed.success || message.kind !== "IMAGE") continue;
+        const b = parsed.data, hash = (value: unknown) => createHash("sha256").update(canonicalJsonV1(value)).digest("hex");
+        if (b.pageId !== input.pageId || b.conversationId !== input.conversationId || b.customerHash !== input.customerHash ||
+          b.recipientHash !== input.recipientHash || b.responseGroupId !== row.response_group_id ||
+          b.messageHashes[row.sequence_no] !== hash(message)) continue;
+        // A single physical attachment can have a validated proof for each
+        // product that contributed it. Retain each product's history.
+        const products = [...new Set(b.images.filter(i => i.url === message.imageUrl).map(i => i.productId))];
+        for (const productId of products.slice(0, 6 - media.length)) {
+          media.push({ productId, assetRef: `asset:${hash(message.imageUrl)}`,
+            status: row.status, occurredAt: row.accepted_at.toISOString() });
+        }
+      } catch { /* Expired/unreadable or legacy payloads supply no inferred history. */ }
+    }
+    return media.reverse();
+  }
+
+  /** Proof of this exact acknowledgement intent, not a provider tag receipt. */
+  async hasCommittedHandoffDelivery(input: { pageId: string; conversationId: string; revision: number; reason: string;
+    responseGroupId: string; bindingHash: string }): Promise<boolean> {
+    const result = await this.pool.query<{ proven: boolean }>(`SELECT EXISTS (
+      SELECT 1 FROM handoff_events WHERE page_id=$1 AND conversation_id=$2
+      AND direction='BOT_TO_HUMAN' AND owner_before='BOT' AND owner_after='HUMAN'
+      AND handoff_generation=$3 AND reason_code=$4
+      AND reason_detail_safe @> $5::jsonb) AS proven`, [input.pageId, input.conversationId, input.revision, input.reason,
+      JSON.stringify({ responseGroupId: input.responseGroupId, deliveryBindingHash: input.bindingHash })]);
+    return result.rows[0]?.proven === true;
   }
 
   async readMetaResponseGroupGate(
@@ -3264,9 +3425,9 @@ export class PostgresRealtimeRuntimeStore {
     await this.pool.end();
   }
 
-  private async lockCurrentInboxBatch<TState>(
+  private async lockCurrentInboxBatch(
     client: PoolClient,
-    input: RealtimeCommitInput<TState>,
+    input: Pick<RealtimeCommitInput<unknown>, "pageId" | "customerHash">,
     guard: RealtimeInboxBatchGuard,
   ): Promise<Readonly<{ current: boolean; sourceMessageIdHash: string | null }>> {
     if (
@@ -3496,7 +3657,9 @@ export class PostgresRealtimeRuntimeStore {
         this.metaRecipientAad(input.pageId, outboxId),
       );
       const payload = this.cipher.encryptJson(
-        message,
+        { ...message, ...(plan.mediaBinding === undefined ? {} : { commerceMediaBinding: plan.mediaBinding }),
+          ...(plan.handoffBinding === undefined ? {} : { commerceHandoffBinding: plan.handoffBinding }),
+          ...(plan.publicCartSummary === undefined || sequence!==0 ? {} : { commercePublicCartSummary: CommercePublicCartSummaryV1Schema.parse(plan.publicCartSummary) }) },
         this.metaPayloadAad(input.pageId, outboxId),
         new Date(now.getTime() + 20 * 86_400_000),
       );
@@ -3642,6 +3805,10 @@ export class PostgresRealtimeRuntimeStore {
       validateLockedCanonicalCartTransitionV1(
         plan as RealtimeSalesCyclePlan<unknown>, lockedState, now,
       );
+      if (plan.events.length === 0) {
+        if (canonicalJsonV1(plan.state) !== canonicalJsonV1(lockedState)) throw new Error("SALES_READBACK_CHANGED");
+        return; // Lock/readback for the final response; do not manufacture a sales revision or renew its expiry.
+      }
     } else {
       throw new Error("CART_MUTATION_LOCKED_STATE_REQUIRED");
     }

@@ -1,0 +1,132 @@
+{
+  "identity": {
+    "sourceSha": "362876e83be4014c28fae60abcaf2e5a3243adb1",
+    "manifestHash": "652116f4e8a3050ae6a51bf88a288f95275c3b0dfdae47c9bf2a4b3a1c655532",
+    "sourceConfigHash": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+    "promptHashes": {
+      "owner": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
+      "verifier": "02a727ab7b188c11b15fc74ee46744d7027d63c016f7a34f163a1517ae722800"
+    },
+    "models": {
+      "conversation": {
+        "provider": "VERTEX_AI",
+        "model": "gemini-3.5-flash-lite",
+        "version": "gemini-3.5-flash-lite",
+        "effort": "high",
+        "location": "global",
+        "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+        "generationConfig": {
+          "candidateCount": 1,
+          "responseMimeType": "text/plain",
+          "maxOutputTokens": 8192,
+          "thinkingConfig": {
+            "thinkingLevel": "HIGH",
+            "includeThoughts": false
+          },
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "retry": 0,
+          "timeoutMs": 90000
+        }
+      },
+      "verifier": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      }
+    },
+    "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+    "corpusHashes": {
+      "cases.b1.json": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+      "stateful-cases.json": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+      "sales-journeys.candidate.json": "4b888f6e44f5b4e144125da38d70bf175946dc5277eabb8d0ab5a6639077fbeb",
+      "sales-media-followup-cases.json": "dff5c57dff681f75ac35e484c014b0c62965bde2169941aa5b488ce879bba93a"
+    }
+  },
+  "status": "NOT_PROMOTED",
+  "registered": 4,
+  "completed": 4,
+  "eligible": 3,
+  "fallback": 1,
+  "providerRequests": 8,
+  "errors": 0,
+  "retry": 0,
+  "reason": "Pair1 improvement unclear; pair2 visual loses usefulness through fallback. N1 does not establish stability. Native retains existing baseline owner/tool use; scoped feedback candidate worth retaining because controls pass.",
+  "entries": [
+    {
+      "slot": 1,
+      "artifactHash": "48fc91ce9b71d30e62099024473a4515dad829ec2126db66fd142fc972dec971",
+      "pair": 0,
+      "arm": "baseline",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ mặc đi tiệc ban ngày rất hợp và không bị rườm rà đâu chị nhé, vì chân váy ren tơ Hàn có độ rũ và chuyển động mềm mại tự nhiên, kết hợp cùng áo thêu form nhẹ nhàng tạo tổng thể sang trọng nhưng vẫn giữ được nét thanh thoát, dịu dàng. \n\nThêm nữa, trọn bộ set váy này có giá 799.000đ, hoàn toàn nằm trong ngân sách 900 nghìn của chị (nếu mua lẻ áo 499.000đ và chân váy 449.000đ sẽ tổng 948.000đ và vượt ngân sách ạ). Chị lấy nguyên set này luôn nha chị?",
+        "fallbackId": null
+      },
+      "wholeTurnFinding": "Trả lời đúng dịp và giá; dài, thêm phép so mua lẻ không cần thiết, nhiều tính từ. Chưa hơn rõ khả năng tư vấn trước."
+    },
+    {
+      "slot": 2,
+      "artifactHash": "d35b57dfdd0f7c003fa8b07b0ec45bdbc4e1ae35e46983756547b958138486f8",
+      "pair": 0,
+      "arm": "visual",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ không bị rườm rà đâu chị nhé. Chân váy dùng chất ren tơ Hàn mềm mại với độ rũ tự nhiên, kết hợp cùng áo tơ thêu thanh thoát nên tổng thể tạo hiệu ứng bay bổng, nhã nhặn và sang trọng, mặc đi tiệc ban ngày cực kỳ hợp ạ. \n\nSet váy này có giá 799.000đ, hoàn toàn vừa vặn với ngân sách 900.000đ của chị.",
+        "fallbackId": null
+      },
+      "wholeTurnFinding": "Ngắn hơn baseline nhưng vẫn diễn giải chất liệu và tính từ chung; chưa có lý do chọn rõ hơn nhờ pixel."
+    },
+    {
+      "slot": 3,
+      "artifactHash": "9406a52657db9fb4bf3c176fbee45c5201a34f9eb4613b49a062662d39b8f209",
+      "pair": 1,
+      "arm": "visual",
+      "terminal": {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      },
+      "wholeTurnFinding": "Actual terminal là static fallback, không giúp khách quyết định. Draft rất dài, nhấn sắc trắng trong khi catalog colors rỗng; verifier chỉ trả UNSUPPORTED_PROTECTED_ASSERTION/product:SV2447, không chỉ span nên chưa xác định duy nhất nguyên nhân."
+    },
+    {
+      "slot": 4,
+      "artifactHash": "bc99c12db38483550ac28463f5969e116ef1600fa6a57a42ecfe3c0b2928ae36",
+      "pair": 1,
+      "arm": "baseline",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Đi ăn cưới ban ngày diện set Thạch Thảo rất hợp vì chất liệu tơ Hàn thêu và ren mang lại vẻ sang trọng, nhã nhặn chứ không bị sến. Tuy nhiên, nếu chị quen mặc đồ tối giản và sợ cả bộ hơi điệu, mình có thể chọn mua lẻ để dễ mặc hơn.\n\nChị có thể lấy riêng áo thêu (499.000đ) phối cùng quần hoặc chân váy trơn sẵn có, vừa giữ được điểm nhấn tinh tế vừa đúng style quen thuộc. Hoặc nếu muốn diện trọn vẹn độ bay bổng cho buổi tiệc, bộ nguyên set (799.000đ) sẽ giúp chị nổi bật một cách sang trọng mà không cần phối cầu kỳ ạ.",
+        "fallbackId": null
+      },
+      "wholeTurnFinding": "Đưa mua lẻ và cả bộ nhưng chưa dừng ở lựa chọn phù hợp nhất; dùng đồ trơn sẵn có khi khách chưa xác nhận tủ đồ. Cần sửa về lựa chọn/giọng, không dùng verifier PASS làm quality PASS."
+    }
+  ]
+}

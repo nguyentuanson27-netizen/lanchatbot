@@ -1,0 +1,208 @@
+{
+  "runSourceSha": "5cbcde984c9594272b5ea905c3afd0f60dccef00",
+  "surface": "NATIVE_READ_ONLY_OWNER_COMPARISON",
+  "all": {
+    "registered": 10,
+    "recorded": 10,
+    "terminalCounts": {
+      "FALLBACK": 1,
+      "SEND_ELIGIBLE": 9
+    },
+    "fallbackHandoffNoSendRate": 0.1,
+    "ownerLatency": {
+      "n": 13,
+      "p50Ms": 4873.22,
+      "p95Ms": 7924.23
+    },
+    "verifierLatency": {
+      "n": 10,
+      "p50Ms": 7640.29,
+      "p95Ms": 12165.04
+    },
+    "addedVerificationAndReadbackLatency": {
+      "n": 10,
+      "p50Ms": 8209.39,
+      "p95Ms": 12832.42
+    },
+    "endToEndAttemptLatency": {
+      "n": 10,
+      "p50Ms": 16390.83,
+      "p95Ms": 22723.81
+    },
+    "generationRequests": 23,
+    "errorGenerations": 0,
+    "timeoutGenerations": 0,
+    "errorRatePerGeneration": 0.0,
+    "timeoutRatePerGeneration": 0.0,
+    "tokens": {
+      "owner": {
+        "generations": 13,
+        "reportedInputRows": 13,
+        "reportedOutputRows": 13,
+        "inputTokens": 39308,
+        "outputTokens": 7892,
+        "reportedThinkingRows": 13,
+        "thinkingTokens": 6376
+      },
+      "verifier": {
+        "generations": 10,
+        "reportedInputRows": 10,
+        "reportedOutputRows": 10,
+        "inputTokens": 37184,
+        "outputTokens": 1465,
+        "reportedThinkingRows": 10,
+        "thinkingTokens": 1206
+      }
+    },
+    "cost": null,
+    "ownerTurnGenerationLatency": {
+      "n": 10,
+      "p50Ms": 6172.1,
+      "p95Ms": 10241.88
+    },
+    "toolRounds": 3,
+    "toolCalls": 4,
+    "providerStatusCounts": {
+      "200": 23
+    }
+  },
+  "owners": {
+    "gemini": {
+      "registered": 5,
+      "recorded": 5,
+      "terminalCounts": {
+        "FALLBACK": 1,
+        "SEND_ELIGIBLE": 4
+      },
+      "fallbackHandoffNoSendRate": 0.2,
+      "ownerLatency": {
+        "n": 7,
+        "p50Ms": 4016.88,
+        "p95Ms": 5129.45
+      },
+      "verifierLatency": {
+        "n": 5,
+        "p50Ms": 6390.27,
+        "p95Ms": 13718.47
+      },
+      "addedVerificationAndReadbackLatency": {
+        "n": 5,
+        "p50Ms": 7801.48,
+        "p95Ms": 14262.99
+      },
+      "endToEndAttemptLatency": {
+        "n": 5,
+        "p50Ms": 17186.94,
+        "p95Ms": 19965.29
+      },
+      "generationRequests": 12,
+      "errorGenerations": 0,
+      "timeoutGenerations": 0,
+      "errorRatePerGeneration": 0.0,
+      "timeoutRatePerGeneration": 0.0,
+      "tokens": {
+        "owner": {
+          "generations": 7,
+          "reportedInputRows": 7,
+          "reportedOutputRows": 7,
+          "inputTokens": 21709,
+          "outputTokens": 7176,
+          "reportedThinkingRows": 7,
+          "thinkingTokens": 6376
+        },
+        "verifier": {
+          "generations": 5,
+          "reportedInputRows": 5,
+          "reportedOutputRows": 5,
+          "inputTokens": 18980,
+          "outputTokens": 962,
+          "reportedThinkingRows": 5,
+          "thinkingTokens": 823
+        }
+      },
+      "cost": null,
+      "ownerTurnGenerationLatency": {
+        "n": 5,
+        "p50Ms": 5239.27,
+        "p95Ms": 7950.71
+      },
+      "toolRounds": 2,
+      "toolCalls": 3,
+      "providerStatusCounts": {
+        "200": 12
+      }
+    },
+    "sol": {
+      "registered": 5,
+      "recorded": 5,
+      "terminalCounts": {
+        "SEND_ELIGIBLE": 5
+      },
+      "fallbackHandoffNoSendRate": 0.0,
+      "ownerLatency": {
+        "n": 6,
+        "p50Ms": 6172.1,
+        "p95Ms": 8043.35
+      },
+      "verifierLatency": {
+        "n": 5,
+        "p50Ms": 7845.62,
+        "p95Ms": 8567.65
+      },
+      "addedVerificationAndReadbackLatency": {
+        "n": 5,
+        "p50Ms": 8257.23,
+        "p95Ms": 9387.84
+      },
+      "endToEndAttemptLatency": {
+        "n": 5,
+        "p50Ms": 16259.97,
+        "p95Ms": 23237.82
+      },
+      "generationRequests": 11,
+      "errorGenerations": 0,
+      "timeoutGenerations": 0,
+      "errorRatePerGeneration": 0.0,
+      "timeoutRatePerGeneration": 0.0,
+      "tokens": {
+        "owner": {
+          "generations": 6,
+          "reportedInputRows": 6,
+          "reportedOutputRows": 6,
+          "inputTokens": 17599,
+          "outputTokens": 716,
+          "reportedThinkingRows": 6,
+          "thinkingTokens": 0
+        },
+        "verifier": {
+          "generations": 5,
+          "reportedInputRows": 5,
+          "reportedOutputRows": 5,
+          "inputTokens": 18204,
+          "outputTokens": 503,
+          "reportedThinkingRows": 5,
+          "thinkingTokens": 383
+        }
+      },
+      "cost": null,
+      "ownerTurnGenerationLatency": {
+        "n": 5,
+        "p50Ms": 7047.15,
+        "p95Ms": 11204.33
+      },
+      "toolRounds": 1,
+      "toolCalls": 1,
+      "providerStatusCounts": {
+        "200": 11
+      }
+    }
+  },
+  "sourceDomainCounters": {
+    "catalogReads": 27,
+    "posReads": 18,
+    "policyReads": 8,
+    "embeddingCalls": 1
+  },
+  "costEvidence": "Billed cost not exposed; no estimate.",
+  "latencyPolicy": "Linear-interpolated sample quantiles; full completion includes local transport/authentication/API and tool continuations. E2E includes code preload, excludes compilation/setup; N1 per case/model."
+}

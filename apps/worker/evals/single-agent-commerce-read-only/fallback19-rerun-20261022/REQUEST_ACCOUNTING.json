@@ -1,0 +1,987 @@
+{
+  "generations": [
+    {
+      "caseId": "b1-changed-occasion",
+      "scope": "TARGET",
+      "id": "a8eacd377ffbb744369aa10bc43d297a82321a79adcdda63510f0af5ef7b9652:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-changed-occasion",
+      "scope": "TARGET",
+      "id": "a8eacd377ffbb744369aa10bc43d297a82321a79adcdda63510f0af5ef7b9652:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-changed-occasion",
+      "scope": "TARGET",
+      "id": "a8eacd377ffbb744369aa10bc43d297a82321a79adcdda63510f0af5ef7b9652:owner:3",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-changed-occasion",
+      "scope": "TARGET",
+      "id": "a8eacd377ffbb744369aa10bc43d297a82321a79adcdda63510f0af5ef7b9652:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-partial-source-v2",
+      "scope": "TARGET",
+      "id": "077b0561250e28b5c3d903814f5f76f733f69c8a3b5ec6cc74d5b35d698f87ce:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-partial-source-v2",
+      "scope": "TARGET",
+      "id": "077b0561250e28b5c3d903814f5f76f733f69c8a3b5ec6cc74d5b35d698f87ce:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-partial-source-v2",
+      "scope": "TARGET",
+      "id": "077b0561250e28b5c3d903814f5f76f733f69c8a3b5ec6cc74d5b35d698f87ce:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-price-v2",
+      "scope": "TARGET",
+      "id": "a34649b335bee6b85b23a0ed6ad7793911af833de99b31673d21d5d6c88068ea:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-price-v2",
+      "scope": "TARGET",
+      "id": "a34649b335bee6b85b23a0ed6ad7793911af833de99b31673d21d5d6c88068ea:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-price-v2",
+      "scope": "TARGET",
+      "id": "a34649b335bee6b85b23a0ed6ad7793911af833de99b31673d21d5d6c88068ea:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-component-stock-v2",
+      "scope": "TARGET",
+      "id": "460b92eb29c326fc33600bdfdb88bdc6123ac34d38dedf8032d34b6d34878627:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-component-stock-v2",
+      "scope": "TARGET",
+      "id": "460b92eb29c326fc33600bdfdb88bdc6123ac34d38dedf8032d34b6d34878627:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-component-stock-v2",
+      "scope": "TARGET",
+      "id": "460b92eb29c326fc33600bdfdb88bdc6123ac34d38dedf8032d34b6d34878627:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-search-read-v2",
+      "scope": "TARGET",
+      "id": "0c2258b61d58b25be86b0fa6e24e3f769f33b42a21f80dbce0253af795a1ce0d:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-search-read-v2",
+      "scope": "TARGET",
+      "id": "0c2258b61d58b25be86b0fa6e24e3f769f33b42a21f80dbce0253af795a1ce0d:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-search-read-v2",
+      "scope": "TARGET",
+      "id": "0c2258b61d58b25be86b0fa6e24e3f769f33b42a21f80dbce0253af795a1ce0d:owner:3",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-search-read-v2",
+      "scope": "TARGET",
+      "id": "0c2258b61d58b25be86b0fa6e24e3f769f33b42a21f80dbce0253af795a1ce0d:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-buying-concern-v2",
+      "scope": "TARGET",
+      "id": "700f03f717a2a48f0b7393df290f91f7a7cd5d75189f2f8b3e5d3ea5c508035f:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-buying-concern-v2",
+      "scope": "TARGET",
+      "id": "700f03f717a2a48f0b7393df290f91f7a7cd5d75189f2f8b3e5d3ea5c508035f:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-policy-used-v2",
+      "scope": "TARGET",
+      "id": "15611f7c4ee123e55507ea313ff44085a7e2051f2165d63027fef1e99b19b5d0:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-policy-used-v2",
+      "scope": "TARGET",
+      "id": "15611f7c4ee123e55507ea313ff44085a7e2051f2165d63027fef1e99b19b5d0:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-policy-used-v2",
+      "scope": "TARGET",
+      "id": "15611f7c4ee123e55507ea313ff44085a7e2051f2165d63027fef1e99b19b5d0:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-changed-occasion-v3",
+      "scope": "TARGET",
+      "id": "8043de48ad7a1f337f72e0341eaa64f42f42c01d3395e9f442b43a15ff6ed3e2:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-changed-occasion-v3",
+      "scope": "TARGET",
+      "id": "8043de48ad7a1f337f72e0341eaa64f42f42c01d3395e9f442b43a15ff6ed3e2:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-changed-occasion-v3",
+      "scope": "TARGET",
+      "id": "8043de48ad7a1f337f72e0341eaa64f42f42c01d3395e9f442b43a15ff6ed3e2:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-current-policy-v3",
+      "scope": "TARGET",
+      "id": "2778b2c72ddef2e418ec4f57dfaacaa3192c4861bd8492194c461e730e218bae:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-current-policy-v3",
+      "scope": "TARGET",
+      "id": "2778b2c72ddef2e418ec4f57dfaacaa3192c4861bd8492194c461e730e218bae:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-current-policy-v3",
+      "scope": "TARGET",
+      "id": "2778b2c72ddef2e418ec4f57dfaacaa3192c4861bd8492194c461e730e218bae:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-partial-source-v3",
+      "scope": "TARGET",
+      "id": "c837fe1182562d57d48440eef50a1ab6c79f93868804654c78ef8c6b785da7ba:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-partial-source-v3",
+      "scope": "TARGET",
+      "id": "c837fe1182562d57d48440eef50a1ab6c79f93868804654c78ef8c6b785da7ba:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-partial-source-v3",
+      "scope": "TARGET",
+      "id": "c837fe1182562d57d48440eef50a1ab6c79f93868804654c78ef8c6b785da7ba:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-price-v3",
+      "scope": "TARGET",
+      "id": "99c5dcf3b6fabbaadabc0b26259571c6e0b9c16fb5ed79a82fe0844a6eeeed93:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-price-v3",
+      "scope": "TARGET",
+      "id": "99c5dcf3b6fabbaadabc0b26259571c6e0b9c16fb5ed79a82fe0844a6eeeed93:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-price-v3",
+      "scope": "TARGET",
+      "id": "99c5dcf3b6fabbaadabc0b26259571c6e0b9c16fb5ed79a82fe0844a6eeeed93:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-component-stock-v3",
+      "scope": "TARGET",
+      "id": "fd72d14d90ee1037ba299899b9eecebc60cbe0e8d72125fa23b013276334748d:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-component-stock-v3",
+      "scope": "TARGET",
+      "id": "fd72d14d90ee1037ba299899b9eecebc60cbe0e8d72125fa23b013276334748d:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-component-stock-v3",
+      "scope": "TARGET",
+      "id": "fd72d14d90ee1037ba299899b9eecebc60cbe0e8d72125fa23b013276334748d:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-search-read-v3",
+      "scope": "TARGET",
+      "id": "309fba02a6ea4d729ff200e7f5236f7746c7a3d234ea844ce6f3e8d4d65d6df7:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-search-read-v3",
+      "scope": "TARGET",
+      "id": "309fba02a6ea4d729ff200e7f5236f7746c7a3d234ea844ce6f3e8d4d65d6df7:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-search-read-v3",
+      "scope": "TARGET",
+      "id": "309fba02a6ea4d729ff200e7f5236f7746c7a3d234ea844ce6f3e8d4d65d6df7:owner:3",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-search-read-v3",
+      "scope": "TARGET",
+      "id": "309fba02a6ea4d729ff200e7f5236f7746c7a3d234ea844ce6f3e8d4d65d6df7:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-buying-concern-v3",
+      "scope": "TARGET",
+      "id": "a7b6c76fc352c1602e074db79f67a7fb86539c29d2fc76db9d9c341211f6af26:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-buying-concern-v3",
+      "scope": "TARGET",
+      "id": "a7b6c76fc352c1602e074db79f67a7fb86539c29d2fc76db9d9c341211f6af26:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-buying-concern-v3",
+      "scope": "TARGET",
+      "id": "a7b6c76fc352c1602e074db79f67a7fb86539c29d2fc76db9d9c341211f6af26:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-policy-used-v3",
+      "scope": "TARGET",
+      "id": "dcdd7977ddcc4a03c0d17853890c42f57954de17257875326c6fd4c93a15d029:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-policy-used-v3",
+      "scope": "TARGET",
+      "id": "dcdd7977ddcc4a03c0d17853890c42f57954de17257875326c6fd4c93a15d029:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "b1-policy-used-v3",
+      "scope": "TARGET",
+      "id": "dcdd7977ddcc4a03c0d17853890c42f57954de17257875326c6fd4c93a15d029:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "sales-discovery-advice:need",
+      "scope": "TARGET",
+      "id": "d0376817-9d36-4c44-8b3e-387c5de6266b:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "sales-discovery-advice:need",
+      "scope": "TARGET",
+      "id": "d0376817-9d36-4c44-8b3e-387c5de6266b:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "sales-discovery-advice:need",
+      "scope": "TARGET",
+      "id": "d0376817-9d36-4c44-8b3e-387c5de6266b:owner:3",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "sales-discovery-advice:need",
+      "scope": "TARGET",
+      "id": "d0376817-9d36-4c44-8b3e-387c5de6266b:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "stateful-open",
+      "scope": "PREREQUISITE",
+      "id": "aed6cdcd-bf8f-4d88-a2a9-a7adbb47e048:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "stateful-open",
+      "scope": "PREREQUISITE",
+      "id": "aed6cdcd-bf8f-4d88-a2a9-a7adbb47e048:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "stateful-open",
+      "scope": "PREREQUISITE",
+      "id": "aed6cdcd-bf8f-4d88-a2a9-a7adbb47e048:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "stateful-variant-quantity",
+      "scope": "PREREQUISITE",
+      "id": "81b4030c-a652-40d0-95e7-0e2695e62799:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "stateful-variant-quantity",
+      "scope": "PREREQUISITE",
+      "id": "81b4030c-a652-40d0-95e7-0e2695e62799:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "stateful-variant-quantity",
+      "scope": "PREREQUISITE",
+      "id": "81b4030c-a652-40d0-95e7-0e2695e62799:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "stateful-quote",
+      "scope": "TARGET",
+      "id": "08ff7df2-fb77-438f-b523-8e54811db6d3:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "stateful-quote",
+      "scope": "TARGET",
+      "id": "08ff7df2-fb77-438f-b523-8e54811db6d3:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "stateful-correction",
+      "scope": "TARGET",
+      "id": "4118fbd9-9f30-4a67-8138-8f5f98e56eea:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "stateful-correction",
+      "scope": "TARGET",
+      "id": "4118fbd9-9f30-4a67-8138-8f5f98e56eea:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "stateful-correction",
+      "scope": "TARGET",
+      "id": "4118fbd9-9f30-4a67-8138-8f5f98e56eea:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "negotiation-cart-setup",
+      "scope": "PREREQUISITE",
+      "id": "4a36cdaa-859d-45bf-a9c4-7f9359296351:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "negotiation-cart-setup",
+      "scope": "PREREQUISITE",
+      "id": "4a36cdaa-859d-45bf-a9c4-7f9359296351:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "negotiation-cart-setup",
+      "scope": "PREREQUISITE",
+      "id": "4a36cdaa-859d-45bf-a9c4-7f9359296351:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "negotiation-price-objection",
+      "scope": "PREREQUISITE",
+      "id": "e322f51e-fa3d-4a86-8102-4f4f0b3ace27:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "negotiation-price-objection",
+      "scope": "PREREQUISITE",
+      "id": "e322f51e-fa3d-4a86-8102-4f4f0b3ace27:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "negotiation-price-objection",
+      "scope": "PREREQUISITE",
+      "id": "e322f51e-fa3d-4a86-8102-4f4f0b3ace27:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "negotiation-total-control",
+      "scope": "TARGET",
+      "id": "1de6ceb0-252c-4145-93b7-82a9712f8a1c:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    },
+    {
+      "caseId": "negotiation-total-control",
+      "scope": "TARGET",
+      "id": "1de6ceb0-252c-4145-93b7-82a9712f8a1c:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "httpStatus": 200,
+      "providerErrorCode": null
+    }
+  ],
+  "wire": {
+    "a8eacd377ffbb744369aa10bc43d297a82321a79adcdda63510f0af5ef7b9652:owner:1": {
+      "role": "owner",
+      "bodyHash": "5031bab80ea104c3b3c0e0ac214bf64fb71acd73b0db5557ec4b8bd4a4461e0b"
+    },
+    "a8eacd377ffbb744369aa10bc43d297a82321a79adcdda63510f0af5ef7b9652:owner:2": {
+      "role": "owner",
+      "bodyHash": "19766876645c59aefa1931a1a08585a2a03dee40eb7786e1e0df3c4fb5ddbb0c"
+    },
+    "a8eacd377ffbb744369aa10bc43d297a82321a79adcdda63510f0af5ef7b9652:owner:3": {
+      "role": "owner",
+      "bodyHash": "e7a741303db0ea4098587d946f446bc26373f1a2686bf417569ed61b3d6f192b"
+    },
+    "a8eacd377ffbb744369aa10bc43d297a82321a79adcdda63510f0af5ef7b9652:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "e46ce1a72e481efd96d6680a720c3d2a9c590f127bd29878a0ef4c087d88f684"
+    },
+    "077b0561250e28b5c3d903814f5f76f733f69c8a3b5ec6cc74d5b35d698f87ce:owner:1": {
+      "role": "owner",
+      "bodyHash": "b085ea76f0292ea006c971fd738eda2b35b630157f232c54b5827c5ba1d439f6"
+    },
+    "077b0561250e28b5c3d903814f5f76f733f69c8a3b5ec6cc74d5b35d698f87ce:owner:2": {
+      "role": "owner",
+      "bodyHash": "4844cc13459b04c7cdac9a463a892a7a085cf580c3734d5e047d6fa1274c69cc"
+    },
+    "077b0561250e28b5c3d903814f5f76f733f69c8a3b5ec6cc74d5b35d698f87ce:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "e1d93c80038ff5b86522e758bc95c90b9195f2154ba921e045df8aa6eb28f63a"
+    },
+    "a34649b335bee6b85b23a0ed6ad7793911af833de99b31673d21d5d6c88068ea:owner:1": {
+      "role": "owner",
+      "bodyHash": "21a67bbb19d5584297626db2468cf86d605c00cb8763302a4b3e1415a4576070"
+    },
+    "a34649b335bee6b85b23a0ed6ad7793911af833de99b31673d21d5d6c88068ea:owner:2": {
+      "role": "owner",
+      "bodyHash": "00488b35e7a1ad835a21b763ed7d495ff813746506636db73516fe8be1754a57"
+    },
+    "a34649b335bee6b85b23a0ed6ad7793911af833de99b31673d21d5d6c88068ea:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "874a18fbbe064ef9f6d44e5f7a6d702e3afc193a285cddcdf20df423afffa90a"
+    },
+    "460b92eb29c326fc33600bdfdb88bdc6123ac34d38dedf8032d34b6d34878627:owner:1": {
+      "role": "owner",
+      "bodyHash": "d54c524b7e8689b42988f39cad533a10dd33f19dcfcd7d0d4934f2c1146ba887"
+    },
+    "460b92eb29c326fc33600bdfdb88bdc6123ac34d38dedf8032d34b6d34878627:owner:2": {
+      "role": "owner",
+      "bodyHash": "d2a19e6ee14b21120bfc0558adbc8ed4da6beaf7cb02782d675ce8276d1a9823"
+    },
+    "460b92eb29c326fc33600bdfdb88bdc6123ac34d38dedf8032d34b6d34878627:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "b23b52e13aeca223a93cb4a1bf784e5ad5226af94084b9166a3813cdee278132"
+    },
+    "0c2258b61d58b25be86b0fa6e24e3f769f33b42a21f80dbce0253af795a1ce0d:owner:1": {
+      "role": "owner",
+      "bodyHash": "4aab0794a0f791ee0ceaf1e8162f47794634e13066db9e4069611e397a1110d1"
+    },
+    "0c2258b61d58b25be86b0fa6e24e3f769f33b42a21f80dbce0253af795a1ce0d:owner:2": {
+      "role": "owner",
+      "bodyHash": "e133a8a6675237bda66019bad83954ba8c49569b46c69765c601530044a0e6af"
+    },
+    "0c2258b61d58b25be86b0fa6e24e3f769f33b42a21f80dbce0253af795a1ce0d:owner:3": {
+      "role": "owner",
+      "bodyHash": "8116c291e94b57a03b2cc26cbe7377d0a6b8e2aca27515c20739db6dfc6e76e1"
+    },
+    "0c2258b61d58b25be86b0fa6e24e3f769f33b42a21f80dbce0253af795a1ce0d:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "effd1abe60a97c45df8ae9843207caf3ecae5334020b04f4b74cf0941bc5db12"
+    },
+    "700f03f717a2a48f0b7393df290f91f7a7cd5d75189f2f8b3e5d3ea5c508035f:owner:1": {
+      "role": "owner",
+      "bodyHash": "91e17649c35bf4c40863210dccc977072f1cb90943dbd2fc863358f6fc6bf8c3"
+    },
+    "700f03f717a2a48f0b7393df290f91f7a7cd5d75189f2f8b3e5d3ea5c508035f:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "8a23c9177f10ae22247a43b1ef650624d2d5d48075e2dbd0f20ee8f4f9766592"
+    },
+    "15611f7c4ee123e55507ea313ff44085a7e2051f2165d63027fef1e99b19b5d0:owner:1": {
+      "role": "owner",
+      "bodyHash": "3d4bbb59bb9fc266476d28d33a804e08252f50196d3b402dd7f18478a428085c"
+    },
+    "15611f7c4ee123e55507ea313ff44085a7e2051f2165d63027fef1e99b19b5d0:owner:2": {
+      "role": "owner",
+      "bodyHash": "681d9cb0e44259fda8f4ea98d41e4bcd26df727e12021965cd092e7e919b75d0"
+    },
+    "15611f7c4ee123e55507ea313ff44085a7e2051f2165d63027fef1e99b19b5d0:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "4a6ca154477e4e9b161144532af9d1a9428331278262cfcfd363f87de670e437"
+    },
+    "8043de48ad7a1f337f72e0341eaa64f42f42c01d3395e9f442b43a15ff6ed3e2:owner:1": {
+      "role": "owner",
+      "bodyHash": "d41021363b6ab25eef34ba94e36beb33d79cec4cbbd4c03d3249df71350e9a47"
+    },
+    "8043de48ad7a1f337f72e0341eaa64f42f42c01d3395e9f442b43a15ff6ed3e2:owner:2": {
+      "role": "owner",
+      "bodyHash": "f2261d5d6daa88747f5f5ee137c1f7fca66dc5446dde1d2c43c3034242b8f5c6"
+    },
+    "8043de48ad7a1f337f72e0341eaa64f42f42c01d3395e9f442b43a15ff6ed3e2:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "e641c10d830519f028f82aa5aed50ad7e313462e4824595a4b08684357e4ee71"
+    },
+    "2778b2c72ddef2e418ec4f57dfaacaa3192c4861bd8492194c461e730e218bae:owner:1": {
+      "role": "owner",
+      "bodyHash": "2af4b7bb0de0867e6f413b816db13da88378d16da7e497ea4d3e681cc853fb13"
+    },
+    "2778b2c72ddef2e418ec4f57dfaacaa3192c4861bd8492194c461e730e218bae:owner:2": {
+      "role": "owner",
+      "bodyHash": "d5bd7d0b2d9c0558fc2eef8dab2e69b18627d8285a20272af094a8987175edd0"
+    },
+    "2778b2c72ddef2e418ec4f57dfaacaa3192c4861bd8492194c461e730e218bae:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "d3d60c25d8339bfb0cbbdf6a07825fc99f95c511a430e0231477733ce078379f"
+    },
+    "c837fe1182562d57d48440eef50a1ab6c79f93868804654c78ef8c6b785da7ba:owner:1": {
+      "role": "owner",
+      "bodyHash": "33cfa8c74f9a5aae021d37c26aaef0e4966ee32c1cf10f88f5724c6d28021600"
+    },
+    "c837fe1182562d57d48440eef50a1ab6c79f93868804654c78ef8c6b785da7ba:owner:2": {
+      "role": "owner",
+      "bodyHash": "05a8268a62b5e0901abe49d3587b525f011c237b15769f53c4537b142b22f6bc"
+    },
+    "c837fe1182562d57d48440eef50a1ab6c79f93868804654c78ef8c6b785da7ba:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "287fdf4a8be6dc9351e9dc9e9943dc7e280af61a3f6e6e4b8c88d8e75774bee7"
+    },
+    "99c5dcf3b6fabbaadabc0b26259571c6e0b9c16fb5ed79a82fe0844a6eeeed93:owner:1": {
+      "role": "owner",
+      "bodyHash": "7e6ddcda706829407ddd72453d065d0f3fa7c432a4dbd3825e11515b22a1aaea"
+    },
+    "99c5dcf3b6fabbaadabc0b26259571c6e0b9c16fb5ed79a82fe0844a6eeeed93:owner:2": {
+      "role": "owner",
+      "bodyHash": "47a5cc59e1b672b4829bd0e57d269f2dc9aba0c82782b333190b8f4ebaab257e"
+    },
+    "99c5dcf3b6fabbaadabc0b26259571c6e0b9c16fb5ed79a82fe0844a6eeeed93:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "da2ffa53b445703c3ead1401ce64ad1bdea719ee58553841700771a4f5a0ca27"
+    },
+    "fd72d14d90ee1037ba299899b9eecebc60cbe0e8d72125fa23b013276334748d:owner:1": {
+      "role": "owner",
+      "bodyHash": "2595e20f35ae3311722ced189e3ff18be329b63713196d9c890e5946507b5646"
+    },
+    "fd72d14d90ee1037ba299899b9eecebc60cbe0e8d72125fa23b013276334748d:owner:2": {
+      "role": "owner",
+      "bodyHash": "eda6cf35cf7109f887fd60a1c2c824eb253449d1033600d79eea9894f7b1f4ea"
+    },
+    "fd72d14d90ee1037ba299899b9eecebc60cbe0e8d72125fa23b013276334748d:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "76d1fdfdf9ab029903766f4deb27092329b8451e5d456b8f747c2cec15204a1c"
+    },
+    "309fba02a6ea4d729ff200e7f5236f7746c7a3d234ea844ce6f3e8d4d65d6df7:owner:1": {
+      "role": "owner",
+      "bodyHash": "9ddcd412e967130600caf1ebcc5c319d4d160dc26ba79ca5874ee766e69ae7ea"
+    },
+    "309fba02a6ea4d729ff200e7f5236f7746c7a3d234ea844ce6f3e8d4d65d6df7:owner:2": {
+      "role": "owner",
+      "bodyHash": "2426123e98b747d7c3edddd2aa9e3bfc94828946c40bd98f748907ced8357add"
+    },
+    "309fba02a6ea4d729ff200e7f5236f7746c7a3d234ea844ce6f3e8d4d65d6df7:owner:3": {
+      "role": "owner",
+      "bodyHash": "7f63e6b25d2ebd34776d840dbd19ddd41352e0ed2d535fa0f55840126a4518d3"
+    },
+    "309fba02a6ea4d729ff200e7f5236f7746c7a3d234ea844ce6f3e8d4d65d6df7:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "f416851f5b3aaedbaa0de2c4611f931d0908f03b23c932c95e806963d458c264"
+    },
+    "a7b6c76fc352c1602e074db79f67a7fb86539c29d2fc76db9d9c341211f6af26:owner:1": {
+      "role": "owner",
+      "bodyHash": "3431bf65bb5a0e77063c3ad166c4cc8d385ccdcf0d8beb49fb2c8a47860148f0"
+    },
+    "a7b6c76fc352c1602e074db79f67a7fb86539c29d2fc76db9d9c341211f6af26:owner:2": {
+      "role": "owner",
+      "bodyHash": "0004bfdd8f62b96f5d3c8cc8aa481b98c897c905dbb9fd9fb12b9db5f22c92b4"
+    },
+    "a7b6c76fc352c1602e074db79f67a7fb86539c29d2fc76db9d9c341211f6af26:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "ece3a3a833718a885519a8e725e99e40bbd4b9c8447546d6144cd047c6f4598b"
+    },
+    "dcdd7977ddcc4a03c0d17853890c42f57954de17257875326c6fd4c93a15d029:owner:1": {
+      "role": "owner",
+      "bodyHash": "695d131e44c89c8ca4f7a0c6a869600ed980ac4b8fdd81938a302357e017f27b"
+    },
+    "dcdd7977ddcc4a03c0d17853890c42f57954de17257875326c6fd4c93a15d029:owner:2": {
+      "role": "owner",
+      "bodyHash": "bd2845287bdac54d0e42cc48ebceb37fd8f62730cf78e015b9d6f2e54dcd5c27"
+    },
+    "dcdd7977ddcc4a03c0d17853890c42f57954de17257875326c6fd4c93a15d029:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "77abed452f4557fc7b5914aacbf8ef5b2594682092dde2b4f53c1a8fef73af2d"
+    },
+    "d0376817-9d36-4c44-8b3e-387c5de6266b:owner:1": {
+      "role": "owner",
+      "bodyHash": "e2e1f6b36818a3bd78c57b471a938cecfbd8a55491b65b337bfb9b19f0d4af09"
+    },
+    "d0376817-9d36-4c44-8b3e-387c5de6266b:owner:2": {
+      "role": "owner",
+      "bodyHash": "5426963c510d42d9d953697a6e41ffed2c91dc2f602eb63c932b7705b0238fac"
+    },
+    "d0376817-9d36-4c44-8b3e-387c5de6266b:owner:3": {
+      "role": "owner",
+      "bodyHash": "4fe29b3ac07ca3b0fa166e4ac9d88ffb2b1b009a4fdef77c7d38b84f03a73753"
+    },
+    "d0376817-9d36-4c44-8b3e-387c5de6266b:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "399b04c0e30dd677a775bb75aa7b172904462bca1581f12da55b8b0f6eb11125"
+    },
+    "aed6cdcd-bf8f-4d88-a2a9-a7adbb47e048:owner:1": {
+      "role": "owner",
+      "bodyHash": "4c33f28e553a4193ad6532e8161e5d503a0e463d9ee353be3412e495333dea2c"
+    },
+    "aed6cdcd-bf8f-4d88-a2a9-a7adbb47e048:owner:2": {
+      "role": "owner",
+      "bodyHash": "76ce13de690246a3431cb9d97e0b3fddb85e1554158c567010023dd53c11a107"
+    },
+    "aed6cdcd-bf8f-4d88-a2a9-a7adbb47e048:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "bbabcd22ad31a9a92cb1bc0591033e05c5c4c721f0ddf7813949f58221cf9ce9"
+    },
+    "81b4030c-a652-40d0-95e7-0e2695e62799:owner:1": {
+      "role": "owner",
+      "bodyHash": "51ab7cd9304af9e3cea37479576171184c4437bba344ceedc385574ec4eb2b02"
+    },
+    "81b4030c-a652-40d0-95e7-0e2695e62799:owner:2": {
+      "role": "owner",
+      "bodyHash": "389fae8da58c12cbd6f99fdad18e7a8d3f9dd9806e9bf2ebf07ca0c949b72910"
+    },
+    "81b4030c-a652-40d0-95e7-0e2695e62799:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "02d1d3544675b6d132409f34ccbe83b94521c01ee964a2b0990969b16e234b98"
+    },
+    "08ff7df2-fb77-438f-b523-8e54811db6d3:owner:1": {
+      "role": "owner",
+      "bodyHash": "f37cb9d19b7343178ab21d68be830e4da95146a8fa0173dd1191565e8f9d2452"
+    },
+    "08ff7df2-fb77-438f-b523-8e54811db6d3:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "95985b3e5fa44df6b9e4bb494a382a84bf61f19becbfa463da2274074daeb2a9"
+    },
+    "4118fbd9-9f30-4a67-8138-8f5f98e56eea:owner:1": {
+      "role": "owner",
+      "bodyHash": "e8cdc36dd10c20067d745dcdaaa86afe6394edb18a476fe563fcee95511b22dc"
+    },
+    "4118fbd9-9f30-4a67-8138-8f5f98e56eea:owner:2": {
+      "role": "owner",
+      "bodyHash": "31c8e6bc614f90b2f38e111c3b2c6f146f7f53981f2547a85d694f54af719073"
+    },
+    "4118fbd9-9f30-4a67-8138-8f5f98e56eea:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "9c1d36a051d9d89b607088ffdf1d75e3f94966876decbd5da00655a876c675c3"
+    },
+    "4a36cdaa-859d-45bf-a9c4-7f9359296351:owner:1": {
+      "role": "owner",
+      "bodyHash": "032a9a0dd4e839c0926dbe21352b874a4a7dc50bb0da12b01cc970eca419429c"
+    },
+    "4a36cdaa-859d-45bf-a9c4-7f9359296351:owner:2": {
+      "role": "owner",
+      "bodyHash": "54bde09a675521fc434aa6d765f790f54fad81dc81ff01e8cdfb5521ab9337fc"
+    },
+    "4a36cdaa-859d-45bf-a9c4-7f9359296351:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "529391c62b84f49a4caccaf6af2ef92b7670033020de5394dca3b06d2decb9ae"
+    },
+    "e322f51e-fa3d-4a86-8102-4f4f0b3ace27:owner:1": {
+      "role": "owner",
+      "bodyHash": "d3e07014879c3f66258ac7487fcab426f2d92ccbc262e5ee189c62762817d8ac"
+    },
+    "e322f51e-fa3d-4a86-8102-4f4f0b3ace27:owner:2": {
+      "role": "owner",
+      "bodyHash": "68549e29009efa0a7bbc21539cb771305284d4d79e252fc68da99716a641213d"
+    },
+    "e322f51e-fa3d-4a86-8102-4f4f0b3ace27:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "4cc6c0d80577903590ddf31aa7fea0b05a230f878b9d5789b8ad528e10330558"
+    },
+    "1de6ceb0-252c-4145-93b7-82a9712f8a1c:owner:1": {
+      "role": "owner",
+      "bodyHash": "0e8b273ff06eef4ae8c3b2127599993ca68410f1fa116476e6803ee12d423cef"
+    },
+    "1de6ceb0-252c-4145-93b7-82a9712f8a1c:verifier:1": {
+      "role": "verifier",
+      "bodyHash": "41a44e2547fcaf2ee098c2db8fe89806568754a0f24ae3304106717f0853ca7c"
+    }
+  },
+  "evaluatorLabelLeakIds": []
+}

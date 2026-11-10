@@ -1,0 +1,374 @@
+[
+  {
+    "name": "provider-preflight",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "unused",
+      "COD",
+      "--provider-preflight"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "source-check",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-explicit-offer-focus-20261021\\source-check",
+      "--source-check"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "r1-case02",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "2:2",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-explicit-offer-focus-20261021\\r1-case02",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "r1-case04",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "4:4",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-explicit-offer-focus-20261021\\r1-case04",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "r1-case15",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "15:15",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-explicit-offer-focus-20261021\\r1-case15",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "r2-case02",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "2:2",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-explicit-offer-focus-20261021\\r2-case02",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "r2-case04",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "4:4",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-explicit-offer-focus-20261021\\r2-case04",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "r2-case15",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "15:15",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-explicit-offer-focus-20261021\\r2-case15",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "r3-case02",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "2:2",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-explicit-offer-focus-20261021\\r3-case02",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "r3-case04",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "4:4",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-explicit-offer-focus-20261021\\r3-case04",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "r3-case15",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "15:15",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-explicit-offer-focus-20261021\\r3-case15",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "r1-case09",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "9:9",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-explicit-offer-focus-20261021\\r1-case09",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "r1-case17",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "17:17",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-explicit-offer-focus-20261021\\r1-case17",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "r1-case23",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "23:23",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-explicit-offer-focus-20261021\\r1-case23",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "r1-case03",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "3:3",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-explicit-offer-focus-20261021\\r1-case03",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "r1-case05",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "5:5",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-explicit-offer-focus-20261021\\r1-case05",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "r1-case06",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "6:6",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-explicit-offer-focus-20261021\\r1-case06",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "r1-case08",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "8:8",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-explicit-offer-focus-20261021\\r1-case08",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "r1-case16",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "16:16",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-explicit-offer-focus-20261021\\r1-case16",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "r1-case21",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-division-session-20261019.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\run.mjs",
+      "--config",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-config.b1.json",
+      "--cases",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\cases.b1.json",
+      "--range",
+      "21:21",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-explicit-offer-focus-20261021\\r1-case21",
+      "--run"
+    ],
+    "exitCode": 0
+  }
+]

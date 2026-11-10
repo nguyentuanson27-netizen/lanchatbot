@@ -1,0 +1,714 @@
+{
+  "implementationBaseSha": "3c793f6cb486b240b09911bd85891f99e298f239",
+  "executableSourceSha": "3a06936f8f43b7b31e09215fd8cd516f79797429",
+  "sourceDirtyDuringFinalPG": false,
+  "files": [
+    {
+      "path": "c3-search-red-20261030.log",
+      "workspaceRelativePath": "../c3-search-red-20261030.log",
+      "sha256": "71b60f11558eea3891700607a00f4f129d506f737e23906e11626f02f65b0a60",
+      "bytes": 16422
+    },
+    {
+      "path": "c3-variant-contracts-build-20261030.log",
+      "workspaceRelativePath": "../c3-variant-contracts-build-20261030.log",
+      "sha256": "d23db8d288ecb15955642a1c7c1156e7d98e476a78ea3564c4f8ca8a4bcd6962",
+      "bytes": 173
+    },
+    {
+      "path": "c3-variant-contracts-green-20261030-02.log",
+      "workspaceRelativePath": "../c3-variant-contracts-green-20261030-02.log",
+      "sha256": "c5fdd477924dd19b5d3031b2503dec22d32338777085c1f3b60d7aba0472874b",
+      "bytes": 380
+    },
+    {
+      "path": "c3-variant-contracts-green-20261030.log",
+      "workspaceRelativePath": "../c3-variant-contracts-green-20261030.log",
+      "sha256": "a0248332ae02cb611170eed565be61ac6a7eed970ce67b2849586f04e78b13ff",
+      "bytes": 448
+    },
+    {
+      "path": "c3-variant-contracts-red-20261030.log",
+      "workspaceRelativePath": "../c3-variant-contracts-red-20261030.log",
+      "sha256": "70489873306545c91715535143fcfe254a02a260dda1865c49510263ea0e9145",
+      "bytes": 3935
+    },
+    {
+      "path": "c3-variant-dbfocused-20261030-01.log",
+      "workspaceRelativePath": "../c3-variant-dbfocused-20261030-01.log",
+      "sha256": "ecb3a77386ecbd9b5fc242b6916a04f3baa4d80f60f0fbdc3fcc7948257560a4",
+      "bytes": 375
+    },
+    {
+      "path": "c3-variant-deps-build-20261030.log",
+      "workspaceRelativePath": "../c3-variant-deps-build-20261030.log",
+      "sha256": "d3f4abfff879c23f72f000c0cf7080e36402669cf767726cf9c557f642f215ae",
+      "bytes": 4557
+    },
+    {
+      "path": "c3-variant-final-build-20261030-01.log",
+      "workspaceRelativePath": "../c3-variant-final-build-20261030-01.log",
+      "sha256": "3d4e65640031c1ccaf9f10959642d212a81cf9fb9b094e98a39d44d906a121c8",
+      "bytes": 5249
+    },
+    {
+      "path": "c3-variant-final-build-20261030-02.log",
+      "workspaceRelativePath": "../c3-variant-final-build-20261030-02.log",
+      "sha256": "18bb0f23c06f9e0077da059a9c60ed50164eb83b709013e7fa9b580ce80d6768",
+      "bytes": 5249
+    },
+    {
+      "path": "c3-variant-final-canonical-checks-20261030.log",
+      "workspaceRelativePath": "../c3-variant-final-canonical-checks-20261030.log",
+      "sha256": "968f788a857b013dcb47991fbc74f5712c18c57ce7354fa57b85a8cdb0d3ff4d",
+      "bytes": 12456
+    },
+    {
+      "path": "c3-variant-final-contracts-20261030.log",
+      "workspaceRelativePath": "../c3-variant-final-contracts-20261030.log",
+      "sha256": "68e62641fd39d59918ebd6d8f4cf94ef050c1696a70044fefda77697b1d7c794",
+      "bytes": 449
+    },
+    {
+      "path": "c3-variant-final-fullfocused-20261030-01.log",
+      "workspaceRelativePath": "../c3-variant-final-fullfocused-20261030-01.log",
+      "sha256": "7797ecd92a72b71c1e3b8f09eab42c0eb4777d0860d1842d0382dfcd72d230cd",
+      "bytes": 8650
+    },
+    {
+      "path": "c3-variant-final-fullfocused-20261030-02.log",
+      "workspaceRelativePath": "../c3-variant-final-fullfocused-20261030-02.log",
+      "sha256": "b031c9a324b8e42323619fe3f4d0e795b41d835b943c216fee36628d2a3da881",
+      "bytes": 1509
+    },
+    {
+      "path": "c3-variant-final-fullfocused-20261030-03.log",
+      "workspaceRelativePath": "../c3-variant-final-fullfocused-20261030-03.log",
+      "sha256": "8d150589667b8b442a7d18bbea25393ba456687b0e0893d8525dc1c8025ddf20",
+      "bytes": 1406
+    },
+    {
+      "path": "c3-variant-final-fullfocused-20261030-04.log",
+      "workspaceRelativePath": "../c3-variant-final-fullfocused-20261030-04.log",
+      "sha256": "f2d2c9e38477d8a1869ee9c1fd4ac1c2ca87130875f19a213d8e8f5b38404941",
+      "bytes": 1297
+    },
+    {
+      "path": "c3-variant-final-fullfocused-20261030-05.log",
+      "workspaceRelativePath": "../c3-variant-final-fullfocused-20261030-05.log",
+      "sha256": "d4fc431469f2e8de9937f7b19f770cee1984c1153fd613b62205b5726df5d3c3",
+      "bytes": 1407
+    },
+    {
+      "path": "c3-variant-final-node-20261030-01.log",
+      "workspaceRelativePath": "../c3-variant-final-node-20261030-01.log",
+      "sha256": "c59d09295f7411a4826a0124f5f57e2c00d0cb14c5f588e0800444177bafb1ff",
+      "bytes": 85271
+    },
+    {
+      "path": "c3-variant-final-node-20261030-02.log",
+      "workspaceRelativePath": "../c3-variant-final-node-20261030-02.log",
+      "sha256": "dd63270b153f50f1808c0fc90e9c8daf5c665d4eea066cd21724a6f1d683fc01",
+      "bytes": 85248
+    },
+    {
+      "path": "c3-variant-final-node-20261030-03.log",
+      "workspaceRelativePath": "../c3-variant-final-node-20261030-03.log",
+      "sha256": "21876b112db818f651b1895c480f63e8cdce25ccb5993378ed7070d77eb9573a",
+      "bytes": 85274
+    },
+    {
+      "path": "c3-variant-final-node-20261030-04.log",
+      "workspaceRelativePath": "../c3-variant-final-node-20261030-04.log",
+      "sha256": "ac845a3442a72352fbb91d307b6ad4d50411c1f42aa62335093640799eb171f5",
+      "bytes": 85253
+    },
+    {
+      "path": "c3-variant-final-shared-20261030-01.log",
+      "workspaceRelativePath": "../c3-variant-final-shared-20261030-01.log",
+      "sha256": "aa598199e37085a22c0dc68c64074108e1f43e863f0bffacb50390c00db0c3b7",
+      "bytes": 1553
+    },
+    {
+      "path": "c3-variant-final-worker-checks-20261030-03.log",
+      "workspaceRelativePath": "../c3-variant-final-worker-checks-20261030-03.log",
+      "sha256": "4511d03256c3b3a97cd7bf92d391304ef48482fd039569cb9f20b655792dc69b",
+      "bytes": 10686
+    },
+    {
+      "path": "c3-variant-final-worker-checks-20261030-04.log",
+      "workspaceRelativePath": "../c3-variant-final-worker-checks-20261030-04.log",
+      "sha256": "eb118ceac2ca407dbfd8500ff765760e3af8e9b95d670074589b9e2959cea46c",
+      "bytes": 10686
+    },
+    {
+      "path": "c3-variant-final-worker-emit-20261030-02.log",
+      "workspaceRelativePath": "../c3-variant-final-worker-emit-20261030-02.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "c3-variant-final-worker-emit-20261030-03.log",
+      "workspaceRelativePath": "../c3-variant-final-worker-emit-20261030-03.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "c3-variant-final-worker-emit-20261030.log",
+      "workspaceRelativePath": "../c3-variant-final-worker-emit-20261030.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "c3-variant-focused-20261030-03.log",
+      "workspaceRelativePath": "../c3-variant-focused-20261030-03.log",
+      "sha256": "4148c5bee4994e2b9328dcca9d150af6b37ed187df4a14c809740b34308d6cf5",
+      "bytes": 11182
+    },
+    {
+      "path": "c3-variant-pg04-emit-witness-20261030.json",
+      "workspaceRelativePath": "../c3-variant-pg04-emit-witness-20261030.json",
+      "sha256": "00f49d8b517e1c48279728c613c961f10e5c58e6b0347c8db5375737966b1a4f",
+      "bytes": 286
+    },
+    {
+      "path": "c3-variant-search-pg-20261030-01/integration.json",
+      "workspaceRelativePath": "../c3-variant-search-pg-20261030-01/integration.json",
+      "sha256": "dd252c87ec1346536febb6b223567b2c64d7e71f8f1ec6e18d55c15e0dc0461d",
+      "bytes": 7684
+    },
+    {
+      "path": "c3-variant-search-pg-20261030-01.log",
+      "workspaceRelativePath": "../c3-variant-search-pg-20261030-01.log",
+      "sha256": "0382710f4c84016c0e74c49f702d54aa2a425371b78871bef9506cb2989489dd",
+      "bytes": 1653
+    },
+    {
+      "path": "c3-variant-search-pg-20261030-02/integration.json",
+      "workspaceRelativePath": "../c3-variant-search-pg-20261030-02/integration.json",
+      "sha256": "75873a8158f832677879415d0064aca128faee37f13d5ecdf34060c5ec662e0a",
+      "bytes": 18214
+    },
+    {
+      "path": "c3-variant-search-pg-20261030-02.log",
+      "workspaceRelativePath": "../c3-variant-search-pg-20261030-02.log",
+      "sha256": "d13fb746a99fd9ca4b70533eb3eeb8e42c24898cc72ab94aaa017d122f5c453d",
+      "bytes": 2613
+    },
+    {
+      "path": "c3-variant-search-pg-20261030-03/integration.json",
+      "workspaceRelativePath": "../c3-variant-search-pg-20261030-03/integration.json",
+      "sha256": "017f479de817d56e149851eb407561d942d00cb37faf9f230f2eec4c7dda4b35",
+      "bytes": 35981
+    },
+    {
+      "path": "c3-variant-search-pg-20261030-03.log",
+      "workspaceRelativePath": "../c3-variant-search-pg-20261030-03.log",
+      "sha256": "d9e39c1171c823cdc9f6af6b17628ce02f9a797bb59e0da89d956c4a457c21fd",
+      "bytes": 6654
+    },
+    {
+      "path": "c3-variant-search-pg-20261030-04/integration.json",
+      "workspaceRelativePath": "../c3-variant-search-pg-20261030-04/integration.json",
+      "sha256": "6b345a42320b666cfb5d61123903c2ef605779e715488ea449dbd0f1e89baa89",
+      "bytes": 35981
+    },
+    {
+      "path": "c3-variant-search-pg-20261030-04.log",
+      "workspaceRelativePath": "../c3-variant-search-pg-20261030-04.log",
+      "sha256": "d9e39c1171c823cdc9f6af6b17628ce02f9a797bb59e0da89d956c4a457c21fd",
+      "bytes": 6654
+    },
+    {
+      "path": "c3-variant-search-pg04-validation-20261030.json",
+      "workspaceRelativePath": "../c3-variant-search-pg04-validation-20261030.json",
+      "sha256": "a65746fd742d49cbfbf5eceac8c99f834ab17ae8f4de88ac4be416c046f1b230",
+      "bytes": 2115
+    },
+    {
+      "path": "c3-variant-search-postfix-final-replay-20261030.json",
+      "workspaceRelativePath": "../c3-variant-search-postfix-final-replay-20261030.json",
+      "sha256": "aa88425ff5885fd9e7f1d39c8a6daba94bde842277913c8dd51866b24e0ae5c5",
+      "bytes": 3652
+    },
+    {
+      "path": "c3-variant-search-postfix-final-replay-20261030.log",
+      "workspaceRelativePath": "../c3-variant-search-postfix-final-replay-20261030.log",
+      "sha256": "dbef665182976ab1196afd8e7035a723419ae4cab7f82b47439820bc2fdc0155",
+      "bytes": 484
+    },
+    {
+      "path": "c3-variant-search-postfix-final-replay-20261030.mjs",
+      "workspaceRelativePath": "../c3-variant-search-postfix-final-replay-20261030.mjs",
+      "sha256": "9054bb39b689becc7d7d672890256bbc3f893d992a1a6bc195294b76f3f86734",
+      "bytes": 6538
+    },
+    {
+      "path": "c3-variant-search-postfix-replay-20261030.json",
+      "workspaceRelativePath": "../c3-variant-search-postfix-replay-20261030.json",
+      "sha256": "b03cbe27e32d5b1bb785b2254bcad9a8ae77a2fae8915b4c912b9e61a8d41f24",
+      "bytes": 3652
+    },
+    {
+      "path": "c3-variant-search-postfix-replay-20261030.log",
+      "workspaceRelativePath": "../c3-variant-search-postfix-replay-20261030.log",
+      "sha256": "dbef665182976ab1196afd8e7035a723419ae4cab7f82b47439820bc2fdc0155",
+      "bytes": 484
+    },
+    {
+      "path": "c3-variant-search-postfix-replay-20261030.mjs",
+      "workspaceRelativePath": "../c3-variant-search-postfix-replay-20261030.mjs",
+      "sha256": "33a83b276fd08ac08011c8cd4b2dac23b9187debdb7e75e75f6b27526d3a330d",
+      "bytes": 6532
+    },
+    {
+      "path": "c3-variant-sharedfocused-20261030-01.log",
+      "workspaceRelativePath": "../c3-variant-sharedfocused-20261030-01.log",
+      "sha256": "e21b275b3023bcca7e0be79db0037c65775f82a9769a0988cd5072e4de67a1fd",
+      "bytes": 481
+    },
+    {
+      "path": "c3-variant-source-atomic-green-20261030.log",
+      "workspaceRelativePath": "../c3-variant-source-atomic-green-20261030.log",
+      "sha256": "47283be26e2184a814cfbbd370ffb0c2083223cbafb59ab96e0632ca58b8f816",
+      "bytes": 459
+    },
+    {
+      "path": "c3-variant-source-atomic-red-20261030.log",
+      "workspaceRelativePath": "../c3-variant-source-atomic-red-20261030.log",
+      "sha256": "a77ecabe07d076a61a59a1dbc8e2cff962355852ad11acc95a5ff2b37ea6ee5c",
+      "bytes": 11820
+    },
+    {
+      "path": "c3-variant-source-units-20261030.log",
+      "workspaceRelativePath": "../c3-variant-source-units-20261030.log",
+      "sha256": "1cc72bf2bc2e7da4aca2a5b411e404b1dce249989e6d790b8d278ba7c7020bbe",
+      "bytes": 430
+    },
+    {
+      "path": "c3-variant-symmetric-source-green-20261030.log",
+      "workspaceRelativePath": "../c3-variant-symmetric-source-green-20261030.log",
+      "sha256": "90cee9fecaf863a274e00444ed4211f69cc2d18ee9c072016705e3b8208622df",
+      "bytes": 527
+    },
+    {
+      "path": "c3-variant-symmetric-source-red-20261030.log",
+      "workspaceRelativePath": "../c3-variant-symmetric-source-red-20261030.log",
+      "sha256": "22d3519560a57b6965b507673735879e98621a7046661721977268f302b9a7da",
+      "bytes": 20494
+    },
+    {
+      "path": "c3-variant-worker-focused-20261030-04.log",
+      "workspaceRelativePath": "../c3-variant-worker-focused-20261030-04.log",
+      "sha256": "a407e61a12aa01acf6669b3852e26f1b94327056a99d7aebf7759b619d4f0fb2",
+      "bytes": 768
+    },
+    {
+      "path": "c3-variant-worker-green-20261030-02.log",
+      "workspaceRelativePath": "../c3-variant-worker-green-20261030-02.log",
+      "sha256": "86f497e1f52cb9f9d5596b5cb339ee79218ea264525ec4c602ad5aa5738f3d6a",
+      "bytes": 449
+    },
+    {
+      "path": "c3-variant-worker-tsc-20261030-01.log",
+      "workspaceRelativePath": "../c3-variant-worker-tsc-20261030-01.log",
+      "sha256": "eb5ef03ef9c9cb2429979375e5304b0559ad53ccb18482ef7674a463f8460ff0",
+      "bytes": 1578
+    },
+    {
+      "path": "c3-variant-worker-tsc-20261030-02.log",
+      "workspaceRelativePath": "../c3-variant-worker-tsc-20261030-02.log",
+      "sha256": "ce4abc0741795ad5247dfc0106f524ba41fa93e02c06d82ec5b662ed43d2c48d",
+      "bytes": 1098
+    },
+    {
+      "path": "c3-variant-worker-tsc-20261030-03.log",
+      "workspaceRelativePath": "../c3-variant-worker-tsc-20261030-03.log",
+      "sha256": "ce4abc0741795ad5247dfc0106f524ba41fa93e02c06d82ec5b662ed43d2c48d",
+      "bytes": 1098
+    },
+    {
+      "path": "c3-variant-workerfocused-20261030-01.log",
+      "workspaceRelativePath": "../c3-variant-workerfocused-20261030-01.log",
+      "sha256": "9ba8ff7a17d3a94c5d5fc3a2d7dd9130365a04567186082e9b5e1dc1a11bde40",
+      "bytes": 15050
+    },
+    {
+      "path": "c3-variant-final-db-provenance-20261030.log",
+      "workspaceRelativePath": "../c3-variant-final-db-provenance-20261030.log",
+      "sha256": "a0eb2877803318af5b09e37da37faf00b716a726995cfba605dee0941184626f",
+      "bytes": 400
+    }
+  ],
+  "commands": [
+    {
+      "command": "pnpm --filter @lana/contracts exec vitest run src/v2/canonical-evidence-readiness.test.ts src/v2/cart-variant-readiness.test.ts",
+      "result": "71 PASS",
+      "log": "../c3-variant-final-contracts-20261030.log",
+      "sourceNote": "packages byte-identical e7ff2e3d through final source"
+    },
+    {
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/effect-readiness.test.ts src/protected-claims.test.ts src/reply-assembler.test.ts",
+      "result": "55 PASS",
+      "log": "../c3-variant-final-shared-20261030-01.log",
+      "sourceNote": "packages byte-identical e7ff2e3d through final source"
+    },
+    {
+      "command": "pnpm --filter @lana/database exec vitest run --no-file-parallelism src/realtime-runtime.test.ts",
+      "result": "56 PASS; same-value/different-provenance guard negatives included in later rerun",
+      "log": "../c3-variant-final-shared-20261030-01.log",
+      "sourceNote": "later provenance-negative rerun output retained in tool transcript after e7ff2e3d; test count still56"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/realtime-sales-cycle.test.ts src/realtime-sales-catalog.test.ts src/single-agent-commerce-effects.test.ts src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-read-only.test.ts src/single-agent-commerce-read-only-context.test.ts src/single-agent-commerce-preparation.test.ts src/single-agent-commerce-selection-compact.test.ts src/single-agent-semantic-verifier-boundary.test.ts src/single-agent-commerce-ingress.test.ts",
+      "result": "507 PASS",
+      "log": "../c3-variant-final-fullfocused-20261030-05.log",
+      "sourceSha": "3a06936f8f43b7b31e09215fd8cd516f79797429"
+    },
+    {
+      "command": "pnpm --filter @lana/worker test:evals",
+      "result": "768 PASS / 2 existing SKIP / 0 FAIL",
+      "log": "../c3-variant-final-node-20261030-04.log",
+      "sourceSha": "3a06936f8f43b7b31e09215fd8cd516f79797429"
+    },
+    {
+      "command": "pnpm -r --filter \"@lana/worker^...\" build",
+      "result": "exit0",
+      "log": "../c3-variant-deps-build-20261030.log",
+      "sourceNote": "initial dependency build; subsequent worker builds rebuilt final dependency graph"
+    },
+    {
+      "command": "pnpm --filter @lana/contracts typecheck; pnpm --filter @lana/business-tools typecheck; pnpm --filter @lana/database typecheck; pnpm --filter @lana/worker typecheck; pnpm --filter @lana/worker build; pnpm --filter @lana/worker lint",
+      "result": "all exit0, each chained with failure exit",
+      "log": "../c3-variant-final-canonical-checks-20261030.log",
+      "sourceNote": "packages unchanged through final; worker-only source changes followed by exact final worker checks"
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck; pnpm --filter @lana/worker build; pnpm --filter @lana/worker lint",
+      "result": "all exit0, each chained with failure exit",
+      "log": "../c3-variant-final-worker-checks-20261030-04.log",
+      "sourceSha": "3a06936f8f43b7b31e09215fd8cd516f79797429"
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-variant-search-pg-20261030-04 COD",
+      "result": "exit0 / 76 PASS / 7 invariants PASS / DB dropped / generation0 / sendfalse",
+      "log": "../c3-variant-search-pg-20261030-04.log",
+      "sourceSha": "3a06936f8f43b7b31e09215fd8cd516f79797429"
+    },
+    {
+      "command": "node ../c3-variant-search-postfix-final-replay-20261030.mjs",
+      "result": "exit0; original clock/world/capturedsearch; target reads2OK each arm, L8/M14 valid both, repeatedM15 blocked",
+      "log": "../c3-variant-search-postfix-final-replay-20261030.log",
+      "sourceSha": "3a06936f8f43b7b31e09215fd8cd516f79797429"
+    },
+    {
+      "command": "git diff --check; git diff --quiet e7ff2e3d HEAD -- packages",
+      "result": "exit0",
+      "sourceSha": "3a06936f8f43b7b31e09215fd8cd516f79797429"
+    },
+    {
+      "command": "pnpm --filter @lana/database exec vitest run --no-file-parallelism src/realtime-runtime.test.ts -t \"enforces exact cart-mutation\"",
+      "result": "1 PASS / 55 filtered SKIP; explicit negative assertions for same-value/different source provenance in both guards",
+      "log": "../c3-variant-final-db-provenance-20261030.log",
+      "sourceSha": "3a06936f8f43b7b31e09215fd8cd516f79797429",
+      "sourceNote": "repeat verification to retain explicit log for previously transcript-only negative test assertions; not extra distinct coverage"
+    }
+  ],
+  "redEvidence": {
+    "initialContracts": "3 FAIL / 1 PASS",
+    "initialSearch": "1 FAIL",
+    "sourcePreparation": "3 FAIL before fix",
+    "reverseRace": "4 FAIL before fix; one preexisting direction PASS",
+    "note": "first2shelltailwrappers exited0 despite Vitest exit1 in logs; REDobserved not PASS"
+  },
+  "finalCounts": {
+    "workerFocused": 507,
+    "nodePass": 768,
+    "nodeExistingSkip": 2,
+    "contracts": 71,
+    "businessTools": 55,
+    "database": 56,
+    "actualPostgres": 76
+  },
+  "postgresFinal": {
+    "sourceSha": "3a06936f8f43b7b31e09215fd8cd516f79797429",
+    "status": "PASS",
+    "sourceDirty": false,
+    "cases": 76,
+    "testDatabaseDropped": true,
+    "providerGenerations": 0,
+    "sendEnabled": false,
+    "checks": [
+      {
+        "name": "stale_revision",
+        "status": "PASS",
+        "artifactHash": "a01ef95175cd278fd43caaee5e990fee8cf4e4aad007d2bd8272b698f9fc092d",
+        "caseName": "B composed newer inbound between final readback and commit cancels eligibility without an Outbox"
+      },
+      {
+        "name": "duplicate_source",
+        "status": "PASS",
+        "artifactHash": "a01ef95175cd278fd43caaee5e990fee8cf4e4aad007d2bd8272b698f9fc092d",
+        "caseName": "B3 native cart commits once; duplicate does not repeat database transaction"
+      },
+      {
+        "name": "crash_after_commit",
+        "status": "PASS",
+        "artifactHash": "a01ef95175cd278fd43caaee5e990fee8cf4e4aad007d2bd8272b698f9fc092d",
+        "caseName": "B composed recovery accounting commit-response-lost"
+      },
+      {
+        "name": "ambiguous_reconciliation",
+        "status": "PASS",
+        "artifactHash": "a01ef95175cd278fd43caaee5e990fee8cf4e4aad007d2bd8272b698f9fc092d",
+        "caseName": "B3 native quantity change persists, unknown commit reconciles without replay"
+      },
+      {
+        "name": "operation_idempotency",
+        "status": "PASS",
+        "artifactHash": "a01ef95175cd278fd43caaee5e990fee8cf4e4aad007d2bd8272b698f9fc092d",
+        "caseName": "B composed ingress commits an open cart, authorizes the exact reply and captures delivery once"
+      },
+      {
+        "name": "history_outbox_recovery",
+        "status": "PASS",
+        "artifactHash": "a01ef95175cd278fd43caaee5e990fee8cf4e4aad007d2bd8272b698f9fc092d",
+        "caseName": "B composed two native mutations retain one source and next owner receives accepted history and current cart"
+      },
+      {
+        "name": "no_duplicate_effect",
+        "status": "PASS",
+        "artifactHash": "a01ef95175cd278fd43caaee5e990fee8cf4e4aad007d2bd8272b698f9fc092d",
+        "caseName": "B composed N4 sends exact text and selected image in one response group without replay duplicates"
+      }
+    ]
+  },
+  "postgresAttempts": [
+    {
+      "sourceSha": "f39383c5f126e2cf6d61ade73b268805178c6f1e",
+      "sourceDirty": false,
+      "status": "FAIL",
+      "providerGenerations": 0,
+      "sendEnabled": false,
+      "testDatabaseDropped": true,
+      "error": "SOURCE_LEASE_REQUIRED",
+      "attempt": 1,
+      "cases": 9,
+      "lastCase": {
+        "name": "B variant shared raw counter cannot authorize distinct component sizes",
+        "status": "FAIL",
+        "error": "SOURCE_LEASE_REQUIRED"
+      }
+    },
+    {
+      "sourceSha": "3d2ba0089b659f9226d15f4e917af0d03f162937",
+      "sourceDirty": false,
+      "status": "FAIL",
+      "providerGenerations": 0,
+      "sendEnabled": false,
+      "testDatabaseDropped": true,
+      "error": "Expected values to be strictly equal:\n\n1 !== 2\n",
+      "attempt": 2,
+      "cases": 22,
+      "lastCase": {
+        "name": "B composed selection checkout tuple identity supports M plus L without zero-stock color substitution",
+        "status": "FAIL",
+        "error": "Expected values to be strictly equal:\n\n1 !== 2\n"
+      }
+    },
+    {
+      "sourceSha": "050db1ddfed42a2147a8e9e55c5ba32ef22f14da",
+      "sourceDirty": false,
+      "status": "PASS",
+      "providerGenerations": 0,
+      "sendEnabled": false,
+      "testDatabaseDropped": true,
+      "error": null,
+      "attempt": 3,
+      "cases": 76,
+      "lastCase": {
+        "name": "B qualification shared queue preserves an invalid observed attempt without later dispatch",
+        "status": "PASS"
+      }
+    },
+    {
+      "sourceSha": "3a06936f8f43b7b31e09215fd8cd516f79797429",
+      "sourceDirty": false,
+      "status": "PASS",
+      "providerGenerations": 0,
+      "sendEnabled": false,
+      "testDatabaseDropped": true,
+      "error": null,
+      "attempt": 4,
+      "cases": 76,
+      "lastCase": {
+        "name": "B qualification shared queue preserves an invalid observed attempt without later dispatch",
+        "status": "PASS"
+      }
+    }
+  ],
+  "emitWitness": {
+    "sourceSha": "3a06936f8f43b7b31e09215fd8cd516f79797429",
+    "nodeCreatedAt": "2026-10-30T15:32:52.9995760Z",
+    "moduleEmittedAt": "2026-10-30T15:32:48.9480107Z",
+    "moduleSha256": "65a6fd8cf8c0f82c942c68dc0333b0d60a331ce4208e72b189d66066eaef0f44",
+    "buildBeforeNode": true
+  },
+  "sameWorldReplay": {
+    "kind": "POST_FIX_SAME_WORLD_CLOCK_COMPONENT_REPLAY_NOT_PROVIDER_OR_END_TO_END",
+    "currentHead": "3a06936f8f43b7b31e09215fd8cd516f79797429",
+    "worldHash": "a46067d9e203eff5c5f77f6447b3b9b3efe04df813fae43091d71dbb605a4f0e",
+    "providerGenerations": 0,
+    "networkReads": 0,
+    "effects": 0,
+    "sendEnabled": false,
+    "productCapacity": {
+      "limit": 4,
+      "clock": "2026-10-30T08:36:14.659Z",
+      "capturedSearchCandidates": [
+        "V406",
+        "SQ748",
+        "V168"
+      ],
+      "probes": [
+        {
+          "searchFirst": false,
+          "sourceWorldHash": "a46067d9e203eff5c5f77f6447b3b9b3efe04df813fae43091d71dbb605a4f0e",
+          "before": [],
+          "reads": [
+            "SQ2447",
+            "SV2447"
+          ],
+          "results": [
+            {
+              "status": "OK",
+              "reason": null
+            },
+            {
+              "status": "OK",
+              "reason": null
+            }
+          ],
+          "after": [
+            "SQ2447",
+            "SV2447"
+          ]
+        },
+        {
+          "searchFirst": true,
+          "sourceWorldHash": "a46067d9e203eff5c5f77f6447b3b9b3efe04df813fae43091d71dbb605a4f0e",
+          "before": [],
+          "reads": [
+            "SQ2447",
+            "SV2447"
+          ],
+          "results": [
+            {
+              "status": "OK",
+              "reason": null
+            },
+            {
+              "status": "OK",
+              "reason": null
+            }
+          ],
+          "after": [
+            "SQ2447",
+            "SV2447"
+          ]
+        }
+      ]
+    },
+    "stockClaimScope": {
+      "clock": "2026-10-30T08:43:12.997Z",
+      "selections": [
+        {
+          "productId": "SV2447",
+          "offerId": "AO",
+          "components": [
+            {
+              "size": "L",
+              "color": "__NO_COLOR__"
+            }
+          ],
+          "quantity": 1,
+          "stock": 8,
+          "price": 499000
+        },
+        {
+          "productId": "SV2447",
+          "offerId": "AO",
+          "components": [
+            {
+              "size": "M",
+              "color": "__NO_COLOR__"
+            }
+          ],
+          "quantity": 1,
+          "stock": 14,
+          "price": 499000
+        }
+      ],
+      "stockClaims": [
+        {
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "cv2:6ff7a47d053e6ffc4b3eb1d50f18567f70a6aa3e071bdc2dca488ff339fb5a03"
+          },
+          "value": {
+            "status": "IN_STOCK",
+            "availableQuantity": 8
+          },
+          "contentHash": "564c8fd1e6e3ec281226ccdf3a1c2e441ce13dc36edde4b2155c1f69dc253ef1"
+        },
+        {
+          "scope": {
+            "kind": "PRODUCT",
+            "productId": "SV2447",
+            "variantId": "cv2:5a422d3742f6188ea8e42d5532445a979e2ae6987251f6e91c35c768e4c3f718"
+          },
+          "value": {
+            "status": "IN_STOCK",
+            "availableQuantity": 14
+          },
+          "contentHash": "39cd12a6880a8f7af99fc72b737283c9144d84da4ad56830c3376713607d7ebe"
+        }
+      ],
+      "singleValidation": [
+        {
+          "missing": false,
+          "conflict": false,
+          "mismatch": false
+        },
+        {
+          "missing": false,
+          "conflict": false,
+          "mismatch": false
+        }
+      ],
+      "combinedValidation": {
+        "missing": false,
+        "conflict": false,
+        "mismatch": false
+      }
+    }
+  },
+  "limitations": [
+    "No model quality run after fix",
+    "No inventory reservation or POS write",
+    "Unknown mixed inventory independence fails closed",
+    "No threshold or historical grade edits",
+    "Phase C BLOCKED / C3 NOT_RUN / B_NOT_GO"
+  ],
+  "independentReview": {
+    "status": "APPROVE_IMPLEMENTATION",
+    "reviewer": "/root/bc_fix_review",
+    "executableSourceSha": "3a06936f8f43b7b31e09215fd8cd516f79797429",
+    "artifactHashesIndependentlyChecked": 56,
+    "realAdapterInvariantChecks": 7,
+    "actualPGCases": 76,
+    "remainingBlockingFindings": 0,
+    "scope": "code/evidence only; model quality NOT_RUN, Phase C BLOCKED, no deploy approval"
+  }
+}

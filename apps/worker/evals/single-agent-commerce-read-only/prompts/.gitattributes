@@ -1,0 +1,2 @@
+# Preserve the exact owner prompt bytes used by frozen provider registrations.
+owner.vi.txt -text -whitespace

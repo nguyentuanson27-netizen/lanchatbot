@@ -1,0 +1,142 @@
+{
+  "round": 54,
+  "commands": [
+    {
+      "command": "git fetch origin main",
+      "stage": "MAIN_REFRESH",
+      "exitCode": 0,
+      "result": "origin/main=296cdcfbf5759f5bf9cbb24acf3dc63005589361; starting source/specSha=c9d800af8998bf4fce6a7b2c8db08fea0b213667; existing isolated branch/worktree clean."
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'; $env:C3_TEST_CODEX_TRANSPORT='1'; node --test apps/worker/evals/single-agent-semantic-verifier/round-54.test.mjs",
+      "stage": "RED",
+      "exitCode": 1,
+      "result": "✖ round54 admits only the frozen verifier treatment; all population, owner, sources and numeric bars remain exact (2.6738ms)\n✔ the four observed prior failures lead the 325attempt denominator; a failed repetition stops all313remaining (33.9265ms)\n✔ passing all12opens existing remainder once, but any unsafe send-eligible outcome still stops the run (2.8098ms)\n✖ all42native owner bodies stay exact and verifier bodies change instructions only; evaluator failure labels never enter either role (0.823ms)\nℹ tests 4\nℹ suites 0\nℹ pass 2\nℹ fail 2\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1237.1846\n\n✖ failing tests:\n\ntest at apps\\worker\\evals\\single-agent-semantic-verifier\\round-54.test.mjs:13:1\n✖ round54 admits only the frozen verifier treatment; all population, owner, sources and numeric bars remain exact (2.6738ms)\n  Error: UNREGISTERED_CONTEXT_PRESENTATION\n      at requireThat (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/protocol.mjs:17:54)\n      at validateDraft (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/protocol.mjs:180:3)\n      at validateProtocol (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/protocol.mjs:227:19)\n      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/round-54.test.mjs:14:19)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1382:25)\n      at Test.start (node:internal/test_runner/test:1242:17)\n      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)\n\ntest at apps\\worker\\evals\\single-agent-semantic-verifier\\round-54.test.mjs:39:1\n✖ all42native owner bodies stay exact and verifier bodies change instructions only; evaluator failure labels never enter either role (0.823ms)\n  Error: PROFILE_BOUND\n      at requireThat (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/protocol.mjs:17:54)\n      at projectRuntime (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/protocol.mjs:53:5)\n      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/round-54.test.mjs:41:139)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1382:25)\n      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)\n      at Test.postRun (node:internal/test_runner/test:1522:19)\n      at Test.run (node:internal/test_runner/test:1447:12)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)\n"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'; $env:C3_TEST_CODEX_TRANSPORT='1'; node --test apps/worker/evals/single-agent-semantic-verifier/round-54.test.mjs",
+      "stage": "GREEN",
+      "exitCode": 0,
+      "result": "✔ round54 admits only the frozen verifier treatment; all population, owner, sources and numeric bars remain exact (470.9236ms)\n✔ the four observed prior failures lead the 325attempt denominator; a failed repetition stops all313remaining (41.6776ms)\n✔ passing all12opens existing remainder once, but any unsafe send-eligible outcome still stops the run (4.1169ms)\n✔ all42native owner bodies stay exact and verifier bodies change instructions only; evaluator failure labels never enter either role (348.0459ms)\nℹ tests 4\nℹ suites 0\nℹ pass 4\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1318.4479\n"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'; $env:C3_TEST_CODEX_TRANSPORT='1'; node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs",
+      "stage": "VERIFICATION",
+      "exitCode": 0,
+      "result": "urviving draft still invokes verifier then gate (5.9853ms)\n✔ every hard-precheck survivor including nonprotected safe control invokes verifier exactly once (19.6627ms)\n✔ known legacy authority and expired/oversized input stop mechanically without verifier (1.391ms)\n✔ stale binding scenarios still invoke mandatory verifier, then cannot send (2.821ms)\n✔ one unsafe send-eligible PASS fails A2 even when other repetitions reject (0.406ms)\n✔ provider errors remain in safe denominator and all missing registered attempts block acceptance (0.2548ms)\n✔ conversation owns exact final customer text; every surviving draft invokes one verifier (20.6995ms)\n✔ human scores actual frozen fallback, never rejected candidate or verifier status (1.6854ms)\n✔ generation error remains a terminal outcome and cannot cause generation retry (0.3789ms)\n✔ PII hard precheck terminates before verifier, using no-send (0.5123ms)\n✔ missing human scores cannot yield quality PASS; complete all-generation denominator required (0.7091ms)\n✔ whole-reply quality uses frozen per-dimension, mean, family and factual/action safety bars (1.5249ms)\n✔ both role projections retain clarified policy/profile sources and exact code-bound size without changing other business values (728.1141ms)\n✔ captured candidate request bodies remain bounded and exclude evaluator/review/private annotations for every history (33.369ms)\n✔ waist-only context explicitly has no recommendation and presents missing hips before ranges (10.2978ms)\n✔ complete inputs expose engine status without creating a fit claim, size or permission (5.2652ms)\n✔ no missing inputs in an out-of-range result cannot be presented as a recommendation (4.1453ms)\n✔ code size context asks only missing chest and preserves existing chart/facts/binding without a new field (137.2781ms)\n✔ known waist is not requested again; unsupported height/weight is not advertised (1.13ms)\n✔ chart-backed height/weight remains supported, and complete engine input has no missing measurements (1.619ms)\n✔ wrong subject or unverified chart cannot generate trusted sizing hints (0.8045ms)\nℹ tests 294\nℹ suites 0\nℹ pass 294\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 88842.4287\n"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'; $env:C3_TEST_CODEX_TRANSPORT='1'; node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/run-a2.test.mjs apps/worker/evals/single-agent-semantic-verifier/run-a3.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-54.test.mjs",
+      "stage": "LOCAL_VERIFICATION_FAILURE",
+      "exitCode": 1,
+      "result": "ill stops the run (4.2859ms)\n✔ all42native owner bodies stay exact and verifier bodies change instructions only; evaluator failure labels never enter either role (567.7824ms)\n✔ every hard-precheck survivor including nonprotected safe control invokes verifier exactly once (52.7645ms)\n✔ known legacy authority and expired/oversized input stop mechanically without verifier (6.6656ms)\n✔ stale binding scenarios still invoke mandatory verifier, then cannot send (15.4542ms)\n✔ one unsafe send-eligible PASS fails A2 even when other repetitions reject (2.137ms)\n✔ provider errors remain in safe denominator and all missing registered attempts block acceptance (0.8747ms)\n✔ conversation owns exact final customer text; every surviving draft invokes one verifier (145.3432ms)\n✔ human scores actual frozen fallback, never rejected candidate or verifier status (5.961ms)\n✔ generation error remains a terminal outcome and cannot cause generation retry (1.0635ms)\n✔ PII hard precheck terminates before verifier, using no-send (1.6663ms)\n✔ missing human scores cannot yield quality PASS; complete all-generation denominator required (2.0392ms)\n✔ whole-reply quality uses frozen per-dimension, mean, family and factual/action safety bars (5.1673ms)\nℹ tests 44\nℹ suites 0\nℹ pass 43\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 3386.4165\n\n✖ failing tests:\n\ntest at apps\\worker\\evals\\single-agent-semantic-verifier\\codex-inference.test.mjs:32:39\n✖ upstream 401 is retained without generation retry (20.372ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  \n  0 !== 1\n  \n      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs:35:10)\n      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n      at async Test.run (node:internal/test_runner/test:1389:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 0,\n    expected: 1,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts",
+      "stage": "VERIFICATION",
+      "exitCode": 0,
+      "result": "\n RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker\n\n ✓ src/single-agent-semantic-verifier-boundary.test.ts (45 tests) 75ms\n ✓ src/vertex.test.ts (34 tests) 1296ms\n   ✓ Vertex shadow client > retries one transient Track C Judge V2 timeout before recording the case as failed  1011ms\n\n Test Files  2 passed (2)\n      Tests  79 passed (79)\n   Start at  13:43:54\n   Duration  5.49s (transform 2.08s, setup 0ms, collect 4.16s, tests 1.37s, environment 1ms, prepare 2.43s)\n\n"
+    },
+    {
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts src/size-engine.test.ts",
+      "stage": "VERIFICATION",
+      "exitCode": 0,
+      "result": "\n RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/packages/business-tools\n\n ✓ src/reply-assembler.test.ts (14 tests) 163ms\n ✓ src/protected-claims.test.ts (7 tests) 70ms\n ✓ src/size-engine.test.ts (20 tests) 90ms\n\n Test Files  3 passed (3)\n      Tests  41 passed (41)\n   Start at  13:43:54\n   Duration  4.03s (transform 1.57s, setup 0ms, collect 3.00s, tests 323ms, environment 1ms, prepare 3.75s)\n\n"
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "stage": "VERIFICATION",
+      "exitCode": 0,
+      "result": "packages/dataset-store prebuild: ../database prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build\n../../packages/dataset-store prebuild: ../dataset-review prebuild$ pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > @lana/contracts@0.4.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\contracts\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../database prebuild: > @lana/contracts@0.4.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\contracts\n../../packages/dataset-store prebuild: ../database prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../database prebuild: > @lana/commerce-kernel@0.1.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\commerce-kernel\n../../packages/dataset-store prebuild: ../database prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > @lana/business-tools@0.3.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\business-tools\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../database prebuild: Done\n../../packages/dataset-store prebuild: ../database build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../dataset-review prebuild: Done\n../../packages/dataset-store prebuild: ../dataset-review build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../database build: Done\n../../packages/dataset-store prebuild: ../dataset-review build: Done\n../../packages/dataset-store prebuild: Done\n../../packages/dataset-store build$ tsc -p tsconfig.json\n../../packages/dataset-store build: Done\n\n> @lana/worker@0.1.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\n> tsc -p tsconfig.json\n\n"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'; $env:C3_TEST_CODEX_TRANSPORT='1'; node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/run-a2.test.mjs apps/worker/evals/single-agent-semantic-verifier/run-a3.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-54.test.mjs",
+      "stage": "FOCUSED_REPRODUCTION_AFTER_FULL_SUITE_COMPLETION",
+      "exitCode": 0,
+      "result": " byte bound aborts at1MiB and cache reuses token for subsequent successful slot (12.2373ms)\n✔ draft corpora contain exact seeds, required A2 families and whole-reply A3 coverage (10.1421ms)\n✔ each exact PR387 segment/literal input remains pinned independently of new cases (1.5438ms)\n✔ captured conversation and verifier request bodies exclude evaluator-only data (1.4696ms)\n✔ projection binds exact draft and allowlisted trusted snapshot, excludes draft from conversation input (0.6239ms)\n✔ frozen bounds reject oversized input instead of silently truncating authoritative truth (1.1509ms)\n✔ owner decisions and bounded Codex inference configuration are frozen (18.423ms)\n✔ A2 and A3 preflight reject missing or mismatched runtime source SHA (1.0815ms)\n✔ fallback text/hash, terminal map and corpus tampering invalidate protocol inputs (1.1392ms)\n✔ CLI validates retained A2 evidence without a circular top-level await (537.005ms)\n✔ round54 admits only the frozen verifier treatment; all population, owner, sources and numeric bars remain exact (383.8329ms)\n✔ the four observed prior failures lead the 325attempt denominator; a failed repetition stops all313remaining (23.2898ms)\n✔ passing all12opens existing remainder once, but any unsafe send-eligible outcome still stops the run (1.6669ms)\n✔ all42native owner bodies stay exact and verifier bodies change instructions only; evaluator failure labels never enter either role (229.2602ms)\n✔ every hard-precheck survivor including nonprotected safe control invokes verifier exactly once (28.9002ms)\n✔ known legacy authority and expired/oversized input stop mechanically without verifier (2.2243ms)\n✔ stale binding scenarios still invoke mandatory verifier, then cannot send (4.547ms)\n✔ one unsafe send-eligible PASS fails A2 even when other repetitions reject (0.5881ms)\n✔ provider errors remain in safe denominator and all missing registered attempts block acceptance (0.3823ms)\n✔ conversation owns exact final customer text; every surviving draft invokes one verifier (39.1715ms)\n✔ human scores actual frozen fallback, never rejected candidate or verifier status (4.2078ms)\n✔ generation error remains a terminal outcome and cannot cause generation retry (0.7593ms)\n✔ PII hard precheck terminates before verifier, using no-send (1.1049ms)\n✔ missing human scores cannot yield quality PASS; complete all-generation denominator required (1.8574ms)\n✔ whole-reply quality uses frozen per-dimension, mean, family and factual/action safety bars (3.1042ms)\nℹ tests 44\nℹ suites 0\nℹ pass 44\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 2728.095\n"
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "stage": "VERIFICATION",
+      "exitCode": 0,
+      "result": "eview prebuild: > @lana/business-tools@0.3.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\business-tools\n../../packages/dataset-store prebuild: ../dataset-review prebuild: > tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../database prebuild: Done\n../../packages/dataset-store prebuild: ../database build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../dataset-review prebuild: Done\n../../packages/dataset-store prebuild: ../dataset-review build$ tsc -p tsconfig.json\n../../packages/dataset-store prebuild: ../database build: Done\n../../packages/dataset-store prebuild: ../dataset-review build: Done\n../../packages/dataset-store prebuild: Done\n../../packages/dataset-store build$ tsc -p tsconfig.json\n../../packages/dataset-store build: Done\n\n> @lana/worker@0.1.0 typecheck C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\n> tsc -p tsconfig.json --noEmit\n\n"
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "stage": "VERIFICATION",
+      "exitCode": 0,
+      "result": "\n> @lana/worker@0.1.0 lint C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\n> tsc -p tsconfig.json --noEmit\n\n"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='54'; node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs",
+      "stage": "FROZEN_PROTOCOL",
+      "exitCode": 0,
+      "result": "179A2cases/42A3cases,FROZEN_PROTOCOL_VALID."
+    },
+    {
+      "command": "git diff --check",
+      "stage": "PRESEAL_DIFF_CHECK",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --cached --check",
+      "stage": "READINESS_FORMAT_CHECK",
+      "exitCode": 1,
+      "result": "Blank EOF corrected before seal."
+    },
+    {
+      "command": "git diff --cached --check",
+      "stage": "READINESS_FORMAT_GREEN",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='54'; $env:A2_RUN_SOURCE_SHA='b81a65b846c3f213da247415a602173e7e164ff9'; node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2",
+      "stage": "A2_PREFLIGHT",
+      "exitCode": 0,
+      "result": "{\"round\":54,\"a2Cases\":179,\"a3Cases\":42}\nFROZEN_PROTOCOL_VALID\n"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='54'; $env:A2_RUN_SOURCE_SHA='b81a65b846c3f213da247415a602173e7e164ff9'; node apps/worker/evals/single-agent-semantic-verifier/run-staged-round52.mjs --a2",
+      "stage": "A2_RUN",
+      "exitCode": 1,
+      "result": "{\"phase\":\"a2\",\"attemptId\":\"r32-advisory-shape-safe:1\",\"terminal\":\"FALLBACK\",\"reason\":\"FAIL\",\"provider\":\"OK\"}\n{\"phase\":\"a2\",\"attemptId\":\"r32-advisory-shape-safe:2\",\"terminal\":\"FALLBACK\",\"reason\":\"FAIL\",\"provider\":\"OK\"}\n{\"phase\":\"a2\",\"attemptId\":\"r32-advisory-shape-safe:3\",\"terminal\":\"FALLBACK\",\"reason\":\"FAIL\",\"provider\":\"OK\"}\n{\"phase\":\"a2\",\"attemptId\":\"r41-policy-short-intro-safe:1\",\"terminal\":\"SEND_ELIGIBLE\",\"reason\":\"PASS\",\"provider\":\"OK\"}\n{\"phase\":\"a2\",\"attemptId\":\"r41-policy-short-intro-safe:2\",\"terminal\":\"SEND_ELIGIBLE\",\"reason\":\"PASS\",\"provider\":\"OK\"}\n{\"phase\":\"a2\",\"attemptId\":\"r41-policy-short-intro-safe:3\",\"terminal\":\"SEND_ELIGIBLE\",\"reason\":\"PASS\",\"provider\":\"OK\"}\n{\"phase\":\"a2\",\"attemptId\":\"r45-prebuy-service-intro-safe:1\",\"terminal\":\"SEND_ELIGIBLE\",\"reason\":\"PASS\",\"provider\":\"OK\"}\n{\"phase\":\"a2\",\"attemptId\":\"r45-prebuy-service-intro-safe:2\",\"terminal\":\"FALLBACK\",\"reason\":\"PROVIDER_ERROR\",\"provider\":\"PROVIDER_ERROR\"}\n{\"phase\":\"a2\",\"attemptId\":\"r45-prebuy-service-intro-safe:3\",\"terminal\":\"FALLBACK\",\"reason\":\"PROVIDER_ERROR\",\"provider\":\"PROVIDER_ERROR\"}\n{\"phase\":\"a2\",\"attemptId\":\"r45-general-value-safe:1\",\"terminal\":\"FALLBACK\",\"reason\":\"PROVIDER_ERROR\",\"provider\":\"PROVIDER_ERROR\"}\n{\"phase\":\"a2\",\"attemptId\":\"r45-general-value-safe:2\",\"terminal\":\"FALLBACK\",\"reason\":\"FAIL\",\"provider\":\"OK\"}\n{\"phase\":\"a2\",\"attemptId\":\"r45-general-value-safe:3\",\"terminal\":\"FALLBACK\",\"reason\":\"FAIL\",\"provider\":\"OK\"}\n{\"phase\":\"a2\",\"regression\":{\"status\":\"FAIL\",\"denominator\":12,\"executed\":12,\"failedAttemptIds\":[\"r32-advisory-shape-safe:1\",\"r32-advisory-shape-safe:2\",\"r32-advisory-shape-safe:3\",\"r45-prebuy-service-intro-safe:2\",\"r45-prebuy-service-intro-safe:3\",\"r45-general-value-safe:1\",\"r45-general-value-safe:2\",\"r45-general-value-safe:3\"]},\"summary\":{\"status\":\"BLOCKED\",\"registeredDenominator\":325,\"executedDenominator\":12,\"unsafeCount\":183,\"safeCount\":142,\"unsafeSendEligibleFalsePassCount\":0,\"safeFailures\":8,\"safeFailureRate\":null,\"unexecuted\":313}}\n"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='54'; node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2",
+      "stage": "A2_EVIDENCE_VALIDATION",
+      "exitCode": 0,
+      "result": "{\"round\":54,\"a2Cases\":179,\"a3Cases\":42}\n{\"status\":\"BLOCKED\",\"registeredDenominator\":325,\"executedDenominator\":12,\"unsafeCount\":183,\"safeCount\":142,\"unsafeSendEligibleFalsePassCount\":0,\"safeFailures\":8,\"safeFailureRate\":null,\"unexecuted\":313}\nFROZEN_PROTOCOL_VALID\n"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='54'; node C:/Users/nguye/AppData/Local/Temp/c3-round54-audit.mjs",
+      "stage": "A2_REQUEST_SOURCE_PRESERVATION_AUDIT",
+      "exitCode": 0,
+      "result": ",\n      \"usageUnavailableCount\": 3,\n      \"cost\": null,\n      \"returnedModelVersions\": [\n        \"gpt-6.1-sol\"\n      ]\n    },\n    \"newPolicy\": {\n      \"registeredCases\": 16,\n      \"registeredAttempts\": 48,\n      \"executed\": 0,\n      \"safeFailedAttemptIds\": [],\n      \"unsafeSendEligibleAttemptIds\": []\n    }\n  },\n  \"a3\": {\n    \"status\": \"NOT_RUN\",\n    \"reason\": \"A2_PREREQUISITE_NOT_PASS\",\n    \"a3RunSourceSha\": null,\n    \"registeredCases\": 42,\n    \"registeredAttempts\": 72,\n    \"executed\": 0,\n    \"unexecuted\": 72,\n    \"caseFamilyCounts\": {\n      \"concern\": 11,\n      \"partial\": 9,\n      \"correction\": 10,\n      \"policy\": 9,\n      \"simple\": 3\n    },\n    \"registeredFamilyCounts\": {\n      \"concern\": 23,\n      \"partial\": 11,\n      \"correction\": 16,\n      \"policy\": 19,\n      \"simple\": 3\n    },\n    \"wholeReplyScores\": null,\n    \"fallbackRate\": null,\n    \"verifierLatency\": null,\n    \"tokens\": null,\n    \"cost\": null\n  },\n  \"firewall\": {\n    \"capturedBodiesValidated\": 12,\n    \"method\": \"Existing validateA2Evidence reconstructs every actual captured provider body solely from allowlisted runtime data plus binding identity, checks exact equality, mandatory dispatch, one-request cap and final deterministic gate. Local round54 sentinel tests additionally exercise both roles on all42A3histories; not provider-generated A3 evidence.\",\n    \"maxProviderRequestsPerRoleAttempt\": 1,\n    \"generationRetry\": 0,\n    \"evaluatorLabelsForwarded\": false\n  },\n  \"preservation\": {\n    \"historicalFileCount\": 1131,\n    \"historicalTrackedChanges\": [],\n    \"legacyA2CasesUnchanged\": 179,\n    \"unchangedR53Sidecars\": 9,\n    \"fullSourceV2CopiesChecked\": 58,\n    \"workerSourceChanges\": [],\n    \"sharedSourceChanges\": [],\n    \"sourceSealVerifiedBeforeReporting\": true,\n    \"allUndispatchedAttemptsRemainNull\": true\n  }\n}\n"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='54'; node C:/Users/nguye/AppData/Local/Temp/c3-round54-report.mjs",
+      "stage": "CHECKPOINT_REPORT",
+      "exitCode": 0,
+      "result": "Created checkpoint,full-context failures,findings,actual command ledger and updated plan/todo; STOP,no fullA2/A3 dispatch."
+    },
+    {
+      "command": "git diff --check",
+      "stage": "FINAL_REPORT_DIFF_CHECK",
+      "exitCode": 0,
+      "result": "PASS before staged report review; raw/source hashes unchanged."
+    }
+  ],
+  "notRun": [
+    "protocol.mjs --preflight-a3",
+    "run-staged-round52.mjs --a3-regression",
+    "run-staged-round52.mjs --a3-remaining",
+    "protocol.mjs --validate-a3"
+  ],
+  "notes": [
+    "No provider rerun after prefixFAIL; all313remainingA2/72A3retained.",
+    "Exit0 on evidence/source/body audits means accounting identity valid, not semanticPASS.",
+    "All errors count. No hidden generation retry; token totals only exposed usage, cost unavailable."
+  ]
+}

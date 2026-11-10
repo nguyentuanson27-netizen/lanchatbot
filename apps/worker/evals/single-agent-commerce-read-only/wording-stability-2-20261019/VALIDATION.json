@@ -1,0 +1,21 @@
+{
+  "sourceSha": "35c9007b6e979e9708f3474d34307b8f66fa6d55",
+  "frozenGitHashesMatched": 5,
+  "commandsAllExit0": true,
+  "registeredSlots": 16,
+  "primaryRows": 16,
+  "testDatabaseDropped": true,
+  "generationErrorScan": [],
+  "noGenerationRetry": true,
+  "privateCheckoutModelRequests": 0,
+  "unexpectedSourceErrorLogScan": [],
+  "normalBusinessTerminalMetadata": [
+    "CHECKOUT_DETAILS_MISSING",
+    "PURCHASE_CONFIRMED",
+    "CUSTOMER_REQUESTED_HUMAN"
+  ],
+  "unexpectedReadbackRecovery": 0,
+  "recordedTimeouts": 0,
+  "validationCorrection": "Initial supplemental assertion incorrectly treated all recovery metadata as errors; corrected to allow the three registered business terminals. No runtime/raw/run was changed.",
+  "unchangedExecutableConfigPaths": 7
+}

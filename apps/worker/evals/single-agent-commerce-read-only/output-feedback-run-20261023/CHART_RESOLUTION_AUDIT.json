@@ -1,0 +1,1147 @@
+{
+  "observedAt": "2026-10-23T12:10:44.313Z",
+  "mode": "READ_ONLY_LIVE_POLICY_AND_CATALOG_NO_GENERATION",
+  "products": [
+    {
+      "code": "SV2447",
+      "productId": "SV2447",
+      "title": "Set váy Thạch Thảo",
+      "target": {
+        "brand": "LANA",
+        "parentProductId": "SV2447",
+        "componentProductId": "SV2447",
+        "componentRole": "DRESS",
+        "category": "VAY",
+        "form": null,
+        "material": "REN"
+      },
+      "evaluation": {
+        "sizeChart": null,
+        "eligibility": {
+          "schemaVersion": 1,
+          "status": "INELIGIBLE",
+          "policyBundle": "FRESH",
+          "publication": "PUBLISHED",
+          "verification": "VERIFIED",
+          "measurementBasis": "BODY",
+          "scope": "MISMATCH",
+          "reasonCodes": [
+            "SIZE_CHART_SCOPE_MISMATCH"
+          ]
+        },
+        "charts": []
+      }
+    },
+    {
+      "code": "SQ2447",
+      "productId": "SQ2447",
+      "title": "Set quần Thạch Thảo",
+      "target": {
+        "brand": "LANA",
+        "parentProductId": "SQ2447",
+        "componentProductId": "SQ2447",
+        "componentRole": "PANTS",
+        "category": "QUAN",
+        "form": null,
+        "material": "TƠ"
+      },
+      "evaluation": {
+        "sizeChart": null,
+        "eligibility": {
+          "schemaVersion": 1,
+          "status": "INELIGIBLE",
+          "policyBundle": "FRESH",
+          "publication": "PUBLISHED",
+          "verification": "VERIFIED",
+          "measurementBasis": "BODY",
+          "scope": "MISMATCH",
+          "reasonCodes": [
+            "SIZE_CHART_SCOPE_MISMATCH"
+          ]
+        },
+        "charts": []
+      }
+    }
+  ],
+  "charts": [
+    {
+      "artifactKey": "size-chart:SD276",
+      "version": 2,
+      "lifecycle": "PUBLISHED",
+      "contentHash": "sha256:4dc553a16e69a3773ce8e791a0766b01f9fa4c932561f09da3f9fda9c4893e70",
+      "content": {
+        "kind": "SIZE_CHART",
+        "chart": {
+          "bands": [
+            {
+              "note": null,
+              "size": "S",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 86,
+                  "minInclusive": 86
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 78,
+                  "minInclusive": 62
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 96,
+                  "minInclusive": 96
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 160,
+                  "minInclusive": 153
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 52,
+                  "minInclusive": 43
+                }
+              ]
+            },
+            {
+              "note": null,
+              "size": "M",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 92,
+                  "minInclusive": 92
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 82,
+                  "minInclusive": 66
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 102,
+                  "minInclusive": 102
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 165,
+                  "minInclusive": 158
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 62,
+                  "minInclusive": 52
+                }
+              ]
+            },
+            {
+              "note": null,
+              "size": "L",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 98,
+                  "minInclusive": 98
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 86,
+                  "minInclusive": 70
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 108,
+                  "minInclusive": 108
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 170,
+                  "minInclusive": 160
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 72,
+                  "minInclusive": 62
+                }
+              ]
+            }
+          ],
+          "brand": "La.na Design",
+          "category": "ÁO DÀI",
+          "reference": {
+            "source": "IMAGE_EXTRACTION",
+            "chartId": "image_registry:09bb0478-dd3b-5328-917f-48c1cadd2b82:SD276",
+            "version": "size-chart-v1.0.0-523d5951f9dd",
+            "verifiedAt": "2026-08-03T08:35:27.770Z",
+            "verifiedByRef": "5cec00ea5233806b4844245293a83ce76627b9854e2804bbd3ddd5045fb10b5f",
+            "sourceArtifactRef": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg",
+            "verificationStatus": "VERIFIED",
+            "sourceContentSha256": "c1481347dbde0567c746fb7e16019c27b875a219267d9a9f83dbf8a25274a0fd"
+          },
+          "componentRole": "OTHER",
+          "schemaVersion": 1,
+          "boundaryPolicy": "REQUIRE_HUMAN_REVIEW"
+        },
+        "scope": {
+          "forms": [],
+          "level": "COMPONENT",
+          "materials": [],
+          "categories": [
+            "ÁO DÀI"
+          ],
+          "componentRole": "OTHER",
+          "parentProductIds": [
+            "SD276"
+          ]
+        },
+        "extraction": {
+          "confidence": 0.95,
+          "extractorVersion": "size-chart-v1.0.0",
+          "measurementBasis": "BODY"
+        },
+        "schemaVersion": 1,
+        "sourceMetadata": {
+          "source": "IMAGE_EXTRACTION",
+          "observedAt": "2026-07-31T08:52:25.418Z",
+          "sourceVersion": "size-chart-v1.0.0",
+          "sourceReference": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg"
+        }
+      }
+    },
+    {
+      "artifactKey": "size-chart:SD365",
+      "version": 2,
+      "lifecycle": "PUBLISHED",
+      "contentHash": "sha256:50fbd936582d219c7765e8347b3deb441a40c4ff370b63c55b19bc1f9389f2e5",
+      "content": {
+        "kind": "SIZE_CHART",
+        "chart": {
+          "bands": [
+            {
+              "note": null,
+              "size": "S",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 86,
+                  "minInclusive": 86
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 78,
+                  "minInclusive": 62
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 96,
+                  "minInclusive": 96
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 160,
+                  "minInclusive": 153
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 52,
+                  "minInclusive": 43
+                }
+              ]
+            },
+            {
+              "note": null,
+              "size": "M",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 92,
+                  "minInclusive": 92
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 82,
+                  "minInclusive": 66
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 102,
+                  "minInclusive": 102
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 165,
+                  "minInclusive": 158
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 62,
+                  "minInclusive": 52
+                }
+              ]
+            },
+            {
+              "note": null,
+              "size": "L",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 98,
+                  "minInclusive": 98
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 86,
+                  "minInclusive": 70
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 108,
+                  "minInclusive": 108
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 170,
+                  "minInclusive": 160
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 72,
+                  "minInclusive": 62
+                }
+              ]
+            }
+          ],
+          "brand": "La.na Design",
+          "category": "ÁO DÀI",
+          "reference": {
+            "source": "IMAGE_EXTRACTION",
+            "chartId": "image_registry:9c4a587e-e100-5911-8731-3100b5ab721e:SD365",
+            "version": "size-chart-v1.0.0-0ec5c388646c",
+            "verifiedAt": "2026-08-03T08:35:31.622Z",
+            "verifiedByRef": "5cec00ea5233806b4844245293a83ce76627b9854e2804bbd3ddd5045fb10b5f",
+            "sourceArtifactRef": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg",
+            "verificationStatus": "VERIFIED",
+            "sourceContentSha256": "c1481347dbde0567c746fb7e16019c27b875a219267d9a9f83dbf8a25274a0fd"
+          },
+          "componentRole": "DRESS",
+          "schemaVersion": 1,
+          "boundaryPolicy": "REQUIRE_HUMAN_REVIEW"
+        },
+        "scope": {
+          "forms": [],
+          "level": "COMPONENT",
+          "materials": [],
+          "categories": [
+            "ÁO DÀI"
+          ],
+          "componentRole": "DRESS",
+          "parentProductIds": [
+            "SD365"
+          ]
+        },
+        "extraction": {
+          "confidence": 0.95,
+          "extractorVersion": "size-chart-v1.0.0",
+          "measurementBasis": "BODY"
+        },
+        "schemaVersion": 1,
+        "sourceMetadata": {
+          "source": "IMAGE_EXTRACTION",
+          "observedAt": "2026-07-31T08:52:37.146Z",
+          "sourceVersion": "size-chart-v1.0.0",
+          "sourceReference": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg"
+        }
+      }
+    },
+    {
+      "artifactKey": "size-chart:SD375",
+      "version": 2,
+      "lifecycle": "PUBLISHED",
+      "contentHash": "sha256:6ed8c85a4e9c7b4e22c84c529a1220f46cd33e533f12ad51125bbd1955f3fdfe",
+      "content": {
+        "kind": "SIZE_CHART",
+        "chart": {
+          "bands": [
+            {
+              "note": null,
+              "size": "S",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 86,
+                  "minInclusive": 86
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 78,
+                  "minInclusive": 62
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 96,
+                  "minInclusive": 96
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 160,
+                  "minInclusive": 153
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 52,
+                  "minInclusive": 43
+                }
+              ]
+            },
+            {
+              "note": null,
+              "size": "M",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 92,
+                  "minInclusive": 92
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 82,
+                  "minInclusive": 66
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 102,
+                  "minInclusive": 102
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 165,
+                  "minInclusive": 158
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 62,
+                  "minInclusive": 52
+                }
+              ]
+            },
+            {
+              "note": null,
+              "size": "L",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 98,
+                  "minInclusive": 98
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 86,
+                  "minInclusive": 70
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 108,
+                  "minInclusive": 108
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 170,
+                  "minInclusive": 160
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 72,
+                  "minInclusive": 62
+                }
+              ]
+            }
+          ],
+          "brand": "La.na Design",
+          "category": "AO DAI",
+          "reference": {
+            "source": "IMAGE_EXTRACTION",
+            "chartId": "image_registry:41800bcc-4b82-550f-9744-ca5ad6a4420c:SD375",
+            "version": "size-chart-v1.0.0-c482fd6045c9",
+            "verifiedAt": "2026-08-03T02:30:18.648Z",
+            "verifiedByRef": "5cec00ea5233806b4844245293a83ce76627b9854e2804bbd3ddd5045fb10b5f",
+            "sourceArtifactRef": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg",
+            "verificationStatus": "VERIFIED",
+            "sourceContentSha256": "c1481347dbde0567c746fb7e16019c27b875a219267d9a9f83dbf8a25274a0fd"
+          },
+          "componentRole": "DRESS",
+          "schemaVersion": 1,
+          "boundaryPolicy": "REQUIRE_HUMAN_REVIEW"
+        },
+        "scope": {
+          "forms": [],
+          "level": "COMPONENT",
+          "materials": [],
+          "categories": [
+            "AO DAI"
+          ],
+          "componentRole": "DRESS",
+          "parentProductIds": [
+            "SD375"
+          ]
+        },
+        "extraction": {
+          "confidence": 0.95,
+          "extractorVersion": "size-chart-v1.0.0",
+          "measurementBasis": "BODY"
+        },
+        "schemaVersion": 1,
+        "sourceMetadata": {
+          "source": "IMAGE_EXTRACTION",
+          "observedAt": "2026-08-01T08:55:38.895Z",
+          "sourceVersion": "size-chart-v1.0.0",
+          "sourceReference": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg"
+        }
+      }
+    },
+    {
+      "artifactKey": "size-chart:SD396",
+      "version": 2,
+      "lifecycle": "PUBLISHED",
+      "contentHash": "sha256:536f393b1a4f4605275e9aa74889091640b4aebb1612108ae56d8436ea2f97bf",
+      "content": {
+        "kind": "SIZE_CHART",
+        "chart": {
+          "bands": [
+            {
+              "note": null,
+              "size": "S",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 86,
+                  "minInclusive": 86
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 78,
+                  "minInclusive": 62
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 96,
+                  "minInclusive": 96
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 160,
+                  "minInclusive": 153
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 52,
+                  "minInclusive": 43
+                }
+              ]
+            },
+            {
+              "note": null,
+              "size": "M",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 92,
+                  "minInclusive": 92
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 82,
+                  "minInclusive": 66
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 102,
+                  "minInclusive": 102
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 165,
+                  "minInclusive": 158
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 62,
+                  "minInclusive": 52
+                }
+              ]
+            },
+            {
+              "note": null,
+              "size": "L",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 98,
+                  "minInclusive": 98
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 86,
+                  "minInclusive": 70
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 108,
+                  "minInclusive": 108
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 170,
+                  "minInclusive": 160
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 72,
+                  "minInclusive": 62
+                }
+              ]
+            }
+          ],
+          "brand": "La.na Design",
+          "category": "ÁO DÀI",
+          "reference": {
+            "source": "IMAGE_EXTRACTION",
+            "chartId": "image_registry:d78d3317-408e-5951-94f7-e7289d8c4fc8:SD396",
+            "version": "size-chart-v1.0.0-b1cdf46d53cc",
+            "verifiedAt": "2026-08-03T08:35:49.836Z",
+            "verifiedByRef": "5cec00ea5233806b4844245293a83ce76627b9854e2804bbd3ddd5045fb10b5f",
+            "sourceArtifactRef": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg",
+            "verificationStatus": "VERIFIED",
+            "sourceContentSha256": "c1481347dbde0567c746fb7e16019c27b875a219267d9a9f83dbf8a25274a0fd"
+          },
+          "componentRole": "DRESS",
+          "schemaVersion": 1,
+          "boundaryPolicy": "REQUIRE_HUMAN_REVIEW"
+        },
+        "scope": {
+          "forms": [],
+          "level": "COMPONENT",
+          "materials": [],
+          "categories": [
+            "ÁO DÀI"
+          ],
+          "componentRole": "DRESS",
+          "parentProductIds": [
+            "SD396"
+          ]
+        },
+        "extraction": {
+          "confidence": 0.95,
+          "extractorVersion": "size-chart-v1.0.0",
+          "measurementBasis": "BODY"
+        },
+        "schemaVersion": 1,
+        "sourceMetadata": {
+          "source": "IMAGE_EXTRACTION",
+          "observedAt": "2026-07-31T08:52:49.272Z",
+          "sourceVersion": "size-chart-v1.0.0",
+          "sourceReference": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg"
+        }
+      }
+    },
+    {
+      "artifactKey": "size-chart:SD398",
+      "version": 2,
+      "lifecycle": "PUBLISHED",
+      "contentHash": "sha256:158395f5d9c659b840cf66f7e8bd62762ace9b3cf035ad1ed869b1801c6187f6",
+      "content": {
+        "kind": "SIZE_CHART",
+        "chart": {
+          "bands": [
+            {
+              "note": null,
+              "size": "S",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 86,
+                  "minInclusive": 86
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 78,
+                  "minInclusive": 62
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 96,
+                  "minInclusive": 96
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 160,
+                  "minInclusive": 153
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 52,
+                  "minInclusive": 43
+                }
+              ]
+            },
+            {
+              "note": null,
+              "size": "M",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 92,
+                  "minInclusive": 92
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 82,
+                  "minInclusive": 66
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 102,
+                  "minInclusive": 102
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 165,
+                  "minInclusive": 158
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 62,
+                  "minInclusive": 52
+                }
+              ]
+            },
+            {
+              "note": null,
+              "size": "L",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 98,
+                  "minInclusive": 98
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 86,
+                  "minInclusive": 70
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 108,
+                  "minInclusive": 108
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 170,
+                  "minInclusive": 160
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 72,
+                  "minInclusive": 62
+                }
+              ]
+            }
+          ],
+          "brand": "La.na Design",
+          "category": "ÁO DÀI",
+          "reference": {
+            "source": "IMAGE_EXTRACTION",
+            "chartId": "image_registry:efe31c09-b307-5977-bfff-565532bbc329:SD398",
+            "version": "size-chart-v1.0.0-fbc5b6714dd1",
+            "verifiedAt": "2026-08-03T08:35:46.411Z",
+            "verifiedByRef": "5cec00ea5233806b4844245293a83ce76627b9854e2804bbd3ddd5045fb10b5f",
+            "sourceArtifactRef": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg",
+            "verificationStatus": "VERIFIED",
+            "sourceContentSha256": "c1481347dbde0567c746fb7e16019c27b875a219267d9a9f83dbf8a25274a0fd"
+          },
+          "componentRole": "DRESS",
+          "schemaVersion": 1,
+          "boundaryPolicy": "REQUIRE_HUMAN_REVIEW"
+        },
+        "scope": {
+          "forms": [],
+          "level": "COMPONENT",
+          "materials": [],
+          "categories": [
+            "ÁO DÀI"
+          ],
+          "componentRole": "DRESS",
+          "parentProductIds": [
+            "SD398"
+          ]
+        },
+        "extraction": {
+          "confidence": 0.95,
+          "extractorVersion": "size-chart-v1.0.0",
+          "measurementBasis": "BODY"
+        },
+        "schemaVersion": 1,
+        "sourceMetadata": {
+          "source": "IMAGE_EXTRACTION",
+          "observedAt": "2026-07-31T08:52:57.228Z",
+          "sourceVersion": "size-chart-v1.0.0",
+          "sourceReference": "https://content.pancake.vn/web-media-263/s3000x3000/10/8d/45/e5/d51cb080b47c8c136b545f4d735058be1dc7aab360b7f1c7794e432d-w:1500-h:1500-l:492529-t:image/jpeg.jpeg"
+        }
+      }
+    },
+    {
+      "artifactKey": "size-chart:SQ2447",
+      "version": 2,
+      "lifecycle": "PUBLISHED",
+      "contentHash": "sha256:139fe2874e56add9a1c2dcc7cfa06c988000a8b796d78314d76c44daf6bf584e",
+      "content": {
+        "kind": "SIZE_CHART",
+        "chart": {
+          "bands": [
+            {
+              "note": null,
+              "size": "S",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 86,
+                  "minInclusive": 86
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 74,
+                  "minInclusive": 62
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 98,
+                  "minInclusive": 98
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 168,
+                  "minInclusive": 155
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 51,
+                  "minInclusive": 43
+                }
+              ]
+            },
+            {
+              "note": null,
+              "size": "M",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 90,
+                  "minInclusive": 90
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 78,
+                  "minInclusive": 66
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 102,
+                  "minInclusive": 102
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 168,
+                  "minInclusive": 155
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 57,
+                  "minInclusive": 51
+                }
+              ]
+            },
+            {
+              "note": null,
+              "size": "L",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 94,
+                  "minInclusive": 94
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 82,
+                  "minInclusive": 70
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 106,
+                  "minInclusive": 106
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 168,
+                  "minInclusive": 155
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 65,
+                  "minInclusive": 57
+                }
+              ]
+            },
+            {
+              "note": null,
+              "size": "XL",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 98,
+                  "minInclusive": 98
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 88,
+                  "minInclusive": 74
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 110,
+                  "minInclusive": 110
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 168,
+                  "minInclusive": 155
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 75,
+                  "minInclusive": 65
+                }
+              ]
+            }
+          ],
+          "brand": "La.na Design",
+          "category": "SET",
+          "reference": {
+            "source": "IMAGE_EXTRACTION",
+            "chartId": "image_registry:42e42d5a-c407-5927-af69-0fe8ab21a8e4:SQ2447",
+            "version": "size-chart-v1.0.0-1395f0b5e842",
+            "verifiedAt": "2026-08-10T04:37:04.454Z",
+            "verifiedByRef": "5cec00ea5233806b4844245293a83ce76627b9854e2804bbd3ddd5045fb10b5f",
+            "sourceArtifactRef": "https://content.pancake.vn/web-media-262/s3000x3000/6a/2d/75/b3/97a0cc14210c5ad56ebd4193b2669e7b5b4ff2c1275167a871e9626b-w:1500-h:1500-l:228804-t:image/jpeg.jpeg",
+            "verificationStatus": "VERIFIED",
+            "sourceContentSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7"
+          },
+          "componentRole": "OTHER",
+          "schemaVersion": 1,
+          "boundaryPolicy": "REQUIRE_HUMAN_REVIEW"
+        },
+        "scope": {
+          "forms": [],
+          "level": "COMPONENT",
+          "materials": [],
+          "categories": [
+            "SET"
+          ],
+          "componentRole": "OTHER",
+          "parentProductIds": [
+            "SQ2447"
+          ]
+        },
+        "extraction": {
+          "confidence": 0.95,
+          "extractorVersion": "size-chart-v1.0.0",
+          "measurementBasis": "BODY"
+        },
+        "schemaVersion": 1,
+        "sourceMetadata": {
+          "source": "IMAGE_EXTRACTION",
+          "observedAt": "2026-07-31T08:53:20.984Z",
+          "sourceVersion": "size-chart-v1.0.0",
+          "sourceReference": "https://content.pancake.vn/web-media-262/s3000x3000/6a/2d/75/b3/97a0cc14210c5ad56ebd4193b2669e7b5b4ff2c1275167a871e9626b-w:1500-h:1500-l:228804-t:image/jpeg.jpeg"
+        }
+      }
+    },
+    {
+      "artifactKey": "size-chart:SQ520",
+      "version": 3,
+      "lifecycle": "PUBLISHED",
+      "contentHash": "sha256:6ea0b28acbef238c046e7aa6ed14f6c87519c796545e50b1f2bb64da8e6385ef",
+      "content": {
+        "kind": "SIZE_CHART",
+        "chart": {
+          "bands": [
+            {
+              "note": null,
+              "size": "S",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 86,
+                  "minInclusive": 86
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 74,
+                  "minInclusive": 62
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 98,
+                  "minInclusive": 98
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 168,
+                  "minInclusive": 155
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 51,
+                  "minInclusive": 43
+                }
+              ]
+            },
+            {
+              "note": null,
+              "size": "M",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 90,
+                  "minInclusive": 90
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 78,
+                  "minInclusive": 66
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 102,
+                  "minInclusive": 102
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 168,
+                  "minInclusive": 155
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 57,
+                  "minInclusive": 51
+                }
+              ]
+            },
+            {
+              "note": null,
+              "size": "L",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 94,
+                  "minInclusive": 94
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 82,
+                  "minInclusive": 70
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 106,
+                  "minInclusive": 106
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 168,
+                  "minInclusive": 155
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 65,
+                  "minInclusive": 57
+                }
+              ]
+            },
+            {
+              "note": null,
+              "size": "XL",
+              "ranges": [
+                {
+                  "kind": "BUST_CM",
+                  "maxInclusive": 98,
+                  "minInclusive": 98
+                },
+                {
+                  "kind": "WAIST_CM",
+                  "maxInclusive": 88,
+                  "minInclusive": 74
+                },
+                {
+                  "kind": "HIPS_CM",
+                  "maxInclusive": 110,
+                  "minInclusive": 110
+                },
+                {
+                  "kind": "HEIGHT_CM",
+                  "maxInclusive": 168,
+                  "minInclusive": 155
+                },
+                {
+                  "kind": "WEIGHT_KG",
+                  "maxInclusive": 75,
+                  "minInclusive": 65
+                }
+              ]
+            }
+          ],
+          "brand": "La.na Design",
+          "category": "DRESS",
+          "reference": {
+            "source": "IMAGE_EXTRACTION",
+            "chartId": "image_registry:fc7c5508-cc45-522c-8ce7-d9907cb38d6b:SQ520",
+            "version": "size-chart-v1.0.0-e81ee282e1b5",
+            "verifiedAt": "2026-08-10T04:35:34.802Z",
+            "verifiedByRef": "5cec00ea5233806b4844245293a83ce76627b9854e2804bbd3ddd5045fb10b5f",
+            "sourceArtifactRef": "https://content.pancake.vn/web-media-262/s3000x3000/6a/2d/75/b3/97a0cc14210c5ad56ebd4193b2669e7b5b4ff2c1275167a871e9626b-w:1500-h:1500-l:228804-t:image/jpeg.jpeg",
+            "verificationStatus": "VERIFIED",
+            "sourceContentSha256": "6af482330db999b995608d26965fdb8eea8107f2197c3b0f337f7a7a938555f7"
+          },
+          "componentRole": "DRESS",
+          "schemaVersion": 1,
+          "boundaryPolicy": "REQUIRE_HUMAN_REVIEW"
+        },
+        "scope": {
+          "forms": [],
+          "level": "COMPONENT",
+          "materials": [],
+          "categories": [
+            "DRESS"
+          ],
+          "componentRole": "DRESS",
+          "parentProductIds": [
+            "SQ520"
+          ]
+        },
+        "extraction": {
+          "confidence": 0.95,
+          "extractorVersion": "size-chart-v1.0.0",
+          "measurementBasis": "BODY"
+        },
+        "schemaVersion": 1,
+        "sourceMetadata": {
+          "source": "IMAGE_EXTRACTION",
+          "observedAt": "2026-07-31T08:53:24.962Z",
+          "sourceVersion": "size-chart-v1.0.0",
+          "sourceReference": "https://content.pancake.vn/web-media-262/s3000x3000/6a/2d/75/b3/97a0cc14210c5ad56ebd4193b2669e7b5b4ff2c1275167a871e9626b-w:1500-h:1500-l:228804-t:image/jpeg.jpeg"
+        }
+      }
+    }
+  ],
+  "aliasApplied": false,
+  "sourceWrites": 0
+}

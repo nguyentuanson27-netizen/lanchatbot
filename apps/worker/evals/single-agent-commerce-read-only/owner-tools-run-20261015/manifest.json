@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "surface": "NATIVE_READ_ONLY_OWNER_COMPARISON",
+  "repetitions": 1,
+  "caseIds": [
+    "b1-changed-occasion",
+    "b1-current-policy",
+    "b1-price",
+    "b1-buying-concern",
+    "b1-policy-used"
+  ],
+  "owners": {
+    "gemini": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "sol": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "low",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [
+          {
+            "type": "function",
+            "name": "search_products",
+            "description": "Tìm sản phẩm của shop; trả ref cùng mô tả/thuộc tính có nguồn để tư vấn. Chỉ read_product khi còn cần giá, tồn hoặc chi tiết chưa có.",
+            "strict": false,
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "query"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "type": "function",
+            "name": "read_product",
+            "description": "Đọc sản phẩm, bảng size, giá và tồn theo ref shop đã cấp. Kết quả offerType cho biết lựa chọn bán thực tế của facts; chỉ truyền offerType khi cần lựa chọn khác từ availableOffers. size dùng xem tồn, không chứng minh mặc vừa. availability giữ trạng thái nguồn của giá/tồn.",
+            "strict": false,
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "subjectRef": {
+                  "type": "string"
+                },
+                "offerType": {
+                  "type": "string"
+                },
+                "color": {
+                  "type": "string"
+                },
+                "size": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "subjectRef"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "type": "function",
+            "name": "read_policy",
+            "description": "Đọc quy định hiện hành của shop. Không đọc lịch sử đơn hoặc duyệt điều kiện đổi của riêng khách; orderEligibility=null nghĩa là chưa xét đơn.",
+            "strict": false,
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "tool_choice": "auto",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "low",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY",
+        "include": [
+          "reasoning.encrypted_content"
+        ]
+      }
+    }
+  },
+  "verifier": {
+    "provider": "OPENAI",
+    "model": "gpt-6.1-sol",
+    "version": "gpt-6.1-sol",
+    "effort": "high",
+    "credentialRoute": "CODEX_CHATGPT_LOGIN",
+    "generationConfig": {
+      "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+      "cliVersion": "0.159.2",
+      "wireApi": "responses",
+      "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+      "tools": [],
+      "tool_choice": "none",
+      "parallel_tool_calls": false,
+      "store": false,
+      "stream": true,
+      "reasoningEffort": "high",
+      "temperature": "OMITTED_PROVIDER_DEFAULT",
+      "topP": "OMITTED_PROVIDER_DEFAULT",
+      "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+      "timeoutMs": 90000,
+      "maxResponseBytes": 1048576,
+      "relayUpstreamRequestsPerAttempt": 1,
+      "retry": 0,
+      "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+      "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+    }
+  },
+  "promptHashes": {
+    "owner": "82964a2a1874652b6c872372bce043f960734aa4c1a42cc910f59b7e2ef47e0f",
+    "verifier": "fe7e21965c6cc608c854b97f2513130c9d2f39cf5bec443f4a637f7d8e6f7957"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "sourceConfigHash": "5ca8dc68da2a11d6a29bb9d03617686f3116a3e43b8c646da0b012212bcefb6e",
+  "casesHash": "a5c2f5e6f1af91acb84ea5ebe865536dfa5a5148360e004a25d22551b7582059",
+  "ownerGenerationsPerSlot": 3,
+  "verifierGenerationsPerSlot": 1,
+  "maximumGenerationRequests": 40,
+  "bounds": {
+    "ownerRequestBytes": 32768,
+    "verifierRequestBytes": 32768,
+    "draftBytes": 4096,
+    "latestBytes": 2048,
+    "historyBytes": 4096,
+    "historyCount": 8,
+    "timeoutMs": 90000,
+    "toolResultsBytes": 8192
+  },
+  "terminalMap": {
+    "PASS": "SEND_ELIGIBLE_SEND_DISABLED",
+    "FAIL": "STATIC_FALLBACK",
+    "UNCERTAIN": "STATIC_FALLBACK",
+    "MALFORMED": "STATIC_FALLBACK",
+    "TIMEOUT": "STATIC_FALLBACK",
+    "PROVIDER_ERROR": "STATIC_FALLBACK",
+    "STALE": "HANDOFF_NO_SEND_CAPABILITY",
+    "PERMISSION": "NO_SEND",
+    "PRIVACY": "NO_SEND",
+    "RECIPIENT": "NO_SEND"
+  },
+  "fallback": {
+    "id": "C3_A_NONPROTECTED_V2",
+    "text": "Phần này em chưa trả lời được, chị nhé.",
+    "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+  },
+  "sendEnabled": false,
+  "scoring": "WHOLE_TERMINAL_PRIMARY_SUBJECTIVE_NO_JUDGE_MODEL",
+  "toolRounds": 2,
+  "toolCalls": 6,
+  "toolSchemaHashes": {
+    "gemini": "462a24dc257abfd1931876e2568bbef60e2982f89d92a45692b1b9ff8876d3bd",
+    "sol": "8f684a05e0a7436eaaf6bc02209e74f22ed74a58a6ce29edf16ba29dc01e0667"
+  }
+}

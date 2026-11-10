@@ -1,0 +1,12 @@
+{
+  "sourceSha": "c31e206bbb030c77706d33c8d58a419b737bc4f6",
+  "mode": "CAPTURED_WORLD_FULL_CONTEXT_PRESENTATION_NOT_LIVE_ELIGIBILITY",
+  "ownerContextPresentation": "VI_DATA_BLOCKS_COMPACT_V2",
+  "controls": 17,
+  "diagnosticSlots": 16,
+  "totalRegisteredOutcomes": 33,
+  "maximumGenerationRequests": 49,
+  "repetitions": 1,
+  "retry": 0,
+  "sendEnabled": false
+}

@@ -1,0 +1,136 @@
+{
+  "sourceSha": "d894eb1afe0c3e1aca3d6599334b734decafc825",
+  "newOutcomes": 31,
+  "earlierOutcomes": 0,
+  "populationCoverage": 31,
+  "singleSourceFull31Run": true,
+  "b1": {
+    "recorded": 24,
+    "terminals": {
+      "FALLBACK": 9,
+      "SEND_ELIGIBLE": 15
+    },
+    "fallbackReasons": {
+      "FAIL": 2,
+      "PROVIDER_ERROR": 7
+    },
+    "wholeTurnLatency": {
+      "n": 24,
+      "p50Ms": 13623.660500000013,
+      "p95Ms": 17642.976200000005
+    },
+    "addedVerificationLatency": {
+      "n": 24,
+      "p50Ms": 6801.221999999994,
+      "p95Ms": 11367.255799999999
+    }
+  },
+  "stateful": {
+    "recorded": 7,
+    "terminals": {
+      "SEND_ELIGIBLE": 4,
+      "HANDOFF": 2,
+      "NO_SEND": 1
+    },
+    "fallbackReasons": {},
+    "wholeTurnLatency": {
+      "n": 7,
+      "p50Ms": 28170.597899999993,
+      "p95Ms": 51979.51819999999
+    },
+    "addedVerificationLatency": {
+      "n": 4,
+      "p50Ms": 8257.268599999996,
+      "p95Ms": 9648.5161
+    }
+  },
+  "generationInvocations": 87,
+  "maximumGenerationInvocations": 120,
+  "roles": {
+    "owner": 59,
+    "verifier": 28
+  },
+  "generationHttpRequests": 87,
+  "unknownRequestAccounting": 0,
+  "httpStatuses": {
+    "200": 80,
+    "429": 7
+  },
+  "automaticRetries": 0,
+  "generationErrors": 7,
+  "timeouts": 0,
+  "verifierErrors": 7,
+  "inputTokens": 318534,
+  "outputTokens": 27629,
+  "usageCoverage": {
+    "complete": 80,
+    "denominator": 87
+  },
+  "costEvidence": "NOT_EXPOSED_NO_ESTIMATE",
+  "verifierLatency": {
+    "n": 28,
+    "p50Ms": 5973.072,
+    "p95Ms": 10659.561000000002
+  },
+  "ownerLatency": {
+    "n": 59,
+    "p50Ms": 1996.7486000000208,
+    "p95Ms": 6524.6054
+  },
+  "knownOwnerAuthRequests": 2,
+  "codexAuthRequests": null,
+  "finalOnlyRequests": 3,
+  "finalOnlyToolViolations": 0,
+  "testDatabaseDropped": true,
+  "sendEnabled": false,
+  "ownerGenerations": {
+    "invocations": 59,
+    "requests": 59,
+    "errors": 0,
+    "inputTokens": 222671,
+    "outputTokens": 25917,
+    "thinkingTokens": 23474
+  },
+  "verifierGenerations": {
+    "invocations": 28,
+    "requests": 28,
+    "errors": 7,
+    "errorRate": 0.25,
+    "timeouts": 0,
+    "verdicts": {
+      "FAIL": 2,
+      "PASS": 19
+    },
+    "inputTokens": 95863,
+    "outputTokens": 1712,
+    "thinkingTokens": 1176,
+    "successfulLatency": {
+      "n": 21,
+      "p50Ms": 6364.0815,
+      "p95Ms": 10659.561000000002
+    }
+  },
+  "timeoutRate": 0,
+  "generationErrorRate": 0.08045977011494253,
+  "combinedTerminalRates": {
+    "FALLBACK": 0.2903225806451613,
+    "SEND_ELIGIBLE": 0.6129032258064516,
+    "HANDOFF": 0.06451612903225806,
+    "NO_SEND": 0.03225806451612903
+  },
+  "fallbackRate": 0.375,
+  "verificationMeasurement": "Adapter elapsed interval for every mandatory verifier invocation including errors; separate successful-only latency. Whole-turn includes source/DB/local relay latency, not live SLA.",
+  "combinedTerminalCounts": {
+    "FALLBACK": 9,
+    "SEND_ELIGIBLE": 19,
+    "HANDOFF": 2,
+    "NO_SEND": 1
+  },
+  "maximumOwnerRequestBytes": 31678,
+  "maximumObservedPerOutcome": {
+    "ownerGenerations": 3,
+    "verifierGenerations": 1,
+    "toolRounds": 2,
+    "toolCalls": 3
+  }
+}

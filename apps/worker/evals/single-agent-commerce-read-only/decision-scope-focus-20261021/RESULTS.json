@@ -1,0 +1,31 @@
+{
+  "status": "FOCUS18_COMPLETE_STOP_BEFORE_FULL",
+  "implementationSha": "2470a79da74081fe16cb04debd34cf8f18c61316",
+  "runSourceSha": "e2474d0df2f24e1600d3815e4baf8b926f02b703",
+  "recorded": 18,
+  "registered": 18,
+  "primary": {
+    "USABLE": 10,
+    "NEEDS_EDIT": 7,
+    "UNUSABLE": 1
+  },
+  "verifierVerdicts": {
+    "PASS": 18
+  },
+  "actualTerminals": {
+    "SEND_ELIGIBLE": 17,
+    "HANDOFF": 1
+  },
+  "actualReasons": {
+    "PASS": 17,
+    "STALE": 1
+  },
+  "generationRequests": 52,
+  "providerErrors": 0,
+  "providerTimeouts": 0,
+  "retry": 0,
+  "fullB1B2B3": "NOT_RUN_FOCUSED_REVIEW_DID_NOT_MEET_PREDECLARED_CONDITION",
+  "recommendation": "STOP_BEFORE_FULL",
+  "automaticNextFixOrRun": false,
+  "sendEnabled": false
+}

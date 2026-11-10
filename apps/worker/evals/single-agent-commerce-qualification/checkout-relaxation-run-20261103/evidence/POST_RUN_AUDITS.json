@@ -1,0 +1,24 @@
+{
+  "status": "APPROVED",
+  "scope": "ACCOUNTING_CAPTURE_REPORT_ACCURACY_ONLY",
+  "reviewer": "/root/sales_completion_implementation_review",
+  "recordedAtUTC": "2026-11-03T17:30:13.703312+00:00",
+  "sourceSha": "88a331404226b44d2e87e0b5cc1c8689261bb345",
+  "checks": [
+    "33cases/48actualcapturedturns, noNOT_RUN",
+    "71uniquegenerationrecords/71generationHTTP, max1each",
+    "request hashes and evaluator firewall",
+    "48nativeartifact/textOutbox hash bindings",
+    "actual terminal mapping and codeowned capture",
+    "sourceclean/database drops/sendfalse/nohardstop",
+    "93rawartifact hashes and accountingpacket copies",
+    "2ownerAuthHTTP+5auxHTTP separated",
+    "14report links and allreportcounts/limitations/qualitative findings"
+  ],
+  "limits": [
+    "quality NOT_GRADED",
+    "no semantic safety or GO approval",
+    "full55/S6 not run",
+    "model pendingpublicinterruption not covered"
+  ]
+}

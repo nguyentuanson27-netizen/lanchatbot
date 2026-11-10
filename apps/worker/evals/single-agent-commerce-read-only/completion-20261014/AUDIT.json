@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "sourceSha": "97f24609c0ab362893238fe1cabd3e1e6e8f690d",
+  "rawSavepoint": "4ac64501",
+  "primarySavepoint": "7827c193",
+  "requestBodies": 28,
+  "ownerBodies": 21,
+  "verifierBodies": 7,
+  "evaluatorLabelLeaks": 0,
+  "mandatoryVerifierFinals": 7,
+  "bindingMatches": 7,
+  "sourceCheckSnapshotStable": true,
+  "rawHashesVerified": 15,
+  "allGenerationSlotsAccounted": true,
+  "generationRetries": 0,
+  "sourceCompletionIdentity": "AWAITING_WHOLE_REPLY_REVIEW",
+  "limitation": "B1 final readback values are not separately persisted; current gate output is retained and its mechanism has focused tests. No claim of an independent live-send/stateful qualification."
+}

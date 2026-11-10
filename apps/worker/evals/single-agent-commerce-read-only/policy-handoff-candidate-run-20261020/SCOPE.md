@@ -1,0 +1,15 @@
+# Five policy + candidate handoff model slots — 2026-10-20
+
+Owner requested a new model run after fix `30e6aa65` and verification report `bfcaefb1`. Five existing questions, one generation journey each; no additional variants or repeats. Inputs are byte-identical to the previous five-slot corpus. No automatic provider generation retry; maximum20 requests, owner3/verifier1 per slot.
+
+Use the current manifest: owner Vertex global gemini-3.5-flash-lite HIGH; verifier OpenAI/Codex-login gpt-6.1-sol high. Exact models/config, prompt/schema/input hashes and effective/upstream source hashes are in REGISTRATION.json. Prior109 focused unit tests and28 real PostgreSQL/capture checks verified the unchanged executable/config; no repeat is claimed here.
+
+Prepare captured the current public policy read-only and the local administrative candidate matrix. This is **ISOLATED_CANDIDATE_HANDOFF**, not evidence that the source has a published matrix. Preparation found the upstream matrix absent; future reads must match that captured upstream, while the effective in-memory source must match the frozen candidate. No source publish or mutation.
+
+Reuse the exact existing `policy-handoff-run-20261020/run.mjs` with `--registration-dir` pointing here. Commit inputs and require a clean executable/config tree before preflight/provider. Runtime RUN_SOURCE.json records HEAD; do not write that SHA back into frozen source. Changes after seal require a different run identity.
+
+Real runtime/inbox/outbox stores in a disposable PostgreSQL database, synthetic customers and links. Only the capture transport can receive dispatcher sends. Handoff must commit HUMAN ownership/event/tag intent/message together. Native owner tool continuations are permitted; no additional semantic role or model-authored acknowledgement. Model final drafts must pass the existing verifier/final gate. Code-owned handoff terminals retain the existing path. Meta/Pancake network delivery and real staff response are not tested.
+
+Score the complete actual customer outcome before diagnosing native tool/verifier details. Keep quality separate from the mechanism. Apply the owner priorities already fixed: answer the situation rather than recite policy, ask the decisive missing fact first, be concise/natural, provide a usable next step, and preserve factual/action safety. A handoff request is not approval of eligibility/stock/refund. An operational fallback is still an actual terminal and remains in the denominator. No keyword-based quality scoring or relabeling historical evidence.
+
+Retain every registered slot and provider request/error, including failures. After collection, lock primary review before diagnosis; report exact terminal text, disposition, state/event/tag/message/capture readbacks, latency, token usage, exposed cost or NOT_EXPOSED, and label-firewall/source binding checks. Compare these five outcomes to the previous five without claiming stable improvement from one sample each. No patch, sample replacement, full B run, live send/deploy or B GO in this registration; A remains OWNER_BYPASS.

@@ -1,0 +1,231 @@
+{
+  "schemaVersion": 1,
+  "priorRound": 48,
+  "priorCorpusHash": "a0438f119ba6db24d339b51ad03ba3a8630c068e6c78282e457c14dbf07a0176",
+  "edits": [
+    {
+      "caseId": "r5-missing-customer-size",
+      "field": "history[0].text",
+      "before": "Chị cần quần navy mặc với áo sơ mi trắng ở nhà.",
+      "after": "Chị cần quần navy mặc với áo sơ mi trắng chị đang có.",
+      "reason": "Clarify existing owned garment; no new wearing occasion or product fact."
+    },
+    {
+      "caseId": "r5-white-variant-alternative",
+      "field": "history[0].text",
+      "before": "Chị thích SM613 trắng, ngực98cm. Chị có quần đen, tiền áo tầm550k.",
+      "after": "Chị thích SM613 trắng, ngực 98cm. Chị có quần đen, tiền áo tầm550k.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r5-white-variant-alternative",
+      "field": "history[1].text",
+      "before": "Theo vòng ngực98cm chị xem sizeL. Mẫu này còn có xanh nhạt.",
+      "after": "Theo vòng ngực 98cm chị xem size L. Mẫu này còn có xanh nhạt.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r5-white-variant-alternative",
+      "field": "latestCustomerMessage",
+      "before": "TrắngL còn không? Hết thì em chọn màu khác để chị mặc với quần đen nhé.",
+      "after": "Trắng L còn không? Hết thì em chọn màu khác để chị mặc với quần đen nhé.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r5-correct-product",
+      "field": "history[0].text",
+      "before": "Chị hỏi set ST411 navy, giá749k đúng không?",
+      "after": "Chị hỏi set ST411 navy, giá 749k đúng không?",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r5-correct-product",
+      "field": "history[1].text",
+      "before": "Dạ đúng chị, set gồm áo và quần749k. Navy còn S,M,L.",
+      "after": "Dạ đúng chị, set gồm áo và quần 749k. Navy còn S, M, L.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r5-correct-measurement",
+      "field": "history[0].text",
+      "before": "Chị muốn VA512 đen, ngực91, eo72, mông97cm.",
+      "after": "Chị muốn VA512 đen, ngực 91, eo 72, mông 97cm.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r5-correct-measurement",
+      "field": "history[1].text",
+      "before": "Theo số đo đó em chọnM cho chị. ĐenM đang còn hàng.",
+      "after": "Theo số đo đó em chọn M cho chị. ĐenM đang còn hàng.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r5-correct-measurement",
+      "field": "latestCustomerMessage",
+      "before": "Chị đo nhầm. Số mới là ngực96, eo77, mông104cm. ChuyểnL nhé em?",
+      "after": "Chị đo nhầm. Số mới là ngực 96, eo 77, mông 104cm. Chuyển L nhé em?",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r5-referent-navy",
+      "field": "history[1].text",
+      "before": "Set749k, quần bán riêng459k chị nhé.",
+      "after": "Set 749k, quần bán riêng459k chị nhé.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r5-referent-navy",
+      "field": "history[2].text",
+      "before": "Chị lấy riêng quầnnavy thôi, áo có rồi. Eo74, mông98cm.",
+      "after": "Chị lấy riêng quần navy thôi, áo có rồi. Eo74, mông 98cm.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r5-referent-navy",
+      "field": "history[3].text",
+      "before": "Dạ, quầnQU714navy sizeM theo sốđo của chị nhé.",
+      "after": "Dạ, quần QU714 navy size M theo số đo của chị nhé.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r5-referent-navy",
+      "field": "latestCustomerMessage",
+      "before": "Ừ, mẫu đó cònM thì chị lấyM nhé.",
+      "after": "Ừ, mẫu đó còn M thì chị lấy M nhé.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r5-try-exchange",
+      "field": "history[0].text",
+      "before": "Chị chọn VA512 đenL nhưng lo mua về chưa ưng.",
+      "after": "Chị chọn VA512 đen L nhưng lo mua về chưa ưng.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r5-try-exchange",
+      "field": "history[1].text",
+      "before": "Shop đổi size hoặc mẫu trong7ngày từ nhận hàng, hàng chưa dùng và nguyên tem; khách trả phí vậnchuyển đổi.",
+      "after": "Shop đổi size hoặc mẫu trong 7 ngày từ nhận hàng, hàng chưa dùng và nguyên tem; khách trả phí vận chuyển đổi.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r5-refund-distinction",
+      "field": "latestCustomerMessage",
+      "before": "Chị vẫn lấy trắngM. Mà thử không thích thì được hoàn tiền à?",
+      "after": "Chị vẫn lấy trắng M. Mà thử không thích thì được hoàn tiền à?",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r5-simple-price",
+      "field": "latestCustomerMessage",
+      "before": "Sơ miSM613 giá bao nhiêu em?",
+      "after": "Sơ mi SM613 giá bao nhiêu em?",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r5-simple-stock",
+      "field": "history[0].text",
+      "before": "Chị đang xem quầnQU714navyM.",
+      "after": "Chị đang xem quần QU714 navy M.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r5-simple-stock",
+      "field": "history[1].text",
+      "before": "Dạ mẫuquầnsuông459k chị nhé.",
+      "after": "Dạ mẫu quần suông 459k chị nhé.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r5-simple-stock",
+      "field": "latestCustomerMessage",
+      "before": "NavyM còn hàng không em?",
+      "after": "Navy M còn hàng không em?",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r5-simple-ack",
+      "field": "history[0].text",
+      "before": "Chị biết setST411749k rồi, để chị xem thêm nhé.",
+      "after": "Chị biết set ST411 749k rồi, để chị xem thêm nhé.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r7-exchange-after-use",
+      "field": "history[0].text",
+      "before": "Chị thích ST411 be. Ngực92, eo74, mông96cm.",
+      "after": "Chị thích ST411 be. Ngực92, eo 74, mông 96cm.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r7-exchange-after-use",
+      "field": "history[1].text",
+      "before": "Em chọnM theo sốđo chị nhé, beM đang còn; set749k.",
+      "after": "Em chọn M theo số đo chị nhé, be M đang còn; set 749k.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r7-exchange-after-use",
+      "field": "latestCustomerMessage",
+      "before": "Chị định mặc đi làm vài buổi, không ưng thì đổi trong7ngày được chứ? Phí đổi bên nào trả?",
+      "after": "Chị định mặc đi làm vài buổi, không ưng thì đổi trong 7 ngày được chứ? Phí đổi bên nào trả?",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r12-change-color-only",
+      "field": "latestCustomerMessage",
+      "before": "Chị đổi ý lấy xanh nhạt cho dễ phối với quần navy ở nhà. Vẫn M nhé? Áo xanh giá bao nhiêu?",
+      "after": "Chị đổi ý lấy xanh nhạt phối với quần navy chị có nhé. Vẫn M nhỉ? Áo xanh giá bao nhiêu em?",
+      "reason": "Clarify existing owned garment; no new wearing occasion or product fact."
+    },
+    {
+      "caseId": "r14-price-repeat-wear",
+      "field": "history[0].text",
+      "before": "Chị thích set ST411 navy để mặc đi làm, thỉnh thoảng tách áo phối với đồ ở nhà nữa.",
+      "after": "Chị thích set ST411 navy để mặc đi làm, thỉnh thoảng tách áo phối với đồ chị đang có nữa.",
+      "reason": "Clarify existing owned garment; no new wearing occasion or product fact."
+    },
+    {
+      "caseId": "r15-value-use",
+      "field": "history[0].text",
+      "before": "Chị thích ST411 navy, định mặc đi làm rồi cuối tuần tách áo phối đồ ở nhà.",
+      "after": "Chị thích ST411 navy, định mặc đi làm rồi cuối tuần tách áo phối với đồ chị đang có.",
+      "reason": "Clarify existing owned garment; no new wearing occasion or product fact."
+    },
+    {
+      "caseId": "r15-fit-reassurance",
+      "field": "history[0].text",
+      "before": "Chị chọn set ST411 be, ngực92, eo74, mông96cm. Chị mặc đi làm và hay ngồi nhiều.",
+      "after": "Chị chọn set ST411 be, ngực 92, eo 74, mông 96cm. Chị mặc đi làm và hay ngồi nhiều.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r15-fit-reassurance",
+      "field": "history[1].text",
+      "before": "Em chọn size M cho chị, be M còn; set749k.",
+      "after": "Em chọn size M cho chị, be M còn; set 749k.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r15-color-final-confirm",
+      "field": "history[0].text",
+      "before": "Chị chọn SM613 trắng, ngực92cm.",
+      "after": "Chị chọn SM613 trắng, ngực 92cm.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r15-color-final-confirm",
+      "field": "history[1].text",
+      "before": "Em chọn trắng size M,499k chị nhé.",
+      "after": "Em chọn trắng size M, 499k chị nhé.",
+      "reason": "Separate joined words/numbers in authored chat; preserve meaning and numeric facts."
+    },
+    {
+      "caseId": "r15-color-final-confirm",
+      "field": "history[2].text",
+      "before": "Chị đổi xanh nhạt để mặc với quần navy ở nhà nhé.",
+      "after": "Chị đổi xanh nhạt để mặc với quần navy chị có nhé.",
+      "reason": "Clarify existing owned garment; no new wearing occasion or product fact."
+    }
+  ]
+}

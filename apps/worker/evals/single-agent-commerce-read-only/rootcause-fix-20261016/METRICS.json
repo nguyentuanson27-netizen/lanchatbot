@@ -1,0 +1,87 @@
+{
+  "runSourceSha": "ea983ad05034ea2fbfa2e8b656d8734aa2e2848f",
+  "registered": 24,
+  "recorded": 24,
+  "repetitions": 1,
+  "maximumGenerationInvocations": 96,
+  "generationInvocations": 74,
+  "ownerGenerationInvocations": 55,
+  "verifierGenerationInvocations": 19,
+  "knownGenerationHttpRequests": 74,
+  "unknownRequestAccounting": 0,
+  "ownerHttpRequests": 55,
+  "verifierHttpRequests": 19,
+  "preparedOwnerEnvelopes": 55,
+  "actualCodexRelayBodies": 19,
+  "knownOwnerAuthRequests": 1,
+  "codexAuthRequests": null,
+  "automaticRetries": 0,
+  "generationErrors": 2,
+  "generationErrorRate": 0.02702702702702703,
+  "timeouts": 0,
+  "timeoutRate": 0,
+  "verifierErrors": 0,
+  "verifierTimeouts": 0,
+  "providerHttpErrors": 0,
+  "terminalCounts": {
+    "FALLBACK": 8,
+    "SEND_ELIGIBLE": 16
+  },
+  "verdictCounts": {
+    "PASS": 16,
+    "FAIL": 3
+  },
+  "fallbackHandoffNoSendRate": 0.3333333333333333,
+  "inputTokens": 228343,
+  "outputTokens": 22693,
+  "tokenUsageCoverage": {
+    "completeGenerations": 73,
+    "totalGenerations": 74
+  },
+  "cost": null,
+  "costEvidence": "NOT_EXPOSED_NO_ESTIMATE",
+  "percentileMethod": "nearest rank; descriptive N1, no acceptance threshold",
+  "verifierLatency": {
+    "n": 19,
+    "p50Ms": 5025.502600000007,
+    "p95Ms": 25026.774199999985
+  },
+  "ownerLatency": {
+    "n": 55,
+    "p50Ms": 1767.702900000033,
+    "p95Ms": 5120.286699999997
+  },
+  "addedVerificationLatency": {
+    "n": 19,
+    "p50Ms": 5665.469199999992,
+    "p95Ms": 25696.36719999998
+  },
+  "endToEndLatency": {
+    "n": 24,
+    "p50Ms": 10952.617299999998,
+    "p95Ms": 22256.128500000006
+  },
+  "toolLatency": {
+    "n": 24,
+    "p50Ms": 654.2682999999961,
+    "p95Ms": 2947.5746999999974
+  },
+  "runtimeToolCalls": 32,
+  "sourceCounters": {
+    "embeddingCalls": 3,
+    "policyReads": 10,
+    "catalogReads": 55,
+    "posReads": 37
+  },
+  "sendEnabled": false,
+  "httpStatusCounts": {
+    "200": 73,
+    "NO_CAPTURED_RESPONSE": 1
+  },
+  "fallbackReasons": {
+    "CONTEXT_BOUND": 1,
+    "BUDGET": 2,
+    "PROVIDER_ERROR": 2,
+    "FAIL": 3
+  }
+}

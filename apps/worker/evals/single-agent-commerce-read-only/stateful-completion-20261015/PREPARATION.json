@@ -1,0 +1,159 @@
+{
+  "sourceSha": "e7765a71b7c9718a45fe591f7e20ab4649e6cc36",
+  "sourceDocuments": {
+    "docs/specs/c3-single-agent-commerce-architecture-20261004.md": "7e0265e3b6b3d556d8fb0f3c7267abccef5de86a",
+    "docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md": "4a09b55d2f3a972a65697738876cc5eab21e7a2b",
+    "docs/specs/c3-phase-b-read-only-integration-plan-20261014.md": "12b9cdc66ad5bf98b66f8ea156df984b8de046f9",
+    "docs/specs/c3-phase-b-execution-20261014.md": "c397034d68897c0ee96947dce39b1a550e940920",
+    "docs/specs/c3-phase-b-integration-audit-20261015.md": "7c7a34dd61040ed6dd0e476520203be3dc2644cd",
+    "tasks/plan.md": "05a22671acd51c9d974609bee94e8d9004d51552",
+    "tasks/todo.md": "ac303232d5a79acc14d401177b977362da3b6ff0"
+  },
+  "checks": [
+    {
+      "log": "c3-b-finish-worker-context-fix.log",
+      "sha256": "b60ddc201991e3bb030a3a39c51c629582e34602b3502aaff56041900ea5943c",
+      "tail": [
+        " ✓ src/bf01-realtime-runner.test.ts (6 tests) 9ms",
+        " ✓ src/redis-chat-history.test.ts (2 tests) 5ms",
+        " ✓ src/redis-business-facts.test.ts (2 tests) 5ms",
+        "",
+        " Test Files  129 passed (129)",
+        "      Tests  1748 passed (1748)",
+        "   Start at  20:03:19",
+        "   Duration  33.81s (transform 22.39s, setup 0ms, collect 155.48s, tests 56.48s, environment 67ms, prepare 60.83s)",
+        ""
+      ]
+    },
+    {
+      "log": "c3-b-finish-evals-seal.log",
+      "sha256": "ce7434bff40f569bbe40be088aa23a7730d03a231b79995b103de435513c207f",
+      "tail": [
+        "✔ both screened final drafts take the verifier with new instructions, no labels or generation retry (132.2479ms)",
+        "ℹ tests 479",
+        "ℹ suites 0",
+        "ℹ pass 479",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 139411.0409"
+      ]
+    },
+    {
+      "log": "c3-b-finish-contracts.log",
+      "sha256": "273775413bcaeedbd35b7c64c39bdfcc78e40f401a4e20eb87edcb30ffdcd1e0",
+      "tail": [
+        " ✓ src/v4/bf06-media-partial-resolution-policy.test.ts (3 tests) 22ms",
+        " ✓ src/v4/bf07-multi-product-resolution-policy.test.ts (3 tests) 25ms",
+        " ✓ src/v2/grounded-reply.test.ts (7 tests) 27ms",
+        "",
+        " Test Files  22 passed (22)",
+        "      Tests  220 passed (220)",
+        "   Start at  18:48:02",
+        "   Duration  8.64s (transform 9.93s, setup 0ms, collect 21.85s, tests 2.07s, environment 58ms, prepare 36.17s)",
+        ""
+      ]
+    },
+    {
+      "log": "c3-b-finish-business-tools.log",
+      "sha256": "f586b2efa9efbadc769dc1e0157bdc0d3172951126b6210a72092a83a89a8e5f",
+      "tail": [
+        " ✓ src/canonical-cart-engine.test.ts (5 tests) 55ms",
+        " ✓ src/customer-profile-extractor.test.ts (6 tests) 35ms",
+        " ✓ src/qdrant-image-channel.test.ts (1 test) 22ms",
+        "",
+        " Test Files  23 passed (23)",
+        "      Tests  353 passed (353)",
+        "   Start at  18:48:02",
+        "   Duration  11.89s (transform 13.23s, setup 0ms, collect 57.78s, tests 3.02s, environment 26ms, prepare 36.00s)",
+        ""
+      ]
+    },
+    {
+      "log": "c3-b-finish-database-migration.log",
+      "sha256": "026c5cdfa4278a4bf404109eda8a3522a15decf590bd1307fac59f41dc1a3645",
+      "tail": [
+        " ↓ src/gate-e-evidence-store.postgres.test.ts (12 tests | 12 skipped)",
+        " ↓ src/track-b-commerce-authority-writer.postgres.test.ts (4 tests | 4 skipped)",
+        " ↓ src/track-b-operator-role-boundary.postgres.test.ts (5 tests | 5 skipped)",
+        "",
+        " Test Files  29 passed | 4 skipped (33)",
+        "      Tests  238 passed | 30 skipped (268)",
+        "   Start at  20:11:55",
+        "   Duration  4.46s (transform 3.74s, setup 0ms, collect 14.00s, tests 1.62s, environment 15ms, prepare 11.44s)",
+        ""
+      ]
+    },
+    {
+      "log": "c3-b-finish-chat-runtime.log",
+      "sha256": "ace46c5c6156e5239725e8c5cd35c390247fb68ffc65d81963043b3e86e8f07b",
+      "tail": [
+        " ✓ src/runtime-policy-resolver.test.ts (8 tests) 124ms",
+        " ✓ src/index.test.ts (5 tests) 35ms",
+        " ✓ src/sales-cycle-runtime-contract-mismatch.test.ts (2 tests) 17ms",
+        "",
+        " Test Files  5 passed (5)",
+        "      Tests  52 passed (52)",
+        "   Start at  18:49:31",
+        "   Duration  7.74s (transform 1.57s, setup 0ms, collect 3.93s, tests 401ms, environment 2ms, prepare 1.47s)",
+        ""
+      ]
+    },
+    {
+      "log": "c3-b-finish-worker-build-context-fix.log",
+      "sha256": "698f2cec749cb5125b1f96a67ea6dc1dd7b0766af6aa44451c8892d3867ccb76",
+      "tail": [
+        "../../packages/dataset-store prebuild: ../database build: Done",
+        "../../packages/dataset-store prebuild: ../dataset-review build: Done",
+        "../../packages/dataset-store prebuild: Done",
+        "../../packages/dataset-store build$ tsc -p tsconfig.json",
+        "../../packages/dataset-store build: Done",
+        "",
+        "> @lana/worker@0.1.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker",
+        "> tsc -p tsconfig.json",
+        ""
+      ]
+    },
+    {
+      "log": "c3-b-finish-worker-typecheck-context-fix.log",
+      "sha256": "feb66ca0d98fe17e1dbbf9bf7133d11c56db11ba640efe44a91da5571c218971",
+      "tail": [
+        "../../packages/dataset-store prebuild: ../database build: Done",
+        "../../packages/dataset-store prebuild: ../dataset-review build: Done",
+        "../../packages/dataset-store prebuild: Done",
+        "../../packages/dataset-store build$ tsc -p tsconfig.json",
+        "../../packages/dataset-store build: Done",
+        "",
+        "> @lana/worker@0.1.0 typecheck C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker",
+        "> tsc -p tsconfig.json --noEmit",
+        ""
+      ]
+    },
+    {
+      "log": "c3-b-finish-worker-lint-context-fix.log",
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "tail": [
+        "",
+        "> @lana/worker@0.1.0 lint C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker",
+        "> tsc -p tsconfig.json --noEmit",
+        ""
+      ]
+    },
+    {
+      "log": "c3-b-finish-shared-typecheck.log",
+      "sha256": "3f84d0bdef2d212964cc7145ff3aa620cd65a8232b61d0b5b2e32bd959d3545c",
+      "tail": [
+        "packages/chat-runtime pretypecheck: > @lana/commerce-kernel@0.1.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\commerce-kernel",
+        "packages/chat-runtime pretypecheck: > tsc -p tsconfig.json",
+        "packages/chat-runtime pretypecheck: > @lana/business-tools@0.3.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\business-tools",
+        "packages/chat-runtime pretypecheck: > tsc -p tsconfig.json",
+        "packages/chat-runtime pretypecheck: > @lana/conversation-engine@0.3.0 build C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\packages\\conversation-engine",
+        "packages/chat-runtime pretypecheck: > tsc -p tsconfig.json",
+        "packages/chat-runtime pretypecheck: Done",
+        "packages/chat-runtime typecheck$ tsc -p tsconfig.json --noEmit",
+        "packages/chat-runtime typecheck: Done"
+      ]
+    }
+  ]
+}

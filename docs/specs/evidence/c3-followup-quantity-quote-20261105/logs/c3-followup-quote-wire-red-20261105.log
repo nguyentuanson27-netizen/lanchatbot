@@ -1,0 +1,35 @@
+✔ quote strict declaration, native result projection and actual HTTP request match (48.5541ms)
+✔ final-only CompactV2 keeps projected quote trace but grants no new call (8.6966ms)
+✔ quote parse rejects extra fields/duplicate offers and preserves signed content (0.8425ms)
+✖ phase/budget and primitive accounting are bound; legacy configuration remains valid (7.8975ms)
+✔ registered tool schema includes quote only when enabled, and binds its exact schema (1.1575ms)
+✖ returning quote wire requires quantity for one offer and keeps the code total without media or evaluator labels (5.6292ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 4
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1745.5005
+
+✖ failing tests:
+
+test at apps\worker\evals\single-agent-commerce-read-only\quote-task.test.mjs:44:1
+✖ phase/budget and primitive accounting are bound; legacy configuration remains valid (7.8975ms)
+  Error: PROMPT_HASH
+      at check (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/protocol.mjs:7:40)
+      at validateProtocol (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/protocol.mjs:71:41)
+      at TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/quote-task.test.mjs:46:79)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at apps\worker\evals\single-agent-commerce-read-only\quote-task.test.mjs:61:1
+✖ returning quote wire requires quantity for one offer and keeps the code total without media or evaluator labels (5.6292ms)
+  Error: PROVIDER_ERROR
+      at file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs:455:24
+      at async TestContext.<anonymous> (file:///C:/Users/nguye/Documents/S%E1%BA%A3n%20ph%E1%BA%A9m%20AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker/evals/single-agent-commerce-read-only/quote-task.test.mjs:67:2)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    telemetry: { generationId: 'q:owner:2', providerRequests: 1, authRequests: 0, httpStatus: 200, modelVersion: null, inputTokens: null, outputTokens: null, cost: null, finishReason: 'STOP', requestBudget: { textFrameBytes: 7461, systemBytes: 32, toolSchemaBytes: 2709, trustedFrameBytes: 2752, dialogueBytes: 1708, textLimitBytes: 65536, presentedTextFrameBytes: 7623, basePresentedFrameBytes: 7623, inlineImageBytes: 0, frameLimitBytes: 65536 }, requestSchemaHash: '713e6e1c2f3c8334b6b707cd67f971839a5be1f5dd18bc9d119defd4464c62c0', requestBytes: 7623, requestHash: '6a3fce2aaa2b4fd9a3468e684c48af49df2dd7a008d91a54de00dc4589c40a94', functionCallingMode: 'AUTO', declaredToolCount: 2, thinkingTokens: null, rawFinishReason: 'STOP', failureStage: 'COMPLETION', failureCode: 'OWNER_MODEL_VERSION' }
+  }

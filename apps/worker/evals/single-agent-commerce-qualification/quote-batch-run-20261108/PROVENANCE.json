@@ -1,0 +1,184 @@
+{
+  "runSourceSha": "06b3901b8986233766d181534c0805691729f98a",
+  "implementationBaseSha": "5c623a2039aaee07b67f02a5d1797078da4c43ac",
+  "previousImplementationReportHead": "9bc94cc7485127218b10645bec679082b8024363",
+  "registration": {
+    "status": "PREFLIGHT_PASS",
+    "source": "06b3901b8986233766d181534c0805691729f98a",
+    "pendingRegistrationHash": "8eef91a55b0721cba937c328eabf4a1c3231ab28c171ff18c97fda570e347f85",
+    "registrationHash": "4feda53c5e72737df2ba681261990ca0f481b620d6a5cc9ede304f3954aecd5c",
+    "corpusHash": "8c11f52782b53c5d07f3493139b8a1705393c84dbd84b7ef71df6c9d474fd480",
+    "configHash": "0e58c98089bfb1b65b5e68bb926651aace9665819b929b78e6e9559168d00f5e",
+    "worldHash": "9b6d8b1e69965b719c476395f70b600e0cffe4cd359eefd4ea790dbcb395c41a",
+    "initialHash": "54f0c560c373c01f4e9d27bff6ed7b4dee67ae7517f26988d16fbc506a5d2988",
+    "codex": {
+      "version": "codex-cli 0.159.2",
+      "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+    },
+    "cases": 4,
+    "turns": 7,
+    "maximumGenerationRequests": 28,
+    "sendEnabled": false,
+    "providerRequests": 0
+  },
+  "candidate": {
+    "sourceSha": "06b3901b8986233766d181534c0805691729f98a",
+    "model": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "promptHash": "75e29844627f136512f5dd427df4592b57f33598b03eff8118fc495fb9d1e109",
+    "openingMediaRule": {
+      "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2"
+    },
+    "contextPolicyHash": "99d82e4b65cca20725d48362e884170c55690ad7c48ae6c2652e2d46b1b75a3c",
+    "toolContractHash": "ff6fcff49a16536f0fdb4ae91b75c18cf22e76d29c22477291e5c078cffebee5",
+    "assemblyHash": "54a635c8534ff0d3d0ab9b8ea8b6eda6b23f8db1496a74a0fd6e8480b68c5c72",
+    "runtimeHash": "cefa29b9ea72bea115a81e504dd2a155043157dccee9feaeeab3e462c9b53987",
+    "verifier": {
+      "model": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      },
+      "promptHash": "6ffaebf52151edca3baae03581e44731d727a29dc3b132e87c8dcc8f1ae5f944",
+      "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+      "serializationHash": "aff01bf07dd1715b8e6f4b2447c2c1cf29fa52644cc6b61c2be2767d633fe24f",
+      "bindingHash": "f7a63d2727e695ff2050ad4b4e2b7dd1c9cf697fae833fce6fb260912646a2b1",
+      "boundsHash": "6179ba4eb906926b3b58c2cd754f53c4e511bc4d8b2a6e0049d2463a32a1c26b"
+    }
+  },
+  "worldHash": "9b6d8b1e69965b719c476395f70b600e0cffe4cd359eefd4ea790dbcb395c41a",
+  "corpusHash": "8c11f52782b53c5d07f3493139b8a1705393c84dbd84b7ef71df6c9d474fd480",
+  "configIdentity": {
+    "verifier": "ef083a887e7a34fa7c691394e74e2cd6bac47a2f5d4a21791925a5e4e3e86d4a",
+    "candidate": "377ab1089d157005006981ebb48accb3c9ab69c708c04c7926cb5d242c842a7c",
+    "protocol": "0e58c98089bfb1b65b5e68bb926651aace9665819b929b78e6e9559168d00f5e"
+  },
+  "repetitions": 1,
+  "generationRetry": 0,
+  "registeredCampaign": {
+    "cases": 34,
+    "turns": 55
+  },
+  "executed": {
+    "cases": 4,
+    "turns": 7,
+    "providerGenerations": 23,
+    "providerHttpRequests": 23
+  },
+  "notRun": {
+    "cases": 30,
+    "turns": 48
+  },
+  "addedVerificationLatencyMs": {
+    "p50": 11439.397300000011,
+    "p95": 14430.569999999978
+  },
+  "terminalDispositionPolicy": "All fallback -> committed silent handoff; no fallback customer text. No handoff/no-send occurred in executed R1.",
+  "artifacts": {
+    "ACCOUNTING.json": {
+      "rawSha256": "27a289474ce7d49257452b6299e49cc0b9f375f58b17718911fed2e242918040"
+    },
+    "INTEGRATION.json": {
+      "rawSha256": "5c6c8e1f969ade83e34e75046c81e2659d2afecbda0e1813d9ab4ccce79d8156"
+    },
+    "GATE.json": {
+      "rawSha256": "686b1e5937b6eb282127f6efa07691a1c3a2ad304e172dc63e57a7e9f5df71b6"
+    },
+    "INDEPENDENT_AUDIT.json": {
+      "rawSha256": "660f912e81681e0ba062f251c50eb3ef72fb30ed0a2e892897cd0a12b555a6a6"
+    },
+    "INPUT_REVIEW.json": {
+      "rawSha256": "7f338b3239c7c6dc85ef02e2d8c5c0f16476268ef64f691202028b4a8279f8e5"
+    },
+    "PG_ACCEPTANCE.json": {
+      "rawSha256": "11d249b73d3c57610ab3f2d85c8eacb1cdc8e6e9f01b8c7fddb2652389873e74"
+    },
+    "PG_REVIEW.json": {
+      "rawSha256": "b995f6cc4447ca2f25e21260d4c5e335a2f1947a8a9ab66dea9f2e453b1bb7d2"
+    },
+    "EVALUATION_POLICY.json": {
+      "rawSha256": "6ebd313fc65b5890de87712590f4bbd39ac804a5d2e5e69985a5976e67538bc6"
+    }
+  },
+  "commands": [
+    "node --check apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+    "git diff --check",
+    "node --test apps/worker/evals/single-agent-commerce-read-only/quote-task.test.mjs apps/worker/evals/single-agent-commerce-read-only/task-path-repair.test.mjs",
+    "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-quote-batch-pg-20261108-04 COD --check-prefix \"C quote batch V2\"",
+    "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-qualification/capture-world.mjs ../c3-quote-batch-model-world-20261108-02 ../c3-media-context-model-codes-20261103-02.json",
+    "python ../c3-media-context-model-source-wrapper-20261103-02.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-quote-batch-model-initial-20261108-01 COD --phase-c-initial-world ../c3-quote-batch-model-world-20261108-02/WORLD.json",
+    "node ../c3-quote-batch-model-prepare-20261108-01.mjs",
+    "node ../c3-quote-batch-model-independent-input-check-20261108-01.mjs",
+    "node ../c3-quote-batch-model-finalize-20261108-01.mjs",
+    "python ../c3-quote-batch-model-launch-20261108-01.py r1",
+    "node ../c3-quote-batch-model-accounting-20261108-01.mjs r1"
+  ],
+  "setupFailuresBeforeProvider": [
+    {
+      "artifact": "c3-quote-batch-pg-20261108-01",
+      "result": "STATE_REQUIRED: new test observed lazy sales state before initialization; DB dropped/provider0"
+    },
+    {
+      "artifact": "c3-quote-batch-pg-20261108-02",
+      "result": "actual5 vs expected4: opening preparation omitted by test expectation; DB dropped/provider0"
+    },
+    {
+      "artifact": "c3-quote-batch-pg-20261108-03",
+      "result": "worktree PASS1/droptrue/provider0; final04 exact clean-source PASS retained"
+    },
+    {
+      "artifact": "c3-quote-batch-model-world-20261108-01",
+      "result": "caller used outdated test code list including SM613 absent in real catalog; failed capture/no generation; corrected to previous actual9-code list for02, no source timestamps renewed"
+    }
+  ],
+  "qualification": "DEVELOPMENT_R1_FAIL_STOP_NO_GO_NO_C3_COMPARISON",
+  "sourceWrites": 0,
+  "liveSends": 0,
+  "onlineSemanticRoles": [
+    "OWNER",
+    "VERIFIER"
+  ],
+  "semanticRolesAdded": 0
+}

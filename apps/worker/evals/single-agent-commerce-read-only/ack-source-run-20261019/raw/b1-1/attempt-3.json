@@ -1,0 +1,29 @@
+{
+  "caseId": "b1-buying-concern",
+  "sourceMode": "LIVE",
+  "elapsedMs": 5.606400000164285,
+  "runtime": {
+    "latest": "Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.",
+    "history": [],
+    "initialProductCodes": [
+      "SV2447"
+    ]
+  },
+  "result": {
+    "terminal": {
+      "disposition": "NO_SEND",
+      "reason": "SOURCE_OR_ATTEMPT_UNAVAILABLE",
+      "text": null,
+      "fallbackId": null
+    },
+    "errorType": "QdrantSearchError",
+    "errorCode": "QDRANT_NETWORK_ERROR",
+    "sendEnabled": false
+  },
+  "counters": {
+    "embeddingCalls": 1,
+    "policyReads": 0,
+    "catalogReads": 10,
+    "posReads": 6
+  }
+}

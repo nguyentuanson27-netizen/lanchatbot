@@ -1,0 +1,137 @@
+{
+  "recommendation": "STOP",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "intakeHead": "bf586d5669f0c5d9459123b02ae14c40d35ab95b",
+  "specs": [
+    {
+      "path": "docs/specs/c3-phase-b-read-only-integration-plan-20261014.md",
+      "sha256": "b11ffbb85b997027c8dfd6b8530381d90e2904ec44af1ba60580f52e8e84ac75",
+      "lastChangeCommit": "dd5c9d46f41f1514982210034f551a95cd356f68"
+    },
+    {
+      "path": "docs/specs/c3-phase-b-execution-20261014.md",
+      "sha256": "b358241dc9fb0a86335ff87c0d5c3cf9f1574eb4f5d34f179911a9991a9340bd",
+      "lastChangeCommit": "0f4c4eba9be29d6033058ae1be3bebc9daafffbd"
+    },
+    {
+      "path": "apps\\worker\\evals\\single-agent-commerce-read-only\\two-round-20261015\\SCOPE.md",
+      "sha256": "fb9a5a147271d7c5f688f094008a248af8e44e2dabbebb49021af34d58b74ee4",
+      "lastChangeCommit": "5764253eada47456dcb0890c1e2893476199f1c9"
+    }
+  ],
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "registeredSlots": 16,
+  "executedSlots": 6,
+  "unexecutedSlots": 10,
+  "uniqueQuestionsExecuted": 3,
+  "ownerGenerations": 12,
+  "verifierGenerations": 6,
+  "providerRequests": 18,
+  "generationRetries": 0,
+  "providerErrors": 0,
+  "providerTimeouts": 0,
+  "observedUnsafeEligible": 0,
+  "reviewedEligible": 2,
+  "independentHumanAccepted": false,
+  "newSemanticRoles": 0,
+  "newRuntimeLayers": 0,
+  "runtimeLineDelta": {
+    "insertions": 69,
+    "deletions": 26,
+    "files": 5
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "bRunSourceSha": "9564b4a59871f1e096c72f8d50f60b41ee06577d",
+      "promptHashes": {
+        "owner": "722e5958260b1abbc3a12282c55df7b4d792805ade8ee7b812b535f7b22fcbb2",
+        "verifier": "fe7e21965c6cc608c854b97f2513130c9d2f39cf5bec443f4a637f7d8e6f7957"
+      },
+      "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+      "inputHash": "a5c2f5e6f1af91acb84ea5ebe865536dfa5a5148360e004a25d22551b7582059",
+      "registered": 8,
+      "executed": 3,
+      "adequate": 1,
+      "fallback": 2,
+      "unexecuted": 5,
+      "providerRequests": 9
+    },
+    {
+      "round": 2,
+      "bRunSourceSha": "22457e0a9e7722187e9bedf9bae0ff0551f4aeb6",
+      "promptHashes": {
+        "owner": "d6ba7b6c3a4705fcab140a0d74b527ce9b36ebb9639c1b7cf470eb48a3c02a67",
+        "verifier": "fe7e21965c6cc608c854b97f2513130c9d2f39cf5bec443f4a637f7d8e6f7957"
+      },
+      "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+      "inputHash": "a5c2f5e6f1af91acb84ea5ebe865536dfa5a5148360e004a25d22551b7582059",
+      "registered": 8,
+      "executed": 3,
+      "adequate": 1,
+      "fallback": 2,
+      "unexecuted": 5,
+      "providerRequests": 9
+    }
+  ],
+  "deliveryAudit": {
+    "rawFilesAndGitBlobsVerified": 14,
+    "stableSourceReadbacks": 2,
+    "capturedBodiesChecked": 18,
+    "verifierBindingsChecked": 6,
+    "evaluatorLabelLeaks": 0,
+    "secretLikeMatchesIn48ChangedFiles": 0,
+    "historicalAAndSharedSourcesUnchanged": true,
+    "remoteCi": "NOT_YET_VERIFIED"
+  }
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "path": "apps/worker/evals/single-agent-commerce-read-only/compact-native-full-run-20261026/DISPATCH_DRIVER.py",
+    "sha256": "f7cefbd4c0f1cead2d67ebba70ca9068472eab2fbac7837bb5c1a7194bd73aa2"
+  },
+  {
+    "path": "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs",
+    "sha256": "78d4fff410ee88cfd694e69098304e49f80c17f3d117097eb64961d1c5840e93"
+  },
+  {
+    "path": "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+    "sha256": "ce63332c810ac217d79f552b4133caa14f570dd23e8b8236ef102deb14a3a5d5"
+  },
+  {
+    "path": "apps/worker/evals/single-agent-commerce-read-only/manifest.json",
+    "sha256": "8a2525f4b2d0479c5f0ee6e377055527304d1e7de54cc585a38757731499b593"
+  },
+  {
+    "path": "apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt",
+    "sha256": "a9fdb61fcbdbb26e2b79a1e70e0cb6637d0ed265ebe6f191f4971c98b8cc1ce1"
+  },
+  {
+    "path": "apps/worker/evals/single-agent-commerce-read-only/protocol.mjs",
+    "sha256": "09929f7f528c78bd93b44ffc97a74bc32a6feb9383dbb41d2d90cb4250a66341"
+  },
+  {
+    "path": "apps/worker/evals/single-agent-commerce-read-only/quote-task.test.mjs",
+    "sha256": "ac8f844cd4b727c5c1b4fb07c0d0f9651dc20923f3a2ada5fbb31d6a87b5802c"
+  },
+  {
+    "path": "apps/worker/evals/single-agent-commerce-read-only/stateful-provider.mjs",
+    "sha256": "d79c052364acae68919ecf8161242dba8c625b3e2a8fd1108f663b8bf78621c5"
+  },
+  {
+    "path": "apps/worker/src/single-agent-commerce-ingress.test.ts",
+    "sha256": "bff1a970745236d515937a8b604cf038da8cc8ee328cae3a4ad7be10d6ab216f"
+  },
+  {
+    "path": "apps/worker/src/single-agent-commerce-ingress.ts",
+    "sha256": "ffc4fc1da6da115a585e63f2c6649a3e1353bce42a9e0f4fb9765c4202b70ba4"
+  },
+  {
+    "path": "apps/worker/src/single-agent-commerce-quote.test.ts",
+    "sha256": "e5fe40eecc897a6503b00df1f62c75294c0cae52f6d3bfd5407b56b31f73cc1c"
+  },
+  {
+    "path": "apps/worker/src/single-agent-commerce-quote.ts",
+    "sha256": "63fc0f4a77b22caedf8e0154350294ba14183f33dc90981e26a85a985a9b7fe8"
+  },
+  {
+    "path": "apps/worker/src/single-agent-commerce-read-only.ts",
+    "sha256": "cc169ad07961dac6ba4c0547fef005a64864b8273fb42486b6adab1a0f4c5a42"
+  },
+  {
+    "path": "apps/worker/src/single-agent-commerce.ts",
+    "sha256": "a53414842357c6ede0ebd65bf4c4eceae344ff7ab29f8ba579dc719e69d93925"
+  }
+]

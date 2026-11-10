@@ -1,0 +1,108 @@
+{
+  "sourceSha": "3a3d2b0c5da214df221774974bbf6170d10c4d54",
+  "previousRunSourceSha": "9ecbbe5cd12e6a910c2b81f8271921846d55640a",
+  "mode": "CRITICAL_EXPERIENCE_FIX_VERIFICATION_NOT_FULL_QUALIFICATION",
+  "implementationBaseSha": "e7e0fbf855fc1e167cacee8186e96ea84739886e",
+  "targets": [
+    "b1-partial-source-v2",
+    "b1-price-v2",
+    "b1-component-stock-v2",
+    "b1-changed-occasion-v3",
+    "sales-discovery-advice:need",
+    "sales-product-gallery:overview",
+    "stateful-correction",
+    "stateful-request-checkout",
+    "stateful-private-checkout",
+    "stateful-confirm",
+    "stateful-human-request"
+  ],
+  "prerequisites": [
+    "stateful-open",
+    "stateful-variant-quantity",
+    "stateful-quote"
+  ],
+  "registeredTargets": 11,
+  "registeredPrerequisites": 3,
+  "registeredOutcomes": 14,
+  "registeredScopedControls": 17,
+  "totalRegisteredSlotsIncludingControls": 31,
+  "maximumGenerationRequests": 69,
+  "repetitions": 1,
+  "generationRetry": 0,
+  "sendEnabled": false,
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "hashes": {
+    "manifest.json": "17698319f54cd6858b2e50f51aa94c210872f80d558182d61bfffdc2631f7238",
+    "cases.b1.json": "ee298235bec3e3529b782f0ca243041dad0ff48b2317cf93d363c7ed5bb3040a",
+    "stateful-cases.json": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+    "sales-journeys.candidate.json": "b2575660b7d412eb6a2d11befb04de75fd840789c7126026bb257ce60f183a93",
+    "source-config.b1.json": "b4c15f1823bf16d63a1ff67eb3a11711b28ed6592ec7bc1e65e0ceb3fbbc0d59",
+    "prompts/owner.vi.txt": "323b9c3c2ae272b03c26d4d41eeebbcb4842102e23ab63a9bf8cd4001d506e1a",
+    "prompts/verifier.vi.txt": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c",
+    "handoff-matrix.candidate.json": "6c6a2836087cf778879ec4b3049a6d627155c34366560cb618bc182560fec24d",
+    "run.mjs": "316e6fe9ad6ad31d8a6a6f2d44f308407c04b09ff99f92d242a992419985e756",
+    "isolated-integration.mjs": "d86e277ffb53d568334bc40105e7a1dc4f8a604c6147c86a2f58318321965611",
+    "stateful-provider.mjs": "943f287c7e6cbe42fe0ca156c517915106820430ac808d7520661cd0810fa0df",
+    "gemini-inference.mjs": "94ba516c89a1beeed9dc8a9a804a2f47ce5fc781bc13d57daa0a39342afdae4d",
+    "protocol.mjs": "50d5dcaeda1c6e8a74303b61322d8779e0823549910b5f13c3396a7a066e5bd2",
+    "feedback-controls-20261023.mjs": "3b628313471b8fa33326e466c39c56defaea4c0d068154f6787cba7cf87ade3d",
+    "source-session.py": "94b6cac60dff03506badc1751ba4e8ea54cce278ec82ff448eeb0e8a6a44294d"
+  },
+  "driverSha256": "c6a43c51f3ec8691430b815ed1845e6d17f5c483f7c440ba72678d44c6e3be7e",
+  "scopedControls": "17 fresh controls from existing corpus before native dispatch; fail stops native dispatch",
+  "changedExecutionConfig": {
+    "ownerFinalRequest": "TEXT_WITH_COMPLETED_TOOL_DATA",
+    "toolResultAccounting": "BATCH_EXCLUDING_EXACT_CURRENT_PRODUCT_DUPLICATES"
+  },
+  "selection": "B1 ranges11:13,17:17; journey-openings through gallery; full eight-slot stateful journey for three real setup turns and five targets"
+}

@@ -22,7 +22,7 @@ export const MANUAL_IMAGE_INTAKE_HEADERS = [
   "IMAGE_ID", "PROCESSED_AT", "ERROR", "BRAND",
 ] as const;
 
-/** 42 cột A:AP. A:V là vùng app ghi (AI_*), W:AP là vùng người duyệt — app không đụng. */
+/** 44 cột A:AR. A:V là vùng app ghi (AI_*), W:AR là vùng người duyệt — app không đụng. */
 export const IMAGE_REGISTRY_HEADERS = [
   "IMAGE_ID", "MA_SP", "IMAGE_URL", "NORMALIZED_IMAGE_URL", "IMAGE_HASH", "SOURCE_CONTEXT",
   "AI_IMAGE_TYPE", "AI_IMAGE_INTENTS", "AI_ANGLE", "AI_DETAIL_TYPE", "AI_PARTS_VISIBLE",
@@ -32,12 +32,12 @@ export const IMAGE_REGISTRY_HEADERS = [
   "IMAGE_TYPE", "IMAGE_INTENTS", "ANGLE", "DETAIL_TYPE", "PARTS_VISIBLE", "VISUAL_COLORS",
   "VISUAL_MATERIALS", "BACKGROUND_TYPE", "HAS_MODEL", "HAS_TEXT_OVERLAY", "QUALITY_SCORE",
   "VERIFIED", "REVIEW_STATUS", "MANUAL_OVERRIDE", "ACTIVE", "APPROVED_BY", "APPROVED_AT",
-  "PUBLISHED_HASH", "PUBLISHED_AT", "NOTES",
+  "PUBLISHED_HASH", "PUBLISHED_AT", "NOTES", "VERIFIED_PRODUCT_COLOR", "COLOR_BINDING_IMAGE_HASH",
 ] as const;
 
-/** Giá trị mặc định cho vùng người duyệt W:AP khi tạo dòng mới. REVIEW_STATUS=PENDING. */
+/** Giá trị mặc định cho vùng người duyệt W:AR khi tạo dòng mới. REVIEW_STATUS=PENDING. */
 const REVIEWER_DEFAULTS: (string | number | boolean)[] = [
-  "", "", "", "", "", "", "", "", "", "", "", false, "PENDING", false, true, "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", false, "PENDING", false, true, "", "", "", "", "", "", "",
 ];
 
 export interface MetadataJob {

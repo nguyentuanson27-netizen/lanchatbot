@@ -1,0 +1,27 @@
+{
+  "status": "API_COMPATIBILITY_PASS",
+  "result": {
+    "kind": "FINAL",
+    "text": "Dạ áo này mặc với quần jeans xanh đậm rất hợp luôn chị nhé! \n\nÁo blouse trắng kem có chi tiết thêu và tay bồng nhẹ nhàng, khi phối cùng quần jeans xanh đậm sẽ tạo sự tương phản rất đẹp mắt: vừa giữ được nét nữ tính, điệu đà của áo, lại vừa đem lại vẻ trẻ trung, năng động và gọn gàng. Chị mặc đi chơi, dạo phố hay đi cà phê đều rất xinh ạ.",
+    "telemetry": {
+      "generationId": "181efaab-d93a-450f-8e02-7b2f8e7b8347",
+      "providerRequests": 1,
+      "authRequests": 1,
+      "httpStatus": 200,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "inputTokens": 4833,
+      "outputTokens": 683,
+      "cost": null,
+      "finishReason": "STOP",
+      "requestBytes": 276977,
+      "requestHash": "5b95adff942cca94e03f35d001844384ba324fea96311428f445e7b9d74d321f",
+      "functionCallingMode": "NONE",
+      "declaredToolCount": 0,
+      "thinkingTokens": 585,
+      "rawFinishReason": "STOP",
+      "unexpectedToolCall": false
+    }
+  },
+  "sendEligible": false,
+  "sendEnabled": false
+}

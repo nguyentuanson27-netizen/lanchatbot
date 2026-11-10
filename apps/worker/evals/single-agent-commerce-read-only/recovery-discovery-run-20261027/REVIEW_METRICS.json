@@ -1,0 +1,111 @@
+{
+  "sourceSha": "574ef87db95b8109bf39689c30f7c33b9dc0112d",
+  "nativeRegistered": 51,
+  "nativeExecuted": 51,
+  "nativeNotRun": 0,
+  "controlsExecuted": 17,
+  "completeDenominator": 68,
+  "qualificationErrors": [],
+  "nativeTerminals": {
+    "SEND_ELIGIBLE": 37,
+    "HANDOFF": 9,
+    "NO_SEND": 4,
+    "FALLBACK": 1
+  },
+  "providerGenerationRequests": 141,
+  "maximumUpstreamPerGeneration": 1,
+  "retry": 0,
+  "requestsByRole": {
+    "control-verifier": 17,
+    "owner": 86,
+    "verifier": 38
+  },
+  "observedModelVersions": {
+    "gpt-6.1-sol": 55,
+    "gemini-3.5-flash-lite": 86
+  },
+  "generationErrors": [],
+  "tokens": {
+    "input": 969446,
+    "output": 87511,
+    "thinkingIncludedInOutput": 80795
+  },
+  "tokensByRole": {
+    "owner": {
+      "input": 629250,
+      "output": 81506,
+      "thinkingIncludedInOutput": 77031
+    },
+    "verifier": {
+      "input": 214879,
+      "output": 3733,
+      "thinkingIncludedInOutput": 2746
+    },
+    "control-verifier": {
+      "input": 125317,
+      "output": 2272,
+      "thinkingIncludedInOutput": 1018
+    }
+  },
+  "cost": null,
+  "verifierProviderLatencyMs": {
+    "samples": 38,
+    "p50": 8029,
+    "p95": 18033
+  },
+  "verificationWithReadbackMs": {
+    "samples": 38,
+    "p50": 10874.032399999996,
+    "p95": 18789.612900000007
+  },
+  "driverSlotLatencyMs": {
+    "samples": 51,
+    "p50": 27280.910900000003,
+    "p95": 59659.0588
+  },
+  "reconstructedAccounting": [],
+  "customerInputRestoredFromActualRequest": [],
+  "runtimeErrors": [],
+  "captureDisplayRestoredByHash": [],
+  "wireAudit": {
+    "capturedActualBodies": 141,
+    "ownerHashChecks": 86,
+    "ownerWireMatchChecks": 86,
+    "verifierWireChecks": 34,
+    "b1VerifierTelemetryChecks": 21,
+    "boundedEvaluatorOrSecretKeyMatches": 0,
+    "boundedCaseIdStringMatches": 0
+  },
+  "testDatabaseCleanup": [
+    {
+      "cohort": "opening-quotes",
+      "testDatabase": "c3_b_test_c54dd841fe876ea1",
+      "dropped": true
+    },
+    {
+      "cohort": "media-followup",
+      "testDatabase": "c3_b_test_838d066f9c67dfd5",
+      "dropped": true
+    },
+    {
+      "cohort": "missing-pos",
+      "testDatabase": "c3_b_test_e0b4f350f0281d30",
+      "dropped": true
+    },
+    {
+      "cohort": "journey-openings",
+      "testDatabase": "c3_b_test_6272824d334a6534",
+      "dropped": true
+    },
+    {
+      "cohort": "stateful",
+      "testDatabase": "c3_b_test_78fecaa4da99c53b",
+      "dropped": true
+    },
+    {
+      "cohort": "negotiation",
+      "testDatabase": "c3_b_test_92347bc8bdbf2dd3",
+      "dropped": true
+    }
+  ]
+}

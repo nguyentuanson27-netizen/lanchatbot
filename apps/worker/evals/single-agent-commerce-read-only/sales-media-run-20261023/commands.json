@@ -1,0 +1,51 @@
+[
+  {
+    "name": "preflight-media",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-sales-media-run-20261023\\media",
+      "COD",
+      "--provider-run",
+      "--candidate-handoff",
+      "--media-probe",
+      "--provider-preflight"
+    ],
+    "startedAt": "2026-10-23T02:34:53.274857+00:00",
+    "exitCode": 0,
+    "finishedAt": "2026-10-23T02:35:08.607079+00:00"
+  },
+  {
+    "name": "media",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\isolated-integration.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-sales-media-run-20261023\\media",
+      "COD",
+      "--provider-run",
+      "--candidate-handoff",
+      "--media-probe"
+    ],
+    "startedAt": "2026-10-23T02:35:08.915544+00:00",
+    "exitCode": 0,
+    "finishedAt": "2026-10-23T02:38:04.649792+00:00"
+  },
+  {
+    "name": "advice",
+    "command": [
+      "C:\\Users\\nguye\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "node",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\advice-diagnostic.mjs",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\sales-media-preparation-20261023\\advice-paired-inputs.json",
+      "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-sales-media-run-20261023\\advice"
+    ],
+    "startedAt": "2026-10-23T02:38:05.014695+00:00",
+    "exitCode": 0,
+    "finishedAt": "2026-10-23T02:40:00.868109+00:00"
+  }
+]

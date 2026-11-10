@@ -1,0 +1,152 @@
+[
+  {
+    "condition": "current-source",
+    "caseId": "media-detail",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, em gửi chị ảnh cận cảnh phần thêu nổi trên áo Thạch Thảo nhé ạ!",
+      "fallbackId": null
+    },
+    "images": [
+      {
+        "sequence": 1,
+        "type": "image",
+        "url": "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg"
+      }
+    ],
+    "calls": [
+      "select_product_media"
+    ]
+  },
+  {
+    "condition": "current-source",
+    "caseId": "media-feedback",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?",
+      "fallbackId": "C3_B_MEDIA_NEXT_STEP_V1"
+    },
+    "images": [],
+    "calls": [
+      "select_product_media",
+      "select_product_media",
+      "select_product_media"
+    ]
+  },
+  {
+    "condition": "current-source",
+    "caseId": "media-back",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, em gửi chị ảnh mặt sau của set Thạch Thảo ạ!",
+      "fallbackId": null
+    },
+    "images": [
+      {
+        "sequence": 1,
+        "type": "image",
+        "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg"
+      }
+    ],
+    "calls": [
+      "select_product_media"
+    ]
+  },
+  {
+    "condition": "current-source",
+    "caseId": "media-concern",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ bộ Thạch Thảo này phần ren tập trung ở chân váy (ren tơ Hàn mềm, có độ rũ và độ bay tự nhiên) kết hợp với áo tơ thêu nổi form nhẹ, nên khi mặc lên người trông rất thanh nhã, nhẹ nhàng chứ không bị quá lồng lộn hay nặng nề đâu ạ. Mặc đi ăn cưới buổi trưa rất vừa vặn, sang trọng và lịch sự. \n\nChị có thể tham khảo mặc nguyên bộ, hoặc nếu vẫn lăn tăn phần chân váy ren thì mình có thể chọn mua áo lẻ (499.000đ) để phối với chân váy trơn hoặc quần sẵn có trong tủ đồ cũng rất xinh ạ. Em gửi chị xem hình ảnh của mẫu này nhé!",
+      "fallbackId": null
+    },
+    "images": [
+      {
+        "sequence": 1,
+        "type": "image",
+        "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+      },
+      {
+        "sequence": 2,
+        "type": "image",
+        "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg"
+      }
+    ],
+    "calls": [
+      "read_product",
+      "select_product_media"
+    ]
+  },
+  {
+    "condition": "assumed-feedback",
+    "caseId": "media-detail",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ em gửi chị ảnh cận cảnh phần thêu của áo Thạch Thảo nhé ạ.",
+      "fallbackId": null
+    },
+    "images": [
+      {
+        "sequence": 1,
+        "type": "image",
+        "url": "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg"
+      }
+    ],
+    "calls": [
+      "select_product_media"
+    ]
+  },
+  {
+    "condition": "assumed-feedback",
+    "caseId": "media-feedback",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "images": [],
+    "calls": [
+      "select_product_media"
+    ]
+  },
+  {
+    "condition": "assumed-feedback",
+    "caseId": "media-back",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, em gửi chị ảnh chụp mặt sau của bộ Thạch Thảo đây ạ. Thiết kế phía sau cũng giữ form dáng nhẹ nhàng và độ rũ tự nhiên như mặt trước chị nhé.",
+      "fallbackId": null
+    },
+    "images": [
+      {
+        "sequence": 1,
+        "type": "image",
+        "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg"
+      }
+    ],
+    "calls": [
+      "select_product_media"
+    ]
+  },
+  {
+    "condition": "assumed-feedback",
+    "caseId": "media-concern",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Chị đi ăn cưới buổi trưa chọn chiếc áo thêu tơ Hàn lẻ (499.000đ) phối với một chiếc chân váy hoặc quần trơn dáng suông sẽ rất thanh lịch, gọn gàng mà không lo bị nhiều ren ạ. \n\nHoặc nếu chị mặc nguyên bộ Thạch Thảo (799.000đ), phần chân váy dùng chất ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên nên khi mặc lên rất mềm mại, bay bổng chứ không bị thô hay rườm rà đâu ạ. Chị thích phương án tách áo lẻ phối đồ hay lấy cả bộ để em hỗ trợ mình nhé?",
+      "fallbackId": null
+    },
+    "images": [],
+    "calls": [
+      "read_product"
+    ]
+  }
+]

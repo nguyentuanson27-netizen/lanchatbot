@@ -1,0 +1,200 @@
+[
+  {
+    "productId": "SV2447",
+    "syncedAt": "2026-10-22T12:04:25.028Z",
+    "shippingEta": {
+      "NOI-THANH-HN": {
+        "transit_min_days": 1,
+        "transit_max_days": 2
+      },
+      "MIEN-BAC": {
+        "transit_min_days": 2,
+        "transit_max_days": 4
+      },
+      "MIEN-TRUNG": {
+        "transit_min_days": 3,
+        "transit_max_days": 5
+      },
+      "MIEN-NAM": {
+        "transit_min_days": 3,
+        "transit_max_days": 6
+      }
+    },
+    "fulfillmentPolicy": {
+      "tinh_trang": "READY-STOCK",
+      "can_order_when_zero": true,
+      "prep_min_days": 1,
+      "prep_max_days": 2,
+      "zero_stock_policy": "PRE-ORDER",
+      "zero_stock_prep_min_days": 5,
+      "zero_stock_prep_max_days": 8,
+      "eta_valid_until": "",
+      "eta_updated_at": ""
+    }
+  },
+  {
+    "productId": "SV2447",
+    "syncedAt": "2026-10-22T12:04:25.028Z",
+    "shippingEta": {
+      "NOI-THANH-HN": {
+        "transit_min_days": 1,
+        "transit_max_days": 2
+      },
+      "MIEN-BAC": {
+        "transit_min_days": 2,
+        "transit_max_days": 4
+      },
+      "MIEN-TRUNG": {
+        "transit_min_days": 3,
+        "transit_max_days": 5
+      },
+      "MIEN-NAM": {
+        "transit_min_days": 3,
+        "transit_max_days": 6
+      }
+    },
+    "fulfillmentPolicy": {
+      "tinh_trang": "READY-STOCK",
+      "can_order_when_zero": true,
+      "prep_min_days": 1,
+      "prep_max_days": 2,
+      "zero_stock_policy": "PRE-ORDER",
+      "zero_stock_prep_min_days": 5,
+      "zero_stock_prep_max_days": 8,
+      "eta_valid_until": "",
+      "eta_updated_at": ""
+    }
+  },
+  {
+    "productId": "SV2447",
+    "syncedAt": "2026-10-22T12:04:25.028Z",
+    "shippingEta": {
+      "NOI-THANH-HN": {
+        "transit_min_days": 1,
+        "transit_max_days": 2
+      },
+      "MIEN-BAC": {
+        "transit_min_days": 2,
+        "transit_max_days": 4
+      },
+      "MIEN-TRUNG": {
+        "transit_min_days": 3,
+        "transit_max_days": 5
+      },
+      "MIEN-NAM": {
+        "transit_min_days": 3,
+        "transit_max_days": 6
+      }
+    },
+    "fulfillmentPolicy": {
+      "tinh_trang": "READY-STOCK",
+      "can_order_when_zero": true,
+      "prep_min_days": 1,
+      "prep_max_days": 2,
+      "zero_stock_policy": "PRE-ORDER",
+      "zero_stock_prep_min_days": 5,
+      "zero_stock_prep_max_days": 8,
+      "eta_valid_until": "",
+      "eta_updated_at": ""
+    }
+  },
+  {
+    "productId": "SQ149",
+    "syncedAt": "2026-10-22T12:04:25.028Z",
+    "shippingEta": {
+      "NOI-THANH-HN": {
+        "transit_min_days": 1,
+        "transit_max_days": 2
+      },
+      "MIEN-BAC": {
+        "transit_min_days": 2,
+        "transit_max_days": 4
+      },
+      "MIEN-TRUNG": {
+        "transit_min_days": 3,
+        "transit_max_days": 5
+      },
+      "MIEN-NAM": {
+        "transit_min_days": 3,
+        "transit_max_days": 6
+      }
+    },
+    "fulfillmentPolicy": {
+      "tinh_trang": "READY-STOCK",
+      "can_order_when_zero": true,
+      "prep_min_days": 1,
+      "prep_max_days": 2,
+      "zero_stock_policy": "PRE-ORDER",
+      "zero_stock_prep_min_days": 5,
+      "zero_stock_prep_max_days": 8,
+      "eta_valid_until": "",
+      "eta_updated_at": ""
+    }
+  },
+  {
+    "productId": "SV463",
+    "syncedAt": "2026-10-22T12:04:25.028Z",
+    "shippingEta": {
+      "NOI-THANH-HN": {
+        "transit_min_days": 1,
+        "transit_max_days": 2
+      },
+      "MIEN-BAC": {
+        "transit_min_days": 2,
+        "transit_max_days": 4
+      },
+      "MIEN-TRUNG": {
+        "transit_min_days": 3,
+        "transit_max_days": 5
+      },
+      "MIEN-NAM": {
+        "transit_min_days": 3,
+        "transit_max_days": 6
+      }
+    },
+    "fulfillmentPolicy": {
+      "tinh_trang": "READY-STOCK",
+      "can_order_when_zero": true,
+      "prep_min_days": 1,
+      "prep_max_days": 2,
+      "zero_stock_policy": "PRE-ORDER",
+      "zero_stock_prep_min_days": 5,
+      "zero_stock_prep_max_days": 8,
+      "eta_valid_until": "",
+      "eta_updated_at": ""
+    }
+  },
+  {
+    "productId": "SQ784",
+    "syncedAt": "2026-10-22T12:04:25.028Z",
+    "shippingEta": {
+      "NOI-THANH-HN": {
+        "transit_min_days": 1,
+        "transit_max_days": 2
+      },
+      "MIEN-BAC": {
+        "transit_min_days": 2,
+        "transit_max_days": 4
+      },
+      "MIEN-TRUNG": {
+        "transit_min_days": 3,
+        "transit_max_days": 5
+      },
+      "MIEN-NAM": {
+        "transit_min_days": 3,
+        "transit_max_days": 6
+      }
+    },
+    "fulfillmentPolicy": {
+      "tinh_trang": "PRE-ORDER",
+      "can_order_when_zero": true,
+      "prep_min_days": 5,
+      "prep_max_days": 8,
+      "zero_stock_policy": "",
+      "zero_stock_prep_min_days": null,
+      "zero_stock_prep_max_days": null,
+      "eta_valid_until": "",
+      "eta_updated_at": ""
+    }
+  }
+]

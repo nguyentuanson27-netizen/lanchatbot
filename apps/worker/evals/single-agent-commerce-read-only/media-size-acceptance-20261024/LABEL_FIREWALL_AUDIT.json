@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "actualGenerationRequests": 160,
+  "actualWiresScanned": 160,
+  "evaluatorLabelLeaks": 0,
+  "privateFixtureLeaks": 0,
+  "internalDelegationLeaks": 0,
+  "roles": [
+    "owner",
+    "verifier"
+  ],
+  "maximumProviderRequestsPerGeneration": 1,
+  "notes": "Outer audit caseId/evaluator metadata never forwarded. Every dispatched generation has a retained wire; failed provider attempts remain in accounting. B1 verifier wires come from telemetry.requestBody."
+}

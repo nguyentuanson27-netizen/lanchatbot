@@ -1,0 +1,73 @@
+{
+  "sourceSha": "70d52342a42554c47cacf223e24d582d9dc49f13",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "hashes": {
+    "stateful-provider.mjs": "a747d0518bfa4a39bfb57b3a6d3f1d5d0a7ced70039e8edd8d1a060f5448c6cd",
+    "assumed-feedback.mjs": "86245af5f09550fb78663a0c6b9cdbade72e2f6adbe9b282acf9361cebce985f",
+    "sales-media-cases.json": "5e20e6521b47cf4d0b1aed58f6d06cb3000d84fd16d64c7e46e70f028ae4134e",
+    "manifest.json": "5a543c6582c1080eda1bb3a6daa4a3be8ed4f59af20574ec5d6d11389eeb433f",
+    "prompts/owner.vi.txt": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
+    "prompts/verifier.vi.txt": "0b240599a04d9a86c25ed2b3b815c152e83106c85e61940efde15b020e4c2fde",
+    "isolated-integration.mjs": "75f567915c7cdbaa632ba9dc1103e2fff99f7e4a826fa2c4fcc5c6733a990f07",
+    "gemini-inference.mjs": "b011b873a484493ac68d094ff9e1fdef72d5dd7970f59c19630d2276958181be"
+  },
+  "outcomes": 2,
+  "maximumGenerationRequests": 8,
+  "repetitionsPerCondition": 1,
+  "conditions": [
+    "assumed-feedback"
+  ],
+  "assumption": "Known public catalog asset marked feedback in isolated copy only, not verified real customer provenance",
+  "retry": 0,
+  "sendEnabled": false
+}

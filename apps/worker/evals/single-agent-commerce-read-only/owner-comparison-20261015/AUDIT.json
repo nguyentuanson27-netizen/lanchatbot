@@ -1,0 +1,90 @@
+{
+  "status": "PASS",
+  "runSourceSha": "695f126db30aeeb5369bb2eefefedd8fafd24c64",
+  "rawCommit": "23beeb81324fe870812d981484172673a3a019b8",
+  "primaryCommit": "eeaa1b019172fc63a24aacf8e0634ad7d6439412",
+  "bindings": [
+    {
+      "slot": 1,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 2,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 3,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 4,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 5,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 6,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 7,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 8,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 9,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 10,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 11,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    },
+    {
+      "slot": 12,
+      "finalDraftBound": true,
+      "snapshotBindingValid": true,
+      "finalReadbackUnchanged": true
+    }
+  ],
+  "rawDiskAndGitBlobsVerified": 18,
+  "historicalAEvidenceAndPriorBRoundsUnchanged": true,
+  "actualOwnerGenerations": 12,
+  "actualVerifierGenerations": 12,
+  "maxProviderRequestsPerGeneration": 1,
+  "allHttp200": true,
+  "runtimeToolRounds": 0,
+  "mode": "CODE_PRELOADED_LIVE_SOURCES",
+  "sendEnabled": false,
+  "limits": "Structural audit reuses code binding/readback and captured request records. It does not judge protected semantics or prove GPT native tool calling. Primary review found one unsafe eligible outcome, which remains a failure."
+}

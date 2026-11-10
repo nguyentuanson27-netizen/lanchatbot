@@ -1,0 +1,89 @@
+{
+  "mode": "POST_INTERRUPTION_OWNED_TEST_DB_READBACK_AND_CLEANUP",
+  "sourceSha": "6477c840e5cd678d795d336a55b1ba95e287116f",
+  "target": "c3_b_test_18b0997926ff7a18",
+  "providerGenerations": 0,
+  "liveMutation": false,
+  "sendEnabled": false,
+  "verifiedTestMarker": true,
+  "handoffEvents": [
+    {
+      "conversation_id": "ec03e8d6-db2d-4620-ab1a-8d24b1566027",
+      "direction": "BOT_TO_HUMAN",
+      "source": "BOT_POLICY",
+      "reason_code": "DEPENDENCY_FAILURE",
+      "owner_before": "BOT",
+      "owner_after": "HUMAN",
+      "handoff_generation": "5",
+      "desired_tag": "NHAN_VIEN",
+      "occurred_at": "2026-10-15T23:11:31.376Z"
+    },
+    {
+      "conversation_id": "c044b50b-643a-4551-8415-41283eafa2b6",
+      "direction": "BOT_TO_HUMAN",
+      "source": "CUSTOMER_REQUEST",
+      "reason_code": "CUSTOMER_REQUESTED_HUMAN",
+      "owner_before": "BOT",
+      "owner_after": "HUMAN",
+      "handoff_generation": "1",
+      "desired_tag": "NHAN_VIEN",
+      "occurred_at": "2026-10-15T23:11:55.376Z"
+    }
+  ],
+  "ownership": [
+    {
+      "conversation_id": "7c077091-c144-4811-8ff3-d17369500b4b",
+      "conversation_owner": "BOT"
+    },
+    {
+      "conversation_id": "c044b50b-643a-4551-8415-41283eafa2b6",
+      "conversation_owner": "HUMAN"
+    },
+    {
+      "conversation_id": "ec03e8d6-db2d-4620-ab1a-8d24b1566027",
+      "conversation_owner": "HUMAN"
+    }
+  ],
+  "tagIntents": [
+    {
+      "conversation_id": "ec03e8d6-db2d-4620-ab1a-8d24b1566027",
+      "desired_tag": "NHAN_VIEN",
+      "handoff_generation": "5",
+      "status": "PENDING"
+    },
+    {
+      "conversation_id": "c044b50b-643a-4551-8415-41283eafa2b6",
+      "desired_tag": "NHAN_VIEN",
+      "handoff_generation": "1",
+      "status": "PENDING"
+    }
+  ],
+  "handoffCases": [
+    {
+      "conversation_id": "ec03e8d6-db2d-4620-ab1a-8d24b1566027",
+      "status": "NEW"
+    },
+    {
+      "conversation_id": "c044b50b-643a-4551-8415-41283eafa2b6",
+      "status": "NEW"
+    }
+  ],
+  "outboxStatusCounts": [
+    {
+      "status": "SENT_ACCEPTED",
+      "count": 3
+    }
+  ],
+  "inboxStatusCounts": [
+    {
+      "status": "PROCESSED",
+      "count": 6
+    },
+    {
+      "status": "PROCESSING",
+      "count": 1
+    }
+  ],
+  "sessionsBeforeDrop": 0,
+  "testDatabaseDropped": true
+}

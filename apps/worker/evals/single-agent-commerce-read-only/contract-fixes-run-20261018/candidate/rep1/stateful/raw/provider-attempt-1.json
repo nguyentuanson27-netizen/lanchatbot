@@ -1,0 +1,778 @@
+{
+  "caseId": "stateful-open",
+  "journeyId": "sales",
+  "elapsedMs": 37638.2113,
+  "result": {
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "RECEIPT_BACKED_CART_SUMMARY",
+      "text": "Em đã thêm món chị chọn vào giỏ. Tổng 529.000đ, đã gồm phí giao hàng. Có món đặt trước, chị nhé.",
+      "fallbackId": null
+    },
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "OWNER_TOOL_MODE"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 3,
+    "verifierGenerations": 0,
+    "toolRounds": 2,
+    "toolCalls": 3,
+    "generations": [
+      {
+        "id": "d84af9bf-dec8-462f-aa23-a44f24d450cd:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 3991.053,
+        "telemetry": {
+          "generationId": "d84af9bf-dec8-462f-aa23-a44f24d450cd:owner:1",
+          "providerRequests": 1,
+          "authRequests": 1,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4036,
+          "outputTokens": 1062,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 20932,
+          "requestHash": "4b6ee22ae2b45781cd516a15c93fe64ab4caec773bd259c83f4fc6db23d93eeb",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 10,
+          "thinkingTokens": 958,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "d84af9bf-dec8-462f-aa23-a44f24d450cd:owner:2",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 2433.735700000001,
+        "telemetry": {
+          "generationId": "d84af9bf-dec8-462f-aa23-a44f24d450cd:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 6657,
+          "outputTokens": 421,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 30626,
+          "requestHash": "63fe8561ea3c68b3ded4e482b210061d2389a8e21ddf861c99cf1d6ed7aa4d8f",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 10,
+          "thinkingTokens": 375,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      },
+      {
+        "id": "d84af9bf-dec8-462f-aa23-a44f24d450cd:owner:3",
+        "role": "owner",
+        "status": "PROVIDER_ERROR",
+        "latencyMs": 1007.6261000000013,
+        "telemetry": {
+          "generationId": "d84af9bf-dec8-462f-aa23-a44f24d450cd:owner:3",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 7017,
+          "outputTokens": 45,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 28865,
+          "requestHash": "2418a90a5213baf5a4ff343490309c2df5a07307fde6a9a3dd031c1d50c2a857",
+          "functionCallingMode": "NONE",
+          "declaredToolCount": 0,
+          "thinkingTokens": 35,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": true
+        }
+      }
+    ],
+    "toolLatencyMs": 9963.368300000002,
+    "verificationLatencyMs": null,
+    "enqueued": 1,
+    "commitStatus": "COMMITTED"
+  },
+  "owners": 3,
+  "verifiers": 0,
+  "batch": {
+    "pageId": "1198992073286645",
+    "conversationHash": "8ccc27707acfa23c71c8827f824009114c26d33303b025708b8cb0e0f4668d62",
+    "generation": 1,
+    "leaseToken": "dd2edc07-4cfc-4374-bb7f-5c0446cc6ad6",
+    "inboxIds": [
+      "eebac4ad-8b64-4b31-ad4c-b5a31beb66d4"
+    ],
+    "evaluationGroupId": "d84af9bf-dec8-462f-aa23-a44f24d450cd",
+    "eventKind": "CUSTOMER",
+    "firstReceiveSequence": 1,
+    "lastReceiveSequence": 1,
+    "attemptCount": 1,
+    "items": [
+      {
+        "inboxId": "eebac4ad-8b64-4b31-ad4c-b5a31beb66d4",
+        "pageId": "1198992073286645",
+        "eventKey": "stateful-3c885258-12f6-4920-9fd6-b0f02218b879",
+        "conversationHash": "8ccc27707acfa23c71c8827f824009114c26d33303b025708b8cb0e0f4668d62",
+        "occurredAt": "2026-10-18T10:19:13.011Z",
+        "receivedAt": "2026-10-18T10:19:13.011Z",
+        "receiveSequence": 1,
+        "attemptCount": 1,
+        "leaseToken": "dd2edc07-4cfc-4374-bb7f-5c0446cc6ad6",
+        "eventKind": "CUSTOMER",
+        "envelope": {
+          "schemaVersion": 1,
+          "customerSendEnabled": false,
+          "routing": {
+            "owner": "APP"
+          },
+          "message": {
+            "schemaVersion": 1,
+            "traceId": "51f11f91-a4f4-4721-bf2b-5ab9dfe099a6",
+            "eventKey": "stateful-3c885258-12f6-4920-9fd6-b0f02218b879",
+            "pageId": "1198992073286645",
+            "messageId": "stateful-3c885258-12f6-4920-9fd6-b0f02218b879",
+            "senderId": "synthetic-recipient-8ccc27707acfa23c71c8827f824009114c26d33303b025708b8cb0e0f4668d62",
+            "conversationId": "synthetic-meta-conversation",
+            "occurredAt": "2026-10-18T10:19:13.011Z",
+            "isEcho": false,
+            "appId": null,
+            "text": "Chị lấy riêng áo Thạch Thảo màu be, size M nhé. Eo chị 76, mông 98.",
+            "attachments": []
+          }
+        }
+      }
+    ]
+  },
+  "toolResponses": [
+    {
+      "name": "apply_customer_state",
+      "response": {
+        "status": "OK",
+        "data": {
+          "revision": 2,
+          "measurements": [
+            {
+              "kind": "WAIST_CM",
+              "value": 76
+            },
+            {
+              "kind": "HIPS_CM",
+              "value": 98
+            }
+          ]
+        }
+      },
+      "id": "call_55077"
+    },
+    {
+      "name": "read_product",
+      "response": {
+        "status": "OK",
+        "data": {
+          "subjectRef": "SV2447",
+          "label": "Set váy Thạch Thảo",
+          "variantId": "offer:SV2447:SET_VAY",
+          "offerType": "SET_VAY",
+          "requestedOfferType": null,
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "sellingOptions": [
+            {
+              "offerType": "AO",
+              "variantId": "offer:SV2447:AO",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-18T10:04:08.737Z",
+              "expiresAt": "2026-10-18T12:04:08.737Z",
+              "facts": [
+                {
+                  "type": "PRICE",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SV2447",
+                    "variantId": "offer:SV2447:AO"
+                  },
+                  "value": {
+                    "amountVnd": 499000,
+                    "currency": "VND"
+                  }
+                },
+                {
+                  "type": "STOCK",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SV2447",
+                    "variantId": "offer:SV2447:AO"
+                  },
+                  "value": {
+                    "status": "IN_STOCK",
+                    "availableQuantity": 110
+                  }
+                }
+              ],
+              "availability": {
+                "price": {
+                  "status": "OK",
+                  "reason": null
+                },
+                "stock": {
+                  "status": "OK",
+                  "reason": null
+                }
+              }
+            },
+            {
+              "offerType": "CV",
+              "variantId": "offer:SV2447:CV",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-18T10:04:08.737Z",
+              "expiresAt": "2026-10-18T12:04:08.737Z",
+              "facts": [
+                {
+                  "type": "PRICE",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SV2447",
+                    "variantId": "offer:SV2447:CV"
+                  },
+                  "value": {
+                    "amountVnd": 449000,
+                    "currency": "VND"
+                  }
+                },
+                {
+                  "type": "STOCK",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SV2447",
+                    "variantId": "offer:SV2447:CV"
+                  },
+                  "value": {
+                    "status": "IN_STOCK",
+                    "availableQuantity": 64
+                  }
+                }
+              ],
+              "availability": {
+                "price": {
+                  "status": "OK",
+                  "reason": null
+                },
+                "stock": {
+                  "status": "OK",
+                  "reason": null
+                }
+              }
+            },
+            {
+              "offerType": "SET_VAY",
+              "variantId": "offer:SV2447:SET_VAY",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-18T10:04:08.737Z",
+              "expiresAt": "2026-10-18T12:04:08.737Z",
+              "facts": [
+                {
+                  "type": "PRICE",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SV2447",
+                    "variantId": "offer:SV2447:SET_VAY"
+                  },
+                  "value": {
+                    "amountVnd": 799000,
+                    "currency": "VND"
+                  }
+                },
+                {
+                  "type": "STOCK",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SV2447",
+                    "variantId": "offer:SV2447:SET_VAY"
+                  },
+                  "value": {
+                    "status": "IN_STOCK",
+                    "availableQuantity": 52
+                  }
+                }
+              ],
+              "availability": {
+                "price": {
+                  "status": "OK",
+                  "reason": null
+                },
+                "stock": {
+                  "status": "OK",
+                  "reason": null
+                }
+              }
+            }
+          ],
+          "attributes": null,
+          "sizeCharts": [],
+          "content": {
+            "productName": "Set váy Thạch Thảo",
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productUrl": null,
+            "metadata": {
+              "authority": "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+              "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98",
+              "observedAt": "2026-09-28T04:31:05.725Z",
+              "expiresAt": null,
+              "freshForSeconds": null,
+              "freshnessState": "FRESH"
+            }
+          },
+          "facts": [
+            {
+              "type": "PRICE",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:SET_VAY"
+              },
+              "value": {
+                "amountVnd": 799000,
+                "currency": "VND"
+              }
+            },
+            {
+              "type": "STOCK",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:SET_VAY"
+              },
+              "value": {
+                "status": "IN_STOCK",
+                "availableQuantity": 52
+              }
+            }
+          ],
+          "availability": {
+            "price": {
+              "status": "OK",
+              "reason": null
+            },
+            "stock": {
+              "status": "OK",
+              "reason": null
+            }
+          },
+          "missing": [
+            "ATTRIBUTES"
+          ]
+        }
+      },
+      "id": "call_55078"
+    },
+    {
+      "name": "apply_customer_state",
+      "response": {
+        "status": "OK",
+        "data": {
+          "revision": 2,
+          "measurements": [
+            {
+              "kind": "WAIST_CM",
+              "value": 76
+            },
+            {
+              "kind": "HIPS_CM",
+              "value": 98
+            }
+          ]
+        }
+      },
+      "id": "call_55077"
+    },
+    {
+      "name": "read_product",
+      "response": {
+        "status": "OK",
+        "data": {
+          "subjectRef": "SV2447",
+          "label": "Set váy Thạch Thảo",
+          "variantId": "offer:SV2447:SET_VAY",
+          "offerType": "SET_VAY",
+          "requestedOfferType": null,
+          "availableOffers": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ],
+          "sellingOptions": [
+            {
+              "offerType": "AO",
+              "variantId": "offer:SV2447:AO",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-18T10:04:08.737Z",
+              "expiresAt": "2026-10-18T12:04:08.737Z",
+              "facts": [
+                {
+                  "type": "PRICE",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SV2447",
+                    "variantId": "offer:SV2447:AO"
+                  },
+                  "value": {
+                    "amountVnd": 499000,
+                    "currency": "VND"
+                  }
+                },
+                {
+                  "type": "STOCK",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SV2447",
+                    "variantId": "offer:SV2447:AO"
+                  },
+                  "value": {
+                    "status": "IN_STOCK",
+                    "availableQuantity": 110
+                  }
+                }
+              ],
+              "availability": {
+                "price": {
+                  "status": "OK",
+                  "reason": null
+                },
+                "stock": {
+                  "status": "OK",
+                  "reason": null
+                }
+              }
+            },
+            {
+              "offerType": "CV",
+              "variantId": "offer:SV2447:CV",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-18T10:04:08.737Z",
+              "expiresAt": "2026-10-18T12:04:08.737Z",
+              "facts": [
+                {
+                  "type": "PRICE",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SV2447",
+                    "variantId": "offer:SV2447:CV"
+                  },
+                  "value": {
+                    "amountVnd": 449000,
+                    "currency": "VND"
+                  }
+                },
+                {
+                  "type": "STOCK",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SV2447",
+                    "variantId": "offer:SV2447:CV"
+                  },
+                  "value": {
+                    "status": "IN_STOCK",
+                    "availableQuantity": 64
+                  }
+                }
+              ],
+              "availability": {
+                "price": {
+                  "status": "OK",
+                  "reason": null
+                },
+                "stock": {
+                  "status": "OK",
+                  "reason": null
+                }
+              }
+            },
+            {
+              "offerType": "SET_VAY",
+              "variantId": "offer:SV2447:SET_VAY",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-18T10:04:08.737Z",
+              "expiresAt": "2026-10-18T12:04:08.737Z",
+              "facts": [
+                {
+                  "type": "PRICE",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SV2447",
+                    "variantId": "offer:SV2447:SET_VAY"
+                  },
+                  "value": {
+                    "amountVnd": 799000,
+                    "currency": "VND"
+                  }
+                },
+                {
+                  "type": "STOCK",
+                  "scope": {
+                    "kind": "PRODUCT",
+                    "productId": "SV2447",
+                    "variantId": "offer:SV2447:SET_VAY"
+                  },
+                  "value": {
+                    "status": "IN_STOCK",
+                    "availableQuantity": 52
+                  }
+                }
+              ],
+              "availability": {
+                "price": {
+                  "status": "OK",
+                  "reason": null
+                },
+                "stock": {
+                  "status": "OK",
+                  "reason": null
+                }
+              }
+            }
+          ],
+          "attributes": null,
+          "sizeCharts": [],
+          "content": {
+            "productName": "Set váy Thạch Thảo",
+            "description": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+            "productUrl": null,
+            "metadata": {
+              "authority": "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+              "sourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98",
+              "observedAt": "2026-09-28T04:31:05.725Z",
+              "expiresAt": null,
+              "freshForSeconds": null,
+              "freshnessState": "FRESH"
+            }
+          },
+          "facts": [
+            {
+              "type": "PRICE",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:SET_VAY"
+              },
+              "value": {
+                "amountVnd": 799000,
+                "currency": "VND"
+              }
+            },
+            {
+              "type": "STOCK",
+              "scope": {
+                "kind": "PRODUCT",
+                "productId": "SV2447",
+                "variantId": "offer:SV2447:SET_VAY"
+              },
+              "value": {
+                "status": "IN_STOCK",
+                "availableQuantity": 52
+              }
+            }
+          ],
+          "availability": {
+            "price": {
+              "status": "OK",
+              "reason": null
+            },
+            "stock": {
+              "status": "OK",
+              "reason": null
+            }
+          },
+          "missing": [
+            "ATTRIBUTES"
+          ]
+        }
+      },
+      "id": "call_55078"
+    },
+    {
+      "name": "add_to_cart",
+      "response": {
+        "status": "OK",
+        "data": {
+          "operationId": "a0c4d7e5828f5c8ee7307fc4c8e0f6e5543d6b3bc8b6a3f99421763a45877892",
+          "effect": "CART_OPENED",
+          "cart": {
+            "schemaVersion": 1,
+            "cartId": "5459d976-1ea9-586a-83bb-11cf89fae665",
+            "salesEpisodeId": "900fe9e1-78e8-5d7e-8476-ff65f31c7418",
+            "customerProfileId": "150d0913-2f99-4ad9-92d6-963e21be86d3",
+            "revision": 1,
+            "currency": "VND",
+            "status": "OPEN",
+            "checkoutEligibility": "ELIGIBLE",
+            "lines": [
+              {
+                "lineId": "a0c4d7e5-828f-5c8e-8730-7fc4c8e0f6e5",
+                "parentProductId": "SV2447",
+                "offerId": "AO",
+                "offerKind": "DIRECT",
+                "quantity": 1,
+                "components": [
+                  {
+                    "componentProductId": "SV2447_AO",
+                    "componentSku": "SV2447_AO",
+                    "componentRole": "TOP",
+                    "color": "BE",
+                    "size": "M",
+                    "quantity": 1
+                  }
+                ],
+                "allowMixedSizes": false,
+                "allowComponentSale": false,
+                "posUnitPriceVnd": 499000,
+                "priceAuthority": {
+                  "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+                  "shopId": "LANA_DESIGN",
+                  "parentProductId": "SV2447",
+                  "offerId": "AO",
+                  "offerPriceKind": "DIRECT",
+                  "componentProductId": null,
+                  "metadata": {
+                    "authority": "PANCAKE_POS",
+                    "sourceVersion": "p2-default",
+                    "observedAt": "2026-10-18T10:04:08.737Z",
+                    "expiresAt": "2026-10-20T10:04:08.737Z",
+                    "freshForSeconds": 172800,
+                    "freshnessState": "FRESH"
+                  }
+                },
+                "lineTotalVnd": 499000
+              }
+            ],
+            "adjustments": [],
+            "shippingFeeVnd": 30000,
+            "subtotalVnd": 499000,
+            "discountTotalVnd": 0,
+            "grandTotalVnd": 529000,
+            "createdAt": "2026-10-18T10:19:33.437Z",
+            "updatedAt": "2026-10-18T10:19:33.437Z"
+          },
+          "cartItems": [
+            {
+              "subjectRef": "a0c4d7e5-828f-5c8e-8730-7fc4c8e0f6e5",
+              "productRef": "SV2447",
+              "offerType": "AO",
+              "quantity": 1,
+              "components": [
+                {
+                  "componentRole": "TOP",
+                  "size": "M",
+                  "color": "BE"
+                }
+              ],
+              "stockStatus": "PRE_ORDER",
+              "stockAvailableQuantity": 0
+            }
+          ],
+          "purchaseConfirmed": false,
+          "externalOrderCreated": false
+        }
+      },
+      "id": "call_433983"
+    }
+  ],
+  "actualCapturedMessages": [
+    "Em đã thêm món chị chọn vào giỏ. Tổng 529.000đ, đã gồm phí giao hàng. Có món đặt trước, chị nhé."
+  ],
+  "committedPublicState": {
+    "stage": "CART_OPEN",
+    "revision": 4,
+    "cart": {
+      "schemaVersion": 1,
+      "cartId": "5459d976-1ea9-586a-83bb-11cf89fae665",
+      "salesEpisodeId": "900fe9e1-78e8-5d7e-8476-ff65f31c7418",
+      "customerProfileId": "150d0913-2f99-4ad9-92d6-963e21be86d3",
+      "revision": 1,
+      "currency": "VND",
+      "status": "OPEN",
+      "checkoutEligibility": "ELIGIBLE",
+      "lines": [
+        {
+          "lineId": "a0c4d7e5-828f-5c8e-8730-7fc4c8e0f6e5",
+          "parentProductId": "SV2447",
+          "offerId": "AO",
+          "offerKind": "DIRECT",
+          "quantity": 1,
+          "components": [
+            {
+              "componentProductId": "SV2447_AO",
+              "componentSku": "SV2447_AO",
+              "componentRole": "TOP",
+              "color": "BE",
+              "size": "M",
+              "quantity": 1
+            }
+          ],
+          "allowMixedSizes": false,
+          "allowComponentSale": false,
+          "posUnitPriceVnd": 499000,
+          "priceAuthority": {
+            "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+            "shopId": "LANA_DESIGN",
+            "parentProductId": "SV2447",
+            "offerId": "AO",
+            "offerPriceKind": "DIRECT",
+            "componentProductId": null,
+            "metadata": {
+              "authority": "PANCAKE_POS",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-18T10:04:08.737Z",
+              "expiresAt": "2026-10-20T10:04:08.737Z",
+              "freshForSeconds": 172800,
+              "freshnessState": "FRESH"
+            }
+          },
+          "lineTotalVnd": 499000
+        }
+      ],
+      "adjustments": [],
+      "shippingFeeVnd": 30000,
+      "subtotalVnd": 499000,
+      "discountTotalVnd": 0,
+      "grandTotalVnd": 529000,
+      "createdAt": "2026-10-18T10:19:33.437Z",
+      "updatedAt": "2026-10-18T10:19:33.437Z"
+    },
+    "measurements": [
+      {
+        "kind": "WAIST_CM",
+        "value": 76,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-18T10:19:13.011Z",
+          "sourceEventHash": "9b2abccf65c064f41260f39f0239817a7c125bd43fa6d8d7ca9ddc5b4e9021eb"
+        }
+      },
+      {
+        "kind": "HIPS_CM",
+        "value": 98,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-18T10:19:13.011Z",
+          "sourceEventHash": "9b2abccf65c064f41260f39f0239817a7c125bd43fa6d8d7ca9ddc5b4e9021eb"
+        }
+      }
+    ],
+    "customerProfileRevision": 2
+  },
+  "counts": {
+    "embedding": 0,
+    "owner": 3,
+    "verifier": 0
+  }
+}

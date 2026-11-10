@@ -1,0 +1,58 @@
+{
+  "caseId": "b1-changed-occasion",
+  "runtime": {
+    "latest": "Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé.",
+    "history": [
+      {
+        "role": "customer",
+        "text": "Chị định lấy set Thạch Thảo mặc đi đám cưới."
+      },
+      {
+        "role": "shop",
+        "text": "Đi đám cưới mặc bộ này đẹp chị ạ."
+      }
+    ],
+    "initialProductCodes": [
+      "SV2447"
+    ]
+  },
+  "result": {
+    "status": "RECORDED_REPLAY",
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "MALFORMED",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "verificationLatencyMs": 0.7233999999998559,
+    "draft": "Set Thạch Thảo dùng chất liệu tơ Hàn và ren tơ Hàn mềm, có độ bay và rũ tự nhiên nên giữ form khá tốt, đi ô tô 3 tiếng không bị nhăn nhiều đâu chị nha. \n\nNếu chị muốn tìm mẫu váy liền form đứng, ít nhăn hơn nữa khi di chuyển lâu, chị có thể tham khảo **Váy Diệp An (V168)** hoặc **Váy Ngọc Trâm (V406)** với chất liệu tơ ống và ren hoa nổi, mặc vừa gọn gàng, thanh lịch lại rất thoải mái ạ. Chị ưng mẫu nào để em tư vấn kỹ hơn nhé!",
+    "generations": [
+      {
+        "role": "owner",
+        "status": "OK",
+        "telemetry": {
+          "generationId": "521d2e8e-8ad0-48d2-9c55-91c60b3b807c:owner:1",
+          "providerRequests": 1,
+          "authRequests": 1,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3950,
+          "outputTokens": 2097,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 18647,
+          "requestHash": "00eadb47642948109a2bd83910f0b7280f6924b0024f3bd6e3528331be23d011",
+          "functionCallingMode": "NONE",
+          "declaredToolCount": 0,
+          "thinkingTokens": 1959,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      }
+    ],
+    "elapsedMs": 6427.7152,
+    "captureHash": "aeeaa9e55cfe804832725b52857748cb4afecac5e30f8b2682e20210493331a1",
+    "replayClock": "2026-10-19T05:49:14.854Z"
+  },
+  "sendEnabled": false
+}

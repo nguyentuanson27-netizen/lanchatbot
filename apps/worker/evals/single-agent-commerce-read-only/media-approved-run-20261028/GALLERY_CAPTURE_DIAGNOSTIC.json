@@ -1,0 +1,12 @@
+{
+  "scope": "OFFLINE_INITIAL_CAPTURE_REPLAY_NOT_ORIGINAL_NATIVE_EXCEPTION",
+  "sourceSha": "0487b7bbe08f179bffafc8c0b44af9463feeb2c4",
+  "capturedAt": "2026-10-28T08:37:35.041Z",
+  "colors": [],
+  "imageCount": 11,
+  "result": {
+    "status": "REJECTED",
+    "code": "MEDIA_COLOR_BINDING_UNVERIFIED"
+  },
+  "originalNativeExceptionUnavailable": true
+}

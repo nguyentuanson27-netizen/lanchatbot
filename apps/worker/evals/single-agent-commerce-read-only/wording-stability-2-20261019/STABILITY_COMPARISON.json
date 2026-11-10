@@ -1,0 +1,654 @@
+{
+  "newRounds": 2,
+  "registeredSlots": 32,
+  "completedSlots": 32,
+  "primary": {
+    "NEEDS_EDIT": 2,
+    "USABLE": 26,
+    "OWNERSHIP_CONTROL": 2,
+    "UNUSABLE": 2
+  },
+  "requestsPerRound": [
+    35,
+    35
+  ],
+  "providerErrors": [],
+  "verifierLatencyMs": {
+    "n": 24,
+    "p50": 6529.447650000002,
+    "p95": 10860.999999999996
+  },
+  "addedVerificationLatencyMs": {
+    "n": 24,
+    "p50": 8213.409799999987,
+    "p95": 11733.437279999996
+  },
+  "comparison": [
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-open",
+      "samples": [
+        {
+          "folder": "ack-source-rerun-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Nhận đúng áo lẻ/be/M, đã thêm giỏ và nói hàng đặt trước. Câu ngắn phục vụ lựa chọn mua, không báo giữ hàng hoặc tự suy độ vừa.",
+          "actual": [
+            "Em đã thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ. Mẫu này là hàng đặt trước chị nhé!"
+          ],
+          "voiceFindings": []
+        },
+        {
+          "folder": "wording-stability-1-20261019",
+          "primary": "NEEDS_EDIT",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Giỏ đúng áo be M, nhưng shop nói “Chị đã thêm…cho mình” thay vì xác nhận việc shop vừa làm: sai vai xưng hô trong chính câu xác nhận. Cần sửa câu trước gửi, không phải lỗi mutation.",
+          "actual": [
+            "Chị đã thêm áo Thạch Thảo màu be size M (hàng đặt trước) vào giỏ cho mình nhé ạ!"
+          ],
+          "voiceFindings": [
+            "Sai chủ thể xưng hô; “nhé ạ” gượng."
+          ]
+        },
+        {
+          "folder": "wording-stability-2-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Shop xác nhận đúng đã thêm áo be M/hàng đặt trước; readback giỏ khớp.",
+          "actual": [
+            "Dạ em đã thêm áo Thạch Thảo màu be size M (hàng đặt trước) vào giỏ cho mình rồi ạ!"
+          ],
+          "voiceFindings": []
+        }
+      ]
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-variant-quantity",
+      "samples": [
+        {
+          "folder": "ack-source-rerun-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Đổi đúng hai áo L giữ be và xác nhận một câu gắn với việc khách yêu cầu.",
+          "actual": [
+            "Em đã cập nhật giỏ thành 2 chiếc áo Thạch Thảo màu be size L cho chị rồi ạ."
+          ],
+          "voiceFindings": [
+            "Còn từ cập nhật giỏ nhưng không khiến khách hiểu sai lựa chọn; không fail một từ."
+          ]
+        },
+        {
+          "folder": "wording-stability-1-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Đổi đúng size L, số lượng 2 và xác nhận đúng lựa chọn.",
+          "actual": [
+            "Dạ em đã đổi sang size L và tăng số lượng thành 2 chiếc áo Thạch Thảo màu be cho mình rồi ạ!"
+          ],
+          "voiceFindings": []
+        },
+        {
+          "folder": "wording-stability-2-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Đổi đúng size L, số lượng 2 và xác nhận đúng lựa chọn.",
+          "actual": [
+            "Dạ em đã đổi áo Thạch Thảo màu be sang size L và tăng số lượng thành 2 chiếc cho mình rồi ạ!"
+          ],
+          "voiceFindings": []
+        }
+      ]
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-quote",
+      "samples": [
+        {
+          "folder": "ack-source-rerun-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Trả đúng tổng978100 và giải thích998000 trừ49900 cộng ship30000 cho câu hỏi hai áo cả ship. Các số có ích, không coi là liệt kê fact vô cớ.",
+          "actual": [
+            "Dạ, 2 chiếc áo Thạch Thảo màu be size L của chị có tổng tiền hàng 998.000đ, được ưu đãi 49.900đ và phí ship 30.000đ, tổng cộng thanh toán là 978.100đ chị nhé ạ!"
+          ],
+          "voiceFindings": [
+            "Có thể đưa tổng lên trước, bớt nhắc tên/màu/size và đuôi chị nhé ạ."
+          ]
+        },
+        {
+          "folder": "wording-stability-1-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Trả tổng cả ship 978.100đ đúng readback; tiền hàng và ưu đãi không mâu thuẫn.",
+          "actual": [
+            "Dạ, 2 chiếc áo Thạch Thảo màu be size L của mình có tổng tiền hàng là 998.000đ (499.000đ/chiếc). Phí ship là 30.000đ, tính cả ưu đãi thì tổng thanh toán (bao gồm cả phí ship) là 978.100đ chị nhé ạ!"
+          ],
+          "voiceFindings": [
+            "Dài, nhắc phí ship hai lần; có thể nói gọn."
+          ]
+        },
+        {
+          "folder": "wording-stability-2-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Trả đủ phép tính tiền hàng 998k, giảm 49.900đ, ship 30k và tổng 978.100đ đúng.",
+          "actual": [
+            "Dạ 2 áo có tổng tiền 998.000đ, được giảm 49.900đ, cộng thêm 30.000đ phí ship nên tổng thanh toán của mình là 978.100đ chị nha!"
+          ],
+          "voiceFindings": []
+        }
+      ]
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-correction",
+      "samples": [
+        {
+          "folder": "ack-source-rerun-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "State sửa đúng eo74/mông96 và giữ hai áo be/L theo lựa chọn khách, không kết luận vừa. Lời nhận có ích trong hành trình mua; không đếm số đo hoặc từ cập nhật để loại.",
+          "actual": [
+            "Dạ vâng chị nha, em đã cập nhật lại số đo cho chị rồi ạ. Giỏ hàng của mình vẫn giữ 2 chiếc áo Thạch Thảo màu be size L như chị chốt nhé!"
+          ],
+          "voiceFindings": [
+            "Hai câu với Dạ vâng chị nha, đã cập nhật, giỏ hàng của mình vẫn giữ còn hành chính/dài hơn mẫu run lỗi trước. Cải thiện giọng chưa ổn định."
+          ]
+        },
+        {
+          "folder": "wording-stability-1-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Cập nhật đúng eo 74/mông 96, giữ L như khách chọn; nhắc đúng hai số vừa sửa là xác nhận hợp lý.",
+          "actual": [
+            "Dạ vâng, em đã cập nhật lại số đo (eo 74, mông 96) cho mình rồi ạ. Áo chị vẫn giữ size L nhé!"
+          ],
+          "voiceFindings": [
+            "“đã cập nhật” còn hành chính; có thể ngắn hơn."
+          ]
+        },
+        {
+          "folder": "wording-stability-2-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Cập nhật eo 74/mông 96 đúng state, giữ L như khách chọn; không tự đổi size.",
+          "actual": [
+            "Dạ em đã cập nhật lại số đo mới cho mình rồi ạ, áo màu be size L chị đang chọn vẫn giữ nguyên nha chị!"
+          ],
+          "voiceFindings": [
+            "Vẫn “đã cập nhật” rồi nhắc lựa chọn; dùng được nhưng có thể ngắn hơn."
+          ]
+        }
+      ]
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-request-checkout",
+      "samples": [
+        {
+          "folder": "ack-source-rerun-20261019",
+          "primary": "USABLE",
+          "disposition": "NO_SEND",
+          "reason": "Khách yêu cầu lên đơn dẫn tới actual code invitation thu thông tin nhận hàng, không để model xin PII. Artifact redact nên không chấm chi tiết literal bị che.",
+          "actual": [
+            "Chị gửi thêm [NAME]"
+          ],
+          "voiceFindings": []
+        },
+        {
+          "folder": "wording-stability-1-20261019",
+          "primary": "USABLE",
+          "disposition": "NO_SEND",
+          "reason": "Mời bổ sung thông tin checkout qua luồng code; chưa nhận là đã tạo đơn.",
+          "actual": [
+            "Chị gửi thêm [NAME]"
+          ],
+          "voiceFindings": []
+        },
+        {
+          "folder": "wording-stability-2-20261019",
+          "primary": "USABLE",
+          "disposition": "NO_SEND",
+          "reason": "Mời bổ sung thông tin checkout qua luồng code; chưa nhận là đã tạo đơn.",
+          "actual": [
+            "Chị gửi thêm [NAME]"
+          ],
+          "voiceFindings": []
+        }
+      ]
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-private-checkout",
+      "samples": [
+        {
+          "folder": "ack-source-rerun-20261019",
+          "primary": "USABLE",
+          "disposition": "NO_SEND",
+          "reason": "Private code tạo preview đúng hai áo be/L, tổng978100, discount/ship và ETA8–14 ngày; không dùng model cho private turn. Có bước xác nhận mua thật trong candidate.",
+          "actual": [
+            "2 áo SV2447 màu be, size L: 998.000đ\nTạm tính: 998.000đ\nƯu đãi: -49.900đ\nPhí ship: 30.000đ\nTổng: 978.100đ\nSV2447: hàng đặt trước\nNgười nhận: Khách thử nghiệm - [PHONE]\n[ADDRESS]\nThanh toán: COD\nDự kiến nhận hàng: 8-14 ngày.\nChị xác nhận chốt đơn nhé."
+          ],
+          "voiceFindings": [
+            "Preview vẫn dùng mã SV2447 thay tên, không phát sinh sau prompt fix."
+          ]
+        },
+        {
+          "folder": "wording-stability-1-20261019",
+          "primary": "USABLE",
+          "disposition": "NO_SEND",
+          "reason": "Preview code có hai áo be L, tổng 978.100đ và thông tin đặt trước/ETA; dữ liệu riêng được che trong bản công khai.",
+          "actual": [
+            "2 áo SV2447 màu be, size L: 998.000đ\nTạm tính: 998.000đ\nƯu đãi: -49.900đ\nPhí ship: 30.000đ\nTổng: 978.100đ\nSV2447: hàng đặt trước\nNgười nhận: Khách thử nghiệm - [PHONE]\n[ADDRESS]\nThanh toán: COD\nDự kiến nhận hàng: 8-14 ngày.\nChị xác nhận chốt đơn nhé."
+          ],
+          "voiceFindings": []
+        },
+        {
+          "folder": "wording-stability-2-20261019",
+          "primary": "USABLE",
+          "disposition": "NO_SEND",
+          "reason": "Preview code có hai áo be L, tổng 978.100đ và thông tin đặt trước/ETA; dữ liệu riêng được che trong bản công khai.",
+          "actual": [
+            "2 áo SV2447 màu be, size L: 998.000đ\nTạm tính: 998.000đ\nƯu đãi: -49.900đ\nPhí ship: 30.000đ\nTổng: 978.100đ\nSV2447: hàng đặt trước\nNgười nhận: Khách thử nghiệm - [PHONE]\n[ADDRESS]\nThanh toán: COD\nDự kiến nhận hàng: 8-14 ngày.\nChị xác nhận chốt đơn nhé."
+          ],
+          "voiceFindings": []
+        }
+      ]
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-confirm",
+      "samples": [
+        {
+          "folder": "ack-source-rerun-20261019",
+          "primary": "USABLE",
+          "disposition": "HANDOFF",
+          "reason": "Khách chốt sau preview, code đi tới PURCHASE_CONFIRMED và phát câu chuyển nhân viên kiểm tra/lên đơn, không nhận là đơn POS đã tạo.",
+          "actual": [
+            "Dạ, em chuyển nhân viên kiểm tra và lên đơn cho chị nhé."
+          ],
+          "voiceFindings": []
+        },
+        {
+          "folder": "wording-stability-1-20261019",
+          "primary": "USABLE",
+          "disposition": "HANDOFF",
+          "reason": "Chốt ý mua và chuyển nhân viên theo state; không nhận đã tạo POS order.",
+          "actual": [
+            "Dạ, em chuyển nhân viên kiểm tra và lên đơn cho chị nhé."
+          ],
+          "voiceFindings": []
+        },
+        {
+          "folder": "wording-stability-2-20261019",
+          "primary": "USABLE",
+          "disposition": "HANDOFF",
+          "reason": "Chốt ý mua và chuyển nhân viên theo state; không nhận đã tạo POS order.",
+          "actual": [
+            "Dạ, em chuyển nhân viên kiểm tra và lên đơn cho chị nhé."
+          ],
+          "voiceFindings": []
+        }
+      ]
+    },
+    {
+      "run": "stateful-1",
+      "caseId": "stateful-human-request",
+      "samples": [
+        {
+          "folder": "ack-source-rerun-20261019",
+          "primary": "OWNERSHIP_CONTROL",
+          "disposition": "HANDOFF",
+          "reason": "Khách yêu cầu nhân viên đi tới ownership control riêng, không cần tin model tư vấn.",
+          "actual": [],
+          "voiceFindings": []
+        },
+        {
+          "folder": "wording-stability-1-20261019",
+          "primary": "OWNERSHIP_CONTROL",
+          "disposition": "HANDOFF",
+          "reason": "Khách xin gặp nhân viên; bot nhường quyền theo control, không chấm là lời tư vấn thiếu.",
+          "actual": [],
+          "voiceFindings": []
+        },
+        {
+          "folder": "wording-stability-2-20261019",
+          "primary": "OWNERSHIP_CONTROL",
+          "disposition": "HANDOFF",
+          "reason": "Khách xin gặp nhân viên; bot nhường quyền theo control, không chấm là lời tư vấn thiếu.",
+          "actual": [],
+          "voiceFindings": []
+        }
+      ]
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-changed-occasion",
+      "samples": [
+        {
+          "folder": "ack-source-rerun-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Xét lại lời khuyên theo việc đi xe dự cưới, chọn cụ thể set Khánh Trang của shop và giải thích so sánh chất liệu; có phương án để khách tiếp tục chọn mua.",
+          "actual": [
+            "Dạ, set Thạch Thảo dùng chất tơ Hàn và ren tơ mềm, có độ bay nên đi ô tô gần 3 tiếng ngồi lâu sẽ dễ bị hằn nếp nhăn ạ. \n\nNếu chị ngại nhăn khi ngồi xe đường dài, em đổi sang **set váy Khánh Trang** nhé chị. Mẫu này làm từ chất liệu thô boi phối ren, vải đứng form và ít nhăn hơn, mặc lên vẫn rất nhẹ nhàng, nữ tính mà giữ form gọn gàng suốt chuyến đi. Chị xem set này có ưng ý hơn không ạ?"
+          ],
+          "voiceFindings": [
+            "Còn nhắc lại hoàn cảnh và nhiều lời khen; câu có ưng ý hơn chung chung. Không đòi mọi suy luận ít nhăn tương đối phải có phép thử."
+          ]
+        },
+        {
+          "folder": "wording-stability-1-20261019",
+          "primary": "UNUSABLE",
+          "disposition": "FALLBACK",
+          "reason": "Khách cần lựa chọn ít nhăn hơn cho chuyến xe; thực tế chỉ nhận fallback nên chưa được tư vấn.",
+          "actual": [
+            "Phần này em chưa trả lời được, chị nhé."
+          ],
+          "voiceFindings": []
+        },
+        {
+          "folder": "wording-stability-2-20261019",
+          "primary": "NEEDS_EDIT",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Có so sánh chất liệu và tìm được hai mẫu, nhưng khách đã nhờ shop chọn giúp: reply đưa Khánh Trang hoặc Thanh Vũ rồi hỏi khách ưng mẫu nào, chưa có lựa chọn ưu tiên/lý do phân biệt. Cần viết lại để shop dẫn quyết định thay vì trả việc chọn lại cho khách.",
+          "actual": [
+            "Dạ, set Thạch Thảo dùng chất liệu tơ Hàn và ren tơ Hàn mềm bay nên khi ngồi ô tô gần 3 tiếng di chuyển đường dài sẽ dễ bị hằn nếp gấp nhẹ áo váy đó chị ạ.\n\nNếu chị muốn mẫu ít nhăn hơn để khi tới nơi trang phục vẫn phẳng phiu, mình có thể chuyển sang **Set váy Khánh Trang** (chất thô boi phối ren form suông nhẹ) hoặc **Set váy Thanh Vũ** (áo ren dệt sợi cotton, chân váy tơ crep). Chất thô boi hoặc ren cotton đứng dáng hơn một chút khi ngồi xe lâu, mặc lên vẫn rất lịch sự, nữ tính và rất hợp để đi tiệc cưới nha chị. Chị xem mình ưng mẫu nào em tư vấn thêm cho ạ!"
+          ],
+          "voiceFindings": [
+            "Dài; kể thuộc tính hai mẫu rồi kết bằng CTA chung. Không chấm chỉ do có hai mẫu, mà do yêu cầu chọn giúp chưa được giải quyết."
+          ]
+        }
+      ]
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-partial-source-v2",
+      "samples": [
+        {
+          "folder": "ack-source-rerun-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Trả chất liệu/dáng có nguồn; nói chưa kiểm được mua lẻ/giá size M, không tự xác nhận có/không bán lẻ hoặc bịa giá/tồn. Đây là cách trả lời một phần hợp lý khi fixture thiếu nguồn; không bắt thêm bước mua bất khả thi.",
+          "actual": [
+            "Chân váy của set được làm từ chất ren tơ Hàn mềm mại, form nhẹ và có độ rũ tự nhiên rất thướt tha, mặc lên vừa thoải mái lại vừa dịu dàng chị ạ. \n\nCòn về việc mua riêng chân váy và giá size M thì hiện tại em chưa kiểm tra được thông tin này, chị thông cảm giúp em nhé!"
+          ],
+          "voiceFindings": [
+            "Đã bỏ hệ thống nhưng mô tả nhiều tính từ và xin thông cảm vẫn dài. Góp ý giọng; không dùng một cụm lễ phép làm lý do tự động loại."
+          ]
+        },
+        {
+          "folder": "wording-stability-1-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Trả được chất liệu/dáng; không tự báo bán lẻ hay giá khi POS cố ý không available.",
+          "actual": [
+            "Chân váy Thạch Thảo được làm từ chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên rất thướt tha chị ạ. \n\nCòn về việc mua riêng chân váy size M, hiện em chưa có thông tin giá và mức bán lẻ này nên chưa báo chính xác được cho chị nhé."
+          ],
+          "voiceFindings": [
+            "“thông tin giá và mức bán lẻ này” khó hiểu; nên nói trực tiếp chưa báo được giá/tình trạng size M."
+          ]
+        },
+        {
+          "folder": "wording-stability-2-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Trả được chất liệu/dáng, chưa tra được bán riêng và giá trong fixture POS unavailable; không bịa giá/tồn.",
+          "actual": [
+            "Chân váy Thạch Thảo được làm từ chất ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên rất bay bổng ạ. \n\nDạ hiện em chưa tra được thông tin giá và việc shop có hỗ trợ tách lẻ chân váy size M không, chị thông cảm nha!"
+          ],
+          "voiceFindings": [
+            "“hỗ trợ tách lẻ chân váy size M” và xin thông cảm hơi hành chính."
+          ]
+        }
+      ]
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-buying-concern",
+      "samples": [
+        {
+          "folder": "ack-source-rerun-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Có nhận định cho tiệc ban ngày và giá799k đúng, báo lựa chọn áo499k/chân váy449k theo nguồn. Giải quyết được câu hỏi về vẻ ngoài với lời tư vấn thẩm mỹ; không ép khách mua ít hoặc bắt theo một phối đồ mẫu.",
+          "actual": [
+            "Ngân sách 900 nghìn của chị hoàn toàn thoải mái ạ, vì nguyên set váy Thạch Thảo có giá 799.000đ. \n\nChị yên tâm là chất ren tơ Hàn của váy khá mềm, có độ rũ và bay tự nhiên kết hợp cùng áo tơ thêu nhẹ nhàng, nên tổng thể rất thanh thoát và sang trọng. Mặc đi tiệc ban ngày sẽ vừa thanh lịch, trang nhã lại không bị rườm rà hay nặng nề đâu ạ. \n\nNếu chị vẫn muốn tiết chế bớt độ ren, mình có thể chọn mua riêng áo thêu (499.000đ) hoặc chân váy ren (449.000đ) để phối đồ. Chị thích diện nguyên set luôn hay muốn thử tách rời ạ?"
+          ],
+          "voiceFindings": [
+            "Ba đoạn mở lại ngân sách, nhiều tính từ và chuyển thành ba hướng mua làm quyết định kém gọn. Câu khuyên tiết chế ren bằng cả áo hoặc chân váy chưa giải thích phối với món gì, lý do còn yếu; không tự kết luận mọi cách mua chân váy ren đều sai."
+          ]
+        },
+        {
+          "folder": "wording-stability-1-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Trả thẳng nỗi lo ren rườm rà, gắn chất liệu/phom với cảm nhận thanh nhã và giá bộ trong ngân sách. Tư vấn thẩm mỹ được phép.",
+          "actual": [
+            "Dạ set váy Thạch Thảo này nguyên bộ có giá 799.000đ nên hoàn toàn vừa với ngân sách 900k của chị ạ. \n\nChị yên tâm là phần chân váy dùng ren tơ Hàn mềm, có độ rũ tự nhiên kết hợp cùng áo tơ thêu form nhẹ và bay bổng, không bị cứng hay nặng nề đâu ạ. Thiết kế này tạo cảm giác thanh nhã, nhẹ nhàng nên mặc đi tiệc ban ngày rất sang, không bị rườm rà hay quá chói mắt đâu chị nhé!"
+          ],
+          "voiceFindings": [
+            "Nhiều tính từ, lặp ngân sách; lời giải thích dài hơn cần thiết."
+          ]
+        },
+        {
+          "folder": "wording-stability-2-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Trả thẳng lo ren rườm rà, giải thích cảm giác mềm/nhẹ và báo giá799k; có bước mời mua trong khả năng checkout.",
+          "actual": [
+            "Dạ set này mặc đi tiệc ban ngày rất hợp và không bị rườm rà đâu chị nhé. Chân váy dùng chất ren tơ Hàn mềm với form nhẹ và độ rũ tự nhiên, kết hợp cùng áo tơ thêu nổi thanh thoát nên tạo cảm giác bay bổng, nhã nhặn chứ không bị cứng hay nặng nề ạ.\n\nTrọn bộ nguyên set có giá **799.000đ**, hoàn toàn vừa vặn trong ngân sách 900 nghìn của chị. Chị có muốn em chốt đơn set này luôn không ạ?"
+          ],
+          "voiceFindings": [
+            "Vẫn nhiều tính từ và nhắc lại ngân sách; lời mời chốt hơi gấp nhưng không sai."
+          ]
+        }
+      ]
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-search-read",
+      "samples": [
+        {
+          "folder": "ack-source-rerun-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Tra đúng SD375, báo rõ áo lẻ929k/cả bộ1065k, không dùng mã offer hoặc bắt khách nhắc mã.",
+          "actual": [
+            "Dạ áo dài mã SD375 bên em có hai lựa chọn ạ:\n- Mua áo lẻ: 929.000đ\n- Mua cả bộ: 1.065.000đ\n\nChị muốn chọn mua phần nào ạ?"
+          ],
+          "voiceFindings": [
+            "Câu hỏi chọn phần nào có thể bỏ khi khách chỉ hỏi giá; danh sách hai giá trực tiếp phục vụ câu hỏi nên không phải fact dumping."
+          ]
+        },
+        {
+          "folder": "wording-stability-1-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Giá áo 929k/bộ 1.065k đúng, hỏi khách chọn loại để tiếp tục mua.",
+          "actual": [
+            "Áo dài mã SD375 bên shop có 2 lựa chọn cho chị:\n- Mua áo lẻ: 929.000đ\n- Mua cả bộ: 1.065.000đ\n\nChị quan tâm mẫu áo lẻ hay cả bộ để em hỗ trợ thêm nhé ạ?"
+          ],
+          "voiceFindings": [
+            "“để em hỗ trợ thêm” hơi khuôn."
+          ]
+        },
+        {
+          "folder": "wording-stability-2-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Giá áo/cả bộ đúng; “có sẵn hai lựa chọn” trong cả đoạn là hai offer, không tuyên bố size/stock cụ thể.",
+          "actual": [
+            "Dạ, mẫu áo dài SD375 hiện có sẵn hai lựa chọn cho chị ạ:\n- Áo lẻ: 929.000đ\n- Cả bộ: 1.065.000đ\n\nChị muốn lấy áo lẻ hay nguyên bộ để em hỗ trợ thêm nhé ạ?"
+          ],
+          "voiceFindings": [
+            "“hiện có sẵn” có thể bỏ để tránh khách hiểu nhầm thành tồn."
+          ]
+        }
+      ]
+    },
+    {
+      "run": "advice-1",
+      "caseId": "b1-changed-occasion",
+      "samples": [
+        {
+          "folder": "ack-source-rerun-20261019",
+          "primary": "UNUSABLE",
+          "disposition": "FALLBACK",
+          "reason": "Actual outcome chỉ có fallback, không giúp khách chọn mẫu đi cưới theo ưu tiên mới. Không chấm rejected draft như câu khách được nhận; nguyên nhân xem sau primary lock.",
+          "actual": [
+            "Phần này em chưa trả lời được, chị nhé."
+          ],
+          "voiceFindings": []
+        },
+        {
+          "folder": "wording-stability-1-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Đổi lựa chọn sang Diệp An từ mô tả có 2 lớp/đứng form, liên hệ chất tơ mềm với nhu cầu đi xe. Đây là tư vấn so sánh định tính theo rubric hiện hành, không hứa hiệu quả phục hồi nếp nhăn hay kết quả thử nghiệm.",
+          "actual": [
+            "Dạ ngồi ô tô gần 3 tiếng thì Set Thạch Thảo chất tơ mềm bay sẽ rất dễ bị hằn nếp nhăn ạ. \n\nNếu chị muốn tìm mẫu giữ form tốt hơn khi di chuyển dài, em thấy **Váy Diệp An** là lựa chọn hợp lý nhất. Mẫu này có thiết kế 2 lớp giúp váy đứng form đẹp, form suông nhẹ nhàng mặc vừa thoải mái, lịch sự lại hạn chế bị nhàu nếp hơn khi ngồi xe lâu đó chị."
+          ],
+          "voiceFindings": [
+            "“rất dễ”, “hợp lý nhất” khá tuyệt đối; nên tư vấn vừa phải hơn."
+          ]
+        },
+        {
+          "folder": "wording-stability-2-20261019",
+          "primary": "UNUSABLE",
+          "disposition": "FALLBACK",
+          "reason": "Khách cần shop chọn đồ ít nhăn hơn; thực tế chỉ nhận fallback, không được giải quyết việc mua.",
+          "actual": [
+            "Phần này em chưa trả lời được, chị nhé."
+          ],
+          "voiceFindings": []
+        }
+      ]
+    },
+    {
+      "run": "advice-1",
+      "caseId": "b1-partial-source-v2",
+      "samples": [
+        {
+          "folder": "ack-source-rerun-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Trả chất ren/dáng và nói rõ chưa tra được tách lẻ/giá/tình trạng M. Không kể hệ thống, xin lỗi dài hoặc tự nhận quyền bán lẻ; phần thiếu có nguyên nhân fixture, không buộc bịa thông tin mua.",
+          "actual": [
+            "Chân váy của set được làm bằng chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên rất thướt tha chị nhé. Còn việc tách lẻ chân váy cũng như giá và tình trạng size M thì hiện em chưa tra được thông tin ạ."
+          ],
+          "voiceFindings": [
+            "Còn thướt tha/việc tách lẻ; có thể gọn thêm nhưng reply một đoạn đã dùng được."
+          ]
+        },
+        {
+          "folder": "wording-stability-1-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Trả chất liệu/dáng và nói rõ chưa có thông tin bán riêng/giá/tồn M trong fixture POS unavailable; không hứa tra sau khi không có khả năng.",
+          "actual": [
+            "Dạ, chân váy được làm từ chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên mặc rất thướt tha chị ạ. \n\nCòn về việc tách lẻ chân váy cũng như giá và tình trạng size M, hiện em chưa có thông tin chi tiết cho phần này để báo mình nha chị."
+          ],
+          "voiceFindings": [
+            "Hai đoạn cho câu trả lời đơn giản; có thể gọn."
+          ]
+        },
+        {
+          "folder": "wording-stability-2-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Trả chất liệu/dáng và báo chưa kiểm tra được bán riêng/size M/giá theo fixture; không hứa tra sau hoặc bịa dữ kiện.",
+          "actual": [
+            "Dạ chân váy làm từ chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên mặc rất thoáng và bay dáng ạ. \n\nCòn về việc tách mua riêng chân váy, kiểm tra size M và giá thì em chưa thể kiểm tra được lúc này, chị thông cảm giúp em nha!"
+          ],
+          "voiceFindings": [
+            "“bay dáng”, “chị thông cảm giúp em” gượng; có thể nói gọn."
+          ]
+        }
+      ]
+    },
+    {
+      "run": "advice-1",
+      "caseId": "b1-buying-concern",
+      "samples": [
+        {
+          "folder": "ack-source-rerun-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Đưa nhận định bộ799k phù hợp tiệc ban ngày, giải thích từ chất liệu/thẩm mỹ và báo giá có nguồn. Nhãn nhất quán với rubric cho phép lời tư vấn tổng thể, không ép dùng lập luận của evaluator.",
+          "actual": [
+            "Dạ, set này dùng ren tơ Hàn mềm có độ rũ tự nhiên kết hợp cùng áo tơ thêu form nhẹ nên mặc lên bay bổng và thanh nhã lắm ạ, đi tiệc ban ngày rất sang và lịch sự, không bị rườm rà đâu chị nhé. \n\nNgân sách 900 nghìn của mình chọn nguyên bộ giá 799 nghìn là rất vừa vặn luôn ạ."
+          ],
+          "voiceFindings": [
+            "Vẫn catalog, tính từ và lặp ngân sách; xử lý phân vân chưa sắc. Giữ voice finding thay vì đổi nhãn chỉ vì mềm/rũ."
+          ]
+        },
+        {
+          "folder": "wording-stability-1-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Giải tỏa lo rườm rà và đưa cách bớt ren bằng áo thêu phối váy trơn; giá bộ/áo khớp nguồn.",
+          "actual": [
+            "Dạ, set Thạch Thảo này mặc đi tiệc ban ngày rất hợp và không bị rườm rà đâu chị ạ! Thiết kế gồm áo tơ Hàn thêu nổi nhẹ nhàng kết hợp chân váy ren tơ Hàn mềm, form váy có độ rũ và bay tự nhiên nên tạo cảm giác thanh thoát, bay bổng chứ không bị nặng nề hay cứng nhắc. \n\nHơn nữa, nguyên bộ có giá 799.000đ, hoàn toàn nằm trong ngân sách 900.000đ của chị. Nếu chị vẫn muốn tiết chế bớt phần ren, mình có thể chọn mua riêng áo thêu (499.000đ) để phối cùng các kiểu chân váy trơn sẵn có trong tủ đồ nha chị."
+          ],
+          "voiceFindings": [
+            "Dài, nhiều cụm bay bổng/thanh thoát; lặp ngân sách."
+          ]
+        },
+        {
+          "folder": "wording-stability-2-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Giải tỏa lo rườm rà, nêu giá bộ đúng và mời mua. Không có claim công năng hay fit mới; nhận xét thẩm mỹ được phép.",
+          "actual": [
+            "Dạ, set Thạch Thảo dùng chất ren tơ Hàn mềm với form nhẹ và có độ rũ tự nhiên nên mặc đi tiệc ban ngày rất sang và thanh thoát, không bị rườm rà hay nặng nề đâu chị nhé. \n\nGiá nguyên bộ là 799.000đ, hoàn toàn vừa vặn với ngân sách 900k của mình. Chị lấy luôn cả bộ để mặc liền một set đi tiệc luôn không ạ?"
+          ],
+          "voiceFindings": [
+            "Lặp “luôn” trong CTA, nhiều tính từ và nhắc lại ngân sách."
+          ]
+        }
+      ]
+    },
+    {
+      "run": "advice-1",
+      "caseId": "b1-search-read",
+      "samples": [
+        {
+          "folder": "ack-source-rerun-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Báo đúng hai lựa chọn và giá SD375 bằng áo lẻ/cả bộ, không có thuật ngữ offer nội bộ.",
+          "actual": [
+            "Dạ, mẫu áo dài SD375 hiện có hai lựa chọn với mức giá như sau ạ:\n\n- **Áo lẻ:** 929.000đ\n- **Cả bộ:** 1.065.000đ\n\nChị đang quan tâm phần áo lẻ hay cả bộ ạ?"
+          ],
+          "voiceFindings": [
+            "Mở bài và câu hỏi chốt hơi khuôn; hai giá là thông tin khách cần chứ không phải liệt kê thừa."
+          ]
+        },
+        {
+          "folder": "wording-stability-1-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Báo đúng hai giá và hỏi áo lẻ/cả bộ, bước tiếp theo thực hiện được.",
+          "actual": [
+            "Dạ, mẫu áo dài SD375 bên em có hai lựa chọn với mức giá như sau ạ:\n- Áo lẻ: 929.000đ\n- Cả bộ: 1.065.000đ\n\nChị muốn chọn mua áo lẻ hay cả bộ ạ?"
+          ],
+          "voiceFindings": []
+        },
+        {
+          "folder": "wording-stability-2-20261019",
+          "primary": "USABLE",
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "Báo đúng giá áo/cả bộ và hỏi lựa chọn tương ứng; bước tiếp theo dùng được.",
+          "actual": [
+            "Dạ, áo dài mã SD375 bên em có hai lựa chọn với mức giá như sau ạ:\n\n- Áo lẻ: 929.000đ\n- Cả bộ: 1.065.000đ\n\nChị đang muốn tham khảo dạng áo lẻ hay cả bộ ạ?"
+          ],
+          "voiceFindings": [
+            "“tham khảo dạng” hơi cứng."
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/packages/database
+
+ ✓ src/shadow-mirror.test.ts (13 tests) 276ms
+ ✓ src/chat-history.test.ts (4 tests) 154ms
+ ✓ src/realtime-runtime.test.ts (53 tests) 1617ms
+   ✓ PostgresRealtimeRuntimeStore handoff commit > enforces exact cart-mutation authority, claims, payload and locked-state binding  1133ms
+
+ Test Files  3 passed (3)
+      Tests  70 passed (70)
+   Start at  02:18:10
+   Duration  18.39s (transform 9.66s, setup 0ms, collect 15.53s, tests 2.05s, environment 29ms, prepare 16.54s)
+

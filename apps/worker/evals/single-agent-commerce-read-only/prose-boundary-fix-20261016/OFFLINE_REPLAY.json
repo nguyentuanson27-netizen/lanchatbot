@@ -1,0 +1,121 @@
+{
+  "mode": "OFFLINE_OWNER_BODY_COMPATIBILITY_ONLY",
+  "inputSha256": "c384b4ccb3f87ff79f2c9709d154f33381923c959a3a2bf1f6f32d6445dd0688",
+  "sourceArtifact": "../context-fix-run-20261016/b1/first/raw/requests.jsonl",
+  "ownerPromptSha256": "e3157cf28eb75ea6020799e0e3e32efaeac0b036ef69c27518e3b8fe1ff41f75",
+  "requests": 13,
+  "providerRequests": 0,
+  "modelQualityMeasured": false,
+  "expectedChangesOnly": "active owner instructions and exact catalog content relocated outside trusted",
+  "historiesNativePartsFactsPoliciesReceiptsStateAndToolsUnchanged": true,
+  "inputMutation": false,
+  "evaluatorCaseIdLeaks": 0,
+  "maximumNewRequestBytes": 17560,
+  "maximumBodyByteDelta": 133,
+  "results": [
+    {
+      "generationId": "d34e69a20b7870b0a44ba5613534790fbc11f5bcd4856d19863b707002c6f483:owner:1",
+      "oldBytes": 12919,
+      "newBytes": 13025,
+      "descriptionCount": 0,
+      "finalOnly": false,
+      "newBodySha256": "c076a0f3f1db8d92df915b3041eff537fc17c4e39943def9d9cfb5ac86f48b8a"
+    },
+    {
+      "generationId": "d34e69a20b7870b0a44ba5613534790fbc11f5bcd4856d19863b707002c6f483:owner:2",
+      "oldBytes": 17427,
+      "newBytes": 17560,
+      "descriptionCount": 1,
+      "finalOnly": false,
+      "newBodySha256": "18675064a4d2a51a68f513f2138a609f8970551d205f76304fd1f03ed872d732"
+    },
+    {
+      "generationId": "11cff4875fe042fbb097fba70174e30458c2f37ae941c35665318f9c4c6b4ad0:owner:1",
+      "oldBytes": 12524,
+      "newBytes": 12630,
+      "descriptionCount": 0,
+      "finalOnly": false,
+      "newBodySha256": "599b730a1176db4956fb40b43f9a1589e058d89149a58306a4e026d94f6e997f"
+    },
+    {
+      "generationId": "11cff4875fe042fbb097fba70174e30458c2f37ae941c35665318f9c4c6b4ad0:owner:2",
+      "oldBytes": 13712,
+      "newBytes": 13818,
+      "descriptionCount": 0,
+      "finalOnly": false,
+      "newBodySha256": "0ccdab0275caf6dc2ef2247e4fca5aa4ba2b7212a5654055585dd3fc0d2151fc"
+    },
+    {
+      "generationId": "11cff4875fe042fbb097fba70174e30458c2f37ae941c35665318f9c4c6b4ad0:owner:3",
+      "oldBytes": 14418,
+      "newBytes": 14507,
+      "descriptionCount": 0,
+      "finalOnly": true,
+      "newBodySha256": "b971b67b6524d1db7356bb170a65e1d4b3923a869b0ad56434c698d6a9b1a88e"
+    },
+    {
+      "generationId": "67cb94a4e3b19334568d6e79c946d226f9ddff9a6aa87da89a6c46bfb835be97:owner:1",
+      "oldBytes": 12735,
+      "newBytes": 12841,
+      "descriptionCount": 0,
+      "finalOnly": false,
+      "newBodySha256": "152fd7fa9320fff1e1c1d52b4a36cb6bca9d99a4ffef7c7018e899906a86e1ac"
+    },
+    {
+      "generationId": "67cb94a4e3b19334568d6e79c946d226f9ddff9a6aa87da89a6c46bfb835be97:owner:2",
+      "oldBytes": 16991,
+      "newBytes": 17124,
+      "descriptionCount": 1,
+      "finalOnly": false,
+      "newBodySha256": "3c28bd66ff0e02960b032a2a499df6ed56beb38a6a679f0a401ae41c8b60729d"
+    },
+    {
+      "generationId": "d3f08f87d51118a71fdc062ed59384835216ae2955bb85af830bd36d0b2aa13c:owner:1",
+      "oldBytes": 12893,
+      "newBytes": 12999,
+      "descriptionCount": 0,
+      "finalOnly": false,
+      "newBodySha256": "522d56a845d6f11492394906d35956c869293f2670b8c53165a908bb7a7883be"
+    },
+    {
+      "generationId": "d3f08f87d51118a71fdc062ed59384835216ae2955bb85af830bd36d0b2aa13c:owner:2",
+      "oldBytes": 17021,
+      "newBytes": 17154,
+      "descriptionCount": 1,
+      "finalOnly": false,
+      "newBodySha256": "adbd5066d0d1bd4bb8846d239e8102f835cffda8763673e6df7b029a8b625547"
+    },
+    {
+      "generationId": "97c68942db73baca87e17f5077a06874e8197303396fd0795bc597b4a082b7f6:owner:1",
+      "oldBytes": 12695,
+      "newBytes": 12801,
+      "descriptionCount": 0,
+      "finalOnly": false,
+      "newBodySha256": "2b594118ecd1b93d1a8c4500ca84114c5cb97023786bd2c4df97e377d2604a7d"
+    },
+    {
+      "generationId": "97c68942db73baca87e17f5077a06874e8197303396fd0795bc597b4a082b7f6:owner:2",
+      "oldBytes": 16521,
+      "newBytes": 16654,
+      "descriptionCount": 1,
+      "finalOnly": false,
+      "newBodySha256": "001ed5d1ddbb9be089504d22f2a753f643bf1465df4a3ae95886946ea0d5ee9b"
+    },
+    {
+      "generationId": "66e732ea0eb6b48d2a2ed49092d2656fd79c91d42118d6ae4bcb68015201f421:owner:1",
+      "oldBytes": 12801,
+      "newBytes": 12907,
+      "descriptionCount": 0,
+      "finalOnly": false,
+      "newBodySha256": "b95914d3e2144a0ae246da223cd889a387731df99ce280adac99ae5be5f4e260"
+    },
+    {
+      "generationId": "66e732ea0eb6b48d2a2ed49092d2656fd79c91d42118d6ae4bcb68015201f421:owner:2",
+      "oldBytes": 16987,
+      "newBytes": 17120,
+      "descriptionCount": 1,
+      "finalOnly": false,
+      "newBodySha256": "f86a74c32ea54ceeb4d83d23d78fa1695baf66e4b6f97129989819bdac17252d"
+    }
+  ]
+}

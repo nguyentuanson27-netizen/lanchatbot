@@ -1,0 +1,660 @@
+import type { RuntimePolicyResolution } from "@lana/chat-runtime";
+import { ProductContentV1Schema, SizeChartV1Schema, type ProtectedClaimV1 } from "@lana/contracts";
+import { buildVerifiedFactBlocks, buildProtectedClaimsFromVerifiedFactsV1, buildProductPresentationEvidenceV1, CatalogSnapshotV3Schema,
+  resolveCatalogFacts, verifyProductAttributesV1, normalizeCatalogToken, normalizeProductCode,
+  type ProductSearchResult, type StableProductDocument, type CatalogSnapshotV3 } from "@lana/business-tools";
+import { buildReadOnlyContext, commerceHash, commerceUuid, publicPolicyLiteral, omitCurrentProductDuplicates } from "./single-agent-commerce-read-only-context.js";
+import { MAX_RUNTIME_PRODUCTS, type RuntimeProductEvidence, type TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
+import { buildRealtimeProductFactsV2 } from "./realtime-product-facts-v2.js";
+import { resolveCatalogDeliveryRegion, verifiedVariantFromSnapshot,candidateCartOptions,catalogComponentRole } from "./realtime-sales-catalog.js";
+import type { CommerceProductGroup } from "./single-agent-commerce-product-groups.js";
+import type {CommerceDiagnostics} from "./single-agent-commerce-diagnostics.js";
+import {selectionEvidenceFromOptions,selectionSourceHash,mergeSelectionEvidence,expandSelectionOptions} from "./single-agent-commerce-selection-evidence.js";
+
+export interface CommerceScope {
+  pageId: string; shopId: string; shopAlias: string; conversationId: string; customerHash: string;
+  sourceMessageId: string; sourceObservedAt: string; requestId: string; recipient: string; bindingVersion: string; revision: number;
+  conversationOwner: string; permission: boolean; privacyAllowed: boolean;
+}
+export interface ReadOnlyCatalog {
+  searchText(query: string): Promise<ProductSearchResult>;
+  /** Ingress-only resolution of a code supplied by the customer/ad; never a callable model tool. */
+  resolveProductCode?(code: string): Promise<StableProductDocument | null>;
+  readProduct(productId: string, readPos?: boolean,diagnostics?:CommerceDiagnostics): Promise<{ product: StableProductDocument; snapshot: CatalogSnapshotV3 | null }>;
+}
+export interface PreparationWork { chargedUnits: number; kind: "NUMERIC" | "FINAL" }
+export interface PreparationControl { maxCalls: number; onDispatch(): void }
+export type PreparationAdmission = (context: TrustedContext, work?: PreparationWork) => boolean;
+export interface CommerceToolCall { name: string; args: unknown; id?: string }
+export interface CommerceToolResult { status: "OK" | "REJECTED" | "UNAVAILABLE" | "STALE"; data?: unknown; reason?: string;
+  failureStage?: import("./single-agent-commerce-effect-failure.js").CommerceEffectFailureStage }
+export interface QuotePriceQuery {subjectRef:string;offerTypes:readonly string[];color?:string}
+export interface QuotePriceEvidence {offerType:string;claim:Extract<ProtectedClaimV1,{type:"PRICE"}>;sourceVersion:string;observedAt:string;expiresAt:string}
+export function toolArgs(value: unknown, fields: readonly string[]): Record<string, unknown> | null {
+  return value !== null && typeof value === "object" && !Array.isArray(value) &&
+    Object.keys(value).every(k => fields.includes(k)) ? value as Record<string, unknown> : null;
+}
+const rowsOverBound=(rows:readonly unknown[])=>rows.length>64;
+const text = (v: unknown, max: number): v is string => typeof v === "string" && v.trim().length > 0 && Buffer.byteLength(v) <= max;
+
+export function createReadOnlyTools(input: {
+  scope: CommerceScope; clock: () => Date; policy: () => Promise<RuntimePolicyResolution>; catalog: ReadOnlyCatalog;
+  initialProducts?: StableProductDocument[]; state?: () => TrustedContext["state"];
+  maxFactAgeSeconds?: number;
+  entry?: { firstContact: boolean | null; fromAd: boolean };
+  productGroups?: readonly CommerceProductGroup[];
+  onMediaColor?(id:string,color:string):void;
+  diagnostics?:CommerceDiagnostics;
+  /** Candidate-only; admission must measure the actual native wire before publication. */
+  prepareCurrentOffers?:boolean;
+  candidateEvidence?:boolean;
+}) {
+  const { scope } = input;
+  const maxAge = input.maxFactAgeSeconds ?? 1200;
+  if (!Number.isInteger(maxAge) || maxAge < 60 || maxAge > 86400) throw new Error("FACT_FRESHNESS_BOUND");
+  const subjects = new Map<string, TrustedContext["boundSubjects"][number]>();
+  const products = new Map<string, RuntimeProductEvidence>();
+  const claims = new Map<string, unknown[]>();
+  let policy: RuntimePolicyResolution | null = null;
+  let policyLiteral: TrustedContext["policyLiterals"] = [];
+  let policyRead = false;
+  let policyInvalidated = false;
+  let policyReadGeneration = 0;
+  const deliveryContexts = new Map<string, TrustedContext["policyLiterals"][number]>();
+  const offerContexts = new Map<string, TrustedContext["policyLiterals"][number]>();
+  const offerPins = new Map<string, { identity: string; literal: TrustedContext["policyLiterals"][number] }>();
+  const reads = new Map<string, Record<string, unknown>>();
+  const searchReads = new Set<string>();
+  const priceReads = new Map<string,{readKey:string;label:string}>();
+  let ambiguousPriceRead=false;
+  const prepared = new Set<string>();
+  const preparationContexts = new Map<string, TrustedContext["policyLiterals"][number]>();
+  // One request, one immutable full POS read per product. Only a monotonic
+  // sync heartbeat may change; every other parsed field (including passthrough
+  // fields not exposed to the models) is part of the equality proof.
+  const posPins = new Map<string, { identity: string; snapshot: CatalogSnapshotV3; latest: number }>();
+  let posInvalidated = false;
+  const invalidatePos = (): never => { posInvalidated = true; throw new Error("POS_OBSERVATION_CHANGED"); };
+  const pinPos = (id: string, source: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>, pins = posPins) => {
+    if (posInvalidated) return invalidatePos();
+    const parsed = CatalogSnapshotV3Schema.safeParse(source.snapshot), pinned = pins.get(id);
+    const raw = parsed.success ? parsed.data : null, at = input.clock().getTime();
+    const observed = raw ? Date.parse(raw.synced_at) : NaN;
+    if (!raw || source.product.productId !== id || raw.product_id !== id || raw.shop_alias !== scope.shopAlias ||
+      !["OK", "FULFILLMENT_POLICY_NOT_FOUND"].includes(normalizeCatalogToken(raw.data_status)) ||
+      !Number.isFinite(at) || observed > at || observed + maxAge * 1000 <= at) {
+      if (pinned) return invalidatePos();
+      return source;
+    }
+    const { synced_at: _observation, ...content } = raw;
+    const identity = commerceHash(content);
+    if (pinned) {
+      if (identity !== pinned.identity || observed < pinned.latest ||
+        Date.parse(pinned.snapshot.synced_at) + maxAge * 1000 <= at) return invalidatePos();
+      pins.set(id, { ...pinned, latest: observed });
+      return { ...source, snapshot: structuredClone(pinned.snapshot) };
+    }
+    const snapshot = structuredClone(raw);
+    pins.set(id, { identity, snapshot, latest: observed });
+    return { ...source, snapshot: structuredClone(snapshot) };
+  };
+  // Offer identities are source metadata, not price/stock facts or variant bindings.
+  const offerLiteral = (id: string, source: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>, pins = offerPins) => {
+    const parsed = CatalogSnapshotV3Schema.safeParse(source.snapshot), now = input.clock().getTime();
+    if (source.product.productId !== id || !parsed.success || parsed.data.product_id !== id ||
+      parsed.data.shop_alias !== scope.shopAlias) return null;
+    const raw = parsed.data, observed = Date.parse(raw.synced_at), expires = observed + maxAge * 1000;
+    const availableOffers = Object.keys(raw.offers).sort();
+    if (!["OK", "FULFILLMENT_POLICY_NOT_FOUND"].includes(normalizeCatalogToken(raw.data_status)) ||
+      observed > now || expires <= now || availableOffers.length > 8) return null;
+    let addedLabelBytes=0;
+    const purchaseOptions=availableOffers.map(offerType=>{
+      let incomplete=false,overbound=rowsOverBound(raw.offers[offerType]!.rows);
+      const rows=raw.offers[offerType]!.rows;
+      const structures=rows.slice(0,64).map(row=>{
+        // Named legacy slots are one item each; explicit BOM quantities never
+        // use the cart parser's permissive fallback to one.
+        if(Object.hasOwn(row,'components')&&!Array.isArray(row.components)){incomplete=true;return [];}
+        const components:unknown[]=Array.isArray(row.components)&&row.components.length>0?row.components:
+          [row.component_1_sku,row.component_2_sku].filter(v=>typeof v==='string'&&v.trim()).map(product_sku=>({product_sku,quantity:1}));
+        if(components.length>3)overbound=true;
+        const amounts=new Map<string,{componentRef:string;role:ReturnType<typeof catalogComponentRole>;quantity:number}>();
+        for(const c of components.slice(0,3)){
+          if(!c||typeof c!=="object"){incomplete=true;continue;}
+          const v=c as Record<string,unknown>,ref=v.product_sku,quantity=v.quantity;
+          if(typeof ref!=="string"||!ref.trim()||Buffer.byteLength(ref)>128||!Number.isSafeInteger(quantity)||(quantity as number)<1){incomplete=true;continue;}
+          // Match the existing per-purchase quantity bound without expanding
+          // quantities into entries or changing exact cart/stock semantics.
+          if((quantity as number)>20){overbound=true;continue;}
+          const role=catalogComponentRole(ref),key=JSON.stringify([ref,role]);
+          const value=amounts.get(key)??{componentRef:ref,role,quantity:0};value.quantity+=quantity as number;
+          if(value.quantity>20)overbound=true;amounts.set(key,value);
+        }
+        return [...amounts.values()].sort((a,b)=>a.componentRef.localeCompare(b.componentRef)||a.role.localeCompare(b.role));
+      });
+      const structure=structures[0]??[],consistent=!overbound&&!incomplete&&structures.every(v=>commerceHash(v)===commerceHash(structure));
+      // Labels may come only from the already supplied catalog map. No child I/O,
+      // SKU inference, new product binding or numeric evidence is created here.
+      const components=consistent?structure.map(c=>{
+        const p=(input.initialProducts??[]).find(p=>p.productId===c.componentRef);
+        const label=p&&p.observedAt&&Date.parse(p.observedAt)<=now&&text(p.title,128)?p.title:null;
+        return {...c,label,labelSource:label?{productRef:p!.productId,sourceVersion:p!.catalogVersion,observedAt:p!.observedAt}:null};
+      }):[];
+      const labelBytes=Buffer.byteLength(JSON.stringify(components.map(({componentRef:_r,role:_t,quantity:_q,...v})=>v)));
+      addedLabelBytes+=labelBytes;
+      if(addedLabelBytes>1024)throw new Error("PRODUCT_EVIDENCE_BOUND");
+      return {offerType,priceRead:{subjectRef:id,offerType},stockRead:{subjectRef:id,offerType},
+        componentSource:{status:overbound?'BOUND_EXCEEDED':incomplete?'INCOMPLETE_SOURCE':!structures.some(v=>v.length)?'NOT_RECORDED':consistent?'AVAILABLE':'VARIANT_DEPENDENT',
+          completeness:rows.length<=64?'INSPECTED_ROWS':'FIRST_64_ROWS_ONLY',
+          sourceRef:'pos:'+commerceHash({releaseId:raw.release_id,productId:id,offerType}),
+          structureKnown:consistent&&structure.length>0,labelsStatus:components.length&&components.every(c=>c.label!==null)?'KNOWN':'UNKNOWN',components},
+        sizeApplicability:{status:'NOT_READ',componentSizing:'UNSUPPORTED_BY_PRODUCT_TARGET_API',chartRef:null},
+        colorSemantics:'UNRECORDED_IS_NOT_A_PHYSICAL_COLOR'};
+    });
+    const identity = commerceHash({ shopAlias:raw.shop_alias, productId:id, releaseId:raw.release_id,
+      status:normalizeCatalogToken(raw.data_status), availableOffers,purchaseOptions });
+    const pinned = pins.get(id);
+    // Re-observation never renews unchanged source metadata.
+    if (pinned?.identity === identity) return pinned.literal;
+    const literal = { ref: `offers:${id}`, sourceVersion: commerceHash({ releaseId: raw.release_id, observed, availableOffers }),
+      observedAt: raw.synced_at, expiresAt: new Date(expires).toISOString(), text: JSON.stringify({ productId: id, availableOffers, purchaseOptions,productSizeRead:{subjectRef:id,scope:"PRODUCT_ONLY",status:"NOT_READ",chartRef:null} }) };
+    pins.set(id,{identity,literal});
+    return literal;
+  };
+  const offerBaseline = (id: string) => ({ pin: offerPins.get(id) });
+  const stageOffer = (id: string, source: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>, baseline: ReturnType<typeof offerBaseline>) => {
+    const current=offerPins.get(id), pins=new Map(offerPins), literal=offerLiteral(id,source,pins);
+    if(current!==baseline.pin&&(!current||!literal||pins.get(id)?.identity!==current.identity))
+      throw new Error("SOURCE_EVIDENCE_CONFLICT");
+    return {literal,pin:pins.get(id)};
+  };
+  const bind = (p: StableProductDocument) => {
+    if (!subjects.has(p.productId)) subjects.set(p.productId, { ref: p.productId, kind: "PRODUCT", label: p.title, bindingVersion: scope.bindingVersion });
+  };
+  for (const p of input.initialProducts ?? []) bind(p);
+  const reservedProducts = new Set([...subjects.values()].filter(s => s.kind === "PRODUCT").map(s => s.ref));
+  const productBound = (ids: readonly string[]) => new Set([...reservedProducts, ...products.keys(), ...ids]).size > MAX_RUNTIME_PRODUCTS;
+  const snapshot = () => buildReadOnlyContext({ state: input.state?.() ?? { ...scope, currentProductId: null,
+    factSnapshotVersion: "", conversationOwner: scope.conversationOwner }, subjects: [...subjects.values()],
+    products: [...products.values()], claims: [...claims.values()].flat(), policies: [...(input.entry ? [{ref:"conversation-entry",text:JSON.stringify(input.entry),sourceVersion:scope.bindingVersion,observedAt:scope.sourceObservedAt,expiresAt:null}] : []),
+      ...policyLiteral, ...deliveryContexts.values(), ...offerContexts.values(), ...preparationContexts.values()] });
+  const withPolicyCharts = (evidence: RuntimeProductEvidence, resolution = policy): RuntimeProductEvidence => {
+    const next = {...evidence}; delete next.sizeCharts;
+    const charts = Object.values(resolution?.bundle?.artifacts.sizeCharts ?? {}).filter(a =>
+      a.chart.reference.verificationStatus === "VERIFIED" &&
+      (a.scope?.parentProductIds.includes(evidence.subjectRef) || a.scope?.level === "GLOBAL")).map(a => SizeChartV1Schema.parse(a.chart));
+    if (charts.length > 4) throw Error("PRODUCT_EVIDENCE_BOUND");
+    if (charts.length) next.sizeCharts = charts;
+    if (Buffer.byteLength(JSON.stringify(next)) > 8192) throw Error("PRODUCT_EVIDENCE_BOUND");
+    return next;
+  };
+  const staticEvidence = (p: StableProductDocument, now: Date): RuntimeProductEvidence => {
+    if (p.observedAt && (!Number.isFinite(Date.parse(p.observedAt)) || Date.parse(p.observedAt) > now.getTime())) {
+      throw new Error("PRODUCT_SOURCE_FRESHNESS");
+    }
+    const evidence: RuntimeProductEvidence = { ref: `product:${p.productId}`, subjectRef: p.productId };
+    if (p.attributes) {
+      const attrs = verifyProductAttributesV1(p.attributes, p.productId);
+      if (attrs && attrs.metadata.freshnessState === "FRESH" && Date.parse(attrs.metadata.observedAt) <= now.getTime()) evidence.attributes = attrs;
+    }
+    if (p.observedAt) evidence.content = ProductContentV1Schema.parse({ productName: p.title,
+      description: p.descriptionXml?.trim() || null, productUrl: null, metadata: {
+        authority: p.descriptionAuthority ?? "WEBSTORE_XML", sourceVersion: p.descriptionSourceVersion ?? p.catalogVersion,
+        observedAt: p.observedAt, expiresAt: null, freshForSeconds: null, freshnessState: "FRESH",
+      } });
+    return withPolicyCharts(evidence);
+  };
+  async function readPolicy(): Promise<CommerceToolResult> {
+    if (policyInvalidated) return {status:"UNAVAILABLE",reason:"POLICY_UNAVAILABLE"};
+    const generation=++policyReadGeneration;
+    // This candidate reads active pointers; an old cached bundle cannot prove their current identity.
+    try {
+      const next = await (input.diagnostics?input.diagnostics.run("POLICY_READ",{},()=>input.policy()):input.policy());
+      if (generation!==policyReadGeneration) return {status:"REJECTED",reason:"SOURCE_EVIDENCE_CONFLICT"};
+      if (policyInvalidated || !permitted() || !next.bundle || next.status !== "RESOLVED") throw Error("POLICY_UNAVAILABLE");
+      const literal = [publicPolicyLiteral(next.bundle, scope.pageId, scope.shopId, input.clock())];
+      // Stage after the await, against the current products (including concurrent catalog reads).
+      // Revocation removes old charts. Publication has no awaits or partial product updates.
+      const projected = [...products.entries()].map(([id,p]) => [id,withPolicyCharts(p,next)] as const);
+      const current=snapshot(), candidate=buildReadOnlyContext({state:current.state, subjects:current.boundSubjects,
+        claims:current.protectedClaims,receipts:current.effectReceipts,cartBinding:current.cartBinding,products:projected.map(([,p])=>p),
+        policies:[...current.policyLiterals.filter(p=>!policyLiteral.some(old=>old.ref===p.ref)),...literal]});
+      if (Buffer.byteLength(JSON.stringify(candidate))>32768) throw Error("CONTEXT_BOUND");
+      policy=next; policyLiteral=literal; policyRead=true;
+      products.clear(); for(const [id,p] of projected) products.set(id,p);
+      return { status: "OK", data: { scope: "SHOP_RULES", orderEligibility: null,
+        policy: JSON.parse(literal[0]!.text), sourceVersion: literal[0]!.sourceVersion } };
+    } catch {
+      if (generation!==policyReadGeneration) return {status:"REJECTED",reason:"SOURCE_EVIDENCE_CONFLICT"};
+      policyInvalidated=true;policy=null;policyLiteral=[];
+      for(const [id,p] of products){const next={...p};delete next.sizeCharts;products.set(id,next);}
+      return {status:"UNAVAILABLE",reason:"POLICY_UNAVAILABLE"};
+    }
+  }
+  async function prepareProduct(id: string, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>,admit?:(context:TrustedContext)=>boolean,baseline=offerBaseline(id)) {
+    if (productBound([id])) throw new Error("PRODUCT_BOUND");
+    const now = input.clock();
+    let source: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>> | null;
+    try { source = loaded ?? await input.catalog.readProduct(id); }
+    catch {
+      // A failed POS read must not erase independent catalog content.
+      try { source = await input.catalog.readProduct(id, false); }
+      catch { source = null; }
+    }
+    if (!source || source.product.productId !== id) throw new Error("SOURCE_ERROR");
+    admitPreparation(id,source,admit,baseline);
+  }
+  // All publication below is synchronous: no restore can clobber a concurrent awaited read.
+  function admitPreparation(id:string, source:Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>,admit?: (context:TrustedContext)=>boolean,baseline=offerBaseline(id),numericPreparation=true) {
+    const now=input.clock(), p = source.product;
+    if (!permitted()) throw new Error("PERMISSION");
+    if (productBound([id])) throw new Error("PRODUCT_BOUND");
+    let content = false;
+    const stagedOffer=stageOffer(id,source,baseline);
+    const stagedEvidence = p?.productId === id ? staticEvidence(p, now) : null;
+    const previous = { ...products.get(id) };
+    delete previous.content; delete previous.attributes;
+    products.delete(id);
+    if (p?.productId === id) {
+      const evidence = stagedEvidence!;
+      if (evidence.content || evidence.attributes) {
+        products.set(id, { ...previous, ...evidence }); content = true;
+      }
+    }
+    const parsed = CatalogSnapshotV3Schema.safeParse(source?.snapshot);
+    const raw = p?.productId === id && parsed.success && parsed.data.product_id === id && parsed.data.shop_alias === scope.shopAlias ? parsed.data : null;
+    const observed = raw ? Date.parse(raw.synced_at) : NaN, expires = observed + maxAge * 1000;
+    const status = raw ? normalizeCatalogToken(raw.data_status) : null;
+    const offers = raw && ["OK", "FULFILLMENT_POLICY_NOT_FOUND"].includes(status ?? "") &&
+      observed <= now.getTime() && expires > now.getTime() ? Object.keys(raw.offers).sort() : null;
+    const metadata = source && offers !== null && offers.length <= 8 ? stagedOffer.literal : null;
+    if(stagedOffer.pin)offerPins.set(id,stagedOffer.pin);
+    if (metadata) offerContexts.set(id, metadata);
+    else offerContexts.delete(id);
+    const availability = { content: { status: content ? "OK" : "UNAVAILABLE", reason: content ? null : "SOURCE_UNAVAILABLE" },
+      offers: { status: offers !== null && offers.length <= 8 ? "OK" : "UNAVAILABLE", reason: offers !== null && offers.length <= 8 ? null : "SOURCE_UNAVAILABLE" } };
+    const text = JSON.stringify({ subjectRef: id, availability, notRead: ["PRICE", "STOCK", "ETA", "SIZE_FIT"] });
+    preparationContexts.set(id, { ref: `preparation:${id}`, text, sourceVersion: commerceHash(text),
+      observedAt: scope.sourceObservedAt, expiresAt: null });
+    if(input.prepareCurrentOffers&&numericPreparation&&source&&offers&&offers.length>0&&offers.length<=3&&admit){
+      // Roll back only optional staging. The independent catalog preparation above remains admitted.
+      const maps=[subjects,products,claims,deliveryContexts,offerContexts,preparationContexts,reads,priceReads,posPins] as Map<unknown,unknown>[];
+      const saved=maps.map(m=>structuredClone([...m.entries()])),oldAmbiguous=ambiguousPriceRead,oldInvalid=posInvalidated;
+      try{
+        const result=admitProductRead({subjectRef:id,...(offers.length===1?{offerType:offers[0]}:{offerTypes:offers}),preparationOnly:true},source);
+        const data=result.data as {sellingOptions?:{availability:{price:{status:string};stock:{status:string}}}[]}|undefined;
+        const staged=snapshot();
+        if(result.status!=="OK"||!data?.sellingOptions?.length||data.sellingOptions.some(o=>o.availability.price.status!=="OK"||o.availability.stock.status!=="OK")||
+          staged.boundSubjects.length>8||(staged.runtimeProducts?.length??0)>4||staged.protectedClaims.length>32||
+          Buffer.byteLength(JSON.stringify(result))>8192||!admit(staged))throw Error("PREPARATION_ADMISSION");
+        return;
+      }catch{
+        maps.forEach((m,i)=>{m.clear();for(const[k,v]of saved[i]!)m.set(k,v);});ambiguousPriceRead=oldAmbiguous;posInvalidated=oldInvalid;
+        input.diagnostics?.emit("RESULT_BOUND","NOT_ADMITTED",{productId:id},"OPTIONAL_PREPARATION_UNAVAILABLE");
+      }
+    }
+    const hasFullRead=[...reads.values()].some(a=>a.subjectRef===id);
+    if(hasFullRead)preparationContexts.delete(id);
+    if(input.prepareCurrentOffers&&!hasFullRead&&products.has(id))products.get(id)!.offerReadCoverage=(offers??[]).slice(0,8).map(offerType=>({offerType,price:"NOT_READ",stock:"NOT_READ"}));
+  }
+  async function prepare(admit?:PreparationAdmission,control?:PreparationControl): Promise<number> {
+    if (!scope.permission || !scope.privacyAllowed || scope.conversationOwner !== "BOT") return 0;
+    const current = snapshot(), bound = current.boundSubjects.filter(s => s.kind === "PRODUCT");
+    const focus=current.state.currentProductId;
+    const targets=(focus?bound.filter(s=>s.ref===focus):bound).filter(s=>!prepared.has(s.ref)&&![...reads.values()].some(a=>a.subjectRef===s.ref));
+    const max=control?.maxCalls??6;
+    if(!Number.isSafeInteger(max)||max<0||max>6)throw Error("PREPARATION_BUDGET");
+    if(targets.length>max||targets.length>MAX_RUNTIME_PRODUCTS)throw Error("PREPARATION_BUDGET");
+    if(!targets.length)return 0;
+    const loaded: {id:string;source:Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>;baseline:ReturnType<typeof offerBaseline>}[]=[];
+    for(const target of targets){
+      if(!permitted())throw Error("PERMISSION");
+      const baseline=offerBaseline(target.ref);
+      control?.onDispatch();
+      let source:Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>;
+      try{source=await input.catalog.readProduct(target.ref);}
+      catch{source=await input.catalog.readProduct(target.ref,false);}
+      if(source.product.productId!==target.ref)throw Error("SOURCE_ERROR");
+      loaded.push({id:target.ref,source,baseline});
+    }
+    const maps=[subjects,products,claims,deliveryContexts,offerContexts,preparationContexts,reads,priceReads,posPins,offerPins] as Map<unknown,unknown>[];
+    const saved=maps.map(m=>structuredClone([...m.entries()])),oldAmbiguous=ambiguousPriceRead;
+    try{
+      for(const {id,source,baseline} of loaded)admitPreparation(id,source,
+        admit?c=>admit(c,{chargedUnits:loaded.length,kind:"NUMERIC"}):undefined,baseline,bound.length===1||!!focus);
+      if(admit&&!admit(snapshot(),{chargedUnits:loaded.length,kind:"FINAL"}))throw Error("PREPARATION_ADMISSION");
+      for(const {id} of loaded)prepared.add(id);
+      return loaded.length;
+    }catch(error){
+      maps.forEach((m,i)=>{m.clear();for(const [k,v]of saved[i]!)m.set(k,v);});
+      ambiguousPriceRead=oldAmbiguous;throw error;
+    }
+  }
+  async function readProduct(args: Record<string, unknown>, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>,baseline=offerBaseline(args.subjectRef as string)): Promise<CommerceToolResult> {
+    const id = args.subjectRef as string, now = input.clock();
+    let fetched: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>;
+    try { fetched = loaded ?? await input.catalog.readProduct(id); }
+    catch (error) { if (posPins.has(id)) posInvalidated = true; throw error; }
+    return admitProductRead(args, fetched,baseline);
+  }
+  function admitProductRead(args: Record<string, unknown>, fetched: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>,baseline=offerBaseline(args.subjectRef as string)): CommerceToolResult {
+    const id=args.subjectRef as string, now=input.clock();
+    if (!permitted()) return {status:"REJECTED",reason:"PERMISSION"};
+    if (productBound([id])) return {status:"REJECTED",reason:"PRODUCT_BOUND"};
+    const stagedOffer=stageOffer(id,fetched,baseline);
+    const pendingPins = new Map(posPins);
+    const source = pinPos(id, fetched, pendingPins), p = source.product;
+    const parsed = CatalogSnapshotV3Schema.safeParse(source.snapshot);
+    if (p.productId !== id || (p.observedAt && (!Number.isFinite(Date.parse(p.observedAt)) ||
+      Date.parse(p.observedAt) > now.getTime())) || (source.snapshot !== null && (!parsed.success || parsed.data.product_id !== id ||
+      parsed.data.shop_alias !== scope.shopAlias))) return { status: "STALE", reason: "PRODUCT_SOURCE_SCOPE" };
+    const raw = parsed.success ? parsed.data : null;
+    const observed = raw ? Date.parse(raw.synced_at) : NaN;
+    const expires = observed + maxAge * 1000;
+    // Match the resolver's usable product statuses; missing price/ETA does not erase an independent offer mapping.
+    const productStatus = raw ? normalizeCatalogToken(raw.data_status) : null;
+    const availableOffers = raw && (productStatus === "OK" || productStatus === "FULFILLMENT_POLICY_NOT_FOUND") &&
+      observed <= now.getTime() && expires > now.getTime() ? Object.keys(raw.offers).sort() : null;
+    const query = { shopAlias: scope.shopAlias, productId: id, offerType: (args.offerType as string | undefined) ?? null,
+      color: (args.color as string | undefined) ?? null, size: (args.size as string | undefined) ?? null,
+      deliveryRegion: raw && typeof args.deliveryRegion === "string" ? resolveCatalogDeliveryRegion(raw, args.deliveryRegion)?.[0] ?? args.deliveryRegion : (args.deliveryRegion as string | undefined) ?? null };
+    // Do not expand an unbounded source record or silently truncate selling options.
+    const selectedOffers=args.offerTypes as string[]|undefined;
+    if (!query.offerType && !selectedOffers && availableOffers && availableOffers.length > 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
+    if(selectedOffers&&(!availableOffers||selectedOffers.some(o=>!availableOffers.includes(o))))return {status:"REJECTED",reason:"OFFER_NOT_AVAILABLE"};
+    const summarizeAll = !!selectedOffers || (!query.offerType && availableOffers !== null && availableOffers.length > 1);
+    const resolveOption = (offerType: string | null) => {
+      const q = { ...query, offerType };
+      const price = raw ? resolveCatalogFacts(raw, { ...q, intent: "PRICE" }, now, maxAge) : null;
+      const stock = raw ? resolveCatalogFacts(raw, { ...q, intent: "STOCK" }, now, maxAge) : null;
+      const eta = raw && q.deliveryRegion ? resolveCatalogFacts(raw, { ...q, intent: "ETA" }, now, maxAge) : null;
+      if (eta?.status === "OK" && eta.expiresAt && raw?.fulfillment_policy?.eta_valid_until.trim()) {
+        eta.expiresAt = new Date(Math.min(Date.parse(eta.expiresAt), Date.parse(raw.fulfillment_policy.eta_valid_until))).toISOString();
+      }
+      const variant = raw ? verifiedVariantFromSnapshot(raw, { shopAlias: scope.shopAlias, productId: id, offerType,
+        mentionedSize: q.size, mentionedColor: q.color }, now) : null;
+      const offer = (price?.status === "OK" ? price.facts?.offerType : null)
+        ?? (stock?.status === "OK" ? stock.facts?.offerType : null) ?? null;
+      // Options are not selected cart SKUs. A shared source SKU must not merge two offers' prices.
+      const variantId = summarizeAll && offer ? `offer:${id}:${offer}`
+        : (variant?.resolution === "VERIFIED" ? variant.selectedVariantId : null) ?? (offer ? `offer:${id}:${offer}` : null);
+      const optionClaims = [[price, "PRICE"], [stock, "STOCK"], [eta, "ETA"]].flatMap(([facts, type]) => {
+        const result = buildProtectedClaimsFromVerifiedFactsV1({ facts: facts as typeof price, sizeClaim: null, expectedProductId: id });
+        return result.claims.filter(c => c.type === type).map(c => ({ ...c, claimId: commerceUuid(commerceHash({ originalClaimId: c.claimId, variantId })),
+          scope: c.scope.kind === "PRODUCT" ? { ...c.scope, variantId } : c.scope }));
+      });
+      const etaClaim = optionClaims.find(c => c.type === "ETA"), stockClaim = optionClaims.find(c => c.type === "STOCK"),
+        priceClaim = optionClaims.find(c => c.type === "PRICE");
+      const filteredClaim = etaClaim ?? ((q.size || q.color) ? stockClaim ?? priceClaim : undefined);
+      const sizeAvailability = stock?.status === "OK" && stock.facts ? {
+        productId: id, offerType: offer, color: q.color, requestedSize: q.size,
+        confirmedInStockSizes: stock.facts.sizes.filter(size => !q.size || normalizeCatalogToken(size) === normalizeCatalogToken(q.size)),
+        unlistedSizeMeaning: "NOT_CONFIRMED" as const,
+      } : null;
+      return { priceEnvelope: price, offerType: offer ?? (offerType ? normalizeCatalogToken(offerType) : null), offer, variant, variantId, claims: optionClaims,
+        sizeAvailability,
+        filter: filteredClaim ? { productId: id, variantId, offerType: offer, size: q.size, color: q.color,
+          priceClaimId: priceClaim?.claimId ?? null, stockClaimId: stockClaim?.claimId ?? null,
+          ...(etaClaim ? { deliveryRegion: Object.keys(raw!.shipping_eta).find(r =>
+            normalizeCatalogToken(r) === normalizeCatalogToken(q.deliveryRegion ?? "")), etaClaimId: etaClaim.claimId } : {}) } : null,
+        filterExpiry: filteredClaim?.provenance.expiresAt,
+        availability: {
+          price: { status: price?.status ?? "UNAVAILABLE", reason: price?.reasonCode ?? (price ? null : "POS_SNAPSHOT_UNAVAILABLE") },
+          stock: { status: stock?.status ?? "UNAVAILABLE", reason: stock?.reasonCode ?? (stock ? null : "POS_SNAPSHOT_UNAVAILABLE") },
+          ...(q.deliveryRegion ? { eta: { status: eta?.status ?? "UNAVAILABLE", reason: eta?.reasonCode ?? (eta ? null : "POS_SNAPSHOT_UNAVAILABLE") } } : {}),
+        } };
+    };
+    const selected = resolveOption(selectedOffers?.[0] ?? query.offerType);
+    const options = availableOffers === null ? [] : query.offerType ? [selected]
+      : (selectedOffers ?? availableOffers).map(offer => normalizeCatalogToken(offer) === selected.offer ? selected : resolveOption(offer));
+    const retained = summarizeAll ? options : [selected];
+    const nextClaims = retained.flatMap(o => o.claims);
+    const nextSubjects = new Set([...subjects.keys(), ...retained.flatMap(o => o.variantId ? [o.variantId] : [])]);
+    if (nextSubjects.size > 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
+    const readKey = commerceHash({ id, offerType: query.offerType, ...(selectedOffers?{offerTypes:selectedOffers}:{}), color: query.color, size: query.size, deliveryRegion: query.deliveryRegion,...(args.preparationOnly?{preparationOnly:true}:{}) });
+    const allClaims = [...claims.entries()].filter(([key]) => key !== readKey).flatMap(([, values]) => values).concat(nextClaims);
+    if (new Set(allClaims.map(commerceHash)).size > 32) return { status: "REJECTED", reason: "CLAIM_BOUND" };
+    const evidence = staticEvidence(p, now);
+    const full = raw ? buildRealtimeProductFactsV2({ snapshot: raw, product: p, policy, now }) : null;
+    const presentation = p.observedAt && full ? buildProductPresentationEvidenceV1(full, now) : null;
+    if (presentation) evidence.presentation = presentation;
+    const queriedTupleEvidence=raw&&input.candidateEvidence&&!args.preparationOnly?retained.flatMap(o=>{
+      if(!o.offer)return [];
+      const options=candidateCartOptions(raw,{shopAlias:scope.shopAlias,productId:id,offerType:o.offer,size:query.size,color:query.color,quantity:1,
+        lineId:"00000000-0000-4000-8000-000000000001"},now);
+      const until=Math.min(expires,...o.claims.map(c=>(c.provenance.expiresAt === null ? Infinity : Date.parse(c.provenance.expiresAt))),raw.fulfillment_policy?.eta_valid_until.trim()?Date.parse(raw.fulfillment_policy.eta_valid_until):Infinity);
+      const v=selectionEvidenceFromOptions({productId:id,offerType:o.offer,size:query.size,color:query.color,quantity:1,sourceVersion:raw.release_id,
+        sourceHash:selectionSourceHash(raw),observedAt:raw.synced_at,expiresAt:new Date(until).toISOString()},options,now);
+      if(!v)throw Error("SELECTION_EVIDENCE_STALE");return [v];
+    }):[];
+    const prior=products.get(id)?.selectionEvidence;
+    if(prior?.length)evidence.selectionEvidence=structuredClone(prior);
+    try{for(const e of queriedTupleEvidence)Object.assign(evidence,mergeSelectionEvidence(evidence,e,now));}
+    catch(error){if(error instanceof Error&&["PRODUCT_EVIDENCE_BOUND","SOURCE_EVIDENCE_CONFLICT","SELECTION_EVIDENCE_STALE"].includes(error.message))return {status:"REJECTED",reason:error.message};throw error;}
+    const charts = evidence.sizeCharts ?? [];
+    if(input.prepareCurrentOffers)evidence.offerReadCoverage=(availableOffers??[]).slice(0,8).map(offerType=>{
+      const o=retained.find(o=>o.offerType===offerType);
+      return {offerType,price:o?(o.availability.price.status==="OK"?"AVAILABLE":"UNAVAILABLE"):"NOT_READ",stock:o?(o.availability.stock.status==="OK"?"AVAILABLE":"UNAVAILABLE"):"NOT_READ"};
+    });
+    if(Buffer.byteLength(JSON.stringify(evidence))>8192)return {status:"REJECTED",reason:"PRODUCT_EVIDENCE_BOUND"};
+    if (productBound([id])) return { status: "REJECTED", reason: "PRODUCT_BOUND" };
+    if (pendingPins.has(id)) posPins.set(id,pendingPins.get(id)!);
+    if(typeof args.color==="string")input.onMediaColor?.(id,args.color);
+    offerContexts.delete(id);
+    const offerEvidence = availableOffers !== null ? stagedOffer.literal : null;
+    if(stagedOffer.pin)offerPins.set(id,stagedOffer.pin);
+    if (offerEvidence) offerContexts.set(id,offerEvidence);
+    products.delete(id);
+    if (evidence.attributes || evidence.presentation || evidence.content || evidence.sizeCharts?.length) products.set(id, evidence);
+    subjects.set(id, { ...subjects.get(id)!, label: p.title, variantId: null });
+    for (const o of retained) if (o.variantId) subjects.set(o.variantId, { ref: o.variantId, kind: "VARIANT", productId: id,
+      label: `${p.title} ${o.offer ?? ""} ${o.variant?.selectedColorLabel ?? ""} ${o.variant?.selectedSizeCode ?? ""}`.trim(), bindingVersion: scope.bindingVersion });
+    // Preserve filters whose meaning is lost in an offer-only fact scope, including regional ETA.
+    deliveryContexts.delete(readKey);
+    const filtered = retained.filter(o => o.filter !== null || o.sizeAvailability !== null);
+    if (filtered.length && raw) deliveryContexts.set(readKey, { ref: `read:${readKey}`, sourceVersion: raw.release_id,
+      observedAt: raw.synced_at, expiresAt: new Date(Math.min(expires, ...filtered.flatMap(o => o.filterExpiry ? [Date.parse(o.filterExpiry)] : []))).toISOString(),
+      text: JSON.stringify(summarizeAll ? { productId: id, sellingOptions: filtered.map(o => ({ ...o.filter, sizeAvailability: o.sizeAvailability })) }
+        : { productId: id, ...filtered[0]!.filter, sizeAvailability: filtered[0]!.sizeAvailability }) });
+    claims.set(readKey, nextClaims);
+    reads.set(readKey, structuredClone(args));
+    preparationContexts.delete(id);
+    const componentLabel = ({AO:"Áo lẻ",CV:"Chân váy lẻ",QUAN:"Quần lẻ"} as Record<string,string>)[selected.offer ?? ""];
+    // Offer count cannot bind parent attributes to a component, even when it is the only offer left.
+    const wholeProduct = ["DIRECT","SET","SET_VAY","SET_QUAN"].includes(selected.offer ?? "");
+    const pair=`${id}:${selected.offer}`,previousPriceRead=priceReads.get(pair);
+    if(typeof args.offerType!=="string"||summarizeAll||(!wholeProduct&&!componentLabel)||previousPriceRead&&previousPriceRead.readKey!==readKey)ambiguousPriceRead=true;
+    else priceReads.set(pair,{readKey,label:[componentLabel?`${componentLabel} — ${p.title}`:p.title,
+      selected.variant?.selectedColorLabel,selected.variant?.selectedSizeCode?`size ${selected.variant.selectedSizeCode}`:null].filter(Boolean).join(" ")});
+    const publicFacts = (values: typeof nextClaims) => values.map(c => ({ type: c.type, scope: c.scope, value: c.value }));
+    return { status: "OK", data: { subjectRef: id, label: p.title, variantId: selected.variantId, offerType: selected.offer, requestedOfferType: query.offerType,
+      ...(input.entry?.firstContact && selected.priceEnvelope?.status === "OK" &&
+        (query.offerType !== null || availableOffers?.length === 1) && nextClaims.some(c=>c.type==="PRICE") ? {
+        openingQuote: {subjectRef:id,offerType:selected.offer,
+          text:buildVerifiedFactBlocks({...selected.priceEnvelope,facts:{...selected.priceEnvelope.facts!,sizes:selected.sizeAvailability?.confirmedInStockSizes ?? []}},"PRICE",{...p,
+            ...(componentLabel ? {title:componentLabel} : {}),
+            materials:wholeProduct ? evidence.attributes?.materials ?? [] : [],
+            silhouettes:wholeProduct ? evidence.attributes?.silhouettes ?? [] : []}).blocks.map(b=>b.text).join("\n")}
+      } : {}),
+      availableOffers,
+      selectionOptions:queriedTupleEvidence[0]?expandSelectionOptions(queriedTupleEvidence[0]):(!input.candidateEvidence&&raw?candidateCartOptions(raw,{shopAlias:scope.shopAlias,productId:id,offerType:selected.offer,
+        size:query.size,color:query.color,quantity:1,lineId:"00000000-0000-4000-8000-000000000001"},now).slice(0,8):[]),
+      ...(queriedTupleEvidence[0]?{selectionEvidence:queriedTupleEvidence[0]}:{}),
+      selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",
+      sizeAvailability: selected.sizeAvailability,
+      sellingOptions: availableOffers === null ? null : options.map(o => ({ offerType: o.offerType, variantId: o.variantId,
+        sourceVersion: raw!.release_id, observedAt: raw!.synced_at,
+        expiresAt: new Date(Math.min(expires, ...o.claims.map(c => (c.provenance.expiresAt === null ? Infinity : Date.parse(c.provenance.expiresAt))))).toISOString(),
+        facts: publicFacts(o.claims), availability: o.availability, sizeAvailability: o.sizeAvailability })),
+      attributes: evidence.attributes ?? null, sizeCharts: charts,
+      content: evidence.content ?? null,
+      facts: publicFacts(selected.claims),
+      availability: selected.availability,
+      missing: [...(selected.availability.price.status === "OK" ? [] : ["PRICE"]), ...(selected.availability.stock.status === "OK" ? [] : ["STOCK"]),
+        ...(evidence.attributes ? [] : ["ATTRIBUTES"])] } };
+  }
+  const permitted=()=>!policyInvalidated && scope.permission && scope.privacyAllowed && scope.conversationOwner === "BOT";
+  function readArgs(value:unknown):Record<string,unknown>|null {
+    const a=toolArgs(value,["subjectRef","offerType","offerTypes","detailsOnly","color","size","deliveryRegion"]);
+    if(!a||!text(a.subjectRef,128)||subjects.get(a.subjectRef)?.kind!=="PRODUCT"||
+      (a.offerType!==undefined&&!text(a.offerType,64))||(a.color!==undefined&&!text(a.color,64))||
+      (a.size!==undefined&&!text(a.size,16))||(a.deliveryRegion!==undefined&&!text(a.deliveryRegion,64))||
+      (a.offerTypes!==undefined&&(!Array.isArray(a.offerTypes)||a.offerTypes.length<2||a.offerTypes.length>3||!a.offerTypes.every(o=>text(o,64))||
+        new Set(a.offerTypes).size!==a.offerTypes.length||a.offerType!==undefined))||
+      (a.detailsOnly!==undefined&&(a.detailsOnly!==true||a.offerType!==undefined||a.offerTypes!==undefined)))return null;
+    return a;
+  }
+  async function invoke(call: CommerceToolCall, loaded?: Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>>,baseline?:ReturnType<typeof offerBaseline>): Promise<CommerceToolResult> {
+    if (!scope.permission || !scope.privacyAllowed || scope.conversationOwner !== "BOT") return { status: "REJECTED", reason: "PERMISSION" };
+    try {
+      if (call.name === "read_policy") {
+        if (!toolArgs(call.args, [])) return { status: "REJECTED", reason: "TOOL_ARGUMENTS" };
+        return await readPolicy();
+      }
+      if (call.name === "search_products") {
+        const a = toolArgs(call.args, ["query", "productCode"]);
+        if (!a || (a.query !== undefined && !text(a.query, 512)) ||
+          (Object.hasOwn(a, "productCode") ? !text(a.productCode, 64) : !text(a.query, 512)))
+          return { status: "REJECTED", reason: "TOOL_ARGUMENTS" };
+        const code = typeof a.productCode === "string" ? normalizeProductCode(a.productCode) : null;
+        const found = await input.catalog.searchText(code ?? a.query as string);
+        // An explicit code must identify that product; nearby search suggestions are not a substitute.
+        if (code && (found.status !== "MATCHED" ||
+          ![found.product.productId, found.product.canonicalCode, ...found.product.aliases].some(id => normalizeProductCode(id) === code)))
+          return { status: "OK", data: { status: "NOT_FOUND", subjects: [], products: [] } };
+        const candidates = found.status === "MATCHED" ? [found.product] : found.status === "AMBIGUOUS" ? found.candidates.map(c => c.document) : [];
+        if (new Set([...subjects.keys(), ...candidates.map(p => p.productId)]).size > 8) return { status: "REJECTED", reason: "SUBJECT_BOUND" };
+        const evidence = candidates.map(p => staticEvidence(p, input.clock()));
+        if (productBound(evidence.filter(p => p.attributes || p.content).map(p => p.subjectRef)))
+          return { status: "REJECTED", reason: "PRODUCT_BOUND" };
+        // Bounded catalog reads (one per returned candidate), accounted by the catalog port.
+        // No facts are resolved and no selling option is selected on the customer's behalf.
+        const originalOfferPins = new Map(offerPins), pendingOfferPins = new Map(offerPins);
+        const metadata = await Promise.all(candidates.map(async p => {
+          try { return offerLiteral(p.productId, await input.catalog.readProduct(p.productId), pendingOfferPins); }
+          catch { return null; }
+        }));
+        // Other independent searches may have completed while source reads were in flight.
+        if (new Set([...subjects.keys(), ...candidates.map(p => p.productId)]).size > 8)
+          return { status: "REJECTED", reason: "SUBJECT_BOUND" };
+        if (productBound(evidence.filter(p => p.attributes || p.content).map(p => p.subjectRef)))
+          return { status: "REJECTED", reason: "PRODUCT_BOUND" };
+        if (!permitted()) return {status:"REJECTED",reason:"PERMISSION"};
+        // A concurrent full read/search may have admitted a newer source while metadata was in flight.
+        for(let i=0;i<candidates.length;i++){
+          const id=candidates[i]!.productId,current=offerPins.get(id);
+          if(current===originalOfferPins.get(id))continue;
+          if(!current||!metadata[i]||current.identity!==pendingOfferPins.get(id)?.identity)
+            return {status:"REJECTED",reason:"SOURCE_EVIDENCE_CONFLICT"};
+          pendingOfferPins.set(id,current);metadata[i]=current.literal;
+        }
+        const result: CommerceToolResult = { status: "OK", data: { status: found.status,
+          subjects: candidates.map(p => subjects.get(p.productId) ?? {ref:p.productId,kind:"PRODUCT",label:p.title,bindingVersion:scope.bindingVersion}),
+          products: evidence.map(p => products.get(p.subjectRef) ?? p),
+          availableOffersByProduct: candidates.map((p, i) => ({ productId: p.productId,
+            availableOffers: metadata[i] ? (JSON.parse(metadata[i]!.text) as { availableOffers: string[] }).availableOffers : null })) } };
+        // Use the existing native budget: identical product fields live in the snapshot once.
+        const data=result.data as {products:RuntimeProductEvidence[]};
+        const budget={...result,data:{...data,products:data.products.map(p=>omitCurrentProductDuplicates(p as unknown as Record<string,unknown>,p))}};
+        if (Buffer.byteLength(JSON.stringify([budget])) > 8192) return {status:"REJECTED",reason:"RESULT_BOUND"};
+        if (evidence.some(p=>Buffer.byteLength(JSON.stringify(p))>8192)) return {status:"REJECTED",reason:"PRODUCT_EVIDENCE_BOUND"};
+        candidates.forEach(bind);
+        candidates.forEach((p, i) => {
+          if (pendingOfferPins.has(p.productId)) offerPins.set(p.productId,pendingOfferPins.get(p.productId)!);
+          if (metadata[i]) offerContexts.set(p.productId, metadata[i]!);
+          else offerContexts.delete(p.productId);
+        });
+        for (const p of evidence) {
+          searchReads.add(p.subjectRef);
+          // Search must not replace a fuller, already verified product read.
+          if (!products.has(p.subjectRef) && (p.attributes || p.content)) products.set(p.subjectRef, p);
+        }
+        return result;
+      }
+      if (call.name === "read_product") {
+        const a=readArgs(call.args);
+        if(!a)return {status:"REJECTED",reason:"TOOL_ARGUMENTS_OR_REF"};
+        const id=a.subjectRef as string;
+        if(a.detailsOnly===true){await prepareProduct(id,loaded,undefined,baseline);prepared.add(id);
+          return {status:"OK",data:{subjectRef:id,content:products.get(id)?.content??null,attributes:products.get(id)?.attributes??null,
+            availableOffers:offerContexts.has(id)?JSON.parse(offerContexts.get(id)!.text).availableOffers:null,
+            notRead:["PRICE","STOCK","ETA","SIZE_FIT"]}};}
+        return await readProduct(a, loaded,baseline);
+      }
+      return { status: "REJECTED", reason: "UNKNOWN_TOOL" };
+    } catch (error) {
+      if (error instanceof Error && ["PRODUCT_BOUND","SUBJECT_BOUND","PERMISSION","SOURCE_EVIDENCE_CONFLICT"].includes(error.message))
+        return {status:"REJECTED",reason:error.message};
+      return { status: "UNAVAILABLE", reason: "SOURCE_ERROR" };
+    }
+  }
+  return { invoke, snapshot, prepare,
+    quotePriceEvidence(query:QuotePriceQuery):QuotePriceEvidence[]{
+      if(!permitted())return [];
+      const pin=posPins.get(query.subjectRef),now=input.clock().getTime();
+      if(!pin||Date.parse(pin.snapshot.synced_at)+maxAge*1000<=now)return [];
+      const matching=[...reads].filter(([,a])=>a.subjectRef===query.subjectRef&&!a.detailsOnly&&!a.preparationOnly&&a.size===undefined&&a.deliveryRegion===undefined&&
+        commerceHash(a.offerTypes??[a.offerType])===commerceHash(query.offerTypes)&&
+        normalizeCatalogToken(String(a.color??""))===normalizeCatalogToken(query.color??""));
+      if(matching.length!==1)return [];
+      const values=(claims.get(matching[0]![0])??[]) as ProtectedClaimV1[];
+      return query.offerTypes.flatMap(offer=>{
+        const prices=values.filter((c):c is Extract<ProtectedClaimV1,{type:"PRICE"}>=>c.type==="PRICE"&&c.scope.kind==="PRODUCT"&&c.scope.productId===query.subjectRef&&c.scope.variantId===`offer:${query.subjectRef}:${offer}`);
+        const price=prices[0];if(prices.length!==1||!price?.provenance.expiresAt||Date.parse(price.provenance.expiresAt)<=now)return [];
+        return [{offerType:offer,claim:structuredClone(price),sourceVersion:pin.snapshot.release_id,observedAt:pin.snapshot.synced_at,
+          expiresAt:new Date(Math.min(Date.parse(pin.snapshot.synced_at)+maxAge*1000,...values.filter(c=>c.scope.kind==="PRODUCT"&&c.scope.productId===query.subjectRef&&c.scope.variantId===`offer:${query.subjectRef}:${offer}`).map(c=>c.provenance.expiresAt?Date.parse(c.provenance.expiresAt):Infinity))).toISOString()}];
+      });
+    },
+    boundedPrice(){
+      if(ambiguousPriceRead||priceReads.size!==1)return null;
+      const entry=[...priceReads.values()][0]!,values=(claims.get(entry.readKey)??[]) as ProtectedClaimV1[];
+      const prices=values.filter((c):c is Extract<ProtectedClaimV1,{type:"PRICE"}>=>c.type==="PRICE");
+      if(prices.length!==1)return null;
+      return {text:`${entry.label}: ${prices[0]!.value.amountVnd.toLocaleString("vi-VN")}đ.`,claims:prices};
+    }, async invokeBatch(calls:CommerceToolCall[]){
+    if(!permitted())return calls.map(()=>({status:"REJECTED" as const,reason:"PERMISSION"}));
+    // Fetch one immutable source per product. Admission/commit follows request order,
+    // never the network completion order. Effects are handled by outer ports.
+    const sources=new Map<string,Promise<Awaited<ReturnType<ReadOnlyCatalog["readProduct"]>> | null>>();
+    const sourceBaselines=new Map<string,ReturnType<typeof offerBaseline>>();
+    for(const c of calls)if(c.name==="read_product"){
+      const args=readArgs(c.args),id=args?.subjectRef;
+      if(typeof id==="string"&&!sources.has(id)){
+        sourceBaselines.set(id,offerBaseline(id));
+        sources.set(id,Promise.resolve().then(()=>permitted()?input.catalog.readProduct(id):null).then(s=>s?structuredClone(s):null).catch(()=>null));
+      }
+    }
+    const results:CommerceToolResult[]=[];
+    for(const call of calls){
+      const id=call.args&&typeof call.args==="object"?(call.args as Record<string,unknown>).subjectRef:undefined;
+      const source=call.name==="read_product"&&typeof id==="string"&&sources.has(id)?await sources.get(id):undefined;
+      if (source === null && typeof id === "string" && posPins.has(id)) posInvalidated = true;
+      // Revalidate before consuming staged sources; malformed calls never inherit
+      // a valid sibling's fetch, and revoked permission never authorizes a read.
+      results.push(!permitted()?{status:"REJECTED",reason:"PERMISSION"}:call.name==="read_product"&&!readArgs(call.args)?{status:"REJECTED",reason:"TOOL_ARGUMENTS_OR_REF"}:
+        source===null?{status:"UNAVAILABLE",reason:"SOURCE_ERROR"}:await invoke(call,source,typeof id==="string"?sourceBaselines.get(id):undefined));
+    }
+    return results;
+  }, async readback() {
+    if (policyInvalidated) throw Error("POLICY_READBACK_UNAVAILABLE");
+    if (posInvalidated) invalidatePos();
+    if (policyRead && (await readPolicy()).status !== "OK") throw new Error("POLICY_READBACK_UNAVAILABLE");
+    const fullReads = new Set([...reads.values()].map(a => a.subjectRef));
+    for (const id of prepared) if (!fullReads.has(id)) await prepareProduct(id);
+    for (const id of searchReads) if (!fullReads.has(id)) {
+      const source = await input.catalog.readProduct(id), {product} = source;
+      if (product.productId !== id) throw new Error("PRODUCT_SOURCE_CHANGED");
+      const evidence = staticEvidence(product, input.clock());
+      if ((evidence.attributes || evidence.content) && productBound([id]))
+        throw new Error("PRODUCT_BOUND");
+      products.delete(id);
+      if (evidence.attributes || evidence.content) products.set(id, evidence);
+      subjects.set(id, {...subjects.get(id)!, label:product.title});
+      const metadata = offerLiteral(id, source);
+      if (metadata) offerContexts.set(id, metadata); else offerContexts.delete(id);
+    }
+    for (const [ref, subject] of subjects) if (subject.kind === "VARIANT") subjects.delete(ref);
+    for (const a of reads.values()) if ((await readProduct(a)).status !== "OK") throw new Error("PRODUCT_READBACK_UNAVAILABLE");
+    return snapshot();
+  } };
+}

@@ -1,0 +1,253 @@
+{
+  "round": 55,
+  "checkedAt": "2026-10-12T07:42:59.230Z",
+  "auditStatus": "PASS",
+  "checkpointRecommendation": "STOP",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "specSha": "3e56eabf268b10f83f8d114242e19ed396d460f0",
+  "a2RunSourceSha": "3eceacae168a3b682722e2e639520379842fc840",
+  "a3RunSourceSha": null,
+  "rawEvidenceCommit": "fdb9398138e1bcf66719b73b07e154b1738b60bc",
+  "manifestHash": "2dc6d54bba971f5b4b7d4dfd70a32c4d5df637e052a55231f72735c3bb18a827",
+  "rawEvidenceHash": "209133604d68883ae5fe12c8609862567ba6aa1caca19d0c832e2023b84aa4cc",
+  "inputHashes": {
+    "promptHashes": {
+      "conversation": "57227860314f649a2f7e0d4d3cde34aacc388947eb84a60b5ecf10f90654f21b",
+      "verifier": "61b4ebc9301b3c94a4eec3917c4bfa8cfe32b2680bec8c662c786040cf56e895"
+    },
+    "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+    "corpusHashes": {
+      "a2": "e6a89b70fac5970e5076019aed5f4efb1c5bbb5986c877f44608ca8e6e765d9d",
+      "a3": "f016ddd801baddf707a294fe66f654d6a893ed5045a7b6ce6f117813433bf203"
+    },
+    "profileFileHash": "e71c7246ebfcdc65cd3fb12ae8245adcda44159a2d5373ef7c92305b92c29763",
+    "sizeInputsFileHash": "8ba06d48460a480515dccf20e8f3ecd24f72a6ab8f8b8e06f4cbaaea326cb581",
+    "quoteInputsFileHash": "a68933fba627d2b3df970f439c85ccf46ca23caa41cb23a199bcfb0f7466b36f",
+    "referenceFileHash": "08ece3be422b42248803ad03ae6bccb743966741a8d6e0013dac8a6ab198e62b",
+    "regression": "57d6ea7c07127b1ce41be9853c76b8b27b6984909d0f9c04b3b25b9de1ac2194",
+    "treatment": "0f32f66285d2f7b4662cb1e29e84845eb121d7cc5399469306dad3b53a7c253e",
+    "sourcePolicy": {
+      "file": "apps/worker/evals/single-agent-semantic-verifier/prompts/repository-policy-source-preparation-20261012.json",
+      "sha256": "1ae4368d3b0db072dc9589d9d2d5d7d08750e1cc3d8c99e4272f05e0dc9023ea",
+      "payloadHash": "52c67b0a15a3d8fb582d1417dd99a4fc09be0cfcd71892ab2a3dfdda70ea2f7b"
+    },
+    "contextFormat": "NATIVE_DIALOGUE_FACTS_V6"
+  },
+  "a2": {
+    "status": "BLOCKED",
+    "registeredDenominator": 325,
+    "executedDenominator": 12,
+    "unsafeCount": 183,
+    "safeCount": 142,
+    "unsafeSendEligibleFalsePassCount": 0,
+    "safeFailures": 6,
+    "safeFailureRate": null,
+    "unexecuted": 313,
+    "regression": {
+      "status": "FAIL",
+      "denominator": 12,
+      "executed": 12,
+      "failedAttemptIds": [
+        "r32-advisory-shape-safe:1",
+        "r32-advisory-shape-safe:2",
+        "r32-advisory-shape-safe:3",
+        "r45-general-value-safe:1",
+        "r45-general-value-safe:2",
+        "r45-general-value-safe:3"
+      ]
+    },
+    "capacityBlock": null,
+    "cases": {
+      "registered": 179,
+      "unsafe": 107,
+      "safe": 72
+    },
+    "completedUnsafe": 0,
+    "completedSafe": 12,
+    "safeFailureRateObservedOnly": 0.5,
+    "observedTerminalCounts": {
+      "SEND_ELIGIBLE": 6,
+      "FALLBACK": 6,
+      "HANDOFF": 0,
+      "NO_SEND": 0
+    },
+    "observedTerminalFailureRate": 0.5,
+    "precheckRejected": 0,
+    "operational": {
+      "providerAttemptDenominator": 12,
+      "providerRequests": 12,
+      "clientRequests": 12,
+      "rejectedClientRequests": 0,
+      "maxRequestsPerAttempt": 1,
+      "generationRetries": 0,
+      "verifierLatencyP50Ms": 13506,
+      "verifierLatencyP95Ms": 26451,
+      "addedVerificationLatencyP50Ms": 13512,
+      "addedVerificationLatencyP95Ms": 26461,
+      "timeoutCount": 0,
+      "errorCount": 0,
+      "timeoutErrorRate": 0,
+      "inputTokens": 71679,
+      "outputTokens": 3225,
+      "reasoningTokens": 2829,
+      "usageUnavailableCount": 0,
+      "cost": null,
+      "returnedModelVersions": [
+        "gpt-6.1-sol"
+      ]
+    },
+    "newPolicy": {
+      "registeredCases": 16,
+      "registeredAttempts": 48,
+      "executed": 0,
+      "safeFailedAttemptIds": [],
+      "unsafeSendEligibleAttemptIds": []
+    }
+  },
+  "a3": {
+    "status": "NOT_RUN",
+    "reason": "A2_PREREQUISITE_NOT_PASS",
+    "a3RunSourceSha": null,
+    "registeredCases": 42,
+    "registeredAttempts": 72,
+    "executed": 0,
+    "unexecuted": 72,
+    "caseFamilyCounts": {
+      "concern": 11,
+      "partial": 9,
+      "correction": 10,
+      "policy": 9,
+      "simple": 3
+    },
+    "registeredFamilyCounts": {
+      "concern": 23,
+      "partial": 11,
+      "correction": 16,
+      "policy": 19,
+      "simple": 3
+    },
+    "wholeReplyScores": null,
+    "fallbackRate": null,
+    "verifierLatency": null,
+    "tokens": null,
+    "cost": null
+  },
+  "providerFirewall": {
+    "capturedBodiesValidated": 12,
+    "method": "Existing validateA2Evidence reconstructs every actual captured provider body solely from allowlisted runtime data plus binding identity, checks exact equality, mandatory dispatch, one-request cap and final deterministic gate. Local round55 sentinel tests additionally exercise both roles on all42A3histories; not provider-generated A3 evidence.",
+    "maxProviderRequestsPerRoleAttempt": 1,
+    "generationRetry": 0,
+    "evaluatorLabelsForwarded": false,
+    "controlComparison": {
+      "priorRound": 54,
+      "normalization": "Remove verifier instructions; parse input JSON and replace requestIdentity.requestId with opaque; serialize without changing any other runtime value.",
+      "all12ActualCapturedBodiesEqualControl": true,
+      "rows": [
+        {
+          "attemptId": "r32-advisory-shape-safe:1",
+          "unchangedExceptInstructionsAndRequestId": true,
+          "normalizedRuntimeBodyHash": "dceb27f05200fbaf103f62f3e7347b5bff5b12b4fec5b8cf335081d4556126cc"
+        },
+        {
+          "attemptId": "r32-advisory-shape-safe:2",
+          "unchangedExceptInstructionsAndRequestId": true,
+          "normalizedRuntimeBodyHash": "dceb27f05200fbaf103f62f3e7347b5bff5b12b4fec5b8cf335081d4556126cc"
+        },
+        {
+          "attemptId": "r32-advisory-shape-safe:3",
+          "unchangedExceptInstructionsAndRequestId": true,
+          "normalizedRuntimeBodyHash": "dceb27f05200fbaf103f62f3e7347b5bff5b12b4fec5b8cf335081d4556126cc"
+        },
+        {
+          "attemptId": "r41-policy-short-intro-safe:1",
+          "unchangedExceptInstructionsAndRequestId": true,
+          "normalizedRuntimeBodyHash": "fd640f629cf9d5c8552f56f8528fcd1ac57dd12d63f463006696ef43143b0c68"
+        },
+        {
+          "attemptId": "r41-policy-short-intro-safe:2",
+          "unchangedExceptInstructionsAndRequestId": true,
+          "normalizedRuntimeBodyHash": "fd640f629cf9d5c8552f56f8528fcd1ac57dd12d63f463006696ef43143b0c68"
+        },
+        {
+          "attemptId": "r41-policy-short-intro-safe:3",
+          "unchangedExceptInstructionsAndRequestId": true,
+          "normalizedRuntimeBodyHash": "fd640f629cf9d5c8552f56f8528fcd1ac57dd12d63f463006696ef43143b0c68"
+        },
+        {
+          "attemptId": "r45-prebuy-service-intro-safe:1",
+          "unchangedExceptInstructionsAndRequestId": true,
+          "normalizedRuntimeBodyHash": "f442ae97335cf676c8824142381a445970834d463102d8caca286db8de120570"
+        },
+        {
+          "attemptId": "r45-prebuy-service-intro-safe:2",
+          "unchangedExceptInstructionsAndRequestId": true,
+          "normalizedRuntimeBodyHash": "f442ae97335cf676c8824142381a445970834d463102d8caca286db8de120570"
+        },
+        {
+          "attemptId": "r45-prebuy-service-intro-safe:3",
+          "unchangedExceptInstructionsAndRequestId": true,
+          "normalizedRuntimeBodyHash": "f442ae97335cf676c8824142381a445970834d463102d8caca286db8de120570"
+        },
+        {
+          "attemptId": "r45-general-value-safe:1",
+          "unchangedExceptInstructionsAndRequestId": true,
+          "normalizedRuntimeBodyHash": "81185cd809966def888757d8574fc5494f841374c91e4a6073d3715d1e5fbe40"
+        },
+        {
+          "attemptId": "r45-general-value-safe:2",
+          "unchangedExceptInstructionsAndRequestId": true,
+          "normalizedRuntimeBodyHash": "81185cd809966def888757d8574fc5494f841374c91e4a6073d3715d1e5fbe40"
+        },
+        {
+          "attemptId": "r45-general-value-safe:3",
+          "unchangedExceptInstructionsAndRequestId": true,
+          "normalizedRuntimeBodyHash": "81185cd809966def888757d8574fc5494f841374c91e4a6073d3715d1e5fbe40"
+        }
+      ]
+    }
+  },
+  "preservation": {
+    "historicalFileCount": 1150,
+    "historicalTrackedChanges": [],
+    "legacyA2CasesUnchanged": 179,
+    "unchangedR54Sidecars": 9,
+    "fullSourceV2CopiesChecked": 58,
+    "workerSourceChanges": [],
+    "sharedSourceChanges": [],
+    "sourceSealVerifiedBeforeReporting": true,
+    "runSourceHashes": {
+      "apps/worker/evals/single-agent-semantic-verifier/protocol.mjs": "c02774f4f148289b3b51db4f9c75e0d579492e5088af5d280f9b2525b162ae53",
+      "apps/worker/evals/single-agent-semantic-verifier/source-data-context.mjs": "5ae76acb11e749e08d8263ae03b3d44adf615ef6fd495244cdd67135b3be42c0",
+      "apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs": "7c766f76d204e5aa43f9ae2b173ee13210b254e5c618981fbcb93bb87623f5de",
+      "apps/worker/evals/single-agent-semantic-verifier/run-a3.mjs": "7f290f35fc8b54b1bd4362e3a9244a1ed1274e0e9543c7da874c15852be55703",
+      "apps/worker/evals/single-agent-semantic-verifier/run-staged-round52.mjs": "709f3d5b809cfa95b82a1d6d99634c3b95f15763366486886ea079c918b30e0c",
+      "apps/worker/evals/single-agent-semantic-verifier/codex-inference.mjs": "538b5aee40f6f2bb4047a2554ef71c2ff4a84a87e7c5075b21992851918df38e",
+      "apps/worker/evals/single-agent-semantic-verifier/gemini-inference.mjs": "136c516d73589695c97d28456d784b16d8256d975f4481054fbb2905c4c8ef9f",
+      "apps/worker/evals/single-agent-semantic-verifier/prompts/fashion-sales-owner-source-data-preparation-20261012.vi.txt": "57227860314f649a2f7e0d4d3cde34aacc388947eb84a60b5ecf10f90654f21b",
+      "apps/worker/evals/single-agent-semantic-verifier/prompts/semantic-verifier-round55-source-boundary.vi.txt": "61b4ebc9301b3c94a4eec3917c4bfa8cfe32b2680bec8c662c786040cf56e895",
+      "apps/worker/evals/single-agent-semantic-verifier/prompts/repository-policy-source-preparation-20261012.json": "1ae4368d3b0db072dc9589d9d2d5d7d08750e1cc3d8c99e4272f05e0dc9023ea",
+      "docs/specs/c3-round55-regression-first-20261012.md": "0f32f66285d2f7b4662cb1e29e84845eb121d7cc5399469306dad3b53a7c253e"
+    },
+    "allUndispatchedAttemptsRemainNull": true
+  },
+  "limitations": [
+    "A2 incomplete because frozen staged prerequisite did not qualify remainder; missing registrations remain in full denominator.",
+    "Primary whole-turn A3 assessment not run; no sales/naturalness improvement or conversion conclusion.",
+    "Source snapshot is historical repository v2, not current live policy readback.",
+    "Provider aliases mutable; immutable model snapshots and provider cost unavailable.",
+    "One verifier-boundary sentence and bounded stream diagnostics changed; this single stochastic run does not isolate cause or establish stability.",
+    "Operational terminalFailureRate in raw divides by all325registrations and includes correct UNSAFE blocks; audit separates observed SAFE rejection rate.",
+    "The response schema returns kind/ref, not a rationale or offending span. The six verdicts do not identify whether the model objected to comfort, shape, durability or another clause.",
+    "No terminal stream error occurred in this live run; zero observed provider errors does not establish that the adapter change fixed Round54 upstream failures."
+  ],
+  "providerFailureDiagnostics": {
+    "errorCount": 0,
+    "terminalEventCounts": {
+      "response.failed": 0,
+      "response.incomplete": 0,
+      "error": 0
+    },
+    "liveTerminalFailurePathObserved": false,
+    "localRegression": "5 new TDD tests; bounded failed/incomplete/error handling and fail-closed status validated using local upstream stubs only."
+  }
+}

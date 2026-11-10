@@ -1,0 +1,107 @@
+{
+  "caseId": "stateful-private-checkout",
+  "journeyId": "sales",
+  "elapsedMs": 5439.130300000004,
+  "result": {
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "DEPENDENCY_FAILURE",
+      "text": null,
+      "fallbackId": null
+    },
+    "sendEnabled": false,
+    "enqueued": 0,
+    "mode": "PRIVATE_CODE_PATH",
+    "privateCheckoutFailure": {
+      "stage": "PLANNER",
+      "reasonCode": "NO_TRANSITION_PLAN",
+      "readinessReasons": []
+    }
+  },
+  "owners": 0,
+  "verifiers": 0,
+  "batch": {
+    "pageId": "1198992073286645",
+    "conversationHash": "183eb8afa07b71685d376af195958d26853cec9b5d7cf88d085bc1ec98e24929",
+    "generation": 5,
+    "leaseToken": "75b37835-9855-49e1-b38e-d140065c7ee4",
+    "inboxIds": [
+      "45cec26d-6456-40ff-86d2-2b2f45371291"
+    ],
+    "evaluationGroupId": "f38a511a-18a5-4da0-bc7b-8643c03ddeec",
+    "eventKind": "CUSTOMER",
+    "firstReceiveSequence": 5,
+    "lastReceiveSequence": 5,
+    "attemptCount": 1,
+    "items": [
+      {
+        "inboxId": "45cec26d-6456-40ff-86d2-2b2f45371291",
+        "pageId": "1198992073286645",
+        "eventKey": "stateful-3c8ce50f-fd20-4d40-8858-b589e58a950b",
+        "conversationHash": "183eb8afa07b71685d376af195958d26853cec9b5d7cf88d085bc1ec98e24929",
+        "occurredAt": "2026-10-16T07:59:46.811Z",
+        "receivedAt": "2026-10-16T07:59:46.811Z",
+        "receiveSequence": 5,
+        "attemptCount": 1,
+        "leaseToken": "75b37835-9855-49e1-b38e-d140065c7ee4",
+        "eventKind": "CUSTOMER",
+        "envelope": {
+          "schemaVersion": 1,
+          "customerSendEnabled": false,
+          "routing": {
+            "owner": "APP"
+          },
+          "message": {
+            "schemaVersion": 1,
+            "traceId": "e6c90779-5e61-479e-b1b1-92bde43a4754",
+            "eventKey": "stateful-3c8ce50f-fd20-4d40-8858-b589e58a950b",
+            "pageId": "1198992073286645",
+            "messageId": "stateful-3c8ce50f-fd20-4d40-8858-b589e58a950b",
+            "senderId": "synthetic-recipient-183eb8afa07b71685d376af195958d26853cec9b5d7cf88d085bc1ec98e24929",
+            "conversationId": "synthetic-meta-conversation",
+            "occurredAt": "2026-10-16T07:59:46.811Z",
+            "isEcho": false,
+            "appId": null,
+            "text": "Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD",
+            "attachments": []
+          }
+        }
+      }
+    ]
+  },
+  "toolResponses": [],
+  "actualCapturedMessages": [],
+  "committedPublicState": {
+    "stage": "DISCOVERY",
+    "revision": 0,
+    "cart": null,
+    "measurements": [
+      {
+        "kind": "WAIST_CM",
+        "value": 74,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-16T07:59:01.508Z",
+          "sourceEventHash": "dc460c8e76d76c5cdac0b7ae96c41434754608e1d25ae3b4482270e879888b93"
+        }
+      },
+      {
+        "kind": "HIPS_CM",
+        "value": 96,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-16T07:59:01.508Z",
+          "sourceEventHash": "dc460c8e76d76c5cdac0b7ae96c41434754608e1d25ae3b4482270e879888b93"
+        }
+      }
+    ],
+    "customerProfileRevision": 3
+  },
+  "counts": {
+    "embedding": 0,
+    "owner": 12,
+    "verifier": 1
+  }
+}

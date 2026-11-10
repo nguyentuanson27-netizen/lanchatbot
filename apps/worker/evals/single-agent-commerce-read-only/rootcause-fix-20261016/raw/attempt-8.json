@@ -1,0 +1,67 @@
+{
+  "caseId": "b1-policy-used",
+  "sourceMode": "LIVE",
+  "elapsedMs": 5265.122300000003,
+  "runtime": {
+    "latest": "Chị đã mặc bộ này đi làm một buổi rồi nhưng về thấy không hợp. Giờ chị đổi sang màu khác được không em? Nếu đổi thì ai chịu phí ship?",
+    "history": [],
+    "initialProductCodes": []
+  },
+  "result": {
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "PROVIDER_ERROR",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 2,
+    "verifierGenerations": 0,
+    "toolRounds": 1,
+    "toolCalls": 1,
+    "generations": [
+      {
+        "id": "6cfcba2f987730b734fa76c4d252abab0c6d69c04c6a105d351dec5230876502:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1409.9756000000052,
+        "telemetry": {
+          "generationId": "6cfcba2f987730b734fa76c4d252abab0c6d69c04c6a105d351dec5230876502:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 2348,
+          "outputTokens": 177,
+          "cost": null,
+          "thinkingTokens": 167
+        }
+      },
+      {
+        "id": "6cfcba2f987730b734fa76c4d252abab0c6d69c04c6a105d351dec5230876502:owner:2",
+        "role": "owner",
+        "status": "PROVIDER_ERROR",
+        "latencyMs": 3010.8329000000085,
+        "telemetry": {
+          "generationId": "6cfcba2f987730b734fa76c4d252abab0c6d69c04c6a105d351dec5230876502:owner:2",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 3318,
+          "outputTokens": 671,
+          "cost": null,
+          "thinkingTokens": 671
+        }
+      }
+    ],
+    "toolLatencyMs": 843.395199999999,
+    "verificationLatencyMs": null
+  },
+  "counters": {
+    "embeddingCalls": 1,
+    "policyReads": 3,
+    "catalogReads": 17,
+    "posReads": 12
+  }
+}

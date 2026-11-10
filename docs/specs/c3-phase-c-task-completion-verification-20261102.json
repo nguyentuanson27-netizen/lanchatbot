@@ -1,0 +1,1062 @@
+{
+  "kind": "C3_PHASE_C_TASK_COMPLETION_IMPLEMENTATION_VERIFICATION",
+  "implementationBaseSha": "33c80efdba2eed221ced1b1485c0546421364e93",
+  "evidenceStatus": "CHECKS_COMPLETE_BOUNDED_IMPLEMENTATION_APPROVED",
+  "independentReview": {
+    "status": "APPROVE_IMPLEMENTATION",
+    "reviewer": "/root/phase_c_task_completion_implementation_review",
+    "reviewedExecutableSha": "fdbb3cf425078f66794cdda3ebf28f0b3df0bca1",
+    "runtimePostgresSha": "5ca28f5ad00cd0140acb3cbc8d007b14176aefb8",
+    "artifactHashesVerified": 63,
+    "sourceGitBlobsVerified": 42,
+    "remainingGateP1": "BOUND_BLOCKED",
+    "remainingGateP2a": "DESIGN_BLOCKED",
+    "modelQuality": "NOT_RUN",
+    "qualification": "BLOCKED"
+  },
+  "planSha256": "3fcfb9e42faa96f38af50a375788f1a722332d217ec29a73f280443fac30c9fd",
+  "specGitBlobs": {
+    "docs/specs/c3-single-agent-commerce-architecture-20261004.md": "7e0265e3b6b3d556d8fb0f3c7267abccef5de86a",
+    "docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md": "4a09b55d2f3a972a65697738876cc5eab21e7a2b"
+  },
+  "noProviderGenerations": true,
+  "noLiveSend": true,
+  "noShopSourceWrites": true,
+  "newConversationQuality": "NOT_RUN",
+  "checks": [
+    {
+      "id": "worker-focused",
+      "log": "../c3-task-completion-final-worker-focused-20261102.log",
+      "startedAt": "2026-11-01T17:59:34.1138959Z",
+      "exitCode": 0,
+      "command": [
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=4",
+        "src/single-agent-commerce",
+        "src/realtime-sales-cycle.test.ts",
+        "src/single-agent-semantic-verifier-boundary.test.ts",
+        "src/track-b-protected-claim-boundary.test.ts"
+      ],
+      "endedAt": "2026-11-01T18:00:00.6945965Z"
+    },
+    {
+      "id": "contracts",
+      "log": "../c3-task-completion-final-contracts-20261102.log",
+      "startedAt": "2026-11-01T18:00:00.7320822Z",
+      "exitCode": 0,
+      "command": [
+        "pnpm",
+        "--filter",
+        "@lana/contracts",
+        "exec",
+        "vitest",
+        "run",
+        "src/v2/canonical-commerce-bindings.test.ts",
+        "src/v2/canonical-evidence-readiness.test.ts"
+      ],
+      "endedAt": "2026-11-01T18:00:04.2149613Z"
+    },
+    {
+      "id": "kernel",
+      "log": "../c3-task-completion-final-kernel-20261102.log",
+      "startedAt": "2026-11-01T18:00:04.2218193Z",
+      "exitCode": 0,
+      "command": [
+        "pnpm",
+        "--filter",
+        "@lana/commerce-kernel",
+        "exec",
+        "vitest",
+        "run"
+      ],
+      "endedAt": "2026-11-01T18:00:07.7639355Z"
+    },
+    {
+      "id": "business",
+      "log": "../c3-task-completion-final-business-20261102.log",
+      "startedAt": "2026-11-01T18:00:07.7685670Z",
+      "exitCode": 0,
+      "command": [
+        "pnpm",
+        "--filter",
+        "@lana/business-tools",
+        "exec",
+        "vitest",
+        "run",
+        "src/canonical-cart-engine.test.ts",
+        "src/protected-claims.test.ts",
+        "src/reply-assembler.test.ts",
+        "src/effect-readiness.test.ts",
+        "src/canonical-evidence.test.ts",
+        "src/negotiation-engine-v2.test.ts"
+      ],
+      "endedAt": "2026-11-01T18:00:12.6212807Z"
+    },
+    {
+      "id": "runtime",
+      "log": "../c3-task-completion-final-runtime-20261102.log",
+      "startedAt": "2026-11-01T18:00:12.6254186Z",
+      "exitCode": 0,
+      "command": [
+        "pnpm",
+        "--filter",
+        "@lana/chat-runtime",
+        "exec",
+        "vitest",
+        "run",
+        "src/sales-cycle-runtime.test.ts"
+      ],
+      "endedAt": "2026-11-01T18:00:17.0586289Z"
+    },
+    {
+      "id": "database",
+      "log": "../c3-task-completion-final-database-20261102.log",
+      "startedAt": "2026-11-01T18:00:17.0727338Z",
+      "exitCode": 0,
+      "command": [
+        "pnpm",
+        "--filter",
+        "@lana/database",
+        "exec",
+        "vitest",
+        "run",
+        "src/realtime-runtime.test.ts"
+      ],
+      "endedAt": "2026-11-01T18:00:22.1982772Z"
+    },
+    {
+      "id": "worker-lint",
+      "log": "../c3-task-completion-final-worker-lint-20261102.log",
+      "startedAt": "2026-11-01T18:00:22.2018142Z",
+      "exitCode": 0,
+      "command": [
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "lint"
+      ],
+      "endedAt": "2026-11-01T18:00:28.4579229Z"
+    },
+    {
+      "id": "worker-typecheck",
+      "command": [
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "log": "../c3-task-completion-sealed-worker-typecheck-20261102.log"
+    },
+    {
+      "id": "worker-build",
+      "command": [
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "build"
+      ],
+      "exitCode": 0,
+      "log": "../c3-task-completion-sealed-worker-build-20261102.log"
+    },
+    {
+      "id": "full-node",
+      "sourceSha": "5ca28f5ad00cd0140acb3cbc8d007b14176aefb8",
+      "command": [
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "test:evals"
+      ],
+      "exitCode": 0,
+      "pass": 789,
+      "fail": 0,
+      "existingSkip": 2,
+      "log": "../c3-task-completion-node-sealed-20261102.log"
+    },
+    {
+      "id": "frozen-native-bound-probe",
+      "sourceSha": "5ca28f5ad00cd0140acb3cbc8d007b14176aefb8",
+      "command": [
+        "node",
+        "../c3-task-completion-offline-sealed-20261102.mjs"
+      ],
+      "exitCode": 0,
+      "result": "../c3-task-completion-offline-sealed-20261102.json"
+    },
+    {
+      "id": "node-reviewed",
+      "sourceSha": "fdbb3cf425078f66794cdda3ebf28f0b3df0bca1",
+      "exitCode": 0,
+      "pass": 793,
+      "fail": 0,
+      "existingSkip": 2,
+      "log": "../c3-task-completion-node-reviewed-20261102.log",
+      "command": [
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "test:evals"
+      ]
+    },
+    {
+      "id": "qualification-reviewed",
+      "sourceSha": "fdbb3cf425078f66794cdda3ebf28f0b3df0bca1",
+      "exitCode": 0,
+      "pass": 107,
+      "fail": 0,
+      "existingSkip": 0,
+      "log": "../c3-task-completion-qualification-reviewed-20261102.log",
+      "command": [
+        "node",
+        "--test",
+        "apps/worker/evals/single-agent-commerce-qualification/*.test.mjs"
+      ]
+    },
+    {
+      "id": "error-accounting-green",
+      "sourceSha": "fdbb3cf425078f66794cdda3ebf28f0b3df0bca1",
+      "exitCode": 0,
+      "pass": 5,
+      "fail": 0,
+      "existingSkip": 0,
+      "log": "../c3-task-completion-error-accounting-green-20261102.log",
+      "command": [
+        "node",
+        "--test",
+        "apps/worker/evals/single-agent-commerce-qualification/task-outcomes.test.mjs"
+      ]
+    },
+    {
+      "id": "exact-preview-domain",
+      "sourceSha": "fdbb3cf425078f66794cdda3ebf28f0b3df0bca1",
+      "exitCode": 0,
+      "pass": 110,
+      "log": "../c3-task-completion-final-domain-test-20261102.log",
+      "command": [
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "exec",
+        "vitest",
+        "run",
+        "src/single-agent-commerce-effects.test.ts"
+      ],
+      "note": "Ran with same three-file delta before commit; direct code/test equality at fdbb"
+    },
+    {
+      "id": "reviewed-typecheck",
+      "sourceSha": "fdbb3cf425078f66794cdda3ebf28f0b3df0bca1",
+      "exitCode": 0,
+      "log": "../c3-task-completion-reviewed-typecheck-20261102.log",
+      "command": [
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "exec",
+        "tsc",
+        "-p",
+        "tsconfig.json",
+        "--noEmit"
+      ]
+    }
+  ],
+  "priorCanonicalSharedChecks": {
+    "kind": "TASK_COMPLETION_CANONICAL_BUILD_AND_TYPECHECK",
+    "sourceSha": "1adf878b70285e4b415cd2b2591f94dea4d81f10",
+    "sourceDirty": false,
+    "status": "PASS",
+    "results": [
+      {
+        "startedAt": "2026-11-01T17:38:35.6214540Z",
+        "id": "worker-build",
+        "endedAt": "2026-11-01T17:39:13.7760750Z",
+        "log": "../c3-task-completion-worker-build-20261102.log",
+        "command": [
+          "pnpm",
+          "--filter",
+          "@lana/worker",
+          "build"
+        ],
+        "exitCode": 0
+      },
+      {
+        "startedAt": "2026-11-01T17:39:13.7990283Z",
+        "id": "worker-typecheck",
+        "endedAt": "2026-11-01T17:39:50.7974327Z",
+        "log": "../c3-task-completion-worker-typecheck-20261102.log",
+        "command": [
+          "pnpm",
+          "--filter",
+          "@lana/worker",
+          "typecheck"
+        ],
+        "exitCode": 0
+      },
+      {
+        "startedAt": "2026-11-01T17:39:50.8013178Z",
+        "id": "worker-lint",
+        "endedAt": "2026-11-01T17:39:55.8901802Z",
+        "log": "../c3-task-completion-worker-lint-20261102.log",
+        "command": [
+          "pnpm",
+          "--filter",
+          "@lana/worker",
+          "lint"
+        ],
+        "exitCode": 0
+      },
+      {
+        "startedAt": "2026-11-01T17:39:55.8931793Z",
+        "id": "contracts-typecheck",
+        "endedAt": "2026-11-01T17:39:57.8798782Z",
+        "log": "../c3-task-completion-contracts-typecheck-20261102.log",
+        "command": [
+          "pnpm",
+          "--filter",
+          "@lana/contracts",
+          "exec",
+          "tsc",
+          "-p",
+          "tsconfig.json",
+          "--noEmit"
+        ],
+        "exitCode": 0
+      },
+      {
+        "startedAt": "2026-11-01T17:39:57.8823005Z",
+        "id": "kernel-typecheck",
+        "endedAt": "2026-11-01T17:39:59.9630814Z",
+        "log": "../c3-task-completion-kernel-typecheck-20261102.log",
+        "command": [
+          "pnpm",
+          "--filter",
+          "@lana/commerce-kernel",
+          "exec",
+          "tsc",
+          "-p",
+          "tsconfig.json",
+          "--noEmit"
+        ],
+        "exitCode": 0
+      },
+      {
+        "startedAt": "2026-11-01T17:39:59.9655938Z",
+        "id": "business-typecheck",
+        "endedAt": "2026-11-01T17:40:02.3676867Z",
+        "log": "../c3-task-completion-business-typecheck-20261102.log",
+        "command": [
+          "pnpm",
+          "--filter",
+          "@lana/business-tools",
+          "exec",
+          "tsc",
+          "-p",
+          "tsconfig.json",
+          "--noEmit"
+        ],
+        "exitCode": 0
+      },
+      {
+        "startedAt": "2026-11-01T17:40:02.3704191Z",
+        "id": "runtime-typecheck",
+        "endedAt": "2026-11-01T17:40:04.7295068Z",
+        "log": "../c3-task-completion-runtime-typecheck-20261102.log",
+        "command": [
+          "pnpm",
+          "--filter",
+          "@lana/chat-runtime",
+          "exec",
+          "tsc",
+          "-p",
+          "tsconfig.json",
+          "--noEmit"
+        ],
+        "exitCode": 0
+      },
+      {
+        "startedAt": "2026-11-01T17:40:04.7322966Z",
+        "id": "database-typecheck",
+        "endedAt": "2026-11-01T17:40:07.0713931Z",
+        "log": "../c3-task-completion-database-typecheck-20261102.log",
+        "command": [
+          "pnpm",
+          "--filter",
+          "@lana/database",
+          "exec",
+          "tsc",
+          "-p",
+          "tsconfig.json",
+          "--noEmit"
+        ],
+        "exitCode": 0
+      }
+    ]
+  },
+  "sharedSourceUnchangedAfter1ad": true,
+  "proofGates": {
+    "P0": "IMPLEMENTED_ACTUAL_POSTGRES_PASS",
+    "P1": "BOUND_BLOCKED",
+    "P2a": "DESIGN_BLOCKED",
+    "P2b": "IMPLEMENTED_MODEL_NOT_RUN",
+    "P2c": "MODEL_NOT_RUN",
+    "P3": "IMPLEMENTED_NEW_POPULATION_NOT_FROZEN"
+  },
+  "postgresRuns": [
+    {
+      "sourceSha": "00948c18635dde59074c9004a7fadd6f4caa8511",
+      "sourceDirty": false,
+      "cases": 85,
+      "status": "PASS",
+      "testDatabaseDropped": true,
+      "providerGenerations": 0,
+      "sendEnabled": false,
+      "artifact": "../c3-task-completion-pg-20261101-01/integration.json",
+      "validatedInvariants": 7,
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "../c3-task-completion-pg-20261101-01",
+        "COD"
+      ]
+    },
+    {
+      "sourceSha": "1adf878b70285e4b415cd2b2591f94dea4d81f10",
+      "sourceDirty": false,
+      "cases": 94,
+      "status": "PASS",
+      "testDatabaseDropped": true,
+      "providerGenerations": 0,
+      "sendEnabled": false,
+      "artifact": "../c3-task-completion-pg-20261102-02/integration.json",
+      "validatedInvariants": 7,
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "../c3-task-completion-pg-20261102-02",
+        "COD"
+      ]
+    },
+    {
+      "sourceSha": "5ca28f5ad00cd0140acb3cbc8d007b14176aefb8",
+      "sourceDirty": false,
+      "cases": 94,
+      "status": "PASS",
+      "testDatabaseDropped": true,
+      "providerGenerations": 0,
+      "sendEnabled": false,
+      "artifact": "../c3-task-completion-pg-20261102-03/integration.json",
+      "validatedInvariants": 7,
+      "command": [
+        "python",
+        "apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py",
+        "node",
+        "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+        "../c3-task-completion-pg-20261102-03",
+        "COD"
+      ]
+    }
+  ],
+  "failedOrPreliminaryEvidence": [
+    {
+      "artifact": "../c3-task-completion-verification-20261102-attempt01.json",
+      "reason": "PowerShell argument splatting setup error; corrected launcher, no source/API change"
+    },
+    {
+      "artifact": "../c3-task-completion-test-verification-20261102.json",
+      "reason": "4 failures; accounting order fixed and obsolete holding-message assertions updated; final932PASS"
+    },
+    {
+      "artifact": "../c3-task-completion-node-20261101.log",
+      "reason": "1 diagnostic exact-shape assertion updated for safe metadata; final789PASS"
+    },
+    {
+      "artifact": "../c3-task-completion-offline-20261101.log",
+      "reason": "probe omitted actual bindCommerceFacts mapping; corrected helper only, native source unchanged"
+    },
+    {
+      "artifact": "../c3-task-completion-error-accounting-red-20261102.log",
+      "reason": "4 observed assertions expose missing ERROR counter/status-order hole; fixed with5GREEN at fdbb"
+    }
+  ],
+  "structuralDelta": {
+    "semanticRolesAdded": 0,
+    "thirdOnlineRole": false,
+    "generationRetryAdded": false,
+    "parserOrSemanticRouterAdded": false,
+    "productionCaseRegexAdded": false,
+    "promptChanges": false,
+    "addedModules": [
+      "conservative callable projection",
+      "closed diagnostic stages",
+      "shared read-selection decoder",
+      "offline judge/task reporting"
+    ]
+  },
+  "artifacts": [
+    {
+      "path": "../c3-task-completion-adapter-readiness-20261101.log",
+      "sha256": "60bd926124ab65c25b5577f45360bb6bc0df05c8314af4b7acdb0f6a18fdc63e",
+      "bytes": 13254
+    },
+    {
+      "path": "../c3-task-completion-attribution-20261101.log",
+      "sha256": "8037ea2065f96238a39fb36a217c86aa214ea0cc7a2a0bfe27ee486987f4d02f",
+      "bytes": 3608
+    },
+    {
+      "path": "../c3-task-completion-build-20261101.log",
+      "sha256": "77831a651cd615159fe593abf28c7e1425ee1eded9349cb8affaac1fce87afaa",
+      "bytes": 5959
+    },
+    {
+      "path": "../c3-task-completion-build-final-20261101.log",
+      "sha256": "e96205505804236adaddc5cc44546ba2e85c812ce53ad4bcb536145460da17b6",
+      "bytes": 5249
+    },
+    {
+      "path": "../c3-task-completion-business-typecheck-20261102.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "../c3-task-completion-contracts-typecheck-20261102.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "../c3-task-completion-database-typecheck-20261102.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "../c3-task-completion-error-accounting-green-20261102.log",
+      "sha256": "95a7e7577158e7ec2f49ea06ca9b36682f911533780f759373c0285b51a1d70e",
+      "bytes": 517
+    },
+    {
+      "path": "../c3-task-completion-error-accounting-red-20261102.log",
+      "sha256": "1c4db81d088953563867b12ff7aef35da8ff075d7ee8b8f52a37bcd094558337",
+      "bytes": 4052
+    },
+    {
+      "path": "../c3-task-completion-error-accounting-red-20261102.test.mjs",
+      "sha256": "bc64bddbc577559d4b3d9c37e2a9bedb4913f140a4028cbd73c31a53c69acbb8",
+      "bytes": 1942
+    },
+    {
+      "path": "../c3-task-completion-error-accounting-test-prepare-20261102.py",
+      "sha256": "67f06ea04edcc6914b73ce8094a549a13beb702e17cb6e9558b2e6535b6230c5",
+      "bytes": 351
+    },
+    {
+      "path": "../c3-task-completion-final-business-20261102.log",
+      "sha256": "e8a4bcd2a5a8726ddbadafef2c16946ffbfb6dad9774849e4ee9a04fbe048979",
+      "bytes": 645
+    },
+    {
+      "path": "../c3-task-completion-final-checks-20261102.json",
+      "sha256": "105dd2f4e5e7c588fcf85c1779b061a2a22b1c16c45b2f1d6641c49287062ac2",
+      "bytes": 3441
+    },
+    {
+      "path": "../c3-task-completion-final-checks-20261102.ps1",
+      "sha256": "fad34c3e8b5213972523989cc70631cea7c1851458e9a93a32c4f3dca4e129ec",
+      "bytes": 2029
+    },
+    {
+      "path": "../c3-task-completion-final-contracts-20261102.log",
+      "sha256": "4a104827ff9639d91a8c96cac905595d2110f34f9d94f6ccd9273d05e0982dbb",
+      "bytes": 455
+    },
+    {
+      "path": "../c3-task-completion-final-database-20261102.log",
+      "sha256": "abc63823edee692b02ea586e961aa14446ad2581b40927b247f26777b81742c6",
+      "bytes": 517
+    },
+    {
+      "path": "../c3-task-completion-final-domain-test-20261102.log",
+      "sha256": "7824676129f39878e753cb4b170fa309cc7072bdfd03f35f8927977aae3ea215",
+      "bytes": 521
+    },
+    {
+      "path": "../c3-task-completion-final-kernel-20261102.log",
+      "sha256": "ed7e5da1f29508c7538481f0b9cfbaa23fedefd6cb8edd0e6662a2bbf6fda6d7",
+      "bytes": 428
+    },
+    {
+      "path": "../c3-task-completion-final-review-fix-20261102.py",
+      "sha256": "dadf57a4659534f4d5def32e69a274e66896b0533d1231b5a774ee7a81a8d24b",
+      "bytes": 2631
+    },
+    {
+      "path": "../c3-task-completion-final-runtime-20261102.log",
+      "sha256": "2214b3c4376329e446bb2ec950d854c5bf5d6483cc9d3dc29ecb7033a4adfe88",
+      "bytes": 382
+    },
+    {
+      "path": "../c3-task-completion-final-worker-focused-20261102.log",
+      "sha256": "d77160d84f87cdc769fce8e690646fec6ffde750f8e8461edcd0a31f42914543",
+      "bytes": 4449
+    },
+    {
+      "path": "../c3-task-completion-final-worker-lint-20261102.log",
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "bytes": 171
+    },
+    {
+      "path": "../c3-task-completion-finalize-evidence-20261102.py",
+      "sha256": "c7a15ffc54374ba1014b55a06085fca9392b29b0bd1b7f0e002ef7a8eb89b929",
+      "bytes": 3889
+    },
+    {
+      "path": "../c3-task-completion-kernel-typecheck-20261102.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "../c3-task-completion-node-20261101.log",
+      "sha256": "d6dd134ee1ab5f747f35199c18279ada1f27b3b58b7d844d2e3cc7645609e6ec",
+      "bytes": 89382
+    },
+    {
+      "path": "../c3-task-completion-node-final-20261102.log",
+      "sha256": "e2d370b4fc6fd70175c99ef7d4538cbc69e67d8538e86add661904e30c467fed",
+      "bytes": 87394
+    },
+    {
+      "path": "../c3-task-completion-node-reviewed-20261102.log",
+      "sha256": "44a050984837963818872c7ebf33bdd46406e09dec41e44b2e62add91beef7c8",
+      "bytes": 87693
+    },
+    {
+      "path": "../c3-task-completion-node-sealed-20261102.log",
+      "sha256": "41374ec9f1c601c14e78ab43db1f1eabf42b2ca6b5841dbd75b685b84b896aee",
+      "bytes": 87411
+    },
+    {
+      "path": "../c3-task-completion-offline-20261101-02.log",
+      "sha256": "befa0fccbe500f9e4f7398eec9a3f7929dfb94d0a1e4d910f9b7e74bd7f6a4e7",
+      "bytes": 1954
+    },
+    {
+      "path": "../c3-task-completion-offline-20261101.json",
+      "sha256": "81544e5b68d8b915c8020060a70cd96179e86fd56b953c90d30b18e59b086a94",
+      "bytes": 2394
+    },
+    {
+      "path": "../c3-task-completion-offline-20261101.log",
+      "sha256": "2b070347cc895a4526e2ca521dab96506cc67ccef85a018d9f2d68a78530c1ef",
+      "bytes": 411
+    },
+    {
+      "path": "../c3-task-completion-offline-20261101.mjs",
+      "sha256": "293b6d31f9bdaafa9dc83e38ad5030d3a3e3529b6460b1176df00cd35914fbc2",
+      "bytes": 10065
+    },
+    {
+      "path": "../c3-task-completion-offline-sealed-20261102.json",
+      "sha256": "bbe0db15d110f420236a17ea652aa216547b4ff7fc4918fadaeb1c54435d6547",
+      "bytes": 2394
+    },
+    {
+      "path": "../c3-task-completion-offline-sealed-20261102.log",
+      "sha256": "7911b145e87cf32bf9672414169dad84748fe40182f61ce328461e052a9266f1",
+      "bytes": 1954
+    },
+    {
+      "path": "../c3-task-completion-offline-sealed-20261102.mjs",
+      "sha256": "b2833d344edcd9fc9ca47c2cb91f2c7dc85addb17170eded05d5d75aeeca4897",
+      "bytes": 10074
+    },
+    {
+      "path": "../c3-task-completion-pg-20261101-01.log",
+      "sha256": "9dc0b582eb4c2bfcaf4aa0225e2f7cd4553c8e2e5cc0c14c000ae5e27364e36a",
+      "bytes": 7162
+    },
+    {
+      "path": "../c3-task-completion-pg-20261102-02.log",
+      "sha256": "ea122060de079df81755c278a5292e8ecb4cb5dc0cba18089f9ae525396d417f",
+      "bytes": 7663
+    },
+    {
+      "path": "../c3-task-completion-pg-20261102-03.log",
+      "sha256": "ea122060de079df81755c278a5292e8ecb4cb5dc0cba18089f9ae525396d417f",
+      "bytes": 7663
+    },
+    {
+      "path": "../c3-task-completion-qualification-reviewed-20261102.log",
+      "sha256": "5ad291a7cbaa942475d7692abe247a5a513bec29fc85671c40d49b8ee2a9b035",
+      "bytes": 11015
+    },
+    {
+      "path": "../c3-task-completion-reviewed-typecheck-20261102.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "../c3-task-completion-runtime-parity-20261102.json",
+      "sha256": "74c029d966165a789c1515494bda95ea2c7a9b7ecb9d344b8f5ecd77bdc59b0d",
+      "bytes": 727
+    },
+    {
+      "path": "../c3-task-completion-runtime-parity-20261102.py",
+      "sha256": "d65da0adca1c5117c92e7d4d36188bcebc0daede57e07651f261581766579949",
+      "bytes": 1419
+    },
+    {
+      "path": "../c3-task-completion-runtime-typecheck-20261102.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "../c3-task-completion-sealed-build-20261102.json",
+      "sha256": "673d1c8ae23991087efde3db167b587a827ef36523b254d007e5b71bc0b66598",
+      "bytes": 638
+    },
+    {
+      "path": "../c3-task-completion-sealed-build-20261102.ps1",
+      "sha256": "93db3eaf94ff2541720cfdfa7233ebf67a3654fc1f68c06c04d3108eaec90bfa",
+      "bytes": 667
+    },
+    {
+      "path": "../c3-task-completion-sealed-worker-build-20261102.log",
+      "sha256": "f96d11446d3247568638d503117cdfdb64632aa34d9f1e4302c94cfc8061efe9",
+      "bytes": 5249
+    },
+    {
+      "path": "../c3-task-completion-sealed-worker-typecheck-20261102.log",
+      "sha256": "287a72700c1f4b15b3102a944f0fea66ec9f69df7519ab5c76ad80e950061b89",
+      "bytes": 5266
+    },
+    {
+      "path": "../c3-task-completion-test-verification-20261102.json",
+      "sha256": "3a3dcebe3f8e366274764e11e41d135c2ca704556f9312e1dcce4eddc1e20a17",
+      "bytes": 641
+    },
+    {
+      "path": "../c3-task-completion-validate-20261102.mjs",
+      "sha256": "3f80e57c3843c2db2a6ec52cee85d9da7ec05c45d613d587a8a4ce2c8889a9ab",
+      "bytes": 801
+    },
+    {
+      "path": "../c3-task-completion-verification-20261102-attempt01.json",
+      "sha256": "2dc3053627d02e4126c51ce47052e437cb2f6ff3799285441f248adc57e54cbd",
+      "bytes": 534
+    },
+    {
+      "path": "../c3-task-completion-verification-20261102.json",
+      "sha256": "8709709a23d92cfa0edf15012fdf3def6d407034f2ad2a1b066392d10faa461c",
+      "bytes": 3406
+    },
+    {
+      "path": "../c3-task-completion-verification-final-20261102.py",
+      "sha256": "ec553cc1fb6d32bf9aa223c0d395c6442189f56dbc0996c8f9ec729ca9b3d319",
+      "bytes": 5226
+    },
+    {
+      "path": "../c3-task-completion-worker-build-20261102.log",
+      "sha256": "ecd667ecd977c1e8e9a9db26d188cb5636885c34993eb2d6fa28db480e2dc4f6",
+      "bytes": 5249
+    },
+    {
+      "path": "../c3-task-completion-worker-build-sealed-20261102.log",
+      "sha256": "b95e340e428f70452bc53350734e7af99e21d6d42a8084012a44dfdac496e612",
+      "bytes": 5249
+    },
+    {
+      "path": "../c3-task-completion-worker-focused-20261102.log",
+      "sha256": "af12ada7528a3ed36a9607e6d7d7848ad89ec5d9599eb04b8de0d11d393697e5",
+      "bytes": 22637
+    },
+    {
+      "path": "../c3-task-completion-worker-lint-20261102.log",
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "bytes": 171
+    },
+    {
+      "path": "../c3-task-completion-worker-typecheck-20261102.log",
+      "sha256": "6c8a461e81e49b9f330fdec1c9e0dd1adcbaafc2511597cfde39c5eb781bbb98",
+      "bytes": 5266
+    },
+    {
+      "path": "../c3-task-completion-pg-20261101-01/integration.json",
+      "sha256": "f5cb1a9a91e94df75f6efb1406c0ba486f6e645f44743562c11e12223ae8fe49",
+      "bytes": 36903
+    },
+    {
+      "path": "../c3-task-completion-pg-20261101-01/VALIDATED_INVARIANTS.json",
+      "sha256": "eab0d47f537d7d8818acbaa98f7b5d2980bf7a1aa5d11ad5bae4985dc95a6a9d",
+      "bytes": 1993
+    },
+    {
+      "path": "../c3-task-completion-pg-20261102-02/integration.json",
+      "sha256": "a7eebfee3758109984cf49adb1e534fa900617958b3774cb8f2de31f230fc49a",
+      "bytes": 37818
+    },
+    {
+      "path": "../c3-task-completion-pg-20261102-02/VALIDATED_INVARIANTS.json",
+      "sha256": "776cc2d31631f06039f6d24b762947e0e45faa308ea963abdffd344a1d2c2021",
+      "bytes": 1993
+    },
+    {
+      "path": "../c3-task-completion-pg-20261102-03/integration.json",
+      "sha256": "f06afa2463109cd41956226416af2f069774d31899703d5c4212aeeea0911dba",
+      "bytes": 37818
+    },
+    {
+      "path": "../c3-task-completion-pg-20261102-03/VALIDATED_INVARIANTS.json",
+      "sha256": "ebe75fd7e88a699a116e8ad7e62d5097d10f8aea42c7634d18d9060cfc6c8271",
+      "bytes": 1993
+    }
+  ],
+  "runtimePostgresSourceSha": "5ca28f5ad00cd0140acb3cbc8d007b14176aefb8",
+  "finalReviewedExecutableSha": "fdbb3cf425078f66794cdda3ebf28f0b3df0bca1",
+  "sourceFilesAtRuntimePostgresSha": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/bind-corpus.mjs",
+      "sha256": "55363a38fe6a321eae83e67c63a45e695cf3d0f51e7cd7d44072747fd1ac5397",
+      "gitBlob": "effa3e700d917b02432e14c3b20733eb51f36c75"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/bind-corpus.test.mjs",
+      "sha256": "9265a0241fc87283305a2fb5d9453b3b1f6b2829f65fb964188d3af3f578f193",
+      "gitBlob": "059c24d4c362cba7b76a1e9b2e40ce7fb665ec70"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/cli.mjs",
+      "sha256": "7ede5246828d2c5b872479b33672a1e03f36fd7a2fa150e6764bd6c7c2070780",
+      "gitBlob": "9d910b3f95723a76bc9c6fc99f2bb6a9a17e5bad"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/judge-task-contract.mjs",
+      "sha256": "b0f1e8f71be0dbb64032d9680149409a034cf3c3221ba3b14ff96c1f78ae0159",
+      "gitBlob": "ae389c4a57030996af40efb1174fa87deb79c5e9"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/qualification.mjs",
+      "sha256": "453bf4dbf193bb81fef4f240c9af4874ba97e4d63e879227f470a2098e6bd51a",
+      "gitBlob": "631614d198e8a5186054e3d7c32ec1e174a92192"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/qualification.test.mjs",
+      "sha256": "4ee4525ccfb8155a855c1f6a5d732c415013f6e6885c9f3e42f393fc0d363325",
+      "gitBlob": "09c0c1e965e8113be7d5ec62b31cf6abfc1e1c07"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-readiness.mjs",
+      "sha256": "d45e6eef41bf26a61eff494203d38880978853655a0961bc3549dd6315dec952",
+      "gitBlob": "4723911255f49a636b76ef720e841d77631b2c52"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-readiness.test.mjs",
+      "sha256": "68f9b1a28b201d0f6d5e8b26afa0edb321956632df1dc74fc32c608ca5022d8e",
+      "gitBlob": "98b53786b5ac42d9a93d8af84d4428ad78551dd0"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/task-outcomes.mjs",
+      "sha256": "ab8ac0e0bb6abd7fdc709f3c7d87ad9b2debf1ed08de3aa42a820675006f384d",
+      "gitBlob": "fe1a7988f254c19c5e4d946dcc5da2a5d2bd40c6"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/task-outcomes.test.mjs",
+      "sha256": "cce4d3f4e7cb174d60057c663dc81ada4d0b97c07c2492a584dd55ac03af4f82",
+      "gitBlob": "6009e8c71c2226632ff5a604cb25a163a352adf3"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs",
+      "sha256": "9174bb53c3f8dfca28d883c4b02130d9181a5853049b31f0c832b9f2f517cfba",
+      "gitBlob": "f265ed5a7d8595b168402de556d65d68b9f2336f"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs",
+      "sha256": "70dfc1a12e39c7a86798e9a631591896f1a6bb41600a492980848f49a1e2a146",
+      "gitBlob": "82c26ad91a23e31a8886873afdf272bf34c7d3e4"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "sha256": "4bf7f58a1aa66dfce4c808a69cd5ae414ed3d6df7233ad6ac8c0ba17adbd8d09",
+      "gitBlob": "cad37d9d13074091332194f32096486900c54697"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/product-read-selection.mjs",
+      "sha256": "75faa4e454d63a86b35254b5bca4e317d4eb91bf31eb4cfbf77aa68f099fbb37",
+      "gitBlob": "7496e0c31842d4c9617f27b18a88a06c1bc86d39"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/tool-output-diagnostic.test.mjs",
+      "sha256": "3843a133b9ad9c014543f507655dc26ebf468bf6970cf0b1c943488a274ba376",
+      "gitBlob": "4f984015e19db921aa4e82480622c2348a2e26ac"
+    },
+    {
+      "path": "apps/worker/src/realtime-sales-cycle.ts",
+      "sha256": "28d1cd5943064a3e47811047fe22735114ae69f9159b093f927dd68067938273",
+      "gitBlob": "a28c41dc6a9215d27db74f10580984b64f61ad3b"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-callable.test.ts",
+      "sha256": "5c383884479e57898d49461fd0bae0948944a2c284794707b4efc018dfac7cc8",
+      "gitBlob": "347793f13343bd2279fc79683a4a5538c081a18e"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-callable.ts",
+      "sha256": "a564d1eae14cc778b9d3b1fa2489fa7de0eb2ffe454d9cf5c6cebf180ae6d4bb",
+      "gitBlob": "f226fa7c3e07610550e7a47ffcde2ad4a742c207"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-effect-failure.ts",
+      "sha256": "2af221263cf64e753470ed0027e9f3cf26a17de38ff3f91de7e75952d5f5e076",
+      "gitBlob": "08d6e577d2c249bde5d1b09bcae8db6c17ddb647"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-effects.test.ts",
+      "sha256": "dbee7d02dcde6add5b280daf4328eb52e7587f062f4882b23e8d8e942a95aa84",
+      "gitBlob": "2f76090b2181c18a409ad9c8f0b62a16ffdf78dd"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-effects.ts",
+      "sha256": "d007aa698f174e501a623cbbd06ae39922da083bc6cc845add4fbe58be1fb0f5",
+      "gitBlob": "0453d8bc912151ef447ee5df7e5e694ae998d5dd"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-ingress.test.ts",
+      "sha256": "34758ff3b30075d9b93031a5e8d4c2982944afee28cbcde0ca08a716b4ca14dd",
+      "gitBlob": "226adb7dfef104debe78542573d7ed0a4232f5e0"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-persistence.test.ts",
+      "sha256": "e1ed930e50b7e29150a61ec6da8c22954c27897020508d232ed74166d87990ae",
+      "gitBlob": "845dd247ec452afeba13b38fe1677ea717940584"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-persistence.ts",
+      "sha256": "74ba55b06a20a7f1b669e043456c3e533cf43902244e850aa90f5f1936fec373",
+      "gitBlob": "b314293eff1d653e0c7adf7a30f45ba52a42a6b7"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-read-only-tools.ts",
+      "sha256": "4ba44f597a58fc0b9b9d602a6581ade546d88e47f6e8eb99f802932c71d40834",
+      "gitBlob": "5f3fe535d9873a0e67daf547296f53d8303a04a2"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-read-only.ts",
+      "sha256": "01b37f810357cd60ddd51846b2c9a6e06a2fcdff1bae92c73469e1221c5f0f0a",
+      "gitBlob": "1bf0812e0bd8673173dc24f11ee93be6796b276d"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-session.ts",
+      "sha256": "6d4c8c848a5c1ca7bcc0b12bbe1a77d660bbed643ef9415bb566ece5296d3b07",
+      "gitBlob": "17ded339060e8cdac36ee264cc615bf5fbd67447"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-state.test.ts",
+      "sha256": "d6785b7eb7c5382ed471a394d0f89de6e85e7de9a2d867beab296107086d71c8",
+      "gitBlob": "b092ff77534632d1edb35643303fe90c60cd8545"
+    },
+    {
+      "path": "packages/business-tools/src/canonical-cart-engine.test.ts",
+      "sha256": "2eec7c8ce9ea8d00f8b33cee2a887c6d89a382a2fa9812ee619f877407acd821",
+      "gitBlob": "b0f3e4ad35b2c26014ce44f5ea17e77411b058f3"
+    },
+    {
+      "path": "packages/business-tools/src/effect-readiness.ts",
+      "sha256": "2b69781693973a18dd03f39a0fb6da4c8ff124302dd66ba9d19b2df8b67c00d8",
+      "gitBlob": "e04663e7786ae9b90dd73ad421bc2b5da8528199"
+    },
+    {
+      "path": "packages/business-tools/src/negotiation-engine-v2.ts",
+      "sha256": "1ab09dc8ddd677741f112653256bb5fadc728d3a1acc6fe4502474709bcff6cf",
+      "gitBlob": "d320d4e91e31bcb0588c7268f6fcd6c35944ba55"
+    },
+    {
+      "path": "packages/commerce-kernel/src/canonical-cart-engine.ts",
+      "sha256": "1d6f134b46478c46fb5c652693f707b5bc5a203238be8856309853d174b8a491",
+      "gitBlob": "9ce32b9cafd0fd4b29c5501b9a4e77c591377744"
+    },
+    {
+      "path": "packages/commerce-kernel/src/negotiation-transition.ts",
+      "sha256": "d3d06ceead3fc9834a206e15339b7401862e60d693f9eeb9da28c160ade8765b",
+      "gitBlob": "7eae08b02dad08e526daa556f6676108e0e31c31"
+    },
+    {
+      "path": "packages/contracts/src/v2/canonical-commerce-bindings.test.ts",
+      "sha256": "315d2715f984dc5617a7b1353684051aa8205efdd99cc0112baf2da1054fff76",
+      "gitBlob": "39732f0da5b909927100cc430a49d6c6a3284dae"
+    },
+    {
+      "path": "packages/contracts/src/v2/canonical-commerce-bindings.ts",
+      "sha256": "f3c399d8f924a551129c01c4d313f6298dcf58b2054b91dfb06687592761358e",
+      "gitBlob": "d4ba9b3282181dcb64b962108ffd0ce6d7c24724"
+    },
+    {
+      "path": "packages/contracts/src/v2/canonical-evidence-readiness.ts",
+      "sha256": "b501c688dc382be04b1ce7921ebe23c7579facea69229ace6f998dac5694e962",
+      "gitBlob": "a94c508e2d8b0f5d848157000df21dba85ef0c61"
+    },
+    {
+      "path": "packages/contracts/src/v2/context-v2.ts",
+      "sha256": "d83d2a4b7b9cff317306560effe196caf86ec86ec5ec53ee6428083d7c290b77",
+      "gitBlob": "d61ca802623eb2420fd2412acedab07edfa46949"
+    },
+    {
+      "path": "packages/contracts/src/v2/decision-observability.ts",
+      "sha256": "e8ac3f812c25db8e2e731c1632f08179dd44d9070a5d58308b2260efcdcef2e4",
+      "gitBlob": "fc1849b555b6b859a7567f91bd4c8ffffec9ef7e"
+    },
+    {
+      "path": "packages/database/src/realtime-runtime.ts",
+      "sha256": "0c32019ae41ba2fdbed0f77556737d0e0873a185fd40110d2cbecb00e5b69ed8",
+      "gitBlob": "a7e9ab876fc6989730564ddecc0c68b7652ad7b7"
+    }
+  ],
+  "qualification": "BLOCKED",
+  "redGreenReporting": {
+    "red": {
+      "sourceSha": "5ca28f5ad00cd0140acb3cbc8d007b14176aefb8",
+      "pass": 0,
+      "fail": 4,
+      "log": "../c3-task-completion-error-accounting-red-20261102.log",
+      "command": [
+        "node",
+        "--test",
+        "../c3-task-completion-error-accounting-red-20261102.test.mjs"
+      ]
+    },
+    "green": {
+      "sourceSha": "fdbb3cf425078f66794cdda3ebf28f0b3df0bca1",
+      "pass": 5,
+      "fail": 0
+    },
+    "officialQualificationUnchanged": true
+  },
+  "qualityUnknownDefinition": "Unique matched registered attempt rows missing a complete grade, regardless of status; missing/duplicate slots have separate counters.",
+  "runtimeParityArtifact": "../c3-task-completion-runtime-parity-20261102.json",
+  "finalDeltaFiles": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/task-outcomes.mjs",
+      "sha256": "6fbb288578a7ae48e1fc29d376aa090c04f64b9ae1553e64619a7e028ab39697",
+      "gitBlob": "d77869bbef675da44d6341b22e54820e4b117912"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/task-outcomes.test.mjs",
+      "sha256": "cb7229ac44dfab529ad507a9c085abe9530e769c4ad078574479b96b6591f785",
+      "gitBlob": "28b238a648540be8b7d093fca7e5a4d0f4df442d"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-effects.test.ts",
+      "sha256": "7ea54b395f57426e17330dbdcf23054b690f8f30390de71036ecf275c691225b",
+      "gitBlob": "e75c0ab10745056b437d01e725c1fccc3c8fd3b7"
+    }
+  ],
+  "artifactPathBase": "Repository working directory; raw artifacts are outside the repository.",
+  "sourceFileHashSemantics": "sha256 is captured raw working-tree bytes at named source; gitBlob is normalized Git repository content identity."
+}

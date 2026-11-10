@@ -1,0 +1,12 @@
+{
+  "mode": "READ_ONLY_CURRENT_SOURCE_SELECTION",
+  "checkedAt": "2026-10-17T03:53:31.311Z",
+  "providerGenerations": 0,
+  "sourceWrites": 0,
+  "sendEnabled": false,
+  "queries": [],
+  "sourceSha256": "171293d10507828c6c592b1f37843595de1e2e6e60c8ae1bcf49f886284a0ede",
+  "sourceObservedAt": "2026-10-17T03:34:03.456Z",
+  "status": "BLOCKED",
+  "error": "SOURCE_READ_FAILED"
+}

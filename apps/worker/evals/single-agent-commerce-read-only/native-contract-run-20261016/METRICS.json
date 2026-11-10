@@ -1,0 +1,86 @@
+{
+  "sourceSha": "f2289491ccbf88ad58692060160f29aa1bf6133b",
+  "newOutcomes": 31,
+  "earlierOutcomes": 0,
+  "populationCoverage": 31,
+  "singleSourceFull31Run": true,
+  "b1": {
+    "recorded": 24,
+    "terminals": {
+      "FALLBACK": 3,
+      "SEND_ELIGIBLE": 21
+    },
+    "fallbackReasons": {
+      "FAIL": 3
+    },
+    "wholeTurnLatency": {
+      "n": 24,
+      "p50Ms": 14178.583700000003,
+      "p95Ms": 19645.545400000003
+    },
+    "addedVerificationLatency": {
+      "n": 24,
+      "p50Ms": 8111.549200000009,
+      "p95Ms": 10931.502900000021
+    }
+  },
+  "stateful": {
+    "recorded": 7,
+    "terminals": {
+      "FALLBACK": 4,
+      "HANDOFF": 2,
+      "NO_SEND": 1
+    },
+    "fallbackReasons": {
+      "BUDGET": 4
+    },
+    "wholeTurnLatency": {
+      "n": 7,
+      "p50Ms": 30335.1627,
+      "p95Ms": 37107.503600000004
+    },
+    "addedVerificationLatency": {
+      "n": 0,
+      "p50Ms": null,
+      "p95Ms": null
+    }
+  },
+  "generationInvocations": 89,
+  "maximumGenerationInvocations": 120,
+  "roles": {
+    "owner": 65,
+    "verifier": 24
+  },
+  "generationHttpRequests": 89,
+  "unknownRequestAccounting": 0,
+  "httpStatuses": {
+    "200": 89
+  },
+  "automaticRetries": 0,
+  "generationErrors": 0,
+  "timeouts": 0,
+  "verifierErrors": 0,
+  "inputTokens": 337379,
+  "outputTokens": 30401,
+  "usageCoverage": {
+    "complete": 89,
+    "denominator": 89
+  },
+  "costEvidence": "NOT_EXPOSED_NO_ESTIMATE",
+  "verifierLatency": {
+    "n": 24,
+    "p50Ms": 7382.597499999974,
+    "p95Ms": 10271.408800000034
+  },
+  "ownerLatency": {
+    "n": 65,
+    "p50Ms": 2367.293800000014,
+    "p95Ms": 3968.1572000000015
+  },
+  "knownOwnerAuthRequests": 2,
+  "codexAuthRequests": null,
+  "finalOnlyRequests": 8,
+  "finalOnlyToolViolations": 4,
+  "testDatabaseDropped": true,
+  "sendEnabled": false
+}

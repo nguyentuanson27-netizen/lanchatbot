@@ -1,0 +1,13 @@
+*.json -text
+*.json whitespace=cr-at-eol
+# Preserve actual reply trailing spaces and original Markdown hard breaks.
+CONVERSATIONS.md whitespace=-blank-at-eol
+frozen-inputs/*.md whitespace=-blank-at-eol
+raw/** -text
+checks/** -text
+source/** -text
+frozen-inputs/** -text
+*.log whitespace=cr-at-eol,-blank-at-eof
+raw/**/*.log whitespace=cr-at-eol,-blank-at-eof
+checks/**/*.log whitespace=cr-at-eol,-blank-at-eof
+source/**/*.log whitespace=cr-at-eol,-blank-at-eof

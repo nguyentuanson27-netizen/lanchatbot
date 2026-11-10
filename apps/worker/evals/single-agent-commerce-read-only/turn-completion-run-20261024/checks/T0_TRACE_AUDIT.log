@@ -1,0 +1,145 @@
+[
+  {
+    "run": "media-size-acceptance-20261024",
+    "caseId": "b1-changed-occasion",
+    "attempts": 1,
+    "terminals": [
+      {
+        "disposition": "FALLBACK",
+        "reason": "OWNER_TOOL_MODE",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    ]
+  },
+  {
+    "run": "media-size-acceptance-20261024",
+    "caseId": "sales-discovery-advice:need",
+    "attempts": 1,
+    "terminals": [
+      {
+        "disposition": "FALLBACK",
+        "reason": "OWNER_TOOL_MODE",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    ]
+  },
+  {
+    "run": "media-size-acceptance-20261024",
+    "caseId": "b1-search-read-v2",
+    "attempts": 1,
+    "terminals": [
+      {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ shop có chị nhé, set váy Khánh Trang bên em có bán cả bộ lẫn mua lẻ ạ:\n- Nguyên set: 999.000đ\n- Áo lẻ hoặc chân váy lẻ: 499.000đ/món\n\nChị muốn lấy cả set hay cần em tư vấn thêm size nào không ạ?",
+        "fallbackId": null
+      }
+    ]
+  },
+  {
+    "run": "media-size-acceptance-20261024",
+    "caseId": "b1-search-read-v3",
+    "attempts": 1,
+    "terminals": [
+      {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ mẫu Set quần Xuân Thảo (SQ223) bên em vẫn còn hàng chị nha. Giá chi tiết các lựa chọn:\n\n- Áo lẻ: 429.000đ (sẵn size S, M, L, XL)\n- Quần lẻ: 429.000đ (sẵn size S, M, L)\n- Cả bộ: 699.000đ (sẵn size S, M, L)",
+        "fallbackId": null
+      }
+    ]
+  },
+  {
+    "run": "execution-media-run-20261024",
+    "caseId": "b1-changed-occasion",
+    "attempts": 0,
+    "terminals": []
+  },
+  {
+    "run": "execution-media-run-20261024",
+    "caseId": "sales-discovery-advice:need",
+    "attempts": 1,
+    "terminals": [
+      {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2"
+      }
+    ]
+  },
+  {
+    "run": "execution-media-run-20261024",
+    "caseId": "b1-search-read-v2",
+    "attempts": 0,
+    "terminals": []
+  },
+  {
+    "run": "execution-media-run-20261024",
+    "caseId": "b1-search-read-v3",
+    "attempts": 0,
+    "terminals": []
+  },
+  {
+    "run": "full-phase-b-20261024",
+    "caseId": "b1-changed-occasion",
+    "attempts": 1,
+    "terminals": [
+      {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set Thạch Thảo dùng chất liệu tơ Hàn và ren mềm, khi ngồi ô tô di chuyển 3 tiếng sẽ dễ bị hằn nếp nhăn ở vải. \n\nChị đổi sang **Váy Ngọc Trâm (V406)** giúp em nhé ạ. Mẫu này thiết kế váy yếm 2 lớp kết hợp ren hoa nổi có độ đứng form tốt hơn, giúp hạn chế nhăn khi ngồi xe lâu mà mặc đi đám cưới rất sang trọng và thanh lịch.",
+        "fallbackId": null
+      }
+    ]
+  },
+  {
+    "run": "full-phase-b-20261024",
+    "caseId": "sales-discovery-advice:need",
+    "attempts": 1,
+    "terminals": [
+      {
+        "disposition": "FALLBACK",
+        "reason": "FAIL",
+        "text": "Phần này em chưa trả lời được, chị nhé.",
+        "fallbackId": "C3_A_NONPROTECTED_V2",
+        "semanticDiagnostic": [
+          {
+            "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+            "protectedRef": "product:SQ675",
+            "excerpt": "không lo bó bụng",
+            "basis": "Lời trấn an này kết luận SQ675 không bó vùng bụng của khách. Nguồn chỉ xác nhận thiết kế cạp chun, chưa có kết quả SIZE_FIT cho SQ675 và hồ sơ hiện tại để bảo đảm độ vừa/chật đó."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "run": "full-phase-b-20261024",
+    "caseId": "b1-search-read-v2",
+    "attempts": 1,
+    "terminals": [
+      {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, shop có sẵn set váy Khánh Trang chị nhé. Mẫu này shop có cả set nguyên bộ và bán lẻ từng món:\n\n- Set váy: 999.000đ\n- Áo lẻ: 499.000đ\n- Chân váy lẻ: 499.000đ\n\nChị quan tâm set nguyên bộ hay muốn mua lẻ món nào ạ?",
+        "fallbackId": null
+      }
+    ]
+  },
+  {
+    "run": "full-phase-b-20261024",
+    "caseId": "b1-search-read-v3",
+    "attempts": 1,
+    "terminals": [
+      {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ mẫu Set quần Xuân Thảo (SQ223) nhà em vẫn còn hàng chị nhé. Giá cụ thể cho mình đây ạ:\n- Mua cả bộ: 699.000đ\n- Áo lẻ hoặc quần lẻ: 429.000đ/món\n\nChị lấy nguyên bộ hay muốn chọn áo/quần lẻ thế ạ?",
+        "fallbackId": null
+      }
+    ]
+  }
+]

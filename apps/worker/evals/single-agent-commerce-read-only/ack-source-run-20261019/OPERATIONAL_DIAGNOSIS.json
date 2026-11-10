@@ -1,0 +1,58 @@
+{
+  "providerErrors": [
+    {
+      "run": "b1-1",
+      "caseId": "b1-search-read",
+      "role": "owner",
+      "generationStatus": "PROVIDER_ERROR",
+      "providerStatus": null,
+      "providerRequests": 1,
+      "failureStage": "GENERATION",
+      "failureCode": "TRANSPORT_ERROR",
+      "httpStatus": null
+    }
+  ],
+  "sourceErrors": [
+    {
+      "run": "b1-1",
+      "caseId": "b1-changed-occasion",
+      "errorType": null,
+      "errorCode": null,
+      "terminalReason": "CURRENT_READBACK_UNAVAILABLE",
+      "elapsedMs": 1526539.8876
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-partial-source-v2",
+      "errorType": "QdrantSearchError",
+      "errorCode": "QDRANT_NETWORK_ERROR",
+      "terminalReason": "SOURCE_OR_ATTEMPT_UNAVAILABLE",
+      "elapsedMs": 7176.261500000022
+    },
+    {
+      "run": "b1-1",
+      "caseId": "b1-buying-concern",
+      "errorType": "QdrantSearchError",
+      "errorCode": "QDRANT_NETWORK_ERROR",
+      "terminalReason": "SOURCE_OR_ATTEMPT_UNAVAILABLE",
+      "elapsedMs": 5.606400000164285
+    }
+  ],
+  "verifierLatencyMs": {
+    "n": 7,
+    "p50": 5958.0,
+    "p95": 9550.387749999998
+  },
+  "addedVerificationLatencyMs": {
+    "n": 7,
+    "p50": 7800.416900000011,
+    "p95": 1059965.9187099987,
+    "max": 1510036.5432999998,
+    "note": "All measurements retained, including integrated readback-unavailable wait of about25minutes; not comparable to healthy-run verification latency."
+  },
+  "runnerExit": {
+    "b1-1": 13,
+    "reason": "Detected unsettled top-level await while awaiting database/redis close after completion file and all4attempt files had been written"
+  },
+  "runContinuation": "Only not-yet-started registered advice stage; no integrated/stateful/provider generation retry. Two absent captures remain BLOCKED."
+}

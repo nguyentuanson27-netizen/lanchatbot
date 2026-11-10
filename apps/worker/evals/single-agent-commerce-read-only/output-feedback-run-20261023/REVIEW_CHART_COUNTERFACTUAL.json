@@ -1,0 +1,121 @@
+{
+  "mode": "OFFLINE_COUNTERFACTUAL_NOT_AUTHORIZED_MAPPING",
+  "sourceHead": "022af40398a42f5f4f60eae2010c9095e2a2ce03",
+  "sourceAudit": "95cbaf55",
+  "providerRequests": 0,
+  "sourceWrites": 0,
+  "rows": [
+    {
+      "productId": "SV2447",
+      "arm": "original",
+      "target": {
+        "brand": "LANA",
+        "parentProductId": "SV2447",
+        "componentProductId": "SV2447",
+        "componentRole": "DRESS",
+        "category": "VAY",
+        "form": null,
+        "material": "REN"
+      },
+      "selectedChart": null
+    },
+    {
+      "productId": "SV2447",
+      "arm": "brand-only",
+      "target": {
+        "brand": "La.na Design",
+        "parentProductId": "SV2447",
+        "componentProductId": "SV2447",
+        "componentRole": "DRESS",
+        "category": "VAY",
+        "form": null,
+        "material": "REN"
+      },
+      "selectedChart": null
+    },
+    {
+      "productId": "SV2447",
+      "arm": "category-component-only",
+      "target": {
+        "brand": "LANA",
+        "parentProductId": "SV2447",
+        "componentProductId": "SV2447",
+        "componentRole": "OTHER",
+        "category": "SET",
+        "form": null,
+        "material": "REN"
+      },
+      "selectedChart": null
+    },
+    {
+      "productId": "SV2447",
+      "arm": "brand-category-component",
+      "target": {
+        "brand": "La.na Design",
+        "parentProductId": "SV2447",
+        "componentProductId": "SV2447",
+        "componentRole": "OTHER",
+        "category": "SET",
+        "form": null,
+        "material": "REN"
+      },
+      "selectedChart": null
+    },
+    {
+      "productId": "SQ2447",
+      "arm": "original",
+      "target": {
+        "brand": "LANA",
+        "parentProductId": "SQ2447",
+        "componentProductId": "SQ2447",
+        "componentRole": "PANTS",
+        "category": "QUAN",
+        "form": null,
+        "material": "T\u01a0"
+      },
+      "selectedChart": null
+    },
+    {
+      "productId": "SQ2447",
+      "arm": "brand-only",
+      "target": {
+        "brand": "La.na Design",
+        "parentProductId": "SQ2447",
+        "componentProductId": "SQ2447",
+        "componentRole": "PANTS",
+        "category": "QUAN",
+        "form": null,
+        "material": "T\u01a0"
+      },
+      "selectedChart": null
+    },
+    {
+      "productId": "SQ2447",
+      "arm": "category-component-only",
+      "target": {
+        "brand": "LANA",
+        "parentProductId": "SQ2447",
+        "componentProductId": "SQ2447",
+        "componentRole": "OTHER",
+        "category": "SET",
+        "form": null,
+        "material": "T\u01a0"
+      },
+      "selectedChart": null
+    },
+    {
+      "productId": "SQ2447",
+      "arm": "brand-category-component",
+      "target": {
+        "brand": "La.na Design",
+        "parentProductId": "SQ2447",
+        "componentProductId": "SQ2447",
+        "componentRole": "OTHER",
+        "category": "SET",
+        "form": null,
+        "material": "T\u01a0"
+      },
+      "selectedChart": "image_registry:42e42d5a-c407-5927-af69-0fe8ab21a8e4:SQ2447"
+    }
+  ]
+}

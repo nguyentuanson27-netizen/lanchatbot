@@ -1,0 +1,17 @@
+{
+  "historicalArtifactsUnchanged": 36,
+  "sealedExecutableFiles": 5,
+  "sealedFrozenFiles": 6,
+  "manifestHash": "f3e050c3795154da897d1105a4df59cc9429eaefd72e68c5b563fcf39d13e4df",
+  "capturedProviderRecords": 282,
+  "providerRequests": 282,
+  "maxProviderRequestsPerSlot": 1,
+  "clientRequests": 282,
+  "rejectedClientRequests": 0,
+  "firewall": "PASS_ALL_CAPTURED_MODEL_REQUESTS",
+  "returnedModels": [
+    "gpt-6.1-sol"
+  ],
+  "a2RunSourceSha": "fd4145e993d0c03724d24b93a0220446c76baa50",
+  "a3RunSourceSha": "216e41d5f02d5b6bfa453ec4857e2fdb8d8a5b8f"
+}

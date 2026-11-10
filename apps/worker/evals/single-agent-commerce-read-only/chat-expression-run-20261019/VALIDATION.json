@@ -1,0 +1,20 @@
+{
+  "runSourceSha": "849585aad1ac89f865396946cd6c9201208bfefc",
+  "registeredSlots": 6,
+  "recordedSlots": 6,
+  "generationRequests": 12,
+  "allGenerationsOneRequest": true,
+  "providerErrors": 0,
+  "timeouts": 0,
+  "retry": 0,
+  "frozenGitHashesMatched": [
+    "apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt",
+    "apps/worker/evals/single-agent-commerce-read-only/prompts/verifier.vi.txt",
+    "apps/worker/evals/single-agent-commerce-read-only/chat-expression-run-20261019/targeted-input.json"
+  ],
+  "publicGitRawHashesMatched": 12,
+  "conditional16Dispatched": false,
+  "conditional16Status": "NOT_DISPATCHED_CONDITION_NOT_MET",
+  "reason": "Actual fallback slot2 blocks continuation. Whole-turn review also requires editing the time-bounded form claim in send-eligible slot3.",
+  "reviewerAssessment": "Codex whole-turn/source review, no independent human adjudication of slot3 interpretation."
+}

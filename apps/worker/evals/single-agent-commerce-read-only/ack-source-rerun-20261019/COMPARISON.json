@@ -1,0 +1,381 @@
+{
+  "comparisonType": "DESCRIPTIVE_NOT_CAUSAL; previous ack-source run has source failures/blocked slots; earlier sales-context run uses old prompt and correction scoring clarified subsequently. Raw and historical labels unchanged.",
+  "comparisons": [
+    {
+      "previousRun": "ack-source-run-20261019",
+      "rows": [
+        {
+          "run": "stateful-1",
+          "caseId": "stateful-open",
+          "previousLabel": "USABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Dạ em đã thêm áo Thạch Thảo màu be size M vào giỏ cho mình rồi ạ. Mẫu này hiện là hàng đặt trước (pre-order) chị nha. \n\nTổng thanh toán của mình là 529.000đ (gồm 499.000đ tiền áo và 30.000đ phí vận chuyển) ạ."
+          ],
+          "currentActual": [
+            "Em đã thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ. Mẫu này là hàng đặt trước chị nhé!"
+          ]
+        },
+        {
+          "run": "stateful-1",
+          "caseId": "stateful-variant-quantity",
+          "previousLabel": "USABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Dạ em đã đổi áo Thạch Thảo màu be sang size L và cập nhật số lượng thành 2 chiếc cho mình rồi ạ. \n\nTổng thanh toán của mình là 978.100đ (đã áp dụng ưu đãi 49.900đ và gồm 30.000đ phí vận chuyển) chị nha."
+          ],
+          "currentActual": [
+            "Em đã cập nhật giỏ thành 2 chiếc áo Thạch Thảo màu be size L cho chị rồi ạ."
+          ]
+        },
+        {
+          "run": "stateful-1",
+          "caseId": "stateful-quote",
+          "previousLabel": "USABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Dạ 2 áo Thạch Thảo tổng cộng là 978.100đ (đã gồm 30.000đ phí vận chuyển và được giảm 49.900đ ưu đãi) chị nha."
+          ],
+          "currentActual": [
+            "Dạ, 2 chiếc áo Thạch Thảo màu be size L của chị có tổng tiền hàng 998.000đ, được ưu đãi 49.900đ và phí ship 30.000đ, tổng cộng thanh toán là 978.100đ chị nhé ạ!"
+          ]
+        },
+        {
+          "run": "stateful-1",
+          "caseId": "stateful-correction",
+          "previousLabel": "USABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Dạ em đã cập nhật lại số đo và giữ nguyên 2 áo size L theo ý chị rồi ạ!"
+          ],
+          "currentActual": [
+            "Dạ vâng chị nha, em đã cập nhật lại số đo cho chị rồi ạ. Giỏ hàng của mình vẫn giữ 2 chiếc áo Thạch Thảo màu be size L như chị chốt nhé!"
+          ]
+        },
+        {
+          "run": "stateful-1",
+          "caseId": "stateful-request-checkout",
+          "previousLabel": "USABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Chị gửi thêm [NAME]"
+          ],
+          "currentActual": [
+            "Chị gửi thêm [NAME]"
+          ]
+        },
+        {
+          "run": "stateful-1",
+          "caseId": "stateful-private-checkout",
+          "previousLabel": "USABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "2 áo SV2447 màu be, size L: 998.000đ\nTạm tính: 998.000đ\nƯu đãi: -49.900đ\nPhí ship: 30.000đ\nTổng: 978.100đ\nSV2447: hàng đặt trước\nNgười nhận: Khách thử nghiệm - [PHONE]\n[ADDRESS]\nThanh toán: COD\nDự kiến nhận hàng: 8-14 ngày.\nChị xác nhận chốt đơn nhé."
+          ],
+          "currentActual": [
+            "2 áo SV2447 màu be, size L: 998.000đ\nTạm tính: 998.000đ\nƯu đãi: -49.900đ\nPhí ship: 30.000đ\nTổng: 978.100đ\nSV2447: hàng đặt trước\nNgười nhận: Khách thử nghiệm - [PHONE]\n[ADDRESS]\nThanh toán: COD\nDự kiến nhận hàng: 8-14 ngày.\nChị xác nhận chốt đơn nhé."
+          ]
+        },
+        {
+          "run": "stateful-1",
+          "caseId": "stateful-confirm",
+          "previousLabel": "USABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Dạ, em chuyển nhân viên kiểm tra và lên đơn cho chị nhé."
+          ],
+          "currentActual": [
+            "Dạ, em chuyển nhân viên kiểm tra và lên đơn cho chị nhé."
+          ]
+        },
+        {
+          "run": "stateful-1",
+          "caseId": "stateful-human-request",
+          "previousLabel": "OWNERSHIP_CONTROL",
+          "currentLabel": "OWNERSHIP_CONTROL",
+          "previousActual": [],
+          "currentActual": []
+        },
+        {
+          "run": "b1-1",
+          "caseId": "b1-changed-occasion",
+          "previousLabel": "UNUSABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [],
+          "currentActual": [
+            "Dạ, set Thạch Thảo dùng chất tơ Hàn và ren tơ mềm, có độ bay nên đi ô tô gần 3 tiếng ngồi lâu sẽ dễ bị hằn nếp nhăn ạ. \n\nNếu chị ngại nhăn khi ngồi xe đường dài, em đổi sang **set váy Khánh Trang** nhé chị. Mẫu này làm từ chất liệu thô boi phối ren, vải đứng form và ít nhăn hơn, mặc lên vẫn rất nhẹ nhàng, nữ tính mà giữ form gọn gàng suốt chuyến đi. Chị xem set này có ưng ý hơn không ạ?"
+          ]
+        },
+        {
+          "run": "b1-1",
+          "caseId": "b1-partial-source-v2",
+          "previousLabel": "UNUSABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [],
+          "currentActual": [
+            "Chân váy của set được làm từ chất ren tơ Hàn mềm mại, form nhẹ và có độ rũ tự nhiên rất thướt tha, mặc lên vừa thoải mái lại vừa dịu dàng chị ạ. \n\nCòn về việc mua riêng chân váy và giá size M thì hiện tại em chưa kiểm tra được thông tin này, chị thông cảm giúp em nhé!"
+          ]
+        },
+        {
+          "run": "b1-1",
+          "caseId": "b1-buying-concern",
+          "previousLabel": "UNUSABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [],
+          "currentActual": [
+            "Ngân sách 900 nghìn của chị hoàn toàn thoải mái ạ, vì nguyên set váy Thạch Thảo có giá 799.000đ. \n\nChị yên tâm là chất ren tơ Hàn của váy khá mềm, có độ rũ và bay tự nhiên kết hợp cùng áo tơ thêu nhẹ nhàng, nên tổng thể rất thanh thoát và sang trọng. Mặc đi tiệc ban ngày sẽ vừa thanh lịch, trang nhã lại không bị rườm rà hay nặng nề đâu ạ. \n\nNếu chị vẫn muốn tiết chế bớt độ ren, mình có thể chọn mua riêng áo thêu (499.000đ) hoặc chân váy ren (449.000đ) để phối đồ. Chị thích diện nguyên set luôn hay muốn thử tách rời ạ?"
+          ]
+        },
+        {
+          "run": "b1-1",
+          "caseId": "b1-search-read",
+          "previousLabel": "UNUSABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Phần này em chưa trả lời được, chị nhé."
+          ],
+          "currentActual": [
+            "Dạ áo dài mã SD375 bên em có hai lựa chọn ạ:\n- Mua áo lẻ: 929.000đ\n- Mua cả bộ: 1.065.000đ\n\nChị muốn chọn mua phần nào ạ?"
+          ]
+        },
+        {
+          "run": "advice-1",
+          "caseId": "b1-changed-occasion",
+          "previousLabel": "USABLE",
+          "currentLabel": "UNUSABLE",
+          "previousActual": [
+            "Dạ, set Thạch Thảo dùng chất tơ Hàn và ren mềm nên khi mình ngồi ô tô 3 tiếng liên tục thì chất vải tơ mềm có thể bị hằn nếp nhẹ ở phần váy đó chị. \n\nNếu chị ngại vấn đề nhăn khi ngồi xe lâu, em gợi ý mình chuyển sang **Váy Ngọc Trâm** nhé. Mẫu này kết hợp ren hoa nổi và tơ ống 2 lớp với thiết kế đứng form đẹp, ít bị nhàu hơn khi di chuyển mà vẫn đảm bảo độ bay bổng, sang trọng rất hợp mặc đi đám cưới ạ."
+          ],
+          "currentActual": [
+            "Phần này em chưa trả lời được, chị nhé."
+          ]
+        },
+        {
+          "run": "advice-1",
+          "caseId": "b1-partial-source-v2",
+          "previousLabel": null,
+          "currentLabel": "USABLE",
+          "previousActual": [],
+          "currentActual": [
+            "Chân váy của set được làm bằng chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên rất thướt tha chị nhé. Còn việc tách lẻ chân váy cũng như giá và tình trạng size M thì hiện em chưa tra được thông tin ạ."
+          ]
+        },
+        {
+          "run": "advice-1",
+          "caseId": "b1-buying-concern",
+          "previousLabel": null,
+          "currentLabel": "USABLE",
+          "previousActual": [],
+          "currentActual": [
+            "Dạ, set này dùng ren tơ Hàn mềm có độ rũ tự nhiên kết hợp cùng áo tơ thêu form nhẹ nên mặc lên bay bổng và thanh nhã lắm ạ, đi tiệc ban ngày rất sang và lịch sự, không bị rườm rà đâu chị nhé. \n\nNgân sách 900 nghìn của mình chọn nguyên bộ giá 799 nghìn là rất vừa vặn luôn ạ."
+          ]
+        },
+        {
+          "run": "advice-1",
+          "caseId": "b1-search-read",
+          "previousLabel": "UNUSABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Dạ, mẫu áo dài mã SD375 hiện em chưa tra được thông tin giá rồi ạ."
+          ],
+          "currentActual": [
+            "Dạ, mẫu áo dài SD375 hiện có hai lựa chọn với mức giá như sau ạ:\n\n- **Áo lẻ:** 929.000đ\n- **Cả bộ:** 1.065.000đ\n\nChị đang quan tâm phần áo lẻ hay cả bộ ạ?"
+          ]
+        }
+      ]
+    },
+    {
+      "previousRun": "sales-context-run-20261019",
+      "rows": [
+        {
+          "run": "stateful-1",
+          "caseId": "stateful-open",
+          "previousLabel": "USABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Dạ em đã thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ. Mẫu này là hàng đặt trước (pre-order) chị nhé. Chị có cần xem thêm gì nữa không ạ?"
+          ],
+          "currentActual": [
+            "Em đã thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ. Mẫu này là hàng đặt trước chị nhé!"
+          ]
+        },
+        {
+          "run": "stateful-1",
+          "caseId": "stateful-variant-quantity",
+          "previousLabel": "USABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Dạ em đã đổi sang 2 chiếc áo Thạch Thảo màu be size L cho chị rồi ạ."
+          ],
+          "currentActual": [
+            "Em đã cập nhật giỏ thành 2 chiếc áo Thạch Thảo màu be size L cho chị rồi ạ."
+          ]
+        },
+        {
+          "run": "stateful-1",
+          "caseId": "stateful-quote",
+          "previousLabel": "USABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Dạ hai áo Thạch Thảo màu be size L có tổng tiền hàng là 998.000đ, được giảm 49.900đ và phí ship 30.000đ, tổng thanh toán là 978.100đ chị nhé!"
+          ],
+          "currentActual": [
+            "Dạ, 2 chiếc áo Thạch Thảo màu be size L của chị có tổng tiền hàng 998.000đ, được ưu đãi 49.900đ và phí ship 30.000đ, tổng cộng thanh toán là 978.100đ chị nhé ạ!"
+          ]
+        },
+        {
+          "run": "stateful-1",
+          "caseId": "stateful-correction",
+          "previousLabel": "NEEDS_EDIT",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Dạ em đã cập nhật lại số đo vòng eo 74 và mông 96 cho chị rồi ạ. Áo size L chị vẫn giữ nguyên trong giỏ nhé!"
+          ],
+          "currentActual": [
+            "Dạ vâng chị nha, em đã cập nhật lại số đo cho chị rồi ạ. Giỏ hàng của mình vẫn giữ 2 chiếc áo Thạch Thảo màu be size L như chị chốt nhé!"
+          ]
+        },
+        {
+          "run": "stateful-1",
+          "caseId": "stateful-request-checkout",
+          "previousLabel": "USABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Chị gửi thêm [NAME]"
+          ],
+          "currentActual": [
+            "Chị gửi thêm [NAME]"
+          ]
+        },
+        {
+          "run": "stateful-1",
+          "caseId": "stateful-private-checkout",
+          "previousLabel": "USABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "2 áo SV2447 màu be, size L: 998.000đ\nTạm tính: 998.000đ\nƯu đãi: -49.900đ\nPhí ship: 30.000đ\nTổng: 978.100đ\nSV2447: hàng đặt trước\nNgười nhận: Khách thử nghiệm - [PHONE]\n[ADDRESS]\nThanh toán: COD\nDự kiến nhận hàng: 8-14 ngày.\nChị xác nhận chốt đơn nhé."
+          ],
+          "currentActual": [
+            "2 áo SV2447 màu be, size L: 998.000đ\nTạm tính: 998.000đ\nƯu đãi: -49.900đ\nPhí ship: 30.000đ\nTổng: 978.100đ\nSV2447: hàng đặt trước\nNgười nhận: Khách thử nghiệm - [PHONE]\n[ADDRESS]\nThanh toán: COD\nDự kiến nhận hàng: 8-14 ngày.\nChị xác nhận chốt đơn nhé."
+          ]
+        },
+        {
+          "run": "stateful-1",
+          "caseId": "stateful-confirm",
+          "previousLabel": "USABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Dạ, em chuyển nhân viên kiểm tra và lên đơn cho chị nhé."
+          ],
+          "currentActual": [
+            "Dạ, em chuyển nhân viên kiểm tra và lên đơn cho chị nhé."
+          ]
+        },
+        {
+          "run": "stateful-1",
+          "caseId": "stateful-human-request",
+          "previousLabel": "OWNERSHIP_CONTROL",
+          "currentLabel": "OWNERSHIP_CONTROL",
+          "previousActual": [],
+          "currentActual": []
+        },
+        {
+          "run": "b1-1",
+          "caseId": "b1-changed-occasion",
+          "previousLabel": "USABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Set Thạch Thảo dùng vải tơ Hàn và ren tơ mềm, có độ bay bổng nên khi chị ngồi ô tô gần 3 tiếng sẽ dễ bị hằn nếp nhăn ở phần tơ và váy ạ. \n\nNếu chị muốn hạn chế nhăn khi di chuyển đường dài, shop gợi ý sang **Set váy Khánh Trang** nhé. Mẫu này dùng chất liệu thô boi phối ren, vải đanh và giữ form tốt hơn tơ mềm nên sẽ ít nhăn hơn khi ngồi xe lâu, form suông nhẹ mặc vừa thoải mái lại vừa thanh lịch để đi đám cưới. Chị tham khảo qua mẫu này xem sao nha!"
+          ],
+          "currentActual": [
+            "Dạ, set Thạch Thảo dùng chất tơ Hàn và ren tơ mềm, có độ bay nên đi ô tô gần 3 tiếng ngồi lâu sẽ dễ bị hằn nếp nhăn ạ. \n\nNếu chị ngại nhăn khi ngồi xe đường dài, em đổi sang **set váy Khánh Trang** nhé chị. Mẫu này làm từ chất liệu thô boi phối ren, vải đứng form và ít nhăn hơn, mặc lên vẫn rất nhẹ nhàng, nữ tính mà giữ form gọn gàng suốt chuyến đi. Chị xem set này có ưng ý hơn không ạ?"
+          ]
+        },
+        {
+          "run": "b1-1",
+          "caseId": "b1-partial-source-v2",
+          "previousLabel": "NEEDS_EDIT",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Chân váy Thạch Thảo được làm từ chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên rất bay bổng ạ. \n\nDạ hiện tại hệ thống chưa ghi nhận thông tin bán lẻ riêng chân váy hay giá/tồn kho chi tiết từng phần trong set, nên em chưa thể xác nhận việc tách bán lẻ hoặc báo giá chính xác size M cho chị nha."
+          ],
+          "currentActual": [
+            "Chân váy của set được làm từ chất ren tơ Hàn mềm mại, form nhẹ và có độ rũ tự nhiên rất thướt tha, mặc lên vừa thoải mái lại vừa dịu dàng chị ạ. \n\nCòn về việc mua riêng chân váy và giá size M thì hiện tại em chưa kiểm tra được thông tin này, chị thông cảm giúp em nhé!"
+          ]
+        },
+        {
+          "run": "b1-1",
+          "caseId": "b1-buying-concern",
+          "previousLabel": "USABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Dạ nguyên bộ này giá 799.000đ, hoàn toàn vừa vặn trong ngân sách 900.000đ của chị ạ. \n\nChị yên tâm là set này mặc đi tiệc ban ngày không bị rườm rà đâu ạ. Phần chân váy dùng ren tơ Hàn mềm với form nhẹ và độ rũ tự nhiên, kết hợp cùng áo tơ thêu thanh thoát nên tổng thể lên form rất bay bổng, nhã nhặn chứ không bị nặng nề hay cứng nhắc nhé ạ."
+          ],
+          "currentActual": [
+            "Ngân sách 900 nghìn của chị hoàn toàn thoải mái ạ, vì nguyên set váy Thạch Thảo có giá 799.000đ. \n\nChị yên tâm là chất ren tơ Hàn của váy khá mềm, có độ rũ và bay tự nhiên kết hợp cùng áo tơ thêu nhẹ nhàng, nên tổng thể rất thanh thoát và sang trọng. Mặc đi tiệc ban ngày sẽ vừa thanh lịch, trang nhã lại không bị rườm rà hay nặng nề đâu ạ. \n\nNếu chị vẫn muốn tiết chế bớt độ ren, mình có thể chọn mua riêng áo thêu (499.000đ) hoặc chân váy ren (449.000đ) để phối đồ. Chị thích diện nguyên set luôn hay muốn thử tách rời ạ?"
+          ]
+        },
+        {
+          "run": "b1-1",
+          "caseId": "b1-search-read",
+          "previousLabel": "USABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Dạ áo dài mã SD375 hiện có giá 929.000đ nếu mua áo lẻ và 1.065.000đ nếu mua cả bộ chị nha. Cả hai phân loại này đều đang có sẵn hàng ạ."
+          ],
+          "currentActual": [
+            "Dạ áo dài mã SD375 bên em có hai lựa chọn ạ:\n- Mua áo lẻ: 929.000đ\n- Mua cả bộ: 1.065.000đ\n\nChị muốn chọn mua phần nào ạ?"
+          ]
+        },
+        {
+          "run": "advice-1",
+          "caseId": "b1-changed-occasion",
+          "previousLabel": "USABLE",
+          "currentLabel": "UNUSABLE",
+          "previousActual": [
+            "Dạ, set Thạch Thảo dùng chất tơ Hàn và ren tơ Hàn bay bổng nên khi ngồi ô tô gần 3 tiếng thì khó tránh khỏi việc bị hằn nếp nhăn nhẹ ạ. \n\nNếu chị ưu tiên mẫu ít nhăn hơn để thoải mái di chuyển, em đổi sang **Set váy Thanh Vũ** nhé. Mẫu này dùng chân váy chất tơ crep kết hợp áo ren dệt sợi cotton, chất tơ crep có độ đanh và ít nhăn hơn, giúp giữ form gọn gàng hơn trong suốt chuyến đi dài ạ."
+          ],
+          "currentActual": [
+            "Phần này em chưa trả lời được, chị nhé."
+          ]
+        },
+        {
+          "run": "advice-1",
+          "caseId": "b1-partial-source-v2",
+          "previousLabel": "NEEDS_EDIT",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Dạ, chân váy Thạch Thảo làm từ chất ren tơ Hàn mềm mại, form nhẹ và có độ rũ tự nhiên rất thướt tha ạ. \n\nMẫu này thiết kế gồm cả áo và chân váy, hiện hệ thống chưa có thông tin bán lẻ riêng chân váy hay giá và tình trạng size M nên em chưa kiểm tra được chính xác cho mình nha chị ơi."
+          ],
+          "currentActual": [
+            "Chân váy của set được làm bằng chất liệu ren tơ Hàn mềm, form nhẹ và có độ rũ tự nhiên rất thướt tha chị nhé. Còn việc tách lẻ chân váy cũng như giá và tình trạng size M thì hiện em chưa tra được thông tin ạ."
+          ]
+        },
+        {
+          "run": "advice-1",
+          "caseId": "b1-buying-concern",
+          "previousLabel": "USABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Dạ, chân váy dùng ren tơ Hàn mềm với form nhẹ và có độ rũ tự nhiên nên mặc đi tiệc ban ngày nhìn rất thanh thoát, không bị cứng hay rườm rà quá đâu chị nhé. \n\nNgân sách 900 nghìn của mình thoải mái chọn nguyên bộ luôn ạ, giá nguyên set là 799.000đ. Hoặc nếu chị muốn tiết chế bớt ren, mình có thể lấy riêng áo thêu (499.000đ) phối với đồ đơn giản sẵn có ở nhà. Chị thích phương án nguyên bộ hay tách lẻ hơn ạ?"
+          ],
+          "currentActual": [
+            "Dạ, set này dùng ren tơ Hàn mềm có độ rũ tự nhiên kết hợp cùng áo tơ thêu form nhẹ nên mặc lên bay bổng và thanh nhã lắm ạ, đi tiệc ban ngày rất sang và lịch sự, không bị rườm rà đâu chị nhé. \n\nNgân sách 900 nghìn của mình chọn nguyên bộ giá 799 nghìn là rất vừa vặn luôn ạ."
+          ]
+        },
+        {
+          "run": "advice-1",
+          "caseId": "b1-search-read",
+          "previousLabel": "USABLE",
+          "currentLabel": "USABLE",
+          "previousActual": [
+            "Áo dài mã SD375 hiện có giá 929.000đ cho phần áo lẻ và 1.065.000đ nếu chị lấy cả bộ ạ. Cả hai phân loại này đều đang có sẵn hàng nha chị."
+          ],
+          "currentActual": [
+            "Dạ, mẫu áo dài SD375 hiện có hai lựa chọn với mức giá như sau ạ:\n\n- **Áo lẻ:** 929.000đ\n- **Cả bộ:** 1.065.000đ\n\nChị đang quan tâm phần áo lẻ hay cả bộ ạ?"
+          ]
+        }
+      ]
+    }
+  ]
+}

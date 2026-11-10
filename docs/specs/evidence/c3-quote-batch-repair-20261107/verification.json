@@ -1,0 +1,72 @@
+{
+  "implementationBaseSha": "5c623a2039aaee07b67f02a5d1797078da4c43ac",
+  "executableSavepoint": "d9f4e55f",
+  "providerGenerations": 0,
+  "realPostgresAcceptance": "BLOCKED: SSH port22 timeout twice before integration; Docker Linux engine unavailable",
+  "testDatabasesCreated": 0,
+  "sourceWrites": 0,
+  "liveSends": 0,
+  "logs": [
+    {
+      "path": "c3-quote-batch-red-20261107.log",
+      "sha256": "b2d6c3c0d3460b255329a39b69a098326795d8e4a6f5162efc93eea8001f730b"
+    },
+    {
+      "path": "c3-local-selection-red-20261107.log",
+      "sha256": "98e46b0aa0b7447c1aa736791bbaf4d93a38520e55c439f1f4f8e96a2d0e410f"
+    },
+    {
+      "path": "c3-quote-batch-focused-20261107.log",
+      "sha256": "5549651873e3ff92255e7b2c96f0546f1d22fe3c400c689acd27206764ce953b"
+    },
+    {
+      "path": "c3-quote-batch-worker-final-20261107.log",
+      "sha256": "475c9b784fdbe127ec27dca54f88fbb66ceb671c55952ab5eaefc55abbd1300f"
+    },
+    {
+      "path": "c3-quote-batch-wire-final-20261107.log",
+      "sha256": "15e06b4f40146d77994843faddb2c91d3355085ef7f1716b192565053a2d0d99"
+    },
+    {
+      "path": "c3-quote-batch-evals-20261107.log",
+      "sha256": "f419febf07cda2878734901fd9e8fa08b52e843300b4e1db7e3022be11558090"
+    },
+    {
+      "path": "c3-quote-batch-round60-recheck-20261107.log",
+      "sha256": "e42461ab1e26aee6ed5f129235b203f2bde15b6feec93dc67877f770af822659"
+    },
+    {
+      "path": "c3-quote-batch-evals-final-20261107.log",
+      "sha256": "addd39de3d023798d631fa9e8f72e519ccb969ea771f2b5b295a3fb3324b96eb"
+    },
+    {
+      "path": "c3-quote-batch-build-final-20261107.log",
+      "sha256": "a3286ca07128f17c09932eb1532eb9e65bd24f3ec6c0df64c204744075d85c7f"
+    },
+    {
+      "path": "c3-quote-batch-typecheck-20261107.log",
+      "sha256": "bd9e0d6a88d15930afb9701d7b736594474f6cf1617850384528356bdac25616"
+    },
+    {
+      "path": "c3-quote-batch-lint-20261107.log",
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415"
+    },
+    {
+      "path": "c3-quote-batch-pg-20261107-01.log",
+      "sha256": "58cef88ddb2648312fd0fdc1e5eebd3c8e2e97c14f2c87d0c22a0951a1bc5b37"
+    },
+    {
+      "path": "c3-quote-batch-pg-20261107-02.log",
+      "sha256": "58cef88ddb2648312fd0fdc1e5eebd3c8e2e97c14f2c87d0c22a0951a1bc5b37"
+    }
+  ],
+  "results": {
+    "workerCommerce": "944PASS/33files after cross-parent regression",
+    "nodeEvals": "870PASS/2existingSKIP final; previous run868PASS/1localstubFAIL/2SKIP retained, targeted round60 rerun7PASS",
+    "focusedAdapter": "38PASS",
+    "build": "PASS",
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "modelRun": "NOT_RUN"
+  }
+}

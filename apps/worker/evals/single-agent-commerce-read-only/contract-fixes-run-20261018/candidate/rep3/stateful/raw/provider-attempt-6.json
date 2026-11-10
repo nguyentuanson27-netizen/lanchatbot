@@ -1,0 +1,208 @@
+{
+  "caseId": "stateful-confirm",
+  "journeyId": "sales",
+  "elapsedMs": 20550.337700000004,
+  "result": {
+    "terminal": {
+      "disposition": "HANDOFF",
+      "reason": "PURCHASE_CONFIRMED",
+      "text": null,
+      "fallbackId": null
+    },
+    "recovery": {
+      "originalDisposition": "HANDOFF",
+      "originalReason": "PURCHASE_CONFIRMED"
+    },
+    "sendEnabled": false,
+    "ownerGenerations": 1,
+    "verifierGenerations": 0,
+    "toolRounds": 1,
+    "toolCalls": 1,
+    "generations": [
+      {
+        "id": "e1f810eb-9ffd-4bd1-a691-4bddbb6c6fdd:owner:1",
+        "role": "owner",
+        "status": "OK",
+        "latencyMs": 1943.449900000007,
+        "telemetry": {
+          "generationId": "e1f810eb-9ffd-4bd1-a691-4bddbb6c6fdd:owner:1",
+          "providerRequests": 1,
+          "authRequests": 0,
+          "httpStatus": 200,
+          "modelVersion": "gemini-3.5-flash-lite",
+          "inputTokens": 4714,
+          "outputTokens": 394,
+          "cost": null,
+          "finishReason": "STOP",
+          "requestBytes": 22966,
+          "requestHash": "a2142b5cbc15985d264b565efe55f58879d24d8d822d50adb8f63adce33c257a",
+          "functionCallingMode": "AUTO",
+          "declaredToolCount": 10,
+          "thinkingTokens": 384,
+          "rawFinishReason": "STOP",
+          "unexpectedToolCall": false
+        }
+      }
+    ],
+    "toolLatencyMs": 5780.556400000001,
+    "verificationLatencyMs": null,
+    "enqueued": 1
+  },
+  "owners": 1,
+  "verifiers": 0,
+  "batch": {
+    "pageId": "1198992073286645",
+    "conversationHash": "82272a145fc64b78803e920e93034a92742684b7d6475a8057c9dfdcf94eb8b9",
+    "generation": 6,
+    "leaseToken": "55811bd6-eff7-436d-a78d-e8d8a97447e3",
+    "inboxIds": [
+      "7c3f86db-6ab7-4794-93c3-b308ad376f07"
+    ],
+    "evaluationGroupId": "e1f810eb-9ffd-4bd1-a691-4bddbb6c6fdd",
+    "eventKind": "CUSTOMER",
+    "firstReceiveSequence": 6,
+    "lastReceiveSequence": 6,
+    "attemptCount": 1,
+    "items": [
+      {
+        "inboxId": "7c3f86db-6ab7-4794-93c3-b308ad376f07",
+        "pageId": "1198992073286645",
+        "eventKey": "stateful-78387726-8610-49ce-83c2-680b4d867d38",
+        "conversationHash": "82272a145fc64b78803e920e93034a92742684b7d6475a8057c9dfdcf94eb8b9",
+        "occurredAt": "2026-10-18T10:25:08.573Z",
+        "receivedAt": "2026-10-18T10:25:08.573Z",
+        "receiveSequence": 6,
+        "attemptCount": 1,
+        "leaseToken": "55811bd6-eff7-436d-a78d-e8d8a97447e3",
+        "eventKind": "CUSTOMER",
+        "envelope": {
+          "schemaVersion": 1,
+          "customerSendEnabled": false,
+          "routing": {
+            "owner": "APP"
+          },
+          "message": {
+            "schemaVersion": 1,
+            "traceId": "ecf68146-e3f3-4c37-bcd7-3933bd13a606",
+            "eventKey": "stateful-78387726-8610-49ce-83c2-680b4d867d38",
+            "pageId": "1198992073286645",
+            "messageId": "stateful-78387726-8610-49ce-83c2-680b4d867d38",
+            "senderId": "synthetic-recipient-82272a145fc64b78803e920e93034a92742684b7d6475a8057c9dfdcf94eb8b9",
+            "conversationId": "synthetic-meta-conversation",
+            "occurredAt": "2026-10-18T10:25:08.573Z",
+            "isEcho": false,
+            "appId": null,
+            "text": "Chốt đơn cho chị nhé.",
+            "attachments": []
+          }
+        }
+      }
+    ]
+  },
+  "toolResponses": [],
+  "actualCapturedMessages": [
+    "Em đã ghi nhận xác nhận mua hàng. Nhân viên sẽ kiểm tra và lên đơn cho chị."
+  ],
+  "committedPublicState": {
+    "stage": "PURCHASE_CONFIRMED",
+    "revision": 10,
+    "cart": {
+      "schemaVersion": 1,
+      "cartId": "51811ea1-3712-566b-89c5-953ede7e488a",
+      "salesEpisodeId": "e30aac82-e979-57d9-8ec0-9ca5f9b4560a",
+      "customerProfileId": "ed5fd636-935e-4e81-8d41-aa6040987583",
+      "revision": 4,
+      "currency": "VND",
+      "status": "READY_FOR_CONFIRMATION",
+      "checkoutEligibility": "ELIGIBLE",
+      "lines": [
+        {
+          "lineId": "378cdbbe-f620-53b9-8cd1-8913e960a8e2",
+          "parentProductId": "SV2447",
+          "offerId": "AO",
+          "offerKind": "DIRECT",
+          "quantity": 2,
+          "components": [
+            {
+              "componentProductId": "SV2447_AO",
+              "componentSku": "SV2447_AO",
+              "componentRole": "TOP",
+              "color": "BE",
+              "size": "L",
+              "quantity": 1
+            }
+          ],
+          "allowMixedSizes": false,
+          "allowComponentSale": false,
+          "posUnitPriceVnd": 499000,
+          "priceAuthority": {
+            "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+            "shopId": "LANA_DESIGN",
+            "parentProductId": "SV2447",
+            "offerId": "AO",
+            "offerPriceKind": "DIRECT",
+            "componentProductId": null,
+            "metadata": {
+              "authority": "PANCAKE_POS",
+              "sourceVersion": "p2-default",
+              "observedAt": "2026-10-18T10:04:08.737Z",
+              "expiresAt": "2026-10-20T10:04:08.737Z",
+              "freshForSeconds": 172800,
+              "freshnessState": "FRESH"
+            }
+          },
+          "lineTotalVnd": 998000
+        }
+      ],
+      "adjustments": [
+        {
+          "adjustmentId": "6f83f1c7-fa94-5500-82fe-199c448a27d0",
+          "kind": "PERCENT_DISCOUNT",
+          "amountVnd": 49900,
+          "percentageBps": 500,
+          "policyAuthorization": {
+            "policyBundleId": "admin-policy:1198992073286645",
+            "policyBundleVersion": "1a618942f5821335db2e00be8c71ea7a",
+            "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+            "decisionId": "55ad1e9b-3eb7-5463-a001-4c6a505ea165",
+            "authorizedAt": "2026-10-18T10:25:04.557Z"
+          }
+        }
+      ],
+      "shippingFeeVnd": 30000,
+      "subtotalVnd": 998000,
+      "discountTotalVnd": 49900,
+      "grandTotalVnd": 978100,
+      "createdAt": "2026-10-18T10:22:57.909Z",
+      "updatedAt": "2026-10-18T10:25:04.557Z"
+    },
+    "measurements": [
+      {
+        "kind": "WAIST_CM",
+        "value": 74,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-18T10:24:30.661Z",
+          "sourceEventHash": "ce07917f386853f9e1d5f5ef69bfe3891792e6db7433da5289fd9bd2460990dc"
+        }
+      },
+      {
+        "kind": "HIPS_CM",
+        "value": 96,
+        "provenance": {
+          "source": "CUSTOMER_MESSAGE",
+          "confidence": 1,
+          "observedAt": "2026-10-18T10:24:30.661Z",
+          "sourceEventHash": "ce07917f386853f9e1d5f5ef69bfe3891792e6db7433da5289fd9bd2460990dc"
+        }
+      }
+    ],
+    "customerProfileRevision": 3
+  },
+  "counts": {
+    "embedding": 0,
+    "owner": 10,
+    "verifier": 4
+  }
+}

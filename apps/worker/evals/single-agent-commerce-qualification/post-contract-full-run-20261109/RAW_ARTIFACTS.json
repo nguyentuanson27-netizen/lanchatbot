@@ -1,0 +1,690 @@
+{
+  "kind": "LOCAL_RAW_PATH_HASH_INVENTORY_NOT_EMBEDDED_PRIVATE_PROVIDER_REQUESTS",
+  "files": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-accounting-20261109-01.mjs",
+      "bytes": 4523,
+      "sha256": "9ef85a0cd1588eca65b3b2e68403329095dd9534a510d0d228955f54faff5d74"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-audit-20261109-01.mjs",
+      "bytes": 7797,
+      "sha256": "90691d3ae6fdb176eafc2f11f2b83dcce9910ba381f1e1b5428337de7c2d1bf1"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-audit-20261109-02.mjs",
+      "bytes": 8165,
+      "sha256": "3e61b30f8ba90f4c8e4bbf3237bdc71440c3247f38b0a973b10038540bf4482f"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-accounting-20261109-01.json",
+      "bytes": 21515,
+      "sha256": "2f7dcb1323c0c6a8f0e02645491ddb5e9c1936740d1fe30e807465d80d7a049b"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-command-20261109-01.json",
+      "bytes": 1071,
+      "sha256": "dcff097f7464812933b9f2ad958c3035145fa8103aa0e52d4173e5bf6e288fea"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-completion-20261109-01.json",
+      "bytes": 139,
+      "sha256": "827a038e52519423e763741554286e610e5887c8f99b5ad8f90d07bb1f4dbf86"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-run-20261109-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-run-20261109-01\\CANDIDATE_EVIDENCE.partial.json",
+      "bytes": 1055137,
+      "sha256": "283bbe6c102d8f8645bdff6f797a6bb19a97bc509fe8ec7b9a2aea8ef0310aa5"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-run-20261109-01\\NATIVE_REQUESTS.jsonl",
+      "bytes": 688207,
+      "sha256": "e3ef58286e9b08b139dd5490ab8adba50b435c39a5680b1f0bccb317b2120dfa"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-run-20261109-01\\integration.json",
+      "bytes": 7613,
+      "sha256": "5f8d6195b9ab7722ab6517cf3cdacc47c885fff064abc22aeb0f1418c06b1f1b"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-run-20261109-01\\native-c86ff7ab967b4f8c7d71567f4c71fa0ce6edff3cca19bea4035343d3ff8ee8a9-turn-0.json",
+      "bytes": 452997,
+      "sha256": "5652cdf6dd643a0cecd15f586ce1af407313b14ba1d34695bfbb023acc1bdf68"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-run-20261109-01\\native-c86ff7ab967b4f8c7d71567f4c71fa0ce6edff3cca19bea4035343d3ff8ee8a9-turn-1.json",
+      "bytes": 155656,
+      "sha256": "fe09f5a78b2d1011ea8824651292ea6dcf8e36fd8c46c0f0db5075430ac70ce1"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-run-20261109-01\\native-c86ff7ab967b4f8c7d71567f4c71fa0ce6edff3cca19bea4035343d3ff8ee8a9-turn-2.json",
+      "bytes": 32847,
+      "sha256": "eca9caaaed5e667f389545dea81e22420db30081fdb1f8682d30a88e4167aa68"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-run-20261109-01\\native-c86ff7ab967b4f8c7d71567f4c71fa0ce6edff3cca19bea4035343d3ff8ee8a9-turn-3.json",
+      "bytes": 38296,
+      "sha256": "c7ddc7aa460f6f551a58915b56ad2a242a01d2c85542a7f959bb70150cd00442"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-run-20261109-01\\native-c86ff7ab967b4f8c7d71567f4c71fa0ce6edff3cca19bea4035343d3ff8ee8a9-turn-4.json",
+      "bytes": 43781,
+      "sha256": "110a7cd89456c63018d3478b5da7a59b76999043b1d269b963fb5fef5e67c031"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-run-20261109-01\\native-c86ff7ab967b4f8c7d71567f4c71fa0ce6edff3cca19bea4035343d3ff8ee8a9-turn-5.json",
+      "bytes": 49501,
+      "sha256": "ff7fe09ebdac08bfed20eb83c5b66ea10059c3d7a3082627f53219be99d27e01"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-run-20261109-01\\native-c86ff7ab967b4f8c7d71567f4c71fa0ce6edff3cca19bea4035343d3ff8ee8a9-turn-6.json",
+      "bytes": 184347,
+      "sha256": "89373cc739feaf693ecf85202258abe86b32ceab7d7746b378336f1e3d1e3c4b"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-sealed-20261109-01\\DIAGNOSTIC_DISPATCH.json",
+      "bytes": 162,
+      "sha256": "6f635d3e946e62cc99f50b8ba61b28d20940c59f35b475cc4f6adc43a0586ddb"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-sealed-20261109-01\\INPUT_APPROVAL.json",
+      "bytes": 838,
+      "sha256": "95f61eef3d05a53fccb18685abb57fb58cafdead43bc9a6a9e8668e997e5ed02"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-sealed-20261109-01\\PREFLIGHT.json",
+      "bytes": 484,
+      "sha256": "76066241bf01560024b5740d73b20734020ff79e785363fd82f2d53bac75a976"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-sealed-20261109-01\\REGISTRATION.json",
+      "bytes": 106655,
+      "sha256": "08544bad320734b8019fd767ab1e5694e97471bdec80eba7b2c2aada4408fafc"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-sealed-20261109-01\\REGISTRATION.pending.json",
+      "bytes": 106271,
+      "sha256": "e4b6cd704075b8051ecfaff0ea4c025471e1a848e702ab1638bdb5ea73f0a6a9"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-sealed-20261109-01\\SOURCE_READINESS_REVIEW.json",
+      "bytes": 1979,
+      "sha256": "30b99067415323115b49c9070762a0cf0347823e0e77febee76ee32aba9817b2"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-checkout-started-20261109-01.json",
+      "bytes": 999,
+      "sha256": "59417af97c3503d3e24282c3201258e69fe6a0d021cafe220b5d5faf4aedaf93"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-completed-20261109-01.json",
+      "bytes": 968,
+      "sha256": "af8ab3eaf56b7c89bed62e61b6b3007d9ac5bc8bf365bb338df6eab88dc3342a"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-evaluation-policy-20261109-01.json",
+      "bytes": 1148,
+      "sha256": "3243d96120ea992a172bf4ebfb8400b3f03cc613562a1bd57010890988d468f3"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-helper-inventory-20261109-01.json",
+      "bytes": 1597,
+      "sha256": "eda8dab19856ea477da6ce101eb9973f187d315822ece3f34415381a1efc0e12"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-initial-20261109-01.log",
+      "bytes": 74,
+      "sha256": "9836ebc8db3db372b1cec6eacaed6a16b02bc0972f3d4915c2be685f745e29da"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-initial-20261109-01\\INITIAL_STATE.json",
+      "bytes": 700,
+      "sha256": "5c29a4688b60994144d324a841f4b4a1ea20f7da9a3d694906c9b2cd5b025207"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-initial-20261109-01\\integration.json",
+      "bytes": 8221,
+      "sha256": "690531b0210d26d82a0bca0a77c652312892dc156675c08f7adee0b80d4bc6a9"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-input-index-20261109-01.json",
+      "bytes": 1680,
+      "sha256": "711526b49b7b953981dc99693adf4dfdcea2569c8511d631de4f8955e858f006"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-integrity-20261109-02.json",
+      "bytes": 4154,
+      "sha256": "9e06660cdfe025592c45288f356b3416f40c2983893f188e9f56c2fbaabd669a"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-launch-20261109-01.log",
+      "bytes": 1019,
+      "sha256": "726916946491f79b6c922f5c2f4b5f7bfd557a350a07a120ee0079c10adceace"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-launch-20261109-01.py",
+      "bytes": 4981,
+      "sha256": "58b360bf7630f292ed091cecbb9b05bc983d31a28ed2805fb5b6cd6f8030b684"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-prepare-20261109-01.log",
+      "bytes": 1366,
+      "sha256": "85dc26230e7f78bc67f7eab44000985e2ccca901c1ba5177514d1d09987c6dbb"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-prepare-20261109-01.mjs",
+      "bytes": 12537,
+      "sha256": "77f6d69f8cffe094ba0610870a230ada440eff4f4c6a917a720d1342407c2583"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-public-view-20261109-01.json",
+      "bytes": 60038,
+      "sha256": "c8bab1594e418d24b09cba54d1df04bd3db74e9daf6b520d2df61a96761b8b97"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-public-view-20261109-01.mjs",
+      "bytes": 3902,
+      "sha256": "0ec28cdcbe3ad7269eef1c1900bd2fdb5613abdef6043593258a12e8fad863fb"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-accounting-20261109-01.json",
+      "bytes": 46772,
+      "sha256": "a2427705ed9bab32821c2cb0d0f51e135eec9089ab887298b913c3bd0ae9908d"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-command-20261109-01.json",
+      "bytes": 1047,
+      "sha256": "c56fea36028090fe51f60deca86186e29d3a97dc6170eed1bf057e7e913f5705"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-completion-20261109-01.json",
+      "bytes": 135,
+      "sha256": "9be26a6268d641712445db67048f852120c2d899998d5d7110d5da1376218d04"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-run-20261109-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-run-20261109-01\\CANDIDATE_EVIDENCE.partial.json",
+      "bytes": 3222979,
+      "sha256": "586705f9fc76dfd6821e13e2498f7429e1d332195fad802814460e77e1c12925"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-run-20261109-01\\NATIVE_REQUESTS.jsonl",
+      "bytes": 3442045,
+      "sha256": "e74f1a84365507c7d4debabb73e00a0ea2f2f15cd88b21f40aa33cead21608d9"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-run-20261109-01\\integration.json",
+      "bytes": 7614,
+      "sha256": "ad0f2b97bd1b8778b6439150d9618673a736e2b7ff35efdee8fbb8a42778260e"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-run-20261109-01\\native-06b9572f561c554db2114561abf245f4a6ea0a38b15c92b0b1b5cb316fcb0944-turn-0.json",
+      "bytes": 439043,
+      "sha256": "3d687826e0422971442c7275238d73275152c48b8a03f8b06a133c798f77ecda"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-run-20261109-01\\native-06b9572f561c554db2114561abf245f4a6ea0a38b15c92b0b1b5cb316fcb0944-turn-1.json",
+      "bytes": 405560,
+      "sha256": "6a182dea15c876164a17a77ef01547e2e814276a4d20cf9dd39b0ec31ff38294"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-run-20261109-01\\native-06b9572f561c554db2114561abf245f4a6ea0a38b15c92b0b1b5cb316fcb0944-turn-2.json",
+      "bytes": 418313,
+      "sha256": "4c4f3764289a544a75cc3c6d07fba5c453c7a4b31bebf874914952e70ea4d3ac"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-run-20261109-01\\native-35869db26688300b3eb3f98e2cec3a08c6099267c1db2c697a464c006db18597-turn-0.json",
+      "bytes": 326629,
+      "sha256": "a94927ffd6707dd4faf885cbe5a1ff79d21e2e51ab04999195d8c53383023042"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-run-20261109-01\\native-48c201c4ce8360a9480d79b7b62864b20c5ba601908dce1cc72d8cfe43276787-turn-0.json",
+      "bytes": 488692,
+      "sha256": "f68e7ce12e23247f096ace6646314a69f2c4dd91a42ed2de5618d433629193ff"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-run-20261109-01\\native-e97e4d9886737b4be054c35eb976f377dccd9e750e9e19a5a3e8da29f666a5d5-turn-0.json",
+      "bytes": 453448,
+      "sha256": "b5fa5a328b35bc27293d6700eff451eae109dcfd7127032fc7eaf6ae25118111"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-run-20261109-01\\native-e97e4d9886737b4be054c35eb976f377dccd9e750e9e19a5a3e8da29f666a5d5-turn-1.json",
+      "bytes": 409071,
+      "sha256": "de91784ac60848c5a9be65723bacc61f0181a8aed5e3178d673be028b314f510"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-sealed-20261109-01\\DIAGNOSTIC_DISPATCH.json",
+      "bytes": 162,
+      "sha256": "5a31d6a19b73abc1d9bb474b0b6c85b5e6681672c51b91abd6e65b456319048b"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-sealed-20261109-01\\INPUT_APPROVAL.json",
+      "bytes": 838,
+      "sha256": "5b251633ff5013def489bf9c9372ead5a0a2bd3ca619a7c190574e17c951ea69"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-sealed-20261109-01\\PREFLIGHT.json",
+      "bytes": 484,
+      "sha256": "0c0cce4b1200610d4c11c4a8aaf4db5f21f9b59bbd67fc79bf827020dbe01f28"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-sealed-20261109-01\\REGISTRATION.json",
+      "bytes": 321344,
+      "sha256": "64ea017df3eb1d857e0eb30f98d728a1c1a13acab5b3c6879fc9f980456d1d02"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-sealed-20261109-01\\REGISTRATION.pending.json",
+      "bytes": 320966,
+      "sha256": "408a41def0300c921755cb00bb9589568f13c631172cb7bdc18c158e1500e89b"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-sealed-20261109-01\\SOURCE_READINESS_REVIEW.json",
+      "bytes": 6898,
+      "sha256": "680701cce72fcbd3d18492ebc7e49153bf43aee486cae1f74c268b439d325e35"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r1-started-20261109-01.json",
+      "bytes": 975,
+      "sha256": "68569bb7d647253efdd68de0e012b2fda29365f2100204a18e9c91e7adc77763"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-accounting-20261109-01.json",
+      "bytes": 86992,
+      "sha256": "8ea955e1c78748b6ce7696fcdfe6637efd3d8438a7ded4e73bb285f32bb964e9"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-command-20261109-01.json",
+      "bytes": 1047,
+      "sha256": "51639542e5238a1d7562653af53d79946485d24f030b36d3ce617c4fba2e8022"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-completion-20261109-01.json",
+      "bytes": 136,
+      "sha256": "f8d88492c611cb5ffdb76363ea6bd6d2723cc6be072f889f59287f60b13c98e6"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\CANDIDATE_EVIDENCE.partial.json",
+      "bytes": 6451630,
+      "sha256": "ea0bb8bbd2c7bdf017f9b7d09fb4122335cff47958f2400b402147c1233c3f46"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\NATIVE_REQUESTS.jsonl",
+      "bytes": 5728960,
+      "sha256": "a50be72b19906ef228988ba6bf3f4835dc58db8cb91e652dfaf774ecd519661f"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\integration.json",
+      "bytes": 7614,
+      "sha256": "2bb8d397ad070bd060a68f8912f95dc3aba8b1746fd5fe032df6da40a5c0e09d"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\native-161006c038e8ec4236ffec1f4f93da966daf8a0ed7d378a54c7dbf45bdf13a33-turn-0.json",
+      "bytes": 601906,
+      "sha256": "b29b5a0fa6a660436d01252892d425c7eb286ace4f92ce62de16d56500f11c11"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\native-5332528dd179fc3773744892932cbd19fa78b6377b0622c8b080ee0d4eba2181-turn-0.json",
+      "bytes": 238925,
+      "sha256": "ba5c1f8e30fcb7baa162898536b29c84c3d1b01031f7367a3947ba71359f86fe"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\native-54c09cda9dc8779d3c9bc36a22969c7c0276d102ef460ac1449785a2094a85ca-turn-0.json",
+      "bytes": 451919,
+      "sha256": "440e5aeecad5a4affb7eb5c7678b50254f2d05b4fdd08b465f3abf927859f249"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\native-54c09cda9dc8779d3c9bc36a22969c7c0276d102ef460ac1449785a2094a85ca-turn-1.json",
+      "bytes": 155548,
+      "sha256": "1bec95ab35969d52dc57c35da93828c8cdd88a4df776872bfcea99e649b99cb5"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\native-54c09cda9dc8779d3c9bc36a22969c7c0276d102ef460ac1449785a2094a85ca-turn-2.json",
+      "bytes": 32711,
+      "sha256": "c80e9d0433b99ca467dbeae6a9fe56441c78add5c4c0d43c58a2b1d7be2f6e84"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\native-883fa570e645e14556ebaef75993b33f799eef88f919eb7bd9a88a8c93af5f8c-turn-0.json",
+      "bytes": 444247,
+      "sha256": "bc6837a04e7ae9d8765acd5c567383bff69906be29704b232a0b1ea9df896c99"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\native-883fa570e645e14556ebaef75993b33f799eef88f919eb7bd9a88a8c93af5f8c-turn-1.json",
+      "bytes": 136241,
+      "sha256": "e6ac8e5cd2b0bf220b6d4b54afb42008a71a6f0fde5eb14e2d3e89d6dbe3e393"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\native-883fa570e645e14556ebaef75993b33f799eef88f919eb7bd9a88a8c93af5f8c-turn-2.json",
+      "bytes": 13661,
+      "sha256": "e9c890b9b3294f7ac89602a75be2d1ee96b91c6fbda6b2f385eb15139cdfcdad"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\native-8fc507a3d42ab962d3d943b6e8662d2548ba6d524753eb007e0731499d6f37cd-turn-0.json",
+      "bytes": 471867,
+      "sha256": "77f0c812f0b2031916d309847ca18e70b5e09027a9349dfdfbb253b042308bee"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\native-8fc507a3d42ab962d3d943b6e8662d2548ba6d524753eb007e0731499d6f37cd-turn-1.json",
+      "bytes": 420962,
+      "sha256": "3f280ed91d65b7f576705d5a6f7978892958750c0b4162b3ec70ff56178c69d7"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\native-8fc507a3d42ab962d3d943b6e8662d2548ba6d524753eb007e0731499d6f37cd-turn-2.json",
+      "bytes": 225836,
+      "sha256": "3d26a7c9f693189301dd3bbce4b4ff07accec818e63024b2faff36e1710c9f85"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\native-949c339034561a547173c6dd0efa6245d6fddc1588b2fe21c2049aacbf7bd27d-turn-0.json",
+      "bytes": 306027,
+      "sha256": "2d02299f607a96055e60a81765d81e0998e7185decd5069dec6bfa9f9da56a2f"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\native-949c339034561a547173c6dd0efa6245d6fddc1588b2fe21c2049aacbf7bd27d-turn-1.json",
+      "bytes": 426074,
+      "sha256": "50fd03b892ae1ea8a1bf31797e43615950b7e47bc1ad2f4cf7541f6d28878261"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\native-a2067ddc150fbc0cd698951441958d1b666ef8e7db074c9c68e9828ed0aee35f-turn-0.json",
+      "bytes": 172081,
+      "sha256": "8bfacd35f6c62c984e246651ffcd12925e96e00592fe3658442011b8d2fe9224"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\native-bb57ddccf10ba9e51c8c67c11d32fc5c6e47d86391d0b9ffb7bedcf9a6d096aa-turn-0.json",
+      "bytes": 479274,
+      "sha256": "4a6931e1629063287a6361efbddccdd7bc282a8f49f3cb41041ccafac9e7e236"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\native-bb57ddccf10ba9e51c8c67c11d32fc5c6e47d86391d0b9ffb7bedcf9a6d096aa-turn-1.json",
+      "bytes": 463203,
+      "sha256": "dccf78342870969d869947f896c761e7e1470490039c5d55905cc15f427d4866"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-run-20261109-01\\native-efc70e72c9b3cacfd8f065ff747023f63e18c7127f7f6810e9654a2b950f2943-turn-0.json",
+      "bytes": 442259,
+      "sha256": "487ff74c730a408a97b53ee240fe56926e348a547451b452904f27aeaa84f08b"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-sealed-20261109-01\\DIAGNOSTIC_DISPATCH.json",
+      "bytes": 162,
+      "sha256": "2663b149d8d3873260ebc0e17e4784e31336d13e0d0e3932a98b62951d8fc105"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-sealed-20261109-01\\INPUT_APPROVAL.json",
+      "bytes": 839,
+      "sha256": "0462f2ba1b365c71771f5636838f5d3df550cfcfae07110f858fabe8c979b1fa"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-sealed-20261109-01\\PREFLIGHT.json",
+      "bytes": 485,
+      "sha256": "c3103b49502e8f588700cd79310e7b45a02344488248c5945cfb57084ead0f78"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-sealed-20261109-01\\REGISTRATION.json",
+      "bytes": 971252,
+      "sha256": "dd1fd3dc4b5c4c9ab38d77fa0b1971e7aebeb78df4eabc8cbc2e0716cd100635"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-sealed-20261109-01\\REGISTRATION.pending.json",
+      "bytes": 970874,
+      "sha256": "28d38beab2ea095f8ca8ce5b1f5ac9fa9d5538f55b580c662cbce0852c54b419"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-sealed-20261109-01\\SOURCE_READINESS_REVIEW.json",
+      "bytes": 15323,
+      "sha256": "22a5f0257f5267a5d3701f76f60afa9df6361952b6326df81f9df2ffedb387a5"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-r2-started-20261109-01.json",
+      "bytes": 975,
+      "sha256": "e38995fe73ce9a2c5dadb42dc04571e1a5b80cff2dbc3e7678661f90c9ea3d79"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-accounting-20261109-01.json",
+      "bytes": 130625,
+      "sha256": "0b877de1aedd8ece8566555d19b5d656feb9f1baff22f1352b33d1d080d85d4c"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-command-20261109-01.json",
+      "bytes": 1075,
+      "sha256": "96120c68ec87dfae663337a44b6b09d15787933fab733a425a7832988326ee57"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-completion-20261109-01.json",
+      "bytes": 144,
+      "sha256": "4fbe22f6a33447eb85ec50f5404193924fc4ade02f62b740be70bde997710fa4"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\CANDIDATE_EVIDENCE.partial.json",
+      "bytes": 8819743,
+      "sha256": "a0170a43a1807ff971f5497ce039ecaea94c989044610717bf599e8a5f1e5d6c"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\NATIVE_REQUESTS.jsonl",
+      "bytes": 8345493,
+      "sha256": "b4e91c8fe1b45e5da9382f3d10fc98d88d37d399bebd25dd6bdad691b1a52cf2"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\integration.json",
+      "bytes": 8928,
+      "sha256": "c8b6e825f48cf564d084fd71469b0d691f64bbbd96ff4975fc6d4586e3440a73"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-02915faf3737a7b22f2929444bc5c6ba3e9c5baeeb2bd55ed116ca9c1c406a33-turn-0.json",
+      "bytes": 68179,
+      "sha256": "bb0bb5e26c93d09889f0e57284df73b1c99517f8f6f020fcc094e6b67a2cf313"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-036f635dac9998169837e521795c83e7920860736a5aaf22881fa658ca481618-turn-0.json",
+      "bytes": 145532,
+      "sha256": "182e3c3cebaf411c61bb24c7410e3877ce832868c3697bd44524bed69fe0b8af"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-0418e9b2f8f5e80d496971fee92eec2c310c5473f4fcb413443f864db11e1788-turn-0.json",
+      "bytes": 474480,
+      "sha256": "b6ba8e0c0f61b8508f05502ecdabb10e6a09f5c9d276a281cf47fcc0cdcb7432"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-0418e9b2f8f5e80d496971fee92eec2c310c5473f4fcb413443f864db11e1788-turn-1.json",
+      "bytes": 290797,
+      "sha256": "27d87e5e41902e6835a04b9a1611aa08d2d612dcb9e27649877368a2b1c621e5"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-0418e9b2f8f5e80d496971fee92eec2c310c5473f4fcb413443f864db11e1788-turn-2.json",
+      "bytes": 296836,
+      "sha256": "90fa07cabbfb682d90c02e4c4e720a6a6c068f8fd9fa789948e6910fa0169664"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-1748ac72c2a52529fa20ab4cc065a862ba9658b95f913288ff4c69bd0e7b5697-turn-0.json",
+      "bytes": 523054,
+      "sha256": "a0b7be8feffd749982dbf89744270f6a8b56b728ec3c145006e66344edb270a6"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-1a3709b20901d8452974333955c249bf66363affd5cc945f0a89034c6d97f329-turn-0.json",
+      "bytes": 461987,
+      "sha256": "174e5b45b6a41bf2648292fa41794d92ac9a5d8b99680d7d42f3529aad7ed3c5"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-32e27e462f97e0dff61fb3d124b48b07b5e470e25f6d38ccaedaf2e8553d914b-turn-0.json",
+      "bytes": 173512,
+      "sha256": "7eaa68e4aeb2a88c62d2ade19b86244bb52087c39134aafcf9bfc823aaad886e"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-3463fbfff1c8c4f95305730a3b6ec5ed276adf829e43526925dbcc34a0ebd12a-turn-0.json",
+      "bytes": 449057,
+      "sha256": "6ebf4aa36bff328b7f2da7c5b6ac14edfc9d3be02634115c760fc9f6b50ce10a"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-35b85b32467a73b18ca6643a1ffb277f89ac3d3b5cf77b0d57fb7da3d1a2a277-turn-0.json",
+      "bytes": 395881,
+      "sha256": "c9801545d352d7c04d8ef9b54646297709daf72983c5a5ad61c734f9af9fd5ac"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-42add0bafc7bbdc3ee95ab99970de345f15bc6fb917faa5eebbeb4432dda2d3e-turn-0.json",
+      "bytes": 427769,
+      "sha256": "c22345bb79b9c23cf3e01ce71815f78a9d0df5854529f10d822463026f428eb8"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-6eb2b33ee3852f5b1a8a495680fdc384ed99f7109f7335ac53ac7ca86ddd4edb-turn-0.json",
+      "bytes": 517296,
+      "sha256": "3d0ba30a3a5340cf9b079fe4cba6c0c8ad1d3f4b4a1c69a70b302d3f2d0d9a5d"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-6f1aad58c14824483713b7d5a43122136925b1bab4eeb881e4b652b3a2d959e6-turn-0.json",
+      "bytes": 67953,
+      "sha256": "9a7deff9b349135e0df5ffd45097e859b18298d2c2bad982e111d3c1550c0bbf"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-6f1aad58c14824483713b7d5a43122136925b1bab4eeb881e4b652b3a2d959e6-turn-1.json",
+      "bytes": 6695,
+      "sha256": "12cf0d8d916da1cb0e43a865d18f1e8ed3aff89f51627ea52903c60377996444"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-6f1aad58c14824483713b7d5a43122136925b1bab4eeb881e4b652b3a2d959e6-turn-2.json",
+      "bytes": 7797,
+      "sha256": "cc97d39d9a7b409cff82cfe8122f210b5d82a1e4d428da23666a0d5acc609f1c"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-7db1945e69b13b2faf452b1c7c83874074828a239e55aa1b085665deea02321a-turn-0.json",
+      "bytes": 479591,
+      "sha256": "d2688d6a82fd4dfc81f3ee4c6bb7226ed1bf8a342d54abf1799db08626864eea"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-82eab1d34b8fd827e86652b53fe276ddd54e132f868534cebe0c1008c62dfa61-turn-0.json",
+      "bytes": 505697,
+      "sha256": "a7820de24ef81e09915d7e82de2fc6495c33ce226a11058a893e12823921e4b9"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-8aefa912b014ae9593cecaf7a3760a957aea54d9fd56ce31da40b0309db22b27-turn-0.json",
+      "bytes": 140077,
+      "sha256": "9e1675b6193ca3fc0a00caee14b9572c5e72309d2983787e2b7c7d645410884b"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-99fba046d32a0ff69378157b213209906610be550e027b75dcaf7b7bee3c1c1f-turn-0.json",
+      "bytes": 337225,
+      "sha256": "217930a85eba0adc849fb69fca96b588010ce86f20a8cecdaea0a15b98b2a6bf"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-c18d1afccc74ddd587e56e899c29cc2d588de5d0d78330ea5c856efccd14f372-turn-0.json",
+      "bytes": 330034,
+      "sha256": "5d3eed1b57e4d1656e967d491068c1c4c6c3534e23fab357f526044a75334e08"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-c72adce2fa7b4488c7e1e47af3f069260b5abe14a5eeb319d5fecf86955cebd0-turn-0.json",
+      "bytes": 173646,
+      "sha256": "79a40a5cb96aa213b61f6b64ce0f362d4b8d825b251bc9b3ad422230e3584b05"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-c944f58e2daa380f7c85ae5509d5db8ff7bea3828ca1d8100c4a60e420ac6906-turn-0.json",
+      "bytes": 434430,
+      "sha256": "23038d21db6dcf6edf939ecf281069a23fc4389d6ff98915cc1063d6bf1f82a3"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-e493e8dfe052d67fcef82c2eddc8bdb66034e82f3bcf448c960ef69e7f7965b1-turn-0.json",
+      "bytes": 438073,
+      "sha256": "cb2ced9938b03211a6d07207d33c95df1436b1ba72cdfc5f37d95b36b19d2bfb"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-run-20261109-01\\native-fb094a153f1af34dacc0d79c7b26f4d508047e51c03a45f0d5b7956b88f3c398-turn-0.json",
+      "bytes": 509134,
+      "sha256": "5f6708221cd67860d7629dd99d110746c4c82bb0b6d40eaf50312eb61bfd7b7c"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-sealed-20261109-01\\DIAGNOSTIC_DISPATCH.json",
+      "bytes": 162,
+      "sha256": "5f17a0d66a4f83815ec981db775cce9394bd574bfb4ff51a0e366fac9bb26204"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-sealed-20261109-01\\INPUT_APPROVAL.json",
+      "bytes": 840,
+      "sha256": "a0dc0332a7437007ff66ffbe0d10ef432b0e200de65c1640be3a2412e2697ebb"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-sealed-20261109-01\\PREFLIGHT.json",
+      "bytes": 486,
+      "sha256": "2254486dabea1925f9d78c0352b9e10b2f57141d341de5da99031c5dca793b53"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-sealed-20261109-01\\REGISTRATION.json",
+      "bytes": 1747505,
+      "sha256": "fcbf6675a48c83fbb0408f28c2188a496a3858cd7ec45eee4986c0b3a7ce4d69"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-sealed-20261109-01\\REGISTRATION.pending.json",
+      "bytes": 1747120,
+      "sha256": "67e605608412a0a592f9e6dd4d4c1bfe8b679e499da78faa077a4c458f5eb4fe"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-sealed-20261109-01\\SOURCE_READINESS_REVIEW.json",
+      "bytes": 27424,
+      "sha256": "f1c1f125d7e0bf2c18dbf5f965788400b4cc81d5b99776e2d328e3d93060b532"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-remainder-started-20261109-01.json",
+      "bytes": 1003,
+      "sha256": "4268dc55d7b958bafb5f3e511ffc6e53b8ad78f467a6f03d12ae634a50e20159"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-seal-20261109-01.json",
+      "bytes": 2614,
+      "sha256": "ddf0c7b3c1f6be8c39cede4ef19dce124e2f54fb7bb0d262b35207fb27d27a4e"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-seal-20261109-01.log",
+      "bytes": 317,
+      "sha256": "c97e0878845602355077ae960814e3e3df2daeb78cbfc07da565a00d0527ccb9"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-seal-20261109-01.mjs",
+      "bytes": 4603,
+      "sha256": "2f84cf28058447a36c1fc16cd857e652405bf118e3fad79bc18ffaa0953f67c8"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-world-20261109-01.log",
+      "bytes": 1644,
+      "sha256": "f13925e1a041fa5988e2f5890b7fb32f3975e3cb85e687cd563477f63ac36bff"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-world-20261109-01\\SUMMARY.json",
+      "bytes": 122,
+      "sha256": "ead41a2786c17b895eefbdc033b9f15b92cdd3400cb1a2588994b4664549dceb"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-world-20261109-02.log",
+      "bytes": 138,
+      "sha256": "24a5fffe93c46f1a7e9b5f8bec7746c8eda372b27f904fb63abcada5b898e9dd"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-world-20261109-02\\PUBLIC_SOURCE_WORLD.json",
+      "bytes": 42772967,
+      "sha256": "3f9dabeeba0426098b1dd3e4c6cc6a67134e3f7fd8c95dd90001cab3d63aeade"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-world-20261109-02\\SUMMARY.json",
+      "bytes": 2736,
+      "sha256": "27fb5ac3a92bc65f5ccafe03966ceaebcdf3695e9983d63fe5f084d3f2b5ab87"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-post-contract-full-world-20261109-02\\WORLD.json",
+      "bytes": 42784406,
+      "sha256": "6d9d828b20b046d2885dc3177e0b4a22092d78519253632228df756abad70b84"
+    }
+  ]
+}

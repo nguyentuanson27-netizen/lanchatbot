@@ -1,0 +1,103 @@
+{
+  "sourceSha": "283f09e16d3034bbd07e44fc4866e57a5ce68e91",
+  "mode": "PROVIDER_REAL_POSTGRES_LIVE_PUBLIC_CATALOG_CURRENT_CAPTURED_POLICY_CAPTURE_DELIVERY",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9",
+    "verifier": "0b240599a04d9a86c25ed2b3b815c152e83106c85e61940efde15b020e4c2fde"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "requestBounds": {
+    "ownerWireBytes": 65536,
+    "verifierWireBytes": 32768
+  },
+  "toolSchemaHash": "17ce1e5380282400806f44de574db46f859d4c060e836ca7aced486d99830f7f",
+  "catalogInputMode": "LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION",
+  "candidateHandoffFileHash": "1fb7dd7cb5eab0e7685e0f3df1b1407d9bdea56dbe538034868b5189f9700c62",
+  "catalogImageInput": {
+    "count": 2,
+    "maxBytes": 524288,
+    "maxRequestBytes": 1507328,
+    "mediaResolution": "MEDIA_RESOLUTION_MEDIUM",
+    "maxDimension": 1024,
+    "maxSourceBytes": 2097152,
+    "maxSourceDimension": 12000,
+    "maxSourcePixels": 50000000,
+    "sourceHashRequired": true,
+    "hashContract": "APPROVED_REGISTRY_REF_PLUS_DOWNLOAD_SHA256_PLUS_PREPARED_SHA256",
+    "resize": "EXISTING_FFMPEG_GEOMETRY_JPEG_Q3_OR_PNG"
+  },
+  "selection": {
+    "mode": "FOUR_INDEPENDENT_MEDIA_INGRESS_TURNS",
+    "registered": [
+      "media-detail",
+      "media-feedback",
+      "media-back",
+      "media-concern"
+    ]
+  },
+  "selectionHash": "f9cea562dc2fda04deeb5e7e9e1f155c7b0efd083c4caa9ec9e823e82b3ebcc3",
+  "corpusHash": "5e20e6521b47cf4d0b1aed58f6d06cb3000d84fd16d64c7e46e70f028ae4134e",
+  "sourceConfigHash": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+  "registeredOutcomes": 4,
+  "publicTurns": 4,
+  "privateCodeTurns": 0,
+  "repetitions": 1,
+  "maximumGenerationRequests": 16,
+  "retry": 0,
+  "codex": {
+    "version": "codex-cli 0.159.2",
+    "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+  },
+  "sendEnabled": false
+}

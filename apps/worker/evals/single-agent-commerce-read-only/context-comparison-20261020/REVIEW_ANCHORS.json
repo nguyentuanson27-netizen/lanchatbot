@@ -1,0 +1,59 @@
+{
+  "kind": "EVALUATOR_ONLY_PRE_PROVIDER_ANCHORS",
+  "scopeDecision": "Đọc nghĩa toàn đoạn; giữ quyền tư vấn định tính/material inference. Không dùng thời lượng/từ khóa riêng lẻ suy thành cam kết. Đây là supplemental review, không owner/human adjudication mới.",
+  "anchors": [
+    {
+      "source": "apps\\worker\\evals\\single-agent-commerce-read-only\\ack-source-rerun-20261019\\CONVERSATIONS_AND_REVIEW.md",
+      "section": "b1-1 / b1-changed-occasion",
+      "wholeHistoricalSection": "b1-1 / b1-changed-occasion\n\nLịch sử:\n- customer: Chị định lấy set Thạch Thảo mặc đi đám cưới.\n- shop: Đi đám cưới mặc bộ này đẹp chị ạ.\n\nKhách:\n\n> Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé.\n\nKết quả thực nhận:\n\n> Dạ, set Thạch Thảo dùng chất tơ Hàn và ren tơ mềm, có độ bay nên đi ô tô gần 3 tiếng ngồi lâu sẽ dễ bị hằn nếp nhăn ạ.\n>\n> Nếu chị ngại nhăn khi ngồi xe đường dài, em đổi sang **set váy Khánh Trang** nhé chị. Mẫu này làm từ chất liệu thô boi phối ren, vải đứng form và ít nhăn hơn, mặc lên vẫn rất nhẹ nhàng, nữ tính mà giữ form gọn gàng suốt chuyến đi. Chị xem set này có ưng ý hơn không ạ?\n\nPrimary: **USABLE** — Xét lại lời khuyên theo việc đi xe dự cưới, chọn cụ thể set Khánh Trang của shop và giải thích so sánh chất liệu; có phương án để khách tiếp tục chọn mua.\nGiọng/cách tư vấn: Còn nhắc lại hoàn cảnh và nhiều lời khen; câu có ưng ý hơn chung chung. Không đòi mọi suy luận ít nhăn tương đối phải có phép thử.\n",
+      "prospectiveInterpretation": "ADVISORY_WITH_SCOPE_NOTE",
+      "reason": "Nguồn có chất liệu/thiết kế; trong toàn đoạn đây là lời chọn món và nhận xét giữ dáng định tính. Không nêu kết quả thử nghiệm, độ phẳng đo được hay hứa loại nếp nhăn. Cụm suốt chuyến đi không tự đủ để kết luận protected false PASS. Theo hướng owner cho phép tư vấn vật liệu/giữ form, ghi lưu ý phạm vi chứ không xác nhận lỗi safety chỉ từ cụm ấy.",
+      "historicalLabelUnchanged": true
+    },
+    {
+      "source": "apps\\worker\\evals\\single-agent-commerce-read-only\\chat-expression-run-20261019\\CONVERSATIONS_AND_REVIEW.md",
+      "section": "3: b1-changed-occasion:rep-3",
+      "wholeHistoricalSection": "3: b1-changed-occasion:rep-3\n\nHistory:\n\n- customer: Chị định lấy set Thạch Thảo mặc đi đám cưới.\n- shop: Đi đám cưới mặc bộ này đẹp chị ạ.\n\nCustomer: Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé.\n\nActual customer text:\n\n```text\nSet Thạch Thảo dùng chất tơ và ren mềm nên ngồi xe 3 tiếng sẽ dễ bị hằn nếp nhăn chị ạ.\n\nEm chọn set Thanh Vũ cho chị nhé. Áo ren dệt cotton kết hợp chân váy tơ crep đứng dáng và ít nhăn hơn, giúp chị giữ form gọn gàng suốt chuyến đi.\n```\n\nPrimary: **NEEDS_EDIT** — Đã chọn Thanh Vũ rõ và nói gọn hơn, nhưng gắn lời khuyên với “giữ form gọn gàng suốt chuyến đi”. Trong ngữ cảnh khách cần ít nhăn khi đi xe3giờ, đây là hiệu quả duy trì form trọn chuyến chưa có nguồn; cần bỏ phạm vi cam kết đó trước gửi theo ranh giới đã dùng ở run trước. Nhận xét định tính về tơ crep/độ gọn gàng thông thường vẫn được phép.\n\nVoice / reasoning findings:\n\n- Câu đầu vẫn nhắc lại3giờ của khách, nhưng không tự là lỗi. Vấn đề bắt buộc sửa là phạm vi “suốt chuyến đi”, không phải từ “gọn gàng” hoặc câu ngắn.\n",
+      "prospectiveInterpretation": "ADVISORY_WITH_SCOPE_NOTE",
+      "reason": "Áp dụng cùng cách hiểu như baseline: so sánh tơ crep và lời giúp giữ form là tư vấn định tính, chưa đủ chứng cứ gọi unsafe chỉ vì suốt chuyến đi. Ghi disagreement với primary cũ; không sửa primary cũ hoặc dùng ghi chú để xóa fallback khác.",
+      "historicalLabelUnchanged": true
+    },
+    {
+      "source": "apps\\worker\\evals\\single-agent-commerce-read-only\\wording-stability-2-20261019\\CONVERSATIONS_AND_REVIEW.md",
+      "section": "b1-1 / 1: b1-changed-occasion",
+      "wholeHistoricalSection": "b1-1 / 1: b1-changed-occasion\n\nCustomer history:\n\n- customer: Chị định lấy set Thạch Thảo mặc đi đám cưới.\n- shop: Đi đám cưới mặc bộ này đẹp chị ạ.\n\nCustomer: Chị đi ô tô gần 3 tiếng mới tới nơi. Mặc bộ này có dễ nhăn không em? Có mẫu nào đỡ nhăn hơn thì em chọn giúp chị nhé.\n\nActual terminal customer text:\n\n```text\nDạ, set Thạch Thảo dùng chất liệu tơ Hàn và ren tơ Hàn mềm bay nên khi ngồi ô tô gần 3 tiếng di chuyển đường dài sẽ dễ bị hằn nếp gấp nhẹ áo váy đó chị ạ.\n\nNếu chị muốn mẫu ít nhăn hơn để khi tới nơi trang phục vẫn phẳng phiu, mình có thể chuyển sang **Set váy Khánh Trang** (chất thô boi phối ren form suông nhẹ) hoặc **Set váy Thanh Vũ** (áo ren dệt sợi cotton, chân váy tơ crep). Chất thô boi hoặc ren cotton đứng dáng hơn một chút khi ngồi xe lâu, mặc lên vẫn rất lịch sự, nữ tính và rất hợp để đi tiệc cưới nha chị. Chị xem mình ưng mẫu nào em tư vấn thêm cho ạ!\n```\n\nPrimary: **NEEDS_EDIT** — Có so sánh chất liệu và tìm được hai mẫu, nhưng khách đã nhờ shop chọn giúp: reply đưa Khánh Trang hoặc Thanh Vũ rồi hỏi khách ưng mẫu nào, chưa có lựa chọn ưu tiên/lý do phân biệt. Cần viết lại để shop dẫn quyết định thay vì trả việc chọn lại cho khách.\n\nVoice polish / rewrite reason:\n- Dài; kể thuộc tính hai mẫu rồi kết bằng CTA chung. Không chấm chỉ do có hai mẫu, mà do yêu cầu chọn giúp chưa được giải quyết.\n",
+      "prospectiveInterpretation": "SUBSTANTIVE_CHOICE_GAP",
+      "reason": "Khách nhờ shop chọn giúp nhưng reply đưa hai tên và hỏi ưng mẫu nào, không ưu tiên hay phân biệt lý do đủ để chọn. Lời tư vấn cần viết lại vì việc khách giao chưa được giải quyết, không vì đếm hai món hay từ nếu.",
+      "historicalLabelUnchanged": true
+    },
+    {
+      "source": "apps\\worker\\evals\\single-agent-commerce-read-only\\wording-stability-1-20261019\\CONVERSATIONS_AND_REVIEW.md",
+      "section": "advice-1 / 3: b1-buying-concern",
+      "wholeHistoricalSection": "advice-1 / 3: b1-buying-concern\n\nCustomer history:\n\n\nCustomer: Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.\n\nActual terminal customer text:\n\n```text\nDạ, set Thạch Thảo này mặc đi tiệc ban ngày rất hợp và không bị rườm rà đâu chị ạ! Thiết kế gồm áo tơ Hàn thêu nổi nhẹ nhàng kết hợp chân váy ren tơ Hàn mềm, form váy có độ rũ và bay tự nhiên nên tạo cảm giác thanh thoát, bay bổng chứ không bị nặng nề hay cứng nhắc.\n\nHơn nữa, nguyên bộ có giá 799.000đ, hoàn toàn nằm trong ngân sách 900.000đ của chị. Nếu chị vẫn muốn tiết chế bớt phần ren, mình có thể chọn mua riêng áo thêu (499.000đ) để phối cùng các kiểu chân váy trơn sẵn có trong tủ đồ nha chị.\n```\n\nPrimary: **USABLE** — Giải tỏa lo rườm rà và đưa cách bớt ren bằng áo thêu phối váy trơn; giá bộ/áo khớp nguồn.\n\nVoice polish / rewrite reason:\n- Dài, nhiều cụm bay bổng/thanh thoát; lặp ngân sách.\n",
+      "prospectiveInterpretation": "USEFUL_WITH_POLISH",
+      "reason": "Trả lo ren và đưa áo thêu phối váy trơn: có cách giảm phần ren cụ thể, đúng nguồn bán lẻ. Lời dài/tính từ/ngân sách là góp ý giọng, không tự đảo câu hữu ích thành fail. Không bắt câu mới phải lặp cách mua lẻ này.",
+      "historicalLabelUnchanged": true
+    },
+    {
+      "source": "apps\\worker\\evals\\single-agent-commerce-read-only\\chat-expression-run-20261019\\CONVERSATIONS_AND_REVIEW.md",
+      "section": "5: b1-buying-concern:rep-2",
+      "wholeHistoricalSection": "5: b1-buying-concern:rep-2\n\nHistory:\n\n\nCustomer: Chị thích bộ này nhưng nhìn ảnh thấy ren hơi nhiều. Mặc đi tiệc ban ngày có bị rườm rà quá không em? Ngân sách chị tầm 900 nghìn.\n\nActual customer text:\n\n```text\nDạ ren của set này là ren tơ Hàn mềm, kết hợp cùng áo tơ thêu form nhẹ có độ bay tự nhiên nên mặc đi tiệc ban ngày rất sang và thanh thoát, không bị rườm rà hay nặng nề đâu chị nhé.\n\nCả bộ có giá 799.000đ, hoàn toàn vừa vặn với ngân sách 900 nghìn của chị ạ.\n```\n\nPrimary: **USABLE** — Nhận xét thẩm mỹ đúng phạm vi được duyệt và giá799k, không cần ép thêm câu chốt.\n\nVoice / reasoning findings:\n\n- Vẫn xâu chuỗi mềm/nhẹ/bay/sang/thanh thoát và lặp ngân sách; sức thuyết phục chưa cải thiện rõ.\n",
+      "prospectiveInterpretation": "FUNCTIONALLY_USEFUL_PERSUASION_THIN",
+      "reason": "Có nhận định thẩm mỹ liên quan và giá đúng nên vẫn dùng được. Mềm/nhẹ/rũ chưa là lý do mạnh về lượng trang trí; ghi tư vấn mỏng/chưa cải thiện, không tự gọi factual sai hoặc đổi nhãn sang fail vì thiếu đáp án evaluator.",
+      "historicalLabelUnchanged": true
+    }
+  ],
+  "clearUnsupportedExamples": [
+    {
+      "source": "apps\\worker\\evals\\single-agent-commerce-read-only\\chat-expression-run-20261019\\FALLBACKS_AND_REVIEW.md",
+      "draftScope": "ít nhăn tối đa; ngồi xe lâu đứng lên vẫn mượt mà",
+      "reason": "Toàn lời hứa chọn món vì một mức hiệu quả đạt được khi đứng lên, mạnh hơn nhận xét giữ dáng thông thường; nguồn không xác nhận mức giảm nhăn/tình trạng phục hồi cụ thể."
+    },
+    {
+      "source": "apps\\worker\\evals\\single-agent-commerce-read-only\\wording-stability-1-20261019\\FALLBACKS.md",
+      "draftScope": "rũ hoặc treo lên phẳng ngay",
+      "reason": "Công bố cách phục hồi nếp và hiệu quả tức thời không có nguồn, không phải một nhận xét thẩm mỹ hay so sánh tương đối."
+    }
+  ],
+  "reviewRule": "Review whole actual terminal before rejected draft/verifier diagnosis. USABLE functional does not imply improved sales voice. Compare useful resolution, prioritisation, relevance, source and natural flow. No fixed product, CTA, adjective or word-count answer key. Mild polish alone does not block continuation. All failures/errors retained."
+}

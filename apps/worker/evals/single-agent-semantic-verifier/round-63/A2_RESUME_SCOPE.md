@@ -1,0 +1,7 @@
+# Round63 — resume exactly43undispatched A2 slots
+
+Owner explicitly requests the43remaining slots. NativeCodex account/rateLimits/read at2026-10-13T01:20:45.896Z reports primary8%used/secondary37%used, no reachedlimit. This read does not guarantee inference availability. No generation used for capacity read. Existing verifier gpt-6.1-sol/high/Codexlogin, corpus/schema/prompt/config/bar/fallback/authority unchanged.
+
+Reuse the existing completion runner with a fixed --resume-remaining selector for this43slot plan, prior combined evidence and separate resumed-shard paths. Preserve all308outcomes including5providererrors and1UNSAFEeligiblePASS. Partition15/14/14disjoint, each slot once/max1generation/no retry. No majority/best-of-N. New unsafePASS collected diagnostically, qualificationFAILcannot be reversed; explicitcapacityerrors stillstop availability. Agents are runner operators only; no new semanticrole.
+
+ObservedRED: currentrunner selects old output and rejects COMPLETION_EVIDENCE_ALREADY_EXISTS; fresh resume paths required. Focused registration/loop/merge tests plus full eval suite beforecommit/clean/HEADruntime a2ResumeRunSourceSha/3preflights. Never write runtimeSHAback into frozen source. Rawsavepoint beforereview, aggregate by attemptId once. Prior original and supplementalraw/hash/source identities unchanged; newrequests belong to newsealedsource. NoA3/GO/Round64/post-A/merge/deploy/live send.

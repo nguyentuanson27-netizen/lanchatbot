@@ -1,0 +1,4 @@
+/b1/first/raw/** -text -whitespace
+/source-readback.json -text -whitespace
+/stateful-preflight.json -text -whitespace
+/CONVERSATIONS.md -whitespace

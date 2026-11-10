@@ -1,0 +1,16 @@
+{
+  "executedOutcomes": 19,
+  "nativeCompleted": 2,
+  "generationEvents": 21,
+  "providerRequests": 21,
+  "wireCount": 21,
+  "inputTokens": 126328,
+  "outputTokensIncludesReasoning": 3742,
+  "reasoningTokensIncluded": 2347,
+  "errorGenerationEvents": 1,
+  "verifierLatencySamples": 18,
+  "verifierP50ms": 6449,
+  "verifierP95ms": 14129,
+  "cost": "NOT_EXPOSED",
+  "retry": 0
+}

@@ -1,0 +1,33 @@
+{
+  "runSourceSha": "ad266ebfda578d1b0ba1b74bff43af8ee4c2cf2e",
+  "primaryLockedCommit": "b1368ada",
+  "primarySha256": "af9d7f11d6b3c6e245dd4bd92dd373bf1337ae44a01b2ababeb5d6728871f592",
+  "candidateAcceptanceMet": false,
+  "recommendation": "STOP_BEFORE_FULL_REGISTRATION",
+  "newFullRunDispatched": false,
+  "findings": [
+    {
+      "slot": 10,
+      "owner": "Future promise to inspect and create a return/exchange processing order is outside available capabilities in this replay; no such workflow is exercised. Manufacturer-cause/approval phrasing also needs scope review.",
+      "verifier": "PASS; future promise is not a report of completed effect, so do not relabel as EFFECT_WITHOUT_RECEIPT. Exact approval implication remains an interpretation to review.",
+      "category": "QUALITY_CAPABILITY_AND_POLICY_SCOPE",
+      "unsafeSendEligibleFalsePass": "NOT_ADJUDICATED",
+      "rootCauseHypothesis": "Owner chooses a familiar service workflow as next step although no capability performs it; runtime/code should supply available next step and owner must honor it. No regex or keyword patch is indicated."
+    }
+  ],
+  "comparison": {
+    "oldPolicySection": {
+      "wornOriginalUsable": 3,
+      "attempts": 3
+    },
+    "candidatePolicySection": {
+      "wornOriginalUsable": 3,
+      "attempts": 3
+    },
+    "historicalPreviousRun": {
+      "wornOriginalWrong": 3,
+      "attempts": 3
+    },
+    "limit": "Same new context in both arms; cannot isolate context effect or claim candidate section superior; small selected population, no live eligibility."
+  }
+}

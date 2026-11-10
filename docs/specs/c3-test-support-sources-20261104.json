@@ -1,0 +1,139 @@
+{
+  "kind": "TEST_FEEDBACK_HANDOFF_SOURCE_REPLAY",
+  "rawSourceWorldHash": "658e571d533c11f02d8d9d79aa4d653544c69324c0cb09e7fc8817d4c305a1a7",
+  "testWorldHash": "fefc047d5c0d9995af07aa5020581082a40da1051dd759aaaf9c09d88c8c7aa1",
+  "checkedAt": "2026-11-04T02:46:34.672Z",
+  "checks": {
+    "nativeCatalogParity": 2,
+    "whiteSelections": 8,
+    "componentSizeSources": 4,
+    "feedbackMedia": 2,
+    "activeMatrixRules": 30,
+    "silentCustomerReasons": 29,
+    "silentHandoffCommits": 2
+  },
+  "decisions": [
+    {
+      "reason": "AFTER_SALES_REQUEST",
+      "status": "SILENT"
+    },
+    {
+      "reason": "ORDER_STATUS",
+      "status": "SILENT"
+    },
+    {
+      "reason": "DELIVERY_TRACKING",
+      "status": "SILENT"
+    },
+    {
+      "reason": "DELIVERY_DELAY",
+      "status": "SILENT"
+    },
+    {
+      "reason": "CHANGE_DELIVERY_INFO",
+      "status": "SILENT"
+    },
+    {
+      "reason": "CANCEL_ORDER",
+      "status": "SILENT"
+    },
+    {
+      "reason": "PAYMENT_AFTER_ORDER",
+      "status": "SILENT"
+    },
+    {
+      "reason": "EXCHANGE",
+      "status": "SILENT"
+    },
+    {
+      "reason": "RETURN",
+      "status": "SILENT"
+    },
+    {
+      "reason": "REFUND",
+      "status": "SILENT"
+    },
+    {
+      "reason": "DEFECT",
+      "status": "SILENT"
+    },
+    {
+      "reason": "WARRANTY",
+      "status": "SILENT"
+    },
+    {
+      "reason": "WRONG_OR_MISSING_ITEM",
+      "status": "SILENT"
+    },
+    {
+      "reason": "CUSTOMER_REQUESTED_HUMAN",
+      "status": "SILENT"
+    },
+    {
+      "reason": "PRICE_UNAVAILABLE",
+      "status": "SILENT"
+    },
+    {
+      "reason": "STOCK_UNAVAILABLE",
+      "status": "SILENT"
+    },
+    {
+      "reason": "SIZE_RULE_UNAVAILABLE",
+      "status": "SILENT"
+    },
+    {
+      "reason": "ETA_UNAVAILABLE",
+      "status": "SILENT"
+    },
+    {
+      "reason": "POLICY_UNAVAILABLE",
+      "status": "SILENT"
+    },
+    {
+      "reason": "PRODUCT_AMBIGUOUS",
+      "status": "SILENT"
+    },
+    {
+      "reason": "UNSUPPORTED_REQUEST",
+      "status": "SILENT"
+    },
+    {
+      "reason": "SAFETY_OR_COMPLIANCE",
+      "status": "SILENT"
+    },
+    {
+      "reason": "DEPENDENCY_FAILURE",
+      "status": "SILENT"
+    },
+    {
+      "reason": "PRICE_CHANGED_BEFORE_CONFIRMATION",
+      "status": "SILENT"
+    },
+    {
+      "reason": "STOCK_CHANGED_BEFORE_CONFIRMATION",
+      "status": "SILENT"
+    },
+    {
+      "reason": "SIZE_CHANGED_BEFORE_CONFIRMATION",
+      "status": "SILENT"
+    },
+    {
+      "reason": "ETA_CHANGED_BEFORE_CONFIRMATION",
+      "status": "SILENT"
+    },
+    {
+      "reason": "PAYMENT_RECEIPT_REVIEW_REQUIRED",
+      "status": "SILENT"
+    },
+    {
+      "reason": "RESPONSE_UNAVAILABLE",
+      "status": "SILENT"
+    }
+  ],
+  "rawSourceUnchanged": true,
+  "providerRequests": 0,
+  "sourceWrites": 0,
+  "liveSend": false,
+  "worldPath": "../c3-test-support-world-20261104-02/WORLD.json",
+  "clockPolicy": "Original capture clock; replay only, not a sealed fresh model input"
+}

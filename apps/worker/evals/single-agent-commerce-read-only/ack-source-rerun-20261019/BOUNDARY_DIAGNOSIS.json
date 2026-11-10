@@ -1,0 +1,57 @@
+{
+  "latency": {
+    "verifierMs": {
+      "n": 12,
+      "p50": 6859.541299999997,
+      "p95": 13065.033489999996
+    },
+    "addedVerificationMs": {
+      "n": 12,
+      "p50": 8097.573949999994,
+      "p95": 16485.781535
+    }
+  },
+  "providerErrors": [],
+  "sourceErrors": [],
+  "missingCaptureCount": 0,
+  "capturedProductBounds": [
+    {
+      "caseId": "b1-changed-occasion",
+      "runtimeProductsPerCapture": [
+        1,
+        4
+      ]
+    },
+    {
+      "caseId": "b1-partial-source-v2",
+      "runtimeProductsPerCapture": [
+        1,
+        1
+      ]
+    },
+    {
+      "caseId": "b1-buying-concern",
+      "runtimeProductsPerCapture": [
+        1,
+        1
+      ]
+    },
+    {
+      "caseId": "b1-search-read",
+      "runtimeProductsPerCapture": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "fallback": {
+    "run": "advice-1",
+    "caseId": "b1-changed-occasion",
+    "reason": "FAIL",
+    "verifierKind": "UNSUPPORTED_PROTECTED_ASSERTION",
+    "protectedRef": "product:SV2447",
+    "rejectedPromise": "giũ nhẹ hoặc treo lên là vải sẽ suôn phẳng lại ngay"
+  },
+  "note": "No source/transport error observed in this run. Owner per-generation latency absent from generation record shape; cost not exposed."
+}

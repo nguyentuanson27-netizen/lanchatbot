@@ -1,0 +1,112 @@
+{
+  "kind": "INDEPENDENT_PLAN_REVIEW",
+  "reviewer": "/root/post_contract_plan_review",
+  "revision": 2,
+  "verdict": "REQUEST_CHANGES",
+  "reviewedPlan": "docs/specs/c3-phase-c-tool-contract-completion-plan-20261109.md",
+  "reviewedPlanSha256": "1ad663dea8849a68fd3ae1e701db3478e3387698916ae64d177c9e67a5a3679f",
+  "planningBaseSha": "076d39694d2c068283b28d76a9550d2cb8eaedbb",
+  "scope": "PLAN_ONLY_NOT_IMPLEMENTATION",
+  "findings": [
+    {
+      "id": "R2-F1",
+      "priority": "P1",
+      "status": "OPEN",
+      "title": "Không biến view-only observation thành constraint gửi ảnh",
+      "planLines": [
+        85,
+        87
+      ],
+      "evidence": [
+        {
+          "path": "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs",
+          "line": 113
+        },
+        {
+          "path": "apps/worker/src/single-agent-commerce-media.ts",
+          "line": 158
+        },
+        {
+          "path": "apps/worker/src/single-agent-commerce-opening-media.ts",
+          "line": 19
+        }
+      ],
+      "reason": "Plan gộp explicit select/view màu/loại và cấm generic sau lookup failure. view_product_media chỉ cấp APPEARANCE_ONLY cho owner, không chọn outbound. Một view màu be thất bại vì fetch/binding rồi quote có nghĩa vụ generic photo sẽ lại bị chặn, dù generic source hợp lệ. Đây là tái tạo optional-read→handoff qua gate, không phải bảo toàn yêu cầu ảnh cụ thể của khách.",
+      "requiredAmendment": "Tách operation provenance: SELECT là outbound selection/constraint; VIEW là observation phục vụ visual reasoning và không tự tạo/nâng/cấm outbound photo obligation. Không dùng failed VIEW như lời khách yêu cầu ảnh màu đó. Failed VIEW không được cấp visual facts; nếu request thực sự cần thông tin chưa biết thì owner vẫn handoff. Explicit SELECT màu/loại thất bại và physical cart constraints giữ fail-closed, không generic substitution hoặc hidden retry.",
+      "acceptance": [
+        "view(be) lỗi + quote-only generic obligation + generic approved source: không handoff chỉ vì view, không visual claim/colour-matched claim từ view lỗi; cap/actual source gate giữ nguyên",
+        "view bị lỗi không bị retry trong gate để lấy visual success",
+        "select(be) lỗi: không thay ảnh chung; exact requested-type và cart physical-colour controls giữ nguyên",
+        "cùng snapshot: view thành công không tự tạo ảnh gửi; source/permission/hash thay đổi vẫn block"
+      ]
+    },
+    {
+      "id": "R2-F2",
+      "priority": "P2",
+      "status": "OPEN",
+      "title": "Khóa danh sách read siblings; recommend_size không ops vẫn có thể CAS retained target",
+      "planLines": [
+        48,
+        50
+      ],
+      "evidence": [
+        {
+          "path": "apps/worker/src/single-agent-commerce-quote.ts",
+          "line": 18
+        },
+        {
+          "path": "apps/worker/src/single-agent-commerce-state.ts",
+          "line": 388
+        },
+        {
+          "path": "apps/worker/src/single-agent-commerce-state.ts",
+          "line": 473
+        }
+      ],
+      "reason": "\"Các read-only calls hiện hỗ trợ\" chưa liệt kê đóng, trong khi plan chỉ nêu cấm recommend_size có ops. recommend_size không ops vẫn có thể rememberTargets/CAS khi retainAdvice bật; không được phân loại read-only chỉ vì không có customerStateOps. Đây là ambiguity triển khai cần đóng, chưa có bằng chứng code đã mở nhánh đó.",
+      "requiredAmendment": "Ghi exact sibling allowlist của quote batch: quote_product, read_product không customerSelected, read_policy, select_product_media, view_product_media; writer đầu chỉ ba loại đã chốt. Loại mọi recommend_size (có hoặc không ops), quote_cart, search và unknown tool khỏi quote batch mới trong revision này; đường non-quote cũ giữ nguyên. Muốn mở thêm phải có work/dependency/source acceptance riêng, không suy từ tool name hoặc absence of ops.",
+      "acceptance": [
+        "quote + recommend_size không ops bị reject trước writer/CAS/retained-target write, như có ops",
+        "giữ non-quote P07 identical patch coalescing và size target persistence, không tăng CAS/receipt",
+        "unknown/new capability không tự được xem là read-only sibling"
+      ]
+    }
+  ],
+  "previousFindingsClosed": [
+    "Quote target obligations cover multiple bound refs; one image per successful first-contact quote product target, preserving current form without prose classifier",
+    "W2 separates pre-cart reference totals and current concession/cart authority; no hidden quote_cart rewrite",
+    "W1 preserves customerSelected and defines three generated schema/decoder branches with filters/null rules",
+    "Known no-commit continuation narrowed to code-owned NEGOTIATION_CONTEXT_REQUIRED; unknown commit and other errors stop",
+    "W4 bounded frozen-only component labels and no new customer-wearing assumption; cohorts prospective/history unchanged",
+    "Native NOT_EXERCISED and source gap evidence cannot silently pass as repaired native path"
+  ],
+  "checksActuallyRun": [
+    {
+      "command": "git status --short; git rev-parse HEAD",
+      "result": "HEAD matches076d3969; only pending plan document observed before review writes; executable unchanged"
+    },
+    {
+      "command": "Get-FileHash docs/specs/c3-phase-c-tool-contract-completion-plan-20261109.md -Algorithm SHA256; full plan read",
+      "result": "Exact SHA256 verified; full sections1–10 read"
+    },
+    {
+      "command": "Read targeted quote/opening media/state/effect/native adapter source with numbered lines",
+      "result": "Confirmed VIEW/SELECT separation and retained-target CAS in recommend_size without ops; no executable test/provider"
+    },
+    {
+      "command": "Prior review read-only opening-gate probe reused as context",
+      "result": "Current implementation with A+B refs plus A pre-cart quote and no images reports NOT_REQUIRED; R2 now explicitly remedies with quote-target obligations, so prior finding closed"
+    }
+  ],
+  "notRun": [
+    "No provider/model run",
+    "No broad suite/PG rerun",
+    "No official provider API documentation check: required by plan before API implementation",
+    "No code/prompt/corpus/git mutation"
+  ],
+  "uncertainties": [
+    "Public branch schema representation on actual provider endpoint remains implementation precondition; local existing schema support is not live API confirmation",
+    "Native owner may still over-call tools or produce unsupported prose; plan does not guarantee semantic quality/stability",
+    "Source-positive customer-wearing capability remains absent unless a genuine/explicitly approved source is supplied before a new freeze"
+  ]
+}

@@ -1,0 +1,3 @@
+C target repair component fits reach durable accepted group and restart delivery: PASS
+C target repair contradictory same-target claims fail the real DB guard with no accepted sequence: PASS
+C target repair missing colour stays non-mutating until supplied for both sizes: PASS

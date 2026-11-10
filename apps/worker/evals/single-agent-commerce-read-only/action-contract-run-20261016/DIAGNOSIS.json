@@ -1,0 +1,441 @@
+{
+  "runSourceSha": "69d8d27e4332de4d37fc1a9ebf0d8031067acb47",
+  "primaryReviewSavepoint": "acb7d037e4a793a91f75f2c1cf540d446ce68861",
+  "phase": "POST_PRIMARY_OFFLINE_DIAGNOSIS",
+  "newProviderGenerations": 0,
+  "stateful": [
+    {
+      "slot": 1,
+      "caseId": "stateful-open",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ em thêm áo Thạch Thảo màu be size M vào giỏ cho chị rồi ạ!",
+        "fallbackId": null
+      },
+      "executedToolRounds": 2,
+      "executedToolCalls": 3,
+      "generatedCalls": [
+        {
+          "generationId": "4b851813-8bd5-47cc-9c46-7b91d7e5d715:owner:1",
+          "calls": [
+            {
+              "name": "apply_customer_state",
+              "args": {
+                "ops": [
+                  {
+                    "value": 76,
+                    "op": "SET",
+                    "field": "measurements.WAIST_CM"
+                  },
+                  {
+                    "op": "SET",
+                    "value": 98,
+                    "field": "measurements.HIPS_CM"
+                  }
+                ]
+              },
+              "id": "call_966851"
+            },
+            {
+              "name": "read_product",
+              "args": {
+                "subjectRef": "SV2447"
+              },
+              "id": "call_966852"
+            }
+          ]
+        },
+        {
+          "generationId": "4b851813-8bd5-47cc-9c46-7b91d7e5d715:owner:2",
+          "calls": [
+            {
+              "name": "add_to_cart",
+              "args": {
+                "offerType": "AO",
+                "color": "be",
+                "quantity": 1,
+                "subjectRef": "SV2447",
+                "size": "M"
+              },
+              "id": "call_2184552"
+            }
+          ]
+        }
+      ],
+      "toolResponses": [
+        {
+          "name": "apply_customer_state",
+          "status": "OK",
+          "reason": null,
+          "data": {}
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            },
+            "availableOffers": [
+              "AO",
+              "CV",
+              "SET_VAY"
+            ]
+          },
+          "sellingOptions": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ]
+        },
+        {
+          "name": "apply_customer_state",
+          "status": "OK",
+          "reason": null,
+          "data": {}
+        },
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            },
+            "availableOffers": [
+              "AO",
+              "CV",
+              "SET_VAY"
+            ]
+          },
+          "sellingOptions": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ]
+        },
+        {
+          "name": "add_to_cart",
+          "status": "OK",
+          "reason": null,
+          "data": {}
+        }
+      ],
+      "finalOnly": [
+        {
+          "generationId": "4b851813-8bd5-47cc-9c46-7b91d7e5d715:owner:3",
+          "declaredTools": [],
+          "mode": "NONE",
+          "returnedToolCall": false
+        }
+      ],
+      "cartIsNull": false,
+      "publicStateKeys": [
+        "stage",
+        "revision",
+        "cart",
+        "measurements",
+        "customerProfileRevision"
+      ],
+      "privateCheckoutFailure": null
+    },
+    {
+      "slot": 2,
+      "caseId": "stateful-variant-quantity",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ em đổi sang size L và lấy 2 chiếc áo Thạch Thảo màu be cho chị rồi ạ!",
+        "fallbackId": null
+      },
+      "executedToolRounds": 1,
+      "executedToolCalls": 2,
+      "generatedCalls": [
+        {
+          "generationId": "0b4be303-47d3-41a8-8e04-6193978a09a4:owner:1",
+          "calls": [
+            {
+              "name": "change_cart_item",
+              "args": {
+                "color": "BE",
+                "componentRole": "TOP",
+                "size": "L",
+                "subjectRef": "d0b9d743-f1b9-5d96-822a-441d67840457",
+                "action": "SET_COMPONENT_VARIANT"
+              },
+              "id": "call_483142"
+            },
+            {
+              "name": "change_cart_item",
+              "args": {
+                "action": "SET_QUANTITY",
+                "subjectRef": "d0b9d743-f1b9-5d96-822a-441d67840457",
+                "quantity": 2
+              },
+              "id": "call_483143"
+            }
+          ]
+        }
+      ],
+      "toolResponses": [
+        {
+          "name": "change_cart_item",
+          "status": "OK",
+          "reason": null,
+          "data": {}
+        },
+        {
+          "name": "change_cart_item",
+          "status": "OK",
+          "reason": null,
+          "data": {}
+        }
+      ],
+      "finalOnly": [],
+      "cartIsNull": false,
+      "publicStateKeys": [
+        "stage",
+        "revision",
+        "cart",
+        "measurements",
+        "customerProfileRevision"
+      ],
+      "privateCheckoutFailure": null
+    },
+    {
+      "slot": 3,
+      "caseId": "stateful-quote",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ 2 chiếc áo là 998.000đ, được ưu đãi giảm 49.900đ cộng thêm 30.000đ phí ship, tổng cộng thanh toán là 978.100đ chị nhé!",
+        "fallbackId": null
+      },
+      "executedToolRounds": 0,
+      "executedToolCalls": 0,
+      "generatedCalls": [],
+      "toolResponses": [],
+      "finalOnly": [],
+      "cartIsNull": false,
+      "publicStateKeys": [
+        "stage",
+        "revision",
+        "cart",
+        "measurements",
+        "customerProfileRevision"
+      ],
+      "privateCheckoutFailure": null
+    },
+    {
+      "slot": 4,
+      "caseId": "stateful-correction",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ em cập nhật lại số đo mới cho chị rồi ạ, 2 chiếc áo size L trong giỏ của chị vẫn được giữ nguyên nhé ạ!",
+        "fallbackId": null
+      },
+      "executedToolRounds": 1,
+      "executedToolCalls": 1,
+      "generatedCalls": [
+        {
+          "generationId": "ed87cb7b-8e4d-492c-bf76-f80fd68c20c6:owner:1",
+          "calls": [
+            {
+              "name": "apply_customer_state",
+              "args": {
+                "ops": [
+                  {
+                    "value": 74,
+                    "field": "measurements.WAIST_CM",
+                    "op": "SET"
+                  },
+                  {
+                    "value": 96,
+                    "field": "measurements.HIPS_CM",
+                    "op": "SET"
+                  }
+                ]
+              },
+              "id": "call_4147890"
+            }
+          ]
+        }
+      ],
+      "toolResponses": [
+        {
+          "name": "apply_customer_state",
+          "status": "OK",
+          "reason": null,
+          "data": {}
+        }
+      ],
+      "finalOnly": [],
+      "cartIsNull": false,
+      "publicStateKeys": [
+        "stage",
+        "revision",
+        "cart",
+        "measurements",
+        "customerProfileRevision"
+      ],
+      "privateCheckoutFailure": null
+    },
+    {
+      "slot": 5,
+      "caseId": "stateful-private-checkout",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "executedToolRounds": null,
+      "executedToolCalls": null,
+      "generatedCalls": [],
+      "toolResponses": [],
+      "finalOnly": [],
+      "cartIsNull": false,
+      "publicStateKeys": [
+        "stage",
+        "revision",
+        "cart",
+        "measurements",
+        "customerProfileRevision"
+      ],
+      "privateCheckoutFailure": {
+        "stage": "PLANNER",
+        "reasonCode": "CART_ETA_UNAVAILABLE",
+        "readinessReasons": []
+      }
+    },
+    {
+      "slot": 6,
+      "caseId": "stateful-confirm",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "CURRENT_AUTHORITY_CHANGED",
+        "text": null,
+        "fallbackId": null
+      },
+      "executedToolRounds": 0,
+      "executedToolCalls": 0,
+      "generatedCalls": [],
+      "toolResponses": [],
+      "finalOnly": [],
+      "cartIsNull": false,
+      "publicStateKeys": [
+        "stage",
+        "revision",
+        "cart",
+        "measurements",
+        "customerProfileRevision"
+      ],
+      "privateCheckoutFailure": null
+    },
+    {
+      "slot": 7,
+      "caseId": "stateful-human-request",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "CUSTOMER_REQUESTED_HUMAN",
+        "text": null,
+        "fallbackId": null
+      },
+      "executedToolRounds": 1,
+      "executedToolCalls": 1,
+      "generatedCalls": [
+        {
+          "generationId": "4ab047c3-71a9-43a6-bd87-3e5f54ac4330:owner:1",
+          "calls": [
+            {
+              "name": "request_handoff",
+              "args": {
+                "reason": "CUSTOMER_REQUESTED_HUMAN"
+              },
+              "id": "call_1819819"
+            }
+          ]
+        }
+      ],
+      "toolResponses": [],
+      "finalOnly": [],
+      "cartIsNull": true,
+      "publicStateKeys": [
+        "stage",
+        "revision",
+        "cart",
+        "measurements",
+        "customerProfileRevision"
+      ],
+      "privateCheckoutFailure": null
+    }
+  ],
+  "b1UnsentDrafts": [
+    {
+      "slot": 21,
+      "caseId": "b1-component-stock-v3",
+      "latest": "Áo Thạch Thảo có bán riêng không em? Chị lấy size M, còn thì báo chị giá luôn nhé.",
+      "finalDraftNotSent": "Dạ áo Thạch Thảo bên em có bán riêng chị nhé. Áo size M hiện sẵn hàng, giá 499.000đ ạ.",
+      "verdict": {
+        "verdict": "PASS",
+        "violations": []
+      },
+      "matchingClaimFacts": [],
+      "toolResponses": [
+        {
+          "name": "read_product",
+          "status": "OK",
+          "reason": null,
+          "data": {
+            "availability": {
+              "price": {
+                "status": "OK",
+                "reason": null
+              },
+              "stock": {
+                "status": "OK",
+                "reason": null
+              }
+            },
+            "availableOffers": [
+              "AO",
+              "CV",
+              "SET_VAY"
+            ]
+          },
+          "sellingOptions": [
+            "AO",
+            "CV",
+            "SET_VAY"
+          ]
+        }
+      ],
+      "actualTerminal": {
+        "disposition": "HANDOFF",
+        "reason": "STALE",
+        "text": null,
+        "fallbackId": null
+      },
+      "exactReasonBeyondSchemaExposed": false
+    }
+  ],
+  "causalLimit": "Observed tool sequence is established. Native description/prompt effects are not isolated by this N1 combined treatment.",
+  "noPostResultRuntimeOrPromptChange": true
+}

@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "sourceSha": "e51db388c6dfa95c5e5af7b2b82c21646e1e1933",
+  "targetOutcomes": 30,
+  "additionalPrerequisites": 5,
+  "allNewOutcomes": 35,
+  "targetTerminalDispositions": {
+    "SEND_ELIGIBLE": 27,
+    "NO_SEND": 1,
+    "HANDOFF": 2
+  },
+  "targetFallbacks": 0,
+  "targetNotRun": 0,
+  "actualGenerationRequests": 97,
+  "maximumRequestsPerGeneration": 1,
+  "providerErrors": 0,
+  "timeouts": 0,
+  "wiresScanned": 97,
+  "testDatabasesDropped": 2,
+  "checks": [
+    "All 8 cohort runs and 8 preflights exit0",
+    "No duplicate generation retry; all 97 actual requests accounted and firewall-scanned",
+    "Real isolated cart two L; corrected profile74/96; PURCHASE_CONFIRMED; code checkout text proven by transport hash",
+    "35 whole-terminal reviews locked, 30 targets separated from 5 prerequisites"
+  ],
+  "limits": [
+    "24 B1 outcomes send eligibility only, not delivery capture",
+    "No fresh controls/full A2; old controls historical only",
+    "N1 no stability or conversion claim; mixed-source51 completion not same-source qualification"
+  ]
+}

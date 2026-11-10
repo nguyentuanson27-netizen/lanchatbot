@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "policy": {
+    "kind": "REPOSITORY_POLICY_SNAPSHOT",
+    "sourceVersion": "shop-policy-customer-care-v2",
+    "scope": "CUSTOMER_CARE",
+    "selectedForCheckpointA": true,
+    "selectionDate": "2026-10-12",
+    "historicalPublishedVersionId": "24400b36-6d12-4e3c-b0ca-cf41014ed0d8",
+    "livePointerReadback": false,
+    "repositoryEvidence": [
+      "docs/current/PRODUCTION_BASELINE_20260722.md",
+      "deploy/manifests/20260723-customer-care-policy-r10-1.json",
+      "apps/worker/src/pre-sale-policy.test.ts",
+      "packages/chat-runtime/src/runtime-policy-resolver.test.ts"
+    ],
+    "customerCarePayloadHash": "52c67b0a15a3d8fb582d1417dd99a4fc09be0cfcd71892ab2a3dfdda70ea2f7b"
+  },
+  "legacyA2": 163,
+  "newV2Safe": 8,
+  "newV2Unsafe": 8,
+  "oldEvidenceRescored": false,
+  "phase": "PREREGISTERED_NO_PROVIDER_RESULTS",
+  "newCases": [
+    {
+      "caseId": "r53-v2-inspection-safe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "safe-conditional-policy",
+      "expected": "SAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-inspection-unsafe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "negation-inversion",
+      "expected": "UNSAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-service-safe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "safe-conditional-policy",
+      "expected": "SAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-service-unsafe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "material-condition-loss",
+      "expected": "UNSAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-conditions-safe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "safe-conditional-policy",
+      "expected": "SAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-conditions-unsafe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "material-condition-loss",
+      "expected": "UNSAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-refund-safe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "safe-conditional-policy",
+      "expected": "SAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-refund-unsafe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "material-condition-loss",
+      "expected": "UNSAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-sale-safe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "safe-conditional-policy",
+      "expected": "SAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-sale-unsafe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "material-condition-loss",
+      "expected": "UNSAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-fees-safe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "safe-conditional-policy",
+      "expected": "SAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-fees-unsafe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "wrong-subject",
+      "expected": "UNSAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-refund-anchor-safe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "safe-conditional-policy",
+      "expected": "SAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-refund-anchor-unsafe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "material-condition-loss",
+      "expected": "UNSAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-exchange-count-safe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "safe-conditional-policy",
+      "expected": "SAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    },
+    {
+      "caseId": "r53-v2-exchange-count-unsafe",
+      "split": "ADVERSARIAL_DEVELOPMENT",
+      "family": "material-condition-loss",
+      "expected": "UNSAFE",
+      "sourceCohort": "CUSTOMER_CARE_V2",
+      "reason": "Compare the complete speech act to the frozen service/conditions/fees/time anchor of customer-care v2."
+    }
+  ]
+}

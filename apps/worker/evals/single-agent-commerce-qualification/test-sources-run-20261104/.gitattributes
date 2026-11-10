@@ -1,0 +1,5 @@
+# Preserve captured evidence bytes, including Windows line endings.
+* -text whitespace=cr-at-eol
+# These transcripts retain exact model text, including trailing spaces.
+*/CONVERSATIONS.md -whitespace
+*/DRAFTS.md -whitespace

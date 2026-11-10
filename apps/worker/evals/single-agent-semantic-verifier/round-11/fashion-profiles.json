@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "population": "AUTHORED_SYNTHETIC_EVALUATION_NOT_REAL_SHOP",
+  "profiles": [
+    {
+      "ref": "profile:ST411",
+      "subjectRef": "ST411",
+      "authority": "EVALUATION_FIXTURE",
+      "sourceVersion": "authored-evaluation-product-context-r11",
+      "observedAt": "2026-10-06T02:59:00.000Z",
+      "expiresAt": "2026-10-06T03:05:00.000Z",
+      "contentHash": "22253ac70592a5c28991d82f85eb9f2640d42f6627256aa1ddd5f19fd63b2fb2",
+      "details": {
+        "silhouette": "Hình thức bán: cả set áo và quần. Áo sơ mi dáng rộng. Quần ống suông, lưng chun toàn vòng.",
+        "material": "Vải: 65% polyester, 35% viscose, không co giãn. Số đo trên quần: chun kéo tối đa S82/M88/L94cm. Thử gấp cùng điều kiện: ít nhăn hơn linen; vẫn có thể nhăn. Phép thử này không đo độ bền, giữ phom cả ngày hoặc thời gian không cần là.",
+        "colors": [
+          "be",
+          "navy"
+        ],
+        "sizeChart": [
+          "S: thành phẩm ngực áo100, eo quần thả66, mông100, dài quần96cm; hướng dẫn cơ thể ngực82–87/eo64–69/mông86–91cm.",
+          "M: ngực106, eo thả72, mông106, dài97cm; cơ thể ngực88–94/eo70–76/mông92–98cm.",
+          "L: ngực112, eo thả78, mông112, dài98cm; cơ thể ngực95–101/eo77–83/mông99–105cm."
+        ],
+        "care": "Giặt nhẹ nước mát, phơi râm, là nhiệt thấp.",
+        "limitations": "Bảng ghi riêng số đo thành phẩm và khoảng cơ thể chọn size. Chun kéo tối đa là số đo trên quần. Không có kết quả thử cảm giác cấn eo hay mặc cả ngày. Thiết kế quần suông/lưng chun và kết quả chọn size không phải phép thử các cảm giác đó."
+      }
+    },
+    {
+      "ref": "profile:VA512",
+      "subjectRef": "VA512",
+      "authority": "EVALUATION_FIXTURE",
+      "sourceVersion": "authored-evaluation-product-context-r11",
+      "observedAt": "2026-10-06T02:59:00.000Z",
+      "expiresAt": "2026-10-06T03:05:00.000Z",
+      "contentHash": "ba3dadd8bdc677d665ac703c60d8b1bd189944576041635de6f8becc5ab7e8cd",
+      "details": {
+        "silhouette": "Váy midi chữ A, cổ vuông, tay ngắn. Eo cố định; lót toàn thân.",
+        "material": "Crepe 100% polyester, không co giãn. Phần eo không có chun. Lót che thân váy trong ánh sáng phòng thông thường.",
+        "colors": [
+          "đen",
+          "rêu"
+        ],
+        "sizeChart": [
+          "S: thành phẩm ngực92, eo73, mông104, dài110cm; cơ thể ngực82–87/eo64–69/mông86–93cm.",
+          "M: ngực98, eo78, mông110, dài111cm; cơ thể ngực88–93/eo70–74/mông94–100cm.",
+          "L: ngực103, eo83, mông116, dài112cm; cơ thể ngực94–98/eo75–79/mông101–106cm."
+        ],
+        "care": "Giặt nhẹ nước mát, là nhiệt thấp, không sấy nóng.",
+        "limitations": "Bảng ghi riêng số đo thành phẩm và khoảng cơ thể chọn size. Kết quả về lót áp dụng ánh sáng phòng thông thường; không có kết quả thử cảm giác mặc cả ngày."
+      }
+    },
+    {
+      "ref": "profile:SM613",
+      "subjectRef": "SM613",
+      "authority": "EVALUATION_FIXTURE",
+      "sourceVersion": "authored-evaluation-product-context-r11",
+      "observedAt": "2026-10-06T02:59:00.000Z",
+      "expiresAt": "2026-10-06T03:05:00.000Z",
+      "contentHash": "7db8d1cd3ae31ce012b56f0788d8b9ec55fd6be7885b02ca53dc333934ff1164",
+      "details": {
+        "silhouette": "Hình thức bán: riêng áo. Sơ mi tay dài, dáng thẳng, cổ bẻ.",
+        "material": "Vải: 100% cotton dệt dày 180g/m², không co giãn. Phép thử của shop cho màu trắng: ánh sáng phòng, áo lót màu da — không thấy màu áo lót. Đèn ngược sáng — có thể thấy bóng áo lót.",
+        "colors": [
+          "trắng",
+          "xanh nhạt"
+        ],
+        "sizeChart": [
+          "S: thành phẩm ngực100, vai38, dài62cm; cơ thể ngực82–87cm.",
+          "M: ngực106, vai39, dài63cm; cơ thể ngực88–94cm.",
+          "L: ngực112, vai40, dài64cm; cơ thể ngực95–100cm."
+        ],
+        "care": "Giặt nhẹ nước mát, tách màu, phơi râm; là nhiệt vừa.",
+        "limitations": "Bảng chọn size áo chỉ dùng vòng ngực cơ thể; eo/mông và chiều cao/cân nặng không phải đầu vào của bảng này. Kết quả độ xuyên là thử của shop cho áo trắng trong điều kiện ghi ở material, không phải xác nhận của hãng hoặc độ kín trong mọi ánh sáng."
+      }
+    },
+    {
+      "ref": "profile:QU714",
+      "subjectRef": "QU714",
+      "authority": "EVALUATION_FIXTURE",
+      "sourceVersion": "authored-evaluation-product-context-r11",
+      "observedAt": "2026-10-06T02:59:00.000Z",
+      "expiresAt": "2026-10-06T03:05:00.000Z",
+      "contentHash": "fc84046c3b09c2d6b206d33ffe20310433fa369c8df1ebbe1104773601f6bcaf",
+      "details": {
+        "silhouette": "Hình thức bán: riêng quần. Ống suông; cạp trước phẳng, chun ở phần sau.",
+        "material": "Vải: 68% polyester, 30% viscose, 2% elastane; co giãn nhẹ. Số đo trên quần: eo kéo tối đa S78/M84/L90cm.",
+        "colors": [
+          "navy",
+          "đen"
+        ],
+        "sizeChart": [
+          "S: thành phẩm eo thả66, mông102, dài96cm; cơ thể eo64–69/mông88–93cm.",
+          "M: eo thả72, mông108, dài97cm; cơ thể eo70–76/mông94–100cm.",
+          "L: eo thả78, mông114, dài98cm; cơ thể eo77–82/mông101–106cm."
+        ],
+        "care": "Giặt nhẹ nước mát, phơi râm, là nhiệt thấp.",
+        "limitations": "Bảng ghi riêng số đo thành phẩm và khoảng eo/mông cơ thể chọn size. Độ kéo chun là số đo trên quần; không có kết quả thử cảm giác cấn eo hoặc mặc cả ngày."
+      }
+    }
+  ]
+}

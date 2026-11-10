@@ -1,0 +1,13 @@
+{
+  "status": "LOCAL_CHECKS_PASS_PROVIDER_NOT_RUN",
+  "checks": [
+    {"command":"node --test apps/worker/evals/single-agent-commerce-read-only/b1-owner-prompt.test.mjs apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs","exitCode":0,"passed":62,"failed":0},
+    {"command":"pnpm --filter @lana/worker build","exitCode":0},
+    {"command":"node --input-type=module (readB1OwnerPrompt against additive candidate.json)","exitCode":0,"bytes":14870,"sha256":"a7fc3efe8ca821c16bbba4692ac04cb2d4f8748e26a36d5091bcd79ad51e38e6"},
+    {"command":"python c3-prepare-additive.py: exact baseline prefix, exact prior illustrative suffix, frozen registrations and ast.parse(run.py)","exitCode":0},
+    {"command":"git diff --check","exitCode":0}
+  ],
+  "selfReview":{"baselinePrefixByteIdentical":true,"approvedExamplesSuffixByteIdentical":true,"removedOrRewrittenInstructions":0,"noCaseSpecificExamples":true,"modelsVerifierSourcesCorpusUnchanged":true,"noRuntimeLogicChange":true},
+  "notRun":["separate worker lint","separate worker typecheck","full repository suite","B2/B3 provider"],
+  "tdd":"Prompt-only eval candidate, existing registration tests reused; no new runtime logic or RED-to-GREEN claim."
+}

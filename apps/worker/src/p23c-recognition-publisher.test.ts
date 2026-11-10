@@ -1,3 +1,4 @@
+import {buildApprovedQdrantJobs} from "./p23c-jobs.js";
 import { describe, expect, it, vi } from "vitest";
 import type {
   ImageRecognitionPoint,
@@ -110,6 +111,9 @@ function harness(input: {
         embeddingPipelineVersion: String(point.payload.embedding_pipeline_version ?? ""),
         payload: point.payload,
       });
+    }),
+    overwritePayload:vi.fn(async(pointId,payload)=>{
+      const old=existing.get(pointId)!;existing.set(pointId,{...old,sourceHash:String(payload.source_hash),payload});
     }),
     deletePoint: vi.fn(async (pointId: string) => {
       deletes.push(pointId);
@@ -388,4 +392,32 @@ describe("V2 recognition publisher run", () => {
     expect(summary.fatal_error).toContain("IMAGE_RECOGNITION_COLLECTION_DIMENSION_INVALID");
     expect(test.upserts).toEqual([]);
   });
+});
+
+it("does not re-embed recognition for delivery-only color binding and preserves it in payload projection",()=>{
+ const row={MA_SP:"CB182",IMAGE_ID:"point-1",IMAGE_URL:"https://cdn.example/p.jpg",IMAGE_TYPE:"MODEL",IMAGE_HASH:"a".repeat(64),REVIEW_STATUS:"APPROVED",VERIFIED:"TRUE"};
+ const run={run_id:"r",started_at:"2026-10-27T00:00:00Z",shard_count:1,shard_index:0,shard_label:"1/1"};
+ const old=buildApprovedQdrantJobs([],[row],run)[0]!,updated=buildApprovedQdrantJobs([],[{...row,VERIFIED_PRODUCT_COLOR:"be",COLOR_BINDING_IMAGE_HASH:"a".repeat(64)}],run)[0]!;
+ expect(planRecognitionPoint(updated,targetState({sourceHash:old.source_hash}),PIPELINE)).toEqual({action:"PAYLOAD_ONLY",reason:"COLOR_METADATA_CHANGED"});
+ expect(recognitionPointPayload(updated,config,"2026-10-27T00:00:00Z")).toMatchObject({image_verified_product_color:"be",image_color_binding_status:"VALID"});
+});
+
+it("actually updates color metadata without embedding, preserves observation time, and handles removal",async()=>{
+ const row={MA_SP:"CB182",IMAGE_ID:"point-1",IMAGE_URL:"https://cdn.example/p.jpg",IMAGE_TYPE:"MODEL",IMAGE_HASH:"a".repeat(64),REVIEW_STATUS:"APPROVED",VERIFIED:"TRUE"};
+ const run={run_id:"r",started_at:"2026-10-27T00:00:00Z",shard_count:1,shard_index:0,shard_label:"1/1"};
+ const old=buildApprovedQdrantJobs([],[row],run)[0]!,updated=buildApprovedQdrantJobs([],[{...row,VERIFIED_PRODUCT_COLOR:"be",COLOR_BINDING_IMAGE_HASH:"a".repeat(64)}],run)[0]!;
+ const existing=new Map([[old.point_id,{pointId:old.point_id,sourceHash:old.source_hash,embeddingPipelineVersion:PIPELINE,payload:{source_hash:old.source_hash,published_at:"old-observation"}}]]);
+ const h=harness({jobs:[updated],existing});expect((await h.publisher.run()).failed).toBe(0);
+ expect(h.embed).not.toHaveBeenCalled();expect(h.target.overwritePayload).toHaveBeenCalledTimes(1);
+ expect(existing.get(old.point_id)?.payload).toMatchObject({image_verified_product_color:"be",published_at:"old-observation"});
+ const remove=harness({jobs:[old],existing});expect((await remove.publisher.run()).failed).toBe(0);expect(remove.embed).not.toHaveBeenCalled();
+ expect(existing.get(old.point_id)?.payload).not.toHaveProperty("image_verified_product_color");
+});
+
+it("does not claim a color metadata write succeeded without target readback confirmation",async()=>{
+ const row={MA_SP:"P1",IMAGE_ID:"point-1",IMAGE_URL:"https://cdn.example/p.jpg",IMAGE_TYPE:"MODEL",IMAGE_HASH:"a".repeat(64),REVIEW_STATUS:"APPROVED",VERIFIED:"TRUE"};
+ const run={run_id:"r",started_at:"2026-10-27T00:00:00Z",shard_count:1,shard_index:0,shard_label:"1/1"};
+ const old=buildApprovedQdrantJobs([],[row],run)[0]!,updated=buildApprovedQdrantJobs([],[{...row,VERIFIED_PRODUCT_COLOR:"be",COLOR_BINDING_IMAGE_HASH:"a".repeat(64)}],run)[0]!;
+ const h=harness({jobs:[updated],existing:new Map([[old.point_id,{pointId:old.point_id,sourceHash:old.source_hash,embeddingPipelineVersion:PIPELINE,payload:{}}]])});
+ h.target.overwritePayload=vi.fn(async()=>{});const report=await h.publisher.run();expect(report.failed).toBe(1);expect(report.success).toBe(0);expect(h.embed).not.toHaveBeenCalled();
 });

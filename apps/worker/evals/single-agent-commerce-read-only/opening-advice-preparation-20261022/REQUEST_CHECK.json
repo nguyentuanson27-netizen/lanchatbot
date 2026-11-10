@@ -1,0 +1,39 @@
+{
+  "status": "OFFLINE_REQUEST_PROJECTION_PASS",
+  "providerGenerations": 0,
+  "notLiveEligibility": true,
+  "results": [
+    {
+      "caseId": "b1-buying-concern",
+      "processingAt": "2026-10-22T12:24:23.554Z",
+      "ownerWireBytes": 17255,
+      "verifierWireBytesAtMaximumDraft": 24926,
+      "captureHash": "2af68b517fc379cafbf33093b63c6b08b75e6a76edfae3b693c9749e645249fb",
+      "effectiveOwnerHash": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9"
+    },
+    {
+      "caseId": "b1-changed-occasion-v2",
+      "processingAt": "2026-10-22T12:24:55.812Z",
+      "ownerWireBytes": 16156,
+      "verifierWireBytesAtMaximumDraft": 21069,
+      "captureHash": "98038a88b1a7691cae9facca0e5174999d0e6f88811da1121fb2ed4fb0cd9362",
+      "effectiveOwnerHash": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9"
+    },
+    {
+      "caseId": "b1-buying-concern-v2",
+      "processingAt": "2026-10-22T12:26:24.135Z",
+      "ownerWireBytes": 17321,
+      "verifierWireBytesAtMaximumDraft": 24992,
+      "captureHash": "6e7142177caffaad3bac29938efa2df90e5f8a9e4a61fbcf4713183805d56404",
+      "effectiveOwnerHash": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9"
+    },
+    {
+      "caseId": "b1-buying-concern-v3",
+      "processingAt": "2026-10-22T12:28:00.037Z",
+      "ownerWireBytes": 17312,
+      "verifierWireBytesAtMaximumDraft": 24982,
+      "captureHash": "1b6243fd9af5482565efc5433ce3c6a3063af9d2e0d21a0518f863c6f23182ff",
+      "effectiveOwnerHash": "27aaf35d22a6209512eeeddbc11b169eede5bd15bc6f8e2c9ed1c867301da6a9"
+    }
+  ]
+}

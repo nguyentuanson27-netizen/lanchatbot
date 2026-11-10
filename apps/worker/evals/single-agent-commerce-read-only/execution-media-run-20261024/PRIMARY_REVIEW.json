@@ -1,0 +1,498 @@
+[
+  {
+    "caseId": "b1-partial-source-v2",
+    "mode": "SEND_ELIGIBILITY_ONLY",
+    "quality": "NEEDS_EDIT",
+    "regression": false,
+    "reason": "Vẫn trả vải nhưng kể hệ thống chưa có giá/tồn, cùng lỗi nội bộ cũ; không xin lại số đo hoặc bịa giá.",
+    "outcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chân váy làm từ chất liệu ren tơ Hàn mềm, có form nhẹ và độ rũ tự nhiên. Hiện tại hệ thống chưa có sẵn thông tin giá và tình trạng size M riêng cho chân váy này nên em chưa báo giá chính xác cho mình được ạ.",
+        "fallbackId": null
+      }
+    },
+    "artifact": "b1-11-11/attempt-11.json"
+  },
+  {
+    "caseId": "b1-buying-concern-v2",
+    "mode": "SEND_ELIGIBILITY_ONLY",
+    "quality": "NEEDS_EDIT",
+    "regression": false,
+    "reason": "Chọn set nhưng đoạn dài dùng nhiều lời khen tương đương, lặp gu khách; chưa giải thích thuyết phục chuyện nhiều ren. Lỗi chất lượng cũ.",
+    "outcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, chị hoàn toàn có thể tự tin chọn set này đi ăn cưới ban ngày nha chị. \n\nDù chị quen mặc đồ trơn và sợ set có ren, thêu sẽ hơi điệu, nhưng Thạch Thảo được thiết kế form nhẹ nhàng với chất tơ Hàn và ren tơ mềm, có độ bay và rũ tự nhiên nên lên người rất thanh thoát, không bị cứng hay rườm rà quá mức. Các chi tiết thêu nổi và ren chỉ tạo điểm nhấn trang nhã, vừa đủ lịch sự, sang trọng cho không gian tiệc cưới ban ngày mà vẫn giữ được sự tinh tế, nhã nhặn cho người quen mặc đơn giản như chị. \n\nSet này có giá 799.000đ và hiện shop đang có sẵn hàng, chị cân nhắc lấy diện đi tiệc rất hợp và thoải mái ạ.",
+        "fallbackId": null
+      }
+    },
+    "artifact": "b1-15-15/attempt-15.json"
+  },
+  {
+    "caseId": "b1-changed-occasion-v3",
+    "mode": "SEND_ELIGIBILITY_ONLY",
+    "quality": "USABLE_WITH_STYLE_NOTE",
+    "regression": false,
+    "reason": "Chọn áo lẻ cho cuộc gặp buổi sáng. So sánh với cả bộ/tiệc tối có liên quan, không fail vì nhắc hoàn cảnh cũ trong phép so sánh. Không còn gán đồ sẵn có cho khách.",
+    "outcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, gặp khách hàng buổi sáng thì mình lấy áo lẻ thôi chị ạ. Áo tơ Hàn có form nhẹ và họa tiết thêu nổi tinh tế, khi phối cùng các trang phục gọn gàng sẽ giúp tổng thể trông thanh lịch và chuyên nghiệp hơn. \n\nCòn cả bộ có thêm chân váy ren tơ mềm với độ rũ tự nhiên, thiên về nét mềm mại và bay bổng hơn nên sẽ hợp với tiệc tối hơn chị nhé.",
+        "fallbackId": null
+      }
+    },
+    "artifact": "b1-17-17/attempt-17.json"
+  },
+  {
+    "caseId": "b1-buying-concern-v3",
+    "mode": "SEND_ELIGIBILITY_ONLY",
+    "quality": "NEEDS_EDIT",
+    "regression": true,
+    "reason": "Áo lẻ là hướng mua hợp lý tận dụng váy đen; không fail vì không upsell. Nhưng lại mở cả hai hướng và hỏi khách chọn lại, làm yếu lời khuyên so với reply đã chọn rõ vòng trước.",
+    "outcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Với ngân sách 850 nghìn, chị hoàn toàn có thể chọn mua riêng áo (499 nghìn) hoặc lấy cả bộ (799 nghìn) đều vừa vặn ạ.\n\nNếu chị ưu tiên sự linh hoạt để phối đồ mặc lại nhiều lần, em gợi ý chị mua **riêng áo Thạch Thảo** (499 nghìn). Áo chất tơ Hàn thêu nổi form nhẹ rất dễ mix-match cùng chân váy đen dáng suông sẵn có của chị để đi làm hay đi chơi. \n\nCòn nếu chị thích diện nguyên set ren tơ Hàn đồng bộ, thướt tha đúng chuẩn thiết kế, lấy **cả bộ** (799 nghìn) cũng nằm trọn trong ngân sách của mình luôn chị nhé. \n\nChị thích phương án mua riêng áo để phối cùng đồ sẵn có hay lấy cả bộ ạ?",
+        "fallbackId": null
+      }
+    },
+    "artifact": "b1-23-23/attempt-23.json"
+  },
+  {
+    "caseId": "b1-partial-source",
+    "mode": "SEND_ELIGIBILITY_ONLY",
+    "quality": "NEEDS_EDIT",
+    "regression": false,
+    "reason": "Giữ phần vải đã biết nhưng tự diễn giải chưa cập nhật trên hệ thống; cùng lỗi giải thích nội bộ cũ, không phải tiến bộ giọng.",
+    "outcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set Thạch Thảo có áo làm từ tơ Hàn thêu họa tiết thêu nổi, chất vải mềm, thoáng và có độ bay tự nhiên; chân váy bằng ren tơ Hàn mềm, form nhẹ, rũ tự nhiên chị nhé. \n\nDạ hiện tại thông tin về giá và tình trạng còn hàng của size M chưa được cập nhật trên hệ thống ạ.",
+        "fallbackId": null
+      }
+    },
+    "artifact": "b1-3-3/attempt-3.json"
+  },
+  {
+    "caseId": "b1-price",
+    "mode": "SEND_ELIGIBILITY_ONLY",
+    "quality": "USABLE",
+    "regression": false,
+    "reason": "Giá cả bộ và hai món lẻ đúng nguồn. Danh sách giá giúp phân biệt lựa chọn, không fail chỉ vì có danh sách.",
+    "outcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, set váy Thạch Thảo (SV2447) có giá 799.000đ cho cả bộ ạ. Ngoài ra, sản phẩm có bán lẻ các món:\n- Áo lẻ: 499.000đ\n- Chân váy lẻ: 449.000đ",
+        "fallbackId": null
+      }
+    },
+    "artifact": "b1-4-4/attempt-4.json"
+  },
+  {
+    "caseId": "b1-component-stock",
+    "mode": "SEND_ELIGIBILITY_ONLY",
+    "quality": "USABLE",
+    "regression": false,
+    "reason": "Đáp đúng áo lẻ size M, giá 499k và tồn; gọn, không tự khẳng định khách mặc vừa.",
+    "outcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, áo của set Thạch Thảo size M hiện vẫn còn hàng chị nhé. Áo bán riêng có giá 499.000đ ạ.",
+        "fallbackId": null
+      }
+    },
+    "artifact": "b1-5-5/attempt-5.json"
+  },
+  {
+    "caseId": "b1-buying-concern",
+    "mode": "SEND_ELIGIBILITY_ONLY",
+    "quality": "NEEDS_EDIT",
+    "regression": true,
+    "reason": "Chọn cả bộ trong budget hợp lệ nhưng trấn an bằng nhiều lời khen; CTA lên đơn vượt capability read-only B1, khác reply vòng trước không có CTA này.",
+    "outcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ set này mặc đi tiệc ban ngày rất hợp và không bị rườm rà đâu chị nhé. Áo làm từ chất tơ Hàn thêu form nhẹ, kết hợp cùng chân váy ren tơ mềm có độ rũ và độ bay tự nhiên, tạo tổng thể thanh thoát và sang trọng. \n\nNgân sách 900 nghìn của chị hoàn toàn thoải mái vì nguyên bộ có giá 799.000đ thôi ạ. Chị có muốn em lên đơn luôn cho mình không ạ?",
+        "fallbackId": null
+      }
+    },
+    "artifact": "b1-7-7/attempt-7.json"
+  },
+  {
+    "caseId": "b1-policy-used",
+    "mode": "SEND_ELIGIBILITY_ONLY",
+    "quality": "USABLE_WITH_STYLE_NOTE",
+    "regression": false,
+    "reason": "Từ chối vì đã mặc đi làm, đúng việc khách hỏi. Không ép đọc lại điều kiện khác; phí đổi không phát sinh trong tình huống đã từ chối. Còn giọng quy định/thông cảm.",
+    "outcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, theo quy định của shop, sản phẩm đổi hàng yêu cầu chưa qua sử dụng (chỉ ướm thử bên ngoài). Do chị đã mặc đi làm rồi nên shop không hỗ trợ đổi sang màu khác được, mong chị thông cảm giúp em nhé ạ!",
+        "fallbackId": null
+      }
+    },
+    "artifact": "b1-8-8/attempt-8.json"
+  },
+  {
+    "caseId": "b1-changed-occasion-v2",
+    "mode": "SEND_ELIGIBILITY_ONLY",
+    "quality": "NEEDS_EDIT",
+    "regression": true,
+    "reason": "Khách dễ nóng ngoài trời nhưng reply đưa áo lẻ hoặc cả bộ, không quyết định rõ. Vòng trước có món thay Uyển Hoa; đây là thoái lui về giải quyết nhu cầu, không quy kết nguyên nhân cho code chỉ từ N1.",
+    "outcome": {
+      "mode": "SEND_ELIGIBILITY_ONLY",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Áo dùng chất tơ Hàn thêu mềm, thoáng cùng chân váy ren tơ Hàn form nhẹ và có độ bay tự nhiên. Nếu chị lo ở ngoài trời lâu dễ nóng, mình có thể chọn mua riêng áo lẻ phối với đồ khác cho nhẹ thoáng, hoặc diện cả set vì thiết kế form nhẹ nhàng ạ.",
+        "fallbackId": null
+      }
+    },
+    "artifact": "b1-9-9/attempt-9.json"
+  },
+  {
+    "caseId": "media-overview-next:ask",
+    "mode": "CAPTURE_TRANSPORT",
+    "quality": "FALLBACK",
+    "regression": false,
+    "reason": "NO_MATCH feedback rồi chọn DETAIL hai ảnh CLOSEUP, một AO và một UNKNOWN. Draft nói chi tiết tơ thêu và ren; verifier FAIL selected media ref. Chưa chứng minh ảnh UNKNOWN là phần ren. Không coi đây mặc định là chặn câu thiếu feedback; actual hỏi lại, không ảnh.",
+    "outcome": {
+      "mode": "CAPTURE_TRANSPORT",
+      "messages": [
+        "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?"
+      ],
+      "attachments": [],
+      "committedOutbox": [
+        {
+          "id": "1d4765fb-3af2-472d-a861-bef6931b7092",
+          "group": "75fc75d3-e5cb-4d0f-9b15-a8cb637917a1",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ],
+      "enqueued": 1,
+      "commitStatus": "COMMITTED"
+    },
+    "artifact": "media/provider-attempt-1.json"
+  },
+  {
+    "caseId": "media-overview-next:continue",
+    "mode": "CAPTURE_TRANSPORT",
+    "quality": "USABLE",
+    "regression": false,
+    "reason": "Khách đồng ý xem, capture hai ảnh cả bộ và lời dẫn gọn; kiểm actual attachments/accepted Outbox.",
+    "outcome": {
+      "mode": "CAPTURE_TRANSPORT",
+      "messages": [
+        "Dạ chị xem ảnh mặc lên form cả bộ Thạch Thảo nha ạ!",
+        "[CODE_IMAGE]",
+        "[CODE_IMAGE]"
+      ],
+      "attachments": [
+        {
+          "sequence": 1,
+          "type": "image",
+          "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+        },
+        {
+          "sequence": 2,
+          "type": "image",
+          "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg"
+        }
+      ],
+      "committedOutbox": [
+        {
+          "id": "f0961ebb-1187-41eb-9f74-d82c880a6e3a",
+          "group": "a17e4a76-85aa-45bc-85ac-f3258d41cafd",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        },
+        {
+          "id": "600f93eb-bce4-4db0-a54d-9ea44809fc17",
+          "group": "a17e4a76-85aa-45bc-85ac-f3258d41cafd",
+          "sequence": 1,
+          "status": "SENT_ACCEPTED"
+        },
+        {
+          "id": "7f7697d0-eced-481c-82f3-2def1443e9fc",
+          "group": "a17e4a76-85aa-45bc-85ac-f3258d41cafd",
+          "sequence": 2,
+          "status": "SENT_ACCEPTED"
+        }
+      ],
+      "enqueued": 3,
+      "commitStatus": "COMMITTED"
+    },
+    "artifact": "media/provider-attempt-2.json"
+  },
+  {
+    "caseId": "media-detail-next:ask",
+    "mode": "CAPTURE_TRANSPORT",
+    "quality": "USABLE",
+    "regression": false,
+    "reason": "Báo chưa có ảnh khách mặc và đề nghị ảnh chi tiết, không nói đã gửi khi chưa chuẩn bị attachment. PASS không đồng nghĩa mọi câu thiếu feedback đều được miễn kiểm tra.",
+    "outcome": {
+      "mode": "CAPTURE_TRANSPORT",
+      "messages": [
+        "Dạ bộ Thạch Thảo hiện chưa có ảnh khách mặc ạ. Chị có muốn xem ảnh chụp chi tiết hoa văn thêu nổi và chất tơ Hàn của mẫu này không ạ?"
+      ],
+      "attachments": [],
+      "committedOutbox": [
+        {
+          "id": "bb98bcde-4420-4be4-ae87-9ef00b9eddd0",
+          "group": "7985171a-2d61-408c-a837-4a77639b93f4",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ],
+      "enqueued": 1,
+      "commitStatus": "COMMITTED"
+    },
+    "artifact": "media/provider-attempt-3.json"
+  },
+  {
+    "caseId": "media-detail-next:continue",
+    "mode": "CAPTURE_TRANSPORT",
+    "quality": "USABLE",
+    "regression": false,
+    "reason": "Capture một ảnh cận áo, lời dẫn đúng TOP/detail và không lặp mô tả dài.",
+    "outcome": {
+      "mode": "CAPTURE_TRANSPORT",
+      "messages": [
+        "Dạ em gửi chị ảnh cận cảnh họa tiết thêu nổi trên áo ạ.",
+        "[CODE_IMAGE]"
+      ],
+      "attachments": [
+        {
+          "sequence": 1,
+          "type": "image",
+          "url": "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg"
+        }
+      ],
+      "committedOutbox": [
+        {
+          "id": "8ad9153e-e424-476b-8430-c240232ae482",
+          "group": "69223435-d32a-47b2-8084-00bd851a8366",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        },
+        {
+          "id": "37492b56-d6e8-4927-8048-099f203aed69",
+          "group": "69223435-d32a-47b2-8084-00bd851a8366",
+          "sequence": 1,
+          "status": "SENT_ACCEPTED"
+        }
+      ],
+      "enqueued": 2,
+      "commitStatus": "COMMITTED"
+    },
+    "artifact": "media/provider-attempt-4.json"
+  },
+  {
+    "caseId": "media-and-price:ask",
+    "mode": "CAPTURE_TRANSPORT",
+    "quality": "USABLE",
+    "regression": false,
+    "reason": "Giữ giá áo 499k và gửi một ảnh sản phẩm thay feedback, actual đủ hai phần; không mất giá do câu ảnh.",
+    "outcome": {
+      "mode": "CAPTURE_TRANSPORT",
+      "messages": [
+        "Dạ hiện shop chưa có sẵn ảnh khách mặc mẫu này, em gửi chị ảnh chụp sản phẩm nha. Áo lẻ Thạch Thảo có giá 499.000đ chị nhé.",
+        "[CODE_IMAGE]"
+      ],
+      "attachments": [
+        {
+          "sequence": 1,
+          "type": "image",
+          "url": "https://content.pancake.vn/1/s3000x3000/79/0c/78/d8/a10cffdc9d29de26105f87f0fc08ba1dbe4197c8a76c6843d7d3d870-w:3588-h:5382-l:1102566-t:image/jpeg.jpeg"
+        }
+      ],
+      "committedOutbox": [
+        {
+          "id": "00d53dab-7baa-4466-b370-f2185f1fb07f",
+          "group": "df53c6e3-0d8f-4755-978d-3ac834293ba8",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        },
+        {
+          "id": "db3efc5d-dfd1-433d-8d8f-e22c051fbfa5",
+          "group": "df53c6e3-0d8f-4755-978d-3ac834293ba8",
+          "sequence": 1,
+          "status": "SENT_ACCEPTED"
+        }
+      ],
+      "enqueued": 2,
+      "commitStatus": "COMMITTED"
+    },
+    "artifact": "media/provider-attempt-5.json"
+  },
+  {
+    "caseId": "media-and-size:ask",
+    "mode": "CAPTURE_TRANSPORT",
+    "quality": "FALLBACK",
+    "regression": true,
+    "reason": "sourceQuote ban đầu chứa cả hai số đo trong từng op nên STATE write bị MEASUREMENT_SOURCE_INVALID; recommend_size tiếp đó STATE_OR_REF. Model sửa quote ở generation sau nhưng 2 calls vượt 1 call còn lại vì preparation tính trong cap6; BUDGET trước execution. Không verifier, actual chỉ hỏi ảnh, khác expected handoff vòng trước. Đây là lỗi lập chuỗi/state/budget, không phải verifier.",
+    "outcome": {
+      "mode": "CAPTURE_TRANSPORT",
+      "messages": [
+        "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?"
+      ],
+      "attachments": [],
+      "committedOutbox": [
+        {
+          "id": "f75eae07-354b-4531-9bd1-1e9365324bae",
+          "group": "fbb064f5-450f-4b17-9a56-8aa1f38f8782",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ],
+      "enqueued": 1,
+      "commitStatus": "COMMITTED"
+    },
+    "artifact": "media/provider-attempt-6.json"
+  },
+  {
+    "caseId": "media-decision:ask",
+    "mode": "CAPTURE_TRANSPORT",
+    "quality": "NEEDS_EDIT",
+    "regression": false,
+    "reason": "Đúng giá, có đề xuất áo lẻ nhưng lại mở cả bộ và hỏi lại lựa chọn; nhiều lời khen, chưa xử lý dứt điểm nỗi lo ren. Không ảnh actual ở ca này; không claim đã dùng ảnh để thuyết phục.",
+    "outcome": {
+      "mode": "CAPTURE_TRANSPORT",
+      "messages": [
+        "Dạ, phần chân váy của set Thạch Thảo dùng chất ren tơ Hàn mềm và có độ rũ tự nhiên nên khi mặc lên sẽ tạo độ bay bổng, thanh nhã chứ không bị cứng hay rườm rà đâu chị ạ, rất nhẹ nhàng và lịch sự để đi ăn cưới buổi trưa. \n\nNếu chị vẫn muốn tiết chế độ ren, mẫu này có bán riêng áo lẻ (499.000đ) chất tơ Hàn thêu nổi để chị dễ phối với quần hoặc chân váy trơn khác. Còn nguyên bộ (799.000đ) thì tổng thể thiết kế hài hòa và rất ăn ảnh. Chị muốn chọn mặc cả bộ hay lấy áo lẻ phối riêng ạ?"
+      ],
+      "attachments": [],
+      "committedOutbox": [
+        {
+          "id": "b0948b83-80c6-48d4-9c45-37167ba3c10b",
+          "group": "68d108a9-c6a7-4f53-8578-7662f9307eb8",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ],
+      "enqueued": 1,
+      "commitStatus": "COMMITTED"
+    },
+    "artifact": "media/provider-attempt-7.json"
+  },
+  {
+    "caseId": "sales-discovery-advice:need",
+    "mode": "CAPTURE_TRANSPORT",
+    "quality": "FALLBACK",
+    "regression": false,
+    "reason": "Lượt cuối tuân thủ FINAL_REPLY, không còn OWNER_TOOL_MODE trong N1 này. Verifier FAIL product:SQ748; draft có lưng chun co giãn/không lo bó bụng. Source có quần short lưng chun, thô đũi; verdict không span nên chưa cô lập khẳng định gây FAIL hoặc kết luận chặn đúng. Tính phù hợp quần short đi làm cũng cần xem. Actual vẫn fallback.",
+    "outcome": {
+      "mode": "CAPTURE_TRANSPORT",
+      "messages": [
+        "Phần này em chưa trả lời được, chị nhé."
+      ],
+      "attachments": [],
+      "committedOutbox": [
+        {
+          "id": "d394e280-ef84-4f80-b694-aebc1459045c",
+          "group": "c0a55f09-4a9d-4668-9ef1-68d9e49a22ee",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ],
+      "enqueued": 1,
+      "commitStatus": "COMMITTED"
+    },
+    "artifact": "openings/provider-attempt-1.json"
+  },
+  {
+    "caseId": "sales-product-gallery:overview",
+    "mode": "CAPTURE_TRANSPORT",
+    "quality": "FALLBACK",
+    "regression": false,
+    "reason": "Color-free selection đã OK sau color binding failure; tiến bộ ở thao tác so với chưa chọn ảnh chung. Draft vẫn nói chưa có ảnh be riêng và verifier FAIL media-lookup; không có span nên không khẳng định duy nhất clause gây lỗi. Actual không có ảnh, hỏi lại không hữu ích.",
+    "outcome": {
+      "mode": "CAPTURE_TRANSPORT",
+      "messages": [
+        "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?"
+      ],
+      "attachments": [],
+      "committedOutbox": [
+        {
+          "id": "65c9ac88-1ecd-47b8-ae2d-ced2d6a651f6",
+          "group": "b556293e-5e41-4d63-8673-ff52adca3e50",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ],
+      "enqueued": 1,
+      "commitStatus": "COMMITTED"
+    },
+    "artifact": "openings/provider-attempt-2.json"
+  },
+  {
+    "caseId": "sales-size-advice:height-weight",
+    "mode": "CAPTURE_TRANSPORT",
+    "quality": "EXPECTED_HANDOFF",
+    "regression": false,
+    "reason": "Code chuyển nhân viên vì không có chart đúng authority/scope, capture và receipt giữ đúng. Không gọi đây là đã tự động chọn size.",
+    "outcome": {
+      "mode": "CAPTURE_TRANSPORT",
+      "messages": [
+        "Em chuyển nhân viên chọn size cho chị nhé."
+      ],
+      "attachments": [],
+      "committedOutbox": [
+        {
+          "id": "08846e98-5b06-4d87-888d-ffb0a6e9145d",
+          "group": "970b44cd-e63a-431f-ae82-0c05826bb192",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ],
+      "enqueued": 1,
+      "commitStatus": "COMMITTED"
+    },
+    "artifact": "openings/provider-attempt-3.json"
+  },
+  {
+    "caseId": "sales-southern-delivery:deadline",
+    "mode": "CAPTURE_TRANSPORT",
+    "quality": "USABLE",
+    "regression": false,
+    "reason": "Đã trả ETA 4–8 ngày và từ chối hẹn sáng mai, actual được capture. Câu hỏi mới sáng mai rõ hơn thứ Sáu; cả prompt lẫn fixture đổi nên không quy toàn bộ cải thiện riêng cho verifier.",
+    "outcome": {
+      "mode": "CAPTURE_TRANSPORT",
+      "messages": [
+        "Dạ set này ship về Cần Thơ dự kiến mất từ 4 đến 8 ngày nên không kịp giao cho chị vào sáng mai được ạ."
+      ],
+      "attachments": [],
+      "committedOutbox": [
+        {
+          "id": "81bb0b3e-27a1-4597-af8f-01d4b18e863d",
+          "group": "55f75042-2cb2-480a-aa71-8546925cb14b",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED"
+        }
+      ],
+      "enqueued": 1,
+      "commitStatus": "COMMITTED"
+    },
+    "artifact": "openings/provider-attempt-4.json"
+  }
+]

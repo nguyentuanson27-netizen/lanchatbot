@@ -1,0 +1,20 @@
+{
+  "protocolTests": {
+    "pass": 10,
+    "fail": 0,
+    "skip": 0
+  },
+  "deterministicCodPass": 26,
+  "deterministicBankPass": 26,
+  "allSixChildJobsExitZero": true,
+  "allThreeIsolatedDatabasesDropped": true,
+  "rawGitBlobHashesMatched": 49,
+  "exactByteCopies": 41,
+  "publicPrivateBatchRemovedCopies": 8,
+  "runSourceRelevantBlobsUnchanged": 11,
+  "primaryLockHashPreserved": true,
+  "finalDiffCheck": "PASS_WORKTREE_AND_STAGED_REPORT",
+  "workerBuild": "Existing source-check and B1 entrypoints each compiled current worker before source imports; child exit0",
+  "typecheckLintFullUnitSuite": "NOT_RERUN_NO_RUNTIME_CHANGE",
+  "sendEnabled": false
+}

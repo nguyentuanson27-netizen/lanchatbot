@@ -1,0 +1,74 @@
+{
+  "files": [
+    {
+      "path": "commands.json",
+      "sha256": "95ec6a5f7882a73a35f0456c6f498533cb68d87280a229567585c7cfd7e01846",
+      "exactBytes": true
+    },
+    {
+      "path": "provider-preflight.log",
+      "sha256": "0b69e022ed6c029d69944f550650fbec30f8620fd08f3403dc4eb91242bda4d8",
+      "exactBytes": true
+    },
+    {
+      "path": "RUN_SOURCE.json",
+      "sha256": "b8416fd95d1078e95029364709f9cf0e1051692c2281db13a6e973f69e300059",
+      "exactBytes": true
+    },
+    {
+      "path": "targeted.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exactBytes": true
+    },
+    {
+      "path": "targeted/attempt-1.json",
+      "sha256": "fcd94384797c4b39ed8e87c034d640ad86f947e8138e5150df921a1dc70c48ee",
+      "exactBytes": true
+    },
+    {
+      "path": "targeted/attempt-2.json",
+      "sha256": "79fdc86ed55a2d60c60620c5100c50f9cca29a4685fcdc79b4f8ba0de2d9f57a",
+      "exactBytes": true
+    },
+    {
+      "path": "targeted/attempt-3.json",
+      "sha256": "1689c7f6e6b194084d57513810b87a56c8726c576dbde8689a37c22b021f53c1",
+      "exactBytes": true
+    },
+    {
+      "path": "targeted/attempt-4.json",
+      "sha256": "b2dfc298a63f94828f71d0c0166892f63132ba5e72053df3916b48432a9c0211",
+      "exactBytes": true
+    },
+    {
+      "path": "targeted/attempt-5.json",
+      "sha256": "da2ad953e4bfaf7899c0ab81c5a767a42cbd7fc38c712cc2732764c0ab939364",
+      "exactBytes": true
+    },
+    {
+      "path": "targeted/attempt-6.json",
+      "sha256": "eb754f4436f00174c12306073b917570925eaab22ddc323f4cd3a03a221e07f0",
+      "exactBytes": true
+    },
+    {
+      "path": "targeted/attempt-7.json",
+      "sha256": "01c56561c76bf3325bc6e2ec171705056d3470cb34d6a17b3c5ad3311273aa99",
+      "exactBytes": true
+    },
+    {
+      "path": "targeted/attempt-8.json",
+      "sha256": "728e2b280d9dd8efdb0ff4e585302da56affef86cf9fb345b4d79f48e9924b6c",
+      "exactBytes": true
+    },
+    {
+      "path": "targeted/registration.json",
+      "sha256": "2bc1951995319dfeeb216e897a6f02db7d3f75f8e6323095788858fd398bccc0",
+      "exactBytes": true
+    },
+    {
+      "path": "targeted/requests.jsonl",
+      "sha256": "3759f518b1957f8f05bb575325644e564f6da5cd16df792742e19dfaa869c2da",
+      "exactBytes": true
+    }
+  ]
+}

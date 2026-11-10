@@ -1,0 +1,115 @@
+{
+  "kind": "EVALUATOR_ONLY_SOURCE_COMPARISON",
+  "scope": "Authored evaluation presentation, not a shared registry update. No product performance added.",
+  "products": [
+    {
+      "productId": "SV1561",
+      "productName": "Set váy Khánh Trang",
+      "captureDescription": "Thiết kế nữ tính, nhẹ nhàng với chất liệu thô boi phối ren cho cả áo và chân váy, mang lại cảm giác thoáng mát, mềm nhẹ và dễ chịu khi mặc. Sự kết hợp giữa chất vải thô mộc mạc và ren tinh tế tạo nên tổng thể hài hòa, vừa gần gũi vừa thanh lịch. Áo được thiết kế form suông nhẹ, dễ mặc và phù hợp với nhiều dáng người. Các chi tiết phối ren tinh tế giúp tạo điểm nhấn mềm mại, tăng thêm nét nữ tính cho trang phục. Chân váy được làm từ thô boi phối ren, form váy nhẹ nhàng với độ rũ tự nhiên. Thiết kế cạp chun linh hoạt, giúp mặc thoải mái và dễ dàng, phù hợp với nhiều vóc dáng. Phần ren được xử lý khéo léo, tạo độ bay nhẹ và tăng tính thẩm mỹ cho tổng thể.",
+      "captureDescriptionSha256": "38d6a937f1692a4afe8411c13e672449541a6dae6d2ab61e4427ad3013b9361c",
+      "captureSourceVersion": "catalog-v2",
+      "upstreamOriginalSha256FromExistingConfig": null,
+      "upstreamHashStatus": "NOT_READ_FOR_T4_VERIFY_CURRENT_UPSTREAM_ONLY_IF_T5_RUNS",
+      "candidateDescription": "Áo và chân váy: thô boi phối ren; vải thoáng mát, mềm nhẹ, dễ chịu. Áo form suông nhẹ, dễ mặc, phù hợp nhiều dáng người; chi tiết phối ren mềm mại. Chân váy form nhẹ, độ rũ tự nhiên, cạp chun linh hoạt; phần ren tạo độ bay nhẹ. Phong cách nữ tính, gần gũi, thanh lịch.",
+      "candidateDescriptionSha256": "e7edfa234a84460e042fdf1139a8a5ddd573436dc99d6e66f653b29f0cf352fd",
+      "changed": true,
+      "originalBytes": 877,
+      "candidateBytes": 345,
+      "sourceReview": {
+        "kept": [
+          "thô boi phối ren ở cả áo và chân váy",
+          "thoáng mát, mềm nhẹ, dễ chịu",
+          "áo suông nhẹ/dễ mặc/phù hợp nhiều dáng",
+          "phối ren mềm mại",
+          "váy nhẹ/rũ/cạp chun linh hoạt",
+          "ren tạo độ bay nhẹ",
+          "nữ tính/gần gũi/thanh lịch"
+        ],
+        "removedOrMerged": [
+          "Gộp các lần mềm/nhẹ/nữ tính trong các câu mở đầu và mô tả áo/váy.",
+          "Bỏ câu tổng thể hài hòa và tăng tính thẩm mỹ: quảng cáo chung; giữ phong cách cụ thể.",
+          "Bỏ đánh giá công sức xử lý khéo léo; không phải cấu tạo hay kỹ thuật sản xuất cụ thể."
+        ]
+      }
+    },
+    {
+      "productId": "SV165",
+      "productName": "Set váy Thanh Vũ",
+      "captureDescription": "Thiết kế nữ tính và thanh lịch với sự kết hợp giữa áo ren hoa dệt sợi cotton và chân váy tơ crep mềm nhẹ, mang lại cảm giác thoáng mát, nhẹ nhàng và dễ chịu khi mặc. Chất liệu ren có độ thoáng, mềm mại giúp tổng thể trang phục trở nên tinh tế và duyên dáng. Áo được thiết kế ren dệt sợi cotton tay hến, tạo độ bồng nhẹ nữ tính. Phần cổ áo đính hoa trang trí là điểm nhấn nổi bật, giúp tổng thể thiết kế trở nên mềm mại và thanh lịch hơn. Chân váy được thiết kế 2 lớp từ chất liệu tơ crep, form váy nhẹ nhàng với cạp chun co giãn giúp mặc thoải mái và phù hợp với nhiều dáng người. Phần chân váy tạo can bèo mềm mại, mang lại độ bay nhẹ và giúp tổng thể trang phục thêm phần duyên dáng.",
+      "captureDescriptionSha256": "0b80764b90eed79becacde995d790d325e468bcf4737d9b3fff8a9b6cd6dd053",
+      "captureSourceVersion": "catalog-v2",
+      "upstreamOriginalSha256FromExistingConfig": null,
+      "upstreamHashStatus": "NOT_READ_FOR_T4_VERIFY_CURRENT_UPSTREAM_ONLY_IF_T5_RUNS",
+      "candidateDescription": "Áo: ren hoa dệt sợi cotton, mềm mại, thoáng; tay hến tạo độ bồng nhẹ, cổ đính hoa. Chân váy: tơ crep mềm nhẹ, 2 lớp, form nhẹ, cạp chun co giãn, can bèo mềm mại tạo độ bay nhẹ. Cảm giác mặc thoáng mát, nhẹ và dễ chịu; phù hợp nhiều dáng người. Phong cách nữ tính, thanh lịch.",
+      "candidateDescriptionSha256": "0329c92aa22201838317a7dd5104424748ae6ca8e635dc91b80ba59081063cd2",
+      "changed": true,
+      "originalBytes": 905,
+      "candidateBytes": 355,
+      "sourceReview": {
+        "kept": [
+          "ren hoa dệt sợi cotton mềm và thoáng",
+          "tay hến/bồng nhẹ/cổ đính hoa",
+          "váy tơ crep mềm nhẹ/hai lớp/form nhẹ",
+          "cạp chun co giãn/phù hợp nhiều dáng",
+          "can bèo mềm mại/độ bay nhẹ",
+          "thoáng mát/nhẹ/dễ chịu",
+          "nữ tính/thanh lịch"
+        ],
+        "removedOrMerged": [
+          "Gộp lời mềm mại/thanh lịch/nữ tính lặp ở nhiều câu.",
+          "Gộp tinh tế/duyên dáng thành phong cách nữ tính, thanh lịch; không mất chi tiết trang trí.",
+          "Bỏ điểm nhấn nổi bật và giúp tổng thể thêm duyên dáng: lời quảng cáo chung quanh chi tiết cổ hoa/can bèo đã giữ."
+        ]
+      }
+    },
+    {
+      "productId": "SV244",
+      "productName": "Set váy Diễm Hoa",
+      "captureDescription": "Thiết kế nữ tính và nổi bật với chất liệu ren lưới đính hoa 3D, kết hợp cùng chân váy tơ mềm mịn nhẹ bay, mang lại cảm giác thanh thoát và tinh tế khi mặc. Bề mặt vải được trang trí hoa 3D nổi bật, tạo điểm nhấn sang trọng và thu hút. Áo được thiết kế 2 lớp từ ren hoa 3D, chất liệu mát, nhẹ và thoáng. Form áo đuôi cá rủ xòe nhẹ, giúp tạo độ bay mềm mại và tôn dáng nữ tính. Thiết kế rộng suông nhẹ mang lại cảm giác thoải mái nhưng vẫn giữ được nét thanh lịch. Chân váy được thiết kế 2 lớp cạp chun, phần váy 3 tầng đan nhau tạo độ bồng bềnh và chuyển động mềm mại khi di chuyển. Form váy bay nhẹ giúp tổng thể trang phục thêm phần nổi bật và duyên dáng.",
+      "captureDescriptionSha256": "19bf935aee0815d14b468658e09c226e4ad452c1c351c78f1e8e0071a95f251f",
+      "captureSourceVersion": "catalog-v2",
+      "upstreamOriginalSha256FromExistingConfig": null,
+      "upstreamHashStatus": "NOT_READ_FOR_T4_VERIFY_CURRENT_UPSTREAM_ONLY_IF_T5_RUNS",
+      "candidateDescription": "Áo: ren lưới đính hoa 3D nổi, 2 lớp; mát, nhẹ, thoáng; form rộng suông nhẹ, đuôi cá rủ xòe nhẹ, tôn dáng. Chân váy: tơ mềm mịn, 2 lớp, cạp chun, 3 tầng đan nhau tạo độ bồng bềnh và chuyển động mềm mại. Cảm giác mặc thoải mái, nhẹ bay. Phong cách nữ tính, nổi bật, sang trọng, thanh thoát.",
+      "candidateDescriptionSha256": "f2a9f48c5e90f9649d44ac9dfb53f78f560076d84520e9d91826d6bead0927ae",
+      "changed": true,
+      "originalBytes": 867,
+      "candidateBytes": 371,
+      "sourceReview": {
+        "kept": [
+          "ren lưới hoa 3D nổi/hai lớp",
+          "mát/nhẹ/thoáng",
+          "form rộng suông nhẹ/đuôi cá rủ xòe/tôn dáng",
+          "váy tơ mềm mịn/hai lớp/cạp chun/ba tầng đan nhau",
+          "bồng bềnh/chuyển động mềm mại/nhẹ bay/thoải mái",
+          "nữ tính/nổi bật/sang trọng/thanh thoát"
+        ],
+        "removedOrMerged": [
+          "Gộp hai lần hoa 3D nổi và thu hút thành mô tả cùng phong cách nổi bật.",
+          "Gộp tinh tế/thanh lịch/duyên dáng lặp vào nhóm phong cách đã giữ; không bỏ phom/tầng/lớp.",
+          "Gộp các câu nhẹ/bay lặp quanh áo và váy."
+        ]
+      }
+    },
+    {
+      "productId": "SV2447",
+      "productName": "Set váy Thạch Thảo",
+      "captureDescription": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+      "captureDescriptionSha256": "f93f47d2dd7cc2650a99d988ab701d082213bc25f102f2900b1a6cdae0785320",
+      "captureSourceVersion": "candidate-registry-description:dfdddc35810cf1ec3fa9deeb6d3f68840a0b605500d3647258234664c7c73c98",
+      "upstreamOriginalSha256FromExistingConfig": "996dea11b6f90334423bace59f66094f1617c3d5b026989f4d53335ee6897dab",
+      "upstreamHashStatus": "NOT_READ_FOR_T4_VERIFY_CURRENT_UPSTREAM_ONLY_IF_T5_RUNS",
+      "candidateDescription": "Áo: tơ Hàn thêu, họa tiết thêu nổi, form nhẹ. Vải mềm, thoáng, có độ bay tự nhiên. Chân váy: ren tơ Hàn mềm, form nhẹ, có độ rũ tự nhiên. Thiết kế gồm áo thêu và chân váy ren.",
+      "candidateDescriptionSha256": "f93f47d2dd7cc2650a99d988ab701d082213bc25f102f2900b1a6cdae0785320",
+      "changed": false,
+      "originalBytes": 227,
+      "candidateBytes": 227,
+      "sourceReview": {
+        "kept": [
+          "Toàn bộ mô tả đã biên tập hiện hành."
+        ],
+        "removedOrMerged": []
+      }
+    }
+  ]
+}

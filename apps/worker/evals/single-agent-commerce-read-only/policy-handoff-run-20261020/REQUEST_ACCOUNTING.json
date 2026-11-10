@@ -1,0 +1,136 @@
+{
+  "generations": [
+    {
+      "slot": 1,
+      "id": "handoff-b108eaf0-1909-4b28-814e-430c9b90c025:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1723.4876000000004,
+      "inputTokens": 3027,
+      "outputTokens": 191,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "slot": 1,
+      "id": "handoff-b108eaf0-1909-4b28-814e-430c9b90c025:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4480.7246,
+      "inputTokens": 4168,
+      "outputTokens": 1336,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "slot": 1,
+      "id": "handoff-b108eaf0-1909-4b28-814e-430c9b90c025:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 8268.8797,
+      "inputTokens": 3644,
+      "outputTokens": 69,
+      "modelVersion": "gpt-6.1-sol"
+    },
+    {
+      "slot": 2,
+      "id": "handoff-21241144-8a3a-4387-807d-cb0f0ac64419:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2148.8426,
+      "inputTokens": 3020,
+      "outputTokens": 410,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "slot": 2,
+      "id": "handoff-21241144-8a3a-4387-807d-cb0f0ac64419:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4644.751700000001,
+      "inputTokens": 4380,
+      "outputTokens": 1408,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "slot": 3,
+      "id": "handoff-733c038a-bbd7-478d-946e-9b69ba6559df:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2434.3755999999994,
+      "inputTokens": 3008,
+      "outputTokens": 556,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "slot": 3,
+      "id": "handoff-733c038a-bbd7-478d-946e-9b69ba6559df:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 8678.464,
+      "inputTokens": 4514,
+      "outputTokens": 2668,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "slot": 3,
+      "id": "handoff-733c038a-bbd7-478d-946e-9b69ba6559df:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 6129.992200000001,
+      "inputTokens": 3656,
+      "outputTokens": 80,
+      "modelVersion": "gpt-6.1-sol"
+    },
+    {
+      "slot": 4,
+      "id": "handoff-9ec171c7-7201-4ac7-9c93-71fd2ca5b5a0:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1442.2237000000023,
+      "inputTokens": 3007,
+      "outputTokens": 135,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "slot": 4,
+      "id": "handoff-9ec171c7-7201-4ac7-9c93-71fd2ca5b5a0:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1796.1860000000015,
+      "inputTokens": 4092,
+      "outputTokens": 419,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "slot": 4,
+      "id": "handoff-9ec171c7-7201-4ac7-9c93-71fd2ca5b5a0:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 5090.095499999996,
+      "inputTokens": 3606,
+      "outputTokens": 49,
+      "modelVersion": "gpt-6.1-sol"
+    },
+    {
+      "slot": 5,
+      "id": "handoff-6f07502d-7db2-4d6c-a34e-a76557ab6337:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 3119.5910000000003,
+      "inputTokens": 3022,
+      "outputTokens": 869,
+      "modelVersion": "gemini-3.5-flash-lite"
+    }
+  ]
+}

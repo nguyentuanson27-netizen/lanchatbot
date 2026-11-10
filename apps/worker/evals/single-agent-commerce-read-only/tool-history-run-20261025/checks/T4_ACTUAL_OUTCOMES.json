@@ -1,0 +1,47 @@
+{
+  "decision": "ADVICE_NO_INTERVENTION",
+  "cases": [
+    {
+      "caseId": "b1-buying-concern-v2",
+      "path": "apps\\worker\\evals\\single-agent-commerce-read-only\\turn-completion-run-20261024\\raw\\b1-15-15\\attempt-15.json",
+      "sha256": "1cc35ecdc1071aba6b5de40d8990410746825ae5f7a8b08ead08c8f238124067",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, nếu chị quen mặc đồ trơn và sợ set này hơi điệu thì em tư vấn thật là Set Thạch Thảo thiên về nét nhẹ nhàng, thanh nhã chứ không bị sến hay quá cầu kỳ đâu ạ. \n\nChất liệu tơ Hàn thêu và ren tơ mềm mại, có độ bay và rũ tự nhiên giúp form dáng nhẹ nhàng, rất lịch sự và sang trọng, mặc đi ăn cưới ban ngày là cực kỳ hợp lý. \n\nTuy nhiên, vì set gồm cả áo thêu nổi và chân váy ren, nếu chị vẫn thấy hơi khác so với phong cách tối giản quen thuộc của mình, mình có thể linh hoạt chọn mua riêng áo lẻ (phối cùng quần hoặc chân váy trơn sẵn có) hoặc diện nguyên set để vừa vặn với không gian tiệc. Chị xem mình thích phương án nào hơn ạ?",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": null
+    },
+    {
+      "caseId": "b1-changed-occasion-v2",
+      "path": "apps\\worker\\evals\\single-agent-commerce-read-only\\turn-completion-run-20261024\\raw\\b1-9-9\\attempt-9.json",
+      "sha256": "633fd0c903c6c2242f19552b98ab43dce5c56acca55de001187f62a24c39e6ee",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Set này sử dụng chất tơ Hàn thêu và ren tơ Hàn mềm, form nhẹ, vải mềm, thoáng và có độ bay tự nhiên chị ạ. Chất liệu có độ thoáng nhất định, tuy nhiên đứng ở sân vườn dưới trời nắng lâu và dễ nóng, chị cân nhắc thêm yếu tố thời tiết ngoài trời để thoải mái nhất nhé.",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": null
+    },
+    {
+      "caseId": "media-decision:ask",
+      "path": "apps\\worker\\evals\\single-agent-commerce-read-only\\turn-completion-run-20261024\\raw\\media-followup\\provider-attempt-7.json",
+      "sha256": "7bb4737d26bd93ac4d434d6f755aa2d475f83973920779608b83596f92867987",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chị yên tâm nha, chân váy làm từ chất ren tơ Hàn mềm mại với form nhẹ và độ rũ tự nhiên, mặc lên rất thanh thoát, nữ tính chứ không bị rườm rà hay quá lòe loẹt đâu ạ. Mẫu này kết hợp áo thêu tinh tế, diện đi ăn cưới buổi trưa vừa lịch sự, nhã nhặn lại vừa sang trọng và nổi bật. \n\nTrọn bộ có giá 799.000đ (hoặc chị có thể mua áo lẻ 499.000đ hoặc chân váy lẻ 449.000đ), shop sẵn các size từ S đến XL. Chị tham khảo hình ảnh chi tiết chất liệu em gửi nha, mình ưng size nào cứ báo em tư vấn kỹ hơn ạ!",
+        "fallbackId": null
+      },
+      "actualCapturedMessages": [
+        "Chị yên tâm nha, chân váy làm từ chất ren tơ Hàn mềm mại với form nhẹ và độ rũ tự nhiên, mặc lên rất thanh thoát, nữ tính chứ không bị rườm rà hay quá lòe loẹt đâu ạ. Mẫu này kết hợp áo thêu tinh tế, diện đi ăn cưới buổi trưa vừa lịch sự, nhã nhặn lại vừa sang trọng và nổi bật. \n\nTrọn bộ có giá 799.000đ (hoặc chị có thể mua áo lẻ 499.000đ hoặc chân váy lẻ 449.000đ), shop sẵn các size từ S đến XL. Chị tham khảo hình ảnh chi tiết chất liệu em gửi nha, mình ưng size nào cứ báo em tư vấn kỹ hơn ạ!",
+        "[CODE_IMAGE]",
+        "[CODE_IMAGE]"
+      ]
+    }
+  ],
+  "reason": "Existing instructions explicitly require a buying direction, relevant differences and no return of the same choice. No specific conflicting instruction or lost decision field established; preserve baseline and report residual.",
+  "historicalPosSnapshot": "Exact SQ748 historical POS snapshot unavailable; structural fixture separately labeled, no exact replay claim."
+}

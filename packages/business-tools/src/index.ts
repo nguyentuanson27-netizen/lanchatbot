@@ -25,3 +25,4 @@ export * from "./vietnamese-text.js";
 export * from "./canonical-evidence.js";
 export * from "./effect-readiness.js";
 export * from "./protected-claims.js";
+export {mediaRevalidationIdentity,createMediaRevalidationProof,readMediaRevalidation,mediaObservationTime,type MediaRevalidationProof} from "./media-revalidation.js";

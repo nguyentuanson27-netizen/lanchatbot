@@ -1,0 +1,62 @@
+{
+  "sourceSha": "22b6bea85f18a8a441e28f5631515405b197ea9f",
+  "mode": "PUBLIC_CATALOG_IMAGE_API_SANITY_NO_SEND",
+  "models": {
+    "owner": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    }
+  },
+  "promptHash": "434e5dc01326075c74b63ff705406b531ec5adc3b95214b55731bc52b8ce86f3",
+  "bounds": {
+    "count": 2,
+    "maxBytes": 524288,
+    "maxSourceBytes": 2097152,
+    "maxDimension": 1024,
+    "maxSourceDimension": 12000,
+    "maxSourcePixels": 50000000,
+    "timeoutMs": 8000,
+    "maxRequestBytes": 1507328
+  },
+  "mediaResolution": "MEDIA_RESOLUTION_MEDIUM",
+  "registeredAttempts": 1,
+  "maximumGenerationRequests": 1,
+  "retry": 0,
+  "requestHash": "5b95adff942cca94e03f35d001844384ba324fea96311428f445e7b9d74d321f",
+  "images": [
+    {
+      "subjectRef": "SV2447",
+      "assetRef": "asset:1d468b542cef730ec27e5adf3a1fcc4d4a8ff56a3660ac9c875a51b8fd5a8f77",
+      "sha256": "bfaf228341477016679338166533275767daf06fa94236956150093d5e530a08",
+      "downloadSha256": "c35087700062bd468e2894ad4485550ef6ea8e236b683d5401e9f5c20f8d7602",
+      "registrySha256": "2052d1c8bf997f04e8f4e9f80dcbc59b62797bb1865b146f41b775197b36cb6a",
+      "mimeType": "image/jpeg"
+    },
+    {
+      "subjectRef": "SV2447",
+      "assetRef": "asset:53b6839931377606f16df706e12bf083d15ebacfd2ac7ea28d824075d822da9e",
+      "sha256": "85d42822bfb5eb7e98d8fb13ad2f1f5b5b44c7ff626d9fd674f22fac05865fea",
+      "downloadSha256": "2ebcb52a8d3f2923a9e5e02f5f66f1ceeaaf4ef6db75493d09916ec5230483f7",
+      "registrySha256": "fde1e4c575c26587d753dad576701b4a51634a25ef6ac1dd5510b5db16e14f9f",
+      "mimeType": "image/jpeg"
+    }
+  ],
+  "sendEnabled": false
+}

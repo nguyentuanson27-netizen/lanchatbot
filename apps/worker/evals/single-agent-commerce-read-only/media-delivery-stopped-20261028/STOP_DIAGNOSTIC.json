@@ -1,0 +1,29 @@
+{
+  "status": "STOPPED_DELIVERY_REGRESSION",
+  "sourceSha": "342c1e97be0a7ca7462d53e151fa66cc6d435e00",
+  "sourceUnchanged": true,
+  "worktreeCleanAfterChildCleanup": true,
+  "reason": "Native media group Outbox MANUAL_REVIEW after model PASS; final delivery consumer still used publication timestamp",
+  "dispatcherOnlyStopped": true,
+  "dispatcherPid": 12364,
+  "activeChildNotKilled": true,
+  "childCleanup": [
+    {
+      "cohort": "opening-quotes",
+      "completed": 5,
+      "testDatabaseDropped": true
+    },
+    {
+      "cohort": "media-followup",
+      "completed": 7,
+      "testDatabaseDropped": true
+    }
+  ],
+  "registeredNative": 51,
+  "observedNative": 12,
+  "nativeNotRun": 39,
+  "controlAttempts": 17,
+  "retry": 0,
+  "parentLastCommandExitUnknown": true,
+  "capturedAtUtc": "2026-10-28T07:41:54.735546+00:00"
+}

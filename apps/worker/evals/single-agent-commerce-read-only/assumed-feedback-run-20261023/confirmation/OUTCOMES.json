@@ -1,0 +1,42 @@
+[
+  {
+    "condition": "assumed-feedback",
+    "caseId": "media-detail",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, em gửi chị cận cảnh họa tiết thêu nổi trên áo tơ Hàn của set Thạch Thảo ạ.",
+      "fallbackId": null
+    },
+    "images": [
+      {
+        "sequence": 1,
+        "type": "image",
+        "url": "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg"
+      }
+    ],
+    "calls": [
+      "select_product_media"
+    ]
+  },
+  {
+    "condition": "assumed-feedback",
+    "caseId": "media-feedback",
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, em gửi chị ảnh khách mặc set Thạch Thảo bên em ạ.",
+      "fallbackId": null
+    },
+    "images": [
+      {
+        "sequence": 1,
+        "type": "image",
+        "url": "https://content.pancake.vn/1/s3000x3000/d9/a1/e3/e9/02be5da5317318f897bfb1d9832209119f6bd9ce6375c86e1732fdf1-w:3689-h:4356-l:748803-t:image/jpeg.jpeg"
+      }
+    ],
+    "calls": [
+      "select_product_media"
+    ]
+  }
+]

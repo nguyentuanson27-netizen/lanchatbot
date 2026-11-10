@@ -1,0 +1,13 @@
+{
+  "sourceSha": "895baecccfde1d2a8f2a8f181e70819d3941aab3",
+  "command": [
+    "node",
+    "feedback-controls-20261023.mjs",
+    "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-b-output-feedback-20261023\\followup-outcome-guard",
+    "--preflight"
+  ],
+  "exitCode": 1,
+  "expectedRejection": "FIXTURE_OPERATION_OUTCOME",
+  "generationRequests": 0,
+  "reason": "Captured NO_MATCH fixture produces operation error; blocked before dispatch"
+}

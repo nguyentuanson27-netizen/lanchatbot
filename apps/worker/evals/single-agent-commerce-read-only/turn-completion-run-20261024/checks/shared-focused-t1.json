@@ -1,0 +1,14 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@lana/contracts",
+    "exec",
+    "vitest",
+    "run",
+    "src/commerce-handoff-delivery.test.ts",
+    "src/commerce-media-delivery.test.ts"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 16.964423656463623
+}

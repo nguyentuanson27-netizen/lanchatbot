@@ -1,0 +1,115 @@
+{
+  "runSourceSha": "68694ce209baf953a338e16f37853ce3e63af110",
+  "registeredSlots": 32,
+  "recordedSlots": 32,
+  "generationRequests": 90,
+  "retry": 0,
+  "families": {
+    "stateful": {
+      "slots": 8,
+      "terminal": {
+        "SEND_ELIGIBLE": 4,
+        "NO_SEND": 2,
+        "HANDOFF": 2
+      },
+      "reasons": {
+        "RECEIPT_BACKED_CART_SUMMARY": 1,
+        "PASS": 3,
+        "CHECKOUT_DETAILS_MISSING": 1,
+        "PRIVATE_CHECKOUT_COMMITTED": 1,
+        "PURCHASE_CONFIRMED": 1,
+        "CUSTOMER_REQUESTED_HUMAN": 1
+      },
+      "providerRequests": 15,
+      "verifierLatencyMs": {
+        "n": 3,
+        "p50": 4924.035499999998,
+        "p95": 8939.30909000001
+      },
+      "addedVerificationLatencyMs": {
+        "n": 3,
+        "p50": 7641.301300000006,
+        "p95": 12723.73711
+      },
+      "providerErrors": 1
+    },
+    "b1": {
+      "slots": 24,
+      "terminal": {
+        "SEND_ELIGIBLE": 23,
+        "FALLBACK": 1
+      },
+      "reasons": {
+        "PASS": 23,
+        "FAIL": 1
+      },
+      "providerRequests": 75,
+      "verifierLatencyMs": {
+        "n": 24,
+        "p50": 4902.469299999997,
+        "p95": 8033.756275000003
+      },
+      "addedVerificationLatencyMs": {
+        "n": 24,
+        "p50": 5494.354249999989,
+        "p95": 9075.912745000009
+      },
+      "providerErrors": 0
+    }
+  },
+  "roles": {
+    "owner": {
+      "requests": 63,
+      "inputTokens": 217849,
+      "outputTokens": 37795,
+      "missingUsage": 0,
+      "modelVersions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "observedInferenceLatencyMs": {
+        "n": 63,
+        "p50": 2138.980899999995,
+        "p95": 4482.328430000009
+      }
+    },
+    "verifier": {
+      "requests": 27,
+      "inputTokens": 121469,
+      "outputTokens": 1907,
+      "missingUsage": 0,
+      "modelVersions": [
+        "gpt-6.1-sol"
+      ],
+      "observedInferenceLatencyMs": {
+        "n": 27,
+        "p50": 4905.930300000007,
+        "p95": 9019.810660000008
+      }
+    }
+  },
+  "verdictCounts": {
+    "PASS": 26,
+    "FAIL": 1
+  },
+  "wireCapturesChecked": 120,
+  "leaks": [],
+  "cleanup": {
+    "stateful-1": {
+      "testDatabaseDropped": true,
+      "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+      "completedOutcomes": 8
+    }
+  },
+  "cost": "NOT_EXPOSED",
+  "requestCountDistribution": {
+    "1": 90
+  },
+  "errorBreakdown": {
+    "generationErrorOutcomes": 1,
+    "ownerFinalOnlyToolModeViolation": 1,
+    "transportHttpAuthQuotaErrors": 0,
+    "timeouts": 0,
+    "generationErrorRate": 0.011111111111111112,
+    "sourceErrorsObserved": 0
+  }
+}

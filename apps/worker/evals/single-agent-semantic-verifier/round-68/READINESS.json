@@ -1,0 +1,170 @@
+{
+  "round": 68,
+  "status": "DETERMINISTIC_READINESS_PASS",
+  "checkedAt": "2026-10-14T03:37:45.905099+00:00",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "specSha": "3a12b167cff56ef839aa7160b5238c8bfd105e21",
+  "freezeSavepoint": "4cbd892c",
+  "providerQualificationGenerations": 0,
+  "counts": {
+    "a2Cases": 138,
+    "a2RegisteredSlots": 142,
+    "a2Unsafe": 91,
+    "a2Safe": 51,
+    "a2Prefix": 6,
+    "a3Cases": 42,
+    "a3RegisteredSlots": 42
+  },
+  "hashes": {
+    "manifest": "722b818421fa8b5ad2d48df40667274b890937830622a12dc4fb97f4c33e16a5",
+    "a2": "76bfd2754d3382006a31d97fb5f5601138e8d696dd83f2ead7caeef7dec23a96",
+    "a3": "f016ddd801baddf707a294fe66f654d6a893ed5045a7b6ce6f117813433bf203",
+    "prompts": {
+      "verifier": "9aebc569176f6270d87e59c2ed856537f71ab72f3edbfd5e13ee9bbbe89d2222",
+      "conversation": "097d7dca6ac7f1267cb7b581c2872b3fffa06d989963ccbddc2b57eef7f7185d"
+    },
+    "schema": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+    "boundaryExecutable": "344035c06c67ecfae317d385ee07c96aed86aac37c27bbc497aca69c40260b37",
+    "vertexExecutable": "fb2054f3b82da64be777ba6b3accde769000864e7c8fa7a8346db973f79390fe"
+  },
+  "commands": [
+    {
+      "command": "git fetch origin main\ngit rev-parse HEAD origin/main",
+      "exitCode": 0,
+      "result": "HEAD0b30bed4c7f6393852aff7188a3fcf0d9284cacd; main296cdcfbf5759f5bf9cbb24acf3dc63005589361"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/round-68.test.mjs",
+      "exitCode": 1,
+      "tests": 4,
+      "pass": 1,
+      "fail": 3,
+      "observed": [
+        "UNREGISTERED_CONTEXT_PRESENTATION",
+        "missing early checkpoint callback",
+        "unsupported profile projection"
+      ],
+      "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-red.stdout.log"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/round-68.test.mjs",
+      "exitCode": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-green.stdout.log",
+      "intermediateObserved": "3PASS/1FAIL; V7 Vertex native-admission enum omitted68; fixed same enum without API or setting change."
+    },
+    {
+      "exitCode": 0,
+      "finishedAt": "2026-10-14T03:34:53.3074171+00:00",
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs",
+      "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-full-eval.stdout.log",
+      "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-full-eval.stderr.log",
+      "tests": 430,
+      "passCount": 430,
+      "skipped": 0
+    },
+    {
+      "finishedAt": "2026-10-14T03:34:05.2468234+00:00",
+      "exitCode": 0,
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'\n$env:C3_TEST_CODEX_TRANSPORT='1'\nnode --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs",
+      "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-focused.stdout.log",
+      "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-focused.stderr.log",
+      "tests": 29,
+      "passCount": 29,
+      "skipped": 0
+    },
+    {
+      "exitCode": 0,
+      "finishedAt": "2026-10-14T03:32:57.0606003+00:00",
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts",
+      "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-worker-boundary.stdout.log",
+      "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-worker-boundary.stderr.log",
+      "tests": 79,
+      "passCount": 79,
+      "skipped": 0
+    },
+    {
+      "exitCode": 0,
+      "finishedAt": "2026-10-14T03:32:55.7874415+00:00",
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts",
+      "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-protected.stdout.log",
+      "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-protected.stderr.log",
+      "tests": 21,
+      "passCount": 21,
+      "skipped": 0
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "finishedAt": "2026-10-14T03:35:52.7551383+00:00",
+      "exitCode": 0,
+      "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-typecheck.stdout.log",
+      "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-typecheck.stderr.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "finishedAt": "2026-10-14T03:36:36.4906694+00:00",
+      "exitCode": 0,
+      "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-build.stdout.log",
+      "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-build.stderr.log"
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0,
+      "finishedAt": "2026-10-14T03:34:58.6647179+00:00",
+      "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-lint.stdout.log",
+      "stderr": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-lint.stderr.log"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='68'\nnode apps/worker/evals/single-agent-semantic-verifier/protocol.mjs",
+      "exitCode": 0,
+      "result": "FROZEN_PROTOCOL_VALID;138A2/42A3"
+    },
+    {
+      "command": "inspectCodex()/inspectGemini(manifest), read-only existing routes",
+      "exitCode": 0,
+      "stdout": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-round68-routes.json",
+      "generationRequests": 0
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "routes": {
+    "protocol": {
+      "a2Unsafe": 87,
+      "a2Safe": 51,
+      "a3": 42
+    },
+    "codex": {
+      "version": "codex-cli 0.159.2",
+      "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+    },
+    "gemini": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "projectId": "project-388db62b-f5a4-4e76-a2b",
+      "location": "global",
+      "transport": "NODE_FETCH_NO_RETRY",
+      "credentialRoute": "EXISTING_LOCAL_VERTEX_SERVICE_ACCOUNT",
+      "credentialAvailable": true,
+      "nodeVersion": "v24.19.0",
+      "helperExecutableHash": "fb2054f3b82da64be777ba6b3accde769000864e7c8fa7a8346db973f79390fe"
+    }
+  },
+  "selfReview": {
+    "scope": "Five existing evaluation executables only: fixed68 enum/hash pin, reuse stagedA2/fullA3/persistence/adapters. No runtime/business/shared changes. New four mechanical tests; no semantic quality claim from mocks. All frozen inputs and current prompts byte-exact.",
+    "complexityDelta": "0new online roles/layers/gates/framework/parser/regex/template/repair. Existing fixed-round registration extended; no new dispatcher.",
+    "boundary": "One owner/one verifier; code remains authority; hard-precheck survivors mandatory verifier; final gate and fallback unchanged. Exact projected bodies exclude evaluator labels in all-case capture tests.",
+    "source": "Commit complete executable/config and require clean tree before capturing runtime sourceSHA; no seal in frozen manifest.",
+    "limitations": [
+      "Two-case screen still failed; latest owner explicitly requests full new run without further repair.",
+      "Credentials inspected; availability and semantic results unproven until actual requests.",
+      "Nonblind subjective offline primary review; no independent/human/owner or conversion acceptance.",
+      "Immutable provider versions and costs may be unexposed.",
+      "Development cases reused; no holdout/promotion claim."
+    ]
+  }
+}

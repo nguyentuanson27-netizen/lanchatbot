@@ -1,0 +1,110 @@
+[
+  {
+    "population": "stateful",
+    "rep": 1,
+    "out": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-post-review-replay-rep1-stateful",
+    "command": [
+      "python",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-offer-replay-session-20261016.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-post-review-replay-rep1-stateful",
+      "COD",
+      "--provider-run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "population": "stateful",
+    "rep": 2,
+    "out": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-post-review-replay-rep2-stateful",
+    "command": [
+      "python",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-offer-replay-session-20261016.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-post-review-replay-rep2-stateful",
+      "COD",
+      "--provider-run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "population": "stateful",
+    "rep": 3,
+    "out": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-post-review-replay-rep3-stateful",
+    "command": [
+      "python",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-offer-replay-session-20261016.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-post-review-replay-rep3-stateful",
+      "COD",
+      "--provider-run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "population": "b1-priority",
+    "rep": 1,
+    "out": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-post-review-replay-rep1-b1-priority",
+    "command": [
+      "python",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-offer-replay-session-20261016.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/run.mjs",
+      "--config",
+      "apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json",
+      "--cases",
+      "apps/worker/evals/single-agent-commerce-read-only/contract-replay-20261018/cases.priority.json",
+      "--range",
+      "1:8",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-post-review-replay-rep1-b1-priority",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "population": "b1-priority",
+    "rep": 2,
+    "out": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-post-review-replay-rep2-b1-priority",
+    "command": [
+      "python",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-offer-replay-session-20261016.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/run.mjs",
+      "--config",
+      "apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json",
+      "--cases",
+      "apps/worker/evals/single-agent-commerce-read-only/contract-replay-20261018/cases.priority.json",
+      "--range",
+      "1:8",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-post-review-replay-rep2-b1-priority",
+      "--run"
+    ],
+    "exitCode": 0
+  },
+  {
+    "population": "b1-priority",
+    "rep": 3,
+    "out": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-post-review-replay-rep3-b1-priority",
+    "command": [
+      "python",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-offer-replay-session-20261016.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/run.mjs",
+      "--config",
+      "apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json",
+      "--cases",
+      "apps/worker/evals/single-agent-commerce-read-only/contract-replay-20261018/cases.priority.json",
+      "--range",
+      "1:8",
+      "--out",
+      "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-post-review-replay-rep3-b1-priority",
+      "--run"
+    ],
+    "exitCode": 0
+  }
+]

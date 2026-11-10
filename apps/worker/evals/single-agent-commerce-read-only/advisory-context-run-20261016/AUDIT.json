@@ -1,0 +1,20 @@
+{
+  "status": "ACCOUNTING_BINDINGS_AND_PROJECTION_VERIFIED",
+  "rawDiskAndGitHashes": 40,
+  "ownerDispatchHashes": 60,
+  "verifierExactBindings": 27,
+  "eligibleExactDraftMatches": 27,
+  "allGeneratedFinalsVerified": true,
+  "evaluatorLeaks": 0,
+  "privateFixtureLeaksInRequests": 0,
+  "privateCheckoutModelRequests": 0,
+  "atMostOneRequestPerKnownGeneration": true,
+  "sourceIdentityPreserved": true,
+  "capturedEligibleExactReplies": 4,
+  "frozenFilesMatchSourceAndDisk": 13,
+  "offlineAuditScriptSha256": "3dae318eb0cf3cfcd20b5e64e0e7138c169dd2b4298e61ec97ac4b314d419a1e",
+  "all31OutcomesRetained": true,
+  "testDatabaseDropped": true,
+  "humanAcceptance": null,
+  "providerEcho": "Prepared/dispatched body hash plus adapter capture tests; no independent provider-side echo"
+}

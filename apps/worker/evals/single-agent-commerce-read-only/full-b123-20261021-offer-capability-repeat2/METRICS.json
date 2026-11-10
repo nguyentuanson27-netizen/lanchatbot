@@ -1,0 +1,117 @@
+{
+  "runSourceSha": "a4e393e7c3084ac6ad29595c50f5925442c2f58c",
+  "registeredSlots": 32,
+  "recordedSlots": 32,
+  "generationRequests": 89,
+  "retry": 0,
+  "families": {
+    "stateful": {
+      "slots": 8,
+      "terminal": {
+        "SEND_ELIGIBLE": 4,
+        "NO_SEND": 2,
+        "HANDOFF": 2
+      },
+      "reasons": {
+        "PASS": 3,
+        "RECEIPT_BACKED_CART_SUMMARY": 1,
+        "CHECKOUT_DETAILS_MISSING": 1,
+        "PRIVATE_CHECKOUT_COMMITTED": 1,
+        "PURCHASE_CONFIRMED": 1,
+        "CUSTOMER_REQUESTED_HUMAN": 1
+      },
+      "providerRequests": 14,
+      "verifierLatencyMs": {
+        "n": 4,
+        "p50": 8154.171200000004,
+        "p95": 9547.318720000001
+      },
+      "addedVerificationLatencyMs": {
+        "n": 4,
+        "p50": 15854.344949999995,
+        "p95": 17474.007350000003
+      },
+      "providerErrors": 0
+    },
+    "b1": {
+      "slots": 24,
+      "terminal": {
+        "SEND_ELIGIBLE": 22,
+        "FALLBACK": 2
+      },
+      "reasons": {
+        "PASS": 22,
+        "FAIL": 2
+      },
+      "providerRequests": 75,
+      "verifierLatencyMs": {
+        "n": 24,
+        "p50": 7778.696799999976,
+        "p95": 15231.933404999998
+      },
+      "addedVerificationLatencyMs": {
+        "n": 24,
+        "p50": 8582.372600000002,
+        "p95": 15897.399334999993
+      },
+      "providerErrors": 0
+    }
+  },
+  "roles": {
+    "owner": {
+      "requests": 61,
+      "inputTokens": 253867,
+      "outputTokens": 36940,
+      "missingUsage": 0,
+      "modelVersions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "latencyMs": {
+        "n": 61,
+        "p50": 2505.1723999999813,
+        "p95": 7200.0285
+      }
+    },
+    "verifier": {
+      "requests": 28,
+      "inputTokens": 124795,
+      "outputTokens": 2461,
+      "missingUsage": 0,
+      "modelVersions": [
+        "gpt-6.1-sol"
+      ],
+      "latencyMs": {
+        "n": 28,
+        "p50": 7778.696799999976,
+        "p95": 14750.434344999998
+      }
+    }
+  },
+  "verdictCounts": {
+    "PASS": 26,
+    "FAIL": 2
+  },
+  "wireCapturesChecked": 121,
+  "leaks": [],
+  "cleanup": {
+    "stateful-1": {
+      "testDatabaseDropped": true,
+      "status": "COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW",
+      "completedOutcomes": 8
+    }
+  },
+  "cost": "NOT_EXPOSED",
+  "requestCountDistribution": {
+    "1": 89
+  },
+  "providerErrors": 0,
+  "providerTimeouts": 0,
+  "providerErrorRate": 0.0,
+  "fallbackRateAllSlots": 0.0625,
+  "sourceEmbeddingCalls": {
+    "sourceCheck": 1,
+    "stateful": 0,
+    "b1": 1
+  },
+  "embeddingAccounting": "B1 attempt counters are cumulative; use final attempt once."
+}

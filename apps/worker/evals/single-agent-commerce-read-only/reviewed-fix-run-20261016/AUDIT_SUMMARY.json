@@ -1,0 +1,18 @@
+{
+  "registeredOutcomes": 31,
+  "retainedOutcomes": 31,
+  "generationInvocations": 90,
+  "maximumGenerationInvocations": 120,
+  "generationHttpRequests": 90,
+  "unknownRequestAccounting": 0,
+  "automaticRetries": 0,
+  "rawDiskAndGitHashes": 39,
+  "ownerDispatchHashes": 65,
+  "verifierExactBindings": 25,
+  "finalOnlyRequests": 9,
+  "finalOnlyToolViolations": 2,
+  "ownedProviderDatabaseDropped": true,
+  "evaluatorLeaks": 0,
+  "privateInputLeaks": 0,
+  "sendEnabled": false
+}

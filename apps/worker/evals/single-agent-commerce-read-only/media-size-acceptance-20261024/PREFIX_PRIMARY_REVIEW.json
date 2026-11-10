@@ -1,0 +1,428 @@
+{
+  "sourceSha": "af482367aa953486a27f290b658c23ef1200f993",
+  "protocol": "Whole actual customer outcome and dialogue continuity; no keyword scores. Original rejected drafts/tool diagnostics reviewed separately afterwards. Gallery terminal includes its retained diagnostic; it is not used to turn original FAIL into PASS.",
+  "items": [
+    {
+      "caseId": "sales-discovery-advice:need",
+      "actualOutcome": {
+        "terminal": {
+          "disposition": "FALLBACK",
+          "reason": "OWNER_TOOL_MODE",
+          "text": "Phần này em chưa trả lời được, chị nhé.",
+          "fallbackId": "C3_A_NONPROTECTED_V2"
+        },
+        "messages": [
+          "Phần này em chưa trả lời được, chị nhé."
+        ],
+        "attachments": [],
+        "outbox": [
+          {
+            "id": "91d530b9-d3b3-4d32-b575-af19a7518c1e",
+            "group": "3c8bb8f9-8299-4994-822f-26b9864befa6",
+            "sequence": 0,
+            "status": "SENT_ACCEPTED"
+          }
+        ]
+      },
+      "review": "NOT_RESOLVED",
+      "reason": "Khách cần chọn đồ đi làm, nhưng chỉ nhận câu chưa trả lời được. Không có lựa chọn hoặc bước tiếp theo.",
+      "attemptFileSha256": "44a9fbd5c8824ea931c4e0e534a5ff02c93e206b666b3e529deec6e6b86f538e"
+    },
+    {
+      "caseId": "sales-product-gallery:overview",
+      "actualOutcome": {
+        "terminal": {
+          "disposition": "FALLBACK",
+          "reason": "FAIL",
+          "text": "Em gửi chị ảnh của mẫu để mình xem trước nhé.",
+          "fallbackId": "C3_B_VERIFIED_MEDIA_V1"
+        },
+        "messages": [
+          "Em gửi chị ảnh của mẫu để mình xem trước nhé.",
+          "[CODE_IMAGE]",
+          "[CODE_IMAGE]"
+        ],
+        "attachments": [
+          {
+            "sequence": 1,
+            "type": "image",
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          },
+          {
+            "sequence": 2,
+            "type": "image",
+            "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg"
+          }
+        ],
+        "outbox": [
+          {
+            "id": "056bc508-1a8a-4481-a293-c984a3b70720",
+            "group": "c0d3845a-8e4b-42de-8237-bfe27c65c17d",
+            "sequence": 0,
+            "status": "SENT_ACCEPTED"
+          },
+          {
+            "id": "ca2258d0-1b8a-4ac3-aaeb-e1eb50bfdfee",
+            "group": "c0d3845a-8e4b-42de-8237-bfe27c65c17d",
+            "sequence": 1,
+            "status": "SENT_ACCEPTED"
+          },
+          {
+            "id": "4c305942-2809-4a31-8d59-938852d930dc",
+            "group": "c0d3845a-8e4b-42de-8237-bfe27c65c17d",
+            "sequence": 2,
+            "status": "SENT_ACCEPTED"
+          }
+        ]
+      },
+      "review": "PARTIAL_RECOVERY",
+      "reason": "Khách nhận hai ảnh đúng mẫu và lời dẫn ảnh chung. Đã sửa mất ảnh của recovery; chưa chứng minh ảnh đúng màu be, không coi hoàn thành yêu cầu màu.",
+      "attemptFileSha256": "e6634a7b40b4bbac20bb2aa66c202cc0dade6ebf56aa46aa98eb17a8e890bfbe"
+    },
+    {
+      "caseId": "sales-size-advice:height-weight",
+      "actualOutcome": {
+        "terminal": {
+          "disposition": "HANDOFF",
+          "reason": "DEPENDENCY_FAILURE",
+          "text": null,
+          "fallbackId": null
+        },
+        "messages": [],
+        "attachments": [],
+        "outbox": []
+      },
+      "review": "NOT_RESOLVED",
+      "reason": "Handoff im lặng, khách không nhận câu trả lời chọn size hoặc câu hỏi bổ sung. Cần chẩn đoán sau primary review; chưa quy nguyên nhân cho model hay chart.",
+      "attemptFileSha256": "8525110e56d106193ea2e808acf01636243d841111e0bcc3f1d71a6176a728bd"
+    },
+    {
+      "caseId": "sales-southern-delivery:deadline",
+      "actualOutcome": {
+        "terminal": {
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "PASS",
+          "text": "Dạ, set váy Thạch Thảo (mã SV2447) hiện có giá 799.000đ, có các size S, M, L, XL ạ. \n\nTuy nhiên, thời gian vận chuyển về Cần Thơ dự kiến từ 4–8 ngày nên không thể kịp giao cho chị vào sáng mai được, shop xin phép không nhận đơn gấp này ạ.",
+          "fallbackId": null
+        },
+        "messages": [
+          "Dạ, set váy Thạch Thảo (mã SV2447) hiện có giá 799.000đ, có các size S, M, L, XL ạ. \n\nTuy nhiên, thời gian vận chuyển về Cần Thơ dự kiến từ 4–8 ngày nên không thể kịp giao cho chị vào sáng mai được, shop xin phép không nhận đơn gấp này ạ.",
+          "[CODE_IMAGE]",
+          "[CODE_IMAGE]"
+        ],
+        "attachments": [
+          {
+            "sequence": 1,
+            "type": "image",
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          },
+          {
+            "sequence": 2,
+            "type": "image",
+            "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg"
+          }
+        ],
+        "outbox": [
+          {
+            "id": "fd710271-15cd-4efc-b86d-0dc00320727c",
+            "group": "4b7c3edf-db9e-4cde-8305-61df28a9a041",
+            "sequence": 0,
+            "status": "SENT_ACCEPTED"
+          },
+          {
+            "id": "64051607-442e-4f69-91c4-7cdbfd626ed1",
+            "group": "4b7c3edf-db9e-4cde-8305-61df28a9a041",
+            "sequence": 1,
+            "status": "SENT_ACCEPTED"
+          },
+          {
+            "id": "421516c2-f38a-4295-8280-faec2b589bde",
+            "group": "4b7c3edf-db9e-4cde-8305-61df28a9a041",
+            "sequence": 2,
+            "status": "SENT_ACCEPTED"
+          }
+        ]
+      },
+      "review": "NEEDS_EDIT",
+      "reason": "Đã báo không nhận lịch gấp, nhưng mở đầu bằng giá/mã/danh sách size và ảnh làm loãng câu hỏi thời hạn. Câu không thể kịp giao dễ đọc thành kết luận chắc chắn từ ETA dự kiến; cần giữ riêng giới hạn này.",
+      "attemptFileSha256": "88c9c4c74a2b0861efe4cc30ed71c4d595e94568fa1187be4efb972c13fe9551"
+    },
+    {
+      "caseId": "media-overview-next:ask",
+      "actualOutcome": {
+        "terminal": {
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "PASS",
+          "text": "Dạ hiện shop chưa có ảnh khách mặc thực tế cho bộ Thạch Thảo này, em gửi chị ảnh mẫu mặc để chị dễ nhìn phom áo tơ thêu và chân váy ren nhé ạ.",
+          "fallbackId": null
+        },
+        "messages": [
+          "Dạ hiện shop chưa có ảnh khách mặc thực tế cho bộ Thạch Thảo này, em gửi chị ảnh mẫu mặc để chị dễ nhìn phom áo tơ thêu và chân váy ren nhé ạ.",
+          "[CODE_IMAGE]",
+          "[CODE_IMAGE]"
+        ],
+        "attachments": [
+          {
+            "sequence": 1,
+            "type": "image",
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          },
+          {
+            "sequence": 2,
+            "type": "image",
+            "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg"
+          }
+        ],
+        "outbox": [
+          {
+            "id": "d4d8969c-d669-4c16-bf8a-b5a67d83ea89",
+            "group": "afddb1de-73ee-4c22-840f-057e6f3bb61d",
+            "sequence": 0,
+            "status": "SENT_ACCEPTED"
+          },
+          {
+            "id": "aaedefc3-0527-4e9b-ab61-58748b1883ef",
+            "group": "afddb1de-73ee-4c22-840f-057e6f3bb61d",
+            "sequence": 1,
+            "status": "SENT_ACCEPTED"
+          },
+          {
+            "id": "8059c951-1c75-453a-8634-6aba3b7c8d7a",
+            "group": "afddb1de-73ee-4c22-840f-057e6f3bb61d",
+            "sequence": 2,
+            "status": "SENT_ACCEPTED"
+          }
+        ]
+      },
+      "review": "USABLE",
+      "reason": "Phân biệt ảnh mẫu với feedback và gửi hai ảnh. Có thể dùng, câu dẫn hơi nhiều mô tả.",
+      "attemptFileSha256": "e9e8095297116dc4a6c019f364348ee3dd4b04f628909ed722b79cefb539d60e"
+    },
+    {
+      "caseId": "media-overview-next:continue",
+      "actualOutcome": {
+        "terminal": {
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "PASS",
+          "text": "Dạ em gửi chị ảnh mẫu mặc cả bộ áo tơ thêu và chân váy ren Thạch Thảo đây ạ, chị xem phom dáng giúp em nhé.",
+          "fallbackId": null
+        },
+        "messages": [
+          "Dạ em gửi chị ảnh mẫu mặc cả bộ áo tơ thêu và chân váy ren Thạch Thảo đây ạ, chị xem phom dáng giúp em nhé.",
+          "[CODE_IMAGE]",
+          "[CODE_IMAGE]"
+        ],
+        "attachments": [
+          {
+            "sequence": 1,
+            "type": "image",
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          },
+          {
+            "sequence": 2,
+            "type": "image",
+            "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg"
+          }
+        ],
+        "outbox": [
+          {
+            "id": "a474a0c3-2835-4cad-a9e6-ff14f08c7626",
+            "group": "81b51b16-a514-44d9-84c1-44fd2f516d15",
+            "sequence": 0,
+            "status": "SENT_ACCEPTED"
+          },
+          {
+            "id": "596f5af2-1780-47b0-a768-5a3816d224ff",
+            "group": "81b51b16-a514-44d9-84c1-44fd2f516d15",
+            "sequence": 1,
+            "status": "SENT_ACCEPTED"
+          },
+          {
+            "id": "1fe1325a-dcee-4103-bcde-31b34059368f",
+            "group": "81b51b16-a514-44d9-84c1-44fd2f516d15",
+            "sequence": 2,
+            "status": "SENT_ACCEPTED"
+          }
+        ]
+      },
+      "review": "USABLE_WITH_POLISH",
+      "reason": "Thực hiện đúng yêu cầu tiếp nối và gửi cả bộ. Cụm xem phom dáng giúp em hơi gượng; không làm mất kết quả.",
+      "attemptFileSha256": "c940bc1d373e452bd9b5bcabdb7938f8c980879da7478c5f3af9e018612695d9"
+    },
+    {
+      "caseId": "media-detail-next:ask",
+      "actualOutcome": {
+        "terminal": {
+          "disposition": "HANDOFF",
+          "reason": "DEPENDENCY_FAILURE",
+          "text": null,
+          "fallbackId": null
+        },
+        "messages": [],
+        "attachments": [],
+        "outbox": []
+      },
+      "review": "NOT_RESOLVED",
+      "reason": "Không có tin hoặc ảnh cho khách, handoff im lặng. Chẩn đoán kỹ thuật giữ riêng sau primary review.",
+      "attemptFileSha256": "d40b642227dc8170ed2388ac7ba04e5d9e39b75446ce8c8308fce8dc9a881957"
+    },
+    {
+      "caseId": "media-detail-next:continue",
+      "actualOutcome": {
+        "terminal": {
+          "disposition": "NO_SEND",
+          "reason": "HUMAN_OWNS_CONVERSATION",
+          "text": null,
+          "fallbackId": null
+        },
+        "messages": [],
+        "attachments": [],
+        "outbox": []
+      },
+      "review": "BLOCKED_BY_PRIOR_HANDOFF",
+      "reason": "Lượt sau không chạy tư vấn do quyền đã chuyển HUMAN ở lượt trước. Không đếm thành một lỗi model độc lập mới; vẫn giữ trong denominator.",
+      "attemptFileSha256": "189323097160be6782a4607a0ef20c074db6ad6458417411e3d28d7b2b89f999"
+    },
+    {
+      "caseId": "media-and-price:ask",
+      "actualOutcome": {
+        "terminal": {
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "PASS",
+          "text": "Dạ, shop gửi chị ảnh mẫu mặc set Thạch Thảo nha ạ. Áo lẻ có giá 499.000đ, hiện đủ size từ S đến XL chị nhé.",
+          "fallbackId": null
+        },
+        "messages": [
+          "Dạ, shop gửi chị ảnh mẫu mặc set Thạch Thảo nha ạ. Áo lẻ có giá 499.000đ, hiện đủ size từ S đến XL chị nhé.",
+          "[CODE_IMAGE]",
+          "[CODE_IMAGE]"
+        ],
+        "attachments": [
+          {
+            "sequence": 1,
+            "type": "image",
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          },
+          {
+            "sequence": 2,
+            "type": "image",
+            "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg"
+          }
+        ],
+        "outbox": [
+          {
+            "id": "0dafd961-66ab-4bf2-b0f1-5589cb5571b3",
+            "group": "12bbb262-3919-4de2-bc00-4577aaaf0e92",
+            "sequence": 0,
+            "status": "SENT_ACCEPTED"
+          },
+          {
+            "id": "d0ce856c-d5d2-4772-b5b8-a437e29d0b4e",
+            "group": "12bbb262-3919-4de2-bc00-4577aaaf0e92",
+            "sequence": 1,
+            "status": "SENT_ACCEPTED"
+          },
+          {
+            "id": "cc235fba-e712-4201-bc6a-a7a50bdaed18",
+            "group": "12bbb262-3919-4de2-bc00-4577aaaf0e92",
+            "sequence": 2,
+            "status": "SENT_ACCEPTED"
+          }
+        ]
+      },
+      "review": "USABLE",
+      "reason": "Gửi ảnh mẫu, giá áo lẻ và tồn size đúng phạm vi. Dùng được; không gọi ảnh mẫu là ảnh khách.",
+      "attemptFileSha256": "97fcaf7aa58188ce76d1746b8e644a700ae004cb329848e35382e608ffac6ff7"
+    },
+    {
+      "caseId": "media-and-size:ask",
+      "actualOutcome": {
+        "terminal": {
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "PASS",
+          "text": "Dạ, em gửi chị ảnh chụp cận cảnh chi tiết thêu ở phần áo ạ. Với chiều cao 1m58 và nặng 52kg, chị mặc size M là vừa đẹp chị nhé.",
+          "fallbackId": null
+        },
+        "messages": [
+          "Dạ, em gửi chị ảnh chụp cận cảnh chi tiết thêu ở phần áo ạ. Với chiều cao 1m58 và nặng 52kg, chị mặc size M là vừa đẹp chị nhé.",
+          "[CODE_IMAGE]"
+        ],
+        "attachments": [
+          {
+            "sequence": 1,
+            "type": "image",
+            "url": "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg"
+          }
+        ],
+        "outbox": [
+          {
+            "id": "81e38036-dbb7-4337-bba4-f3544a98bc0c",
+            "group": "419b45c4-ce69-4a3e-823d-c1926bad11e1",
+            "sequence": 0,
+            "status": "SENT_ACCEPTED"
+          },
+          {
+            "id": "1114adb8-5944-4528-b7f0-57787a154edc",
+            "group": "419b45c4-ce69-4a3e-823d-c1926bad11e1",
+            "sequence": 1,
+            "status": "SENT_ACCEPTED"
+          }
+        ]
+      },
+      "review": "USABLE_PENDING_FIT_PROVENANCE",
+      "reason": "Có đúng ảnh cận thêu và trả lời size M. Câu nhắc chiều cao/cân nặng để giải thích lựa chọn, không phải đọc lại hồ sơ ba vòng. Chưa xác nhận fit có code claim trước khi xem diagnostics.",
+      "attemptFileSha256": "ed3c02a3fbbd76ec27e818527bf5b3bfc7dae2934fb0293010cd0c6bfc53ce38"
+    },
+    {
+      "caseId": "media-decision:ask",
+      "actualOutcome": {
+        "terminal": {
+          "disposition": "SEND_ELIGIBLE",
+          "reason": "PASS",
+          "text": "Chị yên tâm nha, mẫu này áo làm bằng chất tơ Hàn thêu nổi nhẹ nhàng, thoáng và mềm mại, kết hợp với chân váy ren tơ rũ tự nhiên nên mặc đi ăn cưới buổi trưa rất sang, thanh lịch và không bị nóng bức đâu ạ. Phần ren của chân váy tạo độ bay rủ mềm mại chứ không bị rườm rà hay quá cầu kỳ. \n\nNếu mình vẫn thích áo thêu mà muốn tiết chế bớt phần ren, chị có thể chọn mua lẻ áo (499.000đ) để phối với chân váy trơn sẵn có trong tủ, hoặc lấy nguyên set (799.000đ) để diện trọn bộ đồng điệu ạ. Chị xem qua hình ảnh mẫu mặc để dễ hình dung độ bồng bềnh của thiết kế nhé!",
+          "fallbackId": null
+        },
+        "messages": [
+          "Chị yên tâm nha, mẫu này áo làm bằng chất tơ Hàn thêu nổi nhẹ nhàng, thoáng và mềm mại, kết hợp với chân váy ren tơ rũ tự nhiên nên mặc đi ăn cưới buổi trưa rất sang, thanh lịch và không bị nóng bức đâu ạ. Phần ren của chân váy tạo độ bay rủ mềm mại chứ không bị rườm rà hay quá cầu kỳ. \n\nNếu mình vẫn thích áo thêu mà muốn tiết chế bớt phần ren, chị có thể chọn mua lẻ áo (499.000đ) để phối với chân váy trơn sẵn có trong tủ, hoặc lấy nguyên set (799.000đ) để diện trọn bộ đồng điệu ạ. Chị xem qua hình ảnh mẫu mặc để dễ hình dung độ bồng bềnh của thiết kế nhé!",
+          "[CODE_IMAGE]",
+          "[CODE_IMAGE]"
+        ],
+        "attachments": [
+          {
+            "sequence": 1,
+            "type": "image",
+            "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+          },
+          {
+            "sequence": 2,
+            "type": "image",
+            "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg"
+          }
+        ],
+        "outbox": [
+          {
+            "id": "81ae64f7-6beb-4ded-b704-d2cfcc3b9892",
+            "group": "f75ff311-0a1d-4fe1-b350-9810cd463fa7",
+            "sequence": 0,
+            "status": "SENT_ACCEPTED"
+          },
+          {
+            "id": "476f1d38-a5e8-47b2-832d-26cacfc9d518",
+            "group": "f75ff311-0a1d-4fe1-b350-9810cd463fa7",
+            "sequence": 1,
+            "status": "SENT_ACCEPTED"
+          },
+          {
+            "id": "ae75604d-48d0-4467-9d24-3f3b988714a8",
+            "group": "f75ff311-0a1d-4fe1-b350-9810cd463fa7",
+            "sequence": 2,
+            "status": "SENT_ACCEPTED"
+          }
+        ]
+      },
+      "review": "NEEDS_EDIT",
+      "reason": "Dài, nhiều lời khen và hai cách mua rồi để khách tự chọn. Tự giả định khách có chân váy trơn trong tủ. Câu không bị nóng bức chắc hơn thông tin thoáng/mềm; ghi residual, không tự đổi verdict sau run.",
+      "attemptFileSha256": "7eca900126bb8bfc80b067cbb1023de01023491d8faf8636f88f216adaa00080"
+    }
+  ]
+}

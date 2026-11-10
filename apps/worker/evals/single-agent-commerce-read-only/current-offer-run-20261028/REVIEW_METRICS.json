@@ -1,0 +1,20 @@
+{
+  "status": "BLOCKED_SOURCE_MEDIA_FRESHNESS",
+  "sourceSha": "a7adf18de6eb24ce6410205ba395d99346685d8e",
+  "registeredNativeOutcomes": 51,
+  "executedNativeOutcomes": 0,
+  "nativeNotRun": 51,
+  "registeredControls": 17,
+  "executedControlProviderAttempts": 0,
+  "controlsNotRun": 17,
+  "providerRequests": 0,
+  "embeddingRequests": 0,
+  "sourceWrites": 0,
+  "liveSends": 0,
+  "generationRetry": 0,
+  "qualityEvaluated": false,
+  "failureStage": "CONTROLS_PREFLIGHT",
+  "failure": "FIXTURE_OPERATION_STATUS",
+  "reason": "Positive media fixtures no longer eligible after unchanged source metadata crossed thirty-day freshness boundary",
+  "recommendation": "BLOCKED"
+}

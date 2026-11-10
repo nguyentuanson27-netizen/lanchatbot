@@ -1,0 +1,302 @@
+[
+  {
+    "slot": 1,
+    "owner": "gemini",
+    "repetition": 1,
+    "caseId": "b1-changed-occasion",
+    "runtime": {
+      "latest": "Chị phải lên sân khấu có đèn rọi thẳng, chị ngại thấy bóng áo lót. Vậy còn nên lấy set này không?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị đang xem set Thạch Thảo SV2447 để đi tiệc trong nhà."
+        },
+        {
+          "role": "shop",
+          "text": "Set này có thể mặc đi tiệc chị nhé."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    }
+  },
+  {
+    "slot": 2,
+    "owner": "sol",
+    "repetition": 1,
+    "caseId": "b1-changed-occasion",
+    "runtime": {
+      "latest": "Chị phải lên sân khấu có đèn rọi thẳng, chị ngại thấy bóng áo lót. Vậy còn nên lấy set này không?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị đang xem set Thạch Thảo SV2447 để đi tiệc trong nhà."
+        },
+        {
+          "role": "shop",
+          "text": "Set này có thể mặc đi tiệc chị nhé."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Với việc phải lên sân khấu có đèn rọi thẳng, em khuyên chị **chưa nên chọn set Thạch Thảo** nếu ưu tiên là không lộ bóng áo lót. Mẫu này dùng áo tơ Hàn thêu và chân váy ren, nhưng hiện em chưa có thông tin về lớp lót hay độ che phủ dưới ánh đèn mạnh để khẳng định đáp ứng được yêu cầu của chị. Điều đó không có nghĩa là set chắc chắn bị lộ, chỉ là chưa đủ căn cứ để chị yên tâm chọn cho dịp này.",
+      "fallbackId": null
+    }
+  },
+  {
+    "slot": 3,
+    "owner": "gemini",
+    "repetition": 1,
+    "caseId": "b1-current-policy",
+    "runtime": {
+      "latest": "Giờ chị nhận được 10 ngày, mới ướm bên ngoài người, chưa mặc hay giặt, còn nguyên tem và sạch. Đổi màu được không em? Phí đổi bao nhiêu?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Trước đây chị nhớ shop nói đổi trong 7 ngày."
+        }
+      ],
+      "initialProductCodes": []
+    },
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    }
+  },
+  {
+    "slot": 4,
+    "owner": "sol",
+    "repetition": 1,
+    "caseId": "b1-current-policy",
+    "runtime": {
+      "latest": "Giờ chị nhận được 10 ngày, mới ướm bên ngoài người, chưa mặc hay giặt, còn nguyên tem và sạch. Đổi màu được không em? Phí đổi bao nhiêu?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Trước đây chị nhớ shop nói đổi trong 7 ngày."
+        }
+      ],
+      "initialProductCodes": []
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, chính sách hiện tại cho đổi màu trong **15 ngày kể từ khi nhận hàng**, nên chị nhận 10 ngày vẫn còn trong hạn, không phải 7 ngày ạ. Phí vận chuyển đổi hai chiều tổng cộng **30.000đ**, đổi qua bưu tá và mỗi đơn được đổi tối đa 1 lần.\n\nChị mới ướm bên ngoài, chưa mặc hay giặt, còn tem và sạch là phù hợp với các điều kiện đó. Chị cho em biết món có bị hư hỏng gì không và đơn này đã đổi lần nào chưa nhé?",
+      "fallbackId": null
+    }
+  },
+  {
+    "slot": 5,
+    "owner": "gemini",
+    "repetition": 2,
+    "caseId": "b1-changed-occasion",
+    "runtime": {
+      "latest": "Chị phải lên sân khấu có đèn rọi thẳng, chị ngại thấy bóng áo lót. Vậy còn nên lấy set này không?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị đang xem set Thạch Thảo SV2447 để đi tiệc trong nhà."
+        },
+        {
+          "role": "shop",
+          "text": "Set này có thể mặc đi tiệc chị nhé."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    }
+  },
+  {
+    "slot": 6,
+    "owner": "sol",
+    "repetition": 2,
+    "caseId": "b1-changed-occasion",
+    "runtime": {
+      "latest": "Chị phải lên sân khấu có đèn rọi thẳng, chị ngại thấy bóng áo lót. Vậy còn nên lấy set này không?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị đang xem set Thạch Thảo SV2447 để đi tiệc trong nhà."
+        },
+        {
+          "role": "shop",
+          "text": "Set này có thể mặc đi tiệc chị nhé."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Với việc phải lên sân khấu có đèn rọi thẳng, em khuyên chị **chưa nên chọn set Thạch Thảo** nếu ưu tiên là không thấy bóng áo lót. Mẫu này dùng áo tơ Hàn thêu và chân váy ren tơ Hàn, nhưng thông tin hiện có chưa xác nhận lớp lót hay độ kín của áo dưới ánh đèn mạnh, nên em chưa thể đảm bảo điều chị đang lo.\n\nCho dịp này, chị nên ưu tiên mẫu có lớp lót và độ kín dưới ánh đèn được xác nhận rõ hơn nhé.",
+      "fallbackId": null
+    }
+  },
+  {
+    "slot": 7,
+    "owner": "gemini",
+    "repetition": 2,
+    "caseId": "b1-current-policy",
+    "runtime": {
+      "latest": "Giờ chị nhận được 10 ngày, mới ướm bên ngoài người, chưa mặc hay giặt, còn nguyên tem và sạch. Đổi màu được không em? Phí đổi bao nhiêu?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Trước đây chị nhớ shop nói đổi trong 7 ngày."
+        }
+      ],
+      "initialProductCodes": []
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Thời gian đổi hàng bên mình là trong 15 ngày kể từ khi nhận đồ nên 10 ngày là mình đổi được bình thường chị nha. Sản phẩm mới ướm, còn nguyên tem và sạch sẽ là đúng điều kiện đổi của shop ạ.\n\nShop hỗ trợ đổi sang màu khác chị nhé, phí vận chuyển hai chiều là 30.000đ. Chị muốn đổi sang màu nào để em hỗ trợ mình tiếp ạ?",
+      "fallbackId": null
+    }
+  },
+  {
+    "slot": 8,
+    "owner": "sol",
+    "repetition": 2,
+    "caseId": "b1-current-policy",
+    "runtime": {
+      "latest": "Giờ chị nhận được 10 ngày, mới ướm bên ngoài người, chưa mặc hay giặt, còn nguyên tem và sạch. Đổi màu được không em? Phí đổi bao nhiêu?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Trước đây chị nhớ shop nói đổi trong 7 ngày."
+        }
+      ],
+      "initialProductCodes": []
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, quy định hiện tại là đổi trong **15 ngày kể từ khi nhận hàng**, không phải 7 ngày chị nhé. Chị nhận được 10 ngày, chỉ ướm bên ngoài, chưa mặc hay giặt, còn nguyên tem và sạch thì đang phù hợp với các điều kiện đó để đổi màu.\n\nPhí vận chuyển hai chiều là **30.000đ**, đổi qua bên giao hàng và mỗi đơn được đổi tối đa **1 lần**. Chị đã đổi lần nào với đơn này chưa, và sản phẩm có bị hư hỏng gì không ạ?",
+      "fallbackId": null
+    }
+  },
+  {
+    "slot": 9,
+    "owner": "gemini",
+    "repetition": 3,
+    "caseId": "b1-changed-occasion",
+    "runtime": {
+      "latest": "Chị phải lên sân khấu có đèn rọi thẳng, chị ngại thấy bóng áo lót. Vậy còn nên lấy set này không?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị đang xem set Thạch Thảo SV2447 để đi tiệc trong nhà."
+        },
+        {
+          "role": "shop",
+          "text": "Set này có thể mặc đi tiệc chị nhé."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Dạ, áo của set làm từ chất tơ Hàn có độ bay và thoáng, nhưng mô tả hiện không ghi nhận có lớp lót kín đáo. Với nhu cầu lên sân khấu đèn rọi thẳng mà mình ngại lộ áo lót, chị có thể cân nhắc chưa chọn set này để yên tâm hơn nha chị.",
+      "fallbackId": null
+    }
+  },
+  {
+    "slot": 10,
+    "owner": "sol",
+    "repetition": 3,
+    "caseId": "b1-changed-occasion",
+    "runtime": {
+      "latest": "Chị phải lên sân khấu có đèn rọi thẳng, chị ngại thấy bóng áo lót. Vậy còn nên lấy set này không?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Chị đang xem set Thạch Thảo SV2447 để đi tiệc trong nhà."
+        },
+        {
+          "role": "shop",
+          "text": "Set này có thể mặc đi tiệc chị nhé."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Với việc chị phải lên sân khấu có đèn rọi thẳng, em khuyên chị **chưa nên chọn set Thạch Thảo lúc này**. Mẫu dùng tơ Hàn thêu và ren tơ Hàn, nhưng shop hiện chưa có thông tin về lớp lót hay độ che phủ dưới đèn sân khấu, nên em chưa thể đảm bảo không thấy bóng áo lót. Điểm chị lo là quan trọng nên em không muốn khuyên chị lấy khi chưa xác minh được ạ.",
+      "fallbackId": null
+    }
+  },
+  {
+    "slot": 11,
+    "owner": "gemini",
+    "repetition": 3,
+    "caseId": "b1-current-policy",
+    "runtime": {
+      "latest": "Giờ chị nhận được 10 ngày, mới ướm bên ngoài người, chưa mặc hay giặt, còn nguyên tem và sạch. Đổi màu được không em? Phí đổi bao nhiêu?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Trước đây chị nhớ shop nói đổi trong 7 ngày."
+        }
+      ],
+      "initialProductCodes": []
+    },
+    "terminal": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    }
+  },
+  {
+    "slot": 12,
+    "owner": "sol",
+    "repetition": 3,
+    "caseId": "b1-current-policy",
+    "runtime": {
+      "latest": "Giờ chị nhận được 10 ngày, mới ướm bên ngoài người, chưa mặc hay giặt, còn nguyên tem và sạch. Đổi màu được không em? Phí đổi bao nhiêu?",
+      "history": [
+        {
+          "role": "customer",
+          "text": "Trước đây chị nhớ shop nói đổi trong 7 ngày."
+        }
+      ],
+      "initialProductCodes": []
+    },
+    "terminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "reason": "PASS",
+      "text": "Được chị nhé, quy định hiện tại cho phép đổi màu trong **15 ngày từ khi nhận hàng**, không phải 7 ngày như trước chị nhớ. Chị nhận 10 ngày nên vẫn trong hạn; chỉ ướm bên ngoài, chưa mặc hay giặt, còn tem và sạch là phù hợp với các điều kiện đó.\n\nPhí vận chuyển đổi **hai chiều tổng 30.000đ**, bên vận chuyển giao món mới và nhận lại món cũ. Mỗi đơn được đổi tối đa 1 lần, hàng cần không hư hỏng nữa chị nhé. Đơn này chị đã đổi lần nào chưa ạ?",
+      "fallbackId": null
+    }
+  }
+]

@@ -1,0 +1,65 @@
+"""One explicit rerun of eleven owner-selected outcomes plus three real stateful prerequisites."""
+import concurrent.futures, hashlib, json, subprocess, sys
+from pathlib import Path
+
+repo=Path(r'C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005')
+out=repo.parent/'c3-phase-b-input-context-targeted-rerun-20261025'
+base=repo/'apps/worker/evals/single-agent-commerce-read-only'
+launcher=base/'model-code-division-run-20261019/raw/credential-launcher.py'
+def git(*args):return subprocess.check_output(['git',*args],cwd=repo,text=True).strip()
+assert not git('status','--porcelain'),'DIRTY_SOURCE'
+source=git('rev-parse','HEAD')
+assert source=='d4c8187134eb24c3bebf1f69a843ca7dd1945ac0'
+out.mkdir()
+targets=['b1-partial-source-v2','b1-price-v2','b1-component-stock-v2','b1-changed-occasion-v3',
+ 'sales-discovery-advice:need','sales-product-gallery:overview','stateful-correction',
+ 'stateful-request-checkout','stateful-private-checkout','stateful-confirm','stateful-human-request']
+setup=['stateful-open','stateful-variant-quantity','stateful-quote']
+files=['manifest.json','cases.b1.json','stateful-cases.json','sales-journeys.candidate.json','source-config.b1.json',
+ 'prompts/owner.vi.txt','prompts/verifier.vi.txt','handoff-matrix.candidate.json','run.mjs','isolated-integration.mjs','stateful-provider.mjs']
+prior=json.loads((base/'input-context-full-20261025/REGISTRATION.json').read_text())
+hashes={f:hashlib.sha256((base/f).read_bytes()).hexdigest() for f in files}
+assert all(hashes[f]==prior['hashes'][f] for f in files if f in prior['hashes']),'FROZEN_INPUT_CHANGED'
+registration={'sourceSha':source,'previousRunSourceSha':prior['sourceSha'],'mode':'OWNER_SELECTED_RERUN_NOT_FULL_QUALIFICATION',
+ 'targets':targets,'prerequisites':setup,'registeredTargets':11,'registeredPrerequisites':3,'registeredOutcomes':14,
+ 'maximumGenerationRequests':52,'repetitions':1,'generationRetry':0,'sendEnabled':False,
+ 'models':json.loads((base/'manifest.json').read_text())['models'],'hashes':hashes,
+ 'driverSha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+ 'scopedControls':'NOT_RERUN; previous 17 results remain historical; no runtime/prompt/config changes',
+ 'selection':'B1 ranges11:13,17:17; journey-openings through gallery; full eight-slot stateful journey for three real setup turns and five targets'}
+(out/'REGISTRATION.json').write_text(json.dumps(registration,indent=2),encoding='utf-8')
+def run(name,args):
+ print('START '+name,flush=True)
+ with (out/(name+'.log')).open('xb') as f:
+  p=subprocess.run(list(map(str,args)),cwd=repo,stdout=f,stderr=subprocess.STDOUT,creationflags=subprocess.CREATE_NO_WINDOW)
+ row={'name':name,'command':list(map(str,args)),'exitCode':p.returncode}
+ (out/(name+'-command.json')).write_text(json.dumps(row,indent=2),encoding='utf-8')
+ print('DONE '+name+' exit='+str(p.returncode),flush=True)
+ assert p.returncode==0,'COMMAND_FAILED_'+name
+ assert git('rev-parse','HEAD')==source and not git('status','--porcelain'),'SOURCE_CHANGED'
+ return row
+def persisted(name,flags):
+ args=[sys.executable,launcher,'node',base/'isolated-integration.mjs']
+ shared=['COD','--provider-run','--candidate-handoff',*flags]
+ pre=run(name+'-preflight',args+[out/(name+'-preflight'),*shared,'--provider-preflight'])
+ result=run(name,args+[out/name,*shared])
+ assert json.loads((out/name/'integration.json').read_text(encoding='utf-8-sig'))['testDatabaseDropped'] is True
+ return [pre,result]
+commands=[]
+try:
+ args=[sys.executable,launcher,'node',base/'run.mjs','--config',base/'source-config.b1.json','--cases',base/'cases.b1.json']
+ commands.append(run('b1-preflight',args+['--out',out/'b1-preflight','--preflight']))
+ # The existing B1 runner builds dist; finish both B1 dispatches before persisted processes use it.
+ for name,rng in [('b1-errors-11-13','11:13'),('b1-error-17','17:17')]:
+  commands.append(run(name,args+['--out',out/name,'--range',rng,'--run']))
+ with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+  fs=[pool.submit(persisted,'journey-openings',['--journey-openings','--through-case','sales-product-gallery:overview']),
+      pool.submit(persisted,'stateful',[])]
+  for f in fs:commands.extend(f.result())
+ (out/'COMMANDS.json').write_text(json.dumps(commands,indent=2),encoding='utf-8')
+ assert len(commands)==7
+ assert git('rev-parse','HEAD')==source and not git('status','--porcelain')
+ (out/'DISPATCH_STATUS.json').write_text(json.dumps({'status':'COLLECTED_REQUIRES_WHOLE_TERMINAL_REVIEW','sourceSha':source,'sourceUnchanged':True}))
+except Exception as e:
+ (out/'DISPATCH_STATUS.json').write_text(json.dumps({'status':'INCOMPLETE','sourceSha':source,'error':str(e)}))
+ raise

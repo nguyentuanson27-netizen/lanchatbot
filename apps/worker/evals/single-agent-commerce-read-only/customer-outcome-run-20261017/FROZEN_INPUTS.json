@@ -1,0 +1,263 @@
+{
+  "schemaVersion": 1,
+  "kind": "PRE_PROVIDER_FROZEN_INPUTS",
+  "intakeHead": "5a158cdf0e559c00e6c7cb69bd2180a03e306cd3",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "verificationSourceSha": "319616b121c7fe1b6b7aed6076fa5afbdd438c90",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "569b89d98a2d25fb2c03d9f09560f06d4f9e90aa1e2431a0d3813144573da161",
+    "verifier": "b3633274a8e34fa536f6e64dbd47b203c06da172e0336664244c6333bdab6e24"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "verdictSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "verdict",
+      "violations"
+    ],
+    "properties": {
+      "verdict": {
+        "type": "string",
+        "enum": [
+          "PASS",
+          "FAIL",
+          "UNCERTAIN"
+        ]
+      },
+      "violations": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "protectedRef"
+          ],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "UNSUPPORTED_PROTECTED_ASSERTION",
+                "SUBJECT_MISMATCH",
+                "CONTRADICTION_OR_NEGATION",
+                "MATERIAL_CONDITION_LOSS",
+                "POLICY_OR_BENEFIT_STRENGTHENING",
+                "EFFECT_WITHOUT_RECEIPT",
+                "STALE_OR_SUPERSEDED_MEANING",
+                "OTHER_PROTECTED_SEMANTIC_RISK"
+              ]
+            },
+            "protectedRef": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "terminalMap": {
+    "PASS": "SEND_ELIGIBLE_SEND_DISABLED",
+    "FAIL": "STATIC_FALLBACK",
+    "UNCERTAIN": "STATIC_FALLBACK",
+    "MALFORMED": "STATIC_FALLBACK",
+    "TIMEOUT": "STATIC_FALLBACK",
+    "PROVIDER_ERROR": "STATIC_FALLBACK",
+    "STALE": "HANDOFF_NO_SEND_CAPABILITY",
+    "PERMISSION": "NO_SEND",
+    "PRIVACY": "NO_SEND",
+    "RECIPIENT": "NO_SEND"
+  },
+  "fallback": {
+    "id": "C3_A_NONPROTECTED_V2",
+    "text": "Phần này em chưa trả lời được, chị nhé.",
+    "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+  },
+  "nativeToolSchemaHashes": {
+    "b1": "23867cc18d8d7c1fb37d789960f4807b8129b20cd607551b09021292ed0b40f8",
+    "stateful": "a0b9ab8ae3eaa8fc5193df5f0ac0d0e9524596c0d3fdf2c7a5f2660231f615c3"
+  },
+  "files": {
+    "manifest.json": {
+      "sha256": "03af1dd13f892bb516c45463a83d151e1f611d80c75c57c5f4ec9fb03c31935b",
+      "bytes": 4359
+    },
+    "source-config.b1.json": {
+      "sha256": "5ca8dc68da2a11d6a29bb9d03617686f3116a3e43b8c646da0b012212bcefb6e",
+      "bytes": 901
+    },
+    "cases.b1.json": {
+      "sha256": "790a28e0415bf4b0bdf23c44993cbe78fe76415827a080e9bb09e777775dca67",
+      "bytes": 16225
+    },
+    "context-fix-20261016/cases.priority.json": {
+      "sha256": "8f858e80f27984008e5d29d87d421645ee1b3c53631e09b31c4c2ea7eb722267",
+      "bytes": 16825
+    },
+    "stateful-cases.json": {
+      "sha256": "51d53b26a9d85ee37786a269df1700cbbe9b4b2fd16ec243bc4a2bce56f3a749",
+      "bytes": 2075
+    },
+    "prompts/owner.vi.txt": {
+      "sha256": "569b89d98a2d25fb2c03d9f09560f06d4f9e90aa1e2431a0d3813144573da161",
+      "bytes": 11820
+    },
+    "prompts/verifier.vi.txt": {
+      "sha256": "b3633274a8e34fa536f6e64dbd47b203c06da172e0336664244c6333bdab6e24",
+      "bytes": 11646
+    },
+    "run.mjs": {
+      "sha256": "94571585c78d6bfafc0dff6559ae6224ab14018a7c3a96d41d6b31eac909a46f",
+      "bytes": 11792
+    },
+    "stateful-provider.mjs": {
+      "sha256": "4fb63952f5047cc2bb2a17fa23b490bc1ef5eaea667003b20e5abe962f3f889b",
+      "bytes": 6427
+    },
+    "isolated-integration.mjs": {
+      "sha256": "61d4ff7520f3a11941a4139ba005de494b07776cc848c999d39559435133fa73",
+      "bytes": 52806
+    },
+    "gemini-inference.mjs": {
+      "sha256": "d64c8eda01576b67c368e1b0833e5bacf58302d5c6531483ae3b0ace287a4b52",
+      "bytes": 17185
+    },
+    "protocol.mjs": {
+      "sha256": "d40a6315a8b1dcadbd7f225ad036d8c104af41a7c2f7fd4e3aa188a9df2270c9",
+      "bytes": 6209
+    },
+    "source-session.py": {
+      "sha256": "abb7f898d2c087ce93f697f3b115561c12c303171f0e6af9a5aa066cd5b6dc7f",
+      "bytes": 4453
+    }
+  },
+  "referenceBlobs": {
+    "docs/specs/c3-single-agent-commerce-architecture-20261004.md": "7e0265e3b6b3d556d8fb0f3c7267abccef5de86a",
+    "docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md": "4a09b55d2f3a972a65697738876cc5eab21e7a2b",
+    "docs/specs/c3-phase-b-execution-20261014.md": "a452326d77e4493b88b02c0072cef808fecad2d8",
+    "docs/specs/c3-phase-b-advisory-and-chat-boundary-20261016.md": "5a531cfeb03fcc20e178517a47f5be5a234e1593",
+    "tasks/plan.md": "9d84b6052e2fef0df094f66b988342cc967e2a89",
+    "tasks/todo.md": "ad6d913329b15b50e94ba0cdc736c6212e6f3cbc"
+  },
+  "population": {
+    "b1": 24,
+    "stateful": 7,
+    "statefulPublicTurns": 6,
+    "privateCodeTurns": 1,
+    "repetitions": 1,
+    "maximumGenerationInvocations": 120,
+    "b1Range": [
+      1,
+      24
+    ]
+  },
+  "collectionOrder": [
+    "STATEFUL_1_TO_7",
+    "B1_1_TO_24"
+  ],
+  "retry": 0,
+  "sendEnabled": false,
+  "humanAcceptance": null,
+  "sourceSnapshots": "LIVE_PUBLIC_PER_READ_CURRENT_POLICY_CAPTURED_IN_DISPOSABLE_DB",
+  "sourceReadback": {
+    "sha256": "9586cc5430b9a351bedc5f360a325984b49ef4b1e92749598949c6c335f6c2f3",
+    "bytes": 30875
+  },
+  "sourceSelection": {
+    "sha256": "3f4eab00b9f4b7fe70af59ea3233407e3ba4cfee5861206f184f373a1ecb413c",
+    "bytes": 4856
+  },
+  "scopeSha256": "f4c034288f0162469b07bdec5d1a373bb950e7f1e76e3d40becc99412dd197c9",
+  "credentialLauncher": {
+    "path": "C:/Users/nguye/AppData/Local/Temp/c3-offer-replay-session-20261016.py",
+    "sha256": "875724a9b92ecc677a0549a41b701edbd49d3831fe9be69506bc12ffd6c5e218",
+    "bytes": 3935
+  },
+  "controlledDomainVerification": {
+    "cod-pass.json": {
+      "sha256": "f4b6bf387c9e3786fedad4a6589d4cf86acc265c96a7839e17ddaaae681b03e1",
+      "bytes": 9948,
+      "sourceSha": "332ce14936a663976e2d27e40ba1205e4698e4c1",
+      "pass": 25,
+      "providerGenerations": 0,
+      "testDatabaseDropped": true
+    },
+    "bank-pass.json": {
+      "sha256": "21d19fa1eed7d1f678d172150319e2ae893ff100a04a5c44b004c546ef8138aa",
+      "bytes": 9968,
+      "sourceSha": "332ce14936a663976e2d27e40ba1205e4698e4c1",
+      "pass": 25,
+      "providerGenerations": 0,
+      "testDatabaseDropped": true
+    }
+  },
+  "receiptRecovery": {
+    "reason": "RECEIPT_BACKED_ACK",
+    "effectSourceSha256": "a5df582993090624c53e4c46900d7fb70420940f862c01c9e8079fa3ff7f73a5",
+    "mutatedCart": "Code-owned committed parent-line quantity; size/color only when every component agrees. Existing receipt/scope/readback/permission/privacy checks apply. No inferred completion of all customer intentions."
+  },
+  "knownLimits": [
+    "AUTHORITATIVE_PRIVATE_ADDRESS_TO_REGION_UNRESOLVED",
+    "LONG_NATIVE_SIGNATURE_MAY_EXCEED_UNCHANGED_32768_BYTE_BOUND",
+    "PRIOR_NONE_VIOLATION_CAUSE_UNKNOWN",
+    "LIVE_N1_NOT_CAUSAL_OR_STABILITY_PROOF",
+    "A_OWNER_BYPASS_NO_NEW_A_QUALIFICATION"
+  ],
+  "stoppingRule": "Collect31 registered outcomes unless source/auth/isolation/integrity prevents valid execution; preserve every failure and NOT_RUN, no quality-triggered replacement or rerun",
+  "generationResults": "NOT_RUN_AT_FREEZE",
+  "runSourceShaPolicy": "CAPTURE_CURRENT_HEAD_AT_RUNTIME_AFTER_COMMIT_CLEAN_NO_SELF_REFERENCE"
+}

@@ -1,0 +1,4 @@
+*.json -text
+*.jsonl -text
+# Preserve exact captured reply whitespace in the transcript, including provider trailing spaces.
+CONVERSATIONS.md -whitespace

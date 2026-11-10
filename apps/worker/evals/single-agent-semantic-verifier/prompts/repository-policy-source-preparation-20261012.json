@@ -1,0 +1,26 @@
+{
+  "status": "PREPARATION_ONLY_NOT_FROZEN_FOR_PROVIDER",
+  "source": {
+    "kind": "REPOSITORY_POLICY_SNAPSHOT",
+    "sourceVersion": "shop-policy-customer-care-v2",
+    "scope": "CUSTOMER_CARE",
+    "selectedForCheckpointA": true,
+    "selectionDate": "2026-10-12",
+    "historicalPublishedVersionId": "24400b36-6d12-4e3c-b0ca-cf41014ed0d8",
+    "livePointerReadback": false,
+    "repositoryEvidence": [
+      "docs/current/PRODUCTION_BASELINE_20260722.md",
+      "deploy/manifests/20260723-customer-care-policy-r10-1.json",
+      "apps/worker/src/pre-sale-policy.test.ts",
+      "packages/chat-runtime/src/runtime-policy-resolver.test.ts"
+    ],
+    "customerCarePayloadHash": "52c67b0a15a3d8fb582d1417dd99a4fc09be0cfcd71892ab2a3dfdda70ea2f7b"
+  },
+  "policyLiterals": [
+    {
+      "ref": "customer-care:repository-v2",
+      "text": "{\"exchange\":{\"windowDaysFromReceipt\":15,\"maxExchangesPerOrder\":1,\"supportedActions\":[\"SIZE\",\"COLOR\",\"MODEL\"],\"saleRestriction\":{\"discountThresholdBps\":3000,\"allowedActions\":[\"SIZE\",\"COLOR\"]},\"requiredConditions\":{\"originalTags\":true,\"unused\":true,\"unwashed\":true,\"clean\":true,\"undamaged\":true},\"totalTwoWayShippingFeeVnd\":30000,\"modelExchangePricing\":\"NEW_PRODUCT_LIST_PRICE_NO_SALE\",\"customerPaysPositivePriceDifference\":true,\"fulfillmentMethod\":\"COURIER_SWAP\"},\"returns\":{\"eligibleReasons\":[\"MANUFACTURING_FABRIC_DEFECT\",\"MANUFACTURING_SEAM_DEFECT\",\"WRONG_PRODUCT_SENT\"],\"reportingWindowDaysFromReceipt\":5,\"shopShippingCoveragePercent\":100,\"refundBusinessDaysMin\":1,\"refundBusinessDaysMax\":3,\"refundStartsAfter\":\"SHOP_CONFIRMS_ELIGIBLE_ERROR\"},\"inspection\":{\"tryOnMode\":\"HOLD_UP_ONLY\",\"refusedParcelShippingFeeVnd\":30000},\"marketplacePricing\":{\"shopeePriceMatch\":false,\"reason\":\"PLATFORM_SUBSIDY_AND_VOUCHERS\"},\"customerFaq\":{\"discloseLightingAndDisplayColorVariance\":true,\"handWashPreferred\":true,\"machineWashAllowedWithLaundryBagAndGentleCycle\":true}}",
+      "sourceVersion": "shop-policy-customer-care-v2"
+    }
+  ]
+}

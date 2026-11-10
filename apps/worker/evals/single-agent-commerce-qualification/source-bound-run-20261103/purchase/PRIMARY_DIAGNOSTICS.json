@@ -1,0 +1,929 @@
+[
+  {
+    "caseId": "c-po-20261031-p01",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, áo tơ Hàn thêu trong set Thạch Thảo bên em có bán lẻ chị nhé. Giá áo lẻ là 499.000đ ạ. \n\nÁo làm từ chất liệu tơ Hàn mềm, thoáng mát, có độ bay tự nhiên cùng họa tiết thêu nổi form nhẹ nhàng, hiện có đủ các size S, M, L, XL chị nha."
+      ],
+      "images": [
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+        },
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg"
+        }
+      ]
+    },
+    "nativeReason": "PASS",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": {
+      "status": "READY",
+      "requiredProducts": [
+        "SV2447"
+      ],
+      "chargedUnits": 0
+    },
+    "normalToolCalls": 3,
+    "toolResults": [
+      {
+        "name": "quote_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-po-20261031-p02",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "nativeReason": "DEPENDENCY_FAILURE",
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "PREPARATION_UNAVAILABLE"
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "openingMediaWork": {
+      "status": "UNAVAILABLE",
+      "requiredProducts": [
+        "SQ2447"
+      ],
+      "chargedUnits": 1,
+      "reason": "OPENING_MEDIA_SOURCE"
+    },
+    "normalToolCalls": 2,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-po-20261031-p03",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, chân váy Thạch Thảo size M bên em còn hàng chị nhé, giá 449.000đ ạ."
+      ],
+      "images": [
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+        },
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg"
+        }
+      ]
+    },
+    "nativeReason": "PASS",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": {
+      "status": "READY",
+      "requiredProducts": [
+        "SV2447"
+      ],
+      "chargedUnits": 0
+    },
+    "normalToolCalls": 2,
+    "toolResults": [
+      {
+        "name": "select_product_media",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-po-20261031-p04",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ với chiều cao 1m60, nặng 55kg và sở thích mặc thoải mái, em tư vấn chị mặc **size M** của set váy Thạch Thảo là vừa đẹp ạ."
+      ],
+      "images": [
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+        }
+      ]
+    },
+    "nativeReason": "PASS",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": {
+      "status": "READY",
+      "requiredProducts": [
+        "SV2447"
+      ],
+      "chargedUnits": 1
+    },
+    "normalToolCalls": 3,
+    "toolResults": [
+      {
+        "name": "recommend_size",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-po-20261031-p04",
+    "turnIndex": 1,
+    "actualTerminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ set váy Thạch Thảo có giá 799.000đ chị nhé."
+      ],
+      "images": []
+    },
+    "nativeReason": "PASS",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "normalToolCalls": 1,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-po-20261031-p06",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "nativeReason": "DEPENDENCY_FAILURE",
+    "recovery": null,
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "openingMediaWork": null,
+    "normalToolCalls": 2,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-po-20261031-p07",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "SIZE_RULE_UNAVAILABLE"
+    },
+    "nativeReason": "SIZE_RULE_UNAVAILABLE",
+    "recovery": null,
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "SIZE_RULE_UNAVAILABLE"
+    },
+    "openingMediaWork": null,
+    "normalToolCalls": 3,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": [
+      {
+        "stage": "RESULT_PROJECTION",
+        "operation": "recommend_size",
+        "status": "UNAVAILABLE",
+        "reason": "SIZE_SOURCE_UNAVAILABLE"
+      },
+      {
+        "stage": "RESULT_PROJECTION",
+        "operation": "recommend_size",
+        "status": "UNAVAILABLE",
+        "reason": "SIZE_SOURCE_UNAVAILABLE"
+      }
+    ]
+  },
+  {
+    "caseId": "c-po-20261031-p08",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Em đã thêm set váy Thạch Thảo size M vào giỏ cho chị rồi ạ. Tổng đơn của mình là 829.000đ (gồm 799.000đ tiền sản phẩm và 30.000đ phí ship). Chị sẵn sàng chốt đơn thì báo em nhé ạ!"
+      ],
+      "images": [
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+        }
+      ]
+    },
+    "nativeReason": "PASS",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": {
+      "status": "READY",
+      "requiredProducts": [
+        "SV2447"
+      ],
+      "chargedUnits": 1
+    },
+    "normalToolCalls": 3,
+    "toolResults": [
+      {
+        "name": "add_to_cart",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-po-20261031-p08",
+    "turnIndex": 1,
+    "actualTerminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Em đã đổi giỏ hàng sang áo lẻ Thạch Thảo size M cho chị rồi ạ. Tổng đơn của mình là 529.000đ (gồm 499.000đ tiền áo và 30.000đ phí ship). Chị sẵn sàng chốt đơn thì báo em nhé ạ!"
+      ],
+      "images": []
+    },
+    "nativeReason": "PASS",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "normalToolCalls": 2,
+    "toolResults": [
+      {
+        "name": "change_cart_item",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-po-20261031-p09",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "nativeReason": "DEPENDENCY_FAILURE",
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "PREPARATION_UNAVAILABLE"
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "openingMediaWork": {
+      "status": "UNAVAILABLE",
+      "requiredProducts": [
+        "SQ2447",
+        "SV2447"
+      ],
+      "chargedUnits": 1,
+      "reason": "OPENING_MEDIA_SOURCE"
+    },
+    "normalToolCalls": 5,
+    "toolResults": [
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-po-20261031-p09",
+    "turnIndex": 1,
+    "actualTerminal": {
+      "disposition": "NO_SEND",
+      "messages": [],
+      "images": [],
+      "reason": "HUMAN_OWNS_CONVERSATION"
+    },
+    "nativeReason": "HUMAN_OWNS_CONVERSATION",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": null,
+    "normalToolCalls": null,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-po-20261031-p10",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "nativeReason": "DEPENDENCY_FAILURE",
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "PREPARATION_UNAVAILABLE"
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "openingMediaWork": {
+      "status": "UNAVAILABLE",
+      "requiredProducts": [
+        "SQ675",
+        "SQ748",
+        "V406"
+      ],
+      "chargedUnits": 1,
+      "reason": "OPENING_MEDIA_SOURCE"
+    },
+    "normalToolCalls": 4,
+    "toolResults": [
+      {
+        "name": "search_products",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      },
+      {
+        "name": "search_products",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-po-20261031-h01",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "nativeReason": "DEPENDENCY_FAILURE",
+    "recovery": null,
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "openingMediaWork": null,
+    "normalToolCalls": 2,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": [
+      {
+        "stage": "RESULT_PROJECTION",
+        "operation": "add_to_cart",
+        "status": "UNAVAILABLE",
+        "reason": "SELECTION_UNAVAILABLE"
+      }
+    ]
+  },
+  {
+    "caseId": "c-po-20261031-h02",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "nativeReason": "DEPENDENCY_FAILURE",
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "PREPARATION_UNAVAILABLE"
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "openingMediaWork": {
+      "status": "UNAVAILABLE",
+      "requiredProducts": [
+        "SV1561"
+      ],
+      "chargedUnits": 1,
+      "reason": "OPENING_MEDIA_SOURCE"
+    },
+    "normalToolCalls": 2,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-s05",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "nativeReason": "DEPENDENCY_FAILURE",
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "PREPARATION_UNAVAILABLE"
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "openingMediaWork": {
+      "status": "UNAVAILABLE",
+      "requiredProducts": [
+        "SQ675",
+        "SQ748",
+        "V406"
+      ],
+      "chargedUnits": 1,
+      "reason": "OPENING_MEDIA_SOURCE"
+    },
+    "normalToolCalls": 4,
+    "toolResults": [
+      {
+        "name": "search_products",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      },
+      {
+        "name": "search_products",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-s06",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "nativeReason": "DEPENDENCY_FAILURE",
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "PREPARATION_UNAVAILABLE"
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "openingMediaWork": {
+      "status": "UNAVAILABLE",
+      "requiredProducts": [
+        "SQ2447",
+        "SV2447"
+      ],
+      "chargedUnits": 1,
+      "reason": "OPENING_MEDIA_SOURCE"
+    },
+    "normalToolCalls": 4,
+    "toolResults": [
+      {
+        "name": "select_product_media",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-s08",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "nativeReason": "DEPENDENCY_FAILURE",
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "PREPARATION_UNAVAILABLE"
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "openingMediaWork": {
+      "status": "UNAVAILABLE",
+      "requiredProducts": [
+        "V039",
+        "V168"
+      ],
+      "chargedUnits": 1,
+      "reason": "OPENING_MEDIA_SOURCE"
+    },
+    "normalToolCalls": 5,
+    "toolResults": [
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-s09",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "nativeReason": "DEPENDENCY_FAILURE",
+    "recovery": {
+      "originalDisposition": "FALLBACK",
+      "originalReason": "PREPARATION_UNAVAILABLE"
+    },
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "openingMediaWork": {
+      "status": "UNAVAILABLE",
+      "requiredProducts": [
+        "SQ2447",
+        "SV2447"
+      ],
+      "chargedUnits": 0,
+      "reason": "OPENING_MEDIA_BUDGET"
+    },
+    "normalToolCalls": 5,
+    "toolResults": [
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      },
+      {
+        "name": "read_product",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      },
+      {
+        "name": "read_policy",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-s10",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "AFTER_SALES_REQUEST"
+    },
+    "nativeReason": "AFTER_SALES_REQUEST",
+    "recovery": null,
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "AFTER_SALES_REQUEST"
+    },
+    "openingMediaWork": null,
+    "normalToolCalls": 1,
+    "toolResults": [
+      {
+        "name": "read_policy",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-s12",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEFECT"
+    },
+    "nativeReason": "DEFECT",
+    "recovery": null,
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEFECT"
+    },
+    "openingMediaWork": null,
+    "normalToolCalls": 0,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-s14",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ vâng, chị cứ xem thoải mái nhé ạ, cần hỗ trợ thêm gì chị cứ ới em nha!"
+      ],
+      "images": []
+    },
+    "nativeReason": "PASS",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": {
+      "status": "NOT_REQUIRED",
+      "requiredProducts": [],
+      "chargedUnits": 0
+    },
+    "normalToolCalls": 0,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-s15",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "nativeReason": "DEPENDENCY_FAILURE",
+    "recovery": null,
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "DEPENDENCY_FAILURE"
+    },
+    "openingMediaWork": null,
+    "normalToolCalls": 5,
+    "toolResults": [],
+    "diagnosticErrors": [
+      {
+        "stage": "MEDIA_SELECT",
+        "operation": null,
+        "reason": "MEDIA_COLOR_BINDING_UNVERIFIED"
+      }
+    ],
+    "nonSuccessDiagnostics": [
+      {
+        "stage": "MEDIA_SELECT",
+        "operation": null,
+        "status": "ERROR",
+        "reason": "MEDIA_COLOR_BINDING_UNVERIFIED"
+      },
+      {
+        "stage": "RESULT_PROJECTION",
+        "operation": "select_product_media",
+        "status": "UNAVAILABLE",
+        "reason": "MEDIA_COLOR_BINDING_UNVERIFIED"
+      }
+    ]
+  },
+  {
+    "caseId": "c-20261028-j2",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "HANDOFF",
+      "messages": [],
+      "images": [],
+      "reason": "SIZE_RULE_UNAVAILABLE"
+    },
+    "nativeReason": "SIZE_RULE_UNAVAILABLE",
+    "recovery": null,
+    "handoff": {
+      "attempts": 1,
+      "status": "COMMITTED",
+      "reason": "SIZE_RULE_UNAVAILABLE"
+    },
+    "openingMediaWork": null,
+    "normalToolCalls": 2,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": [
+      {
+        "stage": "RESULT_PROJECTION",
+        "operation": "recommend_size",
+        "status": "UNAVAILABLE",
+        "reason": "SIZE_SOURCE_UNAVAILABLE"
+      }
+    ]
+  },
+  {
+    "caseId": "c-20261028-j2",
+    "turnIndex": 1,
+    "actualTerminal": {
+      "disposition": "NO_SEND",
+      "messages": [],
+      "images": [],
+      "reason": "HUMAN_OWNS_CONVERSATION"
+    },
+    "nativeReason": "HUMAN_OWNS_CONVERSATION",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": null,
+    "normalToolCalls": null,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-j2",
+    "turnIndex": 2,
+    "actualTerminal": {
+      "disposition": "NO_SEND",
+      "messages": [],
+      "images": [],
+      "reason": "HUMAN_OWNS_CONVERSATION"
+    },
+    "nativeReason": "HUMAN_OWNS_CONVERSATION",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": null,
+    "normalToolCalls": null,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-j6",
+    "turnIndex": 0,
+    "actualTerminal": {
+      "disposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Em đã thêm set váy Thạch Thảo size M (799.000đ) vào giỏ hàng cho chị rồi ạ. Tổng giỏ hàng của chị là 829.000đ (đã gồm 30.000đ phí ship)."
+      ],
+      "images": [
+        {
+          "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+        }
+      ]
+    },
+    "nativeReason": "PASS",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": {
+      "status": "READY",
+      "requiredProducts": [
+        "SV2447"
+      ],
+      "chargedUnits": 1
+    },
+    "normalToolCalls": 3,
+    "toolResults": [
+      {
+        "name": "add_to_cart",
+        "status": "OK",
+        "reason": null,
+        "reasonCode": null
+      }
+    ],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-j6",
+    "turnIndex": 1,
+    "actualTerminal": {
+      "disposition": "CODE_OWNED_SEND",
+      "messages": [
+        "Chị cho em tên người nhận nhé."
+      ],
+      "images": []
+    },
+    "nativeReason": "CHECKOUT_DETAILS_MISSING",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": null,
+    "normalToolCalls": 2,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  },
+  {
+    "caseId": "c-20261028-j6",
+    "turnIndex": 2,
+    "actualTerminal": {
+      "disposition": "CODE_OWNED_SEND",
+      "messages": [
+        "Chị cho em tên người nhận nhé."
+      ],
+      "images": []
+    },
+    "nativeReason": "PRIVATE_CHECKOUT_COMMITTED",
+    "recovery": null,
+    "handoff": null,
+    "openingMediaWork": null,
+    "normalToolCalls": 0,
+    "toolResults": [],
+    "diagnosticErrors": [],
+    "nonSuccessDiagnostics": []
+  }
+]

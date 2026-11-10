@@ -1,0 +1,707 @@
+{
+  "kind": "PHASE_C_SOURCE_BOUND_OPENING_FIX_VERIFICATION",
+  "implementationBaseSha": "d4172797d5eeeca921f2c068ac9bd1ca5beb49d3",
+  "sourceSha": "b6676b681acf25c027decea4434f96a0f3ede433",
+  "status": "ENGINEERING_VERIFIED_PENDING_FINAL_INDEPENDENT_REVIEW",
+  "providerGenerations": 0,
+  "deployment": false,
+  "liveSends": 0,
+  "sourceFiles": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/candidate-provider.mjs",
+      "sha256": "99bd9ef559d16a9c846ce3b2e4cf870f3934c52ff40b3d09fbeb3e0aa77d0e12",
+      "gitBlob": "001e6ee5ca87068f1d72ad3b13d2bc4a7e02b34e"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/candidate-provider.test.mjs",
+      "sha256": "11171571ec4549319fc0de927dc2d8b3e8cb29701819bd217ca1801c4fbb91c4",
+      "gitBlob": "b3b1e7b1481a9ca600d3e4d30a6437940bc1dd1e"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/cli.mjs",
+      "sha256": "e11bd3289fb6f5a22816bc07b9d265c09ab42a0e97f121e6a7e78af6580bee79",
+      "gitBlob": "ae9e41a5099ba0b698d38c63d3cabf4582e926ed"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/cli.test.mjs",
+      "sha256": "4bce28bccd0c623ce1965e294c29978e73c9c519f262ec59ec9d55478dc078f6",
+      "gitBlob": "c68d127202a0e2239c362ba11841d3fe35fdbd50"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/diagnostic.mjs",
+      "sha256": "c4452e6711c56bebc7c57ae9bb25f87d3ce9e596e1f749fad90774a7290edbc0",
+      "gitBlob": "6e9f13d726238b771943c01f1e6b3217771361a5"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/diagnostic.test.mjs",
+      "sha256": "3a2718107417863f61843d866230b9bca8a25a591b4a3430eca0eda7856d2da3",
+      "gitBlob": "3eea8753a9ee70c97fdc076dcf6bfd683b38daf8"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/opening-execution-readiness.mjs",
+      "sha256": "c3bdf5aaf0e240cc66f17597dc7ff08cc2464218c4b55fd9daf09337f6c16d77",
+      "gitBlob": "b1826e18514a4b3038cba74be24acbe8bdd7db63"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/remainder-diagnostic.test.mjs",
+      "sha256": "04a115672467ce89c3ef120db775a946aee1a58658647153d14e62e51c724c43",
+      "gitBlob": "5fadf30f07fba107f65eeb4fa800355b6579be79"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-readiness.mjs",
+      "sha256": "b4be41553bb60501b5bddcd4c689bd9db9adb9c3556ef345cab8f7c80bbc1933",
+      "gitBlob": "df14f8d8b129db304d65277e417536b11dd520a2"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/source-readiness.test.mjs",
+      "sha256": "3bb48919ff06b5bc2ba39fbe044f6c294fe9796da761a228fffa95ba12bc39c9",
+      "gitBlob": "e5969e27da2ac8283173e363b6fb9da1fbf797f7"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs",
+      "sha256": "da2a672ccfc53930e1b10349082b72cff289362e9326650854da36d2b6a5e975",
+      "gitBlob": "851a8cae455273fa0854f2efa9e035cdf7d2b5a9"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "sha256": "5017ef1d50fd3c1a12e3fdc3082e7721fd7726f1fec01be2ac26b4dbd4fa5bc9",
+      "gitBlob": "78eb5b398336467a7c5370ba876787855346ed6a"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/product-read-selection.mjs",
+      "sha256": "c4d05bf8e8d626b9bd4614198210571f3da18c734917d1b79975f5ef80e7fc25",
+      "gitBlob": "518359335c75c13de235501e283b9eb0cee001ab"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/product-read-selection.test.mjs",
+      "sha256": "d775798bfbd5fe2cb233759896fa6e080a609e3c7bdf950e7998dad714407759",
+      "gitBlob": "7d3b72a491471a9facf276cbfcd44b0a0ebbfed9"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-checkout-media.ts",
+      "sha256": "790e9485a64a76f2d0f306b6c445a108703ad57213b30c35cd6715ee11d4366a",
+      "gitBlob": "aa826ebd1a568935c759aecff22384e3556b2496"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-diagnostics.test.ts",
+      "sha256": "033479b748a020a0358a26559d6a6c525a9d657c3563918fabf9415a7effcaf4",
+      "gitBlob": "68ffb9431d1cac85183ce88f2111a76ea2a3db31"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-diagnostics.ts",
+      "sha256": "b7a58b2ec2d6c13aae9c94f45cd1a9828b858c231b3124b6103169310fa1cf2f",
+      "gitBlob": "9119f17c73032226b9113524865dfb87a16edaba"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-effects.ts",
+      "sha256": "15f6727580852e93387fa42e8da75147f6b85d41ddab2f84c6f58864e7efba42",
+      "gitBlob": "8bbc2f735b79e4d8028d6e296575b01000aea0f7"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-ingress.test.ts",
+      "sha256": "1a5fb4c4f79890127b789f5430d7345c26fd1b79950f2d169448cab89cebe641",
+      "gitBlob": "49f9e4a871716ec2706ae03d912fea26acd6ea9b"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-opening-media.ts",
+      "sha256": "4720ca1f6efea2d50e1faa16d106d2d4f86b916665aab223e9e3133cf180f4ab",
+      "gitBlob": "ad4a9f5beacb6f2e761962eb7dfb0f61b41e7f09"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-read-only.ts",
+      "sha256": "7f8697272ba1a9e56d09e7c3fa98c39933714b36735ba0241b8d1212814245bc",
+      "gitBlob": "098aecec8630698d3033c122310c60c9c8933141"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-session.ts",
+      "sha256": "71deecfa75977f4bfcea915bfdbdeea68d8cfcb64f50ef89c43912b4e4b417a5",
+      "gitBlob": "ecdab6879213eebb9f43f8e9b4e2bdf123b2e565"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce.ts",
+      "sha256": "cf439a5a75a155c8f21ab5f7fbfb72be6a2bd42fc65411a7d0c18f3deea15213",
+      "gitBlob": "2e75a3063ee1e4cfaaa65de5f951ebdefa88067c"
+    },
+    {
+      "path": "docs/specs/c3-phase-c-opening-checkout-source-bound-fix-20261102.md",
+      "sha256": "f4df37a42014b9cac35f495d817bbb3d513c10771b958043606f7db5ab6f917f",
+      "gitBlob": "2122d2f92dc2d7bc6c0f6ff6d1f4c4a0253c1044"
+    }
+  ],
+  "commands": [
+    {
+      "id": "adapter-red",
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-diagnostics.test.ts -t \"source-proven unlabelled|known media exceptions\"",
+      "log": "../c3-typed-colour-red-20261102.log",
+      "result": "OBSERVED_RED_3_FAIL"
+    },
+    {
+      "id": "source-sentinel-red",
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts -t \"noncanonical source sentinel\"",
+      "log": "../c3-typed-source-sentinel-red-20261102.log",
+      "result": "OBSERVED_RED_2_FAIL"
+    },
+    {
+      "id": "source-sentinel-green",
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-diagnostics.test.ts -t \"source-proven unlabelled|noncanonical source sentinel|unlabelled source media proof|expiry while preparing|known media exceptions\"",
+      "log": "../c3-typed-source-sentinel-green-20261102.log",
+      "result": "PASS_10"
+    },
+    {
+      "id": "private-expiry-red",
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts -t \"unlabelled private preparation\"",
+      "log": "../c3-unlabelled-late-source-red-20261102.log",
+      "result": "OBSERVED_RED_1_FAIL_3_PASS"
+    },
+    {
+      "id": "private-expiry-green",
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts -t \"unlabelled private preparation\"",
+      "log": "../c3-unlabelled-late-gates-final-20261102.log",
+      "result": "PASS_5"
+    },
+    {
+      "id": "unknown-cart-red",
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts -t \"unknown cart component colour\"",
+      "log": "../c3-unlabelled-unknown-cart-red-20261102.log",
+      "result": "OBSERVED_RED_2_FAIL"
+    },
+    {
+      "id": "unknown-cart-green",
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-opening-media.test.ts -t \"unknown cart component colour|source-proven unlabelled|noncanonical source sentinel|unlabelled private preparation|prepares photo before\"",
+      "log": "../c3-unlabelled-unknown-cart-green-20261102.log",
+      "result": "PASS_15"
+    },
+    {
+      "id": "nullable-red",
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/product-read-selection.test.mjs",
+      "log": "../c3-nullability-red-20261102.log",
+      "result": "OBSERVED_RED_1_FAIL"
+    },
+    {
+      "id": "policy-factor-red",
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/product-read-selection.test.mjs",
+      "log": "../c3-policy-factor-red-20261102.log",
+      "result": "OBSERVED_RED_1_FAIL_1_PASS"
+    },
+    {
+      "id": "policy-factor-green",
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/product-read-selection.test.mjs",
+      "log": "../c3-policy-factor-green02-20261102.log",
+      "result": "PASS_2"
+    },
+    {
+      "id": "readiness-red",
+      "command": "node --test apps/worker/evals/single-agent-commerce-qualification/source-readiness.test.mjs",
+      "log": "../c3-execution-readiness-red-20261102.log",
+      "result": "OBSERVED_RED_1_FAIL"
+    },
+    {
+      "id": "readiness-entrypoints",
+      "command": "node --test apps/worker/evals/single-agent-commerce-qualification/source-readiness.test.mjs apps/worker/evals/single-agent-commerce-qualification/candidate-provider.test.mjs apps/worker/evals/single-agent-commerce-qualification/diagnostic.test.mjs apps/worker/evals/single-agent-commerce-qualification/cli.test.mjs",
+      "log": "../c3-execution-entrypoints-20261102.log",
+      "result": "PASS_40"
+    },
+    {
+      "id": "changed-controls",
+      "command": "node --test apps/worker/evals/single-agent-commerce-qualification/remainder-diagnostic.test.mjs apps/worker/evals/single-agent-commerce-qualification/source-readiness.test.mjs apps/worker/evals/single-agent-commerce-read-only/product-read-selection.test.mjs",
+      "log": "../c3-opening-fix-changed-controls-20261102.log",
+      "result": "PASS_19"
+    },
+    {
+      "id": "worker-full-final",
+      "command": "pnpm --filter @lana/worker exec vitest run src",
+      "log": "../c3-opening-fix-worker02-20261102.log",
+      "result": "PASS_2566_153_FILES"
+    },
+    {
+      "id": "node-full-first",
+      "command": "node --test --test-concurrency=1 \"apps/worker/evals/single-agent-semantic-verifier/*.test.mjs\" \"apps/worker/evals/single-agent-commerce-read-only/*.test.mjs\" \"apps/worker/evals/single-agent-commerce-qualification/*.test.mjs\"",
+      "log": "../c3-opening-fix-node01-20261102.log",
+      "result": "FAIL_1_826_PASS_2_EXISTING_SKIP_UNIT_FIXTURE_FIXED"
+    },
+    {
+      "id": "node-full-final",
+      "command": "node --test --test-concurrency=1 \"apps/worker/evals/single-agent-semantic-verifier/*.test.mjs\" \"apps/worker/evals/single-agent-commerce-read-only/*.test.mjs\" \"apps/worker/evals/single-agent-commerce-qualification/*.test.mjs\"",
+      "log": "../c3-opening-fix-node02-20261102.log",
+      "result": "PASS_827_2_EXISTING_SKIP_EXIT_0"
+    },
+    {
+      "id": "canonical-worker-build",
+      "command": "pnpm --filter @lana/worker build",
+      "log": "../c3-opening-fix-build01-20261102.log",
+      "result": "PASS_EXIT_0_BEFORE_FINAL_DELTA"
+    },
+    {
+      "id": "final-direct-build",
+      "command": "pnpm --filter @lana/worker exec tsc -p tsconfig.json",
+      "log": "../c3-opening-fix-direct-build04-20261102.log",
+      "result": "PASS_EXIT_0"
+    },
+    {
+      "id": "typecheck",
+      "command": "pnpm --filter @lana/worker exec tsc -p tsconfig.json --noEmit",
+      "log": "../c3-opening-fix-typecheck-final-20261102.log",
+      "result": "PASS_EXIT_0_BEFORE_FINAL_DELTA"
+    },
+    {
+      "id": "lint",
+      "command": "pnpm --filter @lana/worker lint",
+      "log": "../c3-opening-fix-lint01-20261102.log",
+      "result": "PASS_EXIT_0_BEFORE_FINAL_DELTA"
+    },
+    {
+      "id": "protected",
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts",
+      "log": "../c3-opening-fix-protected-20261102.log",
+      "result": "PASS_21"
+    },
+    {
+      "id": "frozen-cart-replay",
+      "command": "node ../c3-opening-frozen-cart-proof-20261102.mjs",
+      "log": "../c3-opening-frozen-cart-proof-20261102.log",
+      "result": "PASS_3_BOUNDED_REPLAYS"
+    },
+    {
+      "id": "frozen-continuation-replay",
+      "command": "node ../c3-opening-continuation-proof-20261102.mjs",
+      "log": "../c3-opening-continuation-proof03-20261102.log",
+      "result": "PASS_RAW65292_PRESENTED65469"
+    },
+    {
+      "id": "offline-advice-controls",
+      "command": "node ../c3-opening-advice-controls-20261102.mjs",
+      "log": "../c3-opening-advice-controls-20261102.json",
+      "result": "PASS_ARITHMETIC_6_CONTROLS_CONTEXTUAL_JUDGMENT_NOT_RUN"
+    },
+    {
+      "id": "pg-first",
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-opening-source-bound-pg-20261102-01 COD",
+      "log": "../c3-opening-source-bound-pg-20261102-01/integration.json",
+      "result": "FAIL_54_PASS_1_FIXTURE_ETA_GAP_DATABASE_DROPPED"
+    },
+    {
+      "id": "pg-final",
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-opening-source-bound-pg-20261102-02 COD",
+      "log": "../c3-opening-source-bound-pg-20261102-02/integration.json",
+      "result": "PASS_122_7_INVARIANTS_DATABASE_DROPPED_PROVIDER0_SEND_FALSE"
+    },
+    {
+      "id": "canonical-worker-build-final",
+      "command": "pnpm --filter @lana/worker build",
+      "log": "../c3-opening-fix-build-final-20261102.log",
+      "result": "PASS_EXIT_0"
+    },
+    {
+      "id": "worker-lint-final",
+      "command": "pnpm --filter @lana/worker lint",
+      "log": "../c3-opening-fix-lint-final-20261102.log",
+      "result": "PASS_EXIT_0"
+    },
+    {
+      "id": "worker-typecheck-final",
+      "command": "pnpm --filter @lana/worker exec tsc -p tsconfig.json --noEmit",
+      "log": "../c3-opening-fix-typecheck-final02-20261102.log",
+      "result": "PASS_EXIT_0"
+    },
+    {
+      "id": "explicit-exit-typecheck",
+      "command": "pnpm --filter @lana/worker exec tsc -p tsconfig.json --noEmit",
+      "log": "../c3-opening-fix-explicit-typecheck-20261102.log",
+      "result": "PASS",
+      "exitCode": 0
+    },
+    {
+      "id": "explicit-exit-lint",
+      "command": "pnpm --filter @lana/worker lint",
+      "log": "../c3-opening-fix-explicit-lint-20261102.log",
+      "result": "PASS",
+      "exitCode": 0
+    },
+    {
+      "id": "pg-invariant-validator",
+      "command": "node ../c3-task-completion-validate-20261102.mjs ../c3-opening-source-bound-pg-20261102-02",
+      "log": "../c3-opening-source-bound-pg-20261102-02/VALIDATED_INVARIANTS.json",
+      "result": "PASS_7"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "../c3-execution-entrypoints-20261102.log",
+      "bytes": 4256,
+      "sha256": "48d829b8f38989fa1a0cad004343d8937e491d26cac9ece6b35fb5b183f3f9b3"
+    },
+    {
+      "path": "../c3-execution-readiness-cli-20261102.log",
+      "bytes": 4344,
+      "sha256": "7d83e61da0ea18d7078316376c950176ccc427cd82dfedc909a0a559086ea4dc"
+    },
+    {
+      "path": "../c3-execution-readiness-green01-20261102.log",
+      "bytes": 2277,
+      "sha256": "2d037a63a1ca627b7a03cd611e78aade38b632ac545e58dabcda528930c4e102"
+    },
+    {
+      "path": "../c3-execution-readiness-red-20261102.log",
+      "bytes": 2948,
+      "sha256": "0439193c2621d19dd987d17dfd8c977c3ded73373956be96a206968c118a8c56"
+    },
+    {
+      "path": "../c3-finalize-source-bound-evidence-20261102.py",
+      "bytes": 2729,
+      "sha256": "675597b7462933643379591b04cf6b78ba07f65daeae68a3949dba8a4fe2d511"
+    },
+    {
+      "path": "../c3-nullability-red-20261102.log",
+      "bytes": 1661,
+      "sha256": "cd5c4ce53292d10782004c64d2fd6709da6ebb86820b217a117e81a7d108b789"
+    },
+    {
+      "path": "../c3-opening-advice-controls-20261102.json",
+      "bytes": 9345,
+      "sha256": "87adc1c22336b3b637d564cacdf3ecc38274ab6787a938dae01bdcbb6741760d"
+    },
+    {
+      "path": "../c3-opening-advice-controls-20261102.mjs",
+      "bytes": 3786,
+      "sha256": "874e9c3a7874316493e531a858c068ac899b5c4c62024fba0dcd80e22d632e16"
+    },
+    {
+      "path": "../c3-opening-continuation-proof-20261102.json",
+      "bytes": 953,
+      "sha256": "bc09f09fe932422c7059c761b56768ff4f9e6983c0cf0c421c742c0ba2b86778"
+    },
+    {
+      "path": "../c3-opening-continuation-proof-20261102.log",
+      "bytes": 872,
+      "sha256": "c2e730e7e0ca5349cd4aeef7aaee01a9e3ced450f67e6f6f11e997eedef007dd"
+    },
+    {
+      "path": "../c3-opening-continuation-proof-20261102.mjs",
+      "bytes": 4870,
+      "sha256": "e22993a0c3e52876be567e3e232b7fbc266a6b8118e42ea37c8fd7c54d392326"
+    },
+    {
+      "path": "../c3-opening-continuation-proof02-20261102.log",
+      "bytes": 872,
+      "sha256": "26f0b0fe7ead504c5677b85835bcbaec391a206c433a09c724bb7fd34ded7947"
+    },
+    {
+      "path": "../c3-opening-continuation-proof03-20261102.log",
+      "bytes": 834,
+      "sha256": "2a108c2f4fcf1d55031b603223844257939d3a2e1a571b48c2a2bab9c3282fe5"
+    },
+    {
+      "path": "../c3-opening-fix-build-final-20261102.log",
+      "bytes": 5249,
+      "sha256": "3ac6af4436e75fbb6a5fb9534122496d3b3415089cb4873f615b0b2db2310cf6"
+    },
+    {
+      "path": "../c3-opening-fix-build01-20261102.log",
+      "bytes": 5249,
+      "sha256": "db15a082be133afad31df17f4bf2ee659764f13e46aa947cc6cf94201d941713"
+    },
+    {
+      "path": "../c3-opening-fix-changed-controls-20261102.log",
+      "bytes": 2133,
+      "sha256": "6085952689096b61006a7fc73f3760d295fd70ec93764a179ced2c11c6316410"
+    },
+    {
+      "path": "../c3-opening-fix-direct-build02-20261102.log",
+      "bytes": 631,
+      "sha256": "2d15d65b86361014be15ad511948d066f4cd0668390a0ebbfeb1356df6370036"
+    },
+    {
+      "path": "../c3-opening-fix-direct-build04-20261102.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../c3-opening-fix-explicit-exits-20261102.json",
+      "bytes": 626,
+      "sha256": "b3f6a8d54637f72042efdbb3087cdfbe63cd973680e6a8946f4d141ebc7e15fd"
+    },
+    {
+      "path": "../c3-opening-fix-explicit-lint-20261102.log",
+      "bytes": 167,
+      "sha256": "0d0a8de522f21dbf44fffd2752d4913d7410fc8a951bd2542f2352aabfe5a3aa"
+    },
+    {
+      "path": "../c3-opening-fix-explicit-typecheck-20261102.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../c3-opening-fix-focused02-20261102.log",
+      "bytes": 652,
+      "sha256": "60cffe6737ce30f461a0a4f03316f3e3e6c8e986b7fcc96a5ca55bb949de4415"
+    },
+    {
+      "path": "../c3-opening-fix-lint-final-20261102.log",
+      "bytes": 171,
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415"
+    },
+    {
+      "path": "../c3-opening-fix-lint01-20261102.log",
+      "bytes": 171,
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415"
+    },
+    {
+      "path": "../c3-opening-fix-node01-20261102.log",
+      "bytes": 92190,
+      "sha256": "68514cb306ec0b438bec053fc22c44a14ce124da595dfe209e4b43048c82e313"
+    },
+    {
+      "path": "../c3-opening-fix-node02-20261102.log",
+      "bytes": 90767,
+      "sha256": "fc4a1a9e42b2446cd3462b0421344a71adb5f5e0a6f5bdac44c9e0ff22112f4f"
+    },
+    {
+      "path": "../c3-opening-fix-protected-20261102.log",
+      "bytes": 429,
+      "sha256": "2ce5f4b36f8235d2acb606911cb8fbd5d0f7bfdc0f6f8eaeba7a6d7aabc0462e"
+    },
+    {
+      "path": "../c3-opening-fix-source-guard-20261102.json",
+      "bytes": 344,
+      "sha256": "72354d4d4c4890469182fd1cbf16370e527563f8bb0370857bc8ecee6639965f"
+    },
+    {
+      "path": "../c3-opening-fix-typecheck-final-20261102.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../c3-opening-fix-typecheck-final02-20261102.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../c3-opening-fix-worker02-20261102.log",
+      "bytes": 18797,
+      "sha256": "16c60325478814c725905e62d72717d58a44334edd8cd4fb027d667ff16be1be"
+    },
+    {
+      "path": "../c3-opening-frozen-cart-proof-20261102.json",
+      "bytes": 1162,
+      "sha256": "5c1302f6752fff02e5d575708d28953bb7371f9e0e0c8d93c2956c02782baa30"
+    },
+    {
+      "path": "../c3-opening-frozen-cart-proof-20261102.log",
+      "bytes": 915,
+      "sha256": "175812692dfde32c7d65d18c7b25321e771af7c6c5cfa2994a1c101541bbe25c"
+    },
+    {
+      "path": "../c3-opening-frozen-cart-proof-20261102.mjs",
+      "bytes": 3252,
+      "sha256": "8ab65c6fe559c95832143ab7a0fec2e00ec015ea5bbd5e28972045975ba65163"
+    },
+    {
+      "path": "../c3-opening-source-bound-pg-20261102-01/integration.json",
+      "bytes": 14021,
+      "sha256": "0f79adce6c0fe68d470b52e84b902262b94db565e0ca2485924798e9ab77e16d"
+    },
+    {
+      "path": "../c3-opening-source-bound-pg-20261102-02.log",
+      "bytes": 9869,
+      "sha256": "7067d717b1ea58c40e51497a6eadc157a8e7f32f2b071809ce764d2977dc4307"
+    },
+    {
+      "path": "../c3-opening-source-bound-pg-20261102-02/VALIDATED_INVARIANTS.json",
+      "bytes": 1993,
+      "sha256": "5461c51bf2c520016798f95ade837f8bb598c3c748940304436208a2d8b166d9"
+    },
+    {
+      "path": "../c3-opening-source-bound-pg-20261102-02/integration.json",
+      "bytes": 41312,
+      "sha256": "fcf77c3d359c0e67efceeea5147aa06357e7f82fc13cda14b8636c7147431d98"
+    },
+    {
+      "path": "../c3-policy-factor-green02-20261102.log",
+      "bytes": 361,
+      "sha256": "dd6be87ff79d5183a9df73f2c940093fe9f12f73c87e4939cf3188815af96478"
+    },
+    {
+      "path": "../c3-policy-factor-red-20261102.log",
+      "bytes": 1247,
+      "sha256": "9539faa25aa0b4a08212daaa83cb7bd5cd77d3e435a14a89a4158d9ec68db693"
+    },
+    {
+      "path": "../c3-task-completion-validate-20261102.mjs",
+      "bytes": 801,
+      "sha256": "3f80e57c3843c2db2a6ec52cee85d9da7ec05c45d613d587a8a4ce2c8889a9ab"
+    },
+    {
+      "path": "../c3-typed-colour-fixture-diagnostic-20261102.log",
+      "bytes": 17499,
+      "sha256": "8d8467a5ff5991ccf40777ccbcd1ce4603211a41e9a32dea6808a9660d466bcc"
+    },
+    {
+      "path": "../c3-typed-colour-focused01-20261102.log",
+      "bytes": 15738,
+      "sha256": "131ebde657ec3bc33004698c4a830336d1bd64245adef17ac65876ea875f4cd9"
+    },
+    {
+      "path": "../c3-typed-colour-green01-20261102.log",
+      "bytes": 14400,
+      "sha256": "0e6b8f835e9761d544afe0e1d28a7955daefa6b01c534407740b8d7ae74cd0ac"
+    },
+    {
+      "path": "../c3-typed-colour-green02-20261102.log",
+      "bytes": 14207,
+      "sha256": "6f0dfd1b49cb8db3063841a6e6d148bf84879d3d04dfea1af16971b62e1b423d"
+    },
+    {
+      "path": "../c3-typed-colour-green03-20261102.log",
+      "bytes": 16735,
+      "sha256": "8f059a85d216b0e4a7216b4f74ef1b50078b4af85109d84f247e32cdf11c84d1"
+    },
+    {
+      "path": "../c3-typed-colour-green04-20261102.log",
+      "bytes": 16897,
+      "sha256": "bbbecd06d51bf45cfd8bc1b8cadad1b8200076eac55af6d91c05f9fd2251c1a6"
+    },
+    {
+      "path": "../c3-typed-colour-green05-20261102.log",
+      "bytes": 596,
+      "sha256": "3498e84d66574c48b42dd57d569d8536301c89ea5b35313b517399336125286d"
+    },
+    {
+      "path": "../c3-typed-colour-red-20261102.log",
+      "bytes": 17397,
+      "sha256": "416d3cad5fb49810052d5ef57ea8d1064a475770d608e298e20dfd6ef067fd10"
+    },
+    {
+      "path": "../c3-typed-colour-typecheck01-20261102.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../c3-typed-source-sentinel-green-20261102.log",
+      "bytes": 598,
+      "sha256": "c1fe701414eef1b89425d5c632c2612436dfcdf034ebb6139f79c29aef48c2ae"
+    },
+    {
+      "path": "../c3-typed-source-sentinel-red-20261102.log",
+      "bytes": 15118,
+      "sha256": "caa88b7d9e8add5b685b7994e29b0d3f5cefd273fe0c576036d6067bbf5a205d"
+    },
+    {
+      "path": "../c3-unlabelled-late-gates-final-20261102.log",
+      "bytes": 412,
+      "sha256": "6931b4ba86ebe9f24c180da5782fc1ee185606bc3015a1cac62cd78498143686"
+    },
+    {
+      "path": "../c3-unlabelled-late-source-red-20261102.log",
+      "bytes": 15288,
+      "sha256": "ad2aa761eb00a3af9f97c6078f1c278d0655bd5f8256c694b17f6f9f39b4ee16"
+    },
+    {
+      "path": "../c3-unlabelled-unknown-cart-green-20261102.log",
+      "bytes": 496,
+      "sha256": "b73db1994b6134ac6b72b952e5184ac09af55989224c72d4bca60cfd7f532ecc"
+    },
+    {
+      "path": "../c3-unlabelled-unknown-cart-red-20261102.log",
+      "bytes": 15759,
+      "sha256": "21363b8c13dd5af46c8234f5fb26045d88b20819ff098b26022eea4d210eeeac"
+    }
+  ],
+  "limits": [
+    "No model generation, quality grade, qualification GO or C3 parity claim.",
+    "Historical s13 failed second body missing; reconstruction uses frozen sources/actual signed first output/tool results, only67 byte headroom.",
+    "s11 full malformed output missing; actual bounded color=NULL diagnostic plus representative decoder controls only.",
+    "Frozen p08/j6/j4 helper proofs and synthetic persisted PostgreSQL controls are separate evidence.",
+    "Original verifier FAIL and historical source cohorts unchanged.",
+    "All-admitted product image rule retained; conflicting colours deferred.",
+    "Readiness paths are declared unit-quantity prerequisites at the supplied clock, not future cart quantity or sales-completion guarantees."
+  ],
+  "structuralDelta": {
+    "changedFiles": 24,
+    "runtimeFiles": 9,
+    "newRuntimeModelRoles": 0,
+    "newOnlineTools": 0,
+    "newSemanticLayers": 0,
+    "productionEntrypointWiring": false,
+    "generationRetries": 0,
+    "repairLoops": 0,
+    "allAdmittedMediaRuleChanged": false,
+    "newStateMutationTools": 0,
+    "newEvaluationExecutionPrerequisiteHelper": 1
+  },
+  "independentReview": {
+    "reviewer": "/root/phase_c_task_completion_implementation_review",
+    "status": "FINAL_EVIDENCE_PENDING",
+    "closedFindings": [
+      "R1 canonical raw source sentinel",
+      "R2 actual diagnostic/provider prospective v3 entry",
+      "R3 honest productless readiness",
+      "R4 final cart/source TTL after awaited reads",
+      "R5 unknown cart colour cannot borrow no-selection generic path",
+      "P2 offline source binding correction"
+    ],
+    "p2SourceBindings": "INDEPENDENTLY_VERIFIED_6_OF_6_ARITHMETIC_AND_SOURCE_BINDINGS_ONLY"
+  },
+  "retainedIntermediateFailures": [
+    {
+      "log": "../c3-typed-colour-focused01-20261102.log",
+      "result": "167_PASS_1_PINNED_C3_TIMEOUT",
+      "resolution": "Same exact focused tests later170PASS; no timeout change."
+    },
+    {
+      "log": "../c3-typed-colour-green01-20261102.log",
+      "result": "EARLY_ADAPTER_TEST_FAILURE",
+      "resolution": "State binding corrected to current revision, not nonexistent salesCycleRevision."
+    },
+    {
+      "log": "../c3-typed-colour-fixture-diagnostic-20261102.log",
+      "result": "CONFIRM_TRANSITION_UNAVAILABLE",
+      "resolution": "Fixture now has actual customer buying intent; runtime transition guard unchanged."
+    },
+    {
+      "log": "../c3-opening-fix-direct-build02-20261102.log",
+      "result": "TYPECHECK_FAIL_READONLY_TEST_ASSIGNMENT",
+      "resolution": "Construct new typed fixture selection values; final build/typecheck/lint pass."
+    },
+    {
+      "log": "../c3-execution-readiness-cli-20261102.log",
+      "result": "OLD_UNIT_EXPECTED_ERROR_PRECEDENCE",
+      "resolution": "Prospective v3 rejection deliberately precedes older missing-photo error; exact current entry controls pass."
+    },
+    {
+      "log": "../c3-execution-readiness-green01-20261102.log",
+      "result": "NEGATIVE_FIXTURE_DID_NOT_CREATE_REAL_COLOUR_AMBIGUITY",
+      "resolution": "Use two recorded physical colours with generic unlabelled image; runtime eligibility unchanged."
+    },
+    {
+      "log": "../c3-opening-continuation-proof-20261102.log",
+      "result": "RECONSTRUCTED_65642_OVER_BOUND",
+      "resolution": "Explicit nullability description shortened; lossless same-body version factoring gives final65469. No cap/truncation change."
+    },
+    {
+      "log": "../c3-opening-continuation-proof02-20261102.log",
+      "result": "RECONSTRUCTED_65552_OVER_BOUND",
+      "resolution": "Exact sourceVersion also represented in policy:<hash> ref and recovered by audit expander; final65469."
+    }
+  ],
+  "additionalArtifacts": [
+    "../c3-opening-fix-source-guard-20261102.json",
+    "../c3-opening-frozen-cart-proof-20261102.mjs",
+    "../c3-opening-frozen-cart-proof-20261102.json",
+    "../c3-opening-continuation-proof-20261102.mjs",
+    "../c3-opening-continuation-proof-20261102.json",
+    "../c3-opening-advice-controls-20261102.mjs",
+    "../c3-opening-advice-controls-20261102.json",
+    "../c3-task-completion-validate-20261102.mjs",
+    "../c3-opening-fix-explicit-exits-20261102.json"
+  ],
+  "postgres": {
+    "sourceSha": "b6676b681acf25c027decea4434f96a0f3ede433",
+    "cases": 122,
+    "passed": 122,
+    "invariants": 7,
+    "sourceDirty": false,
+    "testDatabaseDropped": true,
+    "providerGenerations": 0,
+    "sendEnabled": false
+  }
+}

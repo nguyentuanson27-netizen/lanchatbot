@@ -1,0 +1,128 @@
+{
+  "round": 55,
+  "commands": [
+    {
+      "command": "git fetch origin main",
+      "exitCode": 0,
+      "summary": "refreshed main; 296cdcfbf5759f5bf9cbb24acf3dc63005589361"
+    },
+    {
+      "command": "node --test apps/worker/evals/single-agent-semantic-verifier/codex-inference-diagnostics.test.mjs",
+      "exitCode": 1,
+      "summary": "observed RED: 7 existing tests PASS, 5 new stream terminal diagnostics/fail-closed tests FAIL; 0 real provider generations"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'; node --test apps/worker/evals/single-agent-semantic-verifier/round-55.test.mjs",
+      "exitCode": 1,
+      "summary": "observed RED: 2/4 PASS, 2 fail as Round55 nativeV6/round admission not implemented; 0 real generations"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'; node --test apps/worker/evals/single-agent-semantic-verifier/codex-inference-diagnostics.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-55.test.mjs",
+      "exitCode": 0,
+      "summary": "GREEN16/16; 0 real provider generations"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/vertex.test.ts",
+      "exitCode": 0,
+      "summary": "PASS79/79 boundary+Vertex focused tests"
+    },
+    {
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts src/size-engine.test.ts",
+      "exitCode": 0,
+      "summary": "PASS41/41 protected claims/reply assembler/size engine"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'; $env:C3_TEST_CODEX_TRANSPORT='1'; node --test --test-concurrency=1 apps/worker/evals/single-agent-semantic-verifier/*.test.mjs",
+      "exitCode": 0,
+      "summary": "PASS303/303 complete local eval suite, including installed CLI local stub; 0 real generations"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'; $env:C3_TEST_CODEX_TRANSPORT='1'; node --test apps/worker/evals/single-agent-semantic-verifier/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/run-a2.test.mjs apps/worker/evals/single-agent-semantic-verifier/run-a3.test.mjs apps/worker/evals/single-agent-semantic-verifier/gemini-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference-diagnostics.test.mjs apps/worker/evals/single-agent-semantic-verifier/round-55.test.mjs",
+      "exitCode": 0,
+      "summary": "PASS56/56 focused protocol/A2/A3/provider/diagnostics/R55 tests; 0 real generations"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='39'; node --test apps/worker/evals/single-agent-semantic-verifier/round-55.test.mjs",
+      "exitCode": 0,
+      "summary": "PASS4/4 frozen R55 protocol/body/firewall/regression tests"
+    },
+    {
+      "command": "node --test apps/worker/evals/single-agent-semantic-verifier/codex-inference-diagnostics.test.mjs",
+      "exitCode": 0,
+      "summary": "PASS12/12 bounded diagnostics tests"
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0,
+      "summary": "PASS worker lint"
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "exitCode": 0,
+      "summary": "PASS worker build and dependencies"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='55'; node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs",
+      "exitCode": 0,
+      "summary": "FROZEN_PROTOCOL_VALID 107UNSAFE/72SAFE A2 and42A3; no generation"
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "exitCode": 0,
+      "summary": "PASS worker typecheck and dependency build"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='55'; $env:C3_VERTEX_CREDENTIAL_FILE='<existing approved local credential path>'; node --input-type=module -e \"import {inspectCodex} from './apps/worker/evals/single-agent-semantic-verifier/codex-inference.mjs'; import {inspectGemini} from './apps/worker/evals/single-agent-semantic-verifier/gemini-inference.mjs'; import {loadInputs} from './apps/worker/evals/single-agent-semantic-verifier/run-a2.mjs'; console.log(JSON.stringify({codex:inspectCodex(),gemini:inspectGemini(loadInputs().manifest),realGenerationRequests:0}));\"",
+      "exitCode": 0,
+      "summary": "Read-only inspection: Codex0.159.2/binaryhash and Gemini credential route/helperhash match frozen identities; 0 real generations",
+      "credentialLocatorRedacted": true
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='55'; $env:A2_RUN_SOURCE_SHA='3eceacae168a3b682722e2e639520379842fc840'; node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --preflight-a2",
+      "exitCode": 0,
+      "summary": "PREFLIGHT_PASS clean worktree and exact sealed source; no generation"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='55'; $env:A2_RUN_SOURCE_SHA='3eceacae168a3b682722e2e639520379842fc840'; node apps/worker/evals/single-agent-semantic-verifier/run-staged-round52.mjs --a2",
+      "exitCode": 1,
+      "summary": "Actual staged run: regressionFAIL; see immutable raw A2 evidence; no remainder or A3"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='55'; node apps/worker/evals/single-agent-semantic-verifier/protocol.mjs --validate-a2",
+      "exitCode": 0,
+      "summary": "Actual raw evidence valid: complete325registry,12executed/313NOT_RUN, regressionFAIL and fullsummaryBLOCKED; validity is not A2PASS"
+    },
+    {
+      "command": "git commit -m 'eval(c3): preserve round55 A2 regression outcomes before review'",
+      "exitCode": 0,
+      "summary": "Raw savepoint fdb93981 before diagnostic interpretation and reports"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='55'; node 'C:/Users/nguye/AppData/Local/Temp/c3-round55-audit.mjs'",
+      "exitCode": 0,
+      "summary": "Evidence/source/body/request/final-gate/preservation audit PASS; 1150 historical files unchanged,9input sidecars identical,0production/shared edits. RecommendationSTOP; no A3"
+    },
+    {
+      "command": "$env:C3_CHECKPOINT_A_ROUND='55'; node 'C:/Users/nguye/AppData/Local/Temp/c3-round55-report.mjs'",
+      "exitCode": 0,
+      "summary": "Completed source-bound report; all12actual runtime bodies equalR54 apart from instructions/requestId; no provider dispatch. Final document readback follows separately."
+    },
+    {
+      "command": "node 'C:/Users/nguye/AppData/Local/Temp/c3-round55-readback.mjs'",
+      "exitCode": 0,
+      "summary": "Actual final document/evidence readback PASS: hashes,12outcomes,325registrations,313undispatched,A3NOT_RUN,0source drift; no provider dispatch."
+    }
+  ],
+  "notRun": [
+    "protocol.mjs --preflight-a3",
+    "run-staged-round52.mjs --a3-regression",
+    "run-staged-round52.mjs --a3-remaining",
+    "protocol.mjs --validate-a3"
+  ],
+  "notes": [
+    "No generation retries, error exclusions, majority voting or post-result rescue changes.",
+    "Read-only credential inspection command redacts its local credential locator; all focused test/build/typecheck/lint/run commands are exact.",
+    "Exit0 for accounting audits means identities and denominator valid, not semanticPASS.",
+    "A2prefix12of325 was selected prior-failure SAFE cohort; do not extrapolate its rejection rate to fullSAFE142 or infer unsafe safety."
+  ]
+}

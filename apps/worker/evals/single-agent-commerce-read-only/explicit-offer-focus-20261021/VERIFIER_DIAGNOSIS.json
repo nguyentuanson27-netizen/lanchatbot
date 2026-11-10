@@ -1,0 +1,146 @@
+[
+  {
+    "run": "r1-case02",
+    "id": "ce0f2fac6782060319828cbcf0c9f8ea5e5abbc367c7f5b61b01a5004c9001de:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "r1-case04",
+    "id": "5665443a59d381bc1aabf41740f244a6700e476ab1dd5e6d0ff86e6a0cfdce60:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "r1-case15",
+    "id": "bf90513e640c1d428c0b9ad12d67a72a0c6ff9156118ec4c181ea9b77410d2b6:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "r2-case02",
+    "id": "ce0f2fac6782060319828cbcf0c9f8ea5e5abbc367c7f5b61b01a5004c9001de:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "r2-case04",
+    "id": "5665443a59d381bc1aabf41740f244a6700e476ab1dd5e6d0ff86e6a0cfdce60:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "r2-case15",
+    "id": "bf90513e640c1d428c0b9ad12d67a72a0c6ff9156118ec4c181ea9b77410d2b6:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "r3-case02",
+    "id": "ce0f2fac6782060319828cbcf0c9f8ea5e5abbc367c7f5b61b01a5004c9001de:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "r3-case04",
+    "id": "5665443a59d381bc1aabf41740f244a6700e476ab1dd5e6d0ff86e6a0cfdce60:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "r3-case15",
+    "id": "bf90513e640c1d428c0b9ad12d67a72a0c6ff9156118ec4c181ea9b77410d2b6:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "r1-case09",
+    "id": "7099c9992dd381aae508e4362b0484fc47b51f912dff03162c0d315825301d01:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "r1-case17",
+    "id": "92104c7144d59eebe304baedef55cb3bcee172a1474b322b146fc8a80f578baa:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "r1-case23",
+    "id": "5c99edccfa931d559ac7c8dabf9527cac8e3aefb96c0cb9280c28690c08c7dc6:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "r1-case03",
+    "id": "704b582ae05c824574d5865305fc1749e39354b4fa11e6238da11e7ff512b5bd:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "r1-case05",
+    "id": "4a108d40fb01c40a5f3f4ba33baf313eeee8b0e974d50fc59a10520609f3fc6e:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "r1-case06",
+    "id": "416b2f3997cf79e860e52e8e57c4ed58e80d0d0433b86cb69e9468603f2619e7:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "r1-case08",
+    "id": "0344cf2cfd3676dd3b0910d8a69dd768034fad6040b2d4894bace501bbe8d7f1:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "r1-case16",
+    "id": "bf3275b81d9d190e93f3b1951a1a67b5ba9401e38d3e43bbb55e04250bae67ee:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  },
+  {
+    "run": "r1-case21",
+    "id": "552b68d7c082f6dbc73b42032ff2b1a5a118f42f2f756401fc20bd24545807ac:verifier:1",
+    "verdict": {
+      "verdict": "PASS",
+      "violations": []
+    }
+  }
+]

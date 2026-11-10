@@ -1,0 +1,55 @@
+{
+  "runSourceSha": "fec9c51ccf2ead4842f5525b368770b3567217f5",
+  "rawSavepoint": "6110fb7fe1185ac6e49cfccaa473853bde95c36b",
+  "primaryReviewSavepoint": "2d893499e3df3719e6b8f4a56fa6d0caeb103136",
+  "registration": {
+    "registered": 24,
+    "recorded": 24,
+    "inputHash": "790a28e0415bf4b0bdf23c44993cbe78fe76415827a080e9bb09e777775dca67",
+    "manifestHash": "dbd7aafaa64a48e16b8d9be0210771ca26bef6ef8f9b6ca23514edeffc0ffd5b",
+    "sourceConfigHash": "5ca8dc68da2a11d6a29bb9d03617686f3116a3e43b8c646da0b012212bcefb6e",
+    "promptHashes": {
+      "owner": "d6ba7b6c3a4705fcab140a0d74b527ce9b36ebb9639c1b7cf470eb48a3c02a67",
+      "verifier": "fe7e21965c6cc608c854b97f2513130c9d2f39cf5bec443f4a637f7d8e6f7957"
+    },
+    "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+    "toolSchemaHash": "462a24dc257abfd1931876e2568bbef60e2982f89d92a45692b1b9ff8876d3bd"
+  },
+  "requestAccounting": {
+    "capturedProviderRequests": 80,
+    "ownerRequests": 57,
+    "ownerResults": 57,
+    "verifierDispatched": 23,
+    "verifierResults": 23,
+    "maxOneProviderRequestPerGeneration": true,
+    "automaticRetries": 0
+  },
+  "projectionFirewall": {
+    "forbiddenLabelsChecked": 72,
+    "leaks": []
+  },
+  "bindings": {
+    "verifierDrafts": 23,
+    "exactDraftHashAndDialogueMatches": 23,
+    "sendEligibleExactDraftMatches": 16
+  },
+  "verdicts": {
+    "PASS": 16,
+    "FAIL": 7,
+    "noVerifierBudgetFallback": 1
+  },
+  "models": {
+    "ownerVersions": [
+      "gemini-3.5-flash-lite"
+    ],
+    "verifierVersions": [
+      "gpt-6.1-sol"
+    ]
+  },
+  "sendEnabledFalse": true,
+  "sourceIdentityPreserved": true,
+  "notes": [
+    "sourceIdentityPreserved is established by completion.status=AWAITING_WHOLE_REPLY_REVIEW and exact registration source SHA; no post-run generation occurred.",
+    "Size-filtered stock queries are retained in native tool logs, while protected claim scope lacks an explicit size field; report as an evidence-contract limitation."
+  ]
+}

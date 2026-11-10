@@ -1,0 +1,125 @@
+{
+  "status": "DETERMINISTIC_READINESS_PASS_PROVIDER_NOT_RUN",
+  "intakeHead": "bf586d5669f0c5d9459123b02ae14c40d35ab95b",
+  "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "redObserved": [
+    "initial tool tests: 2 failures before runtime edits",
+    "owner source projection: 1 assertion failure before adapter edit",
+    "dispatchRange missing export before implementation",
+    "search/full-read evidence mismatch: 1 failure in self-review before correction",
+    "search-only readback unnecessarily depends on POS: 1 failure before internal source-mode fix"
+  ],
+  "green": {
+    "postSourceWorkerFiles": 126,
+    "postSourceWorkerTests": 1713,
+    "nodeFullPassed": 460,
+    "nodeOptionalSkipped": 2,
+    "nodeFocusedPassed": 20,
+    "protectedReplyPassed": 52
+  },
+  "checks": [
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-read-only-context.test.ts src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-read-only-sources.test.ts src/single-agent-commerce-read-only.test.ts src/single-agent-commerce-state.test.ts src/single-agent-commerce-effects.test.ts src/single-agent-commerce-persistence.test.ts src/single-agent-semantic-verifier-boundary.test.ts src/track-b-protected-claim-boundary.test.ts src/realtime-product-facts-v2.test.ts",
+      "exitCode": 0,
+      "elapsedSeconds": 4.875,
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-two-round-20261015-evidence\\focused-worker.txt",
+      "sha256": "b4c24075056c604a9e8dd513c6de9d89c1924a10af59f260985c1129a1c72ca8"
+    },
+    {
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts src/product-presentation.test.ts src/product-facts-v2.test.ts src/size-engine.test.ts",
+      "exitCode": 0,
+      "elapsedSeconds": 2.828,
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-two-round-20261015-evidence\\protected-reply.txt",
+      "sha256": "860e40e0ba7f2e9ca35de9cfae6f2eba824c39b624bc8ead7e33d9cfe795e728"
+    },
+    {
+      "command": "pnpm --filter @lana/worker test",
+      "exitCode": 0,
+      "elapsedSeconds": 183.281,
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-two-round-20261015-evidence\\worker-full.txt",
+      "sha256": "c87633a88a2549586aee9e293d38145704766de219e400c8be7f0b49de19b217"
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "exitCode": 0,
+      "elapsedSeconds": 44.141,
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-two-round-20261015-evidence\\worker-typecheck.txt",
+      "sha256": "0b71d7b8b6d06a2c8c0b6d64f53e7cab092357724ea13895d42b735d6ba753a5"
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "exitCode": 0,
+      "elapsedSeconds": 35.844,
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-two-round-20261015-evidence\\worker-build.txt",
+      "sha256": "54945d4d9e5533a4d33c425f11b9409f2ce7ab33370a774c25fd300352c33c01"
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0,
+      "elapsedSeconds": 4.765,
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-two-round-20261015-evidence\\worker-lint.txt",
+      "sha256": "0d0a8de522f21dbf44fffd2752d4913d7410fc8a951bd2542f2352aabfe5a3aa"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src",
+      "exitCode": 0,
+      "elapsedSeconds": 29.438,
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-two-round-20261015-evidence\\post-source-worker-src.txt",
+      "sha256": "9c60603e15450f00c9cb7183eedcbdda61050907f29c8a4987fc430a84a21376"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec tsc -p tsconfig.json --noEmit",
+      "exitCode": 0,
+      "elapsedSeconds": 5.61,
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-two-round-20261015-evidence\\post-source-typecheck.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec tsc -p tsconfig.json",
+      "exitCode": 0,
+      "elapsedSeconds": 5.625,
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-two-round-20261015-evidence\\post-source-build.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0,
+      "elapsedSeconds": 4.391,
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-two-round-20261015-evidence\\post-source-lint.txt",
+      "sha256": "0d0a8de522f21dbf44fffd2752d4913d7410fc8a951bd2542f2352aabfe5a3aa"
+    }
+  ],
+  "sameEightCaseObjects": true,
+  "order": [
+    "b1-changed-occasion",
+    "b1-current-policy",
+    "b1-partial-source",
+    "b1-price",
+    "b1-component-stock",
+    "b1-search-read",
+    "b1-buying-concern",
+    "b1-policy-used"
+  ],
+  "verifierUnchanged": true,
+  "modelsConfigBarsFallbackUnchanged": true,
+  "promptHashes": {
+    "owner": "722e5958260b1abbc3a12282c55df7b4d792805ade8ee7b812b535f7b22fcbb2",
+    "verifier": "fe7e21965c6cc608c854b97f2513130c9d2f39cf5bec443f4a637f7d8e6f7957"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "casesSha256": "a5c2f5e6f1af91acb84ea5ebe865536dfa5a5148360e004a25d22551b7582059",
+  "sourceConfigSha256": "5ca8dc68da2a11d6a29bb9d03617686f3116a3e43b8c646da0b012212bcefb6e",
+  "selfReview": [
+    "same source evidence in search output and verifier snapshot",
+    "search-only current readback skips POS and invents no price/stock",
+    "raw diagnostics retained separately from owner availability",
+    "native signatures/call IDs intact",
+    "no eligibility inference engine/PII/effect/production wiring/third role/retry"
+  ],
+  "providerDocumentation": "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling",
+  "limitations": [
+    "full worker command ran before the final source-only independence fix; full Vitest src/typecheck/build/lint and focused native protocol tests ran again after it",
+    "no current provider result or human acceptance at preparation",
+    "full-suite optional installed-login stub probes remain skipped; actual high relay is checked by the forthcoming registered run"
+  ]
+}

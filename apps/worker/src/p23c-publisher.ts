@@ -7,6 +7,9 @@
  */
 import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
+import type {MediaRevalidationProof} from "@lana/business-tools";
+import {revalidatePublishedMedia,type MediaRevalidationResult} from "./p23c-media-revalidation.js";
+import {SecureRecognitionImageDownloader,readImageDimensions} from "./media-recognition-v2-image-pipeline.js";
 import type { createClient } from "redis";
 import {
   buildApprovedQdrantJobs,
@@ -21,6 +24,7 @@ import {
   buildXmlProfiles,
   groupXmlItems,
   normalizeStructuredExtraction,
+  type XmlProfile,
 } from "./p23c-profiles.js";
 import {
   contextualTextFromPayload,
@@ -66,10 +70,12 @@ export interface QdrantClient {
   scrollPointStates(): Promise<Map<string, ExistingPointState>>;
   upsertPoint(point: unknown): Promise<void>;
   setPayload(pointId: string, payload: Record<string, unknown>): Promise<void>;
+  invalidateMediaProof?(pointId:string,expected:MediaRevalidationProof):Promise<void>;
   deletePoint(pointId: string): Promise<void>;
 }
 
 export interface ImagePipeline {
+  prepareForRevalidation?(imageUrl:string):Promise<{buffer:Buffer;mime:string}>;
   /** Tải ảnh, kiểm tra kích thước/MIME và resize về tối đa 800px chiều rộng. */
   prepare(imageUrl: string): Promise<{ buffer: Buffer; mime: string }>;
   /** Tách nền qua dịch vụ RemBG. */
@@ -102,6 +108,7 @@ export interface PointResult {
 }
 
 export interface P23cRunSummary {
+  readonly media_revalidation?: readonly MediaRevalidationResult[];
   readonly status: "OK" | "RUN_LOCKED" | "NO_PENDING_WORK" | "FATAL";
   readonly run_id: string;
   readonly started_at: string;
@@ -129,6 +136,8 @@ export interface P23cRunSummary {
 }
 
 export interface P23cPublisherOptions {
+  /** Explicit scope only; proof refresh never publishes other catalog changes. */
+  readonly mediaRevalidationProductIds?: readonly string[];
   readonly redis: ReturnType<typeof createClient>;
   readonly sheets: SheetsReader;
   readonly feed: XmlFeedReader;
@@ -205,6 +214,37 @@ export class P23cPublisher {
 
   private hashV3Mode(): "OFF" | "DRY_RUN" | "LIVE" {
     return this.options.hashV3Mode ?? "OFF";
+  }
+
+  private async revalidateMedia(profiles:readonly XmlProfile[],run:RunContext):Promise<MediaRevalidationResult[]> {
+    const ids=new Set((this.options.mediaRevalidationProductIds??[]).map(id=>id.trim().toUpperCase()).filter(Boolean));
+    if(this.effectiveDryRun()||ids.size===0)return [];
+    const invalidateProof=this.options.qdrant.invalidateMediaProof?.bind(this.options.qdrant);
+    if(!invalidateProof)throw new Error("MEDIA_REVALIDATION_INVALIDATOR_REQUIRED");
+    const sources=await this.options.sheets.batchGetValues(this.options.sheetId,["image_registry!A:AR"],"UNFORMATTED_VALUE");
+    const jobs=buildApprovedQdrantJobs(profiles,collectImageRegistryRows(sheetRowsFromValues(sources[0]?.values)),run);
+    const points=await this.options.qdrant.scrollPointStates(),results:MediaRevalidationResult[]=[];
+    const approved=(rows:readonly QdrantJob[],id:string)=>{
+      const found=rows.filter(job=>job.point_id===id);
+      return found.length===1&&found[0]!.publish_action==="UPSERT"?structuredClone(found[0]!.payload):null;
+    };
+    for(const point of [...points.values()].filter(p=>ids.has(String(p.payload.product_id??p.payload.ma_sp??"").toUpperCase()))
+      .slice(0,this.options.payloadBatchSize??500)) {
+      results.push(await revalidatePublishedMedia({
+        source:{pointId:point.point_id,payload:structuredClone(point.payload),approvedPayload:approved(jobs,point.point_id)},
+        clock:()=>this.now(),prepare:url=>this.options.images.prepareForRevalidation?.(url)??this.options.images.prepare(url),
+        readCurrent:async()=>{
+          const [fresh,registry]=await Promise.all([this.options.qdrant.scrollPointStates(),
+            this.options.sheets.batchGetValues(this.options.sheetId,["image_registry!A:AR"],"UNFORMATTED_VALUE")]);
+          const current=fresh.get(point.point_id);if(!current)return null;
+          const rows=buildApprovedQdrantJobs(profiles,collectImageRegistryRows(sheetRowsFromValues(registry[0]?.values)),run);
+          return {pointId:point.point_id,payload:structuredClone(current.payload),approvedPayload:approved(rows,point.point_id)};
+        },
+        writeProof:proof=>this.options.qdrant.setPayload(point.point_id,{image_revalidation:proof}),
+        invalidateProof:proof=>invalidateProof(point.point_id,proof),
+      }));
+    }
+    return results;
   }
 
   private hashConfig(): HashV3Config {
@@ -338,7 +378,7 @@ export class P23cPublisher {
         this.options.feed.fetchFeed(),
         this.options.sheets.batchGetValues(
           this.options.sheetId,
-          ["product_registry!A:AZ", "image_registry!A:AP"],
+          ["product_registry!A:AZ", "image_registry!A:AR"],
           "UNFORMATTED_VALUE",
         ),
       ]);
@@ -421,11 +461,13 @@ export class P23cPublisher {
       );
 
       if (!batch.selected.length) {
+        const mediaRevalidation=await this.revalidateMedia(profiles,run);
         const released = await this.releaseLock(lockKey, lockToken);
         lockReleased = released;
         return {
           ...empty,
           status: "NO_PENDING_WORK",
+          ...(mediaRevalidation.length?{media_revalidation:mediaRevalidation}:{}),
           finished_at: this.now().toISOString(),
           held_row_count: batch.meta.held_row_count,
           qdrant_existing_point_count: batch.meta.qdrant_existing_point_count,
@@ -453,6 +495,7 @@ export class P23cPublisher {
       }
 
       await this.acknowledgeSheets(results);
+      const mediaRevalidation=await this.revalidateMedia(profiles,run);
 
       const count = (status: PointStatus): number => results.filter((row) => row.status === status).length;
       const failures = results.filter((row) => row.status === "FAILED");
@@ -508,6 +551,7 @@ export class P23cPublisher {
 
       return {
         status: "OK",
+        ...(mediaRevalidation.length?{media_revalidation:mediaRevalidation}:{}),
         run_id: this.options.runId,
         started_at: startedAt,
         finished_at: finishedAt,
@@ -682,6 +726,16 @@ export class HttpQdrantClient implements QdrantClient {
       { payload, points: [pointId] },
     );
   }
+
+  /** Point-scoped conditional quarantine; a concurrent newer proof does not match. */
+  async invalidateMediaProof(pointId:string,expected:MediaRevalidationProof):Promise<void> {
+    await this.request(`/collections/${encodeURIComponent(this.collection)}/points/payload?wait=true`,"POST",{
+      payload:{image_revalidation:{...expected,status:"INVALID"}},
+      filter:{must:[{has_id:[pointId]},...["version","status","checkedAt","metadataSha256"].map(key=>({
+        key:`image_revalidation.${key}`,match:{value:expected[key as keyof MediaRevalidationProof]},
+      }))]},
+    });
+  }
 }
 
 // --- Ảnh: tải, kiểm tra, resize bằng ffmpeg, tách nền qua RemBG ---
@@ -713,6 +767,22 @@ export class FfmpegImagePipeline implements ImagePipeline {
     this.rembgAuthHeader = options.rembgAuthHeader;
     this.timeoutMs = Math.max(10_000, Math.min(300_000, options.timeoutMs ?? 120_000));
     this.fetchImpl = options.fetchImpl ?? fetch;
+  }
+
+  async prepareForRevalidation(imageUrl:string):Promise<{buffer:Buffer;mime:string}> {
+    let mime="";
+    const downloader=new SecureRecognitionImageDownloader({allowedHostSuffixes:["content.pancake.vn"],maxBytes:this.maxBytes,
+      timeoutMs:30_000,fetchImpl:async(url,options)=>{
+        const response=await this.fetchImpl(url,options);
+        if(response.ok)mime=(response.headers.get("content-type")??"").split(";")[0]!.trim().toLowerCase();
+        return response;
+      }});
+    const original=Buffer.from(await downloader.download(imageUrl,new AbortController().signal));
+    const dimensions=readImageDimensions(original);
+    if(!dimensions||dimensions.width>12_000||dimensions.height>12_000||dimensions.width*dimensions.height>50_000_000)
+      throw new Error("MEDIA_REVALIDATION_DIMENSION_BOUND");
+    const outputMime=mime==="image/png"||mime==="image/webp"?"image/png":"image/jpeg";
+    return {buffer:await this.resize(original,outputMime),mime:outputMime};
   }
 
   async prepare(imageUrl: string): Promise<{ buffer: Buffer; mime: string }> {

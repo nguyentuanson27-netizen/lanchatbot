@@ -1,0 +1,109 @@
+{
+  "finalExecutableSourceSha": "5b70fe87f28ef4c5e1c6f033f22ed8dc5868af96",
+  "productionFiles": 18,
+  "productionAdded": 518,
+  "productionRemoved": 70,
+  "testFiles": 10,
+  "newCandidateModules": 2,
+  "semanticRolesAdded": 0,
+  "newTables": 0,
+  "newDurableStores": 0,
+  "compatibilityMigrations": 1,
+  "liveSchemaApplications": 0,
+  "ownerPromptBytes": 10504,
+  "ownerPromptSha256": "81b17e0e6854fdb89403d54995bac7f0f48418c10efece346db9f5f678848c11",
+  "promptMatchesGitBytes": true,
+  "ownerPromptDeltaFromFirstBatch": 151,
+  "files": [
+    {
+      "path": "apps/worker/src/realtime-runner.ts",
+      "added": 1,
+      "removed": 0
+    },
+    {
+      "path": "apps/worker/src/realtime-sales-cycle.ts",
+      "added": 34,
+      "removed": 9
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-effects.ts",
+      "added": 66,
+      "removed": 18
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-handoff.ts",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-ingress.ts",
+      "added": 183,
+      "removed": 0
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-persistence.ts",
+      "added": 17,
+      "removed": 6
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-read-only-context.ts",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-session.ts",
+      "added": 113,
+      "removed": 0
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-state.ts",
+      "added": 12,
+      "removed": 4
+    },
+    {
+      "path": "packages/business-tools/src/effect-readiness.ts",
+      "added": 2,
+      "removed": 2
+    },
+    {
+      "path": "packages/contracts/src/v2/canonical-commerce-bindings.ts",
+      "added": 8,
+      "removed": 2
+    },
+    {
+      "path": "packages/contracts/src/v2/canonical-evidence-readiness.ts",
+      "added": 14,
+      "removed": 20
+    },
+    {
+      "path": "packages/contracts/src/v2/context-v2.ts",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "packages/contracts/src/v2/decision-observability.ts",
+      "added": 2,
+      "removed": 0
+    },
+    {
+      "path": "packages/database/migrations/0035_sales_cycle_clarification_commands.down.sql",
+      "added": 22,
+      "removed": 0
+    },
+    {
+      "path": "packages/database/migrations/0035_sales_cycle_clarification_commands.up.sql",
+      "added": 12,
+      "removed": 0
+    },
+    {
+      "path": "packages/database/src/realtime-inbox.ts",
+      "added": 8,
+      "removed": 0
+    },
+    {
+      "path": "packages/database/src/realtime-runtime.ts",
+      "added": 21,
+      "removed": 6
+    }
+  ]
+}

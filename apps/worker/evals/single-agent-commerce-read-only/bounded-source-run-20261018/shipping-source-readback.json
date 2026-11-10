@@ -1,0 +1,65 @@
+{
+  "kind": "EXISTING_SHIPPING_SOURCE_READ_ONLY",
+  "sourceWrites": 0,
+  "providerGenerations": 0,
+  "checkedAt": "2026-10-17T17:21:31.523Z",
+  "cachedBatchKeys": [
+    "tabs",
+    "previous_inventory_rows",
+    "cached_at"
+  ],
+  "sheetShippingRows": [
+    [
+      "REGION",
+      "TRANSIT_MIN_DAYS",
+      "TRANSIT_MAX_DAYS",
+      "ENABLED"
+    ],
+    [
+      "NOI_THANH_HN",
+      "1",
+      "2",
+      "TRUE"
+    ],
+    [
+      "MIEN_BAC",
+      "2",
+      "4",
+      "TRUE"
+    ],
+    [
+      "MIEN_TRUNG",
+      "3",
+      "5",
+      "TRUE"
+    ],
+    [
+      "MIEN_NAM",
+      "3",
+      "6",
+      "TRUE"
+    ]
+  ],
+  "shippingConfig": {
+    "schema_version": 1,
+    "synced_at": "2026-10-17T17:04:05.913Z",
+    "regions": {
+      "NOI-THANH-HN": {
+        "transit_min_days": 1,
+        "transit_max_days": 2
+      },
+      "MIEN-BAC": {
+        "transit_min_days": 2,
+        "transit_max_days": 4
+      },
+      "MIEN-TRUNG": {
+        "transit_min_days": 3,
+        "transit_max_days": 5
+      },
+      "MIEN-NAM": {
+        "transit_min_days": 3,
+        "transit_max_days": 6
+      }
+    }
+  }
+}

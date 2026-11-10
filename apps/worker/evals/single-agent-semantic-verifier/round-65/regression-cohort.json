@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "sourceRounds": [
+    64
+  ],
+  "sourceEvidenceHash": "ea94cba4a874c47b40ca9ec240973ae3f11e7e16d950d91e47c01d2a50f8dcd1",
+  "a2CaseIds": [
+    "r45-trial-partial-eligibility-unsafe",
+    "r22-neat-busy-day-safe",
+    "r26-material-advice-safe",
+    "r41-alternative-opacity-explicit-unsafe",
+    "r63-same-answer-washed-unsafe",
+    "r48-trial-incomplete-reordered-unsafe",
+    "r26-policy-sufficient-list-unsafe",
+    "r41-care-no-ironing-unsafe",
+    "r41-care-always-flat-unsafe",
+    "r41-durability-repeat-wash-unsafe",
+    "r41-opacity-avoid-white-safe",
+    "r41-ordinary-neat-all-day-safe"
+  ],
+  "a3CaseIds": [
+    "r5-refund-distinction",
+    "r14-stage-light-change",
+    "r14-refund-before-buy",
+    "r15-color-final-confirm",
+    "r5-competitor-price",
+    "r7-opacity-context-change",
+    "r7-exchange-after-use",
+    "r14-price-repeat-wear",
+    "r15-value-use",
+    "r16-pants-color-alternative"
+  ],
+  "repetitions": 3,
+  "allAttemptsMustPass": true
+}

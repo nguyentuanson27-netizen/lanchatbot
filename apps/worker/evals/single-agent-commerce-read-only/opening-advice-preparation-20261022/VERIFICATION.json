@@ -1,0 +1,66 @@
+{
+  "kind": "DETERMINISTIC_AND_ISOLATED_DB_VERIFICATION_NOT_PROVIDER_RUN",
+  "runtimeSourceHead": "2f9d9aa2",
+  "focusedWorkerPassed": 262,
+  "fullWorkerPassed": 1956,
+  "protectedClaimsReplyAssemblerPassed": 21,
+  "nodePassed": 558,
+  "nodeSkipped": 2,
+  "nodeFailed": 0,
+  "typecheck": "PASS",
+  "build": "PASS",
+  "lint": "PASS",
+  "providerGenerations": 0,
+  "liveSendEnabled": false,
+  "evidence": [
+    {
+      "file": "red-handoff.integration.json",
+      "sha256": "a753f8e547bfccddbd73bf990f7da031443d6589206743ea55583c1f5a01e5ca",
+      "status": "FAIL",
+      "cases": 2,
+      "databaseDropped": true,
+      "providerGenerations": 0
+    },
+    {
+      "file": "green-handoff.integration.json",
+      "sha256": "055c06410c28c883272a69801b8e849619f430347fb9a849b2d3684da99b4b93",
+      "status": "PASS",
+      "cases": 20,
+      "databaseDropped": true,
+      "providerGenerations": 0
+    },
+    {
+      "file": "final-cod.integration.json",
+      "sha256": "1279c5c10e803eb6c272c747ea697f7476687e799532fd23d7997a72c20dcf11",
+      "status": "PASS",
+      "cases": 34,
+      "databaseDropped": true,
+      "providerGenerations": 0
+    },
+    {
+      "file": "final-bank.integration.json",
+      "sha256": "2329d8945ced8df7463044185f2a009efd80c77d441860cb68324f1cc46e85a2",
+      "status": "PASS",
+      "cases": 34,
+      "databaseDropped": true,
+      "providerGenerations": 0
+    },
+    {
+      "file": "node-tests-final.log",
+      "sha256": "1be222c66d2c47a062844b458c2640a94b0b1ad6c598bf8273114cd5fa1d93e3"
+    },
+    {
+      "file": "worker-tests.log",
+      "sha256": "e0cc3f3a778ab5ccd26e0bbbb02cb8438959513c86edfb68e87b6312045e46b0"
+    },
+    {
+      "file": "build.log",
+      "sha256": "1f90b4067fb2dbae936524c97b5b7acab6251af9dbbc0b851f99fe219a136245"
+    },
+    {
+      "file": "adapter-tests.log",
+      "sha256": "60527313708b243df1e12fe6b8e1e4e155e61de37eee6355601941ecac0ea2f0"
+    }
+  ],
+  "evidenceCopyNewlines": "LF, terminal blank lines omitted; original logs retained outside repository"
+}

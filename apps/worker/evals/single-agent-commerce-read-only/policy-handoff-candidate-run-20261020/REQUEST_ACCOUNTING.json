@@ -1,0 +1,158 @@
+{
+  "generations": [
+    {
+      "slot": 1,
+      "id": "handoff-3f6020e4-115c-4395-80fa-47a2ffa9daad:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1849.8402999999998,
+      "inputTokens": 3049,
+      "outputTokens": 207,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "slot": 1,
+      "id": "handoff-3f6020e4-115c-4395-80fa-47a2ffa9daad:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 5489.182499999999,
+      "inputTokens": 4206,
+      "outputTokens": 1634,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "slot": 1,
+      "id": "handoff-3f6020e4-115c-4395-80fa-47a2ffa9daad:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 10514.2343,
+      "inputTokens": 3642,
+      "outputTokens": 56,
+      "modelVersion": "gpt-6.1-sol"
+    },
+    {
+      "slot": 2,
+      "id": "handoff-5df3d5b0-4eb8-40dc-96b3-202963dcf1bd:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2000.9922000000006,
+      "inputTokens": 3042,
+      "outputTokens": 339,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "slot": 2,
+      "id": "handoff-5df3d5b0-4eb8-40dc-96b3-202963dcf1bd:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 7373.804000000004,
+      "inputTokens": 4331,
+      "outputTokens": 2234,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "slot": 2,
+      "id": "handoff-5df3d5b0-4eb8-40dc-96b3-202963dcf1bd:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 6421.673999999999,
+      "inputTokens": 3620,
+      "outputTokens": 72,
+      "modelVersion": "gpt-6.1-sol"
+    },
+    {
+      "slot": 3,
+      "id": "handoff-823f7348-d441-45b4-a2da-08ed318a091e:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2170.8306999999986,
+      "inputTokens": 3030,
+      "outputTokens": 390,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "slot": 3,
+      "id": "handoff-823f7348-d441-45b4-a2da-08ed318a091e:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 5576.133800000003,
+      "inputTokens": 4370,
+      "outputTokens": 1678,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "slot": 3,
+      "id": "handoff-823f7348-d441-45b4-a2da-08ed318a091e:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 7887.536300000007,
+      "inputTokens": 3623,
+      "outputTokens": 91,
+      "modelVersion": "gpt-6.1-sol"
+    },
+    {
+      "slot": 4,
+      "id": "handoff-3ee340bc-8701-44a0-a4ef-6f54193c2cc2:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1347.238799999992,
+      "inputTokens": 3029,
+      "outputTokens": 114,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "slot": 4,
+      "id": "handoff-3ee340bc-8701-44a0-a4ef-6f54193c2cc2:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1993.5687999999936,
+      "inputTokens": 4093,
+      "outputTokens": 326,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "slot": 4,
+      "id": "handoff-3ee340bc-8701-44a0-a4ef-6f54193c2cc2:verifier:1",
+      "role": "verifier",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4569.145699999994,
+      "inputTokens": 3602,
+      "outputTokens": 22,
+      "modelVersion": "gpt-6.1-sol"
+    },
+    {
+      "slot": 5,
+      "id": "handoff-3a682c66-db6e-4584-ba4e-25fc29a9da52:owner:1",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1841.9539000000077,
+      "inputTokens": 3044,
+      "outputTokens": 295,
+      "modelVersion": "gemini-3.5-flash-lite"
+    },
+    {
+      "slot": 5,
+      "id": "handoff-3a682c66-db6e-4584-ba4e-25fc29a9da52:owner:2",
+      "role": "owner",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2096.0899999999965,
+      "inputTokens": 4289,
+      "outputTokens": 505,
+      "modelVersion": "gemini-3.5-flash-lite"
+    }
+  ]
+}

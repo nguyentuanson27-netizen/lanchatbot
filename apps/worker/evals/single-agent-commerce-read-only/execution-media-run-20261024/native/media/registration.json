@@ -1,0 +1,120 @@
+{
+  "sourceSha": "9887c21743f2183cf475c70bf27bfb9fe93fe723",
+  "mode": "PROVIDER_REAL_POSTGRES_LIVE_PUBLIC_CATALOG_CURRENT_CAPTURED_POLICY_CAPTURE_DELIVERY",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "ca12a250c6dd69f96946bf6f2d4657f5d99a1e94364a7f0892e7603c69bd38de",
+    "verifier": "50401b2704724bebd604e0da3b2155ebeade8629145a723153c24b5630fd1a2f"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "requestBounds": {
+    "ownerWireBytes": 65536,
+    "verifierWireBytes": 32768
+  },
+  "toolSchemaHash": "5d20e9ce0362dda92ae00638c14ddc13bc57f91c0f52228378cac487c3043482",
+  "assumedFeedback": null,
+  "fallbackCatalog": {
+    "default": {
+      "id": "C3_A_NONPROTECTED_V2",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+    },
+    "mediaUnavailable": {
+      "id": "C3_B_MEDIA_NEXT_STEP_V1",
+      "text": "Chị muốn xem ảnh tổng thể hay ảnh cận chi tiết của mẫu này ạ?",
+      "sha256": "c1330d313ad88ccd89abb65f60f42fd29cac3e277d2cd33b0e4a0e49b44d78ee"
+    }
+  },
+  "catalogInputMode": "LIVE_PUBLIC_WITH_ISOLATED_REGISTRY_DESCRIPTION",
+  "candidateHandoffFileHash": "1fb7dd7cb5eab0e7685e0f3df1b1407d9bdea56dbe538034868b5189f9700c62",
+  "catalogImageInput": {
+    "count": 2,
+    "maxBytes": 524288,
+    "maxRequestBytes": 1507328,
+    "mediaResolution": "MEDIA_RESOLUTION_MEDIUM",
+    "maxDimension": 1024,
+    "maxSourceBytes": 2097152,
+    "maxSourceDimension": 12000,
+    "maxSourcePixels": 50000000,
+    "sourceHashRequired": true,
+    "hashContract": "APPROVED_REGISTRY_REF_PLUS_DOWNLOAD_SHA256_PLUS_PREPARED_SHA256",
+    "resize": "EXISTING_FFMPEG_GEOMETRY_JPEG_Q3_OR_PNG"
+  },
+  "selection": {
+    "mode": "FIVE_MEDIA_JOURNEYS_SEVEN_TURNS",
+    "registered": [
+      "media-overview-next:ask",
+      "media-overview-next:continue",
+      "media-detail-next:ask",
+      "media-detail-next:continue",
+      "media-and-price:ask",
+      "media-and-size:ask",
+      "media-decision:ask"
+    ],
+    "prerequisite": "Actual prior terminal/history in each journey; no forced provider fallback."
+  },
+  "selectionHash": "0b5be65ff63548cc30e43e01b0a0871da2ad57a5e9a06655128b81a9278f1003",
+  "corpusHash": "dff5c57dff681f75ac35e484c014b0c62965bde2169941aa5b488ce879bba93a",
+  "sourceConfigHash": "4be0232836fa5f172c2b582802ceee8efa288e7449629fe831d323558a030f3d",
+  "registeredOutcomes": 7,
+  "publicTurns": 7,
+  "privateCodeTurns": 0,
+  "repetitions": 1,
+  "maximumGenerationRequests": 28,
+  "retry": 0,
+  "codex": {
+    "version": "codex-cli 0.159.2",
+    "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+  },
+  "sendEnabled": false
+}

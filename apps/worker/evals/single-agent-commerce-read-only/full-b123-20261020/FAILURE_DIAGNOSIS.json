@@ -1,0 +1,38 @@
+{
+  "primaryLockSha": "9b5070c4",
+  "fallback": {
+    "caseId": "b1-policy-used-v2",
+    "slot": 16,
+    "actual": {
+      "disposition": "FALLBACK",
+      "reason": "FAIL",
+      "text": "Phần này em chưa trả lời được, chị nhé.",
+      "fallbackId": "C3_A_NONPROTECTED_V2"
+    },
+    "rejectedDraft": "Dạ, shop hỗ trợ đổi size cho mình chị nhé! Miễn là sản phẩm còn nguyên tem mác, chưa qua sử dụng, chưa giặt và còn sạch sẽ, nguyên vẹn trong vòng 15 ngày kể từ lúc nhận hàng là bên em hỗ trợ đổi size được ạ. \n\nNếu mặc không vừa, chị cứ nhắn em để bên em lên lịch đổi size cho mình nha.",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "POLICY_OR_BENEFIT_STRENGTHENING",
+          "protectedRef": "policy:84302ec1478263a9e32739d767c0899d9f32b7ef22e8252774cbfe4c85941e86"
+        }
+      ]
+    },
+    "assessment": "Correct rejection: customer already wore garment for five minutes; current inspection.tryOnMode=HOLD_UP_ONLY permits holding up, not wearing. Opening agreement grants exchange in the stated situation despite reciting unused/unwashed/clean/intact conditions. Not a failure for missing condition keywords; all those conditions are in the draft. No repair/reverify."
+  },
+  "opening": {
+    "reason": "OWNER_TOOL_MODE",
+    "httpStatus": 200,
+    "unexpectedToolCall": true,
+    "functionCallingMode": "NONE",
+    "declaredToolCount": 0,
+    "originalDisposition": "FALLBACK",
+    "actualDisposition": "SEND_ELIGIBLE",
+    "actualReason": "RECEIPT_BACKED_CART_SUMMARY",
+    "effectCommitted": true,
+    "assessment": "Owner emitted function call on final-only generation. Existing code authority recovered once from committed receipt, retained preorder disclosure and code quote; not a verifier PASS and no generation retry. Tool intent behind rejected final-only call is not inferred."
+  },
+  "dataVsModel": "Exchange source already supplies HOLD_UP_ONLY and15-day/30k rules. This fallback is an application error, not evidence that another product-information source is required. Partial-source gaps are deliberate existing fault fixtures.",
+  "protectedScope": "No claim of global safety or deterministic semantic proof. Primary accepted ordinary design/material advice under owner-approved boundary; verdict alone does not prove correctness."
+}

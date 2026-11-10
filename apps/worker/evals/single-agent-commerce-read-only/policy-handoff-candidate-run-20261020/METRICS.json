@@ -1,0 +1,52 @@
+{
+  "registeredSlots": 5,
+  "recordedSlots": 5,
+  "generationRequests": 14,
+  "requestCountDistribution": {
+    "1": 14
+  },
+  "providerErrors": 0,
+  "timeouts": 0,
+  "retry": 0,
+  "terminal": {
+    "SEND_ELIGIBLE": 4,
+    "HANDOFF": 1
+  },
+  "cost": "NOT_EXPOSED",
+  "testDatabaseDropped": true,
+  "roles": {
+    "owner": {
+      "requests": 10,
+      "inputTokens": 36483,
+      "outputTokens": 7722,
+      "missingUsage": 0,
+      "modelVersions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "latencyMs": {
+        "n": 10,
+        "p50": 2048.5410999999986,
+        "p95": 6564.852410000001
+      }
+    },
+    "verifier": {
+      "requests": 4,
+      "inputTokens": 14487,
+      "outputTokens": 241,
+      "missingUsage": 0,
+      "modelVersions": [
+        "gpt-6.1-sol"
+      ],
+      "latencyMs": {
+        "n": 4,
+        "p50": 7154.605150000003,
+        "p95": 10120.2296
+      }
+    }
+  },
+  "addedVerificationLatencyMs": {
+    "n": 4,
+    "p50": 8800.624349999991,
+    "p95": 11815.411614999994
+  }
+}

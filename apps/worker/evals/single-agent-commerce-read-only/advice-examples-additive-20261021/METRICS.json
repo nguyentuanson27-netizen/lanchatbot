@@ -1,0 +1,48 @@
+{
+  "registered": 12,
+  "recorded": 12,
+  "requests": 36,
+  "errors": 0,
+  "automaticRetries": 0,
+  "sourceEmbeddingCalls": {
+    "preflightSourceCheck": 1,
+    "attempts": 0
+  },
+  "cost": "NOT_EXPOSED",
+  "roles": {
+    "owner": {
+      "generations": 24,
+      "requests": 24,
+      "inputTokens": 94951,
+      "outputTokens": 17689,
+      "missingUsage": 0,
+      "latencyMsP50": 2849.2377499999966,
+      "latencyMsP95": 5943.104534999998
+    },
+    "verifier": {
+      "generations": 12,
+      "requests": 12,
+      "inputTokens": 58090,
+      "outputTokens": 749,
+      "missingUsage": 0,
+      "latencyMsP50": 5043.074050000003,
+      "latencyMsP95": 6660.541085000002
+    }
+  },
+  "dispositions": {
+    "SEND_ELIGIBLE": 12,
+    "FALLBACK": 0,
+    "HANDOFF": 0,
+    "NO_SEND": 0
+  },
+  "providerTimeouts": 0,
+  "providerErrorRate": 0.0,
+  "addedVerificationLatencyMs": {
+    "p50": 5735.724600000001,
+    "p95": 7373.07854
+  },
+  "notes": [
+    "Latency excludes per-child credential/source launcher setup; owner and verifier have different workloads.",
+    "Output tokens may include reasoning. No provider cost exposed."
+  ]
+}

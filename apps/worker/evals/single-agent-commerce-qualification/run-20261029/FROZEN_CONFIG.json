@@ -1,0 +1,192 @@
+{
+  "version": 1,
+  "qualificationStage": "ABSOLUTE",
+  "nativeCodecs": {
+    "OWNER": "NATIVE_B_OWNER_V1",
+    "VERIFIER": "NATIVE_B_VERIFIER_V1",
+    "STRATEGIST": "MAIN_C3_V1",
+    "RESPONDER": "MAIN_C3_V1"
+  },
+  "sendEnabled": false,
+  "retry": 0,
+  "repetitions": 1,
+  "implementationBaseSha": "f160dfa4f7e0c8b3e29232570710d99d4f5ed012",
+  "candidate": {
+    "sourceSha": "36e45015c381ebe91a2591a288b112e3dd8caa0e",
+    "model": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "promptHash": "9887885e8cfa284a8a8fa45e4df28c7550684f1228a3c3e1995072ba26d8c392",
+    "contextPolicyHash": "2a2027bbf393c4257f3744a8977757ea4fe1bcf3602405e2e49d7ae5ce01d690",
+    "toolContractHash": "15491d50aba1a59730f7e40161aefd121447a40abaf9beb157df406408c28ae6",
+    "assemblyHash": "541d102fa80b79c95b72b10605bb26e7fbd8d5734edbb518a7ecb3898dbb09c2",
+    "runtimeHash": "bafe34f5ba98f007668b863861cd8ed13e6917a6bd52c6162bd33f720007146f",
+    "verifier": {
+      "model": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      },
+      "promptHash": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c",
+      "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+      "serializationHash": "93bd246918f3c61426fc61a67b5a29109ec348bb7569da927f16b065c1232f70",
+      "bindingHash": "a2f235d19d51a017e3f4d7f52d91f783155243bcb2411702886f12a0ef80d92a",
+      "boundsHash": "6179ba4eb906926b3b58c2cd754f53c4e511bc4d8b2a6e0049d2463a32a1c26b"
+    }
+  },
+  "measurementPolicy": {
+    "latency": "MONOTONIC_MS_EVERY_GENERATION",
+    "percentiles": "NEAREST_RANK",
+    "tokens": "PROVIDER_OR_EXPLICIT_UNAVAILABLE",
+    "cost": "PROVIDER_OR_EXPLICIT_UNAVAILABLE",
+    "toolCalls": "EVERY_ATTEMPT",
+    "terminalReasons": "EVERY_NON_SEND",
+    "embedding": {
+      "kind": "NATIVE_VERTEX_EMBED_TEXT_V1",
+      "maximumPredictHttpPerInvocation": 2,
+      "retry": "ONE_REFRESH_AND_RETRY_ONLY_AFTER_FIRST_PREDICT_401",
+      "oauth": "NATIVE_TOKEN_CACHE_SINGLE_REFRESH_NO_OAUTH_RETRY",
+      "generationRequests": 0,
+      "requestEvidence": "PREDICT_BODY_HASH_ONLY_OAUTH_BODY_NEVER_RETAINED",
+      "usage": "NOT_EXPOSED_BY_NATIVE_EMBED_PORT"
+    }
+  },
+  "onlineRoles": [
+    "OWNER",
+    "VERIFIER"
+  ],
+  "maximumOwnerGenerations": 3,
+  "maximumVerifierGenerations": 1,
+  "ownerDecision": {
+    "status": "APPROVED",
+    "evidenceRef": "owner-reply:call_c242e38f43fc43008382efd4abff8c46:2026-10-28",
+    "decisionHash": "642eb79b10c7a0c8cdaf85b08c3d405d1b1c4ed7f2f68a3e55c1ff821ed9da67"
+  },
+  "thresholds": {
+    "singleQuality": 0.9,
+    "journeyQuality": 0.9,
+    "safeUsability": 0.9,
+    "singleNetWin": 0.1,
+    "journeyNetWin": 0.1
+  },
+  "judge": {
+    "kind": "OFFLINE_MODEL",
+    "identity": "INDEPENDENT_GPT_6_1_SOL_HIGH_BLIND",
+    "model": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high"
+    },
+    "approvalRef": "owner-reply:call_bd286ceab8db4f4780bc1a76537484da:2026-10-28",
+    "promptHash": "80843a39c70548e8709a5cbd42628927b0c34515cd3d2d55e7667212355d6bff",
+    "rubricHash": "a652669b2ea5d788eaba897bfd24f0bbf8fe3fbe3a6ab6e64ecdc4cb51984fad",
+    "blind": true,
+    "disagreement": "REQUIRE_ADJUDICATION"
+  },
+  "baseline": {
+    "sourceSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+    "capabilityPath": "apps/worker/src/track-c-c3-two-pass-candidate.ts",
+    "model": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "application/json",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "capabilityStatus": "PACKAGE_ONLY_REFERENCE_SHARED_EGRESS",
+    "captureBuilderHash": "09a4471c96fbe0dd05ccfffd5542b1941729b2a84825e1d51779a286428dde1d",
+    "sourceInventoryHash": "b2de7a8f799d136402c14475e7b5c06489b87da91021d8e0786fb9abbe4f4424",
+    "buildInventoryHash": "329e510b1aec79f137752c53227bb1572dc836465d9434f50b421c7e841d97c3",
+    "informationParity": "UNPROVED_NATIVE_CONTEXT_V2_FIELD_LOSS",
+    "nativeRoleOutputContract": {
+      "kind": "PINNED_NATIVE_JSON_ROLE_SPECIFIC_SCHEMAS",
+      "schemaSelection": "EXACT_NATIVE_STRATEGIST_AND_RESPONDER_REQUEST_BUILDERS",
+      "sourceHashes": {
+        "apps/worker/src/track-c-c3-two-pass-candidate.ts": "6d8babaefbf7cd09d038e277ced1a9de203e2a5cecf3280040696d0bd6da9ec3",
+        "apps/worker/src/track-c-c3-sales-quality-candidate.ts": "191cd466e0562e8b8a64e6d35f92ed4a2d92b5cb27ab01cf31f5c90c3fb1d665"
+      }
+    }
+  },
+  "blinding": {
+    "scheme": "HMAC_SHA256_ORDER_V1",
+    "seedCommitment": "edd188f3be795326992ffbc6847185900809aefd9595e3ddd98dbeb9a4606642"
+  },
+  "frozenPolicyProjection": {
+    "kind": "EXISTING_OWNER_APPROVED_MATRIX_ISOLATED_ONLY",
+    "capturedSourceWorldHash": "13b7801a64f496111a92bafe30a2e7029190e96110ecc0f760577ec3eb17e58b",
+    "upstreamPublishedMatrixHash": null,
+    "candidateMatrixHash": "sha256:5154e9ea1e04200c8f92b9812ddcdae39d20e7cb508f96fafc7613ae3d833d74",
+    "candidateMatrixSourcePath": "apps/worker/evals/single-agent-commerce-read-only/handoff-matrix.candidate.json",
+    "candidateMatrixTextHash": "69ff7dadeec5acda4416e7872faaad342ea34960d32db2a630b9a0606beccc92",
+    "candidateInputContentHash": "sha256:5154e9ea1e04200c8f92b9812ddcdae39d20e7cb508f96fafc7613ae3d833d74",
+    "recordEnvelope": "EXISTING_DB_READ_SCHEMAS_V1_NO_POLICY_CONTENT_CHANGE",
+    "sourcePolicyWrites": 0,
+    "sourcePublication": false
+  },
+  "observationHistory": {
+    "priorRegistrationHash": "745433226f43f714922f2e4b1ceb968b30b931876ef85c13c526dc64563cdc54",
+    "priorExecutionSourceSha": "5125aa89c0f846027ba539ace49150f9f9d3ec62",
+    "priorObservedSafetyAttempts": 24,
+    "priorConversationalAttempts": 0,
+    "priorArtifactsMayBeImported": false,
+    "population": "NEW_UNOBSERVED_SAFETY_VARIANTS_AND_ORIGINAL_UNEXECUTED_CONVERSATIONS",
+    "preDispatchInvalidatedRegistrationHash": "596bab0fdb94e13b0164ba8672c72e2beb0afd48f28d7decf31be2d6bc2f41d9",
+    "preDispatchInvalidationReason": "OVERNIGHT_SOURCE_EXPIRY_ZERO_DISPATCH_ZERO_GENERATIONS"
+  }
+}

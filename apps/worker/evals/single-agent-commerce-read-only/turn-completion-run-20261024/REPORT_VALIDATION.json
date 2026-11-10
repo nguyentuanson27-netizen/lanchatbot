@@ -1,0 +1,41 @@
+{
+  "status": "PASS",
+  "bRunSourceSha": "235d570a90f792a096e37d4094e6feaf3c7eee95",
+  "rawAndFrozenFilesChecked": 251,
+  "stagedFilesScanned": 267,
+  "secretPatternHits": 0,
+  "primaryReviewHashPreserved": true,
+  "frozenRuntimeBytesMatchRegistration": true,
+  "unchangedGitSourceComparedWithFrozenAfterLineEndingNormalization": true,
+  "gitCheckoutLineEndingTransforms": [
+    {
+      "file": "stateful-cases.json",
+      "gitBlobSha256": "bb3d66589802d5c71bc617d85c5f4d7680ba32cc6ac74f489189365759daadda",
+      "runtimeFrozenSha256": "d8ab24a2ed2c181447d4fa8bf23973bdf61471edea284ae6a96421c8f67082af",
+      "difference": "LF_CRLF_ONLY"
+    },
+    {
+      "file": "sales-journeys.candidate.json",
+      "gitBlobSha256": "a325f2daf2b20682291e94759a4cdd341ea3c929deeb03ef19754b181b6b5c18",
+      "runtimeFrozenSha256": "b2575660b7d412eb6a2d11befb04de75fd840789c7126026bb257ce60f183a93",
+      "difference": "LF_CRLF_ONLY"
+    },
+    {
+      "file": "opening-quote-cases.json",
+      "gitBlobSha256": "d189c726cab335dcf545a525b7b7a442c067399cbd1ff5c76adeb69092f5af50",
+      "runtimeFrozenSha256": "d095fd2e7bcc4bbe82f107e0944741c4b7310d145846f6a7bda8cea70de0b8de",
+      "difference": "LF_CRLF_ONLY"
+    }
+  ],
+  "stagedRawByteParity": true,
+  "cachedDiffCheck": "PASS",
+  "reportLocalLinks": "PASS",
+  "priorValidationFailures": [
+    "First archive staging normalized top-level PRIMARY_REVIEW CRLF to LF. Added scoped JSON -text attributes and restaged with --renormalize; original raw and primary runtime bytes never changed.",
+    "Initial validator incorrectly required pre-existing Windows runtime checkout bytes to equal Git blob bytes. Now records both hashes and requires LF/CRLF-only difference plus unchanged source Git blobs and exact runtime/frozen/registration parity; no corpus rewrite."
+  ],
+  "command": [
+    "python",
+    "c3-turn-completion-validate-20261024.py"
+  ]
+}

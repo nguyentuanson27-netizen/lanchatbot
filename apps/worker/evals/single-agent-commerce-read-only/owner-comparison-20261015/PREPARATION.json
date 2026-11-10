@@ -1,0 +1,195 @@
+{
+  "status": "DETERMINISTIC_READINESS_PASS",
+  "providerGenerations": 0,
+  "red": [
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs",
+      "exitCode": 1,
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\red.log",
+      "logSha256": "bd6740aa9e14dafd5b74b0823b473f06f8c728fab8fb83ca914169b207f800e6"
+    },
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs",
+      "exitCode": 1,
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\red-tool-call.log",
+      "logSha256": "e984d16a244c58d17cc0b1b0fe3d082519bdd4b1e996167ca98f85270bfa3ac3"
+    },
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs",
+      "exitCode": 1,
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\red-tool-definitions.log",
+      "logSha256": "33bb9fc2cbdc468ac264c51b6a6e1d9e9fb33d1777217f2c26477e5a9314c6d8"
+    },
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs",
+      "exitCode": 1,
+      "reason": "Use official EasyInputMessage string-content history form",
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\red-history-content.log",
+      "logSha256": "cc2a82ff6bc980269a57dca47a65e14b971e8f0793df658899e864deb77ab9a8"
+    }
+  ],
+  "green": {
+    "command": "node --test apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs",
+    "exitCode": 0,
+    "pass": 6,
+    "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\green-final.log",
+    "logSha256": "210c88e2d0f91d28f15e02c30d1730b5fcc827d6b061553b396a7ab58d657c6e"
+  },
+  "checks": [
+    {
+      "durationSeconds": 1.9335543,
+      "command": "node --test apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs",
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\focused-node.log",
+      "exitCode": 0,
+      "logSha256": "2330f659c90af85808f8b686e28e735072617e0e6d4a0d7e6e706ded4f545804"
+    },
+    {
+      "durationSeconds": 16.998345,
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-semantic-verifier-boundary.test.ts src/single-agent-commerce-read-only.test.ts",
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\focused-boundary.log",
+      "exitCode": 0,
+      "logSha256": "2b8fd565fe1268ab00d4ade2ad30c1c1fe6ed2c07491769cb4e55122118446dc"
+    },
+    {
+      "durationSeconds": 4.79376,
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts",
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\protected-reply.log",
+      "exitCode": 0,
+      "logSha256": "d1ce7184cbc742d49d9cce12557cefccbcb1ba021a32e1f56e169146ffe85f59"
+    },
+    {
+      "durationSeconds": 338.4915192,
+      "command": "pnpm --filter @lana/worker test",
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\worker-test.log",
+      "exitCode": 0,
+      "logSha256": "94361bfb2d0dc17b36167dc524f73a3d9411c1112c07e5d31685183493ecdd44"
+    },
+    {
+      "durationSeconds": 64.3651244,
+      "command": "pnpm --filter @lana/worker typecheck",
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\worker-typecheck.log",
+      "exitCode": 0,
+      "logSha256": "309c1ed731644570c1680c6d96256eafb9a1202a8dc64e4ee7e4bc1348f277e2"
+    },
+    {
+      "durationSeconds": 57.3462935,
+      "command": "pnpm --filter @lana/worker build",
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\worker-build.log",
+      "exitCode": 0,
+      "logSha256": "8e905f8ad0323b0bc132a45af3ea3911c2200ef2247850a2d3e52c64e0e12a70"
+    },
+    {
+      "durationSeconds": 8.3490014,
+      "command": "pnpm --filter @lana/worker lint",
+      "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\worker-lint.log",
+      "exitCode": 0,
+      "logSha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415"
+    }
+  ],
+  "workerTests": {
+    "files": 126,
+    "pass": 1713
+  },
+  "evalTests": {
+    "pass": 466,
+    "skip": 2,
+    "skipReason": "Optional installed Codex login/local stub checks; not provider runs"
+  },
+  "focused": {
+    "nodePass": 36,
+    "nodeSkip": 1,
+    "boundaryRuntimePass": 60,
+    "protectedReplyPass": 21
+  },
+  "selfReview": {
+    "productionWiring": false,
+    "promptChanges": false,
+    "semanticRolesPerAttempt": [
+      "one owner",
+      "one verifier"
+    ],
+    "newSemanticParserOrRepair": false,
+    "nativeGeminiDefaultUnchanged": true,
+    "actualWireProjectionTested": true,
+    "solEffort": "low",
+    "verifierEffort": "high",
+    "all12SlotsCounted": true,
+    "limitation": "Post-read owner diagnostic only; no GPT native tool calling, full B1/A qualification, or live delivery. FINAL_READBACK audit reuses the existing readback; no new source read or gate."
+  },
+  "windowsAlias": "Tracked link-text file temporarily replaced by a junction for existing full-worker tests, restored byte-exact by helper finally block.",
+  "finalWireVerification": {
+    "command": "node --test apps/worker/evals/single-agent-commerce-read-only/owner-comparison.test.mjs apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs apps/worker/evals/single-agent-semantic-verifier/codex-inference.test.mjs",
+    "exitCode": 0,
+    "pass": 36,
+    "skip": 1,
+    "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\final-wire-tests.log",
+    "logSha256": "083662e8affc477597b6e86f316753d5960d98dc6828bc1c47e2dde22d93f4a6"
+  },
+  "initialPreflight": {
+    "sourceSha": "b11ac53aab0f56d655fe90335840ace53dea08d8",
+    "status": "SOURCE_PREFLIGHT_PASS",
+    "providerGenerations": 0,
+    "limitation": "Wire history representation subsequently changed to the official string-content form. A fresh clean-source preflight is required; no provider request occurred on the earlier seal."
+  },
+  "sourceCacheCorrection": {
+    "reason": "Initial real preflight recorded only one active-pointer read across read_policy plus readback; resolver cached the resolved bundle for5s.",
+    "change": "Candidate source port invalidates existing scoped cache before every resolve. Existing tools reject LAST_KNOWN_GOOD on source failure.",
+    "observedRed": {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-read-only-sources.test.ts",
+      "exitCode": 1,
+      "pass": 5,
+      "fail": 2
+    },
+    "green": {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-read-only-sources.test.ts src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-read-only-context.test.ts src/single-agent-semantic-verifier-boundary.test.ts src/single-agent-commerce-read-only.test.ts",
+      "exitCode": 0,
+      "pass": 90
+    },
+    "checks": [
+      {
+        "durationSeconds": 41.3554025,
+        "command": "pnpm --filter @lana/worker exec vitest run src",
+        "exitCode": 0,
+        "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\source-cache-validation\\worker-src-tests.log",
+        "logSha256": "841bf725622ad90561fda109d78ef00c04a9f22ac739f83847f9348a2c3b8423"
+      },
+      {
+        "durationSeconds": 60.0603371,
+        "command": "pnpm --filter @lana/worker typecheck",
+        "exitCode": 0,
+        "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\source-cache-validation\\worker-typecheck.log",
+        "logSha256": "c1d43e6a3b7b59f5e125c306ad3c9eeaf5f14022d9ac8989b654f6741cb7f071"
+      },
+      {
+        "durationSeconds": 59.5018978,
+        "command": "pnpm --filter @lana/worker build",
+        "exitCode": 0,
+        "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\source-cache-validation\\worker-build.log",
+        "logSha256": "de935666542d9c07ccd6e2c45cc7593dda48e9da1f10608c98c79d07eb69cfce"
+      },
+      {
+        "durationSeconds": 8.2152658,
+        "command": "pnpm --filter @lana/worker lint",
+        "exitCode": 0,
+        "log": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\source-cache-validation\\worker-lint.log",
+        "logSha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415"
+      }
+    ],
+    "currentWorkerSourcePass": 1715,
+    "currentWorkerSourceFiles": 126,
+    "providerGenerationsBeforeCorrection": 0,
+    "supersededSeal": "97dcbbc4b388a66f04ac65816e052a78c15872f1",
+    "interruptedPreflightExit": -1,
+    "rawDirectoryExistedAtInterruption": false,
+    "rawLogs": {
+      "red-policy-cache.log": {
+        "path": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\red-policy-cache.log",
+        "sha256": "fc084730d25b49fa25fbd9f3ffa467755b7cea3017903ec877a1bd3a2605bd71"
+      },
+      "green-policy-cache.log": {
+        "path": "C:\\Users\\nguye\\AppData\\Local\\Temp\\c3-b-owner-comparison-20261015\\green-policy-cache.log",
+        "sha256": "8b621bf16e845c301af087c5c76eccb5ec05792d6ff0064d9fafd43155106f7d"
+      }
+    }
+  }
+}

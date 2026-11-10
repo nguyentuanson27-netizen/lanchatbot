@@ -1,0 +1,15 @@
+# Round48 — owner-authorized A2 then conditional A3
+
+Owner 2026-10-11: “chạy vòng mới a2, a3”. Exactly one fresh run of the prepared Round48. This execution authorization supersedes preparation-only status; it does not authorize changed prompts/corpus/labels/models/bars, another iteration, post-A, merge/deploy or live send.
+
+Refreshed origin/main / implementationBaseSha: `296cdcfbf5759f5bf9cbb24acf3dc63005589361`. Prepared head: `cbec2d3bac6383ce89ffc1562e48123b966d583a`. Frozen preparation/spec SHA inside manifest: `db2219a6ed779ac8f9677cfae4b12ee225478d2f`. Inputs/prompt/schema/config/control hashes remain byte-exact as prepared. Owner Gemini3.5FlashLite/high, verifier gpt6.1sol/high, defaultN1/selectedN3 and all existing quality/usability thresholds retained.
+
+Before seal, one adapter omission was found: Gemini V4 admission did not include Round48. Observed RED for the actual Round48 conversation request failing before dispatch, then minimal one-entry admission fix. No provider API/body/config/retry change. Installed-client stub/full/focused regression tests must pass before generation. Prior worker build/typecheck/lint/boundary/protected verification is retained on unchanged TypeScript/shared source; current commands will be recorded separately without claiming reruns.
+
+Execute from clean committed executable/config source: capture HEAD at runtime as a2RunSourceSha, preflight→A2→validate.163cases/253attempts,147UNSAFE/106SAFE; every surviving draft verified. Any preregistered unsafe send-eligible PASS immediately makes A2FAIL/STOP. AUTH_HEADER/HTTP401/429/explicit-quota stops with current failure retained and remainder null. No generation retry or rerunning the same attempt. Errors stay in denominator; missing coverage blocks acceptance. A2FAIL/BLOCKED means A3NOT_RUN.
+
+Only A2PASS permits A3. Commit A2raw, require clean executable/config source and capture fresh runtimea3RunSourceSha; preflight→66A3 attempts from42histories→validate. Preserve raw and human-null packet in a commit before primary review. Review fullhistory/actualterminal against frozen rubric, then retain separate subjective Codex scores/reasons and commit before rejected-draft diagnostics. Do not claim human/independent scoring. Whole-turn usefulness/naturalness/decision support matter, not keywords. Actual fallback/handoff/no-send is the scored outcome, all generations/errors count.
+
+Report both run-source identities, hashes, full denominators, per-attempt request/error/usage evidence, latency/dispositions, contamination firewall reconstruction, findings/unknowns, actual commands and complexity in round-48/CHECKPOINT_A.md; update tasks/draftPR390. Stop with GO/STOP/BLOCKED recommendation. No automatic Round49 or post-A.
+
+Sources: [frozen preparation scope](c3-round48-policy-contract-preparation-20261011.md), [parent](c3-single-agent-commerce-architecture-20261004.md), [amendment](c3-semantic-verifier-boundary-amendment-20261005.md), [plan](../../tasks/plan.md), [todo](../../tasks/todo.md).

@@ -1,0 +1,23 @@
+{
+  "runSourceSha": "2bc7d5d27a9d1f14c30e5911501263c4ca070ca4",
+  "primaryReviewLockSha": "d5c9eb7902aa234b77daa07d462605f135d94d02",
+  "childSourceAndPromptRegistrationsMatched": 2,
+  "verifierBindingsRecomputed": 28,
+  "ownerExactPromptCaptures": 61,
+  "wireBodiesChecked": 93,
+  "evaluatorLabelLeaks": 0,
+  "exactEligibleTextMatches": 28,
+  "captureHashesMatched": 0,
+  "publishedArtifactHashesMatched": 49,
+  "testDatabaseDropped": true,
+  "sendEnabled": false,
+  "unchangedFrozenFileCount": 14,
+  "publishedRawGitBlobHashesMatched": 49,
+  "allAttemptsOneUpstreamRequest": true,
+  "secretPrivatePhoneScan": "PASS",
+  "primaryHashMatchedLock": true,
+  "actualOwnerPriceDifferenceRequests": 11,
+  "actualOwnerPriceDifferencePairs": 31,
+  "actual499k799kComparisonPairs": 8,
+  "maxCapturedOwnerBytes": 26060
+}

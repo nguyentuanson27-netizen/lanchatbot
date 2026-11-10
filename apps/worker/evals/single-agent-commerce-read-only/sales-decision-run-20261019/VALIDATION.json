@@ -1,0 +1,20 @@
+{
+  "runSourceSha": "7e9ece0a10280ff0aa87e7083ce2bcc145d9bb13",
+  "targetedSlotsRegistered": 6,
+  "targetedSlotsRecorded": 6,
+  "generationRequests": 12,
+  "eachGenerationExactlyOneRequest": true,
+  "providerErrors": 0,
+  "timeouts": 0,
+  "retry": 0,
+  "frozenGitHashesMatched": [
+    "apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt",
+    "apps/worker/evals/single-agent-commerce-read-only/prompts/verifier.vi.txt",
+    "apps/worker/evals/single-agent-commerce-read-only/sales-decision-run-20261019/targeted-input.json"
+  ],
+  "publishedGitArtifactHashesMatched": 12,
+  "conditional16Dispatched": false,
+  "conditional16Reason": "Target slot3 actual fallback is a preregistered substantive failure; full16 remains NOT_DISPATCHED_CONDITION_NOT_MET, not failed/successful model outcomes.",
+  "targetedAdviceNotLiveEligibility": true,
+  "providerCost": "NOT_EXPOSED"
+}

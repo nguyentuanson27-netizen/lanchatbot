@@ -1,0 +1,34 @@
+{
+  "baseSha": "fdb2a63e1b8522042274b812b25ac0cffa53c2a6",
+  "ownerOldSha256": "057fcb7a47d69ffce4731a8ee58bb7ecafe36204bd6726128325e7838a813d70",
+  "ownerNewSha256": "ae408588d78e0a49f867e8dca24cef38f6ded5903ba251e9790b460ecfe2e207",
+  "oldBytes": 9710,
+  "newBytes": 10044,
+  "authoritySectionsUnchanged": true,
+  "tddRed": {
+    "pass": 4,
+    "fail": 2
+  },
+  "tddGreen": {
+    "pass": 6,
+    "fail": 0
+  },
+  "selfReview": {
+    "newContentSelection": "Use evidence internally; express details serving current advice/buying decision. Preserve multi-question completeness and proactive selling.",
+    "style": "Ordinary spoken vocabulary; no repeated near-synonymous praise; no banned words/sentence quota/answer examples.",
+    "missingDecisionInputs": "Existing size/source/state/permission rules preserved.",
+    "changedRuntimeRoles": 0,
+    "changedVerifier": false
+  },
+  "focusedTests": {
+    "command": "node --test apps/worker/evals/single-agent-commerce-read-only/advice-diagnostic.test.mjs apps/worker/evals/single-agent-commerce-read-only/candidate-description.test.mjs apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs apps/worker/evals/single-agent-commerce-read-only/protocol.test.mjs",
+    "pass": 65,
+    "fail": 0,
+    "skip": 0
+  },
+  "workerBuild": {
+    "command": "pnpm --filter @lana/worker build",
+    "exitCode": 0
+  },
+  "selfReviewSkill": "code-review-and-quality (read earlier in this conversation); solo self-review, no independent reviewer requested in this turn"
+}

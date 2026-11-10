@@ -1,0 +1,50 @@
+{
+  "sourceSha": "468d85ea6577c428cf2f6f155c9774926537364b",
+  "nativeRegistered": 51,
+  "nativeExecuted": 51,
+  "nativeNotRun": 0,
+  "controlsExecuted": 17,
+  "completeDenominator": 68,
+  "nativeTerminals": {
+    "SEND_ELIGIBLE": 37,
+    "HANDOFF": 10,
+    "NO_SEND": 4
+  },
+  "providerGenerationRequests": 142,
+  "requestsByRole": {
+    "owner": 87,
+    "verifier": 38,
+    "control-verifier": 17
+  },
+  "maximumUpstreamPerGeneration": 1,
+  "observedModelVersions": {
+    "gemini-3.5-flash-lite": 87,
+    "gpt-6.1-sol": 55
+  },
+  "generationErrors": [],
+  "inputTokens": 900693,
+  "outputTokens": 79932,
+  "geminiThinkingAlreadyIncludedInOutput": 69408,
+  "cost": null,
+  "verifierLatencySeconds": {
+    "n": 38,
+    "p50": 7.0,
+    "p95": 13.046
+  },
+  "verificationWithReadbackSeconds": {
+    "n": 38,
+    "p50": 8.579,
+    "p95": 16.409
+  },
+  "driverElapsedSeconds": {
+    "n": 51,
+    "p50": 18.916,
+    "p95": 43.89
+  },
+  "wireAudit": {
+    "capturedActualBodies": 142,
+    "ownerHashesChecked": 87,
+    "ownerHashMismatches": [],
+    "evaluatorKeyMatches": []
+  }
+}

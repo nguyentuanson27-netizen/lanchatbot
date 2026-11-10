@@ -1,0 +1,110 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+ ❯ src/single-agent-commerce-ingress.test.ts (71 tests | 1 failed | 70 skipped) 71ms
+   ↓ preserves a benign caption through the shared history redactor
+   ↓ adds bounded actual image history without evicting customer corrections or exceeding eight entries
+   ↓ keeps an accepted-image conversation returning when the text history write was lost
+   × does not call an unavailable delivery history an empty first contact 70ms
+     → expected { firstContact: true, fromAd: false } to deeply equal { firstContact: null, fromAd: false }
+   ↓ recovers first-contact images with a verified turn product and no persisted focus (code)
+   ↓ recovers first-contact images with a verified turn product and no persisted focus (source-title)
+   ↓ recovers first-contact images with a verified turn product and no persisted focus (approved-group)
+   ↓ does not grant first-contact image recovery from not-requested
+   ↓ does not grant first-contact image recovery from two-titles
+   ↓ does not grant first-contact image recovery from unresolved-ad
+   ↓ does not grant first-contact image recovery from unresolved-code
+   ↓ does not grant first-contact image recovery from shortened-title
+   ↓ does not grant first-contact image recovery from ambiguous-group
+   ↓ preserves a selected image in a code-owned fallback group without sending the rejected draft (cart=false)
+   ↓ preserves a selected image in a code-owned fallback group without sending the rejected draft (cart=true)
+   ↓ does not recover images across a source failure
+   ↓ does not recover images across a human failure
+   ↓ does not recover images across a revision failure
+   ↓ does not recover images across a pending-state failure
+   ↓ does not recover images across a other-product failure
+   ↓ finishes mixed media and size intake after a corrected inline call within the unchanged budget
+   ↓ does not enqueue a partial mixed handoff group after source changes
+   ↓ does not enqueue a partial mixed handoff group after human changes
+   ↓ does not enqueue a partial mixed handoff group after revision changes
+   ↓ does not enqueue a partial mixed handoff group after inbox changes
+   ↓ does not enqueue a partial mixed handoff group after policy changes
+   ↓ does not enqueue a partial mixed handoff group after unknown-transaction changes
+   ↓ keeps customer-requested handoff free of images even when media was selected in an earlier round
+   ↓ continues after the actual media fallback with history and persisted product (GENERIC)
+   ↓ continues after the actual media fallback with history and persisted product (DETAIL)
+   ↓ keeps a mixed price/media reply only after whole-draft verification (PASS)
+   ↓ keeps a mixed price/media reply only after whole-draft verification (UNCERTAIN)
+   ↓ does not count the same objection again when a superseded batch gains a new tail
+   ↓ keeps receipt evidence private and passes the actual batch source guard (textAfter=false)
+   ↓ keeps receipt evidence private and passes the actual batch source guard (textAfter=true)
+   ↓ hands unknown customer media to staff with the first media message linkage and no provider exposure
+   ↓ does not fetch or expose hostile attachment URLs and preserves human ownership
+   ↓ enqueues approved media and exact final text in one protected response group (false/'SM613')
+   ↓ enqueues approved media and exact final text in one protected response group (true/'SM613')
+   ↓ enqueues approved media and exact final text in one protected response group (true/'OTHER1')
+   ↓ binds current context from verified explicit/ad/state sources without guessing from reads ('SM613')
+   ↓ binds current context from verified explicit/ad/state sources without guessing from reads ('OTHER1')
+   ↓ binds current context from verified explicit/ad/state sources without guessing from reads ('SM613')
+   ↓ binds current context from verified explicit/ad/state sources without guessing from reads (null)
+   ↓ fills the public history window after private rows without duplicating the latest batch
+   ↓ keeps pending checkout input private before history or either model (Nguyễn Thị Lan)
+   ↓ keeps pending checkout input private before history or either model (Khoan, áo này giặt máy được không em?)
+   ↓ starts the independent generation read while current authority is being loaded
+   ↓ persisted ingress source and final revision > uses available scoped names in the actual private preview without model or extra catalog reads (named=true)
+   ↓ persisted ingress source and final revision > uses available scoped names in the actual private preview without model or extra catalog reads (named=false)
+   ↓ persisted ingress source and final revision > binds a code-owned cart summary to current cart/fact readiness before enqueue (READY)
+   ↓ persisted ingress source and final revision > binds a code-owned cart summary to current cart/fact readiness before enqueue (PRICE_CHANGED)
+   ↓ persisted ingress source and final revision > binds a code-owned cart summary to current cart/fact readiness before enqueue (UNAVAILABLE)
+   ↓ persisted ingress source and final revision > enqueues a code-owned fallback without unrelated product coverage ([])
+   ↓ persisted ingress source and final revision > enqueues a code-owned fallback without unrelated product coverage ([ 'SM613', 'OTHER1', 'OTHER2' ])
+   ↓ persisted ingress source and final revision > enqueues a policy-only generated reply without a product and still verifies it
+   ↓ persisted ingress source and final revision > binds only products with actual verified claims after other candidates were loaded
+   ↓ persisted ingress source and final revision > enqueues a static fallback when an existing cart cannot be refreshed
+   ↓ persisted ingress source and final revision > does not write customer state after a newer Inbox generation arrives during owner generation
+   ↓ persisted ingress source and final revision > does not rebase a verified reply onto a conversation revision changed after final tools readback
+   ↓ persisted ingress source and final revision > does not write customer state after authority transfers to a human during generation
+   ↓ persisted ingress source and final revision > enqueues an unchanged verified world with precisely its conversation revision
+   ↓ reports exact binding mismatch without sending when egress readback changes
+   ↓ provides opening context from actual ingress history: ad
+   ↓ provides opening context from actual ingress history: organic
+   ↓ provides opening context from actual ingress history: returning
+   ↓ provides opening context from actual ingress history: private-history
+   ↓ passes the opening card and chosen images through the existing verifier and egress group
+   ↓ composes ingress with the real scoped source adapter and no product seed: ad
+   ↓ composes ingress with the real scoped source adapter and no product seed: explicit
+   ↓ composes ingress with the real scoped source adapter and no product seed: missing-ad
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/single-agent-commerce-ingress.test.ts > does not call an unavailable delivery history an empty first contact
+AssertionError: expected { firstContact: true, fromAd: false } to deeply equal { firstContact: null, fromAd: false }
+
+- Expected
++ Received
+
+  {
+-   "firstContact": null,
++   "firstContact": true,
+    "fromAd": false,
+  }
+
+ ❯ src/single-agent-commerce-ingress.test.ts:110:17
+    108|     return { kind: "FINAL", text: "Dạ chị." };
+    109|   });
+    110|   expect(entry).toEqual({ firstContact: null, fromAd: false });
+       |                 ^
+    111| });
+    112| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 70 skipped (71)
+   Start at  02:40:08
+   Duration  3.97s (transform 1.76s, setup 0ms, collect 2.98s, tests 71ms, environment 0ms, prepare 271ms)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/single-agent-commerce-ingress.test.ts -t unavailable delivery history

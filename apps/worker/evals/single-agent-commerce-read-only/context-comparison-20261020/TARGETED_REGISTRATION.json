@@ -1,0 +1,201 @@
+{
+  "kind": "PRE_PROVIDER_REGISTRATION",
+  "sourceSha": "CAPTURE_CLEAN_HEAD_AT_RUNTIME_DO_NOT_WRITE_BACK",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "057fcb7a47d69ffce4731a8ee58bb7ecafe36204bd6726128325e7838a813d70",
+    "verifier": "8a75dec909a24acf8962b421a9a6cf1f1d208ec01b89401ce94c27ba1dc5299a"
+  },
+  "schemaHash": "76797908438360502c6cdb6f7f9b8341076edfbffc3a627c28685752bc468d97",
+  "registeredSlots": 12,
+  "maximumGenerationRequests": 24,
+  "retry": 0,
+  "inputSha256": "e148f1253ec1a73d2b45d6f39a2ea5b3f4a6881ab43f43ee3cebd35326975a44",
+  "captureSource": "apps/worker/evals/single-agent-commerce-read-only/wording-stability-2-20261019/raw/advice-input-1.json",
+  "captureSourceSha256": "859ef3a51985b838d45f811ebf417c3066c5420677f64634913ec59c60e1598a",
+  "slotOrder": [
+    {
+      "slot": 1,
+      "caseId": "b1-changed-occasion:rep-1:control",
+      "family": "b1-changed-occasion",
+      "repetition": 1,
+      "arm": "control",
+      "descriptionProductsChanged": []
+    },
+    {
+      "slot": 2,
+      "caseId": "b1-changed-occasion:rep-1:candidate",
+      "family": "b1-changed-occasion",
+      "repetition": 1,
+      "arm": "candidate",
+      "descriptionProductsChanged": [
+        "SV1561",
+        "SV165",
+        "SV244"
+      ]
+    },
+    {
+      "slot": 3,
+      "caseId": "b1-buying-concern:rep-1:control",
+      "family": "b1-buying-concern",
+      "repetition": 1,
+      "arm": "control",
+      "descriptionProductsChanged": []
+    },
+    {
+      "slot": 4,
+      "caseId": "b1-buying-concern:rep-1:candidate",
+      "family": "b1-buying-concern",
+      "repetition": 1,
+      "arm": "candidate",
+      "descriptionProductsChanged": []
+    },
+    {
+      "slot": 5,
+      "caseId": "b1-changed-occasion:rep-2:candidate",
+      "family": "b1-changed-occasion",
+      "repetition": 2,
+      "arm": "candidate",
+      "descriptionProductsChanged": [
+        "SV1561",
+        "SV165",
+        "SV244"
+      ]
+    },
+    {
+      "slot": 6,
+      "caseId": "b1-changed-occasion:rep-2:control",
+      "family": "b1-changed-occasion",
+      "repetition": 2,
+      "arm": "control",
+      "descriptionProductsChanged": []
+    },
+    {
+      "slot": 7,
+      "caseId": "b1-buying-concern:rep-2:candidate",
+      "family": "b1-buying-concern",
+      "repetition": 2,
+      "arm": "candidate",
+      "descriptionProductsChanged": []
+    },
+    {
+      "slot": 8,
+      "caseId": "b1-buying-concern:rep-2:control",
+      "family": "b1-buying-concern",
+      "repetition": 2,
+      "arm": "control",
+      "descriptionProductsChanged": []
+    },
+    {
+      "slot": 9,
+      "caseId": "b1-changed-occasion:rep-3:control",
+      "family": "b1-changed-occasion",
+      "repetition": 3,
+      "arm": "control",
+      "descriptionProductsChanged": []
+    },
+    {
+      "slot": 10,
+      "caseId": "b1-changed-occasion:rep-3:candidate",
+      "family": "b1-changed-occasion",
+      "repetition": 3,
+      "arm": "candidate",
+      "descriptionProductsChanged": [
+        "SV1561",
+        "SV165",
+        "SV244"
+      ]
+    },
+    {
+      "slot": 11,
+      "caseId": "b1-buying-concern:rep-3:control",
+      "family": "b1-buying-concern",
+      "repetition": 3,
+      "arm": "control",
+      "descriptionProductsChanged": []
+    },
+    {
+      "slot": 12,
+      "caseId": "b1-buying-concern:rep-3:candidate",
+      "family": "b1-buying-concern",
+      "repetition": 3,
+      "arm": "candidate",
+      "descriptionProductsChanged": []
+    }
+  ],
+  "mode": "SAME_CAPTURE_REPLAY_CLOCK_TOOLS_DISABLED_NO_FULL_TOOL_HISTORY_NOT_INDEPENDENT_LIVE_JOURNEYS",
+  "launcherHash": "84a43f0c8ba5c46a48db6552f61910d2e93e198f5b6807c4afc4de8d581eeab3",
+  "reviewProtocol": "Read whole customer turn, history, actual customer outcome and public state. Judge whether advice helps choose and buy shop goods, resolves the stated hesitation, and offers a usable next step when useful. USABLE/NEEDS_EDIT/UNUSABLE/OWNERSHIP_CONTROL before verifier diagnosis. Ordinary aesthetic/material advice accepted; no keyword/fact-count scoring, forced CTA, forced alternative or lowest-price preference. NEEDS_EDIT must identify content that needs rewriting before sending; minor voice polish alone does not overturn an otherwise useful answer. Missing source deliberately injected by a fixture is reported separately from model errors. Preserve historical labels and counts; supplemental comparison is descriptive.",
+  "continuation": "Complete all12 diagnostic slots unless operational unavailability. No retry/repair. Continue new16 integrated only if treated changed-occasion demonstrates whole-reply improvement, concern does not materially regress and no substantive candidate failure. Subjective polish alone is not failure. No majority voting; any substantive candidate failure stops conditional16.",
+  "sendEnabled": false,
+  "totalCeiling": {
+    "targetedSlots": 12,
+    "conditionalIntegratedSlots": 16,
+    "generationRequests": 76
+  },
+  "fallback": {
+    "id": "C3_A_NONPROTECTED_V2",
+    "text": "Phần này em chưa trả lời được, chị nhé.",
+    "sha256": "cfc8c9403a905ecf8cb04edc5622a8badd6abd813f3d9b5456c2211d39a0e5d2"
+  },
+  "preparationBaseSha": "f9c9c4a973a2f987042d7e1bc5ebbe2c6c485a5c",
+  "change": "Owner presentation only for three alternative product descriptions. SV2447 unchanged; concern owner requests identical across arms. Canonical context, owner prompt, verifier and config unchanged.",
+  "voiceReviewFocus": "Whole customer outcome and useful buying advice, anchored before run in REVIEW_ANCHORS. No keyword/fact-count scoring or compulsory CTA. Distinguish functional usable but thin persuasion from substantive choice gap. Read terminal before rejected-draft diagnosis.",
+  "reviewClarification": "docs/specs/c3-phase-b-context-comparison-plan-20261020.md",
+  "reviewClarificationHash": "e13115f3040811a3245fc75e22b2d986e0dc120ed0765d2c818fb9bfcd46654d",
+  "descriptionMapSha256": "79213e098f2fef2692303fb152e1ec96e77f1541dd8909e1ae9c042d0ce32312",
+  "sourceReviewSha256": "c5dd7ed7a147da6359285c06c70b99d417a5132174787ed3412357c0a2ad2889",
+  "reviewAnchorsSha256": "8733a33f8d32320633aad20e1dd7c3fdf0acba2faea8efeafe74be1986252da2",
+  "primaryTreatmentCase": "b1-changed-occasion",
+  "unchangedInputControlCase": "b1-buying-concern"
+}

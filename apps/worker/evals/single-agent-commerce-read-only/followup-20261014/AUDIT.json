@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "sourceSha": "8bbea938bd947f02910b29976c75b47e8ce00c9c",
+  "rawSavepoint": "965e3138",
+  "primarySavepoint": "fa61bce3",
+  "requestBodies": 26,
+  "ownerBodies": 19,
+  "verifierBodies": 7,
+  "maximumRequestBytes": 24113,
+  "evaluatorLabelLeaks": 0,
+  "mandatoryVerifierFinals": 7,
+  "bindingMatches": 7,
+  "sourceSnapshotStable": true,
+  "rawHashesVerified": 12,
+  "sameEightWorldsLabelsSourceModes": true,
+  "verifierPromptUnchanged": true,
+  "allGenerationSlotsAccounted": true,
+  "generationRetries": 0,
+  "sourceCompletionIdentity": "AWAITING_WHOLE_REPLY_REVIEW",
+  "limitation": "Final B1 readback snapshots are not separately retained; current gate outcomes and focused mechanism tests are retained. Development N1, no live send/stateful qualification."
+}
