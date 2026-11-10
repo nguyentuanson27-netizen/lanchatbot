@@ -6,6 +6,7 @@ import {createHash} from 'node:crypto';
 import {createServiceAccountAssertion,vertexGenerateEndpoint} from '../../dist/vertex.js';
 import {omitCurrentProductDuplicates} from '../../dist/single-agent-commerce-read-only-context.js';
 import {sizeRequestScope} from '../../dist/single-agent-commerce-state.js';
+import {CART_WRITE_TOOLS,presentCartWriteResult} from '../../dist/single-agent-commerce-owner-view.js';
 import {HandoffReasonV2Schema,canonicalJsonV1,CustomerProfileV1Schema,CommerceHistoryMetadataV1Schema} from '@lana/contracts';
 import {presentOwnerData,presentCompactOwnerData} from './owner-data-presentation.mjs';
 import {compactOwnerProducts,compactCurrentFacts,compactSelectionResult,sharedSingleItemReads} from './owner-product-tables.mjs';
@@ -199,6 +200,8 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  requireThat(contents.every(c=>c.parts.every(p=>!p.inlineData&&!p.fileData)),'OWNER_IMAGE_BINDING');
  for(const message of contents)for(const part of message.parts??[]){
   const response=part.functionResponse;
+  // Code-owned meaning of a cart write comes first; source bookkeeping stays out of the owner view.
+  if(response?.response&&CART_WRITE_TOOLS.includes(response.name))response.response=presentCartWriteResult(response.response);
   const data=response?.response?.data;if(!data)continue;
   // Reference only the identical policy already present in this same request.
   // Older/different policies keep their full result; scope/eligibility/version remain local.

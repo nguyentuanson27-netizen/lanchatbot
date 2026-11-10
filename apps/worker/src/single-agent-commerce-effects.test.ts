@@ -131,7 +131,16 @@ describe("replacement choices and negotiation prerequisites",()=>{
   expect(Buffer.byteLength(JSON.stringify(wire))).toBeLessThanOrEqual(65536);
   expect(wire.contents.find((m:Record<string,any>)=>m.role==="model")).toEqual(signed);
   const response=wire.contents.flatMap((m:Record<string,any>)=>m.parts).find((p:Record<string,any>)=>p.functionResponse)?.functionResponse.response;
-  expect(response).toMatchObject({status:"UNAVAILABLE",data:{effectCommitted:false,preCartQuoteRequest:{calculationStatus:"NOT_CALCULATED",sourcePriceStatus:"REQUIRES_QUOTE_READ",target:{subjectRef:"SM613",offerTypes:["DIRECT"]}}}});
+  // The owner reads the meaning first: nothing was added, and which colours to ask for. Hashes stay out of this result.
+  expect(response).toMatchObject({status:"NOT_DONE",reason:"CUSTOMER_CHOICE_NEEDED",data:{effectCommitted:false,
+   outcome:{done:false,cartChanged:false,needsFromCustomer:"COLOR",choicesAreAllForRequest:true,
+    choices:[{color:"navy",size:"M",stock:"IN_STOCK"},{color:"be",size:"M",stock:"IN_STOCK"}]},
+   preCartQuoteRequest:{calculationStatus:"NOT_CALCULATED",sourcePriceStatus:"REQUIRES_QUOTE_READ",target:{subjectRef:"SM613",offerTypes:["DIRECT"]}}}});
+  expect(Object.keys(response.data)[0]).toBe("outcome");
+  for(const internal of ["selectionEvidenceFromProduct","selectionOptionsFromEvidence","choiceResolution","availableColors"])expect(response.data).not.toHaveProperty(internal);
+  expect(response).not.toHaveProperty("failureStage");
+  // The raw result still carries the proof the quote route and verifier context rely on.
+  expect(failed).toMatchObject({status:"UNAVAILABLE",reason:"SELECTION_UNAVAILABLE",failureStage:"SOURCE",data:{choiceResolution:{kind:"NEEDS_CUSTOMER_CHOICE"}}});
   expect(policy).not.toHaveBeenCalled();expect(s.commits).toHaveLength(0);expect(tools.quoteTaskWork!()).toEqual([]);
  });
 });
