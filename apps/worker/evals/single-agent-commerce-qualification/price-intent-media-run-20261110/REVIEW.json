@@ -1,0 +1,128 @@
+{
+  "kind": "WHOLE_CONVERSATION_DEVELOPMENT_REVIEW_NOT_BLIND_QUALIFICATION",
+  "runSourceSha": "5613e8b37784f8c2eb6be4ce3a115d8b13b7100e",
+  "reviewer": "/root",
+  "independentResultReview": {
+    "reviewer": "/root/post_contract_input_review",
+    "status": "PARTIAL_USAGE_LIMIT",
+    "confirmed": [
+      "J4 false cart success blocked, negotiation not exercised",
+      "P09 no cart tool, continuation blocked before HTTP"
+    ],
+    "provisional": [
+      "S16 apparent direct silent handoff",
+      "S04 exact color count depends on scope"
+    ],
+    "formalScore": null
+  },
+  "cases": [
+    {
+      "caseId": "c-po-20261031-p06",
+      "status": "TASK_OK",
+      "reason": "Báo đủ bộ ba món 989.000đ, size S/M/L và một ảnh SD023 đúng nguồn.",
+      "turns": 1,
+      "qualityDenominatorEligible": true
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "status": "TASK_OK_WITH_FRICTION",
+      "reason": "Ghi sở thích be và không tạo giỏ. Khách đã cảm ơn, câu hỏi gợi thêm chi tiết chưa cần thiết.",
+      "turns": 1,
+      "qualityDenominatorEligible": true
+    },
+    {
+      "caseId": "c-20261028-s16",
+      "status": "SOURCE_GAP_HANDOFF_OK",
+      "reason": "Owner chủ động gọi handoff, code commit chuyển giao, không ảnh/tin. Không gọi media có requiredEvidence và không gọi verifier trong ca này.",
+      "turns": 1,
+      "qualityDenominatorEligible": false
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "status": "TASK_OK_WITH_FRICTION",
+      "reason": "Đã cập nhật từ 56kg thành 51kg, giữ hồ sơ còn lại và dùng TOP M khi khách chọn mặc thoải mái. Lượt sửa số đo cần thêm một lần gọi tool sau lỗi dẫn chứng. Đọc lại số đo làm câu trả lời nặng.",
+      "turns": 3,
+      "qualityDenominatorEligible": true
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "status": "MATERIAL_FAIL",
+      "reason": "Lượt 1 add_to_cart thiếu màu, effectCommitted=false. Owner báo đã thêm giỏ. Verifier chặn đúng. Handoff làm hai lượt sau thuộc HUMAN, nên nhánh thương lượng không được đo.",
+      "turns": 3,
+      "qualityDenominatorEligible": true
+    },
+    {
+      "caseId": "c-20261028-s04",
+      "status": "MATERIAL_FAIL",
+      "reason": "Tool cấp các lựa chọn trắng/be trong danh sách giới hạn. Lời đáp khẳng định chính xác hai màu mà không giới hạn phạm vi. Verifier chặn và khách không nhận được thông tin đã biết.",
+      "turns": 1,
+      "qualityDenominatorEligible": true
+    },
+    {
+      "caseId": "c-20261028-s09",
+      "status": "TASK_OK_WITH_FRICTION",
+      "reason": "Trả được cách giặt theo FAQ. Phần giữ form dáng và độ bền tốt nhất là lời thêm thiếu căn cứ cụ thể, cần xem lại ranh giới nghĩa. Không tính như một lời bảo đảm độ bền đã được xác lập.",
+      "turns": 1,
+      "qualityDenominatorEligible": true
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "status": "TASK_OK_CUSTOMER_INPUT",
+      "reason": "Hai áo M/L 978.100đ gồm 30.000đ ship và 49.900đ giảm theo hai đơn vị. Quote trước giỏ thực sự chạy. Chờ chọn màu.",
+      "turns": 3,
+      "qualityDenominatorEligible": true
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "status": "TASK_OK_CUSTOMER_INPUT",
+      "reason": "Đã tạo giỏ set M. Đổi sang áo còn thiếu màu, giỏ cũ giữ nguyên và owner hỏi đúng phần thiếu.",
+      "turns": 2,
+      "qualityDenominatorEligible": true
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "status": "TASK_OK",
+      "reason": "Engine trả TOP M và PANTS M. Owner dùng cả hai kết quả và ảnh đúng mẫu.",
+      "turns": 1,
+      "qualityDenominatorEligible": true
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "status": "MATERIAL_FAIL",
+      "reason": "Lượt 2 chọn đường đọc, quote và ảnh, không add_to_cart. Lần sinh tiếp theo bị chặn khi dựng request 68.237 byte, trần 65.536 byte, 0 HTTP. Không có câu trả lời sau khi khách phân biệt mẫu.",
+      "turns": 2,
+      "qualityDenominatorEligible": true
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "status": "TASK_OK",
+      "reason": "Giỏ 829.000đ, thu thông tin riêng tư, preview và chốt qua receipt. Chuyển giao im lặng thành công.",
+      "turns": 7,
+      "qualityDenominatorEligible": true
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "status": "TASK_OK_WITH_FRICTION",
+      "reason": "Chọn Diệp An cho dịp đi lễ và nêu Odette có sẵn như một phương án thay thế. Lời tư vấn dài và hỏi lại lựa chọn.",
+      "turns": 1,
+      "qualityDenominatorEligible": true
+    }
+  ],
+  "taskAdequateCases": 9,
+  "materialFailureCases": 3,
+  "salesCaseDenominator": 12,
+  "sourceGapControls": 1,
+  "sourceGapControlsPassed": 1,
+  "screenGate": "FAIL",
+  "recommendation": "STOP",
+  "notExercised": [
+    "J4 negotiation result path after first-turn handoff",
+    "S16 requiredEvidence tool branch and duplicate attachment in native model run",
+    "paired positive short purchase answer",
+    "W2 writer then quote in a single admitted batch"
+  ],
+  "reviewNotes": [
+    "S09 qualitative care rationale flagged for additional semantic review",
+    "Development known cases, N1, refreshed source world. No stability, causality or qualification claim."
+  ]
+}

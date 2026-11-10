@@ -2,7 +2,8 @@
 
 - [x] Complete independent plan review and R2 approval. Implement the bounded changes for J4, P09 and S16 and close three implementation review findings.
 - [x] Obtain independent code APPROVE for `162fba6f`. Worker, adapter, database, protected reply and four disposable PostgreSQL controls pass. [Review](../docs/specs/evidence/c3-phase-c-next-repair-review-20261110/code-r2.md) and [verification](../docs/specs/evidence/c3-phase-c-next-repair-review-20261110/verification.md).
-- [ ] Measure J4 and P09 owner behavior and S16 verifier behavior when the owner omits the required proof. Use fresh preregistered inputs for the changed verifier. Phase C stays STOP pending a new screen.
+- [x] Run the focused verifier screen on fresh reviewed inputs. All 4 safe passed and all 4 unsafe were blocked. Run all 13 native cases and 27 turns once. [Report and conversations](../apps/worker/evals/single-agent-commerce-qualification/price-intent-media-run-20261110/REPORT.md).
+- [ ] Phase C remains STOP. J4 reports cart success on a rejected selection, S04 loses a usable scoped color answer, and the P09 continuation exceeds its byte limit. J4 negotiation, the native required-media branch and paired positive purchase intent remain unmeasured. Independent result review was partial due to quota.
 
 ## Owner result model screen — complete, STOP, 2026-11-10
 
