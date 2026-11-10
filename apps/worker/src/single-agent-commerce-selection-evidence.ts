@@ -5,11 +5,35 @@ import type {CandidateCartOption} from "./realtime-sales-catalog.js";
 // At most six normal calls, each comparing at most three offers. Byte bounds remain stricter.
 export const MAX_SELECTION_OBSERVATIONS=18;
 export type CandidateSelectionOption=Pick<CandidateCartOption,"size"|"color"|"status"|"reasonCode"|"identityHash">;
+export type SelectionStock=CandidateSelectionOption["status"];
+/** Every recorded value among ALL source tuples of the query, not only the retained ones.
+ *  complete=false when a tuple has no recorded value or the list was capped.
+ *  Carried only when tuples were cut; with ALL_EXACT_TUPLES_FOR_QUERY the options already are the whole list. */
+export interface SelectionValues {values:{value:string;stock:SelectionStock[]}[];complete:boolean}
+export type SelectionCompleteness="ALL_EXACT_TUPLES_FOR_QUERY"|"FIRST_8_EXACT_TUPLES_NOT_COMPLETE_INVENTORY";
 export interface CandidateSelectionEvidence {
- kind:"CANDIDATE_SELECTION_V2";productId:string;offerType:string;size:string|null;color:string|null;quantity:number;
+ kind:"CANDIDATE_SELECTION_V3";productId:string;offerType:string;size:string|null;color:string|null;quantity:number;
  sourceVersion:string;sourceHash:string;observedAt:string;expiresAt:string;
- completeness:"FIRST_8_EXACT_TUPLES_NOT_COMPLETE_INVENTORY";options:CandidateSelectionOption[];contentHash:string;
+ completeness:SelectionCompleteness;options:CandidateSelectionOption[];contentHash:string;
+ allSourceValuesForQuery:{colors:SelectionValues;sizes:SelectionValues}|null;
  colorSemantics:"UNRECORDED_IS_NOT_A_PHYSICAL_COLOR";
+}
+export const MAX_SELECTION_OPTIONS=8,MAX_SELECTION_VALUES=12;
+const STOCK:readonly SelectionStock[]=["IN_STOCK","PRE_ORDER","OUT_OF_STOCK","UNKNOWN"];
+/** Scope label for a tuple list cut to MAX_SELECTION_OPTIONS; `total` is the count before the cut. */
+export const selectionOptionScope=(total:number)=>total<=MAX_SELECTION_OPTIONS
+ ?"ALL_EXACT_TUPLES_FOR_QUERY" as const:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY" as const;
+/** Distinct recorded values with the stock states seen for each. An unrecorded colour is not a colour. */
+export function selectionValues(options:readonly Pick<CandidateSelectionOption,"size"|"color"|"status">[],field:"color"|"size"):SelectionValues {
+ const seen=new Map<string,{value:string;stock:Set<SelectionStock>}>();let complete=true;
+ for(const o of options){
+  const raw=o[field];
+  if(raw===null||raw==="__NO_COLOR__"||!raw.trim()){complete=false;continue;}
+  const key=normalizeCatalogToken(raw);let entry=seen.get(key);
+  if(!entry){if(seen.size>=MAX_SELECTION_VALUES){complete=false;continue;}seen.set(key,entry={value:raw,stock:new Set()});}
+  entry.stock.add(o.status);
+ }
+ return {values:[...seen.values()].map(v=>({value:v.value,stock:STOCK.filter(k=>v.stock.has(k))})),complete};
 }
 export const selectionEvidenceHash=(v:unknown)=>createHash("sha256").update(canonicalJsonV1(v)).digest("hex");
 export const selectionSourceHash=(v:Record<string,unknown>)=>{const{synced_at:_heartbeat,...content}=v;return selectionEvidenceHash(content);};
@@ -23,10 +47,11 @@ const nullable=(v:unknown,max:number)=>v===null||str(v,max);
 /** Validates a code-produced observation's complete envelope; hashes provide integrity, not independent source authority. */
 export function validSelectionEvidence(v:unknown,productId:string,now:Date):v is CandidateSelectionEvidence {
  if(!Number.isFinite(now.getTime()))return false;
- if(!object(v)||Object.keys(v).sort().join(',')!=="color,colorSemantics,completeness,contentHash,expiresAt,kind,observedAt,offerType,options,productId,quantity,size,sourceHash,sourceVersion"||
-  v.kind!=="CANDIDATE_SELECTION_V2"||v.productId!==productId||!str(v.productId)||!str(v.offerType,64)||!str(v.sourceVersion)||!sha(v.sourceHash)||!sha(v.contentHash)||
+ if(!object(v)||Object.keys(v).sort().join(',')!=="allSourceValuesForQuery,color,colorSemantics,completeness,contentHash,expiresAt,kind,observedAt,offerType,options,productId,quantity,size,sourceHash,sourceVersion"||
+  v.kind!=="CANDIDATE_SELECTION_V3"||v.productId!==productId||!str(v.productId)||!str(v.offerType,64)||!str(v.sourceVersion)||!sha(v.sourceHash)||!sha(v.contentHash)||
   !nullable(v.size,32)||!nullable(v.color,64)||!Number.isSafeInteger(v.quantity)||(v.quantity as number)<1||(v.quantity as number)>20||
-  v.completeness!=="FIRST_8_EXACT_TUPLES_NOT_COMPLETE_INVENTORY"||v.colorSemantics!=="UNRECORDED_IS_NOT_A_PHYSICAL_COLOR"||!Array.isArray(v.options)||v.options.length>8||
+  !["ALL_EXACT_TUPLES_FOR_QUERY","FIRST_8_EXACT_TUPLES_NOT_COMPLETE_INVENTORY"].includes(v.completeness as string)||v.colorSemantics!=="UNRECORDED_IS_NOT_A_PHYSICAL_COLOR"||!Array.isArray(v.options)||v.options.length>MAX_SELECTION_OPTIONS||
+  (v.completeness==="FIRST_8_EXACT_TUPLES_NOT_COMPLETE_INVENTORY"&&v.options.length!==MAX_SELECTION_OPTIONS)||
   !str(v.observedAt,64)||!str(v.expiresAt,64)||!Number.isFinite(Date.parse(v.observedAt))||Date.parse(v.observedAt)>now.getTime()||
   !Number.isFinite(Date.parse(v.expiresAt))||Date.parse(v.expiresAt)<=now.getTime()||Date.parse(v.expiresAt)<=Date.parse(v.observedAt))return false;
  const ids=new Set<string>();
@@ -34,22 +59,52 @@ export function validSelectionEvidence(v:unknown,productId:string,now:Date):v is
   !nullable(o.size,32)||!nullable(o.color,64)||!sha(o.identityHash)||ids.has(o.identityHash as string)||
   !["IN_STOCK","PRE_ORDER","OUT_OF_STOCK","UNKNOWN"].includes(o.status as string)||!nullable(o.reasonCode,128)||
   (v.size!==null&&normalizeCatalogToken(o.size??"")!==normalizeCatalogToken(v.size))||(v.color!==null&&normalizeCatalogToken(o.color??"")!==normalizeCatalogToken(v.color)))return false;ids.add(o.identityHash as string);}
+ const all=v.allSourceValuesForQuery,options=v.options as CandidateSelectionOption[];
+ if(v.completeness==="ALL_EXACT_TUPLES_FOR_QUERY"){if(all!==null)return false;}
+ else if(!object(all)||Object.keys(all).sort().join(',')!=="colors,sizes")return false;
+ else for(const [field,max] of [["color",64],["size",32]] as const){
+  const f=all[field==="color"?"colors":"sizes"];
+  if(!object(f)||Object.keys(f).sort().join(',')!=="complete,values"||typeof f.complete!=="boolean"||!Array.isArray(f.values)||f.values.length>MAX_SELECTION_VALUES)return false;
+  const tokens=new Map<string,string[]>();
+  for(const e of f.values){
+   if(!object(e)||Object.keys(e).sort().join(',')!=="stock,value"||!str(e.value,max)||e.value==="__NO_COLOR__"||!Array.isArray(e.stock)||!e.stock.length||
+    canonicalJsonV1(e.stock)!==canonicalJsonV1(STOCK.filter(k=>(e.stock as unknown[]).includes(k)))||tokens.has(normalizeCatalogToken(e.value)))return false;
+   tokens.set(normalizeCatalogToken(e.value),e.stock as string[]);
+  }
+  // Retained tuples are a subset of the source tuples the value lists were built from.
+  for(const o of options){
+   const raw=o[field];
+   if(raw===null||raw==="__NO_COLOR__"){if(f.complete)return false;continue;}
+   const stock=tokens.get(normalizeCatalogToken(raw));
+   if(stock?!stock.includes(o.status):f.values.length<MAX_SELECTION_VALUES||f.complete)return false;
+  }
+ }
  const {contentHash,...body}=v;return selectionEvidenceHash(body)===contentHash&&Buffer.byteLength(canonicalJsonV1(v))<=4096;
 }
-export function selectionEvidenceFromOptions(input:Omit<CandidateSelectionEvidence,"kind"|"completeness"|"contentHash"|"options"|"colorSemantics">,options:readonly CandidateCartOption[],now:Date):CandidateSelectionEvidence|null {
+/** `options` must be every source tuple matching the query: completeness and value lists are derived from all of them. */
+export function selectionEvidenceFromOptions(input:Omit<CandidateSelectionEvidence,"kind"|"completeness"|"contentHash"|"options"|"colorSemantics"|"allSourceValuesForQuery">,options:readonly CandidateCartOption[],now:Date):CandidateSelectionEvidence|null {
  // Validate full source tuples before removing repeated fields. Envelope TTL normalization
  // is unchanged from V1: the existing caller owns its source/config/policy expiry.
- const retained=options.slice(0,8);
- if(retained.some(o=>!object(o)||Object.keys(o).sort().join(',')!=="color,expiresAt,identityHash,observedAt,offerType,productId,quantity,reasonCode,size,sourceVersion,status"||
+ const retained=options.slice(0,MAX_SELECTION_OPTIONS);
+ if(options.some(o=>!object(o)||Object.keys(o).sort().join(',')!=="color,expiresAt,identityHash,observedAt,offerType,productId,quantity,reasonCode,size,sourceVersion,status"||
   o.productId!==input.productId||o.offerType!==input.offerType||o.quantity!==input.quantity||o.sourceVersion!==input.sourceVersion||o.observedAt!==input.observedAt||
   !str(o.expiresAt,64)||!Number.isFinite(Date.parse(o.expiresAt))||Date.parse(o.expiresAt)<=Date.parse(o.observedAt)))return null;
- const body={kind:"CANDIDATE_SELECTION_V2" as const,...input,completeness:"FIRST_8_EXACT_TUPLES_NOT_COMPLETE_INVENTORY" as const,
+ const body={kind:"CANDIDATE_SELECTION_V3" as const,...input,
+  completeness:(options.length<=MAX_SELECTION_OPTIONS?"ALL_EXACT_TUPLES_FOR_QUERY":"FIRST_8_EXACT_TUPLES_NOT_COMPLETE_INVENTORY") as SelectionCompleteness,
+  allSourceValuesForQuery:options.length<=MAX_SELECTION_OPTIONS?null:{colors:selectionValues(options,"color"),sizes:selectionValues(options,"size")},
   colorSemantics:"UNRECORDED_IS_NOT_A_PHYSICAL_COLOR" as const,options:retained.map(({size,color,status,reasonCode,identityHash})=>({size,color,status,reasonCode,identityHash}))};
  const v={...body,contentHash:selectionEvidenceHash(body)};return validSelectionEvidence(v,input.productId,now)?v:null;
 }
+/** Shorten the lifetime of an existing observation. Completeness and value lists are kept:
+ *  they describe all source tuples and cannot be re-derived from the retained ones. */
+export function selectionEvidenceWithExpiry(e:CandidateSelectionEvidence,expiresAt:string,now:Date):CandidateSelectionEvidence|null {
+ if(!validSelectionEvidence(e,e.productId,now)||!Number.isFinite(Date.parse(expiresAt))||Date.parse(expiresAt)>Date.parse(e.expiresAt))return null;
+ const {contentHash:_old,...rest}=e,body={...rest,expiresAt};
+ const v={...body,contentHash:selectionEvidenceHash(body)};return validSelectionEvidence(v,e.productId,now)?v:null;
+}
 /** Restore the unchanged full result contract; no source authority or TTL is inferred here. */
 export function expandSelectionOptions(e:CandidateSelectionEvidence):CandidateCartOption[]{
- if(e.kind!=="CANDIDATE_SELECTION_V2")throw Error("SELECTION_EVIDENCE_VERSION");
+ if(e.kind!=="CANDIDATE_SELECTION_V3")throw Error("SELECTION_EVIDENCE_VERSION");
  return e.options.map(o=>({...o,productId:e.productId,offerType:e.offerType,quantity:e.quantity,sourceVersion:e.sourceVersion,observedAt:e.observedAt,expiresAt:e.expiresAt}));
 }
 /** Presentation has no stock/offer semantics. Add exact source labels without inventing a physical color. */

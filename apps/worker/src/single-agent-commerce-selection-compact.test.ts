@@ -26,7 +26,7 @@ it("three offers with eight exact tuples fit without dropping options or raising
 
 it("V2 factors only repeated envelope fields and expands exactly the original normalized tuple contract",()=>{
  const {options,input}=optionsFixture(),e=selection.selectionEvidenceFromOptions(input,options,commerceNow)!;
- expect(e.kind).toBe("CANDIDATE_SELECTION_V2");
+ expect(e.kind).toBe("CANDIDATE_SELECTION_V3");
  expect(Object.keys(e.options[0]!).sort()).toEqual(["color","identityHash","reasonCode","size","status"]);
  const expanded=selection.expandSelectionOptions(e);
  expect(expanded).toEqual(options.slice(0,8).map(o=>({...o,expiresAt:input.expiresAt})));

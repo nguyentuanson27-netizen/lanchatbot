@@ -9,7 +9,7 @@ import { buildRealtimeProductFactsV2 } from "./realtime-product-facts-v2.js";
 import { resolveCatalogDeliveryRegion, verifiedVariantFromSnapshot,candidateCartOptions,catalogComponentRole } from "./realtime-sales-catalog.js";
 import type { CommerceProductGroup } from "./single-agent-commerce-product-groups.js";
 import type {CommerceDiagnostics} from "./single-agent-commerce-diagnostics.js";
-import {selectionEvidenceFromOptions,selectionSourceHash,mergeSelectionEvidence,expandSelectionOptions} from "./single-agent-commerce-selection-evidence.js";
+import {selectionEvidenceFromOptions,selectionSourceHash,mergeSelectionEvidence,expandSelectionOptions,selectionOptionScope} from "./single-agent-commerce-selection-evidence.js";
 
 export interface CommerceScope {
   pageId: string; shopId: string; shopAlias: string; conversationId: string; customerHash: string;
@@ -467,6 +467,8 @@ export function createReadOnlyTools(input: {
     else priceReads.set(pair,{readKey,label:[componentLabel?`${componentLabel} — ${p.title}`:p.title,
       selected.variant?.selectedColorLabel,selected.variant?.selectedSizeCode?`size ${selected.variant.selectedSizeCode}`:null].filter(Boolean).join(" ")});
     const publicFacts = (values: typeof nextClaims) => values.map(c => ({ type: c.type, scope: c.scope, value: c.value }));
+    const unboundTuples=!queriedTupleEvidence[0]&&!input.candidateEvidence&&raw?candidateCartOptions(raw,{shopAlias:scope.shopAlias,productId:id,offerType:selected.offer,
+      size:query.size,color:query.color,quantity:1,lineId:"00000000-0000-4000-8000-000000000001"},now):[];
     return { status: "OK", data: { subjectRef: id, label: p.title, variantId: selected.variantId, offerType: selected.offer, requestedOfferType: query.offerType,
       ...(input.entry?.firstContact && selected.priceEnvelope?.status === "OK" &&
         (query.offerType !== null || availableOffers?.length === 1) && nextClaims.some(c=>c.type==="PRICE") ? {
@@ -477,10 +479,9 @@ export function createReadOnlyTools(input: {
             silhouettes:wholeProduct ? evidence.attributes?.silhouettes ?? [] : []}).blocks.map(b=>b.text).join("\n")}
       } : {}),
       availableOffers,
-      selectionOptions:queriedTupleEvidence[0]?expandSelectionOptions(queriedTupleEvidence[0]):(!input.candidateEvidence&&raw?candidateCartOptions(raw,{shopAlias:scope.shopAlias,productId:id,offerType:selected.offer,
-        size:query.size,color:query.color,quantity:1,lineId:"00000000-0000-4000-8000-000000000001"},now).slice(0,8):[]),
+      selectionOptions:queriedTupleEvidence[0]?expandSelectionOptions(queriedTupleEvidence[0]):unboundTuples.slice(0,8),
       ...(queriedTupleEvidence[0]?{selectionEvidence:queriedTupleEvidence[0]}:{}),
-      selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",
+      selectionOptionScope:selectionOptionScope(queriedTupleEvidence[0]?(queriedTupleEvidence[0].completeness==="ALL_EXACT_TUPLES_FOR_QUERY"?queriedTupleEvidence[0].options.length:Infinity):unboundTuples.length),
       sizeAvailability: selected.sizeAvailability,
       sellingOptions: availableOffers === null ? null : options.map(o => ({ offerType: o.offerType, variantId: o.variantId,
         sourceVersion: raw!.release_id, observedAt: raw!.synced_at,

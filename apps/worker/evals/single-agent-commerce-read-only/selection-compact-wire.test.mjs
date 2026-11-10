@@ -34,7 +34,7 @@ test('all three offers keep every exact tuple in both native wires and fit uncha
  assert.deepEqual(ownerProducts.find(p=>p.subjectRef===f.product.productId).selectionEvidence,product.selectionEvidence);
  assert.deepEqual(JSON.parse(verifierBody.input[0].content[0].text).trusted.runtimeProducts[0].selectionEvidence,product.selectionEvidence);
  assert.equal(product.selectionEvidence.flatMap(e=>e.options).length,24);
- for(const e of product.selectionEvidence){assert.equal(e.kind,'CANDIDATE_SELECTION_V2');assert.equal(e.options.length,8);assert(Buffer.byteLength(JSON.stringify(e))<=4096);
+ for(const e of product.selectionEvidence){assert.equal(e.kind,'CANDIDATE_SELECTION_V3');assert.equal(e.options.length,8);assert(Buffer.byteLength(JSON.stringify(e))<=4096);
   assert(JSON.stringify(body).includes(e.contentHash));assert(JSON.stringify(verifierBody).includes(e.contentHash));
  }
  const projected=body.contents.at(-1).parts[0].functionResponse.response.data;assert(!Object.hasOwn(projected,'selectionEvidence'));assert(!Object.hasOwn(projected,'selectionOptions'));

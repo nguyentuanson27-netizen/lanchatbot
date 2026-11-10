@@ -10,7 +10,7 @@ import type { CommerceTools } from "./single-agent-commerce-read-only.js";
 import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-catalog.js";
 import type { TerminalOutcome, TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import { formatCartLineSelection, selectionsMatchCartLines } from "./realtime-sales-cycle.js";
-import {selectionChoiceResolution,validSelectionEvidence,selectionEvidenceFromOptions,mergeSelectionEvidence,selectionMeaningHash,selectionQueryKey,expandSelectionOptions,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
+import {selectionChoiceResolution,validSelectionEvidence,selectionEvidenceWithExpiry,selectionOptionScope,mergeSelectionEvidence,selectionMeaningHash,selectionQueryKey,expandSelectionOptions,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
 import { CommerceEffectCommitError, type CommerceEffectFailureStage } from "./single-agent-commerce-effect-failure.js";
 
 const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase", "record_negotiation"]);
@@ -162,8 +162,7 @@ export async function createCommerceEffectTools(input: {
         normalizeCatalogToken(e.size??"")!==normalizeCatalogToken(query.size??"")||normalizeCatalogToken(e.color??"")!==normalizeCatalogToken(query.color??""))throw Error("SELECTION_EVIDENCE_SCOPE");
       const expiresAt=new Date(Math.min(Date.parse(e.expiresAt),Date.parse(e.observedAt)+(input.selectionMaxAgeSeconds??1200)*1000,
         policy?.policy.effectiveUntil?Date.parse(policy.policy.effectiveUntil):Infinity)).toISOString();
-      const clipped=selectionEvidenceFromOptions({productId:e.productId,offerType:e.offerType,size:e.size,color:e.color,quantity:e.quantity,sourceVersion:e.sourceVersion,
-        sourceHash:e.sourceHash,observedAt:e.observedAt,expiresAt},expandSelectionOptions(e),now);
+      const clipped=selectionEvidenceWithExpiry(e,expiresAt,now);
       if(!clipped)throw Error("SELECTION_EVIDENCE_STALE");
       const key=selectionQueryKey(clipped),previous=selectionObservations.get(key);
       if(previous&&(selectionMeaningHash(previous.evidence)!==selectionMeaningHash(clipped)||Date.parse(clipped.observedAt)<Date.parse(previous.evidence.observedAt)))throw Error("SOURCE_EVIDENCE_CONFLICT");
@@ -173,12 +172,12 @@ export async function createCommerceEffectTools(input: {
       mergeSelectionEvidence(checked,bound,now);
       selectionObservations.set(key,{query:previous?.query??query,evidence:bound});
       const choiceResolution=selectionChoiceResolution(bound,now,result.status);
-      return {...result,effectCommitted:false,selectionOptions:expandSelectionOptions(bound),selectionEvidence:bound,selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",selectionStatus:result.status,
+      return {...result,effectCommitted:false,selectionOptions:expandSelectionOptions(bound),selectionEvidence:bound,selectionOptionScope:selectionOptionScope(bound.completeness==="ALL_EXACT_TUPLES_FOR_QUERY"?bound.options.length:Infinity),selectionStatus:result.status,
         ...(choiceResolution?{choiceResolution}:{}),
         ...(choiceResolution?.kind==="SHOP_DATA_MISSING"?{shopDataGap:choiceResolution.reason}: {})};
     }
     if (result.status !== "READY") return { status: result.status, reasonCode: result.reasonCode,
-      selectionOptions:(result.selectionOptions??[]).slice(0,8),selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY",selectionStatus:result.status };
+      selectionOptions:(result.selectionOptions??[]).slice(0,8),selectionOptionScope:selectionOptionScope((result.selectionOptions??[]).length),selectionStatus:result.status };
     if (result.shopId !== input.scope.shopId || result.line.parentProductId !== productId ||
       Date.parse(result.sourceObservedAt) > input.clock().getTime() || Date.parse(result.sourceExpiresAt) <= input.clock().getTime()) throw new Error("SELECTION_UNAVAILABLE");
     const line = { ...result.line, lineId }; selections.set(lineId, { ...result, line }); return { ...result, line };

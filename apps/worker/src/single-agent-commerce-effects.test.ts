@@ -144,7 +144,7 @@ it("binds a validated ambiguous selection to both models and invalidates it when
  const result=await s.tools.invoke({...s.add,args:{...s.add.args,color:null}});
  expect(result).toMatchObject({status:"UNAVAILABLE",data:{selectionEvidence:{quantity:1,options:expect.arrayContaining([expect.objectContaining({color:"be",status:"PRE_ORDER"})])}}});
  expect(result).toMatchObject({data:{choiceResolution:{kind:"NEEDS_CUSTOMER_CHOICE",field:"COLOR",
-  completeness:"FIRST_8_EXACT_TUPLES_NOT_COMPLETE_INVENTORY",optionRefs:expect.any(Array)}}});
+  completeness:"ALL_EXACT_TUPLES_FOR_QUERY",optionRefs:expect.any(Array)}}});
  const data=result.data as {selectionEvidence:{contentHash:string;options:{identityHash:string}[]};choiceResolution:{evidenceHash:string;optionRefs:string[]}};
  expect(data.choiceResolution.evidenceHash).toBe(data.selectionEvidence.contentHash);
  expect(data.choiceResolution.optionRefs).toEqual(data.selectionEvidence.options.map(o=>o.identityHash));
@@ -594,7 +594,7 @@ describe("code-owned commerce effects and recovery", () => {
     const s = await setup();
     const failure = { status, reasonCode: "CART_VARIANT_AMBIGUOUS", availableSizes: ["L"], availableColors: ["BE"] };
     s.select.mockResolvedValue({ ...failure, evaluator: "PRIVATE_EVALUATOR_LABEL" } as never);
-    expect(await s.tools.invoke(s.add)).toEqual({ status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE",failureStage:"SOURCE", data: {status:failure.status,reasonCode:failure.reasonCode,selectionStatus:failure.status,selectionOptions:[],selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY"} });
+    expect(await s.tools.invoke(s.add)).toEqual({ status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE",failureStage:"SOURCE", data: {status:failure.status,reasonCode:failure.reasonCode,selectionStatus:failure.status,selectionOptions:[],selectionOptionScope:"ALL_EXACT_TUPLES_FOR_QUERY"} });
     expect(s.commits).toHaveLength(0); expect(s.current().cart).toBeNull();
     expect(s.tools.snapshot().effectReceipts).toHaveLength(0);
     expect(s.tools.snapshot().protectedClaims).not.toEqual(expect.arrayContaining([expect.objectContaining({ type: "SIZE_FIT" })]));
@@ -605,7 +605,7 @@ describe("code-owned commerce effects and recovery", () => {
     const failure = { status: "VARIANT_UNAVAILABLE", reasonCode: "CART_SIZE_NOT_FOUND", availableSizes: ["M"], availableColors: ["NAVY"] };
     s.select.mockResolvedValue(failure as never);
     expect(await s.tools.invoke({ name: "change_cart_item", args: { subjectRef: line.lineId, action: "SET_COMPONENT_VARIANT", componentRole: line.components[0]!.componentRole, size: "L" } }))
-      .toEqual({ status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE",failureStage:"SOURCE", data: {status:failure.status,reasonCode:failure.reasonCode,selectionStatus:failure.status,selectionOptions:[],selectionOptionScope:"FIRST_8_EXACT_TUPLES_FOR_QUERY_NOT_COMPLETE_INVENTORY"} });
+      .toEqual({ status: "UNAVAILABLE", reason: "SELECTION_UNAVAILABLE",failureStage:"SOURCE", data: {status:failure.status,reasonCode:failure.reasonCode,selectionStatus:failure.status,selectionOptions:[],selectionOptionScope:"ALL_EXACT_TUPLES_FOR_QUERY"} });
     expect(s.current()).toEqual(before); expect(s.commits).toHaveLength(1);
     expect(s.tools.snapshot().effectReceipts.some(r => r.effect === "CART_MUTATED")).toBe(false);
   });

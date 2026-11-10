@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {compactSelectionResult,expandSelectionResult,compactOwnerProducts,expandOwnerProducts} from './owner-product-tables.mjs';
 import {selectionEvidenceHash,expandSelectionOptions} from '../../dist/single-agent-commerce-selection-evidence.js';
 const fixture=()=>{
- const body={kind:'CANDIDATE_SELECTION_V2',productId:'P1',offerType:'AO',size:'M',color:null,quantity:1,sourceVersion:'s',sourceHash:'a'.repeat(64),observedAt:'2026-11-05T00:00:00.000Z',expiresAt:'2026-11-05T02:00:00.000Z',completeness:'FIRST_8_EXACT_TUPLES_NOT_COMPLETE_INVENTORY',colorSemantics:'UNRECORDED_IS_NOT_A_PHYSICAL_COLOR',options:[{size:'M',color:'WHITE',status:'IN_STOCK',reasonCode:null,identityHash:'b'.repeat(64)},{size:'M',color:'BE',status:'PRE_ORDER',reasonCode:null,identityHash:'c'.repeat(64)}]};
+ const body={kind:'CANDIDATE_SELECTION_V3',productId:'P1',offerType:'AO',size:'M',color:null,quantity:1,sourceVersion:'s',sourceHash:'a'.repeat(64),observedAt:'2026-11-05T00:00:00.000Z',expiresAt:'2026-11-05T02:00:00.000Z',completeness:'ALL_EXACT_TUPLES_FOR_QUERY',allSourceValuesForQuery:null,colorSemantics:'UNRECORDED_IS_NOT_A_PHYSICAL_COLOR',options:[{size:'M',color:'WHITE',status:'IN_STOCK',reasonCode:null,identityHash:'b'.repeat(64)},{size:'M',color:'BE',status:'PRE_ORDER',reasonCode:null,identityHash:'c'.repeat(64)}]};
  const e={...body,contentHash:selectionEvidenceHash(body)},products=[{subjectRef:'P1',selectionEvidence:[e]}];
  const data={status:'COLOR_REQUIRED',reasonCode:'CART_COLOR_REQUIRED',selectionEvidence:e,selectionOptions:expandSelectionOptions(e),choiceResolution:{kind:'NEEDS_CUSTOMER_CHOICE',field:'COLOR',evidenceHash:e.contentHash,optionRefs:e.options.map(o=>o.identityHash)}};
  return {data,products};
