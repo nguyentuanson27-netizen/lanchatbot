@@ -1,0 +1,203 @@
+{
+  "kind": "INDEPENDENT_FIX_DIRECTION_REVIEW",
+  "revision": 1,
+  "reviewer": "/root/post_contract_input_review",
+  "reviewedAt": "2026-11-10T06:46:22.790Z",
+  "reviewedSourceSha": "f405a6f6a714b845e2723d14b53a08b5fc1c0588",
+  "status": "REQUEST_CHANGES",
+  "reviewedProposal": "Parent supplied J4 readonly pricing/pre-cart negotiation; P09 declaration+source binding; S16 expressed requirement/source eligibility/dedup. This review narrows proposal, no executable edits/provider calls.",
+  "remainingBlockingFindings": 4,
+  "findings": [
+    {
+      "id": "NR1_J4_NO_NEW_NEGOTIATION_ENGINE",
+      "priority": "P1",
+      "status": "REVISE_SCOPE",
+      "issue": "The proposal combines an already implemented standard pre-cart quote with a potential pre-cart negotiation assessment. Only the first has an approved existing authority path. Simulating persisted negotiation before a cart would introduce new concession/event-consumption semantics, not merely expose missing context.",
+      "evidence": [
+        {
+          "file": "apps/worker/src/single-agent-commerce-quote.ts",
+          "line": 82,
+          "detail": "total() already calls evaluateShopPolicy using priced pre-cart lines, priceObjectionCount0/purchaseReadyfalse and binds PRE_CART_POLICY/appliesNegotiationReceiptfalse."
+        },
+        {
+          "file": "packages/business-tools/src/negotiation-engine-v2.ts",
+          "line": 90,
+          "detail": "NegotiationStateV2 binds cart/cartVersion/stateVersion, consumed objection evidence and processed events; applyNegotiationEventV2 expects CAS persistence."
+        },
+        {
+          "file": "apps/worker/src/single-agent-commerce-read-only-context.ts",
+          "line": 52,
+          "detail": "Current policy projection already contains minimumProductCount/discountBps/countingUnit/setAndComboCountAsOne."
+        }
+      ],
+      "requiredCorrection": "Remove new pre-cart negotiation/concession assessment from this repair. Reuse quote_product/read_policy and existing evaluateShopPolicy; expose source-derived parent-unit count/basis from the actual calculation where needed, not a second promotion engine or hard-coded5%. Keep missing-negotiation result UNKNOWN. Avoid creating a cart just to answer a price objection.",
+      "ownerDecisionIfExpanded": "Offering or reserving negotiated concessions before a cart requires an explicit business/event-ledger/expiry/consumption decision and new plan; not assumed authorized."
+    },
+    {
+      "id": "NR1_P09_NO_MECHANICAL_CONSENT_PROOF",
+      "priority": "P1",
+      "status": "REVISE_ACCEPTANCE",
+      "issue": "Removing the contradictory tool declaration is justified, but sourceQuote existence, current-message binding or an owner-issued enum cannot prove semantic purchase intent. The verifier runs after effects and cannot undo an unwanted cart mutation. A plan that calls those fields authorization proof repeats prior metadata-as-authority errors.",
+      "evidence": [
+        {
+          "file": "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs",
+          "line": 103,
+          "detail": "add_to_cart declaration says chosen offer/size→call directly, competing with owner prompt explicitly distinguishing referent clarification from purchase."
+        },
+        {
+          "file": "apps/worker/src/single-agent-commerce-effects.ts",
+          "line": 270,
+          "detail": "Effect authorization and operation identity bind current scope/source message; that is not independent semantic consent evidence."
+        },
+        {
+          "file": "apps/worker/evals/single-agent-commerce-qualification/owner-result-screen-run-20261110/CONVERSATIONS.md",
+          "detail": "P09 customer answers Bộ quần nhé after a stock question and shop disambiguation; real CART_OPENED receipt exists without purchase request."
+        }
+      ],
+      "requiredCorrection": "Fix the competing declaration at its origin; keep read_product/customerSelected or existing retained-selection path as read/selection only, and keep clear purchase add_to_cart fast path. Do not add fields falsely labeled code-verified buying intent or use the post-effect verifier as a hidden pre-effect role. Acceptance must be behavioral: whole paired dialogues produce zero cart/CAS/event/receipt in the informational arm and exactly one correct cart change in the genuine buying arm, including a short answer completing a prior explicit buy request. This measures owner behavior; residual semantic intent risk remains even if observed cases pass.",
+      "ownerDecisionIfExpanded": "If owner requires deterministic prevention rather than measured behavior, a code-owned customer confirmation/postback flow or separately authorized pre-effect semantic design is needed. That changes UX/architecture and needs owner decision; do not silently force extra confirmation for every explicit buy."
+    },
+    {
+      "id": "NR1_S16_REQUIREMENT_IS_NOT_SOURCE",
+      "priority": "P1",
+      "status": "REVISE_SOURCE_SCOPE",
+      "issue": "A customer-wearing request value is a useful domain constraint, but adding the enum cannot create source provenance or close the case where the owner incorrectly requests ordinary FEEDBACK. The actual stable image schema has no wearer-provenance field and descriptionEvidence unconditionally emits NOT_RECORDED.",
+      "evidence": [
+        {
+          "file": "apps/worker/src/single-agent-commerce-media.ts",
+          "line": 35,
+          "detail": "customerWearingEvidence is always NOT_RECORDED for every selected asset."
+        },
+        {
+          "file": "apps/worker/src/single-agent-commerce-media-eligibility.ts",
+          "line": 4,
+          "detail": "Current intent surface has FEEDBACK but no customer-wearing requirement."
+        },
+        {
+          "file": "packages/business-tools/src/search.ts",
+          "line": 44,
+          "detail": "Strict stable image schema has feedback/review/hash metadata; no verified customer-wearing provenance."
+        },
+        {
+          "file": "apps/worker/evals/single-agent-commerce-qualification/owner-result-screen-run-20261110/INDEPENDENT_REVIEW.md",
+          "detail": "Actual verifier saw latest wearing request, final feedback reply and NOT_RECORDED limits, yet passed the implication."
+        }
+      ],
+      "requiredCorrection": "Implement a truthful negative requirement path only in this revision: one narrow expressed customer-wearing requirement in the existing media tool (not both a new intent and redundant flag), check existing source metadata and report required provenance NOT_RECORDED/unavailable; use existing silent handoff recovery. Generic FEEDBACK remains usable for genuine feedback-only requests. Do not fabricate positive provenance or weaken this failed case by relabeling it. Explicitly retain the semantic omission risk when owner sends FEEDBACK/GENERIC instead; mandatory verifier must still evaluate the whole dialogue and exact reply, with safety controls for the observed implication. Source-gap is outside sales quality, not outside safety.",
+      "ownerDecisionIfExpanded": "Positive wearer capability requires an approved actual asset/provenance source, subject/component/hash/approval binding and schema/producer/consumer plan. Until then report not implemented; no mass data rewrite or synthetic wearer fact."
+    },
+    {
+      "id": "NR1_MEDIA_DEDUP_KEEP_ALL_PROOFS",
+      "priority": "P1",
+      "status": "DEFINE_IMPLEMENTATION_BOUNDARY",
+      "issue": "Deduplicating by choosing one parent image would remove source/subject coverage and may bypass revocation for the other parent. The duplication is caused by combining identity and physical send dedup, not missing metadata.",
+      "evidence": [
+        {
+          "file": "apps/worker/src/single-agent-commerce-ingress.ts",
+          "line": 325,
+          "detail": "selectedMedia is deduplicated by [productId,url] then reused for image message units, opening checks and media binding."
+        },
+        {
+          "file": "apps/worker/src/single-agent-commerce-media-delivery.ts",
+          "line": 68,
+          "detail": "Delivery gate loads and validates sourceVersion for each binding image and rechecks authority before sequence0."
+        },
+        {
+          "file": "packages/contracts/src/commerce-media-delivery.ts",
+          "line": 7,
+          "detail": "Existing binding can retain multiple image-source proofs while messageHashes binds the actual physical message group; no one-to-one image/message count assertion in inspected contract."
+        }
+      ],
+      "requiredCorrection": "Separate physical attachment list from complete selected evidence. Dedup only identical canonical URL plus source-content hash; retain every validated parent/source proof for opening coverage, protected claims and delivery binding. Do not infer alias equivalence from title or URL alone. Same URL with conflicting hashes/source facts must not pick a winner. Test one physical image for two valid refs, both proofs retained, revoke either source or change scope/permission after restart→whole group blocks; distinct assets remain distinct.",
+      "ownerDecisionIfExpanded": "A new shared coverage schema is not obviously required for same-asset proof preservation. If actual consumers require one-to-one image/message binding, amend that exact contract and test it rather than dropping proof."
+    }
+  ],
+  "recommendedMinimalRevisedPlan": [
+    {
+      "step": "P0 Evidence and scope",
+      "action": "Freeze prior205cd497/13case27turn evidence and current f405a6f6 baseline. Declare the new goal as J4 standard-price handling, P09 measured intent behavior, S16 missing-provenance terminal safety and duplicate physical attachment repair. Keep successes J1/P07/J2/P08/checkout as same-input controls; no voice overhaul, model/cap change or rerun authorization.",
+      "acceptance": "All prior failure labels remain, no new source assumptions. Split deterministic contract acceptance, owner behavioral evidence and residual risks."
+    },
+    {
+      "step": "P1 J4 existing standard pricing",
+      "action": "Use existing quote_product/read_policy; enrich only the source-backed count-unit explanation returned from actual policy/calculation (effective parent-unit count and sourced set/combo counting rule). It must be policy-version/hash-bound and unchanged on readback. No synthetic cart, concession simulation, new tier or hypothetical discount result.",
+      "acceptance": "One set quantity1 counts1; two parent-product units count2; three-piece combo counts1; quantity2 same parent counts2 where existing engine does. Totals/adjustments exactly equal existing engine on same inputs. Changed policy minimum/discount propagates without hard-code. UNKNOWN never becomes NO_SUPPORT or BEST_PRICE."
+    },
+    {
+      "step": "P2 Mechanical negotiation retry reachability",
+      "action": "Optional bounded suppression of record_negotiation only after a code-proved NOT_EVALUATED with unchanged prerequisites and current source/binding; permit again when actual cart/negotiation prerequisites change. This is reachability/work saving, not intent classification or a no-support conclusion. Do not globally remove current same-batch add→negotiation capability without regressions.",
+      "acceptance": "Repeated unchanged missing-cart invocation cannot spend another equivalent operation; creation or valid cart change restores normal existing path; different source message/binding/version cannot reuse an old memo. Current valid negotiation and unknown-commit controls remain."
+    },
+    {
+      "step": "P3 P09 narrow semantic contract alignment",
+      "action": "Remove selected-offer/size alone→buy language from add_to_cart declaration, make explicit current customer buy/change request the condition, retain direct path once that condition holds. Referent answers use read/selection. Avoid new authorization enum/sourceQuote-as-proof/state classifier.",
+      "acceptance": "Paired conversational controls with matched final short utterance but different accepted histories: inventory clarification→no cart writes; explicit purchase clarification→exact one cart commit; explicit first-turn buy→fast path preserved; cancellation/correction and retained offer work. No exact reply prose/keyword grading. Record residual intent risk; no deterministic consent claim."
+    },
+    {
+      "step": "P4 S16 absent-provenance safety path",
+      "action": "Express the stronger requested media requirement once in existing tool, keep ordinary feedback separate, return source-not-recorded and use existing silent handoff. Do not add a false positive schema/source. Address verifier full-context implication using minimal scoped principle and genuinely different semantic controls, not a case-specific final-phrase blacklist.",
+      "acceptance": "Exact stronger requirement+missing provenance→zero outbound text/images and real committed handoff (or fail-closed no-send if handoff unproved). Generic feedback request+verified feedback classification still usable. Same reply surface with wearing vs feedback customer context must have different supportedness decisions; omitted/incorrect owner requirement must not be called deterministically solved. Prompt injection, stale/wrong hash/part/product and exact draft final gate controls retained."
+    },
+    {
+      "step": "P5 Physical media dedup with proof union",
+      "action": "Keep complete selected evidence for gate/claims; derive a separate bounded physical send list from exact same URL/content-hash identity, retain both source records in delivery binding.",
+      "acceptance": "One physical attachment, both source proofs, atomic once beforesequence0, restart+revocation/hash/scope/permission negatives; no duplicate sends, loss of opening coverage or future quoted-product coverage."
+    },
+    {
+      "step": "P6 Build/review before any generation",
+      "action": "Observed meaningful RED→minimum GREEN, focused changed worker/adapter/manifest/projection/schema/source/media/delivery and existing protected/reply/checkout/state tests; canonical worker build/typecheck/lint, shared checks only if touched, dataset guards. Actual disposable PostgreSQL acceptance required for newly changed effect/recovery/outbox behavior (synthetic owner/verifier distinguished). Independent exact-head code review/fix to APPROVE.",
+      "acceptance": "No production wiring/thirdrole/router/parser/regex/repair loop; caps6/2/3/1 and retry0; no live source mutations or live send. New provider run not authorized by plan review."
+    },
+    {
+      "step": "P7 Future evidence, only when requested",
+      "action": "Preregister all cases and new semantic paired controls, exact source/world/model/prompt/schema/corpus identities and attempts. Changed verifier prompt invalidates old verifier-config evidence; run focused safety population before wider sales flow if a run is later authorized. Preserve unsafe result denominator and stop per protocol; do not repeat to hunt PASS.",
+      "acceptance": "Case completion differs from native path exercise. W2 NOT_EXERCISED remains unresolved unless an unforced registered native path actually reaches writer→quote; deterministic PG alone is not that evidence. N1 cannot establish stability; no GO on lower handoff count."
+    }
+  ],
+  "necessaryOwnerDecisions": [
+    {
+      "area": "Pre-cart negotiated concessions",
+      "neededNow": false,
+      "decision": "Deferred. Owner approval needed only if business wants promised/reserved negotiation concessions without current persisted cart/ledger."
+    },
+    {
+      "area": "Deterministic purchase-consent guarantee",
+      "neededNow": false,
+      "decision": "Current narrow fix retains owner interpretation and measured residual risk. A hard guarantee requires code-owned customer confirmation/postback or a new separately approved pre-effect semantic design; do not infer approval from this plan."
+    },
+    {
+      "area": "Positive customer-wearing source",
+      "neededNow": false,
+      "decision": "No positive capability until actual approved provenance is supplied. Current revision can honestly implement missing-source handoff without asking owner to rewrite all test data."
+    }
+  ],
+  "evidenceVersusInference": [
+    "Observed J4 UNKNOWN projection was present; policy was available as source but not owner-loaded at the first two frames. Final owner had transaction policy after attempted cart. Thus not simply missing source or missing UNKNOWN explanation; it is poor tool use plus count-unit interpretation.",
+    "Observed P09 mutation had valid receipt; missing buy semantics is a different question from system permission/source/receipt validity. No deterministic language proof currently exists in inspected path.",
+    "Observed S16 final in whole context implies satisfying customer-wearing request; NOT_RECORDED means unsupported, not that image definitely lacks a person. Generic feedback label alone is not unsafe in a genuine feedback-only context.",
+    "Technical competing declaration is real. Its causal contribution to behavior and the effect of any fix remain unproven until a fresh bounded model run; do not promise stability from source cleanup."
+  ],
+  "preserve": [
+    "J1 pre-cart quantity2/978100 current policy path",
+    "P07 exact component engine M/M and per-call fit metadata",
+    "J2 profile correction/RELAXED current claim",
+    "P08 no uncommitted replacement claim and ask missing colour",
+    "Private checkout actual preview/CONFIRM_PURCHASE/silent terminal",
+    "1 owner+max1 verifier, code sole authority, final exactdraft/snapshot gates, caps and retry0"
+  ],
+  "evidenceHashes": {
+    "apps/worker/evals/single-agent-commerce-qualification/owner-result-screen-run-20261110/REPORT.md": "62e88814f0e1350198b4b6d84e01e886979ff77b255d705d56d7a752b9b847e3",
+    "apps/worker/evals/single-agent-commerce-qualification/owner-result-screen-run-20261110/INDEPENDENT_REVIEW.md": "148de2d4172c77b37f8bc1a45095f49dd5aa95e9791a5467dcc473232531b856",
+    "apps/worker/evals/single-agent-commerce-qualification/owner-result-screen-run-20261110/TASK_TRACE.json": "fa6a504cb850b7631e0b36097fb9bbc4264ce74341ed9a8be6e0c532241a317c",
+    "docs/specs/c3-phase-c-owner-result-meaning-repair-20261110.md": "4729fb560fb0f8eddca7f9d7d0fd61c0ac1e11543ccb554dbd18657c17567a3e",
+    "docs/specs/c3-phase-c-owner-result-meaning-review-amendment-20261110.md": "23e336ae515413389f08c743e6f0f6683b4913bff23d0a41a4012484c009bd4a"
+  },
+  "newProviderRequests": 0,
+  "executableEdits": 0,
+  "scopeOfWrites": "ONLY_THIS_REVIEW_ARTIFACT_DIRECTORY",
+  "limitations": [
+    "This is proposal review, not revised plan approval/code approval/model run authorization.",
+    "No fresh source lookup/asset visual review/provider generation/live mutation.",
+    "No universal deterministic semantic safety or purchase intent guarantee can be inferred."
+  ]
+}
