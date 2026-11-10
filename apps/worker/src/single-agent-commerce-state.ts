@@ -402,6 +402,7 @@ export async function createCustomerStateTools(input: {
         return { status: "OK", data: { status: decision.recommendation.status, action: decision.action,
           fitScope:fitTarget,...(componentSource?{}:{unsupportedScopes:["COMPONENT"]}),
           sizeSourceHash:sourceHash,
+          profileRevision:effective.profile.revision,measurementFingerprint:claim?.measurementFingerprint??null,
           missingInputs: decision.missingInputs, recommendedSizes: claim ? decision.recommendation.recommendedSizes : [],
           inputFitPreference:effective.profile.fitPreference, alternativeSizes:claim?.value.alternativeSizes??null } };
       }

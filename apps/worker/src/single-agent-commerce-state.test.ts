@@ -488,8 +488,9 @@ it("co-locates received fit preference and only the alternatives authorized by t
  {op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"74"},
  {op:"SET",field:"measurements.HIPS_CM",value:96,sourceQuote:"96"},
  {op:"SET",field:"fitPreference",value:"RELAXED",sourceQuote:"thích rộng"}]}});
- const claim=(s.tools.snapshot().protectedClaims as {type:string;value:{alternativeSizes:string[]}}[]).find(c=>c.type==="SIZE_FIT");
+ const claim=(s.tools.snapshot().protectedClaims as {type:string;value:{alternativeSizes:string[];measurementFingerprint:string;customerProfileRevision:number}}[]).find(c=>c.type==="SIZE_FIT");
  expect(claim).toBeDefined();expect(r).toMatchObject({status:"OK",data:{inputFitPreference:"RELAXED",alternativeSizes:claim!.value.alternativeSizes}});
+ expect(r).toMatchObject({data:{profileRevision:claim!.value.customerProfileRevision,measurementFingerprint:claim!.value.measurementFingerprint}});
  const missing=await setup();const empty=missing.getStored();empty.profile.measurements=[];missing.setStored(empty);await missing.tools.readback();const result=await missing.tools.invoke({name:"recommend_size",args:{subjectRef:"QU714"}});
  expect(result).toMatchObject({data:{alternativeSizes:null}});
 });

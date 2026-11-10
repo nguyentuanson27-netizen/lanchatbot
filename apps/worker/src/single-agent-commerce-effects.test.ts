@@ -11,6 +11,8 @@ import { cartSelectionFromSnapshot } from "./realtime-sales-catalog.js";
 import { CommerceEffectCommitError } from "./single-agent-commerce-effect-failure.js";
 import { createCustomerStateTools } from "./single-agent-commerce-state.js";
 import { canonicalCartPolicyLinesV2 } from "@lana/business-tools";
+import {withExplicitQuoteTask} from "./single-agent-commerce-quote.js";
+import {readFileSync} from "node:fs";
 
 const bankPolicy = { policyId: "synthetic-bank", version: "1", bankName: "Synthetic bank", accountNumber: "118619000",
   accountHolder: "SYNTHETIC TEST", qrImageUrl: "https://example.invalid/qr.png", customerInstruction: "Thông tin thanh toán từ code.",
@@ -23,7 +25,7 @@ function fixtureSelection(snapshot: ReturnType<typeof fixtureProduct>["snapshot"
   return { ...result, shopId: commerceScope().shopId, line: { ...result.line,
     priceAuthority: { ...result.line.priceAuthority!, shopId: commerceScope().shopId } } };
 }
-async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi cao, bớt cho chị được không?"]) {
+async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi cao, bớt cho chị được không?"],unprovedEffect=false) {
   const scope = commerceScope(), f = fixtureProduct(), policy = (await fixturePolicy()).bundle!;
   let current = createSalesCycleRuntimeState("test-cycle", { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
   // Existing domain precondition, representing earlier verified size advice; never fake it in the effect tool.
@@ -50,6 +52,7 @@ async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi c
     sourceObservedAt: commerceNow.toISOString(), sourceExpiresAt: new Date(commerceNow.getTime()+1_200_000).toISOString() }; });
   const readPolicy = vi.fn(async () => policy);
   const tools = await createCommerceEffectTools({ base, scope, clock, conversationKey: "test-cycle", repository, authorize,
+    ...(unprovedEffect?{executeCommand:async()=>{throw new CommerceEffectCommitError("READBACK");}}:{}),
     policy: readPolicy,negotiationSources:negotiationTexts.map((text,i)=>({text,sourceMessageId:i===0?scope.sourceMessageId:`other-message-${i}`,observedAt:commerceNow.toISOString()})),
     resolveBankTransferPolicy: () => bankPolicy,
     trustedPorts: {
@@ -100,6 +103,36 @@ describe("replacement choices and negotiation prerequisites",()=>{
    .toMatchObject({status:"REJECTED",reason:"NEGOTIATION_CONTEXT_REQUIRED",data:{effectCommitted:false,
     negotiationStatus:"NOT_EVALUATED",missing:["CART","NEGOTIATION"],supportAvailability:"UNKNOWN"}});
   expect(s.current()).toEqual(before);expect(s.commits).toHaveLength(0);
+ });
+ it.each(["changed-state","unknown-commit"])("keeps selection no-commit proof code-only and invalidates it after %s",async mode=>{
+  const s=await setup(undefined,undefined,mode==="unknown-commit"),f=fixtureProduct();f.snapshot.offers.DIRECT!.rows.push({...structuredClone(f.snapshot.offers.DIRECT!.rows[0]!),color:"be"});
+  s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+  const failed=await s.tools.invoke({...s.add,args:{...s.add.args,color:null}}),before=structuredClone(s.current());
+  expect(failed).toMatchObject({status:"UNAVAILABLE",failureStage:"SOURCE",data:{effectCommitted:false,choiceResolution:{kind:"NEEDS_CUSTOMER_CHOICE"}}});
+  expect(s.tools.uncommittedSelectionResult!(failed)).toBe(true);expect(s.tools.uncommittedSelectionResult!(structuredClone(failed))).toBe(false);
+  const reads=vi.spyOn(s.repository,"read"),n=reads.mock.calls.length;
+  expect(s.tools.uncommittedSelectionResult!(failed)).toBe(true);expect(reads).toHaveBeenCalledTimes(n);expect(s.commits).toHaveLength(0);expect(s.current()).toEqual(before);
+  await s.tools.invoke(s.add);
+  expect(s.tools.uncommittedSelectionResult!(failed)).toBe(false);expect(s.commits).toHaveLength(mode==="unknown-commit"?0:1);
+  if(mode==="unknown-commit")expect(await s.tools.terminalOutcome!()).toMatchObject({disposition:"NO_SEND",reason:"UNKNOWN_COMMIT"});
+ });
+ it("carries the real no-commit selection route into the next native owner wire without quote I/O",async()=>{
+  const {buildGeminiCommerceRequest}=await import(new URL("../evals/single-agent-commerce-read-only/gemini-inference.mjs",import.meta.url).href);
+  const s=await setup(),f=fixtureProduct();f.snapshot.offers.DIRECT!.rows.push({...structuredClone(f.snapshot.offers.DIRECT!.rows[0]!),color:"be"});
+  s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+  const policy=vi.fn(async()=>s.policy.policy),tools=withExplicitQuoteTask({...s.base,...s.tools,availableTools:["read_product","request_handoff","add_to_cart"]},s.scope,false,policy,()=>commerceNow);
+  const call={...s.add,args:{...s.add.args,color:null}},signed={role:"model" as const,parts:[{functionCall:call,thoughtSignature:"keep-signature"}]};
+  await s.base.prepare!();const failed=await tools.invoke(call);
+  const wire=buildGeminiCommerceRequest({generationId:"test:next-owner",context:tools.snapshot(),
+   instructions:readFileSync(new URL("../evals/single-agent-commerce-read-only/prompts/owner.vi.txt",import.meta.url),"utf8"),
+   availableTools:tools.availableTools,toolWorkAccounting:"PRIMITIVE_WORK_V2",toolsAllowed:true,toolBudget:{callsRemaining:4,roundsRemaining:1},
+   contents:[{role:"user",parts:[{text:"Chị lấy áo size M nhé."}]},signed,{role:"user",parts:[{functionResponse:{name:call.name,response:failed}}]}],
+   ownerContextPresentation:"VI_DATA_BLOCKS_COMPACT_V2",signal:new AbortController().signal});
+  expect(Buffer.byteLength(JSON.stringify(wire))).toBeLessThanOrEqual(65536);
+  expect(wire.contents.find((m:Record<string,any>)=>m.role==="model")).toEqual(signed);
+  const response=wire.contents.flatMap((m:Record<string,any>)=>m.parts).find((p:Record<string,any>)=>p.functionResponse)?.functionResponse.response;
+  expect(response).toMatchObject({status:"UNAVAILABLE",data:{effectCommitted:false,preCartQuoteRequest:{calculationStatus:"NOT_CALCULATED",sourcePriceStatus:"REQUIRES_QUOTE_READ",target:{subjectRef:"SM613",offerTypes:["DIRECT"]}}}});
+  expect(policy).not.toHaveBeenCalled();expect(s.commits).toHaveLength(0);expect(tools.quoteTaskWork!()).toEqual([]);
  });
 });
 

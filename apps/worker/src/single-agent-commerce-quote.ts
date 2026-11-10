@@ -7,6 +7,7 @@ import {evaluateShopPolicy} from "@lana/business-tools";
 import {decodeCommerceMediaArgs} from "./single-agent-commerce-media.js";
 import {offerKind} from "./realtime-sales-catalog.js";
 import {normalizeCatalogToken} from "@lana/business-tools";
+import {validSelectionEvidence,selectionChoiceResolution} from "./single-agent-commerce-selection-evidence.js";
 
 export const EXPLICIT_QUOTE_TASK={version:"EXPLICIT_QUOTE_V3",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:1,readOnlyBatch:false,maxPerTurn:2} as const;
 export type ExplicitQuoteTask=typeof EXPLICIT_QUOTE_TASK;
@@ -186,15 +187,49 @@ export function withExplicitQuoteTask(base:CommerceTools,scope:CommerceScope,fir
   }
   return {status:"OK",data:{...data,quoteTaskStatus:"PREPARED_PENDING_FINAL_GATE",calculationBasis:"PRE_CART_POLICY",appliesNegotiationReceipt:false,currentCartQuoteRef:offerTypes.length===1?currentCartRef(current,{subjectRef:a.subjectRef,offerType:offerTypes[0]!,quantity:typeof a.quantity==="number"?a.quantity:undefined,...(typeof a.color==="string"?{color:a.color}:{})}):null,...(preCartQuote?{preCartQuote}:{})}};
  }
+ // A proven missing purchase choice does not imply that a read-only quote needs
+ // that choice. This describes a request target, never a calculated total or a
+ // complete argument list. In particular, one attempted line is not order quantity.
+ function quoteRoute(call:CommerceToolCall,result:CommerceToolResult):CommerceToolResult {
+  if(!availableTools.includes("quote_product")||(!opening&&!followUp)||result.status!=="UNAVAILABLE"||result.reason!=="SELECTION_UNAVAILABLE"||result.failureStage!=="SOURCE"||!base.uncommittedSelectionResult?.(result))return result;
+  try{
+   const replace=call.name==="change_cart_item";
+   if(call.name!=="add_to_cart"&&!replace)return result;
+   const a=toolArgs(call.args,replace?["subjectRef","action","targetSubjectRef","offerType","quantity","size","color"]:["subjectRef","offerType","quantity","size","color"]);
+   if(!a||replace&&a.action!=="REPLACE_LINE")return result;
+   const target=replace?a.targetSubjectRef:a.subjectRef,data=result.data as Record<string,unknown>|undefined,c=base.snapshot();
+   if(typeof target!=="string"||typeof a.offerType!=="string"||!data||data.effectCommitted!==false||
+    !c.state.permission||!c.state.privacyAllowed||c.state.conversationOwner!=="BOT"||c.state.customerStateUpdatePending===true||
+    c.state.bindingVersion!==scope.bindingVersion||c.state.recipient!==scope.recipient||
+    !c.boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===target&&s.bindingVersion===scope.bindingVersion))return result;
+   const e=data.selectionEvidence;
+   if(!validSelectionEvidence(e,target,clock())||e.offerType!==a.offerType||commerceHash(selectionChoiceResolution(e,clock(),String(data.status)))!==commerceHash(data.choiceResolution))return result;
+   const choice=selectionChoiceResolution(e,clock(),String(data.status));if(choice?.kind!=="NEEDS_CUSTOMER_CHOICE")return result;
+   const same=(x:unknown,y:unknown)=>x===y||typeof x==="string"&&typeof y==="string"&&normalizeCatalogToken(x)===normalizeCatalogToken(y);
+   const lines=replace&&Array.isArray(c.state.cartItems)?c.state.cartItems.filter(line=>line.subjectRef===a.subjectRef):[];
+   const cartQuote=c.state.cartQuote as {cartId?:string;cartVersion?:number}|undefined;
+   if(replace&&(lines.length!==1||!c.cartBinding||cartQuote?.cartId!==c.cartBinding.cartId||cartQuote?.cartVersion!==c.cartBinding.cartVersion||
+    !c.boundSubjects.some(s=>s.kind==="CART_LINE"&&s.ref===a.subjectRef&&s.bindingVersion===scope.bindingVersion)))return result;
+   const quantity=a.quantity??(replace?lines[0]!.quantity:1),color=replace&&a.color==="__NO_COLOR__"?null:a.color??null;
+   if(!Number.isInteger(quantity)||Number(quantity)<1||Number(quantity)>20||e.quantity!==quantity||!same(e.size,a.size??null)||!same(e.color,color))return result;
+   const current=(c.runtimeProducts??[]).filter(p=>p.subjectRef===target).flatMap(p=>p.selectionEvidence??[]);
+   if(!current.some(v=>commerceHash(v)===commerceHash(e)))return result;
+   const offers=JSON.parse(c.policyLiterals.find(p=>p.ref===`offers:${target}`)?.text??"null")?.availableOffers;
+   if(!Array.isArray(offers)||!offers.includes(a.offerType))return result;
+   const sourcePriceStatus=sourcePrices({subjectRef:target,offerTypes:[a.offerType]}).length===1?"CURRENT_EXACT_READ":"REQUIRES_QUOTE_READ";
+   return {...result,data:{...data,preCartQuoteRequest:{tool:"quote_product",target:{subjectRef:target,offerTypes:[a.offerType]},
+    quantity:"FROM_CUSTOMER_REQUEST",calculationStatus:"NOT_CALCULATED",sourcePriceStatus,purchaseMissingField:choice.field,evidenceHash:e.contentHash}}};
+  }catch{return result;}
+ }
  return {...base,availableTools,openingQuoteTargets:()=>[...openingProofs.keys()],toolWorkAccounting:"PRIMITIVE_WORK_V2",quoteTaskWork:()=>structuredClone(work),
   snapshot:()=>withQuote(base.snapshot()),readback:async()=>{
    const current=await base.readback();
    for(const p of priceProofs.values())if(commerceHash(sourcePrices(p.query))!==commerceHash(p.evidence))throw Error("QUOTE_PRICE_SOURCE_CHANGED");
    quoteLiterals.clear();for(const q of quoteRequests.values())await total(current,q);return withQuote(current);
   },
-  invoke:call=>call.name==="quote_product"?quote(call):base.invoke(call),
+  invoke:async call=>call.name==="quote_product"?quote(call):quoteRoute(call,await base.invoke(call)),
   invokeBatch:async calls=>{
-   if(!calls.some(c=>c.name==="quote_product"))return base.invokeBatch(calls);
+   if(!calls.some(c=>c.name==="quote_product"))return (await base.invokeBatch(calls)).map((r,i)=>quoteRoute(calls[i]!,r));
    const batch=quoteBatchWork(calls);
    if(!batch||batch.units>6||attempts+batch.quotes>2||batch.targets.some(t=>attemptedTargets.has(t))||calls.some(c=>!availableTools.includes(c.name))||!knownBatch(calls))return calls.map(()=>reject("QUOTE_BATCH_INVALID"));
    const results:CommerceToolResult[]=[];let stopped=false;

@@ -33,6 +33,8 @@ export interface CommerceTools {
   /** Request-local code proofs, not model-issued delivery requirements. */
   openingQuoteTargets?():readonly string[];
   noCommitNegotiationResult?(result:CommerceToolResult):boolean;
+  /** Original proven pre-commit selection failure, still valid in current authority. No I/O. */
+  uncommittedSelectionResult?(result:CommerceToolResult):boolean;
   openingMediaTiming?:'BEFORE_OWNER';
   /** No I/O: known cart targets must leave enough primitive work and image slots. */
   openingMediaFeasible?(calls:readonly CommerceToolCall[],remaining:number):boolean;

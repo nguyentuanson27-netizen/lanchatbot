@@ -47,6 +47,7 @@ export async function createCommerceEffectTools(input: {
   }
   let current = await read(), policy: RuntimePolicyBundle | null = null, uncertain = false, failedEffect = false;
   const noCommitNegotiations=new WeakMap<CommerceToolResult,{state:string;authority:string}>();
+  const noCommitSelections=new WeakMap<CommerceToolResult,{state:string;authority:string}>();
   const selections = new Map<string, Extract<CartSelectionResult, { status: "READY" }>>();
   const selectionObservations=new Map<string,{query:CartSelectionQuery;evidence:CandidateSelectionEvidence}>();
   let authority = await input.readAuthority?.();
@@ -412,6 +413,10 @@ export async function createCommerceEffectTools(input: {
     const result = await invokeEffect(call);
     if(call.name==="record_negotiation"&&result.reason==="NEGOTIATION_CONTEXT_REQUIRED"&&result.failureStage==="VALIDATION"&&!uncertain)
       noCommitNegotiations.set(result,{state:commerceHash(current),authority:commerceHash(authority??input.scope)});
+    const data=result.data as {effectCommitted?:boolean;choiceResolution?:{kind?:string}}|undefined;
+    if(["add_to_cart","change_cart_item"].includes(call.name)&&result.status==="UNAVAILABLE"&&result.reason==="SELECTION_UNAVAILABLE"&&
+      result.failureStage==="SOURCE"&&data?.effectCommitted===false&&data.choiceResolution?.kind==="NEEDS_CUSTOMER_CHOICE"&&!uncertain)
+      noCommitSelections.set(result,{state:commerceHash(current),authority:commerceHash(authority??input.scope)});
     if (names.has(call.name) && result.status !== "OK") failedEffect = true;
     return result;
   }
@@ -419,6 +424,10 @@ export async function createCommerceEffectTools(input: {
   await refreshSelections();
   return { invoke, snapshot, noCommitNegotiationResult(result){
     const proof=noCommitNegotiations.get(result),s=snapshot().state;
+    return !!proof&&!uncertain&&s.permission&&s.privacyAllowed&&s.conversationOwner==="BOT"&&s.bindingVersion===turnBinding&&s.recipient===turnRecipient&&
+      proof.state===commerceHash(current)&&proof.authority===commerceHash(authority??input.scope);
+  },uncommittedSelectionResult(result){
+    const proof=noCommitSelections.get(result),s=snapshot().state;
     return !!proof&&!uncertain&&s.permission&&s.privacyAllowed&&s.conversationOwner==="BOT"&&s.bindingVersion===turnBinding&&s.recipient===turnRecipient&&
       proof.state===commerceHash(current)&&proof.authority===commerceHash(authority??input.scope);
   },unlabelledCartProducts(context){

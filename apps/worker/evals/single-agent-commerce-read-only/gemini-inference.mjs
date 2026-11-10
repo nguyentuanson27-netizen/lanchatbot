@@ -238,6 +238,28 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
    if(Array.isArray(data.cartItems))delete data.cart;
    if(compactV2)response.response.data=compactSelectionResult(data,c.runtimeProducts??[]);
   }
+  const presented=response.response.data;
+  // These are code-owned result meanings, not extra facts or a prose classifier.
+  // Native continuations and the final completed trace share this one projection.
+  if(presented.preCartQuoteRequest&&!(request.toolsAllowed!==false&&
+   declarations.some(d=>d.name==='quote_product')&&(!request.callableTools||request.callableTools.includes('quote_product'))&&
+   (!request.toolBudget||request.toolBudget.callsRemaining>=1)))delete presented.preCartQuoteRequest;
+  if(response.name==='record_negotiation'&&response.response.status==='REJECTED'&&response.response.reason==='NEGOTIATION_CONTEXT_REQUIRED'&&
+   data.effectCommitted===false&&data.negotiationStatus==='NOT_EVALUATED'&&data.supportAvailability==='UNKNOWN'&&
+   Array.isArray(data.missing)&&data.missing.length>0&&data.missing.every(k=>['CART','NEGOTIATION'].includes(k))){
+   presented.supportEvaluation={status:data.negotiationStatus,supportAvailability:data.supportAvailability,missing:structuredClone(data.missing),
+    meaning:'Lần gọi này chưa xét được hỗ trợ; chưa có kết luận shop có hay không có ưu đãi.'};
+   for(const k of ['negotiationStatus','supportAvailability','missing'])delete presented[k];
+  }
+  const fitFields=['fitScope','sizeSourceHash','missingInputs','recommendedSizes','inputFitPreference','alternativeSizes'];
+  if(response.name==='recommend_size'&&response.response.status==='OK'&&fitFields.every(k=>Object.hasOwn(data,k))){
+   presented.fitEvaluation={status:data.status,target:structuredClone(data.fitScope),sizeSourceHash:data.sizeSourceHash,
+    missingInputs:structuredClone(data.missingInputs),recommendedSizes:structuredClone(data.recommendedSizes),
+    inputFitPreference:data.inputFitPreference,alternativeSizes:structuredClone(data.alternativeSizes),
+    ...Object.fromEntries(['profileRevision','measurementFingerprint'].filter(k=>Object.hasOwn(data,k)).map(k=>[k,data[k]])),
+    meaning:'Kết quả lần gọi này; chỉ dùng khi còn khớp hồ sơ và target hiện hành. Size thường mặc không cấp thêm alternative.'};
+   for(const k of [...fitFields,'profileRevision','measurementFingerprint'])delete presented[k];
+  }
  }
  const state=Object.fromEntries(['currentProductId','consideredSize','salesStage','customerMeasurements','fitPreference','preferences','cartQuote','cartItems','checkoutStatus',
   'customerProfileId','customerProfileRevision','measurementFingerprint','sizeMeasurementFingerprints','sizeFitTargets','customerStateUpdatePending']
