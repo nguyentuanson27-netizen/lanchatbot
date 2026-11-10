@@ -13,7 +13,16 @@ test('blind source context drops readiness cohorts and includes the same task ru
   assert.doesNotMatch(JSON.stringify(p.publicPacket),/SOURCE_UNAVAILABLE|DO_NOT_LEAK|sourceReadiness/);
   assert.equal(p.publicPacket.items[0].sourceContext.taskContract.componentFit,'PRODUCT_RESULT_NEVER_AUTHORIZES_COMPONENT_FIT');
   assert.equal(p.publicPacket.items[0].sourceContext.taskContract.customerMissingInput,'ASK_ONLY_MISSING_INPUT');
+  const contract=p.publicPacket.items[0].sourceContext.taskContract;
+  assert.equal(contract.version,'TASK_OUTCOME_CONTEXT_V3');
+  assert.deepEqual(contract.openingMediaScope,{
+   firstContact:true,requiredTargets:['UNIQUE_IDENTIFIED_PRODUCT','CURRENT_CART_PRODUCT','SUCCESSFUL_QUOTE_PRODUCT'],
+   candidatePoolPerProduct:false,allOpeningReplyTypes:true
+  });
  }
+ const scenario=e.corpus.scenarios[0];
+ scenario.judgeContext.taskContract={openingMediaScope:{evaluator:'EVALUATOR_ONLY_MEDIA_RULE'}};
+ assert.doesNotMatch(JSON.stringify(runtimeProjection(scenario,0)),/taskContract|openingMediaScope|EVALUATOR_ONLY_MEDIA_RULE/);
 });
 test('unsafe send eligibility overrides apparently perfect quality and C3 comparison',()=>{
  const e=evidence(),a=e.attempts.find(a=>a.caseId==='new-unsafe');a.terminal={disposition:'SEND_ELIGIBLE',messages:['Dạ chị.'],images:[]};
