@@ -16,9 +16,13 @@ export interface CommerceCatalogImage {subjectRef:string;assetRef:string;sha256:
 export const COMMERCE_VISION_BOUNDS={count:2,maxBytes:512*1024,maxSourceBytes:2*1024*1024,maxDimension:1024,maxSourceDimension:12000,maxSourcePixels:50000000,timeoutMs:8000} as const;
 const intents=new Set<CustomerImageIntent>(["GENERIC","BACK","DETAIL","SIZE_GUIDE","PRODUCT_ONLY","FEEDBACK"]);
 const componentParts={TOP:"AO",SKIRT:"CHAN_VAY",PANTS:"QUAN"};
+const missingMediaReason=(query:MediaQuery)=>query.requiredEvidence==='CUSTOMER_WEARING'
+  ? 'CUSTOMER_WEARING_EVIDENCE_UNAVAILABLE' : 'NO_VERIFIED_MATCHING_MEDIA';
+const requiredMediaRejected=():CommerceToolResult=>({status:"REJECTED",reason:"REQUIRED_MEDIA_UNAVAILABLE"});
 /** Shared closed argument contract; does not bind refs, select assets or grant authority. */
 export function decodeCommerceMediaArgs(value:unknown):MediaQuery|null {
-  let a=toolArgs(value,["subjectRef","intent","color","componentRole","deliveryMode"]);
+  let a=toolArgs(value,["subjectRef","intent","color","componentRole","deliveryMode","requiredEvidence"]);
+  if(a?.requiredEvidence!==undefined&&a.requiredEvidence!=="CUSTOMER_WEARING")return null;
   if(a?.deliveryMode!==undefined&&!['REPLACE','APPEND'].includes(String(a.deliveryMode)))return null;
   if(a){a={...a};delete a.deliveryMode;}
   if(a?.color===null){a={...a};delete a.color;}
@@ -43,6 +47,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
   type SourceCheck={sourceVersion:string;expiresAt:string|null};
   type Observation={query:MediaQuery;operation:string;stage:string;outcome:string;source:SourceCheck|null;literal:TrustedContext["policyLiterals"][number]};
   const observations=new Map<string,Observation>();
+  let requiredMediaUnavailable=false;
   const viewed=new Map<string,{query:MediaQuery;assets:CommerceMediaAsset[];images:CommerceCatalogImage[]}>();
   const catalogImages=()=>structuredClone([...viewed.values()].flatMap(v=>v.images));
   const downloader=new SecureRecognitionImageDownloader({allowedHostSuffixes:input.allowedHostSuffixes,maxBytes:COMMERCE_VISION_BOUNDS.maxSourceBytes,timeoutMs:COMMERCE_VISION_BOUNDS.timeoutMs});
@@ -93,16 +98,17 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
     if(!base.state.permission||base.state.conversationOwner!=="BOT"||!base.state.privacyAllowed) return {status:"REJECTED",reason:"MEDIA_PERMISSION"};
     if(!a||(call.name==="view_product_media"&&(call.args as {deliveryMode?:unknown}).deliveryMode!==undefined)||!base.boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===a.subjectRef))return {status:"REJECTED",reason:"MEDIA_ARGUMENTS_OR_REF"};
     const query=a,key=commerceHash(query);
+    if(query.requiredEvidence==='CUSTOMER_WEARING')requiredMediaUnavailable=true;
     const observationKey=commerceHash({operation:call.name,query});
     if(!observations.has(observationKey)&&observations.size>=6)return {status:"REJECTED",reason:"MEDIA_OBSERVATION_BOUND"};
     let source:SourceCheck|null=null,stage="CATALOG_SELECTION",availableAlternatives:CustomerImageIntent[]|null=null;
     const unavailable=(reason:string):CommerceToolResult=>{
       const observedAt=input.clock().toISOString();
       const eventOnly=reason==="MEDIA_SOURCE_UNAVAILABLE";
-      const alternatives=reason==="NO_VERIFIED_MATCHING_MEDIA"?availableAlternatives:null;
+      const alternatives=query.requiredEvidence?[]:reason==="NO_VERIFIED_MATCHING_MEDIA"?availableAlternatives:null;
       const evidence={subjectRef:query.subjectRef,requested:query,operation:call.name,stage,outcome:reason,scope:"MEDIA_ONLY",availableAlternatives:alternatives,
         authority:eventOnly?"OPERATION_EVENT_ONLY":"SCOPED_CATALOG_LOOKUP",
-        meaning:eventOnly?"This operation failed; no conclusion about availability or stock.":
+        meaning:eventOnly?"This operation failed; no conclusion about availability or stock.":reason==='CUSTOMER_WEARING_EVIDENCE_UNAVAILABLE'?"The inspected source does not record the requested customer-wearing provenance; feedback classification is not that proof.":
           reason==="MEDIA_COLOR_BINDING_UNVERIFIED"?"Requested image color is unverified; neither image absence nor colors for sale are established.":
           "No currently eligible matching asset in the inspected source and query; not shop-wide absence."};
       const recordSource=eventOnly?null:source;
@@ -110,9 +116,9 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
         expiresAt:recordSource?.expiresAt??null,
         sourceVersion:recordSource?.sourceVersion??commerceHash({event:evidence,observedAt}),text:JSON.stringify(evidence)};
       observations.set(observationKey,{query,operation:call.name,stage,outcome:reason,source:recordSource,literal});
-      return {status:"UNAVAILABLE",reason,data:{subjectRef:query.subjectRef,requested:{intent:query.intent,color:query.color??null,componentRole:query.componentRole??null},scope:"MEDIA_ONLY",availableAlternatives:alternatives,observation:evidence,
+      return {status:"UNAVAILABLE",reason,data:{subjectRef:query.subjectRef,requested:{intent:query.intent,color:query.color??null,componentRole:query.componentRole??null,...(query.requiredEvidence?{requiredEvidence:query.requiredEvidence}:{})},scope:"MEDIA_ONLY",availableAlternatives:alternatives,observation:evidence,
         // This is a possible new query, never a selected/available attachment.
-        ...(reason==="MEDIA_COLOR_BINDING_UNVERIFIED"&&call.name==="select_product_media"?{
+        ...(reason==="MEDIA_COLOR_BINDING_UNVERIFIED"&&call.name==="select_product_media"&&!query.requiredEvidence?{
           preparedAttachmentCount:0,
           nextSelection:{name:"select_product_media",args:{subjectRef:query.subjectRef,intent:query.intent,
             ...(query.componentRole?{componentRole:query.componentRole}:{})}},
@@ -122,7 +128,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
     let validating=false,validatingAsset:string|null=null;
     try{
       const view=call.name==="view_product_media",assets=(await (input.diagnostics?input.diagnostics.run("MEDIA_SELECT",query,()=>select(query,value=>{source=value;},value=>{availableAlternatives=value;})):select(query,value=>{source=value;},value=>{availableAlternatives=value;}))).slice(0,view?COMMERCE_VISION_BOUNDS.count:selectionCount);
-      if(!assets.length)return unavailable("NO_VERIFIED_MATCHING_MEDIA");
+      if(!assets.length)return unavailable(missingMediaReason(query));
       if(view){
         if(catalogImages().length-(viewed.get(key)?.images.length??0)+assets.length>COMMERCE_VISION_BOUNDS.count)return {status:"REJECTED",reason:"VISION_BOUND"};
         stage="IMAGE_FETCH_OR_PREPARE";
@@ -165,12 +171,26 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
         descriptionEvidence:descriptionEvidence(query,assets),assets:assets.map(({assetRef,angle,imageType,feedback,partsVisible})=>({assetRef,angle,imageType,feedback,partsVisible})),scope:query.color?"COLOR_BOUND":"GENERIC_PRODUCT",colorMatched:!!query.color,delivery:"PENDING_FINAL_GATE"}};
     }catch(error){if(validating)input.diagnostics?.emit("MEDIA_VALIDATE","ERROR",{assetRef:validatingAsset},error instanceof Error?error.message:"UNKNOWN_INTERNAL");return unavailable(error instanceof Error&&error.message==="MEDIA_COLOR_BINDING_UNVERIFIED"?error.message:"MEDIA_SOURCE_UNAVAILABLE");}
   }
-  return {...input.base,mediaSelection,catalogImages,
+  return {...input.base,mediaSelection,catalogImages,requiredMediaUnavailable:()=>requiredMediaUnavailable,
     prepareProductImage:(subjectRef,color)=>invokeMedia({name:"select_product_media",args:{subjectRef,intent:"GENERIC",deliveryMode:"APPEND",...(color?{color}:{})}},1),
     fallbackId:()=>input.base.sizeOutcome?.()?"C3_A_NONPROTECTED_V2": [...observations.values()].some(o=>o.outcome!=="OK")
       ?"C3_B_MEDIA_UNAVAILABLE_V1":input.base.fallbackId?.()??"C3_A_NONPROTECTED_V2",snapshot:()=>overlay(input.base.snapshot()),
-    invoke:call=>mediaTool(call.name)?invokeMedia(call):input.base.invoke(call),
-    async invokeBatch(calls){
+    async invoke(call){
+      if(requiredMediaUnavailable&&call.name!=="request_handoff")return requiredMediaRejected();
+      return mediaTool(call.name)?invokeMedia(call):input.base.invoke(call);
+    },
+    async invokeBatch(calls):Promise<CommerceToolResult[]>{
+      if(requiredMediaUnavailable){
+        if(calls.length===1&&calls[0]!.name==="request_handoff")return input.base.invokeBatch(calls);
+        return calls.map(requiredMediaRejected);
+      }
+      // No sibling effect can commit before discovering that a declared required
+      // source cannot be supplied. The unmet constraint is sticky for this turn.
+      const required=calls.findIndex(c=>mediaTool(c.name)&&decodeCommerceMediaArgs(c.args)?.requiredEvidence==='CUSTOMER_WEARING');
+      if(required>=0){
+        const result=await invokeMedia(calls[required]!);
+        return calls.map((_c,i)=>i===required?result:requiredMediaRejected());
+      }
       const other=calls.filter(c=>!mediaTool(c.name)),results=await input.base.invokeBatch(other);
       const output:CommerceToolResult[]=[];
       for(const c of calls)output.push(mediaTool(c.name)?await invokeMedia(c):results[other.indexOf(c)]!);
@@ -181,7 +201,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
         if(o.literal.expiresAt!==null&&Date.parse(o.literal.expiresAt)<=input.clock().getTime())throw new Error("MEDIA_LOOKUP_EXPIRED");
         if(!o.source)continue; // Immutable operation event, never retry the failed operation.
         let current:SourceCheck|null=null,outcome="OK";
-        try{const assets=await select(o.query,value=>{current=value;});if(!assets.length)outcome="NO_VERIFIED_MATCHING_MEDIA";}
+        try{const assets=await select(o.query,value=>{current=value;});if(!assets.length)outcome=missingMediaReason(o.query);}
         catch(error){outcome=error instanceof Error?error.message:"MEDIA_SOURCE_UNAVAILABLE";}
         if(!current||commerceHash((current as SourceCheck).sourceVersion)!==commerceHash(o.source.sourceVersion)||outcome!==o.outcome)
           throw new Error("MEDIA_LOOKUP_SOURCE_CHANGED");

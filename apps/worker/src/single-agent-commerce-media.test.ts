@@ -20,6 +20,44 @@ const setup = async (clock:()=>Date=()=>commerceNow) => {
   return {f,scope,tools,call,image,readProduct};
 };
 
+it("does not substitute a feedback detail for an explicitly required customer-wearing proof",async()=>{
+ const s=await setup();s.f.product.images[0]!.feedback=true;s.f.product.images[0]!.imageType="DETAIL";
+ const result=await s.tools.invoke({name:"select_product_media",args:{subjectRef:s.f.product.productId,intent:"FEEDBACK",requiredEvidence:"CUSTOMER_WEARING"}});
+ expect(result).toMatchObject({status:"UNAVAILABLE",reason:"CUSTOMER_WEARING_EVIDENCE_UNAVAILABLE"});
+ expect(s.tools.mediaSelection!()).toEqual([]);
+ expect(await s.tools.readback()).toEqual(s.tools.snapshot());
+ s.f.product.images[0]!.reviewStatus=null;
+ await expect(s.tools.readback()).rejects.toThrow('MEDIA_LOOKUP_SOURCE_CHANGED');
+ s.f.product.images[0]!.reviewStatus="APPROVED";
+ // A later generic replacement cannot erase the unmet stronger requirement.
+ await s.tools.invoke({...s.call,args:{subjectRef:s.f.product.productId,intent:"GENERIC"}});
+ const verifier=vi.fn(async()=>({result:{verdict:"PASS",violations:[]}}));
+ const r=await runCommerceTurn({scope:s.scope,tools:s.tools,latest:"Em gửi ảnh khách mặc nhé",history:[],clock:()=>commerceNow,
+  ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",owner:async()=>({kind:"FINAL",text:"Em gửi ảnh chị nhé."}),verifier});
+ expect(r.terminal.disposition).toBe("NO_SEND");expect(r.terminal.text).toBeNull();expect(verifier).not.toHaveBeenCalled();
+});
+
+it("keeps ordinary feedback eligible without claiming customer-wearing provenance",async()=>{
+ const s=await setup();s.f.product.images[0]!.feedback=true;s.f.product.images[0]!.imageType="DETAIL";
+ await s.tools.prepare!();
+ const hints=s.tools.mediaCapabilities!();
+ const {projectMediaCapabilities}=await import(new URL("../evals/single-agent-commerce-read-only/media-capabilities.mjs",import.meta.url).href);
+ expect(projectMediaCapabilities(hints,s.tools.snapshot(),commerceNow.getTime())).toEqual(hints);
+ expect(hints[0]).toMatchObject({customerWearingEvidence:"NOT_RECORDED",queries:expect.arrayContaining([{intent:"FEEDBACK",componentRole:null,color:null,status:"MATCH_AVAILABLE"}])});
+ expect(await s.tools.invoke({name:"select_product_media",args:{subjectRef:s.f.product.productId,intent:"FEEDBACK"}})).toMatchObject({status:"OK"});
+ expect(s.tools.mediaSelection!()).toHaveLength(1);
+});
+
+it("deduplicates only physical attachments and rejects conflicting facts without dropping source proofs",async()=>{
+ const {physicalCommerceMedia}=await import('./single-agent-commerce-media-delivery.js');
+ const a={assetRef:'asset:one',productId:'P1',url:'https://content.pancake.vn/shared.jpg',sourceContentSha256:'a'.repeat(64),observedAt:commerceNow.toISOString(),expiresAt:null,sourceVersion:'p1:v1',angle:'FRONT',imageType:'MODEL',partsVisible:['AO']};
+ const b={...a,productId:'P2',sourceVersion:'p2:v2'},proofs=[a,b];
+ expect(physicalCommerceMedia(proofs)).toHaveLength(1);expect(proofs).toEqual([a,b]);
+ expect(()=>physicalCommerceMedia([a,{...b,sourceContentSha256:'b'.repeat(64)}])).toThrow('MEDIA_ATTACHMENT_CONFLICT');
+ expect(()=>physicalCommerceMedia([a,{...b,imageType:'DETAIL'}])).toThrow('MEDIA_ATTACHMENT_CONFLICT');
+ expect(physicalCommerceMedia([a,{...b,url:'https://content.pancake.vn/other.jpg'}])).toHaveLength(2);
+});
+
 it("does not mislabel a second asset fetch failure as validation of that asset",async()=>{
  const s=await setup(),events:import("./single-agent-commerce-diagnostics.js").CommerceDiagnostic[]=[];
  s.f.product.images[0]!.angle="FRONT";s.f.product.images=[...s.f.product.images,{...s.f.product.images[0]!,angle:"BACK",url:"https://content.pancake.vn/second-back.jpg",sortOrder:1}];

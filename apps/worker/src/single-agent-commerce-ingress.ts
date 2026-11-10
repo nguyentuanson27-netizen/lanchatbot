@@ -26,7 +26,7 @@ import { extractAdProductCodes } from "./media-resolution.js";
 import { checkoutDetails, selectionsMatchCartLines } from "./realtime-sales-cycle.js";
 import {paymentChoice} from "./checkout-payment-choice.js";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
-import { makeCommerceMediaDeliveryBinding } from "./single-agent-commerce-media-delivery.js";
+import { makeCommerceMediaDeliveryBinding,physicalCommerceMedia } from "./single-agent-commerce-media-delivery.js";
 import { commerceSizeSource,commerceComponentSizeSource } from "./single-agent-commerce-product-groups.js";
 
 const textHash = (text: string) => createHash("sha256").update(text, "utf8").digest("hex");
@@ -322,7 +322,9 @@ export async function runPersistedCommerceIngress(input: {
   // A defensive delivery guard also forbids static/image/receipt fallback output.
   if (result.recovery)
     return { ...result, ...await closeWithoutSend("FALLBACK_OUTPUT_FORBIDDEN") };
-  const selectedMedia = [...new Map((tools.mediaSelection?.() ?? []).map(image => [commerceHash([image.productId, image.url]), image])).values()];
+  const selectedMedia = [...(tools.mediaSelection?.() ?? [])];
+  let attachments;
+  try{attachments=physicalCommerceMedia(selectedMedia);}catch{return {...result,...await closeWithoutSend('MEDIA_ATTACHMENT_CONFLICT')};}
   const generatedPass = result.terminal.disposition === "SEND_ELIGIBLE" && result.terminal.reason === "PASS";
   if(input.openingMediaRule&&tools.openingMediaReady?.(world,generatedPass?selectedMedia:[])!==true){
     const terminal=await tools.recoverFallback?.({disposition:"FALLBACK",reason:"PREPARATION_UNAVAILABLE",text:null,fallbackId:null})??noSend("OPENING_MEDIA_UNPROVED").terminal;
@@ -331,7 +333,7 @@ export async function runPersistedCommerceIngress(input: {
   }
   const allowedText = result.terminal.disposition === "SEND_ELIGIBLE" ? result.terminal.text : null;
   const messagesOut = [...(allowedText ? [{ kind: "TEXT" as const, text: allowedText }] : []),
-    ...(generatedPass ? selectedMedia.map(a=>({kind:"IMAGE" as const,imageUrl:a.url})) : [])];
+    ...(generatedPass ? attachments.map(a=>({kind:"IMAGE" as const,imageUrl:a.url})) : [])];
   if (allowedText && allowedText.length > 2000) return { ...result, ...await closeWithoutSend("DELIVERY_TEXT_BOUND") };
   const sourceHash = textHash(scope.sourceMessageId);
   const cartSummary = result.terminal.disposition === "SEND_ELIGIBLE" && result.terminal.reason === "RECEIPT_BACKED_CART_SUMMARY";

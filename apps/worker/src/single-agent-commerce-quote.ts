@@ -20,7 +20,7 @@ const isWriter=(c:CommerceToolCall)=>["apply_customer_state","record_negotiation
  (c.name==="read_product"&&(c.args as {customerSelected?:unknown}|null)?.customerSelected===true);
 function batchShape(c:CommerceToolCall):boolean {
  const fields:Record<string,string[]>={quote_product:["subjectRef","offerTypes","color","quantity","deliveryRegion"],read_product:["subjectRef","offerType","offerTypes","detailsOnly","color","size","deliveryRegion","customerSelected"],
-  read_policy:[],apply_customer_state:["ops"],record_negotiation:["intent","sourceQuote"],select_product_media:["subjectRef","intent","color","componentRole","deliveryMode"],view_product_media:["subjectRef","intent","color","componentRole"]};
+  read_policy:[],apply_customer_state:["ops"],record_negotiation:["intent","sourceQuote"],select_product_media:["subjectRef","intent","color","componentRole","deliveryMode","requiredEvidence"],view_product_media:["subjectRef","intent","color","componentRole","requiredEvidence"]};
  if(!fields[c.name])return false;const a=toolArgs(c.args,fields[c.name]!);if(!a)return false;
  if(c.name==="read_policy")return true;
  if(c.name==="apply_customer_state")return Array.isArray(a.ops)&&a.ops.length>0&&a.ops.length<=8&&a.ops.every(o=>{
@@ -96,6 +96,11 @@ export function withExplicitQuoteTask(base:CommerceTools,scope:CommerceScope,fir
    closingEvidence:{previousState:null,purchaseReady:false,priceObjectionCount:0,secondConcessionAlreadyApplied:false},now:at,authorizationNow:at});
   if(result.status!=="AUTHORIZED")return null;
   const evidence={kind:"PRE_CART_TOTAL_V1",calculationBasis:"PRE_CART_POLICY",appliesNegotiationReceipt:false,
+   negotiationAssessment:"NOT_EVALUATED",
+   standardPromotion:{status:result.adjustments.some(a=>a.ruleId==="SHOP_WIDE_MULTI_ITEM_PERCENT")?"APPLIED":"NOT_APPLIED",
+    parentProductUnits:result.parentProductUnitCount,
+    minimumParentProductUnits:p.multiItemOffer.minimumProductCount,discountBps:p.multiItemOffer.discountBps,
+    countingUnit:p.multiItemOffer.countingUnit,setAndComboCountAsOne:p.multiItemOffer.setAndComboCountAsOne},
    currentCartQuoteRef:currentCartRef(current,q),...q,subtotalVnd:result.subtotalVnd,shippingFeeVnd:result.shippingFeeVnd,
    discountTotalVnd:result.discountTotalVnd,grandTotalVnd:result.grandTotalVnd,priceHash:commerceHash(price),policyHash:commerceHash(p),
    cartStateHash:commerceHash({binding:current.cartBinding??null,items:current.state.cartItems??[]}),bindingVersion:current.state.bindingVersion,recipient:current.state.recipient};
@@ -227,11 +232,19 @@ export function withExplicitQuoteTask(base:CommerceTools,scope:CommerceScope,fir
    for(const p of priceProofs.values())if(commerceHash(sourcePrices(p.query))!==commerceHash(p.evidence))throw Error("QUOTE_PRICE_SOURCE_CHANGED");
    quoteLiterals.clear();for(const q of quoteRequests.values())await total(current,q);return withQuote(current);
   },
-  invoke:async call=>call.name==="quote_product"?quote(call):quoteRoute(call,await base.invoke(call)),
+  invoke:async call=>call.name==="quote_product"
+   ? base.requiredMediaUnavailable?.()?reject('REQUIRED_MEDIA_UNAVAILABLE'):quote(call)
+   :quoteRoute(call,await base.invoke(call)),
   invokeBatch:async calls=>{
    if(!calls.some(c=>c.name==="quote_product"))return (await base.invokeBatch(calls)).map((r,i)=>quoteRoute(calls[i]!,r));
+   if(base.requiredMediaUnavailable?.())return calls.map(()=>reject('REQUIRED_MEDIA_UNAVAILABLE'));
    const batch=quoteBatchWork(calls);
    if(!batch||batch.units>6||attempts+batch.quotes>2||batch.targets.some(t=>attemptedTargets.has(t))||calls.some(c=>!availableTools.includes(c.name))||!knownBatch(calls))return calls.map(()=>reject("QUOTE_BATCH_INVALID"));
+   const requiredMedia=calls.find(c=>['select_product_media','view_product_media'].includes(c.name)&&decodeCommerceMediaArgs(c.args)?.requiredEvidence==='CUSTOMER_WEARING');
+   if(requiredMedia){
+    const result=await base.invoke(requiredMedia);
+    return calls.map(c=>c===requiredMedia?result:reject('REQUIRED_MEDIA_UNAVAILABLE'));
+   }
    const results:CommerceToolResult[]=[];let stopped=false;
    for(const call of calls){
     const current=base.snapshot();

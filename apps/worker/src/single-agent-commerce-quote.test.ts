@@ -106,6 +106,7 @@ describe("explicit quote operation",()=>{
   const s=await setup();await s.tools.prepare!();
   const r=await s.tools.invoke({...quote,args:{...quote.args,quantity:1,deliveryRegion:"Cần Thơ"}});
   expect(r).toMatchObject({status:"OK",data:{preCartQuote:{grandTotalVnd:524000,quantity:1,deliveryRegion:"Cần Thơ"}}});
+  expect(r).toMatchObject({data:{preCartQuote:{standardPromotion:{status:"NOT_APPLIED",parentProductUnits:1},negotiationAssessment:"NOT_EVALUATED"}}});
   expect(s.tools.snapshot().state.cartQuote).toBeUndefined();expect(s.tools.snapshot().effectReceipts).toHaveLength(0);
   const before=s.tools.snapshot();expect(before.policyLiterals.some(p=>p.ref.startsWith("pre-cart-quote:"))).toBe(true);
   s.f.snapshot.offers.DIRECT!.sale_price=599000;s.f.snapshot.offers.DIRECT!.rows[0]!.sale_price=599000;
@@ -138,6 +139,7 @@ describe("explicit quote operation",()=>{
   expect(s.tools.availableTools).toContain("quote_product");
   const before=s.tools.snapshot(),r=await s.tools.invoke({...quote,args:{...quote.args,quantity:2}});
   expect(r).toMatchObject({status:"OK",data:{preCartQuote:{quantity:2,subtotalVnd:998000,discountTotalVnd:49900,shippingFeeVnd:25000,grandTotalVnd:973100}}});
+  expect(r).toMatchObject({data:{preCartQuote:{standardPromotion:{status:"APPLIED",parentProductUnits:2,minimumParentProductUnits:2,discountBps:500,setAndComboCountAsOne:true},negotiationAssessment:"NOT_EVALUATED"}}});
   expect((r.data as Record<string,unknown>).media).toBeUndefined();expect(s.tools.mediaSelection!()).toEqual([]);
   const {factSnapshotVersion:_beforeRead,...businessBefore}=before.state,{factSnapshotVersion:_afterRead,...businessAfter}=s.tools.snapshot().state;
   expect(businessAfter).toEqual(businessBefore);expect(s.tools.snapshot().effectReceipts).toEqual(before.effectReceipts);

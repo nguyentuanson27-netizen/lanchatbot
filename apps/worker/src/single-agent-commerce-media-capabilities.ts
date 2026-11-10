@@ -4,6 +4,7 @@ import {commerceHash} from './single-agent-commerce-read-only-context.js';
 import {eligibleCommerceMedia,type MediaQuery} from './single-agent-commerce-media-eligibility.js';
 export interface MediaCapability {
  schemaVersion:1;subjectRef:string;observedAt:string;expiresAt:string|null;mediaSourceHash:string;
+ customerWearingEvidence:'NOT_RECORDED';
  queries:{intent:string;componentRole:string|null;color:string|null;status:'MATCH_AVAILABLE'|'NO_VERIFIED_MATCH'}[];
 }
 export function createMediaCapabilityCache(clock:()=>Date,hosts:readonly string[],bindingVersion:string){
@@ -28,7 +29,7 @@ export function createMediaCapabilityCache(clock:()=>Date,hosts:readonly string[
     if(e.color)queries.push({subjectRef:id,intent:'GENERIC',color:e.color});
     const rows=queries.map(q=>{let available=false;try{available=eligibleCommerceMedia(e.product,q,e.at,hosts).images.length>0;}catch{}
      return {intent:q.intent,componentRole:q.componentRole??null,color:q.color??null,status:available?'MATCH_AVAILABLE' as const:'NO_VERIFIED_MATCH' as const};});
-    const value:MediaCapability={schemaVersion:1,subjectRef:id,observedAt:new Date(e.at).toISOString(),expiresAt:e.expires===null?null:new Date(e.expires).toISOString(),mediaSourceHash:e.hash,queries:rows};
+    const value:MediaCapability={schemaVersion:1,subjectRef:id,observedAt:new Date(e.at).toISOString(),expiresAt:e.expires===null?null:new Date(e.expires).toISOString(),mediaSourceHash:e.hash,customerWearingEvidence:'NOT_RECORDED',queries:rows};
     if(Buffer.byteLength(JSON.stringify(value))<=1024)result.push(value);else omissions.add("PRODUCT_BYTES");
    }
    if(Buffer.byteLength(JSON.stringify(result))>4096){omissions.add("FIELD_BYTES");return [];}

@@ -8,7 +8,8 @@ export function projectMediaCapabilities(raw,context,at=Date.now(),audit=()=>{})
  if(!Array.isArray(raw)||raw.length>8){audit({omitted:'MALFORMED'});return [];}
  const output=[],seen=new Set();
  for(const x of raw){
-  const shape=exact(x,['schemaVersion','subjectRef','observedAt','expiresAt','mediaSourceHash','queries']);
+  const keys=['schemaVersion','subjectRef','observedAt','expiresAt','mediaSourceHash','queries'];
+  const shape=exact(x,keys)||(exact(x,[...keys,'customerWearingEvidence'])&&x.customerWearingEvidence==='NOT_RECORDED');
   if(!shape||x.schemaVersion!==1||!context.boundSubjects.some(s=>s.kind==='PRODUCT'&&s.ref===x.subjectRef)||
    seen.has(x.subjectRef)||typeof x.mediaSourceHash!=='string'||typeof x.observedAt!=='string'||(x.expiresAt!==null&&typeof x.expiresAt!=='string')||!/^[a-f0-9]{64}$/.test(x.mediaSourceHash)||!Array.isArray(x.queries)||!x.queries.length||x.queries.length>7||
    !x.queries.every(q=>exact(q,['intent','componentRole','color','status'])&&['GENERIC','FEEDBACK','DETAIL','BACK'].includes(q.intent)&&

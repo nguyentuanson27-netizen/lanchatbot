@@ -2844,10 +2844,13 @@ export class PostgresRealtimeRuntimeStore {
         if (b.pageId !== input.pageId || b.conversationId !== input.conversationId || b.customerHash !== input.customerHash ||
           b.recipientHash !== input.recipientHash || b.responseGroupId !== row.response_group_id ||
           b.messageHashes[row.sequence_no] !== hash(message)) continue;
-        const image = b.images.filter(i => i.url === message.imageUrl);
-        if (image.length !== 1) continue;
-        media.push({ productId: image[0]!.productId, assetRef: `asset:${hash(message.imageUrl)}`,
-          status: row.status, occurredAt: row.accepted_at.toISOString() });
+        // A single physical attachment can have a validated proof for each
+        // product that contributed it. Retain each product's history.
+        const products = [...new Set(b.images.filter(i => i.url === message.imageUrl).map(i => i.productId))];
+        for (const productId of products.slice(0, 6 - media.length)) {
+          media.push({ productId, assetRef: `asset:${hash(message.imageUrl)}`,
+            status: row.status, occurredAt: row.accepted_at.toISOString() });
+        }
       } catch { /* Expired/unreadable or legacy payloads supply no inferred history. */ }
     }
     return media.reverse();

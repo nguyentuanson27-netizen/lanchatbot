@@ -109,7 +109,7 @@ describe("committed sales effect readback", () => {
     expect(await store.readAcceptedCommerceCartSummaries(input)).toEqual([]);
     expect(query.mock.calls.length).toBe(7);
   });
-  it.each(["SENT_ACCEPTED", "DELIVERED", "READ", "RETRYABLE", "AMBIGUOUS", "wrong-recipient", "wrong-product"])
+  it.each(["SENT_ACCEPTED", "DELIVERED", "READ", "RETRYABLE", "AMBIGUOUS", "wrong-recipient", "wrong-product", "shared-image"])
     ("projects only exact accepted media receipts after restart (%s)", async mode => {
     const cipher = new LocalEnvelopeCipher("00".repeat(32), "test"), page = "page", id = "image";
     const recipientHash = createHash("sha256").update("recipient").digest("hex"), h = "a".repeat(64);
@@ -121,17 +121,23 @@ describe("committed sales effect readback", () => {
       responseGroupId: "group", generation: 1, revision: 1, stateHash: h, policyHash: h,
       messageHashes: [h, hash(message)], images: [{ productId: "P101", url: mode === "wrong-product" ? "https://content.pancake.vn/other.jpg" : message.imageUrl,
         sourceVersion: h, observedAt: new Date().toISOString(), expiresAt: new Date(Date.now()+60_000).toISOString() }] };
+    if(mode==="shared-image")binding.images.push({...binding.images[0]!,productId:"P102",sourceVersion:"b".repeat(64)});
     const payload = cipher.encryptJson({ ...message, commerceMediaBinding: binding },
       `lana:meta-payload:v2:${page}:${id}`, new Date(Date.now()+60_000));
     const query = vi.fn(async (_sql: string, _args?: unknown[]) => ({ rows: [{ outbox_id: id, page_id: page, conversation_id: "conversation", response_group_id: "group",
-      sequence_no: 1, status: mode.startsWith("wrong-") ? "SENT_ACCEPTED" : mode, accepted_at: new Date(), payload_ciphertext: payload.ciphertext, payload_nonce: payload.nonce,
+      sequence_no: 1, status: mode.startsWith("wrong-") || mode==="shared-image" ? "SENT_ACCEPTED" : mode, accepted_at: new Date(), payload_ciphertext: payload.ciphertext, payload_nonce: payload.nonce,
       payload_auth_tag: payload.authTag, payload_encrypted_dek: payload.encryptedDek, payload_key_ref: payload.keyRef, payload_expires_at: payload.expiresAt }] }));
     const store = new PostgresRealtimeRuntimeStore("postgresql://unused:unused@localhost:5432/unused", cipher);
     (store as unknown as { pool: unknown }).pool = { query };
     const media = await store.readAcceptedCommerceMedia({ pageId: page, conversationId: "conversation", customerHash: h,
       recipientHash, before: new Date(Date.now()+1000) });
-    expect(media).toHaveLength(["SENT_ACCEPTED", "DELIVERED", "READ"].includes(mode) ? 1 : 0);
-    if (media.length) expect(media[0]).toMatchObject({ productId: "P101", assetRef: `asset:${hash(message.imageUrl)}`, status: mode });
+    if(mode==="shared-image"){
+      expect(media.map(m=>m.productId).sort()).toEqual(["P101","P102"]);
+      expect(media.every(m=>m.assetRef===`asset:${hash(message.imageUrl)}`&&m.status==="SENT_ACCEPTED")).toBe(true);
+    }else{
+      expect(media).toHaveLength(["SENT_ACCEPTED", "DELIVERED", "READ"].includes(mode) ? 1 : 0);
+      if (media.length) expect(media[0]).toMatchObject({ productId: "P101", assetRef: `asset:${hash(message.imageUrl)}`, status: mode });
+    }
     expect(JSON.stringify(media)).not.toContain("https:");
     expect(query.mock.calls[0]?.[0]).toContain("JOIN conversations");
   });

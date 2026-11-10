@@ -31,7 +31,7 @@ test('native Compact V2 keeps signed tool pairs and history while adding one bou
  const r=request();r.toolsAllowed=true;r.availableTools=['read_product'];
  r.contents.push({role:'model',parts:[{functionCall:{name:'read_product',args:{subjectRef:hint().subjectRef}},thoughtSignature:'signed'}]},
   {role:'user',parts:[{functionResponse:{name:'read_product',response:{status:'OK',data:{subjectRef:hint().subjectRef}}}}]});
- r.ownerContextPresentation='VI_DATA_BLOCKS_COMPACT_V2';const base=buildGeminiCommerceRequest(r);r.mediaCapabilities=[hint()];const withHint=buildGeminiCommerceRequest(r);
+ r.ownerContextPresentation='VI_DATA_BLOCKS_COMPACT_V2';const base=buildGeminiCommerceRequest(r);r.mediaCapabilities=[{...hint(),customerWearingEvidence:'NOT_RECORDED'}];const withHint=buildGeminiCommerceRequest(r);
  assert.deepEqual(withHint.contents.slice(1),base.contents.slice(1));assert.deepEqual(withHint.tools,base.tools);
  assert.deepEqual(readCompactSections(withHint.contents[0]).find(s=>s.label==='Khả năng thực hiện lượt này').value.mediaCapabilities,r.mediaCapabilities);
 });

@@ -1,6 +1,6 @@
 import {normalizeCatalogToken,selectRequestedImages,selectPriceCardImages,mediaObservationTime,type StableProductDocument,type CustomerImageIntent} from '@lana/business-tools';
 import {safeRecognitionImageUrl} from './media-recognition-v2-image-pipeline.js';
-export interface MediaQuery {subjectRef:string;intent:CustomerImageIntent;color?:string;componentRole?:'TOP'|'SKIRT'|'PANTS'}
+export interface MediaQuery {subjectRef:string;intent:CustomerImageIntent;color?:string;componentRole?:'TOP'|'SKIRT'|'PANTS';requiredEvidence?:'CUSTOMER_WEARING'}
 const parts={TOP:'AO',SKIRT:'CHAN_VAY',PANTS:'QUAN'};
 export const commerceMediaIntents:CustomerImageIntent[]=['GENERIC','BACK','DETAIL','SIZE_GUIDE','PRODUCT_ONLY','FEEDBACK'];
 /** Pure eligibility shared by hints and real selection. Never authorizes delivery. */
@@ -23,7 +23,9 @@ export function eligibleCommerceMedia(product:StableProductDocument,query:MediaQ
  if(query.color&&!base.some(colorMatch))throw Error('MEDIA_COLOR_BINDING_UNVERIFIED');
  const approved={...product,images:query.color?base.filter(colorMatch):base,imageUrls:[]};
  const select=(intent:CustomerImageIntent)=>intent==='GENERIC'?selectPriceCardImages(approved):selectRequestedImages(approved,intent);
- const selected=select(query.intent);
+ // The current source schema records feedback classification, not wearer provenance.
+ // This stronger request has no eligible positive source path in this revision.
+ const selected=query.requiredEvidence==='CUSTOMER_WEARING'?{images:[]}:select(query.intent);
  const transitions=(product.images??[]).map(i=>mediaObservationTime(i,product.observedAt)).filter(t=>Number.isFinite(t)&&t>at);
  return {images:selected.images,alternatives:selected.images.length?[]:commerceMediaIntents.filter(i=>i!==query.intent&&select(i).images.length>0),
   expiresAt:transitions.length?Math.min(...transitions):null};

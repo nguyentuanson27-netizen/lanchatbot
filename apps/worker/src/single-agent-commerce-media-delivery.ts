@@ -10,6 +10,16 @@ import { commerceHash, publicPolicyLiteral } from "./single-agent-commerce-read-
 import { safeRecognitionImageUrl } from "./media-recognition-v2-image-pipeline.js";
 
 export type { MediaDeliveryImage, CommerceMediaDeliveryBinding };
+/** One physical send per exact approved URL, retaining source evidence elsewhere. */
+export function physicalCommerceMedia(images:readonly import('./single-agent-commerce-media.js').CommerceMediaAsset[]){
+ const unique=new Map<string,(typeof images)[number]>();
+ const facts=(a:(typeof images)[number])=>commerceHash([a.sourceContentSha256,a.imageType,a.angle,a.feedback===true,[...a.partsVisible].sort()]);
+ for(const image of images){const old=unique.get(image.url);
+  if(old&&facts(old)!==facts(image))throw Error('MEDIA_ATTACHMENT_CONFLICT');
+  if(!old)unique.set(image.url,image);
+ }
+ return [...unique.values()];
+}
 export const commerceDeliveryPolicyHash = (policy: RuntimePolicyBundle, pageId: string, shopId: string, now: Date) =>
   commerceHash({ policy: publicPolicyLiteral(policy, pageId, shopId, now), matrix: policy.artifacts.handoffMatrix });
 

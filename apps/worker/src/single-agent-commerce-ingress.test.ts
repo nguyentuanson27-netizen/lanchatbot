@@ -77,6 +77,30 @@ function fixture(productIds = ["SM613"]) {
 
 afterEach(() => vi.restoreAllMocks());
 
+it("sends one shared attachment while binding both parent sources",async()=>{
+ const f=fixture(['SM613','OTHER1']);
+ for(const p of f.products)p.product.images=[{url:'https://content.pancake.vn/shared.jpg',role:'PRIMARY',angle:'FRONT',imageType:'MODEL',intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:commerceNow.toISOString(),partsVisible:['AO']}];
+ const calls=f.products.map((p,i)=>({name:'select_product_media',args:{subjectRef:p.product.productId,intent:'GENERIC',deliveryMode:i?'APPEND':'REPLACE'}}));let n=0;
+ const result=await f.run(async()=>++n===1?{kind:'TOOLS',calls,content:{role:'model',parts:calls.map(functionCall=>({functionCall}))}}:{kind:'FINAL',text:'Chị xem ảnh nhé.'});
+ expect(result.terminal.disposition).toBe('SEND_ELIGIBLE');
+ const meta=f.commit.mock.calls.at(-1)![1].metaPlan!;
+ expect(meta.messages.filter(m=>m.kind==='IMAGE')).toHaveLength(1);
+ const binding=CommerceMediaDeliveryBindingV1Schema.parse(meta.mediaBinding);
+ expect(binding.images.map(i=>i.productId).sort()).toEqual(['OTHER1','SM613']);
+ expect(binding.messageHashes).toHaveLength(2);
+});
+
+it("missing requested wearer proof hands off silently before any sibling cart mutation",async()=>{
+ const f=fixture();f.enableHandoff();
+ f.products[0]!.product.images=[{url:'https://content.pancake.vn/detail.jpg',role:'PRIMARY',angle:'CLOSEUP',imageType:'DETAIL',intents:[],sortOrder:0,qualityScore:null,feedback:true,reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:commerceNow.toISOString(),partsVisible:['AO']}];
+ const calls=[{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:null}},{name:'select_product_media',args:{subjectRef:'SM613',intent:'FEEDBACK',requiredEvidence:'CUSTOMER_WEARING'}}];
+ const owner=vi.fn(async()=>({kind:'TOOLS' as const,calls,content:{role:'model' as const,parts:calls.map(functionCall=>({functionCall}))}}));
+ const result=await f.run(owner);
+ expect(result.terminal.disposition).toBe('HANDOFF');expect(result.enqueued).toBe(0);
+ expect(f.select).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+ expect(f.commit.mock.calls.every(c=>!c[1].metaPlan&&!c[1].salesCyclePlan)).toBe(true);
+});
+
 it("runs explicit main-C3 evaluation through the persisted egress without OWNER or verifier",async()=>{
  const f=fixture(),owner=vi.fn();
  const reference:NonNullable<Parameters<typeof runPersistedCommerceIngress>[0]["evaluationTurn"]>["run"]=async(turn,state)=>{

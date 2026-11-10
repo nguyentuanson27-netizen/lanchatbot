@@ -550,7 +550,7 @@ try{
   baselineBuild:JSON.parse(readFileSync(phaseCArg('--phase-c-baseline-build'),'utf8'))});
  if(j2j1Input){const {createCampaignPorts}=await import('../single-agent-commerce-qualification/j2-j1-campaign.mjs');
   providerPorts=await createCampaignPorts({root,input:j2j1Input,world:initialWorld,out:resolve(out),readPorts:providerPorts});}
- async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,oldMedia=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false,candidateTuples=false,preparedOffers=false,preorderChoices=false,checkoutEta=false,multiOfferContext=false,componentFit=false,physicalChoices=false,canonicalOfferIds=false}={}){
+ async function statefulFixture({live=false,missingEta=false,dependencyHoldingReply=null,sizeHoldingReply=null,media=false,oldMedia=false,revalidatedMedia=false,initialProductCodes=['SV2447'],deferredHandoff=false,sourceMode='LIVE',missingDependencyRule=false,candidateTuples=false,preparedOffers=false,preorderChoices=false,checkoutEta=false,multiOfferContext=false,componentFit=false,physicalChoices=false,canonicalOfferIds=false,sharedMedia=false}={}){
   assert(!live||(!preparedOffers&&!preorderChoices),'SYNTHETIC_PREPARATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||!revalidatedMedia,'SYNTHETIC_REVALIDATION_FORBIDDEN_IN_PROVIDER_RUN');
   assert(!live||(dependencyHoldingReply===null&&sizeHoldingReply===null&&!missingDependencyRule),'SYNTHETIC_RULE_FORBIDDEN_IN_PROVIDER_RUN');
@@ -602,7 +602,14 @@ try{
    product.product.images[0].observedAt=product.product.observedAt;
    product.product.images[0].revalidation={status:'VALID',checkedAt:at.toISOString()};}
   if(oldMedia){assert(media&&!live);product.product.images[0].observedAt='2025-01-01T00:00:00.000Z';}
-  const read=live?await providerPorts.read(bound,policyStore,policy,initialProductCodes,facts):{policy:()=>policy(true),catalog:{readProduct:async()=>mediaChanged?{...product,product:{...product.product,images:[]}}:product,searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:[product.product]};
+  assert(!sharedMedia||!live&&media,'SHARED_MEDIA_SYNTHETIC_ONLY');
+  const alias=sharedMedia?fixtureProduct('OTHER1',at):null;
+  if(alias)alias.product.images=structuredClone(product.product.images);
+  let revokedMediaProduct=null;
+  const read=live?await providerPorts.read(bound,policyStore,policy,initialProductCodes,facts):{policy:()=>policy(true),catalog:{readProduct:async id=>{
+   const source=alias?.product.productId===id?alias:product;
+   return mediaChanged||revokedMediaProduct===id?{...source,product:{...source.product,images:[]}}:source;
+  },searchText:async()=>({status:'NOT_FOUND',reasonCode:'NO_CANDIDATES'})},initialProducts:alias?[product.product,alias.product]:[product.product]};
   if(componentFit){
    const group=structuredClone(JSON.parse(readFileSync(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json'),'utf8')).productGroups[0]);
    group.name='Synthetic component fit test';group.productTitles.SM613=product.product.title;
@@ -710,11 +717,45 @@ try{
   return {bound,turn,state,seedControlCart,changeStoredCart,capture,capturePayloads,gateCalls,deliveryObservations,drain,syntheticNow,readCheckoutMediaProofs,
    readPolicyStatuses:async()=>({transaction:(await policy()).status,active:(await read.policy()).status}),
    restartDelivery:()=>{dispatcher=makeDispatcher();},changeVariantSource:()=>{sourceVariantChanged=true;},changeMediaSource:()=>{mediaChanged=true;},changeHandoffPolicy:()=>{policyChanged=true;},disableReceiptRead:()=>{receiptAvailable=false;},
+   revokeSharedMedia:id=>{assert(sharedMedia);revokedMediaProduct=id;},
    revokeMediaProof:()=>{assert(revalidatedMedia);product.product.images[0].revalidation={status:'INVALID'};},
    refreshPosSource:mode=>{product.snapshot.synced_at=new Date(mode==='expired'?Date.now()-3*3600000:Date.now()).toISOString();
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
+ await check('C price-intent-media missing wearer proof blocks writer-first quote and hands off silently',async()=>{
+  const j=await statefulFixture({media:true,preparedOffers:true,dependencyHoldingReply:'Em sẽ kiểm tra rồi báo chị nhé.'});
+  const {state:before}=await runtime.loadOrCreateSalesCycle(pageId,j.bound.conversationId,()=>createSalesCycleRuntimeState(
+   j.bound.conversationId,{pageId,conversationId:j.bound.conversationId},new Date()));
+  const r=await j.turn('Chị thích màu be, báo giá và cho chị xem ảnh khách mặc nhé.',[native([
+   {name:'apply_customer_state',args:{ops:[{op:'SET',field:'preferences.colors',value:['be'],sourceQuote:'be'}]}},
+   {name:'quote_product',args:{subjectRef:'SM613',offerTypes:['DIRECT'],quantity:1}},
+   {name:'select_product_media',args:{subjectRef:'SM613',intent:'FEEDBACK',requiredEvidence:'CUSTOMER_WEARING'}},
+  ])],{testQuoteTask:EXPLICIT_QUOTE_TASK});
+  assert.equal(r.owners,1);assert.equal(r.verifiers,0);assert.equal(r.result.terminal.disposition,'HANDOFF',JSON.stringify(r.result));
+  assert.equal(r.result.terminal.text,null);assert.equal(r.result.enqueued,0);assert.deepEqual(r.result.quoteTaskWork,[]);
+  const profile=await runtime.loadOrCreateCustomerProfile(pageId,j.bound.customerHash,()=>{throw Error('PROFILE_REQUIRED');});
+  assert.deepEqual(profile.profile.preferences.colors,[]);assert.deepEqual(await j.state(),before);
+  j.restartDelivery();await j.drain();assert.deepEqual(j.capture,[]);
+  assert.equal((await pool.query('SELECT count(*)::int AS n FROM handoff_events WHERE conversation_id=$1',[j.bound.conversationId])).rows[0].n,1);
+ });
+ for(const revoked of [null,'SM613','OTHER1'])await check('C price-intent-media one shared attachment with both proofs '+(revoked??'current'),async()=>{
+  const j=await statefulFixture({media:true,sharedMedia:true});
+  const r=await j.turn('Cho chị xem ảnh hai mẫu nhé.',[native([
+   {name:'select_product_media',args:{subjectRef:'SM613',intent:'GENERIC'}},
+   {name:'select_product_media',args:{subjectRef:'OTHER1',intent:'GENERIC',deliveryMode:'APPEND'}},
+  ]),say('Chị xem ảnh nhé.')]);
+  assert.equal(r.result.enqueued,2,JSON.stringify(r.result));
+  if(revoked)j.revokeSharedMedia(revoked);
+  j.restartDelivery();await j.drain();await j.drain();
+  assert.deepEqual(j.capture,revoked?[]:['Chị xem ảnh nhé.','[CODE_IMAGE]']);
+  const history=await runtime.readAcceptedCommerceMedia({pageId,conversationId:j.bound.conversationId,customerHash:j.bound.customerHash,
+   recipientHash:hash('synthetic-recipient-'+j.bound.customerHash),before:await j.syntheticNow()});
+  assert.deepEqual(history.map(h=>h.productId).sort(),revoked?[]:['OTHER1','SM613']);
+  if(!revoked)assert.equal(new Set(history.map(h=>h.assetRef)).size,1);
+  const rows=(await pool.query('SELECT status FROM meta_outbox WHERE conversation_id=$1 ORDER BY sequence_no',[j.bound.conversationId])).rows;
+  assert.equal(rows.length,2);assert(rows.every(row=>row.status===(revoked?'MANUAL_REVIEW':'SENT_ACCEPTED')),JSON.stringify(rows));
+ });
  await check('C post-full contract incidental media failure retains a verified acknowledgement',async()=>{
   const j=await statefulFixture({media:true}),text='Dạ, em cảm ơn chị nhé.';
   const r=await j.turn('Chị thích màu be, cảm ơn em nhé.',[

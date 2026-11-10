@@ -21,7 +21,8 @@ function requiredReadHandoffReason(call: CommerceToolCall, result: CommerceToolR
   // A media lookup is not proof that the customer needs this image. Return its
   // scoped failure to the owner; required opening images still have a code gate.
   // The owner must hand off when the missing image is needed for the request.
-  if (["select_product_media","view_product_media"].includes(call.name))return null;
+  if (["select_product_media","view_product_media"].includes(call.name))return result.status==='UNAVAILABLE'&&
+    (call.args as {requiredEvidence?:unknown}|null)?.requiredEvidence==='CUSTOMER_WEARING'?"DEPENDENCY_FAILURE":null;
   if (!["read_product", "read_policy", "search_products"].includes(call.name)) return null;
   if (result.status === "UNAVAILABLE" || result.status === "STALE")
     return call.name === "read_policy" ? "POLICY_UNAVAILABLE" : "DEPENDENCY_FAILURE";

@@ -68,6 +68,8 @@ export interface CommerceTools {
   mediaCapabilities?(): readonly import("./single-agent-commerce-media-capabilities.js").MediaCapability[];
   catalogImages?(): readonly import("./single-agent-commerce-media.js").CommerceCatalogImage[];
   mediaSelection?(): readonly import("./single-agent-commerce-media.js").CommerceMediaAsset[];
+  /** Sticky request-local missing source for an explicitly requested media proof. */
+  requiredMediaUnavailable?():boolean;
   prepare?(admit?:import("./single-agent-commerce-read-only-tools.js").PreparationAdmission, control?:import("./single-agent-commerce-read-only-tools.js").PreparationControl): Promise<number>;
   availableTools?: readonly string[];
   invoke(call: CommerceToolCall): Promise<CommerceToolResult>;
@@ -130,6 +132,7 @@ export async function runCommerceTurn(input: {
   let toolLatencyMs = 0, verificationStarted: number | undefined;
   const generations: { id: string; role: "owner" | "verifier"; status: string; latencyMs: number; telemetry?: unknown }[] = [];
   const finish = async (terminal: TerminalOutcome, committedTerminal = false) => {
+    if(terminal.disposition==='SEND_ELIGIBLE'&&input.tools.requiredMediaUnavailable?.())terminal=fallback('REQUIRED_MEDIA_UNAVAILABLE');
     let recovery: { originalDisposition: TerminalOutcome["disposition"]; originalReason: string;
       originalDiagnostic?: TerminalOutcome["diagnostic"] } | null = null;
     const rejected = terminal.disposition === "FALLBACK" ||
@@ -293,6 +296,7 @@ export async function runCommerceTurn(input: {
       toolLatencyMs += performance.now()-toolStarted;
       const actual = await effectTerminal();
       if (actual) return finish(actual, true);
+      if(input.tools.requiredMediaUnavailable?.())return finish(fallback('REQUIRED_MEDIA_UNAVAILABLE'));
       if(terminalCall&&(results.length!==1||results[0]?.status!=="OK"))
         return finish({disposition:"NO_SEND",reason:"HANDOFF_REQUEST_REJECTED",text:null,fallbackId:null});
       if (input.tools.sizeOutcome?.()?.status === "NO_VERIFIED_CHART") return finish(fallback("SIZE_RULE_UNAVAILABLE"));
@@ -328,6 +332,7 @@ export async function runCommerceTurn(input: {
       const actual=await effectTerminal();if(actual)return finish(actual,true);
       if(openingMediaWork.status==='UNAVAILABLE')return finish(fallback("PREPARATION_UNAVAILABLE"));
     }
+    if(input.tools.requiredMediaUnavailable?.())return finish(fallback('REQUIRED_MEDIA_UNAVAILABLE'));
     const trusted = input.tools.snapshot();
     if(!trusted.state.permission||!trusted.state.privacyAllowed||trusted.state.conversationOwner!=="BOT")
       return finish({disposition:"NO_SEND",reason:"PERMISSION_OR_PRIVACY",text:null,fallbackId:null});
