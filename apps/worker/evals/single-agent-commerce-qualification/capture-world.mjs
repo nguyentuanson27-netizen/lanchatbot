@@ -11,9 +11,10 @@ import {digest} from './qualification.mjs';
 import {capturePublicIndex,createFrozenSearch} from './frozen-search.mjs';
 import {supplementTestColorWorld} from './test-color-source.mjs';
 import {supplementTestSupportWorld} from './test-support-sources.mjs';
-import {captureTestMediaWorld} from './test-media-source.mjs';
+import {captureTestMediaWorld,reuseTestMediaWorld} from './test-media-source.mjs';
 import {FfmpegImagePipeline} from '../../dist/p23c-publisher.js';
-const [out,codesFile]=process.argv.slice(2);assert(out&&codesFile,'C_CAPTURE_ARGUMENTS');
+const [out,codesFile,proofFlag,proofPath]=process.argv.slice(2);assert(out&&codesFile,'C_CAPTURE_ARGUMENTS');
+assert(proofFlag===undefined||proofFlag==='--test-media-proof-world'&&proofPath&&process.argv.length===6,'C_CAPTURE_MEDIA_PROOF_ARGUMENTS');
 const outside=relative(process.cwd(),resolve(out));assert(outside&&(outside==='..'||outside.startsWith('..'+sep)||isAbsolute(outside)),'C_CAPTURE_OUTSIDE_SOURCE');
 const git=(...a)=>execFileSync('git',a,{encoding:'utf8'}).trim();assert.equal(git('status','--porcelain'),'','C_DIRTY_SOURCE');
 const sourceSha=git('rev-parse','HEAD'),codes=JSON.parse(readFileSync(codesFile,'utf8'));
@@ -50,7 +51,9 @@ try{
  const rawWorld={kind:'FROZEN_PUBLIC_BUSINESS_WORLD',version:1,sourceSha,capturedAt:at,config,products,snapshots,policyRecords:records,
   sourceEvidenceHashes:[digest(products),digest(snapshots),digest(records),digest(search)],search,providerRequests:0,sourceWrites:0};
  const pipeline=new FfmpegImagePipeline({rembgUrl:'https://unused.invalid',rembgAuthHeader:''});
- const world=await captureTestMediaWorld(supplementTestSupportWorld(supplementTestColorWorld(rawWorld)),{prepare:url=>pipeline.prepareForRevalidation(url)});
+ const supplemented=supplementTestSupportWorld(supplementTestColorWorld(rawWorld));
+ const world=proofPath?reuseTestMediaWorld(supplemented,JSON.parse(readFileSync(proofPath,'utf8'))):
+  await captureTestMediaWorld(supplemented,{prepare:url=>pipeline.prepareForRevalidation(url)});
  assert.deepEqual(await capturePublicIndex({baseUrl:process.env.QDRANT_BASE_URL,apiKey:process.env.QDRANT_API_KEY,collection:config.qdrantCollection,dimension:config.vertex.embeddingDimension}),search,'C_CAPTURE_INDEX_CHANGED_AFTER_MEDIA');
  if(world.testSourceSupplement||world.testSupportSupplement||world.testMediaSupplement)writeFileSync(resolve(out,'PUBLIC_SOURCE_WORLD.json'),JSON.stringify(rawWorld,null,2)+'\n',{flag:'wx'});
  writeFileSync(resolve(out,'WORLD.json'),JSON.stringify(world,null,2)+'\n',{flag:'wx'});

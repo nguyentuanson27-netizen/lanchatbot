@@ -32,3 +32,15 @@ export async function captureTestMediaWorld(w,{prepare,clock=()=>new Date()}){
  r.products=r.products.map(p=>supplementTestMediaProduct(p,r));
  r.sourceEvidenceHashes=[digest(r.products),digest(r.snapshots),digest(r.policyRecords),...(r.search?.status==='FROZEN_NATIVE_INDEX'?[digest(r.search)]:[])];return r;
 }
+export function reuseTestMediaWorld(w,previous){
+ assertTestMediaWorld(previous);
+ assert(!w.testMediaSupplement&&previous.testMediaSupplement&&
+  digest(w.config?.testMediaSources)===previous.testMediaSupplement.configurationHash,'TEST_MEDIA_REUSE_CONFIG');
+ const result=structuredClone(w);
+ result.testMediaSupplement={...structuredClone(previous.testMediaSupplement),baseWorldHash:digest(w),
+  proofReuse:{previousWorldHash:digest(previous),policy:'REUSE_OWNER_APPROVED_TEST_ASSET_ORIGINAL_CHECK_TIME'}};
+ result.products=result.products.map(product=>supplementTestMediaProduct(product,result));
+ result.sourceEvidenceHashes=[digest(result.products),digest(result.snapshots),digest(result.policyRecords),
+  ...(result.search?.status==='FROZEN_NATIVE_INDEX'?[digest(result.search)]:[])];
+ return result;
+}
