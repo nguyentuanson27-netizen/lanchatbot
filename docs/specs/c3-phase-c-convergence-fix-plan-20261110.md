@@ -1,6 +1,6 @@
 # Kế hoạch: đưa Phase C ra khỏi vòng lặp fix → chạy model → fix
 
-Ngày lập: 10/11/2026. Trạng thái: **ĐỀ XUẤT, chờ owner chốt D1–D4**. Chưa có thay đổi runtime nào được thực hiện theo tài liệu này.
+Ngày lập: 10/11/2026. Cập nhật 11/11/2026: **owner đã chốt D1–D4; Giai đoạn 2 và phần code của Giai đoạn 1 đã làm xong** trên nhánh `claude/sleepy-edison-4xadgb`. Xem [mục 14](#14-trạng-thái-thực-hiện-11112026) để biết việc đã làm, số đo và việc còn lại.
 
 Căn cứ: review PR 392 tại head `6ef2be81c4e3f4c6ae7f90fee9afe3fbf26304a2` (nhánh `feat/c3-phase-c-qualification-20261028`). Mọi đường dẫn và số dòng bên dưới tính theo commit đó. Review chỉ đọc code, prompt và báo cáo; không chạy test hay model. Raw trace nằm ngoài repo, nên các nhận định về nội dung tool result là suy từ code và phải được xác nhận lại ở Giai đoạn 0.
 
@@ -40,7 +40,14 @@ Nguyên tắc áp dụng cho mọi giai đoạn:
 | D3 | Quy tắc đo và ngưỡng đạt | Thay `repetitions: 1` trong `owner-decisions.json` bằng N=5 trên snapshot đóng băng; ngưỡng theo ca ở mục 9 | 1, 5 |
 | D4 | So sánh model owner khác trên cùng bộ replay | Chỉ làm nếu chạm điều kiện dừng ở mục 9 | 5 |
 
-D1 là quyết định nặng nhất. Nó căng giữa hai văn bản đang có hiệu lực: amendment §7.2 và §14.9 (không dựng hệ template) với invariant r31.3 trong `AGENTS.md` (lỗi model chỉ được mất phần đóng góp của nó, phải thử deterministic fallback từ verified facts trước). Nếu owner không duyệt D1, bỏ Giai đoạn 3 và chấp nhận rằng tỷ lệ handoff im lặng sẽ là giới hạn trên của kết quả.
+**Quyết định của owner, 10/11/2026** (ghi tại `apps/worker/evals/single-agent-commerce-qualification/owner-decisions.json`):
+
+- D1: **không duyệt, chỉ dùng handoff.** Bỏ Giai đoạn 3.
+- D2 và D3: **duyệt.**
+- D4: **chưa làm.**
+- Thêm: verifier dùng cùng `gemini-3.5-flash-lite` với owner, thay cho GPT-6.1 Sol.
+
+Phần dưới đây giữ nguyên phân tích lúc đề xuất. D1 là quyết định nặng nhất. Nó căng giữa hai văn bản đang có hiệu lực: amendment §7.2 và §14.9 (không dựng hệ template) với invariant r31.3 trong `AGENTS.md` (lỗi model chỉ được mất phần đóng góp của nó, phải thử deterministic fallback từ verified facts trước). Nếu owner không duyệt D1, bỏ Giai đoạn 3 và chấp nhận rằng tỷ lệ handoff im lặng sẽ là giới hạn trên của kết quả.
 
 ## 4. Giai đoạn 0 — Đóng băng và lấy baseline
 
@@ -263,3 +270,55 @@ Chạy song song, không chặn các giai đoạn trên.
 - Chưa xác nhận harness native hỗ trợ ghim clock.
 - Chưa xác nhận selection evidence có được lưu bền hay không.
 - Mức tiết kiệm byte của từng bước ở 2C là kỳ vọng, phải đo ở bước 1 của 2C.
+
+## 14. Trạng thái thực hiện, 11/11/2026
+
+Nhánh `claude/sleepy-edison-4xadgb` = head PR 392 (`6ef2be81`) + tài liệu này + các commit dưới đây. Chưa mở PR.
+
+### Đã làm
+
+| Hạng mục | Commit | Kiểm chứng |
+|---|---|---|
+| 2A — nhãn completeness theo thực tế, giữ đủ màu/size của danh sách bị cắt | `083dc01e` | 6 test mới. Evidence lên V3; không lưu bền nên bỏ hẳn V2 |
+| 2B — kết quả ghi giỏ cho owner đứng đầu bằng khối `outcome` | `80c18613` | 15 test mới; test trên wire thật xác nhận có tên màu, không còn hash |
+| 2C — trần text và trần signature tách riêng; trả lời từ dữ kiện đã có khi continuation không dựng được | `0d77ea67` | 5 test mới; test ngân sách p04 vốn fail trên head PR nay pass |
+| Verifier Gemini và chạy lặp theo ca (D3) | `bcd88a54` | 7 test mới; manifest đã đăng ký verifier mới |
+| Công cụ đo và kết quả trên fixture | `064e9064` | [Báo cáo](../../apps/worker/evals/single-agent-commerce-qualification/fixture-sampling-20261111/REPORT.md) |
+
+Toàn bộ suite worker sau thay đổi: 2.776 test unit và 904 test eval pass. Còn 6 unit và 6 eval fail, đều fail sẵn trên head PR 392 và không do nhánh này gây ra (xem dưới).
+
+### Khác với kế hoạch ban đầu
+
+- **Lọc schema theo trạng thái (2C bước 3) không làm.** `single-agent-commerce-callable.ts` đã lọc theo state ở từng lần sinh, và cố ý giữ các tool cần giỏ khi giỏ có thể được tạo trong cùng batch. Siết thêm sẽ phá đường "ghi rồi đọc trong một batch" đã thiết kế, để tiết kiệm khoảng 2 KB.
+- **Chặn trước khi chạy batch (2C bước 5) được thay bằng đường lui sau khi chạy.** Khi transport từ chối dựng một continuation còn mở tool, lượt xin một lần câu trả lời qua pha final sẵn có, trong đúng trần 3 lần sinh của owner. Pha này không mang schema tool và không mang lượt tool có chữ ký. Đây không phải tin do code viết: vẫn là owner viết, vẫn qua verifier và final gate, nên không thuộc phạm vi D1.
+- **Trần signature là 65.536 byte**, không phải 32 KiB như dự tính: một test hồi quy sẵn có mang chữ ký 37 KiB.
+- **Evidence V2 không cần đọc tương thích**: evidence chỉ sống trong một lượt, không nằm trong `packages/database`.
+
+### Phát hiện thêm khi thực hiện
+
+- Trên head PR 392, **6 test eval đang fail**, trong đó có ba test hồi quy ngân sách của chính bản sửa 06/11: envelope p04 vượt trần, schema tool không còn tiết kiệm đủ 4 KiB, baseline contract đã cũ. Các bản vá sau 06/11 làm phình lại prompt và schema mà không ai chạy lại suite. Sau 2C còn lại hai test thuộc nhóm này; chúng thuộc Giai đoạn 4.
+- Owner trước đây **không thấy tên màu** trong kết quả `add_to_cart` thiếu màu: chỉ có `availableColors: []`, hash của lựa chọn và một tham chiếu content-hash sang mục sản phẩm. Điều này đã được xác nhận bằng cách dựng wire thật, không còn là suy luận.
+- 6 test unit fail sẵn thuộc Track B release evidence và pipeline ảnh ffmpeg, không liên quan Phase C.
+
+### Số đo với model thật
+
+Chi tiết và giới hạn ở báo cáo fixture. Tóm tắt:
+
+- Trên fixture một sản phẩm, code **trước khi sửa đã đạt 9–10/10** ở cả ba kịch bản, nên số đo này **không chứng minh** 2A và 2B sửa được lỗi J4 và S04 của PR 392. Hai lỗi đó không tái hiện được ở đây.
+- Khác biệt đo được: sau 2B, owner nêu rõ màu nào là hàng đặt trước ở 7/10 lượt so với 3/10.
+- Verifier Gemini: 0/20 draft sai lọt qua, 20/20 draft đúng được gửi, trên bộ 8 draft nhỏ.
+- Chữ ký thật của một vòng tool đo được 12.928 byte.
+
+### Chưa làm và điều kiện để làm
+
+| Việc | Vì sao chưa làm | Cần gì |
+|---|---|---|
+| Giai đoạn 0 bước 4–5: fixture từ raw trace, đối chiếu tool result thật của J4/P09 | Raw trace nằm ngoài repo | Máy đang giữ raw trace |
+| Baseline và lượt đo N=5 trên 13 ca | Không có `WORLD.json`; capture cần Qdrant, PostgreSQL và Redis của runtime | Chạy trên máy có snapshot. Harness đã nhận `repetitions` 1–10; các script prepare/seal/launch ngoài repo cần truyền số lần lặp và gọi `repetition-summary.mjs` |
+| Chạy lại bộ SAFETY 12+12 với verifier Gemini | Cùng lý do | Cùng điều kiện; cần làm trước khi dựa vào verifier mới |
+| Giai đoạn 4: viết lại prompt và mô tả tool | Kế hoạch cấm nhận thay đổi prompt khi chưa có lượt đo N=5 trên bộ ca thật | Sau lượt đo của Giai đoạn 2 |
+| Giai đoạn 5 và 6 | Phụ thuộc các việc trên | — |
+| Xác nhận harness native ghim được clock | Chưa kiểm tra được khi không có world | Việc đầu tiên khi có snapshot |
+
+Hai điểm cần lưu ý khi chạy tiếp: `owner-decisions.json` đã đổi nên mọi config đã seal trước đó không còn khớp `decisionHash`; và `manifest.json` nay đăng ký verifier Gemini nên `runtimeHash`/identity của candidate cũng đổi. Cả hai đều cần `init` và `seal` lại.
+
