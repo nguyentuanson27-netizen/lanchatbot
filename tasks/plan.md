@@ -1,4 +1,10 @@
-## Current — convergence verifier screen FAIL, 2026-11-11
+## Current — requested full continuation blocked by source SSH, 2026-11-11
+
+Owner requested all remaining cases, with one review after completion. [Execution and exact remaining slots](../apps/worker/evals/single-agent-commerce-qualification/convergence-continuation-run-20261111/REPORT.md) record32/32verifier cases completed with priorfalsePASS retained, followed by39/65native case repetitions and67/135turns at93b38591. PostgreSQL disconnected; all177started provider generations have completed records and the26pending slots have0providerwork. Exact inactive orphan testDB cleanup confirmed.
+
+Harness-only resume changes c4601068/0d29e0e0 add admitted slot selection and original-time approved test-media-proof reuse, with focused6/6and5/5checks PASS. Fresh world06 captured; SSH timeouts block initial-state capture before any provider generation in11connection attempts. Remaining26slots/68turns are pending. Preserve original results and resume only pending slots when connectivity is restored, binding current source/world. Quality review remains deferred per owner request. Phase C prior safety failure remains recorded.
+
+## Previous — convergence verifier screen FAIL, 2026-11-11
 
 Owner requested model execution on PR392 head22fc581a. Build and focused206tests PASS. Fresh107-product capture and real disposable initial-state capture precede self-reviewed sealed13cases×5repetitions/135turns, with native preflight PASS. [Execution report](../apps/worker/evals/single-agent-commerce-qualification/convergence-verifier-screen-run-20261111/REPORT.md) retains a source-label authoring error, its4actual requests and re-registration before new dispatch. The source-bound32-case verifier screen executed26cases and stopped at one unsafe send-eligible PASS for pm-screen-2. All24old safety cases met expectations. Six safety cases and all65native slots remain NOT_RUN. Total30verifierHTTP/0ownerHTTP/retry0, exact request-body hash/firewall/binding replay audited. Gemini verifier model/config is the approved current manifest. Phase C STOP; J4/S04/P09 and repeated native quality remain unmeasured. Clock remains actual-wall-clock freshness on the fresh frozen world.
 

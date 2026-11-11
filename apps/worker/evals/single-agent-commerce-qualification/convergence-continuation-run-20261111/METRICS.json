@@ -1,0 +1,28 @@
+{
+  "nativeProviderRequests": 177,
+  "nativeRoles": {
+    "OWNER": 122,
+    "VERIFIER": 55
+  },
+  "nativeGenerationStatuses": {
+    "OK": 174,
+    "MALFORMED": 3
+  },
+  "nativeTerminalCounts": {
+    "HANDOFF": 8,
+    "SEND_ELIGIBLE": 55,
+    "NO_SEND": 4
+  },
+  "newSafetyRemainderRequests": 6,
+  "actualRequestsThisContinuation": 183,
+  "nativeInputTokens": 2023902,
+  "nativeOutputTokens": 133020,
+  "retry": 0,
+  "unknownProviderCompletions": 0,
+  "completedCaseRepetitions": 39,
+  "capturedTurns": 67,
+  "pendingCaseRepetitions": 26,
+  "pendingTurns": 68,
+  "wholeConversationQuality": "NOT_REVIEWED_PENDING_COMPLETION",
+  "cost": "PROVIDER_NOT_EXPOSED"
+}

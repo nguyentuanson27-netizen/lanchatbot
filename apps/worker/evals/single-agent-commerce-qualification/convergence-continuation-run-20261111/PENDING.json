@@ -1,0 +1,266 @@
+{
+  "pendingCaseRepetitions": 26,
+  "pendingTurns": 68,
+  "attempts": [
+    {
+      "caseId": "c-20261028-j1",
+      "repetition": 5,
+      "slotId": "56ad0eec3418e41fbb22fe408524b2615a5b06cf145322733e4e4cce6471b26c",
+      "turns": 3,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "EXECUTED",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "repetition": 1,
+      "slotId": "e9405f947c4e6c5920caf629a1a5b7426639ab10b6654bb34f481d9ee28d30f1",
+      "turns": 2,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "repetition": 2,
+      "slotId": "55edfb000f6224a18eb05ae79f859fa01b01aa849ad91e4b971a923ccdacd90b",
+      "turns": 2,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "repetition": 3,
+      "slotId": "a8055ea26f5b39a51f4462178dd81f7cbc654a44b1d78b35d696c3f828f31a4b",
+      "turns": 2,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "repetition": 4,
+      "slotId": "bac0b2787773861fb8b4ecc91facdafec83e9e16a242b7be54b36486c6679c12",
+      "turns": 2,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "repetition": 5,
+      "slotId": "693d5d89ea903b0f25566952c46a9a8c6da8c1701c01d87aafe5ad8944a00882",
+      "turns": 2,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "repetition": 1,
+      "slotId": "09e7586d0dc12b576cee5e7e5dc2ce99bce86fff787e4ec114cf5d83f1661c61",
+      "turns": 1,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "repetition": 2,
+      "slotId": "25f598a28b49280025aa88dd19ed204a9051923232ed02cc525c121253f705f5",
+      "turns": 1,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "repetition": 3,
+      "slotId": "dd05e33c413d74823e58d214fa03dcc06beca73c7cebc5dba51edc36d34a80ec",
+      "turns": 1,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "repetition": 4,
+      "slotId": "bbd12dd597ad03717f3842f6b787e9e661925a67ade8fff1a1a9924fdaf63dc3",
+      "turns": 1,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "repetition": 5,
+      "slotId": "9962d22257a0e940138914c434219330e16db03799f0cdec825980062fbffa54",
+      "turns": 1,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "repetition": 1,
+      "slotId": "0e43a7e87c8a6ec075a662949a5c0250f51bcd798e4981b9ab6d83e7f01096a5",
+      "turns": 2,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "repetition": 2,
+      "slotId": "1968d27f8fd131720124d05397090c39c07959162a7154a11cc2ac846356f40f",
+      "turns": 2,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "repetition": 3,
+      "slotId": "ed3cce045ef7f07190aca6ba1891de44f2576fa919067adbfb77de1e04657b55",
+      "turns": 2,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "repetition": 4,
+      "slotId": "b5b22db84a4a474457c4803cc43ec55fd0dcf2863eded2832b93758c458e1123",
+      "turns": 2,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "repetition": 5,
+      "slotId": "a0d19ed9a9de513157de627cb93392a639148ac034843cc7aa258f8e6d31f8f5",
+      "turns": 2,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "repetition": 1,
+      "slotId": "4e73c6247f006100a848290d6ff85a691c46211d2c24f9e2cecaadf898bb41e1",
+      "turns": 7,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "repetition": 2,
+      "slotId": "80f361f1600e0d70fa46ae558c160996430570c78d1c1cb763f08240abbc6a56",
+      "turns": 7,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "repetition": 3,
+      "slotId": "cfba6ee79fb2a75c6682a84d0a25d8151b893498039f6dcc44315be898fa41d9",
+      "turns": 7,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "repetition": 4,
+      "slotId": "7a6f09bf5f27040566ff51b9b8fda1ae266d8725f7629b55416d5761701b2fd2",
+      "turns": 7,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "repetition": 5,
+      "slotId": "8b2c3f57fb2a8226c9a05d240d8d75eb4aa44eb12fb34abb3b48a26554500876",
+      "turns": 7,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "repetition": 1,
+      "slotId": "a013a8c89c254e8ed8930fd23ddc59c88dd975969a94a95a8487cc78efb2c365",
+      "turns": 1,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "repetition": 2,
+      "slotId": "4299fcc85a5d0c9d7bac16d428d60ef4cb8a7b3c98f11e7c78e0c0d1927a0743",
+      "turns": 1,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "repetition": 3,
+      "slotId": "274ab81bdcbe9fa36a53972b890baf568dca2117a48cdf669cb37021bb1e5948",
+      "turns": 1,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "repetition": 4,
+      "slotId": "c224492d44e107e5dc2f8014fc6fc5a2cb6215c2c86a071163dd2ef81e67c638",
+      "turns": 1,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "repetition": 5,
+      "slotId": "2ff09fe61f8bcec582b08b16a539183bc17aefd63d6517110b21735e1498f6e7",
+      "turns": 1,
+      "status": "PENDING_INFRASTRUCTURE",
+      "previousRecordedStatus": "NOT_RUN",
+      "providerRequests": 0,
+      "reason": "SOURCE_SSH_CONNECTION_TIMEOUT_AFTER_POSTGRES_DISCONNECT"
+    }
+  ]
+}
