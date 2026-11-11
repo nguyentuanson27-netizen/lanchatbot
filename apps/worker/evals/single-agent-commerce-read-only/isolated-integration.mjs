@@ -44,6 +44,9 @@ const root=fileURLToPath(new URL('../../../../',import.meta.url));
 const phaseCArg=name=>{const i=process.argv.indexOf(name);return i<0?null:process.argv[i+1];};
 assertDiagnosticFlags(process.argv);
 const phaseCDiagnostic=phaseCArg('--phase-c-diagnostic-registration');
+const phaseCSlotFile=phaseCArg('--phase-c-slot-ids');
+assert(!phaseCSlotFile||phaseCDiagnostic,'C_RESUME_DIAGNOSTIC_ONLY');
+const phaseCSlotIds=phaseCSlotFile?JSON.parse(readFileSync(phaseCSlotFile,'utf8')):undefined;
 const phaseC=phaseCArg('--phase-c-registration')??phaseCDiagnostic;
 const j2j1File=phaseCArg('--j2-j1-campaign');
 const j2j1Input=j2j1File?JSON.parse(readFileSync(j2j1File,'utf8')):null;
@@ -1601,7 +1604,7 @@ try{
   assert(phaseCArg('--phase-c-seed'),'C_SEED_REQUIRED');
   const snapshot=session=>phaseCTools.readSessionSnapshot({runtime,pool,historyStore,session});
   const collected=await phaseCTools.collectNativePopulation({preflight:providerFreeze,providerPorts,sessionFactory:statefulFixture,snapshot,historyStore,
-   out:resolve(out),seedPath:phaseCArg('--phase-c-seed'),queue:attemptQueue});
+   out:resolve(out),seedPath:phaseCArg('--phase-c-seed'),queue:attemptQueue,slotIds:phaseCSlotIds});
   report.phaseC={status:'COLLECTED_NOT_GRADED',candidateNativeScenarios:collected.attempts.length,
    auxiliaryHttp:collected.auxiliaryHttp};report.providerGenerations=collected.providerRequests;
   if(phaseCDiagnostic){

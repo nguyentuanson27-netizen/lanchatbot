@@ -7,7 +7,15 @@ import {commonModelConfig} from './native-wire.mjs';
 import {selectFrozenCustomerTurn,selectCheckoutCustomerTurn} from './customer-branches.mjs';
 import {captureNativeTerminal,capturedOutputViolations,clarificationCapture,previewMediaCapture,checkoutBranchWitness} from './native-terminal.mjs';
 const silent=(reason,disposition='NO_SEND')=>({disposition,messages:[],images:[],reason});
-export async function collectNativePopulation({preflight,providerPorts,sessionFactory,snapshot,historyStore,out,seedPath,queue,branchSelector}){
+export function selectRegisteredNativeSlots(registration,arm,slotIds){
+ const slots=registration.slots.filter(slot=>slot.arm===arm&&slot.mode!=='SAFETY');
+ if(slotIds===undefined)return slots;
+ assert(Array.isArray(slotIds)&&slotIds.length>0&&new Set(slotIds).size===slotIds.length&&
+  slotIds.every(id=>typeof id==='string'&&slots.some(slot=>slot.slotId===id)),'C_RESUME_SLOT_SELECTION');
+ const requested=new Set(slotIds);
+ return slots.filter(slot=>requested.has(slot.slotId));
+}
+export async function collectNativePopulation({preflight,providerPorts,sessionFactory,snapshot,historyStore,out,seedPath,queue,branchSelector,slotIds}){
  const reg=preflight.sealed,identity=reg.identity,arm=preflight.registration.arm??'CANDIDATE',seed=JSON.parse(readFileSync(seedPath,'utf8')).seed;
  const attempts=reg.slots.filter(s=>s.arm===arm&&s.mode!=='SAFETY').map(s=>({...s,identity,status:'NOT_RUN'}));
  assert.equal(digest(seed),reg.config.blinding.seedCommitment,'C_BLIND_SEED_CHANGED');
@@ -18,7 +26,8 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
  // One attempt per registered slot: every repetition of a case starts from its own fresh session.
  const registered=reg.slots.filter(s=>s.arm===arm&&s.mode!=='SAFETY');
  assert(registered.length===cases.length*reg.config.repetitions&&new Set(registered.map(s=>s.slotId)).size===registered.length,'C_SLOT_POPULATION');
- for(const [scenarioIndex,slot]of registered.entries()){
+ for(const slot of selectRegisteredNativeSlots(reg,arm,slotIds)){
+  const scenarioIndex=attempts.findIndex(attempt=>attempt.slotId===slot.slotId);
   const scenario=cases.find(s=>s.id===slot.caseId);
   assert(scenario&&Number.isInteger(slot.repetition)&&slot.repetition>=1&&slot.repetition<=reg.config.repetitions&&
    registered.filter(s=>s.caseId===slot.caseId&&s.repetition===slot.repetition).length===1,'C_SLOT_REPETITION');
