@@ -11,7 +11,7 @@ import {publicPolicyLiteral} from '../../dist/single-agent-commerce-read-only-co
 import {judgeSourceInventory,assertJudgeSourceInventory} from './evaluator-source.mjs';
 import {loadSealedDevelopment,approvedDevelopmentInventory} from './development-inventory.mjs';
 import {createGeminiCommerceInference,buildGeminiCommerceRequest} from '../single-agent-commerce-read-only/gemini-inference.mjs';
-import {createCommerceVerifier,buildVerifierRequest,validateProtocol} from '../single-agent-commerce-read-only/protocol.mjs';
+import {createCommerceVerifier,buildVerifierRequest,validateProtocol,geminiVerifier} from '../single-agent-commerce-read-only/protocol.mjs';
 import {withNativePresentation} from '../single-agent-commerce-read-only/native-presentation.mjs';
 import {frozenFacts,frozenCatalog} from './frozen-world.mjs';
 import {NATIVE_CODECS,decodeVerifierWire,assertNativeRuntime} from './native-wire.mjs';
@@ -52,7 +52,7 @@ export function candidatePreflight(root,registrationPath,worldPath){
  assertProspectiveOpeningReadiness(sealed.corpus,sealed.config.candidate.openingMediaRule);
  execFileSync(process.execPath,[fileURLToPath(new URL('./source-readiness.mjs',import.meta.url)),'--assert',worldPath,registrationPath],{stdio:['ignore','pipe','pipe']});
  const m=validateProtocol(read(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/manifest.json')));
- const codex=inspectCodex();assert.equal(codex.version,'codex-cli '+m.models.verifier.generationConfig.cliVersion,'C_PINNED_VERIFIER_CLIENT');
+ const codex=geminiVerifier(m)?null:inspectCodex();if(codex)assert.equal(codex.version,'codex-cli '+m.models.verifier.generationConfig.cliVersion,'C_PINNED_VERIFIER_CLIENT');
  assert.deepEqual(m.models.conversation,sealed.config.candidate.model);assert.deepEqual(m.models.verifier,sealed.config.candidate.verifier.model);
  frozenFacts(world);
  return {root,m,codex,config:world.config,sealed,world,registration:{sourceSha:sealed.runSourceSha,mode:'PHASE_C_FROZEN_NATIVE_PERSISTED',

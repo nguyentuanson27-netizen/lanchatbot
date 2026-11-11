@@ -14,7 +14,7 @@
     "singleNetWin": 0.1,
     "journeyNetWin": 0.1
   },
-  "repetitions": 1,
+  "repetitions": 5,
   "judge": {
     "kind": "OFFLINE_MODEL",
     "identity": "INDEPENDENT_GPT_6_1_SOL_HIGH_BLIND",
@@ -50,5 +50,36 @@
     "behavior": "NATIVE_OPENING_CHECKOUT_ATOMIC_TEXT_MEDIA",
     "conflictingComponentColours": "DEFERRED_UNCHANGED",
     "modelOrVerifierPromptChange": false
+  },
+  "convergencePlanDecisions": {
+    "approvedAt": "2026-11-10",
+    "evidenceRef": "owner-reply:convergence-plan-D1-D4:2026-11-10",
+    "plan": "docs/specs/c3-phase-c-convergence-fix-plan-20261110.md",
+    "ownerAnswer": "D1: chỉ dùng handoff. D2, D3: duyệt. D4: chưa làm. Model verify sử dụng cùng 3.5 flash lite.",
+    "D1_codeOwnedRecoveryReply": "REJECTED_HANDOFF_ONLY",
+    "D2_ownerRequestBound": {
+      "status": "APPROVED",
+      "textBytes": 65536,
+      "providerSignatureBytes": 65536,
+      "signaturesCountedAgainstText": false
+    },
+    "D3_measurement": {
+      "status": "APPROVED",
+      "repetitionsPerCase": 5,
+      "world": "FROZEN_FOR_COMPARISON_FRESH_FOR_FINAL_CONFIRMATION",
+      "caseAccepted": "AT_LEAST_4_OF_5",
+      "changeRejectedWhenAnotherCaseDropsBy": 2,
+      "previousRepetitions": 1
+    },
+    "D4_alternativeOwnerModel": "DEFERRED",
+    "verifierModel": {
+      "status": "APPROVED",
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "previous": "OPENAI gpt-6.1-sol high via Codex login",
+      "transport": "apps/worker/evals/single-agent-commerce-read-only/gemini-verifier.mjs",
+      "protocolManifestStatus": "NOT_YET_SWITCHED_MANIFEST_STILL_PINS_PREVIOUS_VERIFIER"
+    }
   }
 }

@@ -10,7 +10,7 @@ import {assertCandidateSource} from './candidate-provider.mjs';
 import {frozenFacts} from './frozen-world.mjs';
 import {assertJudgeSourceInventory} from './evaluator-source.mjs';
 import {hardPrecheck} from '../../dist/single-agent-semantic-verifier-boundary.js';
-import {validateProtocol} from '../single-agent-commerce-read-only/protocol.mjs';
+import {validateProtocol,geminiVerifier} from '../single-agent-commerce-read-only/protocol.mjs';
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
 import {assertOpeningProductMediaRule} from '../../dist/single-agent-commerce-opening-media.js';
 import {assertProspectiveOpeningReadiness} from './source-readiness.mjs';
@@ -28,13 +28,18 @@ export function diagnosticScope(corpus){
  assert(name===undefined||[FULL_NATIVE_DIAGNOSTIC_SCOPE.name,PURCHASE_OPTIONS_DIAGNOSTIC_SCOPE.name,FULL_NATIVE_REMAINDER_SCOPE.name,PURCHASE_MISSING_SCOPE.name].includes(name),'D_UNKNOWN_SCOPE');
  return name===PURCHASE_MISSING_SCOPE.name?PURCHASE_MISSING_SCOPE:name===FULL_NATIVE_REMAINDER_SCOPE.name?FULL_NATIVE_REMAINDER_SCOPE:name===PURCHASE_OPTIONS_DIAGNOSTIC_SCOPE.name?PURCHASE_OPTIONS_DIAGNOSTIC_SCOPE:name===FULL_NATIVE_DIAGNOSTIC_SCOPE.name?FULL_NATIVE_DIAGNOSTIC_SCOPE:DIAGNOSTIC_SCOPE;
 }
-export function diagnosticSlots(corpus){
+// Owner decision D3 (2026-11-10): a development run may repeat every case on the same frozen world so that a
+// change is judged on a pass rate per case, not on one sample. Each repetition is its own slot with its own
+// session and caps; repetition 1 keeps the historical slot identity.
+export function diagnosticSlots(corpus,repetitions=1){
  const scope=diagnosticScope(corpus);
+ assert(Number.isInteger(repetitions)&&repetitions>=1&&repetitions<=10,'D_REPETITIONS');
  assert.equal(corpus.scenarios.length,scope.maximumCases,'D_CASE_DENOMINATOR');
- return scope.cases.map((c,i)=>{const s=corpus.scenarios[i];
+ return scope.cases.flatMap((c,i)=>{const s=corpus.scenarios[i];
   const probe=c.sourceCase==='SCOPED_MEDIA_OBSERVATION_VERIFIER_ONLY';
   assert(s.id===c.sourceCase&&s.turns.length===c.turns&&s.mode===(c.mode??(probe?'SAFETY':c.turns===3?'JOURNEY':'SINGLE')),'D_SCOPE_CHANGED');
-  return {slotId:digest({diagnostic:true,corpusHash:digest(corpus),caseId:s.id}),caseId:s.id,mode:s.mode,arm:'CANDIDATE',repetition:1,maximumGenerations:c.maximumGenerationRequests};
+  return Array.from({length:repetitions},(_,k)=>({slotId:digest({diagnostic:true,corpusHash:digest(corpus),caseId:s.id,...(k?{repetition:k+1}:{})}),
+   caseId:s.id,mode:s.mode,arm:'CANDIDATE',repetition:k+1,maximumGenerations:c.maximumGenerationRequests}));
  });
 }
 export function validateDiagnostic(reg,world){
@@ -42,9 +47,9 @@ export function validateDiagnostic(reg,world){
  assert(reg.kind==='PHASE_C_DEVELOPMENT_DIAGNOSTIC_V1'&&reg.status==='REGISTERED_DEVELOPMENT_NOT_QUALIFICATION'&&
   reg.sendEnabled===false&&reg.corpus.provenance?.developmentOnly===true&&reg.scopeHash===digest(scope),'D_REGISTRATION_KIND');
  if(scope===FULL_NATIVE_DIAGNOSTIC_SCOPE||scope===PURCHASE_OPTIONS_DIAGNOSTIC_SCOPE||scope===FULL_NATIVE_REMAINDER_SCOPE||scope===PURCHASE_MISSING_SCOPE||B_PRESERVING_SCOPES.includes(scope))assert.equal(digest(reg.corpus.scenarios.map(s=>({id:s.id,mode:s.mode,turns:s.turns,customerPolicy:s.customerPolicy??null}))),scope.customerScriptsHash,'D_CUSTOMER_SCRIPTS_CHANGED');
- validateConfig(reg.config);assert.equal(reg.config.repetitions,1);assert.equal(reg.config.retry,0);
+ validateConfig(reg.config);assert.equal(reg.config.retry,0);
  assert.deepEqual(reg.identity,qualificationIdentity(reg.config));assert.equal(reg.worldHash,digest(world));frozenFacts(world);
- assert.equal(reg.corpusHash,digest(reg.corpus));assert.deepEqual(reg.slots,diagnosticSlots(reg.corpus));
+ assert.equal(reg.corpusHash,digest(reg.corpus));assert.deepEqual(reg.slots,diagnosticSlots(reg.corpus,reg.config.repetitions));
  assert(reg.review?.status==='APPROVED'&&reg.review.corpusHash===reg.corpusHash&&reg.review.worldHash===reg.worldHash&&
   reg.review.sourceChecksHash===digest(reg.sourceChecks)&&reg.review.reviewer&&reg.review.evidenceRef&&reg.review.newProviderResultsObserved===0,'D_INPUT_REVIEW');
  assert(Number.isFinite(Date.parse(reg.registeredAt))&&Date.parse(reg.registeredAt)<=Date.now(),'D_REGISTRATION_TIME');
@@ -80,7 +85,7 @@ export function diagnosticControl(reg,{checkSource}){
    assert(!stopped,'D_BATCH_STOPPED:'+stopped);
    try{
     checkSource();assert(generations.every(g=>Number.isInteger(g.providerRequests)&&g.providerRequests>=0&&g.providerRequests<=1&&g.status!=='PENDING'),'D_ACCOUNTING_UNKNOWN');
-    assert(generations.length<scope.maximumGenerationRequests,'D_BATCH_CAP');
+    assert(generations.length<scope.maximumGenerationRequests*(reg.config?.repetitions??1),'D_BATCH_CAP');
     for(const s of reg.slots){const rows=generations.filter(g=>g.slotId===s.slotId);assert(rows.length<=s.maximumGenerations,'D_ACTUAL_CAP_VIOLATION');
      for(let i=0;i<reg.corpus.scenarios.find(c=>c.id===s.caseId).turns.length;i++)for(const r of ['OWNER','VERIFIER'])assert(rows.filter(g=>g.turnIndex===i&&g.role===r).length<=(r==='OWNER'?3:1),'D_ACTUAL_CAP_VIOLATION');}
     assert(reg.slots.some(s=>s.slotId===active?.slotId&&(s.mode!=='SAFETY'||role==='VERIFIER')),'D_UNREGISTERED_DISPATCH');
@@ -103,7 +108,7 @@ export function diagnosticProviderRegistration(sealed){
  const openingMediaRule=sealed.config?.candidate?.openingMediaRule;assertOpeningProductMediaRule(openingMediaRule);
  assertProspectiveOpeningReadiness(sealed.corpus,openingMediaRule);
  return {sourceSha:sealed.runSourceSha,mode:'PHASE_C_DEVELOPMENT_DIAGNOSTIC_ONLY',arm:'CANDIDATE',openingMediaRule,
-  maximumGenerationRequests:diagnosticScope(sealed.corpus).maximumGenerationRequests,ownerContextPresentation:'VI_DATA_BLOCKS_COMPACT_V2'};
+  maximumGenerationRequests:diagnosticScope(sealed.corpus).maximumGenerationRequests*(sealed.config?.repetitions??1),ownerContextPresentation:'VI_DATA_BLOCKS_COMPACT_V2'};
 }
 export function diagnosticPreflight(root,registrationPath,worldPath){
  const sealed=read(registrationPath),world=read(worldPath);validateDiagnostic(sealed,world);
@@ -111,8 +116,8 @@ export function diagnosticPreflight(root,registrationPath,worldPath){
  assert.equal(execFileSync('git',['status','--porcelain'],{cwd:root,encoding:'utf8'}).trim(),'','C_DIRTY_SOURCE');
  assertCurrentCandidate(root,sealed.config);assertApprovedDecisions(root,sealed.config);
  execFileSync(process.execPath,[fileURLToPath(new URL('./source-readiness.mjs',import.meta.url)),'--assert',worldPath,registrationPath],{stdio:['ignore','pipe','pipe']});
- const m=validateProtocol(read(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/manifest.json'))),codex=inspectCodex();
- assert.equal(codex.version,'codex-cli '+m.models.verifier.generationConfig.cliVersion);
+ const m=validateProtocol(read(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/manifest.json'))),codex=geminiVerifier(m)?null:inspectCodex();
+ if(codex)assert.equal(codex.version,'codex-cli '+m.models.verifier.generationConfig.cliVersion);
  assert.deepEqual(m.models.conversation,sealed.config.candidate.model);assert.deepEqual(m.models.verifier,sealed.config.candidate.verifier.model);
  const p={root,sealed,world,m,codex,config:world.config,registration:diagnosticProviderRegistration(sealed)};
  p.diagnosticControl=diagnosticControl(sealed,{checkSource:()=>{assertCandidateSource(p);for(const snapshot of sealed.sourceChecks)assert.equal(hardPrecheck(snapshot,'Dạ.',new Date()),null,'D_SOURCE_INVALIDATED');}});

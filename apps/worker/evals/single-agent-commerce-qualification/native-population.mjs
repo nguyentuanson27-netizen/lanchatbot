@@ -15,8 +15,13 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
  const save=()=>writeFileSync(resolve(out,arm+'_EVIDENCE.partial.json'),JSON.stringify({config:reg.config,corpus:reg.corpus,identity,
   source:{clean:true,sourceSha:reg.runSourceSha,registeredBeforeFirstRequest:true,corpusHash:reg.corpusHash},blindSeed:seed,attempts},null,2));
  save();
- for(const [scenarioIndex,scenario]of cases.entries()){
-  const slot=reg.slots.find(s=>s.arm===arm&&s.caseId===scenario.id);assert(slot&&slot.repetition===1,'C_N1_SLOT');
+ // One attempt per registered slot: every repetition of a case starts from its own fresh session.
+ const registered=reg.slots.filter(s=>s.arm===arm&&s.mode!=='SAFETY');
+ assert(registered.length===cases.length*reg.config.repetitions&&new Set(registered.map(s=>s.slotId)).size===registered.length,'C_SLOT_POPULATION');
+ for(const [scenarioIndex,slot]of registered.entries()){
+  const scenario=cases.find(s=>s.id===slot.caseId);
+  assert(scenario&&Number.isInteger(slot.repetition)&&slot.repetition>=1&&slot.repetition<=reg.config.repetitions&&
+   registered.filter(s=>s.caseId===slot.caseId&&s.repetition===slot.repetition).length===1,'C_SLOT_REPETITION');
   if(queue.blocked()){
    attempts[scenarioIndex]={...slot,identity,status:'NOT_RUN',reason:'PERSISTED_QUEUE_BLOCKED'};save();continue;
   }

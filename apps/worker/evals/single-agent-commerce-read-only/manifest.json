@@ -39,30 +39,29 @@
       }
     },
     "verifier": {
-      "provider": "OPENAI",
-      "model": "gpt-6.1-sol",
-      "version": "gpt-6.1-sol",
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
       "effort": "high",
-      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
       "generationConfig": {
-        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
-        "cliVersion": "0.159.2",
-        "wireApi": "responses",
-        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
-        "tools": [],
-        "tool_choice": "none",
-        "parallel_tool_calls": false,
-        "store": false,
-        "stream": true,
-        "reasoningEffort": "high",
+        "transport": "VERTEX_GENERATE_CONTENT_NO_RETRY",
+        "candidateCount": 1,
+        "responseMimeType": "application/json",
+        "responseSchema": "VERDICT_SCHEMA_AS_RESPONSE_JSON_SCHEMA",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "tools": "NONE",
         "temperature": "OMITTED_PROVIDER_DEFAULT",
         "topP": "OMITTED_PROVIDER_DEFAULT",
-        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
         "timeoutMs": 90000,
         "maxResponseBytes": 1048576,
-        "relayUpstreamRequestsPerAttempt": 1,
+        "requestsPerAttempt": 1,
         "retry": 0,
-        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
         "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
       }
     }
