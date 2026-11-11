@@ -280,5 +280,25 @@
     "relativeLinks": "PASS",
     "completedPendingDenominator": "PASS"
   },
-  "recordedRecoverySavepoint": "c3a81b49"
+  "recordedRecoverySavepoint": "c3a81b49",
+  "githubPublication": {
+    "status": "PENDING_NETWORK",
+    "lastPublishedHead": "93b3859180c8ec93eccbb251962ae300756ebd4f",
+    "attempts": [
+      {
+        "transport": "GIT_SSH",
+        "result": "github.com port22 connect timeout"
+      },
+      {
+        "transport": "GIT_HTTPS_EXISTING_GH_CREDENTIAL_HELPER",
+        "result": "github.com:443 connect failed"
+      },
+      {
+        "transport": "GITHUB_CONNECTOR",
+        "result": "Transport closed"
+      }
+    ]
+  },
+  "runContinuationStatus": "BLOCKED_SOURCE_SSH_CONNECTION",
+  "finalRecordedAt": "2026-11-11T11:51:40.556679+00:00"
 }

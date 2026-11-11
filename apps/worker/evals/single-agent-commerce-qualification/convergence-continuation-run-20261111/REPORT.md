@@ -13,3 +13,5 @@ Database test còn lại sau gián đoạn đã được xác nhận không có 
 Theo yêu cầu chạy đủ rồi mới review, **chưa chấm hoặc tổng kết chất lượng hội thoại**. Tệp bên dưới ghi nguyên kết quả đã thực thi, gồm draft bị chặn và kết quả thực tế, có che dữ liệu riêng tư giả lập. [Lịch sử 67 lượt](CONVERSATIONS.md) · [Audit](INTEGRITY.json)
 
 Các phần còn chờ gồm J1 lần 5 và năm lần cho từng ca P08, P07, P09, checkout-complete, S08. Việc tiếp tục cần khôi phục kết nối VPS, rồi chuẩn bị/seal theo source hiện hành và chỉ chạy các slot còn chờ. Lỗi verifier trước đó tiếp tục được giữ trong kết quả Phase C.
+
+Bản cập nhật được lưu tại repository trên máy. Kết nối GitHub qua SSH và HTTPS đều thất bại ở lần xuất bản cuối, nên chưa cập nhật được PR392.
