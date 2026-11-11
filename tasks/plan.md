@@ -2,7 +2,7 @@
 
 Owner requested all remaining cases, with one review after completion. [Execution and exact remaining slots](../apps/worker/evals/single-agent-commerce-qualification/convergence-continuation-run-20261111/REPORT.md) record32/32verifier cases completed with priorfalsePASS retained, followed by39/65native case repetitions and67/135turns at93b38591. PostgreSQL disconnected; all177started provider generations have completed records and the26pending slots have0providerwork. Exact inactive orphan testDB cleanup confirmed.
 
-Harness-only resume changes c4601068/0d29e0e0 add admitted slot selection and original-time approved test-media-proof reuse, with focused6/6and5/5checks PASS. Fresh world06 captured; SSH timeouts block initial-state capture before any provider generation in11connection attempts. Remaining26slots/68turns are pending. Preserve original results and resume only pending slots when connectivity is restored, binding current source/world. Quality review remains deferred per owner request. Phase C prior safety failure remains recorded.
+Harness-only resume changes c4601068/0d29e0e0 add admitted slot selection and original-time approved test-media-proof reuse, with focused6/6and5/5checks PASS. Fresh world06 captured; SSH timeouts block initial-state capture before any provider generation in12connection attempts. Remaining26slots/68turns are pending. Preserve original results and resume only pending slots when connectivity is restored, binding current source/world. Quality review remains deferred per owner request. Phase C prior safety failure remains recorded.
 
 ## Previous — convergence verifier screen FAIL, 2026-11-11
 

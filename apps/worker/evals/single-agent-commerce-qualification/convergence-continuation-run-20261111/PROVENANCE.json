@@ -225,7 +225,9 @@
     "initialStandaloneAttempts": 2,
     "controllerAttempts": 8,
     "finalStandaloneAttempt": 1,
-    "failedStage": "SSH_CONNECT_BEFORE_INITIAL_STATE_OR_PROVIDER_REQUEST"
+    "failedStage": "SSH_CONNECT_BEFORE_INITIAL_STATE_OR_PROVIDER_REQUEST",
+    "recoveredStandaloneAttempt": 1,
+    "totalFailedSshInitialAttempts": 12
   },
   "recoveryStatus": "BLOCKED_INITIAL_SOURCE_CONNECTION",
   "providerRetries": 0,
@@ -268,6 +270,15 @@
     "c3-convergence-model-initial-bootstrap-20261111-5.log": "58cef88ddb2648312fd0fdc1e5eebd3c8e2e97c14f2c87d0c22a0951a1bc5b37",
     "c3-convergence-model-initial-bootstrap-20261111-6.log": "58cef88ddb2648312fd0fdc1e5eebd3c8e2e97c14f2c87d0c22a0951a1bc5b37",
     "c3-convergence-model-initial-bootstrap-20261111-7.log": "58cef88ddb2648312fd0fdc1e5eebd3c8e2e97c14f2c87d0c22a0951a1bc5b37",
-    "c3-convergence-model-initial-bootstrap-20261111-8.log": "d2d5d0c69ece5c35d7bb88e8ae68fbde05ad62283cb1b87dcf40d1d3052eb08d"
-  }
+    "c3-convergence-model-initial-bootstrap-20261111-8.log": "d2d5d0c69ece5c35d7bb88e8ae68fbde05ad62283cb1b87dcf40d1d3052eb08d",
+    "c3-convergence-model-initial-recovered-20261111-03.log": "58cef88ddb2648312fd0fdc1e5eebd3c8e2e97c14f2c87d0c22a0951a1bc5b37"
+  },
+  "publicationChecks": {
+    "datasetBoundary": "PASS",
+    "jsonParse": "PASS",
+    "credentialPatternCheck": "PASS",
+    "relativeLinks": "PASS",
+    "completedPendingDenominator": "PASS"
+  },
+  "recordedRecoverySavepoint": "c3a81b49"
 }

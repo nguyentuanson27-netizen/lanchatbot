@@ -3,7 +3,7 @@
 - [x] Complete the6remaining verifier cases without replaying prior26. Aggregate32/32executed retains1unsafe falsePASS. Owner explicitly authorized the remaining native cases despite the earlier verifier stop.
 - [x] Run39complete native case repetitions/67turns at93b38591 before PostgreSQL disconnect. Audit177started/177completedgenerations,0unknowncompletion. Exact39finished slots retained. One allocated J1rep5 session had0providerwork and0turns.
 - [x] Confirm/drop exact inactive orphan database. Add tested diagnostic slot selection and reuse of previously approved test media proof with original check time. Fresh107-product snapshot captured after source transport/download failures.
-- [ ] SSH timeout blocks initial-state setup after11zero-generation connection attempts, including8bounded controller attempts. Remaining26case repetitions/68turns are PENDING_INFRASTRUCTURE. Prepared resume code has not run native. [Execution history and recovery evidence](../apps/worker/evals/single-agent-commerce-qualification/convergence-continuation-run-20261111/REPORT.md).
+- [ ] SSH timeout blocks initial-state setup after12zero-generation connection attempts, including8bounded controller attempts. Remaining26case repetitions/68turns are PENDING_INFRASTRUCTURE. Prepared resume code has not run native. [Execution history and recovery evidence](../apps/worker/evals/single-agent-commerce-qualification/convergence-continuation-run-20261111/REPORT.md).
 - [ ] Defer whole-conversation quality review until completion, as requested. No completed model case replay, model/prompt substitution, live send or shop-source write.
 
 ## Convergence model execution — verifier FAIL, 2026-11-11
