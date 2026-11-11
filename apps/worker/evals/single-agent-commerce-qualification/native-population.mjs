@@ -123,6 +123,11 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
    if(verifier){t.verificationAddedMs=verifier.metrics?.latencyMs??null;
     t.verificationAndPostprocessingMs=performance.now()-verifier.startedMonotonicMs;a.metrics.verificationAddedMs+=t.verificationAddedMs??0;}
    if(errorCode||observed?.qualification?.status!=='VALID'){a.status='ERROR';save();break;}
+   if(scenario.customerPolicy?.selector==='EVALUATOR_CODE_PROOF'&&actual.disposition==='HANDOFF'&&after.authority.owner==='HUMAN'){
+    a.journeyEnded={reason:'COMMITTED_HANDOFF',unreachedTurns:scenario.turns.length-i-1};
+    save();
+    break;
+   }
    save();
   }
   // Keep evaluator coverage when SINGLE deliberately omits its redundant turn list.
