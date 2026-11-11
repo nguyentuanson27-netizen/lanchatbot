@@ -15,17 +15,46 @@ export const contract=r=>{const b=wire.buildGeminiCommerceRequest(r);return {sch
 const baseline=JSON.parse(readFileSync(new URL('./task-path-contract-baseline.json',import.meta.url)));
 test('observed p04 context/dialogue envelope fits full tools without altering signed content',()=>{
  // Exact observed section sizes, synthetic contents. This is a portable stress control, not a historical body.
+ // Owner decision D2: the 11,024-byte provider signature observed on this path is bounded separately from text.
  const r=request(true);r.instructions=readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8');
  r.context.policyLiterals.push({ref:'synthetic-public-source',text:''});
- const signed={role:'model',parts:[{functionCall:{id:'read',name:'read_product',args:{subjectRef:'P1',selection:'SINGLE',offerType:'AO'}},thoughtSignature:''}]};
- r.contents.push(signed,{role:'user',parts:[{functionResponse:{name:'read_product',id:'read',response:{status:'OK',data:{subjectRef:'P1'}}}}]});
+ const signed={role:'model',parts:[{functionCall:{id:'read',name:'read_product',args:{subjectRef:'P1',selection:'SINGLE',offerType:'AO'}},thoughtSignature:'s'.repeat(11024)}]};
+ const response={status:'OK',data:{subjectRef:'P1',content:''}};
+ r.contents.push(signed,{role:'user',parts:[{functionResponse:{name:'read_product',id:'read',response}}]});
  let budget;wire.buildGeminiCommerceRequest(r,undefined,undefined,b=>budget=b);
  r.context.policyLiterals.at(-1).text='x'.repeat(9393-budget.trustedFrameBytes);
- signed.parts[0].thoughtSignature='s'.repeat(20338-Buffer.byteLength(JSON.stringify(r.contents)));
+ response.data.content='x'.repeat(20338-budget.dialogueBytes);
  const saved=structuredClone(signed),body=wire.buildGeminiCommerceRequest(r,undefined,undefined,b=>budget=b);
- assert.equal(budget.trustedFrameBytes,9393);assert.equal(budget.dialogueBytes,20338);
- assert(budget.presentedTextFrameBytes<=65536);assert.deepEqual(body.contents.at(-2),saved);assert.equal(body.tools[0].functionDeclarations.length,14);
- const larger=structuredClone(r);larger.instructions+='x'.repeat(2000);assert.throws(()=>wire.buildGeminiCommerceRequest(larger),/OWNER_REQUEST_BOUND/);
+ assert.equal(budget.trustedFrameBytes,9393);assert.equal(budget.dialogueBytes,20338);assert.equal(budget.signatureBytes,11024);
+ // textFrameBytes counts the raw frame, presentedTextFrameBytes the wire actually sent; neither includes the signature.
+ assert.equal(wire.ownerTextBytes(body),budget.presentedTextFrameBytes);assert.equal(wire.ownerSignatureBytes(body),11024);
+ const parts=budget.systemBytes+budget.toolSchemaBytes+budget.trustedFrameBytes+budget.dialogueBytes-11024;
+ assert(budget.textFrameBytes>=parts&&budget.textFrameBytes<parts+512,'TEXT_FRAME_IS_PARTS_WITHOUT_SIGNATURE');
+ assert(budget.toolResponseBytes>0&&budget.toolResponseBytes<budget.dialogueBytes);
+ // The continuation that used to overflow now keeps at least a tenth of the text bound free.
+ assert(budget.presentedTextFrameBytes<=wire.OWNER_REQUEST_MAX_BYTES*0.9,`headroom ${wire.OWNER_REQUEST_MAX_BYTES-budget.presentedTextFrameBytes}`);
+ assert.deepEqual(body.contents.at(-2),saved);assert.equal(body.tools[0].functionDeclarations.length,14);
+ const larger=structuredClone(r);larger.instructions+='x'.repeat(wire.OWNER_REQUEST_MAX_BYTES-budget.textFrameBytes+1);
+ assert.throws(()=>wire.buildGeminiCommerceRequest(larger),e=>e.message==='OWNER_REQUEST_BOUND'&&e.requestBytes===wire.OWNER_REQUEST_MAX_BYTES+1);
+ const fits=structuredClone(r);fits.instructions+='x'.repeat(wire.OWNER_REQUEST_MAX_BYTES-budget.presentedTextFrameBytes);
+ assert.doesNotThrow(()=>wire.buildGeminiCommerceRequest(fits));
+});
+test('provider signatures are returned unchanged and bounded on their own, never against the text frame',()=>{
+ const build=size=>{
+  const r=request(true);
+  r.contents.push({role:'model',parts:[{functionCall:{id:'read',name:'read_product',args:{subjectRef:'P1'}},thoughtSignature:'s'.repeat(size)}]},
+   {role:'user',parts:[{functionResponse:{name:'read_product',id:'read',response:{status:'OK',data:{subjectRef:'P1'}}}}]});
+  let budget;const body=wire.buildGeminiCommerceRequest(r,undefined,undefined,b=>budget=b);return {body,budget};
+ };
+ const small=build(16),large=build(wire.OWNER_SIGNATURE_MAX_BYTES);
+ assert.equal(large.budget.signatureBytes,wire.OWNER_SIGNATURE_MAX_BYTES);assert.equal(large.budget.signatureLimitBytes,wire.OWNER_SIGNATURE_MAX_BYTES);
+ // Text accounting does not move with the signature; the signed part reaches the wire byte for byte.
+ assert.equal(large.budget.textFrameBytes,small.budget.textFrameBytes);assert.equal(large.budget.presentedTextFrameBytes,small.budget.presentedTextFrameBytes);
+ assert.equal(large.body.contents.at(-2).parts[0].thoughtSignature.length,wire.OWNER_SIGNATURE_MAX_BYTES);
+ assert.throws(()=>build(wire.OWNER_SIGNATURE_MAX_BYTES+1),/OWNER_REQUEST_BOUND/);
+ // A signature hidden in ordinary text is text.
+ const r=request(true);r.contents[0].parts[0].text='s'.repeat(wire.OWNER_REQUEST_MAX_BYTES);
+ assert.throws(()=>wire.buildGeminiCommerceRequest(r),/OWNER_REQUEST_BOUND/);
 });
 test('emitted schemas and call policy preserved; current owner prompt matches manifest',()=>{
  for(const compact of [false,true])for(const returning of [false,true])assert.equal(hash(contract(request(returning,compact))),baseline.contracts[`${compact}:${returning}`]);

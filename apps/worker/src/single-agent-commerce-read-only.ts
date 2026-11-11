@@ -219,6 +219,8 @@ export async function runCommerceTurn(input: {
   catch { return finish(fallback("PREPARATION_UNAVAILABLE")); }
   toolLatencyMs += performance.now() - preparationStarted;
   executedNormalToolInvocations=toolCalls;
+  // Set when a continuation that still offered tools could not be built within the request bound.
+  let replyFromGatheredFacts = false;
   for (let index = 0; index < 3; index++) {
     if(input.tools.openingMediaTiming==='BEFORE_OWNER'&&input.tools.prepareOpeningMedia){
       const started=performance.now(),chargedBefore=openingMediaWork?.chargedUnits??0;
@@ -245,14 +247,23 @@ export async function runCommerceTurn(input: {
       ...(input.tools.mediaCapabilities?{mediaCapabilities:input.tools.mediaCapabilities(),mediaCapabilitiesAt:input.clock().getTime()}:{}),
       ...(input.tools.mediaCapabilityDiagnostics?{mediaCapabilityDiagnostics:input.tools.mediaCapabilityDiagnostics()}:{}),
       ...(input.tools.availableTools ? { availableTools: input.tools.availableTools } : {}),
-      toolsAllowed: !handoff && toolRounds < 2 && toolCalls < 6, toolBudget: { roundsRemaining: 2-toolRounds, callsRemaining: 6-toolCalls } };
+      toolsAllowed: !replyFromGatheredFacts && !handoff && toolRounds < 2 && toolCalls < 6, toolBudget: { roundsRemaining: 2-toolRounds, callsRemaining: 6-toolCalls } };
     const callableTools=commerceCallableTools(baseRequest);
     const request = {...baseRequest,...(callableTools?{callableTools}:{})};
     // The native transport owns its serialized wire bound after projection.
     let output: OwnerGeneration;
     ownerGenerations++;
     try { output = await generate("owner", id, signal => input.owner({ ...request, signal })); }
-    catch { return finish(fallback(generations.at(-1)!.status)); }
+    catch (error) {
+      // The transport refused to build this request, so no provider call was made. Completed tool work
+      // is already paid for and may include a committed effect: ask once, within the same generation cap,
+      // for the reply from those facts through the existing final phase, which carries neither tool
+      // schemas nor signed tool turns. The refused attempt stays in the generation record.
+      if (error instanceof Error && error.message === "OWNER_REQUEST_BOUND" && request.toolsAllowed && toolRounds > 0 && index < 2) {
+        replyFromGatheredFacts = true; continue;
+      }
+      return finish(fallback(generations.at(-1)!.status));
+    }
     if (!output || typeof output !== "object") return finish(fallback("MALFORMED"));
     if (output.kind === "TOOLS") {
       if(!Array.isArray(output.calls)||output.calls.some(c=>!c||typeof c.name!=="string"))return finish(fallback("MALFORMED"));

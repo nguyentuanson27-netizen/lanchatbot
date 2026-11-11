@@ -33,7 +33,16 @@ export function publicCommunicationHistoryMetadata(value){
  requireThat(bytes(parsed)<=1024&&bytes(parsed.publicCartEvents)<=768,'HISTORY_INPUT_BOUND');
  return parsed;
 }
+// Owner decision D2 (2026-11-10): the text bound covers what the model reads as instructions, schemas and data.
+// Provider thought signatures are opaque continuation tokens the request must return unchanged; they are
+// bounded on their own so that one signed tool round cannot crowd out the facts the reply needs.
+// Signatures of 11 KiB per signed turn were observed; two tool rounds are allowed, and a retained
+// regression control carries 37 KiB, so the signature bound equals the text bound.
 export const OWNER_REQUEST_MAX_BYTES=65536;
+export const OWNER_SIGNATURE_MAX_BYTES=65536;
+export const ownerSignatureBytes=body=>(body?.contents??[]).reduce((n,m)=>n+(m.parts??[]).reduce((k,p)=>
+ k+(typeof p.thoughtSignature==='string'?Buffer.byteLength(p.thoughtSignature):0),0),0);
+export const ownerTextBytes=body=>Buffer.byteLength(JSON.stringify(body))-ownerSignatureBytes(body);
 /** Value-free, bounded diagnostics. Never decode/execute a non-STOP completion. */
 export function malformedCallShape(data){
  const parts=data?.candidates?.[0]?.content?.parts;
@@ -364,17 +373,19 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
     ...(request.historyMetadata?.publicCartEvents.length?{untrusted:{acceptedCommunicationHistory:publicCommunicationHistoryMetadata(request.historyMetadata)}}:{})})}]},...replyContents],
   tools:callable.length?[{functionDeclarations:callable}]:[],toolConfig:{functionCallingConfig:{mode:callable.length?'AUTO':'NONE'}},
   generationConfig:{candidateCount:1,responseMimeType:'text/plain',maxOutputTokens:8192,thinkingConfig:{thinkingLevel:'HIGH',includeThoughts:false}}};
- const requestBytes=bytes(body);
+ const signatureBytes=ownerSignatureBytes(body),requestBytes=bytes(body)-signatureBytes;
+ const toolResponseBytes=body.contents.slice(1).reduce((n,m)=>n+m.parts.reduce((k,p)=>k+(p.functionResponse?bytes(p.functionResponse):0),0),0);
  const budget={textFrameBytes:requestBytes,systemBytes:bytes(body.systemInstruction),toolSchemaBytes:bytes(body.tools),
-  trustedFrameBytes:bytes(body.contents[0]),dialogueBytes:bytes(body.contents.slice(1)),textLimitBytes:OWNER_REQUEST_MAX_BYTES};
+  trustedFrameBytes:bytes(body.contents[0]),dialogueBytes:bytes(body.contents.slice(1)),toolResponseBytes,signatureBytes,
+  textLimitBytes:OWNER_REQUEST_MAX_BYTES,signatureLimitBytes:OWNER_SIGNATURE_MAX_BYTES};
  onBudget(budget);
- if(requestBytes>OWNER_REQUEST_MAX_BYTES)throw Object.assign(new Error('OWNER_REQUEST_BOUND'),{requestBytes});
+ if(requestBytes>OWNER_REQUEST_MAX_BYTES||signatureBytes>OWNER_SIGNATURE_MAX_BYTES)throw Object.assign(new Error('OWNER_REQUEST_BOUND'),{requestBytes});
  const render=value=>{
   if(request.ownerContextPresentation===undefined)return value;
   requireThat(['VI_DATA_BLOCKS_V1','VI_DATA_BLOCKS_COMPACT_V2'].includes(request.ownerContextPresentation),'OWNER_PRESENTATION');
   return request.ownerContextPresentation==='VI_DATA_BLOCKS_V1'?presentOwnerData(value):presentCompactOwnerData(value);
  };
- budget.presentedTextFrameBytes=bytes(render(body));onBudget(budget);
+ budget.presentedTextFrameBytes=ownerTextBytes(render(body));onBudget(budget);
  if(budget.presentedTextFrameBytes>OWNER_REQUEST_MAX_BYTES)throw Object.assign(new Error('OWNER_REQUEST_BOUND'),{requestBytes:budget.presentedTextFrameBytes});
  const images=request.catalogImages??[];
  requireThat(Array.isArray(images)&&images.length<=OWNER_IMAGE_BOUNDS.count,'OWNER_IMAGE_BINDING');
@@ -394,15 +405,17 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  if(imageParts.length){body.contents.splice(1,0,{role:'user',parts:imageParts});body.generationConfig.mediaResolution='MEDIA_RESOLUTION_MEDIUM';}
  if(bytes(body)>OWNER_IMAGE_BOUNDS.maxRequestBytes)throw new Error('OWNER_REQUEST_BOUND');
  const baseline=render(body);
+ // With images the whole multimodal frame is bounded; a text frame is bounded without its signatures.
  const wireBound=imageParts.length?OWNER_IMAGE_BOUNDS.maxRequestBytes:OWNER_REQUEST_MAX_BYTES;
- onBudget({...budget,basePresentedFrameBytes:bytes(baseline),inlineImageBytes:images.reduce((n,image)=>n+Buffer.from(image.data,'base64').length,0),frameLimitBytes:wireBound});
- if(bytes(baseline)>wireBound)throw Object.assign(new Error('OWNER_REQUEST_BOUND'),{requestBytes:bytes(baseline)});
+ const framed=value=>imageParts.length?bytes(value):ownerTextBytes(value);
+ onBudget({...budget,basePresentedFrameBytes:framed(baseline),inlineImageBytes:images.reduce((n,image)=>n+Buffer.from(image.data,'base64').length,0),frameLimitBytes:wireBound});
+ if(framed(baseline)>wireBound)throw Object.assign(new Error('OWNER_REQUEST_BOUND'),{requestBytes:framed(baseline)});
  const hints=projectMediaCapabilities(request.mediaCapabilities,c,request.mediaCapabilitiesAt??Date.now(),onHint);
  if(hints.length){
   const enriched=structuredClone(body),top=JSON.parse(enriched.contents[0].parts[0].text);
   top.trusted.execution.mediaCapabilities=hints;enriched.contents[0].parts[0].text=JSON.stringify(top);
   const presented=render(enriched);
-  if(bytes(presented)<=OWNER_REQUEST_MAX_BYTES)return presented;
+  if(ownerTextBytes(presented)<=OWNER_REQUEST_MAX_BYTES)return presented;
   onHint({omitted:'WIRE_BOUND',includedProducts:0});
  }
  return baseline;

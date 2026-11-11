@@ -392,3 +392,41 @@ describe("one conversational owner, tools and exact egress", () => {
     expect(result.generations.find(g => g.role === role)).toMatchObject({ status: "TIMEOUT", telemetry: { providerRequests: 1 } });
   });
 });
+
+describe("a continuation the transport cannot build", () => {
+  const bound = () => Object.assign(new Error("OWNER_REQUEST_BOUND"), { requestBytes: 68237 });
+  const run = async (owner: (request: OwnerRequest, step: number) => OwnerGeneration | Promise<OwnerGeneration>, prompt = "Bộ quần nhé.") => {
+    const s = setup(); let step = 0; const requests: OwnerRequest[] = [];
+    const r = await runCommerceTurn({ ...s, latest: prompt, owner: async request => { requests.push(request); return owner(request, ++step); } });
+    return { r, requests, verifier: s.verifier };
+  };
+  it("answers once from the gathered facts instead of losing completed tool work", async () => {
+    const { r, requests, verifier } = await run((request, step) => {
+      if (step === 1) return tool("read_product", { subjectRef: "SM613" });
+      if (step === 2) { expect(request.toolsAllowed).toBe(true); throw bound(); }
+      return final();
+    });
+    expect(requests).toHaveLength(3);
+    // Same turn, same facts, existing final phase: no tools offered and the tool round kept as history.
+    expect(requests[2]).toMatchObject({ toolsAllowed: false, toolBudget: { roundsRemaining: 1 } });
+    expect(requests[2]!.contents).toEqual(requests[1]!.contents);
+    expect(r.terminal).toMatchObject({ disposition: "SEND_ELIGIBLE", reason: "PASS" });
+    expect(r.generations.map(g => `${g.role}:${g.status}`)).toEqual(["owner:OK", "owner:PROVIDER_ERROR", "owner:OK", "verifier:OK"]);
+    expect(r.ownerGenerations).toBe(3); expect(verifier).toHaveBeenCalledTimes(1);
+  });
+  it("still fails closed when the reply request cannot be built either", async () => {
+    const { r, requests } = await run((_request, step) => { if (step === 1) return tool("read_product", { subjectRef: "SM613" }); throw bound(); });
+    expect(requests).toHaveLength(3); expect(requests[2]!.toolsAllowed).toBe(false);
+    expect(r.terminal.disposition).not.toBe("SEND_ELIGIBLE");
+    expect(r.recovery).toMatchObject({ originalDisposition: "FALLBACK", originalReason: "PROVIDER_ERROR" });
+  });
+  it("does not retry a first request, a provider failure or a late generation", async () => {
+    const first = await run(() => { throw bound(); });
+    expect(first.requests).toHaveLength(1); expect(first.r.terminal.disposition).not.toBe("SEND_ELIGIBLE");
+    const provider = await run((_request, step) => { if (step === 1) return tool("read_product", { subjectRef: "SM613" }); throw new Error("GENERATION_HTTP"); });
+    expect(provider.requests).toHaveLength(2); expect(provider.r.terminal.disposition).not.toBe("SEND_ELIGIBLE");
+    const late = await run((_request, step) => { if (step < 3) return tool("read_product", { subjectRef: "SM613" }); throw bound(); });
+    expect(late.requests).toHaveLength(3); expect(late.requests[2]!.toolsAllowed).toBe(false);
+    expect(late.r.terminal.disposition).not.toBe("SEND_ELIGIBLE");
+  });
+});
