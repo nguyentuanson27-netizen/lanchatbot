@@ -321,4 +321,3 @@ Chi tiết và giới hạn ở báo cáo fixture. Tóm tắt:
 | Xác nhận harness native ghim được clock | Chưa kiểm tra được khi không có world | Việc đầu tiên khi có snapshot |
 
 Hai điểm cần lưu ý khi chạy tiếp: `owner-decisions.json` đã đổi nên mọi config đã seal trước đó không còn khớp `decisionHash`; và `manifest.json` nay đăng ký verifier Gemini nên `runtimeHash`/identity của candidate cũng đổi. Cả hai đều cần `init` và `seal` lại.
-
