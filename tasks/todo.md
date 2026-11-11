@@ -1,4 +1,10 @@
-## Owner-authorized continuation — infrastructure blocked, 2026-11-11
+## Owner-authorized continuation — execution reconciled, STOP, 2026-11-11
+
+- [x] Account for all 65 registered attempts after reconnecting. 59 scripts completed, 5 checkout journeys ended at committed handoff, and J1 repetition 5 lost PostgreSQL after the first captured turn. 103/135 captured turns, 30 checkout turns not reached, 2 J1 turns lost.
+- [x] Audit all 268 native generation requests, including one J1 owner result without a committed turn. No replay or unknown provider completions. Drop the exact inactive orphan database. Review all captured turns after the final execution. [Review and evidence](../apps/worker/evals/single-agent-commerce-qualification/convergence-continuation-run-20261111/COMPLETION.md).
+- [ ] Phase C STOP. P08 and checkout received false rejects with valid CART_OPENED receipts in 10/10 attempts. P07 received three send-eligible size recommendations beyond engine alternatives. The earlier verifier media false PASS remains recorded.
+
+## Previous interruption record, 2026-11-11
 
 - [x] Complete the6remaining verifier cases without replaying prior26. Aggregate32/32executed retains1unsafe falsePASS. Owner explicitly authorized the remaining native cases despite the earlier verifier stop.
 - [x] Run39complete native case repetitions/67turns at93b38591 before PostgreSQL disconnect. Audit177started/177completedgenerations,0unknowncompletion. Exact39finished slots retained. One allocated J1rep5 session had0providerwork and0turns.

@@ -1,5 +1,7 @@
 # Phase C — chạy tiếp và gián đoạn kết nối, 11/11/2026
 
+Lượt chạy đã nối lại sau mốc gián đoạn ghi bên dưới. [Kết quả sau khi thực thi cả 65 lần đã đăng ký](COMPLETION.md)
+
 **BLOCKED_INFRASTRUCTURE.** Đã chạy nốt cả 6 ca verifier còn lại. Bộ verifier nguồn hợp lệ hoàn tất 32/32 ca và giữ nguyên một unsafe send-eligible false PASS đã quan sát ở ca ảnh. [Kết quả gộp verifier](SAFETY_AGGREGATE.json)
 
 Batch hội thoại đã hoàn tất **39/65 lần thử**, ghi nhận **67/135 lượt**. Sau đó kết nối PostgreSQL đóng bất ngờ. Còn **26 lần thử / 68 lượt** chưa thực thi. Một session đã được cấp cho J1 lần 5 nhưng chưa có generation hoặc lượt nào. Journal xác nhận toàn bộ 177 generation đã bắt đầu đều có kết quả hoàn tất. [Đối soát gián đoạn](INTERRUPTION.json) · [Các lần còn chờ](PENDING.json)
