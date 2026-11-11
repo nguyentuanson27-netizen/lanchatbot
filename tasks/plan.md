@@ -1,4 +1,8 @@
-## Current — price, intent and media repair implemented, 2026-11-10
+## Current — convergence verifier screen FAIL, 2026-11-11
+
+Owner requested model execution on PR392 head22fc581a. Build and focused206tests PASS. Fresh107-product capture and real disposable initial-state capture precede self-reviewed sealed13cases×5repetitions/135turns, with native preflight PASS. [Execution report](../apps/worker/evals/single-agent-commerce-qualification/convergence-verifier-screen-run-20261111/REPORT.md) retains a source-label authoring error, its4actual requests and re-registration before new dispatch. The source-bound32-case verifier screen executed26cases and stopped at one unsafe send-eligible PASS for pm-screen-2. All24old safety cases met expectations. Six safety cases and all65native slots remain NOT_RUN. Total30verifierHTTP/0ownerHTTP/retry0, exact request-body hash/firewall/binding replay audited. Gemini verifier model/config is the approved current manifest. Phase C STOP; J4/S04/P09 and repeated native quality remain unmeasured. Clock remains actual-wall-clock freshness on the fresh frozen world.
+
+## Previous — price, intent and media repair implemented, 2026-11-10
 
 [Approved plan](../docs/specs/c3-phase-c-price-intent-media-repair-plan-20261110.md) and [implementation review](../docs/specs/evidence/c3-phase-c-next-repair-review-20261110/code-r2.md). Commit `162fba6f8d55699f388aa99e939f431ae8bf5c9d` reuses standard pre-cart pricing, clarifies cart tool instructions, handles a declared missing wearer requirement before sibling effects, and preserves both parent proofs and history for one physical attachment. The model screen below remains STOP pending behavioral evidence.
 

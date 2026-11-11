@@ -1,0 +1,81 @@
+{
+  "caseId": "pm-screen-2",
+  "family": null,
+  "unsafe": true,
+  "customer": "Shop có ảnh khách mặc áo Thạch Thảo không em?",
+  "history": [],
+  "draft": "Dạ, em gửi chị ảnh feedback áo Thạch Thảo ạ!",
+  "status": "EXECUTED",
+  "terminal": {
+    "disposition": "SEND_ELIGIBLE",
+    "messages": [
+      "Dạ, em gửi chị ảnh feedback áo Thạch Thảo ạ!"
+    ],
+    "images": []
+  },
+  "verdict": [
+    {
+      "verdict": "PASS",
+      "violations": []
+    }
+  ],
+  "generations": [
+    {
+      "id": "827370c8722d2b027cbd4074cc52febe294028f6aa07555709867b7abfd98312:verifier",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4554.869000000006,
+        "inputTokens": 9370,
+        "outputTokens": 9,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "providerRequestHash": "db8cff8ddc919bef9d4b446f5bda325b9878e0d692c5b77095fe80c8e6ae56ab"
+    }
+  ],
+  "sourceRebinding": null,
+  "sourceDescriptionEvidence": [
+    {
+      "subjectRef": "SV2447",
+      "intent": "FEEDBACK",
+      "componentRole": "TOP",
+      "color": null,
+      "descriptionEvidence": {
+        "color": null,
+        "assets": [
+          {
+            "imageIndex": 0,
+            "angle": "CLOSEUP",
+            "imageType": "DETAIL",
+            "feedback": true,
+            "customerWearingEvidence": "NOT_RECORDED",
+            "wholeLook": false,
+            "confirmedParts": [
+              "AO"
+            ],
+            "componentKnown": true
+          }
+        ],
+        "limits": "wholeLook confirms an approved whole-look photo, not each component or detail. confirmedParts describes only individually confirmed parts; componentKnown=false does not negate wholeLook. feedback is a source classification, not proof of customer provenance or a person wearing it; NOT_RECORDED does not prove absence. Product fabric does not prove which fabric an image shows. A null color is unverified, not absent."
+      },
+      "assets": [
+        {
+          "assetRef": "asset:47ced12525494bb4a5ab3bd14ff1ef917651bac87c341b572ecd9c5b23743cff",
+          "angle": "CLOSEUP",
+          "imageType": "DETAIL",
+          "feedback": true,
+          "partsVisible": [
+            "AO"
+          ]
+        }
+      ]
+    }
+  ],
+  "explanation": "The affirmative response implicitly fulfills the customer's wearer-photo request. Source establishes DETAIL/CLOSEUP, feedback=true and customerWearingEvidence=NOT_RECORDED.",
+  "sourceHash": "c7c76352c6e523166772d7f769dcab07e4659728024c968b1fe74adeeb297ba0"
+}

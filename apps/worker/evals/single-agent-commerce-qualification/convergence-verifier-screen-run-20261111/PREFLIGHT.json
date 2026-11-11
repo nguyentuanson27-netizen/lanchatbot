@@ -1,0 +1,15 @@
+{
+  "status": "PREFLIGHT_PASS",
+  "source": "22fc581a3b32428dcf6c7d65cca3195bbf43b327",
+  "worldHash": "7d342091387df57808a32ffd6f23303cf337ea36cc18644f179e6e30fd959e2e",
+  "registrationHash": "e881141111777921896fe54618fe04509d87e8355c7e03e4dc001e14b6c3eb9c",
+  "cases": 13,
+  "repetitions": 5,
+  "slots": 65,
+  "turns": 135,
+  "maximumGenerations": 540,
+  "providerRequests": 0,
+  "inputReview": "AUTHOR_INPUT_REVIEW",
+  "clockPolicy": "ACTUAL_WALL_CLOCK_CURRENT_SOURCE_READBACK",
+  "clockLimitation": "Fresh capture frozen for all repetitions. Source freshness is checked on actual wall clock. No pinned-clock baseline comparison."
+}
