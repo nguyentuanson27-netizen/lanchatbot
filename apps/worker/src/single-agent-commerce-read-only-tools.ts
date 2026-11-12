@@ -25,6 +25,12 @@ export interface ReadOnlyCatalog {
 export interface PreparationWork { chargedUnits: number; kind: "NUMERIC" | "FINAL" }
 export interface PreparationControl { maxCalls: number; onDispatch(): void }
 export type PreparationAdmission = (context: TrustedContext, work?: PreparationWork) => boolean;
+/** Scope of a size-filtered read of one offer; readable when it fits the identifier bound, hashed otherwise. */
+export function sizeFilteredOfferScope(offerScope: string, size: string, color: string | null): string {
+  const readable = `${offerScope}:size:${normalizeCatalogToken(size)}${color ? `:color:${normalizeCatalogToken(color)}` : ""}`;
+  return Buffer.byteLength(readable) <= 128 ? readable
+    : `${offerScope.slice(0, 80)}:size:${commerceHash({ offerScope, size: normalizeCatalogToken(size), color: color ? normalizeCatalogToken(color) : null }).slice(0, 32)}`;
+}
 export interface CommerceToolCall { name: string; args: unknown; id?: string;
   /** Set by the transport when a known tool was called outside its declared schema. Such a call is never executed. */
   invalidArguments?: { field: string } }
@@ -378,8 +384,12 @@ export function createReadOnlyTools(input: {
       const offer = (price?.status === "OK" ? price.facts?.offerType : null)
         ?? (stock?.status === "OK" ? stock.facts?.offerType : null) ?? null;
       // Options are not selected cart SKUs. A shared source SKU must not merge two offers' prices.
-      const variantId = summarizeAll && offer ? `offer:${id}:${offer}`
-        : (variant?.resolution === "VERIFIED" ? variant.selectedVariantId : null) ?? (offer ? `offer:${id}:${offer}` : null);
+      // A read filtered to one size that does not resolve to a single variant states that size's stock only.
+      // It gets its own scope so it cannot collide with the offer-wide stock of an unfiltered read or of the
+      // read behind quote_product, which never carries a size and keeps the offer scope its price lookup expects.
+      const offerScope = offer ? `offer:${id}:${offer}` : null;
+      const variantId = summarizeAll && offer ? offerScope
+        : (variant?.resolution === "VERIFIED" ? variant.selectedVariantId : null) ?? (offerScope && q.size ? sizeFilteredOfferScope(offerScope, q.size, q.color) : offerScope);
       const optionClaims = [[price, "PRICE"], [stock, "STOCK"], [eta, "ETA"]].flatMap(([facts, type]) => {
         const result = buildProtectedClaimsFromVerifiedFactsV1({ facts: facts as typeof price, sizeClaim: null, expectedProductId: id });
         return result.claims.filter(c => c.type === type).map(c => ({ ...c, claimId: commerceUuid(commerceHash({ originalClaimId: c.claimId, variantId })),
@@ -450,7 +460,7 @@ export function createReadOnlyTools(input: {
     if (evidence.attributes || evidence.presentation || evidence.content || evidence.sizeCharts?.length) products.set(id, evidence);
     subjects.set(id, { ...subjects.get(id)!, label: p.title, variantId: null });
     for (const o of retained) if (o.variantId) subjects.set(o.variantId, { ref: o.variantId, kind: "VARIANT", productId: id,
-      label: `${p.title} ${o.offer ?? ""} ${o.variant?.selectedColorLabel ?? ""} ${o.variant?.selectedSizeCode ?? ""}`.trim(), bindingVersion: scope.bindingVersion });
+      label: `${p.title} ${o.offer ?? ""} ${o.variant?.selectedColorLabel ?? ""} ${o.variant?.selectedSizeCode ?? (o.variantId.includes(":size:") ? `size ${o.filter?.size ?? ""}` : "")}`.replace(/\s+/gu, " ").trim(), bindingVersion: scope.bindingVersion });
     // Preserve filters whose meaning is lost in an offer-only fact scope, including regional ETA.
     deliveryContexts.delete(readKey);
     const filtered = retained.filter(o => o.filter !== null || o.sizeAvailability !== null);

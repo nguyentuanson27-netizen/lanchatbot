@@ -133,7 +133,9 @@ export async function createCommerceEffectTools(input: {
       })(), claims: [...base.protectedClaims.filter(c => {
         const claim = c as { type: string; scope: { kind: string; productId?: string; variantId?: string } };
         const replaced = ["PRICE", "STOCK"].includes(claim.type) && active.some(s => claim.scope.kind === "PRODUCT" && claim.scope.productId === s.line.parentProductId &&
-          [s.line.offerId, `offer:${s.line.parentProductId}:${s.line.offerId}`].includes(claim.scope.variantId ?? ""));
+          (claim.scope.variantId === s.line.offerId || claim.scope.variantId === `offer:${s.line.parentProductId}:${s.line.offerId}` ||
+            // A size-filtered read of the same offer is superseded by the selected line as well.
+            (claim.scope.variantId ?? "").startsWith(`offer:${s.line.parentProductId}:${s.line.offerId}:size:`)));
         if(replaced && claim.scope.variantId) supersededVariantRefs.add(claim.scope.variantId);
         return !replaced;
       }), ...selectionClaims],
