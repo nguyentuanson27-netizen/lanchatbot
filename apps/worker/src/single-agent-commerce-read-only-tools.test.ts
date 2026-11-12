@@ -906,11 +906,11 @@ describe("stock stated per colour when a read without a colour covers colours th
   it("lists each colour's stock and marks the merged list as not true of each colour, for owner and verifier alike", async () => {
     const { tools } = twoColours();
     const read = availability(await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", offerType: "DIRECT" } }));
-    const beStock = (read.byColor as { color: string; stock: string }[]).find(c => c.color === "be")!.stock;
     expect(read).toEqual({ productId: "SM613", offerType: "DIRECT", color: null, requestedSize: null, confirmedInStockSizes: ["S", "M", "L", "XL"],
       unlistedSizeMeaning: "NOT_CONFIRMED", confirmedInStockSizesScope: "AT_LEAST_ONE_COLOR_NOT_EACH",
-      byColor: [{ color: "trắng", stock: "IN_STOCK", confirmedInStockSizes: ["S", "M", "L", "XL"] }, { color: "be", stock: beStock, confirmedInStockSizes: [] }] });
-    expect(beStock).not.toBe("IN_STOCK");
+      byColor: [{ color: "trắng", confirmedInStockSizes: ["S", "M", "L", "XL"] }, { color: "be", confirmedInStockSizes: [] }] });
+    // No second stock label: whether "be" can be ordered ahead is stated once, by the selection options.
+    expect(JSON.stringify(read.byColor)).not.toMatch(/STOCK|PRE_ORDER/);
     const literal = tools.snapshot().policyLiterals.find(p => p.ref.startsWith("read:") && JSON.parse(p.text).sizeAvailability);
     expect(JSON.parse(literal!.text).sizeAvailability).toEqual(read);
   });
@@ -918,7 +918,7 @@ describe("stock stated per colour when a read without a colour covers colours th
     const { tools } = twoColours();
     const read = availability(await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", offerType: "DIRECT", size: "M" } }));
     expect(read).toMatchObject({ requestedSize: "M", confirmedInStockSizes: ["M"], confirmedInStockSizesScope: "AT_LEAST_ONE_COLOR_NOT_EACH",
-      byColor: [{ color: "trắng", stock: "IN_STOCK", confirmedInStockSizes: ["M"] }, { color: "be", confirmedInStockSizes: [] }] });
+      byColor: [{ color: "trắng", confirmedInStockSizes: ["M"] }, { color: "be", confirmedInStockSizes: [] }] });
   });
   it("adds nothing when a colour was asked, when the colours agree or when there is one colour", async () => {
     const one = availability(await twoColours().tools.invoke({ name: "read_product", args: { subjectRef: "SM613", offerType: "DIRECT", color: "be" } }));

@@ -409,7 +409,9 @@ export function createReadOnlyTools(input: {
         if (labels.length < 2 || labels.length > 8) return null;
         const entries = labels.map(color => {
           const facts = resolveCatalogFacts(raw, { ...q, color, intent: "STOCK" }, now, maxAge);
-          return facts.status === "OK" && facts.facts ? { color, stock: facts.facts.stockStatus, confirmedInStockSizes: facts.facts.sizes.filter(wantedSize) } : null;
+          // Only the sizes with positive stock: the same meaning as the merged list. Whether a colour without
+          // stock can be ordered ahead is stated by the selection options, not restated here.
+          return facts.status === "OK" && facts.facts ? { color, confirmedInStockSizes: facts.facts.sizes.filter(wantedSize) } : null;
         });
         if (entries.some(e => e === null)) return null;
         const same = (e: typeof entries[number]) => commerceHash({ ...e, color: null }) === commerceHash({ ...entries[0], color: null });
