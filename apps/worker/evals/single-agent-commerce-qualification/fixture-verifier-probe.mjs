@@ -15,11 +15,14 @@ import {makeBinding,finalGate} from '../../dist/single-agent-semantic-verifier-b
 import {commerceNow,commerceScope,fixturePolicy,fixtureProduct} from '../../dist/single-agent-commerce.test-support.js';
 import {createCommerceVerifier} from '../single-agent-commerce-read-only/protocol.mjs';
 
-const {values:args}=parseArgs({options:{n:{type:'string',default:'5'},out:{type:'string'}}});
+const {values:args}=parseArgs({options:{n:{type:'string',default:'5'},out:{type:'string'},verifier:{type:'string',default:'registered'}}});
 const n=Number(args.n);assert(Number.isInteger(n)&&n>=1&&n<=20,'N_1_TO_20');assert(args.out,'OUT_REQUIRED');
 const here=new URL('.',import.meta.url),read=p=>readFileSync(new URL(p,here),'utf8');
 const manifest=JSON.parse(read('../single-agent-commerce-read-only/manifest.json')),instructions=read('../single-agent-commerce-read-only/prompts/verifier.vi.txt');
-const verify=createCommerceVerifier(manifest);
+// 'registered' uses the verifier the manifest names; 'gemini' injects the retained Vertex transport for a comparison.
+assert(['registered','gemini'].includes(args.verifier),'VERIFIER_OPTION');
+const gemini=args.verifier==='gemini'?await import('../single-agent-commerce-read-only/gemini-verifier.mjs'):null;
+const verify=createCommerceVerifier(manifest,gemini?.createGeminiVerifierModel({projectId:JSON.parse(readFileSync(process.env.C3_VERTEX_CREDENTIAL_FILE,'utf8')).project_id}));
 // Sơ mi SM613, 499.000đ, size M: "trắng" in stock, "be" pre-order. Cart empty, no receipt, no negotiation.
 const f=fixtureProduct(),row=f.snapshot.offers.DIRECT.rows[0];
 f.snapshot.offers.DIRECT.rows=['trắng','be'].flatMap(color=>['S','M','L','XL'].map(size=>({...structuredClone(row),color,size,stock_quantity:color==='be'?0:4,
@@ -60,5 +63,5 @@ const summary={unsafeSendEligible:group(true).filter(r=>r.sendEligible).length,u
  safeSendEligible:group(false).filter(r=>r.sendEligible).length,safeTotal:group(false).length,
  byDraft:Object.fromEntries(drafts.map(d=>[d.id,`${rows.filter(r=>r.id===d.id&&r.sendEligible).length}/${n} send-eligible`]))};
 writeFileSync(resolve(args.out,'RESULT.json'),JSON.stringify({kind:'FIXTURE_VERIFIER_PROBE_NOT_SAFETY_GATE',
- sourceSha:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),verifier:manifest.models.verifier,repetitions:n,summary,rows},null,1));
+ sourceSha:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),verifier:gemini?gemini.GEMINI_VERIFIER_MODEL:manifest.models.verifier,repetitions:n,summary,rows},null,1));
 console.log(JSON.stringify(summary));

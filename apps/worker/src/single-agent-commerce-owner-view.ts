@@ -33,13 +33,20 @@ const MEANING={
  DONE:"Đã thực hiện. Giỏ hiện tại là cartItems và cartQuote của kết quả này.",
  COLOR:"Chưa thêm hoặc sửa giỏ. Hỏi khách chọn màu trong choices; có lựa chọn của khách rồi mới gọi lại.",
  SIZE:"Chưa thêm hoặc sửa giỏ. Hỏi khách chọn size trong choices; có lựa chọn của khách rồi mới gọi lại.",
+ // The customer may be asking what it costs, not ordering. A total does not wait for this choice.
+ COLOR_QUOTABLE:"Chưa thêm hoặc sửa giỏ. Khách đang hỏi giá hoặc tổng tiền thì gọi quote_product theo preCartQuoteRequest, báo giá được khi chưa có màu; không gọi lại lệnh này. Khách đang đặt mua thì hỏi khách chọn màu trong choices.",
+ SIZE_QUOTABLE:"Chưa thêm hoặc sửa giỏ. Khách đang hỏi giá hoặc tổng tiền thì gọi quote_product theo preCartQuoteRequest, báo giá được khi chưa có size; không gọi lại lệnh này. Khách đang đặt mua thì hỏi khách chọn size trong choices.",
  SHOP_DATA:"Chưa thêm hoặc sửa giỏ: nguồn shop chưa ghi màu của món này. Không tự đặt tên màu.",
  NOT_DONE:"Thao tác chưa thực hiện, giỏ không đổi. Xử lý theo reason; không báo đã xong.",
  UNKNOWN:"Chưa xác nhận được giỏ đã đổi hay chưa. Không báo đã xong và không gọi lại lệnh này.",
 } as const;
 
-export function presentCartWriteResult(result:OwnerToolResult):OwnerToolResult&{data:Json} {
+/** `quoteCallable`: whether quote_product can actually be called in the generation this result is shown to. */
+export function presentCartWriteResult(result:OwnerToolResult,options:{quoteCallable?:boolean}={}):OwnerToolResult&{data:Json} {
  const data:Json=record(result.data)?structuredClone(result.data):{};
+ // A route the owner cannot take in this generation is not offered.
+ if(options.quoteCallable===false)delete data.preCartQuoteRequest;
+ const quotable=options.quoteCallable!==false&&record(data.preCartQuoteRequest);
  if(result.status==="OK")return {...result,data:{outcome:{done:true,cartChanged:true,meaning:MEANING.DONE} satisfies CartWriteOutcome,...data}};
  const choice=record(data.choiceResolution)?data.choiceResolution:null;
  const proved=data.effectCommitted===false||NOT_COMMITTED.includes(result.failureStage as CommerceEffectFailureStage);
@@ -53,7 +60,7 @@ export function presentCartWriteResult(result:OwnerToolResult):OwnerToolResult&{
   // A choice the owner cannot name is not a usable result; fall through to the plain refusal.
   if(choices.length===refs.size&&choices.length>0){
    const outcome:CartWriteOutcome={done:false,cartChanged:false,needsFromCustomer:choice.field,choices,
-    choicesAreAllForRequest:choice.completeness==="ALL_EXACT_TUPLES_FOR_QUERY",meaning:MEANING[choice.field]};
+    choicesAreAllForRequest:choice.completeness==="ALL_EXACT_TUPLES_FOR_QUERY",meaning:quotable?MEANING[choice.field==="COLOR"?"COLOR_QUOTABLE":"SIZE_QUOTABLE"]:MEANING[choice.field]};
    return {status:"NOT_DONE",reason:"CUSTOMER_CHOICE_NEEDED",data:{outcome,
     ...(record(evidence?.allSourceValuesForQuery)?{allSourceValuesForQuery:evidence!.allSourceValuesForQuery}:{}),...rest()}};
   }

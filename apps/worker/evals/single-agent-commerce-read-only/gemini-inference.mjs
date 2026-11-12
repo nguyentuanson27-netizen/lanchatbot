@@ -207,10 +207,13 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  };
  const contents=structuredClone(request.contents);
  requireThat(contents.every(c=>c.parts.every(p=>!p.inlineData&&!p.fileData)),'OWNER_IMAGE_BINDING');
+ // A quote route is shown, and described in a result's meaning, only when this generation can take it.
+ const quoteCallable=request.toolsAllowed!==false&&declarations.some(d=>d.name==='quote_product')&&
+  (!request.callableTools||request.callableTools.includes('quote_product'))&&(!request.toolBudget||request.toolBudget.callsRemaining>=1);
  for(const message of contents)for(const part of message.parts??[]){
   const response=part.functionResponse;
   // Code-owned meaning of a cart write comes first; source bookkeeping stays out of the owner view.
-  if(response?.response&&CART_WRITE_TOOLS.includes(response.name))response.response=presentCartWriteResult(response.response);
+  if(response?.response&&CART_WRITE_TOOLS.includes(response.name))response.response=presentCartWriteResult(response.response,{quoteCallable});
   const data=response?.response?.data;if(!data)continue;
   // Reference only the identical policy already present in this same request.
   // Older/different policies keep their full result; scope/eligibility/version remain local.
@@ -255,9 +258,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   const presented=response.response.data;
   // These are code-owned result meanings, not extra facts or a prose classifier.
   // Native continuations and the final completed trace share this one projection.
-  if(presented.preCartQuoteRequest&&!(request.toolsAllowed!==false&&
-   declarations.some(d=>d.name==='quote_product')&&(!request.callableTools||request.callableTools.includes('quote_product'))&&
-   (!request.toolBudget||request.toolBudget.callsRemaining>=1)))delete presented.preCartQuoteRequest;
+  if(presented.preCartQuoteRequest&&!quoteCallable)delete presented.preCartQuoteRequest;
   if(response.name==='record_negotiation'&&response.response.status==='REJECTED'&&response.response.reason==='NEGOTIATION_CONTEXT_REQUIRED'&&
    data.effectCommitted===false&&data.negotiationStatus==='NOT_EVALUATED'&&data.supportAvailability==='UNKNOWN'&&
    Array.isArray(data.missing)&&data.missing.length>0&&data.missing.every(k=>['CART','NEGOTIATION'].includes(k))){

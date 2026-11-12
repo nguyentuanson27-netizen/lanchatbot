@@ -21,6 +21,8 @@ describe("cart write result shown to the owner",()=>{
     meaning:expect.stringContaining("Chưa thêm")},
    effectCommitted:false,preCartQuoteRequest:raw.data.preCartQuoteRequest}});
   expect(Object.keys(view.data)[0]).toBe("outcome");
+  // A customer asking the price is pointed at the quote, not back at this command (PR 392 case J1).
+  expect((view.data.outcome as {meaning:string}).meaning).toMatch(/hỏi giá hoặc tổng tiền thì gọi quote_product.*không gọi lại lệnh này.*đặt mua thì hỏi khách chọn màu/su);
   // The internal contract that proves the no-commit route is untouched.
   expect(raw).toEqual(before);
  });
@@ -33,6 +35,13 @@ describe("cart write result shown to the owner",()=>{
   const view=presentCartWriteResult(needsColour("FIRST_8_EXACT_TUPLES_NOT_COMPLETE_INVENTORY"));
   expect(view.data.outcome).toMatchObject({choicesAreAllForRequest:false});
   expect(view.data.allSourceValuesForQuery).toMatchObject({colors:{complete:true}});
+ });
+ it("offers the quote route only when quote_product can be called in that generation",()=>{
+  const view=presentCartWriteResult(needsColour(),{quoteCallable:false});
+  expect(view.data).not.toHaveProperty("preCartQuoteRequest");
+  expect((view.data.outcome as {meaning:string}).meaning).toBe("Chưa thêm hoặc sửa giỏ. Hỏi khách chọn màu trong choices; có lựa chọn của khách rồi mới gọi lại.");
+  const noRoute=needsColour();delete (noRoute.data as {preCartQuoteRequest?:unknown}).preCartQuoteRequest;
+  expect((presentCartWriteResult(noRoute).data.outcome as {meaning:string}).meaning).not.toMatch(/quote_product/u);
  });
  it("asks for size with the same shape",()=>{
   const raw=needsColour();raw.data.choiceResolution.field="SIZE";
