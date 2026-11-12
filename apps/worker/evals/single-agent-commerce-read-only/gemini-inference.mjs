@@ -6,7 +6,7 @@ import {createHash} from 'node:crypto';
 import {createServiceAccountAssertion,vertexGenerateEndpoint} from '../../dist/vertex.js';
 import {omitCurrentProductDuplicates} from '../../dist/single-agent-commerce-read-only-context.js';
 import {sizeRequestScope} from '../../dist/single-agent-commerce-state.js';
-import {CART_WRITE_TOOLS,presentCartWriteResult} from '../../dist/single-agent-commerce-owner-view.js';
+import {CART_WRITE_TOOLS,presentCartWriteResult,presentNegotiationResult,presentPreCartQuoteResult} from '../../dist/single-agent-commerce-owner-view.js';
 import {HandoffReasonV2Schema,canonicalJsonV1,CustomerProfileV1Schema,CommerceHistoryMetadataV1Schema} from '@lana/contracts';
 import {presentOwnerData,presentCompactOwnerData} from './owner-data-presentation.mjs';
 import {compactOwnerProducts,compactCurrentFacts,compactSelectionResult,sharedSingleItemReads} from './owner-product-tables.mjs';
@@ -259,13 +259,9 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   // These are code-owned result meanings, not extra facts or a prose classifier.
   // Native continuations and the final completed trace share this one projection.
   if(presented.preCartQuoteRequest&&!quoteCallable)delete presented.preCartQuoteRequest;
-  if(response.name==='record_negotiation'&&response.response.status==='REJECTED'&&response.response.reason==='NEGOTIATION_CONTEXT_REQUIRED'&&
-   data.effectCommitted===false&&data.negotiationStatus==='NOT_EVALUATED'&&data.supportAvailability==='UNKNOWN'&&
-   Array.isArray(data.missing)&&data.missing.length>0&&data.missing.every(k=>['CART','NEGOTIATION'].includes(k))){
-   presented.supportEvaluation={status:data.negotiationStatus,supportAvailability:data.supportAvailability,missing:structuredClone(data.missing),
-    meaning:'Lần gọi này chưa xét được hỗ trợ; chưa có kết luận shop có hay không có ưu đãi.'};
-   for(const k of ['negotiationStatus','supportAvailability','missing'])delete presented[k];
-  }
+  // Support asked for before a cart: one code-owned statement of what is and is not known, on both routes.
+  if(response.name==='record_negotiation')response.response=presentNegotiationResult(response.response);
+  if(response.name==='quote_product')response.response=presentPreCartQuoteResult(response.response);
   const fitFields=['fitScope','sizeSourceHash','missingInputs','recommendedSizes','inputFitPreference','alternativeSizes'];
   if(response.name==='recommend_size'&&response.response.status==='OK'&&fitFields.every(k=>Object.hasOwn(data,k))){
    presented.fitEvaluation={status:data.status,target:structuredClone(data.fitScope),sizeSourceHash:data.sizeSourceHash,

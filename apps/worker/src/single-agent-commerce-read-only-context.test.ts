@@ -68,3 +68,16 @@ describe("read-only source context", () => {
       current: changed, finalDraft: text, now }).disposition).toBe("HANDOFF");
   });
 });
+
+describe("multi-item offer as both models read it",()=>{
+ it("states how a set or combo is counted, never whether an order qualifies",async()=>{
+  const {publicPolicyLiteral}=await import("./single-agent-commerce-read-only-context.js");
+  const {fixturePolicy,commerceScope,commerceNow}=await import("./single-agent-commerce.test-support.js");
+  const bundle=(await fixturePolicy()).bundle!,scope=commerceScope();
+  const offer=JSON.parse(publicPolicyLiteral(bundle,scope.pageId,scope.shopId,commerceNow).text).multiItemOffer;
+  expect(offer).toMatchObject({minimumProductCount:2,discountBps:500,setAndComboCountAsOne:true});
+  expect(offer.unitDescription).toBe("Mỗi set hoặc combo tính là 1 đơn vị dù gồm nhiều món. Đơn cần từ 2 đơn vị mới được giảm; một set hoặc một combo riêng lẻ là 1 đơn vị.");
+  const separate=structuredClone(bundle);(separate.policy.multiItemOffer as {setAndComboCountAsOne:boolean}).setAndComboCountAsOne=false;
+  expect(JSON.parse(publicPolicyLiteral(separate,scope.pageId,scope.shopId,commerceNow).text).multiItemOffer).not.toHaveProperty("unitDescription");
+ });
+});

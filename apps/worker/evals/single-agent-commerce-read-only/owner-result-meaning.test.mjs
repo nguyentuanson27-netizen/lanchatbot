@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {buildGeminiCommerceRequest} from './gemini-inference.mjs';
 import {readCompactSections} from './owner-data-presentation.mjs';
+import {SUPPORT_NOT_EVALUATED_MEANING} from '../../dist/single-agent-commerce-owner-view.js';
 
 const request=(name,data,final=false)=>({generationId:'meaning:1',instructions:'Tư vấn',ownerContextPresentation:'VI_DATA_BLOCKS_COMPACT_V2',
  context:{boundSubjects:[],protectedClaims:[],runtimeProducts:[],policyLiterals:[],effectReceipts:[],state:{revision:1}},
@@ -25,7 +26,9 @@ for(const final of [false,true])test(`owner groups exact current fit and unknown
  nr.contents.at(-1).parts[0].functionResponse.response.status='REJECTED';nr.contents.at(-1).parts[0].functionResponse.response.reason='NEGOTIATION_CONTEXT_REQUIRED';
  const n=result(buildGeminiCommerceRequest(nr),final);
  assert.equal(n.effectCommitted,false);assert.deepEqual(n.supportEvaluation,{status:'NOT_EVALUATED',supportAvailability:'UNKNOWN',missing:['CART','NEGOTIATION'],
-  meaning:'Lần gọi này chưa xét được hỗ trợ; chưa có kết luận shop có hay không có ưu đãi.'});
+  meaning:SUPPORT_NOT_EVALUATED_MEANING});
+ // Option A: the meaning comes first and tells the owner the customer's next step; it promises and denies nothing.
+ assert.equal(Object.keys(n)[0],'supportEvaluation');assert.match(n.supportEvaluation.meaning,/có giỏ rồi khách nhắn lại lời xin hỗ trợ/u);
  assert(!Object.hasOwn(n,'negotiationStatus'));assert(!Object.hasOwn(n,'supportAvailability'));assert(!Object.hasOwn(n,'missing'));
  assert(Buffer.byteLength(JSON.stringify(wire))<=65536);
 });
@@ -77,3 +80,16 @@ for(const final of [false,true])test(`historical fit and negotiation results sta
  assert.equal(results[0].supportEvaluation.status,'NOT_EVALUATED');assert(!results[0].supportEvaluation.meaning.includes('hiện tại'));
  assert.equal(results[1].cartQuote.grandTotalVnd,499000);assert.equal(results[1].effectCommitted,true);
 });
+for(const final of [false,true])test(`a quote without a cart carries the same support statement as a refused record (${final?'final':'native'})`,()=>{
+ const r=request('quote_product',{subjectRef:'P',calculationBasis:'PRE_CART_POLICY',appliesNegotiationReceipt:false,quoteTaskStatus:'PREPARED_PENDING_FINAL_GATE',
+  preCartQuote:{negotiationAssessment:'NOT_EVALUATED',grandTotalVnd:529000}},final);
+ r.availableTools=['quote_product'];r.toolWorkAccounting='PRIMITIVE_WORK_V2';
+ const before=structuredClone(r.contents),view=result(buildGeminiCommerceRequest(r),final);
+ assert.deepEqual(view.supportEvaluation,{status:'NOT_EVALUATED',supportAvailability:'UNKNOWN',missing:['CART'],meaning:SUPPORT_NOT_EVALUATED_MEANING});
+ assert.equal(view.preCartQuote.grandTotalVnd,529000);assert.equal(view.preCartQuote.negotiationAssessment,'NOT_EVALUATED');
+ assert.deepEqual(r.contents,before);
+ const withCart=request('quote_product',{subjectRef:'P',calculationBasis:'CART',appliesNegotiationReceipt:true},final);
+ withCart.availableTools=['quote_product'];withCart.toolWorkAccounting='PRIMITIVE_WORK_V2';
+ assert(!Object.hasOwn(result(buildGeminiCommerceRequest(withCart),final),'supportEvaluation'));
+});
+

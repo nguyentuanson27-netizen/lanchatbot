@@ -1,5 +1,5 @@
 import {describe,it,expect} from "vitest";
-import {presentCartWriteResult} from "./single-agent-commerce-owner-view.js";
+import {presentCartWriteResult,presentNegotiationResult,presentPreCartQuoteResult,SUPPORT_NOT_EVALUATED_MEANING} from "./single-agent-commerce-owner-view.js";
 
 const option=(color:string|null,status:string,hash:string)=>({size:"M",color,status,reasonCode:null,identityHash:hash.repeat(64),
  productId:"SV2447",offerType:"AO",quantity:1,sourceVersion:"pos-v1",observedAt:"2026-11-10T09:00:00.000Z",expiresAt:"2026-11-10T09:20:00.000Z"});
@@ -71,5 +71,35 @@ describe("cart write result shown to the owner",()=>{
   "never claims either way when the commit is unproved (%s)",(stage,reason)=>{
   const view=presentCartWriteResult({status:"UNAVAILABLE",reason,...(stage?{failureStage:stage}:{})});
   expect(view.data.outcome).toEqual({done:"UNKNOWN",cartChanged:"UNKNOWN",meaning:expect.stringContaining("Không báo đã xong")});
+ });
+});
+
+describe("price support asked for before a cart exists (option A)",()=>{
+ const refused=()=>({status:"REJECTED",reason:"NEGOTIATION_CONTEXT_REQUIRED",failureStage:"VALIDATION",
+  data:{effectCommitted:false,negotiationStatus:"NOT_EVALUATED",supportAvailability:"UNKNOWN",missing:["CART","NEGOTIATION"]}});
+ const quote=()=>({status:"OK",data:{subjectRef:"SV2447",calculationBasis:"PRE_CART_POLICY",appliesNegotiationReceipt:false,quoteTaskStatus:"PREPARED_PENDING_FINAL_GATE",
+  preCartQuote:{negotiationAssessment:"NOT_EVALUATED",grandTotalVnd:529000}}});
+ it("tells the owner what is unknown and what the customer does next, on both routes",()=>{
+  const a=presentNegotiationResult(refused()).data as Record<string,unknown>,b=presentPreCartQuoteResult(quote()).data as Record<string,unknown>;
+  expect(a).toEqual({supportEvaluation:{status:"NOT_EVALUATED",supportAvailability:"UNKNOWN",missing:["CART","NEGOTIATION"],meaning:SUPPORT_NOT_EVALUATED_MEANING},effectCommitted:false});
+  expect(Object.keys(a)[0]).toBe("supportEvaluation");
+  expect(b.supportEvaluation).toEqual({status:"NOT_EVALUATED",supportAvailability:"UNKNOWN",missing:["CART"],meaning:SUPPORT_NOT_EVALUATED_MEANING});
+  // The quote itself is untouched: the total and the field the prompt names are still there.
+  expect(b).toMatchObject({calculationBasis:"PRE_CART_POLICY",preCartQuote:{negotiationAssessment:"NOT_EVALUATED",grandTotalVnd:529000}});
+ });
+ it("promises nothing, denies nothing and names the next step",()=>{
+  expect(SUPPORT_NOT_EVALUATED_MEANING).toMatch(/Không hứa mức hỗ trợ và không nói là không có/u);
+  expect(SUPPORT_NOT_EVALUATED_MEANING).toMatch(/chọn đủ màu và size để lên giỏ; có giỏ rồi khách nhắn lại lời xin hỗ trợ/u);
+  expect(SUPPORT_NOT_EVALUATED_MEANING).toMatch(/^Chỉ dùng khi khách xin hỗ trợ giá\./u);
+  expect(SUPPORT_NOT_EVALUATED_MEANING).not.toMatch(/\d/u);
+ });
+ it("leaves every other result as it was",()=>{
+  const evaluated={status:"OK",data:{effectCommitted:true,negotiationStatus:"EVALUATED",supportAvailability:"AVAILABLE",cartQuote:{grandTotalVnd:499000}}};
+  expect(presentNegotiationResult(evaluated)).toBe(evaluated);
+  for(const other of [{...refused(),reason:"NEGOTIATION_SOURCE_OR_CART"},{...refused(),data:{...refused().data,effectCommitted:true}},{...refused(),data:{...refused().data,missing:["OTHER"]}}])
+   expect(presentNegotiationResult(other)).toBe(other);
+  const cartQuote={status:"OK",data:{calculationBasis:"CART",appliesNegotiationReceipt:true}},failed={status:"UNAVAILABLE",reason:"PRICE_UNAVAILABLE"};
+  expect(presentPreCartQuoteResult(cartQuote)).toBe(cartQuote);expect(presentPreCartQuoteResult(failed)).toBe(failed);
+  const raw=refused(),before=structuredClone(raw);presentNegotiationResult(raw);expect(raw).toEqual(before);
  });
 });

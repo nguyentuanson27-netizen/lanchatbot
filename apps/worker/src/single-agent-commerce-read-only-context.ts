@@ -52,6 +52,10 @@ export function publicPolicyLiteral(bundle: RuntimePolicyBundle, pageId: string,
       shipping: { defaultFeeVnd: policy.shipping.defaultFeeVnd }, multiItemOffer: {
         minimumProductCount: policy.multiItemOffer.minimumProductCount, discountBps: policy.multiItemOffer.discountBps,
         countingUnit: policy.multiItemOffer.countingUnit, setAndComboCountAsOne: policy.multiItemOffer.setAndComboCountAsOne,
+        // Shared source meaning for both models, like tryOnModeDescription above: the flag alone was read as
+        // "a set qualifies". It states how units are counted, not whether a given order qualifies.
+        ...(policy.multiItemOffer.setAndComboCountAsOne ? { unitDescription:
+          `Mỗi set hoặc combo tính là 1 đơn vị dù gồm nhiều món. Đơn cần từ ${policy.multiItemOffer.minimumProductCount} đơn vị mới được giảm; một set hoặc một combo riêng lẻ là 1 đơn vị.` } : {}),
       } }),
   };
 }

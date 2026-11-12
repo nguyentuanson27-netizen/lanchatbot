@@ -70,3 +70,27 @@ export function presentCartWriteResult(result:OwnerToolResult,options:{quoteCall
    meaning:MEANING.SHOP_DATA} satisfies CartWriteOutcome,...rest()}};
  return {...result,data:{outcome:{done:false,cartChanged:false,meaning:MEANING.NOT_DONE} satisfies CartWriteOutcome,...data}};
 }
+
+/**
+ * Price support asked for before a cart exists (owner decision 2026-11-12, option A). The negotiation
+ * engine evaluates support only against a cart, and its evidence must follow the cart's creation, so
+ * nothing can be granted or promised here. The owner is told exactly that and what the customer does next.
+ */
+export const SUPPORT_NOT_EVALUATED_MEANING="Chỉ dùng khi khách xin hỗ trợ giá. Hỗ trợ riêng chưa được xét vì chưa có giỏ; chưa có kết luận shop có hay không hỗ trợ thêm. "+
+ "Không hứa mức hỗ trợ và không nói là không có. Ưu đãi mua nhiều, nếu nêu, phải đúng điều kiện và không thay cho câu trả lời này. "+
+ "Nói với khách: chọn đủ màu và size để lên giỏ; có giỏ rồi khách nhắn lại lời xin hỗ trợ thì shop xét được ngay.";
+/** A refused negotiation record that needs a cart: its meaning, never the internal status words alone. */
+export function presentNegotiationResult(result:OwnerToolResult):OwnerToolResult {
+ const data=record(result.data)?result.data:null;
+ if(result.status!=="REJECTED"||result.reason!=="NEGOTIATION_CONTEXT_REQUIRED"||!data||data.effectCommitted!==false||data.negotiationStatus!=="NOT_EVALUATED"||
+  data.supportAvailability!=="UNKNOWN"||!Array.isArray(data.missing)||!data.missing.length||!data.missing.every(k=>k==="CART"||k==="NEGOTIATION"))return result;
+ const {negotiationStatus,supportAvailability,missing,...rest}=structuredClone(data);
+ return {...result,data:{supportEvaluation:{status:negotiationStatus,supportAvailability,missing,meaning:SUPPORT_NOT_EVALUATED_MEANING},...rest}};
+}
+/** A quote computed without a cart applies no negotiation receipt: say so in the same words as a refused record. */
+export function presentPreCartQuoteResult(result:OwnerToolResult):OwnerToolResult {
+ const data=record(result.data)?result.data:null;
+ if(result.status!=="OK"||!data||data.calculationBasis!=="PRE_CART_POLICY"||data.appliesNegotiationReceipt!==false)return result;
+ return {...result,data:{...structuredClone(data),supportEvaluation:{status:"NOT_EVALUATED",supportAvailability:"UNKNOWN",missing:["CART"],meaning:SUPPORT_NOT_EVALUATED_MEANING}}};
+}
+
