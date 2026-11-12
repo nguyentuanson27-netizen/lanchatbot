@@ -1,5 +1,5 @@
 import {describe,it,expect} from "vitest";
-import {presentCartWriteResult,presentNegotiationResult,presentPreCartQuoteResult,SUPPORT_NOT_EVALUATED_MEANING} from "./single-agent-commerce-owner-view.js";
+import {presentCartWriteResult,presentNegotiationResult,presentPreCartQuoteResult,presentPendingPurchase,PENDING_PURCHASE_MEANING,SUPPORT_NOT_EVALUATED_MEANING} from "./single-agent-commerce-owner-view.js";
 
 const option=(color:string|null,status:string,hash:string)=>({size:"M",color,status,reasonCode:null,identityHash:hash.repeat(64),
  productId:"SV2447",offerType:"AO",quantity:1,sourceVersion:"pos-v1",observedAt:"2026-11-10T09:00:00.000Z",expiresAt:"2026-11-10T09:20:00.000Z"});
@@ -101,5 +101,28 @@ describe("price support asked for before a cart exists (option A)",()=>{
   const cartQuote={status:"OK",data:{calculationBasis:"CART",appliesNegotiationReceipt:true}},failed={status:"UNAVAILABLE",reason:"PRICE_UNAVAILABLE"};
   expect(presentPreCartQuoteResult(cartQuote)).toBe(cartQuote);expect(presentPreCartQuoteResult(failed)).toBe(failed);
   const raw=refused(),before=structuredClone(raw);presentNegotiationResult(raw);expect(raw).toEqual(before);
+ });
+});
+
+describe("pending purchase shown to the owner (PR 392 case J1)",()=>{
+ const line=(size:string,quantity=1)=>({productId:"SV2447",offerType:"AO",size,color:null,quantity,missing:"COLOR"});
+ const pending={lines:[line("M"),line("L"),{...line("M",2),productId:"SM613",offerType:"DIRECT"}],recordedAt:"2026-11-12T09:00:00.000Z"};
+ it("spells out one quote request per product and offer with the quantity the customer asked for",()=>{
+  const view=presentPendingPurchase(pending)!;
+  expect(Object.keys(view)[0]).toBe("meaning");expect(view.meaning).toBe(PENDING_PURCHASE_MEANING.QUOTABLE);
+  expect(view.lines).toEqual([{subjectRef:"SV2447",offerType:"AO",size:"M",color:null,quantity:1,missing:"COLOR"},{subjectRef:"SV2447",offerType:"AO",size:"L",color:null,quantity:1,missing:"COLOR"},
+   {subjectRef:"SM613",offerType:"DIRECT",size:"M",color:null,quantity:2,missing:"COLOR"}]);
+  expect(view.quoteRequests).toEqual([{tool:"quote_product",subjectRef:"SV2447",offerTypes:["AO"],quantity:2},{tool:"quote_product",subjectRef:"SM613",offerTypes:["DIRECT"],quantity:2}]);
+  expect(JSON.stringify(view)).not.toMatch(/recordedAt|productId/);
+ });
+ it("says a price does not wait for the missing choice, and states no price itself",()=>{
+  expect(PENDING_PURCHASE_MEANING.QUOTABLE).toMatch(/Khách hỏi giá hoặc tổng tiền: gọi quote_product theo quoteRequests rồi báo số tiền, không hỏi lại màu hay size trước/u);
+  expect(PENDING_PURCHASE_MEANING.QUOTABLE).toMatch(/chưa phải giỏ hàng/u);
+  for(const text of Object.values(PENDING_PURCHASE_MEANING))expect(text).not.toMatch(/\d/u);
+ });
+ it("offers no quote route the generation cannot take and shows nothing for a malformed note",()=>{
+  const view=presentPendingPurchase(pending,{quoteCallable:false})!;
+  expect(view.meaning).toBe(PENDING_PURCHASE_MEANING.PLAIN);expect(view).not.toHaveProperty("quoteRequests");expect(view.meaning).not.toMatch(/quote_product/u);
+  for(const bad of [undefined,null,{},{lines:[]},{lines:[{...line("M"),missing:"OTHER"}]},{lines:[{...line("M"),quantity:1.5}]}])expect(presentPendingPurchase(bad)).toBeNull();
  });
 });

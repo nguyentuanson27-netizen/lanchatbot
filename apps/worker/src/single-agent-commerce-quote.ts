@@ -1,5 +1,5 @@
 import type {TrustedContext} from "./single-agent-semantic-verifier-boundary.js";
-import type {CommerceTools} from "./single-agent-commerce-read-only.js";
+import type {CommerceTools,PendingPurchaseLine} from "./single-agent-commerce-read-only.js";
 import {toolArgs,type CommerceToolCall,type CommerceToolResult,type CommerceScope,type QuotePriceQuery,type QuotePriceEvidence} from "./single-agent-commerce-read-only-tools.js";
 import {commerceHash} from "./single-agent-commerce-read-only-context.js";
 import {ProtectedClaimV1Schema,CustomerPreferenceV1Schema,PRICE_INVENTORY_FRESH_FOR_SECONDS,type ProtectedClaimV1,type PolicyBundleV1} from "@lana/contracts";
@@ -222,9 +222,26 @@ export function withExplicitQuoteTask(base:CommerceTools,scope:CommerceScope,fir
    const offers=JSON.parse(c.policyLiterals.find(p=>p.ref===`offers:${target}`)?.text??"null")?.availableOffers;
    if(!Array.isArray(offers)||!offers.includes(a.offerType))return result;
    const sourcePriceStatus=sourcePrices({subjectRef:target,offerTypes:[a.offerType]}).length===1?"CURRENT_EXACT_READ":"REQUIRES_QUOTE_READ";
+   // A new line the customer asked for; a replacement of an existing cart line is already held by the cart.
+   if(!replace&&(choice.field==="COLOR"||choice.field==="SIZE"))pendingLines.set(result,{productId:target,offerType:a.offerType,
+    size:typeof a.size==="string"?a.size:null,color:typeof color==="string"?color:null,quantity:Number(quantity),missing:choice.field});
    return {...result,data:{...data,preCartQuoteRequest:{tool:"quote_product",target:{subjectRef:target,offerTypes:[a.offerType]},
     quantity:"FROM_CUSTOMER_REQUEST",calculationStatus:"NOT_CALCULATED",sourcePriceStatus,purchaseMissingField:choice.field,evidenceHash:e.contentHash}}};
   }catch{return result;}
+ }
+ // What the customer asked to buy in this turn and could not yet be added. Kept for the next turn, where the
+ // customer may ask the price or the total before choosing. A cart write that succeeds settles the note.
+ const pendingLines=new WeakMap<CommerceToolResult,PendingPurchaseLine>(),pendingThisTurn=new Map<string,PendingPurchaseLine>();
+ async function notePending(calls:readonly CommerceToolCall[],raw:readonly CommerceToolResult[],routed:CommerceToolResult[]):Promise<CommerceToolResult[]>{
+  if(!base.setPendingPurchase)return routed;
+  let changed=false;
+  calls.forEach((call,i)=>{
+   const line=raw[i]?pendingLines.get(raw[i]!):undefined;
+   if(line){pendingThisTurn.set(commerceHash([line.productId,line.offerType,line.size,line.color]),line);changed=true;}
+   else if(["add_to_cart","change_cart_item"].includes(call.name)&&raw[i]?.status==="OK"){pendingThisTurn.clear();changed=true;}
+  });
+  if(changed)await base.setPendingPurchase(pendingThisTurn.size?[...pendingThisTurn.values()].slice(-4):null);
+  return routed;
  }
  return {...base,availableTools,openingQuoteTargets:()=>[...openingProofs.keys()],toolWorkAccounting:"PRIMITIVE_WORK_V2",quoteTaskWork:()=>structuredClone(work),
   snapshot:()=>withQuote(base.snapshot()),readback:async()=>{
@@ -234,9 +251,9 @@ export function withExplicitQuoteTask(base:CommerceTools,scope:CommerceScope,fir
   },
   invoke:async call=>call.name==="quote_product"
    ? base.requiredMediaUnavailable?.()?reject('REQUIRED_MEDIA_UNAVAILABLE'):quote(call)
-   :quoteRoute(call,await base.invoke(call)),
+   :(async()=>{const raw=await base.invoke(call);return (await notePending([call],[raw],[quoteRoute(call,raw)]))[0]!;})(),
   invokeBatch:async calls=>{
-   if(!calls.some(c=>c.name==="quote_product"))return (await base.invokeBatch(calls)).map((r,i)=>quoteRoute(calls[i]!,r));
+   if(!calls.some(c=>c.name==="quote_product")){const raw=await base.invokeBatch(calls);return notePending(calls,raw,raw.map((r,i)=>quoteRoute(calls[i]!,r)));}
    if(base.requiredMediaUnavailable?.())return calls.map(()=>reject('REQUIRED_MEDIA_UNAVAILABLE'));
    const batch=quoteBatchWork(calls);
    if(!batch||batch.units>6||attempts+batch.quotes>2||batch.targets.some(t=>attemptedTargets.has(t))||calls.some(c=>!availableTools.includes(c.name))||!knownBatch(calls))return calls.map(()=>reject("QUOTE_BATCH_INVALID"));

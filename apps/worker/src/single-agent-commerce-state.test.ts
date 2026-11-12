@@ -209,6 +209,49 @@ describe("accepted effective state before dependent tools", () => {
     expect(later.status).toBe("OK");expect(later.data).not.toHaveProperty("sizeEvaluations");
     expect(s.sizeInput.mock.calls.length).toBe(calls);
   });
+  // PR 392 case J1: a note of what the customer asked to buy, kept in the profile for the next turn.
+  it("keeps a pending purchase across turns without touching the profile receipt or a verified fit", async () => {
+    const s = await setup("Eo 74."),line={productId:"QU714",offerType:"DIRECT",size:"M",color:null,quantity:1,missing:"COLOR" as const};
+    await s.tools.invoke({name:"recommend_size",args:{subjectRef:"QU714",customerStateOps:[{op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"74"}]}});
+    const receipts=structuredClone(s.tools.snapshot().effectReceipts),revision=s.getStored().profile.revision;
+    await s.tools.setPendingPurchase!([line,{...line,size:"L"}]);
+    expect(s.getStored().profile).toMatchObject({revision:revision+1,pendingPurchase:{lines:[line,{...line,size:"L"}],recordedAt:commerceNow.toISOString()}});
+    expect(s.tools.snapshot().state.pendingPurchase).toEqual({lines:[line,{...line,size:"L"}],recordedAt:commerceNow.toISOString()});
+    expect(s.tools.snapshot().effectReceipts).toEqual(receipts);
+    expect(s.tools.snapshot().protectedClaims.filter(c=>(c as {type:string}).type==="SIZE_FIT")).toHaveLength(1);
+    // The same lines again write nothing.
+    await s.tools.setPendingPurchase!([line,{...line,size:"L"}]);expect(s.getStored().profile.revision).toBe(revision+1);
+    // The next turn starts from the store and still shows it.
+    const make=(clock=()=>commerceNow)=>createCustomerStateTools({base:s.base,scope:commerceScope(),store:s.store,clock,sizeInput:s.sizeInput});
+    expect((await make()).snapshot().state.pendingPurchase).toMatchObject({lines:[line,{...line,size:"L"}]});
+    // Not shown once it is a day old, and never for a product that is not bound in the turn.
+    expect((await make(()=>new Date(commerceNow.getTime()+24*3600_000+1))).snapshot().state).not.toHaveProperty("pendingPurchase");
+    const other=await make();await other.setPendingPurchase!([{...line,productId:"SM000"}]);
+    expect(other.snapshot().state).not.toHaveProperty("pendingPurchase");
+    await other.setPendingPurchase!(null);
+    expect(s.getStored().profile).not.toHaveProperty("pendingPurchase");expect(other.snapshot().state).not.toHaveProperty("pendingPurchase");
+  });
+  it("stays reachable through the composed tool layers", async () => {
+    const {createCommerceTools}=await import("./single-agent-commerce.js"),{EXPLICIT_QUOTE_TASK}=await import("./single-agent-commerce-quote.js");
+    const s=await setup(),f=fixtureProduct("QU714"),scope=commerceScope();
+    const tools=await createCommerceTools({quoteTask:EXPLICIT_QUOTE_TASK,media:{allowedHostSuffixes:["example.invalid"]},
+      read:{scope,clock:()=>commerceNow,policy:()=>fixturePolicy(),initialProducts:[f.product],entry:{firstContact:false,fromAd:false},
+        catalog:{readProduct:async()=>f,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}},
+      state:{store:s.store,sizeInput:s.sizeInput,sourceMessages:[]}});
+    await tools.setPendingPurchase!([{productId:"QU714",offerType:"DIRECT",size:"M",color:null,quantity:2,missing:"COLOR"}]);
+    expect(s.getStored().profile.pendingPurchase?.lines).toEqual([{productId:"QU714",offerType:"DIRECT",size:"M",color:null,quantity:2,missing:"COLOR"}]);
+    expect(tools.snapshot().state.pendingPurchase).toMatchObject({lines:[{productId:"QU714",quantity:2}]});
+  });
+  it("never fails the turn when the pending purchase cannot be written", async () => {
+    const s = await setup(),line={productId:"QU714",offerType:"DIRECT",size:"M",color:null,quantity:1,missing:"COLOR" as const};
+    vi.mocked(s.store.compareAndSwap).mockResolvedValueOnce(false);
+    await expect(s.tools.setPendingPurchase!([line])).resolves.toBeUndefined();
+    expect(s.tools.snapshot().state).not.toHaveProperty("pendingPurchase");expect(s.tools.snapshot().state.customerStateUpdatePending).toBeUndefined();
+    // A line the contract does not accept is dropped, not thrown.
+    await expect(s.tools.setPendingPurchase!([{...line,quantity:0}])).resolves.toBeUndefined();
+    expect(s.getStored().profile).not.toHaveProperty("pendingPurchase");
+    expect((await s.tools.invoke({name:"recommend_size",args:{subjectRef:"QU714"}})).status).toBe("OK");
+  });
   it("does not write inline inputs for an unbound size subject or two concurrent writers", async () => {
     const s=await setup("Eo 74.");
     const ops=[{op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"74"}];

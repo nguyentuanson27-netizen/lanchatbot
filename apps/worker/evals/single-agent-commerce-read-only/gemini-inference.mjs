@@ -6,7 +6,7 @@ import {createHash} from 'node:crypto';
 import {createServiceAccountAssertion,vertexGenerateEndpoint} from '../../dist/vertex.js';
 import {omitCurrentProductDuplicates} from '../../dist/single-agent-commerce-read-only-context.js';
 import {sizeRequestScope} from '../../dist/single-agent-commerce-state.js';
-import {CART_WRITE_TOOLS,presentCartWriteResult,presentNegotiationResult,presentPreCartQuoteResult} from '../../dist/single-agent-commerce-owner-view.js';
+import {CART_WRITE_TOOLS,presentCartWriteResult,presentNegotiationResult,presentPreCartQuoteResult,presentPendingPurchase} from '../../dist/single-agent-commerce-owner-view.js';
 import {HandoffReasonV2Schema,canonicalJsonV1,CustomerProfileV1Schema,CommerceHistoryMetadataV1Schema} from '@lana/contracts';
 import {presentOwnerData,presentCompactOwnerData} from './owner-data-presentation.mjs';
 import {compactOwnerProducts,compactCurrentFacts,compactSelectionResult,sharedSingleItemReads} from './owner-product-tables.mjs';
@@ -280,6 +280,9 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   'customerProfileId','customerProfileRevision','measurementFingerprint','sizeMeasurementFingerprints','sizeFitTargets','customerStateUpdatePending']
   .filter(k=>Object.hasOwn(c.state,k)).map(k=>[k,c.state[k]]));
  if(Array.isArray(state.customerMeasurements))state.customerMeasurements=state.customerMeasurements.map(measurement);
+ // What the customer asked to buy and could not yet be added, with the quote route when this generation can take it.
+ const pendingPurchase=presentPendingPurchase(c.state.pendingPurchase,{quoteCallable});
+ if(pendingPurchase)state.pendingPurchase=pendingPurchase;
  // Code owns intake; the owner needs only the public confirmation stage, not its collection checklist.
  if(state.checkoutStatus&&typeof state.checkoutStatus==='object')state.checkoutStatus=Object.fromEntries(
   ['previewAvailable','purchaseConfirmed','publicIntake'].filter(k=>Object.hasOwn(state.checkoutStatus,k)).map(k=>[k,state.checkoutStatus[k]]));

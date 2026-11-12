@@ -94,3 +94,27 @@ export function presentPreCartQuoteResult(result:OwnerToolResult):OwnerToolResul
  return {...result,data:{...structuredClone(data),supportEvaluation:{status:"NOT_EVALUATED",supportAvailability:"UNKNOWN",missing:["CART"],meaning:SUPPORT_NOT_EVALUATED_MEANING}}};
 }
 
+/**
+ * Items the customer asked to buy in an earlier turn that are not in the cart because a colour or size is missing
+ * (PR 392 case J1). A price or a total does not wait for that choice, so the quote request is spelled out. The
+ * quantity is what the refused commands carried; the conversation decides if the customer has since changed it.
+ */
+export const PENDING_PURCHASE_MEANING={
+ QUOTABLE:"Món khách đã đặt mua ở lượt trước nhưng chưa vào giỏ vì còn thiếu lựa chọn ghi ở missing; chưa phải giỏ hàng. "+
+  "Khách hỏi giá hoặc tổng tiền: gọi quote_product theo quoteRequests rồi báo số tiền, không hỏi lại màu hay size trước; khách đã đổi số lượng trong hội thoại thì dùng số lượng mới. "+
+  "Khách cho biết lựa chọn còn thiếu: gọi add_to_cart.",
+ PLAIN:"Món khách đã đặt mua ở lượt trước nhưng chưa vào giỏ vì còn thiếu lựa chọn ghi ở missing; chưa phải giỏ hàng. Khách cho biết lựa chọn còn thiếu: gọi add_to_cart.",
+} as const;
+export function presentPendingPurchase(value:unknown,options:{quoteCallable?:boolean}={}):Json|null {
+ if(!record(value)||!Array.isArray(value.lines)||!value.lines.length||!value.lines.every(l=>record(l)&&typeof l.productId==="string"&&typeof l.offerType==="string"&&
+  Number.isInteger(l.quantity)&&(l.missing==="COLOR"||l.missing==="SIZE")))return null;
+ const lines=(value.lines as Json[]).map(l=>({subjectRef:l.productId,offerType:l.offerType,size:l.size??null,color:l.color??null,quantity:l.quantity,missing:l.missing}));
+ if(options.quoteCallable===false)return {meaning:PENDING_PURCHASE_MEANING.PLAIN,lines};
+ // One request per product and offer: quote_product prices one offer with a quantity.
+ const groups=new Map<string,{tool:"quote_product";subjectRef:string;offerTypes:[string];quantity:number}>();
+ for(const l of lines){
+  const key=JSON.stringify([l.subjectRef,l.offerType]),group=groups.get(key);
+  if(group)group.quantity+=l.quantity as number;else groups.set(key,{tool:"quote_product",subjectRef:l.subjectRef as string,offerTypes:[l.offerType as string],quantity:l.quantity as number});
+ }
+ return {meaning:PENDING_PURCHASE_MEANING.QUOTABLE,lines,quoteRequests:[...groups.values()]};
+}

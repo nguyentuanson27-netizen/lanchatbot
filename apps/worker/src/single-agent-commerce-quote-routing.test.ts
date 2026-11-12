@@ -64,3 +64,30 @@ it("binds a replacement route to the new product/offer and current line quantity
  items[0]!.quantity=2;s.setContext(c);
  expect((await s.tools.invoke(call)).data).not.toHaveProperty("preCartQuoteRequest");
 });
+// PR 392 case J1: what the customer asked to buy and could not yet be added is kept for the next turn.
+it("keeps the refused purchase lines of the turn and settles the note when a cart write succeeds",async()=>{
+ const s=await setup(),note=vi.fn(async()=>{});
+ const tools=withExplicitQuoteTask({...s.controlled,setPendingPurchase:note},s.scope,false,s.policy,()=>commerceNow);
+ const line={productId:"SM613",offerType:"DIRECT",size:"M",color:null,quantity:1,missing:"COLOR"};
+ const first=await tools.invoke(s.call);
+ expect(first.data).toHaveProperty("preCartQuoteRequest");expect(note).toHaveBeenLastCalledWith([line]);
+ // The same line asked again is one line, not two.
+ await tools.invokeBatch([s.call]);expect(note).toHaveBeenLastCalledWith([line]);
+ // An applied cart command means the cart now holds the order.
+ s.setResult({status:"OK",data:{operationId:"op",cartItems:[]}});
+ expect((await tools.invoke(s.call)).status).toBe("OK");expect(note).toHaveBeenLastCalledWith(null);
+ const calls=note.mock.calls.length;
+ await tools.invoke({name:"read_policy",args:{}});expect(note).toHaveBeenCalledTimes(calls);
+});
+it("keeps no note for a refusal that publishes no quote route or for a replacement of a cart line",async()=>{
+ const s=await setup(),note=vi.fn(async()=>{}),r=structuredClone(s.result());
+ (r.data as {choiceResolution:unknown}).choiceResolution={kind:"SHOP_DATA_MISSING",reason:"SHOP_COLOR_UNRECORDED"};s.setResult(r);
+ const tools=withExplicitQuoteTask({...s.controlled,setPendingPurchase:note},s.scope,false,s.policy,()=>commerceNow);
+ expect((await tools.invoke(s.call)).data).not.toHaveProperty("preCartQuoteRequest");expect(note).not.toHaveBeenCalled();
+ const t=await setup(),c=structuredClone(t.context());
+ c.state.cartItems=[{subjectRef:"line",productRef:"SM613",offerType:"SET",quantity:1,components:[]}];c.cartBinding={cartId:"cart",cartVersion:1};c.state.cartQuote={cartId:"cart",cartVersion:1};
+ c.boundSubjects.push({ref:"line",kind:"CART_LINE",label:"old set",bindingVersion:t.scope.bindingVersion});t.setContext(c);
+ const replacing=withExplicitQuoteTask({...t.controlled,setPendingPurchase:note},t.scope,false,t.policy,()=>commerceNow);
+ expect((await replacing.invoke({name:"change_cart_item",args:{action:"REPLACE_LINE",subjectRef:"line",targetSubjectRef:"SM613",offerType:"DIRECT",size:"M",color:null}})).data).toHaveProperty("preCartQuoteRequest");
+ expect(note).not.toHaveBeenCalled();
+});

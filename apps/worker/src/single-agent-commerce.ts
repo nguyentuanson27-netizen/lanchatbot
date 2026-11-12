@@ -76,11 +76,13 @@ export async function createCommerceTools(input: {
   let tools: CommerceTools = readTools;
   tools={...tools,handoffSources};
   const availableTools = ["search_products", "read_product", "read_policy"];
+  let stateTools:CommerceTools|undefined;
   if (input.state) {
     const state=input.state;
     tools = await createCustomerStateTools({ ...state,store:{
       read:()=>observed("PROFILE",{},()=>state.store.read()),compareAndSwap:(revision,next)=>state.store.compareAndSwap(revision,next)},
       sizeInput:ref=>observed("SIZE_SOURCE",{subjectRef:ref},()=>state.sizeInput(ref)),base: tools, scope, clock });
+    stateTools=tools;
     availableTools.push("apply_customer_state", "recommend_size");
     if (input.state.quoteInput) availableTools.push("quote_cart");
   }
@@ -96,7 +98,8 @@ export async function createCommerceTools(input: {
   }
   // State/effect adapters expose their own explicit surface. Attach these
   // code-only proofs after composition so they cannot be lost between layers.
-  tools={...tools,handoffSources,boundedPrice:readTools.boundedPrice,quotePriceEvidence:readTools.quotePriceEvidence};
+  tools={...tools,handoffSources,boundedPrice:readTools.boundedPrice,quotePriceEvidence:readTools.quotePriceEvidence,
+    ...(stateTools?.setPendingPurchase?{setPendingPurchase:stateTools.setPendingPurchase}:{})};
   if (input.handoff) {
     tools = createCommerceHandoffTools({ ...input.handoff, base: tools, scope, clock });
     availableTools.push("request_handoff");

@@ -4,7 +4,7 @@ import { buildProtectedClaimsFromVerifiedFactsV1, createVerifiedSizeRecommendati
   evaluateShopPolicy,selectVerifiedSizeChart, type ShopPolicyEvaluationInput } from "@lana/business-tools";
 import { buildReadOnlyContext, commerceHash } from "./single-agent-commerce-read-only-context.js";
 import { toolArgs, type CommerceScope, type CommerceToolCall, type CommerceToolResult } from "./single-agent-commerce-read-only-tools.js";
-import type { CommerceTools } from "./single-agent-commerce-read-only.js";
+import { PENDING_PURCHASE_MAX_AGE_MS, type CommerceTools, type PendingPurchaseLine } from "./single-agent-commerce-read-only.js";
 import type { TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import type { PostgresRealtimeRuntimeStore, RealtimeInboxBatchGuard } from "@lana/database";
 import { createHash } from "node:crypto";
@@ -182,6 +182,36 @@ export async function createCustomerStateTools(input: {
       committedUpdate=retainedReceipt?{hash:commerceHash(current),receipt:retainedReceipt.receipt}:undefined;
     }catch{invalidateCommit();throw Error("STATE_COMMIT_UNCONFIRMED");}
   }
+  /** Only lines whose product is bound in this turn, and only while the note is recent. */
+  const pendingPurchaseView=(base:TrustedContext)=>{
+    const pending=effective.profile.pendingPurchase,age=pending?input.clock().getTime()-Date.parse(pending.recordedAt):NaN;
+    if(!pending||!(age>=0&&age<=PENDING_PURCHASE_MAX_AGE_MS))return null;
+    const lines=pending.lines.filter(l=>base.boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===l.productId));
+    return lines.length?{lines,recordedAt:pending.recordedAt}:null;
+  };
+  async function setPendingPurchase(lines:readonly PendingPurchaseLine[]|null):Promise<void>{
+    try{
+      if(commitUnconfirmed||stateConflict)return;
+      const prior=effective,wanted=lines?.length?lines.slice(0,4).map(l=>({productId:l.productId,offerType:l.offerType,size:l.size,color:l.color,quantity:l.quantity,missing:l.missing})):null;
+      if(commerceHash(prior.profile.pendingPurchase?.lines??null)===commerceHash(wanted))return;
+      const {pendingPurchase:_previous,...rest}=prior.profile,at=input.clock().toISOString();
+      const parsed=CustomerProfileV1Schema.safeParse({...rest,...(wanted?{pendingPurchase:{lines:wanted,recordedAt:at}}:{}),
+        revision:prior.profile.revision+1,updatedAt:at>prior.profile.updatedAt?at:prior.profile.updatedAt});
+      if(!parsed.success)return;
+      const next={...prior,profile:parsed.data};
+      const retainedReceipt=committedUpdate?.hash===commerceHash(prior)?committedUpdate:undefined;
+      const previousFits=[...sizes.values()].map(s=>s.fitTarget);
+      let written:boolean;
+      try{written=await input.store.compareAndSwap(prior.profile.revision,next);}catch{invalidateCommit();return;}
+      // A refused swap wrote nothing; the note is simply not kept and the final readback sees the store as it is.
+      if(!written)return;
+      try{
+        const current=await input.store.read();if(commerceHash(current)!==commerceHash(next))throw Error("STATE_READBACK_CHANGED");
+        effective=current;sizes.clear();committedUpdate=retainedReceipt?{hash:commerceHash(current),receipt:retainedReceipt.receipt}:undefined;
+        for(const t of previousFits)await refreshAdvice(t);
+      }catch{invalidateCommit();}
+    }catch{/* best effort */}
+  }
   const snapshot = (): TrustedContext => {
     const base = input.base.snapshot();
     const valid = [...sizes.entries()].filter(([, s]) => !blocked() && s.profileHash === profileHash());
@@ -189,6 +219,7 @@ export async function createCustomerStateTools(input: {
     return buildReadOnlyContext({ ...base, state: { ...base.state,
       ...(effective.profile.shoppingSelection&&base.boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===effective.profile.shoppingSelection!.productId)?{
         currentProductId:effective.profile.shoppingSelection.productId,shoppingSelection:effective.profile.shoppingSelection}:{}),
+      ...(pendingPurchaseView(base)?{pendingPurchase:pendingPurchaseView(base)}:{}),
       customerProfileId: effective.profile.profileId, customerProfileRevision: effective.profile.revision,
       customerMeasurements: effective.profile.measurements.map(m => ({ kind: m.kind, value: m.value })),
       fitPreference: effective.profile.fitPreference, preferences: effective.profile.preferences,
@@ -446,7 +477,7 @@ export async function createCustomerStateTools(input: {
       }
     }finally{rehydrationTarget=undefined;blockedDependencies=previousBlocked;sizeOutcome=previousOutcome;}
   }
-  const result:CommerceTools={ invoke, snapshot, sizeOutcome: () => sizeOutcome, async invokeBatch(calls) {
+  const result:CommerceTools={ invoke, snapshot, setPendingPurchase, sizeOutcome: () => sizeOutcome, async invokeBatch(calls) {
     const writesState = (c: CommerceToolCall) => c.name === "apply_customer_state" ||
       (c.name==="read_product"&&!!c.args&&typeof c.args==="object"&&Object.hasOwn(c.args,"customerSelected"))||
       (c.name === "recommend_size" && !!c.args && typeof c.args === "object" && Object.hasOwn(c.args, "customerStateOps"));

@@ -29,10 +29,16 @@ export interface VerifierRequest { generationId: string; instructions: string; f
   turnTime?: CommerceTurnTime;
   latest: string; history: { role: "customer" | "shop"; text: string }[]; binding: VerifierBinding; signal: AbortSignal }
 export interface VerifierGeneration { result: unknown; telemetry?: unknown }
+export interface PendingPurchaseLine {productId:string;offerType:string;size:string|null;color:string|null;quantity:number;missing:"COLOR"|"SIZE"}
+/** A pending purchase older than this is no longer shown or acted on. */
+export const PENDING_PURCHASE_MAX_AGE_MS=24*60*60*1000;
 export interface CommerceTools {
   /** Request-local code proofs, not model-issued delivery requirements. */
   openingQuoteTargets?():readonly string[];
   noCommitNegotiationResult?(result:CommerceToolResult):boolean;
+  /** Replaces the persisted note of items the customer asked to buy that still lack a colour or size; null clears it.
+   *  Best effort: never changes a tool result and never throws. */
+  setPendingPurchase?(lines:readonly PendingPurchaseLine[]|null):Promise<void>;
   /** Original proven pre-commit selection failure, still valid in current authority. No I/O. */
   uncommittedSelectionResult?(result:CommerceToolResult):boolean;
   openingMediaTiming?:'BEFORE_OWNER';

@@ -145,6 +145,48 @@ describe("replacement choices and negotiation prerequisites",()=>{
  });
 });
 
+// PR 392 case J1 through the real layers: the refused purchase is written to the profile by the turn that asked
+// for it and reaches the owner of the next turn together with the quote request.
+it("carries a purchase that still lacks a colour into the next turn's owner view and settles it when the cart is written",async()=>{
+ const {buildGeminiCommerceRequest}=await import(new URL("../evals/single-agent-commerce-read-only/gemini-inference.mjs",import.meta.url).href);
+ const s=await setup(),f=fixtureProduct();f.snapshot.offers.DIRECT!.rows.push({...structuredClone(f.snapshot.offers.DIRECT!.rows[0]!),color:"be"});
+ f.snapshot.offers.DIRECT!.rows.push(...f.snapshot.offers.DIRECT!.rows.map(row=>({...structuredClone(row),size:"L"})));
+ const ready=s.select.getMockImplementation()!;
+ s.select.mockImplementation(async q=>q?.color?ready(q):fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+ let stored=fixtureProfile();
+ const store={read:async()=>structuredClone(stored),compareAndSwap:async(expected:number,next:typeof stored)=>{if(stored.profile.revision!==expected)return false;stored=structuredClone(next);return true;}};
+ const turn=async()=>{
+  const state=await createCustomerStateTools({base:s.base,scope:s.scope,clock:()=>commerceNow,store,sourceMessages:[],sizeInput:async()=>{throw Error("NOT_USED");}});
+  const effects=await createCommerceEffectTools({base:state,scope:s.scope,clock:()=>commerceNow,conversationKey:"test-cycle",repository:s.repository,
+   identity:{cartId:"50000000-0000-4000-8000-000000000001",salesEpisodeId:"60000000-0000-4000-8000-000000000001",customerProfileId:fixtureProfile().profile.profileId},
+   authorize:s.authorize,policy:async()=>s.policy,select:s.select});
+  // The same attachments createCommerceTools makes after composing the layers.
+  return withExplicitQuoteTask({...effects,setPendingPurchase:state.setPendingPurchase!,quotePriceEvidence:s.base.quotePriceEvidence!,availableTools:["read_product","request_handoff","add_to_cart"]},s.scope,false,async()=>s.policy.policy,()=>commerceNow);
+ };
+ await s.base.prepare!();
+ const first=await turn(),sizes=["M","L"].map(size=>({...s.add,args:{...s.add.args,size,color:null}}));
+ const refused=await first.invokeBatch(sizes);
+ expect(refused.map(r=>(r.data as {preCartQuoteRequest?:unknown}).preCartQuoteRequest!==undefined)).toEqual([true,true]);
+ const lines=["M","L"].map(size=>({productId:"SM613",offerType:"DIRECT",size,color:null,quantity:1,missing:"COLOR"}));
+ expect(stored.profile.pendingPurchase).toEqual({lines,recordedAt:commerceNow.toISOString()});expect(s.commits).toHaveLength(0);
+ // Next turn: new tools from the same stores. The customer asks for the total.
+ const second=await turn(),context=second.snapshot();
+ expect(context.state.pendingPurchase).toEqual({lines,recordedAt:commerceNow.toISOString()});
+ const wire=buildGeminiCommerceRequest({generationId:"test:pending",context,instructions:"Tư vấn theo nguồn.",availableTools:second.availableTools,toolWorkAccounting:"PRIMITIVE_WORK_V2",
+  toolsAllowed:true,toolBudget:{callsRemaining:6,roundsRemaining:2},contents:[{role:"user",parts:[{text:"Em báo lại tổng cả phí ship cho chị nhé."}]}],
+  ownerContextPresentation:"VI_DATA_BLOCKS_COMPACT_V2",signal:new AbortController().signal});
+ const text=JSON.stringify(wire).replace(/\\+"/g,'"');
+ expect(text).toContain('"quoteRequests":[{"tool":"quote_product","subjectRef":"SM613","offerTypes":["DIRECT"],"quantity":2}]');
+ expect(text).toContain("không hỏi lại màu hay size trước");expect(Buffer.byteLength(JSON.stringify(wire))).toBeLessThanOrEqual(65536);
+ // The quote the note points at is accepted as written.
+ const quoted=await second.invoke({name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity:2}});
+ expect(quoted).toMatchObject({status:"OK",data:{calculationBasis:"PRE_CART_POLICY",preCartQuote:{quantity:2}}});
+ // The customer names the colour: the cart now holds the order and the note is gone.
+ const third=await turn();
+ expect((await third.invoke({...s.add,args:{...s.add.args,color:"navy"}})).status).toBe("OK");
+ expect(stored.profile).not.toHaveProperty("pendingPurchase");expect(third.snapshot().state).not.toHaveProperty("pendingPurchase");expect(s.commits).toHaveLength(1);
+});
+
 it("binds a validated ambiguous selection to both models and invalidates it when source changes",async()=>{
  const s=await setup(),f=fixtureProduct(),row=f.snapshot.offers.DIRECT!.rows[0]!;
  f.snapshot.fulfillment_policy={tinh_trang:"READY_STOCK",can_order_when_zero:true,prep_min_days:1,prep_max_days:2,zero_stock_policy:"ALLOW",zero_stock_prep_min_days:3,zero_stock_prep_max_days:5,eta_valid_until:""};
