@@ -348,4 +348,3 @@ Suite worker sau các thay đổi: 2.796 test unit và 911 test eval pass; 6 uni
 - **Size Engine đánh giá size khách nhắc tới, và trạng thái tồn theo từng size (P07).** Chạm vào claim `SIZE_FIT`; chưa bắt đầu.
 - **Hỗ trợ giá trước giỏ (J4).** Chờ quyết định.
 - **Đo lại.** Các bản sửa ngày 12/11 chưa có số đo với model. Hành trình checkout với Sol mới được chấm lại câu xác nhận, chưa chạy lại trọn vẹn.
-
