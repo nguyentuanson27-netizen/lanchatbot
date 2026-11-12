@@ -104,6 +104,8 @@ export function resultBudgetView(calls: CommerceToolCall[], results: CommerceToo
 
 
 /** Isolated candidate. Native continuations add world information; no retry, repair, Outbox or send capability. */
+/** Transport codes for a provider response that held no candidate, no parts, no text or an abnormal finish. */
+export const NO_USABLE_OWNER_OUTPUT: ReadonlySet<string> = new Set(["OWNER_CANDIDATE_COUNT", "OWNER_FINISH_REASON", "OWNER_CONTENT_ROLE", "OWNER_CONTENT_PARTS", "OWNER_FINAL_EMPTY"]);
 export async function runCommerceTurn(input: {
   /** Pure native-serializer admission. Must never call a provider or mutate state. */
   admitPreparedContext?:(request:OwnerRequest)=>boolean;
@@ -221,6 +223,8 @@ export async function runCommerceTurn(input: {
   executedNormalToolInvocations=toolCalls;
   // Set when a continuation that still offered tools could not be built within the request bound.
   let replyFromGatheredFacts = false;
+  // Owner decision 2026-11-12: a provider answer that carries no usable candidate is asked for once more.
+  let ownerOutputRetried = false;
   for (let index = 0; index < 3; index++) {
     if(input.tools.openingMediaTiming==='BEFORE_OWNER'&&input.tools.prepareOpeningMedia){
       const started=performance.now(),chargedBefore=openingMediaWork?.chargedUnits??0;
@@ -262,12 +266,34 @@ export async function runCommerceTurn(input: {
       if (error instanceof Error && error.message === "OWNER_REQUEST_BOUND" && request.toolsAllowed && toolRounds > 0 && index < 2) {
         replyFromGatheredFacts = true; continue;
       }
+      // The provider answered but produced nothing to parse: no text, no call, an abnormal finish. Nothing was
+      // executed and nothing can be repaired, so the same request is sent once more inside the generation cap.
+      // Timeouts, HTTP errors and any parsed output, right or wrong, are never retried.
+      if (error instanceof Error && NO_USABLE_OWNER_OUTPUT.has(error.message) && !ownerOutputRetried && index < 2) {
+        ownerOutputRetried = true; continue;
+      }
       return finish(fallback(generations.at(-1)!.status));
     }
     if (!output || typeof output !== "object") return finish(fallback("MALFORMED"));
     if (output.kind === "TOOLS") {
       if(!Array.isArray(output.calls)||output.calls.some(c=>!c||typeof c.name!=="string"))return finish(fallback("MALFORMED"));
       proposedToolCalls += output.calls.length;
+      if (output.calls.some(c => c.invalidArguments)) {
+        // Nothing in a batch with a malformed call is executed: a later call may depend on the refused one,
+        // and a partial batch could commit an effect the owner did not finish asking for. The round and its
+        // calls are charged, so a model that keeps slipping runs out of budget instead of looping.
+        if (!request.toolsAllowed || toolRounds >= 2 || toolCalls + output.calls.length > 6) {
+          rejectedToolCalls += output.calls.length; return finish(fallback(request.toolsAllowed ? "BUDGET" : "OWNER_TOOL_MODE"));
+        }
+        toolRounds++; toolCalls += output.calls.length; rejectedToolCalls += output.calls.length;
+        contents.push(structuredClone(output.content), { role: "user", parts: output.calls.map(call => ({
+          functionResponse: { name: call.name, ...(call.id ? { id: call.id } : {}), response: call.invalidArguments
+            ? { status: "REJECTED" as const, reason: "TOOL_ARGUMENTS", data: { executed: false, invalidField: call.invalidArguments.field,
+                meaning: "Lệnh chưa chạy vì tham số không đúng schema của tool. Sửa trường này rồi gọi lại nếu vẫn cần." } }
+            : { status: "REJECTED" as const, reason: "BATCH_NOT_EXECUTED", data: { executed: false,
+                meaning: "Lệnh chưa chạy vì một lệnh khác trong cùng lượt gọi sai tham số. Gọi lại nếu vẫn cần." } } } })) });
+        continue;
+      }
       const quoteCalls=output.calls.filter(c=>c.name==="quote_product");
       const batch=quoteCalls.length?quoteBatchWork(output.calls):null;
       if(quoteCalls.length&&(!batch||quoteAttempts+batch.quotes>2||batch.targets.some(t=>quoteTargets.has(t)))){

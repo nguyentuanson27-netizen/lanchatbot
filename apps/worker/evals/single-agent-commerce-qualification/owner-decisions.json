@@ -74,12 +74,39 @@
     "D4_alternativeOwnerModel": "DEFERRED",
     "verifierModel": {
       "status": "APPROVED",
-      "provider": "VERTEX_AI",
-      "model": "gemini-3.5-flash-lite",
+      "approvedAt": "2026-11-12",
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
       "effort": "high",
-      "previous": "OPENAI gpt-6.1-sol high via Codex login",
-      "transport": "apps/worker/evals/single-agent-commerce-read-only/gemini-verifier.mjs",
-      "protocolManifestStatus": "NOT_YET_SWITCHED_MANIFEST_STILL_PINS_PREVIOUS_VERIFIER"
+      "ownerAnswer": "dùng 6.1 sol high",
+      "supersedes": {
+        "decidedAt": "2026-11-10",
+        "provider": "VERTEX_AI",
+        "model": "gemini-3.5-flash-lite",
+        "outcome": "REVERTED",
+        "evidence": [
+          "apps/worker/evals/single-agent-commerce-qualification/convergence-verifier-screen-run-20261111/REPORT.md",
+          "apps/worker/evals/single-agent-commerce-qualification/convergence-sol-followup-run-20261112/VERIFIER_REPLAY.md"
+        ],
+        "reason": "False PASS on unsupported size advice and an implied wearer photo; false FAIL on ten receipt-backed cart confirmations."
+      },
+      "geminiTransport": "RETAINED_SELECTABLE_BY_MANIFEST_NOT_REGISTERED"
+    },
+    "ownerGenerationRetry": {
+      "status": "APPROVED",
+      "approvedAt": "2026-11-12",
+      "ownerAnswer": "ok",
+      "rule": "ONE_RETRY_WHEN_THE_PROVIDER_RETURNS_NO_USABLE_OWNER_OUTPUT",
+      "maximumRetriesPerTurn": 1,
+      "countsAgainstOwnerGenerationCap": true,
+      "neverRetries": [
+        "TIMEOUT",
+        "HTTP_ERROR",
+        "REQUEST_BOUND",
+        "VERIFIER",
+        "A_PARSED_OWNER_OUTPUT_OF_ANY_CONTENT"
+      ],
+      "previous": "RETRY_0"
     }
   }
 }

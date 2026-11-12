@@ -420,6 +420,15 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  }
  return baseline;
 }
+/** Code-defined identifiers and shapes only: never a supplied value or an unknown field name. */
+function publicToolDiagnostic(d){
+ const known=[...readOnlyDeclarations,...quoteDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations,...mediaDeclarations];
+ return {schemaCode:'OWNER_TOOL_OUTPUT',tool:known.some(t=>t.name===d.tool)?d.tool:'UNKNOWN_TOOL',
+  field:['ARGS','UNKNOWN_FIELD','subjectRef','offerType','offerTypes','selection','size','color','deliveryRegion','ops','customerStateOps'].includes(d.field)?d.field:'UNKNOWN_FIELD',
+  ...(productReadSelections.includes(d.selection)||d.selection==='INVALID'?{selection:d.selection,fieldPresent:d.fieldPresent===true,
+    fieldType:['MISSING','NULL','ARRAY','STRING','OTHER'].includes(d.fieldType)?d.fieldType:'OTHER'}:{}),
+  valueType:['ARRAY','NULL','OBJECT','OTHER'].includes(d.valueType)?d.valueType:'OTHER',...(d.argumentShape?{argumentShape:d.argumentShape}:{})};
+}
 export function parseGeminiGeneration(body){
  const candidate=body?.candidates?.[0],content=candidate?.content;
  requireThat(Array.isArray(body?.candidates)&&body.candidates.length===1,'OWNER_CANDIDATE_COUNT');
@@ -431,7 +440,18 @@ export function parseGeminiGeneration(body){
  const calls=content.parts.filter(p=>p.functionCall).map(p=>({name:p.functionCall.name,args:p.functionCall.args,
   ...(typeof p.functionCall.id==='string'?{id:p.functionCall.id}:{})}));
  if(calls.length){requireThat(calls.length<=6&&calls.every(c=>typeof c.name==='string'&&c.args&&typeof c.args==='object'&&!Array.isArray(c.args)),'OWNER_TOOL_OUTPUT');
-  const domainCalls=calls.map(c=>{
+  // A known tool called with arguments outside its declared schema is handed to the turn loop as a refused
+  // call naming the field, so the owner can correct it in its next tool round. An unknown tool, a non-object
+  // argument or an oversized batch is still a failed generation.
+  const knownTool=name=>[...readOnlyDeclarations,...quoteDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations,...mediaDeclarations].some(d=>d.name===name);
+  const publicFields=['subjectRef','offerType','offerTypes','selection','size','color','deliveryRegion','ops','customerStateOps','fitScope','quantity'];
+  const refusedToolArguments=[];
+  const domainCalls=calls.map(c=>{try{return decodeCall(c);}catch(error){
+   if(error?.message!=='OWNER_TOOL_OUTPUT'||!error.toolOutputDiagnostic||!knownTool(c.name))throw error;
+   const field=error.toolOutputDiagnostic.field;refusedToolArguments.push(publicToolDiagnostic(error.toolOutputDiagnostic));
+   return {...c,invalidArguments:{field:publicFields.includes(field)?field:'ARGS'}};
+  }});
+  function decodeCall(c){
    const check=(ok,field='ARGS')=>{if(!ok){const known=[...readOnlyDeclarations,...quoteDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations,...mediaDeclarations].some(d=>d.name===c.name);
     throw Object.assign(new Error('OWNER_TOOL_OUTPUT'),{toolOutputDiagnostic:{schemaCode:'OWNER_TOOL_OUTPUT',tool:known?c.name:'UNKNOWN_TOOL',field,valueType:Array.isArray(c.args)?'ARRAY':c.args===null?'NULL':typeof c.args==='object'?'OBJECT':'OTHER'}});}};
    if(c.name==='quote_product'){
@@ -448,8 +468,8 @@ export function parseGeminiGeneration(body){
    if(!opsKey)return c;
    check(Array.isArray(c.args[opsKey])&&c.args[opsKey].every(op=>op&&Object.hasOwn(stateFieldPaths,op.field)),opsKey);
    return {...c,args:{...c.args,[opsKey]:c.args[opsKey].map(op=>({...op,field:stateFieldPaths[op.field]}))}};
-  });
-  return {kind:'TOOLS',calls:domainCalls,content:structuredClone(content)};}
+  }
+  return {kind:'TOOLS',calls:domainCalls,content:structuredClone(content),...(refusedToolArguments.length?{refusedToolArguments}:{})};}
  const text=content.parts.filter(p=>p.thought!==true&&typeof p.text==='string').map(p=>p.text).join('');
  requireThat(text.trim(),'OWNER_FINAL_EMPTY');requireThat(bytes(text)<=4096,'OWNER_FINAL_BOUND');return {kind:'FINAL',text};
 }
@@ -510,6 +530,9 @@ export function createGeminiCommerceInference(config,dependencies={}){
    requireThat(telemetry.modelVersion===config.model,'OWNER_MODEL_VERSION');
    const parsed=parseGeminiGeneration(data);
    telemetry.unexpectedToolCall=parsed.kind==='TOOLS'&&parsed.calls.some(c=>!body.tools.some(t=>t.functionDeclarations.some(d=>d.name===c.name)));
+   // The same sanitised diagnostic a failed generation used to carry, now on a completed one.
+   const {refusedToolArguments,...generation}=parsed;
+   if(refusedToolArguments){telemetry.refusedToolArguments=refusedToolArguments;return {...generation,telemetry};}
    return {...parsed,telemetry};
   }catch(error){
    if(stage==='GENERATION'||stage==='RESPONSE'){
@@ -520,14 +543,7 @@ export function createGeminiCommerceInference(config,dependencies={}){
    const timedOut=signal.aborted||error?.name==='AbortError'||error?.name==='TimeoutError';
    if(error?.message==='OWNER_REQUEST_BOUND'&&Number.isSafeInteger(error.requestBytes))telemetry.requestBytes=error.requestBytes;
    telemetry.failureStage=stage;
-   if(error?.message==='OWNER_TOOL_OUTPUT'&&error.toolOutputDiagnostic){
-    const d=error.toolOutputDiagnostic,known=[...readOnlyDeclarations,...quoteDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations,...mediaDeclarations];
-    telemetry.toolOutputDiagnostic={schemaCode:'OWNER_TOOL_OUTPUT',tool:known.some(t=>t.name===d.tool)?d.tool:'UNKNOWN_TOOL',
-     field:['ARGS','UNKNOWN_FIELD','subjectRef','offerType','offerTypes','selection','size','color','deliveryRegion','ops','customerStateOps'].includes(d.field)?d.field:'UNKNOWN_FIELD',
-     ...(productReadSelections.includes(d.selection)||d.selection==='INVALID'?{selection:d.selection,fieldPresent:d.fieldPresent===true,
-       fieldType:['MISSING','NULL','ARRAY','STRING','OTHER'].includes(d.fieldType)?d.fieldType:'OTHER'}:{}),
-     valueType:['ARRAY','NULL','OBJECT','OTHER'].includes(d.valueType)?d.valueType:'OTHER',...(d.argumentShape?{argumentShape:d.argumentShape}:{})};
-   }
+   if(error?.message==='OWNER_TOOL_OUTPUT'&&error.toolOutputDiagnostic)telemetry.toolOutputDiagnostic=publicToolDiagnostic(error.toolOutputDiagnostic);
    telemetry.failureCode=timedOut?'TIMEOUT':safeFailureCodes.has(error?.message)?error.message:
     stage==='AUTH'?'AUTH_UNAVAILABLE':stage==='GENERATION'?'TRANSPORT_ERROR':stage==='RESPONSE'?'RESPONSE_INVALID':'UNKNOWN';
    throw Object.assign(new Error(timedOut?'PROVIDER_TIMEOUT':'PROVIDER_ERROR'),{telemetry});

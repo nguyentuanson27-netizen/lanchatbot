@@ -255,7 +255,7 @@ it("commits the owner's relevant price-unavailable handoff and its customer mess
   expect(handoff).toHaveLength(1);expect(handoff[0]![1]).toMatchObject({state:{conversationOwner:"HUMAN"},pancakeTagPlan:{desiredTag:"NHAN_VIEN"},metaPlan:{messages:[{kind:"TEXT",text:result.terminal.text}]}});
 });
 
-it.each(["provider","malformed-finish","timeout","fail","uncertain","malformed-verdict"])("atomically hands off unrecovered %s without another generation",async fault=>{
+it.each(["provider","malformed-finish","timeout","fail","uncertain","malformed-verdict"])("atomically hands off unrecovered %s without an unapproved generation",async fault=>{
   const f=fixture(); await enableRecoveryHandoff(f);
   if(fault==="fail"||fault==="uncertain") f.verifier.mockResolvedValue({result:{verdict:fault==="fail"?"FAIL":"UNCERTAIN",violations:[]}});
   if(fault==="malformed-verdict") f.verifier.mockResolvedValue({result:{verdict:"broken",violations:[]}});
@@ -271,7 +271,8 @@ it.each(["provider","malformed-finish","timeout","fail","uncertain","malformed-v
   expect(handoffs).toHaveLength(1);
   expect(handoffs[0]![1]).toMatchObject({pancakeTagPlan:{desiredTag:"NHAN_VIEN"}});
   expect(handoffs[0]![1].metaPlan).toBeUndefined(); expect(result.terminal.text).toBeNull();
-  expect(result.enqueued).toBe(0); expect(owner).toHaveBeenCalledTimes(1);
+  // Owner decision 2026-11-12: only a provider answer with no usable output is asked for once more.
+  expect(result.enqueued).toBe(0); expect(owner).toHaveBeenCalledTimes(fault==="malformed-finish"?2:1);
   expect(f.verifier).toHaveBeenCalledTimes(providerFault?0:1);
 });
 

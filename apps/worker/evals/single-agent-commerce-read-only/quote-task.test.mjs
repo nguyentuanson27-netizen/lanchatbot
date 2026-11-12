@@ -39,7 +39,7 @@ test('final-only CompactV2 keeps projected quote trace but grants no new call',a
 test('quote parse rejects extra fields/duplicate offers and preserves signed content',()=>{
  const body=args=>({candidates:[{finishReason:'STOP',content:{role:'model',parts:[{functionCall:{name:'quote_product',args},thoughtSignature:'signed'}]}}]});
  assert.equal(parseGeminiGeneration(body({subjectRef:'SM613',offerTypes:['DIRECT']})).content.parts[0].thoughtSignature,'signed');
- for(const args of [{subjectRef:'SM613',offerTypes:['DIRECT','DIRECT']},{subjectRef:'SM613',offerTypes:['DIRECT'],skipMedia:true},{subjectRef:'SM613',offerTypes:['DIRECT'],color:null}])assert.throws(()=>parseGeminiGeneration(body(args)),/OWNER_TOOL_OUTPUT/);
+ for(const args of [{subjectRef:'SM613',offerTypes:['DIRECT','DIRECT']},{subjectRef:'SM613',offerTypes:['DIRECT'],skipMedia:true},{subjectRef:'SM613',offerTypes:['DIRECT'],color:null}])assert.deepEqual(parseGeminiGeneration(body(args)).calls[0].invalidArguments,{field:'ARGS'});
 });
 test('phase/budget and primitive accounting are bound; legacy configuration remains valid',async()=>{
  const r=await request();r.toolBudget.callsRemaining=0;assert(!buildGeminiCommerceRequest(r).tools[0].functionDeclarations.some(d=>d.name==='quote_product'));

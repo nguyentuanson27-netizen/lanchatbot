@@ -5,7 +5,7 @@ test('component size scope remains explicit in decoded args and signed native co
  const parsed=parseGeminiGeneration(raw);assert.deepEqual(parsed.calls[0].args,args);
  assert.deepEqual(parsed.content,raw.candidates[0].content);
  for(const scope of [{fitScope:null},{fitScope:'COMPONENT'},{fitScope:'PRODUCT',componentRole:'TOP'},{fitScope:'COMPONENT',componentRole:'BAD'}])
-  assert.throws(()=>parseGeminiGeneration(body([{functionCall:{name:'recommend_size',args:{subjectRef:'P1',...scope}}}])),/OWNER_TOOL_OUTPUT/);
+  assert.deepEqual(parseGeminiGeneration(body([{functionCall:{name:'recommend_size',args:{subjectRef:'P1',...scope}}}])).calls[0].invalidArguments,{field:'fitScope'});
  const r=request();r.availableTools=['recommend_size'];const d=buildGeminiCommerceRequest(r).tools[0].functionDeclarations[0];
  assert.deepEqual(d.parametersJsonSchema.properties.fitScope.enum,['PRODUCT','COMPONENT']);
 });
@@ -58,7 +58,7 @@ test('native field contract maps domain paths without rewriting the signed trans
  assert.equal(parsed.content.parts[0].functionCall.args.ops[0].field,'WAIST_CM');
  assert.equal(parsed.content.parts[0].thoughtSignature,'signed');
  const invalid=body([{functionCall:{name:'apply_customer_state',args:{ops:[{op:'SET',field:'UNKNOWN',value:74}]}}}]);
- assert.throws(()=>parseGeminiGeneration(invalid));
+ assert.deepEqual(parseGeminiGeneration(invalid).calls[0].invalidArguments,{field:'ops'});
 });
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
@@ -76,7 +76,7 @@ test('runtime callable manifest prunes declarations while preserving the configu
  assert.deepEqual(r.context,before.context);
 });
 test('native product-read schema requires a subject as well as a closed selection branch',()=>{
- assert.throws(()=>parseGeminiGeneration(body([{functionCall:{name:'read_product',args:{offerTypes:['AO']}}}])),/OWNER_TOOL_OUTPUT/);
+ assert(parseGeminiGeneration(body([{functionCall:{name:'read_product',args:{offerTypes:['AO']}}}])).calls[0].invalidArguments);
 });
 test('replacement color supports the same null value as the runtime selection contract',()=>{
  const r=request(),d=buildGeminiCommerceRequest(r,effectDeclarations).tools[0].functionDeclarations.find(d=>d.name==='change_cart_item');
@@ -128,7 +128,7 @@ test('native reads use flat offer arrays without rewriting signed calls',()=>{
  assert.deepEqual(parseGeminiGeneration(body([{functionCall:{name:'read_product',args:{subjectRef:'P1',offerTypes:['AO','SET']}}}])).calls[0].args,{subjectRef:'P1',offerTypes:['AO','SET']});
  assert.deepEqual(parseGeminiGeneration(body([{functionCall:{name:'read_product',args:{subjectRef:'P1',offerTypes:[]}}}])).calls[0].args,{subjectRef:'P1',detailsOnly:true});
  for(const args of [{subjectRef:'P1'},{subjectRef:'P1',offerType:null},{subjectRef:'P1',offerTypes:['AO','AO']},{subjectRef:'P1',selection:'DETAILS_ONLY',offerType:'AO'}])
-  assert.throws(()=>parseGeminiGeneration(body([{functionCall:{name:'read_product',args}}])),/OWNER_TOOL_OUTPUT/);
+  assert(parseGeminiGeneration(body([{functionCall:{name:'read_product',args}}])).calls[0].invalidArguments);
  const r=request();const d=buildGeminiCommerceRequest(r).tools[0].functionDeclarations.find(x=>x.name==='read_product');
  assert.ok(d.parametersJsonSchema.required.includes('offerTypes'));assert.equal(d.parametersJsonSchema.properties.offerTypes.maxItems,3);
 });
@@ -1056,11 +1056,12 @@ test('dangling selection-result references stop the actual adapter before auth o
 test('actual malformed read telemetry carries schema/argument shape without values',async()=>{
  const r=request(),privateKey='PRIVATE_FIELD_PERSONAL_ADDRESS',privateValue='PRIVATE_VALUE_PHONE';
  const infer=createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async()=>new Response(JSON.stringify(body([{functionCall:{name:'read_product',args:{subjectRef:'P1',offerTypes:['AO'],[privateKey]:privateValue}}}])))});
- await assert.rejects(()=>infer(r),e=>{
-  assert.equal(e.telemetry.providerRequests,1);assert.match(e.telemetry.requestSchemaHash,/^[a-f0-9]{64}$/);
-  const d=e.telemetry.toolOutputDiagnostic;assert.equal(d.argumentShape.unknownFieldCount,1);assert.equal(d.field,'UNKNOWN_FIELD');
-  assert(!JSON.stringify(e.telemetry).includes(privateKey));assert(!JSON.stringify(e.telemetry).includes(privateValue));return true;
- });
+ // The slip is now a completed generation with a refused call; the same value-free diagnostic stays in telemetry.
+ const out=await infer(r);assert.equal(out.kind,'TOOLS');assert(out.calls[0].invalidArguments);assert(!Object.hasOwn(out,'refusedToolArguments'));
+ assert.equal(out.telemetry.providerRequests,1);assert.match(out.telemetry.requestSchemaHash,/^[a-f0-9]{64}$/);
+ const d=out.telemetry.refusedToolArguments[0];assert.equal(d.argumentShape.unknownFieldCount,1);assert.equal(d.field,'UNKNOWN_FIELD');assert.equal(d.tool,'read_product');
+ assert(!JSON.stringify(out.telemetry).includes(privateKey));assert(!JSON.stringify(out.telemetry).includes(privateValue));
+ assert(!JSON.stringify(out.calls[0].invalidArguments).includes(privateKey));
 });
 
 

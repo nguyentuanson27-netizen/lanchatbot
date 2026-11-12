@@ -25,7 +25,9 @@ export interface ReadOnlyCatalog {
 export interface PreparationWork { chargedUnits: number; kind: "NUMERIC" | "FINAL" }
 export interface PreparationControl { maxCalls: number; onDispatch(): void }
 export type PreparationAdmission = (context: TrustedContext, work?: PreparationWork) => boolean;
-export interface CommerceToolCall { name: string; args: unknown; id?: string }
+export interface CommerceToolCall { name: string; args: unknown; id?: string;
+  /** Set by the transport when a known tool was called outside its declared schema. Such a call is never executed. */
+  invalidArguments?: { field: string } }
 export interface CommerceToolResult { status: "OK" | "REJECTED" | "UNAVAILABLE" | "STALE"; data?: unknown; reason?: string;
   failureStage?: import("./single-agent-commerce-effect-failure.js").CommerceEffectFailureStage }
 export interface QuotePriceQuery {subjectRef:string;offerTypes:readonly string[];color?:string}
