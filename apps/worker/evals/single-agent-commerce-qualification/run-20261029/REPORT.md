@@ -2,7 +2,7 @@
 
 **Recommendation: BLOCKED.** Đã chạy xong toàn bộ candidate được đăng ký, chấm mù độc lập và real-PostgreSQL controls. Chưa đạt qualification, chưa chạy arm C3, chưa được thay C3 hoặc rollout. B_NOT_GO và A OWNER_BYPASS vẫn giữ nguyên. Đây là báo cáo của source đã seal; không sửa prompt/source/corpus để cứu kết quả sau run.
 
-[Toàn bộ 22 hội thoại / 34 lượt khách](CONVERSATIONS.md), [kết quả từng ca](CASE_RESULTS.json), [grades nguyên bản](INDEPENDENT_GRADES.json), [request/token/latency accounting](ACCOUNTING.json), [93 request identities](REQUEST_INDEX.json), [hash/index raw cục bộ](LOCAL_RAW_INDEX.json).
+[Toàn bộ 22 hội thoại / 34 lượt khách](https://github.com/nguyentuanson27-netizen/lanchatbot/blob/e6cf2884697494ab2e0d88dad4b46da25719ed6b/apps/worker/evals/single-agent-commerce-qualification/run-20261029/CONVERSATIONS.md), [kết quả từng ca](CASE_RESULTS.json), [grades nguyên bản](INDEPENDENT_GRADES.json), [request/token/latency accounting](ACCOUNTING.json), [93 request identities](REQUEST_INDEX.json), [hash/index raw cục bộ](LOCAL_RAW_INDEX.json).
 
 ## Kết quả và mẫu số
 

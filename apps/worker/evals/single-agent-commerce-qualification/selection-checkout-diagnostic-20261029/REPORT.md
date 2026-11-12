@@ -1,6 +1,6 @@
 # Phase C — diagnostic sau selection/private checkout fix,29/10/2026
 
-**Đã hoàn tất một batch development:6/6ca,9lượt khách +1probe. STOP batch; Phase C qualification vẫn BLOCKED, C3 NOT_RUN.** [Toàn bộ hội thoại và draft bị chặn](CONVERSATIONS.md), [accounting/cấu hình/hashes/raw references](ACCOUNTING.json), [review độc lập](REVIEW.md).
+**Đã hoàn tất một batch development:6/6ca,9lượt khách +1probe. STOP batch; Phase C qualification vẫn BLOCKED, C3 NOT_RUN.** [Toàn bộ hội thoại và draft bị chặn](https://github.com/nguyentuanson27-netizen/lanchatbot/blob/e6cf2884697494ab2e0d88dad4b46da25719ed6b/apps/worker/evals/single-agent-commerce-qualification/selection-checkout-diagnostic-20261029/CONVERSATIONS.md), [accounting/cấu hình/hashes/raw references](ACCOUNTING.json), [review độc lập](REVIEW.md).
 
 ## Identity và phạm vi
 

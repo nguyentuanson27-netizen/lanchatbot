@@ -2,7 +2,7 @@
 
 **Chạy đủ 21 ca / 28 lượt; chưa đạt Phase C.** Đây là batch development N=1, không phải qualification holdout hoặc đối chứng C3. Giữ đầy đủ denominator, không retry, không chạy lại ca lỗi để thay kết quả.
 
-[Toàn bộ hội thoại](CONVERSATIONS.md) · [accounting](ACCOUNTING.json) · [grade đã khóa](INDEPENDENT_GRADES.json) · [tổng hợp grade](JUDGE_SUMMARY.json) · [mapping sau khóa](UNMASKED_GRADES.json) · [verification implementation](IMPLEMENTATION_VERIFICATION.json) · [offline continuation](OFFLINE_CONTINUATION.json) · [policy replay](OFFLINE_POLICY.json) · [operational](OPERATIONAL.json) · [frozen population](FROZEN_POPULATION.json) · [artifact hashes](ARTIFACTS.json) · [review status](REVIEW_STATUS.json).
+[Toàn bộ hội thoại](https://github.com/nguyentuanson27-netizen/lanchatbot/blob/e6cf2884697494ab2e0d88dad4b46da25719ed6b/apps/worker/evals/single-agent-commerce-qualification/context-publication-run-20261101/CONVERSATIONS.md) · [accounting](ACCOUNTING.json) · [grade đã khóa](INDEPENDENT_GRADES.json) · [tổng hợp grade](JUDGE_SUMMARY.json) · [mapping sau khóa](UNMASKED_GRADES.json) · [verification implementation](IMPLEMENTATION_VERIFICATION.json) · [offline continuation](OFFLINE_CONTINUATION.json) · [policy replay](OFFLINE_POLICY.json) · [operational](OPERATIONAL.json) · [frozen population](FROZEN_POPULATION.json) · [artifact hashes](ARTIFACTS.json) · [review status](REVIEW_STATUS.json).
 
 ## Identity và giới hạn
 

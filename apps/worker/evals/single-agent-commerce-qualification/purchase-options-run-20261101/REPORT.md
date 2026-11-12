@@ -2,7 +2,7 @@
 
 **BLOCKED / batch dừng theo gate; chưa hoàn tất toàn bộ population.** Đăng ký21ca/28lượt khách, N1/retry0; đã thực thi15ca/18lượt.6ca/10lượt còn NOT_RUN sau ca s09 thay đổi snapshot giữa verifier và final gate. Không retry, bỏ gate hoặc chạy lại để thay kết quả.
 
-[Toàn hội thoại và6ca chưa chạy](CONVERSATIONS.md), [accounting V2](ACCOUNTING.json), [primary audit](PRIMARY_AUDIT.json), [stop attribution](STOP_ATTRIBUTION.json), [offline replay](OFFLINE_REPLAY.json), [population/readiness](FROZEN_POPULATION.json), [review status](REVIEW_STATUS.json), [artifact hashes](ARTIFACTS.json).
+[Toàn hội thoại và6ca chưa chạy](https://github.com/nguyentuanson27-netizen/lanchatbot/blob/e6cf2884697494ab2e0d88dad4b46da25719ed6b/apps/worker/evals/single-agent-commerce-qualification/purchase-options-run-20261101/CONVERSATIONS.md), [accounting V2](ACCOUNTING.json), [primary audit](PRIMARY_AUDIT.json), [stop attribution](STOP_ATTRIBUTION.json), [offline replay](OFFLINE_REPLAY.json), [population/readiness](FROZEN_POPULATION.json), [review status](REVIEW_STATUS.json), [artifact hashes](ARTIFACTS.json).
 
 ## Identity và phạm vi
 

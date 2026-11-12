@@ -2,7 +2,7 @@
 
 **Đã chạy đủ 13 ca/27 lượt. Recommendation: STOP.** Code đã được review độc lập APPROVE, nhưng kết quả model còn ba ca lỗi đáng kể và chưa exercise writer→quote. Không chạy lại để tìm mẫu PASS, không mở phần full còn lại.
 
-Source sạch: `8b4e190c8c6e048b4412c45c254de1c75872cf1b`; world `4eeaa30adc2252335387c677c76125d292332bdc35d1106fc87b42b9943dd4a4`. Đây là development screen N1/retry0 trên các ca đã biết, không phải qualification hay bằng chứng độ ổn định. Xem [toàn bộ 27 lượt](CONVERSATIONS.md), [kết quả từng ca/gate](REVIEW.json), [review độc lập](INDEPENDENT_REVIEW.md), [provenance/config/commands](PROVENANCE.json).
+Source sạch: `8b4e190c8c6e048b4412c45c254de1c75872cf1b`; world `4eeaa30adc2252335387c677c76125d292332bdc35d1106fc87b42b9943dd4a4`. Đây là development screen N1/retry0 trên các ca đã biết, không phải qualification hay bằng chứng độ ổn định. Xem [toàn bộ 27 lượt](https://github.com/nguyentuanson27-netizen/lanchatbot/blob/e6cf2884697494ab2e0d88dad4b46da25719ed6b/apps/worker/evals/single-agent-commerce-qualification/tool-contract-screen-run-20261110/CONVERSATIONS.md), [kết quả từng ca/gate](REVIEW.json), [review độc lập](INDEPENDENT_REVIEW.md), [provenance/config/commands](PROVENANCE.json).
 
 ## Kết quả thực tế
 

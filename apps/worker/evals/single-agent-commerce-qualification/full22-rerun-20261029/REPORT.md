@@ -2,7 +2,7 @@
 
 **Đã chạy đủ 22/22 ca và 34/34 lượt khách, N1, retry 0.** Đây là development rerun trên population đã quan sát; không fresh holdout hoặc Phase C qualification PASS. Source run `68d5c33b608aacc67fb454030673e507df072ab1`. Không sửa runtime/prompt giữa các ca. C3 và 24 SAFETY ngoài scope lần này. **STOP sau batch; qualification BLOCKED, C3 NOT_RUN.**
 
-[Toàn bộ hội thoại và draft bị chặn](CONVERSATIONS.md), [accounting/config/hashes](ACCOUNTING.json), [review độc lập và phần chấm còn thiếu](REVIEW.md), [nhận xét từng ca](CASE_REVIEW.md). Draft bị chặn không phải câu khách đã nhận. Handoff không gửi tin theo owner decision hiện hành.
+[Toàn bộ hội thoại và draft bị chặn](https://github.com/nguyentuanson27-netizen/lanchatbot/blob/e6cf2884697494ab2e0d88dad4b46da25719ed6b/apps/worker/evals/single-agent-commerce-qualification/full22-rerun-20261029/CONVERSATIONS.md), [accounting/config/hashes](ACCOUNTING.json), [review độc lập và phần chấm còn thiếu](REVIEW.md), [nhận xét từng ca](CASE_REVIEW.md). Draft bị chặn không phải câu khách đã nhận. Handoff không gửi tin theo owner decision hiện hành.
 
 ## Mẫu số và kết quả thực
 

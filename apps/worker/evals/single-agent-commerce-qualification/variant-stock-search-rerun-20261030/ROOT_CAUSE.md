@@ -1,6 +1,6 @@
 # Review root cause sau full model run — 31/10/2026
 
-Review base `5a011a55dcea7755ea41d2f3db0b9834c3fcef59`; model run source `e43e1b75c6ba3da2b3f77243e17bd6045131731a`. Đã đọc22ca/34turns, raw provider requests/tool history, prompt/schema hiện hành và hai frozen worlds trước/sau. Thực hiện thêm **offline deterministic probes**, không provider/network/effect/PG/model rerun; runtime/source shop/prompt/grades giữ nguyên. [Evidence](ROOT_CAUSE_EVIDENCE.json), [toàn hội thoại](CONVERSATIONS.md), [report giữ nguyên](REPORT.md).
+Review base `5a011a55dcea7755ea41d2f3db0b9834c3fcef59`; model run source `e43e1b75c6ba3da2b3f77243e17bd6045131731a`. Đã đọc22ca/34turns, raw provider requests/tool history, prompt/schema hiện hành và hai frozen worlds trước/sau. Thực hiện thêm **offline deterministic probes**, không provider/network/effect/PG/model rerun; runtime/source shop/prompt/grades giữ nguyên. [Evidence](ROOT_CAUSE_EVIDENCE.json), [toàn hội thoại](https://github.com/nguyentuanson27-netizen/lanchatbot/blob/e6cf2884697494ab2e0d88dad4b46da25719ed6b/apps/worker/evals/single-agent-commerce-qualification/variant-stock-search-rerun-20261030/CONVERSATIONS.md), [report giữ nguyên](REPORT.md).
 
 ## Kết luận
 

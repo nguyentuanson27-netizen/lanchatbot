@@ -1,6 +1,6 @@
 # Phase C — diagnostic sau remediation,29/10/2026
 
-**Đã chạy hết một batch development:6/6ca,9lượt khách +1probe. STOP batch tại đây; qualification vẫn BLOCKED, C3 NOT_RUN.** Không phải full qualification và không dùng những case đã thấy làm fresh holdout. [Toàn bộ hội thoại](CONVERSATIONS.md), [accounting và artifact hashes](ACCOUNTING.json).
+**Đã chạy hết một batch development:6/6ca,9lượt khách +1probe. STOP batch tại đây; qualification vẫn BLOCKED, C3 NOT_RUN.** Không phải full qualification và không dùng những case đã thấy làm fresh holdout. [Toàn bộ hội thoại](https://github.com/nguyentuanson27-netizen/lanchatbot/blob/e6cf2884697494ab2e0d88dad4b46da25719ed6b/apps/worker/evals/single-agent-commerce-qualification/diagnostic-20261029/CONVERSATIONS.md), [accounting và artifact hashes](ACCOUNTING.json).
 
 ## Identity và accounting
 

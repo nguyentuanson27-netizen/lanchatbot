@@ -2,7 +2,7 @@
 
 **Đã chạy đủ22/22ca và34/34lượt**, N1/retry0, source `fe4b82932137df01fea85e974c4a562e00e7204f`. Runtime/prompt/model không đổi trong batch. Đây là development rerun trên quần thể đã quan sát, không fresh qualification. **STOP batch, PhaseC qualification BLOCKED/C3 NOT_RUN/B_NOT_GO giữ nguyên.**
 
-[Toàn bộ hội thoại](CONVERSATIONS.md) · [Primary review22ca](CASE_REVIEW.md) · [Grades chấm mù gốc](INDEPENDENT_GRADES.json) · [Quality observations](QUALITY_RESULTS.json) · [Accounting](ACCOUNTING.json) · [Independent audit](ACCOUNTING_AUDIT.json) · [Extra provenance](SUPPLEMENTAL_EVIDENCE.json).
+[Toàn bộ hội thoại](https://github.com/nguyentuanson27-netizen/lanchatbot/blob/e6cf2884697494ab2e0d88dad4b46da25719ed6b/apps/worker/evals/single-agent-commerce-qualification/bc-repair-rerun-20261030/CONVERSATIONS.md) · [Primary review22ca](CASE_REVIEW.md) · [Grades chấm mù gốc](INDEPENDENT_GRADES.json) · [Quality observations](QUALITY_RESULTS.json) · [Accounting](ACCOUNTING.json) · [Independent audit](ACCOUNTING_AUDIT.json) · [Extra provenance](SUPPLEMENTAL_EVIDENCE.json).
 
 ## Kết quả actual
 
