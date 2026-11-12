@@ -113,6 +113,14 @@ function ownerFailureCode(error: unknown): string | null {
   const reported = (error as { telemetry?: { failureCode?: unknown } }).telemetry?.failureCode;
   return typeof reported === "string" && reported ? reported : error.message;
 }
+/** Owner decision 2026-11-12: the provider refused or failed the request itself (rate limit or server fault).
+ *  Nothing was generated and nothing was executed, so the same request may be sent once more after a short wait. */
+export const OWNER_TRANSIENT_RETRY_DELAY_MS = 2_000;
+function ownerTransientHttp(error: unknown): boolean {
+  if (ownerFailureCode(error) !== "GENERATION_HTTP") return false;
+  const status = (error as { telemetry?: { httpStatus?: unknown } }).telemetry?.httpStatus;
+  return status === 429 || (typeof status === "number" && Number.isInteger(status) && status >= 500 && status <= 599);
+}
 export async function runCommerceTurn(input: {
   /** Pure native-serializer admission. Must never call a provider or mutate state. */
   admitPreparedContext?:(request:OwnerRequest)=>boolean;
@@ -121,6 +129,8 @@ export async function runCommerceTurn(input: {
   historyMetadata?: import("./single-agent-commerce-public-history.js").CommerceHistoryMetadata;
   scope: CommerceScope; latest: string; history: { role: "customer" | "shop"; text: string }[];
   ownerPrompt: string; verifierPrompt: string; tools: CommerceTools; clock: () => Date; timeoutMs?: number;
+  /** Wait before the single retry of an owner request the provider answered with HTTP 429 or 5xx. */
+  ownerTransientRetryDelayMs?: number;
   /** The transport bounds its exact serialized provider body before dispatch. */
   owner: (request: OwnerRequest) => Promise<OwnerGeneration>;
   verifier: (request: VerifierRequest) => Promise<VerifierGeneration>;
@@ -230,7 +240,8 @@ export async function runCommerceTurn(input: {
   executedNormalToolInvocations=toolCalls;
   // Set when a continuation that still offered tools could not be built within the request bound.
   let replyFromGatheredFacts = false;
-  // Owner decision 2026-11-12: a provider answer that carries no usable candidate is asked for once more.
+  // Owner decisions 2026-11-12: a provider answer that carries no usable candidate, or an HTTP 429/5xx refusal
+  // of the request, is asked for once more. One retry per turn covers both, inside the generation cap.
   let ownerOutputRetried = false;
   for (let index = 0; index < 3; index++) {
     if(input.tools.openingMediaTiming==='BEFORE_OWNER'&&input.tools.prepareOpeningMedia){
@@ -276,9 +287,15 @@ export async function runCommerceTurn(input: {
       }
       // The provider answered but produced nothing to parse: no text, no call, an abnormal finish. Nothing was
       // executed and nothing can be repaired, so the same request is sent once more inside the generation cap.
-      // Timeouts, HTTP errors and any parsed output, right or wrong, are never retried.
+      // Timeouts, other HTTP errors and any parsed output, right or wrong, are never retried.
       if (failure !== null && NO_USABLE_OWNER_OUTPUT.has(failure) && !ownerOutputRetried && index < 2) {
         ownerOutputRetried = true; continue;
+      }
+      // HTTP 429 or 5xx: the provider did not generate. Wait once, then send the same request again.
+      if (ownerTransientHttp(error) && !ownerOutputRetried && index < 2) {
+        ownerOutputRetried = true;
+        await new Promise(resolve => setTimeout(resolve, Math.max(0, input.ownerTransientRetryDelayMs ?? OWNER_TRANSIENT_RETRY_DELAY_MS)));
+        continue;
       }
       return finish(fallback(generations.at(-1)!.status));
     }
