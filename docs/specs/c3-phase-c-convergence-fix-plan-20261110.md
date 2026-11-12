@@ -321,3 +321,31 @@ Chi tiết và giới hạn ở báo cáo fixture. Tóm tắt:
 | Xác nhận harness native ghim được clock | Chưa kiểm tra được khi không có world | Việc đầu tiên khi có snapshot |
 
 Hai điểm cần lưu ý khi chạy tiếp: `owner-decisions.json` đã đổi nên mọi config đã seal trước đó không còn khớp `decisionHash`; và `manifest.json` nay đăng ký verifier Gemini nên `runtimeHash`/identity của candidate cũng đổi. Cả hai đều cần `init` và `seal` lại.
+
+## 15. Cập nhật 12/11/2026, sau lượt chạy 65 lần thử và review ở `e6cf2884`
+
+Lượt đo N=5 trên 13 ca đã có ([review 122 lượt](../../apps/worker/evals/single-agent-commerce-qualification/convergence-sol-followup-run-20261112/REVIEW.md)). Trong 65 lần thử của đợt Gemini, 16 lần mất khách vì verifier, code hoặc transport: 10 do verifier chặn nhầm câu xác nhận có biên nhận, 2 do sai tham số tool, 2 do provider trả đầu ra hỏng, 2 do trùng khóa phạm vi tồn kho.
+
+### Quyết định của owner, 12/11/2026
+
+- Verifier quay về **GPT-6.1 Sol High**. Verifier Gemini Flash Lite sai cả hai chiều trên dữ liệu thật; bộ thử 8 draft trên fixture ở mục 14 đã không bắt được điều này.
+- **Cho thử lại đúng một lần** khi provider không trả nội dung dùng được.
+- Hỗ trợ giá trước khi có giỏ: **chưa chốt**, đang chờ owner chọn giữa ba cách (giữ quy tắc và chỉ sửa câu trả lời; xét ngay trên mục tiêu báo giá; ghi nhận lời xin rồi tự áp khi tạo giỏ).
+
+### Đã làm
+
+| Hạng mục | Commit | Ca liên quan |
+|---|---|---|
+| Verifier về Sol High; thử lại một lần; lệnh sai tham số trả lỗi cho owner sửa | `c8f045bb` | P08, checkout, P07, J2, P06 |
+| Tồn theo size có khóa phạm vi riêng | `3f7f3649` | P09 |
+| Kết quả ghi giỏ bị từ chối chỉ sang báo giá khi khách hỏi giá | `620f03bf` | J1 |
+
+Suite worker sau các thay đổi: 2.796 test unit và 911 test eval pass; 6 unit và 6 eval fail như trước, không có lỗi mới.
+
+### Chưa làm
+
+- **Ảnh khi so sánh hai mẫu (S08).** Code coi mọi sản phẩm đã báo giá mở đầu là bắt buộc có ảnh, và một test hiện có ghim đúng hành vi đó. Đây là xung đột giữa hai quy tắc kinh doanh ("báo giá mở đầu kèm ảnh" và "danh sách còn phân vân không bắt buộc mỗi mẫu một ảnh"), nên cần owner quyết định trước khi đổi.
+- **Size Engine đánh giá size khách nhắc tới, và trạng thái tồn theo từng size (P07).** Chạm vào claim `SIZE_FIT`; chưa bắt đầu.
+- **Hỗ trợ giá trước giỏ (J4).** Chờ quyết định.
+- **Đo lại.** Các bản sửa ngày 12/11 chưa có số đo với model. Hành trình checkout với Sol mới được chấm lại câu xác nhận, chưa chạy lại trọn vẹn.
+
