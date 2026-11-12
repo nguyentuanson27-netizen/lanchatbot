@@ -375,3 +375,32 @@ Việc này nên là một PR riêng, có test trên PostgreSQL thật và đố
 ## 16. Kết quả chạy trên d963fd36, 12/11/2026
 
 Đã thực thi 40 lần thử, ghi nhận đủ 84 lượt trên cùng source và snapshot. Checkout với Sol High đi đủ 7 lượt ở cả ba lần. Các lỗi lặp ở J1, J2, J4 và P07 vẫn ảnh hưởng tới bán hàng. J2 lần 4 xác nhận model có thể sửa lệnh sau khi tool từ chối tham số, còn J2 lần 2 phát hiện nhánh thử lại đầu ra hỏng chưa nhận được mã lỗi từ adapter. Kết quả kiểm tra phát triển giữ đề xuất **STOP**. [Lịch sử hội thoại](../../apps/worker/evals/single-agent-commerce-qualification/latest-head-model-run-20261112/CONVERSATIONS.md) · [Review và kết luận](../../apps/worker/evals/single-agent-commerce-qualification/latest-head-model-run-20261112/REVIEW.md)
+
+## 17. Cập nhật sau review 84 lượt ở `e2e0b366`
+
+Checkout đi đủ 7 lượt ở cả ba lần với verifier Sol High. Sáu handoff làm gián đoạn tư vấn: J2 ba lần, J4 hai lần, P07 một lần.
+
+### Đã làm
+
+| Việc | Commit | Ca liên quan |
+|---|---|---|
+| Thử lại một lần nay chạy được trên đường adapter thật | `c014fd5c` | J2 lần 2 |
+| Phương án A cho lời xin hỗ trợ trước giỏ | `eafcfaed` | J4 |
+
+Bản "thử lại một lần" ở `c8f045bb` có lỗi: vòng điều phối so `error.message` với mã lỗi cụ thể, trong khi adapter Gemini đổi message thành `PROVIDER_ERROR` và ghi mã ở `telemetry.failureCode`. Test lúc đó ném lỗi bằng tay nên không bắt được. Test mới đi qua adapter thật và fail trên code cũ.
+
+Phương án A giữ nguyên quy tắc chỉ xét hỗ trợ khi đã có giỏ. Kết quả `record_negotiation` bị từ chối và kết quả báo giá trước giỏ cùng mang một câu do code viết: chưa xét được hỗ trợ, không hứa và không phủ nhận, khách chọn đủ màu và size để lên giỏ rồi nhắn lại lời xin. Phần chính sách dùng chung cho hai model ghi rõ một set hoặc combo tính là 1 đơn vị của ưu đãi mua nhiều.
+
+### Còn lại, theo mức ảnh hưởng tới bán hàng
+
+| Lỗi | Tần suất ở lượt này | Hướng xử lý | Cần quyết định |
+|---|---|---|---|
+| J2: HTTP 429 từ provider làm mất cả hội thoại | 1/4 | Thử lại một lần sau một khoảng chờ ngắn cho 429 và 5xx | Có: quy tắc hiện chỉ thử lại khi provider trả nội dung hỏng |
+| J2: tool từ chối số đo hai lần, hết vòng tool, model tự chọn S | 1/4 | Khi lượt đã xin tư vấn size và lệnh ghi số đo vừa thành công, code tự chạy lại phép tính size đang chờ | Không |
+| J1: khách hỏi tổng, bot hỏi lại màu | 1/3 | Code giữ "món khách đang muốn mua nhưng chưa đủ lựa chọn" và đưa sẵn tổng tạm tính vào context | Có: thêm một trạng thái lưu qua lượt |
+| P07: đề xuất quần L trái kết quả M/M | 1/3 | Size Engine đánh giá size khách nhắc tới và trả lý do | Không, nhưng chạm claim `SIZE_FIT` |
+| P09: báo giá hai mẫu qua `read_product` thì không kèm ảnh | 1/3 | Quy tắc ảnh tính theo giá đã nêu, không theo tool đã gọi | Không: owner đã chốt gửi ảnh cả hai |
+| S04: nói "sẵn size S đến XL" ngay sau khi nêu hai màu | 1/3 | Trả tồn theo từng màu và size thay vì gộp theo offer | Không |
+| S08, S09, S15, giọng văn J2 | lặp lại | Viết lại prompt (Giai đoạn 4) | Không |
+
+Phương án B cho hỗ trợ trước giỏ vẫn chờ owner cho phép sửa bất biến giao dịch (mục 15).
