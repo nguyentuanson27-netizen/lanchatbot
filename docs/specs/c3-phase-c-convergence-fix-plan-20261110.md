@@ -371,3 +371,7 @@ Thiết kế đề xuất cho B, nếu được phép:
 Hai tham số kinh doanh cần owner chốt: lời hứa có hạn bao lâu (đề xuất bằng thời hạn giỏ, 30 phút), và có giới hạn ở mức hỗ trợ thứ nhất hay không (đề xuất có).
 
 Việc này nên là một PR riêng, có test trên PostgreSQL thật và đối chứng hành vi với đường C3 hiện hành.
+
+## 16. Kết quả chạy trên d963fd36, 12/11/2026
+
+Đã thực thi 40 lần thử, ghi nhận đủ 84 lượt trên cùng source và snapshot. Checkout với Sol High đi đủ 7 lượt ở cả ba lần. Các lỗi lặp ở J1, J2, J4 và P07 vẫn ảnh hưởng tới bán hàng. J2 lần 4 xác nhận model có thể sửa lệnh sau khi tool từ chối tham số, còn J2 lần 2 phát hiện nhánh thử lại đầu ra hỏng chưa nhận được mã lỗi từ adapter. Kết quả kiểm tra phát triển giữ đề xuất **STOP**. [Lịch sử hội thoại](../../apps/worker/evals/single-agent-commerce-qualification/latest-head-model-run-20261112/CONVERSATIONS.md) · [Review và kết luận](../../apps/worker/evals/single-agent-commerce-qualification/latest-head-model-run-20261112/REVIEW.md)
