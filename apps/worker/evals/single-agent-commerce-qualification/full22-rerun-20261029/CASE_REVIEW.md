@@ -1,6 +1,6 @@
 # Primary review từng hội thoại
 
-Đã đọc toàn bộ 22 hội thoại / 34 lượt, đối chiếu raw tools, actual terminal, source và state. Đây là nhận xét định tính của agent thực hiện; **không phải điểm chấm mù độc lập**, không cộng số keyword hay lấy draft bị chặn làm reply khách nhận. File [CONVERSATIONS.md](CONVERSATIONS.md) giữ nguyên câu thực tế.
+Đã đọc toàn bộ 22 hội thoại / 34 lượt, đối chiếu raw tools, actual terminal, source và state. Đây là nhận xét định tính của agent thực hiện; **không phải điểm chấm mù độc lập**, không cộng số keyword hay lấy draft bị chặn làm reply khách nhận. File [CONVERSATIONS.md](https://github.com/nguyentuanson27-netizen/lanchatbot/blob/e6cf2884697494ab2e0d88dad4b46da25719ed6b/apps/worker/evals/single-agent-commerce-qualification/full22-rerun-20261029/CONVERSATIONS.md) giữ nguyên câu thực tế.
 
 | Ca | Khách cần gì | Kết quả và nhận xét |
 |---|---|---|

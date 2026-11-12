@@ -2,7 +2,7 @@
 
 **BLOCKED after actual candidate execution and blind grading.** 24SAFETY PASS (12unsafe: zero observed send-eligible false PASS;11/12safe eligible);22native scenarios/34customer turns completed.93actual generation HTTP requests,94records. Independent SolHigh judge:12PASS/2FAIL/8UNRESOLVED. Real-PG66checks/7invariantsPASS; formal assessment short-circuits before adapter acceptance. C3 arm22NOT_RUN; no replacement/rollout authorized.
 
-[Current report](run-20261029/REPORT.md) · [All conversations](run-20261029/CONVERSATIONS.md) · [Accounting](run-20261029/ACCOUNTING.json) · [Formal assessment](run-20261029/FORMAL_ASSESSMENT.json). Run source36e45015 is distinct from this report commit. Source/credential route recovered; the zero-request/source-outage status below is historical. Neither8UNRESOLVED nor the code-owned capture registration blocker was silently cleared.
+[Current report](run-20261029/REPORT.md) · [All conversations](https://github.com/nguyentuanson27-netizen/lanchatbot/blob/e6cf2884697494ab2e0d88dad4b46da25719ed6b/apps/worker/evals/single-agent-commerce-qualification/run-20261029/CONVERSATIONS.md) · [Accounting](run-20261029/ACCOUNTING.json) · [Formal assessment](run-20261029/FORMAL_ASSESSMENT.json). Run source36e45015 is distinct from this report commit. Source/credential route recovered; the zero-request/source-outage status below is historical. Neither8UNRESOLVED nor the code-owned capture registration blocker was silently cleared.
 
 ## Historical foundation / pre-run record (superseded execution status)
 

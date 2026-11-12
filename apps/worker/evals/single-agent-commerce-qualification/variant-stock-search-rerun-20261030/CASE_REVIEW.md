@@ -1,6 +1,6 @@
 # Review toàn bộ 22 ca / 34 lượt sau variant-stock/search fix
 
-Đọc toàn bộ terminal text và trace actual ở [CONVERSATIONS.md](CONVERSATIONS.md), đối chiếu [ACCOUNTING.json](ACCOUNTING.json) và [audit độc lập](ACCOUNTING_AUDIT.json). Đây là chẩn đoán của main, không thay grade chấm mù hoặc sửa runtime sau khi thấy kết quả.
+Đọc toàn bộ terminal text và trace actual ở [CONVERSATIONS.md](https://github.com/nguyentuanson27-netizen/lanchatbot/blob/e6cf2884697494ab2e0d88dad4b46da25719ed6b/apps/worker/evals/single-agent-commerce-qualification/variant-stock-search-rerun-20261030/CONVERSATIONS.md), đối chiếu [ACCOUNTING.json](ACCOUNTING.json) và [audit độc lập](ACCOUNTING_AUDIT.json). Đây là chẩn đoán của main, không thay grade chấm mù hoặc sửa runtime sau khi thấy kết quả.
 
 | Ca | Kết quả và finding thực tế |
 |---|---|

@@ -1,6 +1,6 @@
 # Phase C — giá, ý định mua và ảnh, 10/11/2026
 
-**STOP.** Đã chạy đủ 13 ca và 27 lượt với bản sửa `162fba6f`, trên source sạch `5613e8b37784f8c2eb6be4ce3a115d8b13b7100e`. Tự review toàn hội thoại ghi nhận **9/12 ca bán hàng dùng được**, ba ca lỗi đáng kể J4, S04 và P09. S16 là đối chứng thiếu nguồn riêng và chuyển giao im lặng đúng. [Hội thoại thực tế](CONVERSATIONS.md) · [Kết quả từng ca](REVIEW.json)
+**STOP.** Đã chạy đủ 13 ca và 27 lượt với bản sửa `162fba6f`, trên source sạch `5613e8b37784f8c2eb6be4ce3a115d8b13b7100e`. Tự review toàn hội thoại ghi nhận **9/12 ca bán hàng dùng được**, ba ca lỗi đáng kể J4, S04 và P09. S16 là đối chứng thiếu nguồn riêng và chuyển giao im lặng đúng. [Hội thoại thực tế](https://github.com/nguyentuanson27-netizen/lanchatbot/blob/e6cf2884697494ab2e0d88dad4b46da25719ed6b/apps/worker/evals/single-agent-commerce-qualification/price-intent-media-run-20261110/CONVERSATIONS.md) · [Kết quả từng ca](REVIEW.json)
 
 Owner dùng Gemini 3.5 Flash Lite HIGH. Verifier dùng GPT-6.1 Sol HIGH. Hai prompt là bản đã sửa, các kịch bản và giới hạn lượt gọi giữ như screen trước. Mỗi ca chạy một lần, retry 0. Snapshot mới được đọc và kiểm tra trước khi chạy. [Nguồn, cấu hình, hashes và lệnh thực thi](PROVENANCE.json) · [Review đầu vào](INPUT_REVIEW.json)
 

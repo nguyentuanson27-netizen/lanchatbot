@@ -4,7 +4,7 @@
 
 **Kết quả chưa cải thiện tổng thể.** Search không còn làm mất target thứ2 trong các trace đã kiểm, nhưng khách vẫn chưa được báo giá/size ở một số ca. Hai hành trình mua áo handoff ngay lượt đầu vì owner đặt tên màu chưa ghi nhận, nên không đi tới bước mua hai size/thương lượng.
 
-[Toàn bộ hội thoại](CONVERSATIONS.md) · [Review từng ca](CASE_REVIEW.md) · [Accounting](ACCOUNTING.json) · [Audit độc lập](ACCOUNTING_AUDIT.json) · [Grades chấm mù gốc](INDEPENDENT_GRADES.json) · [Grade lock trước unmask](GRADE_LOCK.json) · [Quality observations](QUALITY_RESULTS.json) · [Provenance](SUPPLEMENTAL_EVIDENCE.json).
+[Toàn bộ hội thoại](https://github.com/nguyentuanson27-netizen/lanchatbot/blob/e6cf2884697494ab2e0d88dad4b46da25719ed6b/apps/worker/evals/single-agent-commerce-qualification/variant-stock-search-rerun-20261030/CONVERSATIONS.md) · [Review từng ca](CASE_REVIEW.md) · [Accounting](ACCOUNTING.json) · [Audit độc lập](ACCOUNTING_AUDIT.json) · [Grades chấm mù gốc](INDEPENDENT_GRADES.json) · [Grade lock trước unmask](GRADE_LOCK.json) · [Quality observations](QUALITY_RESULTS.json) · [Provenance](SUPPLEMENTAL_EVIDENCE.json).
 
 ## Actual outcomes và denominator
 

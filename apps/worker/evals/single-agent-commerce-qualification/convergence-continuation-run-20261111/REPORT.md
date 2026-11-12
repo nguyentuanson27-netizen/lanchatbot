@@ -12,7 +12,7 @@ VPS tiếp tục timeout ở kết nối SSH trước bước lấy credential v
 
 Database test còn lại sau gián đoạn đã được xác nhận không có kết nối và xóa đúng tên từ report. Không sửa nguồn shop hoặc gửi tin thật. Các kiểm tra slot/repetition đạt 6/6, kiểm tra media/slot đạt 5/5.
 
-Theo yêu cầu chạy đủ rồi mới review, **chưa chấm hoặc tổng kết chất lượng hội thoại**. Tệp bên dưới ghi nguyên kết quả đã thực thi, gồm draft bị chặn và kết quả thực tế, có che dữ liệu riêng tư giả lập. [Lịch sử 67 lượt](CONVERSATIONS.md) · [Audit](INTEGRITY.json)
+Theo yêu cầu chạy đủ rồi mới review, **chưa chấm hoặc tổng kết chất lượng hội thoại**. Tệp bên dưới ghi nguyên kết quả đã thực thi, gồm draft bị chặn và kết quả thực tế, có che dữ liệu riêng tư giả lập. [Lịch sử 67 lượt](https://github.com/nguyentuanson27-netizen/lanchatbot/blob/e6cf2884697494ab2e0d88dad4b46da25719ed6b/apps/worker/evals/single-agent-commerce-qualification/convergence-continuation-run-20261111/CONVERSATIONS.md) · [Audit](INTEGRITY.json)
 
 Các phần còn chờ gồm J1 lần 5 và năm lần cho từng ca P08, P07, P09, checkout-complete, S08. Việc tiếp tục cần khôi phục kết nối VPS, rồi chuẩn bị/seal theo source hiện hành và chỉ chạy các slot còn chờ. Lỗi verifier trước đó tiếp tục được giữ trong kết quả Phase C.
 
