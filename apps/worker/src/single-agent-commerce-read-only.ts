@@ -106,6 +106,13 @@ export function resultBudgetView(calls: CommerceToolCall[], results: CommerceToo
 /** Isolated candidate. Native continuations add world information; no retry, repair, Outbox or send capability. */
 /** Transport codes for a provider response that held no candidate, no parts, no text or an abnormal finish. */
 export const NO_USABLE_OWNER_OUTPUT: ReadonlySet<string> = new Set(["OWNER_CANDIDATE_COUNT", "OWNER_FINISH_REASON", "OWNER_CONTENT_ROLE", "OWNER_CONTENT_PARTS", "OWNER_FINAL_EMPTY"]);
+/** A transport reports its specific failure either as the error message or, when it normalises the message
+ *  to PROVIDER_ERROR, as telemetry.failureCode. Both name the same code-defined identifier. */
+function ownerFailureCode(error: unknown): string | null {
+  if (!(error instanceof Error)) return null;
+  const reported = (error as { telemetry?: { failureCode?: unknown } }).telemetry?.failureCode;
+  return typeof reported === "string" && reported ? reported : error.message;
+}
 export async function runCommerceTurn(input: {
   /** Pure native-serializer admission. Must never call a provider or mutate state. */
   admitPreparedContext?:(request:OwnerRequest)=>boolean;
@@ -263,13 +270,14 @@ export async function runCommerceTurn(input: {
       // is already paid for and may include a committed effect: ask once, within the same generation cap,
       // for the reply from those facts through the existing final phase, which carries neither tool
       // schemas nor signed tool turns. The refused attempt stays in the generation record.
-      if (error instanceof Error && error.message === "OWNER_REQUEST_BOUND" && request.toolsAllowed && toolRounds > 0 && index < 2) {
+      const failure = ownerFailureCode(error);
+      if (failure === "OWNER_REQUEST_BOUND" && request.toolsAllowed && toolRounds > 0 && index < 2) {
         replyFromGatheredFacts = true; continue;
       }
       // The provider answered but produced nothing to parse: no text, no call, an abnormal finish. Nothing was
       // executed and nothing can be repaired, so the same request is sent once more inside the generation cap.
       // Timeouts, HTTP errors and any parsed output, right or wrong, are never retried.
-      if (error instanceof Error && NO_USABLE_OWNER_OUTPUT.has(error.message) && !ownerOutputRetried && index < 2) {
+      if (failure !== null && NO_USABLE_OWNER_OUTPUT.has(failure) && !ownerOutputRetried && index < 2) {
         ownerOutputRetried = true; continue;
       }
       return finish(fallback(generations.at(-1)!.status));
