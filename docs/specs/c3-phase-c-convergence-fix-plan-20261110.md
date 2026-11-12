@@ -330,7 +330,8 @@ Lượt đo N=5 trên 13 ca đã có ([review 122 lượt](../../apps/worker/eva
 
 - Verifier quay về **GPT-6.1 Sol High**. Verifier Gemini Flash Lite sai cả hai chiều trên dữ liệu thật; bộ thử 8 draft trên fixture ở mục 14 đã không bắt được điều này.
 - **Cho thử lại đúng một lần** khi provider không trả nội dung dùng được.
-- Hỗ trợ giá trước khi có giỏ: **chưa chốt**, đang chờ owner chọn giữa ba cách (giữ quy tắc và chỉ sửa câu trả lời; xét ngay trên mục tiêu báo giá; ghi nhận lời xin rồi tự áp khi tạo giỏ).
+- Hỗ trợ giá trước khi có giỏ: owner chọn **phương án B** (xét hỗ trợ ngay trên mục tiêu báo giá và giữ lời khi tạo giỏ). Chưa làm; xem "Phương án B cần gì" bên dưới.
+- Ảnh khi báo giá từ hai mẫu trở lên: **gửi ảnh cả hai.** Đây là hành vi hiện có của code, không cần sửa.
 
 ### Đã làm
 
@@ -344,7 +345,29 @@ Suite worker sau các thay đổi: 2.796 test unit và 911 test eval pass; 6 uni
 
 ### Chưa làm
 
-- **Ảnh khi so sánh hai mẫu (S08).** Code coi mọi sản phẩm đã báo giá mở đầu là bắt buộc có ảnh, và một test hiện có ghim đúng hành vi đó. Đây là xung đột giữa hai quy tắc kinh doanh ("báo giá mở đầu kèm ảnh" và "danh sách còn phân vân không bắt buộc mỗi mẫu một ảnh"), nên cần owner quyết định trước khi đổi.
+- **S08 còn lại là việc của lời văn.** Quy tắc ảnh đã được owner xác nhận. Lượt mới tư vấn một mẫu, không nêu mẫu kia và bỏ thông tin hàng đặt trước, trong khi ảnh có cả hai; phần này thuộc Giai đoạn 4.
 - **Size Engine đánh giá size khách nhắc tới, và trạng thái tồn theo từng size (P07).** Chạm vào claim `SIZE_FIT`; chưa bắt đầu.
-- **Hỗ trợ giá trước giỏ (J4).** Chờ quyết định.
+- **Hỗ trợ giá trước giỏ (J4), phương án B.** Chưa bắt đầu, vì cần owner cho phép sửa bất biến giao dịch (xem dưới).
 - **Đo lại.** Các bản sửa ngày 12/11 chưa có số đo với model. Hành trình checkout với Sol mới được chấm lại câu xác nhận, chưa chạy lại trọn vẹn.
+
+### Phương án B cần gì
+
+Lời hứa hỗ trợ trước giỏ chỉ có giá trị nếu giỏ tạo sau đó mang đúng mức hỗ trợ ấy. Ba chỗ trong lớp giao dịch hiện ngăn điều này, và cả ba đều là bất biến được cài có chủ đích:
+
+1. `packages/chat-runtime/src/sales-cycle-runtime.ts`: tin chê giá chỉ được công nhận nếu đến **sau** thời điểm tạo giỏ (`notBefore: cart.createdAt`). Quy tắc này chặn việc dùng lại tin cũ để xin hỗ trợ cho một giỏ mới.
+2. `packages/database/src/realtime-runtime.ts`: giỏ vừa mở phải ở trạng thái `READY`, chưa có lời chê giá nào được ghi nhận; khác đi thì transaction bị từ chối (`CART_OPEN_NEGOTIATION_MISMATCH`).
+3. `packages/contracts/src/v3/sales-cycle.ts`: lệnh thương lượng chỉ hợp lệ khi đã ở bước có giỏ.
+
+Hai gói đầu dùng chung với runtime đang chạy trên `PREPROD_TEST_PAGE`. Phương án C (ghi nhận lời xin rồi tự áp khi tạo giỏ) vướng đúng ba chỗ này; nhận định trước đó rằng C "dùng lại engine hiện có" là sai. Chỉ phương án A không cần sửa lớp giao dịch.
+
+Thiết kế đề xuất cho B, nếu được phép:
+
+- Trạng thái bán hàng có thêm một bản ghi tùy chọn "lời xin hỗ trợ trước giỏ" (tin nguồn, thời điểm, hạn dùng). Trạng thái lưu dạng JSON mã hóa nên không cần migration.
+- Lệnh thương lượng hiện có nhận thêm cờ bật riêng cho trường hợp chưa có giỏ; không bật thì hành vi giữ nguyên từng byte, nên đường C3 hiện hành không đổi. Dùng lại loại lệnh cũ nên không phải sửa ràng buộc `command_kind` trong cơ sở dữ liệu.
+- Khi tạo giỏ, bản ghi được tiêu thụ đúng một lần bằng một sự kiện thương lượng thứ hai ngay sau khi mở giỏ; giỏ vẫn mở ở `READY` như bất biến số 2 yêu cầu. Chỉ quy tắc thời điểm ở số 1 được nới, và chỉ cho đúng bản ghi này.
+- Trước giỏ chỉ cấp mức hỗ trợ thứ nhất; mức cuối vẫn cần có giỏ.
+- `quote_product` tính tổng theo mức hỗ trợ đó để owner nói được con số.
+
+Hai tham số kinh doanh cần owner chốt: lời hứa có hạn bao lâu (đề xuất bằng thời hạn giỏ, 30 phút), và có giới hạn ở mức hỗ trợ thứ nhất hay không (đề xuất có).
+
+Việc này nên là một PR riêng, có test trên PostgreSQL thật và đối chứng hành vi với đường C3 hiện hành.

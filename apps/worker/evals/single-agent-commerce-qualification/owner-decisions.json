@@ -107,6 +107,25 @@
         "A_PARSED_OWNER_OUTPUT_OF_ANY_CONTENT"
       ],
       "previous": "RETRY_0"
+    },
+    "comparisonQuoteMedia": {
+      "status": "APPROVED",
+      "approvedAt": "2026-11-12",
+      "ownerAnswer": "khi báo giá từ hai mẫu trở lên thì gửi ảnh cả hai",
+      "behavior": "EVERY_OPENING_QUOTED_PRODUCT_HAS_A_PHOTO",
+      "codeChange": "NONE_EXISTING_BEHAVIOUR_CONFIRMED"
+    },
+    "preCartPriceSupport": {
+      "status": "OWNER_CHOSE_OPTION_B_NOT_IMPLEMENTED",
+      "approvedAt": "2026-11-12",
+      "ownerAnswer": "chọn B",
+      "optionB": "EVALUATE_SUPPORT_ON_THE_PRE_CART_QUOTE_TARGET_AND_HONOUR_IT_WHEN_THE_CART_IS_CREATED",
+      "requiresChangeTo": [
+        "packages/chat-runtime/src/sales-cycle-runtime.ts: negotiation evidence must not predate cart creation",
+        "packages/database/src/realtime-runtime.ts: a newly opened cart must start at customer state READY with no consumed objection",
+        "packages/contracts/src/v3/sales-cycle.ts: NEGOTIATION_EVENT is allowed only from CART_OPEN or ORDER_PREVIEW"
+      ],
+      "awaiting": "OWNER_AUTHORIZATION_TO_CHANGE_PROTECTED_TRANSACTION_INVARIANTS"
     }
   }
 }
