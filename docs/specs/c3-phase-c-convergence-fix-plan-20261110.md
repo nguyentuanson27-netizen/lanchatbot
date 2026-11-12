@@ -404,3 +404,47 @@ Phương án A giữ nguyên quy tắc chỉ xét hỗ trợ khi đã có giỏ.
 | S08, S09, S15, giọng văn J2 | lặp lại | Viết lại prompt (Giai đoạn 4) | Không |
 
 Phương án B cho hỗ trợ trước giỏ vẫn chờ owner cho phép sửa bất biến giao dịch (mục 15).
+
+## 18. Cập nhật 12/11/2026, sau quyết định "1 ok, 2 ok, luôn push thẳng lên PR"
+
+### Quyết định của owner
+
+| Việc | Quyết định |
+|---|---|
+| Thử lại một lần khi provider trả HTTP 429 hoặc 5xx | Duyệt |
+| Thêm trạng thái lưu qua lượt cho món khách muốn mua nhưng chưa đủ lựa chọn | Duyệt |
+| Push lên nhánh PR 392 | Luôn push thẳng, không hỏi lại |
+
+### Đã làm
+
+| Việc | Commit | Ca liên quan |
+|---|---|---|
+| Thử lại một lần sau 2 giây khi owner nhận HTTP 429 hoặc 5xx | `fc02f13c` | J2 lần 1 |
+| Ghi số đo xong thì code tự tính size đang chờ | `319a7536` | J2 lần 3 |
+| Giữ món khách muốn mua nhưng thiếu màu hoặc size cho lượt sau, kèm lệnh báo giá | `8340d188` | J1 lần 3 |
+| Tồn theo từng màu khi lần đọc không lọc màu | `191ecdc9`, `14483849` | S04 lần 3 |
+
+**Thử lại HTTP.** Mỗi lượt vẫn chỉ có một lần thử lại, dùng chung cho đầu ra hỏng và HTTP 429/5xx, và tính vào giới hạn ba lần sinh của owner. HTTP 4xx khác, timeout và mọi đầu ra đã parse được vẫn không thử lại. Chỉ áp dụng cho owner, không áp dụng cho verifier.
+
+**Size đang chờ (J2).** Ở lần 3, hai lệnh `recommend_size` kèm số đo bị từ chối vì trích dẫn sai, model sửa bằng `apply_customer_state` ở vòng tool cuối và không còn vòng nào để hỏi lại size. Nay lệnh xin size bị từ chối vì số đo chưa ghi được sẽ được nhớ trong lượt. Khi một lệnh ghi sau đó thành công, code chạy phép tính size đang chờ và trả kết quả trong `sizeEvaluations` của chính lệnh ghi. Claim `SIZE_FIT` được tạo như khi model tự gọi. Nếu cùng batch đã có lệnh xin size thì không tính hai lần.
+
+**Món đang chờ (J1).** Khi `add_to_cart` bị từ chối chỉ vì khách chưa chọn màu hoặc size, các dòng đã yêu cầu được lưu vào `pendingPurchase` của hồ sơ khách. Lượt sau owner thấy các dòng này kèm đúng tham số `quote_product` và câu dẫn: khách hỏi giá hay tổng thì báo giá trước, không hỏi lại màu. Ghi chú bị xóa khi một lệnh giỏ thành công, hết hiệu lực sau 24 giờ, và chỉ hiện khi sản phẩm đang được gắn trong lượt.
+
+Khác với đề xuất ở mục 17, **code không tính sẵn tổng tạm tính**. Số lượng khách muốn lấy chỉ đọc được từ hội thoại. Một dòng `add_to_cart` bị từ chối không phải là số lượng đơn hàng, như ghi chú sẵn có ở `quoteRoute`. Tổng do code tự tính có thể sai số lượng mà vẫn mang dáng vẻ đã xác minh. Vì vậy code chỉ đưa lệnh báo giá cụ thể, model vẫn là bên gọi.
+
+Lưu ý khi triển khai: `CustomerProfileV1` là schema strict. Bản phát hành cũ hơn thay đổi này không đọc được hồ sơ đã có trường `pendingPurchase`, nên rollback qua mốc này cần xóa trường đó trước.
+
+**Tồn theo màu (S04).** Lần đọc không lọc màu trả `confirmedInStockSizes` là các size còn hàng ở ít nhất một màu. Model đọc thành "sẵn S đến XL" cho cả màu đặt trước, và verifier không có căn cứ để chặn. Nay khi các màu của offer khác nhau về tồn, kết quả và literal dùng chung cho verifier có thêm `byColor` và nhãn `AT_LEAST_ONE_COLOR_NOT_EACH`. Không thêm gì khi đã lọc màu hoặc các màu giống nhau.
+
+### Chưa làm, kèm lý do
+
+| Lỗi | Lý do chưa làm | Việc cần để làm |
+|---|---|---|
+| P09: báo giá hai mẫu qua `read_product` thì không kèm ảnh | Hướng "tính theo giá đã nêu" ở mục 17 không làm được: code không biết câu trả lời có nêu giá hay không, chỉ verifier đọc câu chữ. Gắn nghĩa vụ ảnh vào mọi `read_product` ở lượt mở đầu thì luồng tìm sản phẩm (1 tìm + 2–3 đọc + ảnh) vượt giới hạn 6 lệnh và thành handoff | Owner chọn: giữ nguyên, hoặc hướng model dùng `quote_product` khi báo giá cho khách mới (sửa prompt, cần đo) |
+| P07: đề xuất quần L trái kết quả M | Quy tắc hiện tại cố ý không cấp size thay thế từ "size thường mặc". Đổi quy tắc là quyết định nghiệp vụ và sửa Size Engine dùng chung với runtime r31.3 | Owner quyết định bot có được nhắc size khách quen mặc như một lựa chọn hay không |
+| S08, S09, S15, giọng văn J2 | Sửa prompt chỉ làm sau khi có số đo N=5 | Lượt chạy mới |
+| Phương án B cho hỗ trợ trước giỏ | Chờ owner cho phép sửa ba bất biến giao dịch | Mục 15 |
+
+### Trạng thái kiểm chứng
+
+Bộ test worker: 2.815 unit pass, 925 eval pass, không có lỗi mới; 6 unit và 6 eval fail có từ trước. Test `packages/contracts`: 254 pass. Chưa có số đo với model cho bất kỳ thay đổi nào ở mục 17 và 18. `owner-decisions.json` đã đổi nên harness cần `init` và `seal` lại trước lượt chạy kế tiếp.

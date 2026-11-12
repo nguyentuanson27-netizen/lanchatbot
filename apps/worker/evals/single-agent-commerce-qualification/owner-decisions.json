@@ -96,17 +96,28 @@
       "status": "APPROVED",
       "approvedAt": "2026-11-12",
       "ownerAnswer": "ok",
-      "rule": "ONE_RETRY_WHEN_THE_PROVIDER_RETURNS_NO_USABLE_OWNER_OUTPUT",
+      "rule": "ONE_RETRY_WHEN_THE_PROVIDER_RETURNS_NO_USABLE_OWNER_OUTPUT_OR_REFUSES_THE_REQUEST_WITH_HTTP_429_OR_5XX",
       "maximumRetriesPerTurn": 1,
       "countsAgainstOwnerGenerationCap": true,
       "neverRetries": [
         "TIMEOUT",
-        "HTTP_ERROR",
+        "ANY_OTHER_HTTP_ERROR",
         "REQUEST_BOUND",
         "VERIFIER",
         "A_PARSED_OWNER_OUTPUT_OF_ANY_CONTENT"
       ],
-      "previous": "RETRY_0"
+      "previous": "RETRY_0",
+      "transientHttp": {
+        "status": "APPROVED",
+        "approvedAt": "2026-11-12",
+        "ownerAnswer": "1 ok",
+        "statuses": [
+          "429",
+          "5XX"
+        ],
+        "waitBeforeRetryMs": 2000,
+        "sharesTheSingleRetryOfTheTurn": true
+      }
     },
     "comparisonQuoteMedia": {
       "status": "APPROVED",
@@ -130,6 +141,28 @@
         ],
         "awaiting": "OWNER_AUTHORIZATION_TO_CHANGE_PROTECTED_TRANSACTION_INVARIANTS"
       }
+    },
+    "pendingPurchaseState": {
+      "status": "APPROVED_IMPLEMENTED",
+      "approvedAt": "2026-11-12",
+      "ownerAnswer": "2 ok",
+      "rule": "KEEP_PURCHASE_LINES_REFUSED_ONLY_FOR_A_MISSING_COLOUR_OR_SIZE_FOR_THE_NEXT_TURN_WITH_THE_QUOTE_REQUEST",
+      "storedIn": "CustomerProfileV1.pendingPurchase (optional field)",
+      "shownForHours": 24,
+      "clearedBy": "A_SUCCESSFUL_CART_WRITE",
+      "neverIs": [
+        "A_CART_LINE",
+        "A_PRICE",
+        "AN_ORDER",
+        "A_TOTAL_COMPUTED_IN_CODE"
+      ],
+      "rollbackNote": "CustomerProfileV1 is a strict schema: a release older than this change cannot parse a profile that carries the field."
+    },
+    "pushToPullRequestBranch": {
+      "status": "STANDING_PERMISSION",
+      "approvedAt": "2026-11-12",
+      "ownerAnswer": "luôn push thẳng lên pr",
+      "branch": "feat/c3-phase-c-qualification-20261028"
     }
   }
 }
