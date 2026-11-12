@@ -146,6 +146,16 @@ export async function createCustomerStateTools(input: {
   let quoteRead = false;
   let committedUpdate: { hash: string; receipt: TrustedContext["effectReceipts"][number] } | undefined;
   let rehydrationTarget:SizeFitTargetV1|undefined;
+  // Size requests the owner made in this turn that could not be evaluated because the customer inputs they
+  // depended on were not yet written. A later successful write evaluates them in code, so the turn does not
+  // end with a corrected profile and no size result. Request-local; never persisted.
+  const owedSizeRequests=new Map<string,{subjectRef:string;fitScope?:"COMPONENT";componentRole?:ProductComponentRole}>();
+  const oweSize=(a:Record<string,unknown>)=>{
+    if(rehydrationTarget||typeof a.subjectRef!=="string"||!sizeRequestScope(a))return;
+    const request=sizeRequestScope(a)==="COMPONENT"?{subjectRef:a.subjectRef,fitScope:"COMPONENT" as const,componentRole:a.componentRole as ProductComponentRole}:{subjectRef:a.subjectRef};
+    const key=commerceHash(request);
+    if(owedSizeRequests.has(key)||owedSizeRequests.size<4)owedSizeRequests.set(key,request);
+  };
   const profileHash = () => commerceHash(effective.profile);
   const validateComponent=(s:Awaited<ReturnType<NonNullable<typeof input.componentSizeInput>>>,request:{parentProductId:string;componentRole:ProductComponentRole})=>{
     const t=SizeFitTargetV1Schema.parse(s.fitTarget);
@@ -324,7 +334,8 @@ export async function createCustomerStateTools(input: {
       observedAt: effective.profile.updatedAt, expiresAt: new Date(Date.parse(effective.profile.updatedAt)+300_000).toISOString() } };
     return { status: "OK", data: { revision: effective.profile.revision, measurements: effective.profile.measurements.map(m => ({ kind: m.kind, value: m.value })) } };
   }
-  async function invoke(call: CommerceToolCall): Promise<CommerceToolResult> {
+  /** `chained`: called by code as part of another tool's work, not as the owner's own call. */
+  async function invoke(call: CommerceToolCall, chained = false): Promise<CommerceToolResult> {
     const state = input.base.snapshot().state;
     if (!state.permission || !state.privacyAllowed || state.conversationOwner !== "BOT") return { status: "REJECTED", reason: "PERMISSION" };
     try {
@@ -351,7 +362,13 @@ export async function createCustomerStateTools(input: {
         let result: CommerceToolResult;
         try { result = await apply(call.args); }
         catch { pendingFields.add("*"); pendingCorrections.set("*",null); result = { status: "REJECTED", reason: "STATE_OR_DOMAIN_INPUT" }; }
-        return result.status === "OK" ? result : { ...result, data: { ...result.data as Record<string, unknown>, ...(!commitUnconfirmed ? { applied: false } : {}), unresolvedFields: [...pendingFields] } };
+        if (result.status !== "OK") return { ...result, data: { ...result.data as Record<string, unknown>, ...(!commitUnconfirmed ? { applied: false } : {}), unresolvedFields: [...pendingFields] } };
+        if (chained || !owedSizeRequests.size || blocked()) return result;
+        // The owner asked for these sizes earlier in the turn; the inputs they waited for are now committed.
+        const owed=[...owedSizeRequests.values()],sizeEvaluations:{request:typeof owed[number];status:string;reason?:string;data?:unknown}[]=[];
+        owedSizeRequests.clear();
+        for(const request of owed){const r=await invoke({name:"recommend_size",args:request},true);sizeEvaluations.push({request,...r});}
+        return {...result,data:{...result.data as Record<string,unknown>,sizeEvaluations}};
       }
       if (call.name === "recommend_size") {
         const a = toolArgs(call.args, ["subjectRef", "customerStateOps", "fitScope", "componentRole"]);
@@ -372,10 +389,11 @@ export async function createCustomerStateTools(input: {
         // A single explicit size request may carry new customer inputs. Reuse the
         // exact writer (validation, CAS, readback, receipt), never calculate on a rejected patch.
         if (a.customerStateOps !== undefined) {
-          const updated = await invoke({ name: "apply_customer_state", args: { ops: a.customerStateOps } });
-          if (updated.status !== "OK") return updated;
+          const updated = await invoke({ name: "apply_customer_state", args: { ops: a.customerStateOps } }, true);
+          if (updated.status !== "OK") { oweSize(a); return updated; }
         }
-        if (blocked()) return { status: "REJECTED", reason: "STATE_OR_REF" };
+        if (blocked()) { oweSize(a); return { status: "REJECTED", reason: "STATE_OR_REF" }; }
+        if (!chained && !rehydrationTarget) owedSizeRequests.delete(commerceHash(request?{subjectRef:a.subjectRef,fitScope:"COMPONENT",componentRole:request.componentRole}:{subjectRef:a.subjectRef}));
         let source: Awaited<ReturnType<typeof input.sizeInput>>;
         try { source = componentSource??await input.sizeInput(a.subjectRef); }
         catch { blockedDependencies=true;return {status:"UNAVAILABLE",reason:"SIZE_SOURCE_UNAVAILABLE"}; }
@@ -452,8 +470,8 @@ export async function createCustomerStateTools(input: {
       const active=(effective.profile.sizeAdviceTargets??[]).filter(t=>snapshot().boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===(t.kind==="PRODUCT"?t.productId:t.parentProductId)));
       const union=new Set([...active,...batchTargets].map(sizeFitTargetKey));
       if(input.retainAdvice&&union.size>4)return calls.map(()=>({status:"REJECTED",reason:"SIZE_TARGET_BOUND"}));
-      const written=await invoke({name:"apply_customer_state",args:{ops:(updates[0]!.args as Record<string,unknown>).customerStateOps}});
-      if(written.status!=="OK")return calls.map(()=>written);
+      const written=await invoke({name:"apply_customer_state",args:{ops:(updates[0]!.args as Record<string,unknown>).customerStateOps}},true);
+      if(written.status!=="OK"){for(const c of updates)oweSize(c.args as Record<string,unknown>);return calls.map(()=>written);}
       try{await rememberTargets(batchTargets);}catch{return calls.map(()=>({status:"REJECTED",reason:"STATE_COMMIT_UNCONFIRMED"}));}
       return result.invokeBatch(calls.map(c=>updates.includes(c)?{...c,args:Object.fromEntries(Object.entries(c.args as Record<string,unknown>).filter(([k])=>k!=="customerStateOps"))}:c));
     }
@@ -466,7 +484,13 @@ export async function createCustomerStateTools(input: {
           op && typeof op === "object" && typeof op.field === "string" ? op.field : "*");
       }
     }
-    const updateResults = updates.length > 1 ? updates.map(() => ({ status: "REJECTED" as const, reason: "MULTIPLE_STATE_UPDATES" })) : await Promise.all(updates.map(invoke));
+    // A size request in this same batch runs after the write below; it is not evaluated a second time by the write.
+    for(const c of calls)if(c.name==="recommend_size"&&!writesState(c)&&c.args&&typeof c.args==="object"){
+      const a=c.args as Record<string,unknown>;
+      if(typeof a.subjectRef==="string"&&sizeRequestScope(a))owedSizeRequests.delete(commerceHash(sizeRequestScope(a)==="COMPONENT"?
+        {subjectRef:a.subjectRef,fitScope:"COMPONENT",componentRole:a.componentRole}:{subjectRef:a.subjectRef}));
+    }
+    const updateResults = updates.length > 1 ? updates.map(() => ({ status: "REJECTED" as const, reason: "MULTIPLE_STATE_UPDATES" })) : await Promise.all(updates.map(c=>invoke(c)));
     const local=calls.filter(c=>!writesState(c)&&["recommend_size","quote_cart"].includes(c.name));
     const remote=calls.filter(c=>!writesState(c)&&!local.includes(c));
     const remoteResults=await input.base.invokeBatch(remote);
@@ -474,7 +498,7 @@ export async function createCustomerStateTools(input: {
     // Retained target registration uses profile CAS. Keep those registrations
     // ordered; two independent target requests must not race the same revision.
     if(input.retainAdvice){for(const call of local)localResults.push(await invoke(call));}
-    else localResults.push(...await Promise.all(local.map(invoke)));
+    else localResults.push(...await Promise.all(local.map(c=>invoke(c))));
     return calls.map(c=>writesState(c)?updateResults[updates.indexOf(c)]!:local.includes(c)?localResults[local.indexOf(c)]!:remoteResults[remote.indexOf(c)]!);
   }, async readback() {
     await input.base.readback();

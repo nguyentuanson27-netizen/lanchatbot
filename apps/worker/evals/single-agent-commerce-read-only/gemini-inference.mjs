@@ -262,14 +262,18 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   // Support asked for before a cart: one code-owned statement of what is and is not known, on both routes.
   if(response.name==='record_negotiation')response.response=presentNegotiationResult(response.response);
   if(response.name==='quote_product')response.response=presentPreCartQuoteResult(response.response);
-  const fitFields=['fitScope','sizeSourceHash','missingInputs','recommendedSizes','inputFitPreference','alternativeSizes'];
-  if(response.name==='recommend_size'&&response.response.status==='OK'&&fitFields.every(k=>Object.hasOwn(data,k))){
-   presented.fitEvaluation={status:data.status,target:structuredClone(data.fitScope),sizeSourceHash:data.sizeSourceHash,
-    missingInputs:structuredClone(data.missingInputs),recommendedSizes:structuredClone(data.recommendedSizes),
-    inputFitPreference:data.inputFitPreference,alternativeSizes:structuredClone(data.alternativeSizes),
-    ...Object.fromEntries(['profileRevision','measurementFingerprint'].filter(k=>Object.hasOwn(data,k)).map(k=>[k,data[k]])),
-    meaning:'Kết quả lần gọi này; chỉ dùng khi còn khớp hồ sơ và target hiện hành. Size thường mặc không cấp thêm alternative.'};
-   for(const k of [...fitFields,'profileRevision','measurementFingerprint'])delete presented[k];
+  if(response.name==='recommend_size'&&response.response.status==='OK'){
+   const fitEvaluation=presentFitEvaluation(data);
+   if(fitEvaluation){presented.fitEvaluation=fitEvaluation;for(const k of [...FIT_FIELDS,'profileRevision','measurementFingerprint'])delete presented[k];}
+  }
+  // Size requests the owner made earlier in the turn, evaluated by code once the inputs were written.
+  if(response.name==='apply_customer_state'&&response.response.status==='OK'&&Array.isArray(data.sizeEvaluations)){
+   presented.sizeEvaluations=data.sizeEvaluations.map(e=>{
+    const fitEvaluation=e.status==='OK'&&e.data?presentFitEvaluation(e.data):null;
+    return {request:e.request,status:e.status,...(e.reason?{reason:e.reason}:{}),...(fitEvaluation?{fitEvaluation}:{})};
+   });
+   presented.sizeEvaluationsMeaning='Số đo đã ghi. sizeEvaluations là kết quả tính size theo hồ sơ mới cho yêu cầu chọn size chưa chạy được trước đó trong lượt này. '+
+    'Dùng đúng kết quả này; mục không có fitEvaluation thì chưa có kết quả size, không tự suy ra size.';
   }
  }
  const state=Object.fromEntries(['currentProductId','consideredSize','salesStage','customerMeasurements','fitPreference','preferences','cartQuote','cartItems','checkoutStatus',
@@ -475,6 +479,15 @@ async function boundedJson(response,max){
  try{while(true){const {value,done}=await reader.read();if(done)break;length+=value.byteLength;
    if(length>max){await reader.cancel();throw new Error('RESPONSE_BOUND');}chunks.push(Buffer.from(value));}
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));}finally{reader.releaseLock();}
+}
+const FIT_FIELDS=['fitScope','sizeSourceHash','missingInputs','recommendedSizes','inputFitPreference','alternativeSizes'];
+function presentFitEvaluation(data){
+ if(!data||typeof data!=='object'||!FIT_FIELDS.every(k=>Object.hasOwn(data,k)))return null;
+ return {status:data.status,target:structuredClone(data.fitScope),sizeSourceHash:data.sizeSourceHash,
+  missingInputs:structuredClone(data.missingInputs),recommendedSizes:structuredClone(data.recommendedSizes),
+  inputFitPreference:data.inputFitPreference,alternativeSizes:structuredClone(data.alternativeSizes),
+  ...Object.fromEntries(['profileRevision','measurementFingerprint'].filter(k=>Object.hasOwn(data,k)).map(k=>[k,data[k]])),
+  meaning:'Kết quả lần gọi này; chỉ dùng khi còn khớp hồ sơ và target hiện hành. Size thường mặc không cấp thêm alternative.'};
 }
 export function createGeminiCommerceInference(config,dependencies={}){
  requireThat(['gemini-3.5-flash-lite','gemini-3.8-flash'].includes(config.model)&&config.effort==='high'&&config.location==='global','OWNER_MODEL_IDENTITY');

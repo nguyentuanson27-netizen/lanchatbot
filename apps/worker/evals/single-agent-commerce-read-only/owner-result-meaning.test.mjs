@@ -32,6 +32,25 @@ for(const final of [false,true])test(`owner groups exact current fit and unknown
  assert(!Object.hasOwn(n,'negotiationStatus'));assert(!Object.hasOwn(n,'supportAvailability'));assert(!Object.hasOwn(n,'missing'));
  assert(Buffer.byteLength(JSON.stringify(wire))<=65536);
 });
+// PR 392 case J2: the size the owner asked for earlier in the turn, evaluated by code after the inputs were written.
+for(const final of [false,true])test(`a customer-state write shows the size it unblocked in the same shape as a size call (${final?'final':'native'})`,()=>{
+ const fit={status:'RECOMMENDED',action:'REPLY',fitScope:{kind:'COMPONENT',parentProductId:'P',componentProductId:'C',componentRole:'TOP'},sizeSourceHash:'a'.repeat(64),
+  missingInputs:[],recommendedSizes:[{componentProductId:'C',componentRole:'TOP',size:'M'}],inputFitPreference:null,alternativeSizes:[],profileRevision:5,measurementFingerprint:'b'.repeat(64)};
+ const data={revision:5,measurements:[{kind:'WEIGHT_KG',value:51}],sizeEvaluations:[
+  {request:{subjectRef:'P',fitScope:'COMPONENT',componentRole:'TOP'},status:'OK',data:fit},
+  {request:{subjectRef:'Q'},status:'UNAVAILABLE',reason:'SIZE_SOURCE_UNAVAILABLE'}]};
+ const r=request('apply_customer_state',data,final),before=structuredClone(r.contents),view=result(buildGeminiCommerceRequest(r),final);
+ assert.equal(view.sizeEvaluations.length,2);
+ assert.deepEqual(view.sizeEvaluations[0],{request:data.sizeEvaluations[0].request,status:'OK',fitEvaluation:{status:'RECOMMENDED',target:fit.fitScope,sizeSourceHash:fit.sizeSourceHash,
+  missingInputs:[],recommendedSizes:fit.recommendedSizes,inputFitPreference:null,alternativeSizes:[],profileRevision:5,measurementFingerprint:fit.measurementFingerprint,
+  meaning:'Kết quả lần gọi này; chỉ dùng khi còn khớp hồ sơ và target hiện hành. Size thường mặc không cấp thêm alternative.'}});
+ // A request that produced no size says so and carries no size to state.
+ assert.deepEqual(view.sizeEvaluations[1],{request:{subjectRef:'Q'},status:'UNAVAILABLE',reason:'SIZE_SOURCE_UNAVAILABLE'});
+ assert.match(view.sizeEvaluationsMeaning,/Dùng đúng kết quả này; mục không có fitEvaluation thì chưa có kết quả size, không tự suy ra size\./u);
+ assert.deepEqual(r.contents,before);
+ const plain=result(buildGeminiCommerceRequest(request('apply_customer_state',{revision:5,measurements:[]},final)),final);
+ assert(!Object.hasOwn(plain,'sizeEvaluations'));assert(!Object.hasOwn(plain,'sizeEvaluationsMeaning'));
+});
 test('current owner prompt uses only the active public read/quote contract',()=>{
  const prompt=readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8');
  assert.doesNotMatch(prompt,/SINGLE|COMPARE|DETAILS_ONLY|mỗi quote hai đơn vị|Không quote trùng offer hay batch cùng mutation/);

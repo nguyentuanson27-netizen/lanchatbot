@@ -165,6 +165,50 @@ describe("accepted effective state before dependent tools", () => {
     expect(s.sizeInput).not.toHaveBeenCalled(); expect(s.store.compareAndSwap).not.toHaveBeenCalled();
     expect((await s.tools.invoke({name:"recommend_size",args:{subjectRef:"QU714",customerStateOps:[{...ops[0],sourceQuote:"74"}]}})).status).toBe("OK");
   });
+  // PR 392 case J2: the size request was refused for its inline inputs, the owner then fixed the inputs with a
+  // plain write in its last tool round and had no round left to ask for the size again.
+  it("evaluates a size request that waited for customer inputs once a later write commits them", async () => {
+    const s = await setup("Eo 74, mông 96."),bad=[{op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"Eo 74, mông 96"}];
+    const refused=await s.tools.invokeBatch([1,2].map(()=>({name:"recommend_size",args:{subjectRef:"QU714",customerStateOps:bad}})));
+    expect(refused.map(r=>r.reason)).toEqual(["MEASUREMENT_SOURCE_INVALID","MEASUREMENT_SOURCE_INVALID"]);
+    expect(s.tools.sizeOutcome!()).toBeNull();expect(s.store.compareAndSwap).not.toHaveBeenCalled();
+    const written=await s.tools.invokeBatch([{name:"apply_customer_state",args:{ops:[{...bad[0],sourceQuote:"74"}]}}]);
+    expect(written).toEqual([{status:"OK",data:{revision:expect.any(Number),measurements:expect.arrayContaining([{kind:"WAIST_CM",value:74}]),
+      sizeEvaluations:[{request:{subjectRef:"QU714"},status:"OK",data:expect.objectContaining({status:"RECOMMENDED",recommendedSizes:expect.any(Array)})}]}}]);
+    const data=(written[0]!.data as {revision:number;sizeEvaluations:{data:{profileRevision:number;recommendedSizes:string[]}}[]});
+    // The result is for the profile as just written, and the reply can state it.
+    expect(data.sizeEvaluations[0]!.data.profileRevision).toBe(data.revision);
+    expect(s.tools.sizeOutcome!()).toEqual({status:"RECOMMENDED"});
+    expect(s.tools.snapshot().protectedClaims.filter(c=>(c as {type:string}).type==="SIZE_FIT")).toHaveLength(1);
+    expect(s.tools.snapshot().effectReceipts).toHaveLength(1);
+    // Settled: a further write in the turn does not evaluate it again.
+    const calls=s.sizeInput.mock.calls.length;
+    const later=await s.tools.invoke({name:"apply_customer_state",args:{ops:[{op:"SET",field:"measurements.HIPS_CM",value:96,sourceQuote:"96"}]}});
+    expect(later.status).toBe("OK");expect(later.data).not.toHaveProperty("sizeEvaluations");
+    expect(s.sizeInput.mock.calls.length).toBe(calls);
+  });
+  it("evaluates nothing the owner did not ask for and nothing while an input is still unresolved", async () => {
+    const plain=await setup("Eo 74.");
+    expect((await plain.tools.invoke({name:"apply_customer_state",args:{ops:[{op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"74"}]}})).data).not.toHaveProperty("sizeEvaluations");
+    expect(plain.sizeInput).not.toHaveBeenCalled();
+    const s=await setup("Eo 74, mông 96.");
+    await s.tools.invoke({name:"recommend_size",args:{subjectRef:"QU714",customerStateOps:[
+      {op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"Eo 74, mông 96"},{op:"SET",field:"measurements.HIPS_CM",value:96,sourceQuote:"Eo 74, mông 96"}]}});
+    // Only one of the two refused fields is corrected: the write is incomplete, so no size is computed.
+    const partial=await s.tools.invoke({name:"apply_customer_state",args:{ops:[{op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"74"}]}});
+    expect(partial.status).toBe("REJECTED");expect(partial.data).not.toHaveProperty("sizeEvaluations");expect(s.sizeInput).not.toHaveBeenCalled();
+    const full=await s.tools.invoke({name:"apply_customer_state",args:{ops:[{op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"74"},{op:"SET",field:"measurements.HIPS_CM",value:96,sourceQuote:"96"}]}});
+    expect(full).toMatchObject({status:"OK",data:{sizeEvaluations:[{request:{subjectRef:"QU714"},status:"OK"}]}});
+  });
+  it("does not evaluate a waiting request twice when the owner asks again itself", async () => {
+    const s = await setup("Eo 74, mông 96."),bad=[{op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"Eo 74, mông 96"}];
+    await s.tools.invoke({name:"recommend_size",args:{subjectRef:"QU714",customerStateOps:bad}});
+    expect((await s.tools.invoke({name:"recommend_size",args:{subjectRef:"QU714",customerStateOps:[{...bad[0],sourceQuote:"74"}]}})).status).toBe("OK");
+    const calls=s.sizeInput.mock.calls.length;
+    const later=await s.tools.invoke({name:"apply_customer_state",args:{ops:[{op:"SET",field:"measurements.HIPS_CM",value:96,sourceQuote:"96"}]}});
+    expect(later.status).toBe("OK");expect(later.data).not.toHaveProperty("sizeEvaluations");
+    expect(s.sizeInput.mock.calls.length).toBe(calls);
+  });
   it("does not write inline inputs for an unbound size subject or two concurrent writers", async () => {
     const s=await setup("Eo 74.");
     const ops=[{op:"SET",field:"measurements.WAIST_CM",value:74,sourceQuote:"74"}];
