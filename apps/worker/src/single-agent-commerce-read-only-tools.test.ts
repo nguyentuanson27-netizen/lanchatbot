@@ -891,6 +891,47 @@ it.each(["AO", "CV", "QUAN"])("does not assign parent attributes to the only rem
   }
 });
 
+// PR 392 case S04: "in stock S to XL" right after naming two colours read as true of the pre-order colour too.
+describe("stock stated per colour when a read without a colour covers colours that differ", () => {
+  const twoColours = (beStock = 0) => {
+    const f = fixtureProduct(), row = f.snapshot.offers.DIRECT!.rows[0]!;
+    f.snapshot.offers.DIRECT!.rows = ["trắng", "be"].flatMap(color => ["S", "M", "L", "XL"].map(size => ({ ...structuredClone(row), color, size,
+      stock_quantity: color === "be" ? beStock : 4, parent_variation_id: `SM613-${color === "be" ? "BE" : "TRANG"}-${size}` })));
+    f.snapshot.fulfillment_policy = { tinh_trang: "READY_STOCK", can_order_when_zero: true, prep_min_days: 1, prep_max_days: 2,
+      zero_stock_policy: "ALLOW", zero_stock_prep_min_days: 3, zero_stock_prep_max_days: 5, eta_valid_until: "" };
+    return { f, tools: createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: fixturePolicy, initialProducts: [f.product],
+      catalog: { readProduct: async () => structuredClone(f), searchText: async () => ({ status: "NOT_FOUND", reasonCode: "NO_CANDIDATES" }) } }) };
+  };
+  const availability = (r: { data?: unknown }) => (r.data as { sizeAvailability: Record<string, unknown> }).sizeAvailability;
+  it("lists each colour's stock and marks the merged list as not true of each colour, for owner and verifier alike", async () => {
+    const { tools } = twoColours();
+    const read = availability(await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", offerType: "DIRECT" } }));
+    const beStock = (read.byColor as { color: string; stock: string }[]).find(c => c.color === "be")!.stock;
+    expect(read).toEqual({ productId: "SM613", offerType: "DIRECT", color: null, requestedSize: null, confirmedInStockSizes: ["S", "M", "L", "XL"],
+      unlistedSizeMeaning: "NOT_CONFIRMED", confirmedInStockSizesScope: "AT_LEAST_ONE_COLOR_NOT_EACH",
+      byColor: [{ color: "trắng", stock: "IN_STOCK", confirmedInStockSizes: ["S", "M", "L", "XL"] }, { color: "be", stock: beStock, confirmedInStockSizes: [] }] });
+    expect(beStock).not.toBe("IN_STOCK");
+    const literal = tools.snapshot().policyLiterals.find(p => p.ref.startsWith("read:") && JSON.parse(p.text).sizeAvailability);
+    expect(JSON.parse(literal!.text).sizeAvailability).toEqual(read);
+  });
+  it("narrows each colour to the size that was asked", async () => {
+    const { tools } = twoColours();
+    const read = availability(await tools.invoke({ name: "read_product", args: { subjectRef: "SM613", offerType: "DIRECT", size: "M" } }));
+    expect(read).toMatchObject({ requestedSize: "M", confirmedInStockSizes: ["M"], confirmedInStockSizesScope: "AT_LEAST_ONE_COLOR_NOT_EACH",
+      byColor: [{ color: "trắng", stock: "IN_STOCK", confirmedInStockSizes: ["M"] }, { color: "be", confirmedInStockSizes: [] }] });
+  });
+  it("adds nothing when a colour was asked, when the colours agree or when there is one colour", async () => {
+    const one = availability(await twoColours().tools.invoke({ name: "read_product", args: { subjectRef: "SM613", offerType: "DIRECT", color: "be" } }));
+    expect(one).not.toHaveProperty("byColor"); expect(one).not.toHaveProperty("confirmedInStockSizesScope");
+    const agree = availability(await twoColours(4).tools.invoke({ name: "read_product", args: { subjectRef: "SM613", offerType: "DIRECT" } }));
+    expect(agree).toEqual({ productId: "SM613", offerType: "DIRECT", color: null, requestedSize: null, confirmedInStockSizes: ["S", "M", "L", "XL"], unlistedSizeMeaning: "NOT_CONFIRMED" });
+    const f = fixtureProduct(), plain = createReadOnlyTools({ scope: commerceScope(), clock: () => commerceNow, policy: fixturePolicy, initialProducts: [f.product],
+      catalog: { readProduct: async () => f, searchText: async () => ({ status: "NOT_FOUND", reasonCode: "NO_CANDIDATES" }) } });
+    const single = availability(await plain.invoke({ name: "read_product", args: { subjectRef: "SM613", offerType: "DIRECT" } }));
+    expect(single).not.toHaveProperty("byColor");
+  });
+});
+
 it("shares scoped positive-stock sizes with owner and verifier and invalidates a size-only source change", async () => {
   const f = fixtureProduct(), row = f.snapshot.offers.DIRECT!.rows[0]!;
   f.snapshot.offers.DIRECT!.rows.push({ ...row, size: "L", stock_quantity: 0 },
