@@ -31,3 +31,5 @@ Các lần lặp dùng cùng hai model Vertex Gemini 3.5 Flash Lite High và cù
 268 request generation thực tế, gồm 177 ở đoạn đầu và 91 trong các đoạn chạy tiếp. Có 264 output thành công và 4 output sai định dạng hoặc sai schema, không retry. Các lượt ghi nhận gồm 73 đủ điều kiện gửi trong môi trường test, 19 handoff và 11 không gửi. Một generation của J1 lần 5 có kết quả provider nhưng PostgreSQL ngắt trước khi ghi được kết quả lượt. Kiểm tra request hash, nhãn evaluator, dữ liệu riêng tư giả lập và văn bản đã duyệt đều đạt. Các database test đã được dọn, không có tin gửi thật.
 
 [Lịch sử 103 lượt](CONVERSATIONS_COMPLETE.md) · [Số liệu và bằng chứng](COMPLETION_EVIDENCE.json) · [Verifier 32 ca và lỗi ảnh giữ lại](SAFETY_AGGREGATE.json)
+
+[Review tổng hợp 122 lượt sau sửa runtime, gồm 19 lượt mới với Sol High và 10 đối chứng riêng verifier](../convergence-sol-followup-run-20261112/REVIEW.md)
