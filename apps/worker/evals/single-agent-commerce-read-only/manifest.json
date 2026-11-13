@@ -68,8 +68,8 @@
     }
   },
   "promptHashes": {
-    "owner": "78522a4f4982c93ca1f513e168800fe3e34e7e764c50a1a11c9ad739b9159170",
-    "verifier": "ef4a060ce221fe0374ec94b96e23aef8ed8b807cb1eb09ed4c6afd3489f6373f"
+    "owner": "19cd58dbfb48cd0971aa67ab5e3369ea4f2df445f58b0de9a6db3115739b7400",
+    "verifier": "ca2c883564b4800f76dcfe7b11b2298fbb4930efd7a3095667f44e965153f7b3"
   },
   "verdictSchema": {
     "type": "object",

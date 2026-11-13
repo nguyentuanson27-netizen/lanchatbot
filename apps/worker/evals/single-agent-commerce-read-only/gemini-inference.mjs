@@ -483,6 +483,9 @@ async function boundedJson(response,max){
    if(length>max){await reader.cancel();throw new Error('RESPONSE_BOUND');}chunks.push(Buffer.from(value));}
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));}finally{reader.releaseLock();}
 }
+// Owner decision 2026-11-13: the size a customer says they usually wear is theirs to choose, not a fit result.
+export const FIT_EVALUATION_MEANING='Kết quả lần gọi này; chỉ dùng khi còn khớp hồ sơ và target hiện hành. Size khách quen mặc không phải kết quả tính và không cấp thêm alternative; '+
+ 'được nhắc như lựa chọn theo thói quen của khách sau size đề xuất, không nói size ấy vừa.';
 const FIT_FIELDS=['fitScope','sizeSourceHash','missingInputs','recommendedSizes','inputFitPreference','alternativeSizes'];
 function presentFitEvaluation(data){
  if(!data||typeof data!=='object'||!FIT_FIELDS.every(k=>Object.hasOwn(data,k)))return null;
@@ -490,7 +493,7 @@ function presentFitEvaluation(data){
   missingInputs:structuredClone(data.missingInputs),recommendedSizes:structuredClone(data.recommendedSizes),
   inputFitPreference:data.inputFitPreference,alternativeSizes:structuredClone(data.alternativeSizes),
   ...Object.fromEntries(['profileRevision','measurementFingerprint'].filter(k=>Object.hasOwn(data,k)).map(k=>[k,data[k]])),
-  meaning:'Kết quả lần gọi này; chỉ dùng khi còn khớp hồ sơ và target hiện hành. Size thường mặc không cấp thêm alternative.'};
+  meaning:FIT_EVALUATION_MEANING};
 }
 export function createGeminiCommerceInference(config,dependencies={}){
  requireThat(['gemini-3.5-flash-lite','gemini-3.8-flash'].includes(config.model)&&config.effort==='high'&&config.location==='global','OWNER_MODEL_IDENTITY');

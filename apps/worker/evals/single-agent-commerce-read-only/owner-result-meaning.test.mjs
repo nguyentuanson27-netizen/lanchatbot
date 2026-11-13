@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {buildGeminiCommerceRequest} from './gemini-inference.mjs';
+import {buildGeminiCommerceRequest,FIT_EVALUATION_MEANING} from './gemini-inference.mjs';
 import {readCompactSections} from './owner-data-presentation.mjs';
 import {SUPPORT_NOT_EVALUATED_MEANING} from '../../dist/single-agent-commerce-owner-view.js';
 
@@ -18,7 +18,7 @@ for(const final of [false,true])test(`owner groups exact current fit and unknown
  const r=request('recommend_size',data,final),before=structuredClone(r.contents),trusted=structuredClone(r.context);
  const wire=buildGeminiCommerceRequest(r),view=result(wire,final);
  assert.deepEqual(view.fitEvaluation,{status:data.status,target:data.fitScope,sizeSourceHash:data.sizeSourceHash,missingInputs:[],recommendedSizes:data.recommendedSizes,inputFitPreference:null,alternativeSizes:[],
-  meaning:'Kết quả lần gọi này; chỉ dùng khi còn khớp hồ sơ và target hiện hành. Size thường mặc không cấp thêm alternative.'});
+  meaning:FIT_EVALUATION_MEANING});
  for(const k of ['fitScope','recommendedSizes','inputFitPreference','alternativeSizes','sizeSourceHash','missingInputs'])assert(!Object.hasOwn(view,k));
  assert.deepEqual(r.contents,before);assert.deepEqual(r.context,trusted);
  if(!final)assert.deepEqual(wire.contents[2],before[1]);
@@ -43,13 +43,28 @@ for(const final of [false,true])test(`a customer-state write shows the size it u
  assert.equal(view.sizeEvaluations.length,2);
  assert.deepEqual(view.sizeEvaluations[0],{request:data.sizeEvaluations[0].request,status:'OK',fitEvaluation:{status:'RECOMMENDED',target:fit.fitScope,sizeSourceHash:fit.sizeSourceHash,
   missingInputs:[],recommendedSizes:fit.recommendedSizes,inputFitPreference:null,alternativeSizes:[],profileRevision:5,measurementFingerprint:fit.measurementFingerprint,
-  meaning:'Kết quả lần gọi này; chỉ dùng khi còn khớp hồ sơ và target hiện hành. Size thường mặc không cấp thêm alternative.'}});
+  meaning:FIT_EVALUATION_MEANING}});
  // A request that produced no size says so and carries no size to state.
  assert.deepEqual(view.sizeEvaluations[1],{request:{subjectRef:'Q'},status:'UNAVAILABLE',reason:'SIZE_SOURCE_UNAVAILABLE'});
  assert.match(view.sizeEvaluationsMeaning,/Dùng đúng kết quả này; mục không có fitEvaluation thì chưa có kết quả size, không tự suy ra size\./u);
  assert.deepEqual(r.contents,before);
  const plain=result(buildGeminiCommerceRequest(request('apply_customer_state',{revision:5,measurements:[]},final)),final);
  assert(!Object.hasOwn(plain,'sizeEvaluations'));assert(!Object.hasOwn(plain,'sizeEvaluationsMeaning'));
+});
+// Owner decision 2026-11-13 (PR 392 case P07): the size a customer says they usually wear may be mentioned.
+test('the usual-size rule reads the same in the size result, the owner prompt and the verifier prompt',()=>{
+ const owner=readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8'),verifier=readFileSync(new URL('./prompts/verifier.vi.txt',import.meta.url),'utf8');
+ // Mentioned after the recommended size, as the customer's habit.
+ assert.match(FIT_EVALUATION_MEANING,/được nhắc như lựa chọn theo thói quen của khách sau size đề xuất/u);
+ // The size call still comes first: a measured wording that dropped it made the owner skip recommend_size.
+ assert.match(owner,/Khách nêu size quen mặc khi nhờ tư vấn: vẫn gọi recommend_size và báo size đề xuất theo kết quả; sau đó được nhắc size quen mặc như lựa chọn theo thói quen của khách/u);
+ assert.match(verifier,/Shop được nhắc lại size khách tự nêu là quen mặc như một lựa chọn theo thói quen của khách khi draft vẫn nêu size theo SIZE_FIT là size shop đề xuất/u);
+ // Never as a fit result or the shop's recommendation.
+ assert.match(FIT_EVALUATION_MEANING,/không phải kết quả tính và không cấp thêm alternative.*không nói size ấy vừa/u);
+ assert.match(owner,/không ghi nhận nó thành size đã chọn và không nói nó vừa, hợp hơn hay là size shop đề xuất/u);
+ assert.match(verifier,/Draft khẳng định size quen mặc vừa, hợp hơn hoặc là size shop đề xuất thì vẫn cần SIZE_FIT/u);
+ // The rules that keep a usual size from becoming an order or a second recommendation are unchanged.
+ assert.match(verifier,/Size thường mặc không tự là lựa chọn mua/u);assert.match(owner,/Size thường mặc khi nhờ tư vấn chưa là yêu cầu mua size ấy/u);
 });
 test('current owner prompt uses only the active public read/quote contract',()=>{
  const prompt=readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8');
