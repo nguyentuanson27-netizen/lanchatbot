@@ -492,3 +492,59 @@ Bộ test worker: 2.822 unit pass, 926 eval pass, không có lỗi mới; 6 unit
 ## 20. Kết quả N=5 trên 2877c0a9, 13/11/2026
 
 Đã init và seal lại theo prompt và owner decisions mới. Chạy đủ 13 ca × 5 lần, ghi nhận 135 lượt trên cùng snapshot. Có 7/12 ca bán hàng đạt ít nhất 4/5. S16 handoff đúng 4/5. Đề xuất **STOP** vì J1 và J4 có lượt tự chọn màu để ghi giỏ, P07 còn gắn size quen mặc với độ thoải mái, và S16 chưa đạt ngưỡng. P09 kèm đúng ảnh của cả hai mẫu trong cả hai lần báo giá qua `read_product`. [Review và số liệu theo ca](../../apps/worker/evals/single-agent-commerce-qualification/convergence-n5-run-20261113/REVIEW.md) · [Lịch sử 135 lượt](../../apps/worker/evals/single-agent-commerce-qualification/convergence-n5-run-20261113/CONVERSATIONS.md)
+
+## 21. Review lượt N=5 trên `2877c0a9` và sửa hai lỗi do thay đổi ở mục 18–19 gây ra
+
+### Kết quả lượt chạy theo từng thay đổi
+
+| Thay đổi | Bằng chứng trong lượt chạy | Kết luận |
+|---|---|---|
+| Ghi số đo xong thì tự tính size (J2) | J2 5/5, trước đó 1/4 | Giữ |
+| Thử lại HTTP 429/5xx | Không phát sinh lỗi provider | Chưa có bằng chứng từ model |
+| Phương án A (J4) | 3/3 lượt đi tới câu hỗ trợ đều giữ đúng quy tắc | Giữ |
+| Món đang chờ (J1) | Không lần nào chạy tới: model tự chọn màu nên `add_to_cart` không bị từ chối | Chưa có bằng chứng |
+| Ảnh cho hai mẫu (P09) | P09 2/2 lần báo giá hai mẫu có đủ ảnh. Nhưng S09 lần 2, S04 lần 4–5 handoff ngay sau hai lệnh đọc | Giữ quy tắc, đổi thời điểm |
+| Tồn theo từng màu (S04) | J1 0/5 và J4 3/5: model coi màu be là không mua được, chỉ mời màu trắng và tự ghi trắng vào giỏ | Gỡ bỏ |
+| Size khách quen mặc (P07) | 5/5 được gửi, cả năm nêu M trước. 4/5 gắn L với mặc thoải mái | Siết câu chữ phía owner |
+
+### Lỗi 1: tồn theo từng màu làm model tự chọn màu
+
+`byColor` liệt kê màu be với danh sách size còn hàng rỗng. Nhãn trạng thái đặt trước đã bị tôi bỏ ở `14483849` để tránh hai nhãn mâu thuẫn, nên model chỉ còn thấy "be: không có size nào". Hệ quả trong lượt chạy:
+
+- J4 lần 2–3 và J1 lần 2, 5: chỉ mời màu trắng, không nhắc màu be.
+- J1 lần 1, 2, 5: tự thêm hai áo trắng khi khách mới nói số lượng và size.
+- J1 lần 3: câu bị chặn viết "màu be hiện không có sẵn size M và L"; verifier dẫn đúng trường `unlistedSizeMeaning` của dữ liệu này.
+- J1 lần 4, J4 lần 4–5: tự thêm áo trắng ngay lượt đầu, sau đó bước chuẩn bị ảnh thất bại và thành handoff khi giỏ đã đổi.
+
+Ở `e2e0b366`, không có `byColor`, cả 6 lần J1 và J4 đều gọi `add_to_cart` không màu, bị từ chối, rồi hỏi khách chọn giữa trắng và be. Đã gỡ ở `8bcdee32`; hai file trở về đúng trạng thái trước `191ecdc9`. Lỗi S04 ban đầu ("sẵn S đến XL" ngay sau khi nêu hai màu, 1/3) quay lại trạng thái chưa xử lý.
+
+### Lỗi 2: ảnh cho hai mẫu lấy mất lệnh model còn cần
+
+Ảnh được lấy trước lần sinh kế tiếp của owner. Với hai sản phẩm gắn sẵn, lượt dùng hết đúng 6 lệnh (2 chuẩn bị, 2 đọc, 2 ảnh) và owner không còn lệnh nào. S09 lần 2 cần `read_policy` nên handoff `POLICY_UNAVAILABLE`; S04 lần 4–5 handoff `PRODUCT_AMBIGUOUS` sau đúng hai lệnh đọc. Đây là suy luận từ dấu vết tool, vì artifact thô của từng lượt không nằm trong repo. Ở `a391ed28` ảnh chỉ được lấy sau khi owner đã viết câu trả lời, từ số lệnh còn thừa.
+
+### P07: câu chữ
+
+Ba chỗ ghi quy tắc ở mục 19 chỉ cấm nói size quen mặc "vừa, hợp hơn". Tiêu chí chấm của lượt chạy cấm cả việc gắn size đó với độ thoải mái. Ở `9ddbee04` prompt owner và câu dẫn kết quả size ghi rõ thêm "rộng hay thoải mái hơn". Prompt verifier chưa đổi: nếu verifier chặn cả ý này thì mỗi lần owner lỡ lời sẽ thành handoff thay vì một câu trả lời được gửi, và đó là lựa chọn của owner.
+
+Đo phía owner trên fixture (bộ áo quần, câu khách của P07, N=10, verifier giả):
+
+| | Câu chữ mục 19 | Câu chữ đã siết |
+|---|---|---|
+| Gọi `recommend_size` cho cả hai phần | 7/10 | 9/10 |
+| Có kết quả và gắn L với thoải mái | 0/7 | 0/9 |
+
+Fixture không tái hiện được lỗi của lượt chạy thật (0/7 so với 4/5), nên phép đo này chỉ cho thấy câu chữ mới không làm giảm việc gọi tool. Tác dụng thật cần lượt chạy kế tiếp.
+
+### Còn mở
+
+| Việc | Ghi chú |
+|---|---|
+| Giỏ đã ghi rồi mới handoff vì ảnh | Có từ trước; lượt này lộ ra vì model tự chọn màu. Vẫn có thể xảy ra khi khách chọn màu thật ở lượt mở đầu |
+| Không có gì ngăn `add_to_cart` với màu khách chưa chọn | Verifier cho qua vì có biên nhận. Cần quyết định của owner về cách chặn |
+| S16 4/5 | Lần 5 hỏi khách chọn set quần hay set váy thay vì handoff |
+| S15 1/5, giọng văn J2 và S08 | Sửa prompt (Giai đoạn 4) |
+| S04 "sẵn S đến XL" | Chưa xử lý lại sau khi gỡ `byColor` |
+
+### Trạng thái kiểm chứng
+
+Bộ test worker: 2.825 unit pass, 926 eval pass, không có lỗi mới; 1 unit và 6 eval fail có từ trước. Hash prompt owner và `owner-decisions.json` đã đổi nên harness cần `init` và `seal` lại.

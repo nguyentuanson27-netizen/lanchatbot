@@ -174,7 +174,9 @@
         "REMAINING_WORK_OR_IMAGE_SLOTS_DO_NOT_COVER_BOTH",
         "RETURNING_CUSTOMER",
         "ONE_PRODUCT_OR_THREE_AND_MORE"
-      ]
+      ],
+      "timing": "AFTER_THE_OWNER_REPLY_FROM_UNUSED_WORK",
+      "correctedAfter": "convergence-n5-run-20261113: added before the owner's next step it took the work the owner still needed"
     },
     "customerUsualSize": {
       "status": "APPROVED_IMPLEMENTED",
@@ -185,14 +187,14 @@
         "A_FIT_RESULT",
         "AN_ALTERNATIVE_SIZE",
         "A_CHOSEN_SIZE",
-        "A_SIZE_DESCRIBED_AS_FITTING"
+        "A_SIZE_DESCRIBED_AS_FITTING_LOOSER_OR_MORE_COMFORTABLE"
       ],
       "sizeEngineChanged": false,
       "promptsChanged": [
-        "owner.vi.txt",
-        "verifier.vi.txt"
+        "owner.vi.txt (twice)",
+        "verifier.vi.txt (once)"
       ],
-      "measured": "OWNER_ONLY_ON_FIXTURE_N8_VERIFIER_NOT_MEASURED"
+      "measured": "N5_REAL_RUN_ON_2877c0a9_4_OF_5_TIED_THE_USUAL_SIZE_TO_COMFORT; OWNER_WORDING_TIGHTENED_AFTER; VERIFIER_NOT_TIGHTENED_PENDING_OWNER_DECISION"
     }
   }
 }
