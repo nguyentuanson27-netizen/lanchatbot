@@ -163,6 +163,36 @@
       "approvedAt": "2026-11-12",
       "ownerAnswer": "luôn push thẳng lên pr",
       "branch": "feat/c3-phase-c-qualification-20261028"
+    },
+    "firstContactPricedReadPhotos": {
+      "status": "APPROVED_IMPLEMENTED",
+      "approvedAt": "2026-11-13",
+      "ownerAnswer": "ok, làm bản giới hạn 2 mẫu",
+      "rule": "FIRST_CONTACT_EXACTLY_TWO_PRODUCTS_PRICED_BY_READ_PRODUCT_GET_ONE_GENERAL_PHOTO_EACH",
+      "blocking": false,
+      "skippedWhen": [
+        "REMAINING_WORK_OR_IMAGE_SLOTS_DO_NOT_COVER_BOTH",
+        "RETURNING_CUSTOMER",
+        "ONE_PRODUCT_OR_THREE_AND_MORE"
+      ]
+    },
+    "customerUsualSize": {
+      "status": "APPROVED_IMPLEMENTED",
+      "approvedAt": "2026-11-13",
+      "ownerAnswer": "bot được nhắc size khách quen mặc",
+      "rule": "MAY_BE_MENTIONED_AFTER_THE_RECOMMENDED_SIZE_AS_THE_CUSTOMERS_OWN_HABIT",
+      "neverIs": [
+        "A_FIT_RESULT",
+        "AN_ALTERNATIVE_SIZE",
+        "A_CHOSEN_SIZE",
+        "A_SIZE_DESCRIBED_AS_FITTING"
+      ],
+      "sizeEngineChanged": false,
+      "promptsChanged": [
+        "owner.vi.txt",
+        "verifier.vi.txt"
+      ],
+      "measured": "OWNER_ONLY_ON_FIXTURE_N8_VERIFIER_NOT_MEASURED"
     }
   }
 }

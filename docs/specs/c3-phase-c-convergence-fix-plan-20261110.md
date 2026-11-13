@@ -448,3 +448,43 @@ Lưu ý khi triển khai: `CustomerProfileV1` là schema strict. Bản phát hà
 ### Trạng thái kiểm chứng
 
 Bộ test worker: 2.815 unit pass, 925 eval pass, không có lỗi mới; 6 unit và 6 eval fail có từ trước. Test `packages/contracts`: 254 pass. Chưa có số đo với model cho bất kỳ thay đổi nào ở mục 17 và 18. `owner-decisions.json` đã đổi nên harness cần `init` và `seal` lại trước lượt chạy kế tiếp.
+
+## 19. Cập nhật 13/11/2026: ảnh cho hai mẫu và size khách quen mặc
+
+### Quyết định của owner
+
+| Việc | Quyết định |
+|---|---|
+| P09: ảnh khi báo giá hai mẫu qua `read_product` | Làm bản giới hạn hai mẫu |
+| P07: size khách quen mặc | Bot được nhắc |
+
+### P09: ảnh cho hai mẫu ở lượt mở đầu
+
+Ở lượt mở đầu, khi owner đọc giá đúng hai sản phẩm bằng `read_product`, code lấy thêm một ảnh chung cho mỗi sản phẩm trước khi owner viết câu trả lời. Đây là phần thêm, không phải nghĩa vụ: không đủ lệnh hoặc chỗ ảnh cho cả hai thì bỏ qua, tra ảnh lỗi không làm hỏng lượt, và câu trả lời không bao giờ bị giữ lại vì nó. Một mẫu hoặc từ ba mẫu trở lên giữ quy tắc cũ.
+
+Bảng số lệnh ở lượt trả lời trước thiếu bước chuẩn bị: mỗi sản phẩm đã gắn sẵn ở đầu lượt tốn một lệnh đọc. Ca P09 vì vậy dùng đúng 6 lệnh (2 chuẩn bị, 2 đọc, 2 ảnh), tức là sát giới hạn. Nếu model gọi thêm bất kỳ lệnh nào thì không có ảnh, và câu trả lời vẫn được gửi.
+
+Rủi ro còn lại, chưa đo được: model đọc hai mẫu nhưng chỉ tư vấn một mẫu thì ảnh của mẫu kia vẫn đi kèm.
+
+### P07: size khách quen mặc
+
+Quy tắc mới: sau size đề xuất theo kết quả, câu trả lời được nhắc size khách tự nói là quen mặc như lựa chọn theo thói quen của khách. Size đó vẫn không phải kết quả tính, không phải size thay thế, không phải size đã chọn, và không được mô tả là vừa. Size Engine và claim `SIZE_FIT` không đổi. Quy tắc được ghi giống nhau ở ba chỗ: câu dẫn của kết quả size, prompt owner và prompt verifier.
+
+Đây là thay đổi prompt trước khi có lượt chạy N=5 đầy đủ, vì quyết định nghiệp vụ không thể có hiệu lực nếu verifier vẫn giữ quy tắc cũ.
+
+Số đo phía owner (Gemini 3.5 Flash Lite, fixture `QU714`, hồ sơ có sẵn eo 74 và mông 95, kết quả tính là M, khách nói "chị hay mặc size L", N=8, verifier giả luôn PASS nên kết luận đọc từ câu nháp):
+
+| | Prompt cũ | Câu chữ đầu tiên | Câu chữ đã dùng |
+|---|---|---|---|
+| Gọi `recommend_size` | 4/8 | 1/6 | 5/8 |
+| Có kết quả M và nêu M trước | 4/4 | 0/0 | 5/5 |
+| Nhắc L mà không nói L vừa | 4/4, trong đó 3 lượt mời chọn L nếu thích rộng | không có | 5/5 |
+| Không gọi tool nhưng vẫn nhận L hoặc kết luận vừa | 2/8 | 4/6 | 1/8 |
+
+Câu chữ đầu tiên của tôi bỏ sót ý "vẫn gọi `recommend_size`" và khiến model bỏ lệnh tính size, nên đã thay trước khi commit. Với prompt cũ model vẫn nhắc L ở mọi lượt có kết quả, và đó là câu Sol chặn ở P07.
+
+Chưa đo: verifier Sol có cho qua câu nhắc size quen mặc theo quy tắc mới hay không, và có còn chặn đúng các câu nhận L khi không có kết quả hay không. Fixture ở đây không chạy được Sol.
+
+### Trạng thái kiểm chứng
+
+Bộ test worker: 2.822 unit pass, 926 eval pass, không có lỗi mới; 6 unit và 6 eval fail có từ trước. Hash prompt trong `manifest.json` và `owner-decisions.json` đã đổi nên harness cần `init` và `seal` lại.
