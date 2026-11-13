@@ -19,9 +19,9 @@ export function withOpeningProductMedia(base:CommerceTools,input:{rule:OpeningPr
  ])].sort();
  // Owner decision 2026-11-13 (PR 392 case P09): on a first contact where the owner read the price of exactly two
  // products, code adds a general photo of each, as it does for prices read through quote_product. This is an
- // addition, never an obligation: it is skipped when the remaining work or image slots do not cover both, a
- // failed lookup does not fail the turn, and the reply is not held back for it. Three or more products keep the
- // rule as it was.
+ // addition, never an obligation: it is made after the owner has written the reply, from work the owner left
+ // unused; it is skipped when that work or the image slots do not cover both, a failed lookup does not fail the
+ // turn, and the reply is not held back for it. Three or more products keep the rule as it was.
  const pricedReads=new Set<string>(),pricedReadPhotoAttempts=new Set<string>();
  const observePricedReads=(calls:readonly {name:string;args:unknown}[],results:readonly {status:string;data?:unknown}[])=>calls.forEach((call,index)=>{
   const a=call.args as {subjectRef?:unknown;detailsOnly?:unknown}|null,data=results[index]?.data as {sellingOptions?:unknown}|undefined;
@@ -113,11 +113,11 @@ export function withOpeningProductMedia(base:CommerceTools,input:{rule:OpeningPr
   },
   openingMediaBlocksCodeOutput:calls=>!input.codeOutputSupported&&input.firstContact!==false&&calls.some(c=>c.name==='confirm_purchase'),
   async prepareOpeningMedia(control:PreparationControl):Promise<OpeningMediaWork>{
-   const work=await prepareRequired(control);
-   if(work.status==='UNAVAILABLE')return work;
-   const extra=await addPricedReadPhotos(control,work.chargedUnits);
-   return extra.charged?{...work,status:'READY',requiredProducts:[...new Set([...work.requiredProducts,...extra.products])].sort(),chargedUnits:work.chargedUnits+extra.charged}:work;
-  }};
+   return prepareRequired(control);
+  },
+  // Runs once the owner has written its reply, on work the owner did not use. Run before the owner, as it was
+  // at first, it took the last units of the turn and the owner had none left for the read it still needed.
+  addFinalMedia:control=>addPricedReadPhotos(control,0)};
  async function prepareRequired(control:PreparationControl):Promise<OpeningMediaWork>{
    let chargedUnits=0;const context=base.snapshot(),requiredProducts=required(context);
    const fail=(reason:string):OpeningMediaWork=>({status:'UNAVAILABLE',requiredProducts,chargedUnits,reason});

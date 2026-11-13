@@ -194,7 +194,20 @@ describe('photos for two priced reads on a first contact',()=>{
   const outputs=[{kind:'TOOLS' as const,calls,content:{role:'model' as const,parts:calls.map(functionCall=>({functionCall}))}},{kind:'FINAL' as const,text:'Dạ, chị thích mẫu nào hơn ạ?'}];
   return runCommerceTurn({scope:s.scope,tools:s.tools,clock:()=>commerceNow,latest:'Hai mẫu này còn size M không em?',history:[],ownerPrompt:'Tư vấn',verifierPrompt:'Kiểm',owner:async()=>outputs.shift()!,verifier:s.verifier});
  }
- it('adds one photo of each product before the reply is written and verified',async()=>{
+ // Measured on the N=5 run of 13 November: added before the owner's next step, the two photos took the last units
+ // of the turn, and an owner that still needed one read (care policy, the other offer) handed off instead.
+ it('leaves the owner its work: the photos come only from what is unused once the reply is written',async()=>{
+  const s=await setup(['SM613','P2'],true,true,undefined,OPENING_PRODUCT_MEDIA_RULE),budgets:number[]=[];
+  const rounds=[[read('SM613'),read('P2')],[{name:'read_policy',args:{}}]];
+  const outputs=[...rounds.map(calls=>({kind:'TOOLS' as const,calls,content:{role:'model' as const,parts:calls.map(functionCall=>({functionCall}))}})),{kind:'FINAL' as const,text:'Dạ, áo giặt tay chị nhé.'}];
+  const r=await runCommerceTurn({scope:s.scope,tools:s.tools,clock:()=>commerceNow,latest:'Áo này giặt máy được không em?',history:[],ownerPrompt:'Tư vấn',verifierPrompt:'Kiểm',
+   owner:async request=>{budgets.push(request.toolBudget!.callsRemaining);return outputs.shift()!;},verifier:s.verifier});
+  // After the two reads the owner still has two units, and uses one for the policy.
+  expect(budgets).toEqual([4,2,1]);expect(r.terminal.disposition).toBe('SEND_ELIGIBLE');expect(r.recovery??null).toBeNull();
+  // One unit is left at the end: not enough for both photos, so none is taken.
+  expect(s.tools.mediaSelection!()).toEqual([]);expect(r.normalToolCalls).toBe(5);
+ });
+ it('adds one photo of each product after the reply is written and before it is verified',async()=>{
   const s=await setup(['SM613','P2'],true,true,undefined,OPENING_PRODUCT_MEDIA_RULE);
   s.verifier.mockImplementation(async r=>{expect(r.trusted.protectedClaims.filter(c=>(c as {type?:string})?.type==='PRODUCT_MEDIA')).toHaveLength(2);return {result:{verdict:'PASS',violations:[]}};});
   const r=await turn(s,[read('SM613'),read('P2')]);

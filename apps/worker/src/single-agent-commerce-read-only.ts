@@ -42,6 +42,8 @@ export interface CommerceTools {
   /** Original proven pre-commit selection failure, still valid in current authority. No I/O. */
   uncommittedSelectionResult?(result:CommerceToolResult):boolean;
   openingMediaTiming?:'BEFORE_OWNER';
+  /** Optional photos added after the owner's reply from unused work. Never fails or holds back the reply. */
+  addFinalMedia?(control:import('./single-agent-commerce-read-only-tools.js').PreparationControl):Promise<{charged:number;products:string[]}>;
   /** No I/O: known cart targets must leave enough primitive work and image slots. */
   openingMediaFeasible?(calls:readonly CommerceToolCall[],remaining:number):boolean;
   /** Code-only, current exact cart/source proof; never a model-issued generic-media permission. */
@@ -391,6 +393,16 @@ export async function runCommerceTurn(input: {
     if(input.tools.openingMediaTiming==='BEFORE_OWNER'&&input.tools.openingMediaReady?.(input.tools.snapshot())!==true){
       if(openingMediaWork)openingMediaWork={...openingMediaWork,status:'UNAVAILABLE',reason:'OPENING_MEDIA_INVALIDATED'};
       return finish(fallback('PREPARATION_UNAVAILABLE'));
+    }
+    if(input.tools.addFinalMedia&&toolCalls<6){
+      const started=performance.now();
+      try{
+        const extra=await input.tools.addFinalMedia({maxCalls:6-toolCalls,onDispatch:()=>{if(toolCalls>=6)throw Error('BUDGET');toolCalls++;executedNormalToolInvocations++;}});
+        if(extra.charged&&openingMediaWork&&openingMediaWork.status!=='UNAVAILABLE')openingMediaWork={...openingMediaWork,status:'READY',
+          requiredProducts:[...new Set([...openingMediaWork.requiredProducts,...extra.products])].sort(),chargedUnits:openingMediaWork.chargedUnits+extra.charged};
+      }catch{/* an addition, never a failure of the turn */}
+      toolLatencyMs+=performance.now()-started;
+      const actual=await effectTerminal();if(actual)return finish(actual,true);
     }
     if(input.tools.prepareOpeningMedia&&input.tools.openingMediaTiming!=='BEFORE_OWNER'){
       const started=performance.now();
