@@ -194,7 +194,13 @@
         "owner.vi.txt (twice)",
         "verifier.vi.txt (once)"
       ],
-      "measured": "N5_REAL_RUN_ON_2877c0a9_4_OF_5_TIED_THE_USUAL_SIZE_TO_COMFORT; OWNER_WORDING_TIGHTENED_AFTER; VERIFIER_NOT_TIGHTENED_PENDING_OWNER_DECISION"
+      "measured": "N5_REAL_RUN_ON_2877c0a9_4_OF_5_TIED_THE_USUAL_SIZE_TO_COMFORT; OWNER_WORDING_TIGHTENED_AFTER; VERIFIER_UNCHANGED_BY_OWNER_DECISION",
+      "verifierBlocksComfortWording": {
+        "status": "REJECTED",
+        "approvedAt": "2026-11-13",
+        "ownerAnswer": "p07: không chặn",
+        "meaning": "THE_VERIFIER_BLOCKS_ONLY_A_USUAL_SIZE_STATED_AS_FITTING_BETTER_SUITED_OR_RECOMMENDED; TYING_IT_TO_COMFORT_IS_STEERED_BY_THE_OWNER_PROMPT_AND_DOES_NOT_STOP_A_REPLY"
+      }
     }
   }
 }

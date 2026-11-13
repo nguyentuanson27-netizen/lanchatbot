@@ -548,3 +548,9 @@ Fixture không tái hiện được lỗi của lượt chạy thật (0/7 so v�
 ### Trạng thái kiểm chứng
 
 Bộ test worker: 2.825 unit pass, 926 eval pass, không có lỗi mới; 1 unit và 6 eval fail có từ trước. Hash prompt owner và `owner-decisions.json` đã đổi nên harness cần `init` và `seal` lại.
+
+### Quyết định của owner sau review, 13/11/2026
+
+**P07: verifier không chặn câu gắn size quen mặc với độ thoải mái.** Verifier chỉ chặn khi câu trả lời nói size quen mặc vừa, hợp hơn hoặc là size shop đề xuất. Việc tránh gắn nó với "rộng hay thoải mái hơn" do prompt owner dẫn hướng và không làm dừng một câu trả lời. Prompt verifier giữ nguyên như ở `0145237b`.
+
+Khi chấm lượt chạy kế tiếp, một câu P07 nêu đúng size đề xuất rồi nhắc size quen mặc kèm ý thoải mái là điểm cần cải thiện về câu chữ, không phải lượt hỏng.
