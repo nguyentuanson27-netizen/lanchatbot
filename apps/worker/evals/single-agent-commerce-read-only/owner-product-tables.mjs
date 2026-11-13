@@ -42,7 +42,10 @@ export function sharedSingleItemReads(products){
    const s=o.componentSource;
    if(s?.status!=='AVAILABLE'||s.completeness!=='INSPECTED_ROWS'||!Array.isArray(s.components)||s.components.length>3)continue;
    for(const c of s.components){
-    if(!component(c))continue;
+    if(!object(c))continue;
+    // Catalog labels and their provenance are presentation metadata, independent of BOM identity.
+    const {label:_label,labelSource:_labelSource,...identity}=c;
+    if(!component(identity))continue;
     const r=refs.get(c.componentRef)??{componentRef:c.componentRef,role:c.role,conflict:false,readTargets:[]};
     if(r.role!==c.role||(c.quantity??1)!==1)r.conflict=true;
     if(s.components.length===1&&(c.quantity??1)===1&&ownRead(o.priceRead,p.subjectRef,o.offerType)&&ownRead(o.stockRead,p.subjectRef,o.offerType))r.readTargets.push({subjectRef:p.subjectRef,offerType:o.offerType});

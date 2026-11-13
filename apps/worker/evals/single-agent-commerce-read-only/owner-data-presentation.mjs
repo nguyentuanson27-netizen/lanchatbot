@@ -1,7 +1,7 @@
 // Evaluation-only lossless presentation. No inferred advice, source change or model instruction.
 import assert from 'node:assert/strict';
 import {expandOwnerProducts,expandCurrentFacts} from './owner-product-tables.mjs';
-const labels={sharedSingleItemReads:'Một món có nhiều đường đọc theo nguồn',turnTime:'Thời điểm xử lý',products:'Sản phẩm',subjects:'Đối tượng đã gắn',facts:'Giá, tồn và kết quả đã xác minh',
+const labels={sharedSingleItemReads:'Cùng một món bán lẻ, các mã set chỉ là đường tra nguồn',turnTime:'Thời điểm xử lý',products:'Sản phẩm',subjects:'Đối tượng đã gắn',facts:'Giá, tồn và kết quả đã xác minh',
  policy:'Quy định và dữ liệu nguồn',state:'Hồ sơ và trạng thái hiện tại',receipts:'Kết quả thao tác đã xác nhận',execution:'Khả năng thực hiện lượt này',untrusted:'Dữ liệu hội thoại kèm theo'};
 const trace=m=>m.parts.flatMap((p,i)=>{try{const v=JSON.parse(p.text);return Array.isArray(v.completedToolTurns)?[{i,value:v}]:[];}catch{return [];}});
 export function contextDataBlocks(wire){
@@ -10,7 +10,8 @@ export function contextDataBlocks(wire){
  const add=(path,value,label)=>blocks.push({path,label,value});
  for(const k of Object.keys(top).filter(k=>k!=='trusted'))add([k],top[k],labels[k]??k);
  const t=top.trusted;assert(t&&typeof t==='object');
- const order=['products','facts','policy','state','receipts','subjects','execution',...Object.keys(t).filter(k=>!['products','facts','policy','state','receipts','subjects','execution'].includes(k))];
+ const preferred=['sharedSingleItemReads','facts','products','policy','state','receipts','subjects','execution'];
+ const order=[...preferred,...Object.keys(t).filter(k=>!preferred.includes(k))];
  for(const k of order){
   if(!Object.hasOwn(t,k))continue;
   if(Array.isArray(t[k])&&t[k].length)for(const [i,value]of t[k].entries())add(['trusted',k,i],value,`${labels[k]??k} ${i+1}`);

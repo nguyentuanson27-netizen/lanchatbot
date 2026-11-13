@@ -79,9 +79,30 @@ test('emitted CompactV2 links retain both independent offers without altering so
  for(const p of ps)r.context.policyLiterals.push({ref:`offers:${p.subjectRef}`,text:JSON.stringify({productId:p.subjectRef,availableOffers:['AO'],purchaseOptions:p.purchaseOptions})});
  const before=structuredClone(r),body=wire.buildGeminiCommerceRequest(r);
  const sections=readCompactSections(body.contents[0]);
- assert.deepEqual(sections.find(s=>s.label==='Một món có nhiều đường đọc theo nguồn').value,tables.sharedSingleItemReads(ps));
+ const group=sections.find(s=>s.label==='Cùng một món bán lẻ, các mã set chỉ là đường tra nguồn').value[0];
+ assert.deepEqual(group.readTargets,tables.sharedSingleItemReads(ps)[0].readTargets);
  const visible=sections.find(s=>s.label==='Sản phẩm').value;
- assert.equal(visible.length,2);assert.deepEqual(visible.map(p=>p.purchaseOptions),ps.map(p=>p.purchaseOptions));assert.deepEqual(r,before);
+ assert.equal(visible.length,2);assert.deepEqual(r,before);
+});
+test('inspected catalog label metadata preserves the shared item and leaves both offers intact',()=>{
+ const r=request(),ps=[product('P1'),product('P2')];
+ for(const p of ps){
+  Object.assign(p.purchaseOptions[0].componentSource.components[0],{label:null,labelSource:null});
+  r.context.policyLiterals.push({ref:`offers:${p.subjectRef}`,text:JSON.stringify({productId:p.subjectRef,availableOffers:['AO'],purchaseOptions:p.purchaseOptions})});
+ }
+ r.context.boundSubjects=ps.map(p=>({ref:p.subjectRef,kind:'PRODUCT',label:p.subjectRef}));
+ const sections=readCompactSections(wire.buildGeminiCommerceRequest(r).contents[0]);
+ const shared=sections.find(s=>s.label==='Cùng một món bán lẻ, các mã set chỉ là đường tra nguồn');
+ assert.equal(shared?.value.length,1);
+ const [{componentRef,...item}]=shared.value;
+ assert.match(componentRef,/^component:[a-f0-9]{64}$/);
+ assert.deepEqual(item,{role:'TOP',readTargets:[{subjectRef:'P1',offerType:'AO'},{subjectRef:'P2',offerType:'AO'}]});
+ assert(sections.indexOf(shared)<sections.findIndex(s=>s.label==='Sản phẩm'));
+ const visible=sections.find(s=>s.label==='Sản phẩm').value;
+ assert.deepEqual(visible.map(p=>p.purchaseOptions[0].priceRead),item.readTargets);
+ assert.deepEqual(visible.map(p=>p.purchaseOptions[0].stockRead),item.readTargets);
+ assert.deepEqual(visible.map(p=>p.purchaseOptions[0].componentSource.components[0].componentRef),[componentRef,componentRef]);
+ assert(!JSON.stringify(sections).includes('TOP-1'));
 });
 test('unknown, conflicting, bundle and duplicate source identities do not suggest common purchase paths',()=>{
  for(const modify of [p=>p[1].purchaseOptions[0].componentSource.status='UNKNOWN',p=>p[1].purchaseOptions[0].componentSource.completeness='UNKNOWN',

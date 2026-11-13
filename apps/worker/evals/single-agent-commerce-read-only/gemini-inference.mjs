@@ -102,7 +102,7 @@ export const stateDeclarations=[
 ];
 // Reuse the same input contract for an explicit update-and-recommend operation.
 const sizeDeclaration=stateDeclarations.find(d=>d.name==='recommend_size');
-sizeDeclaration.description='Chọn size từ hồ sơ/chart đúng sản phẩm. PRODUCT không cấp fit từng phần; dùng COMPONENT + componentRole cho áo/quần/váy riêng. Thiếu nguồn đúng phần thì handoff, không thay bằng PRODUCT. Thông tin khách mới/sửa: truyền customerStateOps, code ghi/đọc lại trước fit; không gọi apply_customer_state trùng. Không mới thì bỏ ops. Lỗi không cấp size; missingInputs thì hỏi đúng phần thiếu.';
+sizeDeclaration.description='Chọn size đúng món: truyền componentRole khi chọn áo/quần/váy riêng. Thiếu nguồn đúng phần thì handoff. Chỉ ghi dữ liệu mới/sửa trong customerStateOps; mỗi số đo trích nguyên văn đúng một giá trị, giữ chữ hoa/thường và đơn vị. Code ghi trước khi tính size. missingInputs: hỏi đúng phần thiếu.';
 delete sizeDeclaration.parameters;
 sizeDeclaration.parametersJsonSchema={type:'object',additionalProperties:false,required:['subjectRef'],properties:{
  subjectRef:{type:'string'},fitScope:{type:'string',enum:['PRODUCT','COMPONENT']},componentRole:{type:'string',enum:['TOP','PANTS','SKIRT','DRESS','OTHER']},
@@ -293,11 +293,8 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   const data=JSON.parse(literal.text);
   if(data.productId!==s.ref||!Array.isArray(data.availableOffers))continue;
   offers.set(s.ref,data.availableOffers);if(data.productSizeRead)productSizeReads.set(s.ref,data.productSizeRead);
-  if(Array.isArray(data.purchaseOptions))purchaseOptions.set(s.ref,data.purchaseOptions.map(option=>{
-   if(!option.componentSource)return option;
-   return {...option,componentSource:{...option.componentSource,components:option.componentSource.components.map(component=>
-    component.label==null?{...component,componentRef:'component:'+createHash('sha256').update(canonicalJsonV1([s.ref,option.offerType,component.componentRef])).digest('hex')}:component)}};
-  }));offerRefs.add(literal.ref);
+  if(Array.isArray(data.purchaseOptions))purchaseOptions.set(s.ref,data.purchaseOptions);
+  offerRefs.add(literal.ref);
   if(!products.has(s.ref))products.set(s.ref,{subjectRef:s.ref});
  }
  const preparationRefs=new Set();
@@ -333,8 +330,26 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
     return {ref:p.ref,text:JSON.stringify(value)};
    }),receipts:c.effectReceipts,
    state};
+ const sharedComponentRefs=new Map();
  const sharedReads=sharedSingleItemReads(ownerView.products);
- if(sharedReads.length)ownerView.sharedSingleItemReads=sharedReads;
+ if(sharedReads.length)ownerView.sharedSingleItemReads=sharedReads.map(group=>{
+  const hasPublicLabel=group.readTargets.some(({subjectRef,offerType})=>purchaseOptions.get(subjectRef)
+   .find(o=>o.offerType===offerType).componentSource.components[0].label!=null);
+  const componentRef=hasPublicLabel?group.componentRef:'component:'+createHash('sha256')
+   .update(canonicalJsonV1(['shared-item',group.componentRef])).digest('hex');
+  sharedComponentRefs.set(group.componentRef,componentRef);
+  return {...group,componentRef};
+ });
+ // Share the item handle while keeping each price/stock path and every unrelated opaque handle intact.
+ ownerView.products=ownerView.products.map(p=>!p.purchaseOptions?p:{...p,purchaseOptions:p.purchaseOptions.map(option=>{
+  if(!option.componentSource)return option;
+  return {...option,componentSource:{...option.componentSource,components:option.componentSource.components.map(component=>{
+   if(component.label!=null)return component;
+   const componentRef=sharedComponentRefs.get(component.componentRef)??'component:'+createHash('sha256')
+    .update(canonicalJsonV1([p.subjectRef,option.offerType,component.componentRef])).digest('hex');
+   return {...component,componentRef};
+  })}};
+ })});
  if(compactV2)ownerView.products=compactOwnerProducts(ownerView.products);
  // Configured capabilities remain visible after this generation's call budget ends.
  // Native toolConfig and runtime checks still enforce whether tools can be called.
@@ -428,7 +443,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
 function publicToolDiagnostic(d){
  const known=[...readOnlyDeclarations,...quoteDeclarations,...stateDeclarations,...effectDeclarations,...handoffDeclarations,...mediaDeclarations];
  return {schemaCode:'OWNER_TOOL_OUTPUT',tool:known.some(t=>t.name===d.tool)?d.tool:'UNKNOWN_TOOL',
-  field:['ARGS','UNKNOWN_FIELD','subjectRef','offerType','offerTypes','selection','size','color','deliveryRegion','ops','customerStateOps'].includes(d.field)?d.field:'UNKNOWN_FIELD',
+  field:['ARGS','UNKNOWN_FIELD','subjectRef','offerType','offerTypes','selection','size','color','deliveryRegion','ops','customerStateOps','fitScope'].includes(d.field)?d.field:'UNKNOWN_FIELD',
   ...(productReadSelections.includes(d.selection)||d.selection==='INVALID'?{selection:d.selection,fieldPresent:d.fieldPresent===true,
     fieldType:['MISSING','NULL','ARRAY','STRING','OTHER'].includes(d.fieldType)?d.fieldType:'OTHER'}:{}),
   valueType:['ARRAY','NULL','OBJECT','OTHER'].includes(d.valueType)?d.valueType:'OTHER',...(d.argumentShape?{argumentShape:d.argumentShape}:{})};
@@ -467,7 +482,11 @@ export function parseGeminiGeneration(body){
     if(!decoded.ok)throw Object.assign(new Error('OWNER_TOOL_OUTPUT'),{toolOutputDiagnostic:{schemaCode:'OWNER_TOOL_OUTPUT',tool:c.name,valueType:'OBJECT',...decoded.diagnostic,argumentShape:productReadArgumentShape(c.args)}});
     return {...c,args:decoded.args};
    }
-   if(c.name==='recommend_size')check(Object.keys(c.args).every(k=>['subjectRef','customerStateOps','fitScope','componentRole'].includes(k))&&sizeRequestScope(c.args)!==null,'fitScope');
+   if(c.name==='recommend_size'){
+    const args=c.args.fitScope===undefined&&c.args.componentRole!==undefined?{...c.args,fitScope:'COMPONENT'}:c.args;
+    check(Object.keys(args).every(k=>['subjectRef','customerStateOps','fitScope','componentRole'].includes(k))&&sizeRequestScope(args)!==null,'fitScope');
+    c={...c,args};
+   }
    const opsKey=c.name==='apply_customer_state'?'ops':c.name==='recommend_size'&&Object.hasOwn(c.args,'customerStateOps')?'customerStateOps':null;
    if(!opsKey)return c;
    check(Array.isArray(c.args[opsKey])&&c.args[opsKey].every(op=>op&&Object.hasOwn(stateFieldPaths,op.field)),opsKey);

@@ -76,9 +76,8 @@ export function presentCartWriteResult(result:OwnerToolResult,options:{quoteCall
  * engine evaluates support only against a cart, and its evidence must follow the cart's creation, so
  * nothing can be granted or promised here. The owner is told exactly that and what the customer does next.
  */
-export const SUPPORT_NOT_EVALUATED_MEANING="Chỉ dùng khi khách xin hỗ trợ giá. Hỗ trợ riêng chưa được xét vì chưa có giỏ; chưa có kết luận shop có hay không hỗ trợ thêm. "+
- "Không hứa mức hỗ trợ và không nói là không có. Ưu đãi mua nhiều, nếu nêu, phải đúng điều kiện và không thay cho câu trả lời này. "+
- "Nói với khách: chọn đủ màu và size để lên giỏ; có giỏ rồi khách nhắn lại lời xin hỗ trợ thì shop xét được ngay.";
+export const SUPPORT_NOT_EVALUATED_MEANING="Chỉ dùng khi khách xin hỗ trợ giá. Giá hiện tại và ưu đãi thường đã có trong báo giá. Hỗ trợ riêng chưa được xét. "+
+ "Không hứa mức hỗ trợ và không nói là không có. Hỏi lựa chọn khách còn thiếu để lên giỏ. Shop xét khi khách hỏi lại sau khi đã có giỏ.";
 /** A refused negotiation record that needs a cart: its meaning, never the internal status words alone. */
 export function presentNegotiationResult(result:OwnerToolResult):OwnerToolResult {
  const data=record(result.data)?result.data:null;

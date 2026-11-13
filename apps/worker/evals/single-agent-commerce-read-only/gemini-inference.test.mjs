@@ -9,6 +9,13 @@ test('component size scope remains explicit in decoded args and signed native co
  const r=request();r.availableTools=['recommend_size'];const d=buildGeminiCommerceRequest(r).tools[0].functionDeclarations[0];
  assert.deepEqual(d.parametersJsonSchema.properties.fitScope.enum,['PRODUCT','COMPONENT']);
 });
+test('a component role on its own selects component scope without changing signed content',()=>{
+ const args={subjectRef:'P1',componentRole:'TOP',customerStateOps:[{op:'SET',field:'HEIGHT_CM',value:162,sourceQuote:'1m62'}]};
+ const raw=body([{functionCall:{name:'recommend_size',args},thoughtSignature:'signed-component'}]);
+ const parsed=parseGeminiGeneration(raw);
+ assert.deepEqual(parsed.calls[0].args,{...args,fitScope:'COMPONENT',customerStateOps:[{...args.customerStateOps[0],field:'measurements.HEIGHT_CM'}]});
+ assert.deepEqual(parsed.content,raw.candidates[0].content);
+});
 test('unrecorded source color is explicit and never becomes a customer selection',()=>{
  const r=request();r.context.runtimeProducts=[{ref:'product:P1',subjectRef:'P1',presentation:{variants:[{variantId:'P1-M',color:'__NO_COLOR__',size:'M'}]}}];
  const before=structuredClone(r.context);
