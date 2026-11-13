@@ -398,30 +398,10 @@ export function createReadOnlyTools(input: {
       const etaClaim = optionClaims.find(c => c.type === "ETA"), stockClaim = optionClaims.find(c => c.type === "STOCK"),
         priceClaim = optionClaims.find(c => c.type === "PRICE");
       const filteredClaim = etaClaim ?? ((q.size || q.color) ? stockClaim ?? priceClaim : undefined);
-      const wantedSize = (size: string) => !q.size || normalizeCatalogToken(size) === normalizeCatalogToken(q.size);
-      // A read without a colour lists the sizes in stock in at least one colour. When the colours differ, each
-      // colour's own stock is stated, so the merged list is not read as true of every colour (PR 392 case S04).
-      const byColor = (() => {
-        if (q.color || !raw || !offer || stock?.status !== "OK") return null;
-        const rows = Object.entries(raw.offers).find(([name]) => normalizeCatalogToken(name) === offer)?.[1].rows ?? [];
-        const labels = [...new Map(rows.filter(row => typeof row.color === "string" && row.color.trim() && row.color !== "__NO_COLOR__" && wantedSize(row.size))
-          .map(row => [normalizeCatalogToken(row.color), row.color])).values()];
-        if (labels.length < 2 || labels.length > 8) return null;
-        const entries = labels.map(color => {
-          const facts = resolveCatalogFacts(raw, { ...q, color, intent: "STOCK" }, now, maxAge);
-          // Only the sizes with positive stock: the same meaning as the merged list. Whether a colour without
-          // stock can be ordered ahead is stated by the selection options, not restated here.
-          return facts.status === "OK" && facts.facts ? { color, confirmedInStockSizes: facts.facts.sizes.filter(wantedSize) } : null;
-        });
-        if (entries.some(e => e === null)) return null;
-        const same = (e: typeof entries[number]) => commerceHash({ ...e, color: null }) === commerceHash({ ...entries[0], color: null });
-        return entries.every(same) ? null : entries;
-      })();
       const sizeAvailability = stock?.status === "OK" && stock.facts ? {
         productId: id, offerType: offer, color: q.color, requestedSize: q.size,
-        confirmedInStockSizes: stock.facts.sizes.filter(wantedSize),
+        confirmedInStockSizes: stock.facts.sizes.filter(size => !q.size || normalizeCatalogToken(size) === normalizeCatalogToken(q.size)),
         unlistedSizeMeaning: "NOT_CONFIRMED" as const,
-        ...(byColor ? { confirmedInStockSizesScope: "AT_LEAST_ONE_COLOR_NOT_EACH" as const, byColor } : {}),
       } : null;
       return { priceEnvelope: price, offerType: offer ?? (offerType ? normalizeCatalogToken(offerType) : null), offer, variant, variantId, claims: optionClaims,
         sizeAvailability,
