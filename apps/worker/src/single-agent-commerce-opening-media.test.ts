@@ -185,3 +185,42 @@ it('reserves replacement loss before any batch write and does not credit selecti
  expect(t.openingMediaFeasible?.([select('SM613'),select('P2')],0)).toBe(false);
  expect(t.openingMediaFeasible?.([select('SM613'),select('P2','APPEND')],0)).toBe(true);
 });
+
+// Owner decision 2026-11-13 (PR 392 case P09): a first reply that prices two products read with read_product
+// carries a photo of each. An addition only: it never holds a reply back.
+describe('photos for two priced reads on a first contact',()=>{
+ const read=(subjectRef:string,extra:Record<string,unknown>={offerType:'DIRECT'})=>({name:'read_product',args:{subjectRef,...extra}});
+ async function turn(s:Awaited<ReturnType<typeof setup>>,calls:{name:string;args:unknown}[]){
+  const outputs=[{kind:'TOOLS' as const,calls,content:{role:'model' as const,parts:calls.map(functionCall=>({functionCall}))}},{kind:'FINAL' as const,text:'Dạ, chị thích mẫu nào hơn ạ?'}];
+  return runCommerceTurn({scope:s.scope,tools:s.tools,clock:()=>commerceNow,latest:'Hai mẫu này còn size M không em?',history:[],ownerPrompt:'Tư vấn',verifierPrompt:'Kiểm',owner:async()=>outputs.shift()!,verifier:s.verifier});
+ }
+ it('adds one photo of each product before the reply is written and verified',async()=>{
+  const s=await setup(['SM613','P2'],true,true,undefined,OPENING_PRODUCT_MEDIA_RULE);
+  s.verifier.mockImplementation(async r=>{expect(r.trusted.protectedClaims.filter(c=>(c as {type?:string})?.type==='PRODUCT_MEDIA')).toHaveLength(2);return {result:{verdict:'PASS',violations:[]}};});
+  const r=await turn(s,[read('SM613'),read('P2')]);
+  expect(r.terminal.disposition).toBe('SEND_ELIGIBLE');expect(s.verifier).toHaveBeenCalledOnce();
+  expect(s.tools.mediaSelection!().map(a=>a.productId).sort()).toEqual(['P2','SM613']);
+  // Two prepared products, two reads, two photos: exactly the six units of a turn.
+  expect(r.normalToolCalls).toBe(6);expect(r.openingMediaWork).toMatchObject({status:'READY',requiredProducts:['P2','SM613'],chargedUnits:2});
+ });
+ it.each([['one product read',['SM613','P2'],[read('SM613')]],['three products read',['SM613','P2','P3'],[read('SM613'),read('P2'),read('P3')]],
+  ['reads that carry no price',['SM613','P2'],[read('SM613',{detailsOnly:true}),read('P2',{detailsOnly:true})]]] as const)('leaves the rule as it was for %s',async(_name,ids,calls)=>{
+  const s=await setup([...ids],true,true,undefined,OPENING_PRODUCT_MEDIA_RULE),r=await turn(s,[...calls]);
+  expect(r.terminal.disposition).toBe('SEND_ELIGIBLE');expect(s.tools.mediaSelection!()).toEqual([]);expect(r.openingMediaWork?.status).toBe('NOT_REQUIRED');
+  expect(r.normalToolCalls).toBe(ids.length+calls.length);
+ });
+ it('adds nothing for a returning customer',async()=>{
+  const s=await setup(['SM613','P2'],false,true,undefined,OPENING_PRODUCT_MEDIA_RULE),r=await turn(s,[read('SM613'),read('P2')]);
+  expect(r.terminal.disposition).toBe('SEND_ELIGIBLE');expect(s.tools.mediaSelection!()).toEqual([]);expect(r.normalToolCalls).toBe(4);
+ });
+ it('still sends the reply when the work left does not cover both photos, and spends nothing on one',async()=>{
+  const s=await setup(['SM613','P2'],true,true,undefined,OPENING_PRODUCT_MEDIA_RULE);
+  const r=await turn(s,[read('SM613'),read('P2'),{name:'read_policy',args:{}}]);
+  expect(r.terminal.disposition).toBe('SEND_ELIGIBLE');expect(s.tools.mediaSelection!()).toEqual([]);expect(r.normalToolCalls).toBe(5);
+ });
+ it('still sends the reply when the source has no photo, and does not look again',async()=>{
+  const s=await setup(['SM613','P2'],true,false,undefined,OPENING_PRODUCT_MEDIA_RULE),r=await turn(s,[read('SM613'),read('P2')]);
+  expect(r.terminal.disposition).toBe('SEND_ELIGIBLE');expect(s.verifier).toHaveBeenCalledOnce();expect(s.tools.mediaSelection!()).toEqual([]);
+  expect(r.normalToolCalls).toBe(6);expect(r.recovery??null).toBeNull();
+ });
+});
