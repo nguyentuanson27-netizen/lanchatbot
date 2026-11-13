@@ -485,7 +485,7 @@ async function boundedJson(response,max){
 }
 // Owner decision 2026-11-13: the size a customer says they usually wear is theirs to choose, not a fit result.
 export const FIT_EVALUATION_MEANING='Kết quả lần gọi này; chỉ dùng khi còn khớp hồ sơ và target hiện hành. Size khách quen mặc không phải kết quả tính và không cấp thêm alternative; '+
- 'được nhắc như lựa chọn theo thói quen của khách sau size đề xuất, không nói size ấy vừa.';
+ 'được nhắc như lựa chọn theo thói quen của khách sau size đề xuất, không nói size ấy vừa, rộng hay thoải mái hơn.';
 const FIT_FIELDS=['fitScope','sizeSourceHash','missingInputs','recommendedSizes','inputFitPreference','alternativeSizes'];
 function presentFitEvaluation(data){
  if(!data||typeof data!=='object'||!FIT_FIELDS.every(k=>Object.hasOwn(data,k)))return null;

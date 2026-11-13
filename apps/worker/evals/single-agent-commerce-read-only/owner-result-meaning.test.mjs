@@ -61,7 +61,9 @@ test('the usual-size rule reads the same in the size result, the owner prompt an
  assert.match(verifier,/Shop được nhắc lại size khách tự nêu là quen mặc như một lựa chọn theo thói quen của khách khi draft vẫn nêu size theo SIZE_FIT là size shop đề xuất/u);
  // Never as a fit result or the shop's recommendation.
  assert.match(FIT_EVALUATION_MEANING,/không phải kết quả tính và không cấp thêm alternative.*không nói size ấy vừa/u);
- assert.match(owner,/không ghi nhận nó thành size đã chọn và không nói nó vừa, hợp hơn hay là size shop đề xuất/u);
+ // The N=5 run of 13 November: four of five replies tied the usual size to wearing more comfortably.
+ assert.match(owner,/không ghi nhận nó thành size đã chọn và không nói nó vừa, hợp hơn, rộng hay thoải mái hơn, hay là size shop đề xuất/u);
+ assert.match(FIT_EVALUATION_MEANING,/không nói size ấy vừa, rộng hay thoải mái hơn/u);
  assert.match(verifier,/Draft khẳng định size quen mặc vừa, hợp hơn hoặc là size shop đề xuất thì vẫn cần SIZE_FIT/u);
  // The rules that keep a usual size from becoming an order or a second recommendation are unchanged.
  assert.match(verifier,/Size thường mặc không tự là lựa chọn mua/u);assert.match(owner,/Size thường mặc khi nhờ tư vấn chưa là yêu cầu mua size ấy/u);
