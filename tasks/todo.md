@@ -1,3 +1,8 @@
+## Phase C · Kết quả N=5 ngày 13/11/2026
+
+- [x] Init và seal lại trên `2877c0a9`. Chạy đủ 13 ca × 5 lần và đối soát 135 lượt, 283 request model, 0 tin gửi thật. [Review và bằng chứng](../apps/worker/evals/single-agent-commerce-qualification/convergence-n5-run-20261113/REVIEW.md).
+- [ ] Phase C STOP. 7/12 ca bán hàng đạt ít nhất 4/5, S16 đạt 4/5 so với ngưỡng 5/5. J1 và J4 có lượt tự chọn màu khi ghi giỏ, P07 còn câu gắn size quen mặc với độ thoải mái.
+
 ## Owner-authorized continuation — execution reconciled, STOP, 2026-11-11
 
 - [x] Account for all 65 registered attempts after reconnecting. 59 scripts completed, 5 checkout journeys ended at committed handoff, and J1 repetition 5 lost PostgreSQL after the first captured turn. 103/135 captured turns, 30 checkout turns not reached, 2 J1 turns lost.

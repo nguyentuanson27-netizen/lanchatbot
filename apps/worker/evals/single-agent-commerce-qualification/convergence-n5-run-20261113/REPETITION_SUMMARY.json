@@ -1,0 +1,403 @@
+{
+  "source": "2877c0a99cf18a8fd91c47a78d48b20faa8ad2d0",
+  "worldHash": "c76cbfc5dca3cfcf2f1569acc6b81a799809c6234e77b911147b1e3249155dcb",
+  "reviewMode": "DIRECT_DEVELOPMENT_REVIEW_OF_TERMINAL_OUTCOMES",
+  "ownerReview": {
+    "p06": {
+      "passed": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "criterion": "Đúng giá bộ ba món và có ảnh."
+    },
+    "s15": {
+      "passed": [
+        3
+      ],
+      "criterion": "Xác nhận ngắn, không kéo sang quảng bá, báo giá hay câu hỏi mới."
+    },
+    "s16": {
+      "passed": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "criterion": "Handoff im lặng khi nguồn thiếu ảnh xác nhận khách mặc."
+    },
+    "j2": {
+      "passed": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "criterion": "Đi hết ba lượt, dùng số đo mới và tư vấn theo kết quả M của Size Engine."
+    },
+    "j4": {
+      "passed": [
+        1,
+        2,
+        3
+      ],
+      "criterion": "Hỗ trợ giá theo phương án A, không tạo giỏ khi chưa chọn màu, báo đúng tổng 529.000đ."
+    },
+    "s04": {
+      "passed": [
+        1,
+        2,
+        3
+      ],
+      "criterion": "Nêu đúng trắng và be, không nói be có sẵn."
+    },
+    "s09": {
+      "passed": [
+        1,
+        3,
+        4,
+        5
+      ],
+      "criterion": "Trả lời đủ giặt tay và giặt máy theo chính sách."
+    },
+    "j1": {
+      "passed": [],
+      "criterion": "Báo đúng tổng 978.100đ và không tự chọn màu để ghi giỏ."
+    },
+    "p08": {
+      "passed": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "criterion": "Xác nhận tạo giỏ đúng biên nhận rồi hỏi màu áo lẻ, chưa báo đã đổi giỏ."
+    },
+    "p07": {
+      "passed": [
+        1
+      ],
+      "criterion": "Nêu M cho hai phần, chỉ nhắc L như thói quen của khách, không gắn L với độ vừa hoặc độ thoải mái."
+    },
+    "p09": {
+      "passed": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "criterion": "Giữ hai mã riêng, trả đúng tồn và giá size M, kèm đúng hai ảnh nếu mở đầu báo giá hai mẫu."
+    },
+    "complete": {
+      "passed": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "criterion": "Đủ hành trình và có biên nhận CONFIRM_PURCHASE."
+    },
+    "s08": {
+      "passed": [
+        1,
+        3,
+        4,
+        5
+      ],
+      "criterion": "Chọn được mẫu đúng dịp và không gán cấu tạo cụ thể vượt nguồn. Theo dõi riêng việc nêu đặt trước."
+    }
+  },
+  "summary": {
+    "kind": "DEVELOPMENT_REPETITION_SUMMARY_V1",
+    "policy": {
+      "minimumRepetitions": 5,
+      "passAtLeast": 4,
+      "stableFailAtMost": 1,
+      "regressionDrop": 2
+    },
+    "cases": [
+      {
+        "caseId": "c-po-20261031-p06",
+        "registered": 5,
+        "passed": 5,
+        "failed": 0,
+        "ungraded": 0,
+        "notRun": 0,
+        "repetitions": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "terminals": {
+          "SEND_ELIGIBLE/PASS": 5
+        },
+        "graded": 5,
+        "classification": "STABLE_PASS"
+      },
+      {
+        "caseId": "c-20261028-s15",
+        "registered": 5,
+        "passed": 1,
+        "failed": 4,
+        "ungraded": 0,
+        "notRun": 0,
+        "repetitions": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "terminals": {
+          "SEND_ELIGIBLE/PASS": 4,
+          "HANDOFF/RESPONSE_UNAVAILABLE": 1
+        },
+        "graded": 5,
+        "classification": "STABLE_FAIL"
+      },
+      {
+        "caseId": "c-20261028-s16",
+        "registered": 5,
+        "passed": 4,
+        "failed": 1,
+        "ungraded": 0,
+        "notRun": 0,
+        "repetitions": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "terminals": {
+          "HANDOFF/PRODUCT_AMBIGUOUS": 2,
+          "HANDOFF/RESPONSE_UNAVAILABLE": 2,
+          "SEND_ELIGIBLE/PASS": 1
+        },
+        "graded": 5,
+        "classification": "STABLE_PASS"
+      },
+      {
+        "caseId": "c-20261028-j2",
+        "registered": 5,
+        "passed": 5,
+        "failed": 0,
+        "ungraded": 0,
+        "notRun": 0,
+        "repetitions": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "terminals": {
+          "SEND_ELIGIBLE/PASS": 5
+        },
+        "graded": 5,
+        "classification": "STABLE_PASS"
+      },
+      {
+        "caseId": "c-20261028-j4",
+        "registered": 5,
+        "passed": 3,
+        "failed": 2,
+        "ungraded": 0,
+        "notRun": 0,
+        "repetitions": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "terminals": {
+          "SEND_ELIGIBLE/PASS": 3,
+          "NO_SEND/HUMAN_OWNS_CONVERSATION": 2
+        },
+        "graded": 5,
+        "classification": "FLAKY"
+      },
+      {
+        "caseId": "c-20261028-s04",
+        "registered": 5,
+        "passed": 3,
+        "failed": 2,
+        "ungraded": 0,
+        "notRun": 0,
+        "repetitions": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "terminals": {
+          "SEND_ELIGIBLE/PASS": 3,
+          "HANDOFF/PRODUCT_AMBIGUOUS": 2
+        },
+        "graded": 5,
+        "classification": "FLAKY"
+      },
+      {
+        "caseId": "c-20261028-s09",
+        "registered": 5,
+        "passed": 4,
+        "failed": 1,
+        "ungraded": 0,
+        "notRun": 0,
+        "repetitions": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "terminals": {
+          "SEND_ELIGIBLE/PASS": 4,
+          "HANDOFF/POLICY_UNAVAILABLE": 1
+        },
+        "graded": 5,
+        "classification": "STABLE_PASS"
+      },
+      {
+        "caseId": "c-20261028-j1",
+        "registered": 5,
+        "passed": 0,
+        "failed": 5,
+        "ungraded": 0,
+        "notRun": 0,
+        "repetitions": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "terminals": {
+          "SEND_ELIGIBLE/PASS": 3,
+          "NO_SEND/HUMAN_OWNS_CONVERSATION": 2
+        },
+        "graded": 5,
+        "classification": "STABLE_FAIL"
+      },
+      {
+        "caseId": "c-po-20261031-p08",
+        "registered": 5,
+        "passed": 5,
+        "failed": 0,
+        "ungraded": 0,
+        "notRun": 0,
+        "repetitions": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "terminals": {
+          "SEND_ELIGIBLE/PASS": 5
+        },
+        "graded": 5,
+        "classification": "STABLE_PASS"
+      },
+      {
+        "caseId": "c-po-20261031-p07",
+        "registered": 5,
+        "passed": 1,
+        "failed": 4,
+        "ungraded": 0,
+        "notRun": 0,
+        "repetitions": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "terminals": {
+          "SEND_ELIGIBLE/PASS": 5
+        },
+        "graded": 5,
+        "classification": "STABLE_FAIL"
+      },
+      {
+        "caseId": "c-po-20261031-p09",
+        "registered": 5,
+        "passed": 5,
+        "failed": 0,
+        "ungraded": 0,
+        "notRun": 0,
+        "repetitions": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "terminals": {
+          "SEND_ELIGIBLE/PASS": 5
+        },
+        "graded": 5,
+        "classification": "STABLE_PASS"
+      },
+      {
+        "caseId": "c-20261104-checkout-complete",
+        "registered": 5,
+        "passed": 5,
+        "failed": 0,
+        "ungraded": 0,
+        "notRun": 0,
+        "repetitions": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "terminals": {
+          "HANDOFF/PURCHASE_CONFIRMED": 5
+        },
+        "graded": 5,
+        "classification": "STABLE_PASS"
+      },
+      {
+        "caseId": "c-20261028-s08",
+        "registered": 5,
+        "passed": 4,
+        "failed": 1,
+        "ungraded": 0,
+        "notRun": 0,
+        "repetitions": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "terminals": {
+          "SEND_ELIGIBLE/PASS": 4,
+          "HANDOFF/RESPONSE_UNAVAILABLE": 1
+        },
+        "graded": 5,
+        "classification": "STABLE_PASS"
+      }
+    ],
+    "totals": {
+      "cases": 13,
+      "stablePass": 8,
+      "flaky": 2,
+      "stableFail": 3,
+      "underSampled": 0,
+      "ungraded": 0
+    }
+  }
+}

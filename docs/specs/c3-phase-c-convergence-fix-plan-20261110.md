@@ -488,3 +488,7 @@ Chưa đo: verifier Sol có cho qua câu nhắc size quen mặc theo quy tắc m
 ### Trạng thái kiểm chứng
 
 Bộ test worker: 2.822 unit pass, 926 eval pass, không có lỗi mới; 6 unit và 6 eval fail có từ trước. Hash prompt trong `manifest.json` và `owner-decisions.json` đã đổi nên harness cần `init` và `seal` lại.
+
+## 20. Kết quả N=5 trên 2877c0a9, 13/11/2026
+
+Đã init và seal lại theo prompt và owner decisions mới. Chạy đủ 13 ca × 5 lần, ghi nhận 135 lượt trên cùng snapshot. Có 7/12 ca bán hàng đạt ít nhất 4/5. S16 handoff đúng 4/5. Đề xuất **STOP** vì J1 và J4 có lượt tự chọn màu để ghi giỏ, P07 còn gắn size quen mặc với độ thoải mái, và S16 chưa đạt ngưỡng. P09 kèm đúng ảnh của cả hai mẫu trong cả hai lần báo giá qua `read_product`. [Review và số liệu theo ca](../../apps/worker/evals/single-agent-commerce-qualification/convergence-n5-run-20261113/REVIEW.md) · [Lịch sử 135 lượt](../../apps/worker/evals/single-agent-commerce-qualification/convergence-n5-run-20261113/CONVERSATIONS.md)
