@@ -28,7 +28,8 @@ for(const final of [false,true])test(`owner groups exact current fit and unknown
  assert.equal(n.effectCommitted,false);assert.deepEqual(n.supportEvaluation,{status:'NOT_EVALUATED',supportAvailability:'UNKNOWN',missing:['CART','NEGOTIATION'],
   meaning:SUPPORT_NOT_EVALUATED_MEANING});
  // Option A: the meaning comes first and tells the owner the customer's next step; it promises and denies nothing.
- assert.equal(Object.keys(n)[0],'supportEvaluation');assert.match(n.supportEvaluation.meaning,/có giỏ rồi khách nhắn lại lời xin hỗ trợ/u);
+ assert.equal(Object.keys(n)[0],'supportEvaluation');assert.match(n.supportEvaluation.meaning,/Hỗ trợ riêng chưa được xét/u);
+ assert.match(n.supportEvaluation.meaning,/Shop xét khi khách hỏi lại sau khi đã có giỏ/u);
  assert(!Object.hasOwn(n,'negotiationStatus'));assert(!Object.hasOwn(n,'supportAvailability'));assert(!Object.hasOwn(n,'missing'));
  assert(Buffer.byteLength(JSON.stringify(wire))<=65536);
 });
@@ -113,7 +114,9 @@ for(const final of [false,true])test(`historical fit and negotiation results sta
  nr.context.state.cartQuote={grandTotalVnd:499000};
  const nbody=buildGeminiCommerceRequest(nr),nturns=final?readCompactSections(nbody.contents[0]).find(s=>s.label==='Lịch sử công cụ đã hoàn tất').value[0].completedToolTurns:nbody.contents;
  const results=nturns.flatMap(m=>m.parts.flatMap(p=>p.functionResponse?[p.functionResponse.response.data]:[]));
- assert.equal(results[0].supportEvaluation.status,'NOT_EVALUATED');assert(!results[0].supportEvaluation.meaning.includes('hiện tại'));
+ assert.deepEqual(results[0].supportEvaluation,{status:'NOT_EVALUATED',supportAvailability:'UNKNOWN',missing:['CART'],
+  meaning:SUPPORT_NOT_EVALUATED_MEANING});
+ assert(!Object.hasOwn(results[0],'cartQuote'));
  assert.equal(results[1].cartQuote.grandTotalVnd,499000);assert.equal(results[1].effectCommitted,true);
 });
 for(const final of [false,true])test(`a quote without a cart carries the same support statement as a refused record (${final?'final':'native'})`,()=>{
