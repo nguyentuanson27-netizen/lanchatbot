@@ -9,6 +9,7 @@ import {sizeRequestScope} from '../../dist/single-agent-commerce-state.js';
 import {CART_WRITE_TOOLS,presentCartWriteResult,presentNegotiationResult,presentPreCartQuoteResult,presentPendingPurchase} from '../../dist/single-agent-commerce-owner-view.js';
 import {HandoffReasonV2Schema,canonicalJsonV1,CustomerProfileV1Schema,CommerceHistoryMetadataV1Schema} from '@lana/contracts';
 import {presentOwnerData,presentCompactOwnerData} from './owner-data-presentation.mjs';
+import {presentVerifiedOfferTerms} from './owner-offer-terms.mjs';
 import {compactOwnerProducts,compactCurrentFacts,compactSelectionResult,sharedSingleItemReads} from './owner-product-tables.mjs';
 
 const requireThat=(ok,reason)=>{if(!ok)throw new Error(reason);};
@@ -402,7 +403,12 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  const render=value=>{
   if(request.ownerContextPresentation===undefined)return value;
   requireThat(['VI_DATA_BLOCKS_V1','VI_DATA_BLOCKS_COMPACT_V2'].includes(request.ownerContextPresentation),'OWNER_PRESENTATION');
-  return request.ownerContextPresentation==='VI_DATA_BLOCKS_V1'?presentOwnerData(value):presentCompactOwnerData(value);
+  if(request.ownerContextPresentation==='VI_DATA_BLOCKS_V1')return presentOwnerData(value);
+  const compact=presentCompactOwnerData(value);
+  if(request.showVerifiedOfferTerms!==true)return compact;
+  const presented=presentVerifiedOfferTerms(compact,c.protectedClaims);
+  const withinBound=ownerTextBytes(presented)<=OWNER_REQUEST_MAX_BYTES&&bytes(presented)<=OWNER_IMAGE_BOUNDS.maxRequestBytes;
+  return withinBound?presented:compact;
  };
  budget.presentedTextFrameBytes=ownerTextBytes(render(body));onBudget(budget);
  if(budget.presentedTextFrameBytes>OWNER_REQUEST_MAX_BYTES)throw Object.assign(new Error('OWNER_REQUEST_BOUND'),{requestBytes:budget.presentedTextFrameBytes});

@@ -136,7 +136,9 @@ export function createCandidateProvider({preflight,out,dependencies={}}){
     assertProspectiveOpeningReadiness({scenarios:[scenario]},preflight.registration.openingMediaRule);
     await assertScenarioReadiness(world,scenario,dependencies.unitFixture&&dependencies.readinessClock?dependencies.readinessClock():new Date(),preflight.registration.openingMediaRule);
    }
-   const original=role==='OWNER'?withNativePresentation(request,'VI_DATA_BLOCKS_COMPACT_V2'):request;
+   const original=role==='OWNER'?withNativePresentation({
+    ...request,showVerifiedOfferTerms:preflight.registration.salesVoiceOfferTerms===true,
+   },'VI_DATA_BLOCKS_COMPACT_V2'):request;
    const body=role==='OWNER'?buildGeminiCommerceRequest(original,undefined,undefined,value=>{preDispatchBudget=value;}):buildVerifierRequest(m,original);
    row.requestBody=body;row.requestHash=digest(body);
    assertRuntimeFirewall(body,preflight.sealed.corpus.scenarios.map(s=>s.id));
