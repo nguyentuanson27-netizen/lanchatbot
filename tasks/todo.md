@@ -3314,3 +3314,10 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Worker focused 364 PASS; Node focused 103 PASS sau cập nhật assertion; worker build, typecheck, lint PASS. Đối chứng đọc B/C cùng snapshot và clock 6/6 OK, cùng claim và readback.
 - [x] Chạy 25/25 lần thử và 45/45 lượt trên 5dfde94b, Gemini 3.5 Flash Lite High và Sol High. 126 request, 38 đủ điều kiện gửi, 6 handoff, 1 no-send. [Báo cáo và hội thoại](../apps/worker/evals/single-agent-commerce-qualification/sales-repair-run-20261113/REVIEW.md).
 - [ ] STOP. S08 chỉ 2/5 báo đặt trước, J4 chặn đúng một câu nói sai phạm vi ưu đãi, J2 vẫn còn liệt kê số đo. Chưa chạy 40 lần thử còn lại, đối chứng chất lượng hội thoại B/C và qualification.
+
+## Phase C — triển khai thử nghiệm giọng tư vấn, 2026-11-15
+
+- [x] Thu gọn phần Giọng chat và xác định đúng phạm vi form báo giá mở đầu. Cập nhật owner prompt hash. Verifier và luồng nghiệp vụ giữ cấu hình hiện hành.
+- [x] Tách replay giọng và cách trình bày giá/tình trạng bán. Chỉ ghép claim giá/tồn cùng product/variant, còn hiệu lực tại clock của request, giữ màu/size theo claim IDs. Bật presentation qua diagnostic riêng với 25 lần thử / 45 lượt.
+- [x] Kiểm offline 34 cặp giọng và 9 cặp trạng thái từ capture đã lưu và bốn đối chứng của mỗi bước. Node focused 131 PASS; worker lint PASS. Cặp chạy giữ nguyên AUTO, lịch sử, kết quả đọc, chữ ký tool và không đưa rubric vào provider.
+- [ ] Chạy hai phép đo Gemini, chấm mù và đánh giá gate; chạy native sau khi đạt cả hai. Chưa có kết quả chất lượng mới.
