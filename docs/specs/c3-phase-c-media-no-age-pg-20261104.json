@@ -1,0 +1,81 @@
+{
+  "kind": "MEDIA_UNTIL_REPLACED_POSTGRES_REGRESSION",
+  "sourceSha": "62b4ac409ca81092ba8c702ed06259e0f5dd72d5",
+  "sourceDirty": false,
+  "status": "PASS",
+  "providerGenerations": 0,
+  "sendEnabled": false,
+  "testDatabaseDropped": true,
+  "rawEvidencePath": "../c3-no-media-age-pg-20261104-01/integration.json",
+  "rawEvidenceSha256": "8d53ef2ce9251090ea062482d18cb0886bc4b66775ee1108feff0b138759978a",
+  "cases": [
+    {
+      "name": "C opening old approved image survives persisted delivery without an age deadline",
+      "status": "PASS"
+    },
+    {
+      "name": "C opening ACK exact text and photo accepted atomically",
+      "status": "PASS"
+    },
+    {
+      "name": "C opening ETA exact text and photo accepted atomically",
+      "status": "PASS"
+    },
+    {
+      "name": "C opening QUOTE exact text and photo accepted atomically",
+      "status": "PASS"
+    },
+    {
+      "name": "C opening missing photo silently hands off with no Outbox",
+      "status": "PASS"
+    },
+    {
+      "name": "C opening customer-only durable history does not exempt a photo",
+      "status": "PASS"
+    },
+    {
+      "name": "C opening durable HUMAN output survives truncated history and binds scope",
+      "status": "PASS"
+    },
+    {
+      "name": "C opening pending output and same-time acceptance never prove prior contact",
+      "status": "PASS"
+    },
+    {
+      "name": "C opening returning accepted output permits a later text-only reply",
+      "status": "PASS"
+    },
+    {
+      "name": "C opening private-first input hands off before checkout writes or public output",
+      "status": "PASS"
+    },
+    {
+      "name": "C opening add-confirm batch commits its native question and photo atomically",
+      "status": "PASS"
+    },
+    {
+      "name": "C opening add chosen red cannot use navy generic photo false",
+      "status": "PASS"
+    },
+    {
+      "name": "C opening add chosen red cannot use navy generic photo true",
+      "status": "PASS"
+    },
+    {
+      "name": "C opening replaced variant cannot reuse the former generic product photo",
+      "status": "PASS"
+    },
+    {
+      "name": "C opening returning checkout preserves native private preview",
+      "status": "PASS"
+    },
+    {
+      "name": "C opening media removed after verifier cannot enqueue a response group",
+      "status": "PASS"
+    },
+    {
+      "name": "C opening media revoked after enqueue cancels group before sequence zero",
+      "status": "PASS"
+    }
+  ]
+}

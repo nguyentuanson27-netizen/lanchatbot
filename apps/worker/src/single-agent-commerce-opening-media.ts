@@ -1,0 +1,146 @@
+import type {CommerceTools} from './single-agent-commerce-read-only.js';
+import type {CommerceScope,PreparationControl} from './single-agent-commerce-read-only-tools.js';
+import type {TrustedContext} from './single-agent-semantic-verifier-boundary.js';
+import {decodeCommerceMediaArgs,type CommerceMediaAsset} from './single-agent-commerce-media.js';
+import {normalizeCatalogToken} from '@lana/business-tools';
+export const OPENING_PRODUCT_MEDIA_RULE=Object.freeze({version:'FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2'} as const);
+export type OpeningProductMediaRule=typeof OPENING_PRODUCT_MEDIA_RULE|{readonly version:'FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1'};
+export interface OpeningMediaWork {status:'NOT_REQUIRED'|'READY'|'UNAVAILABLE';requiredProducts:string[];chargedUnits:number;reason?:string}
+export function assertOpeningProductMediaRule(value:unknown):asserts value is OpeningProductMediaRule {
+ if(value===null||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==1||!('version' in value)||![OPENING_PRODUCT_MEDIA_RULE.version,'FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1'].includes(String(value.version)))throw Error('OPENING_MEDIA_RULE');
+}
+export function withOpeningProductMedia(base:CommerceTools,input:{rule:OpeningProductMediaRule;scope:CommerceScope;clock:()=>Date;firstContact:boolean|null;codeOutputSupported?:boolean}):CommerceTools {
+ assertOpeningProductMediaRule(input.rule);
+ const eager=input.rule.version===OPENING_PRODUCT_MEDIA_RULE.version;
+ const required=(c:TrustedContext)=>input.firstContact===false?[]:[...new Set([
+  ...(base.openingQuoteTargets?.()??[]),
+  ...c.boundSubjects.filter(s=>s.kind==='PRODUCT'&&(!eager||c.boundSubjects.filter(s=>s.kind==='PRODUCT').length===1)).map(s=>s.ref),
+  ...(Array.isArray(c.state.cartItems)?c.state.cartItems.flatMap(i=>typeof i?.productRef==='string'?[i.productRef]:[]):[])
+ ])].sort();
+ // Owner decision 2026-11-13 (PR 392 case P09): on a first contact where the owner read the price of exactly two
+ // products, code adds a general photo of each, as it does for prices read through quote_product. This is an
+ // addition, never an obligation: it is made after the owner has written the reply, from work the owner left
+ // unused; it is skipped when that work or the image slots do not cover both, a failed lookup does not fail the
+ // turn, and the reply is not held back for it. Three or more products keep the rule as it was.
+ const pricedReads=new Set<string>(),pricedReadPhotoAttempts=new Set<string>();
+ const observePricedReads=(calls:readonly {name:string;args:unknown}[],results:readonly {status:string;data?:unknown}[])=>calls.forEach((call,index)=>{
+  const a=call.args as {subjectRef?:unknown;detailsOnly?:unknown}|null,data=results[index]?.data as {sellingOptions?:unknown}|undefined;
+  if(call.name!=='read_product'||results[index]?.status!=='OK'||!a||typeof a.subjectRef!=='string'||a.detailsOnly===true||!Array.isArray(data?.sellingOptions))return;
+  if(data.sellingOptions.some((o:{availability?:{price?:{status?:unknown}}}|null)=>o?.availability?.price?.status==='OK'))pricedReads.add(a.subjectRef);
+ });
+ const metadata=(c:TrustedContext)=>c.policyLiterals.filter(p=>p.ref.startsWith('media:')||p.ref.startsWith('media-lookup:')||!eager&&p.ref.startsWith('read:')).flatMap(p=>{try{return [JSON.parse(p.text) as Record<string,unknown>];}catch{return [];}});
+ const colors=(c:TrustedContext,id:string)=>{
+  const cartItems=Array.isArray(c.state.cartItems)?c.state.cartItems.filter(i=>i.productRef===id):[];
+  // A cart with unknown variant colour cannot borrow the no-selection generic path.
+  if(cartItems.some(i=>!Array.isArray(i.components)||!i.components.length||i.components.some((v:{color?:unknown})=>typeof v.color!=='string'||!v.color.trim())))return null;
+  const cartColors=cartItems.flatMap(i=>i.components.map((v:{color:string})=>v.color));
+  const filters=metadata(c).flatMap(m=>{
+  if((m.subjectRef??m.productId)!==id||m.operation==='view_product_media')return [];
+  return [m,...(m.requested&&typeof m.requested==='object'?[m.requested as Record<string,unknown>]:[]),...(Array.isArray(m.sellingOptions)?m.sellingOptions:[])].flatMap(v=>typeof v.color==='string'&&v.color.trim()?[v.color]:[]);
+ });
+  // V1 retains its strict union. V2 physical cart selections supersede older read
+  // filters; a source-unlabelled tuple never erases an explicit physical constraint.
+  const raw=[...cartColors,...filters];
+  const physical=[...new Set(raw.filter(v=>v!=='__NO_COLOR__').map(normalizeCatalogToken))];
+  if(raw.includes('__NO_COLOR__')&&(physical.length||!base.unlabelledCartProducts?.(c).includes(id)))return null;
+  return physical;
+ };
+ const covers=(c:TrustedContext,a:CommerceMediaAsset,wanted:readonly string[]|null)=>{
+  const now=input.clock().getTime();
+  if(a.imageType==='SIZE_GUIDE'||!Number.isFinite(Date.parse(a.observedAt))||Date.parse(a.observedAt)>now||
+    (a.expiresAt!==null&&(!Number.isFinite(Date.parse(a.expiresAt))||Date.parse(a.expiresAt)<=now)))return false;
+  if(wanted===null)return false;
+  return metadata(c).some(m=>m.subjectRef===a.productId&&m.intent!=='SIZE_GUIDE'&&Array.isArray(m.assets)&&
+   m.assets.some(v=>v.assetRef===a.assetRef)&&(!wanted.length||wanted.length===1&&typeof m.color==='string'&&normalizeCatalogToken(m.color)===wanted[0]));
+ };
+ const currentPhotos=(c:TrustedContext,images:readonly CommerceMediaAsset[])=>images.filter(a=>covers(c,a,colors(c,a.productId)));
+ const ready=(c:TrustedContext,images:readonly CommerceMediaAsset[]=base.mediaSelection?.()??[])=>{
+  const ids=required(c);if(!ids.length)return true;if(input.firstContact===null)return false;
+  const photos=currentPhotos(c,images);return ids.every(id=>photos.some(a=>a.productId===id));
+ };
+ async function addPricedReadPhotos(control:PreparationControl,charged:number):Promise<{charged:number;products:string[]}>{
+  const none={charged:0,products:[] as string[]};
+  if(!eager||input.firstContact!==true||pricedReads.size!==2||!base.prepareProductImage)return none;
+  const context=base.snapshot(),selected=base.mediaSelection?.()??[],photos=currentPhotos(context,selected);
+  const wanted=[...pricedReads].sort().filter(id=>!pricedReadPhotoAttempts.has(id)&&!photos.some(a=>a.productId===id)&&
+   context.boundSubjects.some(s=>s.kind==='PRODUCT'&&s.ref===id));
+  // Both or neither: one photo for a reply that prices two products helps nobody.
+  if(!wanted.length||wanted.some(id=>{const c=colors(context,id);return c===null||c.length>1;})||
+   control.maxCalls-charged<wanted.length||selected.length+wanted.length>4)return none;
+  const products:string[]=[];let used=0;
+  for(const id of wanted){
+   const current=base.snapshot();
+   if(!current.state.permission||!current.state.privacyAllowed||current.state.conversationOwner!=='BOT'||
+    current.state.bindingVersion!==input.scope.bindingVersion||current.state.recipient!==input.scope.recipient||base.handoffStatus?.())break;
+   pricedReadPhotoAttempts.add(id);control.onDispatch();used++;
+   const color=colors(current,id);if(color===null||color.length>1)continue;
+   try{if((await base.prepareProductImage(id,color[0])).status==='OK')products.push(id);}catch{/* an addition, never a failure of the turn */}
+  }
+  return {charged:used,products};
+ }
+ return {...base,openingMediaReady:ready,...(eager?{openingMediaTiming:'BEFORE_OWNER' as const}:{}),
+  invoke:async call=>{const result=await base.invoke(call);observePricedReads([call],[result]);return result;},
+  invokeBatch:async(calls,control)=>{const results=await base.invokeBatch(calls,control);observePricedReads(calls,results);return results;},
+  openingMediaFeasible(calls,remaining){
+   if(!eager||input.firstContact===false)return true;
+   const context=base.snapshot(),existing=base.mediaSelection?.()??[];
+   // SELECT defaults to REPLACE. Earlier selections, including already covering
+   // photos, cannot fund an obligation after a later replacement clears them.
+   let lastReplace=-1;
+   calls.forEach((c,index)=>{if(c.name==='select_product_media'&&decodeCommerceMediaArgs(c.args)!==null&&
+    ((c.args as {deliveryMode?:unknown}).deliveryMode??'REPLACE')==='REPLACE')lastReplace=index;});
+   const retained=lastReplace<0?existing:[],photos=currentPhotos(context,retained);
+   const mutations=calls.flatMap(call=>{
+    const a=call.args as Record<string,unknown>|null;
+    const id=call.name==='add_to_cart'?a?.subjectRef:call.name==='change_cart_item'&&a?.action==='REPLACE_LINE'?a.targetSubjectRef:null;
+    return typeof id==='string'?[{id,color:typeof a?.color==='string'?normalizeCatalogToken(a.color):null}]:[];
+   });
+   const quoteTargets=calls.filter(c=>c.name==='quote_product').map(c=>(c.args as {subjectRef:string}).subjectRef);
+   const ids=[...new Set([...required(context),...mutations.map(m=>m.id),...quoteTargets])];
+   // Null/omission cannot prove a new canonical tuple keeps the old photo colour.
+   const missing=ids.filter(id=>!photos.some(p=>p.productId===id&&mutations.filter(m=>m.id===id).every(m=>m.color!==null&&covers(context,p,[m.color]))));
+   // A matching selection in this already-debited batch may cover the lookup.
+   // This is feasibility only; actual assets/source/colour are checked after I/O.
+   const prepaid=(id:string)=>calls.some((call,index)=>{
+    if(index<lastReplace)return false;
+    if(call.name!=='select_product_media')return false;
+    const a=decodeCommerceMediaArgs(call.args);if(a?.subjectRef!==id||a.intent==='SIZE_GUIDE')return false;
+    const wanted=colors(context,id),changed=mutations.filter(m=>m.id===id);
+    return wanted!==null&&(!wanted.length||wanted.length===1&&typeof a.color==='string'&&normalizeCatalogToken(a.color)===wanted[0])&&
+     changed.every(m=>m.color!==null&&typeof a.color==='string'&&normalizeCatalogToken(a.color)===m.color);
+   });
+   return missing.filter(id=>!prepaid(id)).length<=remaining&&retained.length+missing.length<=4;
+  },
+  openingMediaBlocksCodeOutput:calls=>!input.codeOutputSupported&&input.firstContact!==false&&calls.some(c=>c.name==='confirm_purchase'),
+  async prepareOpeningMedia(control:PreparationControl):Promise<OpeningMediaWork>{
+   return prepareRequired(control);
+  },
+  // Runs once the owner has written its reply, on work the owner did not use. Run before the owner, as it was
+  // at first, it took the last units of the turn and the owner had none left for the read it still needed.
+  addFinalMedia:control=>addPricedReadPhotos(control,0)};
+ async function prepareRequired(control:PreparationControl):Promise<OpeningMediaWork>{
+   let chargedUnits=0;const context=base.snapshot(),requiredProducts=required(context);
+   const fail=(reason:string):OpeningMediaWork=>({status:'UNAVAILABLE',requiredProducts,chargedUnits,reason});
+   if(!requiredProducts.length)return {status:'NOT_REQUIRED',requiredProducts,chargedUnits};
+   if(input.firstContact===null)return fail('OPENING_HISTORY_UNKNOWN');
+   const existing=base.mediaSelection?.()??[],photos=currentPhotos(context,existing),missing=requiredProducts.filter(id=>!photos.some(a=>a.productId===id));
+   if(!missing.length)return {status:'READY',requiredProducts,chargedUnits};
+   // A prior failed lookup for a code-required opening photo cannot be retried
+   // implicitly or replaced by a generic query. Incidental lookups on returning
+   // conversations remain ordinary scoped owner results.
+   if(metadata(context).some(m=>missing.includes(String(m.subjectRef))&&m.scope==='MEDIA_ONLY'&&m.operation==='select_product_media'&&typeof m.outcome==='string'&&m.outcome!=='OK'))return fail('OPENING_MEDIA_SOURCE');
+   if(!Number.isSafeInteger(control.maxCalls)||control.maxCalls>6||control.maxCalls<missing.length)return fail('OPENING_MEDIA_BUDGET');
+   if(existing.length+missing.length>4||!base.prepareProductImage)return fail('OPENING_MEDIA_BOUND_OR_CAPABILITY');
+   if(missing.some(id=>colors(context,id)===null||colors(context,id)!.length>1))return fail('OPENING_MEDIA_COLOR_SCOPE');
+   for(const id of missing){
+    const current=base.snapshot();
+    if(!current.state.permission||!current.state.privacyAllowed||current.state.conversationOwner!=='BOT'||
+      current.state.bindingVersion!==input.scope.bindingVersion||current.state.recipient!==input.scope.recipient||base.handoffStatus?.())return fail('OPENING_MEDIA_AUTHORITY');
+    control.onDispatch();chargedUnits++;
+    const wanted=colors(current,id);if(wanted===null||wanted.length>1)return fail('OPENING_MEDIA_COLOR_SCOPE');
+    const result=await base.prepareProductImage(id,wanted[0]);
+    if(result.status!=='OK')return fail('OPENING_MEDIA_SOURCE');
+   }
+   return ready(base.snapshot())?{status:'READY',requiredProducts,chargedUnits}:fail('OPENING_MEDIA_UNPROVED');
+ }
+}

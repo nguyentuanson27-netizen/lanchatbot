@@ -1,0 +1,148 @@
+{
+  "kind": "WHOLE_CONVERSATION_DEVELOPMENT_REVIEW_NOT_BLIND_QUALIFICATION",
+  "reviewer": "/root",
+  "runSourceSha": "8b4e190c8c6e048b4412c45c254de1c75872cf1b",
+  "cases": [
+    {
+      "caseId": "c-po-20261031-p06",
+      "status": "TASK_OK",
+      "reason": "Báo đúng ba món/989.000đ, có ảnh SD023; không tự gọi component chưa có nhãn là quần.",
+      "qualityDenominatorEligible": true,
+      "turns": 1
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "status": "TASK_OK_WITH_FRICTION",
+      "reason": "Preference be commit, không tạo giỏ. Câu ACK bị kéo thành báo giá/hỏi thêm; đây là hạn chế chất lượng, không phải hoàn tất giao dịch. Không dùng quote_product nên chưa exercise W2.",
+      "qualityDenominatorEligible": true,
+      "turns": 1
+    },
+    {
+      "caseId": "c-20261028-s16",
+      "status": "SOURCE_GAP",
+      "reason": "Không có provenance ảnh khách mặc; draft vẫn nhận có ảnh đáp ứng yêu cầu. Verifier chặn và handoff im lặng đúng. Không chấm là owner hiểu nguồn tốt hoặc sales PASS.",
+      "qualityDenominatorEligible": false,
+      "turns": 1
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "status": "TASK_OK_WITH_FRICTION",
+      "reason": "Ba lượt đều gửi; 56→51kg, giữ162/88/70/94, commit RELAXED và dùng COMPONENT/TOP M từ engine. Cách nói lặp/cứng còn tồn tại.",
+      "qualityDenominatorEligible": true,
+      "turns": 3
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "status": "MATERIAL_FAIL",
+      "reason": "Chưa chọn màu nên giỏ chưa tạo; thương lượng NOT_EVALUATED/support UNKNOWN, owner lại nói không có giảm thêm. Verifier chặn đúng. Lượt sau NO_SEND do HUMAN. Không phải quote batch bị cấm như trước; không exercise writer+quote.",
+      "qualityDenominatorEligible": true,
+      "turns": 3
+    },
+    {
+      "caseId": "c-20261028-s04",
+      "status": "TASK_OK",
+      "reason": "Flat offerTypes read của cả hai mẫu hợp lệ, trả màu Trắng/Be theo nguồn. Không còn OWNER_TOOL_OUTPUT ở sample này.",
+      "qualityDenominatorEligible": true,
+      "turns": 1
+    },
+    {
+      "caseId": "c-20261028-s09",
+      "status": "TASK_OK_WITH_FRICTION",
+      "reason": "Đọc care policy rồi trả giặt tay/giặt máy nhẹ với túi giặt đúng nguồn; còn dài và chen gentle cycle. Sample dùng read_policy, không exercise DETAILS_ONLY decoder.",
+      "qualityDenominatorEligible": true,
+      "turns": 1
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "status": "MATERIAL_FAIL",
+      "reason": "Lượt3 hỏi tổng nhưng owner tiếp tục add_to_cart thiếu màu rồi quote_cart bị chặn. quote_product có trong actual declarations; không dùng đường giá trước giỏ. Chưa đáp ứng mục tiêu tổng tiền, không phải thiếu nguồn giá hay lỗi verifier.",
+      "qualityDenominatorEligible": true,
+      "turns": 3
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "status": "TASK_OK_CUSTOMER_INPUT",
+      "reason": "Giữ set cũ khi REPLACE chưa commit, hỏi màu áo cần thiết; không báo đã đổi xong. Chỉ đạt bước hỏi bổ sung, chưa hoàn tất đổi lựa chọn.",
+      "qualityDenominatorEligible": true,
+      "turns": 2
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "status": "MATERIAL_FAIL",
+      "reason": "Engine cho TOP M/PANTS M, không có alternative; owner tự gợi ý quần L để thoải mái. Verifier chặn đúng, khách không nhận tư vấn dùng được dù đã có kết quả.",
+      "qualityDenominatorEligible": true,
+      "turns": 1
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "status": "TASK_OK",
+      "reason": "Hỏi rõ set quần/váy khi cần; lượt2 đọc đúng SET_QUAN M và báo preorder769.000đ. Không gộp facts theo tên; không ảnh cho pool/returning là đúng phạm vi.",
+      "qualityDenominatorEligible": true,
+      "turns": 2
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "status": "TASK_OK",
+      "reason": "Đúng set M829.000đ; intake riêng tư, preview trước xác nhận, receipt CONFIRM_PURCHASE và handoff PURCHASE_CONFIRMED. Không có tin chờ.",
+      "qualityDenominatorEligible": true,
+      "turns": 7
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "status": "TASK_OK_WITH_FRICTION",
+      "reason": "Chọn Diệp An theo dịp; Odette có sẵn là phương án thay với đánh đổi. Không có nhóm ảnh lệch mẫu, nhưng sample không exercise quote/photo trong pool; câu còn dài và nhiều tính từ.",
+      "qualityDenominatorEligible": true,
+      "turns": 1
+    }
+  ],
+  "taskAdequateCases": 9,
+  "materialFailureCases": 3,
+  "salesCaseDenominator": 12,
+  "sourceGapControls": 1,
+  "screenGate": "FAIL",
+  "recommendation": "STOP",
+  "gates": [
+    {
+      "item": "W1_FLAT_READ",
+      "status": "EXERCISED_PASS",
+      "evidence": "S04 and P09 actual valid flat reads. S09 care response uses read_policy; its old malformed read branch NOT_EXERCISED."
+    },
+    {
+      "item": "W2_WRITER_THEN_QUOTE",
+      "status": "NOT_EXERCISED",
+      "evidence": "S15 apply+read; J4 rejected negotiation then read; neither native case calls quote_product after writer. PG14 controls remain deterministic evidence only."
+    },
+    {
+      "item": "W3_QUOTE_PHOTO",
+      "status": "EXERCISED_PASS",
+      "evidence": "P06 COMPOSITE quote plus SD023 photo, normal work4. Multi-candidate/two-quote-target variants NOT_EXERCISED."
+    },
+    {
+      "item": "W4_COMPOSITION",
+      "status": "EXERCISED_PASS",
+      "evidence": "P06 three items989000, no invented unknown component label."
+    },
+    {
+      "item": "W4_CUSTOMER_WEARING",
+      "status": "SOURCE_GAP",
+      "evidence": "S16 silent handoff; unsupported draft retained, not owner task success."
+    },
+    {
+      "item": "W5_NATIVE_TRANSPORT_ERROR",
+      "status": "NOT_EXERCISED",
+      "evidence": "62 generation results OK; adapter deterministic fault tests do not prove native transport reliability."
+    },
+    {
+      "item": "CONTROLS",
+      "status": "EXERCISED_FAIL",
+      "evidence": "J1 quote and P07 fit materially fail. J2/P08/P09/checkout progress preserved; comparison media affected path NOT_EXERCISED."
+    }
+  ],
+  "limitations": [
+    "N1; known development cases",
+    "Task-adequate includes valid customer-input clarification, not nine completed sales",
+    "Fresh world differs from prior run; no causal or stability claim",
+    "No full final-gate replay, formal blind qualification or C3 comparison",
+    "No automatic remainder or rerun"
+  ]
+}

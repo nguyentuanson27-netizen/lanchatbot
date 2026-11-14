@@ -140,7 +140,7 @@ export function contextFromFrozenTrackCCapture(input: Readonly<{
     context.verifiedClaims.some(({ provenance }) =>
       Date.parse(provenance.observedAt) >
         evaluationAtMs + MAX_FUTURE_OBSERVATION_SKEW_MS ||
-      Date.parse(provenance.expiresAt) <= evaluationAtMs
+      (provenance.expiresAt !== null && Date.parse(provenance.expiresAt) <= evaluationAtMs)
     ) ||
     (context.cartReadiness !== null &&
       Date.parse(context.cartReadiness.expiresAt) <= evaluationAtMs) ||

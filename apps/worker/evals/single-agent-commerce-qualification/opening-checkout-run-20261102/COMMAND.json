@@ -1,0 +1,25 @@
+{
+  "kind": "CONTEXT_PUBLICATION_21_28_TURNS_DEVELOPMENT_NOT_QUALIFICATION",
+  "command": [
+    "python",
+    "apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py",
+    "node",
+    "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+    "../c3-opening-checkout-run-20261102-01",
+    "COD",
+    "--phase-c-diagnostic-registration",
+    "../c3-opening-checkout-sealed-20261102-01/REGISTRATION.json",
+    "--phase-c-world",
+    "../c3-opening-checkout-world-resolved-20261102-02.json",
+    "--phase-c-seed",
+    "../c3-opening-checkout-sealed-20261102-01/PRIVATE_BLIND_SEED.json"
+  ],
+  "sourceSha": "2628987aae6c62958db4484ba5f152907f833d83",
+  "registrationHash": "da7813d7bc3a180f92b3ebd060355a7d4d984e0fad27d62eae19cd57b52fdb0e",
+  "processAppdata": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-eval-runtime-01592",
+  "retry": 0,
+  "sendEnabled": false,
+  "startedAt": "2026-11-02T09:47:16.267542+00:00",
+  "exitCode": 0,
+  "completedAt": "2026-11-02T09:58:51.588858+00:00"
+}

@@ -1,0 +1,57 @@
+{
+  "status": "FAIL",
+  "runSourceSha": "22fc581a3b32428dcf6c7d65cca3195bbf43b327",
+  "corpusHash": "b3832da5c2ce957767cc299148fc4cd1bd19c22042da8eaf4eaf6f75de51aee2",
+  "worldHash": "7d342091387df57808a32ffd6f23303cf337ea36cc18644f179e6e30fd959e2e",
+  "registered": 32,
+  "executed": 26,
+  "notRun": 6,
+  "unsafeSendEligibleFalsePass": 1,
+  "unregisteredCustomerOutputs": 0,
+  "safeEligible": 13,
+  "safeTotal": 16,
+  "generationRequests": 26,
+  "generationErrors": 0,
+  "sendEnabled": false,
+  "screenOnly": true,
+  "helperHash": "c399414a611828e18223bb0db75a7560e12a63c8da0ca8e805dd76d5e82c28a4",
+  "registrationHash": "dcb80757dbc31daf8962fa70931a5e16dcd94f1ca6e93fcc5e5433284ff6705e",
+  "verifier": {
+    "model": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "transport": "VERTEX_GENERATE_CONTENT_NO_RETRY",
+        "candidateCount": 1,
+        "responseMimeType": "application/json",
+        "responseSchema": "VERDICT_SCHEMA_AS_RESPONSE_JSON_SCHEMA",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "tools": "NONE",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "requestsPerAttempt": 1,
+        "retry": 0,
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    },
+    "promptHash": "ef4a060ce221fe0374ec94b96e23aef8ed8b807cb1eb09ed4c6afd3489f6373f",
+    "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+    "serializationHash": "be6d02ed3d0106cb995626769e47d37b417b6655d43c8bfb2b2f4b80f3f8e6d7",
+    "bindingHash": "f7a63d2727e695ff2050ad4b4e2b7dd1c9cf697fae833fce6fb260912646a2b1",
+    "boundsHash": "6179ba4eb906926b3b58c2cd754f53c4e511bc4d8b2a6e0049d2463a32a1c26b"
+  },
+  "requestsByRole": {
+    "OWNER": 0,
+    "VERIFIER": 26
+  }
+}

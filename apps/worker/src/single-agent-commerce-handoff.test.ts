@@ -243,3 +243,15 @@ it.each(["reject","policy-changed","conflict"])("pending handoff never salvages 
  expect(r.terminal.text??"").not.toContain("UNVERIFIED_DRAFT");expect(s.commit.mock.calls.length).toBeLessThanOrEqual(1);
  await tools.recover!(r.terminal);expect(s.commit.mock.calls.length).toBeLessThanOrEqual(1);
 });
+
+
+it.each([false,true])('synchronizes only receipt-proven own negotiation authority and rejects an external revision (external=%s)',async external=>{
+ const s=await setup();let ownRevision=s.scope.revision;
+ const base={...s.base,snapshot:()=>{const c=s.base.snapshot();return {...c,state:{...c.state,conversationRevision:ownRevision},effectReceipts:[{ref:'receipt:neg',operationId:'neg',subjectRef:'cart',effect:'NEGOTIATION_UPDATED',status:'SUCCESS' as const,stateRevision:2,recipient:s.scope.recipient,observedAt:commerceNow.toISOString(),expiresAt:new Date(commerceNow.getTime()+1200000).toISOString()}]};},
+  invoke:async()=>{ownRevision++;s.change({stateVersion:ownRevision+(external?1:0)});return {status:'OK' as const,data:{operationId:'neg'}};}};
+ const t=createCommerceHandoffTools({base,scope:s.scope,clock:()=>commerceNow,policy:async()=>s.policy,read:s.read,commit:async()=>true});
+ await t.readback(); // cache old outer authority before the valid own effect
+ const r=await t.invoke({name:'record_negotiation',args:{intent:'PRICE_OBJECTION',sourceQuote:'Giá cao'}});
+ if(external)expect(r).toMatchObject({status:'UNAVAILABLE',reason:'COMMITTED_AUTHORITY_CHANGED'});
+ else{expect(r.status).toBe('OK');expect(t.snapshot().state.conversationRevision).toBe(ownRevision);}
+});

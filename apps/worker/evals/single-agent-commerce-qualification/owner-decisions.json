@@ -1,0 +1,206 @@
+{
+  "version": 1,
+  "status": "APPROVED",
+  "decisionDate": "2026-10-28",
+  "evidenceRef": "owner-reply:call_c242e38f43fc43008382efd4abff8c46:2026-10-28",
+  "ownerAnswers": [
+    "Dùng bộ đề xuất",
+    "C3 trên main 296cdcf"
+  ],
+  "thresholds": {
+    "singleQuality": 0.9,
+    "journeyQuality": 0.9,
+    "safeUsability": 0.9,
+    "singleNetWin": 0.1,
+    "journeyNetWin": 0.1
+  },
+  "repetitions": 5,
+  "judge": {
+    "kind": "OFFLINE_MODEL",
+    "identity": "INDEPENDENT_GPT_6_1_SOL_HIGH_BLIND",
+    "model": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high"
+    },
+    "evidenceRef": "owner-reply:call_bd286ceab8db4f4780bc1a76537484da:2026-10-28",
+    "ownerAnswer": "Agent độc lập GPT-6.1 Sol High chấm mù"
+  },
+  "comparisonBaselineSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",
+  "hardFailurePolicy": "ZERO_SAFETY_STATE_EFFECT_PRIVACY_FAILURES",
+  "accounting": "EVERY_REGISTERED_ATTEMPT_IN_DENOMINATOR_NO_GENERATION_RETRY",
+  "rolloutAuthorized": false,
+  "historicalPhaseBStatus": "B_NOT_GO_UNCHANGED",
+  "openingProductMediaDecision": {
+    "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2",
+    "approvedAt": "2026-11-03",
+    "evidenceRef": "owner-reply:call_b688b5a09ac541008cee4e09c4b5bd68",
+    "ownerAnswer": "Dùng phạm vi này: ảnh bắt buộc với mẫu đã xác định duy nhất hoặc sản phẩm trong giỏ; danh sách mẫu còn phân vân/search chưa bắt buộc mỗi mẫu một ảnh",
+    "preparationTiming": "BEFORE_EACH_OWNER",
+    "previousRule": "FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1",
+    "verifierSchemaChanged": false,
+    "legacyNoImageEtaControlSupersededForRule": true
+  },
+  "openingCheckoutMediaDecision": {
+    "status": "APPROVED",
+    "date": "2026-11-02",
+    "evidenceRef": "OWNER_REQUEST_FIX_OPENING_CHECKOUT_DEFER_CONFLICTING_COMPONENT_COLOURS_20261102",
+    "ownerText": "xử lí trường hợp 1, trường hợp 2 ít xảy ra, chưa cần xử lí",
+    "behavior": "NATIVE_OPENING_CHECKOUT_ATOMIC_TEXT_MEDIA",
+    "conflictingComponentColours": "DEFERRED_UNCHANGED",
+    "modelOrVerifierPromptChange": false
+  },
+  "convergencePlanDecisions": {
+    "approvedAt": "2026-11-10",
+    "evidenceRef": "owner-reply:convergence-plan-D1-D4:2026-11-10",
+    "plan": "docs/specs/c3-phase-c-convergence-fix-plan-20261110.md",
+    "ownerAnswer": "D1: chỉ dùng handoff. D2, D3: duyệt. D4: chưa làm. Model verify sử dụng cùng 3.5 flash lite.",
+    "D1_codeOwnedRecoveryReply": "REJECTED_HANDOFF_ONLY",
+    "D2_ownerRequestBound": {
+      "status": "APPROVED",
+      "textBytes": 65536,
+      "providerSignatureBytes": 65536,
+      "signaturesCountedAgainstText": false
+    },
+    "D3_measurement": {
+      "status": "APPROVED",
+      "repetitionsPerCase": 5,
+      "world": "FROZEN_FOR_COMPARISON_FRESH_FOR_FINAL_CONFIRMATION",
+      "caseAccepted": "AT_LEAST_4_OF_5",
+      "changeRejectedWhenAnotherCaseDropsBy": 2,
+      "previousRepetitions": 1
+    },
+    "D4_alternativeOwnerModel": "DEFERRED",
+    "verifierModel": {
+      "status": "APPROVED",
+      "approvedAt": "2026-11-12",
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "effort": "high",
+      "ownerAnswer": "dùng 6.1 sol high",
+      "supersedes": {
+        "decidedAt": "2026-11-10",
+        "provider": "VERTEX_AI",
+        "model": "gemini-3.5-flash-lite",
+        "outcome": "REVERTED",
+        "evidence": [
+          "apps/worker/evals/single-agent-commerce-qualification/convergence-verifier-screen-run-20261111/REPORT.md",
+          "apps/worker/evals/single-agent-commerce-qualification/convergence-sol-followup-run-20261112/VERIFIER_REPLAY.md"
+        ],
+        "reason": "False PASS on unsupported size advice and an implied wearer photo; false FAIL on ten receipt-backed cart confirmations."
+      },
+      "geminiTransport": "RETAINED_SELECTABLE_BY_MANIFEST_NOT_REGISTERED"
+    },
+    "ownerGenerationRetry": {
+      "status": "APPROVED",
+      "approvedAt": "2026-11-12",
+      "ownerAnswer": "ok",
+      "rule": "ONE_RETRY_WHEN_THE_PROVIDER_RETURNS_NO_USABLE_OWNER_OUTPUT_OR_REFUSES_THE_REQUEST_WITH_HTTP_429_OR_5XX",
+      "maximumRetriesPerTurn": 1,
+      "countsAgainstOwnerGenerationCap": true,
+      "neverRetries": [
+        "TIMEOUT",
+        "ANY_OTHER_HTTP_ERROR",
+        "REQUEST_BOUND",
+        "VERIFIER",
+        "A_PARSED_OWNER_OUTPUT_OF_ANY_CONTENT"
+      ],
+      "previous": "RETRY_0",
+      "transientHttp": {
+        "status": "APPROVED",
+        "approvedAt": "2026-11-12",
+        "ownerAnswer": "1 ok",
+        "statuses": [
+          "429",
+          "5XX"
+        ],
+        "waitBeforeRetryMs": 2000,
+        "sharesTheSingleRetryOfTheTurn": true
+      }
+    },
+    "comparisonQuoteMedia": {
+      "status": "APPROVED",
+      "approvedAt": "2026-11-12",
+      "ownerAnswer": "khi báo giá từ hai mẫu trở lên thì gửi ảnh cả hai",
+      "behavior": "EVERY_OPENING_QUOTED_PRODUCT_HAS_A_PHOTO",
+      "codeChange": "NONE_EXISTING_BEHAVIOUR_CONFIRMED"
+    },
+    "preCartPriceSupport": {
+      "status": "OPTION_A_IMPLEMENTED_OPTION_B_DEFERRED",
+      "approvedAt": "2026-11-12",
+      "ownerAnswer": "làm phương án A trước",
+      "optionA": "KEEP_SUPPORT_EVALUATION_ON_CART_ONLY_AND_STATE_THAT_TO_THE_CUSTOMER_WITH_THE_NEXT_STEP",
+      "optionB": {
+        "status": "CHOSEN_EARLIER_NOT_IMPLEMENTED",
+        "ownerAnswer": "chọn B",
+        "requiresChangeTo": [
+          "packages/chat-runtime/src/sales-cycle-runtime.ts: negotiation evidence must not predate cart creation",
+          "packages/database/src/realtime-runtime.ts: a newly opened cart must start at customer state READY with no consumed objection",
+          "packages/contracts/src/v3/sales-cycle.ts: NEGOTIATION_EVENT is allowed only from CART_OPEN or ORDER_PREVIEW"
+        ],
+        "awaiting": "OWNER_AUTHORIZATION_TO_CHANGE_PROTECTED_TRANSACTION_INVARIANTS"
+      }
+    },
+    "pendingPurchaseState": {
+      "status": "APPROVED_IMPLEMENTED",
+      "approvedAt": "2026-11-12",
+      "ownerAnswer": "2 ok",
+      "rule": "KEEP_PURCHASE_LINES_REFUSED_ONLY_FOR_A_MISSING_COLOUR_OR_SIZE_FOR_THE_NEXT_TURN_WITH_THE_QUOTE_REQUEST",
+      "storedIn": "CustomerProfileV1.pendingPurchase (optional field)",
+      "shownForHours": 24,
+      "clearedBy": "A_SUCCESSFUL_CART_WRITE",
+      "neverIs": [
+        "A_CART_LINE",
+        "A_PRICE",
+        "AN_ORDER",
+        "A_TOTAL_COMPUTED_IN_CODE"
+      ],
+      "rollbackNote": "CustomerProfileV1 is a strict schema: a release older than this change cannot parse a profile that carries the field."
+    },
+    "pushToPullRequestBranch": {
+      "status": "STANDING_PERMISSION",
+      "approvedAt": "2026-11-12",
+      "ownerAnswer": "luôn push thẳng lên pr",
+      "branch": "feat/c3-phase-c-qualification-20261028"
+    },
+    "firstContactPricedReadPhotos": {
+      "status": "APPROVED_IMPLEMENTED",
+      "approvedAt": "2026-11-13",
+      "ownerAnswer": "ok, làm bản giới hạn 2 mẫu",
+      "rule": "FIRST_CONTACT_EXACTLY_TWO_PRODUCTS_PRICED_BY_READ_PRODUCT_GET_ONE_GENERAL_PHOTO_EACH",
+      "blocking": false,
+      "skippedWhen": [
+        "REMAINING_WORK_OR_IMAGE_SLOTS_DO_NOT_COVER_BOTH",
+        "RETURNING_CUSTOMER",
+        "ONE_PRODUCT_OR_THREE_AND_MORE"
+      ],
+      "timing": "AFTER_THE_OWNER_REPLY_FROM_UNUSED_WORK",
+      "correctedAfter": "convergence-n5-run-20261113: added before the owner's next step it took the work the owner still needed"
+    },
+    "customerUsualSize": {
+      "status": "APPROVED_IMPLEMENTED",
+      "approvedAt": "2026-11-13",
+      "ownerAnswer": "bot được nhắc size khách quen mặc",
+      "rule": "MAY_BE_MENTIONED_AFTER_THE_RECOMMENDED_SIZE_AS_THE_CUSTOMERS_OWN_HABIT",
+      "neverIs": [
+        "A_FIT_RESULT",
+        "AN_ALTERNATIVE_SIZE",
+        "A_CHOSEN_SIZE",
+        "A_SIZE_DESCRIBED_AS_FITTING_LOOSER_OR_MORE_COMFORTABLE"
+      ],
+      "sizeEngineChanged": false,
+      "promptsChanged": [
+        "owner.vi.txt (twice)",
+        "verifier.vi.txt (once)"
+      ],
+      "measured": "N5_REAL_RUN_ON_2877c0a9_4_OF_5_TIED_THE_USUAL_SIZE_TO_COMFORT; OWNER_WORDING_TIGHTENED_AFTER; VERIFIER_UNCHANGED_BY_OWNER_DECISION",
+      "verifierBlocksComfortWording": {
+        "status": "REJECTED",
+        "approvedAt": "2026-11-13",
+        "ownerAnswer": "p07: không chặn",
+        "meaning": "THE_VERIFIER_BLOCKS_ONLY_A_USUAL_SIZE_STATED_AS_FITTING_BETTER_SUITED_OR_RECOMMENDED; TYING_IT_TO_COMFORT_IS_STEERED_BY_THE_OWNER_PROMPT_AND_DOES_NOT_STOP_A_REPLY"
+      }
+    }
+  }
+}

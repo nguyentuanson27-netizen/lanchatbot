@@ -5,6 +5,39 @@ import { commerceHash } from "./single-agent-commerce-read-only-context.js";
 import { commerceNow, commerceScope, fixturePolicy, fixtureProduct } from "./single-agent-commerce.test-support.js";
 import { createHash } from "node:crypto";
 
+it.each(['SM613','OTHER1'])("retains both proofs for one persisted attachment and rejects revocation of %s",async revoked=>{
+ const scope=commerceScope(),policy=(await fixturePolicy()).bundle!,products=['SM613','OTHER1'].map(id=>fixtureProduct(id).product);
+ for(const p of products)p.images=[{url:'https://content.pancake.vn/shared.jpg',role:'PRIMARY',angle:'FRONT',imageType:'MODEL',intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:commerceNow.toISOString(),partsVisible:['AO']}];
+ const recipientId='synthetic-recipient',state={revision:2},messages=[{kind:'TEXT' as const,text:'Chị xem ảnh nhé.'},{kind:'IMAGE' as const,imageUrl:products[0]!.images[0]!.url}];
+ const binding=makeCommerceMediaDeliveryBinding({scope:{...scope,recipient:createHash('sha256').update(recipientId).digest('hex')},generation:1,responseGroupId:'shared',nextState:state,policy,messages,now:commerceNow,
+  images:products.map(p=>({productId:p.productId,url:p.images[0]!.url,sourceVersion:commerceHash({productId:p.productId,catalogVersion:p.catalogVersion,image:p.images[0]!}),observedAt:commerceNow.toISOString(),expiresAt:null}))});
+ // The new gate has no reference to the selecting request or an in-memory union.
+ const freshGate=()=>createCommerceMediaPreSendGate({base:{authorize:async()=>({status:'ALLOWED' as const,reasonCode:null,blockingTag:null,observedAt:commerceNow})},clock:()=>commerceNow,
+  allowedHostSuffixes:['content.pancake.vn'],readAuthority:async()=>({state,stateVersion:2,routingOwner:'APP',appSendEnabled:true,killSwitch:false,generation:1}),policy:async()=>policy,readProduct:async id=>products.find(p=>p.productId===id)!});
+ const claim={pageId:scope.pageId,conversationId:scope.conversationId,responseGroupId:'shared',sequenceNo:0,recipientId,message:messages[0],mediaBinding:JSON.parse(JSON.stringify(binding))} as unknown as ClaimedMetaOutbox;
+ expect((await freshGate().authorize(claim)).status).toBe('ALLOWED');
+ products.find(p=>p.productId===revoked)!.images=[];
+ expect((await freshGate().authorize(claim)).status).toBe('BLOCKED');
+});
+
+it("allows old approved media with no age deadline and still blocks a changed source",async()=>{
+  const scope=commerceScope(),product=fixtureProduct().product,policy=(await fixturePolicy()).bundle!;
+  const image={url:"https://content.pancake.vn/old.jpg",role:"PRIMARY" as const,angle:"FRONT" as const,imageType:"MODEL" as const,intents:[],sortOrder:0,
+    qualityScore:null,feedback:false,metadataVerified:true,reviewStatus:"APPROVED" as const,sourceContentSha256:"a".repeat(64),observedAt:"2025-01-01T00:00:00.000Z",partsVisible:["AO"]};
+  product.images=[image];const state={revision:2},recipientId="synthetic-recipient";
+  const messages=[{kind:"TEXT" as const,text:"Em gửi ảnh chị nhé."},{kind:"IMAGE" as const,imageUrl:image.url}];
+  const mediaBinding=makeCommerceMediaDeliveryBinding({scope:{...scope,recipient:createHash("sha256").update(recipientId).digest("hex")},
+    generation:1,responseGroupId:"old-image-group",nextState:state,policy,messages,now:commerceNow,
+    images:[{productId:product.productId,url:image.url,observedAt:image.observedAt,expiresAt:null,
+      sourceVersion:commerceHash({productId:product.productId,catalogVersion:product.catalogVersion,image})}]});
+  const base={authorize:vi.fn(async()=>({status:"ALLOWED" as const,reasonCode:null,blockingTag:null,observedAt:commerceNow}))};
+  const gate=createCommerceMediaPreSendGate({base,clock:()=>commerceNow,allowedHostSuffixes:["content.pancake.vn"],
+    readAuthority:async()=>({state,stateVersion:2,routingOwner:"APP",appSendEnabled:true,killSwitch:false,generation:1}),policy:async()=>policy,readProduct:async()=>product});
+  const claim={pageId:scope.pageId,conversationId:scope.conversationId,responseGroupId:"old-image-group",sequenceNo:0,recipientId,message:messages[0],mediaBinding} as unknown as ClaimedMetaOutbox;
+  expect((await gate.authorize(claim)).status).toBe("ALLOWED");
+  product.images=[];expect((await gate.authorize(claim)).status).toBe("BLOCKED");
+});
+
 it.each(["unchanged", "source", "revision", "recipient", "generation", "policy", "missing", "private-wire", "expired", "unapproved", "permission", "read-error", "inflight-authority","revalidated","revoked-proof","changed-proof", "catalog-expiry", "policy-expiry", "authority-expiry", "base-expiry", "policy-effective-expiry"])("revalidates durable media group before sequence zero (%s)", async fault => {
   const scope = commerceScope(), product = fixtureProduct().product, policy = (await fixturePolicy()).bundle!;
   product.images = [{ url: "https://content.pancake.vn/detail.jpg", role: "PRIMARY", angle: "CLOSEUP", imageType: "DETAIL", intents: [],

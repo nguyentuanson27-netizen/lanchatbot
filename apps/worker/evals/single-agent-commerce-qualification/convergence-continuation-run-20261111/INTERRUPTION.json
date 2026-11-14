@@ -1,0 +1,24 @@
+{
+  "completedSlots": 39,
+  "completedTurns": 67,
+  "pendingSlots": 26,
+  "pendingTurns": 68,
+  "generationStarted": 177,
+  "generationCompleted": 177,
+  "unknownProviderCompletion": 0,
+  "providerWorkForPendingSlots": 0,
+  "replayedCompletedSlots": 0,
+  "orphanCleanup": {
+    "status": "CLEANUP_CONFIRMED",
+    "database": "c3_b_test_0d802a39561f2cbc",
+    "existed": true,
+    "activeConnections": 0,
+    "testDatabaseDropped": true,
+    "providerRequests": 0,
+    "shopSourceWrites": 0,
+    "liveSends": 0,
+    "at": "2026-11-11T11:09:39.165Z"
+  },
+  "originalEvidenceSha256": "695a2b7cab60d1d91a7a9e792db9c2686841bbdf54f63547b457755fa6799ec7",
+  "originalJournalSha256": "6c019e6d8490297dda790cf852562596df43280282f0b3431311f2f81b3bcd4d"
+}

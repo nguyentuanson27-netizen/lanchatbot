@@ -10,7 +10,7 @@ import type {CommerceToolCall,CommerceToolResult} from "./single-agent-commerce-
 const fixture=JSON.parse(readFileSync(new URL("../evals/single-agent-commerce-read-only/fixtures/discovery-feasibility.public.json",import.meta.url),"utf8"));
 const bytes=(v:unknown)=>Buffer.byteLength(JSON.stringify(v));
 const ownerPrompt=readFileSync(new URL("../evals/single-agent-commerce-read-only/prompts/owner.vi.txt",import.meta.url),"utf8");
-const config={version:"EXPLICIT_QUOTE_V1",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:2,standalone:true,maxPerTurn:1} as const;
+const config={version:"EXPLICIT_QUOTE_V3",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:1,readOnlyBatch:false,maxPerTurn:2} as const;
 
 describe("discovery feasibility through composed reads and actual mocked owner wire",()=>{
  it.each(["complete","partial","source-failure"])("keeps representative two-candidate batch within existing bounds: %s",async mode=>{
@@ -38,7 +38,7 @@ describe("discovery feasibility through composed reads and actual mocked owner w
   const original=(await fixturePolicy()).bundle!;
   const policy={...original,artifacts:{...original.artifacts,handoffMatrix:{schemaVersion:1 as const,kind:"HANDOFF_MATRIX" as const,sourceMetadata:original.artifacts.shopPolicy.sourceMetadata,
    rules:(["DEPENDENCY_FAILURE","RESPONSE_UNAVAILABLE"] as const).map(reason=>({reason,customerMessagePolicy:"SILENT_HANDOFF" as const,holdingReply:null,tag:"NHAN_VIEN" as const}))}}};
-  const tools=await createCommerceTools({quoteTask:config,read:{scope,clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[initial.product],
+  const tools=await createCommerceTools({quoteTask:config,read:{scope,clock:()=>commerceNow,entry:{firstContact:false,fromAd:false},policy:fixturePolicy,initialProducts:[initial.product],
    catalog:{readProduct,searchText:async()=>({status:"AMBIGUOUS",reasonCode:"TOP_GAP_TOO_SMALL",candidates:sources.map(s=>({document:s.product,score:0.8}))})}},
    handoff:{read:async()=>structuredClone(authority),commit:async change=>{authority=structuredClone(change.next);return true;},policy:async()=>policy}});
   const metrics:Record<string,unknown>={fixtureBytes:bytes(fixture),requestedCandidates:2,rawResults:[],chargedResults:[],wire:[],runtimeProducts:[]};
@@ -54,7 +54,7 @@ describe("discovery feasibility through composed reads and actual mocked owner w
   const owner=createGeminiCommerceInference({model:"gemini-3.5-flash-lite",effort:"high",projectId:"test-project",location:"global",declarations:[...readOnlyDeclarations,...handoffDeclarations]},
    {getToken:async()=>"mock-token",fetchImpl:async(_url:string,init:RequestInit)=>{
     const wire=JSON.parse(init.body as string);wires.push(wire);(metrics.wire as number[]).push(bytes(wire));n++;
-    const calls=n===1?[{name:"search_products",args:{query:"bộ quần áo đi làm"}}]:candidates.map(s=>({name:"read_product",args:{subjectRef:s.product.productId,selection:"SINGLE",offerType:"SET_QUAN"}}));
+    const calls=n===1?[{name:"search_products",args:{query:"bộ quần áo đi làm"}}]:candidates.map(s=>({name:"read_product",args:{subjectRef:s.product.productId,offerTypes:["SET_QUAN"]}}));
     const parts=n===3?[{text:"Em chọn mẫu quần 799.000đ cho chị nhé. Chị cho em chiều cao, cân nặng để chọn size."}]:calls.map(functionCall=>({functionCall}));
     return new Response(JSON.stringify({modelVersion:"gemini-3.5-flash-lite",candidates:[{finishReason:"STOP",content:{role:"model",parts}}]}));
    }});

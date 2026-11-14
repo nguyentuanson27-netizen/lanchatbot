@@ -1,3 +1,4 @@
+import {publicCheckoutState} from "./single-agent-commerce-public-history.js";
 import { computeBusinessContentHash, executePersistedSalesCycleCommand, type RuntimePolicyBundle,
   type SalesCycleCommand, type SalesCycleRuntimeState, type SalesCycleStateRepositoryV1,
   type SalesCycleTrustedPortsV1, type ResolvedCartDraftV1 } from "@lana/chat-runtime";
@@ -9,6 +10,8 @@ import type { CommerceTools } from "./single-agent-commerce-read-only.js";
 import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-catalog.js";
 import type { TerminalOutcome, TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import { formatCartLineSelection, selectionsMatchCartLines } from "./realtime-sales-cycle.js";
+import {selectionChoiceResolution,validSelectionEvidence,selectionEvidenceWithExpiry,selectionOptionScope,mergeSelectionEvidence,selectionMeaningHash,selectionQueryKey,expandSelectionOptions,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
+import { CommerceEffectCommitError, type CommerceEffectFailureStage } from "./single-agent-commerce-effect-failure.js";
 
 const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase", "record_negotiation"]);
 export type CommerceCommandResult =
@@ -16,7 +19,7 @@ export type CommerceCommandResult =
   | { status: "DUPLICATE"; state: SalesCycleRuntimeState }
   | { status: "CHECKOUT_REQUESTED"; state: SalesCycleRuntimeState }
   | { status: "HANDOFF"; state: SalesCycleRuntimeState; reasonCode: string }
-  | { status: "REJECTED" | "CONFLICT"; reasonCode: string };
+  | { status: "REJECTED" | "CONFLICT"; reasonCode: string; failureStage?: CommerceEffectFailureStage };
 
 /** Native tools bridge to existing atomic sales-cycle repository. No external order/send implementation. */
 export async function createCommerceEffectTools(input: {
@@ -25,6 +28,7 @@ export async function createCommerceEffectTools(input: {
   authorize: (effect: "CART_OPEN" | "CART_MUTATION" | "PURCHASE_CONFIRMATION", current: SalesCycleRuntimeState) => Promise<boolean>;
   policy: () => Promise<RuntimePolicyBundle>;
   select: (query: CartSelectionQuery) => Promise<CartSelectionResult>;
+  selectionMaxAgeSeconds?:number;
   /** Current public batch messages; code resolves the exact quote's evidence identity. */
   negotiationSources?: readonly { text: string; sourceMessageId: string; observedAt: string }[];
   trustedPorts?: SalesCycleTrustedPortsV1;
@@ -42,7 +46,10 @@ export async function createCommerceEffectTools(input: {
     return s;
   }
   let current = await read(), policy: RuntimePolicyBundle | null = null, uncertain = false, failedEffect = false;
+  const noCommitNegotiations=new WeakMap<CommerceToolResult,{state:string;authority:string}>();
+  const noCommitSelections=new WeakMap<CommerceToolResult,{state:string;authority:string}>();
   const selections = new Map<string, Extract<CartSelectionResult, { status: "READY" }>>();
+  const selectionObservations=new Map<string,{query:CartSelectionQuery;evidence:CandidateSelectionEvidence}>();
   let authority = await input.readAuthority?.();
   if (authority && (authority.bindingVersion !== input.scope.bindingVersion || authority.recipient !== input.scope.recipient)) throw new Error("COMMERCE_SCOPE");
   const turnBinding = authority?.bindingVersion ?? input.scope.bindingVersion;
@@ -67,6 +74,9 @@ export async function createCommerceEffectTools(input: {
       shippingFeeVnd: cart.shippingFeeVnd, discountTotalVnd: cart.discountTotalVnd, grandTotalVnd: cart.grandTotalVnd } : null;
   };
   async function terminalOutcome(): Promise<TerminalOutcome | null> {
+    // An unproved effect blocks every reply, including an otherwise harmless
+    // ACK. Recovery of a rejected draft is not a substitute for this send gate.
+    if(uncertain)return {disposition:"NO_SEND",reason:"UNKNOWN_COMMIT",text:null,fallbackId:null};
     if (!committedTerminal) {
       await refreshAuthority();
       if (authority && (!authority.permission || !authority.privacyAllowed || authority.conversationOwner !== "BOT" ||
@@ -85,6 +95,11 @@ export async function createCommerceEffectTools(input: {
     return { disposition: committedTerminal.disposition ?? "HANDOFF", reason: committedTerminal.reason, text: null, fallbackId: null };
   }
   const snapshot = (): TrustedContext => {
+    if(policy&&current.cart){
+      const ref=current.commerceContext?.policyRef;
+      if(!ref||ref.id!==policy.policy.policyBundleId||ref.version!==policy.policy.policyVersion||
+        ref.contentHash!==computeBusinessContentHash(policy.policy))throw new Error("TRANSACTION_POLICY_BINDING_CHANGED");
+    }
     const base = input.base.snapshot(), subjects = [...base.boundSubjects];
     const active = activeSelections();
     if (current.cart) {
@@ -100,29 +115,71 @@ export async function createCommerceEffectTools(input: {
     const cart = current.cart?.value;
     const stateReceipts = base.effectReceipts.filter(r => r.effect === "CUSTOMER_STATE_UPDATED" && r.subjectRef === base.state.customerProfileId &&
       base.boundSubjects.some(s => s.kind === "CUSTOMER_PROFILE" && s.ref === r.subjectRef)).map(r => ({ ...r, stateRevision: current.revision }));
+    const supersededVariantRefs = new Set<string>();
     return buildReadOnlyContext({ state: { ...base.state, ...authority, conversationRevision: authority?.revision ?? base.state.revision, revision: current.revision,
       salesStage: current.stage, cartItems: cartItems(active),
-      checkoutStatus: { previewAvailable: current.stage === "ORDER_PREVIEW" && current.preview !== null, purchaseConfirmed: current.confirmation !== null,
+      checkoutStatus: { publicIntake:publicCheckoutState(current),previewAvailable: current.stage === "ORDER_PREVIEW" && current.preview !== null, purchaseConfirmed: current.confirmation !== null,
         missingFields: [!current.checkoutDraft?.fullName && "FULL_NAME", !current.checkoutDraft?.phone && "PHONE", !current.checkoutDraft?.address && "ADDRESS", !current.checkoutDraft?.paymentMethod && "PAYMENT_METHOD"].filter(Boolean) },
       ...(current.stage === "HANDED_OFF" ? { permission: false, conversationOwner: "HUMAN" } : {}),
       ...(cart ? { cartQuote: cartQuote() } : {}) },
-      subjects, products: base.runtimeProducts ?? [], claims: [...base.protectedClaims.filter(c => {
+      subjects, supersededVariantRefs, products: (()=>{
+        const products=new Map((base.runtimeProducts??[]).map(p=>[p.subjectRef,structuredClone(p)]));
+        for(const {evidence}of selectionObservations.values()){
+          const p=products.get(evidence.productId)??{ref:`product:${evidence.productId}`,subjectRef:evidence.productId};
+          const next=mergeSelectionEvidence(p,evidence,input.clock());
+          if(!products.has(p.subjectRef)&&products.size>=4)throw Error("PRODUCT_EVIDENCE_BOUND");
+          products.set(p.subjectRef,next);
+        }return [...products.values()];
+      })(), claims: [...base.protectedClaims.filter(c => {
         const claim = c as { type: string; scope: { kind: string; productId?: string; variantId?: string } };
-        return !["PRICE", "STOCK"].includes(claim.type) || !active.some(s => claim.scope.kind === "PRODUCT" && claim.scope.productId === s.line.parentProductId &&
-          [s.line.offerId, `offer:${s.line.parentProductId}:${s.line.offerId}`].includes(claim.scope.variantId ?? ""));
+        const replaced = ["PRICE", "STOCK"].includes(claim.type) && active.some(s => claim.scope.kind === "PRODUCT" && claim.scope.productId === s.line.parentProductId &&
+          (claim.scope.variantId === s.line.offerId || claim.scope.variantId === `offer:${s.line.parentProductId}:${s.line.offerId}` ||
+            // A size-filtered read of the same offer is superseded by the selected line as well.
+            (claim.scope.variantId ?? "").startsWith(`offer:${s.line.parentProductId}:${s.line.offerId}:size:`)));
+        if(replaced && claim.scope.variantId) supersededVariantRefs.add(claim.scope.variantId);
+        return !replaced;
       }), ...selectionClaims],
-      policies: policy ? [...base.policyLiterals.filter(p => !p.ref.startsWith("policy:")),
-        publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock())] : base.policyLiterals,
+      // Active shop rules and durable transaction terms have different authority.
+      // Never replace a current active-pointer observation with a historical pin.
+      policies: policy ? [...base.policyLiterals, (() => {
+        const literal=publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock());
+        return {...literal,ref:literal.ref.replace("policy:","transaction-policy:"),text:JSON.stringify({
+          ...JSON.parse(literal.text),policyBinding:{purpose:current.cart?"COMMITTED_TRANSACTION":"TRANSACTION_PREPARATION",
+            policyRef:current.commerceContext?.policyRef??null}})};
+      })()] : base.policyLiterals,
       // Reuse the selection readback: a known contradiction invalidates this
       // receipt's current scope; unavailable source data adds no new assertion.
       receipts: [...stateReceipts, ...(receipt && active.length === selections.size ? [receipt] : [])], ...(cart ? { cartBinding: { cartId: cart.cartId, cartVersion: cart.revision } } : {}) });
   };
-  async function selection(productId: string, a: Record<string, unknown>, lineId: string, offerType: string | null = null) {
-    const result = await input.select({ shopAlias: input.scope.shopAlias, productId, offerType,
-      size: typeof a.size === "string" ? a.size : null, color: typeof a.color === "string" ? a.color : null,
-      quantity: typeof a.quantity === "number" ? a.quantity : 1, lineId });
+  async function selection(productId: string, a: Record<string, unknown>, lineId: string, offerType: string | null = null, requireColorChoice=false) {
+    const query:CartSelectionQuery={ shopAlias: input.scope.shopAlias, productId, offerType,
+      size: typeof a.size === "string" ? a.size : null, color: requireColorChoice?null:typeof a.color === "string" ? a.color : null,
+      ...(requireColorChoice?{requireColorChoice:true}:{}),
+      quantity: typeof a.quantity === "number" ? a.quantity : 1, lineId,selectionMaxAgeSeconds:input.selectionMaxAgeSeconds??1200};
+    const result = await input.select(query);
+    if(requireColorChoice&&result.status==="READY")throw Error("SELECTION_COLOR_CHOICE_UNPROVED");
+    if(result.status!=="READY"&&result.selectionEvidence){
+      const e=result.selectionEvidence,now=input.clock();
+      if(!validSelectionEvidence(e,productId,now)||normalizeCatalogToken(e.offerType)!==normalizeCatalogToken(offerType??"")||e.quantity!==query.quantity||
+        normalizeCatalogToken(e.size??"")!==normalizeCatalogToken(query.size??"")||normalizeCatalogToken(e.color??"")!==normalizeCatalogToken(query.color??""))throw Error("SELECTION_EVIDENCE_SCOPE");
+      const expiresAt=new Date(Math.min(Date.parse(e.expiresAt),Date.parse(e.observedAt)+(input.selectionMaxAgeSeconds??1200)*1000,
+        policy?.policy.effectiveUntil?Date.parse(policy.policy.effectiveUntil):Infinity)).toISOString();
+      const clipped=selectionEvidenceWithExpiry(e,expiresAt,now);
+      if(!clipped)throw Error("SELECTION_EVIDENCE_STALE");
+      const key=selectionQueryKey(clipped),previous=selectionObservations.get(key);
+      if(previous&&(selectionMeaningHash(previous.evidence)!==selectionMeaningHash(clipped)||Date.parse(clipped.observedAt)<Date.parse(previous.evidence.observedAt)))throw Error("SOURCE_EVIDENCE_CONFLICT");
+      const bound=previous&&Date.parse(previous.evidence.expiresAt)<=Date.parse(clipped.expiresAt)?previous.evidence:clipped;
+      const proposed=input.base.snapshot().runtimeProducts?.find(p=>p.subjectRef===productId)??{ref:`product:${productId}`,subjectRef:productId};
+      let checked=proposed;for(const old of selectionObservations.values())if(old.evidence.productId===productId)checked=mergeSelectionEvidence(checked,old.evidence,now);
+      mergeSelectionEvidence(checked,bound,now);
+      selectionObservations.set(key,{query:previous?.query??query,evidence:bound});
+      const choiceResolution=selectionChoiceResolution(bound,now,result.status);
+      return {...result,effectCommitted:false,selectionOptions:expandSelectionOptions(bound),selectionEvidence:bound,selectionOptionScope:selectionOptionScope(bound.completeness==="ALL_EXACT_TUPLES_FOR_QUERY"?bound.options.length:Infinity),selectionStatus:result.status,
+        ...(choiceResolution?{choiceResolution}:{}),
+        ...(choiceResolution?.kind==="SHOP_DATA_MISSING"?{shopDataGap:choiceResolution.reason}: {})};
+    }
     if (result.status !== "READY") return { status: result.status, reasonCode: result.reasonCode,
-      availableSizes: result.availableSizes, availableColors: result.availableColors };
+      selectionOptions:(result.selectionOptions??[]).slice(0,8),selectionOptionScope:selectionOptionScope((result.selectionOptions??[]).length),selectionStatus:result.status };
     if (result.shopId !== input.scope.shopId || result.line.parentProductId !== productId ||
       Date.parse(result.sourceObservedAt) > input.clock().getTime() || Date.parse(result.sourceExpiresAt) <= input.clock().getTime()) throw new Error("SELECTION_UNAVAILABLE");
     const line = { ...result.line, lineId }; selections.set(lineId, { ...result, line }); return { ...result, line };
@@ -158,6 +215,8 @@ export async function createCommerceEffectTools(input: {
   }
   async function invokeEffect(call: CommerceToolCall): Promise<CommerceToolResult> {
     if (!names.has(call.name)) return input.base.invoke(call);
+    let phase:CommerceEffectFailureStage="AUTHORITY";
+    const execute = async():Promise<CommerceToolResult> => {
     try { await refreshAuthority(); } catch { return { status: "UNAVAILABLE", reason: "CURRENT_AUTHORITY_UNAVAILABLE" }; }
     const state = snapshot().state;
     if (state.customerStateUpdatePending === true) return { status: "REJECTED", reason: "DEPENDENT_STATE_REJECTED" };
@@ -167,27 +226,36 @@ export async function createCommerceEffectTools(input: {
     try {
       current = await read();
       const authorizedRevision = current.revision;
+      phase="VALIDATION";
       const a = toolArgs(call.args, call.name === "add_to_cart" ? ["subjectRef", "offerType", "size", "color", "quantity"] :
-        call.name === "change_cart_item" ? ["subjectRef", "action", "quantity", "size", "color", "componentRole"] : call.name === "record_negotiation" ? ["intent","sourceQuote"] : []);
+        call.name === "change_cart_item" ? ["subjectRef", "action", "quantity", "size", "color", "componentRole", "targetSubjectRef", "offerType"] : call.name === "record_negotiation" ? ["intent","sourceQuote"] : []);
       if (!a) return { status: "REJECTED", reason: "TOOL_ARGUMENTS" };
       let negotiationSource: NonNullable<typeof input.negotiationSources>[number] | undefined;
       if(call.name==="record_negotiation"){
         const quote=a.sourceQuote;
-        if(!current.cart||!current.negotiation||!["PRICE_OBJECTION","PURCHASE_READY"].includes(String(a.intent))||
+        if(!["PRICE_OBJECTION","PURCHASE_READY"].includes(String(a.intent))||
           typeof quote!=="string"||!quote.trim()||Buffer.byteLength(quote)>512)return {status:"REJECTED",reason:"NEGOTIATION_SOURCE_OR_CART"};
         const matches=input.negotiationSources?.filter(source=>source.text.includes(quote))??[];
         negotiationSource=matches[0];
         if(matches.length!==1||!negotiationSource?.sourceMessageId||
           negotiationSource.text.indexOf(quote)!==negotiationSource.text.lastIndexOf(quote))return {status:"REJECTED",reason:"NEGOTIATION_SOURCE_OR_CART"};
+        if(!current.cart||!current.negotiation)return {status:"REJECTED",reason:"NEGOTIATION_CONTEXT_REQUIRED",data:{
+          effectCommitted:false,negotiationStatus:"NOT_EVALUATED",supportAvailability:"UNKNOWN",
+          missing:[...(!current.cart?["CART"]:[]),...(!current.negotiation?["NEGOTIATION"]:[])]}};
       }
       if (call.name === "add_to_cart" && (typeof a.offerType !== "string" || !a.offerType.trim())) {
         return { status: "REJECTED", reason: "OFFER_REQUIRED" };
       }
       if (call.name === "change_cart_item") {
         const fields = a.action === "REMOVE_LINE" ? ["subjectRef", "action"] :
+          a.action === "REPLACE_LINE" ? ["subjectRef", "action", "targetSubjectRef", "offerType", "quantity", "size", "color"] :
           a.action === "SET_QUANTITY" ? ["subjectRef", "action", "quantity"] :
           a.action === "SET_COMPONENT_VARIANT" ? ["subjectRef", "action", "componentRole", "size", "color"] : null;
         if (!fields || !toolArgs(a, fields)) return { status: "REJECTED", reason: "TOOL_ARGUMENTS" };
+        if(a.action==="REPLACE_LINE"&&(typeof a.targetSubjectRef!=="string"||!a.targetSubjectRef.trim()||
+          typeof a.offerType!=="string"||!a.offerType.trim()||!Object.hasOwn(a,"color")||
+          (a.quantity!==undefined&&(!Number.isInteger(a.quantity)||(a.quantity as number)<1||(a.quantity as number)>20))))
+          return {status:"REJECTED",reason:"REPLACEMENT_ARGUMENTS"};
       }
       for (const [field, max] of [["size", 16], ["color", 64], ["offerType", 64]] as const) {
         const value = a[field];
@@ -197,7 +265,11 @@ export async function createCommerceEffectTools(input: {
       const product = call.name === "add_to_cart" ? state && input.base.snapshot().boundSubjects.find(s => s.kind === "PRODUCT" && s.ref === a.subjectRef) : undefined;
       const line = current.cart?.value.lines.find(l => l.lineId === a.subjectRef);
       if ((call.name === "add_to_cart" && !product) || (call.name === "change_cart_item" && !line)) return { status: "REJECTED", reason: "SUBJECT_REF" };
+      const target=call.name==="change_cart_item"&&a.action==="REPLACE_LINE"?
+        input.base.snapshot().boundSubjects.find(s=>s.kind==="PRODUCT"&&s.ref===a.targetSubjectRef):undefined;
+      if(call.name==="change_cart_item"&&a.action==="REPLACE_LINE"&&!target)return {status:"REJECTED",reason:"SUBJECT_REF"};
       const effect = call.name === "confirm_purchase" ? "PURCHASE_CONFIRMATION" : current.cart ? "CART_MUTATION" : "CART_OPEN";
+      phase="AUTHORITY";
       if (!await input.authorize(effect, current)) return { status: "REJECTED", reason: "EFFECT_PERMISSION" };
       const operationId = commerceHash({ pageId: input.scope.pageId, conversationId: input.scope.conversationId,
         sourceMessageId: negotiationSource?.sourceMessageId ?? input.scope.sourceMessageId, tool: call.name, ...(call.name==="record_negotiation"?{}:{args:a}) });
@@ -209,7 +281,7 @@ export async function createCommerceEffectTools(input: {
         await refreshSelections();
         return { status: "OK", data: { operationId, duplicate: true, cart: current.cart?.value, cartItems: cartItems(), cartQuote: cartQuote() } };
       }
-      policy = await input.policy();
+      phase="SOURCE";policy = await input.policy();
       publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock());
       const policyRef = { id: policy.policy.policyBundleId, version: policy.policy.policyVersion, contentHash: computeBusinessContentHash(policy.policy) };
       let draft: ResolvedCartDraftV1 | null = null, mutation: CanonicalCartMutationV2 | null = null;
@@ -224,7 +296,19 @@ export async function createCommerceEffectTools(input: {
           command = { kind: "CART_OPENED", commandId: operationId, cartDraftRef: { id: operationId, version: "1", contentHash: computeBusinessContentHash(draft) }, expiresAt: new Date(input.clock().getTime()+1_800_000).toISOString() };
         } else mutation = { kind: "ADD_LINE", line: selected };
       } else if (call.name === "change_cart_item") {
-        if (a.action === "REMOVE_LINE") mutation = { kind: "REMOVE_LINE", lineId: line!.lineId };
+        if (a.action === "REPLACE_LINE") {
+          const changedScope=target!.ref!==line!.parentProductId||normalizeCatalogToken(a.offerType as string)!==normalizeCatalogToken(line!.offerId);
+          const requireColorChoice=changedScope&&a.color==="__NO_COLOR__";
+          const selected = await selection(target!.ref,{...a,quantity:a.quantity??line!.quantity},line!.lineId,a.offerType as string,requireColorChoice);
+          if (selected.status !== "READY") return {status:"UNAVAILABLE",reason:"SELECTION_UNAVAILABLE",data:selected};
+          if (normalizeCatalogToken(selected.line.offerId) !== normalizeCatalogToken(a.offerType as string) ||
+            selected.line.quantity !== (a.quantity??line!.quantity) ||
+            (typeof a.size==="string"&&selected.line.components.some(c=>normalizeCatalogToken(c.size??"")!==normalizeCatalogToken(a.size as string))) ||
+            (typeof a.color==="string"&&selected.line.components.some(c=>normalizeCatalogToken(c.color??"")!==normalizeCatalogToken(a.color as string))))
+            return {status:"REJECTED",reason:"REPLACEMENT_SELECTION_SCOPE"};
+          mutation = {kind:"REPLACE_LINE",lineId:line!.lineId,line:selected.line};
+        }
+        else if (a.action === "REMOVE_LINE") mutation = { kind: "REMOVE_LINE", lineId: line!.lineId };
         else if (a.action === "SET_QUANTITY" && Number.isInteger(a.quantity) && (a.quantity as number) > 0 && (a.quantity as number) <= 20) mutation = { kind: "SET_QUANTITY", lineId: line!.lineId, quantity: a.quantity as number };
         else if (a.action === "SET_COMPONENT_VARIANT" && (typeof a.size === "string" || typeof a.color === "string")) {
           const component = line!.components.find(c => c.componentRole === a.componentRole);
@@ -240,7 +324,7 @@ export async function createCommerceEffectTools(input: {
         } else return { status: "REJECTED", reason: "MUTATION_ARGUMENTS" };
       }
       if (mutation) command = { kind: "CART_MUTATED", commandId: operationId, expectedCartVersion: current.cart!.value.revision,
-        mutationRef: { id: operationId, version: "1", contentHash: computeBusinessContentHash({ mutation }) }, mutationReasonCode: mutation.kind === "ADD_LINE" ? "LINE_ADDED" : mutation.kind === "REMOVE_LINE" ? "LINE_REMOVED" : mutation.kind === "SET_COMPONENT_VARIANT" ? "VARIANT_CHANGED" : "QUANTITY_CHANGED" };
+        mutationRef: { id: operationId, version: "1", contentHash: computeBusinessContentHash({ mutation }) }, mutationReasonCode: mutation.kind === "REPLACE_LINE" ? "LINE_REPLACED" : mutation.kind === "ADD_LINE" ? "LINE_ADDED" : mutation.kind === "REMOVE_LINE" ? "LINE_REMOVED" : mutation.kind === "SET_COMPONENT_VARIANT" ? "VARIANT_CHANGED" : "QUANTITY_CHANGED" };
       else if (call.name === "confirm_purchase") command = { kind: "CONFIRM_PURCHASE", commandId: operationId,
         intent: { source: "MODEL_STRUCTURED_OUTPUT", intent: "PURCHASE_CONFIRMATION", sourceMessageId: input.scope.sourceMessageId } };
       else if(call.name==="record_negotiation")command={kind:"NEGOTIATION_EVENT",commandId:operationId,expectedNegotiationVersion:current.negotiation!.stateVersion,
@@ -258,6 +342,17 @@ export async function createCommerceEffectTools(input: {
       const repository: SalesCycleStateRepositoryV1 = { read: key => input.repository.read(key),
         compareAndSwap: update => update.expectedRevision === authorizedRevision
           ? input.repository.compareAndSwap(update) : Promise.resolve(false) };
+      phase="AUTHORITY";await refreshAuthority();
+      const permission=snapshot().state;
+      if(!permission.permission||!permission.privacyAllowed||permission.conversationOwner!=="BOT"||
+        permission.recipient!==turnRecipient||permission.bindingVersion!==turnBinding||!await input.authorize(effect,current))
+        return {status:"REJECTED",reason:"EFFECT_PERMISSION"};
+      phase="SOURCE";
+      if(mutation?.kind==="REPLACE_LINE"){
+        const target=selections.get(mutation.lineId);
+        if(!target||Date.parse(target.sourceExpiresAt)<=input.clock().getTime())return {status:"UNAVAILABLE",reason:"SELECTION_UNAVAILABLE"};
+      }
+      phase="COMMIT_UNKNOWN";
       try { commitAttempted = true; result = input.executeCommand
         ? await input.executeCommand({ command: command!, expectedRevision: authorizedRevision,
           conversationRevision: authority?.revision ?? input.scope.revision,
@@ -265,7 +360,8 @@ export async function createCommerceEffectTools(input: {
         : await executePersistedSalesCycleCommand({ repository, conversationKey: input.conversationKey,
         command: command!, now: input.clock(), trustedPorts: ports,
         ...(input.resolveBankTransferPolicy ? { resolveBankTransferPolicy: input.resolveBankTransferPolicy } : {}) }); }
-      catch { current = await read(); await refreshAuthority();
+      catch (error) { if(error instanceof CommerceEffectCommitError)phase=error.stage;
+        current = await read(); await refreshAuthority();
         const proved = input.executeCommand && input.readReceipt ? acceptReceipt(await input.readReceipt(operationId), operationId, [effectName]) : recordReceipt(operationId, effectName, authorizedRevision+1);
         if (!proved) { uncertain = true; return { status: "UNAVAILABLE", reason: "UNKNOWN_COMMIT" }; }
         reconciledRevision = current.revision;
@@ -294,7 +390,9 @@ export async function createCommerceEffectTools(input: {
         receipt = undefined;
         return { status: "OK", data: { handoffAccepted: true } };
       }
-      if (result && !["APPLIED", "DUPLICATE"].includes(result.status)) return { status: "REJECTED", reason: "reasonCode" in result ? result.reasonCode : result.status };
+      if (result && !["APPLIED", "DUPLICATE"].includes(result.status)) return { status: "REJECTED", reason: "reasonCode" in result ? result.reasonCode : result.status,
+        failureStage:result.status==="CONFLICT"?"CAS":"failureStage" in result?result.failureStage??"DOMAIN":"DOMAIN" };
+      phase="READBACK";
       current = await read();
       await refreshAuthority();
       const expectedReceiptRevision=result?.status==="APPLIED"&&input.executeCommand?result.state.revision:authorizedRevision+1;
@@ -308,15 +406,40 @@ export async function createCommerceEffectTools(input: {
       return { status: "OK", data: { operationId, effect: effectName, cart: current.cart?.value, cartItems: cartItems(), cartQuote: cartQuote(),
         purchaseConfirmed: current.confirmation !== null, externalOrderCreated: false } };
     } catch { if (commitAttempted) uncertain = true; return { status: "UNAVAILABLE", reason: "COMMERCE_UNAVAILABLE" }; }
+    };
+    const result=await execute();
+    return result.status==="OK"?result:{...result,failureStage:result.failureStage??phase};
   }
   async function invoke(call: CommerceToolCall): Promise<CommerceToolResult> {
     const result = await invokeEffect(call);
+    if(call.name==="record_negotiation"&&result.reason==="NEGOTIATION_CONTEXT_REQUIRED"&&result.failureStage==="VALIDATION"&&!uncertain)
+      noCommitNegotiations.set(result,{state:commerceHash(current),authority:commerceHash(authority??input.scope)});
+    const data=result.data as {effectCommitted?:boolean;choiceResolution?:{kind?:string}}|undefined;
+    if(["add_to_cart","change_cart_item"].includes(call.name)&&result.status==="UNAVAILABLE"&&result.reason==="SELECTION_UNAVAILABLE"&&
+      result.failureStage==="SOURCE"&&data?.effectCommitted===false&&data.choiceResolution?.kind==="NEEDS_CUSTOMER_CHOICE"&&!uncertain)
+      noCommitSelections.set(result,{state:commerceHash(current),authority:commerceHash(authority??input.scope)});
     if (names.has(call.name) && result.status !== "OK") failedEffect = true;
     return result;
   }
   // Establish current evidence before the owner/verifier sees this turn, including existing carts on later turns.
   await refreshSelections();
-  return { invoke, snapshot, ...(input.base.sizeOutcome ? {sizeOutcome: input.base.sizeOutcome} : {}), terminalOutcome, async invokeBatch(calls) {
+  return { invoke, snapshot, noCommitNegotiationResult(result){
+    const proof=noCommitNegotiations.get(result),s=snapshot().state;
+    return !!proof&&!uncertain&&s.permission&&s.privacyAllowed&&s.conversationOwner==="BOT"&&s.bindingVersion===turnBinding&&s.recipient===turnRecipient&&
+      proof.state===commerceHash(current)&&proof.authority===commerceHash(authority??input.scope);
+  },uncommittedSelectionResult(result){
+    const proof=noCommitSelections.get(result),s=snapshot().state;
+    return !!proof&&!uncertain&&s.permission&&s.privacyAllowed&&s.conversationOwner==="BOT"&&s.bindingVersion===turnBinding&&s.recipient===turnRecipient&&
+      proof.state===commerceHash(current)&&proof.authority===commerceHash(authority??input.scope);
+  },unlabelledCartProducts(context){
+    const cart=current.cart,at=input.clock().getTime();
+    if(!cart||Date.parse(cart.expiresAt)<=at||context.cartBinding?.cartId!==cart.value.cartId||context.cartBinding.cartVersion!==cart.value.revision||
+      context.state.revision!==current.revision||commerceHash(context.state.cartItems)!==commerceHash(cartItems())||!context.state.permission||!context.state.privacyAllowed||context.state.conversationOwner!=='BOT'||context.state.bindingVersion!==turnBinding||context.state.recipient!==turnRecipient)return [];
+    const active=activeSelections();return [...new Set(cart.value.lines.map(l=>l.parentProductId))].filter(id=>cart.value.lines.filter(l=>l.parentProductId===id).every(l=>{
+      const s=active.find(s=>selectionsMatchCartLines([l],[s]));return l.components.length>0&&l.components.every(c=>c.color==='__NO_COLOR__')&&!!s&&
+        s.line.components.length>0&&s.line.components.every(c=>c.color==='__NO_COLOR__')&&Date.parse(s.sourceObservedAt)<=at&&Date.parse(s.sourceExpiresAt)>at;
+    }));
+  }, ...(input.base.sizeOutcome ? {sizeOutcome: input.base.sizeOutcome} : {}), terminalOutcome, async invokeBatch(calls) {
     const independent = calls.filter(c => !names.has(c.name) && c.name !== "quote_cart");
     const results = new Map<CommerceToolCall, CommerceToolResult>();
     const readResults = await input.base.invokeBatch(independent); independent.forEach((c, i) => results.set(c, readResults[i]!));
@@ -326,6 +449,14 @@ export async function createCommerceEffectTools(input: {
     for (const c of calls.filter(c => c.name === "quote_cart")) results.set(c, effectRejected ? { status: "REJECTED", reason: "DEPENDENT_EFFECT_REJECTED" } : await input.base.invoke(c));
     return calls.map(c => results.get(c)!);
   }, async readback() { await input.base.readback(); current = await read(); await refreshAuthority(); if (policy) policy = await input.policy();
+    for(const {query,evidence}of [...selectionObservations.values()]){
+      const replay=await input.select(query);
+      const next=replay.status!=="READY"?replay.selectionEvidence:undefined;
+      if(!next||!validSelectionEvidence(next,evidence.productId,input.clock())||!validSelectionEvidence(evidence,evidence.productId,input.clock())||
+        Date.parse(next.observedAt)<Date.parse(evidence.observedAt)||Date.parse(next.expiresAt)<Date.parse(evidence.expiresAt)||
+        selectionMeaningHash(next)!==selectionMeaningHash(evidence)||
+        (policy?.policy.effectiveUntil&&Date.parse(policy.policy.effectiveUntil)<Date.parse(evidence.expiresAt)))throw Error("SELECTION_EVIDENCE_CHANGED");
+    }
     await refreshSelections();
     return snapshot(); },
   publicCartSummary:()=>publicSummary,

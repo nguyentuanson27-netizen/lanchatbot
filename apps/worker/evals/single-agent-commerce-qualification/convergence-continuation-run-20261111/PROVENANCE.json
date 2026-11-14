@@ -1,0 +1,304 @@
+{
+  "status": "BLOCKED_INFRASTRUCTURE",
+  "recordedAt": "2026-11-11T11:43:47.921466+00:00",
+  "nativeRunSourceSha": "93b3859180c8ec93eccbb251962ae300756ebd4f",
+  "nativeWorldHash": "7d342091387df57808a32ffd6f23303cf337ea36cc18644f179e6e30fd959e2e",
+  "runtimeModel": {
+    "provider": "VERTEX_AI",
+    "model": "gemini-3.5-flash-lite",
+    "version": "gemini-3.5-flash-lite",
+    "effort": "high",
+    "location": "global",
+    "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+    "generationConfig": {
+      "candidateCount": 1,
+      "responseMimeType": "text/plain",
+      "maxOutputTokens": 8192,
+      "thinkingConfig": {
+        "thinkingLevel": "HIGH",
+        "includeThoughts": false
+      },
+      "temperature": "OMITTED_PROVIDER_DEFAULT",
+      "topP": "OMITTED_PROVIDER_DEFAULT",
+      "retry": 0,
+      "timeoutMs": 90000
+    }
+  },
+  "runtimeVerifier": {
+    "model": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "transport": "VERTEX_GENERATE_CONTENT_NO_RETRY",
+        "candidateCount": 1,
+        "responseMimeType": "application/json",
+        "responseSchema": "VERDICT_SCHEMA_AS_RESPONSE_JSON_SCHEMA",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "tools": "NONE",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "requestsPerAttempt": 1,
+        "retry": 0,
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    },
+    "promptHash": "ef4a060ce221fe0374ec94b96e23aef8ed8b807cb1eb09ed4c6afd3489f6373f",
+    "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+    "serializationHash": "be6d02ed3d0106cb995626769e47d37b417b6655d43c8bfb2b2f4b80f3f8e6d7",
+    "bindingHash": "f7a63d2727e695ff2050ad4b4e2b7dd1c9cf697fae833fce6fb260912646a2b1",
+    "boundsHash": "6179ba4eb906926b3b58c2cd754f53c4e511bc4d8b2a6e0049d2463a32a1c26b"
+  },
+  "registrationIdentity": {
+    "verifier": "2beb5b40cff18e863e769d456abd3f2088fee07506a2b5c05035c0a864080b4c",
+    "candidate": "873b9e3b4b6d78321d130a9ef762b0e126cba7722b6e985809ca2ce8ef9a12d7",
+    "protocol": "f206ac33dc9ecd676fca10ddebf7096b683264e730172e2877f2d485a4676d0a"
+  },
+  "nativeCommand": {
+    "sourceSha": "93b3859180c8ec93eccbb251962ae300756ebd4f",
+    "worldHash": "7d342091387df57808a32ffd6f23303cf337ea36cc18644f179e6e30fd959e2e",
+    "cases": 13,
+    "slots": 65,
+    "turns": 135,
+    "repetitions": 5,
+    "retry": 0,
+    "startedAt": "2026-11-11T09:58:25.796112+00:00",
+    "command": [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "..\\c3-convergence-model-run-20261111-02",
+      "COD",
+      "--phase-c-diagnostic-registration",
+      "..\\c3-convergence-model-sealed-20261111-02\\REGISTRATION.json",
+      "--phase-c-world",
+      "../c3-convergence-model-world-20261111-01/WORLD.json",
+      "--phase-c-seed",
+      "..\\c3-convergence-model-sealed-20261111-02\\PRIVATE_BLIND_SEED.json"
+    ],
+    "authorization": {
+      "ownerText": "chạy nốt các ca còn lại; chạy xong mới review và tổng kết",
+      "continueDespitePriorVerifierFailure": true,
+      "priorFailureRemainsRecorded": true,
+      "purpose": "COMPLETE_DEVELOPMENT_OBSERVATION_SEND_DISABLED"
+    },
+    "helpers": [
+      {
+        "path": "..\\c3-convergence-model-prepare-20261111-02.mjs",
+        "sha256": "30cfd303d5ecdf8f5825829f99e121cbf085bcd739df2287331b9559804d2e55"
+      },
+      {
+        "path": "..\\c3-convergence-model-seal-20261111-02.mjs",
+        "sha256": "ed2c8f52c14984154f8e77837e4ad867d298f64aa5cfd57f89b2f33f36d39487"
+      },
+      {
+        "path": "..\\c3-convergence-model-launch-20261111-02.py",
+        "sha256": "2f23a2b5d7e5062a0881c6c0d80540e95fba2fe982dc04b68164f9349a2cf4bb"
+      }
+    ],
+    "exitCode": 1,
+    "completedAt": "2026-11-11T11:05:46.789423+00:00"
+  },
+  "userAuthorization": [
+    "chạy nốt các ca còn lại",
+    "chạy xong mới review và tổng kết"
+  ],
+  "qualityReview": "DEFERRED_UNTIL_COMPLETION",
+  "commandsActuallyRun": [
+    [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "../c3-convergence-safety-remainder-20261111.mjs"
+    ],
+    [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "../c3-convergence-model-initial-20261111-02",
+      "COD",
+      "--phase-c-initial-world",
+      "../c3-convergence-model-world-20261111-01/WORLD.json"
+    ],
+    [
+      "node",
+      "../c3-convergence-model-prepare-20261111-02.mjs"
+    ],
+    [
+      "node",
+      "../c3-convergence-model-seal-20261111-02.mjs"
+    ],
+    [
+      "python",
+      "../c3-convergence-model-launch-20261111-02.py"
+    ],
+    [
+      "node",
+      "../c3-convergence-model-cleanup-20261111-02.mjs"
+    ],
+    [
+      "node",
+      "--test",
+      "apps/worker/evals/single-agent-commerce-qualification/native-slot-selection.test.mjs",
+      "apps/worker/evals/single-agent-commerce-qualification/repetition-summary.test.mjs"
+    ],
+    [
+      "node",
+      "--test",
+      "apps/worker/evals/single-agent-commerce-qualification/test-media-source.test.mjs",
+      "apps/worker/evals/single-agent-commerce-qualification/native-slot-selection.test.mjs"
+    ],
+    [
+      "python",
+      "../c3-convergence-continue-controller-20261111.py"
+    ],
+    [
+      "node",
+      "../c3-convergence-model-public-view-20261111-interrupted.mjs"
+    ],
+    [
+      "node",
+      "../c3-convergence-model-audit-20261111-interrupted.mjs"
+    ],
+    [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-qualification/capture-world.mjs",
+      "../c3-convergence-model-world-20261111-03",
+      "../c3-media-context-model-codes-20261103-02.json"
+    ],
+    [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-qualification/capture-world.mjs",
+      "../c3-convergence-model-world-20261111-04",
+      "../c3-media-context-model-codes-20261103-02.json"
+    ],
+    [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-qualification/capture-world.mjs",
+      "../c3-convergence-model-world-20261111-05",
+      "../c3-media-context-model-codes-20261103-02.json",
+      "--test-media-proof-world",
+      "../c3-convergence-model-world-20261111-01/WORLD.json"
+    ],
+    [
+      "python",
+      "../c3-media-context-model-source-wrapper-20261103-02.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-qualification/capture-world.mjs",
+      "../c3-convergence-model-world-20261111-06",
+      "../c3-media-context-model-codes-20261103-02.json",
+      "--test-media-proof-world",
+      "../c3-convergence-model-world-20261111-01/WORLD.json"
+    ]
+  ],
+  "interruption": "PostgreSQL connection terminated unexpectedly. All 177 started provider generations have completed journal records.",
+  "resumeSourceCommit": "0d29e0e01e60eec9ad92d6875d8f42bf76ad5810",
+  "resumeSourceChanges": [
+    "c4601068 adds a registered native slot selection for only zero-generation pending cases.",
+    "0d29e0e0 allows reusing owner-approved test image proof with its original verification time."
+  ],
+  "resumeVerification": {
+    "slotSelectionAndRepetitionTests": "6/6 PASS",
+    "mediaAndSlotSelectionTests": "5/5 PASS"
+  },
+  "nativeExecutionAfterResumeChanges": 0,
+  "freshSourceCapture": "world06 CAPTURED after read connection resets and failed test-image download in world03-05 attempts",
+  "testImageProof": "Original verified bytes hash/check time from world01 reused. No fresh image revalidation claim.",
+  "connectionRetries": {
+    "initialStandaloneAttempts": 2,
+    "controllerAttempts": 8,
+    "finalStandaloneAttempt": 1,
+    "failedStage": "SSH_CONNECT_BEFORE_INITIAL_STATE_OR_PROVIDER_REQUEST",
+    "recoveredStandaloneAttempt": 1,
+    "totalFailedSshInitialAttempts": 12
+  },
+  "recoveryStatus": "BLOCKED_INITIAL_SOURCE_CONNECTION",
+  "providerRetries": 0,
+  "unknownProviderCompletions": 0,
+  "orphanDatabase": {
+    "status": "CLEANUP_CONFIRMED",
+    "database": "c3_b_test_0d802a39561f2cbc",
+    "existed": true,
+    "activeConnections": 0,
+    "testDatabaseDropped": true,
+    "providerRequests": 0,
+    "shopSourceWrites": 0,
+    "liveSends": 0,
+    "at": "2026-11-11T11:09:39.165Z"
+  },
+  "initialCaptureDatabaseDropped": true,
+  "sourceShopWrites": 0,
+  "liveSends": 0,
+  "rawArtifactSha256": {
+    "c3-convergence-model-run-20261111-02/CANDIDATE_EVIDENCE.partial.json": "695a2b7cab60d1d91a7a9e792db9c2686841bbdf54f63547b457755fa6799ec7",
+    "c3-convergence-model-run-20261111-02/NATIVE_REQUESTS.jsonl": "6c019e6d8490297dda790cf852562596df43280282f0b3431311f2f81b3bcd4d",
+    "c3-convergence-model-run-20261111-02/integration.json": "9b48d9a2bf9bba391cc4f0b8ac7798a967278c931c139679635c8a6fce6cf300",
+    "c3-convergence-model-command-20261111-02.json": "efe53d1f30be3c53ae5e39bd5f58fa0f45a02ac17e1bfd989aa48fd946256b7e",
+    "c3-convergence-model-started-20261111-02.json": "5740eba34cbd5b4d896e3d3d30a3e89ee8c87a5a86ef2f677302bae255f81e16",
+    "c3-convergence-model-sealed-20261111-02/REGISTRATION.json": "79866aa465404c19a8256240a0daa0a90af8ffd8acbdd654c53b9a7cf7cf573b",
+    "c3-convergence-model-world-20261111-01/WORLD.json": "83806f571765dc9a87bef5d70dbaf63ae935e1f69ee8d20792a8dc4fa77be7a7",
+    "c3-convergence-model-world-20261111-06/WORLD.json": "0f3a5beae960a76cada4881b54c2bc5f71ebf0008604ba1c0b9ee2cd2d2d0ea0",
+    "c3-convergence-model-cleanup-20261111-02.json": "bfb629365b8129295cdd72477c13defc2f4616aafe3a51cd92ece23a9d2c2897",
+    "c3-convergence-model-run-20261111-02.log": "ce9bac76bc10f0b0922bbf4a0251dc415ea8b6eb5ebbf5196ceba2123be788c9",
+    "c3-convergence-model-initial-20261111-03.log": "58cef88ddb2648312fd0fdc1e5eebd3c8e2e97c14f2c87d0c22a0951a1bc5b37",
+    "c3-convergence-model-initial-ready-20261111-03.log": "58cef88ddb2648312fd0fdc1e5eebd3c8e2e97c14f2c87d0c22a0951a1bc5b37",
+    "c3-convergence-model-initial-final-20261111-03.log": "58cef88ddb2648312fd0fdc1e5eebd3c8e2e97c14f2c87d0c22a0951a1bc5b37",
+    "c3-convergence-continue-controller-20261111.json": "1b7566422e08990eef51b09f5b292bb64ffe58d386f7c5ab3c3aa627a878de25",
+    "c3-convergence-model-resume-tests-20261111-03.log": "3a8bdce06e334a584b560f36d9d20f75d7aab20f489a7e2499bc14f3cf19f5e4",
+    "c3-convergence-model-resume-media-tests-20261111-03.log": "e4ac70db88fe42b7686976dd760625f6dd39c09819f59b4a1a09ede96f0697d7",
+    "c3-convergence-model-initial-bootstrap-20261111-1.log": "58cef88ddb2648312fd0fdc1e5eebd3c8e2e97c14f2c87d0c22a0951a1bc5b37",
+    "c3-convergence-model-initial-bootstrap-20261111-2.log": "58cef88ddb2648312fd0fdc1e5eebd3c8e2e97c14f2c87d0c22a0951a1bc5b37",
+    "c3-convergence-model-initial-bootstrap-20261111-3.log": "58cef88ddb2648312fd0fdc1e5eebd3c8e2e97c14f2c87d0c22a0951a1bc5b37",
+    "c3-convergence-model-initial-bootstrap-20261111-4.log": "58cef88ddb2648312fd0fdc1e5eebd3c8e2e97c14f2c87d0c22a0951a1bc5b37",
+    "c3-convergence-model-initial-bootstrap-20261111-5.log": "58cef88ddb2648312fd0fdc1e5eebd3c8e2e97c14f2c87d0c22a0951a1bc5b37",
+    "c3-convergence-model-initial-bootstrap-20261111-6.log": "58cef88ddb2648312fd0fdc1e5eebd3c8e2e97c14f2c87d0c22a0951a1bc5b37",
+    "c3-convergence-model-initial-bootstrap-20261111-7.log": "58cef88ddb2648312fd0fdc1e5eebd3c8e2e97c14f2c87d0c22a0951a1bc5b37",
+    "c3-convergence-model-initial-bootstrap-20261111-8.log": "d2d5d0c69ece5c35d7bb88e8ae68fbde05ad62283cb1b87dcf40d1d3052eb08d",
+    "c3-convergence-model-initial-recovered-20261111-03.log": "58cef88ddb2648312fd0fdc1e5eebd3c8e2e97c14f2c87d0c22a0951a1bc5b37"
+  },
+  "publicationChecks": {
+    "datasetBoundary": "PASS",
+    "jsonParse": "PASS",
+    "credentialPatternCheck": "PASS",
+    "relativeLinks": "PASS",
+    "completedPendingDenominator": "PASS"
+  },
+  "recordedRecoverySavepoint": "c3a81b49",
+  "githubPublication": {
+    "status": "PENDING_NETWORK",
+    "lastPublishedHead": "93b3859180c8ec93eccbb251962ae300756ebd4f",
+    "attempts": [
+      {
+        "transport": "GIT_SSH",
+        "result": "github.com port22 connect timeout"
+      },
+      {
+        "transport": "GIT_HTTPS_EXISTING_GH_CREDENTIAL_HELPER",
+        "result": "github.com:443 connect failed"
+      },
+      {
+        "transport": "GITHUB_CONNECTOR",
+        "result": "Transport closed"
+      }
+    ]
+  },
+  "runContinuationStatus": "BLOCKED_SOURCE_SSH_CONNECTION",
+  "finalRecordedAt": "2026-11-11T11:51:40.556679+00:00"
+}

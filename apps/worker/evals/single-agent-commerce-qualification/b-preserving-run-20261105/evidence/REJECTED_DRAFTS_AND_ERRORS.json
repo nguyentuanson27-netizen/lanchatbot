@@ -1,0 +1,96 @@
+{
+  "rejectedDrafts": [
+    {
+      "caseId": "c-20261028-s03",
+      "turnIndex": 0,
+      "finalDraft": "Dạ, váy Ngọc Trâm có ảnh chụp cận cảnh chi tiết ren hoa nổi, em gửi chị xem nhé ạ!",
+      "verdict": {
+        "verdict": "FAIL",
+        "violations": [
+          {
+            "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+            "protectedRef": "media:a0ee96b205397ea2d64ff44d1b2b1f81dc0ac1498576acdb3a3d911c5851904b",
+            "excerpt": "có ảnh chụp cận cảnh chi tiết ren hoa nổi",
+            "basis": "Nguồn xác nhận có ảnh DETAIL nhưng confirmedParts rỗng và componentKnown=false, chưa xác nhận ảnh chụp phần ren hoa nổi. Mô tả chất liệu sản phẩm không chứng minh ảnh thể hiện chi tiết đó."
+          }
+        ]
+      }
+    }
+  ],
+  "generationFaults": [
+    {
+      "caseId": "c-20261028-s13",
+      "turnIndex": 0,
+      "id": "a99c941a-c09a-4c1f-b8fb-03dc0a3b996e:owner:1",
+      "role": "OWNER",
+      "status": "MALFORMED",
+      "providerRequests": 1,
+      "errorCode": "PROVIDER_ERROR",
+      "metrics": {
+        "latencyMs": 13254.62949999998,
+        "inputTokens": 10116,
+        "outputTokens": 3756,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      }
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "turnIndex": 0,
+      "id": "556d5986-6529-406f-a9bd-b0a3f68c1850:owner:1",
+      "role": "OWNER",
+      "status": "MALFORMED",
+      "providerRequests": 1,
+      "errorCode": "PROVIDER_ERROR",
+      "metrics": {
+        "latencyMs": 7611.247499999998,
+        "inputTokens": 10112,
+        "outputTokens": 2095,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      }
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 1,
+      "id": "8c5a47d5-810c-48b3-9d5a-b4ea14bf60ce:owner:2",
+      "role": "OWNER",
+      "status": "PROVIDER_ERROR",
+      "providerRequests": 0,
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "metrics": {
+        "latencyMs": 791.3686000000453,
+        "inputTokens": null,
+        "outputTokens": null,
+        "costUSD": null,
+        "unavailable": {
+          "inputTokens": "PROVIDER_NOT_EXPOSED",
+          "outputTokens": "PROVIDER_NOT_EXPOSED",
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      }
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 0,
+      "id": "366e55f6-ed76-4927-84e7-f6a229b654fb:owner:1",
+      "role": "OWNER",
+      "status": "MALFORMED",
+      "providerRequests": 1,
+      "errorCode": "PROVIDER_ERROR",
+      "metrics": {
+        "latencyMs": 5336.807099999976,
+        "inputTokens": 10246,
+        "outputTokens": 1111,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      }
+    }
+  ]
+}

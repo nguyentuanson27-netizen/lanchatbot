@@ -1,0 +1,35 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+································x
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/single-agent-commerce-opening-media.test.ts > reserves replacement loss before any batch write and does not credit selections cleared later in the batch
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/single-agent-commerce-opening-media.test.ts:183:53
+    181|  expect((await t.prepareOpeningMedia!({maxCalls:6,onDispatch:()=>{}}))…
+    182|  const select=(subjectRef:string,deliveryMode='REPLACE')=>({name:'sele…
+    183|  expect(t.openingMediaFeasible?.([select('P2')],0)).toBe(false);
+       |                                                     ^
+    184|  expect(t.openingMediaFeasible?.([select('P2')],1)).toBe(true);
+    185|  expect(t.openingMediaFeasible?.([select('SM613'),select('P2')],0)).to…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 32 passed (33)
+   Start at  12:38:58
+   Duration  3.74s (transform 1.48s, setup 0ms, collect 2.39s, tests 457ms, environment 0ms, prepare 252ms)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/single-agent-commerce-opening-media.test.ts --reporter=dot

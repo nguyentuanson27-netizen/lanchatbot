@@ -1,0 +1,21 @@
+[
+  {
+    "caseId": "c-20261028-j1",
+    "turnIndex": 2,
+    "exactFinalDraft": "Dạ, áo lẻ set Thạch Thảo có 2 màu Trắng và Be. Chị lấy áo size M màu gì và size L màu gì để em thêm vào giỏ rồi báo tổng kèm phí ship cho mình nhé ạ?",
+    "draftHash": "7d856781c93b145dbb0769d8e92653595f878691592ff9878e48a2a9e62cb20b",
+    "snapshotHash": "41b2eaa5542be137c6dfb513c2b711652fc2ebe37643a9086b14b34a5f07d321",
+    "verdict": {
+      "verdict": "FAIL",
+      "violations": [
+        {
+          "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+          "protectedRef": "product:SV2447",
+          "excerpt": "áo lẻ set Thạch Thảo có 2 màu Trắng và Be.",
+          "basis": "Nguồn hiện tại không xác nhận áo có màu Trắng và Be; màu chỉ được ghi là __NO_COLOR__ với nghĩa chưa có dữ liệu màu, không phải màu thực tế. Tin shop cũ không làm căn cứ xác nhận hai màu này."
+        }
+      ]
+    },
+    "customerVisible": false
+  }
+]

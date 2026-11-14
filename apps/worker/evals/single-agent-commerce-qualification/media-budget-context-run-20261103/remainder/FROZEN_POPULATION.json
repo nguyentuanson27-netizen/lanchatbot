@@ -1,0 +1,855 @@
+{
+  "sourceSha": "5b679acc30e64c4d7a271b4f7aaa49534f10de54",
+  "worldHash": "a8ce90be5347e1d312ddf4f432ed8dfe42c47d06c09ab13013ede0b0d44ca280",
+  "capturedAt": "2026-11-03T05:29:36.431Z",
+  "preparedAt": "2026-11-03T05:34:07.800Z",
+  "cases": [
+    {
+      "id": "c-20261028-s01",
+      "mode": "SINGLE",
+      "turns": 1,
+      "cohort": "SOURCE_UNAVAILABLE",
+      "requirements": [
+        {
+          "requirement": {
+            "facet": "PRICE",
+            "productId": "SV1561",
+            "offerType": "SET_VAY"
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        },
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "SV1561",
+            "intent": "GENERIC",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "FAILED",
+          "reason": "NO_VERIFIED_MATCHING_MEDIA"
+        }
+      ],
+      "executionPaths": [
+        {
+          "path": {
+            "kind": "DISCOVERY",
+            "productIds": [
+              "SV1561"
+            ]
+          },
+          "status": "FAILED",
+          "chargedUnits": 1,
+          "reason": "EXECUTION_PREREQUISITE_UNAVAILABLE"
+        }
+      ]
+    },
+    {
+      "id": "c-20261028-s02",
+      "mode": "SINGLE",
+      "turns": 1,
+      "cohort": "SOURCE_UNAVAILABLE",
+      "requirements": [
+        {
+          "requirement": {
+            "facet": "PRICE",
+            "productId": "SV2447",
+            "offerType": "AO"
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        },
+        {
+          "requirement": {
+            "facet": "PRICE",
+            "productId": "SQ2447",
+            "offerType": "AO"
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        },
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "SV2447",
+            "intent": "GENERIC",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        },
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "SQ2447",
+            "intent": "GENERIC",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "FAILED",
+          "reason": "NO_VERIFIED_MATCHING_MEDIA"
+        }
+      ],
+      "executionPaths": [
+        {
+          "path": {
+            "kind": "DISCOVERY",
+            "productIds": [
+              "SV2447",
+              "SQ2447"
+            ]
+          },
+          "status": "AVAILABLE",
+          "chargedUnits": 0,
+          "reason": null
+        },
+        {
+          "path": {
+            "kind": "DISCOVERY",
+            "productIds": [
+              "SV2447"
+            ]
+          },
+          "status": "AVAILABLE",
+          "chargedUnits": 1,
+          "reason": null
+        }
+      ]
+    },
+    {
+      "id": "c-20261028-s03",
+      "mode": "SINGLE",
+      "turns": 1,
+      "cohort": "SOURCE_UNAVAILABLE",
+      "requirements": [
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "V406",
+            "intent": "DETAIL",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "FAILED",
+          "reason": "NO_VERIFIED_MATCHING_MEDIA"
+        },
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "V406",
+            "intent": "GENERIC",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "FAILED",
+          "reason": "NO_VERIFIED_MATCHING_MEDIA"
+        }
+      ],
+      "executionPaths": [
+        {
+          "path": {
+            "kind": "DISCOVERY",
+            "productIds": [
+              "V406"
+            ]
+          },
+          "status": "FAILED",
+          "chargedUnits": 1,
+          "reason": "EXECUTION_PREREQUISITE_UNAVAILABLE"
+        }
+      ]
+    },
+    {
+      "id": "c-20261028-s04",
+      "mode": "SINGLE",
+      "turns": 1,
+      "cohort": "SOURCE_UNAVAILABLE",
+      "requirements": [
+        {
+          "requirement": {
+            "facet": "COLOR",
+            "productId": "SV2447",
+            "offerType": "AO"
+          },
+          "status": "FAILED",
+          "reason": "SHOP_COLOR_UNRECORDED_OR_UNAVAILABLE"
+        },
+        {
+          "requirement": {
+            "facet": "COLOR",
+            "productId": "SQ2447",
+            "offerType": "AO"
+          },
+          "status": "FAILED",
+          "reason": "SHOP_COLOR_UNRECORDED_OR_UNAVAILABLE"
+        },
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "SV2447",
+            "intent": "GENERIC",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        },
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "SQ2447",
+            "intent": "GENERIC",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "FAILED",
+          "reason": "NO_VERIFIED_MATCHING_MEDIA"
+        }
+      ],
+      "executionPaths": [
+        {
+          "path": {
+            "kind": "DISCOVERY",
+            "productIds": [
+              "SV2447",
+              "SQ2447"
+            ]
+          },
+          "status": "AVAILABLE",
+          "chargedUnits": 0,
+          "reason": null
+        },
+        {
+          "path": {
+            "kind": "DISCOVERY",
+            "productIds": [
+              "SV2447"
+            ]
+          },
+          "status": "AVAILABLE",
+          "chargedUnits": 1,
+          "reason": null
+        }
+      ]
+    },
+    {
+      "id": "c-20261028-s07",
+      "mode": "SINGLE",
+      "turns": 1,
+      "cohort": "SOURCE_UNAVAILABLE",
+      "requirements": [
+        {
+          "requirement": {
+            "facet": "SIZE_SOURCE",
+            "productId": "SV2447",
+            "fitScope": "COMPONENT",
+            "componentRole": "TOP"
+          },
+          "status": "FAILED",
+          "reason": "COMPONENT_FIT_UNSUPPORTED"
+        },
+        {
+          "requirement": {
+            "facet": "SIZE_SOURCE",
+            "productId": "SQ2447",
+            "fitScope": "COMPONENT",
+            "componentRole": "TOP"
+          },
+          "status": "FAILED",
+          "reason": "COMPONENT_FIT_UNSUPPORTED"
+        },
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "SV2447",
+            "intent": "GENERIC",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        },
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "SQ2447",
+            "intent": "GENERIC",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "FAILED",
+          "reason": "NO_VERIFIED_MATCHING_MEDIA"
+        }
+      ],
+      "executionPaths": [
+        {
+          "path": {
+            "kind": "DISCOVERY",
+            "productIds": [
+              "SV2447",
+              "SQ2447"
+            ]
+          },
+          "status": "AVAILABLE",
+          "chargedUnits": 0,
+          "reason": null
+        },
+        {
+          "path": {
+            "kind": "DISCOVERY",
+            "productIds": [
+              "SV2447"
+            ]
+          },
+          "status": "AVAILABLE",
+          "chargedUnits": 1,
+          "reason": null
+        }
+      ]
+    },
+    {
+      "id": "c-20261028-s11",
+      "mode": "SINGLE",
+      "turns": 1,
+      "cohort": "SOURCE_UNAVAILABLE",
+      "requirements": [
+        {
+          "requirement": {
+            "facet": "STOCK",
+            "productId": "SV2447",
+            "offerType": "SET_VAY",
+            "size": "L",
+            "color": "be"
+          },
+          "status": "FAILED",
+          "reason": "VARIANT_NOT_FOUND"
+        },
+        {
+          "requirement": {
+            "facet": "STOCK",
+            "productId": "SQ2447",
+            "offerType": "SET_QUAN",
+            "size": "L",
+            "color": "be"
+          },
+          "status": "FAILED",
+          "reason": "VARIANT_NOT_FOUND"
+        },
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "SV2447",
+            "intent": "GENERIC",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        },
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "SQ2447",
+            "intent": "GENERIC",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "FAILED",
+          "reason": "NO_VERIFIED_MATCHING_MEDIA"
+        }
+      ],
+      "executionPaths": [
+        {
+          "path": {
+            "kind": "DISCOVERY",
+            "productIds": [
+              "SV2447",
+              "SQ2447"
+            ]
+          },
+          "status": "AVAILABLE",
+          "chargedUnits": 0,
+          "reason": null
+        },
+        {
+          "path": {
+            "kind": "DISCOVERY",
+            "productIds": [
+              "SV2447"
+            ]
+          },
+          "status": "AVAILABLE",
+          "chargedUnits": 1,
+          "reason": null
+        }
+      ]
+    },
+    {
+      "id": "c-20261028-s13",
+      "mode": "SINGLE",
+      "turns": 1,
+      "cohort": "SOURCE_UNAVAILABLE",
+      "requirements": [
+        {
+          "requirement": {
+            "facet": "PRICE",
+            "productId": "SV2447",
+            "offerType": "AO"
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        },
+        {
+          "requirement": {
+            "facet": "PRICE",
+            "productId": "SQ2447",
+            "offerType": "AO"
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        },
+        {
+          "requirement": {
+            "facet": "POLICY"
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        },
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "SV2447",
+            "intent": "GENERIC",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        },
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "SQ2447",
+            "intent": "GENERIC",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "FAILED",
+          "reason": "NO_VERIFIED_MATCHING_MEDIA"
+        }
+      ],
+      "executionPaths": [
+        {
+          "path": {
+            "kind": "DISCOVERY",
+            "productIds": [
+              "SV2447",
+              "SQ2447"
+            ]
+          },
+          "status": "AVAILABLE",
+          "chargedUnits": 0,
+          "reason": null
+        },
+        {
+          "path": {
+            "kind": "DISCOVERY",
+            "productIds": [
+              "SV2447"
+            ]
+          },
+          "status": "AVAILABLE",
+          "chargedUnits": 1,
+          "reason": null
+        }
+      ]
+    },
+    {
+      "id": "c-20261028-s16",
+      "mode": "SINGLE",
+      "turns": 1,
+      "cohort": "SOURCE_UNAVAILABLE",
+      "requirements": [
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "SV2447",
+            "intent": "FEEDBACK",
+            "componentRole": "TOP",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "FAILED",
+          "reason": "NO_VERIFIED_MATCHING_MEDIA"
+        },
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "SQ2447",
+            "intent": "FEEDBACK",
+            "componentRole": "TOP",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "FAILED",
+          "reason": "NO_VERIFIED_MATCHING_MEDIA"
+        },
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "SV2447",
+            "intent": "GENERIC",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        },
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "SQ2447",
+            "intent": "GENERIC",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "FAILED",
+          "reason": "NO_VERIFIED_MATCHING_MEDIA"
+        }
+      ],
+      "executionPaths": [
+        {
+          "path": {
+            "kind": "DISCOVERY",
+            "productIds": [
+              "SV2447",
+              "SQ2447"
+            ]
+          },
+          "status": "AVAILABLE",
+          "chargedUnits": 0,
+          "reason": null
+        },
+        {
+          "path": {
+            "kind": "DISCOVERY",
+            "productIds": [
+              "SV2447"
+            ]
+          },
+          "status": "AVAILABLE",
+          "chargedUnits": 1,
+          "reason": null
+        }
+      ]
+    },
+    {
+      "id": "c-20261028-j1",
+      "mode": "JOURNEY",
+      "turns": 3,
+      "cohort": "SOURCE_UNAVAILABLE",
+      "requirements": [
+        {
+          "requirement": {
+            "facet": "SELECTION",
+            "productId": "SV2447",
+            "offerType": "AO",
+            "size": "L"
+          },
+          "status": "FAILED",
+          "reason": "CART_COLOR_REQUIRED"
+        },
+        {
+          "requirement": {
+            "facet": "SELECTION",
+            "productId": "SV2447",
+            "offerType": "AO",
+            "size": "M"
+          },
+          "status": "FAILED",
+          "reason": "CART_COLOR_REQUIRED"
+        },
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "SV2447",
+            "intent": "GENERIC",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        }
+      ],
+      "executionPaths": [
+        {
+          "path": {
+            "kind": "DISCOVERY",
+            "productIds": [
+              "SV2447"
+            ]
+          },
+          "status": "AVAILABLE",
+          "chargedUnits": 1,
+          "reason": null
+        },
+        {
+          "path": {
+            "kind": "POST_CART",
+            "selections": [
+              {
+                "facet": "SELECTION",
+                "productId": "SV2447",
+                "offerType": "AO",
+                "size": "L"
+              }
+            ]
+          },
+          "status": "FAILED",
+          "chargedUnits": 0,
+          "reason": "EXECUTION_PREREQUISITE_UNAVAILABLE"
+        },
+        {
+          "path": {
+            "kind": "POST_CART",
+            "selections": [
+              {
+                "facet": "SELECTION",
+                "productId": "SV2447",
+                "offerType": "AO",
+                "size": "M"
+              }
+            ]
+          },
+          "status": "FAILED",
+          "chargedUnits": 0,
+          "reason": "EXECUTION_PREREQUISITE_UNAVAILABLE"
+        }
+      ]
+    },
+    {
+      "id": "c-20261028-j3",
+      "mode": "JOURNEY",
+      "turns": 3,
+      "cohort": "SALES_READY",
+      "requirements": [
+        {
+          "requirement": {
+            "facet": "PRICE",
+            "productId": "SV2447",
+            "offerType": "AO"
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        },
+        {
+          "requirement": {
+            "facet": "PRICE",
+            "productId": "SV2447",
+            "offerType": "CV"
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        },
+        {
+          "requirement": {
+            "facet": "PRICE",
+            "productId": "SV2447",
+            "offerType": "SET_VAY"
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        },
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "SV2447",
+            "intent": "GENERIC",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        }
+      ],
+      "executionPaths": [
+        {
+          "path": {
+            "kind": "DISCOVERY",
+            "productIds": [
+              "SV2447"
+            ]
+          },
+          "status": "AVAILABLE",
+          "chargedUnits": 1,
+          "reason": null
+        }
+      ]
+    },
+    {
+      "id": "c-20261028-j4",
+      "mode": "JOURNEY",
+      "turns": 3,
+      "cohort": "SOURCE_UNAVAILABLE",
+      "requirements": [
+        {
+          "requirement": {
+            "facet": "SELECTION",
+            "productId": "SV2447",
+            "offerType": "AO",
+            "size": "M"
+          },
+          "status": "FAILED",
+          "reason": "CART_COLOR_REQUIRED"
+        },
+        {
+          "requirement": {
+            "facet": "POLICY"
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        },
+        {
+          "requirement": {
+            "facet": "MEDIA",
+            "productId": "SV2447",
+            "intent": "GENERIC",
+            "allowedHostSuffixes": [
+              "content.pancake.vn",
+              "lanadesign.vn",
+              "fbcdn.net",
+              "fbsbx.com"
+            ]
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        }
+      ],
+      "executionPaths": [
+        {
+          "path": {
+            "kind": "DISCOVERY",
+            "productIds": [
+              "SV2447"
+            ]
+          },
+          "status": "AVAILABLE",
+          "chargedUnits": 1,
+          "reason": null
+        },
+        {
+          "path": {
+            "kind": "POST_CART",
+            "selections": [
+              {
+                "facet": "SELECTION",
+                "productId": "SV2447",
+                "offerType": "AO",
+                "size": "M"
+              }
+            ]
+          },
+          "status": "FAILED",
+          "chargedUnits": 0,
+          "reason": "EXECUTION_PREREQUISITE_UNAVAILABLE"
+        }
+      ]
+    },
+    {
+      "id": "c-20261028-j5",
+      "mode": "JOURNEY",
+      "turns": 3,
+      "cohort": "SALES_READY",
+      "requirements": [
+        {
+          "requirement": {
+            "facet": "POLICY"
+          },
+          "status": "AVAILABLE",
+          "reason": null
+        }
+      ],
+      "executionPaths": []
+    }
+  ],
+  "providerRequests": 0,
+  "sourceWrites": 0
+}

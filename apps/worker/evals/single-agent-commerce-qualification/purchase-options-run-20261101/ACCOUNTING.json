@@ -1,0 +1,2494 @@
+{
+  "kind": "PURCHASE_MODEL_ACCOUNTING_V2",
+  "runSourceSha": "c31a308952534dd558a98fc48eedf1b694bb5c06",
+  "casesRegistered": 21,
+  "turnsRegistered": 28,
+  "casesStatus": {
+    "EXECUTED": 15,
+    "NOT_RUN": 6
+  },
+  "frames": 18,
+  "terminalCounts": {
+    "HANDOFF": 8,
+    "SEND_ELIGIBLE": 9,
+    "NO_SEND": 1
+  },
+  "generationCount": 37,
+  "roles": {
+    "OWNER": 27,
+    "VERIFIER": 10
+  },
+  "generationStatuses": {
+    "OK": 35,
+    "MALFORMED": 1,
+    "PROVIDER_ERROR": 1
+  },
+  "providerRequests": 36,
+  "verifierLatencyMs": {
+    "p50": 7919.643100000001,
+    "p95": 29517.34110000002
+  },
+  "tokenUsage": {
+    "inputObserved": 350739,
+    "outputObserved": 26779,
+    "usageRows": 36,
+    "cost": "UNAVAILABLE_UNLESS_PROVIDER_EXPOSED"
+  },
+  "cohorts": [
+    {
+      "caseId": "c-po-20261031-p01",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-po-20261031-p02",
+      "cohort": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "caseId": "c-po-20261031-p03",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-po-20261031-p04",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-po-20261031-p06",
+      "cohort": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "cohort": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "cohort": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-po-20261031-p10",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-po-20261031-h01",
+      "cohort": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "caseId": "c-po-20261031-h02",
+      "cohort": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "caseId": "c-20261028-s05",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261028-s06",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261028-s09",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261028-s10",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261028-s12",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261028-s14",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "cohort": "SALES_READY"
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "cohort": "SALES_READY"
+    }
+  ],
+  "rawJournalSha256": "db317236c7752d5cf23e6d72f05ea6fbd9fd6b4b02845307bc2eece7139c6877",
+  "journalRows": 167,
+  "sourceWrites": 0,
+  "liveSends": 0,
+  "semanticRoles": [
+    "OWNER",
+    "VERIFIER"
+  ],
+  "framesEvidence": [
+    {
+      "caseId": "c-po-20261031-p01",
+      "turnIndex": 0,
+      "customer": "Áo này bán riêng không em, bao nhiêu vậy?",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "captured": [],
+      "capturedImages": [],
+      "acceptedOutbox": [],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "7173b47ac0e66c2bd48e6a8310092801358874e375294f4d703070642e9582b5",
+      "ownerGenerations": 2,
+      "verifierGenerations": 0,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "7445fb6423c4d8ca56a82896df0ceabf6b150ece4759dbf7879defe1800c0c5e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "ac738a48e7b33976a1249f8282ae0c1f6ee3527d4db861f7ffa949cec6818ffb"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "e079219d208249ce4e57cc540586490c53113202b5e90a236489bd441bb3f26f"
+          },
+          {
+            "ordinal": 3,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "b06a7e233e6ec0f4f0f278b4e8b585b9f66e7a74400c93b1875f3647416ff38c"
+          },
+          {
+            "ordinal": 4,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "847ce7409a94f2ab1e98e3785f655cfe37cad01a274e554784fbff56afdf0e58"
+          },
+          {
+            "ordinal": 5,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "4429267e6fc63a1feb842442455b2e598d6b4da801c18daaa9b1f50741550573",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "ee14d74dbff00786c493c69a236a5e2504deab66bd0438f00767059ff82a8d30"
+          },
+          {
+            "ordinal": 6,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "4429267e6fc63a1feb842442455b2e598d6b4da801c18daaa9b1f50741550573",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "4d49ef568090585851f434a4cf332484c018a3f7b123426f7f09619dffea69ed"
+          },
+          {
+            "ordinal": 7,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "fb01cd3dd0f45a54a55c03e2b5a6017f2cceb667ec70846d9221573b87d77358"
+          },
+          {
+            "ordinal": 8,
+            "operation": "read_product",
+            "facet": "PRICE",
+            "selectorHash": "94840c697cc4fbecc73019cc67b8cb1674ce9a72e33cf7040a8db276bf5c29dc",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "351891b0a4d701f755bcb88325349b77ed95368348494d763d852773880a981e"
+          },
+          {
+            "ordinal": 9,
+            "operation": "read_product",
+            "facet": "STOCK",
+            "selectorHash": "94840c697cc4fbecc73019cc67b8cb1674ce9a72e33cf7040a8db276bf5c29dc",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "351891b0a4d701f755bcb88325349b77ed95368348494d763d852773880a981e"
+          },
+          {
+            "ordinal": 10,
+            "operation": "select_product_media",
+            "facet": "MEDIA",
+            "selectorHash": "b64bb8355fa3f8ae4a869de10c6114d347a8044475dcca89fcf49668c89110bf",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "2f7373b39086d3a94ca40f329f460d1394b7e8ca05c6c09523f111623eb0af2a"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 1,
+          "callsRemaining": 3
+        }
+      },
+      "generations": [
+        {
+          "id": "a8830ec4-a8ef-4f0f-95ea-40fdb4567243:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 4718.578000000009,
+            "inputTokens": 9595,
+            "outputTokens": 661,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "a8830ec4-a8ef-4f0f-95ea-40fdb4567243:owner:2",
+          "role": "OWNER",
+          "status": "MALFORMED",
+          "providerRequests": 1,
+          "errorCode": "PROVIDER_ERROR",
+          "metrics": {
+            "latencyMs": 4432.5495999999985,
+            "inputTokens": 12610,
+            "outputTokens": 582,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-7cb8b64d70c2b56febdafa4c5c89572794ce7c30b3a536ba943d8cc9bf6c9872-turn-0.json"
+    },
+    {
+      "caseId": "c-po-20261031-p02",
+      "turnIndex": 0,
+      "customer": "Chị lấy mỗi quần thôi, quần bao nhiêu em?",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "captured": [],
+      "capturedImages": [],
+      "acceptedOutbox": [],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "fda76342fb7c24bc243a3ee18f66abc9e06e475ac31cbfcc983cfdb74e2b988d",
+      "ownerGenerations": 1,
+      "verifierGenerations": 0,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "8b7682699ae33448208144aa7089f015be4645c386205a3905b38fc2efffcacd",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "9a2b9706de095cd8e8c57a3e3f720d9d13940548baa7d0312f34bee273918b44"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "2f170ebbf8cad5f68f49138d03414563afe2299ab3613c73ee6d75c86f62521d",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "1f6db94325be527985a55ed602e08738c4097931caf5832598badeb68288ae2e"
+          },
+          {
+            "ordinal": 3,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "d2dd2a9061d9a1548c63392f52a64ce3945ae89f20c06442a741dcd465f67f3e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "658b6cbb1fdcd9623b09badd81d45f98af7b4a7d2a3a564351c5df948b7b586e"
+          },
+          {
+            "ordinal": 4,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "2f170ebbf8cad5f68f49138d03414563afe2299ab3613c73ee6d75c86f62521d",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "8502300541c857e9d79df40fd0245071ad6671cb989d105183d9d1c949508771"
+          },
+          {
+            "ordinal": 5,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "b01b2a59e7f929f2258e83e651dea527927b0b4262cca92ed2fc57998295b511",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "8e111ed0c87f335a585eafce629077ee3e4c959da621cf602a766a1a7ca1f25a"
+          },
+          {
+            "ordinal": 6,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "d2dd2a9061d9a1548c63392f52a64ce3945ae89f20c06442a741dcd465f67f3e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "b55a20d44a5ae340afe86486f93a12963c187553d6498d2669cc660c3d978c0a"
+          },
+          {
+            "ordinal": 7,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "b01b2a59e7f929f2258e83e651dea527927b0b4262cca92ed2fc57998295b511",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "78348614920d7cf1c597ff9d1341d51a706948b16d47793692a59a0fd7ebde09"
+          },
+          {
+            "ordinal": 8,
+            "operation": "read_product",
+            "facet": "PRICE",
+            "selectorHash": "49fe211c9e487aa1c927473d09e6d5f1a5a25e55df75862e860daf52a3e05e29",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "274f74b89b2c2df1431868dea80ecf65cb6e98d107eadbf64d4bc48d5b294636"
+          },
+          {
+            "ordinal": 9,
+            "operation": "read_product",
+            "facet": "STOCK",
+            "selectorHash": "49fe211c9e487aa1c927473d09e6d5f1a5a25e55df75862e860daf52a3e05e29",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "274f74b89b2c2df1431868dea80ecf65cb6e98d107eadbf64d4bc48d5b294636"
+          },
+          {
+            "ordinal": 10,
+            "operation": "select_product_media",
+            "facet": "MEDIA",
+            "selectorHash": "baf838cdd0d0edc629f1518859c19e27e600a4197445843d974034b872f9020e",
+            "status": "FAILED",
+            "reason": "NO_VERIFIED_MATCHING_MEDIA",
+            "resultHash": "b81733f202370202c9a147eb776a444cb8159ee6678f77ebac7adace0d3d45a6"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 1,
+          "callsRemaining": 3
+        }
+      },
+      "generations": [
+        {
+          "id": "bc0a86a9-bf5d-4985-9be5-dce393853dd7:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 8077.8701,
+            "inputTokens": 9760,
+            "outputTokens": 1947,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-6c476dc94ff82f920d8c925e55903564823520e821521b0d88fdeb96e5f36a61-turn-0.json"
+    },
+    {
+      "caseId": "c-po-20261031-p03",
+      "turnIndex": 0,
+      "customer": "Chân váy này size M còn không em?",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, chân váy Thạch Thảo size M bên em vẫn còn hàng chị nhé.",
+        "fallbackId": null
+      },
+      "captured": [
+        "Dạ, chân váy Thạch Thảo size M bên em vẫn còn hàng chị nhé."
+      ],
+      "capturedImages": [],
+      "acceptedOutbox": [
+        {
+          "id": "32f0c178-2d6e-4b20-a0e8-5f5e0f96c2a3",
+          "group": "a3099bed-ea9f-45da-b396-e083486651e5",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED",
+          "kind": "TEXT",
+          "contentHash": "d817809a69651005f74f27d92009a9ba108e5feff0a60f8682f15890eb62a275"
+        }
+      ],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "7580af18b1a2be4e00bafca9fa97eab454ae32c43e7ecf6358652704bc9f186f",
+      "ownerGenerations": 1,
+      "verifierGenerations": 1,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "7445fb6423c4d8ca56a82896df0ceabf6b150ece4759dbf7879defe1800c0c5e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "ac738a48e7b33976a1249f8282ae0c1f6ee3527d4db861f7ffa949cec6818ffb"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "e079219d208249ce4e57cc540586490c53113202b5e90a236489bd441bb3f26f"
+          },
+          {
+            "ordinal": 3,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "b06a7e233e6ec0f4f0f278b4e8b585b9f66e7a74400c93b1875f3647416ff38c"
+          },
+          {
+            "ordinal": 4,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "847ce7409a94f2ab1e98e3785f655cfe37cad01a274e554784fbff56afdf0e58"
+          },
+          {
+            "ordinal": 5,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "4429267e6fc63a1feb842442455b2e598d6b4da801c18daaa9b1f50741550573",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "ee14d74dbff00786c493c69a236a5e2504deab66bd0438f00767059ff82a8d30"
+          },
+          {
+            "ordinal": 6,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "4429267e6fc63a1feb842442455b2e598d6b4da801c18daaa9b1f50741550573",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "4d49ef568090585851f434a4cf332484c018a3f7b123426f7f09619dffea69ed"
+          },
+          {
+            "ordinal": 7,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "fb01cd3dd0f45a54a55c03e2b5a6017f2cceb667ec70846d9221573b87d77358"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 2,
+          "callsRemaining": 5
+        }
+      },
+      "generations": [
+        {
+          "id": "5edb027c-7fcf-48a1-a070-71f5403ce43f:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 4855.977900000013,
+            "inputTokens": 9590,
+            "outputTokens": 720,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "5edb027c-7fcf-48a1-a070-71f5403ce43f:verifier:1",
+          "role": "VERIFIER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 7919.643100000001,
+            "inputTokens": 7306,
+            "outputTokens": 42,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-db597b72562dd56cf885103ea708f9b115a77def71e75986045ed97ef119300f-turn-0.json"
+    },
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 0,
+      "customer": "Chị cao 1m60, nặng 55kg, thích mặc rộng một chút. Em chọn size giúp chị nhé.",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, với chiều cao 1m60, nặng 55kg và thích mặc rộng rãi thoải mái thì set váy Thạch Thảo em tư vấn chị chọn size M nhé ạ.",
+        "fallbackId": null
+      },
+      "captured": [
+        "Dạ, với chiều cao 1m60, nặng 55kg và thích mặc rộng rãi thoải mái thì set váy Thạch Thảo em tư vấn chị chọn size M nhé ạ."
+      ],
+      "capturedImages": [],
+      "acceptedOutbox": [
+        {
+          "id": "3f32a247-0234-4ad3-8159-a92ef7cc5f37",
+          "group": "58498829-ba8f-4483-8730-6da971eb8e4e",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED",
+          "kind": "TEXT",
+          "contentHash": "8c43c947c4e6258dd92e44b840acfeebcb570538f0cb3b53c46cf041bb221541"
+        }
+      ],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "29feb3b086edfaa226589c06b25dafdc8c24785575cd2fa7f14b41491e2de8ca",
+      "ownerGenerations": 2,
+      "verifierGenerations": 1,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "7445fb6423c4d8ca56a82896df0ceabf6b150ece4759dbf7879defe1800c0c5e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "ac738a48e7b33976a1249f8282ae0c1f6ee3527d4db861f7ffa949cec6818ffb"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "e079219d208249ce4e57cc540586490c53113202b5e90a236489bd441bb3f26f"
+          },
+          {
+            "ordinal": 3,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "b06a7e233e6ec0f4f0f278b4e8b585b9f66e7a74400c93b1875f3647416ff38c"
+          },
+          {
+            "ordinal": 4,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "847ce7409a94f2ab1e98e3785f655cfe37cad01a274e554784fbff56afdf0e58"
+          },
+          {
+            "ordinal": 5,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "4429267e6fc63a1feb842442455b2e598d6b4da801c18daaa9b1f50741550573",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "ee14d74dbff00786c493c69a236a5e2504deab66bd0438f00767059ff82a8d30"
+          },
+          {
+            "ordinal": 6,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "4429267e6fc63a1feb842442455b2e598d6b4da801c18daaa9b1f50741550573",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "4d49ef568090585851f434a4cf332484c018a3f7b123426f7f09619dffea69ed"
+          },
+          {
+            "ordinal": 7,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "fb01cd3dd0f45a54a55c03e2b5a6017f2cceb667ec70846d9221573b87d77358"
+          },
+          {
+            "ordinal": 8,
+            "operation": "recommend_size",
+            "facet": "SIZE_ENGINE",
+            "selectorHash": "c43d312434da8880de3444b7f31149c546840e86364f0a57935425c8ac3f3290",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "57b89be1173938c6525d110794c7a7b990f962b94b6f5c2e465627187e71999c",
+            "engineOutcome": "RECOMMENDED",
+            "sizeSourceHash": "e8a566c54675103e6fe1a7f465c38c2b052cb7fb4f6afcf5bad08bf5432b141a"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 1,
+          "callsRemaining": 4
+        }
+      },
+      "generations": [
+        {
+          "id": "e3c957ca-215f-42a9-b157-af45a1ebac45:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 5386.590200000006,
+            "inputTokens": 9610,
+            "outputTokens": 1023,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "e3c957ca-215f-42a9-b157-af45a1ebac45:owner:2",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 3892.267300000007,
+            "inputTokens": 11271,
+            "outputTokens": 342,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "e3c957ca-215f-42a9-b157-af45a1ebac45:verifier:1",
+          "role": "VERIFIER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 7598.8597999999765,
+            "inputTokens": 8156,
+            "outputTokens": 74,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-d8121bd6f48bde572d20913b26f5eb500e16ef425e02e09c7f7b6f1b62bbc76d-turn-0.json"
+    },
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 1,
+      "customer": "Vậy cả bộ bao nhiêu em?",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ, set váy Thạch Thảo có giá 799.000đ chị nhé ạ.",
+        "fallbackId": null
+      },
+      "captured": [
+        "Dạ, set váy Thạch Thảo có giá 799.000đ chị nhé ạ."
+      ],
+      "capturedImages": [],
+      "acceptedOutbox": [
+        {
+          "id": "03f6506a-f6c6-40e6-add2-585c4a4ae9a0",
+          "group": "f2160513-1182-4570-996f-20ecc6cf6fa6",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED",
+          "kind": "TEXT",
+          "contentHash": "6fee5f6ae55325b803eed501fb9c6063dbac610cb52a5ee5fc829b70a5ff11f1"
+        }
+      ],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "c40db59dccfccc989d71c1dd5e69ed24700a19897bd46799264bda11fe2a7e7e",
+      "ownerGenerations": 1,
+      "verifierGenerations": 1,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "7445fb6423c4d8ca56a82896df0ceabf6b150ece4759dbf7879defe1800c0c5e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "ac738a48e7b33976a1249f8282ae0c1f6ee3527d4db861f7ffa949cec6818ffb"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "e079219d208249ce4e57cc540586490c53113202b5e90a236489bd441bb3f26f"
+          },
+          {
+            "ordinal": 3,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "b06a7e233e6ec0f4f0f278b4e8b585b9f66e7a74400c93b1875f3647416ff38c"
+          },
+          {
+            "ordinal": 4,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "847ce7409a94f2ab1e98e3785f655cfe37cad01a274e554784fbff56afdf0e58"
+          },
+          {
+            "ordinal": 5,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "4429267e6fc63a1feb842442455b2e598d6b4da801c18daaa9b1f50741550573",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "ee14d74dbff00786c493c69a236a5e2504deab66bd0438f00767059ff82a8d30"
+          },
+          {
+            "ordinal": 6,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "4429267e6fc63a1feb842442455b2e598d6b4da801c18daaa9b1f50741550573",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "4d49ef568090585851f434a4cf332484c018a3f7b123426f7f09619dffea69ed"
+          },
+          {
+            "ordinal": 7,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "fb01cd3dd0f45a54a55c03e2b5a6017f2cceb667ec70846d9221573b87d77358"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 2,
+          "callsRemaining": 5
+        }
+      },
+      "generations": [
+        {
+          "id": "0c373a56-00cc-4585-9b8c-5fa3d551ccab:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 4766.904899999994,
+            "inputTokens": 9507,
+            "outputTokens": 703,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "0c373a56-00cc-4585-9b8c-5fa3d551ccab:verifier:1",
+          "role": "VERIFIER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 6866.841399999976,
+            "inputTokens": 7449,
+            "outputTokens": 22,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-d8121bd6f48bde572d20913b26f5eb500e16ef425e02e09c7f7b6f1b62bbc76d-turn-1.json"
+    },
+    {
+      "caseId": "c-po-20261031-p06",
+      "turnIndex": 0,
+      "customer": "Em tính cả ba món cho chị bao nhiêu?",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "captured": [],
+      "capturedImages": [],
+      "acceptedOutbox": [],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "ced9c9354d28a8ab910e656c9e162d4dae2b4b21f6ba95101b2cde9c87d3bad0",
+      "ownerGenerations": 1,
+      "verifierGenerations": 0,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "c5f2a0ade27f9cb8f53d48d09bdcac3a3d1453ccdee40506d1452e7e4cbf3a21",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "fbf256b1d5e787bd266ba0a818b3b9b6a94e39824d0c80076c1ee4686b1a2c67"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "56edd001cc750713710dc43dd5415d9103bd870eaa4bd7bf74d581ae3e3314f2",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "d023184e5bdcf9474cb02d5fa6b3a81eb0608886ef4a8a78a0051c714e718afb"
+          },
+          {
+            "ordinal": 3,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "e62b77ec9c69e3665a0bbed4ba368a9d282072627985685378f4c0aa3cda4a6c",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "ca15d7ca73efd2cb72fe1d74ca168f67a7c762cc11ef475dc8b0c232497d4904"
+          },
+          {
+            "ordinal": 4,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "56edd001cc750713710dc43dd5415d9103bd870eaa4bd7bf74d581ae3e3314f2",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "0f68fc538b8a470fda47aab94f9a060fba13fda9b3ec6aa72cfda657f3db170f"
+          },
+          {
+            "ordinal": 5,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "e62b77ec9c69e3665a0bbed4ba368a9d282072627985685378f4c0aa3cda4a6c",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "0ca07245bbb1ecc466552d8e8752356fc20c23c492a37870a78acf72c2be9a1a"
+          },
+          {
+            "ordinal": 6,
+            "operation": "read_product",
+            "facet": "METADATA",
+            "selectorHash": "26bf3b8d0387bf0319a64a4b932e7c55b5742ff015eedd3c7aa7847450c30df6",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "308a8589f23fa3815effd2f60cba31a88f606c3f1d027821caf0e05fc66d1c3e"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 1,
+          "callsRemaining": 4
+        }
+      },
+      "generations": [
+        {
+          "id": "c283299d-5e88-4e36-a9b4-72ac381c52ca:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 4385.557300000015,
+            "inputTokens": 8523,
+            "outputTokens": 624,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-1e445c516901d899b3cc138a0ec852636e345adf45c6264655bea7f1ffc53246-turn-0.json"
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "turnIndex": 0,
+      "customer": "Chị cao 1m60, nặng 55kg. Áo chị hay mặc M mà quần lại hay lấy L, em chọn size từng phần giúp chị nhé.",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ em ghi nhận áo size M và quần size L theo ý mình ạ. \n\nMẫu Set Thạch Thảo này nếu lấy trọn bộ cùng size thì giá là 769.000đ. Do mình lấy lệch size (áo M, quần L), mình có thể chọn mua lẻ áo (499.000đ) và quần (429.000đ), tổng giá trị là 928.000đ. \n\nChị lấy áo M và quần L theo hình thức mua lẻ này luôn hay mình muốn thử cân nhắc lấy trọn set cùng size ạ?",
+        "fallbackId": null
+      },
+      "captured": [
+        "Dạ em ghi nhận áo size M và quần size L theo ý mình ạ. \n\nMẫu Set Thạch Thảo này nếu lấy trọn bộ cùng size thì giá là 769.000đ. Do mình lấy lệch size (áo M, quần L), mình có thể chọn mua lẻ áo (499.000đ) và quần (429.000đ), tổng giá trị là 928.000đ. \n\nChị lấy áo M và quần L theo hình thức mua lẻ này luôn hay mình muốn thử cân nhắc lấy trọn set cùng size ạ?"
+      ],
+      "capturedImages": [],
+      "acceptedOutbox": [
+        {
+          "id": "098dc96f-9828-4ad0-a665-c6285e9e2eda",
+          "group": "c1b98be0-915a-4320-b607-1dcc1f954f3c",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED",
+          "kind": "TEXT",
+          "contentHash": "7478d644c210400f9c1f75271759476d4d50ef42ceb91d72a331d99ded15ab0d"
+        }
+      ],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "4267a8e5d969d869f36d7c604bc153c05fe089ef0391735fe4e4fdd061d362a5",
+      "ownerGenerations": 2,
+      "verifierGenerations": 1,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "8b7682699ae33448208144aa7089f015be4645c386205a3905b38fc2efffcacd",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "9a2b9706de095cd8e8c57a3e3f720d9d13940548baa7d0312f34bee273918b44"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "2f170ebbf8cad5f68f49138d03414563afe2299ab3613c73ee6d75c86f62521d",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "1f6db94325be527985a55ed602e08738c4097931caf5832598badeb68288ae2e"
+          },
+          {
+            "ordinal": 3,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "d2dd2a9061d9a1548c63392f52a64ce3945ae89f20c06442a741dcd465f67f3e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "658b6cbb1fdcd9623b09badd81d45f98af7b4a7d2a3a564351c5df948b7b586e"
+          },
+          {
+            "ordinal": 4,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "2f170ebbf8cad5f68f49138d03414563afe2299ab3613c73ee6d75c86f62521d",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "8502300541c857e9d79df40fd0245071ad6671cb989d105183d9d1c949508771"
+          },
+          {
+            "ordinal": 5,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "b01b2a59e7f929f2258e83e651dea527927b0b4262cca92ed2fc57998295b511",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "8e111ed0c87f335a585eafce629077ee3e4c959da621cf602a766a1a7ca1f25a"
+          },
+          {
+            "ordinal": 6,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "d2dd2a9061d9a1548c63392f52a64ce3945ae89f20c06442a741dcd465f67f3e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "b55a20d44a5ae340afe86486f93a12963c187553d6498d2669cc660c3d978c0a"
+          },
+          {
+            "ordinal": 7,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "b01b2a59e7f929f2258e83e651dea527927b0b4262cca92ed2fc57998295b511",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "78348614920d7cf1c597ff9d1341d51a706948b16d47793692a59a0fd7ebde09"
+          },
+          {
+            "ordinal": 8,
+            "operation": "recommend_size",
+            "facet": "SIZE_ENGINE",
+            "selectorHash": "827ef3d40511b82cd08c4bd68832a008ea73258f09cb1dacd98bd628c7034c47",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "5959714647de920ecaf97faf581972944aeb896a7d26b072e42d78594235abc9",
+            "engineOutcome": "RECOMMENDED",
+            "sizeSourceHash": "9e620c77cdb5b78543b8eec14660c538be3e40d2e719d6b0c0d9d337d0255082"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 1,
+          "callsRemaining": 4
+        }
+      },
+      "generations": [
+        {
+          "id": "3094e4b9-6e1b-495e-962c-6c79005bffe0:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 5550.049899999984,
+            "inputTokens": 9785,
+            "outputTokens": 1067,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "3094e4b9-6e1b-495e-962c-6c79005bffe0:owner:2",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 12948.03760000001,
+            "inputTokens": 11510,
+            "outputTokens": 1220,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "3094e4b9-6e1b-495e-962c-6c79005bffe0:verifier:1",
+          "role": "VERIFIER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 15627.511499999964,
+            "inputTokens": 8305,
+            "outputTokens": 316,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-e281b7e4027cd4d3b6d65b63405129a05a3c8e7b23fc09de5e94b80fbef08c70-turn-0.json"
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 0,
+      "customer": "Chị lấy cả bộ size M nhé.",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Em đã thêm set váy Thạch Thảo size M vào giỏ cho chị rồi ạ. Tổng tiền hàng là 799.000đ, phí vận chuyển 30.000đ, tổng thanh toán là 829.000đ. Chị muốn chốt đơn luôn không ạ?",
+        "fallbackId": null
+      },
+      "captured": [
+        "Em đã thêm set váy Thạch Thảo size M vào giỏ cho chị rồi ạ. Tổng tiền hàng là 799.000đ, phí vận chuyển 30.000đ, tổng thanh toán là 829.000đ. Chị muốn chốt đơn luôn không ạ?"
+      ],
+      "capturedImages": [],
+      "acceptedOutbox": [
+        {
+          "id": "64251399-3741-4333-8d5a-4161cfb4acf2",
+          "group": "7a540416-a13f-4c18-99da-8d0f9a6daadb",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED",
+          "kind": "TEXT",
+          "contentHash": "3c7428c1bc30b2d9d87286d9df84ac7cf198090abff31a2ac916b67561b8bc49"
+        }
+      ],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "fc91bc32fcb80a10db55d37d2ee4877a7471e4674716a6d6342df563b2a1604c",
+      "ownerGenerations": 2,
+      "verifierGenerations": 1,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "7445fb6423c4d8ca56a82896df0ceabf6b150ece4759dbf7879defe1800c0c5e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "ac738a48e7b33976a1249f8282ae0c1f6ee3527d4db861f7ffa949cec6818ffb"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "e079219d208249ce4e57cc540586490c53113202b5e90a236489bd441bb3f26f"
+          },
+          {
+            "ordinal": 3,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "b06a7e233e6ec0f4f0f278b4e8b585b9f66e7a74400c93b1875f3647416ff38c"
+          },
+          {
+            "ordinal": 4,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "847ce7409a94f2ab1e98e3785f655cfe37cad01a274e554784fbff56afdf0e58"
+          },
+          {
+            "ordinal": 5,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "4429267e6fc63a1feb842442455b2e598d6b4da801c18daaa9b1f50741550573",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "ee14d74dbff00786c493c69a236a5e2504deab66bd0438f00767059ff82a8d30"
+          },
+          {
+            "ordinal": 6,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "4429267e6fc63a1feb842442455b2e598d6b4da801c18daaa9b1f50741550573",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "4d49ef568090585851f434a4cf332484c018a3f7b123426f7f09619dffea69ed"
+          },
+          {
+            "ordinal": 7,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "fb01cd3dd0f45a54a55c03e2b5a6017f2cceb667ec70846d9221573b87d77358"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 1,
+          "callsRemaining": 4
+        }
+      },
+      "generations": [
+        {
+          "id": "1a70d588-003a-4e1f-b6eb-210c1e76367c:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 5021.503200000036,
+            "inputTokens": 9588,
+            "outputTokens": 780,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "1a70d588-003a-4e1f-b6eb-210c1e76367c:owner:2",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 4251.010699999984,
+            "inputTokens": 12020,
+            "outputTokens": 593,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "1a70d588-003a-4e1f-b6eb-210c1e76367c:verifier:1",
+          "role": "VERIFIER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 10182.505200000014,
+            "inputTokens": 8740,
+            "outputTokens": 110,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-b9778fecfa2b69a1cd2480c98fd59bd09e12aef7cf5b3756e3b84104467489cf-turn-0.json"
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 1,
+      "customer": "Thôi chị lấy mỗi áo thôi, em đổi lại nhé.",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "captured": [],
+      "capturedImages": [],
+      "acceptedOutbox": [],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "ed3d7da5296b9f86685669ff1ae59fdfbc5d43c3cc608550e8ed9313fb1750ea",
+      "ownerGenerations": 2,
+      "verifierGenerations": 0,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": "DEPENDENCY_FAILURE",
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "7445fb6423c4d8ca56a82896df0ceabf6b150ece4759dbf7879defe1800c0c5e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "ac738a48e7b33976a1249f8282ae0c1f6ee3527d4db861f7ffa949cec6818ffb"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "e079219d208249ce4e57cc540586490c53113202b5e90a236489bd441bb3f26f"
+          },
+          {
+            "ordinal": 3,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "b06a7e233e6ec0f4f0f278b4e8b585b9f66e7a74400c93b1875f3647416ff38c"
+          },
+          {
+            "ordinal": 4,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "847ce7409a94f2ab1e98e3785f655cfe37cad01a274e554784fbff56afdf0e58"
+          },
+          {
+            "ordinal": 5,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "fb01cd3dd0f45a54a55c03e2b5a6017f2cceb667ec70846d9221573b87d77358"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 1,
+          "callsRemaining": 3
+        }
+      },
+      "generations": [
+        {
+          "id": "8f8b20fb-69ea-4e5c-b04a-9d2e427a9dfc:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 6983.744199999957,
+            "inputTokens": 9890,
+            "outputTokens": 1603,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "8f8b20fb-69ea-4e5c-b04a-9d2e427a9dfc:owner:2",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 9486.259699999995,
+            "inputTokens": 12172,
+            "outputTokens": 2042,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-b9778fecfa2b69a1cd2480c98fd59bd09e12aef7cf5b3756e3b84104467489cf-turn-1.json"
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "turnIndex": 0,
+      "customer": "Set Thạch Thảo còn size M không em?",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "captured": [],
+      "capturedImages": [],
+      "acceptedOutbox": [],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "999a1fe4db60fffb3a0921e3a3aa3042cee1e0557b8deb638311e053256ab292",
+      "ownerGenerations": 2,
+      "verifierGenerations": 0,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "8b7682699ae33448208144aa7089f015be4645c386205a3905b38fc2efffcacd",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "9a2b9706de095cd8e8c57a3e3f720d9d13940548baa7d0312f34bee273918b44"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "7445fb6423c4d8ca56a82896df0ceabf6b150ece4759dbf7879defe1800c0c5e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "ac738a48e7b33976a1249f8282ae0c1f6ee3527d4db861f7ffa949cec6818ffb"
+          },
+          {
+            "ordinal": 3,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "2f170ebbf8cad5f68f49138d03414563afe2299ab3613c73ee6d75c86f62521d",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "1f6db94325be527985a55ed602e08738c4097931caf5832598badeb68288ae2e"
+          },
+          {
+            "ordinal": 4,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "d2dd2a9061d9a1548c63392f52a64ce3945ae89f20c06442a741dcd465f67f3e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "658b6cbb1fdcd9623b09badd81d45f98af7b4a7d2a3a564351c5df948b7b586e"
+          },
+          {
+            "ordinal": 5,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "2f170ebbf8cad5f68f49138d03414563afe2299ab3613c73ee6d75c86f62521d",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "8502300541c857e9d79df40fd0245071ad6671cb989d105183d9d1c949508771"
+          },
+          {
+            "ordinal": 6,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "b01b2a59e7f929f2258e83e651dea527927b0b4262cca92ed2fc57998295b511",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "8e111ed0c87f335a585eafce629077ee3e4c959da621cf602a766a1a7ca1f25a"
+          },
+          {
+            "ordinal": 7,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "d2dd2a9061d9a1548c63392f52a64ce3945ae89f20c06442a741dcd465f67f3e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "b55a20d44a5ae340afe86486f93a12963c187553d6498d2669cc660c3d978c0a"
+          },
+          {
+            "ordinal": 8,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "b01b2a59e7f929f2258e83e651dea527927b0b4262cca92ed2fc57998295b511",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "78348614920d7cf1c597ff9d1341d51a706948b16d47793692a59a0fd7ebde09"
+          },
+          {
+            "ordinal": 9,
+            "operation": "read_product",
+            "facet": "PRICE",
+            "selectorHash": "5defab0404ec728fdca32e6ac8918f6aea82e449763902a3d180b905d5932c99",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "877d34c66348a3d6fe48fa77d442b702af71e7559a3a76be940bd950a219e6f1"
+          },
+          {
+            "ordinal": 10,
+            "operation": "read_product",
+            "facet": "STOCK",
+            "selectorHash": "5defab0404ec728fdca32e6ac8918f6aea82e449763902a3d180b905d5932c99",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "877d34c66348a3d6fe48fa77d442b702af71e7559a3a76be940bd950a219e6f1"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 1,
+          "callsRemaining": 3
+        }
+      },
+      "generations": [
+        {
+          "id": "5110d8ba-9a1c-4800-b558-a188d4c2c95a:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 9073.36910000001,
+            "inputTokens": 10924,
+            "outputTokens": 2441,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "5110d8ba-9a1c-4800-b558-a188d4c2c95a:owner:2",
+          "role": "OWNER",
+          "status": "PROVIDER_ERROR",
+          "providerRequests": 0,
+          "errorCode": "OWNER_REQUEST_BOUND",
+          "metrics": {
+            "latencyMs": 1640.6667000000016,
+            "inputTokens": null,
+            "outputTokens": null,
+            "costUSD": null,
+            "unavailable": {
+              "inputTokens": "PROVIDER_NOT_EXPOSED",
+              "outputTokens": "PROVIDER_NOT_EXPOSED",
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-495e7009dca0c054a42ce0b0a09dcd9d2d18207adff79ce232f93868bb5a0544-turn-0.json"
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "turnIndex": 1,
+      "customer": "Bộ quần nhé.",
+      "terminal": {
+        "disposition": "NO_SEND",
+        "reason": "HUMAN_OWNS_CONVERSATION",
+        "text": null,
+        "fallbackId": null
+      },
+      "captured": [],
+      "capturedImages": [],
+      "acceptedOutbox": [],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "d3782d26046721e9f17df1a043db4ccb7bf7d434d1a5c9929716c107cae4729c",
+      "ownerGenerations": 0,
+      "verifierGenerations": 0,
+      "readCoverage": null,
+      "generations": [],
+      "nativeArtifact": "native-495e7009dca0c054a42ce0b0a09dcd9d2d18207adff79ce232f93868bb5a0544-turn-1.json"
+    },
+    {
+      "caseId": "c-po-20261031-p10",
+      "turnIndex": 0,
+      "customer": "Cái bộ hoa chị xem hôm trước còn không em?",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ bên em có set quần Uyển Hoa và set quần phối ren hoa laze. Không biết chị đang nhắc đến mẫu nào ạ?",
+        "fallbackId": null
+      },
+      "captured": [
+        "Dạ bên em có set quần Uyển Hoa và set quần phối ren hoa laze. Không biết chị đang nhắc đến mẫu nào ạ?"
+      ],
+      "capturedImages": [],
+      "acceptedOutbox": [
+        {
+          "id": "13ed23c0-a7f5-46a8-8121-6be4cc92e0de",
+          "group": "2c6097d0-b449-43d4-b34c-b142101925e5",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED",
+          "kind": "TEXT",
+          "contentHash": "e14cc28667b9d0260e69276266dc304c8627c0ece3ebb957bd3ba865cf45a3c0"
+        }
+      ],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "669f7ce6777660ca8d0ea6a05a71cbba5e337b1f24715dd338018cf541dc1f90",
+      "ownerGenerations": 2,
+      "verifierGenerations": 1,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "search_products",
+            "facet": "DISCOVERY",
+            "selectorHash": "660b6d441b9f257fdd66ee6eb83185b7becb0d01615808184cd11fd61c312eb3",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "2a25af8e44447fbc951489258307b547839c8c980ff234dddb0c7c44d7ca97f2"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 1,
+          "callsRemaining": 5
+        }
+      },
+      "generations": [
+        {
+          "id": "2a03ebc4-4469-49c7-a441-d4a859444a21:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 3933.9824999999837,
+            "inputTokens": 7559,
+            "outputTokens": 276,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "2a03ebc4-4469-49c7-a441-d4a859444a21:owner:2",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 5398.432199999981,
+            "inputTokens": 11091,
+            "outputTokens": 664,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "2a03ebc4-4469-49c7-a441-d4a859444a21:verifier:1",
+          "role": "VERIFIER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 6724.251799999969,
+            "inputTokens": 6527,
+            "outputTokens": 61,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-96b9300d7c951e985129d7f3e27d2957ececea2f3d1cb9facc7c7e9a0a941ec4-turn-0.json"
+    },
+    {
+      "caseId": "c-po-20261031-h01",
+      "turnIndex": 0,
+      "customer": "Chị lấy áo size L nhé.",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "captured": [],
+      "capturedImages": [],
+      "acceptedOutbox": [],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "25244dee17ff0b81d7f49118c89040732443312b2fde5aa0b4092bdf140b2b7f",
+      "ownerGenerations": 1,
+      "verifierGenerations": 0,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "7445fb6423c4d8ca56a82896df0ceabf6b150ece4759dbf7879defe1800c0c5e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "ac738a48e7b33976a1249f8282ae0c1f6ee3527d4db861f7ffa949cec6818ffb"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "e079219d208249ce4e57cc540586490c53113202b5e90a236489bd441bb3f26f"
+          },
+          {
+            "ordinal": 3,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "b06a7e233e6ec0f4f0f278b4e8b585b9f66e7a74400c93b1875f3647416ff38c"
+          },
+          {
+            "ordinal": 4,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "ab33ea1eccb6f612ec69e3dfb07cb70d9ff3358a578a9546ebbb1c7e99095dea",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "847ce7409a94f2ab1e98e3785f655cfe37cad01a274e554784fbff56afdf0e58"
+          },
+          {
+            "ordinal": 5,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "4429267e6fc63a1feb842442455b2e598d6b4da801c18daaa9b1f50741550573",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "ee14d74dbff00786c493c69a236a5e2504deab66bd0438f00767059ff82a8d30"
+          },
+          {
+            "ordinal": 6,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "4429267e6fc63a1feb842442455b2e598d6b4da801c18daaa9b1f50741550573",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "4d49ef568090585851f434a4cf332484c018a3f7b123426f7f09619dffea69ed"
+          },
+          {
+            "ordinal": 7,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "701e9e4875aea3d1f6cae14ad9232d94c9f83c6963fe5d70919ccb143f7ad743",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "fb01cd3dd0f45a54a55c03e2b5a6017f2cceb667ec70846d9221573b87d77358"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 1,
+          "callsRemaining": 4
+        }
+      },
+      "generations": [
+        {
+          "id": "d68f90aa-9e7c-4f55-8edc-29e107255fb2:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 6604.353599999973,
+            "inputTokens": 9591,
+            "outputTokens": 1201,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-a2a113de77ddece8145eb62c181cd6864b907a933baa67ad6019d0d6a7c126bd-turn-0.json"
+    },
+    {
+      "caseId": "c-po-20261031-h02",
+      "turnIndex": 0,
+      "customer": "Bộ Khánh Trang này bao nhiêu em?",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "captured": [],
+      "capturedImages": [],
+      "acceptedOutbox": [],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "4405f9fe2fa5c9313f492927db4303437fb623063cf95782c2316bc92c5a9b52",
+      "ownerGenerations": 1,
+      "verifierGenerations": 0,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "6d9f4c429ff8d0bd7e19121925ed69841dfb33cae03ea789f721739386b97b78",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "762a352e288ec6b0bc9ef92ab5c480d963bdfd32095b7fcb597dc4f7019ce3e3"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "4830badd58b22c3b750fd412199ecf6aaeb9d7d408e1949616b7e17ee73c0b30",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "0ee4806e318fbaa7bcc2cdafc842915916da2aa1d2482a7cd5c21f01cd98e593"
+          },
+          {
+            "ordinal": 3,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "682dec4db1f8b4191f37c5a69ebe99a6edeced2e1d9d6913eb70ce035f0ef04c",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "fd345737d9b47b71aad28f160d575b788ad2b501ae1253ffe94609b881379227"
+          },
+          {
+            "ordinal": 4,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "16a8d92f18996c34f3b588ba5789b6a406ee685e19b1bf4774e1a03074a66b23",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "88df839db1f7dd097a9ca2c5cb59edbb028e728763a0b5fb0841619b8a6f8885"
+          },
+          {
+            "ordinal": 5,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "16a8d92f18996c34f3b588ba5789b6a406ee685e19b1bf4774e1a03074a66b23",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "026fdb5645b9d94907ee386fd40967921be3450dffb8d1dd2222e61d78874da5"
+          },
+          {
+            "ordinal": 6,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "682dec4db1f8b4191f37c5a69ebe99a6edeced2e1d9d6913eb70ce035f0ef04c",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "d32ee693868b755c5605d0334bd06362a157a09e6ca724d2f41b49a15feab480"
+          },
+          {
+            "ordinal": 7,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "4830badd58b22c3b750fd412199ecf6aaeb9d7d408e1949616b7e17ee73c0b30",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "729e1277f1cb21f23bf10d84cdf746b080669353315c01c8ee3a1b008fd1edf2"
+          },
+          {
+            "ordinal": 8,
+            "operation": "read_product",
+            "facet": "PRICE",
+            "selectorHash": "5ac8b3405be27863eccf068ebc4c175bb47688510a877773063bda1ae2f0aea1",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "fe4c0b2402d229329d6bbd3584cf5b93cf3044d38c501600b231e2251a09cb7b"
+          },
+          {
+            "ordinal": 9,
+            "operation": "read_product",
+            "facet": "STOCK",
+            "selectorHash": "5ac8b3405be27863eccf068ebc4c175bb47688510a877773063bda1ae2f0aea1",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "fe4c0b2402d229329d6bbd3584cf5b93cf3044d38c501600b231e2251a09cb7b"
+          },
+          {
+            "ordinal": 10,
+            "operation": "select_product_media",
+            "facet": "MEDIA",
+            "selectorHash": "cae0db14dd3d2b0aeeecfd4890a3c3b31c37d74583c389f340a5e535ee659200",
+            "status": "FAILED",
+            "reason": "NO_VERIFIED_MATCHING_MEDIA",
+            "resultHash": "8fa6e259ae9b84f2e5de7925f60504a0f6402428e27dd59f5d2ee93d32f99fd7"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 1,
+          "callsRemaining": 3
+        }
+      },
+      "generations": [
+        {
+          "id": "68ba3058-a022-4ee1-a773-592b18b7d3ff:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 6979.93809999997,
+            "inputTokens": 9687,
+            "outputTokens": 1513,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-98bccb1b4be23a1b5d99e8b641253ac54a7c9cea432d94961db8880a7028d441-turn-0.json"
+    },
+    {
+      "caseId": "c-20261028-s05",
+      "turnIndex": 0,
+      "customer": "Chị cần bộ đồ mặc đi ăn với gia đình, thích đơn giản hơn một chút. Em chọn giúp chị nhé.",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Chị mặc Set quần Uyển Hoa (SQ748) nhé ạ. Set này có tone kem phối họa tiết nhẹ nhàng, chất thô đũi cao cấp mềm mịn và thoáng mát, rất hợp diện đi ăn cùng gia đình. Thiết kế áo bèo xếp tầng tinh tế kết hợp quần short suông mang lại nét thanh lịch, vừa lịch sự lại thoải mái vận động. \n\nSet có giá 799.000đ và đang có sẵn size S, L, chị lấy size nào để em gửi đơn cho mình nhé ạ?",
+        "fallbackId": null
+      },
+      "captured": [
+        "Chị mặc Set quần Uyển Hoa (SQ748) nhé ạ. Set này có tone kem phối họa tiết nhẹ nhàng, chất thô đũi cao cấp mềm mịn và thoáng mát, rất hợp diện đi ăn cùng gia đình. Thiết kế áo bèo xếp tầng tinh tế kết hợp quần short suông mang lại nét thanh lịch, vừa lịch sự lại thoải mái vận động. \n\nSet có giá 799.000đ và đang có sẵn size S, L, chị lấy size nào để em gửi đơn cho mình nhé ạ?"
+      ],
+      "capturedImages": [],
+      "acceptedOutbox": [
+        {
+          "id": "30185302-a7ce-4372-a95d-5b54a96390cb",
+          "group": "47395393-c8be-494c-98a4-fd3ed6dab27f",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED",
+          "kind": "TEXT",
+          "contentHash": "e8361431bedead867fc3eb3547d1afbef7309d27cf70669b7a9cac251f1e0372"
+        }
+      ],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "c7379fe3eac90027a11ed91628882305b85392e68227cb9e0ecdeb3d73452dc8",
+      "ownerGenerations": 3,
+      "verifierGenerations": 1,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "search_products",
+            "facet": "DISCOVERY",
+            "selectorHash": "c58d0012736db6250313cdf3691f54889196bd324fb9eeab371e092c0e1bc7ee",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "e6e6eb4ebd864caafd72ff0bb849fb4e157ec0e0e413eb4ab1a1edb0d5738fc4"
+          },
+          {
+            "ordinal": 2,
+            "operation": "read_product",
+            "facet": "PRICE",
+            "selectorHash": "681cd2976fcaf9d887193d74b43bc0d316186f807efb58e27997de140d0b006c",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "e4478d08fc704efcbf3e3c33e30e23c2be0c12d0afcbbfb98c232223b9e080aa"
+          },
+          {
+            "ordinal": 3,
+            "operation": "read_product",
+            "facet": "STOCK",
+            "selectorHash": "681cd2976fcaf9d887193d74b43bc0d316186f807efb58e27997de140d0b006c",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "e4478d08fc704efcbf3e3c33e30e23c2be0c12d0afcbbfb98c232223b9e080aa"
+          },
+          {
+            "ordinal": 4,
+            "operation": "read_product",
+            "facet": "PRICE",
+            "selectorHash": "5ea26879ae1046665473d30676ec0599f04042167ff494d1dc4de0937c0d08b9",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "5a637461af7c1871645eb6d5b0887c975d82a5a04f47d82263683433ef3250ed"
+          },
+          {
+            "ordinal": 5,
+            "operation": "read_product",
+            "facet": "STOCK",
+            "selectorHash": "5ea26879ae1046665473d30676ec0599f04042167ff494d1dc4de0937c0d08b9",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "5a637461af7c1871645eb6d5b0887c975d82a5a04f47d82263683433ef3250ed"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 0,
+          "callsRemaining": 3
+        }
+      },
+      "generations": [
+        {
+          "id": "4e30a3aa-e64a-48a6-aa35-5dd8c3606bd0:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 3522.6009000000195,
+            "inputTokens": 7567,
+            "outputTokens": 282,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "4e30a3aa-e64a-48a6-aa35-5dd8c3606bd0:owner:2",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 5395.733600000036,
+            "inputTokens": 11080,
+            "outputTokens": 1022,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "4e30a3aa-e64a-48a6-aa35-5dd8c3606bd0:owner:3",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 5766.015300000028,
+            "inputTokens": 11902,
+            "outputTokens": 1037,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "4e30a3aa-e64a-48a6-aa35-5dd8c3606bd0:verifier:1",
+          "role": "VERIFIER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 29517.34110000002,
+            "inputTokens": 9919,
+            "outputTokens": 90,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-0520272cb288d7b631e48ae086d77e10cb598ccc59bdc5db34a2e103a25b82b7-turn-0.json"
+    },
+    {
+      "caseId": "c-20261028-s06",
+      "turnIndex": 0,
+      "customer": "Áo Thạch Thảo phối với quần nâu sẫm chị đang có được không em?",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ hợp chị nhé ạ! Áo tơ Hàn thêu có chất liệu mềm mại, bay bổng cùng họa tiết thêu tinh tế, khi phối với quần nâu sẫm sẽ tạo nên tổng thể rất nhã nhặn, thanh lịch và làm nổi bật nét sang trọng của áo.",
+        "fallbackId": null
+      },
+      "captured": [
+        "Dạ hợp chị nhé ạ! Áo tơ Hàn thêu có chất liệu mềm mại, bay bổng cùng họa tiết thêu tinh tế, khi phối với quần nâu sẫm sẽ tạo nên tổng thể rất nhã nhặn, thanh lịch và làm nổi bật nét sang trọng của áo."
+      ],
+      "capturedImages": [],
+      "acceptedOutbox": [
+        {
+          "id": "bf59601f-fdd4-4565-8f22-e17255ffe0ac",
+          "group": "37654111-f76c-4e50-b09c-a42d7713aaa6",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED",
+          "kind": "TEXT",
+          "contentHash": "e5dc5b3184f975ea1f839a7ed3cb8a77f323aa852d5cf7ada01ac380cd53d4a1"
+        }
+      ],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "d2edf43bcae39336f14578213ded4ef1447edf9c44dd993085dd0aeb8d72833b",
+      "ownerGenerations": 1,
+      "verifierGenerations": 1,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "8b7682699ae33448208144aa7089f015be4645c386205a3905b38fc2efffcacd",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "9a2b9706de095cd8e8c57a3e3f720d9d13940548baa7d0312f34bee273918b44"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "7445fb6423c4d8ca56a82896df0ceabf6b150ece4759dbf7879defe1800c0c5e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "ac738a48e7b33976a1249f8282ae0c1f6ee3527d4db861f7ffa949cec6818ffb"
+          },
+          {
+            "ordinal": 3,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "2f170ebbf8cad5f68f49138d03414563afe2299ab3613c73ee6d75c86f62521d",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "1f6db94325be527985a55ed602e08738c4097931caf5832598badeb68288ae2e"
+          },
+          {
+            "ordinal": 4,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "d2dd2a9061d9a1548c63392f52a64ce3945ae89f20c06442a741dcd465f67f3e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "658b6cbb1fdcd9623b09badd81d45f98af7b4a7d2a3a564351c5df948b7b586e"
+          },
+          {
+            "ordinal": 5,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "2f170ebbf8cad5f68f49138d03414563afe2299ab3613c73ee6d75c86f62521d",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "8502300541c857e9d79df40fd0245071ad6671cb989d105183d9d1c949508771"
+          },
+          {
+            "ordinal": 6,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "b01b2a59e7f929f2258e83e651dea527927b0b4262cca92ed2fc57998295b511",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "8e111ed0c87f335a585eafce629077ee3e4c959da621cf602a766a1a7ca1f25a"
+          },
+          {
+            "ordinal": 7,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "d2dd2a9061d9a1548c63392f52a64ce3945ae89f20c06442a741dcd465f67f3e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "b55a20d44a5ae340afe86486f93a12963c187553d6498d2669cc660c3d978c0a"
+          },
+          {
+            "ordinal": 8,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "b01b2a59e7f929f2258e83e651dea527927b0b4262cca92ed2fc57998295b511",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "78348614920d7cf1c597ff9d1341d51a706948b16d47793692a59a0fd7ebde09"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 2,
+          "callsRemaining": 4
+        }
+      },
+      "generations": [
+        {
+          "id": "b24bfd48-a094-48b7-8118-d0812aae658a:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 6732.603099999949,
+            "inputTokens": 10933,
+            "outputTokens": 1495,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "b24bfd48-a094-48b7-8118-d0812aae658a:verifier:1",
+          "role": "VERIFIER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 7327.106400000048,
+            "inputTokens": 8574,
+            "outputTokens": 50,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-73fcb2c64c6173fae154c833c398a4fd938f2fb51eac3798f84bf7b1d173faec-turn-0.json"
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "turnIndex": 0,
+      "customer": "Váy Odette với Diệp An, em chọn giúp chị một mẫu mặc đi lễ nhé.",
+      "terminal": {
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "text": "Dạ đi lễ thì chị chọn **Váy Diệp An** (699.000đ) giúp em nhé ạ. Mẫu này có thiết kế 2 lớp kín đáo, đứng form lịch sự cùng form suông nhẹ thoải mái, rất phù hợp và trang nhã cho dịp đi lễ. \n\nCòn Váy Odette (799.000đ) dùng chất ren phối tơ Hàn thiên về nét điệu đà, bay bổng hơn. Chị ưng mẫu Diệp An thì báo em nhé ạ!",
+        "fallbackId": null
+      },
+      "captured": [
+        "Dạ đi lễ thì chị chọn **Váy Diệp An** (699.000đ) giúp em nhé ạ. Mẫu này có thiết kế 2 lớp kín đáo, đứng form lịch sự cùng form suông nhẹ thoải mái, rất phù hợp và trang nhã cho dịp đi lễ. \n\nCòn Váy Odette (799.000đ) dùng chất ren phối tơ Hàn thiên về nét điệu đà, bay bổng hơn. Chị ưng mẫu Diệp An thì báo em nhé ạ!"
+      ],
+      "capturedImages": [],
+      "acceptedOutbox": [
+        {
+          "id": "cae70d09-e75e-4ccc-b968-99b27bea0925",
+          "group": "43137ee8-c710-494a-8ceb-a3b2ffac8cfd",
+          "sequence": 0,
+          "status": "SENT_ACCEPTED",
+          "kind": "TEXT",
+          "contentHash": "9866c90b545a4223759d83400a44defdc1f8eac81749a13318efc70908e9f5bf"
+        }
+      ],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "53e1c38c03d1d633b0d0dc763bb54a8e587a2308ae438d902841ea96fefc63f6",
+      "ownerGenerations": 1,
+      "verifierGenerations": 1,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "38b74d6e1bdfaa537dbfe5090c59dc740f611633e536621abf94a330e84c9e02",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "674db7a53e1fe9c6b2395855dc382b1f8152c8174221ebe2569f6ddfd75252ff"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "b693d1e540dc56139bcda1ae3d28d70dbd13c3c8694779fbfbc05c8df8a6c7bd",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "c88eab865936a18dac6ca09887d4184bc6092ea1b5ce6d61568a8065061cb730"
+          },
+          {
+            "ordinal": 3,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "194e8b2b20c9e0553157649f40fbec7289e70ba3e184f6c0de0b4e22bbcfbaff",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "814023365848153a7196ae158e2ab135baf363ca014b027cee199081750a1ec5"
+          },
+          {
+            "ordinal": 4,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "1c9c68de20fd429ecfe76fce9292bd98c6ba3bcd85670dcf4cb5fb5f7788b10a",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "830057ff3d6403089794ca2a500983d3a50020246b2e0b31a798d1cb21b752b7"
+          },
+          {
+            "ordinal": 5,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "1c9c68de20fd429ecfe76fce9292bd98c6ba3bcd85670dcf4cb5fb5f7788b10a",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "401462eabe5d1ebb5adf8fd0120ae2efa9a046896a266530067f7fc63e52f26b"
+          },
+          {
+            "ordinal": 6,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "194e8b2b20c9e0553157649f40fbec7289e70ba3e184f6c0de0b4e22bbcfbaff",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "039c5932d31fc9f06ae24e15ab21c81e78fa68b40f7a79fdc378b01b682c4a76"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 2,
+          "callsRemaining": 4
+        }
+      },
+      "generations": [
+        {
+          "id": "0b22806a-b3b7-401d-9749-aa338aa4fc04:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 5628.977300000028,
+            "inputTokens": 10074,
+            "outputTokens": 1065,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "0b22806a-b3b7-401d-9749-aa338aa4fc04:verifier:1",
+          "role": "VERIFIER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 7928.69430000009,
+            "inputTokens": 7557,
+            "outputTokens": 51,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-ff0db98b2fe65190f5976dc79fde64f814bd8e4c8ad9efd43aac57293b9b77e0-turn-0.json"
+    },
+    {
+      "caseId": "c-20261028-s09",
+      "turnIndex": 0,
+      "customer": "Áo Thạch Thảo này có cần giặt tay không hay cho máy được em?",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "captured": [],
+      "capturedImages": [],
+      "acceptedOutbox": [],
+      "captureBasis": "ACTUAL_CAPTURED_TERMINAL_WITH_ACCEPTED_OUTBOX_HASHES",
+      "resultHash": "481b3ddf0a783eeb06a52a1b3e90478851d2726840eac7fc77d2eb703ce4a704",
+      "ownerGenerations": 2,
+      "verifierGenerations": 1,
+      "readCoverage": {
+        "complete": true,
+        "declaredHandoffReason": null,
+        "records": [
+          {
+            "ordinal": 1,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "8b7682699ae33448208144aa7089f015be4645c386205a3905b38fc2efffcacd",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "9a2b9706de095cd8e8c57a3e3f720d9d13940548baa7d0312f34bee273918b44"
+          },
+          {
+            "ordinal": 2,
+            "operation": "prepare",
+            "facet": "METADATA",
+            "selectorHash": "7445fb6423c4d8ca56a82896df0ceabf6b150ece4759dbf7879defe1800c0c5e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "ac738a48e7b33976a1249f8282ae0c1f6ee3527d4db861f7ffa949cec6818ffb"
+          },
+          {
+            "ordinal": 3,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "2f170ebbf8cad5f68f49138d03414563afe2299ab3613c73ee6d75c86f62521d",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "1f6db94325be527985a55ed602e08738c4097931caf5832598badeb68288ae2e"
+          },
+          {
+            "ordinal": 4,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "d2dd2a9061d9a1548c63392f52a64ce3945ae89f20c06442a741dcd465f67f3e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "658b6cbb1fdcd9623b09badd81d45f98af7b4a7d2a3a564351c5df948b7b586e"
+          },
+          {
+            "ordinal": 5,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "2f170ebbf8cad5f68f49138d03414563afe2299ab3613c73ee6d75c86f62521d",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "8502300541c857e9d79df40fd0245071ad6671cb989d105183d9d1c949508771"
+          },
+          {
+            "ordinal": 6,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "b01b2a59e7f929f2258e83e651dea527927b0b4262cca92ed2fc57998295b511",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "8e111ed0c87f335a585eafce629077ee3e4c959da621cf602a766a1a7ca1f25a"
+          },
+          {
+            "ordinal": 7,
+            "operation": "prepare",
+            "facet": "PRICE",
+            "selectorHash": "d2dd2a9061d9a1548c63392f52a64ce3945ae89f20c06442a741dcd465f67f3e",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "b55a20d44a5ae340afe86486f93a12963c187553d6498d2669cc660c3d978c0a"
+          },
+          {
+            "ordinal": 8,
+            "operation": "prepare",
+            "facet": "STOCK",
+            "selectorHash": "b01b2a59e7f929f2258e83e651dea527927b0b4262cca92ed2fc57998295b511",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "78348614920d7cf1c597ff9d1341d51a706948b16d47793692a59a0fd7ebde09"
+          },
+          {
+            "ordinal": 9,
+            "operation": "read_policy",
+            "facet": "POLICY",
+            "selectorHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+            "status": "AVAILABLE",
+            "reason": null,
+            "resultHash": "906fbffe774816e52945fa07021e6f4536818fb85c96034ee800848b20ec620e"
+          }
+        ],
+        "budget": {
+          "roundsRemaining": 1,
+          "callsRemaining": 3
+        }
+      },
+      "generations": [
+        {
+          "id": "377b23c0-a19a-4e08-89b2-722bd0b79ebe:owner:1",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 4359.112199999974,
+            "inputTokens": 10930,
+            "outputTokens": 465,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "377b23c0-a19a-4e08-89b2-722bd0b79ebe:owner:2",
+          "role": "OWNER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 4178.522200000007,
+            "inputTokens": 12345,
+            "outputTokens": 502,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        },
+        {
+          "id": "377b23c0-a19a-4e08-89b2-722bd0b79ebe:verifier:1",
+          "role": "VERIFIER",
+          "status": "OK",
+          "providerRequests": 1,
+          "errorCode": null,
+          "metrics": {
+            "latencyMs": 8904.260600000038,
+            "inputTokens": 9092,
+            "outputTokens": 93,
+            "costUSD": null,
+            "unavailable": {
+              "costUSD": "PROVIDER_NOT_EXPOSED"
+            }
+          }
+        }
+      ],
+      "nativeArtifact": "native-bcd11fbf5e839c48a57ebea27f0bec717f279f7fc0517cdbde8e0714ada99c28-turn-0.json"
+    }
+  ]
+}

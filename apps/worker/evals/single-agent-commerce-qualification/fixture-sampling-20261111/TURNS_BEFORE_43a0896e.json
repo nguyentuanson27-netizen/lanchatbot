@@ -1,0 +1,1722 @@
+{
+ "kind": "FIXTURE_TURN_SAMPLING_NOT_QUALIFICATION",
+ "sourceSha": "43a0896e9c793c3de83dfc11de69d75202124697",
+ "dirty": true,
+ "world": "SYNTHETIC_IN_REPO_FIXTURE_SM613_TWO_COLOURS_FOUR_SIZES",
+ "owner": {
+  "provider": "VERTEX_AI",
+  "model": "gemini-3.5-flash-lite",
+  "effort": "high"
+ },
+ "verifier": {
+  "provider": "VERTEX_AI",
+  "model": "gemini-3.5-flash-lite",
+  "version": "gemini-3.5-flash-lite",
+  "effort": "high",
+  "location": "global",
+  "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE"
+ },
+ "tools": "READ_ONLY+CART_EFFECTS+QUOTE (no handoff, media or customer-state tools on this fixture)",
+ "repetitions": 10,
+ "summary": {
+  "cart-needs-colour": {
+   "n": 10,
+   "correct": 9,
+   "sendEligible": 9,
+   "verifierFail": 1,
+   "handoffOrNoSend": 1
+  },
+  "cart-write-refused": {
+   "n": 10,
+   "correct": 9,
+   "sendEligible": 10,
+   "verifierFail": 0,
+   "handoffOrNoSend": 0
+  },
+  "which-colours": {
+   "n": 10,
+   "correct": 10,
+   "sendEligible": 10,
+   "verifierFail": 0,
+   "handoffOrNoSend": 0
+  }
+ },
+ "rows": [
+  {
+   "scenario": "cart-needs-colour",
+   "repetition": 1,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 size M có hai màu trắng (có sẵn) và be (hàng đặt trước) ạ. Chị lấy màu nào để em thêm vào giỏ hàng cho mình nhé ạ?",
+   "draft": "Dạ, mẫu sơ mi SM613 size M có hai màu trắng (có sẵn) và be (hàng đặt trước) ạ. Chị lấy màu nào để em thêm vào giỏ hàng cho mình nhé ạ?",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [
+    {
+     "name": "read_product",
+     "status": "OK",
+     "reason": null
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29660,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 261,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29837,
+      "basePresentedFrameBytes": 29837,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 39752,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 4792,
+      "dialogueBytes": 7794,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 39929,
+      "basePresentedFrameBytes": 39929,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 21485,
+    "output": 2086
+   },
+   "latencyMs": 11532,
+   "correct": true
+  },
+  {
+   "scenario": "cart-needs-colour",
+   "repetition": 2,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 size M shop có hai màu trắng và be. Chị lấy màu nào ạ?",
+   "draft": "Dạ, mẫu sơ mi SM613 size M shop có hai màu trắng và be. Chị lấy màu nào ạ?",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [
+    {
+     "name": "read_product",
+     "status": "OK",
+     "reason": null
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29660,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 261,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29837,
+      "basePresentedFrameBytes": 29837,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 38928,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 4792,
+      "dialogueBytes": 6970,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 39105,
+      "basePresentedFrameBytes": 39105,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 21334,
+    "output": 1693
+   },
+   "latencyMs": 10101,
+   "correct": true
+  },
+  {
+   "scenario": "cart-needs-colour",
+   "repetition": 3,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 size M shop có hai màu là trắng (có sẵn) và be (hàng đặt trước). Chị thích mặc màu nào hơn ạ?",
+   "draft": "Dạ, mẫu sơ mi SM613 size M shop có hai màu là trắng (có sẵn) và be (hàng đặt trước). Chị thích mặc màu nào hơn ạ?",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [
+    {
+     "name": "read_product",
+     "status": "OK",
+     "reason": null
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29660,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 261,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29837,
+      "basePresentedFrameBytes": 29837,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 40444,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 4792,
+      "dialogueBytes": 8486,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 40621,
+      "basePresentedFrameBytes": 40621,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 21592,
+    "output": 1944
+   },
+   "latencyMs": 10025,
+   "correct": true
+  },
+  {
+   "scenario": "cart-needs-colour",
+   "repetition": 4,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 size M có hai màu trắng (có sẵn) và be (hàng đặt trước). Chị lấy màu nào ạ?",
+   "draft": "Dạ, mẫu sơ mi SM613 size M có hai màu trắng (có sẵn) và be (hàng đặt trước). Chị lấy màu nào ạ?",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [
+    {
+     "name": "read_product",
+     "status": "OK",
+     "reason": null
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29660,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 261,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29837,
+      "basePresentedFrameBytes": 29837,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 39822,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 5169,
+      "dialogueBytes": 7487,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 39999,
+      "basePresentedFrameBytes": 39999,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 22158,
+    "output": 1845
+   },
+   "latencyMs": 10228,
+   "correct": true
+  },
+  {
+   "scenario": "cart-needs-colour",
+   "repetition": 5,
+   "disposition": "NO_SEND",
+   "reason": "FALLBACK_HANDOFF_UNAVAILABLE",
+   "originalReason": "FAIL",
+   "text": "",
+   "draft": "Dạ, mẫu sơ mi SM613 size M shop có sẵn 2 màu trắng và be. Chị lấy màu nào ạ?",
+   "verdict": "FAIL",
+   "violations": [
+    {
+     "kind": "UNSUPPORTED_PROTECTED_ASSERTION",
+     "excerpt": "shop có sẵn 2 màu trắng và be",
+     "basis": "Màu be size M ở trạng thái PRE_ORDER, không phải có sẵn."
+    }
+   ],
+   "toolTrace": [
+    {
+     "name": "read_product",
+     "status": "OK",
+     "reason": null
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29660,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 261,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29837,
+      "basePresentedFrameBytes": 29837,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 39884,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 4792,
+      "dialogueBytes": 7926,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 40061,
+      "basePresentedFrameBytes": 40061,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 21587,
+    "output": 1866
+   },
+   "latencyMs": 13455,
+   "correct": false
+  },
+  {
+   "scenario": "cart-needs-colour",
+   "repetition": 6,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 size M nhà em có 2 màu trắng và be. Chị thích lấy màu nào ạ?",
+   "draft": "Dạ, mẫu sơ mi SM613 size M nhà em có 2 màu trắng và be. Chị thích lấy màu nào ạ?",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [
+    {
+     "name": "read_product",
+     "status": "OK",
+     "reason": null
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29660,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 261,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29837,
+      "basePresentedFrameBytes": 29837,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 40130,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 4792,
+      "dialogueBytes": 8172,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 40307,
+      "basePresentedFrameBytes": 40307,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 21521,
+    "output": 1897
+   },
+   "latencyMs": 10053,
+   "correct": true
+  },
+  {
+   "scenario": "cart-needs-colour",
+   "repetition": 7,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 size M hiện có hai màu trắng và be. Chị lấy áo màu nào ạ?",
+   "draft": "Dạ, mẫu sơ mi SM613 size M hiện có hai màu trắng và be. Chị lấy áo màu nào ạ?",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [
+    {
+     "name": "read_product",
+     "status": "OK",
+     "reason": null
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29660,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 261,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29837,
+      "basePresentedFrameBytes": 29837,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 38844,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 4792,
+      "dialogueBytes": 6886,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 39021,
+      "basePresentedFrameBytes": 39021,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 21286,
+    "output": 1550
+   },
+   "latencyMs": 10594,
+   "correct": true
+  },
+  {
+   "scenario": "cart-needs-colour",
+   "repetition": 8,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 size M có giá 499.000đ với hai màu trắng và be, chị thích mặc màu nào hơn ạ?",
+   "draft": "Dạ, mẫu sơ mi SM613 size M có giá 499.000đ với hai màu trắng và be, chị thích mặc màu nào hơn ạ?",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [
+    {
+     "name": "read_product",
+     "status": "OK",
+     "reason": null
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29660,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 261,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29837,
+      "basePresentedFrameBytes": 29837,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 40426,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 5169,
+      "dialogueBytes": 8091,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 40603,
+      "basePresentedFrameBytes": 40603,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 22238,
+    "output": 1940
+   },
+   "latencyMs": 11588,
+   "correct": true
+  },
+  {
+   "scenario": "cart-needs-colour",
+   "repetition": 9,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 size M hiện có 2 màu là trắng và be ạ. Chị thích lấy màu nào để em lên đơn cho mình ạ?",
+   "draft": "Dạ, mẫu sơ mi SM613 size M hiện có 2 màu là trắng và be ạ. Chị thích lấy màu nào để em lên đơn cho mình ạ?",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [
+    {
+     "name": "read_product",
+     "status": "OK",
+     "reason": null
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29660,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 261,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29837,
+      "basePresentedFrameBytes": 29837,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 38668,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 4792,
+      "dialogueBytes": 6710,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 38845,
+      "basePresentedFrameBytes": 38845,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 21289,
+    "output": 1617
+   },
+   "latencyMs": 9593,
+   "correct": true
+  },
+  {
+   "scenario": "cart-needs-colour",
+   "repetition": 10,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 size M hiện có 2 màu trắng và be (giá 499.000đ). Chị muốn lấy màu nào để em lên đơn giúp mình ạ?",
+   "draft": "Dạ, mẫu sơ mi SM613 size M hiện có 2 màu trắng và be (giá 499.000đ). Chị muốn lấy màu nào để em lên đơn giúp mình ạ?",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [
+    {
+     "name": "read_product",
+     "status": "OK",
+     "reason": null
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29660,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 261,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29837,
+      "basePresentedFrameBytes": 29837,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 42862,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 5169,
+      "dialogueBytes": 10527,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 43039,
+      "basePresentedFrameBytes": 43039,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 22698,
+    "output": 2662
+   },
+   "latencyMs": 17285,
+   "correct": true
+  },
+  {
+   "scenario": "cart-write-refused",
+   "repetition": 1,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, sơ mi SM613 có hai màu trắng và be. Chị lấy màu nào ạ?",
+   "draft": "Dạ, sơ mi SM613 có hai màu trắng và be. Chị lấy màu nào ạ?",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [
+    {
+     "name": "add_to_cart",
+     "status": "UNAVAILABLE",
+     "reason": "SELECTION_UNAVAILABLE"
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 32562,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 3666,
+      "dialogueBytes": 1730,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 32739,
+      "basePresentedFrameBytes": 32739,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 12837,
+    "output": 260
+   },
+   "latencyMs": 4513,
+   "correct": true
+  },
+  {
+   "scenario": "cart-write-refused",
+   "repetition": 2,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 size M hiện có hai màu là trắng và be ạ. Chị thích lấy màu nào để em thêm vào giỏ cho mình ạ?",
+   "draft": "Dạ, mẫu sơ mi SM613 size M hiện có hai màu là trắng và be ạ. Chị thích lấy màu nào để em thêm vào giỏ cho mình ạ?",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [
+    {
+     "name": "add_to_cart",
+     "status": "UNAVAILABLE",
+     "reason": "SELECTION_UNAVAILABLE"
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 32562,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 3666,
+      "dialogueBytes": 1730,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 32739,
+      "basePresentedFrameBytes": 32739,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 12851,
+    "output": 369
+   },
+   "latencyMs": 5437,
+   "correct": false
+  },
+  {
+   "scenario": "cart-write-refused",
+   "repetition": 3,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 có hai màu là trắng và be (size M). Chị lấy màu nào ạ?",
+   "draft": "Dạ, mẫu sơ mi SM613 có hai màu là trắng và be (size M). Chị lấy màu nào ạ?",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [
+    {
+     "name": "add_to_cart",
+     "status": "UNAVAILABLE",
+     "reason": "SELECTION_UNAVAILABLE"
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 32562,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 3666,
+      "dialogueBytes": 1730,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 32739,
+      "basePresentedFrameBytes": 32739,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 12842,
+    "output": 311
+   },
+   "latencyMs": 4987,
+   "correct": true
+  },
+  {
+   "scenario": "cart-write-refused",
+   "repetition": 4,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 size M hiện có hai màu là trắng và be (màu be là hàng đặt trước ạ). Chị muốn lấy áo màu nào ạ?",
+   "draft": "Dạ, mẫu sơ mi SM613 size M hiện có hai màu là trắng và be (màu be là hàng đặt trước ạ). Chị muốn lấy áo màu nào ạ?",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [
+    {
+     "name": "add_to_cart",
+     "status": "UNAVAILABLE",
+     "reason": "SELECTION_UNAVAILABLE"
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 32562,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 3666,
+      "dialogueBytes": 1730,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 32739,
+      "basePresentedFrameBytes": 32739,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 12847,
+    "output": 215
+   },
+   "latencyMs": 6241,
+   "correct": true
+  },
+  {
+   "scenario": "cart-write-refused",
+   "repetition": 5,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, sơ mi SM613 size M bên em có màu trắng và màu be. Chị lấy màu nào ạ?",
+   "draft": "Dạ, sơ mi SM613 size M bên em có màu trắng và màu be. Chị lấy màu nào ạ?",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [
+    {
+     "name": "add_to_cart",
+     "status": "UNAVAILABLE",
+     "reason": "SELECTION_UNAVAILABLE"
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 32562,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 3666,
+      "dialogueBytes": 1730,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 32739,
+      "basePresentedFrameBytes": 32739,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 12845,
+    "output": 417
+   },
+   "latencyMs": 6056,
+   "correct": true
+  },
+  {
+   "scenario": "cart-write-refused",
+   "repetition": 6,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 size M hiện có 2 màu là trắng và be (hàng đặt trước). Chị lấy màu nào ạ?",
+   "draft": "Dạ, mẫu sơ mi SM613 size M hiện có 2 màu là trắng và be (hàng đặt trước). Chị lấy màu nào ạ?",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [
+    {
+     "name": "add_to_cart",
+     "status": "UNAVAILABLE",
+     "reason": "SELECTION_UNAVAILABLE"
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 32562,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 3666,
+      "dialogueBytes": 1730,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 32739,
+      "basePresentedFrameBytes": 32739,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 12847,
+    "output": 558
+   },
+   "latencyMs": 6172,
+   "correct": true
+  },
+  {
+   "scenario": "cart-write-refused",
+   "repetition": 7,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, sơ mi SM613 size M nhà em có hai màu trắng và be, chị lấy màu nào ạ?",
+   "draft": "Dạ, sơ mi SM613 size M nhà em có hai màu trắng và be, chị lấy màu nào ạ?",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [
+    {
+     "name": "add_to_cart",
+     "status": "UNAVAILABLE",
+     "reason": "SELECTION_UNAVAILABLE"
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 32562,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 3666,
+      "dialogueBytes": 1730,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 32739,
+      "basePresentedFrameBytes": 32739,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 12840,
+    "output": 370
+   },
+   "latencyMs": 4284,
+   "correct": true
+  },
+  {
+   "scenario": "cart-write-refused",
+   "repetition": 8,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 size M có 2 màu là trắng và be (màu be là hàng đặt trước). Chị lấy áo màu nào ạ?",
+   "draft": "Dạ, mẫu sơ mi SM613 size M có 2 màu là trắng và be (màu be là hàng đặt trước). Chị lấy áo màu nào ạ?",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [
+    {
+     "name": "add_to_cart",
+     "status": "UNAVAILABLE",
+     "reason": "SELECTION_UNAVAILABLE"
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 32562,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 3666,
+      "dialogueBytes": 1730,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 32739,
+      "basePresentedFrameBytes": 32739,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 12856,
+    "output": 274
+   },
+   "latencyMs": 4782,
+   "correct": true
+  },
+  {
+   "scenario": "cart-write-refused",
+   "repetition": 9,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 có hai màu trắng và be. Chị muốn lấy áo màu nào ạ?",
+   "draft": "Dạ, mẫu sơ mi SM613 có hai màu trắng và be. Chị muốn lấy áo màu nào ạ?",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [
+    {
+     "name": "add_to_cart",
+     "status": "UNAVAILABLE",
+     "reason": "SELECTION_UNAVAILABLE"
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 32562,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 3666,
+      "dialogueBytes": 1730,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 32739,
+      "basePresentedFrameBytes": 32739,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 12840,
+    "output": 264
+   },
+   "latencyMs": 4846,
+   "correct": true
+  },
+  {
+   "scenario": "cart-write-refused",
+   "repetition": 10,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 này có hai màu trắng và be. Chị muốn lấy áo màu nào ạ?",
+   "draft": "Dạ, mẫu sơ mi SM613 này có hai màu trắng và be. Chị muốn lấy áo màu nào ạ?",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [
+    {
+     "name": "add_to_cart",
+     "status": "UNAVAILABLE",
+     "reason": "SELECTION_UNAVAILABLE"
+    }
+   ],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    },
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 32562,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 3666,
+      "dialogueBytes": 1730,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 32739,
+      "basePresentedFrameBytes": 32739,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 12843,
+    "output": 253
+   },
+   "latencyMs": 4321,
+   "correct": true
+  },
+  {
+   "scenario": "which-colours",
+   "repetition": 1,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 có hai màu trắng và be ạ.",
+   "draft": "Dạ, mẫu sơ mi SM613 có hai màu trắng và be ạ.",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29667,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 268,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29844,
+      "basePresentedFrameBytes": 29844,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 11071,
+    "output": 869
+   },
+   "latencyMs": 4699,
+   "correct": true
+  },
+  {
+   "scenario": "which-colours",
+   "repetition": 2,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 hiện có hai màu trắng và be chị nhé.",
+   "draft": "Dạ, mẫu sơ mi SM613 hiện có hai màu trắng và be chị nhé.",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29667,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 268,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29844,
+      "basePresentedFrameBytes": 29844,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 11078,
+    "output": 866
+   },
+   "latencyMs": 4494,
+   "correct": true
+  },
+  {
+   "scenario": "which-colours",
+   "repetition": 3,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 có hai màu trắng và be chị nhé.",
+   "draft": "Dạ, mẫu sơ mi SM613 có hai màu trắng và be chị nhé.",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29667,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 268,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29844,
+      "basePresentedFrameBytes": 29844,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 11072,
+    "output": 702
+   },
+   "latencyMs": 4492,
+   "correct": true
+  },
+  {
+   "scenario": "which-colours",
+   "repetition": 4,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 bên em có hai màu trắng và be chị nhé.",
+   "draft": "Dạ, mẫu sơ mi SM613 bên em có hai màu trắng và be chị nhé.",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29667,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 268,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29844,
+      "basePresentedFrameBytes": 29844,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 11076,
+    "output": 778
+   },
+   "latencyMs": 5468,
+   "correct": true
+  },
+  {
+   "scenario": "which-colours",
+   "repetition": 5,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 hiện có hai màu trắng và be chị nhé.",
+   "draft": "Dạ, mẫu sơ mi SM613 hiện có hai màu trắng và be chị nhé.",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29667,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 268,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29844,
+      "basePresentedFrameBytes": 29844,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 11078,
+    "output": 853
+   },
+   "latencyMs": 5665,
+   "correct": true
+  },
+  {
+   "scenario": "which-colours",
+   "repetition": 6,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, sơ mi SM613 hiện có hai màu trắng và be chị nhé ạ.",
+   "draft": "Dạ, sơ mi SM613 hiện có hai màu trắng và be chị nhé ạ.",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29667,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 268,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29844,
+      "basePresentedFrameBytes": 29844,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 11076,
+    "output": 1180
+   },
+   "latencyMs": 7580,
+   "correct": true
+  },
+  {
+   "scenario": "which-colours",
+   "repetition": 7,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 hiện có hai màu trắng và be chị nhé.",
+   "draft": "Dạ, mẫu sơ mi SM613 hiện có hai màu trắng và be chị nhé.",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29667,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 268,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29844,
+      "basePresentedFrameBytes": 29844,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 11078,
+    "output": 781
+   },
+   "latencyMs": 5150,
+   "correct": true
+  },
+  {
+   "scenario": "which-colours",
+   "repetition": 8,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 bên em có hai màu trắng và be ạ.",
+   "draft": "Dạ, mẫu sơ mi SM613 bên em có hai màu trắng và be ạ.",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29667,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 268,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29844,
+      "basePresentedFrameBytes": 29844,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 11072,
+    "output": 1003
+   },
+   "latencyMs": 6143,
+   "correct": true
+  },
+  {
+   "scenario": "which-colours",
+   "repetition": 9,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 hiện có hai màu trắng và be chị nha.",
+   "draft": "Dạ, mẫu sơ mi SM613 hiện có hai màu trắng và be chị nha.",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29667,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 268,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29844,
+      "basePresentedFrameBytes": 29844,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 11073,
+    "output": 1002
+   },
+   "latencyMs": 5652,
+   "correct": true
+  },
+  {
+   "scenario": "which-colours",
+   "repetition": 10,
+   "disposition": "SEND_ELIGIBLE",
+   "reason": "PASS",
+   "originalReason": null,
+   "text": "Dạ, mẫu sơ mi SM613 hiện có hai màu trắng và be, chị nhé.",
+   "draft": "Dạ, mẫu sơ mi SM613 hiện có hai màu trắng và be, chị nhé.",
+   "verdict": "PASS",
+   "violations": [],
+   "toolTrace": [],
+   "cartLines": 0,
+   "generations": [
+    {
+     "role": "owner",
+     "status": "OK",
+     "requestBudget": {
+      "textFrameBytes": 29667,
+      "systemBytes": 20651,
+      "toolSchemaBytes": 6255,
+      "trustedFrameBytes": 2233,
+      "dialogueBytes": 268,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 29844,
+      "basePresentedFrameBytes": 29844,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+     },
+     "errorCode": null
+    },
+    {
+     "role": "verifier",
+     "status": "OK",
+     "requestBudget": null,
+     "errorCode": null
+    }
+   ],
+   "tokens": {
+    "input": 11076,
+    "output": 975
+   },
+   "latencyMs": 5841,
+   "correct": true
+  }
+ ]
+}

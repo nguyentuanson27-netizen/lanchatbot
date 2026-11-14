@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { MEDIA_FRESH_FOR_SECONDS, CommerceMediaDeliveryBindingV1Schema as bindingSchema,
+import { CommerceMediaDeliveryBindingV1Schema as bindingSchema,
   type CommerceMediaDeliveryImageV1 as MediaDeliveryImage, type CommerceMediaDeliveryBindingV1 as CommerceMediaDeliveryBinding } from "@lana/contracts";
 import type { RuntimePolicyBundle } from "@lana/chat-runtime";
 import {mediaObservationTime,type StableProductDocument} from "@lana/business-tools";
@@ -10,6 +10,16 @@ import { commerceHash, publicPolicyLiteral } from "./single-agent-commerce-read-
 import { safeRecognitionImageUrl } from "./media-recognition-v2-image-pipeline.js";
 
 export type { MediaDeliveryImage, CommerceMediaDeliveryBinding };
+/** One physical send per exact approved URL, retaining source evidence elsewhere. */
+export function physicalCommerceMedia(images:readonly import('./single-agent-commerce-media.js').CommerceMediaAsset[]){
+ const unique=new Map<string,(typeof images)[number]>();
+ const facts=(a:(typeof images)[number])=>commerceHash([a.sourceContentSha256,a.imageType,a.angle,a.feedback===true,[...a.partsVisible].sort()]);
+ for(const image of images){const old=unique.get(image.url);
+  if(old&&facts(old)!==facts(image))throw Error('MEDIA_ATTACHMENT_CONFLICT');
+  if(!old)unique.set(image.url,image);
+ }
+ return [...unique.values()];
+}
 export const commerceDeliveryPolicyHash = (policy: RuntimePolicyBundle, pageId: string, shopId: string, now: Date) =>
   commerceHash({ policy: publicPolicyLiteral(policy, pageId, shopId, now), matrix: policy.artifacts.handoffMatrix });
 
@@ -49,7 +59,7 @@ export function createCommerceMediaPreSendGate(input: {
       const policy = await input.policy(b);
       const validAt = (at: Date) => commerceDeliveryPolicyHash(policy, b.pageId, b.shopId, at) === b.policyHash &&
         b.images.every(image => Date.parse(image.observedAt) <= at.getTime() &&
-          Date.parse(image.expiresAt) > at.getTime() && Date.parse(image.observedAt) + MEDIA_FRESH_FOR_SECONDS * 1000 > at.getTime());
+          (image.expiresAt===null||Date.parse(image.expiresAt)>at.getTime()));
       if (authority.stateVersion !== b.revision || authority.generation !== b.generation || !authority.appSendEnabled || authority.killSwitch ||
         authority.routingOwner !== "APP" || commerceHash(authority.state) !== b.stateHash ||
         !validAt(input.clock())) return blocked();
@@ -59,8 +69,7 @@ export function createCommerceMediaPreSendGate(input: {
         safeRecognitionImageUrl(expected.url, input.allowedHostSuffixes);
         if (!product || product.productId !== expected.productId || !asset || asset.reviewStatus !== "APPROVED" || !asset.metadataVerified ||
           !asset.sourceContentSha256 || !/^[a-f0-9]{64}$/u.test(asset.sourceContentSha256) ||
-          Date.parse(expected.observedAt) > now.getTime() || Date.parse(expected.expiresAt) <= now.getTime() ||
-          Date.parse(expected.observedAt) + MEDIA_FRESH_FOR_SECONDS * 1000 <= now.getTime() ||
+          Date.parse(expected.observedAt) > now.getTime() || (expected.expiresAt!==null&&Date.parse(expected.expiresAt)<=now.getTime()) ||
           mediaObservationTime(asset,product.observedAt) !== Date.parse(expected.observedAt) ||
           commerceHash({ productId: product.productId, catalogVersion: product.catalogVersion, image: asset }) !== expected.sourceVersion) return blocked();
       }

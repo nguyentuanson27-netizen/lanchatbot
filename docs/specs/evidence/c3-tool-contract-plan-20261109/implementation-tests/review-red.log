@@ -1,0 +1,75 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+···············································xxxxxx
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/single-agent-commerce-quote.test.ts > accepts preference ops without invented sourceQuote requirements but rejects invalid state shapes
+AssertionError: expected null to match object { units: 2 }
+
+- Expected: 
+{
+  "units": 2,
+}
+
++ Received: 
+null
+
+ ❯ src/single-agent-commerce-quote.test.ts:257:45
+    255| it('accepts preference ops without invented sourceQuote requirements b…
+    256|  const preference={name:'apply_customer_state',args:{ops:[{op:'SET',fi…
+    257|  expect(quoteBatchWork([preference,quote])).toMatchObject({units:2});
+       |                                             ^
+    258|  for(const ops of [[{op:'CLEAR',field:'preferences.colors',value:[]}],…
+    259|   expect(quoteBatchWork([{name:'apply_customer_state',args:{ops}},quot…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/single-agent-commerce-quote.test.ts > stops quote after writer readback changes revision
+ FAIL  src/single-agent-commerce-quote.test.ts > stops quote after writer readback changes customerProfileRevision
+ FAIL  src/single-agent-commerce-quote.test.ts > stops quote after writer readback changes recipient
+ FAIL  src/single-agent-commerce-quote.test.ts > stops quote after writer readback changes permission
+AssertionError: expected 'QUOTE_BATCH_INVALID' to be 'QUOTE_BATCH_STOPPED' // Object.is equality
+
+Expected: "QUOTE_BATCH_STOPPED"
+Received: "QUOTE_BATCH_INVALID"
+
+ ❯ src/single-agent-commerce-quote.test.ts:268:29
+    266|  const t=withExplicitQuoteTask(base,s.scope,false,async()=>(await fixt…
+    267|  const results=await t.invokeBatch([{name:'apply_customer_state',args:…
+    268|  expect(results[1]?.reason).toBe('QUOTE_BATCH_STOPPED');expect(invoke)…
+       |                             ^
+    269| });
+    270| it('rejects invalid returning quote shape before a valid writer can co…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/single-agent-commerce-quote.test.ts > rejects invalid returning quote shape before a valid writer can commit
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/single-agent-commerce-quote.test.ts:274:49
+    272|  const t=withExplicitQuoteTask({...s.tools,availableTools:[...s.tools.…
+    273|  const result=await t.invokeBatch([{name:'apply_customer_state',args:{…
+    274|  expect(result.every(r=>r.status==='REJECTED')).toBe(true);expect(invo…
+       |                                                 ^
+    275| });
+    276| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 47 passed (53)
+   Start at  12:34:37
+   Duration  4.30s (transform 1.62s, setup 0ms, collect 2.49s, tests 937ms, environment 0ms, prepare 277ms)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/single-agent-commerce-quote.test.ts --reporter=dot

@@ -1,0 +1,280 @@
+{
+  "kind": "INDEPENDENT_SCOPED_IMPLEMENTATION_REVIEW_V2",
+  "status": "APPROVED_SCOPED_IMPLEMENTATION",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-05T07:06:48.501223+00:00",
+  "implementationBaseSha": "d83dc3c85cb22b9fccd463c1025606cd010b5f7a",
+  "scope": "B-preserving I-IV runtime/evaluator changes at exact file hashes; no provider outcome, source readiness, qualification, C3 parity or deploy approval",
+  "sourceSnapshotHash": "94ff452dbef0631d9fa5895ec2fe5da13818f5d145faaaec51b681607316e842",
+  "sourceSnapshotDefinition": "SHA256 compact UTF8 JSON ordered list of path,sha256",
+  "files": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/B_PRESERVING_CHECKOUT_SCOPE_20261104.json",
+      "sha256": "3f5211310d01f3f474846f4875ed743d721509e2924dd28352362c0552a45a6d",
+      "gitBlobSha256": "3f5211310d01f3f474846f4875ed743d721509e2924dd28352362c0552a45a6d"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/B_PRESERVING_PREFIX_SCOPE_20261104.json",
+      "sha256": "edb77e9046fc35783234ab8b6a3d7353b27e7a13217ff9b32782dabdd7352c3c",
+      "gitBlobSha256": "edb77e9046fc35783234ab8b6a3d7353b27e7a13217ff9b32782dabdd7352c3c"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/B_PRESERVING_REMAINDER_SCOPE_20261104.json",
+      "sha256": "42adaa6c4683740941f68145d012ef4b6352e566821b2452f5c8e776dd69d0fb",
+      "gitBlobSha256": "42adaa6c4683740941f68145d012ef4b6352e566821b2452f5c8e776dd69d0fb"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/CHECKOUT_COMPLETE_SCENARIO_20261104.json",
+      "sha256": "10bdcde74ea5b48468b183a9aefdbd4f040c8938084d9316b31fec25a31a9a56",
+      "gitBlobSha256": "10bdcde74ea5b48468b183a9aefdbd4f040c8938084d9316b31fec25a31a9a56"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/capture-world.mjs",
+      "sha256": "70607e03b528022b154d0c26e162c3cd584c5fddcbe28983f1edaa9cd113276b",
+      "gitBlobSha256": "70607e03b528022b154d0c26e162c3cd584c5fddcbe28983f1edaa9cd113276b"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/customer-branches.mjs",
+      "sha256": "bd85a5d41d8e0e8ea6043ae63cb305d8c6f2ff96610b51cddcf561e57ecfb52c",
+      "gitBlobSha256": "bd85a5d41d8e0e8ea6043ae63cb305d8c6f2ff96610b51cddcf561e57ecfb52c"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/customer-branches.test.mjs",
+      "sha256": "d646c9609ce7486dd7406619aa008efa19c6646a9361cf2c6e53a44ff1313250",
+      "gitBlobSha256": "d646c9609ce7486dd7406619aa008efa19c6646a9361cf2c6e53a44ff1313250"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/diagnostic.mjs",
+      "sha256": "26c7d36b97383dadc7541961d9583fcc7a3b28d7bdffb1a9ab1523d395bacc2c",
+      "gitBlobSha256": "e92bd3308f44bbac08d807b81155a51a7528e858e1e8971db402b944070aeb17"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/frozen-search.mjs",
+      "sha256": "3563dea1d14ea687453357329747dcf61d70e17ba2052e73f637826d192b0e7f",
+      "gitBlobSha256": "3563dea1d14ea687453357329747dcf61d70e17ba2052e73f637826d192b0e7f"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/frozen-world.mjs",
+      "sha256": "e7896b889dd1d2f27b46b24e28ab3222df2d0bd78d7dc0ab6e196a81ddd3bef0",
+      "gitBlobSha256": "e7896b889dd1d2f27b46b24e28ab3222df2d0bd78d7dc0ab6e196a81ddd3bef0"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/native-population.mjs",
+      "sha256": "56a6851c9aad45e8b538ebb3aa993f1b29be0264598f5563548860265042b4b6",
+      "gitBlobSha256": "29b932b8a00435a74835bc38917bcef96143d17a124538f90ad5ac556d468892"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/native-terminal.mjs",
+      "sha256": "41cd9db00131570ac2f300f73dd480678f04f699377b02616da1ed45152c26e2",
+      "gitBlobSha256": "4c768bc25c21b3d4de03390c6a860fb3c358562d3f5abfc71ce5631262222ce6"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/native-terminal.test.mjs",
+      "sha256": "f97699c3d401ae314d1ed0d266ca55573384c82465b039ec7b3f7937aa13d463",
+      "gitBlobSha256": "3ff325a87a6669232e023bc1599e6e806675135149600e9f282f88df4ed295dc"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/test-media-source.mjs",
+      "sha256": "1bc60de8d54a22152226f295fd60cc35df0b4a71205ea15077024c13b6e42c0a",
+      "gitBlobSha256": "1bc60de8d54a22152226f295fd60cc35df0b4a71205ea15077024c13b6e42c0a"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-qualification/test-media-source.test.mjs",
+      "sha256": "a0b86153ac816890d42f4b86c01e23f02df3c74be30ab6ec47f7945234e628af",
+      "gitBlobSha256": "a0b86153ac816890d42f4b86c01e23f02df3c74be30ab6ec47f7945234e628af"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs",
+      "sha256": "b8d01fa9d04ed88f1f5b46967f2017952b03fa9572d39f4a95fffda396f97842",
+      "gitBlobSha256": "b8d01fa9d04ed88f1f5b46967f2017952b03fa9572d39f4a95fffda396f97842"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "sha256": "8ab591160a663c592a4fd084504449be7413525f660a57860a7e79d02ddb8d4d",
+      "gitBlobSha256": "24f45adbc5c83582c8663d8db953dd1ebc48729a25397376d0b6a9a87fe59515"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/manifest.json",
+      "sha256": "4f772e1ec6974c03fb7e671e6e8400a8f0b18b6cc70c93139ed714dfca35b143",
+      "gitBlobSha256": "4f772e1ec6974c03fb7e671e6e8400a8f0b18b6cc70c93139ed714dfca35b143"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/product-read-selection.mjs",
+      "sha256": "4cb2ff52063c553588dd004b2885cabef944417fce42d2fde48e73245a14172c",
+      "gitBlobSha256": "4cb2ff52063c553588dd004b2885cabef944417fce42d2fde48e73245a14172c"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt",
+      "sha256": "431b88132aaa9396ac3626744a93e7e9f7aaab35ec1fc843eda3a532295bd951",
+      "gitBlobSha256": "431b88132aaa9396ac3626744a93e7e9f7aaab35ec1fc843eda3a532295bd951"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json",
+      "sha256": "20e9c068b411152cff3f38b0844f545cb6842b6ab70adda3f0b2ab97704b3978",
+      "gitBlobSha256": "20e9c068b411152cff3f38b0844f545cb6842b6ab70adda3f0b2ab97704b3978"
+    },
+    {
+      "path": "apps/worker/src/realtime-sales-catalog.ts",
+      "sha256": "22b6097263f0c929db25efcf8412aff2ffff3d356bf3cfc3a163bc1ccfc1c837",
+      "gitBlobSha256": "9ff680dac8b511caf64fc01f331240a95849d327972271ab0a9566deb96e4346"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-ingress.ts",
+      "sha256": "35e94199b2cd25117b15e21ab26b6554317959f580c48cc2d46202d7415e6037",
+      "gitBlobSha256": "a4ed5c39d8eb869e8142705a83706e72a09efb313553b1c285be3aaab465bac5"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-media-capabilities.ts",
+      "sha256": "7adfde92fd9efcf0fe15da90256959c0c8c394c64e15cbf8af1decae46014508",
+      "gitBlobSha256": "7adfde92fd9efcf0fe15da90256959c0c8c394c64e15cbf8af1decae46014508"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-media.test.ts",
+      "sha256": "54e9dc25a5185e716920c63a788856728041df538705d1dd8541121e7925b5e7",
+      "gitBlobSha256": "b31c661736baccb7621e0ddc7d411a7b6c70d36e255074655292eacf9ad2cb62"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-product-groups.test.ts",
+      "sha256": "39cd8f8ab51fd29cba235ebc755689804ad1bca3c429bbd8edd93623f8f9b219",
+      "gitBlobSha256": "39cd8f8ab51fd29cba235ebc755689804ad1bca3c429bbd8edd93623f8f9b219"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-product-groups.ts",
+      "sha256": "f5551570e00ffc029b4458dce4c734602deb7643f662a81ab455231849df675d",
+      "gitBlobSha256": "f5551570e00ffc029b4458dce4c734602deb7643f662a81ab455231849df675d"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-quote.test.ts",
+      "sha256": "f74b3a473f1a4e6ff621886d98f809000849765d06db698dce678a32c0a123e5",
+      "gitBlobSha256": "f74b3a473f1a4e6ff621886d98f809000849765d06db698dce678a32c0a123e5"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-quote.ts",
+      "sha256": "e72d24532dc86eb2dfaeab45d48e7e698c93e12ac93e6d2ef91a7f0423e30b03",
+      "gitBlobSha256": "e72d24532dc86eb2dfaeab45d48e7e698c93e12ac93e6d2ef91a7f0423e30b03"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-read-only-context.ts",
+      "sha256": "4271053bfab1046e556746d8cdb7ec61fbfab409bf61038f2439ebb5c99681e4",
+      "gitBlobSha256": "4271053bfab1046e556746d8cdb7ec61fbfab409bf61038f2439ebb5c99681e4"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-session.ts",
+      "sha256": "b8b6f8e3e10caa252e04af19d01fb7a30d0b587dd3e9509afde2202e9318bf24",
+      "gitBlobSha256": "5c33bcc342bb3a1bd9e2d632567c8d42a4b899e95a7cb06fba5cf832a1eb995e"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-state.test.ts",
+      "sha256": "c0f73b37542cc696b5e02e5dcda8064aea36ba2d17efdf4a46b14ea4e7db899d",
+      "gitBlobSha256": "c0f73b37542cc696b5e02e5dcda8064aea36ba2d17efdf4a46b14ea4e7db899d"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-state.ts",
+      "sha256": "f87a8d8c2b6f664cd679ad2ca6117fb56769d32dab04eebc847190d2badd6755",
+      "gitBlobSha256": "aa999c788f45be2cb839714661d9f6c208282634e76152a4fa6f4e9cc3fd3f55"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce.ts",
+      "sha256": "ec8f8baacc11bf749a67d3ccbc1bc600ec194194cbf060d2222b0d3bf0ed0662",
+      "gitBlobSha256": "5a063554a8a5424ccc20fef6876da461335d7e811ae07720b59f083569e14439"
+    },
+    {
+      "path": "packages/business-tools/src/size-engine.ts",
+      "sha256": "ba0779d55572784ce6dc0b4c7ecacb271fc401bc4b73c3384f3af6d11645ff14",
+      "gitBlobSha256": "ba0779d55572784ce6dc0b4c7ecacb271fc401bc4b73c3384f3af6d11645ff14"
+    },
+    {
+      "path": "packages/contracts/src/v2/customer-size-cart.ts",
+      "sha256": "2caf5f8c02b879e5f3564934c531433f0cfb3d8d358b57e31b3d9adc9776d6e2",
+      "gitBlobSha256": "2caf5f8c02b879e5f3564934c531433f0cfb3d8d358b57e31b3d9adc9776d6e2"
+    }
+  ],
+  "findings": [],
+  "closedFindings": [
+    "Exact source validator before joined profile updates",
+    "Serialized profile metadata/target CAS and bounded target union",
+    "Optional stale advice refresh does not poison unrelated tasks or clear other valid fit",
+    "Immutable real correction receipt retained across metadata CAS, fit recomputed at new profile revision",
+    "Selected-offer metadata preserves prior fit/receipt and does not open cart",
+    "Obsolete unbound advice intents pruned to avoid lifetime four-product ceiling",
+    "B1 read-only declaration does not advertise customerSelected writer",
+    "Preview branch verifies request/source/recipient/revision/cart/preview/group hashes and exact current operation",
+    "Media capability rejects invalid supplied clock while allowing absent product clock with valid asset proofs"
+  ],
+  "reviewerCommands": [
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-state.test.ts src/single-agent-commerce-quote.test.ts src/single-agent-commerce-product-groups.test.ts src/single-agent-commerce-media.test.ts",
+      "result": "154 PASS /4files/exit0"
+    },
+    {
+      "command": "node --test apps/worker/evals/single-agent-commerce-qualification/native-terminal.test.mjs apps/worker/evals/single-agent-commerce-qualification/customer-branches.test.mjs apps/worker/evals/single-agent-commerce-qualification/test-media-source.test.mjs",
+      "result": "12 PASS /exit0"
+    },
+    {
+      "command": "git diff --check",
+      "result": "exit0"
+    }
+  ],
+  "inspectedPrimaryEvidence": [
+    {
+      "path": "../c3-b-preserve-worker-tests-20261105-02.log",
+      "result": "2648 PASS /154files"
+    },
+    {
+      "path": "../c3-b-preserve-all-evals-20261105.log",
+      "result": "848 PASS /2 existingSKIP /850total /0fail"
+    },
+    {
+      "path": "../c3-b-preserve-shared-tests-20261105.log",
+      "result": "223 focusedPASS as combined contracts/business groups; final business subset150PASS"
+    },
+    {
+      "path": "../c3-b-preserve-worker-build-20261105.log",
+      "result": "build dependencies and worker no errors; primary exit0"
+    },
+    {
+      "path": "../c3-b-preserve-final-typecheck-20261105.log",
+      "result": "no errors; primary exit0"
+    },
+    {
+      "path": "../c3-b-preserve-final-lint-20261105.log",
+      "result": "no errors; primary exit0"
+    },
+    {
+      "path": "../c3-b-preserve-pg-20261105-03/integration.json",
+      "result": "2/2 PASS, realPostgreSQL, provider0/livefalse/testDatabaseDropped:true/sourceDirty:true"
+    },
+    {
+      "path": "../c3-b-preserve-new-quote-wire-20261105.json",
+      "result": "Full captured19,691byte tool surface; constructed raw56,264/presented56,441<65,536; quoteOK529000; provider0; not model adherence proof."
+    },
+    {
+      "path": "../c3-b-preserve-bc-current-20261105.json",
+      "result": "Six pinned historical hardprecheck null at derived nonfuture evidence time, five scripted reads OK, heightweight RECOMMENDED; no model/full parity proof."
+    }
+  ],
+  "limits": [
+    "PostgreSQL evidence is sourceDirty worktree validation; final exact executable identity must be sealed separately",
+    "Six historical B hard prechecks/read-only ports are deterministic compatibility probes, not whole-reply model or full parity proof",
+    "Exact latest old s13 continuation remains OWNER_REQUEST_BOUND; new quote operation is alternative path and owner adherence unverified",
+    "New SD023 media is owner-authorized isolated test source from canonical bytes, not old-hash revalidation/live publication; assumed feedback remains a separate test assumption",
+    "PURCHASE_CONFIRMED stage alone must never authorize branch witness, handoff/output and exact commit proofs remain distinct",
+    "No provider calls or source-shop writes by reviewer; no model result or PhaseC GO inferred"
+  ],
+  "approvedHeadSha": "7057960591ac39a481665befc58e508f9dfdbd02",
+  "cleanExecutableWorktree": true,
+  "headBlobParity": "PASS: all36 reviewed source/config/eval files equal clean HEAD after CRLF-to-LF only; both raw-worktree and Git blob hashes recorded",
+  "lineEndingOnlyPaths": [
+    "apps/worker/evals/single-agent-commerce-qualification/diagnostic.mjs",
+    "apps/worker/evals/single-agent-commerce-qualification/native-population.mjs",
+    "apps/worker/evals/single-agent-commerce-qualification/native-terminal.mjs",
+    "apps/worker/evals/single-agent-commerce-qualification/native-terminal.test.mjs",
+    "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+    "apps/worker/src/realtime-sales-catalog.ts",
+    "apps/worker/src/single-agent-commerce-ingress.ts",
+    "apps/worker/src/single-agent-commerce-media.test.ts",
+    "apps/worker/src/single-agent-commerce-session.ts",
+    "apps/worker/src/single-agent-commerce-state.ts",
+    "apps/worker/src/single-agent-commerce.ts"
+  ]
+}

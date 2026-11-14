@@ -200,6 +200,7 @@ export function sanitizeCandidateClaimValue(
 ): Readonly<Record<string, unknown>> {
   const allowedKeys: readonly string[] = CANDIDATE_CLAIM_VALUE_KEYS[type];
   const input = value as Readonly<Record<string, unknown>>;
+  if(type==="SIZE_FIT"&&(input.fitTarget as {kind?:string}|undefined)?.kind==="COMPONENT")throw Error("COMPONENT_SIZE_FIT_UNSUPPORTED_BY_PRODUCT_CONSUMER");
   return Object.freeze(Object.fromEntries(
     allowedKeys.map((key) => [key, input[key]]),
   ));

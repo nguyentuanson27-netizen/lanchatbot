@@ -1,0 +1,480 @@
+{
+  "kind": "PHASE_C_CONTINUATION_REPAIR_VERIFICATION",
+  "implementationBaseSha": "43211d7d97097a52901316f550871b4b90b31fee",
+  "p1ExecutableSha": "8eb074ef98e6a125ce7985ca992d26b50699f60e",
+  "p1Status": "APPROVE_IMPLEMENTATION_P1",
+  "p2Status": "OWNER_CONTRACT_CHOICE_PENDING",
+  "providerRequests": 0,
+  "sourceShopWrites": 0,
+  "modelQuality": "NOT_RUN",
+  "qualification": "BLOCKED",
+  "rawAndPresentedCapBytes": 65536,
+  "observedBefore": {
+    "raw": 67436,
+    "presented": 67613
+  },
+  "observedAfter": {
+    "status": "WITHIN_BOUND",
+    "budget": {
+      "textFrameBytes": 64966,
+      "systemBytes": 22000,
+      "toolSchemaBytes": 18608,
+      "trustedFrameBytes": 10260,
+      "dialogueBytes": 13838,
+      "textLimitBytes": 65536,
+      "presentedTextFrameBytes": 65143,
+      "basePresentedFrameBytes": 65143,
+      "inlineImageBytes": 0,
+      "frameLimitBytes": 65536
+    },
+    "bytes": 65143,
+    "oldObservedBytes": 67258,
+    "signatureCharacters": 11024,
+    "configuredTools": [
+      "search_products",
+      "read_product",
+      "read_policy",
+      "apply_customer_state",
+      "recommend_size",
+      "quote_cart",
+      "add_to_cart",
+      "change_cart_item",
+      "confirm_purchase",
+      "record_negotiation",
+      "request_handoff",
+      "select_product_media",
+      "view_product_media",
+      "quote_product"
+    ],
+    "callableTools": [
+      "search_products",
+      "read_product",
+      "read_policy",
+      "apply_customer_state",
+      "recommend_size",
+      "quote_cart",
+      "add_to_cart",
+      "change_cart_item",
+      "confirm_purchase",
+      "record_negotiation",
+      "request_handoff",
+      "select_product_media",
+      "view_product_media",
+      "quote_product"
+    ]
+  },
+  "roundtrip": "../c3-continuation-roundtrip-20261102.json",
+  "schemaInstanceComparisons": 4810,
+  "countsOverlap": true,
+  "commands": [
+    {
+      "id": "structural-red",
+      "command": [
+        "node",
+        "--test",
+        "apps/worker/evals/single-agent-commerce-read-only/continuation-structural.test.mjs"
+      ],
+      "exitCode": 1,
+      "log": "../c3-continuation-structural-red-corrected-20261102.log",
+      "pass": 10,
+      "fail": 3,
+      "phase": "BEFORE_IMPLEMENTATION"
+    },
+    {
+      "id": "adapter-green",
+      "command": [
+        "node",
+        "--test",
+        "apps/worker/evals/single-agent-commerce-read-only/continuation-structural.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs"
+      ],
+      "exitCode": 0,
+      "log": "../c3-continuation-adapter-green-20261102.log",
+      "pass": 90,
+      "sourceSha": "febfd28d42cb618f187a4a5aca71d8ebd9d71061"
+    },
+    {
+      "id": "presentation-regression",
+      "command": [
+        "node",
+        "--test",
+        "apps/worker/evals/single-agent-commerce-read-only/continuation-structural.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/native-presentation.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/owner-data-compact.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/compact-context-selection.test.mjs"
+      ],
+      "exitCode": 0,
+      "log": "../c3-continuation-presentation-green-20261102.log",
+      "pass": 23,
+      "note": "Final two-file delta before commit8eb, same file contents"
+    },
+    {
+      "id": "focused-final",
+      "command": [
+        "node",
+        "--test",
+        "apps/worker/evals/single-agent-commerce-read-only/continuation-structural.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/native-presentation.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/owner-data-compact.test.mjs",
+        "apps/worker/evals/single-agent-commerce-read-only/compact-context-selection.test.mjs"
+      ],
+      "exitCode": 0,
+      "log": "../c3-continuation-focused-final-20261102.log",
+      "pass": 98,
+      "sourceSha": "8eb074ef98e6a125ce7985ca992d26b50699f60e"
+    },
+    {
+      "id": "worker-focused",
+      "command": [
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=4",
+        "src/single-agent-commerce-callable.test.ts",
+        "src/single-agent-commerce-effects.test.ts",
+        "src/single-agent-commerce-state.test.ts",
+        "src/single-agent-commerce-ingress.test.ts",
+        "src/single-agent-semantic-verifier-boundary.test.ts",
+        "src/track-b-protected-claim-boundary.test.ts"
+      ],
+      "exitCode": 0,
+      "log": "../c3-continuation-worker-focused-20261102.log",
+      "pass": 348,
+      "sourceSha": "febfd28d42cb618f187a4a5aca71d8ebd9d71061",
+      "laterDelta": "Empty inventory projection plus native-test decoder only, no runtime/shared implementation change"
+    },
+    {
+      "id": "node-before-regression-fix",
+      "command": [
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "test:evals"
+      ],
+      "exitCode": 1,
+      "log": "../c3-continuation-full-node-20261102.log",
+      "pass": 805,
+      "fail": 3,
+      "skip": 2,
+      "sourceSha": "febfd28d42cb618f187a4a5aca71d8ebd9d71061"
+    },
+    {
+      "id": "node-final",
+      "command": [
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "test:evals"
+      ],
+      "exitCode": 0,
+      "log": "../c3-continuation-full-node-final-20261102.log",
+      "pass": 808,
+      "fail": 0,
+      "existingSkip": 2,
+      "sourceSha": "8eb074ef98e6a125ce7985ca992d26b50699f60e"
+    },
+    {
+      "id": "worker-build",
+      "command": [
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "build"
+      ],
+      "exitCode": 0,
+      "log": "../c3-continuation-worker-build-20261102.log",
+      "sourceSha": "8eb074ef98e6a125ce7985ca992d26b50699f60e"
+    },
+    {
+      "id": "worker-tsc",
+      "command": [
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "exec",
+        "tsc",
+        "-p",
+        "tsconfig.json",
+        "--noEmit"
+      ],
+      "exitCode": 0,
+      "log": "../c3-continuation-typecheck-20261102.log",
+      "sourceSha": "febfd28d42cb618f187a4a5aca71d8ebd9d71061"
+    },
+    {
+      "id": "worker-lint",
+      "command": [
+        "pnpm",
+        "--filter",
+        "@lana/worker",
+        "lint"
+      ],
+      "exitCode": 0,
+      "log": "../c3-continuation-lint-20261102.log",
+      "sourceSha": "febfd28d42cb618f187a4a5aca71d8ebd9d71061"
+    },
+    {
+      "id": "actual-committed-probe",
+      "command": [
+        "node",
+        "../c3-continuation-fixed-probe-20261102.mjs"
+      ],
+      "exitCode": 0,
+      "log": "../c3-continuation-final-probe-20261102.log",
+      "sourceSha": "8eb074ef98e6a125ce7985ca992d26b50699f60e"
+    },
+    {
+      "id": "actual-body-roundtrip",
+      "command": [
+        "node",
+        "../c3-continuation-roundtrip-20261102.mjs"
+      ],
+      "exitCode": 0,
+      "sourceSha": "8eb074ef98e6a125ce7985ca992d26b50699f60e",
+      "result": "../c3-continuation-roundtrip-20261102.json"
+    }
+  ],
+  "remaining": [
+    "393 byte observed headroom; not every theoretical continuation fits",
+    "P2a no existing trusted quote task producer; owner choice pending for bounded PRICE observation vs always-image opening replies",
+    "No new provider safety/quality/qualification result; no deployment/live send"
+  ],
+  "sourceFiles": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/continuation-structural.test.mjs",
+      "rawSha256": "642be8671a0a7da68d4401cc4f254c3b0fcdf5290cadf68e42c7fab5a535690e",
+      "gitBlob": "5c7caaa8d7f340c880ef626364490f9d1fbc19b6"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs",
+      "rawSha256": "6ca43c55ed700bcab8d74df97e8dd3502b7fbbe00483350b0600055d15cd0b9e",
+      "gitBlob": "5a4b23b7d4e0504adc491a4bed29dce1eb768b7d"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/native-presentation.test.mjs",
+      "rawSha256": "3e93821a8380aaa9c3795da48e3f51f52dc65b5d3e2ee6cd8bcf31e644cc7f80",
+      "gitBlob": "e04de839d8c53e2eb17e6e5cdf6c57be3829a266"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/owner-data-presentation.mjs",
+      "rawSha256": "6a7e74da123959a2e41c226041499fdfa2ab68e8eeda007172eaa1273d4b52e3",
+      "gitBlob": "a9caa8e0d26d0b016cb4d9471bb9e89b0d071cb6"
+    },
+    {
+      "path": "docs/specs/c3-phase-c-continuation-quote-fix-plan-20261102.md",
+      "rawSha256": "3efc03c209feea493dba92c470ed55a9af0f9e85fa509748df6250b7ada88c37",
+      "gitBlob": "cebe47ba0bba40b48c1163f2f6aabf7d7df98d89"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "../c3-continuation-adapter-green-20261102.log",
+      "sha256": "25c79e3bc16c8ddb3eec4f03c2bc23bcc32ae70b447fb9b9d99931371bd07077",
+      "bytes": 9497
+    },
+    {
+      "path": "../c3-continuation-body-only-20261102.json",
+      "sha256": "a6f61ce2e5bb15c059d71daf64b1dc182d70fb4ea4a81b016108b4a0838c4f40",
+      "bytes": 67613
+    },
+    {
+      "path": "../c3-continuation-body-only-20261102.mjs",
+      "sha256": "20d121b71a14d9c916cb0f7f0e43bc7b197a70ce06f32b304339acaedc5c2f4c",
+      "bytes": 48315
+    },
+    {
+      "path": "../c3-continuation-body-prepare-20261102.mjs",
+      "sha256": "51b3e73e2b0d2b18223bffb8b0ae8f00c8d60d632a5209c2b1a59302d2366c66",
+      "bytes": 1290
+    },
+    {
+      "path": "../c3-continuation-body-probe-20261102.json",
+      "sha256": "969646e5257f01c7dc05ee99bd0e2fe141aaddc73f19bfbe391c89836dd763c4",
+      "bytes": 2534
+    },
+    {
+      "path": "../c3-continuation-body-probe-20261102.log",
+      "sha256": "5d7b7eaae20567e7c7282d9e8b9d88654fa1103e10d2c460754d52b69ce30285",
+      "bytes": 2062
+    },
+    {
+      "path": "../c3-continuation-body-probe-20261102.mjs",
+      "sha256": "589c16c6b0fdda805a74dc4fab2ae87d6f61713c769a84fa4515fef2b60383ac",
+      "bytes": 10201
+    },
+    {
+      "path": "../c3-continuation-final-probe-20261102.log",
+      "sha256": "c0b88e204cad17cedf091d4dd4b35feb3618c321a9764c85b870197da77d5448",
+      "bytes": 2062
+    },
+    {
+      "path": "../c3-continuation-fixed-20261102.json",
+      "sha256": "6895ba3849ef592fb82c6f3236f8409aebd9fb77d93cc65e1323d70e4c9e7056",
+      "bytes": 2534
+    },
+    {
+      "path": "../c3-continuation-fixed-20261102.log",
+      "sha256": "e689e5b49993e4c955f31941959a56a4a910841d3c90725e0c9ff230d6a53ed8",
+      "bytes": 2062
+    },
+    {
+      "path": "../c3-continuation-fixed-body-20261102.json",
+      "sha256": "3fe26ca29e7b0efdfd778ded405cd78abdd5d15009a79116d669d254d9b38d91",
+      "bytes": 65143
+    },
+    {
+      "path": "../c3-continuation-fixed-prepare-20261102.py",
+      "sha256": "8f4b4a7c44db16fc0346813a0db34b36de17c6b42cf7c574ed065a49e250bb49",
+      "bytes": 576
+    },
+    {
+      "path": "../c3-continuation-fixed-probe-20261102.mjs",
+      "sha256": "eddcfa283fc9bcbf1fb21cc8f659ca296d6f06d9bcfab03ef39100d23996fa98",
+      "bytes": 10226
+    },
+    {
+      "path": "../c3-continuation-focused-final-20261102.log",
+      "sha256": "b37244e7c74d7f7accd48911f71f3660177801d5f822b3c3b4f61400ff569526",
+      "bytes": 10443
+    },
+    {
+      "path": "../c3-continuation-full-node-20261102.log",
+      "sha256": "edefe8ed9b9cbf1735df7254bea1b41386b89c1ea7862df46c03d47fce8a6307",
+      "bytes": 97675
+    },
+    {
+      "path": "../c3-continuation-full-node-final-20261102.log",
+      "sha256": "2aefe4bf5c1252ab662eed7b4ab963bcad2e6c273b4a7e6e1768279ea6b5f9ae",
+      "bytes": 89012
+    },
+    {
+      "path": "../c3-continuation-lint-20261102.log",
+      "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+      "bytes": 171
+    },
+    {
+      "path": "../c3-continuation-measure-only-20261102.json",
+      "sha256": "8b7e2ffc16c8c380425f5e49c48726e29c649f18ee1889ff629f3e3a05e67a86",
+      "bytes": 2434
+    },
+    {
+      "path": "../c3-continuation-measure-only-20261102.log",
+      "sha256": "25d3fb99ce46c5bf300b2674ccc461b383277a62b3f44535e90093e6d603526f",
+      "bytes": 1986
+    },
+    {
+      "path": "../c3-continuation-measure-only-20261102.mjs",
+      "sha256": "442d099f20e3c795b12b01397814b3608752f5138367b791a80373e8d9d2a9c2",
+      "bytes": 48587
+    },
+    {
+      "path": "../c3-continuation-measure-prepare-20261102.py",
+      "sha256": "e0a7c7aab29bde300a88075f3f72320752eef35f35aec6626eb6652112e0c329",
+      "bytes": 1213
+    },
+    {
+      "path": "../c3-continuation-measure-probe-20261102.mjs",
+      "sha256": "df589fab600d050fab9fe5e5b11856c6e6a122dd7f639a68a2ffeefbb7fab810",
+      "bytes": 10125
+    },
+    {
+      "path": "../c3-continuation-no-fact-ref-prototype-20261102.py",
+      "sha256": "7ba35acf1de68d6b5b4fd78c775a3cbe0406bed6f2f32cc71e0b771bd0b28acd",
+      "bytes": 1301
+    },
+    {
+      "path": "../c3-continuation-presentation-green-20261102.log",
+      "sha256": "6bc1326b97010b6a3c47924d69ce882fe1616c35a9eb21061e2c21ed5807a014",
+      "bytes": 2375
+    },
+    {
+      "path": "../c3-continuation-references-apply-20261102.py",
+      "sha256": "972dd67ddb9b5f71a8159c6334ac367399c70e3dd065db0dcca389780987d6b1",
+      "bytes": 4328
+    },
+    {
+      "path": "../c3-continuation-regression-fix-20261102.py",
+      "sha256": "ca532e37a64e249d0ec273ede6a34afbb27260af26e32622b25a9101970b3c96",
+      "bytes": 1340
+    },
+    {
+      "path": "../c3-continuation-roundtrip-20261102.json",
+      "sha256": "3ae69a69372ca38eb09ee550ebb21473dc0ab2cb0dde6003dab3941e1d017c39",
+      "bytes": 1259
+    },
+    {
+      "path": "../c3-continuation-roundtrip-20261102.mjs",
+      "sha256": "220f958fe7e3e75c025d1dec5aec386e3423d4ad008bb0f44d4e861e78dc8fe4",
+      "bytes": 2891
+    },
+    {
+      "path": "../c3-continuation-size-breakdown-20261102.py",
+      "sha256": "6ee21d8e18d6d217bf52d286011df264063eec99f53b1d07c562611e81e966c5",
+      "bytes": 734
+    },
+    {
+      "path": "../c3-continuation-structural-apply-20261102.py",
+      "sha256": "4bdcdb0c6a704d073ef1ae3040f7714ef1344eaaefd7edec5fa690024d0dcd64",
+      "bytes": 3143
+    },
+    {
+      "path": "../c3-continuation-structural-green-20261102.log",
+      "sha256": "c5f07bab2ed195a3e7af26af2a652ca53f6541f7ee42dc4894e4f7a03ef4cbc6",
+      "bytes": 1232
+    },
+    {
+      "path": "../c3-continuation-structural-prototype-20261102.json",
+      "sha256": "b6dfef716a30ef7291c8d1880d09d83d6637cf7e525bb8e9cae1e49060d16e32",
+      "bytes": 65111
+    },
+    {
+      "path": "../c3-continuation-structural-prototype-20261102.py",
+      "sha256": "e187d00fd751e1db953d8030171e91ba5fafd27c7e33c46a1068cce7359ef6e3",
+      "bytes": 1498
+    },
+    {
+      "path": "../c3-continuation-structural-red-20261102.log",
+      "sha256": "73e33be7dd138b643705482136969c628abee7a269c12605146dc3670cf50d65",
+      "bytes": 7595
+    },
+    {
+      "path": "../c3-continuation-structural-red-corrected-20261102.log",
+      "sha256": "0b2401249271d63b1617f881a1481e90650e84145d646b63ce902137ae7a1290",
+      "bytes": 5553
+    },
+    {
+      "path": "../c3-continuation-typecheck-20261102.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "../c3-continuation-verification-prepare-20261102.py",
+      "sha256": "1614d408b4423a5f8a0fe814cd7793e24d2395d6fa174658df83ebccf991076e",
+      "bytes": 5724
+    },
+    {
+      "path": "../c3-continuation-worker-build-20261102.log",
+      "sha256": "e9f4b68d46bbb2ad7ca65c63fefef389fe0c02c9b662c68abf6b49f291b397d8",
+      "bytes": 5249
+    },
+    {
+      "path": "../c3-continuation-worker-focused-20261102.log",
+      "sha256": "287cabe42ab290362a25d13516f6b38fbafcedb2e5114c17f33253397a40e6e3",
+      "bytes": 1120
+    }
+  ],
+  "independentReview": {
+    "reviewer": "/root/phase_c_task_completion_implementation_review",
+    "status": "APPROVE_IMPLEMENTATION_P1",
+    "sourceSha": "8eb074ef98e6a125ce7985ca992d26b50699f60e",
+    "artifactHashesVerified": 39,
+    "sourceHashesAndGitBlobsVerified": 5,
+    "independentTestsPassed": 17,
+    "p2a": "OWNER_CONTRACT_CHOICE_PENDING",
+    "modelRunAuthorized": false
+  }
+}

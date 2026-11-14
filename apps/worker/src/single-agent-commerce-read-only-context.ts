@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { canonicalJsonV1 } from "@lana/contracts";
 import type { RuntimePolicyBundle } from "@lana/chat-runtime";
 import type { RuntimeProductEvidence, TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
+import {expandSelectionOptions,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
 
 export const commerceHash = (value: unknown): string =>
   createHash("sha256").update(canonicalJsonV1(value), "utf8").digest("hex");
@@ -16,11 +17,15 @@ export function omitCurrentProductDuplicates(value: Record<string, unknown>, cur
     if (projected[key] !== undefined && current?.[key] !== undefined &&
       canonicalJsonV1(projected[key]) === canonicalJsonV1(current[key])) delete projected[key];
   }
+  if(projected.selectionEvidence&&current?.selectionEvidence?.some(e=>canonicalJsonV1(e)===canonicalJsonV1(projected.selectionEvidence))){
+    const e=projected.selectionEvidence as CandidateSelectionEvidence;delete projected.selectionEvidence;
+    if(canonicalJsonV1(projected.selectionOptions)===canonicalJsonV1(expandSelectionOptions(e)))delete projected.selectionOptions;
+  }
   return projected;
 }
 const stateFields = ["conversationOwner", "revision", "currentProductId", "consideredSize", "salesStage",
   "bindingVersion", "recipient", "permission", "privacyAllowed", "customerProfileId", "customerProfileRevision", "measurementFingerprint",
-  "customerMeasurements", "fitPreference", "preferences", "cartQuote", "cartItems", "checkoutStatus", "sizeMeasurementFingerprints", "conversationRevision", "customerStateUpdatePending"];
+  "customerMeasurements", "fitPreference", "preferences", "shoppingSelection", "pendingPurchase", "cartQuote", "cartItems", "checkoutStatus", "sizeMeasurementFingerprints", "sizeFitTargets", "conversationRevision", "customerStateUpdatePending"];
 
 /** The resolver already validates artifact hashes/lifecycle. This bridge owns scope and public projection. */
 export function publicPolicyLiteral(bundle: RuntimePolicyBundle, pageId: string, shopId: string, now: Date): TrustedContext["policyLiterals"][number] {
@@ -47,6 +52,10 @@ export function publicPolicyLiteral(bundle: RuntimePolicyBundle, pageId: string,
       shipping: { defaultFeeVnd: policy.shipping.defaultFeeVnd }, multiItemOffer: {
         minimumProductCount: policy.multiItemOffer.minimumProductCount, discountBps: policy.multiItemOffer.discountBps,
         countingUnit: policy.multiItemOffer.countingUnit, setAndComboCountAsOne: policy.multiItemOffer.setAndComboCountAsOne,
+        // Shared source meaning for both models, like tryOnModeDescription above: the flag alone was read as
+        // "a set qualifies". It states how units are counted, not whether a given order qualifies.
+        ...(policy.multiItemOffer.setAndComboCountAsOne ? { unitDescription:
+          `Mỗi set hoặc combo tính là 1 đơn vị dù gồm nhiều món. Đơn cần từ ${policy.multiItemOffer.minimumProductCount} đơn vị mới được giảm; một set hoặc một combo riêng lẻ là 1 đơn vị.` } : {}),
       } }),
   };
 }
@@ -60,8 +69,10 @@ export function buildReadOnlyContext(input: {
   policies?: TrustedContext["policyLiterals"];
   receipts?: TrustedContext["effectReceipts"];
   cartBinding?: TrustedContext["cartBinding"];
+  /** Effect composition only: offer variants whose claims were replaced by exact cart selections. */
+  supersededVariantRefs?: ReadonlySet<string>;
 }): TrustedContext {
-  const subjects = [...(input.subjects ?? [])].sort((a, b) => a.ref.localeCompare(b.ref));
+  let subjects = [...(input.subjects ?? [])].sort((a, b) => a.ref.localeCompare(b.ref));
   const products = [...(input.products ?? [])].sort((a, b) => a.ref.localeCompare(b.ref));
   const seen = new Set<string>();
   const claims = [...(input.claims ?? [])].filter(c => { const serialized = canonicalJsonV1(c);
@@ -69,6 +80,16 @@ export function buildReadOnlyContext(input: {
   }).sort((a, b) => canonicalJsonV1(a).localeCompare(canonicalJsonV1(b)));
   const policies = [...(input.policies ?? [])].sort((a, b) => a.ref.localeCompare(b.ref));
   const state = Object.fromEntries(stateFields.filter(k => Object.hasOwn(input.state, k)).map(k => [k, input.state[k]]));
+  if (input.supersededVariantRefs?.size) {
+    // Only remove an explicitly superseded variant with no remaining typed dependency.
+    // Literal text is kept conservatively if it mentions the ref; never interpret prose.
+    const references = (value: unknown, ref: string): boolean => typeof value === "string" ? value === ref :
+      Array.isArray(value) ? value.some(v => references(v, ref)) : value !== null && typeof value === "object" && Object.values(value).some(v => references(v, ref));
+    const dependencies = { products, claims, state, receipts: input.receipts, cart: input.cartBinding };
+    subjects = subjects.filter(s => s.kind !== "VARIANT" || !input.supersededVariantRefs!.has(s.ref) ||
+      references(dependencies,s.ref) || policies.some(p => p.text.includes(s.ref)) ||
+      subjects.some(other => other.ref !== s.ref && references(other,s.ref)));
+  }
   state.factSnapshotVersion = commerceHash({ subjects, products, claims, policies, cart: input.cartBinding ?? null });
   const context = { boundSubjects: subjects, protectedClaims: claims, runtimeProducts: products,
     policyLiterals: policies, effectReceipts: input.receipts ?? [], state,

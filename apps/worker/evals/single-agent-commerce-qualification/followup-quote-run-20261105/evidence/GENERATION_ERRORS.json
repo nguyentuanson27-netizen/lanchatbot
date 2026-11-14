@@ -1,0 +1,106 @@
+[
+  {
+    "group": "r2",
+    "caseId": "c-po-20261031-p04",
+    "turnIndex": 0,
+    "generationId": "91a463a1-f46c-479b-90e5-aa816c0b9788:owner:1",
+    "role": "OWNER",
+    "status": "MALFORMED",
+    "providerRequests": 1,
+    "errorCode": "PROVIDER_ERROR",
+    "telemetry": {
+      "rawFinishReason": "MALFORMED_FUNCTION_CALL",
+      "failureStage": "COMPLETION",
+      "failureCode": "OWNER_FINISH_REASON",
+      "requestBudget": {
+        "textFrameBytes": 49191,
+        "systemBytes": 21996,
+        "toolSchemaBytes": 19608,
+        "trustedFrameBytes": 7194,
+        "dialogueBytes": 133,
+        "textLimitBytes": 65536,
+        "presentedTextFrameBytes": 49368,
+        "basePresentedFrameBytes": 49368,
+        "inlineImageBytes": 0,
+        "frameLimitBytes": 65536
+      },
+      "requestSchemaHash": "4920784974a12abee1b868a88db4075cf9393f8c3208b6a74b35685d7a129ad0"
+    }
+  },
+  {
+    "group": "r2",
+    "caseId": "c-po-20261031-p09",
+    "turnIndex": 1,
+    "generationId": "a1da73dd-39dc-49da-a7cf-0d364b82de9e:owner:2",
+    "role": "OWNER",
+    "status": "PROVIDER_ERROR",
+    "providerRequests": 0,
+    "errorCode": "OWNER_REQUEST_BOUND",
+    "telemetry": {
+      "rawFinishReason": null,
+      "failureStage": "BUILD",
+      "failureCode": "OWNER_REQUEST_BOUND",
+      "requestBudget": {
+        "textFrameBytes": 66579,
+        "systemBytes": 21996,
+        "toolSchemaBytes": 19619,
+        "trustedFrameBytes": 10733,
+        "dialogueBytes": 13971,
+        "textLimitBytes": 65536
+      },
+      "requestSchemaHash": null
+    }
+  },
+  {
+    "group": "r2",
+    "caseId": "c-20261028-s15",
+    "turnIndex": 0,
+    "generationId": "4b90bade-2ac1-47ea-9286-99448c6fb1f4:owner:2",
+    "role": "OWNER",
+    "status": "PROVIDER_ERROR",
+    "providerRequests": 0,
+    "errorCode": "OWNER_REQUEST_BOUND",
+    "telemetry": {
+      "rawFinishReason": null,
+      "failureStage": "BUILD",
+      "failureCode": "OWNER_REQUEST_BOUND",
+      "requestBudget": {
+        "textFrameBytes": 66088,
+        "systemBytes": 21996,
+        "toolSchemaBytes": 19608,
+        "trustedFrameBytes": 6712,
+        "dialogueBytes": 17512,
+        "textLimitBytes": 65536
+      },
+      "requestSchemaHash": null
+    }
+  },
+  {
+    "group": "r2",
+    "caseId": "c-20261028-j4",
+    "turnIndex": 0,
+    "generationId": "b8471500-a214-4b3f-a272-6d0f6ba3a82d:owner:1",
+    "role": "OWNER",
+    "status": "MALFORMED",
+    "providerRequests": 1,
+    "errorCode": "PROVIDER_ERROR",
+    "telemetry": {
+      "rawFinishReason": "MALFORMED_FUNCTION_CALL",
+      "failureStage": "COMPLETION",
+      "failureCode": "OWNER_FINISH_REASON",
+      "requestBudget": {
+        "textFrameBytes": 49151,
+        "systemBytes": 21996,
+        "toolSchemaBytes": 19608,
+        "trustedFrameBytes": 7194,
+        "dialogueBytes": 93,
+        "textLimitBytes": 65536,
+        "presentedTextFrameBytes": 49328,
+        "basePresentedFrameBytes": 49328,
+        "inlineImageBytes": 0,
+        "frameLimitBytes": 65536
+      },
+      "requestSchemaHash": "4920784974a12abee1b868a88db4075cf9393f8c3208b6a74b35685d7a129ad0"
+    }
+  }
+]

@@ -1,0 +1,32 @@
+{
+  "reviewer": "/root",
+  "kind": "AUTHOR_INPUT_REVIEW",
+  "native": {
+    "status": "APPROVE",
+    "kind": "AUTHOR_INPUT_REVIEW",
+    "reviewer": "/root",
+    "evidenceRef": "c3-convergence-model-seal-20261111-01.mjs",
+    "sourceSha": "22fc581a3b32428dcf6c7d65cca3195bbf43b327",
+    "worldHash": "7d342091387df57808a32ffd6f23303cf337ea36cc18644f179e6e30fd959e2e",
+    "pendingRegistrationHash": "669b7e826733f744bf1cc01c66df02e70d096f167c92e530cb811edf681ec4b0",
+    "newProviderResultsObserved": 0,
+    "checks": [
+      "EXACT_PREVIOUS_CUSTOMER_SCRIPTS",
+      "65_UNIQUE_SLOTS",
+      "5_REPETITIONS_PER_CASE",
+      "CURRENT_CANDIDATE_AND_OWNER_DECISIONS",
+      "SOURCE_READINESS",
+      "RUNTIME_EVALUATOR_PROJECTION"
+    ],
+    "clockPolicy": "ACTUAL_WALL_CLOCK_CURRENT_SOURCE_READBACK",
+    "limitation": "Fresh capture frozen for all repetitions. Source freshness is checked on actual wall clock. No pinned-clock baseline comparison."
+  },
+  "safety": {
+    "status": "APPROVED",
+    "reviewer": "/root",
+    "kind": "AUTHOR_INPUT_REVIEW",
+    "newProviderResultsObserved": 0
+  },
+  "sourceLabelCorrection": "SOURCE_LABEL_CORRECTION.json",
+  "independentOutcomeReview": "NOT_REQUESTED_THIS_RUN"
+}

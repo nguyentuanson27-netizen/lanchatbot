@@ -1,0 +1,47 @@
+{
+  "implementationBaseSha": "4530be07cc442333138c432b3a8ae7b4a8503509",
+  "reviewedExecutableSha": "94911899adaaceef5b314518a4d6bb237d8f2208",
+  "sourceDirty": false,
+  "files": [
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/gemini-inference.mjs",
+      "sha256": "a7b6accd833fdce6b1bc8bf4ca921ce02c63308b5fe2bca14dc0bcdf7d0d860c",
+      "gitBlobSha256": "a7b6accd833fdce6b1bc8bf4ca921ce02c63308b5fe2bca14dc0bcdf7d0d860c"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "sha256": "b6962bea969c463a756e3ec541b644193f26fc28e13e1dd9cb4451b5af050421",
+      "gitBlobSha256": "b6962bea969c463a756e3ec541b644193f26fc28e13e1dd9cb4451b5af050421"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/manifest.json",
+      "sha256": "18cfe88ceef0de70cff9e18e711ff033903e29e17aac34e762a231266da1db59",
+      "gitBlobSha256": "18cfe88ceef0de70cff9e18e711ff033903e29e17aac34e762a231266da1db59"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt",
+      "sha256": "a3e486eb540becdf64149c4450b66bc32cee141c36a15e320267b4e88b323c9d",
+      "gitBlobSha256": "a3e486eb540becdf64149c4450b66bc32cee141c36a15e320267b4e88b323c9d"
+    },
+    {
+      "path": "apps/worker/evals/single-agent-commerce-read-only/quote-task.test.mjs",
+      "sha256": "e29904be5d4d3039ed3039a448d1bf34785d256d8dcbc8c97e42787148630f3d",
+      "gitBlobSha256": "e29904be5d4d3039ed3039a448d1bf34785d256d8dcbc8c97e42787148630f3d"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-ingress.test.ts",
+      "sha256": "52a1a6eef82be9db11ed4652c2f21454d00be2c66aaabf80d7955321f06b45ef",
+      "gitBlobSha256": "52a1a6eef82be9db11ed4652c2f21454d00be2c66aaabf80d7955321f06b45ef"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-quote.test.ts",
+      "sha256": "a3b12ac0ab18b4c819ffb6a97760900d4e0bdd84e50da27c52786797ebc3423e",
+      "gitBlobSha256": "a3b12ac0ab18b4c819ffb6a97760900d4e0bdd84e50da27c52786797ebc3423e"
+    },
+    {
+      "path": "apps/worker/src/single-agent-commerce-quote.ts",
+      "sha256": "83c2ebd324993a096561f564ba519c786560667491c63b5ef33eb47ec873817a",
+      "gitBlobSha256": "83c2ebd324993a096561f564ba519c786560667491c63b5ef33eb47ec873817a"
+    }
+  ]
+}

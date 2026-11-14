@@ -1,10 +1,10 @@
-import { BodyMeasurementV1Schema, CustomerProfileV1Schema, type MeasurementKind } from "@lana/contracts";
+import { BodyMeasurementV1Schema, CustomerProfileV1Schema, SizeFitTargetV1Schema,sizeFitTargetKey,sameSizeFitTarget,type SizeFitTargetV1,type ProductComponentRole, type MeasurementKind } from "@lana/contracts";
 import { buildProtectedClaimsFromVerifiedFactsV1, createVerifiedSizeRecommendationClaim, mergeCustomerProfile,
   recommendSize, type CustomerProfileMergeState, type CustomerProfilePatch, type SizeEngineInput,
-  evaluateShopPolicy, type ShopPolicyEvaluationInput } from "@lana/business-tools";
+  evaluateShopPolicy,selectVerifiedSizeChart, type ShopPolicyEvaluationInput } from "@lana/business-tools";
 import { buildReadOnlyContext, commerceHash } from "./single-agent-commerce-read-only-context.js";
 import { toolArgs, type CommerceScope, type CommerceToolCall, type CommerceToolResult } from "./single-agent-commerce-read-only-tools.js";
-import type { CommerceTools } from "./single-agent-commerce-read-only.js";
+import { PENDING_PURCHASE_MAX_AGE_MS, type CommerceTools, type PendingPurchaseLine } from "./single-agent-commerce-read-only.js";
 import type { TrustedContext } from "./single-agent-semantic-verifier-boundary.js";
 import type { PostgresRealtimeRuntimeStore, RealtimeInboxBatchGuard } from "@lana/database";
 import { createHash } from "node:crypto";
@@ -47,6 +47,35 @@ const measurementReasons: Record<string, string> = {
   MEASUREMENT_VALUE: "VALUE_DOES_NOT_MATCH_QUOTE",
 };
 export interface CustomerStateSourceMessage { text: string; sourceMessageId: string; observedAt: string }
+/** Structured argument validation only; never interprets a customer's wording. */
+export function sizeRequestScope(a:{fitScope?:unknown;componentRole?:unknown}):"PRODUCT"|"COMPONENT"|null {
+  const scope=a.fitScope===undefined?"PRODUCT":a.fitScope;
+  if(scope==="PRODUCT")return a.componentRole===undefined?"PRODUCT":null;
+  return scope==="COMPONENT"&&["TOP","PANTS","SKIRT","DRESS","OTHER"].includes(a.componentRole as string)?"COMPONENT":null;
+}
+/** Numeric copy validation only. Never establishes a source or semantic field meaning. */
+function validateMeasurementCopy(text: string, index: number, quote: string, kind: MeasurementKind, value: unknown) {
+  const numbers = [...quote.matchAll(/[+-]?\d+(?:[.,]\d+)?/gu)];
+  if (!numbers.length) throw new Error("MEASUREMENT_SCALAR");
+  const first = index + numbers[0]!.index!, last = numbers.at(-1)!, lastEnd = index + last.index! + last[0].length;
+  if (/[\d+-]/u.test(text[first - 1] ?? "") || /\d/u.test(text[lastEnd] ?? "") ||
+    (/[.,]/u.test(text[first - 1] ?? "") && /\d/u.test(text[first - 2] ?? "")) ||
+    (/[.,]/u.test(text[lastEnd] ?? "") && /\d/u.test(text[lastEnd + 1] ?? ""))) throw new Error("MEASUREMENT_TOKEN");
+  const compact = quote.match(/([12])\s*m\s*(\d{1,2})(?!\d)/iu);
+  let scalar: number;
+  if (kind === "HEIGHT_CM" && numbers.length === 2 && compact && compact.index === numbers[0]!.index &&
+    compact.index! + compact[0].length === numbers[1]!.index! + numbers[1]![0].length) {
+    scalar = Number(compact[1]) * 100 + Number(compact[2]!.padEnd(2, "0"));
+  } else {
+    if (numbers.length !== 1) throw new Error("MEASUREMENT_SCALAR");
+    const number = numbers[0]!, start = index + number.index!, end = start + number[0].length;
+    const unit = text.slice(end).match(/^\s*(cm|kg|m)(?![\p{L}\p{N}])/iu)?.[1]?.toLowerCase();
+    scalar = Number(number[0].replace(",", "."));
+    if (unit === "m" && kind === "HEIGHT_CM") scalar *= 100;
+    else if ((unit === "kg" && kind !== "WEIGHT_KG") || (unit === "cm" && kind === "WEIGHT_KG") || unit === "m") throw new Error("MEASUREMENT_UNIT");
+  }
+  if (scalar !== value) throw new Error("MEASUREMENT_VALUE");
+}
 /** Numeric copy check only; the owner still interprets field, referent and correction meaning. */
 function measurementSource(sources: readonly CustomerStateSourceMessage[], quote: unknown, kind: MeasurementKind,
   value: unknown, scope: CommerceScope, now: Date) {
@@ -58,26 +87,7 @@ function measurementSource(sources: readonly CustomerStateSourceMessage[], quote
   if (!matches.length) throw new Error("MEASUREMENT_QUOTE_NOT_FOUND");
   if (matches.length !== 1) throw new Error("MEASUREMENT_QUOTE_AMBIGUOUS");
   const { source, index } = matches[0]!;
-  const numbers = [...quote.matchAll(/[+-]?\d+(?:[.,]\d+)?/gu)];
-  if (!numbers.length) throw new Error("MEASUREMENT_SCALAR");
-  const first = index + numbers[0]!.index!, last = numbers.at(-1)!, lastEnd = index + last.index! + last[0].length;
-  if (/[\d+-]/u.test(source.text[first - 1] ?? "") || /\d/u.test(source.text[lastEnd] ?? "") ||
-    (/[.,]/u.test(source.text[first - 1] ?? "") && /\d/u.test(source.text[first - 2] ?? "")) ||
-    (/[.,]/u.test(source.text[lastEnd] ?? "") && /\d/u.test(source.text[lastEnd + 1] ?? ""))) throw new Error("MEASUREMENT_TOKEN");
-  const compact = quote.match(/([12])\s*m\s*(\d{1,2})(?!\d)/iu);
-  let scalar: number;
-  if (kind === "HEIGHT_CM" && numbers.length === 2 && compact && compact.index === numbers[0]!.index &&
-    compact.index! + compact[0].length === numbers[1]!.index! + numbers[1]![0].length) {
-    scalar = Number(compact[1]) * 100 + Number(compact[2]!.padEnd(2, "0"));
-  } else {
-    if (numbers.length !== 1) throw new Error("MEASUREMENT_SCALAR");
-    const number = numbers[0]!, start = index + number.index!, end = start + number[0].length;
-    const unit = source.text.slice(end).match(/^\s*(cm|kg|m)(?![\p{L}\p{N}])/iu)?.[1]?.toLowerCase();
-    scalar = Number(number[0].replace(",", "."));
-    if (unit === "m" && kind === "HEIGHT_CM") scalar *= 100;
-    else if ((unit === "kg" && kind !== "WEIGHT_KG") || (unit === "cm" && kind === "WEIGHT_KG") || unit === "m") throw new Error("MEASUREMENT_UNIT");
-  }
-  if (scalar !== value) throw new Error("MEASUREMENT_VALUE");
+  validateMeasurementCopy(source.text, index, quote, kind, value);
   if (!source.sourceMessageId || !Number.isFinite(Date.parse(source.observedAt)) ||
     Date.parse(source.observedAt) > now.getTime()) throw new Error("MEASUREMENT_SOURCE");
   return { source: "CUSTOMER_MESSAGE" as const, sourceEventHash: commerceHash({ pageId: scope.pageId,
@@ -87,58 +97,186 @@ function measurementSource(sources: readonly CustomerStateSourceMessage[], quote
 export async function createCustomerStateTools(input: {
   base: CommerceTools; scope: CommerceScope; store: CustomerStatePort; clock: () => Date;
   sizeInput: (subjectRef: string) => Promise<Omit<SizeEngineInput, "profile" | "generatedAt">>;
+  /** Trusted source port resolves BOM identity and chart applicability independently of claims/model fields. */
+  componentSizeInput?:(request:{parentProductId:string;componentRole:ProductComponentRole})=>Promise<
+    Omit<SizeEngineInput,"profile"|"generatedAt">&{fitTarget:Extract<SizeFitTargetV1,{kind:"COMPONENT"}>;sourceBindingHash:string;sourceExpiresAt:string}>;
   quoteInput?: () => Promise<ShopPolicyEvaluationInput>;
   sourceMessages?: readonly CustomerStateSourceMessage[];
+  /** Code-only hash of the complete verified current ingress batch and scope.
+   * An owner tool argument, shop history or numeric helper cannot grant this proof. */
+  verifiedCurrentSourceHash?: string;
+  /** Candidate opt-in. Persist only requested targets, never a verdict or fit claim. */
+  retainAdvice?:boolean;
 }): Promise<CommerceTools> {
   let effective = await input.store.read(), blockedDependencies = false;
   let commitUnconfirmed = false;
   const invalidateCommit = () => { commitUnconfirmed = true; blockedDependencies = true; committedUpdate = undefined; sizes.clear(); cartQuote = undefined; quoteRead = false; };
   const pendingFields = new Set<string>();
-  const blocked = () => blockedDependencies || pendingFields.size > 0;
+  // Request-local and profile-wide, shared by standalone, inline and batch writes.
+  // null means a current/unknown invalid correction, not an accepted value.
+  const pendingCorrections = new Map<string, string | null>();
+  const pendingOperations = new Map<string, "CLEAR" | "WRITE">();
+  let rejectedReusePending = false, stateConflict = false;
+  const blocked = () => blockedDependencies || stateConflict || rejectedReusePending || pendingFields.size > 0;
+  function nonCurrentReuse(op: Record<string, unknown>, current: CustomerProfileMergeState): boolean {
+    const sources = input.sourceMessages ?? [], now = input.clock().getTime();
+    if (!input.verifiedCurrentSourceHash || !sources.length || typeof op.sourceQuote !== "string" ||
+      !op.sourceQuote.trim() || op.sourceQuote.length > 160 || !["SET", "REPLACE"].includes(String(op.op)) ||
+      current.profile.customerKey.digest !== input.scope.customerHash ||
+      input.verifiedCurrentSourceHash !== commerceHash({pageId:input.scope.pageId,conversationId:input.scope.conversationId,
+        customerHash:input.scope.customerHash,requestId:input.scope.requestId,sourceMessages:sources}) ||
+      new Set(sources.map(s=>s.sourceMessageId)).size !== sources.length ||
+      !sources.some(s=>s.sourceMessageId === input.scope.sourceMessageId && s.observedAt === input.scope.sourceObservedAt) ||
+      sources.some(s=>!s.sourceMessageId || !Number.isFinite(Date.parse(s.observedAt)) || Date.parse(s.observedAt)>now || s.text.includes(op.sourceQuote as string))) return false;
+    const kind = String(op.field).slice("measurements.".length) as MeasurementKind;
+    const old = current.profile.measurements.find(m=>m.kind===kind);
+    if (!old || old.value !== op.value || !["CUSTOMER_MESSAGE","HUMAN_CONFIRMED"].includes(old.provenance.source) ||
+      old.provenance.confidence !== 1 || !/^[a-f0-9]{64}$/.test(old.provenance.sourceEventHash ?? "") ||
+      !Number.isFinite(Date.parse(old.provenance.observedAt)) ||
+      sources.some(s=>old.provenance.sourceEventHash === commerceHash({pageId:input.scope.pageId,
+        conversationId:input.scope.conversationId,sourceMessageId:s.sourceMessageId}) || Date.parse(old.provenance.observedAt)>=Date.parse(s.observedAt)) ||
+      (current.fieldEvidence[String(op.field)] && commerceHash(current.fieldEvidence[String(op.field)])!==commerceHash(old.provenance))) return false;
+    try { validateMeasurementCopy(op.sourceQuote,0,op.sourceQuote,kind,op.value); return BodyMeasurementV1Schema.safeParse(old).success; }
+    catch { return false; }
+  }
   let sizeOutcome: { status: string } | null = null;
-  const sizes = new Map<string, { claims: readonly unknown[]; fingerprint: string | undefined; profileHash: string; sourceHash: string }>();
+  const sizes = new Map<string, { claims: readonly unknown[]; fingerprint: string | undefined; profileHash: string; sourceHash: string;
+    fitTarget:SizeFitTargetV1;sourceExpiresAt:string|null;request:{parentProductId:string;componentRole:ProductComponentRole}|null }>();
   let cartQuote: unknown;
   let quoteRead = false;
   let committedUpdate: { hash: string; receipt: TrustedContext["effectReceipts"][number] } | undefined;
+  let rehydrationTarget:SizeFitTargetV1|undefined;
+  // Size requests the owner made in this turn that could not be evaluated because the customer inputs they
+  // depended on were not yet written. A later successful write evaluates them in code, so the turn does not
+  // end with a corrected profile and no size result. Request-local; never persisted.
+  const owedSizeRequests=new Map<string,{subjectRef:string;fitScope?:"COMPONENT";componentRole?:ProductComponentRole}>();
+  const oweSize=(a:Record<string,unknown>)=>{
+    if(rehydrationTarget||typeof a.subjectRef!=="string"||!sizeRequestScope(a))return;
+    const request=sizeRequestScope(a)==="COMPONENT"?{subjectRef:a.subjectRef,fitScope:"COMPONENT" as const,componentRole:a.componentRole as ProductComponentRole}:{subjectRef:a.subjectRef};
+    const key=commerceHash(request);
+    if(owedSizeRequests.has(key)||owedSizeRequests.size<4)owedSizeRequests.set(key,request);
+  };
   const profileHash = () => commerceHash(effective.profile);
+  const validateComponent=(s:Awaited<ReturnType<NonNullable<typeof input.componentSizeInput>>>,request:{parentProductId:string;componentRole:ProductComponentRole})=>{
+    const t=SizeFitTargetV1Schema.parse(s.fitTarget);
+    if(t.kind!=="COMPONENT"||t.parentProductId!==request.parentProductId||t.componentRole!==request.componentRole||
+      s.target.parentProductId!==t.parentProductId||s.target.componentProductId!==t.componentProductId||s.target.componentRole!==t.componentRole||
+      !/^[a-f0-9]{64}$/.test(s.sourceBindingHash)||!Number.isFinite(Date.parse(s.sourceExpiresAt))||Date.parse(s.sourceExpiresAt)<=input.clock().getTime()||
+      !selectVerifiedSizeChart(s.charts,s.target))throw Error("COMPONENT_SOURCE_UNAVAILABLE");
+  };
+  async function rememberTargets(targets:SizeFitTargetV1[]){
+    if(!input.retainAdvice)return;
+    const prior=effective,nextTargets=[...(prior.profile.sizeAdviceTargets??[])].filter(t=>snapshot().boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===(t.kind==="PRODUCT"?t.productId:t.parentProductId)));
+    for(const t of targets)if(!nextTargets.some(v=>sameSizeFitTarget(v,t)))nextTargets.push(t);
+    if(commerceHash(nextTargets)===commerceHash(prior.profile.sizeAdviceTargets??[]))return;
+    if(nextTargets.length>4)throw Error("SIZE_TARGET_BOUND");
+    const next={...prior,profile:CustomerProfileV1Schema.parse({...prior.profile,sizeAdviceTargets:nextTargets,
+      revision:prior.profile.revision+1,updatedAt:input.clock().toISOString()})};
+    const retainedReceipt=committedUpdate?.hash===commerceHash(prior)?committedUpdate:undefined;
+    try{
+      if(!await input.store.compareAndSwap(prior.profile.revision,next))throw Error("STATE_CONFLICT");
+      const current=await input.store.read();if(commerceHash(current)!==commerceHash(next))throw Error("STATE_READBACK_CHANGED");
+      effective=current;sizes.clear();
+      // Only advice metadata changed. The actual numeric update receipt remains
+      // immutable and still describes the same committed measurement fields.
+      committedUpdate=retainedReceipt?{hash:commerceHash(current),receipt:retainedReceipt.receipt}:undefined;
+    }catch{invalidateCommit();throw Error("STATE_COMMIT_UNCONFIRMED");}
+  }
+  /** Only lines whose product is bound in this turn, and only while the note is recent. */
+  const pendingPurchaseView=(base:TrustedContext)=>{
+    const pending=effective.profile.pendingPurchase,age=pending?input.clock().getTime()-Date.parse(pending.recordedAt):NaN;
+    if(!pending||!(age>=0&&age<=PENDING_PURCHASE_MAX_AGE_MS))return null;
+    const lines=pending.lines.filter(l=>base.boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===l.productId));
+    return lines.length?{lines,recordedAt:pending.recordedAt}:null;
+  };
+  async function setPendingPurchase(lines:readonly PendingPurchaseLine[]|null):Promise<void>{
+    try{
+      if(commitUnconfirmed||stateConflict)return;
+      const prior=effective,wanted=lines?.length?lines.slice(0,4).map(l=>({productId:l.productId,offerType:l.offerType,size:l.size,color:l.color,quantity:l.quantity,missing:l.missing})):null;
+      if(commerceHash(prior.profile.pendingPurchase?.lines??null)===commerceHash(wanted))return;
+      const {pendingPurchase:_previous,...rest}=prior.profile,at=input.clock().toISOString();
+      const parsed=CustomerProfileV1Schema.safeParse({...rest,...(wanted?{pendingPurchase:{lines:wanted,recordedAt:at}}:{}),
+        revision:prior.profile.revision+1,updatedAt:at>prior.profile.updatedAt?at:prior.profile.updatedAt});
+      if(!parsed.success)return;
+      const next={...prior,profile:parsed.data};
+      const retainedReceipt=committedUpdate?.hash===commerceHash(prior)?committedUpdate:undefined;
+      const previousFits=[...sizes.values()].map(s=>s.fitTarget);
+      let written:boolean;
+      try{written=await input.store.compareAndSwap(prior.profile.revision,next);}catch{invalidateCommit();return;}
+      // A refused swap wrote nothing; the note is simply not kept and the final readback sees the store as it is.
+      if(!written)return;
+      try{
+        const current=await input.store.read();if(commerceHash(current)!==commerceHash(next))throw Error("STATE_READBACK_CHANGED");
+        effective=current;sizes.clear();committedUpdate=retainedReceipt?{hash:commerceHash(current),receipt:retainedReceipt.receipt}:undefined;
+        for(const t of previousFits)await refreshAdvice(t);
+      }catch{invalidateCommit();}
+    }catch{/* best effort */}
+  }
   const snapshot = (): TrustedContext => {
     const base = input.base.snapshot();
     const valid = [...sizes.entries()].filter(([, s]) => !blocked() && s.profileHash === profileHash());
     const update = !blocked() && committedUpdate?.hash === commerceHash(effective) ? committedUpdate.receipt : undefined;
     return buildReadOnlyContext({ ...base, state: { ...base.state,
+      ...(effective.profile.shoppingSelection&&base.boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===effective.profile.shoppingSelection!.productId)?{
+        currentProductId:effective.profile.shoppingSelection.productId,shoppingSelection:effective.profile.shoppingSelection}:{}),
+      ...(pendingPurchaseView(base)?{pendingPurchase:pendingPurchaseView(base)}:{}),
       customerProfileId: effective.profile.profileId, customerProfileRevision: effective.profile.revision,
       customerMeasurements: effective.profile.measurements.map(m => ({ kind: m.kind, value: m.value })),
       fitPreference: effective.profile.fitPreference, preferences: effective.profile.preferences,
       ...(blocked() ? { customerStateUpdatePending: true } : {}),
       sizeMeasurementFingerprints: Object.fromEntries(valid.filter(([, s]) => s.fingerprint).map(([id, s]) => [id, s.fingerprint])),
+      sizeFitTargets:Object.fromEntries(valid.filter(([,s])=>s.claims.length===1).map(([id,s])=>[id,{target:s.fitTarget,sourceHash:s.sourceHash,
+        claimId:(s.claims[0] as {claimId:string}).claimId,claimHash:commerceHash(s.claims[0])}])),
       ...(!blocked() && cartQuote ? { cartQuote } : {}) },
       subjects: [...base.boundSubjects, ...(update ? [{ ref: effective.profile.profileId, kind: "CUSTOMER_PROFILE", label: `Thông tin tư vấn, phiên bản ${effective.profile.revision}`, bindingVersion: base.state.bindingVersion }] : [])], products: base.runtimeProducts ?? [], policies: base.policyLiterals,
       receipts: [...base.effectReceipts, ...(update ? [{ ...update, stateRevision: base.state.revision }] : [])], claims: [...base.protectedClaims.filter(c => (c as { type: string }).type !== "SIZE_FIT"), ...valid.flatMap(([, s]) => s.claims)] });
   };
   async function apply(args: unknown): Promise<CommerceToolResult> {
     if (commitUnconfirmed) return { status: "REJECTED", reason: "STATE_COMMIT_UNCONFIRMED" };
+    if (stateConflict) return { status:"REJECTED", reason:"STATE_CONFLICT" };
     const a = toolArgs(args, ["ops"]);
+    const priorPending = new Set(pendingFields);
+    for (const raw of a && Array.isArray(a.ops) && a.ops.length ? a.ops : [null]) {
+      const field = raw && typeof raw === "object" && typeof raw.field === "string" ? raw.field : "*";
+      pendingFields.add(field);
+      if (!pendingCorrections.has(field)) pendingCorrections.set(field, null);
+      if (!pendingOperations.has(field) && raw && typeof raw === "object")
+        pendingOperations.set(field, raw.op === "CLEAR" ? "CLEAR" : "WRITE");
+    }
     if (!a || !Array.isArray(a.ops) || !a.ops.length || a.ops.length > 8) return { status: "REJECTED", reason: "STATE_ARGUMENTS" };
     const observedAt = input.scope.sourceObservedAt;
     if (!observedAt || !Number.isFinite(Date.parse(observedAt)) || Date.parse(observedAt) > input.clock().getTime()) return { status: "REJECTED", reason: "SOURCE_TIME" };
     let current: CustomerProfileMergeState;
     try { current = await input.store.read(); } catch { return {status:"UNAVAILABLE",reason:"STATE_SOURCE_UNAVAILABLE"}; }
-    if (commerceHash(current) !== commerceHash(effective)) { blockedDependencies = true; return { status: "REJECTED", reason: "STATE_CONFLICT" }; }
+    if (commerceHash(current) !== commerceHash(effective)) { stateConflict = true; blockedDependencies = true; return { status: "REJECTED", reason: "STATE_CONFLICT" }; }
     const evidence = { source: "CUSTOMER_MESSAGE" as const, sourceEventHash: commerceHash({ pageId: input.scope.pageId,
       conversationId: input.scope.conversationId, sourceMessageId: input.scope.sourceMessageId }), observedAt, confidence: 1 };
     const patch: CustomerProfilePatch = { profileId: current.profile.profileId, expectedRevision: current.profile.revision };
     const measurements = [], clears: MeasurementKind[] = [], absentClears: MeasurementKind[] = [], fields = new Set<string>();
     const fieldErrors: { field: string; reason: string; allowedValues?: readonly string[]; hint?: string }[] = [];
+    const stage = (field: string, value: unknown, source: unknown, operation: unknown) => {
+      const proof = commerceHash({value,source,operation:operation === "CLEAR" ? "CLEAR" : "WRITE"});
+      const prior = pendingCorrections.get(field);
+      if (prior && prior !== proof) {
+        pendingFields.add("*"); pendingCorrections.set("*",null);
+        fieldErrors.push({field,reason:"CONFLICTING_CURRENT_CORRECTION"});
+      } else pendingCorrections.set(field,proof);
+    };
     for (const raw of a.ops) {
       const op = toolArgs(raw, ["op", "field", "value", "sourceQuote"]);
       if (!op || !["SET", "REPLACE", "CLEAR"].includes(String(op.op)) || typeof op.field !== "string" ||
         fields.has(op.field) || (op.op === "CLEAR" && Object.hasOwn(op, "value"))) throw new Error("STATE_OPERATION");
       fields.add(op.field);
+      if (pendingOperations.get(op.field) !== (op.op === "CLEAR" ? "CLEAR" : "WRITE")) {
+        fieldErrors.push({field:op.field,reason:"CORRECTION_OPERATION_CHANGED"});
+        continue;
+      }
       if (op.field.startsWith("measurements.")) {
         const kind = op.field.slice("measurements.".length) as MeasurementKind;
         if (!(measurementKinds as readonly string[]).includes(kind)) throw new Error("STATE_FIELD");
         const old = current.profile.measurements.find(m => m.kind === kind);
         if (op.op === "CLEAR") {
+          stage(op.field,null,evidence,op.op);
           if (old) { clears.push(kind); measurements.push({ ...old, provenance: evidence }); }
           else {
             const previous = current.fieldEvidence[op.field];
@@ -150,9 +288,15 @@ export async function createCustomerStateTools(input: {
           try {
             const parsed = BodyMeasurementV1Schema.safeParse({ kind, value: op.value,
               provenance: measurementSource(input.sourceMessages ?? [], op.sourceQuote, kind, op.value, input.scope, input.clock()) });
-            if (parsed.success) measurements.push(parsed.data);
+            if (parsed.success) { measurements.push(parsed.data); stage(op.field,parsed.data.value,parsed.data.provenance,op.op); }
             else fieldErrors.push({field:op.field,reason:"INVALID_DOMAIN_VALUE",hint:parsed.error.issues[0]!.message.slice(0,160)});
           } catch (error) {
+            // Rejected non-current reuse is not a current correction. It still
+            // rejects the proposal and cannot authorize a fit without recovery.
+            if (error instanceof Error && error.message === "MEASUREMENT_QUOTE_NOT_FOUND" && nonCurrentReuse(op,current)) {
+              rejectedReusePending = true;
+              if (!priorPending.has(op.field)) { pendingFields.delete(op.field); pendingCorrections.delete(op.field); pendingOperations.delete(op.field); }
+            }
             fieldErrors.push({ field: op.field, reason: error instanceof Error && Object.hasOwn(measurementReasons, error.message) ? measurementReasons[error.message]! : "INVALID_DOMAIN_VALUE" });
           }
         }
@@ -163,7 +307,7 @@ export async function createCustomerStateTools(input: {
         else if (op.op !== "CLEAR" && (typeof op.sourceQuote !== "string" || !op.sourceQuote.trim() || op.sourceQuote.length > 160 ||
           !(input.sourceMessages ?? []).some(source => source.sourceMessageId === input.scope.sourceMessageId && source.text.includes(op.sourceQuote as string)))) {
           fieldErrors.push({field:op.field,reason:"QUOTE_NOT_IN_CURRENT_MESSAGE"});
-        } else Object.assign(patch, { fitPreference: { value: parsed.data.fitPreference, evidence } });
+        } else { Object.assign(patch, { fitPreference: { value: parsed.data.fitPreference, evidence } }); stage(op.field,parsed.data.fitPreference,evidence,op.op); }
       } else {
         const key = op.field.slice("preferences.".length) as typeof preferenceKinds[number];
         if (!op.field.startsWith("preferences.") || !preferenceKinds.includes(key)) throw new Error("STATE_FIELD");
@@ -171,9 +315,11 @@ export async function createCustomerStateTools(input: {
         if (!Array.isArray(value) || value.length > 20 || value.some(v => typeof v !== "string" || !v.trim() || v.length > 64)) { fieldErrors.push({field:op.field,reason:"INVALID_DOMAIN_VALUE"}); continue; }
         const list = op.op === "SET" ? [...current.profile.preferences[key], ...value] : value;
         Object.assign(patch, { preferences: { ...patch.preferences, [key]: { value: list, evidence } } });
+        stage(op.field,list,evidence,op.op);
       }
     }
     if (fieldErrors.length) return { status: "REJECTED", reason: fieldErrors.some(f => !f.field.startsWith("measurements.") || f.reason === "INVALID_DOMAIN_VALUE") ? "STATE_FIELD_INVALID" : "MEASUREMENT_SOURCE_INVALID", data: { fieldErrors } };
+    if ([...pendingFields].some(field=>!fields.has(field))) return {status:"REJECTED",reason:"STATE_UPDATE_INCOMPLETE"};
     // Only this C3 writer may correct the same grounded event under the current CAS.
     // Never weaken the shared timestamp/confidence/source ordering for other writers.
     const mergeBase = { ...structuredClone(current), fieldEvidence: { ...current.fieldEvidence } };
@@ -198,7 +344,7 @@ export async function createCustomerStateTools(input: {
     let readback: CustomerProfileMergeState;
     try {
       if (next.profile.revision !== current.profile.revision && !await input.store.compareAndSwap(current.profile.revision, next)) {
-        blockedDependencies = true; return { status: "REJECTED", reason: "STATE_CONFLICT" };
+        stateConflict = true; blockedDependencies = true; return { status: "REJECTED", reason: "STATE_CONFLICT" };
       }
       readback = await input.store.read();
     } catch {
@@ -207,6 +353,9 @@ export async function createCustomerStateTools(input: {
     if (commerceHash(readback) !== commerceHash(next)) { invalidateCommit(); return { status: "REJECTED", reason: "STATE_READBACK_CHANGED" }; }
     const changed = commerceHash(effective) !== commerceHash(readback);
     effective = readback; blockedDependencies = false;
+    // Only covered, validated fields after exact commit/readback can resolve.
+    for (const field of fields) { pendingFields.delete(field); pendingCorrections.delete(field); pendingOperations.delete(field); }
+    if (changed && measurements.some(m=>!clears.includes(m.kind))) rejectedReusePending = false;
     if (!changed) return { status: "OK", data: { revision: effective.profile.revision, applied: false,
       measurements: effective.profile.measurements.map(m => ({ kind: m.kind, value: m.value })) } };
     sizeOutcome = null; sizes.clear(); cartQuote = undefined; quoteRead = false;
@@ -216,41 +365,93 @@ export async function createCustomerStateTools(input: {
       observedAt: effective.profile.updatedAt, expiresAt: new Date(Date.parse(effective.profile.updatedAt)+300_000).toISOString() } };
     return { status: "OK", data: { revision: effective.profile.revision, measurements: effective.profile.measurements.map(m => ({ kind: m.kind, value: m.value })) } };
   }
-  async function invoke(call: CommerceToolCall): Promise<CommerceToolResult> {
+  /** `chained`: called by code as part of another tool's work, not as the owner's own call. */
+  async function invoke(call: CommerceToolCall, chained = false): Promise<CommerceToolResult> {
     const state = input.base.snapshot().state;
     if (!state.permission || !state.privacyAllowed || state.conversationOwner !== "BOT") return { status: "REJECTED", reason: "PERMISSION" };
     try {
+      if(call.name==="read_product"&&call.args&&typeof call.args==="object"&&Object.hasOwn(call.args,"customerSelected")){
+        const a=call.args as Record<string,unknown>,{customerSelected,...read}=a;
+        if(customerSelected!==true||typeof a.subjectRef!=="string"||typeof a.offerType!=="string"||a.offerTypes!==undefined||a.detailsOnly!==undefined)return {status:"REJECTED",reason:"SELECTION_ARGUMENTS"};
+        const r=await input.base.invoke({name:"read_product",args:read});if(r.status!=="OK")return r;
+        const data=r.data as {subjectRef?:string;requestedOfferType?:string;availableOffers?:string[]};
+        if(data.subjectRef!==a.subjectRef||data.requestedOfferType!==a.offerType||!data.availableOffers?.includes(a.offerType))return {status:"REJECTED",reason:"SELECTION_SOURCE"};
+        const selection={productId:a.subjectRef,offerType:a.offerType};
+        if(commerceHash(effective.profile.shoppingSelection??null)===commerceHash(selection))return r;
+        const prior=effective,next={...prior,profile:CustomerProfileV1Schema.parse({...prior.profile,shoppingSelection:selection,
+          revision:prior.profile.revision+1,updatedAt:input.clock().toISOString()})};
+        const retainedReceipt=committedUpdate?.hash===commerceHash(prior)?committedUpdate:undefined;
+        const previousFits=[...sizes.values()].map(s=>s.fitTarget);
+        try{if(!await input.store.compareAndSwap(prior.profile.revision,next))throw Error("STATE_CONFLICT");
+          const current=await input.store.read();if(commerceHash(current)!==commerceHash(next))throw Error("STATE_READBACK_CHANGED");
+          effective=current;sizes.clear();committedUpdate=retainedReceipt?{hash:commerceHash(current),receipt:retainedReceipt.receipt}:undefined;
+          for(const t of previousFits)await refreshAdvice(t);
+        }catch{invalidateCommit();return {status:"REJECTED",reason:"STATE_COMMIT_UNCONFIRMED"};}
+        return {...r,data:{...data,shoppingSelection:selection,selectionStatus:"CUSTOMER_CHOICE_RECORDED_NOT_PURCHASE"}};
+      }
       if (call.name === "apply_customer_state") {
-        const args = toolArgs(call.args, ["ops"]);
-        const fields = args && Array.isArray(args.ops) && args.ops.length ? args.ops.map(op =>
-          op && typeof op === "object" && typeof op.field === "string" ? op.field as string : "*") : ["*"];
-        fields.forEach(field => pendingFields.add(field));
         let result: CommerceToolResult;
         try { result = await apply(call.args); }
-        catch { result = { status: "REJECTED", reason: "STATE_OR_DOMAIN_INPUT" }; }
-        if (result.status === "OK") fields.forEach(field => pendingFields.delete(field));
-        return result.status === "OK" ? result : { ...result, data: { ...result.data as Record<string, unknown>, ...(!commitUnconfirmed ? { applied: false } : {}), unresolvedFields: [...pendingFields] } };
+        catch { pendingFields.add("*"); pendingCorrections.set("*",null); result = { status: "REJECTED", reason: "STATE_OR_DOMAIN_INPUT" }; }
+        if (result.status !== "OK") return { ...result, data: { ...result.data as Record<string, unknown>, ...(!commitUnconfirmed ? { applied: false } : {}), unresolvedFields: [...pendingFields] } };
+        if (chained || !owedSizeRequests.size || blocked()) return result;
+        // The owner asked for these sizes earlier in the turn; the inputs they waited for are now committed.
+        const owed=[...owedSizeRequests.values()],sizeEvaluations:{request:typeof owed[number];status:string;reason?:string;data?:unknown}[]=[];
+        owedSizeRequests.clear();
+        for(const request of owed){const r=await invoke({name:"recommend_size",args:request},true);sizeEvaluations.push({request,...r});}
+        return {...result,data:{...result.data as Record<string,unknown>,sizeEvaluations}};
       }
       if (call.name === "recommend_size") {
-        const a = toolArgs(call.args, ["subjectRef", "customerStateOps"]);
+        const a = toolArgs(call.args, ["subjectRef", "customerStateOps", "fitScope", "componentRole"]);
         if (!a || typeof a.subjectRef !== "string" || !snapshot().boundSubjects.some(s => s.kind === "PRODUCT" && s.ref === a.subjectRef)) return { status: "REJECTED", reason: "STATE_OR_REF" };
+        const fitScope=sizeRequestScope(a);
+        if (!fitScope) return {status:"REJECTED",reason:"STATE_OR_REF"};
+        // The existing port targets a product. Never turn an unsupported component request
+        // into a product calculation, nor commit inline inputs as a side effect of that request.
+        const request=fitScope==="COMPONENT"?{parentProductId:a.subjectRef,componentRole:a.componentRole as ProductComponentRole}:null;
+        let componentSource:Awaited<ReturnType<NonNullable<typeof input.componentSizeInput>>>|undefined;
+        if(request){
+          try{
+            if(!input.componentSizeInput)throw Error("COMPONENT_SOURCE_UNAVAILABLE");
+            componentSource=await input.componentSizeInput(request);
+            validateComponent(componentSource,request);
+          }catch{blockedDependencies=true;sizes.clear();sizeOutcome={status:"NO_VERIFIED_CHART"};return {status:"UNAVAILABLE",reason:"SIZE_SOURCE_UNAVAILABLE"};}
+        }
         // A single explicit size request may carry new customer inputs. Reuse the
         // exact writer (validation, CAS, readback, receipt), never calculate on a rejected patch.
         if (a.customerStateOps !== undefined) {
-          const updated = await invoke({ name: "apply_customer_state", args: { ops: a.customerStateOps } });
-          if (updated.status !== "OK") return updated;
+          const updated = await invoke({ name: "apply_customer_state", args: { ops: a.customerStateOps } }, true);
+          if (updated.status !== "OK") { oweSize(a); return updated; }
         }
-        if (blocked()) return { status: "REJECTED", reason: "STATE_OR_REF" };
+        if (blocked()) { oweSize(a); return { status: "REJECTED", reason: "STATE_OR_REF" }; }
+        if (!chained && !rehydrationTarget) owedSizeRequests.delete(commerceHash(request?{subjectRef:a.subjectRef,fitScope:"COMPONENT",componentRole:request.componentRole}:{subjectRef:a.subjectRef}));
         let source: Awaited<ReturnType<typeof input.sizeInput>>;
-        try { source = await input.sizeInput(a.subjectRef); }
+        try { source = componentSource??await input.sizeInput(a.subjectRef); }
         catch { blockedDependencies=true;return {status:"UNAVAILABLE",reason:"SIZE_SOURCE_UNAVAILABLE"}; }
         if (source.target.parentProductId !== a.subjectRef) return { status: "REJECTED", reason: "SIZE_SUBJECT" };
-        const decision = recommendSize({ ...source, profile: effective.profile, generatedAt: input.clock().toISOString() });
+        const fitTarget:SizeFitTargetV1=componentSource?componentSource.fitTarget:{kind:"PRODUCT",productId:a.subjectRef};
+        const calculate=()=>recommendSize({...source,...(componentSource?{fitTarget:componentSource.fitTarget}:{}),
+          profile:componentSource?{...effective.profile,sizeHistory:[]}:effective.profile,generatedAt:input.clock().toISOString()});
+        let decision=calculate();
+        if(rehydrationTarget&&!sameSizeFitTarget(rehydrationTarget,fitTarget))return {status:"UNAVAILABLE",reason:"SIZE_TARGET_CHANGED"};
+        if(input.retainAdvice&&!rehydrationTarget&&decision.recommendation.status==="RECOMMENDED"&&!effective.profile.sizeAdviceTargets?.some(t=>sameSizeFitTarget(t,fitTarget))){
+          const targets=effective.profile.sizeAdviceTargets??[];
+          await rememberTargets([fitTarget]);
+          for(const t of targets)if(snapshot().boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===(t.kind==="PRODUCT"?t.productId:t.parentProductId)))
+            await refreshAdvice(t);
+          decision=calculate();
+        }
         sizeOutcome = { status: decision.recommendation.status };
-        const claim = createVerifiedSizeRecommendationClaim({ decision, profile: effective.profile, productId: a.subjectRef });
-        sizes.set(a.subjectRef, { claims: buildProtectedClaimsFromVerifiedFactsV1({ facts: null, sizeClaim: claim, expectedProductId: a.subjectRef }).claims,
-          fingerprint: claim?.measurementFingerprint, profileHash: profileHash(), sourceHash: commerceHash({ target: source.target, charts: source.charts }) });
+        let claim = createVerifiedSizeRecommendationClaim({ decision, profile: effective.profile, productId: a.subjectRef,...(componentSource?{fitTarget}:{}) });
+        if(claim&&componentSource)claim={...claim,expiresAt:new Date(Math.min(Date.parse(claim.expiresAt),Date.parse(componentSource.sourceExpiresAt))).toISOString()};
+        const sourceHash=commerceHash({target:source.target,charts:source.charts,...(componentSource?{fitTarget,sourceBindingHash:componentSource.sourceBindingHash}:{})});
+        if(!sizes.has(sizeFitTargetKey(fitTarget))&&sizes.size>=4)return {status:"REJECTED",reason:"SIZE_TARGET_BOUND"};
+        sizes.set(sizeFitTargetKey(fitTarget), { claims: buildProtectedClaimsFromVerifiedFactsV1({ facts: null, sizeClaim: claim, expectedProductId: a.subjectRef,expectedFitTarget:fitTarget }).claims,
+          fingerprint: claim?.measurementFingerprint, profileHash: profileHash(), sourceHash,fitTarget,sourceExpiresAt:componentSource?.sourceExpiresAt??null,request });
         return { status: "OK", data: { status: decision.recommendation.status, action: decision.action,
+          fitScope:fitTarget,...(componentSource?{}:{unsupportedScopes:["COMPONENT"]}),
+          sizeSourceHash:sourceHash,
+          profileRevision:effective.profile.revision,measurementFingerprint:claim?.measurementFingerprint??null,
           missingInputs: decision.missingInputs, recommendedSizes: claim ? decision.recommendation.recommendedSizes : [],
           inputFitPreference:effective.profile.fitPreference, alternativeSizes:claim?.value.alternativeSizes??null } };
       }
@@ -265,10 +466,46 @@ export async function createCustomerStateTools(input: {
       return await input.base.invoke(call);
     } catch { blockedDependencies = true; return { status: "REJECTED", reason: "STATE_OR_DOMAIN_INPUT" }; }
   }
-  return { invoke, snapshot, sizeOutcome: () => sizeOutcome, async invokeBatch(calls) {
+  async function refreshAdvice(t:SizeFitTargetV1){
+    const previousBlocked=blockedDependencies,previousOutcome=sizeOutcome;
+    const previousSizes=new Map(sizes);
+    rehydrationTarget=t;
+    try{
+      const outcome=await invoke({name:"recommend_size",args:t.kind==="PRODUCT"?{subjectRef:t.productId}:{subjectRef:t.parentProductId,fitScope:"COMPONENT",componentRole:t.componentRole}});
+      if(outcome.status!=="OK"){
+        sizes.clear();for(const [key,value]of previousSizes)if(key!==sizeFitTargetKey(t))sizes.set(key,value);
+      }
+    }finally{rehydrationTarget=undefined;blockedDependencies=previousBlocked;sizeOutcome=previousOutcome;}
+  }
+  const result:CommerceTools={ invoke, snapshot, setPendingPurchase, sizeOutcome: () => sizeOutcome, async invokeBatch(calls) {
     const writesState = (c: CommerceToolCall) => c.name === "apply_customer_state" ||
+      (c.name==="read_product"&&!!c.args&&typeof c.args==="object"&&Object.hasOwn(c.args,"customerSelected"))||
       (c.name === "recommend_size" && !!c.args && typeof c.args === "object" && Object.hasOwn(c.args, "customerStateOps"));
     const updates = calls.filter(writesState);
+    if(updates.length>1&&updates.every(c=>c.name==="recommend_size")&&
+       updates.every(c=>commerceHash((c.args as Record<string,unknown>).customerStateOps)===commerceHash((updates[0]!.args as Record<string,unknown>).customerStateOps))){
+      // Only identical, grounded profile patches may be joined. Resolve every
+      // dependent target first; unsupported targets must not partially write.
+      const batchTargets:SizeFitTargetV1[]=[];
+      try{
+        for(const c of updates){const a=toolArgs(c.args,["subjectRef","customerStateOps","fitScope","componentRole"]);
+          if(!a||typeof a.subjectRef!=="string"||!snapshot().boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===a.subjectRef)||!sizeRequestScope(a))throw Error("STATE_OR_REF");
+          if(sizeRequestScope(a)==="COMPONENT"){
+            if(!input.componentSizeInput)throw Error("COMPONENT_SOURCE_UNAVAILABLE");
+            const s=await input.componentSizeInput({parentProductId:a.subjectRef,componentRole:a.componentRole as ProductComponentRole});
+            validateComponent(s,{parentProductId:a.subjectRef,componentRole:a.componentRole as ProductComponentRole});batchTargets.push(s.fitTarget);
+          }else{const s=await input.sizeInput(a.subjectRef);if(s.target.parentProductId!==a.subjectRef||!selectVerifiedSizeChart(s.charts,s.target))throw Error("SIZE_SOURCE_UNAVAILABLE");
+            batchTargets.push({kind:"PRODUCT",productId:a.subjectRef});}
+        }
+      }catch{blockedDependencies=true;return calls.map(()=>({status:"REJECTED",reason:"STATE_OR_REF"}));}
+      const active=(effective.profile.sizeAdviceTargets??[]).filter(t=>snapshot().boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===(t.kind==="PRODUCT"?t.productId:t.parentProductId)));
+      const union=new Set([...active,...batchTargets].map(sizeFitTargetKey));
+      if(input.retainAdvice&&union.size>4)return calls.map(()=>({status:"REJECTED",reason:"SIZE_TARGET_BOUND"}));
+      const written=await invoke({name:"apply_customer_state",args:{ops:(updates[0]!.args as Record<string,unknown>).customerStateOps}},true);
+      if(written.status!=="OK"){for(const c of updates)oweSize(c.args as Record<string,unknown>);return calls.map(()=>written);}
+      try{await rememberTargets(batchTargets);}catch{return calls.map(()=>({status:"REJECTED",reason:"STATE_COMMIT_UNCONFIRMED"}));}
+      return result.invokeBatch(calls.map(c=>updates.includes(c)?{...c,args:Object.fromEntries(Object.entries(c.args as Record<string,unknown>).filter(([k])=>k!=="customerStateOps"))}:c));
+    }
     if (updates.length > 1) {
       blockedDependencies = true;
       for (const call of updates) {
@@ -278,19 +515,39 @@ export async function createCustomerStateTools(input: {
           op && typeof op === "object" && typeof op.field === "string" ? op.field : "*");
       }
     }
-    const updateResults = updates.length > 1 ? updates.map(() => ({ status: "REJECTED" as const, reason: "MULTIPLE_STATE_UPDATES" })) : await Promise.all(updates.map(invoke));
+    // A size request in this same batch runs after the write below; it is not evaluated a second time by the write.
+    for(const c of calls)if(c.name==="recommend_size"&&!writesState(c)&&c.args&&typeof c.args==="object"){
+      const a=c.args as Record<string,unknown>;
+      if(typeof a.subjectRef==="string"&&sizeRequestScope(a))owedSizeRequests.delete(commerceHash(sizeRequestScope(a)==="COMPONENT"?
+        {subjectRef:a.subjectRef,fitScope:"COMPONENT",componentRole:a.componentRole}:{subjectRef:a.subjectRef}));
+    }
+    const updateResults = updates.length > 1 ? updates.map(() => ({ status: "REJECTED" as const, reason: "MULTIPLE_STATE_UPDATES" })) : await Promise.all(updates.map(c=>invoke(c)));
     const local=calls.filter(c=>!writesState(c)&&["recommend_size","quote_cart"].includes(c.name));
     const remote=calls.filter(c=>!writesState(c)&&!local.includes(c));
     const remoteResults=await input.base.invokeBatch(remote);
-    const localResults=await Promise.all(local.map(invoke));
+    const localResults:CommerceToolResult[]=[];
+    // Retained target registration uses profile CAS. Keep those registrations
+    // ordered; two independent target requests must not race the same revision.
+    if(input.retainAdvice){for(const call of local)localResults.push(await invoke(call));}
+    else localResults.push(...await Promise.all(local.map(c=>invoke(c))));
     return calls.map(c=>writesState(c)?updateResults[updates.indexOf(c)]!:local.includes(c)?localResults[local.indexOf(c)]!:remoteResults[remote.indexOf(c)]!);
   }, async readback() {
     await input.base.readback();
     const current = await input.store.read();
     if (commerceHash(current) !== commerceHash(effective)) { effective = current; committedUpdate = undefined; sizes.clear(); cartQuote = undefined; }
     for (const [id, result] of sizes) {
-      const source = await input.sizeInput(id);
-      if (result.sourceHash !== commerceHash({ target: source.target, charts: source.charts })) sizes.delete(id);
+      try{
+        if(result.request){
+          if(!input.componentSizeInput)throw Error("COMPONENT_SOURCE_UNAVAILABLE");
+          const source=await input.componentSizeInput(result.request);
+          if(!Number.isFinite(Date.parse(source.sourceExpiresAt))||Date.parse(source.sourceExpiresAt)<Date.parse(result.sourceExpiresAt!)||
+            !sameSizeFitTarget(source.fitTarget,result.fitTarget)||result.sourceHash!==commerceHash({target:source.target,charts:source.charts,
+            fitTarget:source.fitTarget,sourceBindingHash:source.sourceBindingHash}))sizes.delete(id);
+        }else{
+          const source = await input.sizeInput(id);
+          if (result.sourceHash !== commerceHash({ target: source.target, charts: source.charts })) sizes.delete(id);
+        }
+      }catch{sizes.delete(id);}
     }
     if (quoteRead && input.quoteInput) {
       const source = await input.quoteInput();
@@ -299,4 +556,11 @@ export async function createCustomerStateTools(input: {
     }
     return snapshot();
   }, ...(input.base.recover ? { recover: input.base.recover } : {}) };
+  if(input.retainAdvice)for(const t of effective.profile.sizeAdviceTargets??[]){
+    const id=t.kind==="PRODUCT"?t.productId:t.parentProductId;
+    if(snapshot().boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===id)){
+      await refreshAdvice(t);
+    }
+  }
+  return result;
 }

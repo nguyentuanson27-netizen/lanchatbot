@@ -1,0 +1,132 @@
+{
+  "kind": "INDEPENDENT_ENGINEERING_DIRECTION_REVIEW_V1",
+  "status": "APPROVED_DIRECTION",
+  "disposition": "APPROVE_DIRECTION_WITH_EXPLICIT_SCOPE_AND_ACCEPTANCE_GATES",
+  "reviewer": "/root/phase_c_task_completion_implementation_review",
+  "reviewedAt": "2026-11-02T13:52:25.135Z",
+  "reviewSourceSha": "b5dbcfcf342444874322ec9c10a46296aa7f5da7",
+  "scope": "Root-cause evidence and proposed bounded fix direction only. No implementation, provider-run, quality-grade or retroactive remainder-post-run approval.",
+  "reviewedArtifacts": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\docs\\specs\\c3-phase-c-opening-checkout-post-run-review-20261102.md",
+      "sha256": "0b79a49a68a96d2141c64448c1b8ad35d18f0792b27c2ccf53263e476800db74"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\docs\\specs\\c3-phase-c-opening-checkout-media-replay-review-20261102.json",
+      "sha256": "46e65c7a305b2f8d1a399fda707c4cfdbaff2803700a20ce5d5a869d0bdc5695"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-opening-checkout-review-media-replay-20261102.mjs",
+      "sha256": "b393a8b92c579861b5111f7cd822c175a08329e61f1d5639a85661ff2e192403"
+    }
+  ],
+  "independentChecks": {
+    "runtimeSharedParity603ToCurrent": "PASS_READONLY_GIT_DIFF_EXIT0",
+    "normalizerSentinel": "PASS___NO_COLOR___TO_NO_COLOR",
+    "threeRawCanonicalHashes": "PASS",
+    "threeExactActualSelectorHashes": "PASS",
+    "frozenExactEligibility": "PASS_ALL3_THROW_MEDIA_COLOR_BINDING_UNVERIFIED",
+    "sameFrozenProductGenericCounterfactual": "PASS_2_ELIGIBLE_EACH_AT_DECLARED_CLOCK",
+    "j3VerifierTrustedPriceClaims": "PASS_AO499000_CV449000_SET799000",
+    "ownerPromptQuoteAndMediaInstructions": "PASS_LINES60_62_REVIEWED",
+    "diagnosticExceptionMasking": "PASS_RUN_CATCH_ALWAYS_EMITS_UNKNOWN_INTERNAL"
+  },
+  "evidenceBoundaries": [
+    {
+      "id": "F1_IMMEDIATE_FAILURE",
+      "classification": "PROVEN_CODE_PATH_ON_FROZEN_INPUTS",
+      "conclusion": "Canonical cart __NO_COLOR__ is normalized and passed as requested media NO_COLOR. Exact query hashes agree with actual three operations. Frozen eligibility reproduces MEDIA_COLOR_BINDING_UNVERIFIED; diagnostic wrapper masks it. This is an adapter defect, not a model-invented physical colour, absent all product photos or demonstrated conflicting-colour case."
+    },
+    {
+      "id": "F1_LIMIT",
+      "classification": "LIMITED_COUNTERFACTUAL",
+      "conclusion": "Declared clock is last owner generation start within turn, not instrumented MEDIA_SELECT time. Two generic-eligible assets do not establish an authorized sent output, exact later freshness, full checkout success or live-source completeness."
+    },
+    {
+      "id": "F2_SCOPE",
+      "classification": "OWNER_CONTRACT_DECISION",
+      "conclusion": "Existing owner-approved all-admitted-product opening media rule deliberately includes ETA/ACK; code also covers clarification/care and candidates admitted by search. Reducing required refs to selected products or bypassing media for clarification would change that contract. Scope change is not approved by this direction review."
+    },
+    {
+      "id": "F3_READINESS",
+      "classification": "PROVEN_PREREQUISITE_COVERAGE_GAP",
+      "conclusion": "Preregistered generic media and selection checks do not establish later post-cart colour-query or discovered-product media readiness. Preserve frozen cohorts and add execution-path proof prospectively."
+    },
+    {
+      "id": "F4_ERRORS",
+      "classification": "SEPARATE_PROVEN_FAILURES",
+      "conclusion": "s13 is OWNER_REQUEST_BOUND 66639/65536 at PRE_DISPATCH with0HTTP, not provider quota/transport. s11 is HTTP200/STOP OWNER_TOOL_OUTPUT with null color in SINGLE; align schema/decoder contract explicitly, not by silent query rewriting."
+    },
+    {
+      "id": "F5_ADVICE",
+      "classification": "SUPPORTED_TARGETING_OBSERVATION_NOT_GRADE",
+      "conclusion": "Price form is explicitly required by current prompt for its trigger. Advice-first j3 applies quote form outside a direct price request; examine task targeting independently after execution paths are reliable, without claiming a locked quality failure or stability result."
+    },
+    {
+      "id": "F6_VERIFIER",
+      "classification": "BASELINE_CONTEXT_REVIEW_REQUIRED",
+      "conclusion": "Trusted prices support standalone total948000 versus set799000 saving149000, and set versus shirt increment300000. Whether the actual unqualified savings phrase communicates a supported comparison remains contextual. The observed FAIL stays frozen; neither automatic PASS nor global relaxation follows."
+    }
+  ],
+  "priorityAndAcceptance": [
+    {
+      "priority": "P0",
+      "id": "TYPED_SENTINEL_ADAPTER",
+      "required": "Recognize only source-proven canonical unlabelled variant identity at the cart-to-media boundary. Keep cart components, offer/variant/stock keys and receipts unchanged. Omit image colour filter only when unlabelled variant is proved and no applicable trusted explicit physical-colour constraint exists; absent/unknown/malformed/unproved customer colour is not automatically a generic-photo permission. No text parser, normalized-string catch-all or silent real-colour fallback."
+    },
+    {
+      "priority": "P0",
+      "id": "COLOUR_CONTROLS",
+      "required": "Replay actual p08/j6/j4 cart/context through prepareOpeningMedia, currentPhotos/readback and final egress, then persisted public add-confirm and private clarification/preview. Negative controls: physical colour with mismatched generic photo; requested specific colour not proved; unknown/unbound variant; sentinel plus independent real-colour constraint; source/stock tamper; stale/revoked media; conflicting component colours remain deferred fail-closed."
+    },
+    {
+      "priority": "P0",
+      "id": "BOUNDED_DIAGNOSTICS",
+      "required": "Emit only existing known typed/allowlisted error codes, with UNKNOWN_INTERNAL for unknown exceptions and no raw exception text/customer data. Diagnostic and result classifications must agree where the error is known; no effect on execution/retry/terminal policy."
+    },
+    {
+      "priority": "P0",
+      "id": "WHOLE_TRANSACTION_REGRESSIONS",
+      "required": "Keep shared6primitive/2round/4image/6unit bounds, one owner/maxone verifier semantics, exact native signed parts, atomic text+media+state+receipt+Inbox group and restart-before-sequence0 gate. Failure sends no bare text and preserves earlier committed cart effects; test actual unlabelled source tuple as well as navy controls."
+    },
+    {
+      "priority": "P1",
+      "id": "MEDIA_SCOPE_CONTRACT",
+      "required": "Retain current required all-admitted refs until owner explicitly chooses another product-identification/selection contract. Present candidate-vs-selected, discovery clarification, care and ACK tradeoffs without claiming owner lacked knowledge. Any future scope mechanism needs existing trusted provenance and independent egress enforcement; owner labels alone are not sole authority."
+    },
+    {
+      "priority": "P1",
+      "id": "READINESS_EXECUTION_PARITY",
+      "required": "Before new provider registration, deterministic end-to-end prerequisite checks must cover prospective post-cart and discovery-selected scopes with actual clock/source. Do not relabel historical j6/p10 or drop unavailable cases; record generic readiness as bounded rather than completion guarantee."
+    },
+    {
+      "priority": "P1",
+      "id": "CONTINUATION_NULLABILITY",
+      "required": "Measure exact combined raw/presented final bodies for actual frozen failed continuations after tool results. Structural dedup/factoring must preserve all facts/refs/native signatures/tool reachability and schema accepted-instance meaning, or explicitly document approved nullable=omission semantics. Retain closed selection modes and reject other invalid shapes; no cap increase, truncation, parser repair or generation retry."
+    },
+    {
+      "priority": "P2",
+      "id": "ADVICE_UPSELL_OFFLINE_CONTROLS",
+      "required": "After P0/P1 proof, evaluate price-trigger versus non-price advice on same frozen context and contextual comparison controls: shirt-only499 versus set799; separately purchased shirt+skirt948 versus set799; missing comparator; falsely claimed saving/total. Review verdict excerpt/basis against complete draft and trusted facts; do not globally weaken verifier or overwrite original FAIL."
+    }
+  ],
+  "documentationCorrection": {
+    "priority": "P2",
+    "text": "Replace the unsupported sentence asserting what the owner did not know with an observed tradeoff and a request to confirm the intended contract. No finding about owner knowledge is established by run artifacts.",
+    "status": "RESOLVED_IN_REVIEWED_DOC_ONLY_DIFF",
+    "resolution": "Exact-source unlabelled-variant/no-effective-real-colour guard made explicit; unsupported owner-knowledge assertion replaced with observed terminal tradeoff and contract confirmation. F2 scope change remains unapproved."
+  },
+  "approvalLimits": [
+    "Approves direction and sequencing only; detailed implementation still requires approved bounded plan/code review and meaningful deterministic/PG evidence.",
+    "No new semantic role, prose router/parser/regex, retry/repair/reverify, fixed response templates, budget/model/effort/prompt/threshold change is authorized here.",
+    "No provider dispatch, live source write, migration, merge/deploy, frozen result regrade or new quality/qualification/C3 GO.",
+    "Prior batch21 accounting/report approval stands; remainder12 post-run independent disposition remains NOT_COMPLETED_USAGE_LIMIT and is not granted retroactively by this review.",
+    "The two registrations may be described as33distinct case IDs/48executed turns for coverage only; do not pool quality/safety denominators or claim paired stability."
+  ],
+  "providerRequestsByReviewer": 0,
+  "runtimeEditsByReviewer": 0,
+  "stateWritesByReviewer": 0,
+  "preClarificationReviewRecordSha256": "6015a27b7255c4233ce4fefae74f4eae0723d865a1fefe801c29a34fde128921",
+  "reviewedDocOnlyWorktreeDiff": true,
+  "finalizedAt": "2026-11-02T13:52:42.343Z"
+}

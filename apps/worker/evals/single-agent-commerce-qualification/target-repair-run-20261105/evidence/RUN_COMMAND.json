@@ -1,0 +1,24 @@
+{
+  "kind": "TARGET_REPAIR_DEVELOPMENT_N1_NOT_QUALIFICATION",
+  "command": [
+    "python",
+    "../c3-media-context-model-source-wrapper-20261103-02.py",
+    "node",
+    "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+    "..\\c3-target-model-r1-run-20261105-01",
+    "COD",
+    "--phase-c-diagnostic-registration",
+    "..\\c3-target-model-r1-sealed-20261105-01\\REGISTRATION.json",
+    "--phase-c-world",
+    "../c3-target-model-world-20261105-02/WORLD.json",
+    "--phase-c-seed",
+    "..\\c3-target-model-r1-sealed-20261105-01\\PRIVATE_BLIND_SEED.json"
+  ],
+  "sourceSha": "94c367a8bc9db5c2c17453436c9db015e4d902c6",
+  "registrationHash": "2abaa2a14137da7391164857112cc14e0d62c462e15ab4bfd923bb949017ab85",
+  "retry": 0,
+  "sendEnabled": false,
+  "startedAt": "2026-11-05T14:08:52.366237+00:00",
+  "exitCode": 0,
+  "completedAt": "2026-11-05T14:14:45.723547+00:00"
+}

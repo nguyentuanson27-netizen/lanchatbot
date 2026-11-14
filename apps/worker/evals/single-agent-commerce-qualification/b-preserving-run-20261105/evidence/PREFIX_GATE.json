@@ -1,0 +1,16 @@
+{
+  "status": "FAIL",
+  "sourceSha": "69bd122100f51584acd6d2ac97dde9254b3e562c",
+  "registrationHash": "0c736539117e36bb5e69dba757bfa69909869c4eaa9e69ffeb52a065e0393d13",
+  "reviewer": "/root/b_preserving_independent_review",
+  "capturedTurns": 24,
+  "materialTaskFailures": 7,
+  "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-preserve-model-prefix-run-20261105-02\\CANDIDATE_EVIDENCE.partial.json",
+  "evidenceSha256": "05b08bbca7c58dbe3ff6c0ddeaf3e4e9993a32ba8c2d36cc4feecdc0b92add62",
+  "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-preserve-model-prefix-run-20261105-02\\integration.json",
+  "integrationSha256": "3ba45d397269974956bc70c97744e5e5b927494dece5e3761f606c5ca0429eda",
+  "auditPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-b-preserving-prefix-final-independent-audit-20261105-02.json",
+  "auditSha256": "571a6fbb848d76b051fa7f7901df5262dfe15a827489f2a6e1f94682b54621f9",
+  "testDatabaseDropped": true,
+  "recommendation": "STOP_REMAINDER_AND_EXTRA_CHECKOUT_NOT_RUN"
+}

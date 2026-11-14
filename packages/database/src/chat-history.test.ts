@@ -143,3 +143,19 @@ describe("PostgresChatHistoryStore shadow evaluation capture", () => {
     ).toBe(false);
   });
 });
+
+describe('prior accepted shop output proof',()=>{
+ it.each([true,false])('uses a scoped unbounded existence proof (%s)',async accepted=>{
+  const {store}=storeWithClient(),query=vi.fn(async(_sql:string,_values:readonly unknown[])=>({rowCount:1,rows:[{accepted}]}));
+  (store as unknown as {pool:unknown}).pool={query};
+  const before=new Date('2026-11-02T00:00:00Z');
+  expect(await store.hasPriorAcceptedShopOutput({pageId:input.pageId,conversationId:input.conversationId,customerHash:input.customerHash,before})).toBe(accepted);
+  expect(query.mock.calls[0]?.[1]).toEqual([input.pageId,input.conversationId,input.customerHash,before]);
+  const sql=query.mock.calls[0]?.[0] as string;expect(sql).toContain('EXISTS');expect(sql).not.toMatch(/LIMIT\s+30/i);expect(sql).toContain('accepted_at < $4');expect(sql).toContain("'HUMAN'");expect(sql).toContain('received_at < $4');
+ });
+ it('rejects missing scope and invalid cutoff rather than claiming first contact',async()=>{
+  const {store}=storeWithClient(),query=vi.fn(async()=>({rowCount:0,rows:[]}));(store as unknown as {pool:unknown}).pool={query};
+  await expect(store.hasPriorAcceptedShopOutput({...input,before:new Date()})).rejects.toThrow('CHAT_HISTORY_CONVERSATION_SCOPE_MISMATCH');
+  query.mockClear();await expect(store.hasPriorAcceptedShopOutput({...input,before:new Date('invalid')})).rejects.toThrow('CHAT_HISTORY_CUTOFF');expect(query).not.toHaveBeenCalled();
+ });
+});

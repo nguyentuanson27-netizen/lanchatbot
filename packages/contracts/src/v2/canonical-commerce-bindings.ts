@@ -142,6 +142,7 @@ export function effectBindingHashPreimageV1(input: z.input<typeof EffectBindingV
 
 export const CartMutationActionV1Schema = z.enum([
   "ADD_LINE",
+  "REPLACE_LINE",
   "REMOVE_LINE",
   "SET_QUANTITY",
   "SET_COMPONENT_VARIANT",
@@ -150,6 +151,7 @@ export type CartMutationActionV1 = z.infer<typeof CartMutationActionV1Schema>;
 
 export const CanonicalCartMutationPayloadV1Schema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("ADD_LINE"), line: CartLineV1Schema }).strict(),
+  z.object({ kind: z.literal("REPLACE_LINE"), lineId: z.string().uuid(), line: CartLineV1Schema }).strict(),
   z.object({ kind: z.literal("REMOVE_LINE"), lineId: z.string().uuid() }).strict(),
   z.object({
     kind: z.literal("SET_QUANTITY"),
@@ -177,8 +179,13 @@ export const CartMutationAuthorityBindingV1Schema = z.object({
     "NATIVE_TOOL_PERMISSION",
   ]),
   authorityEvidenceHash: Sha256Schema,
+  replacedLine: z.object({ lineId: z.string().uuid(), productId: CanonicalProductIdV1Schema,
+    offerId: CanonicalProductIdV1Schema, beforeLineHash: Sha256Schema }).strict().optional(),
   bindingHash: Sha256Schema,
 }).strict().superRefine((value, context) => {
+  if ((value.action === "REPLACE_LINE") !== (value.replacedLine !== undefined)) {
+    context.addIssue({code:z.ZodIssueCode.custom,path:["replacedLine"],message:"old-line binding is required only for replacement"});
+  }
   const expected = value.action === "REMOVE_LINE"
     ? "DETERMINISTIC_REMOVE_CLASSIFIER"
     : "CANONICAL_BUYING_INTENT";
@@ -206,6 +213,7 @@ export const CartMutationReceiptV1Schema = z.object({
   mutationPayloadHash: Sha256Schema,
   mutationReasonCode: z.enum([
     "LINE_ADDED",
+    "LINE_REPLACED",
     "LINE_REMOVED",
     "QUANTITY_CHANGED",
     "VARIANT_CHANGED",
@@ -223,14 +231,19 @@ export const CartMutationReceiptV1Schema = z.object({
   if (value.mutation.kind !== value.authority.action) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["authority", "action"], message: "receipt authority must bind its exact mutation action" });
   }
-  if (value.mutation.kind === "ADD_LINE" && (
+  if ((value.mutation.kind === "ADD_LINE" || value.mutation.kind === "REPLACE_LINE") && (
     value.authority.productId !== value.mutation.line.parentProductId ||
     value.authority.offerId !== value.mutation.line.offerId
   )) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["authority"], message: "receipt authority must bind the exact added product and offer" });
   }
+  if (value.mutation.kind === "REPLACE_LINE" && (value.mutation.lineId !== value.mutation.line.lineId ||
+    value.authority.replacedLine?.lineId !== value.mutation.lineId)) {
+    context.addIssue({code:z.ZodIssueCode.custom,path:["mutation"],message:"replacement must bind the same old and target line identity"});
+  }
   const expectedReason = value.mutation.kind === "ADD_LINE"
     ? "LINE_ADDED"
+    : value.mutation.kind === "REPLACE_LINE" ? "LINE_REPLACED"
     : value.mutation.kind === "REMOVE_LINE"
       ? "LINE_REMOVED"
       : value.mutation.kind === "SET_COMPONENT_VARIANT" ? "VARIANT_CHANGED" : "QUANTITY_CHANGED";

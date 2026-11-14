@@ -1,0 +1,20 @@
+{
+  "caseId": "c-20261028-j1",
+  "turnIndex": 1,
+  "nativeArtifact": "native-693f386f4b69cc4471470971f100b7edaf20b8e6c18ee2a54253b9499e6d36fd-turn-1.json",
+  "canonicalArtifactHash": "f07c99905c778c15c06c8b13386329ec957dafd366ef46121bdc1310db126217",
+  "lastOwnerGenerationId": "63593b44-0266-46b9-8ea8-29ca95be664d:owner:2",
+  "ownerProjectedSubjects": 9,
+  "ownerProjectedFacts": 8,
+  "ownerProjectedReceipts": 1,
+  "boundarySubjectCap": 8,
+  "nativeRecovery": {
+    "originalDisposition": "FALLBACK",
+    "originalReason": "MALFORMED"
+  },
+  "providerGenerationStatuses": [
+    "OK",
+    "OK"
+  ],
+  "limit": "Projection preserves source bound-subject cardinality, but the exact full trusted snapshot at the later hard precheck was not retained. Observed over-cap input, not a fabricated exact gate replay or sole-cause assertion."
+}

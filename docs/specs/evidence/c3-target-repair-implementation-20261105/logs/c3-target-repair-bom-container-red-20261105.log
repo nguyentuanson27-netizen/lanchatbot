@@ -1,0 +1,150 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+ ❯ src/single-agent-commerce-read-only-tools.test.ts (101 tests | 3 failed) 1260ms
+   ✓ read-only domain tools > rejects older deferred full when search has admitted a different source 25ms
+   ✓ read-only domain tools > rejects older deferred details when search has admitted a different source 8ms
+   ✓ read-only domain tools > rejects older deferred batch when search has admitted a different source 8ms
+   ✓ read-only domain tools > rejects older deferred prepare when search has admitted a different source 11ms
+   ✓ read-only domain tools > preserves current offer expiry on a same-identity concurrent full read 65ms
+   ✓ read-only domain tools > preserves admitted evidence when later preparation has details failure 6ms
+   ✓ read-only domain tools > preserves admitted evidence when later preparation has full failure 18ms
+   ✓ read-only domain tools > preserves admitted evidence when later preparation has mismatched-source failure 4ms
+   ✓ read-only domain tools > cannot overwrite a full read with older deferred search metadata 10ms
+   ✓ read-only domain tools > admits one concurrent search atomically and preserves initial target capacity 65ms
+   ✓ read-only domain tools > does not publish malformed catalog evidence or its offer pins 4ms
+   ✓ read-only domain tools > reserves unhydrated initial targets before admitting unrelated search evidence 7ms
+   ✓ read-only domain tools > does not prefetch catalog before rejecting batch permission 3ms
+   ✓ read-only domain tools > does not prefetch catalog before rejecting batch privacy 1ms
+   ✓ read-only domain tools > does not prefetch catalog before rejecting batch owner 1ms
+   ✓ read-only domain tools > does not prefetch catalog before rejecting batch arguments 1ms
+   ✓ read-only domain tools > compares a selected pair even when the catalog has more than eight offers 14ms
+   ✓ read-only domain tools > keeps one failed source read per product without hidden retry (throw) 2ms
+   ✓ read-only domain tools > keeps one failed source read per product without hidden retry (missing) 1ms
+   ✓ read-only domain tools > compares only the explicitly selected offers without adding unrelated variant subjects 17ms
+   ✓ read-only domain tools > admits bounded read calls by input order, independent of source completion order 55ms
+   ✓ read-only domain tools > reads only content and offer metadata for DETAILS_ONLY without authorizing price/stock 4ms
+   ✓ read-only domain tools > pins offer-only evidence across a metadata refresh after prepare without renewing expiry 10ms
+   ✓ read-only domain tools > pins offer-only evidence across a metadata refresh after search without renewing expiry 4ms
+   ✓ read-only domain tools > invalidates pinned offer evidence on actual offer change 4ms
+   ✓ read-only domain tools > invalidates pinned offer evidence on actual release change 2ms
+   ✓ read-only domain tools > invalidates pinned offer evidence on actual unavailable change 3ms
+   ✓ read-only domain tools > makes source offer codes available after discovery before reading protected facts 54ms
+   ✓ read-only domain tools > uses checkout region priority for southern addresses and binds the resolved source key 23ms
+   ✓ read-only domain tools > keeps repeated full reads stable across a synced_at-only refresh 20ms
+   ✓ read-only domain tools > rejects search overflow before exposing or binding unretained product evidence 29ms
+   ✓ read-only domain tools > keeps concurrent searches within the same product budget without partial admission 8ms
+   ✓ read-only domain tools > does not leave bound subjects behind when a search candidate fails source validation 2ms
+   ✓ read-only domain tools > rejects an initial target scope exceeding product capacity without dropping targets 3ms
+   ✓ read-only domain tools > uses the supplied product code for lookup even when a garment query accompanies it 3ms
+   ✓ read-only domain tools > does not overflow on readback when a previously empty search source gains content 11ms
+   ✓ read-only domain tools > does not bind a similar product as the requested code, or treat an empty code as discovery 2ms
+   ✓ read-only domain tools > withdraws attributes missing from the current preparation readback instead of retaining old evidence 5ms
+   ✓ read-only domain tools > prepares offers and content without price/stock variants or full-read dependencies 6ms
+   ✓ read-only domain tools > retains content and an explicit missing-offer status when POS is unavailable 4ms
+   ✓ read-only domain tools > reads all selling-option prices from one snapshot while keeping the top-level default price scoped 24ms
+   ✓ read-only domain tools > keeps an explicitly requested option isolated from another option with an unavailable price 7ms
+   ✓ read-only domain tools > retains a usable component and product content when the default offer cannot supply facts 7ms
+   ✓ read-only domain tools > binds each option's filters and ETA even when two offers share a source SKU 29ms
+   ✓ read-only domain tools > rejects option expansion beyond the existing subject bound without a partial list or partial context write 30ms
+   ✓ read-only domain tools > distinguishes confirmed empty selling options from absent or stale POS 2ms
+   ✓ read-only domain tools > preserves the existing claim bound across independently filtered multi-option reads 122ms
+   ✓ read-only domain tools > binds available selling options to the same current verifier snapshot and invalidates changed options 18ms
+   ✓ read-only domain tools > never represents unavailable or stale selling options as verified absence 6ms
+   ✓ read-only domain tools > keeps size-filtered stock attached to the code-read size when only an offer identity resolves 8ms
+   ✓ read-only domain tools > invalidates verified selling options when a fresh snapshot cannot resolve the product 7ms
+   ✓ read-only domain tools > keeps independent offer mappings when fulfillment policy or price is missing 4ms
+   ✓ read-only domain tools > binds delivery ETA to the requested region and invalidates a changed delivery source 21ms
+   ✓ read-only domain tools > search accounts one source metadata read without binding POS facts and revalidates before eligibility 7ms
+   ✓ read-only domain tools > policy lookup never represents a checked or approved individual exchange 15ms
+   ✓ read-only domain tools > exposes the source-approved payment methods without private payment or checkout data 7ms
+   ✓ read-only domain tools > search and the trusted verifier snapshot use the same existing product evidence after a full read 24ms
+   ✓ read-only domain tools > identifies the resolver's default selling offer and canonical aliases without losing price scope 32ms
+   ✓ read-only domain tools > distinguishes absent POS, stale POS and unavailable offer without deleting independent product content 12ms
+   ✓ read-only domain tools > uses the explicitly supplied source freshness bound and preserves content without POS 10ms
+   ✓ read-only domain tools > reads source policy, keeps missing customerCare explicit and never exposes negotiation internals 5ms
+   ✓ read-only domain tools > explains inspection and exchange together without changing source rules (15 days / 30000 VND / unused=true) 17ms
+   ✓ read-only domain tools > explains inspection and exchange together without changing source rules (7 days / 25000 VND / unused=true) 14ms
+   ✓ read-only domain tools > explains inspection and exchange together without changing source rules (15 days / 30000 VND / unused=false) 11ms
+   ✓ read-only domain tools > policy source changes invalidate old snapshots without changing prompt 7ms
+   ✓ read-only domain tools > does not treat last-known-good policy as a successful current-pointer readback 4ms
+   ✓ read-only domain tools > rejects invented refs and privileged arguments before I/O 1ms
+   ✓ read-only domain tools > turns a verified search match into an allowlisted ref, then reads price/stock 10ms
+   ✓ read-only domain tools > retains independent verified facts when another reader fails 3ms
+   ✓ read-only domain tools > does not erase a verified price because attributes are invalid 8ms
+   ✓ read-only domain tools > returns product evidence when POS is unavailable and marks price/stock missing 3ms
+   ✓ read-only domain tools > rejects cross-shop catalog data and loses old price eligibility on stale readback 10ms
+   ✓ read-only domain tools > keeps both allowed variant claims when comparing sizes of one product 31ms
+   ✓ read-only domain tools > retains current POS facts without inventing missing catalog timestamps or attributes 13ms
+   ✓ read-only domain tools > selects the requested selling offer and keeps its claims distinct from another offer 27ms
+   ✓ offers the existing price card only for first contact (true) 25ms
+   ✓ offers the existing price card only for first contact (false) 4ms
+   ✓ does not supply an opening price card for missing-price 1ms
+   ✓ does not supply an opening price card for stale 2ms
+   ✓ does not supply an opening price card for ambiguous-offer 3ms
+   ✓ keeps a component opening quote separate from the set price and set attributes 4ms
+   ✓ uses verified opening-quote attributes even when search fields disagree (empty=false) 5ms
+   ✓ uses verified opening-quote attributes even when search fields disagree (empty=true) 4ms
+   ✓ does not assign parent attributes to the only remaining AO offer 7ms
+   ✓ does not assign parent attributes to the only remaining CV offer 6ms
+   ✓ does not assign parent attributes to the only remaining QUAN offer 5ms
+   ✓ shares scoped positive-stock sizes with owner and verifier and invalidates a size-only source change 6ms
+   ✓ does not expand confirmed in-stock sizes from empty evidence 6ms
+   ✓ does not expand confirmed in-stock sizes from unknown evidence 5ms
+   ✓ does not expand confirmed in-stock sizes from size-filter evidence 5ms
+   ✓ does not expand confirmed in-stock sizes from stale evidence 4ms
+   ✓ logical purchase composition > compares order-independent quantities without dropping duplicate SKUs 6ms
+   ✓ logical purchase composition > does not invent a component quantity for undefined 2ms
+   ✓ logical purchase composition > does not invent a component quantity for 0 2ms
+   ✓ logical purchase composition > does not invent a component quantity for -1 3ms
+   ✓ logical purchase composition > does not invent a component quantity for 1.5 3ms
+   ✓ logical purchase composition > does not invent a component quantity for 9007199254740992 2ms
+   ✓ logical purchase composition > rejects overbound source rather than expanding quantity 4ms
+   × explicit malformed BOM does not become a legacy one-item composition (null) 40ms
+     → expected { status: 'AVAILABLE', …(3) } to match object { status: 'INCOMPLETE_SOURCE', …(1) }
+(2 matching properties omitted from actual)
+   × explicit malformed BOM does not become a legacy one-item composition ("invalid") 6ms
+     → expected { status: 'AVAILABLE', …(3) } to match object { status: 'INCOMPLETE_SOURCE', …(1) }
+(2 matching properties omitted from actual)
+   × explicit malformed BOM does not become a legacy one-item composition ({"product_sku":"A-AO","quantity":1}) 5ms
+     → expected { status: 'AVAILABLE', …(3) } to match object { status: 'INCOMPLETE_SOURCE', …(1) }
+(2 matching properties omitted from actual)
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/single-agent-commerce-read-only-tools.test.ts > explicit malformed BOM does not become a legacy one-item composition (null)
+ FAIL  src/single-agent-commerce-read-only-tools.test.ts > explicit malformed BOM does not become a legacy one-item composition ("invalid")
+ FAIL  src/single-agent-commerce-read-only-tools.test.ts > explicit malformed BOM does not become a legacy one-item composition ({"product_sku":"A-AO","quantity":1})
+AssertionError: expected { status: 'AVAILABLE', …(3) } to match object { status: 'INCOMPLETE_SOURCE', …(1) }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "components": [],
+-   "status": "INCOMPLETE_SOURCE",
++   "components": [
++     {
++       "componentRef": "A-AO",
++       "quantity": 1,
++       "role": "TOP",
++     },
++   ],
++   "status": "AVAILABLE",
+  }
+
+ ❯ src/single-agent-commerce-read-only-tools.test.ts:968:70
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 98 passed (101)
+   Start at  19:23:34
+   Duration  6.58s (transform 2.63s, setup 0ms, collect 3.83s, tests 1.26s, environment 0ms, prepare 649ms)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/single-agent-commerce-read-only-tools.test.ts

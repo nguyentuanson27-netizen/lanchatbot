@@ -1,17 +1,21 @@
+import {CommerceMediaDeliveryBindingV1Schema} from '@lana/contracts';
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { existsSync,readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { createConversationState } from "@lana/conversation-engine";
 import { applySalesCycleCommand, computeBusinessContentHash, createSalesCycleRuntimeState } from "@lana/chat-runtime";
 import { LocalEnvelopeCipher, PostgresRealtimeRuntimeStore, type RealtimeCommitInput } from "@lana/database";
 import * as composition from "./single-agent-commerce.js";
-import { commerceHistory, runPersistedCommerceIngress } from "./single-agent-commerce-ingress.js";
+import { commerceHistory,isPrivatePendingCheckoutText, runPersistedCommerceIngress } from "./single-agent-commerce-ingress.js";
 import { commerceScope, commerceNow, fixtureProfile, fixturePolicy, fixtureProduct, fixtureCartLine, fixturePolicyPointers } from "./single-agent-commerce.test-support.js";
 import { createCommerceReadSources } from "./single-agent-commerce-read-only-sources.js";
 import type { OwnerGeneration, OwnerRequest } from "./single-agent-commerce-read-only.js";
 import type { CartSelectionResult } from "./realtime-sales-catalog.js";
+import {cartSelectionFromSnapshot} from './realtime-sales-catalog.js';
 
 function fixture(productIds = ["SM613"]) {
   const scope = commerceScope(), products = productIds.map(id => fixtureProduct(id));
-  let generation = 1, revision = 1, profile = fixtureProfile(), tagId: string | null = null;
+  let generation = 1, revision = 1, profile = fixtureProfile(), tagId: string | null = null, fixtureNow=commerceNow;
   let conversation = createConversationState({ conversationId: scope.conversationId, routingOwner: "APP", now: commerceNow });
   let cycle = createSalesCycleRuntimeState(scope.conversationId, { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
   let checkCommit = async (_prepared: RealtimeCommitInput<unknown>) => {};
@@ -38,7 +42,7 @@ function fixture(productIds = ["SM613"]) {
     isEcho: false, appId: null, text: "Em ơi", attachments: [] };
   const batch = { pageId: scope.pageId, conversationHash: scope.customerHash, eventKind: "CUSTOMER", generation: 1,
     evaluationGroupId: "turn", leaseToken: "lease", inboxIds: ["inbox"], items: [{ envelope: { message } }] };
-  const verifier = vi.fn(async () => ({ result: { verdict: "PASS", violations: [] } }));
+  const verifier = vi.fn(async (_request:Parameters<Parameters<typeof runPersistedCommerceIngress>[0]["verifier"]>[0]) => ({ result: { verdict: "PASS", violations: [] } }));
   const select = vi.fn(async (): Promise<CartSelectionResult> => ({ status: "INVALID", reasonCode: "FIXTURE_SOURCE_UNAVAILABLE", availableSizes: [], availableColors: [] }));
   const inbox = { isBatchCurrent: async () => generation === batch.generation, readGeneration: async () => generation,
     completeBatch: vi.fn(async (_batch: unknown, _requireCurrentGeneration = true) => true) };
@@ -47,17 +51,21 @@ function fixture(productIds = ["SM613"]) {
   const history = {recordInboundCustomerMessage: vi.fn(async (_input:unknown) => ({messagePk:"90000000-0000-4000-8000-000000000001"})), listConversationHistory: vi.fn(async () => [] as unknown[])};
   let readOverride: Parameters<typeof runPersistedCommerceIngress>[0]["read"] | undefined;
   const run = (owner: Parameters<typeof runPersistedCommerceIngress>[0]["owner"] = async () => ({ kind: "FINAL", text: "Dạ chị." }),
-    handoffReply?: Parameters<typeof runPersistedCommerceIngress>[0]["handoffReply"],quoteTask?:Parameters<typeof runPersistedCommerceIngress>[0]["quoteTask"]) => runPersistedCommerceIngress({
+    handoffReply?: Parameters<typeof runPersistedCommerceIngress>[0]["handoffReply"],quoteTask?:Parameters<typeof runPersistedCommerceIngress>[0]["quoteTask"],
+    evaluationTurn?:Parameters<typeof runPersistedCommerceIngress>[0]["evaluationTurn"],
+    openingMediaRule?:{readonly version:"FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1"}) => runPersistedCommerceIngress({
     batch, fence: 1, scope, store, inbox,
     history, transaction: async (work: (client: never) => Promise<unknown>) => { await beforeTransaction(); return work({} as never); },
     facts: { ready: async () => true, resolve: async () => {}, close: async () => {}, resolveCartSelection: select }, policy,
     read: readOverride ?? { policy: () => fixturePolicy(), initialProducts: products.map(p => p.product), catalog: {
       readProduct: catalogRead, searchText: async () => ({ status: "NOT_FOUND" }) } },
-    resolveTagId: () => tagId, clock: () => commerceNow, ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm tra.", owner, verifier,
+    resolveTagId: () => tagId, clock: () => fixtureNow, ownerPrompt: "Tư vấn.", verifierPrompt: "Kiểm tra.", owner, verifier,
     ...(handoffReply?{handoffReply}:{}),
     ...(quoteTask?{quoteTask}:{}),
+    ...(evaluationTurn?{evaluationTurn}:{}),
+    ...(openingMediaRule?{openingMediaRule}:{}),
   } as unknown as Parameters<typeof runPersistedCommerceIngress>[0]);
-  return { run, store, inbox, commit, verifier, select, profileWrite, policy, message, products, catalogRead, history, setRead: (read: typeof readOverride) => { readOverride = read; }, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
+  return {setClock:(at:Date)=>{fixtureNow=at;}, run, store, inbox, commit, verifier, select, profileWrite, policy, message, products, catalogRead, history, setRead: (read: typeof readOverride) => { readOverride = read; }, profile: () => profile, supersede: () => { generation++; }, changeRevision: () => { revision++; },
     setCycle: (state: typeof cycle) => { cycle = state; }, cycle: () => cycle, batch,
     newGeneration: () => { batch.generation = generation; },
     checkCommit: (check: typeof checkCommit) => { checkCommit = check; },
@@ -69,6 +77,74 @@ function fixture(productIds = ["SM613"]) {
 
 afterEach(() => vi.restoreAllMocks());
 
+it("sends one shared attachment while binding both parent sources",async()=>{
+ const f=fixture(['SM613','OTHER1']);
+ for(const p of f.products)p.product.images=[{url:'https://content.pancake.vn/shared.jpg',role:'PRIMARY',angle:'FRONT',imageType:'MODEL',intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:commerceNow.toISOString(),partsVisible:['AO']}];
+ const calls=f.products.map((p,i)=>({name:'select_product_media',args:{subjectRef:p.product.productId,intent:'GENERIC',deliveryMode:i?'APPEND':'REPLACE'}}));let n=0;
+ const result=await f.run(async()=>++n===1?{kind:'TOOLS',calls,content:{role:'model',parts:calls.map(functionCall=>({functionCall}))}}:{kind:'FINAL',text:'Chị xem ảnh nhé.'});
+ expect(result.terminal.disposition).toBe('SEND_ELIGIBLE');
+ const meta=f.commit.mock.calls.at(-1)![1].metaPlan!;
+ expect(meta.messages.filter(m=>m.kind==='IMAGE')).toHaveLength(1);
+ const binding=CommerceMediaDeliveryBindingV1Schema.parse(meta.mediaBinding);
+ expect(binding.images.map(i=>i.productId).sort()).toEqual(['OTHER1','SM613']);
+ expect(binding.messageHashes).toHaveLength(2);
+});
+
+it("missing requested wearer proof hands off silently before any sibling cart mutation",async()=>{
+ const f=fixture();f.enableHandoff();
+ f.products[0]!.product.images=[{url:'https://content.pancake.vn/detail.jpg',role:'PRIMARY',angle:'CLOSEUP',imageType:'DETAIL',intents:[],sortOrder:0,qualityScore:null,feedback:true,reviewStatus:'APPROVED',metadataVerified:true,sourceContentSha256:'a'.repeat(64),observedAt:commerceNow.toISOString(),partsVisible:['AO']}];
+ const calls=[{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:null}},{name:'select_product_media',args:{subjectRef:'SM613',intent:'FEEDBACK',requiredEvidence:'CUSTOMER_WEARING'}}];
+ const owner=vi.fn(async()=>({kind:'TOOLS' as const,calls,content:{role:'model' as const,parts:calls.map(functionCall=>({functionCall}))}}));
+ const result=await f.run(owner);
+ expect(result.terminal.disposition).toBe('HANDOFF');expect(result.enqueued).toBe(0);
+ expect(f.select).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+ expect(f.commit.mock.calls.every(c=>!c[1].metaPlan&&!c[1].salesCyclePlan)).toBe(true);
+});
+
+it("runs explicit main-C3 evaluation through the persisted egress without OWNER or verifier",async()=>{
+ const f=fixture(),owner=vi.fn();
+ const reference:NonNullable<Parameters<typeof runPersistedCommerceIngress>[0]["evaluationTurn"]>["run"]=async(turn,state)=>{
+  expect(state.sourceMessagePk).toBe("90000000-0000-4000-8000-000000000001");expect(state.sales.revision).toBe(0);
+  await turn.tools.prepare?.();
+  return {terminal:{disposition:"SEND_ELIGIBLE",reason:"PASS",text:"Dạ chị.",fallbackId:null},recovery:null,
+   sendEnabled:false,ownerGenerations:2,verifierGenerations:0,toolRounds:0,normalToolCalls:1,terminalHandoffCalls:0,toolCalls:1,
+   proposedToolCalls:0,rejectedToolCalls:0,handoff:null,generations:[],toolLatencyMs:0,verificationLatencyMs:null};
+ };
+ const observed=vi.fn(reference),r=await f.run(owner,undefined,undefined,{kind:"PINNED_MAIN_C3",run:observed});
+ expect(observed).toHaveBeenCalledTimes(1);expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+ expect(r).toMatchObject({enqueued:1,terminal:{disposition:"SEND_ELIGIBLE",text:"Dạ chị."}});
+ expect(f.commit.mock.calls.some(c=>c[1].metaPlan?.messages.some(m=>m.kind==="TEXT"&&m.text==="Dạ chị."))).toBe(true);
+});
+const mainReferenceRoot=fileURLToPath(new URL("../../../../lanchatbot-c3-phase-c-main-296cdcf/",import.meta.url));
+it.skipIf(!existsSync(mainReferenceRoot+"/apps/worker/dist/track-c-c3-v5-benchmark-runner.js"))("runs pinned-main C3 builders, two passes and guard through shared ingress commit with local HTTP payloads",async()=>{
+ const helper=new URL("../evals/single-agent-commerce-qualification/",import.meta.url);
+ const {baselineInventory}=await import(new URL("baseline-source.mjs",helper).href);
+ const {createReferenceRunner}=await import(new URL("c3-reference.mjs",helper).href);
+ const {digest}=await import(new URL("qualification.mjs",helper).href);
+ const f=fixture(),manifest=JSON.parse(readFileSync(new URL("../evals/single-agent-commerce-read-only/manifest.json",import.meta.url),"utf8")),
+  model={...manifest.models.conversation,generationConfig:{...manifest.models.conversation.generationConfig,responseMimeType:"application/json"}},
+  build=baselineInventory(mainReferenceRoot),runtimeInput={latest:f.message.text,history:[],initialProductCodes:["SM613"]},observations:unknown[]=[];
+ const reg={runSourceSha:"a".repeat(40),worldHash:"b".repeat(64),config:{baseline:{sourceSha:build.sourceSha,model,
+  capabilityStatus:"VERIFIED_MATCHED_SEND_DISABLED",captureBuilderHash:"c".repeat(64)}},slots:[{slotId:"unit-c3-slot",arm:"C3",scenarioHash:"d".repeat(64)}],
+  corpus:{scenarios:[{id:"not-in-wire-unit-case"}]}};
+ let calls=0;
+ const runner=await createReferenceRunner({preflight:{sealed:reg,world:{config:{vertex:{projectId:"unit-project"}}}},baselineRoot:mainReferenceRoot,baselineBuild:build,
+  observe:(row:unknown)=>observations.push(row),active:()=>({slotId:"unit-c3-slot",turnIndex:0,runtimeInput}),assertCurrent:()=>{},
+  unitTransport:{fixtureOnly:true,send:async(request:{body:string})=>{
+   calls++;const frame=JSON.parse(JSON.parse(request.body).contents[0].parts[0].text);
+   const value=calls===1?{currentNeed:"Acknowledge the customer.",mustResolve:"No unsupported claim.",conversationRead:"Customer greeted the shop.",nextMove:"NONE",avoid:"No effect."}:
+    {segments:[{kind:"GENERAL",text:"Dạ chị."}],strategy:"ANSWER_VERIFIED_FACTS",cta:"NONE"};
+   return {payload:{candidates:[{content:{parts:[{text:JSON.stringify(value)}]}}]},providerModelVersion:model.version,
+    telemetry:{providerRequests:1,modelVersion:model.version,inputTokens:1,outputTokens:1}};
+  }}});
+ const owner=vi.fn(),r=await f.run(owner,undefined,undefined,runner);
+ expect(calls).toBe(2);expect(observations.length).toBe(4);expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+ const c3Diagnostic=(r as unknown as {c3Witness?:{guarded:{errorCode?:string}}}).c3Witness?.guarded.errorCode;
+ expect(c3Diagnostic).toBeUndefined();expect(r.terminal.reason).toBe("PASS");
+ expect(r).toMatchObject({enqueued:1,terminal:{disposition:"SEND_ELIGIBLE",text:"Dạ chị."}});
+ expect(f.commit.mock.calls.some(c=>c[1].metaPlan?.messages.some(m=>m.kind==="TEXT"&&m.text==="Dạ chị."))).toBe(true);
+ expect(digest(build)).toHaveLength(64);
+},60000);
 async function enableRecoveryHandoff(f: ReturnType<typeof fixture>, mode: "holding" | "silent" = "holding") {
   f.enableHandoff();
   const resolved=await fixturePolicy();
@@ -179,7 +255,7 @@ it("commits the owner's relevant price-unavailable handoff and its customer mess
   expect(handoff).toHaveLength(1);expect(handoff[0]![1]).toMatchObject({state:{conversationOwner:"HUMAN"},pancakeTagPlan:{desiredTag:"NHAN_VIEN"},metaPlan:{messages:[{kind:"TEXT",text:result.terminal.text}]}});
 });
 
-it.each(["provider","malformed-finish","timeout","fail","uncertain","malformed-verdict"])("atomically hands off unrecovered %s without another generation",async fault=>{
+it.each(["provider","malformed-finish","timeout","fail","uncertain","malformed-verdict"])("atomically hands off unrecovered %s without an unapproved generation",async fault=>{
   const f=fixture(); await enableRecoveryHandoff(f);
   if(fault==="fail"||fault==="uncertain") f.verifier.mockResolvedValue({result:{verdict:fault==="fail"?"FAIL":"UNCERTAIN",violations:[]}});
   if(fault==="malformed-verdict") f.verifier.mockResolvedValue({result:{verdict:"broken",violations:[]}});
@@ -195,7 +271,8 @@ it.each(["provider","malformed-finish","timeout","fail","uncertain","malformed-v
   expect(handoffs).toHaveLength(1);
   expect(handoffs[0]![1]).toMatchObject({pancakeTagPlan:{desiredTag:"NHAN_VIEN"}});
   expect(handoffs[0]![1].metaPlan).toBeUndefined(); expect(result.terminal.text).toBeNull();
-  expect(result.enqueued).toBe(0); expect(owner).toHaveBeenCalledTimes(1);
+  // Owner decision 2026-11-12: only a provider answer with no usable output is asked for once more.
+  expect(result.enqueued).toBe(0); expect(owner).toHaveBeenCalledTimes(fault==="malformed-finish"?2:1);
   expect(f.verifier).toHaveBeenCalledTimes(providerFault?0:1);
 });
 
@@ -222,7 +299,8 @@ it("keeps an automatic recovery handoff silent when current policy is silent",as
 
 it.each([false,true])("retains V2 executed counters after ingress recovery (normal read=%s)",async readFirst=>{
   const f=fixture();await enableRecoveryHandoff(f,"silent");
-  const quoteTask={version:"EXPLICIT_QUOTE_V1",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:2,standalone:true,maxPerTurn:1} as const;
+  for(const p of f.products)p.product.images=[{url:"https://content.pancake.vn/front.jpg",role:"PRIMARY",angle:"FRONT",imageType:"MODEL",intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
+  const quoteTask={version:"EXPLICIT_QUOTE_V3",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:1,readOnlyBatch:false,maxPerTurn:2} as const;
   let n=0;
   const owner=vi.fn(async():Promise<OwnerGeneration>=>{
     if(readFirst&&++n===1){const call={name:"read_policy",args:{}};return {kind:"TOOLS",calls:[call],content:{role:"model",parts:[{functionCall:call}]}};}
@@ -244,7 +322,8 @@ it.each(["rejected","unknown","readback"])("accounts V2 recovery attempt when co
   if(fault==="rejected")f.commit.mockResolvedValue({stateCommitted:false,metaOutboxCreated:0,inboxBatchStatus:"STALE",handoffEventCreated:false,pancakeTagOutboxCreated:false} as never);
   if(fault==="unknown")f.commit.mockRejectedValue(Error("COMMIT_UNKNOWN"));
   if(fault==="readback")f.checkCommit(async()=>{f.store.loadOrCreate=async()=>{throw Error("READBACK_UNAVAILABLE");};});
-  const quoteTask={version:"EXPLICIT_QUOTE_V1",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:2,standalone:true,maxPerTurn:1} as const;
+  for(const p of f.products)p.product.images=[{url:"https://content.pancake.vn/front.jpg",role:"PRIMARY",angle:"FRONT",imageType:"MODEL",intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
+  const quoteTask={version:"EXPLICIT_QUOTE_V3",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:1,readOnlyBatch:false,maxPerTurn:2} as const;
   const result=await f.run(async()=>{throw Error("HTTP_429");},undefined,quoteTask);
   expect(result.terminal).toMatchObject({disposition:"NO_SEND",text:null});
   expect(result).toMatchObject({toolWorkAccounting:"PRIMITIVE_WORK_V2",terminalHandoffCalls:1});
@@ -573,49 +652,62 @@ it.each(["PASS","UNCERTAIN"])("keeps a mixed price/media reply only after whole-
 });
 
 
-it("hands off missing requested feedback even when the price in the same batch is available",async()=>{
+it("honours the owner's relevant missing-feedback handoff even when price is available",async()=>{
   const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);await enableRecoveryHandoff(f);
   f.message.text="Cho chị xem ảnh khách mặc, áo này bao nhiêu em?";
   const calls=[{name:"select_product_media",args:{subjectRef:p.productId,intent:"FEEDBACK"}},
     {name:"read_product",args:{subjectRef:p.productId,offerType:"DIRECT"}}];
-  const owner=vi.fn(async():Promise<OwnerGeneration>=>({kind:"TOOLS",calls,content:{role:"model",parts:calls.map(c=>({functionCall:c}))}}));
+  let owners=0;
+  const owner=vi.fn(async():Promise<OwnerGeneration>=>{
+    const next=++owners===1?calls:[{name:"request_handoff",args:{reason:"DEPENDENCY_FAILURE"}}];
+    return {kind:"TOOLS",calls:next,content:{role:"model",parts:next.map(c=>({functionCall:c}))}};
+  });
   const result=await f.run(owner);
-  expect(result).toMatchObject({enqueued:1,terminal:{disposition:"HANDOFF",reason:"DEPENDENCY_FAILURE"}});
-  expect(owner).toHaveBeenCalledOnce();expect(f.verifier).not.toHaveBeenCalled();
+  expect(result).toMatchObject({enqueued:0,terminal:{disposition:"HANDOFF",reason:"DEPENDENCY_FAILURE",text:null}});
+  expect(owner).toHaveBeenCalledTimes(2);expect(f.verifier).not.toHaveBeenCalled();
   const handoff=f.commit.mock.calls.filter(c=>c[1].handoffEventPlan);expect(handoff).toHaveLength(1);
-  expect(handoff[0]![1]).toMatchObject({state:{conversationOwner:"HUMAN"},metaPlan:{messages:[{kind:"TEXT",text:result.terminal.text}]}});
+  expect(handoff[0]![1]).toMatchObject({state:{conversationOwner:"HUMAN"}});
+  expect(handoff[0]![1].metaPlan).toBeUndefined();
 });
 
-it("keeps exact verified price and durable product/profile proofs through all adapters before atomic handoff",async()=>{
+it("retains internal price coverage but a holding allowlist cannot send a partial reply on missing-shop-data handoff",async()=>{
  const f=fixture(),p=f.products[0]!.product;f.setFocus(p.productId);await enableRecoveryHandoff(f);
  f.message.text="Áo này bao nhiêu, cho chị xem ảnh khách mặc nhé.";
  const {commerceHash}=await import("./single-agent-commerce-read-only-context.js");
  const holding="Shop đã nhận yêu cầu của chị. Bên em sẽ kiểm tra rồi báo lại chị nhé.";
  const calls=[{name:"read_product",args:{subjectRef:p.productId,offerType:"DIRECT"}},{name:"select_product_media",args:{subjectRef:p.productId,intent:"FEEDBACK"}}];
  let owners=0;
- const r=await f.run(async()=>++owners===1?{kind:"TOOLS",calls,content:{role:"model",parts:calls.map(functionCall=>({functionCall}))}}:
-  {kind:"FINAL",text:"Áo 499.000đ chị nhé."},{approvedHoldingHashes:[commerceHash(holding)]});
- expect(r).toMatchObject({enqueued:1,terminal:{disposition:"HANDOFF",text:`Áo 499.000đ chị nhé.\n\n${holding}`}});
- expect(owners).toBe(2);expect(f.verifier).toHaveBeenCalledOnce();
- const group=f.commit.mock.calls.find(c=>c[1].handoffEventPlan)![1].metaPlan!;
- expect(group.protectedClaims).toEqual(expect.arrayContaining([expect.objectContaining({type:"PRICE"})]));
- const proof=(group.handoffBinding as {reply:{sources:{kind:string}[]}}).reply;
- expect(proof.sources.map(s=>s.kind)).toEqual(expect.arrayContaining(["PRODUCT","PROFILE","SALES_STATE"]));
+ const r=await f.run(async()=>{
+  const next=++owners===1?calls:[{name:"request_handoff",args:{reason:"DEPENDENCY_FAILURE"}}];
+  return {kind:"TOOLS",calls:next,content:{role:"model",parts:next.map(functionCall=>({functionCall}))}};
+ },{approvedHoldingHashes:[commerceHash(holding)]});
+ expect(r).toMatchObject({enqueued:0,terminal:{disposition:"HANDOFF",text:null}});
+ expect(owners).toBe(2);expect(f.verifier).not.toHaveBeenCalled();
+ const committed=f.commit.mock.calls.find(c=>c[1].handoffEventPlan)![1];
+ expect(committed.state).toMatchObject({conversationOwner:"HUMAN"});expect(committed.metaPlan).toBeUndefined();
+ if(!("readCoverage" in r))throw new Error("EXPECTED_COMMERCE_READ_COVERAGE");
+ expect(r.readCoverage?.records).toContainEqual(expect.objectContaining({operation:"read_product",facet:"PRICE",status:"AVAILABLE"}));
 });
 
-async function seedCart(f: ReturnType<typeof fixture>) {
+async function seedCart(f: ReturnType<typeof fixture>,colour='navy') {
   const scope=commerceScope(), resolution=await fixturePolicy(), policy=resolution.bundle!.policy;
   f.policy.mockResolvedValue({...resolution,mayAffectOutbound:true,bundle:{...resolution.bundle!,channel:"PUBLISHED",sideEffects:"LIVE_OUTBOUND"}});
   let state=createSalesCycleRuntimeState(scope.conversationId,{pageId:scope.pageId,conversationId:scope.conversationId},commerceNow);
   for(const kind of ["FACTS_PRESENTED","MEASUREMENTS_REQUIRED","SIZE_RECOMMENDED"] as const)
     state=applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind,commandId:kind},now:commerceNow}).state;
-  const line=fixtureCartLine(),draft={identity:{cartId:"50000000-0000-4000-8000-000000000001",salesEpisodeId:"60000000-0000-4000-8000-000000000001",customerProfileId:fixtureProfile().profile.profileId},
+  let source:Extract<CartSelectionResult,{status:'READY'}>|null=null;
+  if(colour==='__NO_COLOR__'){
+   f.products[0]!.snapshot.offers.DIRECT!.rows[0]!.color=colour;
+   const selected=cartSelectionFromSnapshot(f.products[0]!.snapshot,{selectionMode:'CANDIDATE_TUPLES',shopAlias:scope.shopAlias,productId:'SM613',offerType:'DIRECT',size:'M',color:colour,quantity:1,lineId:fixtureCartLine().lineId},commerceNow);
+   if(selected.status!=='READY')throw Error('TEST_SOURCE_NOT_READY');source={...selected,shopId:scope.shopId,line:{...selected.line,priceAuthority:{...selected.line.priceAuthority!,shopId:scope.shopId}}};
+  }
+  const line=source?.line??fixtureCartLine();line.components.forEach(c=>{c.color=colour;});const draft={identity:{cartId:"50000000-0000-4000-8000-000000000001",salesEpisodeId:"60000000-0000-4000-8000-000000000001",customerProfileId:fixtureProfile().profile.profileId},
     lines:[line],shopId:scope.shopId,policyRef:{id:policy.policyBundleId,version:policy.policyVersion,contentHash:computeBusinessContentHash(policy)}};
   state=applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind:"CART_OPENED",commandId:"open",cartDraftRef:{id:"draft",version:"1",contentHash:computeBusinessContentHash(draft)},
     expiresAt:new Date(commerceNow.getTime()+1800000).toISOString()},now:commerceNow,
     trustedPorts:{resolveCartDraft:()=>draft,resolveShopPolicy:()=>policy,resolveCartMutation:()=>null,resolveInboundMessage:()=>null,revalidateCheckout:()=>null}}).state;
   f.setCycle(state);
-  f.select.mockResolvedValue({status:"READY",line,shopId:scope.shopId,versions:{price:line.priceAuthority!.priceFactRef,inventory:"i1",size:"s1",eta:null},eta:null,etaExpiresAt:null,
+  f.select.mockResolvedValue(source??{status:"READY",line,shopId:scope.shopId,versions:{price:line.priceAuthority!.priceFactRef,inventory:"i1",size:"s1",eta:null},eta:null,etaExpiresAt:null,
     sourceAuthority:"POS_SNAPSHOT",stockStatus:"IN_STOCK",stockAvailableQuantity:4,sourceObservedAt:commerceNow.toISOString(),sourceExpiresAt:new Date(commerceNow.getTime()+1200000).toISOString()});
 }
 
@@ -786,7 +878,7 @@ it("fills the public history window after private rows without duplicating the l
   expect(JSON.stringify(captured!)).not.toContain("[PII_REDACTED_MESSAGE]");
 });
 
-it.each(["Nguyễn Thị Lan", "Khoan, áo này giặt máy được không em?"])("keeps pending checkout input private before history or either model (%s)", async text => {
+async function pendingCheckoutFixture(field:"FULL_NAME"|"PHONE"|"ADDRESS"|"PAYMENT_METHOD"="FULL_NAME"){
   const f = fixture(), scope = commerceScope(), resolution = await fixturePolicy(), policy = resolution.bundle!.policy;
   f.policy.mockResolvedValue({...resolution,mayAffectOutbound:true,bundle:{...resolution.bundle!,channel:"PUBLISHED",sideEffects:"LIVE_OUTBOUND"}});
   let state = createSalesCycleRuntimeState(scope.conversationId,{pageId:scope.pageId,conversationId:scope.conversationId},commerceNow);
@@ -797,17 +889,70 @@ it.each(["Nguyễn Thị Lan", "Khoan, áo này giặt máy được không em?"
   state = applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind:"CART_OPENED",commandId:"open",cartDraftRef:{id:"draft",version:"1",contentHash:computeBusinessContentHash(draft)},
     expiresAt:new Date(commerceNow.getTime()+1800000).toISOString()},now:commerceNow,
     trustedPorts:{resolveCartDraft:()=>draft,resolveShopPolicy:()=>policy,resolveCartMutation:()=>null,resolveInboundMessage:()=>null,revalidateCheckout:()=>null}}).state;
-  state = applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind:"CLARIFICATION_REQUESTED",commandId:"asked",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["FULL_NAME"],
+  state = applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind:"CLARIFICATION_REQUESTED",commandId:"asked",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:[field],
     productId:"SM613",questionFingerprint:"f".repeat(64),maxAttempts:3},now:commerceNow}).state;
-  f.setCycle(state); f.message.text = text;
+  f.setCycle(state);
+  f.select.mockResolvedValue({status:"READY",line:structuredClone(state.cart!.value.lines[0]!),shopId:scope.shopId,
+   versions:{price:state.cart!.value.lines[0]!.priceAuthority!.priceFactRef,inventory:"i1",size:"s1",eta:null},eta:null,etaExpiresAt:null,sourceAuthority:"POS_SNAPSHOT",stockStatus:"IN_STOCK",stockAvailableQuantity:4,
+   sourceObservedAt:commerceNow.toISOString(),sourceExpiresAt:new Date(commerceNow.getTime()+1200000).toISOString()});
+  return f;
+}
+it.each(["Nguyễn Thị Lan","Tên: Nguyễn Thị Lan\nSĐT: 0900000001","0900000001","12 Đường Số 3, Quận 7, TP.HCM","COD"])("keeps detected checkout fields private before history or either model (%s)", async text => {
+  const f=await pendingCheckoutFixture();f.message.text=text;
   const owner = vi.fn(async (): Promise<OwnerGeneration> => ({kind:"FINAL",text:"This must not run"}));
   expect(await f.run(owner)).toMatchObject({mode:"PRIVATE_CODE_PATH",enqueued:1});
   expect(owner).not.toHaveBeenCalled(); expect(f.verifier).not.toHaveBeenCalled();
   expect(f.history.recordInboundCustomerMessage).toHaveBeenCalledWith(expect.objectContaining({text:null}));
   expect(f.history.listConversationHistory).not.toHaveBeenCalled();
   const prepared = f.commit.mock.calls.at(-1)![1];
-  expect(prepared.salesCyclePlan?.state).toMatchObject({checkoutDraft:text.startsWith("Nguyễn") ? {fullName:text} : null});
+  if(text==="Nguyễn Thị Lan")expect(prepared.salesCyclePlan?.state).toMatchObject({checkoutDraft:{fullName:text}});
   expect(JSON.stringify(prepared.metaPlan?.messages)).not.toContain(text);
+});
+
+it.each(["FULL_NAME","PHONE","ADDRESS","PAYMENT_METHOD"] as const)("allows a public product question during pending %s without a private intake commit",async field=>{
+ const f=await pendingCheckoutFixture(field),before=structuredClone(f.cycle());
+ f.message.text="Khoan, áo này giặt máy được không em?";
+ const owner=vi.fn(async():Promise<OwnerGeneration>=>({kind:"FINAL",text:"Dạ chị."}));
+ const result=await f.run(owner);
+ expect(owner).toHaveBeenCalledOnce();expect(f.verifier).toHaveBeenCalledOnce();
+ expect(result.terminal.disposition,JSON.stringify(result)).toBe("SEND_ELIGIBLE");
+ expect(f.cycle().checkoutDraft).toEqual(before.checkoutDraft);
+ expect(f.cycle().clarification).toEqual(before.clarification);
+ expect(f.history.recordInboundCustomerMessage).toHaveBeenCalledWith(expect.objectContaining({text:f.message.text}));
+ expect(f.commit.mock.calls.flatMap(c=>c[1].salesCyclePlan?.events??[]).some(e=>e.commandKind==="CHECKOUT_DETAILS_CAPTURED")).toBe(false);
+});
+it.each([
+ "Tên: Nguyễn Thị Lan, chị đổi sang áo lẻ nhé.",
+ "Chị lấy thêm áo L. SĐT: 0900000001",
+ "Đổi sang áo lẻ nhé. Địa chỉ: 12 Đường Số 3, Quận 7, TP.HCM",
+ "Nguyễn Thị Lan\nĐổi sang áo lẻ cho chị.",
+])("keeps a mixed detected private/public inbound in one private path (%s)",async text=>{
+ const f=await pendingCheckoutFixture();f.message.text=text;
+ const owner=vi.fn(),before=structuredClone(f.cycle().cart);
+ await f.run(owner);expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+ expect(f.cycle().cart).toEqual(before);
+ expect(f.history.recordInboundCustomerMessage).toHaveBeenCalledWith(expect.objectContaining({text:null}));
+});
+it.each(["Chị đổi sang áo lẻ nhé.","Lấy thêm áo L navy cho chị.","Giá hơi cao, bớt cho chị được không?","Cảm ơn em nhé.","Chị muốn nhận hàng trước thứ Sáu, kịp không em?"])("does not classify the public request's business intent to interrupt checkout: %s",text=>{
+ expect(isPrivatePendingCheckoutText(text)).toBe(false);
+});
+it.each(["Lan","12 Đường Số 3"])("keeps the entire inbound batch private when one separate fragment is private: %s",async fragment=>{
+ const f=await pendingCheckoutFixture();f.message.text=fragment;
+ f.appendMessage({...f.message,eventKey:"public-followup",messageId:"public-followup",text:"Khoan, áo này giặt máy được không em?"});
+ const owner=vi.fn();await f.run(owner);expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+ expect(f.history.recordInboundCustomerMessage).toHaveBeenCalledTimes(2);
+ expect(f.history.recordInboundCustomerMessage.mock.calls.every(([r])=>(r as {text:unknown}).text===null)).toBe(true);
+});
+it.each(["Lan","Nguyễn Thị Lan","0900000001","12 Đường Số 3, Quận 7, TP.HCM","COD","[PHONE]"])("retains existing private field syntax and marker protection: %s",text=>{
+ expect(isPrivatePendingCheckoutText(text)).toBe(true);
+});
+it("does not resume the owner for a superseded pending checkout interruption",async()=>{
+ const f=await pendingCheckoutFixture();f.message.text="Đổi sang áo lẻ cho chị.";f.supersede();
+ const owner=vi.fn();expect((await f.run(owner)).terminal.reason).toBe("INBOX_BATCH_SUPERSEDED");expect(owner).not.toHaveBeenCalled();
+});
+it("does not resume the owner after HUMAN takes over pending checkout",async()=>{
+ const f=await pendingCheckoutFixture();f.message.text="Đổi sang áo lẻ cho chị.";f.transferToHuman();
+ const owner=vi.fn();expect((await f.run(owner)).terminal.reason).toBe("HUMAN_OWNS_CONVERSATION");expect(owner).not.toHaveBeenCalled();
 });
 
 it("starts the independent generation read while current authority is being loaded", async () => {
@@ -1081,4 +1226,171 @@ it.each(["unchanged","revision","media"])("explicit quote uses the real group eg
  if(mode==="unchanged"){expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(messages).toEqual([{kind:"TEXT",text:"Áo 499.000đ chị nhé."},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);}
  else{expect(result.terminal.disposition).toBe("NO_SEND");expect(messages).toEqual([]);}
  expect(f.verifier).toHaveBeenCalledOnce();
+});
+
+const openingRule={version:"FIRST_CONTACT_IDENTIFIED_PRODUCT_IMAGE_V1"} as const;
+function openingFixture(withImages=true){
+ const f=fixture();Object.assign(f.history,{hasPriorAcceptedShopOutput:vi.fn(async()=>false)});
+ Object.assign(f.batch.items[0]!,{receivedAt:commerceNow});
+ const p=f.products[0]!.product;
+ if(withImages)p.images=[{url:"https://content.pancake.vn/opening.jpg",role:"PRIMARY",angle:"FRONT",imageType:"MODEL",intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
+ return f;
+}
+it.each(["Dạ chị.","Shop không hẹn sáng mai chị nhé.","Áo 499.000đ chị nhé."])("opening rule attaches media to early FINAL through actual ingress: %s",async text=>{
+ const f=openingFixture();const r=await f.run(async()=>({kind:"FINAL",text}),undefined,undefined,undefined,openingRule);
+ expect(r.terminal.disposition).toBe("SEND_ELIGIBLE");expect(f.commit.mock.calls.at(-1)![1].metaPlan?.messages).toEqual([{kind:"TEXT",text},{kind:"IMAGE",imageUrl:f.products[0]!.product.images[0]!.url}]);
+ const request=f.verifier.mock.calls[0]![0] as unknown as {trusted:{protectedClaims:{type:string}[]}};expect(request.trusted.protectedClaims.some(c=>c.type==="PRODUCT_MEDIA")).toBe(true);
+});
+it("opening rule cannot send an early bare quote without a valid photo",async()=>{
+ const f=openingFixture(false);f.enableHandoff();const r=await f.run(async()=>({kind:"FINAL",text:"Áo 499.000đ chị nhé."}),undefined,undefined,undefined,openingRule);
+ expect(r.terminal.disposition).toBe("HANDOFF");expect(r.terminal.text).toBeNull();expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);expect(f.verifier).not.toHaveBeenCalled();
+});
+it("opening private input cannot commit a code-only message without prior accepted shop output",async()=>{
+ const f=openingFixture();f.enableHandoff();f.message.text="[PHONE] [ADDRESS]";const owner=vi.fn();const r=await f.run(owner,undefined,undefined,undefined,openingRule);
+ expect(r.terminal.disposition).toBe("HANDOFF");expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+});
+
+it('CUSTOMER-only dialogue never substitutes for prior accepted shop output',async()=>{
+ const f=openingFixture();f.history.listConversationHistory.mockResolvedValue(Array.from({length:30},()=>({senderType:'CUSTOMER',direction:'INBOUND',text:'Chị đang xem mẫu này.'})));
+ const r=await f.run(async()=>({kind:'FINAL',text:'Dạ chị.'}),undefined,undefined,undefined,openingRule);expect(r.terminal.disposition).toBe('SEND_ELIGIBLE');expect(f.commit.mock.calls.at(-1)![1].metaPlan?.messages.filter(m=>m.kind==='IMAGE')).toHaveLength(1);
+});
+it('durable returning proof keeps no-photo replies available',async()=>{
+ const f=openingFixture(false);(f.history as unknown as {hasPriorAcceptedShopOutput:ReturnType<typeof vi.fn>}).hasPriorAcceptedShopOutput.mockResolvedValue(true);
+ const r=await f.run(async()=>({kind:'FINAL',text:'Dạ chị.'}),undefined,undefined,undefined,openingRule);expect(r.terminal.disposition).toBe('SEND_ELIGIBLE');expect(f.commit.mock.calls.at(-1)![1].metaPlan?.messages).toEqual([{kind:'TEXT',text:'Dạ chị.'}]);
+});
+it('unknown prior-output source never authorizes a bare opening response',async()=>{
+ const f=openingFixture();f.enableHandoff();(f.history as unknown as {hasPriorAcceptedShopOutput:ReturnType<typeof vi.fn>}).hasPriorAcceptedShopOutput.mockRejectedValue(Error('SOURCE_UNAVAILABLE'));
+ const r=await f.run(async()=>({kind:'FINAL',text:'Dạ chị.'}),undefined,undefined,undefined,openingRule);expect(r.terminal.disposition).toBe('HANDOFF');expect('normalToolCalls' in r&&r.normalToolCalls).toBe(1);expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);
+});
+it('egress independently rejects an evaluation runner that bypasses mandatory preparation',async()=>{
+ const f=openingFixture();f.enableHandoff();
+ const reference:NonNullable<Parameters<typeof runPersistedCommerceIngress>[0]['evaluationTurn']>['run']=async turn=>{await turn.tools.prepare?.();return {terminal:{disposition:'SEND_ELIGIBLE',reason:'PASS',text:'Dạ chị.',fallbackId:null},recovery:null,sendEnabled:false,ownerGenerations:0,verifierGenerations:0,toolRounds:0,normalToolCalls:1,terminalHandoffCalls:0,toolCalls:1,proposedToolCalls:0,rejectedToolCalls:0,handoff:null,generations:[],toolLatencyMs:0,verificationLatencyMs:null};};
+ const r=await f.run(async()=>({kind:'FINAL',text:'unused'}),undefined,undefined,{kind:'PINNED_MAIN_C3',run:reference},openingRule);
+ expect(r.terminal.disposition).toBe('HANDOFF');expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);
+});
+it('prior-output cutoff precedes both source time and durable receipt time',async()=>{
+ const f=openingFixture();const received=new Date(commerceNow.getTime()-1000);Object.assign(f.batch.items[0]!,{receivedAt:received});
+ await f.run(async()=>({kind:'FINAL',text:'Dạ chị.'}),undefined,undefined,undefined,openingRule);
+ const query=(f.history as unknown as {hasPriorAcceptedShopOutput:ReturnType<typeof vi.fn>}).hasPriorAcceptedShopOutput;
+ expect(query.mock.calls[0]![0]).toMatchObject({pageId:f.batch.pageId,customerHash:f.batch.conversationHash,before:received});
+});
+
+it('opening checkout confirm commits the native missing-field question and photo in one group',async()=>{
+ const f=openingFixture();await seedCart(f);f.enableHandoff();f.message.text='Chốt đơn cho chị nhé.';
+ const call={name:'confirm_purchase',args:{}};const owner=vi.fn(async()=>({kind:'TOOLS' as const,calls:[call],content:{role:'model' as const,parts:[{functionCall:call}]}}));
+ const r=await f.run(owner,undefined,undefined,undefined,openingRule);
+ expect(r.terminal).toMatchObject({disposition:'NO_SEND',reason:'CHECKOUT_DETAILS_MISSING'});expect(r.enqueued).toBe(2);
+ const meta=f.commit.mock.calls.find(c=>c[1].metaPlan)![1].metaPlan!;
+ expect(meta.messages[0]).toMatchObject({kind:'TEXT'});expect(meta.messages[1]).toMatchObject({kind:'IMAGE'});expect(CommerceMediaDeliveryBindingV1Schema.parse(meta.mediaBinding).images).toHaveLength(1);
+ expect(meta.effectReadiness?.outcome).toBe('READY');expect(f.cycle().clarification?.missingFields).toEqual(['FULL_NAME']);expect(f.cycle().confirmation).toBeNull();
+ expect(owner).toHaveBeenCalledOnce();expect(f.verifier).not.toHaveBeenCalled();expect(f.commit.mock.calls.some(c=>c[1].handoffEventPlan)).toBe(false);
+});
+it.each(['FINAL','CONFIRM','PRIVATE'])('source-proven unlabelled cart uses generic opening media without changing its tuple: %s',async mode=>{
+ const f=openingFixture();await seedCart(f,'__NO_COLOR__');f.enableHandoff();f.message.text=mode==='PRIVATE'?'Tên: Khách thử nghiệm':'Chốt đơn cho chị nhé.';const before=structuredClone(f.cycle().cart!.value);
+ const responses:unknown[]=[];const call={name:'confirm_purchase',args:{}};const r=await f.run(async request=>{responses.push(...request.contents.flatMap(m=>m.parts.flatMap(p=>'functionResponse' in p?[p.functionResponse]:[])));return mode==='FINAL'?{kind:'FINAL',text:'Dạ chị.'}:{kind:'TOOLS',calls:[call],content:{role:'model',parts:[{functionCall:call}]}};},undefined,undefined,undefined,openingRule);
+ expect(r.enqueued,JSON.stringify({result:r,responses})).toBe(2);expect(f.commit.mock.calls.some(c=>c[1].handoffEventPlan)).toBe(false);expect(f.cycle().cart!.value).toEqual(before);
+ expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[]).filter(m=>m.kind==='IMAGE')).toHaveLength(1);
+});
+it.each(['unavailable','physical-constraint','tuple-change'])('unlabelled source media proof cannot authorize changed or constrained cart: %s',async mode=>{
+ const f=openingFixture();await seedCart(f,'__NO_COLOR__');f.enableHandoff();f.message.text='Chốt đơn cho chị nhé.';
+ if(mode==='unavailable')f.select.mockResolvedValue({status:'INVALID',reasonCode:'SOURCE_UNAVAILABLE',availableSizes:[],availableColors:[]});
+ if(mode==='tuple-change'){const selected=await f.select();if(selected.status!=='READY')throw Error('TEST_SOURCE');selected.line.components[0]!.size='L';f.select.mockResolvedValue(selected);}
+ let n=0;const call={name:'select_product_media',args:{subjectRef:'SM613',intent:'GENERIC',color:'red'}};
+ const r=await f.run(async()=>mode==='physical-constraint'&&++n===1?{kind:'TOOLS',calls:[call],content:{role:'model',parts:[{functionCall:call}]}}:{kind:'FINAL',text:'Dạ chị.'},undefined,undefined,undefined,openingRule);
+ expect(r.enqueued).toBe(0);expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);expect(f.verifier).not.toHaveBeenCalled();
+});
+it.each(['PUBLIC','PRIVATE'])('noncanonical source sentinel cannot prove unlabelled media: %s',async mode=>{
+ const f=openingFixture();await seedCart(f,'__NO_COLOR__');f.enableHandoff();f.message.text=mode==='PRIVATE'?'Tên: Khách thử nghiệm':'Chốt đơn cho chị nhé.';
+ const selected=structuredClone(await f.select());if(selected.status!=='READY')throw Error('TEST_SOURCE');
+ selected.line.components.forEach(c=>{c.color='__no_color__';});f.select.mockResolvedValue(selected);
+ f.products[0]!.snapshot.offers.DIRECT!.rows[0]!.color='__no_color__';
+ const r=await f.run(async()=>({kind:'FINAL',text:'Dạ chị.'}),undefined,undefined,undefined,openingRule);
+ expect(r.enqueued).toBe(0);expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);
+});
+it.each(['PUBLIC','PRIVATE'])('unknown cart component colour is not canonical unlabelled proof: %s',async mode=>{
+ const f=openingFixture();await seedCart(f,'__NO_COLOR__');f.enableHandoff();f.message.text=mode==='PRIVATE'?'Tên: Khách thử nghiệm':'Chốt đơn cho chị nhé.';
+ const cycle=structuredClone(f.cycle());cycle.cart!.value.lines[0]!.components[0]!.color=null;f.setCycle(cycle);
+ const selected=structuredClone(await f.select());if(selected.status!=='READY')throw Error('TEST_SOURCE');selected.line.components[0]!.color=null;f.select.mockResolvedValue(selected);
+ const r=await f.run(async()=>({kind:'FINAL',text:'Dạ chị.'}),undefined,undefined,undefined,openingRule);
+ expect(r.enqueued).toBe(0);expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);
+});
+it.each(['source','cart','late-cart','revision','authority'])('unlabelled private preparation cannot outlive current authority or evidence: %s',async fault=>{
+ const f=openingFixture();await seedCart(f,'__NO_COLOR__');f.enableHandoff();f.message.text='Tên: Khách thử nghiệm';
+ const selected=structuredClone(await f.select());if(selected.status!=='READY')throw Error('TEST_SOURCE');
+ if(fault==='source')f.select.mockResolvedValue({...selected,sourceExpiresAt:new Date(commerceNow.getTime()+20*60000).toISOString()});
+ if(fault==='cart'){
+  // Source remains fresh while the enclosing thirty-minute cart expires.
+  const sourceObservedAt=new Date(commerceNow.getTime()+30*60000).toISOString();
+  f.products[0]!.snapshot.synced_at=sourceObservedAt;f.select.mockResolvedValue({...selected,sourceObservedAt,sourceExpiresAt:new Date(commerceNow.getTime()+50*60000).toISOString()});
+ }
+ let reads=0;if(fault==='late-cart')f.select.mockImplementation(async()=>{if(reads>=2)f.setClock(new Date(commerceNow.getTime()+31*60000));return {...selected,sourceExpiresAt:new Date(commerceNow.getTime()+60*60000).toISOString()};});
+ f.catalogRead.mockImplementation(async id=>{
+  if(++reads===2){if(fault==='revision')f.changeRevision();else if(fault==='authority')f.transferToHuman();else if(fault!=='late-cart')f.setClock(new Date(commerceNow.getTime()+(fault==='cart'?31:21)*60000));}
+  return f.products.find(p=>p.product.productId===id);
+ });
+ const r=await f.run(vi.fn(),undefined,undefined,undefined,openingRule);
+ expect(r.enqueued).toBe(0);expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);expect(f.cycle().checkoutDraft?.fullName??null).toBeNull();
+ if(fault==='late-cart')expect('privateCheckoutFailure' in r&&r.privateCheckoutFailure?.stage).toBe('SOURCE');
+});
+it('opening private checkout asks the next missing field with product photo and zero models',async()=>{
+ const f=openingFixture();await seedCart(f);f.enableHandoff();f.message.text='Tên: Khách thử nghiệm';const owner=vi.fn();
+ const r=await f.run(owner,undefined,undefined,undefined,openingRule);expect(r).toMatchObject({mode:'PRIVATE_CODE_PATH',enqueued:2,terminal:{reason:'PRIVATE_CHECKOUT_COMMITTED'}});
+ const meta=f.commit.mock.calls.find(c=>c[1].metaPlan)![1].metaPlan!;expect(meta.messages[0]).toMatchObject({kind:'TEXT'});expect(meta.messages[1]).toMatchObject({kind:'IMAGE'});
+ expect(CommerceMediaDeliveryBindingV1Schema.parse(meta.mediaBinding).images).toHaveLength(1);expect(f.cycle().checkoutDraft?.fullName).toBe('Khách thử nghiệm');expect(JSON.stringify(meta.messages)).not.toContain('Khách thử nghiệm');expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+});
+
+it.each(['missing','authority','source','policy'])('opening checkout preparation fails before checkout commit: %s',async fault=>{
+ const f=openingFixture(fault!=='missing');await seedCart(f);f.enableHandoff();f.message.text='Tên: Khách thử nghiệm';let n=0;
+ f.catalogRead.mockImplementation(async id=>{
+  if(++n===2){
+   if(fault==='authority')f.transferToHuman();
+   if(fault==='source'){const line=structuredClone(fixtureCartLine());line.posUnitPriceVnd=600000;line.lineTotalVnd=600000;f.select.mockResolvedValue({status:'READY',line,shopId:commerceScope().shopId,versions:{price:'changed',inventory:'i1',size:'s1',eta:null},eta:null,etaExpiresAt:null,sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:4,sourceObservedAt:commerceNow.toISOString(),sourceExpiresAt:new Date(commerceNow.getTime()+1200000).toISOString()});}
+   if(fault==='policy'){const changed=await fixturePolicy();changed.bundle!.policy.shipping.defaultFeeVnd+=1000;f.policy.mockResolvedValue(changed);}
+  }
+  return f.products.find(p=>p.product.productId===id);
+ });
+ const owner=vi.fn(),r=await f.run(owner,undefined,undefined,undefined,openingRule);
+ expect(r.enqueued).toBe(0);expect(f.cycle().checkoutDraft?.fullName??null).toBeNull();if(fault==='missing')expect('normalToolCalls' in r&&r.normalToolCalls).toBe(2);expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);expect(owner).not.toHaveBeenCalled();expect(f.verifier).not.toHaveBeenCalled();
+});
+it('public checkout image preparation shares the already consumed six-call budget',async()=>{
+ const f=openingFixture();await seedCart(f);f.enableHandoff();f.message.text='Chốt đơn cho chị nhé.';
+ const calls=[...Array.from({length:4},()=>({name:'read_policy',args:{}})),{name:'confirm_purchase',args:{}}];
+ const r=await f.run(async()=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(functionCall=>({functionCall}))}}),undefined,undefined,undefined,openingRule);
+ expect(r.enqueued).toBe(0);expect('normalToolCalls' in r&&r.normalToolCalls).toBe(6);expect(f.cycle().clarification??null).toBeNull();expect(f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[])).toEqual([]);
+});
+
+it.each([false,true])('opening private preview binds each same-product purchase variant to its own stock source: changed=%s',async changed=>{
+ const f=openingFixture();await seedCart(f);f.enableHandoff();const state=structuredClone(f.cycle()),first=state.cart!.value.lines[0]!,second=structuredClone(first);
+ second.lineId='40000000-0000-4000-8000-000000000002';second.offerId='SM613-SECOND';second.priceAuthority={...second.priceAuthority!,offerId:second.offerId,priceFactRef:'pos:SM613-SECOND'};second.components[0]!.size='L';second.components[0]!.componentSku='SM613-NAVY-L';
+ state.cart!.value.lines.push(second);state.cart!.value.subtotalVnd=first.lineTotalVnd!+second.lineTotalVnd!;if(state.cart!.value.grandTotalVnd!==null)state.cart!.value.grandTotalVnd+=second.lineTotalVnd!;f.setCycle(state);
+ let prepared=false;f.catalogRead.mockImplementation(async id=>{prepared=true;return f.products.find(p=>p.product.productId===id);});
+ f.select.mockImplementation(async(...args:unknown[])=>{const q=args[0] as {lineId:string};const line=structuredClone(q.lineId===second.lineId?second:first),sourceChanged=changed&&prepared&&q.lineId===second.lineId;
+  return {status:'READY',line,shopId:commerceScope().shopId,versions:{price:line.priceAuthority!.priceFactRef,inventory:sourceChanged?'stock-new':'stock-old',size:'size-v1',eta:'eta-v1'},eta:{minDays:3,maxDays:6},etaExpiresAt:new Date(commerceNow.getTime()+1200000).toISOString(),sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:4,stockCounter:{source:'PANCAKE_DIRECT',unit:'ITEM',identity:JSON.stringify([line.parentProductId,line.components[0]!.size,line.components[0]!.color])},sourceObservedAt:commerceNow.toISOString(),sourceExpiresAt:new Date(commerceNow.getTime()+1200000).toISOString()};
+ });
+ f.message.text='Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD';const r=await f.run(vi.fn(),undefined,undefined,undefined,openingRule);
+ if(changed){expect(r.enqueued).toBe(0);expect(f.cycle().stage).toBe('CART_OPEN');expect('privateCheckoutFailure' in r&&r.privateCheckoutFailure?.stage).toBe('SOURCE');}
+ else{expect(r.enqueued,JSON.stringify(r)).toBe(2);expect(f.cycle().stage).toBe('ORDER_PREVIEW');expect('checkoutMediaOutput' in r&&r.checkoutMediaOutput?.preview?.cartId).toBe(state.cart!.value.cartId);}
+ expect(f.verifier).not.toHaveBeenCalled();
+});
+it('expiry while preparing a code-owned preview is a known SOURCE failure before transaction dispatch',async()=>{
+ const f=openingFixture();await seedCart(f);f.enableHandoff();let mediaStarted=false;
+ f.catalogRead.mockImplementation(async id=>{mediaStarted=true;return f.products.find(p=>p.product.productId===id);});
+ f.select.mockImplementation(async()=>{if(mediaStarted)f.setClock(new Date(commerceNow.getTime()+21*60000));return {status:'READY',line:fixtureCartLine(),shopId:commerceScope().shopId,versions:{price:'pos:SM613',inventory:'stock-v1',size:'size-v1',eta:'eta-v1'},eta:{minDays:3,maxDays:6},etaExpiresAt:new Date(commerceNow.getTime()+1200000).toISOString(),sourceAuthority:'POS_SNAPSHOT',stockStatus:'IN_STOCK',stockAvailableQuantity:4,sourceObservedAt:commerceNow.toISOString(),sourceExpiresAt:new Date(commerceNow.getTime()+1200000).toISOString()};});
+ f.message.text='Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: Quận 1, TP Hồ Chí Minh\nCOD';const r=await f.run(vi.fn(),undefined,undefined,undefined,openingRule);
+ expect(r.enqueued).toBe(0);expect('privateCheckoutFailure' in r&&r.privateCheckoutFailure?.stage).toBe('SOURCE');expect(f.commit.mock.calls.every(c=>!c[1].metaPlan)).toBe(true);expect(f.cycle().stage).toBe('CART_OPEN');
+});
+
+
+it.each(["unchanged","revision"])("returning total before colour selection reaches native egress without a cart or another image: %s",async mode=>{
+ const {EXPLICIT_QUOTE_TASK}=await import("./single-agent-commerce-quote.js");const f=openingFixture(false);
+ (f.history as unknown as {hasPriorAcceptedShopOutput:ReturnType<typeof vi.fn>}).hasPriorAcceptedShopOutput.mockResolvedValue(true);
+ f.history.listConversationHistory.mockResolvedValue([{direction:"INBOUND",senderType:"CUSTOMER",text:"Chị lấy hai áo, một M một L."},{direction:"OUTBOUND",senderType:"BOT",text:"Chị lấy màu nào ạ?"}]);
+ f.message.text="Em báo tổng cả phí ship cho chị nhé.";let n=0;
+ f.verifier.mockImplementation(async()=>{if(mode==="revision")f.changeRevision();return {result:{verdict:"PASS",violations:[]}};});
+ const call={name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity:2}},text="Hai áo cả ship là 973.100đ chị nhé.";
+ const result=await f.run(async request=>{expect(request.availableTools).toContain("quote_product");return ++n===1?{kind:"TOOLS",calls:[call],content:{role:"model",parts:[{functionCall:call}]}}:{kind:"FINAL",text};},undefined,EXPLICIT_QUOTE_TASK,undefined,openingRule);
+ const messages=f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[]);
+ if(mode==="unchanged"){expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(messages).toEqual([{kind:"TEXT",text}]);expect(f.cycle().cart).toBeNull();expect(f.cycle().checkoutDraft).toBeNull();expect(f.cycle().confirmation).toBeNull();}
+ else{expect(result.terminal.disposition).toBe("NO_SEND");expect(messages).toEqual([]);}
+ expect(f.verifier).toHaveBeenCalledOnce();expect(f.select).not.toHaveBeenCalled();
 });

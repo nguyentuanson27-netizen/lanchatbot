@@ -1,0 +1,338 @@
+{
+  "kind": "RUN_PROVENANCE_NOT_MODEL_QUALITY_PROOF",
+  "runSourceSha": "e43e1b75c6ba3da2b3f77243e17bd6045131731a",
+  "approvedExecutableSha": "3a06936f8f43b7b31e09215fd8cd516f79797429",
+  "runtimeSourceChangedDuringBatch": false,
+  "nativeCommands": {
+    "kind": "FULL_22_DEVELOPMENT_RERUN_NOT_QUALIFICATION",
+    "command": [
+      "python",
+      "apps/worker/evals/single-agent-commerce-read-only/model-code-division-run-20261019/raw/credential-launcher.py",
+      "node",
+      "apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs",
+      "../c3-c-variant-run-20261030-01",
+      "COD",
+      "--phase-c-diagnostic-registration",
+      "../c3-c-variant-sealed-20261030-01/REGISTRATION.json",
+      "--phase-c-world",
+      "../c3-c-variant-world-resolved-20261030-01.json",
+      "--phase-c-seed",
+      "../c3-c-variant-sealed-20261030-01/PRIVATE_BLIND_SEED.json"
+    ],
+    "sourceSha": "e43e1b75c6ba3da2b3f77243e17bd6045131731a",
+    "registrationHash": "0c6615a249c044d4011a534e8572ba014f8b9f35802f6731c13c0b2d0b6f981f",
+    "processAppdata": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-eval-runtime-01592",
+    "retry": 0,
+    "sendEnabled": false,
+    "startedAt": "2026-10-30T16:07:55.463714+00:00",
+    "exitCode": 0,
+    "completedAt": "2026-10-30T16:20:27.960327+00:00"
+  },
+  "knownNativeInventoryCombinationLimitation": {
+    "kind": "PREREGISTRATION_READ_ONLY_INVENTORY_NATIVE_V2_UNCHANGED",
+    "candidateRuntimeUnchanged": true,
+    "sourceWorldUnchanged": true,
+    "sourceCheckAdapter": "createReadOnlyTools(candidateEvidence:false)",
+    "scope": "EVALUATOR_SOURCE_AND_FRESHNESS_CHECKS_ONLY_NOT_NATIVE_REQUESTS",
+    "knownNativeCombinationLimitation": {
+      "product": "SQ2447",
+      "combination": "all offers then policy hydrated size charts",
+      "reason": "PRODUCT_EVIDENCE_BOUND",
+      "evidenceRef": "../c3-c-bcrepair-register-20261030-03.log",
+      "providerGenerationsAtObservation": 0
+    }
+  },
+  "sourceCapture": {
+    "raw": {
+      "status": "CAPTURED",
+      "worldHash": "9d2b101e27851934d3dc0fbba0429e0d2316aaae54875b61e2ec934257e98dd7",
+      "products": 107,
+      "sourceSha": "e43e1b75c6ba3da2b3f77243e17bd6045131731a",
+      "providerRequests": 0,
+      "sourceWrites": 0
+    },
+    "failedDirectAttempts": [
+      {
+        "status": "BLOCKED",
+        "stage": "PUBLIC_WORLD_CAPTURE",
+        "errorCode": 23,
+        "providerRequests": 0,
+        "sourceWrites": 0
+      },
+      {
+        "status": "BLOCKED",
+        "stage": "PUBLIC_WORLD_CAPTURE",
+        "errorCode": 23,
+        "providerRequests": 0,
+        "sourceWrites": 0
+      }
+    ],
+    "route": {
+      "kind": "READ_ONLY_SOURCE_CAPTURE_QDRANT_HTTPS_OVER_EXISTING_SSH_TCP",
+      "directCaptureFailures": [
+        "../c3-c-variant-world-20261030-01/SUMMARY.json",
+        "../c3-c-variant-world-20261030-02/SUMMARY.json"
+      ],
+      "originalOriginAndSniPreserved": true,
+      "caVerification": true,
+      "providerRouteChanged": false,
+      "sourceWrites": 0,
+      "providerGenerationsBeforeCapture": 0,
+      "helpers": [
+        {
+          "path": "../c3-c-variant-qdrant-tunnel-20261030.py",
+          "sha256": "53f858bd9f28e0d31421199171bc2e31529948c5e86448e8680a268b0409739d"
+        },
+        {
+          "path": "../c3-c-variant-qdrant-tls-forward-20261030.mjs",
+          "sha256": "b6a1a87f50661b0c6040725d8c3b48347fe1fc94022fbb652fcaaa80dda1cfdd"
+        }
+      ],
+      "review": {
+        "status": "APPROVED_CAPTURE_ONLY",
+        "reviewer": "/root/bc_fix_review",
+        "nonStringRequestInput": "REJECTED"
+      }
+    },
+    "sourceWrites": 0,
+    "healthDiagnosticNote": "First env-only diagnostic returned403 because credentialfile route was omitted; corrected existingfile-based auth returned200. No credential/source/model changed. Direct capture timeouts23 retained; HTTPS/SNI/CA preserved through SSH for successful capture03."
+  },
+  "corpusHash": "b9ecc23351ab192f123d81017621156d3d4f22ff9dee68688bb78b4b0d862b5c",
+  "worldHash": "65af6c5e3b74d4ad751e1975a6df10fe58514301f9ef2bd9fb91b75effe08917",
+  "initialHash": "0b586d05edc30780caf9f4b802947b1cbf17dbf1691188a83087ba69ef66c5d2",
+  "prompts": {
+    "owner": "9887885e8cfa284a8a8fa45e4df28c7550684f1228a3c3e1995072ba26d8c392",
+    "verifier": "8204c6ce38b7bf18dbee8f7fe63735a1e5ea351a4d8c57b6276607476faf1f9c",
+    "schema": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+    "judge": "80843a39c70548e8709a5cbd42628927b0c34515cd3d2d55e7667212355d6bff",
+    "rubric": "a652669b2ea5d788eaba897bfd24f0bbf8fe3fbe3a6ab6e64ecdc4cb51984fad"
+  },
+  "models": {
+    "owner": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    },
+    "judge": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high"
+    }
+  },
+  "files": [
+    {
+      "path": "../c3-c-variant-finalize-20261030.mjs",
+      "sha256": "849481450db3f6eabedce1795e6574603a075804a36b02cdcba17223f3eb604d",
+      "bytes": 2143
+    },
+    {
+      "path": "../c3-c-variant-independent-accounting-20261030.mjs",
+      "sha256": "91e2f221d1bc4e25cf0e9d41cb288b5ee6cbfd509fdcf8ffb0d2c132f34f9077",
+      "bytes": 16517
+    },
+    {
+      "path": "../c3-c-variant-packet-20261030.mjs",
+      "sha256": "3cb379bf619e6e5b2d09a20122e025766646c6c7b1b4cc3ec79146270810bbaf",
+      "bytes": 2524
+    },
+    {
+      "path": "../c3-c-variant-prepare-20261030.mjs",
+      "sha256": "8360aa76b4b1e4508e1c023a8bea517b95c3c07a6f78ff0d55305c390b533a54",
+      "bytes": 9423
+    },
+    {
+      "path": "../c3-c-variant-qdrant-tls-forward-20261030.mjs",
+      "sha256": "b6a1a87f50661b0c6040725d8c3b48347fe1fc94022fbb652fcaaa80dda1cfdd",
+      "bytes": 1804
+    },
+    {
+      "path": "../c3-c-variant-report-20261030.mjs",
+      "sha256": "2f0111828ec95e78d45d8771c86e53f475505ca3c645729ec982fd19ccb831a9",
+      "bytes": 7871
+    },
+    {
+      "path": "../c3-c-variant-launch-20261030.py",
+      "sha256": "4ef37f00444f24181dc92d639b49a8d2ccc749e8e9d1db4616889d19c997e318",
+      "bytes": 1922
+    },
+    {
+      "path": "../c3-c-variant-qdrant-tunnel-20261030.py",
+      "sha256": "53f858bd9f28e0d31421199171bc2e31529948c5e86448e8680a268b0409739d",
+      "bytes": 1792
+    },
+    {
+      "path": "../c3-c-variant-source-health-20261030.py",
+      "sha256": "eb1399cffcaedbb3f2e61ac7453779233ebd34993a64b062be704f5caa16a5c5",
+      "bytes": 1712
+    },
+    {
+      "path": "../c3-c-variant-source-health-auth-20261030.py",
+      "sha256": "2f1b05ccacf0514c23ff4096900a426a75c4685bb8d0ef8d53b39a80d9eb7590",
+      "bytes": 2084
+    },
+    {
+      "path": "../c3-c-variant-helper-seal-20261030.json",
+      "sha256": "584d5fc507e0ef63b7fb3d7fa94b613e43932a5da575cd59072c56455396302b",
+      "bytes": 1573
+    },
+    {
+      "path": "../c3-c-variant-capture-route-20261030.json",
+      "sha256": "e2924f0697c3469927bf76fd5565d939195a19f23d4b0d5695a2bb1e269faae5",
+      "bytes": 878
+    },
+    {
+      "path": "../c3-c-variant-source-health-20261030.log",
+      "sha256": "ccea84dd96649222e089428699d286bddfa87abfd17f954310cdb442cf6fc6c5",
+      "bytes": 107
+    },
+    {
+      "path": "../c3-c-variant-source-health-auth-20261030.log",
+      "sha256": "66e17cdfa5f5a3353d84406d3cc7d43e3267eee28b32f1a9392c90f46e58c9d5",
+      "bytes": 186
+    },
+    {
+      "path": "../c3-c-variant-world-20261030-01/SUMMARY.json",
+      "sha256": "05ca2a52981c9896f6e9bd80764c5030fc5d94060b88d75945a141fffe8852b0",
+      "bytes": 104
+    },
+    {
+      "path": "../c3-c-variant-world-20261030-02/SUMMARY.json",
+      "sha256": "05ca2a52981c9896f6e9bd80764c5030fc5d94060b88d75945a141fffe8852b0",
+      "bytes": 104
+    },
+    {
+      "path": "../c3-c-variant-world-20261030-03/SUMMARY.json",
+      "sha256": "eabff461f9f19406ec6a5d30765d9bb862508dc38ac2f9d5689b9bdb4f7df0ea",
+      "bytes": 208
+    },
+    {
+      "path": "../c3-c-variant-world-capture-20261030-01.log",
+      "sha256": "438b1d81eb6bd3aacf9680ffb1a6664f82a4ca872c42d9fe583fd972276bdb11",
+      "bytes": 416
+    },
+    {
+      "path": "../c3-c-variant-world-capture-20261030-02.log",
+      "sha256": "438b1d81eb6bd3aacf9680ffb1a6664f82a4ca872c42d9fe583fd972276bdb11",
+      "bytes": 416
+    },
+    {
+      "path": "../c3-c-variant-world-capture-20261030-03.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "../c3-c-variant-world-resolve-20261030-01.log",
+      "sha256": "d27d3c8bdc269ff0eeeb69169df7a6545a208eb7eec14a7263c92ca3cc9ed149",
+      "bytes": 166
+    },
+    {
+      "path": "../c3-c-variant-register-20261030-01.log",
+      "sha256": "038b2520bcbd3d2ca4a93594857307b49045f7073408b123dca655700404df3c",
+      "bytes": 1827
+    },
+    {
+      "path": "../c3-c-variant-finalize-20261030-01.log",
+      "sha256": "f0103501b94e4035c0b7a286c7e6f9f194b7ff0efec447246286ccd4d7f7f15b",
+      "bytes": 786
+    },
+    {
+      "path": "../c3-c-variant-protocol-20261030-01.log",
+      "sha256": "720e1660ef09d378880da8277bfff0f2543d28900e371620dc6036acde52b76c",
+      "bytes": 8925
+    },
+    {
+      "path": "../c3-c-variant-initial-20261030-01/INITIAL_STATE.json",
+      "sha256": "27d5b634edab7d08697c9cd606075366c93e110d04b7acedb1b8b4e8b16a3ee4",
+      "bytes": 700
+    },
+    {
+      "path": "../c3-c-variant-initial-20261030-01/integration.json",
+      "sha256": "69647d0b25a02595352de9231bfb850af94e4d268f7a078a3c0044a4bb1db460",
+      "bytes": 7576
+    },
+    {
+      "path": "../c3-c-variant-sealed-20261030-01/INPUT_APPROVAL.json",
+      "sha256": "5f2c500820b5c97939d8e6c679de89ea411663b60b8f6659c738183fac844631",
+      "bytes": 921
+    },
+    {
+      "path": "../c3-c-variant-sealed-20261030-01/DISPATCH_APPROVAL.json",
+      "sha256": "c90912cbe310fe3563d01575ff99af05aad964202289cb6ccd46c4ce833a768d",
+      "bytes": 737
+    },
+    {
+      "path": "../c3-c-variant-blind-20261030-01/GRADE_LOCK.json",
+      "sha256": "58a83c7edab85ec43711363886cf3611d6cba7734a50385b2a3e1186110843bc",
+      "bytes": 426
+    },
+    {
+      "path": "../c3-c-variant-blind-20261030-01/PUBLIC_PACKET.json",
+      "sha256": "5263db67e6fe363d3494a1be1057b775189f301950dd29b58cf0acf02d7a731a",
+      "bytes": 3105748
+    },
+    {
+      "path": "../c3-c-variant-blind-20261030-01/INDEPENDENT_GRADES.json",
+      "sha256": "6a74209bdff9912174b28d82f0f41a4b21afd4faef99948e3c3247783ef1d80a",
+      "bytes": 17834
+    }
+  ],
+  "nativePopulation": {
+    "cases": 22,
+    "turns": 34,
+    "N": 1,
+    "maximumGenerationRequests": 136,
+    "actualGenerationRequests": 65,
+    "retry": 0
+  },
+  "nativeGenerationRequestsExcludeOfflineJudge": true,
+  "offlineJudgeRequestAccounting": "ORCHESTRATOR_AGENT_MODEL_AND_EFFORT_PINNED; BACKEND_HTTP_BUILD_AND_USAGE_NOT_EXPOSED; NOT_AN_ONLINE_ROLE",
+  "qualification": false,
+  "sourceStateAtRun": "clean",
+  "runtimeCurrentDelivery": "e43e1b75c6ba3da2b3f77243e17bd6045131731a",
+  "rolloutAuthorized": false
+}

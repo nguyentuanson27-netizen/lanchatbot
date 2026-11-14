@@ -10,12 +10,36 @@
     "revision": 1
   },
   "channel": "PUBLISHED",
+  "testSupportSources": {
+    "approvalRef": "owner-feedback-handoff-test-supplement-20261104",
+    "handoffCandidateHash": "5154e9ea1e04200c8f92b9812ddcdae39d20e7cb508f96fafc7613ae3d833d74",
+    "feedback": [{
+      "productTitles": {"SV2447": "Set váy Thạch Thảo", "SQ2447": "Set quần Thạch Thảo"},
+      "offerType": "AO", "componentSku": "SV2447-AO",
+      "asset": {
+        "url": "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg",
+        "sha256": "4faaa0ba7fea7dc2058d6e7ece47f6d422be40c96ff06ab6ea568ba9c0aa1961", "partsVisible": ["AO"]
+      }
+    }]
+  },
+  "testColorSources": [{
+    "approvalRef": "owner-white-shirt-test-assumption-20261104",
+    "productTitles": {"SV2447": "Set váy Thạch Thảo", "SQ2447": "Set quần Thạch Thảo"},
+    "offerType": "AO", "componentSku": "SV2447-AO", "sourceColor": "__NO_COLOR__", "color": "TRẮNG",
+    "assets": [{
+      "url": "https://content.pancake.vn/1/s3000x3000/30/a6/9a/19/6fb6d83e276b5589a90244897076dc81aff48c462090ab8ff4bffa45-w:2813-h:4220-l:710250-t:image/jpeg.jpeg",
+      "sha256": "4faaa0ba7fea7dc2058d6e7ece47f6d422be40c96ff06ab6ea568ba9c0aa1961", "partsVisible": ["AO"]
+    }]
+  }],
+  "testMediaSources": {"approvalRef":"owner-new-test-media-SD023-20261104","assets":[{"productId":"SD023","url":"https://content.pancake.vn/1/s3000x3000/f8/01/35/62/552cb23c4c117004dcb3ac97565a0dec3ed2a2f5371555e7f4ea0001-w:4000-h:6000-l:4576023-t:image/jpeg.jpeg","priorSha256":"80017d382c15372334d5a52ec97c243fdf0c5f2c31157c48dcf578e2b167bf69"}]},
   "productGroups": [{
     "name": "Thạch Thảo",
     "customerNames": ["set Thạch Thảo"],
     "productTitles": {"SV2447": "Set váy Thạch Thảo", "SQ2447": "Set quần Thạch Thảo"},
     "approvalRef": "owner-same-name-size-sharing-20261024",
-    "sharedSize": {"artifactKey": "size-chart:SQ2447", "sourceProductId": "SQ2447", "brand": "La.na Design", "category": "SET", "componentRole": "OTHER"}
+    "sharedSize": {"artifactKey": "size-chart:SQ2447", "sourceProductId": "SQ2447", "brand": "La.na Design", "category": "SET", "componentRole": "OTHER",
+      "componentRoles": ["TOP", "PANTS", "SKIRT"], "componentApprovalRef": "owner-test-component-size-sharing-20261104", "componentSourceBrand": "lanadesign",
+      "bodyMaximum": {"kinds": ["BUST_CM", "HIPS_CM"], "approvalRef": "owner-body-maxima-confirmations-20261104"}}
   }],
   "qdrantCollection": "lana_multimodal_data_v2",
   "maxFactAgeSeconds": 7200,

@@ -1,0 +1,31 @@
+{
+  "sourceSha": "94c367a8bc9db5c2c17453436c9db015e4d902c6",
+  "providerRequestsBeforeInputReview": 0,
+  "generationRetry": 0,
+  "artifacts": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-target-model-prepare-20261105-01.mjs",
+      "sha256": "92cfed1882cfd6fce69fedcc792a9150724d45148e01076f6123a77a516504ce"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-target-model-finalize-20261105-01.mjs",
+      "sha256": "8af6c32ff3637f2fb14b7b4c951d7f41ebadd9f721d74f665937d4b6e9f66807"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-target-model-launch-20261105-01.py",
+      "sha256": "732fa853b98841e23221d13a7f29d7fc426135cda3ff634ac2c750bd95e28e23"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-target-model-accounting-20261105-01.mjs",
+      "sha256": "b2e3dae7f9497e3c295786591467fce353119c53171bfbf4a14caf124843e295"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-target-model-evaluation-policy-20261105-01.json",
+      "sha256": "ac988a4eff8a3122ee7119c4b5e64edb4054b3491ef7554fb7c8b74c85564be3"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\S\u1ea3n ph\u1ea9m AI\\c3-media-context-model-source-wrapper-20261103-02.py",
+      "sha256": "21a677bf3ed5afa959ed00fb87053edabe603b677fbb4c0db7d099f140ac68d3"
+    }
+  ]
+}

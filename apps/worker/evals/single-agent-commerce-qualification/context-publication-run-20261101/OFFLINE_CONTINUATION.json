@@ -1,0 +1,69 @@
+{
+  "kind": "OFFLINE_NATIVE_CONTINUATION_REPLAY",
+  "sourceClock": "2026-10-31T17:16:08.895Z",
+  "providerRequests": 0,
+  "networkReads": 0,
+  "effects": 0,
+  "actualInitialBodyBytes": 53289,
+  "reconstructedInitialBodyBytes": 50894,
+  "reconstructedInitialBudget": {
+    "textFrameBytes": 49055,
+    "systemBytes": 21362,
+    "toolSchemaBytes": 19256,
+    "trustedFrameBytes": 8097,
+    "dialogueBytes": 80,
+    "textLimitBytes": 65536,
+    "presentedTextFrameBytes": 49232,
+    "basePresentedFrameBytes": 49232,
+    "inlineImageBytes": 0,
+    "frameLimitBytes": 65536
+  },
+  "reconstructedContinuationBudget": {
+    "textFrameBytes": 63584,
+    "systemBytes": 21362,
+    "toolSchemaBytes": 19256,
+    "trustedFrameBytes": 10650,
+    "dialogueBytes": 12056,
+    "textLimitBytes": 65536,
+    "presentedTextFrameBytes": 63761,
+    "basePresentedFrameBytes": 63761,
+    "inlineImageBytes": 0,
+    "frameLimitBytes": 65536
+  },
+  "reconstructedContinuationBytes": 65423,
+  "status": "WITHIN_BOUND",
+  "currentPromptContinuationBudget": {
+    "textFrameBytes": 64222,
+    "systemBytes": 22000,
+    "toolSchemaBytes": 19256,
+    "trustedFrameBytes": 10650,
+    "dialogueBytes": 12056,
+    "textLimitBytes": 65536,
+    "presentedTextFrameBytes": 64399,
+    "basePresentedFrameBytes": 64399,
+    "inlineImageBytes": 0,
+    "frameLimitBytes": 65536
+  },
+  "currentPromptContinuationBytes": 64399,
+  "currentPromptStatus": "WITHIN_BOUND",
+  "turnTimePreserved": true,
+  "actualToolResultPreserved": true,
+  "nativeOutputJournalBound": true,
+  "mediaCapabilitiesProvided": 2,
+  "mediaHintAudit": [
+    {
+      "includedProducts": 2,
+      "bytes": 1443
+    },
+    {
+      "omitted": "WIRE_BOUND",
+      "includedProducts": 0
+    }
+  ],
+  "verifierWireBytes": 32247,
+  "hardPrecheck": null,
+  "initialPreparedClaimCount": 0,
+  "selectedClaimCount": 2,
+  "signatureCharacters": 9900,
+  "limitation": "Reconstructed source/tool continuation using captured native signature and decoded call. Original failed second body was not captured; public state reused, no historical result changed. Current declaration/prompt differences are measured separately, not owner variance."
+}

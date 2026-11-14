@@ -1,0 +1,48 @@
+{
+  "kind": "AUTOMATED_REQUEST_ACCOUNTING_AND_TERMINAL_BINDING_NOT_FULL_GATE_REPLAY",
+  "sourceSha": "6ac0eb783a3dba2e5641d503cfc222d74f2b0f5f",
+  "worldHash": "551b7fc0ae29d7f87b66250e7c4d6f4c5b38495b8fb01589c5604f232efee3ba",
+  "registeredCases": 2,
+  "executedCases": 2,
+  "generationAttempts": 6,
+  "generationHttp": 6,
+  "ownerGenerations": 4,
+  "verifierGenerations": 2,
+  "providerErrors": 0,
+  "timeouts": 0,
+  "retry": 0,
+  "exactRequestHashes": true,
+  "evaluatorFirewall": "PASS",
+  "metadataBPresent": false,
+  "exactFinalDraftToAcceptedText": [
+    {
+      "caseId": "j1-total",
+      "finalDraftHash": "93180213afc5549f0135400e1cbd281308035cf7500ddbda790dc271b9ad8a87",
+      "requestId": "d1bb7ba0-ef5b-4079-bbdb-4ee90399ba97"
+    },
+    {
+      "caseId": "ack-control",
+      "finalDraftHash": "dce123f66361eccbd7f5370c81371a3f47e87695a1ffad4bd10b27e31954370c",
+      "requestId": "9be8e71f-1602-47cd-93f1-22cb41052cd5"
+    }
+  ],
+  "dbDropped": true,
+  "tokens": {
+    "owner": {
+      "input": 42258,
+      "output": 3652
+    },
+    "verifier": {
+      "input": 16205,
+      "output": 193
+    },
+    "total": {
+      "input": 58463,
+      "output": 3845
+    }
+  },
+  "ownerAuthHttp": 1,
+  "cost": null,
+  "liveSend": false,
+  "sourceWrites": 0
+}

@@ -1,0 +1,21 @@
+{
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-06T08:22:25.329292+00:00",
+  "sourceSha": "9b2cfff594c89d09a11e32c9c4274556291d72a1",
+  "registrationHash": "b4eab27d1768cab1a3efe8af7ac70c278422936d8aa9aff619857378cf0f4384",
+  "worldHash": "436a5be7095ec64c2eaa851b1fcdf7c0a6a6ee5b381a049c3a84978be1159b4f",
+  "capturedTurns": 7,
+  "materialTaskFailures": 1,
+  "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-taskpath-model-r1-run-20261106-02\\CANDIDATE_EVIDENCE.partial.json",
+  "evidenceSha256": "c94f63ed3dc235afcc846f5bdd8505275720e6b5f7b703c2edc14b564312e600",
+  "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-taskpath-model-r1-run-20261106-02\\integration.json",
+  "integrationSha256": "4505bee6497e50e55b4e1749ef761306c0523fbd5dfb5a484d0c70eaee73c3d0",
+  "status": "FAIL",
+  "reason": "p07 owner recommended unverified pants L beyond current component-fit M-only result; correct verifier rejection caused silent handoff.",
+  "casesExecuted": 4,
+  "nextStageAllowed": false,
+  "notRun": {
+    "cases": 30,
+    "turns": 48
+  }
+}

@@ -1,0 +1,38 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+······················································xxxx
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/single-agent-commerce-quote.test.ts > cart-quote reference is scoped to exact current requested cart: other-product
+ FAIL  src/single-agent-commerce-quote.test.ts > cart-quote reference is scoped to exact current requested cart: other-offer
+ FAIL  src/single-agent-commerce-quote.test.ts > cart-quote reference is scoped to exact current requested cart: other-quantity
+ FAIL  src/single-agent-commerce-quote.test.ts > cart-quote reference is scoped to exact current requested cart: old-binding
+AssertionError: expected 'b9b094e8d27114b10e4fca28fe9edbe614650…' to be null // Object.is equality
+
+- Expected: 
+null
+
++ Received: 
+"b9b094e8d27114b10e4fca28fe9edbe614650fe447010424b79d19177600a3e3"
+
+ ❯ src/single-agent-commerce-quote.test.ts:288:77
+    286|  const result=await t.invoke({...quote,args:{...quote.args,quantity:1}…
+    287|  expect(result.status).toBe('OK');
+    288|  expect((result.data as {currentCartQuoteRef:unknown}).currentCartQuot…
+       |                                                                             ^
+    289|  expect(JSON.parse(t.snapshot().policyLiterals.find(p=>p.ref.startsWit…
+    290| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 54 passed (58)
+   Start at  12:35:56
+   Duration  5.77s (transform 1.63s, setup 0ms, collect 2.57s, tests 1.07s, environment 0ms, prepare 295ms)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/single-agent-commerce-quote.test.ts --reporter=dot

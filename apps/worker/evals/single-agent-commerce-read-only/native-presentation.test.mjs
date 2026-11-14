@@ -1,11 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {isDeepStrictEqual} from 'node:util';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {nativePresentation,withNativePresentation} from './native-presentation.mjs';
 import {buildQuoteRequest} from './quote-presentation-diagnostic.mjs';
 import {buildGeminiCommerceRequest,createGeminiCommerceInference} from './gemini-inference.mjs';
-import {readCompactSections} from './owner-data-presentation.mjs';
+import {readCompactSections,expandDeclaredToolExecution} from './owner-data-presentation.mjs';
 const V2='VI_DATA_BLOCKS_COMPACT_V2';
 test('native selection requires explicit valid flag, preserves defaults and rejects duplicates',()=>{
  assert.equal(nativePresentation([]),undefined);assert.equal(nativePresentation(['--owner-presentation',V2]),V2);
@@ -31,7 +32,8 @@ test('compact native wire keeps tool declarations, function pairs/signatures, im
  assert.deepEqual(b.systemInstruction,a.systemInstruction);assert.deepEqual(b.generationConfig,a.generationConfig);
  const groups=readCompactSections(b.contents[0]);const top={trusted:{}};
  const original=JSON.parse(a.contents[0].parts[0].text);
- for(const g of groups){const keys=Object.keys(original.trusted);const values=keys.filter(k=>JSON.stringify(original.trusted[k])===JSON.stringify(g.value));
+ for(const group of groups){const g={...group,value:group.label==='Khả năng thực hiện lượt này'?expandDeclaredToolExecution(group.value,b.tools.flatMap(t=>t.functionDeclarations)):group.value};
+  const keys=Object.keys(original.trusted);const values=keys.filter(k=>isDeepStrictEqual(original.trusted[k],g.value));
   if(g.label==='Thời điểm xử lý')top.turnTime=g.value;else if(g.label==='Dữ liệu hội thoại kèm theo')top.untrusted=g.value;else {assert.equal(values.length,1);top.trusted[values[0]]=g.value;}}
  assert.deepEqual(top,original);assert.deepEqual(req.context,before);
  let sent;await createGeminiCommerceInference({model:'gemini-3.5-flash-lite',effort:'high',location:'global',projectId:'test'},

@@ -39,20 +39,41 @@ test('final-only CompactV2 keeps projected quote trace but grants no new call',a
 test('quote parse rejects extra fields/duplicate offers and preserves signed content',()=>{
  const body=args=>({candidates:[{finishReason:'STOP',content:{role:'model',parts:[{functionCall:{name:'quote_product',args},thoughtSignature:'signed'}]}}]});
  assert.equal(parseGeminiGeneration(body({subjectRef:'SM613',offerTypes:['DIRECT']})).content.parts[0].thoughtSignature,'signed');
- for(const args of [{subjectRef:'SM613',offerTypes:['DIRECT','DIRECT']},{subjectRef:'SM613',offerTypes:['DIRECT'],skipMedia:true},{subjectRef:'SM613',offerTypes:['DIRECT'],color:null}])assert.throws(()=>parseGeminiGeneration(body(args)),/OWNER_TOOL_OUTPUT/);
+ for(const args of [{subjectRef:'SM613',offerTypes:['DIRECT','DIRECT']},{subjectRef:'SM613',offerTypes:['DIRECT'],skipMedia:true},{subjectRef:'SM613',offerTypes:['DIRECT'],color:null}])assert.deepEqual(parseGeminiGeneration(body(args)).calls[0].invalidArguments,{field:'ARGS'});
 });
 test('phase/budget and primitive accounting are bound; legacy configuration remains valid',async()=>{
- const r=await request();r.toolBudget.callsRemaining=1;assert(!buildGeminiCommerceRequest(r).tools[0].functionDeclarations.some(d=>d.name==='quote_product'));
+ const r=await request();r.toolBudget.callsRemaining=0;assert(!buildGeminiCommerceRequest(r).tools[0].functionDeclarations.some(d=>d.name==='quote_product'));
  const m=JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url)));validateProtocol(m);delete m.quoteTask;validateProtocol(m);
- m.quoteTask={...EXPLICIT_QUOTE_TASK,normalUnits:1};assert.throws(()=>validateProtocol(m),/QUOTE_TASK_CONFIG/);
- const result={toolWorkAccounting:'PRIMITIVE_WORK_V2',normalToolCalls:3,terminalHandoffCalls:1,toolCalls:4,executedNormalToolInvocations:2,executedToolInvocations:3,quoteTaskWork:[{reservedUnits:2,readInvocations:1,selectionInvocations:0}]};validateToolWorkAccounting(result);
- for(const x of [{...result,executedToolInvocations:4},{...result,normalToolCalls:7},{...result,quoteTaskWork:[{reservedUnits:1,readInvocations:1,selectionInvocations:0}]}])assert.throws(()=>validateToolWorkAccounting(x));
+ m.quoteTask={...EXPLICIT_QUOTE_TASK,normalUnits:2};assert.throws(()=>validateProtocol(m),/QUOTE_TASK_CONFIG/);
+ const result={toolWorkAccounting:'PRIMITIVE_WORK_V2',normalToolCalls:3,terminalHandoffCalls:1,toolCalls:4,executedNormalToolInvocations:2,executedToolInvocations:3,quoteTaskWork:[{reservedUnits:1,readInvocations:1,selectionInvocations:0}]};validateToolWorkAccounting(result);
+ for(const x of [{...result,executedToolInvocations:4},{...result,normalToolCalls:7},{...result,quoteTaskWork:[{reservedUnits:2,readInvocations:1,selectionInvocations:0}]}])assert.throws(()=>validateToolWorkAccounting(x));
  validateToolWorkAccounting({normalToolCalls:2});
- validateToolWorkAccounting({...result,executedNormalToolInvocations:1,executedToolInvocations:2,quoteTaskWork:[{reservedUnits:2,readInvocations:0,selectionInvocations:0}]});
+ validateToolWorkAccounting({...result,executedNormalToolInvocations:1,executedToolInvocations:2,quoteTaskWork:[{reservedUnits:1,readInvocations:0,selectionInvocations:0}]});
 });
 test('registered tool schema includes quote only when enabled, and binds its exact schema',()=>{
  const changed=structuredClone(quoteDeclarations);changed[0].parametersJsonSchema.properties.offerTypes.maxItems=1;
  assert.notEqual(statefulToolSchemaHash({quoteTask:EXPLICIT_QUOTE_TASK}),statefulToolSchemaHash({quoteTask:EXPLICIT_QUOTE_TASK},changed));
  assert.equal(statefulToolSchemaHash({}),statefulToolSchemaHash({},changed));
  assert.notEqual(statefulToolSchemaHash({}),statefulToolSchemaHash({quoteTask:EXPLICIT_QUOTE_TASK}));
+});
+
+
+test('returning quote wire requires quantity for one offer and keeps the code total without media or evaluator labels',async()=>{
+ const r=await request();r.ownerContextPresentation='VI_DATA_BLOCKS_COMPACT_V2';
+ const entry=r.context.policyLiterals.find(p=>p.ref==='conversation-entry');entry.text=JSON.stringify({firstContact:false,fromAd:false});
+ const data=r.contents.at(-1).parts[0].functionResponse.response.data;delete data.media;
+ data.preCartQuote={kind:'PRE_CART_TOTAL_V1',subjectRef:'SM613',offerType:'DIRECT',quantity:2,subtotalVnd:998000,shippingFeeVnd:25000,discountTotalVnd:49900,grandTotalVnd:973100};
+ let body;
+ await createGeminiCommerceInference({model:'gemini-3.5-flash-lite',effort:'high',projectId:'test-project',location:'global'},{getToken:async()=>'mock-token',fetchImpl:async(_url,init)=>{body=JSON.parse(init.body);return new Response(JSON.stringify({modelVersion:'gemini-3.5-flash-lite',candidates:[{finishReason:'STOP',content:{role:'model',parts:[{text:'Hai áo cả ship là 973.100đ chị nhé.'}]}}]}));}})(r);
+ const d=body.tools[0].functionDeclarations.find(d=>d.name==='quote_product');assert.deepEqual(d.parametersJsonSchema.required,['subjectRef','offerTypes','quantity']);assert.equal(d.parametersJsonSchema.properties.offerTypes.maxItems,1);
+ const result=body.contents.at(-1).parts[0].functionResponse.response.data;assert.deepEqual(result.preCartQuote,data.preCartQuote);assert(!Object.hasOwn(result,'media'));assert(!JSON.stringify(body).includes('EVAL_ONLY'));
+ assert.deepEqual(body.contents.at(-2),r.contents.at(-2));
+});
+
+
+test('one remaining primitive exposes returning quote on the actual wire, with runtime photo feasibility separate',async()=>{
+ const r=await request();r.toolBudget.callsRemaining=1;
+ r.context.policyLiterals.find(p=>p.ref==='conversation-entry').text=JSON.stringify({firstContact:false,fromAd:false});
+ const quote=buildGeminiCommerceRequest(r).tools[0].functionDeclarations.find(d=>d.name==='quote_product');
+ assert(quote);assert.deepEqual(quote.parametersJsonSchema.required,['subjectRef','offerTypes','quantity']);
 });

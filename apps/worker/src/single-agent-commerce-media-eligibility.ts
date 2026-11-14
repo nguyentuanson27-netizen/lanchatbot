@@ -1,7 +1,6 @@
 import {normalizeCatalogToken,selectRequestedImages,selectPriceCardImages,mediaObservationTime,type StableProductDocument,type CustomerImageIntent} from '@lana/business-tools';
-import {MEDIA_FRESH_FOR_SECONDS} from '@lana/contracts';
 import {safeRecognitionImageUrl} from './media-recognition-v2-image-pipeline.js';
-export interface MediaQuery {subjectRef:string;intent:CustomerImageIntent;color?:string;componentRole?:'TOP'|'SKIRT'|'PANTS'}
+export interface MediaQuery {subjectRef:string;intent:CustomerImageIntent;color?:string;componentRole?:'TOP'|'SKIRT'|'PANTS';requiredEvidence?:'CUSTOMER_WEARING'}
 const parts={TOP:'AO',SKIRT:'CHAN_VAY',PANTS:'QUAN'};
 export const commerceMediaIntents:CustomerImageIntent[]=['GENERIC','BACK','DETAIL','SIZE_GUIDE','PRODUCT_ONLY','FEEDBACK'];
 /** Pure eligibility shared by hints and real selection. Never authorizes delivery. */
@@ -10,7 +9,7 @@ export function eligibleCommerceMedia(product:StableProductDocument,query:MediaQ
  const base=(product.images??[]).filter(image=>{
   const observed=mediaObservationTime(image,product.observedAt);
   if(image.reviewStatus!=='APPROVED'||image.metadataVerified!==true||!image.sourceContentSha256||
-   !/^[a-f0-9]{64}$/.test(image.sourceContentSha256)||!Number.isFinite(observed)||observed>at||observed+MEDIA_FRESH_FOR_SECONDS*1000<=at)return false;
+   !/^[a-f0-9]{64}$/.test(image.sourceContentSha256)||!Number.isFinite(observed)||observed>at)return false;
   try{safeRecognitionImageUrl(image.url,hosts);}catch{return false;}
   return !query.componentRole||(image.partsVisible?.length===1&&normalizeCatalogToken(image.partsVisible[0]!)===parts[query.componentRole]);
  });
@@ -24,8 +23,10 @@ export function eligibleCommerceMedia(product:StableProductDocument,query:MediaQ
  if(query.color&&!base.some(colorMatch))throw Error('MEDIA_COLOR_BINDING_UNVERIFIED');
  const approved={...product,images:query.color?base.filter(colorMatch):base,imageUrls:[]};
  const select=(intent:CustomerImageIntent)=>intent==='GENERIC'?selectPriceCardImages(approved):selectRequestedImages(approved,intent);
- const selected=select(query.intent);
- const transitions=(product.images??[]).flatMap(i=>{const t=mediaObservationTime(i,product.observedAt);return [t,t+MEDIA_FRESH_FOR_SECONDS*1000].filter(t=>Number.isFinite(t)&&t>at);});
+ // The current source schema records feedback classification, not wearer provenance.
+ // This stronger request has no eligible positive source path in this revision.
+ const selected=query.requiredEvidence==='CUSTOMER_WEARING'?{images:[]}:select(query.intent);
+ const transitions=(product.images??[]).map(i=>mediaObservationTime(i,product.observedAt)).filter(t=>Number.isFinite(t)&&t>at);
  return {images:selected.images,alternatives:selected.images.length?[]:commerceMediaIntents.filter(i=>i!==query.intent&&select(i).images.length>0),
-  expiresAt:Math.min(at+MEDIA_FRESH_FOR_SECONDS*1000,...transitions)};
+  expiresAt:transitions.length?Math.min(...transitions):null};
 }

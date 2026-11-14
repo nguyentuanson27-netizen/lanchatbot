@@ -98,6 +98,27 @@ describe("CustomerProfileV1", () => {
       }).success,
     ).toBe(false);
   });
+
+  it("keeps a pending purchase as a bounded note with no price, and stays valid without it", () => {
+    const base = {
+      schemaVersion: 1,
+      profileId: "30709206-8f96-4a1b-9311-6f03ef4dd8b2",
+      customerKey,
+      revision: 1,
+      measurements: [measurement],
+      fitPreference: null,
+      createdAt: "2026-07-22T02:00:00.000Z",
+      updatedAt: "2026-07-22T02:01:00.000Z",
+    };
+    const line = { productId: "SV2447", offerType: "AO", size: "M", color: null, quantity: 1, missing: "COLOR" };
+    const pending = (lines: unknown[]) => ({ ...base, pendingPurchase: { lines, recordedAt: "2026-07-22T02:01:00.000Z" } });
+
+    expect(CustomerProfileV1Schema.safeParse(base).success).toBe(true);
+    expect(CustomerProfileV1Schema.parse(pending([line, { ...line, size: "L" }])).pendingPurchase?.lines).toHaveLength(2);
+    for (const lines of [[], Array(5).fill(line), [{ ...line, quantity: 0 }], [{ ...line, missing: "PRICE" }], [{ ...line, unitPriceVnd: 499000 }]]) {
+      expect(CustomerProfileV1Schema.safeParse(pending(lines)).success).toBe(false);
+    }
+  });
 });
 
 describe("SizeChartV1", () => {

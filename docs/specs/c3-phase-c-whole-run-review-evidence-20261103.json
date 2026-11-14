@@ -1,0 +1,647 @@
+{
+  "kind": "PRIMARY_WHOLE_CONVERSATION_REVIEW_NOT_LOCKED_BLIND_GRADING",
+  "reviewSourceSha": "4608cd555cf25c389a636a4c6e3a62bc6b84c93c",
+  "reviewer": "root",
+  "uniqueCapturedCases": 33,
+  "uniqueCapturedTurns": 48,
+  "uncapturedInterruptedS09AttemptRetainedSeparately": true,
+  "providerRequestsInReview": 0,
+  "networkRequestsInReview": 0,
+  "shopSourceWritesInReview": 0,
+  "officialQuality": "NOT_GRADED",
+  "qualification": "BLOCKED",
+  "handoffDirectCauseGroups": {
+    "OPENING_MEDIA_SOURCE": [
+      "c-po-20261031-p02",
+      "c-po-20261031-p06",
+      "c-po-20261031-p07",
+      "c-po-20261031-h02",
+      "c-20261028-s01",
+      "c-20261028-s03"
+    ],
+    "CART_COLOR_REQUIRED": [
+      "c-po-20261031-h01",
+      "c-20261028-j1",
+      "c-20261028-j4"
+    ],
+    "COMPONENT_FIT_UNSUPPORTED": [
+      "c-20261028-s07",
+      "c-20261028-j2"
+    ],
+    "SEMANTIC_FAIL": [
+      "c-po-20261031-p10",
+      "c-20261028-s04",
+      "c-20261028-s11",
+      "c-20261028-s13"
+    ],
+    "BUSINESS_HANDOFF": [
+      "c-20261028-s10",
+      "c-20261028-s12",
+      "c-20261028-j5"
+    ],
+    "GENERATION_OR_CONTEXT": [
+      "c-po-20261031-p01",
+      "c-20261028-s15"
+    ],
+    "UNNECESSARY_MEDIA_QUERY": [
+      "c-20261028-s06"
+    ],
+    "REQUESTED_FEEDBACK_UNAVAILABLE": [
+      "c-20261028-s16"
+    ]
+  },
+  "handoffGroupsAreNotAllLatentDefects": true,
+  "imageEligibilityAtFrozenCaptureClock": {
+    "kind": "OFFLINE_CAPTURE_CLOCK_ANALYSIS_NOT_NEW_SOURCE_APPROVAL",
+    "capturedAt": "2026-11-03T05:29:36.431Z",
+    "freshForSeconds": 2592000,
+    "results": [
+      {
+        "productId": "SD023",
+        "total": 10,
+        "productObservedAt": null,
+        "staleAtCapture": 0,
+        "invalidClock": 10,
+        "genericEligible": 0,
+        "feedbackTopEligible": 0
+      },
+      {
+        "productId": "SQ2447",
+        "total": 10,
+        "productObservedAt": "2026-09-28T04:31:05.725Z",
+        "staleAtCapture": 10,
+        "invalidClock": 0,
+        "genericEligible": 0,
+        "feedbackTopEligible": 0
+      },
+      {
+        "productId": "SV1561",
+        "total": 11,
+        "productObservedAt": "2026-09-28T04:31:05.725Z",
+        "staleAtCapture": 11,
+        "invalidClock": 0,
+        "genericEligible": 0,
+        "feedbackTopEligible": 0
+      },
+      {
+        "productId": "SV2447",
+        "total": 11,
+        "productObservedAt": "2026-09-28T04:31:05.725Z",
+        "staleAtCapture": 0,
+        "invalidClock": 1,
+        "genericEligible": 2,
+        "feedbackTopEligible": 0
+      },
+      {
+        "productId": "V406",
+        "total": 11,
+        "productObservedAt": "2026-09-05T10:07:31.041Z",
+        "staleAtCapture": 11,
+        "invalidClock": 0,
+        "genericEligible": 0,
+        "feedbackTopEligible": 0
+      }
+    ],
+    "providerRequests": 0,
+    "networkRequests": 0,
+    "sourceWrites": 0
+  },
+  "cartResolutionAtFrozenCaptureClock": {
+    "kind": "OFFLINE_CAPTURE_CLOCK_NOT_EFFECT_REPLAY",
+    "capturedAt": "2026-11-03T05:29:36.431Z",
+    "rows": [
+      {
+        "size": "M",
+        "color": null,
+        "status": "COLOR_REQUIRED",
+        "reason": "CART_COLOR_REQUIRED",
+        "options": [
+          {
+            "size": "M",
+            "color": "__NO_COLOR__",
+            "status": "IN_STOCK",
+            "reasonCode": null,
+            "identityHash": "fe5743f3aad845a4c788c2d159403ec5592a8c4c116991623ef76e073baf4dfc",
+            "productId": "SV2447",
+            "offerType": "AO",
+            "quantity": 1,
+            "sourceVersion": "p2-default",
+            "observedAt": "2026-11-03T05:28:56.159Z",
+            "expiresAt": "2026-11-03T07:28:56.159Z"
+          },
+          {
+            "size": "M",
+            "color": "BE",
+            "status": "PRE_ORDER",
+            "reasonCode": null,
+            "identityHash": "f75d0d833394583f749d9c48ed79d700d599f1e83e74ffb6653280230e1e06fa",
+            "productId": "SV2447",
+            "offerType": "AO",
+            "quantity": 1,
+            "sourceVersion": "p2-default",
+            "observedAt": "2026-11-03T05:28:56.159Z",
+            "expiresAt": "2026-11-03T07:28:56.159Z"
+          }
+        ],
+        "line": null
+      },
+      {
+        "size": "M",
+        "color": "__NO_COLOR__",
+        "status": "READY",
+        "reason": null,
+        "options": [],
+        "line": {
+          "components": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "M"
+            }
+          ]
+        }
+      },
+      {
+        "size": "M",
+        "color": "be",
+        "status": "READY",
+        "reason": null,
+        "options": [],
+        "line": {
+          "components": [
+            {
+              "color": "BE",
+              "size": "M"
+            }
+          ]
+        }
+      },
+      {
+        "size": "L",
+        "color": null,
+        "status": "COLOR_REQUIRED",
+        "reason": "CART_COLOR_REQUIRED",
+        "options": [
+          {
+            "size": "L",
+            "color": "__NO_COLOR__",
+            "status": "IN_STOCK",
+            "reasonCode": null,
+            "identityHash": "0438a82a36b58e088504e656c62a3a211bc13e558c529e74dee31e1dbfd4ffff",
+            "productId": "SV2447",
+            "offerType": "AO",
+            "quantity": 1,
+            "sourceVersion": "p2-default",
+            "observedAt": "2026-11-03T05:28:56.159Z",
+            "expiresAt": "2026-11-03T07:28:56.159Z"
+          },
+          {
+            "size": "L",
+            "color": "BE",
+            "status": "PRE_ORDER",
+            "reasonCode": null,
+            "identityHash": "188e0210c8358078d9ae581da298f27421b2b8196331aebd7f71dc98150fd544",
+            "productId": "SV2447",
+            "offerType": "AO",
+            "quantity": 1,
+            "sourceVersion": "p2-default",
+            "observedAt": "2026-11-03T05:28:56.159Z",
+            "expiresAt": "2026-11-03T07:28:56.159Z"
+          }
+        ],
+        "line": null
+      },
+      {
+        "size": "L",
+        "color": "__NO_COLOR__",
+        "status": "READY",
+        "reason": null,
+        "options": [],
+        "line": {
+          "components": [
+            {
+              "color": "__NO_COLOR__",
+              "size": "L"
+            }
+          ]
+        }
+      },
+      {
+        "size": "L",
+        "color": "be",
+        "status": "READY",
+        "reason": null,
+        "options": [],
+        "line": {
+          "components": [
+            {
+              "color": "BE",
+              "size": "L"
+            }
+          ]
+        }
+      }
+    ],
+    "providerRequests": 0,
+    "networkRequests": 0,
+    "sourceWrites": 0
+  },
+  "descriptiveOutcomeComparison": {
+    "kind": "DESCRIPTIVE_DIFFERENT_WORLD_N1_NOT_CAUSAL",
+    "sameUniqueTurnKeys": 48,
+    "changes": [
+      {
+        "case": "c-po-20261031-p01",
+        "turn": 0,
+        "before": "SEND_ELIGIBLE",
+        "after": "HANDOFF",
+        "customerChanged": false
+      },
+      {
+        "case": "c-po-20261031-p09",
+        "turn": 0,
+        "before": "HANDOFF",
+        "after": "SEND_ELIGIBLE",
+        "customerChanged": false
+      },
+      {
+        "case": "c-po-20261031-p09",
+        "turn": 1,
+        "before": "NO_SEND",
+        "after": "SEND_ELIGIBLE",
+        "customerChanged": false
+      },
+      {
+        "case": "c-20261028-s05",
+        "turn": 0,
+        "before": "HANDOFF",
+        "after": "SEND_ELIGIBLE",
+        "customerChanged": false
+      },
+      {
+        "case": "c-20261028-s08",
+        "turn": 0,
+        "before": "HANDOFF",
+        "after": "SEND_ELIGIBLE",
+        "customerChanged": false
+      },
+      {
+        "case": "c-20261028-s09",
+        "turn": 0,
+        "before": "HANDOFF",
+        "after": "SEND_ELIGIBLE",
+        "customerChanged": false
+      },
+      {
+        "case": "c-20261028-s02",
+        "turn": 0,
+        "before": "HANDOFF",
+        "after": "SEND_ELIGIBLE",
+        "customerChanged": false
+      },
+      {
+        "case": "c-20261028-j1",
+        "turn": 0,
+        "before": "SEND_ELIGIBLE",
+        "after": "HANDOFF",
+        "customerChanged": false
+      },
+      {
+        "case": "c-20261028-j1",
+        "turn": 1,
+        "before": "HANDOFF",
+        "after": "NO_SEND",
+        "customerChanged": false
+      },
+      {
+        "case": "c-20261028-j3",
+        "turn": 0,
+        "before": "HANDOFF",
+        "after": "SEND_ELIGIBLE",
+        "customerChanged": false
+      },
+      {
+        "case": "c-20261028-j3",
+        "turn": 1,
+        "before": "NO_SEND",
+        "after": "SEND_ELIGIBLE",
+        "customerChanged": false
+      },
+      {
+        "case": "c-20261028-j3",
+        "turn": 2,
+        "before": "NO_SEND",
+        "after": "SEND_ELIGIBLE",
+        "customerChanged": false
+      }
+    ]
+  },
+  "rawNativeEvidenceForReviewedFrames": [
+    {
+      "caseId": "c-po-20261031-p01",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-bdb9dbf739fb96e23ef5e31f950d743190e182eed10d096aff9799ec2511f403-turn-0.json",
+      "sha256": "648d09cbf2f9e91f95c1f563d2a2fbf7114dadaa949d1c7ac890c6e779131b3d"
+    },
+    {
+      "caseId": "c-po-20261031-p02",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-d022ee6e77ac04bc05ac27454e653a56de04b80c3fd401cb96e9ccbc3dc5615a-turn-0.json",
+      "sha256": "cb668c3b00668ae1759db175a8c0f944fa23386ff3af95f95f8fa7dcfff87f07"
+    },
+    {
+      "caseId": "c-po-20261031-p03",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-66ba378dd77aa7d342de6a74741197cc6f462e261939bc7e009f8dab21f693d4-turn-0.json",
+      "sha256": "e6fcf29676715fb9d929a68a31f15b7ef6d98422b37e65e1ec92f2f0a677264e"
+    },
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-2100b5c3ea0d0e9fc64bc2128e5d6f3c73c2ecfedcf94bb4045a844c9c3e3dce-turn-0.json",
+      "sha256": "9dd34ef741886566ca18358b45339ad2443a9850289086360eed69ba3e47e491"
+    },
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 1,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-2100b5c3ea0d0e9fc64bc2128e5d6f3c73c2ecfedcf94bb4045a844c9c3e3dce-turn-1.json",
+      "sha256": "1fadec557df1cb46521bafd74a7c0f2bd27ea32cf639868d5d9420bbcd5e4e22"
+    },
+    {
+      "caseId": "c-po-20261031-p06",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-e1c2aace2e6c7fce6105a49cc02e4b6c47021031e6d680822592684c62b0a4ef-turn-0.json",
+      "sha256": "c944ba0545f88c111fe90c55432a87900f9613011f057911b76e8443d7c3378d"
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-579193f8af36937c1703a8a27f38932c40113afee459df01114c90b983e0816d-turn-0.json",
+      "sha256": "01a5bbacc10f34c7ae441b2e874c02a996f691fac3e75eb6c44559e53f0a9197"
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-df9944c40c1891929746b7b4ccd21fb7070889738f421172f377e8cec9f0126a-turn-0.json",
+      "sha256": "ee7f72c93174e5dfd12fa3f5266401d4e3bb09d6caa42c57874f9f4c3e187641"
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "turnIndex": 1,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-df9944c40c1891929746b7b4ccd21fb7070889738f421172f377e8cec9f0126a-turn-1.json",
+      "sha256": "00a5993112c318f91c32382ff8fc004cdc714799e260a3891c55f94f4c85505d"
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-a5cf19bfa93a1f099ac1ddc00fbb73d960ffaeefebabc6a095283dac4dda278d-turn-0.json",
+      "sha256": "6d86c588492e4c02ea5d8e1bd0b1fe5b06ca8980dcd0c575e6e27825f0fdd459"
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "turnIndex": 1,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-a5cf19bfa93a1f099ac1ddc00fbb73d960ffaeefebabc6a095283dac4dda278d-turn-1.json",
+      "sha256": "7fddc6c44621faeb19c7874914c1b333756a2717427e42a3b9c85506d1cb72d3"
+    },
+    {
+      "caseId": "c-po-20261031-p10",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-98835f39c44a39ec310b2bd9f8083da1348fa79b45ab36080b9fc5675c88a539-turn-0.json",
+      "sha256": "3be0501fb3783a11b656452be61c6506aa4383b96b970bf4e1956d5e1dea9203"
+    },
+    {
+      "caseId": "c-po-20261031-h01",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-87a792308da88d968c6f9f01f1986bc960d89a368c83f6a62a708ce49eaa3a77-turn-0.json",
+      "sha256": "5295dd460c9bebe80a6a80a7e6fe352fc34a837ef31b7d7d50dc85db8efd7e06"
+    },
+    {
+      "caseId": "c-po-20261031-h02",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-e45f13f952708e61f253d29c47b928413068e8e5d0c60cc9510e147a5265f6ce-turn-0.json",
+      "sha256": "a525160f9575bded2d9ff480314fe583acaaf6affba0cbcbc7a4357c69f00338"
+    },
+    {
+      "caseId": "c-20261028-s05",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-e75ff230eee9aa9dc73f2436bcef7a0cbd6fe79136e81a64aee09fa84753a7c4-turn-0.json",
+      "sha256": "f1477a1e1c369e595b287f44bafe6728b075c665d4f134e4590f6601f62e37c3"
+    },
+    {
+      "caseId": "c-20261028-s06",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-9207e28383b8bcbe9ba38618b11f0f4f3f6b0775edc1e514b90b5905bb634814-turn-0.json",
+      "sha256": "d6b6c20904fb3d683ee3b1fcea7ebc377463087281542bb2fc51f78c80c7a439"
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-01\\native-a87c6e43f535e152b9eff7b1d770b49310a17c31a619225ca0455ba9448facb0-turn-0.json",
+      "sha256": "ce60c94d0ee64d14446058ef3365e458f2bc270ddd94776a58e7a08ec0d04ec8"
+    },
+    {
+      "caseId": "c-20261028-s09",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-02\\native-2b0c4ca4909cf261f4099937781ebde927bd638648d84f1b00d1032dbbe8c3dd-turn-0.json",
+      "sha256": "01e689ddeceaaa46957c67728097288c629f5e9091f1f50fddff8f7477ac8940"
+    },
+    {
+      "caseId": "c-20261028-s10",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-02\\native-0e7ec4e10a4ad63ff05b765163518edc7cca034db924dd2309bef8d62332e033-turn-0.json",
+      "sha256": "ea46cb8061df64a08ea0463bec1ab91a8dd524dfbbab43c06277cd12838282e3"
+    },
+    {
+      "caseId": "c-20261028-s12",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-02\\native-36ba6f39982ea96fd7d4eb58e52f3cb9a34435cb192cedd10691f5c1d94e58d4-turn-0.json",
+      "sha256": "f0f550aef7c8d9e28a183a5970c1704f57cbe7dbc637695085aac11458324a83"
+    },
+    {
+      "caseId": "c-20261028-s14",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-02\\native-b3125ba3d3b90c2bb30254f0e5f94c5bf99230eae7595252057572cb29d0d02a-turn-0.json",
+      "sha256": "b8d79835f8c951cd7482275bc361f0cbe73caa8aa0a07e2c8df2dbf1e0a8953a"
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-02\\native-1ad19dd1ce91220bfc77e46326f20a6b046302802c13c90dfe0c64e2b04e8dd5-turn-0.json",
+      "sha256": "1455b93c806366af2eb6f6597dd434bc8d806810b2bfc4e89a1ccb1f2a091641"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-02\\native-46d4cd21689bf697cecf2acdee878df0bdec1863dd69c2eed5402244e58c2006-turn-0.json",
+      "sha256": "ad64ecd9d5e675b5c3d0f48297c0766d3ee105cddc1554932569180a4578acea"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 1,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-02\\native-46d4cd21689bf697cecf2acdee878df0bdec1863dd69c2eed5402244e58c2006-turn-1.json",
+      "sha256": "938b53d5be1b86a2e418d75886af1c2b11290ced7649aadc41510bf9684d0124"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 2,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-02\\native-46d4cd21689bf697cecf2acdee878df0bdec1863dd69c2eed5402244e58c2006-turn-2.json",
+      "sha256": "e66d24f59c2f1506b9da4cc0cddd3a4cfcdbd2283cb9d7ba1c7f3032ef1a5dab"
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-02\\native-9840706bab5f4cc05b9b63db8ced511eda70fda689229ddbaafdd1f79d391e83-turn-0.json",
+      "sha256": "50d8d361c8813800aab14e827eb0cf9790d965330f94301c83f43b3f34f15fa8"
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 1,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-02\\native-9840706bab5f4cc05b9b63db8ced511eda70fda689229ddbaafdd1f79d391e83-turn-1.json",
+      "sha256": "235e9698a3a0fc71a5578b46d7befa3ef6d3631158bf66ccc8b173c8fc18d7c4"
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 2,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-purchase-run-20261103-02\\native-9840706bab5f4cc05b9b63db8ced511eda70fda689229ddbaafdd1f79d391e83-turn-2.json",
+      "sha256": "dc1c47f07fe04f4f969ac08bb0e5688969286a9d8361d62dc8552543540a5aae"
+    },
+    {
+      "caseId": "c-20261028-s01",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-0a5027b121586eebf8d1af562dcdd76eb8e65b46a02c457953a5280a98e2f53e-turn-0.json",
+      "sha256": "da89038555db33d3d6d850759edc638d94201281f986d3a5e1ed3cc43b9d45b1"
+    },
+    {
+      "caseId": "c-20261028-s02",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-edcb8980dc9c9ae982f81fb566afdec437f704c5a3d1e48f695de478abf701ef-turn-0.json",
+      "sha256": "2598eb24a100afefe0a288b82265b7d245ef4e01a7b67613eda8d0a3484776d2"
+    },
+    {
+      "caseId": "c-20261028-s03",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-61273d8aecab5128ffd82306ce0ca54e5d0b77911c789b143111604fb62f027b-turn-0.json",
+      "sha256": "a603aab3ccaace475fcc21def9c1d6599f4ad930776117026655be2a26dd7866"
+    },
+    {
+      "caseId": "c-20261028-s04",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-8993ab93d7d1ae4b42ce608f37f4b4af0f2f8475bd5660dcc783c5fecc22a95a-turn-0.json",
+      "sha256": "829a0da7b33235dfa2ac72d16ffbf2183e7699c0ba639258875c4080bbc96e9c"
+    },
+    {
+      "caseId": "c-20261028-s07",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-5b2479aff4368040a82d564abddcd3728cef6fa07cea95615cdac50ac3aac9bd-turn-0.json",
+      "sha256": "8a9185f498765d715da15fea68505d8d45eb47eb192136ce5d0adce533056d6e"
+    },
+    {
+      "caseId": "c-20261028-s11",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-815d963745bb635c18ad98f5eb9c20aed62d4ecbf56c6deef2ff208b635eb55e-turn-0.json",
+      "sha256": "b6786db7aa8eda2730116f0c3e4ba747f5fe02fa3b2d88a085e9bfc2fe0ffa83"
+    },
+    {
+      "caseId": "c-20261028-s13",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-f23dcb7a0bb874974a411be6a37161bada03b3abc7c2ede7e18fc364c929085f-turn-0.json",
+      "sha256": "c83c60313ab6903d515f8f4691500bcd2271c837b97418779e03a474c0a364b6"
+    },
+    {
+      "caseId": "c-20261028-s16",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-2a2b7c25202e02cb88c019315a5094dace36c8db87b9943f0dd2278635ec3313-turn-0.json",
+      "sha256": "4b7b5959d5b43c80dbec334806012f504578163939347fdcbc0c0a6c689018ff"
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-9e36fe94d6c9902e440e522194eab62f0f8962a038593e5ed71e78fa6b93a4fc-turn-0.json",
+      "sha256": "8e73018cad96c8c81dcb5542fde2d443db799499716551905347fe2b7f94a607"
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 1,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-9e36fe94d6c9902e440e522194eab62f0f8962a038593e5ed71e78fa6b93a4fc-turn-1.json",
+      "sha256": "ff81809b463cdb99777c82199fa0e37486a7da01d65ff0a0fd5b674b14765b95"
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "turnIndex": 2,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-9e36fe94d6c9902e440e522194eab62f0f8962a038593e5ed71e78fa6b93a4fc-turn-2.json",
+      "sha256": "33e377f24f3ff536f61183f4f01447d842eae178d776756be32fb538ffcb38de"
+    },
+    {
+      "caseId": "c-20261028-j3",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-cbfad31751d87d2faf4cfc28eb989252fdb869acdeedfe8a2e5418c51150672f-turn-0.json",
+      "sha256": "07881e15757a0b0da4a83d73b31691db36450423a9eadff507a1bc7359b5f17e"
+    },
+    {
+      "caseId": "c-20261028-j3",
+      "turnIndex": 1,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-cbfad31751d87d2faf4cfc28eb989252fdb869acdeedfe8a2e5418c51150672f-turn-1.json",
+      "sha256": "adffc62b43585838eaf843accad324f02c24f49f1f381493ab3206361a63911e"
+    },
+    {
+      "caseId": "c-20261028-j3",
+      "turnIndex": 2,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-cbfad31751d87d2faf4cfc28eb989252fdb869acdeedfe8a2e5418c51150672f-turn-2.json",
+      "sha256": "a4310a092926c6da9b091cea64f6081f792f70b92847378f0b106ceb5f50ec22"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-cd7becd21021f281c723ac23ed2293b99ffc8dbe63987c81078aa1e10c7c4a0e-turn-0.json",
+      "sha256": "f970af2447c2854fea5e7e442e6fbf206f5252a9ae95b017bf76f72da939327d"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 1,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-cd7becd21021f281c723ac23ed2293b99ffc8dbe63987c81078aa1e10c7c4a0e-turn-1.json",
+      "sha256": "234aaba9d943f76145c40072f06f968d6bf167de7ea762f9c1fe9cbfc49aa455"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 2,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-cd7becd21021f281c723ac23ed2293b99ffc8dbe63987c81078aa1e10c7c4a0e-turn-2.json",
+      "sha256": "4dea4f5582c12cff406a00fec4678ca34ec5ff26cb18d3292591a2e1f16715b3"
+    },
+    {
+      "caseId": "c-20261028-j5",
+      "turnIndex": 0,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-295736301872c04e9c664f772b90efac217890ff00b9191938c92bd0914052ea-turn-0.json",
+      "sha256": "5ff72d9e31b8cb14c28f8ae169946639c84936b5606c015826044dcca3c0b1c9"
+    },
+    {
+      "caseId": "c-20261028-j5",
+      "turnIndex": 1,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-295736301872c04e9c664f772b90efac217890ff00b9191938c92bd0914052ea-turn-1.json",
+      "sha256": "154739ac1d595ea960ecb1801d248c047768c4006acba0ef28c49975e55c8eaa"
+    },
+    {
+      "caseId": "c-20261028-j5",
+      "turnIndex": 2,
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-model-remainder-run-20261103-02\\native-295736301872c04e9c664f772b90efac217890ff00b9191938c92bd0914052ea-turn-2.json",
+      "sha256": "dcdd076137cdba4ec8c9c33e0634d103efa83dbaa5bd7646f409e1f035ae39d3"
+    }
+  ],
+  "analysisArtifacts": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-whole-review-image-eligibility-20261103.json",
+      "sha256": "2f39f496a9af32d204638a9b0f168761ade8240b2879cd9ddaced0a14fc165b0"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-whole-review-cart-capture-clock-20261103.json",
+      "sha256": "1467e06d9606548a49c2dac01c69aa776ef34e3433cd5deee5eb6329fa17df73"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-media-context-whole-review-outcome-comparison-20261103.json",
+      "sha256": "1ad7a2c3a8ee3a3ae79d977842a31f2ff74e116d9db9bdb16fe847c4cae4ea74"
+    }
+  ],
+  "sealedPacketIntegrity": "ALL36_PAYLOAD_HASHES_UNCHANGED",
+  "reviewExecutionNotes": [
+    "First offline bare package alias import failed ERR_MODULE_NOT_FOUND; corrected explicit existing dist imports for successful pure analyses.",
+    "No new unit/integration/provider test suite run; no live source approval, TTL extension or effect replay."
+  ]
+}

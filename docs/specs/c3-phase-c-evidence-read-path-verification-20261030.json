@@ -1,0 +1,499 @@
+{
+  "schemaVersion": 1,
+  "kind": "EVIDENCE_READ_PATH_DETERMINISTIC_IMPLEMENTATION_ONLY",
+  "implementationBaseSha": "8e955b0b8756564a709e9f7237f343164db47fd1",
+  "approvedPlanSha": "f9b6e0843382e1c2be192137c5148a9d3f8e0c96",
+  "testedExecutableSourceSha": "97c6ce86d6e61f5eb0648a150c5fd464a9ab3e90",
+  "commands": [
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/realtime-sales-catalog.test.ts src/single-agent-commerce-read-only-tools.test.ts src/single-agent-commerce-read-only-context.test.ts src/single-agent-commerce.test.ts src/single-agent-commerce-read-only.test.ts src/single-agent-commerce-ingress.test.ts src/single-agent-commerce-effects.test.ts src/single-agent-semantic-verifier-boundary.test.ts src/track-b-protected-claim-boundary.test.ts src/single-agent-commerce-selection-evidence.test.ts src/single-agent-commerce-diagnostics.test.ts src/single-agent-commerce-evidence-preparation.test.ts src/single-agent-commerce-media.test.ts src/single-agent-commerce-sources.test.ts src/single-agent-commerce-product-groups.test.ts",
+      "exitCode": 0,
+      "sourceSha": "0524df64a9ac9c344ce1da7fe4adf42de053eb5a",
+      "artifact": {
+        "path": "../c3-evidence-final-focused-20261030.log",
+        "sha256": "4e5d01312f54a1a5e63df8532890e99799828ee789bf88c618089c679b27da34",
+        "bytes": 1637
+      },
+      "passed": 486,
+      "files": 13,
+      "unmatchedPatterns": [
+        "src/single-agent-commerce-evidence-preparation.test.ts",
+        "src/single-agent-commerce-sources.test.ts"
+      ]
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-preparation.test.ts src/single-agent-commerce-read-only-sources.test.ts src/single-agent-commerce-public-history.test.ts",
+      "exitCode": 0,
+      "sourceSha": "0524df64a9ac9c344ce1da7fe4adf42de053eb5a",
+      "artifact": {
+        "path": "../c3-evidence-final-additional-20261030.log",
+        "sha256": "771efa673324e5640534249205eeab8c65e034793a4219239d48381cd6367feb",
+        "bytes": 529
+      },
+      "passed": 24,
+      "files": 3
+    },
+    {
+      "command": "pnpm --filter @lana/business-tools exec vitest run src/protected-claims.test.ts src/reply-assembler.test.ts",
+      "exitCode": 0,
+      "sourceSha": "0524df64a9ac9c344ce1da7fe4adf42de053eb5a",
+      "artifact": {
+        "path": "../c3-evidence-final-protected-20261030.log",
+        "sha256": "103b6d1eb6c91aac39fde85ece84ab9ca2e4657c90898637cfc68ef7d7dc3471",
+        "bytes": 429
+      },
+      "passed": 21,
+      "files": 2
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "exitCode": 0,
+      "sourceSha": "0524df64a9ac9c344ce1da7fe4adf42de053eb5a",
+      "artifact": {
+        "path": "../c3-evidence-final-typecheck-20261030.log",
+        "sha256": "ba6c5c1f496b2379848d8334b0ce319b29a5d7b6ef36f141af859f6b3115b53d",
+        "bytes": 5266
+      }
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "exitCode": 0,
+      "sourceSha": "0524df64a9ac9c344ce1da7fe4adf42de053eb5a",
+      "artifact": {
+        "path": "../c3-evidence-build-03-20261030.log",
+        "sha256": "4e7b375c087b1b26dbab3d7fba4c25aeadce53a2831285e7a0a5c5ae8b629784",
+        "bytes": 5249
+      }
+    },
+    {
+      "command": "node --test \"apps/worker/evals/single-agent-commerce-qualification/*.test.mjs\"",
+      "exitCode": 0,
+      "sourceSha": "0524df64a9ac9c344ce1da7fe4adf42de053eb5a",
+      "artifact": {
+        "path": "../c3-evidence-final-qualification-node-20261030.log",
+        "sha256": "8c6594dfd9f851e036bab966b93e60d67f5bd3c1424ec5acee8cd80795d50bc5",
+        "bytes": 8268
+      },
+      "passed": 80,
+      "overlapsFullEvals": true
+    },
+    {
+      "command": "pnpm --filter @lana/worker test:evals",
+      "exitCode": 0,
+      "sourceSha": "0524df64a9ac9c344ce1da7fe4adf42de053eb5a",
+      "artifact": {
+        "path": "../c3-evidence-final-all-evals-20261030.log",
+        "sha256": "09fbc965ac2c7b004d03b2187d0065a10224b7cdfddf81067f82133e80cd82b6",
+        "bytes": 84391
+      },
+      "passed": 761,
+      "skipped": 2,
+      "failed": 0,
+      "skipReason": "C3_TEST_CODEX_TRANSPORT not enabled; two installed-login/local-stub checks"
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0,
+      "sourceSha": "0524df64a9ac9c344ce1da7fe4adf42de053eb5a",
+      "artifact": {
+        "path": "../c3-evidence-final-lint-20261030.log",
+        "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+        "bytes": 171
+      }
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-evidence-pg-target-0524df64-20261030 COD --check-prefix \"B composed evidence read\"",
+      "exitCode": 0,
+      "sourceSha": "0524df64a9ac9c344ce1da7fe4adf42de053eb5a",
+      "artifact": {
+        "path": "../c3-evidence-pg-target-0524df64-20261030.log",
+        "sha256": "6b05f6cf3aead71727490428f25e7f7c34ade7326545365ce1e437a6e2db1395",
+        "bytes": 310
+      },
+      "passed": 3
+    },
+    {
+      "command": "node apps/worker/evals/single-agent-commerce-qualification/cli.mjs init --out ../c3-evidence-read-config-0524df64.json",
+      "exitCode": 0,
+      "sourceSha": "0524df64a9ac9c344ce1da7fe4adf42de053eb5a",
+      "artifact": {
+        "path": "../c3-evidence-read-config-0524df64.json",
+        "sha256": "32b9f904f6d1ae0b7ab3e23d67d3bae853e718a7889c0e4f9378c9e5a56ac5ab",
+        "bytes": 5114
+      },
+      "note": "Artifact is generated config, not console output"
+    },
+    {
+      "command": "node apps/worker/evals/single-agent-commerce-qualification/real-adapter-driver.mjs ../c3-evidence-read-registration-0524df64.json ../c3-evidence-pg-full-0524df64-20261030",
+      "exitCode": 2,
+      "sourceSha": "0524df64a9ac9c344ce1da7fe4adf42de053eb5a",
+      "artifact": {
+        "path": "../c3-evidence-pg-full-0524df64-20261030.log",
+        "sha256": "bd6f34ef68d0cfc1d8ebf7d0f24a32c3f4a09dbe3d9b3a02c4bc5ea76bbd970d",
+        "bytes": 245
+      },
+      "status": "BLOCKED",
+      "passedBeforeStop": 33,
+      "failed": 1,
+      "note": "Failed cart-receipt source query validation; test DB dropped; remaining cases not executed in this run"
+    },
+    {
+      "command": "pnpm --filter @lana/worker exec vitest run src/single-agent-commerce-handoff-sources.test.ts src/single-agent-commerce-handoff-delivery.test.ts src/single-agent-commerce-effects.test.ts src/single-agent-commerce-ingress.test.ts",
+      "exitCode": 0,
+      "sourceSha": "97c6ce86d6e61f5eb0648a150c5fd464a9ab3e90",
+      "artifact": {
+        "path": "../c3-evidence-handoff-query-green-20261030.log",
+        "sha256": "7ca7cf093b680cfc436518432c15aa716d276d21a16bcd2d1f14f093b29ff658",
+        "bytes": 725
+      },
+      "passed": 236,
+      "files": 4,
+      "overlapsPriorWorkerTests": 199
+    },
+    {
+      "command": "pnpm --filter @lana/worker build",
+      "exitCode": 0,
+      "sourceSha": "97c6ce86d6e61f5eb0648a150c5fd464a9ab3e90",
+      "artifact": {
+        "path": "../c3-evidence-build-04-20261030.log",
+        "sha256": "67af0e79ba253bf15ab1484c06a813cbb95afbdf931354f665059621dac93729",
+        "bytes": 5249
+      }
+    },
+    {
+      "command": "pnpm --filter @lana/worker typecheck",
+      "exitCode": 0,
+      "sourceSha": "97c6ce86d6e61f5eb0648a150c5fd464a9ab3e90",
+      "artifact": {
+        "path": "../c3-evidence-typecheck-03-20261030.log",
+        "sha256": "cdf379453f5d1fad2aecdf25a2dbd5cf96d392fe64f2f08733abc1e0b248f632",
+        "bytes": 5266
+      }
+    },
+    {
+      "command": "pnpm --filter @lana/worker lint",
+      "exitCode": 0,
+      "sourceSha": "97c6ce86d6e61f5eb0648a150c5fd464a9ab3e90",
+      "artifact": {
+        "path": "../c3-evidence-lint-02-20261030.log",
+        "sha256": "b3dd9e7411765c32538ab3991390b1ea74ca15e1305e2030222320856e9c5415",
+        "bytes": 171
+      }
+    },
+    {
+      "command": "pnpm --filter @lana/worker test:evals",
+      "exitCode": 0,
+      "sourceSha": "97c6ce86d6e61f5eb0648a150c5fd464a9ab3e90",
+      "artifact": {
+        "path": "../c3-evidence-all-evals-02-20261030.log",
+        "sha256": "9517f0a40570c5d32339beb614eb11f7b1e972c7beb1b0b88aaf965bf0e1728a",
+        "bytes": 84479
+      },
+      "passed": 761,
+      "skipped": 2
+    },
+    {
+      "command": "python apps/worker/evals/single-agent-commerce-read-only/source-session.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-evidence-pg-cart-target-97c6ce86-20261030 COD --check-prefix \"B composed prepared handoff partial cart-\"",
+      "exitCode": 0,
+      "sourceSha": "97c6ce86d6e61f5eb0648a150c5fd464a9ab3e90",
+      "artifact": {
+        "path": "../c3-evidence-pg-cart-target-97c6ce86-20261030.log",
+        "sha256": "fce44cab65d8050a31127846d99424956127426abd9e21344688b0319932f4bd",
+        "bytes": 119
+      },
+      "passed": 2
+    },
+    {
+      "command": "node apps/worker/evals/single-agent-commerce-qualification/real-adapter-driver.mjs ../c3-evidence-read-registration-97c6ce86.json ../c3-evidence-pg-full-97c6ce86-20261030",
+      "exitCode": 0,
+      "sourceSha": "97c6ce86d6e61f5eb0648a150c5fd464a9ab3e90",
+      "artifact": {
+        "path": "../c3-evidence-pg-full-97c6ce86-20261030.log",
+        "sha256": "7e0bfe134a3ce5f48d65c68b787cd1b2251161822bc72a6da95b49b8b2cc70e0",
+        "bytes": 1851
+      }
+    }
+  ],
+  "realPostgres": {
+    "sourceSha": "97c6ce86d6e61f5eb0648a150c5fd464a9ab3e90",
+    "sourceDirty": false,
+    "providerGenerations": 0,
+    "sendEnabled": false,
+    "testDatabaseDropped": true,
+    "priorSourceTargetedPassed": 3,
+    "fullPassed": 73,
+    "checks": [
+      {
+        "name": "stale_revision",
+        "status": "PASS",
+        "artifactHash": "842ffa597a5305129e07bbe28c6bd5183e00588a980a642ada89ec2a029cdb80",
+        "caseName": "B composed newer inbound between final readback and commit cancels eligibility without an Outbox"
+      },
+      {
+        "name": "duplicate_source",
+        "status": "PASS",
+        "artifactHash": "842ffa597a5305129e07bbe28c6bd5183e00588a980a642ada89ec2a029cdb80",
+        "caseName": "B3 native cart commits once; duplicate does not repeat database transaction"
+      },
+      {
+        "name": "crash_after_commit",
+        "status": "PASS",
+        "artifactHash": "842ffa597a5305129e07bbe28c6bd5183e00588a980a642ada89ec2a029cdb80",
+        "caseName": "B composed recovery accounting commit-response-lost"
+      },
+      {
+        "name": "ambiguous_reconciliation",
+        "status": "PASS",
+        "artifactHash": "842ffa597a5305129e07bbe28c6bd5183e00588a980a642ada89ec2a029cdb80",
+        "caseName": "B3 native quantity change persists, unknown commit reconciles without replay"
+      },
+      {
+        "name": "operation_idempotency",
+        "status": "PASS",
+        "artifactHash": "842ffa597a5305129e07bbe28c6bd5183e00588a980a642ada89ec2a029cdb80",
+        "caseName": "B composed ingress commits an open cart, authorizes the exact reply and captures delivery once"
+      },
+      {
+        "name": "history_outbox_recovery",
+        "status": "PASS",
+        "artifactHash": "842ffa597a5305129e07bbe28c6bd5183e00588a980a642ada89ec2a029cdb80",
+        "caseName": "B composed two native mutations retain one source and next owner receives accepted history and current cart"
+      },
+      {
+        "name": "no_duplicate_effect",
+        "status": "PASS",
+        "artifactHash": "842ffa597a5305129e07bbe28c6bd5183e00588a980a642ada89ec2a029cdb80",
+        "caseName": "B composed N4 sends exact text and selected image in one response group without replay duplicates"
+      }
+    ],
+    "artifacts": [
+      {
+        "path": "../c3-evidence-read-registration-97c6ce86.json",
+        "sha256": "8b1047a792b00d51049700a1a6bb7fd0c6f58db0ea5bce27bf6ae4334846e095",
+        "bytes": 5738
+      },
+      {
+        "path": "../c3-evidence-pg-target-0524df64-20261030/integration.json",
+        "sha256": "abc3037267712510938a1e5f60794c11aa5262d7d3378cd19355d66944bc0ced",
+        "bytes": 6709
+      },
+      {
+        "path": "../c3-evidence-pg-cart-target-97c6ce86-20261030/integration.json",
+        "sha256": "d91f49d26194dbfdf07a1249ff4da2684e5ca1bc6afbb8cf034ef3d6125dafe3",
+        "bytes": 6489
+      },
+      {
+        "path": "../c3-evidence-pg-full-97c6ce86-20261030/COMMAND.json",
+        "sha256": "42e638de64188673a57fab3a4c05ecb15571bc54ddc9835d095dbeae0d08cfba",
+        "bytes": 739
+      },
+      {
+        "path": "../c3-evidence-pg-full-97c6ce86-20261030/REAL_ADAPTER.json",
+        "sha256": "a508f579a5884e4acac1184350d7efe069ffa4ad9787fdbd179faa29d39eacbe",
+        "bytes": 2175
+      },
+      {
+        "path": "../c3-evidence-pg-full-97c6ce86-20261030/postgres/integration.json",
+        "sha256": "11c3eaaae48dad0468215840c135e07526026b7562cc70715b9d3069d836751f",
+        "bytes": 35396
+      }
+    ]
+  },
+  "observedRedGreen": [
+    {
+      "area": "P0 diagnostics",
+      "red": {
+        "path": "../c3-evidence-p0-red-20261030.log",
+        "sha256": "d265a6520fe9ecd249511dae68a7ac0fb95e34a23f65e01ee26bd476e148ecec",
+        "bytes": 1710
+      },
+      "green": {
+        "path": "../c3-evidence-p0-green-20261030.log",
+        "sha256": "d89fa1ac8850a746195a89899a09c0fd90f87685db34a67ece402e16c72301ad",
+        "bytes": 381
+      }
+    },
+    {
+      "area": "P1 owner/verifier tuple parity",
+      "red": {
+        "path": "../c3-evidence-p1-red2-20261030.log",
+        "sha256": "8515c9321ba3938f7b34d45dbedddf4359f0be1717d58138c8f4e58e751755db",
+        "bytes": 1691
+      },
+      "green": {
+        "path": "../c3-evidence-p1-green2-20261030.log",
+        "sha256": "2370176ea198707f02501fcbcd5da5c731dbc21bb6e2e98c035200b378dd8929",
+        "bytes": 521
+      }
+    },
+    {
+      "area": "P3 current read preparation",
+      "red": {
+        "path": "../c3-evidence-p3-red-20261030.log",
+        "sha256": "3153272d306ff65c4d32f146699aa50be845ec949127cbc335f3a8f439669809",
+        "bytes": 2238
+      },
+      "green": {
+        "path": "../c3-evidence-p3-green-20261030.log",
+        "sha256": "16364bfa20892410a08bbe2f190b36db0f66fe31423f367093ffeecdee32da5c",
+        "bytes": 383
+      }
+    },
+    {
+      "area": "Review R1/R2 retention and replay",
+      "red": {
+        "path": "../c3-evidence-review-replay-red3-20261030.log",
+        "sha256": "9075b01896bb8c39dad66c29db7ca8cef12e03552e7c06fceed031b6f3ec290a",
+        "bytes": 16102
+      },
+      "green": {
+        "path": "../c3-evidence-review-r1-green3-20261030.log",
+        "sha256": "54c106eaa0b518a4e0ab9add0b051a95809a3a11fb54e41045afd1af3e13af56",
+        "bytes": 456
+      }
+    },
+    {
+      "area": "Review R4/R5 compare and trace",
+      "red": {
+        "path": "../c3-evidence-review-r2-red-20261030.log",
+        "sha256": "b88e277091e4ce8ee179fdf3b13506e463e5fa47aef38ef9474746582fe2ae31",
+        "bytes": 3848
+      },
+      "green": {
+        "path": "../c3-evidence-review-r2-green2-20261030.log",
+        "sha256": "f7bc4c382fbb9efaacf436f5bb733f6dbe31788ad937e04be46605aa60383b16",
+        "bytes": 589
+      }
+    },
+    {
+      "area": "RealPG handoff query schema regression",
+      "red": {
+        "path": "../c3-evidence-handoff-query-red3-20261030.log",
+        "sha256": "754d127fc7900aea8b70b0a19816e32c086ad338ffeb573949b3fae4a8951525",
+        "bytes": 3056
+      },
+      "green": {
+        "path": "../c3-evidence-handoff-query-green-20261030.log",
+        "sha256": "7ca7cf093b680cfc436518432c15aa716d276d21a16bcd2d1f14f093b29ff658",
+        "bytes": 725
+      }
+    }
+  ],
+  "independentChecks": {
+    "reviewer": "/root/full22_run_review",
+    "model": "gpt-6.1-sol",
+    "effort": "high",
+    "sourceSha": "0524df64a9ac9c344ce1da7fe4adf42de053eb5a",
+    "wirePassed": 3,
+    "sourcePassed": 18,
+    "repeatedNotDistinct": true,
+    "artifacts": [
+      {
+        "path": "../c3-evidence-independent-wire-0524df64-20261030.log",
+        "sha256": "b820ec6ba8b7b6739a8f32f4dbffb024dade5df6470a60443a0c202e430ee097",
+        "bytes": 446
+      },
+      {
+        "path": "../c3-evidence-independent-source-0524df64-20261030.log",
+        "sha256": "b632bc02313d9e6cfffb9a03baf31bd276f01f48d0603559b3a9d0a7a31f7f06",
+        "bytes": 527
+      }
+    ]
+  },
+  "sizeAudit": {
+    "artifact": {
+      "path": "../c3-evidence-size-audit-20261030.json",
+      "sha256": "f0a40915be6feaa686d8368193197b886b59504a325d9702f1e995b68e034e94",
+      "bytes": 15139
+    },
+    "buildSourceSha": "83e9e73bd85095b17fd47ed564596e6cd9cf848c",
+    "firstStatus": "RECOMMENDED_M",
+    "correctedStatus": "OUT_OF_RANGE",
+    "missingInputs": [],
+    "sourceChanged": false
+  },
+  "structuralDelta": {
+    "files": 24,
+    "insertions": 600,
+    "deletions": 56,
+    "onlineRolesAdded": 0,
+    "onlineLayersAdded": 0,
+    "productionEntrypointWiring": false,
+    "promptChanges": false,
+    "providerApiChanges": false,
+    "sharedPackageSourceChanges": false,
+    "toolWorkMaximum": 6,
+    "toolRoundMaximum": 2,
+    "runtimeProductBytesMaximum": 8192,
+    "ownerVerifierTextWireBytesMaximum": 65536,
+    "selectionObservationsMaximum": 18
+  },
+  "limits": [
+    "No model generation or new blind grade; quality and fallback reduction unverified",
+    "Two opt-in local Codex transport tests skipped",
+    "No remote CI, merge, deploy, live send or source publication",
+    "P4 source chart does not support corrected measurements; OUT_OF_RANGE/handoff retained",
+    "Earlier dependency failures remain unproven until fresh traced run",
+    "Original qualification BLOCKED; C3 comparison NOT_RUN; B_NOT_GO unchanged"
+  ],
+  "failedIntermediateLogs": [
+    {
+      "path": "../c3-evidence-build-02-20261030.log",
+      "sha256": "cce9590059462122d6120ed04fb7c5ff965516e0792609955910197ef45e8638",
+      "bytes": 5592
+    },
+    {
+      "path": "../c3-evidence-review-r2-green-20261030.log",
+      "sha256": "9cab007b84649fe1dcc0f0f02b623ed8fb081467761b7ddfe152d8b7c34a2ba4",
+      "bytes": 3901
+    },
+    {
+      "path": "../c3-evidence-pg-full-0524df64-20261030/COMMAND.json",
+      "sha256": "509bd7b5998ae633981f0636c833302075ef1bf380df92a0fee059e552f380f1",
+      "bytes": 739
+    },
+    {
+      "path": "../c3-evidence-pg-full-0524df64-20261030/COMMAND.log",
+      "sha256": "5dd4b91e2c7fd5e7676cd9af3b0092da4b75181e952efa7d5ea7ce7eff687878",
+      "bytes": 3440
+    },
+    {
+      "path": "../c3-evidence-pg-full-0524df64-20261030/REAL_ADAPTER.json",
+      "sha256": "95e23f133ccd316bc78d0c0e498d8eb45d2f2bcda162364cbbd328ebea525835",
+      "bytes": 272
+    },
+    {
+      "path": "../c3-evidence-pg-full-0524df64-20261030/postgres/integration.json",
+      "sha256": "4db4f4df9b957b18b0261e767a7cdc9951f551cfa7c8105d08f9f3bb5f0c306c",
+      "bytes": 27953
+    },
+    {
+      "path": "../c3-evidence-handoff-query-red-20261030.log",
+      "sha256": "2558d7b88d64e5fbcc1f2f55ff4fa248eb93c47f108c57e7f56c9a325d0c2d38",
+      "bytes": 15566
+    },
+    {
+      "path": "../c3-evidence-handoff-query-red2-20261030.log",
+      "sha256": "5cfa56a8f46b841b4b5750a4636a869854dea8ababe79248e8cb8127f428b385",
+      "bytes": 8933
+    }
+  ],
+  "references": [
+    {
+      "path": "docs/specs/c3-single-agent-commerce-architecture-20261004.md",
+      "sha256": "78e83815495211386081ff646b93ab7f1bfc1cdbfb9fe4cb6c0a4533c2cf1343"
+    },
+    {
+      "path": "docs/specs/c3-semantic-verifier-boundary-amendment-20261005.md",
+      "sha256": "14745e37eb9ec9b11bd8a47466c07e4c5ab91f75e5627c4e983aa4f408d1b411"
+    },
+    {
+      "path": "docs/specs/c3-phase-c-qualification-plan-20261028.md",
+      "sha256": "d58b7a945d7b5b0ef9733d127a20a00b5ec876221040aaa8c91ee275c1615e06"
+    },
+    {
+      "path": "docs/specs/c3-phase-c-evidence-read-path-fix-plan-20261030.md",
+      "sha256": "56de1c890e28599ae4f23bcd4d1e06228eb70e2b6de5a019ee886fe0ae6d2c34"
+    }
+  ]
+}

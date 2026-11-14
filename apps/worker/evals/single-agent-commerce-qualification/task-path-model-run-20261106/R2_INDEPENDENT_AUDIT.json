@@ -1,0 +1,288 @@
+{
+  "status": "AUDITED_INTEGRITY_PASS_FUNCTIONAL_GATE_FAIL",
+  "reviewer": "/root/b_preserving_independent_review",
+  "reviewedAt": "2026-11-06T08:47:37.266740+00:00",
+  "sourceSha": "9b2cfff594c89d09a11e32c9c4274556291d72a1",
+  "registrationHash": "6b057e083a641f28bface02630ed858eb372d7218ed7ec2c8e87b06828fec1e6",
+  "evidencePath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-taskpath-model-r2-run-20261106-02\\CANDIDATE_EVIDENCE.partial.json",
+  "evidenceSha256": "2106695d44227c59da006a1653b94a5c7abc6d1681ed38165401f16ccdb9afb0",
+  "integrationPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-taskpath-model-r2-run-20261106-02\\integration.json",
+  "integrationSha256": "dc06198202e2931e5b29be784f3c492b4401a1e5fb5fbbf5023300c808e214e5",
+  "accountingSha256": "ff415d644a7d10f45502362d50d6d7b75a81dd0564de1083ea1fa378193e27c7",
+  "ownerOverrideEvidenceSha256": "619bb3d2530109c4ce1fb1ea3a510b6804bcda8486b25511402e1fa8de0a97a2",
+  "casesRegistered": 9,
+  "casesExecuted": 9,
+  "capturedTurns": 17,
+  "generations": {
+    "registeredMaximum": 68,
+    "records": 37,
+    "generationHttpRequests": 36,
+    "owner": 26,
+    "verifier": 11,
+    "OK": 34,
+    "localRequestBuildError0HTTP": 1,
+    "upstreamVerifierHTTP429": 2,
+    "automaticGenerationRetries": 0,
+    "authRequestsSeparate": 1
+  },
+  "actualTerminalCounts": {
+    "SEND_ELIGIBLE": 8,
+    "HANDOFF": 5,
+    "NO_SEND_HUMAN_OWNED": 4
+  },
+  "capturedTexts": 8,
+  "capturedImages": 3,
+  "acceptedOutbox": 11,
+  "verifierOutcomes": {
+    "PASS": 8,
+    "FAIL": 1,
+    "PROVIDER_ERROR_NO_VERDICT": 2
+  },
+  "testDatabaseDropped": true,
+  "sourceDirty": false,
+  "liveSend": false,
+  "materialTaskFailures": 5,
+  "materialFailures": [
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 0,
+      "category": "LOCAL_CONTINUATION_CAPACITY_FAILURE",
+      "detail": "Owner emitted apply_customer_state + read_product rather than combined recommend_size. Profile measurements and RELAXED preference committed; next owner frame66195>65536 blocked locally with0HTTP. Silent handoff; next scripted turn human-owned silence. No evidence mutation failed or may be retried."
+    },
+    {
+      "caseId": "c-20261028-s03",
+      "turnIndex": 0,
+      "category": "MISSING_SHOP_MEDIA_DETAIL_AND_OWNER_UNSUPPORTED_DESCRIPTION",
+      "detail": "Selected DETAIL/FRONT image has confirmedParts[] and componentKnown=false. Owner called it close-up sharp lace; verifier correctly rejected. Historical source gap remains unresolved and task service fails; do not count handoff as sales success."
+    },
+    {
+      "caseId": "c-20261028-s13",
+      "turnIndex": 0,
+      "category": "OWNER_TOOL_BATCH_MODE_VIOLATION",
+      "detail": "Owner proposed two quote_product calls plus two select_product_media in one batch. Standalone once-per-turn quote contract rejects entire four-call batch with OWNER_TOOL_MODE, before source tools. Shared source targets were available, no missing shop source or continuation bound observed. Actual silent handoff."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 1,
+      "category": "VERIFIER_PROVIDER_QUOTA_FAILURE_WITH_OWNER_NEGOTIATION_MISUSE",
+      "detail": "record_negotiation rejected NEGOTIATION_SOURCE_OR_CART because no cart while colour missing; draft claimed499000 best shop price unsupported by successful negotiation proof. Verifier HTTP429 usage_limit_reached gives no verdict. Silent handoff; next turn human silence. Do not assert verifier would have PASS/FAIL."
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 0,
+      "category": "VERIFIER_PROVIDER_QUOTA_FAILURE_AFTER_COMMITTED_CART",
+      "detail": "add_to_cart committed one SET_VAY M cart829000, verifier HTTP429 usage_limit_reached blocked response. Actual silent handoff; next two customer turns human silence, checkout/COD task not completed. Committed cart remains; do not replay add mutation."
+    }
+  ],
+  "frames": [
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 0,
+      "actualDisposition": "HANDOFF",
+      "messages": [],
+      "imageCount": 0,
+      "verdict": null,
+      "nativeArtifact": "native-6f715fafb0e76e1b3a9f83337cadc27c3d78805f593b88b18463daebc9bf0b00-turn-0.json",
+      "nativeRawSha256": "61bbaaece9548ec8bc9040d9e17b8ae7b362a91f430818525ec3f940d901bbe2"
+    },
+    {
+      "caseId": "c-po-20261031-p04",
+      "turnIndex": 1,
+      "actualDisposition": "NO_SEND",
+      "messages": [],
+      "imageCount": 0,
+      "verdict": null,
+      "nativeArtifact": "native-6f715fafb0e76e1b3a9f83337cadc27c3d78805f593b88b18463daebc9bf0b00-turn-1.json",
+      "nativeRawSha256": "ab027c4ae2869a4baa0a3b9e5f77035efb506bc8ac989d98e2f5124ea783439d"
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, set Thạch Thảo size M hiện còn hàng ở cả 2 phiên bản chị nha:\n\n- Set quần Thạch Thảo: 769.000đ\n- Set váy Thạch Thảo: 799.000đ\n\nChị yêu thích phiên bản set quần hay set váy hơn ạ?"
+      ],
+      "imageCount": 0,
+      "verdict": "PASS",
+      "nativeArtifact": "native-816b65878c6deeb92bafc787e7cd7abc0938697e315e545d51936ba3037a50bf-turn-0.json",
+      "nativeRawSha256": "927b1faefc8f16ab5598d63335f45281f48b3e8b5b6bdebf7d0781b9b3a33eb7"
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "turnIndex": 1,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, em đã thêm set quần Thạch Thảo size M (769.000đ) vào giỏ hàng cho chị rồi ạ. Tổng thanh toán gồm phí vận chuyển là 799.000đ ạ."
+      ],
+      "imageCount": 0,
+      "verdict": "PASS",
+      "nativeArtifact": "native-816b65878c6deeb92bafc787e7cd7abc0938697e315e545d51936ba3037a50bf-turn-1.json",
+      "nativeRawSha256": "91a497cb8fafd0303e373d20ceca0affc94cf2ab2dfa1f908a4e4371004cd2eb"
+    },
+    {
+      "caseId": "c-20261028-s03",
+      "turnIndex": 0,
+      "actualDisposition": "HANDOFF",
+      "messages": [],
+      "imageCount": 0,
+      "verdict": "FAIL",
+      "nativeArtifact": "native-20e5cddea3580de60ccd1c4ebd6a080797243cb2dc72b6f3752674ab907c5b9e-turn-0.json",
+      "nativeRawSha256": "1707e3e78ef0dd8fc60cd2c13eb4be95e1b0503813d2893a514014bf281dbc96"
+    },
+    {
+      "caseId": "c-20261028-s13",
+      "turnIndex": 0,
+      "actualDisposition": "HANDOFF",
+      "messages": [],
+      "imageCount": 0,
+      "verdict": null,
+      "nativeArtifact": "native-fc0b004b57961e267d4abed2e063effb98c9c21fb95f12448c723d7dd6eb35b1-turn-0.json",
+      "nativeRawSha256": "02f9243c277ce12385d3df442b5bf74e7749ef605ed76bd7d743969922ce7fd1"
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, em lưu lại áo Thạch Thảo màu be cho chị nhé ạ. Chị có cần em tư vấn thêm về giá, size hoặc cách phối đồ với áo này không ạ?"
+      ],
+      "imageCount": 0,
+      "verdict": "PASS",
+      "nativeArtifact": "native-7f2a9419f6d2d74dec0ff39cd6379f34f3203e9956967a0acc3d3690f9a355af-turn-0.json",
+      "nativeRawSha256": "344dedc012a7560fe3ac4ab96b08cd64c4eb331ec3eb89311c23d5d7e1711046"
+    },
+    {
+      "caseId": "c-20261028-s16",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ, em gửi chị ảnh feedback của áo Thạch Thảo ạ!"
+      ],
+      "imageCount": 1,
+      "verdict": "PASS",
+      "nativeArtifact": "native-776227a70d43009de67b59b796454b5b31607bf43bcfb7542438056cb3238207-turn-0.json",
+      "nativeRawSha256": "0daa3c125fa6c248947e24cb69009191e856ff83f9648747b5602d0002607b02"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ với chiều cao 1m62 và cân nặng 56kg, chị mặc size M áo set váy Thạch Thảo là vừa đẹp chị nhé."
+      ],
+      "imageCount": 1,
+      "verdict": "PASS",
+      "nativeArtifact": "native-c4389384b61f47cb5b99d1c8af5c429a25dc490f539cd0e781020ad0d06ee805-turn-0.json",
+      "nativeRawSha256": "a0aea4e340f56c16ca29ed277bb7d0a23dbd9a6086b6b014467d098bf438b30e"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 1,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ với số đo 1m62, 51kg cùng vòng ngực 88, eo 70, mông 94, chị mặc size M áo set váy Thạch Thảo vẫn rất vừa đẹp chị nhé."
+      ],
+      "imageCount": 0,
+      "verdict": "PASS",
+      "nativeArtifact": "native-c4389384b61f47cb5b99d1c8af5c429a25dc490f539cd0e781020ad0d06ee805-turn-1.json",
+      "nativeRawSha256": "74f6f2ec7ca95833e9ea6af8baa1f126b3396071e776a7b3b39e1e30d8e83552"
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "turnIndex": 2,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ với sở thích mặc thoải mái và các số đo của chị, áo set váy Thạch Thảo size M vẫn là size chuẩn giúp chị vừa vặn, thoải mái vận động mà vẫn giữ form dáng đẹp chị nhé."
+      ],
+      "imageCount": 0,
+      "verdict": "PASS",
+      "nativeArtifact": "native-c4389384b61f47cb5b99d1c8af5c429a25dc490f539cd0e781020ad0d06ee805-turn-2.json",
+      "nativeRawSha256": "7adc1e01014c44dc8c6f627905ecc5eb12e8ae87cddddb219c4abf1c7ce7b667"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 0,
+      "actualDisposition": "SEND_ELIGIBLE",
+      "messages": [
+        "Dạ áo lẻ Set Thạch Thảo size M có hai màu là trắng và be (màu be là hàng đặt trước). Chị lấy áo màu nào ạ?"
+      ],
+      "imageCount": 1,
+      "verdict": "PASS",
+      "nativeArtifact": "native-e7ae7a1ba0546c26e287bd6061f789e79345e4d43c340ece9ec76ba71b6e41ef-turn-0.json",
+      "nativeRawSha256": "871210b927372200a4784ea8562eca49dfd19e572284ee1cb5b1fc25817a1eaf"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 1,
+      "actualDisposition": "HANDOFF",
+      "messages": [],
+      "imageCount": 0,
+      "verdict": null,
+      "nativeArtifact": "native-e7ae7a1ba0546c26e287bd6061f789e79345e4d43c340ece9ec76ba71b6e41ef-turn-1.json",
+      "nativeRawSha256": "269850b7e5b94d97af0cb660f8fcd23882691130bc1787707d40c0da1bd35668"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "turnIndex": 2,
+      "actualDisposition": "NO_SEND",
+      "messages": [],
+      "imageCount": 0,
+      "verdict": null,
+      "nativeArtifact": "native-e7ae7a1ba0546c26e287bd6061f789e79345e4d43c340ece9ec76ba71b6e41ef-turn-2.json",
+      "nativeRawSha256": "0d1cb36968022992a436487cb4c1b91292c80295f33d3913ec4f8567ffcbfd80"
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 0,
+      "actualDisposition": "HANDOFF",
+      "messages": [],
+      "imageCount": 0,
+      "verdict": null,
+      "nativeArtifact": "native-4e248dd517cccd9bae63c15c4628a55a178f44d7670088c5bc9c34eafcea4e22-turn-0.json",
+      "nativeRawSha256": "fb2a8bce7e6b64895f166084f2587e0910419a290a0aec1955ab0ce85191462c"
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 1,
+      "actualDisposition": "NO_SEND",
+      "messages": [],
+      "imageCount": 0,
+      "verdict": null,
+      "nativeArtifact": "native-4e248dd517cccd9bae63c15c4628a55a178f44d7670088c5bc9c34eafcea4e22-turn-1.json",
+      "nativeRawSha256": "0bdd769ffb8efac883563bba0b2d6cc009ae34af7ca03ae46dadf9b32573c82e"
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "turnIndex": 2,
+      "actualDisposition": "NO_SEND",
+      "messages": [],
+      "imageCount": 0,
+      "verdict": null,
+      "nativeArtifact": "native-4e248dd517cccd9bae63c15c4628a55a178f44d7670088c5bc9c34eafcea4e22-turn-2.json",
+      "nativeRawSha256": "2295aefa8d3163308c7f783350821563e8b83c84777e0c207eb3c8e45a6e776d"
+    }
+  ],
+  "integrityChecks": [
+    "All9attempts EXECUTED/17native frames; native canonical artifact digests match evidence, all37generation IDs unique; all available request digests and evaluator firewall assertions pass.",
+    "Each generation has0or1HTTP; local66195bound has0HTTP, quota failures each1HTTP; full denominator retained, no generation retry. Per-turn owner<=3/verifier<=1/toolrounds<=2.",
+    "Draft/snapshot input hashes verified for verifier attempts;14 native final witnesses have unchanged expected/current bindings. All accepted text hashes match captured terminal; all5handoff+4human-owned no-send have zero text/images/Outbox.",
+    "Accepted outputs8texts3images=11Outbox; no recorded safetyFindings, hardstop, unknown effect accounting or live send; real PostgreSQL dropped after full group.",
+    "Actual calls occurred08:28–08:42Z against original POS07:29:08Z source with09:29:08Z expiry; no freshness renew/substitution observed.",
+    "p09 both-turn valid source/size/offer continuity and cart799000 reached delivery; s15 preference ACK reached delivery; synthetic feedback source route scoped test-only; j2 currentM fits/correction/profiles retained.",
+    "OriginalR1FAIL gate unchanged; R2 owner override allowed diagnostic observation only, no promotion/qualification approval."
+  ],
+  "nonMaterialFindings": [
+    "s15 still reports saving preference and asks generic follow-up; j2 repeats full measurements and verbose fit assurances. These voice issues were deferred in frozen policy and not reclassified as material after results."
+  ],
+  "comparison": {
+    "previousSameR2": "Previous campaign8 actual messages including2CODE vs current8 generated; previous9 non-message outcomes vs current9. Failures changed: p09/s15 now usable; newp04bound and providerquota replace previousmalformed/bound errors. N1/freshworld/confounded changes prevent causal stability claim.",
+    "combinedR1R2": "13cases24turns;14SEND_ELIGIBLE,6HANDOFF,4HUMAN_NO_SEND;59generation records/58HTTP,41owner18verifier. R1material1+R2material5=6case failures."
+  },
+  "continueRisk": {
+    "level": "HIGH_OPERATIONAL_QUOTA_BLOCKER",
+    "recommendation": "Do not dispatch remaining groups against unchanged exhausted verifier credential. External quota availability/change and actual-time preflight required for any separately authorized new attempt/campaign; never hidden retry these attempts. Original staged gate disallows progression because R2FAIL.",
+    "notRunCases": 21,
+    "notRunTurns": 31
+  },
+  "qualification": "Development diagnostic only; no whole-reply score, stable improvement, C3 comparison or Phase C GO; no provider calls/source edits by reviewer."
+}

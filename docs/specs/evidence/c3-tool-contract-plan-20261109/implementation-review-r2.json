@@ -1,0 +1,21 @@
+{
+  "kind":"INDEPENDENT_IMPLEMENTATION_REVIEW",
+  "reviewer":"/root/post_contract_plan_review",
+  "revision":2,
+  "verdict":"REQUEST_CHANGES",
+  "baseSha":"36058803b95324d8888ef4e6c76773e01b61bb6f",
+  "reviewedPlanSha256":"6495b49aff8016df34050d79f86b31330905ef2deb9714033b92ecde13cc3bdd",
+  "closedFindings":["IR1-F1","IR1-F2","IR1-F3"],
+  "findings":[{
+    "id":"IR2-F1","priority":"P1",
+    "title":"Negotiated writer commits but sibling quote remains unexecuted in final real-PG acceptance",
+    "evidence":"../c3-tool-contract-pg-final-20261109/integration.json",
+    "observed":{"status":"FAIL","executedCases":4,"failedCases":1,"testDatabaseDropped":true,"quoteTaskWork":[],"negotiationEventCommitted":true},
+    "suspectedMechanism":"Composed handoff authority cache refresh makes the proved own-write revision appear as an out-of-band change in whole-state fingerprint; exact differing field not captured in artifact.",
+    "codeRefs":["apps/worker/src/single-agent-commerce-quote.ts writer readback fingerprint","apps/worker/src/single-agent-commerce-handoff.ts:68","apps/worker/src/single-agent-commerce-handoff.ts:229","apps/worker/src/single-agent-commerce-effects.ts:391"],
+    "required":"Prove exact own-commit post-write authority identity while retaining out-of-band/unknown-commit guards; rerun negotiated positive and negative PG controls with complete cleanup evidence."
+  }],
+  "reviewedEvidence":[{"path":"../c3-tool-contract-node-final-20261109.log","result":"101/101 PASS"},{"path":"../c3-tool-contract-focused-final-20261109.log","result":"1085/1085 PASS,36files"},{"path":"../c3-tool-contract-pg-final-20261109/integration.json","result":"FAIL,3PASS+1FAIL,DBdropped"}],
+  "testsExecutedByReviewer":[],"providerRequestsByReviewer":0,
+  "approvalScope":"NONE_PENDING_REAL_PG_FIX_AND_REVIEW"
+}

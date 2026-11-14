@@ -1,0 +1,14 @@
+✔ quote strict declaration, native result projection and actual HTTP request match (51.4111ms)
+✔ final-only CompactV2 keeps projected quote trace but grants no new call (9.6189ms)
+✔ quote parse rejects extra fields/duplicate offers and preserves signed content (0.9404ms)
+✔ phase/budget and primitive accounting are bound; legacy configuration remains valid (9.9012ms)
+✔ registered tool schema includes quote only when enabled, and binds its exact schema (1.2372ms)
+✔ returning quote wire requires quantity for one offer and keeps the code total without media or evaluator labels (6.673ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1570.0679

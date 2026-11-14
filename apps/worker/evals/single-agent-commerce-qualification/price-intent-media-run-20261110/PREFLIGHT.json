@@ -1,0 +1,14 @@
+{
+  "status": "PREFLIGHT_PASS",
+  "source": "5613e8b37784f8c2eb6be4ce3a115d8b13b7100e",
+  "registrationHash": "a7de668e8b9ae2129171d8c759c606e079ae3fdd74f93cf7b92470dce7721dba",
+  "worldHash": "e641857a4c4c7d272a2a47dd30e7fc0848aa94483601af4b9a32a5b3cfe7359b",
+  "maximumGenerations": 108,
+  "cases": 13,
+  "turns": 27,
+  "codex": {
+    "version": "codex-cli 0.159.2",
+    "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+  },
+  "providerRequests": 0
+}

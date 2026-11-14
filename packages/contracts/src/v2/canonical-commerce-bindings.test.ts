@@ -359,6 +359,20 @@ describe("CartMutationBatchEvidenceV1", () => {
     expect(CartMutationBatchEvidenceV1Schema.safeParse({ ...batch, finalCartStateHash: HASH_B, receipts: [{ ...replacement, mutationReasonCode: "QUANTITY_CHANGED" }] }).success).toBe(false);
   });
 
+  it("requires both old-line binding and exact target identity for replacement receipts",()=>{
+    const target=cart().lines[0]!;
+    const replacement={...receipt(0,HASH_A,HASH_B),mutation:{kind:"REPLACE_LINE",lineId:target.lineId,line:target},mutationReasonCode:"LINE_REPLACED",
+      authority:{...authority("ADD_LINE",target.parentProductId,target.offerId),action:"REPLACE_LINE",authorityKind:"NATIVE_TOOL_PERMISSION",
+        replacedLine:{lineId:target.lineId,productId:"OLD",offerId:"OLD-SET",beforeLineHash:HASH_D}}};
+    const accepts=(r:unknown)=>CartMutationBatchEvidenceV1Schema.safeParse({...batch,finalCartStateHash:HASH_B,receipts:[r]}).success;
+    expect(accepts(replacement)).toBe(true);
+    expect(accepts({...replacement,authority:{...replacement.authority,replacedLine:undefined}})).toBe(false);
+    expect(accepts({...replacement,authority:{...replacement.authority,productId:"OTHER"}})).toBe(false);
+    expect(accepts({...replacement,mutation:{...replacement.mutation,lineId:"1b884806-7c77-4410-bc47-a3d2bb51c936"}})).toBe(false);
+    expect(accepts({...replacement,mutationReasonCode:"QUANTITY_CHANGED"})).toBe(false);
+    expect(accepts({...receipt(0,HASH_A,HASH_B),authority:{...receipt(0,HASH_A,HASH_B).authority,replacedLine:replacement.authority.replacedLine}})).toBe(false);
+  });
+
   it.each([
     { receipts: [receipt(0, HASH_A, HASH_B), receipt(1, HASH_D, HASH_C)] },
     { finalCartStateHash: HASH_D },

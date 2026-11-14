@@ -1,5 +1,8 @@
 import {
   ProtectedClaimV1Schema,
+  sameSizeFitTarget,
+  sizeFitTargetKey,
+  type SizeFitTargetV1,
   type ProtectedClaimV1,
 } from "@lana/contracts";
 
@@ -20,6 +23,7 @@ export interface RealtimeProtectedClaimAuthorizationInput {
   readonly observedClaimTypes: readonly ProtectedClaimV1["type"][];
   readonly availableClaims: readonly unknown[];
   readonly expectedProductIds: readonly string[];
+  readonly expectedFitTargets?:readonly SizeFitTargetV1[];
   readonly expectedProductScopes?: readonly Readonly<{
     productId: string;
     variantId: string | null;
@@ -51,16 +55,23 @@ function claimReason(
   claim: ProtectedClaimV1,
   input: RealtimeProtectedClaimAuthorizationInput,
 ): RealtimeProtectedClaimReasonCode | null {
+  if(claim.type==="SIZE_FIT"&&claim.scope.kind!=="PRODUCT")return `PROTECTED_CLAIM_PRODUCT_SCOPE_MISMATCH:${claim.claimId}`;
   const observedAt = Date.parse(claim.provenance.observedAt);
-  const expiresAt = Date.parse(claim.provenance.expiresAt);
+  const expiresAt = claim.provenance.expiresAt===null?null:Date.parse(claim.provenance.expiresAt);
   if (observedAt > input.now.getTime()) {
     return `PROTECTED_CLAIM_FUTURE:${claim.claimId}`;
   }
-  if (expiresAt <= input.now.getTime()) {
+  if (expiresAt!==null&&expiresAt <= input.now.getTime()) {
     return `PROTECTED_CLAIM_STALE:${claim.claimId}`;
   }
   if (claim.scope.kind === "PRODUCT") {
     const productScope = claim.scope;
+    if(claim.type==="SIZE_FIT"){
+      const actual=claim.value.fitTarget??{kind:"PRODUCT" as const,productId:productScope.productId};
+      const expected=input.expectedFitTargets??input.expectedProductIds.map(productId=>({kind:"PRODUCT" as const,productId}));
+      if((actual.kind==="PRODUCT"?actual.productId:actual.parentProductId)!==productScope.productId||
+        !expected.some(t=>sameSizeFitTarget(t,actual)))return `PROTECTED_CLAIM_PRODUCT_SCOPE_MISMATCH:${claim.claimId}`;
+    }
     if (!input.expectedProductIds.includes(productScope.productId)) {
       return `PROTECTED_CLAIM_PRODUCT_SCOPE_MISMATCH:${claim.claimId}`;
     }
@@ -158,6 +169,7 @@ export interface BindRealtimeProtectedClaimProposalInput {
   readonly defenseObservedClaimTypes?: readonly ProtectedClaimV1["type"][];
   readonly availableClaims: readonly unknown[];
   readonly expectedProductIds: readonly string[];
+  readonly expectedFitTargets?:readonly SizeFitTargetV1[];
   readonly expectedProductScopes?: RealtimeProtectedClaimAuthorizationInput["expectedProductScopes"];
   readonly expectedCart?: RealtimeProtectedClaimAuthorizationInput["expectedCart"];
   readonly now: Date;
@@ -185,6 +197,7 @@ export interface RealtimeProtectedClaimRequest {
   readonly type: ProtectedClaimV1["type"];
   readonly productId?: string;
   readonly variantId?: string | null;
+  readonly expectedFitTarget?:SizeFitTargetV1;
   readonly cartId?: string;
   readonly cartVersion?: number;
 }
@@ -192,6 +205,7 @@ export interface RealtimeProtectedClaimRequest {
 function requestKey(request: RealtimeProtectedClaimRequest): string {
   return JSON.stringify([
     request.type,
+    request.expectedFitTarget?sizeFitTargetKey(request.expectedFitTarget):"PRODUCT_ONLY",
     request.productId === undefined ? "UNSPECIFIED" : request.productId,
     request.variantId === undefined
       ? "UNSPECIFIED"
@@ -206,6 +220,12 @@ function claimMatchesRequest(
   request: RealtimeProtectedClaimRequest,
 ): boolean {
   if (claim.type !== request.type) return false;
+  if(claim.type==="SIZE_FIT"){
+    if(claim.scope.kind!=="PRODUCT")return false;
+    const actual=claim.value.fitTarget??{kind:"PRODUCT" as const,productId:claim.scope.productId};
+    const expected=request.expectedFitTarget??{kind:"PRODUCT" as const,productId:request.productId??claim.scope.productId};
+    if(!sameSizeFitTarget(actual,expected))return false;
+  }
   if (request.productId !== undefined) {
     return claim.scope.kind === "PRODUCT" &&
       claim.scope.productId === request.productId &&
@@ -262,6 +282,7 @@ export function bindRealtimeProtectedClaimProposal(
     observedClaimTypes: requestedTypes,
     availableClaims: input.availableClaims,
     expectedProductIds: input.expectedProductIds,
+    ...(input.expectedFitTargets?{expectedFitTargets:input.expectedFitTargets}:{}),
     ...(input.expectedProductScopes === undefined
       ? {}
       : { expectedProductScopes: input.expectedProductScopes }),

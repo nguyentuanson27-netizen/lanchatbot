@@ -1,0 +1,232 @@
+
+ RUN  v3.2.7 C:/Users/nguye/Documents/Sản phẩm AI/lanchatbot-c3-semantic-verifier-checkpoint-a-20261005/apps/worker
+
+ ✓ src/df13-first-preprod-commerce-version-preparer-cli.test.ts (4 tests) 2138ms
+   ✓ DF13 first-PREPROD COMMERCE version preparer CLI > attests one stable annotated tag object and rejects lightweight, branch, and moved refs  1956ms
+ ✓ src/single-agent-commerce-effects.test.ts (113 tests) 964ms
+ ✓ src/gate-e-registration.test.ts (26 tests) 887ms
+   ✓ Gate E immutable registration boundary > derives provenance, request bytes, scores, and atomic evidence inside one boundary  515ms
+ ✓ src/df13-release-candidate-evidence.test.ts (14 tests) 1505ms
+ ✓ src/single-agent-commerce-state.test.ts (55 tests) 391ms
+ ✓ src/single-agent-commerce-read-only-tools.test.ts (98 tests) 728ms
+ ✓ src/track-b-commerce-authority-preprod-cli.test.ts (28 tests) 652ms
+   ✓ Track B PREPROD V2/LKG operator boundary > can be imported in a production-like process without invoking the CLI main  586ms
+ ✓ src/vertex.test.ts (34 tests) 1171ms
+   ✓ Vertex shadow client > retries one transient Track C Judge V2 timeout before recording the case as failed  1004ms
+ ✓ src/realtime-media-recognition.test.ts (28 tests) 1056ms
+   ✓ V2 realtime recognition pipeline > aborts the reranker when the total deadline expires during earlier stages  1016ms
+ ✓ src/track-c-replay.test.ts (24 tests) 674ms
+ ✓ src/single-agent-commerce-ingress.test.ts (176 tests) 18665ms
+   ✓ runs pinned-main C3 builders, two passes and guard through shared ingress commit with local HTTP payloads  14364ms
+ ✓ src/single-agent-commerce-opening-media.test.ts (32 tests) 674ms
+ ✓ src/df13-commerce-preprod-startup-authority.test.ts (8 tests) 886ms
+ ✓ src/realtime-sales-cycle.test.ts (78 tests) 840ms
+ ✓ src/bf01-realtime-runner.integration.test.ts (24 tests) 560ms
+   ✓ BF-01 runner reconciliation > runs the complete B3 corpus through one capture-only live-path adapter  403ms
+ ✓ src/single-agent-commerce-media.test.ts (46 tests) 782ms
+ ✓ src/single-agent-commerce-read-only.test.ts (43 tests) 677ms
+ ✓ src/single-agent-commerce-quote.test.ts (27 tests) 838ms
+ ✓ src/realtime-runner.test.ts (62 tests) 858ms
+stdout | src/single-agent-commerce-discovery-feasibility.test.ts > discovery feasibility through composed reads and actual mocked owner wire > keeps representative two-candidate batch within existing bounds: complete
+DISCOVERY_FEASIBILITY complete {"fixtureBytes":5314,"requestedCandidates":2,"rawResults":[3959,10627],"chargedResults":[687,3378],"wire":[29068,36084,40501],"runtimeProducts":[4,4],"terminalHistoryBytes":16846,"nativeFunctionResponsesBytes":13653}
+
+stdout | src/single-agent-commerce-discovery-feasibility.test.ts > discovery feasibility through composed reads and actual mocked owner wire > keeps representative two-candidate batch within existing bounds: partial
+DISCOVERY_FEASIBILITY partial {"fixtureBytes":5314,"requestedCandidates":2,"rawResults":[3959,7012],"chargedResults":[687,3664],"wire":[29068,36084,38372],"runtimeProducts":[4,4],"terminalHistoryBytes":14717,"nativeFunctionResponsesBytes":10384}
+
+stdout | src/single-agent-commerce-discovery-feasibility.test.ts > discovery feasibility through composed reads and actual mocked owner wire > keeps representative two-candidate batch within existing bounds: source-failure
+DISCOVERY_FEASIBILITY source-failure {"fixtureBytes":5314,"requestedCandidates":2,"rawResults":[3959,5088],"chargedResults":[687,1740],"wire":[29068,36084],"runtimeProducts":[4,4]}
+
+ ✓ src/single-agent-commerce-discovery-feasibility.test.ts (3 tests) 468ms
+   ✓ discovery feasibility through composed reads and actual mocked owner wire > keeps representative two-candidate batch within existing bounds: complete  335ms
+ ❯ src/single-agent-commerce-preparation.test.ts (26 tests | 1 failed) 347ms
+   ✓ publishes late policy charts before verification, numeric preparation=true 99ms
+   ✓ publishes late policy charts before verification, numeric preparation=false 10ms
+   ✓ rejects failed chart publication atomically and revokes old charts without erasing independent facts 19ms
+   ✓ uses the current policy after a pending catalog read, with no cross-product chart inheritance 21ms
+   ✓ does not let a superseded policy success replace newer revocation 24ms
+   ✓ does not let a superseded policy failure replace newer revocation 21ms
+   ✓ prepares current numeric evidence from exactly the existing singleton source observation, without hydration renewing it 29ms
+   ✓ does not partially publish optional numeric preparation when many admission fails 5ms
+   ✓ does not partially publish optional numeric preparation when reject admission fails 10ms
+   ✓ keeps catalog evidence on optional POS acquisition failure, without inserting stale facts 2ms
+   ✓ does not admit optional data without a native-wire admission callback 2ms
+   ✓ prepares 2 bound targets without choosing a product and charges actual first-owner budget 15ms
+   ✓ prepares 3 bound targets without choosing a product and charges actual first-owner budget 11ms
+   ✓ keeps previously admitted numeric facts while preparing another ambiguous target as metadata 7ms
+   ✓ optional POS failure preserves the independent answer path for Cảm ơn em nhé. 7ms
+   ✓ optional POS failure preserves the independent answer path for Áo này phối quần nâu được không? 5ms
+   ✓ optional POS failure preserves the independent answer path for Giặt máy được không? 7ms
+   ✓ exposes six source offers as read references without numeric fanout 5ms
+   ✓ charges failed preparation before terminal recovery 2ms
+   ✓ rejects exhausted preparation before I/O and publishes no partial set after admission rejects 5ms
+   ✓ does not debit cached preparation or already admitted full reads again 8ms
+   × retains option-specific BOM roles without claiming component size applicability from a product chart 17ms
+     → expected [ { componentRef: 'DESIGN_AO', …(2) } ] to deeply equal [ { componentRef: 'DESIGN_AO', …(1) } ]
+   ✓ does not publish a partial BOM as complete after rejecting null 3ms
+   ✓ does not publish a partial BOM as complete after rejecting {"product_sku":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"} 2ms
+   ✓ does not publish a partial BOM as complete after rejecting {} 2ms
+   ✓ empty BOM array uses the same legacy source components as the cart resolver 3ms
+ ✓ src/track-c-c3-two-pass-candidate.test.ts (48 tests) 335ms
+ ✓ src/bf08-realtime-runner.integration.test.ts (73 tests) 332ms
+ ✓ src/df13-commerce-cutover-evidence.integration.test.ts (2 tests) 323ms
+ ✓ src/bf02-realtime-runner.test.ts (24 tests) 547ms
+ ✓ src/unbounded-multi-product-text.test.ts (14 tests) 350ms
+ ✓ src/track-b-release-candidate-evidence.test.ts (4 tests) 287ms
+ ✓ src/single-agent-commerce-handoff.test.ts (27 tests) 408ms
+ ✓ src/bf02-review-plan.test.ts (6 tests) 297ms
+ ✓ src/p23c-publisher.test.ts (21 tests) 305ms
+ ✓ src/track-c-c3-journey-adapter.test.ts (9 tests) 234ms
+ ✓ src/single-agent-commerce-missing-information.test.ts (24 tests) 252ms
+ ✓ src/single-agent-commerce-pos-refresh.test.ts (32 tests) 253ms
+ ✓ src/bf07-realtime-runner.integration.test.ts (10 tests) 229ms
+ ✓ src/track-b-release-candidate-evidence-cli.test.ts (10 tests) 275ms
+ ✓ src/p23a-registry-sync.test.ts (13 tests) 203ms
+ ✓ src/realtime-golden-transcripts.test.ts (12 tests) 249ms
+ ✓ src/p23b-metadata-staging.test.ts (34 tests) 224ms
+ ✓ src/single-agent-commerce-handoff-delivery.test.ts (25 tests) 195ms
+ ✓ src/vertex-baseline.test.ts (3 tests) 210ms
+ ✓ src/media-recognition-v2-image-pipeline.test.ts (30 tests) 232ms
+ ✓ src/p23c-jobs.test.ts (6 tests) 199ms
+ ✓ src/single-agent-commerce-persistence.test.ts (19 tests) 198ms
+ ✓ src/df13-release-candidate-evidence-cli.test.ts (2 tests) 191ms
+ ✓ src/single-agent-commerce-product-groups.test.ts (27 tests) 164ms
+ ✓ src/single-agent-commerce-selection-evidence.test.ts (4 tests) 191ms
+ ✓ src/track-c-c3-post-pr358-behavior.test.ts (10 tests) 177ms
+ ✓ src/single-agent-commerce-media-delivery.test.ts (22 tests) 109ms
+ ✓ src/single-agent-commerce-silent-fallback.test.ts (18 tests) 126ms
+ ✓ src/track-c-c3-two-pass-quality-adapter.test.ts (11 tests) 170ms
+ ✓ src/df13-runtime-authority-boundary.integration.test.ts (7 tests) 133ms
+ ✓ src/single-agent-commerce-session.test.ts (10 tests) 149ms
+ ✓ src/single-agent-commerce-selection-compact.test.ts (7 tests) 151ms
+ ✓ src/single-agent-semantic-verifier-boundary.test.ts (57 tests) 78ms
+ ✓ src/customer-url-policy.test.ts (134 tests) 113ms
+ ✓ src/track-c-quality-suite-gate.test.ts (6 tests) 155ms
+ ✓ src/single-agent-commerce.test.ts (2 tests) 133ms
+ ✓ src/bf01-typed-intent-reconciliation.integration.test.ts (4 tests) 127ms
+ ✓ src/gate-e-operational.test.ts (14 tests) 156ms
+ ✓ src/foundation-runtime-boundary.test.ts (2 tests) 115ms
+ ✓ src/delivery-health.test.ts (4 tests) 117ms
+ ✓ src/shadow-runner.test.ts (7 tests) 101ms
+ ✓ src/single-agent-commerce-grounded-state.test.ts (20 tests) 108ms
+ ✓ src/track-c-offline-candidate.test.ts (15 tests) 170ms
+ ✓ src/single-agent-commerce-diagnostics.test.ts (8 tests) 133ms
+ ✓ src/track-b-commerce-authority-preprod-adapter.test.ts (21 tests) 152ms
+ ✓ src/single-agent-commerce-read-only-sources.test.ts (11 tests) 103ms
+ ✓ src/realtime-loop.test.ts (2 tests) 73ms
+ ✓ src/track-c-c2-journey-contract.test.ts (18 tests) 143ms
+ ✓ src/gemini-embedding-2-client.test.ts (17 tests) 88ms
+ ✓ src/media-input-limit.test.ts (4 tests) 89ms
+ ✓ src/track-c-quality-v2-evaluator.test.ts (6 tests) 106ms
+ ✓ src/google-sheets-client.test.ts (2 tests) 94ms
+ ✓ src/vertex-media-reranker.test.ts (20 tests) 59ms
+ ✓ src/track-b-commerce-authority-activation.test.ts (33 tests) 68ms
+ ✓ src/single-agent-commerce-session-silent.test.ts (7 tests) 76ms
+ ✓ src/single-agent-commerce-handoff-sources.test.ts (12 tests) 85ms
+ ✓ src/context-v2-candidate.test.ts (18 tests) 95ms
+ ✓ src/image-recognition-qdrant.test.ts (23 tests) 68ms
+ ✓ src/realtime-product-facts-v2.test.ts (12 tests) 61ms
+ ✓ src/context-v2-evaluation.test.ts (19 tests) 55ms
+ ✓ src/realtime-sales-catalog.test.ts (19 tests) 74ms
+ ✓ src/single-agent-commerce-fit-target.test.ts (5 tests) 56ms
+ ✓ src/p23c-hash-v3.test.ts (13 tests) 56ms
+ ✓ src/p23c-recognition-publisher.test.ts (26 tests) 46ms
+ ✓ src/single-agent-commerce-read-only-context.test.ts (10 tests) 46ms
+ ✓ src/gate-e-output-interpreter.test.ts (9 tests) 67ms
+ ✓ src/track-c-c3-sales-quality-candidate.test.ts (4 tests) 47ms
+ ✓ src/p23c-media-revalidation.test.ts (15 tests) 42ms
+ ✓ src/messenger-canary-scenarios.test.ts (30 tests) 35ms
+ ✓ src/context-v2.test.ts (10 tests) 117ms
+ ✓ src/pos-snapshot-runner.test.ts (10 tests) 46ms
+ ✓ src/single-agent-commerce-public-history.test.ts (4 tests) 57ms
+ ✓ src/df13-commerce-cutover.test.ts (30 tests) 36ms
+ ✓ src/df06-commerce-binding-architecture.test.ts (6 tests) 42ms
+ ✓ src/confirmation-classifier.test.ts (11 tests) 11ms
+ ✓ src/realtime-r32.2-compatibility-shield.test.ts (12 tests) 44ms
+ ✓ src/track-b-protected-claim-boundary.test.ts (18 tests) 47ms
+ ✓ src/commerce-authority-comparison.test.ts (20 tests) 14ms
+ ✓ src/pre-sale-policy.test.ts (24 tests) 42ms
+ ✓ src/track-c-quality-v2-gate.test.ts (11 tests) 16ms
+ ✓ src/missing-commerce-signal.test.ts (19 tests) 41ms
+ ✓ src/df13-first-preprod-commerce-version-preparer.test.ts (3 tests) 23ms
+ ✓ src/bounded-concurrency.test.ts (5 tests) 17ms
+ ✓ src/ad-lead-qualification.test.ts (6 tests) 9ms
+ ✓ src/track-c-c3-v5-stage-judge.test.ts (3 tests) 26ms
+ ✓ src/track-b-post-generation-authority.test.ts (9 tests) 10ms
+ ✓ src/bf01-direct-question-reconciliation.test.ts (19 tests) 9ms
+ ✓ src/df13-commerce-runtime-finalization.test.ts (5 tests) 16ms
+ ✓ src/realtime-reply-differential.test.ts (8 tests) 19ms
+ ✓ src/bf03-correction-containment.benchmark.test.ts (2 tests) 32ms
+ ✓ src/track-c-quality-judge.test.ts (11 tests) 38ms
+ ✓ src/df13-commerce-runtime-composition.test.ts (6 tests) 38ms
+ ✓ src/canonical-buying-authority.test.ts (4 tests) 23ms
+ ✓ src/media-recognition-v2-config.test.ts (7 tests) 9ms
+ ✓ src/track-b-live-path-replay.test.ts (6 tests) 84ms
+ ✓ src/dataset-prelabel-runner.test.ts (6 tests) 37ms
+ ✓ src/pos-snapshot-core.test.ts (19 tests) 72ms
+ ✓ src/verified-product-context.test.ts (13 tests) 30ms
+ ✓ src/df13-commerce-fresh-process-executor.test.ts (2 tests) 46ms
+ ✓ src/df04-normalization-architecture.test.ts (4 tests) 111ms
+ ✓ src/decision-observability.test.ts (8 tests) 48ms
+ ✓ src/df13-first-preprod-behavior-writer.test.ts (9 tests) 84ms
+ ✓ src/track-c-quality-suite.test.ts (2 tests) 31ms
+ ✓ src/single-agent-commerce-media-revalidation.test.ts (5 tests) 46ms
+ ✓ src/track-c-quality-v2-scoring.test.ts (6 tests) 29ms
+ ✓ src/checkout-payment-choice.test.ts (22 tests) 52ms
+ ✓ src/meta-outbox-dispatcher.test.ts (13 tests) 79ms
+ ✓ src/bf01-realtime-runner.test.ts (6 tests) 17ms
+ ✓ src/df13-commerce-authority-fence.test.ts (7 tests) 53ms
+ ✓ src/df13-commerce-runtime-executor.test.ts (5 tests) 46ms
+ ✓ src/single-agent-commerce-checkout.test.ts (3 tests) 38ms
+ ✓ src/df13-commerce-runtime-context.test.ts (6 tests) 44ms
+ ✓ src/track-c-must-pass.test.ts (15 tests) 40ms
+ ✓ src/single-agent-commerce-callable.test.ts (3 tests) 34ms
+ ✓ src/size-chart-eligibility.test.ts (14 tests) 36ms
+ ✓ src/df13-runtime-authority-boundary.test.ts (3 tests) 17ms
+ ✓ src/media-clarification.test.ts (5 tests) 13ms
+ ✓ src/pancake-tag-dispatcher.test.ts (2 tests) 19ms
+ ✓ src/bf07-multi-product-clarification.test.ts (5 tests) 30ms
+ ✓ src/size-chart-extractor.test.ts (4 tests) 21ms
+ ✓ src/media-resolution.test.ts (12 tests) 25ms
+ ✓ src/df13-commerce-fence-postgres-provider.test.ts (5 tests) 19ms
+ ✓ src/dataset-prelabel-prompt.test.ts (4 tests) 14ms
+ ✓ src/df13-commerce-default-off-consumer.test.ts (4 tests) 12ms
+ ✓ src/gate-e-git-reader.test.ts (3 tests) 16ms
+ ✓ src/df13-commerce-authority-bundle.test.ts (3 tests) 17ms
+ ✓ src/df13-commerce-authority-contract.test.ts (4 tests) 19ms
+ ✓ src/index.test.ts (2 tests) 12ms
+ ✓ src/business-fact-intent-authorization.test.ts (6 tests) 17ms
+ ✓ src/df13-commerce-fence-dispatcher.test.ts (6 tests) 12ms
+ ✓ src/redis-chat-history.test.ts (2 tests) 10ms
+ ✓ src/meta-outbox-operator-validation.test.ts (5 tests) 9ms
+ ✓ src/redis-business-facts.test.ts (2 tests) 12ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/single-agent-commerce-preparation.test.ts > retains option-specific BOM roles without claiming component size applicability from a product chart
+AssertionError: expected [ { componentRef: 'DESIGN_AO', …(2) } ] to deeply equal [ { componentRef: 'DESIGN_AO', …(1) } ]
+
+- Expected
++ Received
+
+  [
+    {
+      "componentRef": "DESIGN_AO",
++     "quantity": 1,
+      "role": "TOP",
+    },
+  ]
+
+ ❯ src/single-agent-commerce-preparation.test.ts:155:107
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 153 passed (154)
+      Tests  1 failed | 2655 passed (2656)
+   Start at  17:21:17
+   Duration  7314.43s (transform 11.56s, setup 0ms, collect 7273.28s, tests 48.98s, environment 62ms, prepare 7224.42s)
+
+undefined
+C:\Users\nguye\Documents\Sản phẩm AI\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\apps\worker:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src --maxWorkers=2
