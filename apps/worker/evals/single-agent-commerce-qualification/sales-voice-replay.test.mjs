@@ -74,3 +74,23 @@ test('blind packet omits arm identifiers and failed tool outcomes cannot receive
  const changed=replayJudgePacket(reg,observed);
  assert.equal(scoreReplay(reg,observed,{packetHash:digest(changed),ratings,judge}).status,'STOP');
 });
+
+test('the stock replay keeps the chosen prompt fixed, including when voice did not pass',()=>{
+ const f=fixture(),c=f.controls.THANKS_ONLY;
+ const reg=buildReplayRegistration({...f,stage:'OFFERS',treatment:baseline,controls:{
+  MIXED_STOCK:c,PRE_ORDER_ALREADY_DISCLOSED:c,STOCK_CHANGED:c,STOCK_PROOF_UNAVAILABLE:c,
+ }});
+ assert.equal(reg.slots.length,9);assert.equal(reg.maximumOwnerRequests,18);assert.equal(reg.maximumJudgeRequests,9);
+ assert(reg.slots.every(s=>s.arms&&s.arms.every(a=>a.systemInstruction.parts[0].text===baseline)));
+});
+
+test('native screen selects exactly 25 candidate slots and 45 turns',async()=>{
+ const {salesVoiceSlotIds}=await import('./native-population.mjs');
+ const ids=[...caseIds,'c-20261028-s16'];
+ const scenarios=ids.map(id=>({id,turns:Array(id.includes('-j')?3:1).fill({})}));
+ const slots=ids.flatMap(caseId=>[1,2,3,4,5].map(repetition=>({caseId,repetition,arm:'CANDIDATE',mode:'SINGLE',slotId:caseId+':'+repetition})));
+ assert.equal(salesVoiceSlotIds({slots,corpus:{scenarios}}).length,25);
+ assert.throws(()=>salesVoiceSlotIds({slots:slots.slice(1),corpus:{scenarios}}),/D_SALES_VOICE_REPETITIONS/);
+ scenarios[0].turns.push({});
+ assert.throws(()=>salesVoiceSlotIds({slots,corpus:{scenarios}}),/D_SALES_VOICE_TURNS/);
+});

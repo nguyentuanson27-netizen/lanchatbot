@@ -39,7 +39,9 @@ function exactChoice(scope,filters,prices,stocks){
 
 /** Copy current sale terms into the Compact V2 owner view. Original evidence and native turns are retained. */
 export function presentVerifiedOfferTerms(wire,claims){
- const sections=readCompactSections(wire.contents[0],{expandProducts:false});
+ const header=wire.contents[0];
+ if(header.parts.length!==1||!header.parts[0].text.startsWith('Thời điểm xử lý\n'))return wire;
+ const sections=readCompactSections(header,{expandProducts:false});
  const section=name=>sections.find(s=>s.label===name)?.value;
  const visible=section('Giá, tồn và kết quả đã xác minh');
  const subjects=section('Đối tượng đã gắn');

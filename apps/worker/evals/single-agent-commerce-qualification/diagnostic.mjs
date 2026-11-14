@@ -7,6 +7,7 @@ import {execFileSync} from 'node:child_process';
 import {digest,qualificationIdentity,runtimeProjection,validateConfig} from './qualification.mjs';
 import {assertCurrentCandidate,assertApprovedDecisions} from './source-identity.mjs';
 import {assertCandidateSource} from './candidate-provider.mjs';
+import {salesVoiceSlotIds} from './native-population.mjs';
 import {frozenFacts} from './frozen-world.mjs';
 import {assertJudgeSourceInventory} from './evaluator-source.mjs';
 import {hardPrecheck} from '../../dist/single-agent-semantic-verifier-boundary.js';
@@ -49,7 +50,7 @@ export function validateDiagnostic(reg,world){
  if(scope===FULL_NATIVE_DIAGNOSTIC_SCOPE||scope===PURCHASE_OPTIONS_DIAGNOSTIC_SCOPE||scope===FULL_NATIVE_REMAINDER_SCOPE||scope===PURCHASE_MISSING_SCOPE||B_PRESERVING_SCOPES.includes(scope))assert.equal(digest(reg.corpus.scenarios.map(s=>({id:s.id,mode:s.mode,turns:s.turns,customerPolicy:s.customerPolicy??null}))),scope.customerScriptsHash,'D_CUSTOMER_SCRIPTS_CHANGED');
  validateConfig(reg.config);assert.equal(reg.config.retry,0);
  if(reg.config.salesVoiceOfferTerms!==undefined)assert(reg.config.salesVoiceOfferTerms===true&&
-  scope.maximumCases===13&&reg.config.repetitions===5,'D_SALES_VOICE_SCOPE');
+  scope.maximumCases===13&&reg.config.repetitions===5&&salesVoiceSlotIds(reg).length===25,'D_SALES_VOICE_SCOPE');
  assert.deepEqual(reg.identity,qualificationIdentity(reg.config));assert.equal(reg.worldHash,digest(world));frozenFacts(world);
  assert.equal(reg.corpusHash,digest(reg.corpus));assert.deepEqual(reg.slots,diagnosticSlots(reg.corpus,reg.config.repetitions));
  assert(reg.review?.status==='APPROVED'&&reg.review.corpusHash===reg.corpusHash&&reg.review.worldHash===reg.worldHash&&
@@ -108,10 +109,11 @@ export function assertDiagnosticFlags(argv){
 }
 export function diagnosticProviderRegistration(sealed){
  const openingMediaRule=sealed.config?.candidate?.openingMediaRule;assertOpeningProductMediaRule(openingMediaRule);
+ const salesVoice=sealed.config.salesVoiceOfferTerms===true;
  assertProspectiveOpeningReadiness(sealed.corpus,openingMediaRule);
  return {sourceSha:sealed.runSourceSha,mode:'PHASE_C_DEVELOPMENT_DIAGNOSTIC_ONLY',arm:'CANDIDATE',openingMediaRule,
-  maximumGenerationRequests:diagnosticScope(sealed.corpus).maximumGenerationRequests*(sealed.config?.repetitions??1),ownerContextPresentation:'VI_DATA_BLOCKS_COMPACT_V2',
-  ...(sealed.config.salesVoiceOfferTerms===true?{salesVoiceOfferTerms:true}:{})};
+  maximumGenerationRequests:salesVoice?180:diagnosticScope(sealed.corpus).maximumGenerationRequests*(sealed.config?.repetitions??1),ownerContextPresentation:'VI_DATA_BLOCKS_COMPACT_V2',
+  ...(salesVoice?{salesVoiceOfferTerms:true}:{})};
 }
 export function diagnosticPreflight(root,registrationPath,worldPath){
  const sealed=read(registrationPath),world=read(worldPath);validateDiagnostic(sealed,world);

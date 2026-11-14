@@ -6,6 +6,15 @@ import {runtimeProjection,digest,textDigest,outcomeDigest} from './qualification
 import {commonModelConfig} from './native-wire.mjs';
 import {selectFrozenCustomerTurn,selectCheckoutCustomerTurn} from './customer-branches.mjs';
 import {captureNativeTerminal,capturedOutputViolations,clarificationCapture,previewMediaCapture,checkoutBranchWitness} from './native-terminal.mjs';
+const salesVoiceTargets=['c-20261028-s15','c-20261028-s16','c-20261028-j2','c-20261028-j4','c-20261028-s08'];
+export function salesVoiceSlotIds(sealed){
+ const selected=sealed.slots.filter(s=>s.arm==='CANDIDATE'&&s.mode!=='SAFETY'&&salesVoiceTargets.includes(s.caseId));
+ for(const id of salesVoiceTargets)assert.deepEqual(selected.filter(s=>s.caseId===id).map(s=>s.repetition).sort(),[1,2,3,4,5],'D_SALES_VOICE_REPETITIONS');
+ assert.equal(new Set(selected.map(s=>s.slotId)).size,25,'D_SALES_VOICE_SLOT_COUNT');
+ const plannedTurns=selected.reduce((count,slot)=>count+(sealed.corpus.scenarios.find(s=>s.id===slot.caseId)?.turns.length??0),0);
+ assert.equal(plannedTurns,45,'D_SALES_VOICE_TURNS');
+ return selected.map(s=>s.slotId);
+}
 const silent=(reason,disposition='NO_SEND')=>({disposition,messages:[],images:[],reason});
 export function selectRegisteredNativeSlots(registration,arm,slotIds){
  const slots=registration.slots.filter(slot=>slot.arm===arm&&slot.mode!=='SAFETY');
@@ -17,6 +26,13 @@ export function selectRegisteredNativeSlots(registration,arm,slotIds){
 }
 export async function collectNativePopulation({preflight,providerPorts,sessionFactory,snapshot,historyStore,out,seedPath,queue,branchSelector,slotIds}){
  const reg=preflight.sealed,identity=reg.identity,arm=preflight.registration.arm??'CANDIDATE',seed=JSON.parse(readFileSync(seedPath,'utf8')).seed;
+ if(reg.config.salesVoiceOfferTerms===true){
+  const selected=salesVoiceSlotIds(reg);
+  // One sealed single-arm campaign, no arbitrary expansion through diagnostic slot selection.
+  if(slotIds!==undefined)assert.deepEqual([...slotIds].sort(),[...selected].sort(),'D_SALES_VOICE_SLOT_SET');
+  slotIds=selected;
+ }
+
  const attempts=reg.slots.filter(s=>s.arm===arm&&s.mode!=='SAFETY').map(s=>({...s,identity,status:'NOT_RUN'}));
  assert.equal(digest(seed),reg.config.blinding.seedCommitment,'C_BLIND_SEED_CHANGED');
  const cases=reg.corpus.scenarios.filter(s=>s.mode!=='SAFETY');
