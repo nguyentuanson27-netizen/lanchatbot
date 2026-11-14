@@ -3322,3 +3322,9 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Kiểm offline 34 cặp giọng và 9 cặp trạng thái từ capture đã lưu và bốn đối chứng của mỗi bước. Node focused 131 PASS; worker lint PASS. Cặp chạy giữ nguyên AUTO, lịch sử, kết quả đọc, chữ ký tool và không đưa rubric vào provider.
 - [x] Chạy VOICE 34 cặp và OFFERS 9 cặp trên 3357270a. Gemini 3.5 Flash Lite High 86 request, Sol 6.1 High chấm mù đủ 43 cặp, một HTTP 429 giữ trong mẫu số. [Kết quả và hội thoại](../apps/worker/evals/single-agent-commerce-qualification/sales-voice-run-20261115/REVIEW.md).
 - [ ] STOP cả hai phép đo. J2 sửa số đo đạt giọng 1/5 và S08 đạt 2/5 trong VOICE. OFFERS dùng prompt gốc, S08 đủ dữ kiện đặt trước 3/5 so với 4/5 đối chứng. Chưa mở native 25 hành trình/45 lượt. Phase C chưa đạt qualification.
+
+## Phase C — kế hoạch sửa nguồn lời văn và thương lượng, 2026-11-15
+
+- [x] Lập Revision1 theo 43 cặp đã chạy, gọi review độc lập và xử lý hai blocker về source fallback và thời điểm message trước giỏ.
+- [x] Revision2 được cùng reviewer APPROVE tại SHA-256 f200cf4dfe0c43e5a9c2befc25e0cd1a01caf7a2423af7f1c6e23d7ab050354a sau kiểm compatibility state cũ. [Kế hoạch và quyết định](../docs/specs/evidence/c3-sales-context-contract-plan-20261115/README.md).
+- [ ] Triển khai W0–W4 khi được yêu cầu. Kế hoạch gồm contract extension cho pending negotiation, projection giữ raw/caveats, kiểm riêng tác động và native mới từ đầu. Trần324generation chưa sử dụng. Chưa nhận giọng/PhaseC GO.

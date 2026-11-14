@@ -606,3 +606,9 @@ Phạm vi là sửa cách owner trả lời trong Phase C, trên bản `5a41f5be
 ### Review độc lập
 
 GPT-6.1 Sol High yêu cầu hai lần chỉnh trước khi duyệt: khóa mẫu và ngân sách từng bước, chấm lại giọng trên hành trình native, rồi buộc cả bốn đối chứng đặt trước đạt. Reviewer xác nhận **APPROVE** cho nội dung §23.1–23.4 tại blob Git `c46629ff6a449485bf7801c93c98cdd16a0343ab`, SHA-256 `55e1b6ddebc651cd8db9c3813f89394fd34050f35279e5e46938ae6a7ebe36cf` của file trước khi thêm ghi nhận này. Review chỉ duyệt kế hoạch.
+
+## 24. Kế hoạch sau phép đo giọng ngày 15/11/2026
+
+Phép đo §23 STOP cả VOICE và OFFERS. Hướng xử lý tiếp theo nằm ở [kế hoạch sửa nguồn lời văn và thương lượng Revision2](c3-phase-c-sales-context-contract-plan-20261115.md), đã [review độc lập APPROVE](evidence/c3-sales-context-contract-plan-20261115/README.md).
+
+Bản này phân biệt bằng chứng với giả thuyết về lịch sử/mô tả. W2 giữ đầy đủ mô tả nguồn và caveats trong request. W3 cần extension hẹp cho yêu cầu hỗ trợ trước giỏ vì domain hiện chặn source message sớm hơn cart.createdAt. Replay chẩn đoán có12cặp; native có34attempt/66lượt và chỉ mở khi replay đạt. Trần toàn chiến dịch mới324generation. Đây là kế hoạch, chưa triển khai/chạy model hoặc nhận Phase C GO.

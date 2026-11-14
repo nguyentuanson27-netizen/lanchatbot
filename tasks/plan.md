@@ -1,4 +1,8 @@
-## Current — requested continuation execution reconciled, STOP, 2026-11-11
+## Current — kế hoạch sửa nguồn lời văn và thương lượng, 2026-11-15
+
+Kế hoạch [Revision2](../docs/specs/c3-phase-c-sales-context-contract-plan-20261115.md) đã [review độc lập APPROVE](../docs/specs/evidence/c3-sales-context-contract-plan-20261115/README.md) ở đúng hash. Scope W0 inventory/provenance → W1 phục hồi nguyên tắc diễn đạt → W2 projection giữ full nguồn/caveats → W3 pending evidence theo contract → W4 đo riêng và native từ đầu. Base7cdd2e80, chưa implementation/provider. Trần dự kiến324generation, chỉ native khi replay đạt. Giữ STOP của phép đo §23.
+
+## Previous — requested continuation execution reconciled, STOP, 2026-11-11
 
 [Completion review](../apps/worker/evals/single-agent-commerce-qualification/convergence-continuation-run-20261111/COMPLETION.md) accounts for 65 registered attempts, 103 captured turns, 5 checkout journeys ending in committed handoff and one J1 infrastructure interruption. All 268 native generation requests have terminal accounting. One evaluator harness change stops a proof-driven checkout journey after committed handoff, preserving the existing proof requirement before sending private fields. Models and prompts retained across the three captured snapshots. Phase C STOP on receipt false rejects, size-fit false accepts and the prior verifier media failure.
 
