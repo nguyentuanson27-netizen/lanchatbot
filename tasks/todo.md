@@ -3320,4 +3320,5 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Thu gọn phần Giọng chat và xác định đúng phạm vi form báo giá mở đầu. Cập nhật owner prompt hash. Verifier và luồng nghiệp vụ giữ cấu hình hiện hành.
 - [x] Tách replay giọng và cách trình bày giá/tình trạng bán. Chỉ ghép claim giá/tồn cùng product/variant, còn hiệu lực tại clock của request, giữ màu/size theo claim IDs. Bật presentation qua diagnostic riêng với 25 lần thử / 45 lượt.
 - [x] Kiểm offline 34 cặp giọng và 9 cặp trạng thái từ capture đã lưu và bốn đối chứng của mỗi bước. Node focused 131 PASS; worker lint PASS. Cặp chạy giữ nguyên AUTO, lịch sử, kết quả đọc, chữ ký tool và không đưa rubric vào provider.
-- [ ] Chạy hai phép đo Gemini, chấm mù và đánh giá gate; chạy native sau khi đạt cả hai. Chưa có kết quả chất lượng mới.
+- [x] Chạy VOICE 34 cặp và OFFERS 9 cặp trên 3357270a. Gemini 3.5 Flash Lite High 86 request, Sol 6.1 High chấm mù đủ 43 cặp, một HTTP 429 giữ trong mẫu số. [Kết quả và hội thoại](../apps/worker/evals/single-agent-commerce-qualification/sales-voice-run-20261115/REVIEW.md).
+- [ ] STOP cả hai phép đo. J2 sửa số đo đạt giọng 1/5 và S08 đạt 2/5 trong VOICE. OFFERS dùng prompt gốc, S08 đủ dữ kiện đặt trước 3/5 so với 4/5 đối chứng. Chưa mở native 25 hành trình/45 lượt. Phase C chưa đạt qualification.
