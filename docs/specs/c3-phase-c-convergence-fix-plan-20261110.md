@@ -554,3 +554,9 @@ Bộ test worker: 2.825 unit pass, 926 eval pass, không có lỗi mới; 1 unit
 **P07: verifier không chặn câu gắn size quen mặc với độ thoải mái.** Verifier chỉ chặn khi câu trả lời nói size quen mặc vừa, hợp hơn hoặc là size shop đề xuất. Việc tránh gắn nó với "rộng hay thoải mái hơn" do prompt owner dẫn hướng và không làm dừng một câu trả lời. Prompt verifier giữ nguyên như ở `0145237b`.
 
 Khi chấm lượt chạy kế tiếp, một câu P07 nêu đúng size đề xuất rồi nhắc size quen mặc kèm ý thoải mái là điểm cần cải thiện về câu chữ, không phải lượt hỏng.
+
+## 22. Sàng lọc sau sửa dữ liệu tư vấn, lượt chạy ngày 13/11/2026
+
+Đã chạy đủ 5 ca × 5 lần, 45 lượt trên `5dfde94b`. S15 trả đúng áo 5/5 và bỏ câu hỏi chọn set. J2 đi đủ 3 lượt trong cả 5 hành trình, dùng hồ sơ mới và chọn đúng M. S16 handoff im lặng 5/5. J4 còn 1/5 bị chặn do áp ưu đãi mua nhiều cho một set. S08 có sẵn dữ kiện đặt trước ở cả năm lần, nhưng chỉ 2/5 câu nhắc đến.
+
+Giữ **STOP** ở bước sàng lọc. Chưa mở 40 lần thử còn lại của bộ 13 ca. Đối chứng Phase B và Phase C đã kiểm sáu phép đọc cùng đầu vào; chưa chạy đối thoại B đối chứng trên code C mới. [Review, lịch sử và kết quả](../../apps/worker/evals/single-agent-commerce-qualification/sales-repair-run-20261113/REVIEW.md).

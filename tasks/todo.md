@@ -3307,3 +3307,10 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Independent **APPROVE PLAN revision3**, exactSHA2566495b49aff8016df34050d79f86b31330905ef2deb9714033b92ecde13cc3bdd, zero remaining blockers. [Approval evidence](../docs/specs/evidence/c3-tool-contract-plan-20261109/README.md). Plan bytes kept unchanged; separate approval record controls current status.
 - [ ] Implement W1–W5 only when requested: observed RED→GREEN, current official schema documentation, PG/receipt/media/budget/source differential controls and independent implementation review. Not implemented by plan approval.
 - [ ] Native screen/full require new source/config/input seal and explicit run request; NOT_EXERCISED is not PASS; no automatic retry/fix/run loop. S16 positive customer-wearing source and J2 transport reliability remain unknown. No PhaseC GO/merge/deploy/live send.
+
+## Phase C — sửa phần dữ liệu tư vấn, 2026-11-13
+
+- [x] Tái hiện hai lỗi tại đường dựng request. Nhóm áo lẻ trước khi che mã nội bộ, giữ đường đọc theo nguồn. Adapter nhận componentRole hợp lệ khi thiếu fitScope và giữ nguyên phần tool có chữ ký. Rút lời dẫn kết quả hỗ trợ trước giỏ và chỉnh hai quy tắc tư vấn ở prompt owner.
+- [x] Worker focused 364 PASS; Node focused 103 PASS sau cập nhật assertion; worker build, typecheck, lint PASS. Đối chứng đọc B/C cùng snapshot và clock 6/6 OK, cùng claim và readback.
+- [x] Chạy 25/25 lần thử và 45/45 lượt trên 5dfde94b, Gemini 3.5 Flash Lite High và Sol High. 126 request, 38 đủ điều kiện gửi, 6 handoff, 1 no-send. [Báo cáo và hội thoại](../apps/worker/evals/single-agent-commerce-qualification/sales-repair-run-20261113/REVIEW.md).
+- [ ] STOP. S08 chỉ 2/5 báo đặt trước, J4 chặn đúng một câu nói sai phạm vi ưu đãi, J2 vẫn còn liệt kê số đo. Chưa chạy 40 lần thử còn lại, đối chứng chất lượng hội thoại B/C và qualification.
