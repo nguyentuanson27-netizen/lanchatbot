@@ -1113,3 +1113,17 @@ test('response stream reset and abort retain exactly one generation request with
   });assert.equal(calls,1);
  }
 });
+
+
+test('negotiation JSON schema keeps pending actions separate from a new objection',async()=>{
+ const {default:Ajv}=await import('ajv');
+ const validate=new Ajv({strict:false}).compile(effectDeclarations.find(d=>d.name==='record_negotiation').parametersJsonSchema);
+ for(const action of ['APPLY_PENDING','CANCEL_PENDING']){
+  assert.equal(validate({action,pendingRef:'a'.repeat(64)}),true);
+  for(const extra of [{sourceQuote:'Bớt cho chị'},{intent:'PRICE_OBJECTION'},{subjectRef:'P1'},{offerType:'AO'}])
+   assert.equal(validate({action,pendingRef:'a'.repeat(64),...extra}),false);
+ }
+ assert.equal(validate({action:'RECORD',intent:'PRICE_OBJECTION',sourceQuote:'Bớt cho chị',subjectRef:'P1',offerType:'AO'}),true);
+ assert.equal(validate({intent:'PRICE_OBJECTION',sourceQuote:'Bớt cho chị'}),true);
+ assert.equal(validate({action:'RECORD',intent:'PRICE_OBJECTION',sourceQuote:'Bớt cho chị',pendingRef:'a'.repeat(64)}),false);
+});

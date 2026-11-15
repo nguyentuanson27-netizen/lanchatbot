@@ -207,7 +207,7 @@ export function createCommerceHandoffTools(input: {
         // not overlay that revision with this wrapper's pre-write cache, nor
         // accept a later external revision merely because it is newer.
         const proof=input.base.snapshot(),operationId=(result.data as {operationId?:unknown}|undefined)?.operationId;
-        const receipt=proof.effectReceipts.find(r=>r.operationId===operationId&&r.effect==="NEGOTIATION_UPDATED"&&r.status==="SUCCESS");
+        const receipt=proof.effectReceipts.find(r=>r.operationId===operationId&&["NEGOTIATION_UPDATED","NEGOTIATION_REQUEST_RECORDED","NEGOTIATION_REQUEST_INVALIDATED"].includes(r.effect)&&r.status==="SUCCESS");
         try{
           const current=await read();
           if(!receipt||proof.state.conversationRevision!==current.stateVersion||!scopeMatches(current)||
