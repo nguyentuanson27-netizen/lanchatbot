@@ -1,4 +1,10 @@
-## Current — receipt continuity / independent quote repair, 2026-11-15
+## Current — dữ kiện báo giá và bounded retry, 2026-11-16
+
+- [x] Sửa dữ kiện báo giá, chi tiết ưu đãi và guard retry; 342 runtime, 124 Node, 18 protected claim boundary và 22 claim/reply assembly test đã qua. Worker build và lint đã qua.
+- [x] Chạy đủ 6 hội thoại, 18 lượt trên `4673fdc4`. J4 đạt 4/5, control đạt 0/1. Native 49 request, chấm mù 6 request. [Kết quả và hội thoại](../docs/specs/evidence/c3-sales-context-implementation-20261115/PRICE_AUTHORITY_REPAIR_20261116.md).
+- [ ] Phase C STOP. J4 lần 2 thiếu phản hồi có ích về hỗ trợ giá. Control handoff đúng khi draft hứa tự động xét hỗ trợ, làm mất hai lượt mua tiếp theo. Vòng này không thực thi retry trên provider và chưa đi tới bước kích hoạt hỗ trợ ở control.
+
+## Previous — receipt continuity / independent quote repair, 2026-11-15
 
 - [x] Owner-requested rerun of J4 repetitions2/5 completed atd14594a0 with identical executable/config and same world; 2attempts/6turns,18native+2judge requests,all6SEND and no MALFORMED. Judge repetition2PASS, repetition5materialFAIL: unsupported "giá niêm yết tốt nhất" while support NOT_EVALUATED, despite verifierPASS. Original malformed outcomes retained; Phase C STOP. [Rerun evidence](../docs/specs/evidence/c3-sales-context-implementation-20261115/J4_MALFORMED_RERUN_20261115.md).
 
