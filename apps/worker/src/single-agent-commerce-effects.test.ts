@@ -4,7 +4,7 @@ import { createCommerceEffectTools } from "./single-agent-commerce-effects.js";
 import {commerceHash} from "./single-agent-commerce-read-only-context.js";
 import { createReadOnlyTools } from "./single-agent-commerce-read-only-tools.js";
 import { runCommerceTurn, type OwnerGeneration } from "./single-agent-commerce-read-only.js";
-import { hardPrecheck, makeBinding, terminalFallback } from "./single-agent-semantic-verifier-boundary.js";
+import { finalGate, hardPrecheck, makeBinding, terminalFallback } from "./single-agent-semantic-verifier-boundary.js";
 import { commerceNow, commerceScope, fixturePolicy, fixtureProduct, fixtureProfile, fixtureCartLine } from "./single-agent-commerce.test-support.js";
 import type { CartSelectionQuery, CartSelectionResult } from "./realtime-sales-catalog.js";
 import { cartSelectionFromSnapshot } from "./realtime-sales-catalog.js";
@@ -1115,6 +1115,25 @@ describe("code-owned commerce effects and recovery", () => {
 });
 
 describe("deferred support uses actual committed request and cart receipts",()=>{
+ it.each(["same-turn","restored","intervening-revision"] as const)("keeps receipt continuity only through proved consecutive commits: %s",async mode=>{
+  const s=await setup(),f=fixtureProduct();s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+  await s.tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}});
+  await s.tools.invoke({name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao",subjectRef:"SM613",offerType:"DIRECT"}});
+  await s.tools.invoke(s.add);const opening=structuredClone(s.tools.snapshot().effectReceipts[0]!);
+  if(mode==="intervening-revision")s.setCurrent({...s.current(),revision:s.current().revision+1});
+  const tools=mode!=="restored"?s.tools:await createCommerceEffectTools({base:s.base,scope:s.scope,clock:()=>commerceNow,conversationKey:"test-cycle",repository:s.repository,
+    identity:{cartId:s.current().cart!.value.cartId,salesEpisodeId:s.current().cart!.value.salesEpisodeId,customerProfileId:fixtureProfile().profile.profileId},
+    authorize:s.authorize,policy:async()=>s.policy,select:s.select,readReceipt:async id=>id===opening.operationId?opening:null});
+  const result=await tools.invoke({name:"apply_pending_negotiation",args:{pendingRef:s.current().pendingNegotiation!.pendingId}});
+  expect(result.status).toBe("OK");const context=tools.snapshot();
+  expect(context.effectReceiptContinuity!==undefined).toBe(mode!=="intervening-revision");
+  if(mode!=="intervening-revision")expect(context.effectReceipts.find(r=>r.effect==="CART_OPENED")).toEqual(opening);
+  expect(hardPrecheck(context,"Dạ chị.",commerceNow)).toBeNull();
+  const bound=makeBinding("sequence", "Dạ chị.",context);await tools.invoke({name:"change_cart_item",args:{subjectRef:s.current().cart!.value.lines[0]!.lineId,action:"SET_QUANTITY",quantity:2}});
+  const changed=await tools.readback();expect(changed.effectReceiptContinuity).toBeUndefined();
+  expect(changed.effectReceipts.some(r=>r.effect==="CART_OPENED")).toBe(false);
+  expect(finalGate({expected:bound,response:{kind:"VERDICT",binding:bound,result:{verdict:"PASS",violations:[]}},current:changed,finalDraft:"Dạ chị.",now:commerceNow}).disposition).not.toBe("SEND_ELIGIBLE");
+ });
  it("records without a concession and consumes after an authorized cart commit",async()=>{
   const s=await setup(),f=fixtureProduct();
   s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
@@ -1127,6 +1146,7 @@ describe("deferred support uses actual committed request and cart receipts",()=>
   expect((await s.tools.invoke({name:"apply_pending_negotiation",args:{pendingRef:pending.pendingId}})).status).not.toBe("OK");
   expect((await s.tools.invoke(s.add)).status).toBe("OK");
   const commitsBefore=s.commits.length;
+  const opening=structuredClone(s.tools.snapshot().effectReceipts.find(r=>r.effect==="CART_OPENED")!);
   expect((await s.tools.invoke({name:"apply_pending_negotiation",args:{pendingRef:pending.pendingId,sourceQuote:"Giá hơi cao"}})).reason).toBe("TOOL_ARGUMENTS");
   expect(s.commits).toHaveLength(commitsBefore);
   const activated=await s.tools.invoke({name:"apply_pending_negotiation",args:{pendingRef:pending.pendingId}});
@@ -1134,6 +1154,10 @@ describe("deferred support uses actual committed request and cart receipts",()=>
   expect(activated).toMatchObject({status:"OK",data:{effect:"NEGOTIATION_UPDATED"}});
   expect(s.current().pendingNegotiation?.status).toBe("ACTIVATED");
   expect(s.current().negotiation?.consumedObjectionEvidenceIds).toHaveLength(1);
+  const context=s.tools.snapshot();
+  expect(context.effectReceipts.find(r=>r.effect==="CART_OPENED")).toEqual(opening);
+  expect(context.effectReceiptContinuity?.receiptRefs).toEqual([opening.ref,context.effectReceipts.find(r=>r.effect==="NEGOTIATION_UPDATED")!.ref]);
+  expect(hardPrecheck(context,"Dạ chị.",commerceNow)).toBeNull();
   const count=s.commits.length;
   const duplicate=await s.tools.invoke({name:"record_negotiation",args:{action:"APPLY_PENDING",pendingRef:pending.pendingId}});
   expect(duplicate.status).toBe("OK");expect(s.commits).toHaveLength(count);
@@ -1181,4 +1205,18 @@ it("executes W3 record-and-quote then activate-and-quote through the existing gu
  expect(s.current().negotiation?.consumedObjectionEvidenceIds).toHaveLength(1);
  const count=s.commits.length;
  expect((await s.tools.invoke(activation)).status).toBe("OK");expect(s.commits).toHaveLength(count);
+});
+
+it("continues independent quote after proved no-commit rejection of an old objection",async()=>{
+ const s=await setup();await s.tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}});
+ const tools=withExplicitQuoteTask({...s.base,...s.tools,availableTools:["read_product","request_handoff","record_negotiation"]},s.scope,false,async()=>s.policy.policy,()=>commerceNow);
+ const result=await tools.invokeBatch([{name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"old message outside this batch",subjectRef:"SM613",offerType:"DIRECT"}},
+  {name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity:1}}]);
+ expect(result.map(r=>r.status)).toEqual(["REJECTED","OK"]);expect(s.commits).toHaveLength(0);
+ expect(s.tools.noCommitNegotiationResult!(result[0]!)).toBe(true);
+ expect(s.tools.noCommitNegotiationResult!(structuredClone(result[0]!))).toBe(false);
+ expect(result[1]?.data).toMatchObject({benefitAuthorization:{status:"NOT_GRANTED",grantedBenefits:[]}});
+ s.setCurrent({...s.current(),revision:s.current().revision+1});
+ await s.tools.readback();
+ expect(s.tools.noCommitNegotiationResult!(result[0]!)).toBe(false);
 });

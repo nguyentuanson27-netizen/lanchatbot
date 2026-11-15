@@ -57,7 +57,7 @@ export function createCommerceMediaTools(input:{base:CommerceTools;catalog:ReadO
   const overlay=(base:TrustedContext):TrustedContext=>{
     const assets=mediaSelection();
     return buildReadOnlyContext({state:base.state,subjects:base.boundSubjects,products:base.runtimeProducts??[],
-      receipts:base.effectReceipts,...(base.cartBinding?{cartBinding:base.cartBinding}:{}),
+      receipts:base.effectReceipts,receiptContinuity:base.effectReceiptContinuity,...(base.cartBinding?{cartBinding:base.cartBinding}:{}),
       claims:[...base.protectedClaims,...assets.flatMap(a=>buildProtectedMediaClaimsV1({productId:a.productId,imageUrls:[a.url],sourceVersion:a.sourceVersion,observedAt:a.observedAt,expiresAt:a.expiresAt}))],
       policies:[...base.policyLiterals,...[...observations.values()].map(o=>o.literal),...[...viewed].map(([ref,s])=>({ref:`vision:${ref}`,sourceVersion:commerceHash(s.assets),
         observedAt:s.assets.map(a=>a.observedAt).sort().at(-1)!,expiresAt:null,

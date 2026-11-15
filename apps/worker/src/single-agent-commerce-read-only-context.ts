@@ -68,6 +68,7 @@ export function buildReadOnlyContext(input: {
   products?: RuntimeProductEvidence[];
   policies?: TrustedContext["policyLiterals"];
   receipts?: TrustedContext["effectReceipts"];
+  receiptContinuity?:TrustedContext["effectReceiptContinuity"];
   cartBinding?: TrustedContext["cartBinding"];
   /** Effect composition only: offer variants whose claims were replaced by exact cart selections. */
   supersededVariantRefs?: ReadonlySet<string>;
@@ -93,6 +94,7 @@ export function buildReadOnlyContext(input: {
   state.factSnapshotVersion = commerceHash({ subjects, products, claims, policies, cart: input.cartBinding ?? null });
   const context = { boundSubjects: subjects, protectedClaims: claims, runtimeProducts: products,
     policyLiterals: policies, effectReceipts: input.receipts ?? [], state,
+    ...(input.receiptContinuity?{effectReceiptContinuity:input.receiptContinuity}:{}),
     ...(input.cartBinding ? { cartBinding: input.cartBinding } : {}) };
   // Canonical key ordering keeps the existing exact-snapshot binding stable on unchanged source readback.
   return JSON.parse(canonicalJsonV1(context)) as TrustedContext;

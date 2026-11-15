@@ -69,7 +69,7 @@ export function createCommerceHandoffTools(input: {
       recipient: authority.recipient, bindingVersion: authority.bindingVersion, privacyAllowed: authority.privacyAllowed,
       permission: authority.permission && scopeMatches(authority), conversationOwner: authority.state.conversationOwner },
       subjects: base.boundSubjects, products: base.runtimeProducts ?? [], claims: base.protectedClaims, policies: base.policyLiterals,
-      receipts: base.effectReceipts, ...(base.cartBinding ? { cartBinding: base.cartBinding } : {}) });
+      receipts: base.effectReceipts,receiptContinuity:base.effectReceiptContinuity, ...(base.cartBinding ? { cartBinding: base.cartBinding } : {}) });
   };
   const policyIdentity = (bundle: RuntimePolicyBundle) => commerceHash({
     policy: publicPolicyLiteral(bundle, input.scope.pageId, input.scope.shopId, input.clock()), matrix: bundle.artifacts.handoffMatrix });

@@ -5,6 +5,7 @@ import { verifyProductAttributesV1, verifyProductPresentationEvidenceV1 } from "
 import { hasResidualPii } from "@lana/dataset-review";
 import { authorizeRealtimeProtectedClaimProposal } from "./realtime-protected-claim-boundary.js";
 import {validSelectionEvidence,MAX_SELECTION_OBSERVATIONS,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
+import {validatedReceiptContinuity,type EffectReceiptContinuity} from "./single-agent-commerce-effect-receipts.js";
 
 // Shared isolated egress mechanics. No provider, tool, mutation or send interface.
 interface ProductProfile {
@@ -38,6 +39,7 @@ export interface TrustedContext {
   policyLiterals: { ref: string; text: string; sourceVersion: string; observedAt: string; expiresAt: string | null }[];
   effectReceipts: { ref: string; operationId: string; subjectRef: string; status: string; effect: string;
     stateRevision: number; recipient: string; observedAt: string; expiresAt: string }[];
+  effectReceiptContinuity?:EffectReceiptContinuity;
   productProfiles?: ProductProfile[];
   runtimeProducts?: RuntimeProductEvidence[];
   cartBinding?: { cartId: string; cartVersion: number };
@@ -151,8 +153,10 @@ export function hardPrecheck(trusted: TrustedContext, draft: string, now: Date, 
   if (trusted.policyLiterals.some(policy => policy.expiresAt === null
     ? !Number.isFinite(Date.parse(policy.observedAt)) || Date.parse(policy.observedAt) > now.getTime()
     : !fresh({ observedAt: policy.observedAt, expiresAt: policy.expiresAt }, now))) return stale("POLICY_FRESHNESS");
+  const continuity=validatedReceiptContinuity(trusted);
+  if(continuity===null)return stale("EFFECT_RECEIPT_CONTINUITY");
   if (trusted.effectReceipts.some(receipt => !fresh(receipt, now) || receipt.status !== "SUCCESS" ||
-    receipt.recipient !== s.recipient || receipt.stateRevision !== s.revision ||
+    receipt.recipient !== s.recipient || receipt.stateRevision !== s.revision&&!continuity.has(receipt.ref) ||
     !trusted.boundSubjects.some(subject => subject.ref === receipt.subjectRef))) return stale("EFFECT_RECEIPT");
   if (trusted.productProfiles !== undefined) {
     if (!Array.isArray(trusted.productProfiles) || trusted.productProfiles.length > 4 || trusted.productProfiles.some(profile =>

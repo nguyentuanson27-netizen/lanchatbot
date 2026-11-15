@@ -1,3 +1,9 @@
+## Current — receipt continuity / independent quote repair, 2026-11-15
+
+- [x] Reproduce lost CART_OPENED receipt and quote cancellation after validation-only RECORD refusal; implement with unchanged prompts and original receipt revisions.
+- [x] 641 worker / 102 protocol-adapter tests and worker build/noEmit/lint PASS; self-review scope/freshness/budget/receipt invariants.
+- [ ] Fresh source/initial-state capture, seal, execute and review J4 ×5 plus two-shirt control ×1. [Evidence](../docs/specs/evidence/c3-sales-context-implementation-20261115/RECEIPT_QUOTE_REPAIR_20261115.md). Historical STOP retained.
+
 ## Phase C · Kết quả N=5 ngày 13/11/2026
 
 - [x] Init và seal lại trên `2877c0a9`. Chạy đủ 13 ca × 5 lần và đối soát 135 lượt, 283 request model, 0 tin gửi thật. [Review và bằng chứng](../apps/worker/evals/single-agent-commerce-qualification/convergence-n5-run-20261113/REVIEW.md).

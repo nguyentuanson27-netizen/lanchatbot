@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { buildProductAttributesV1 } from "@lana/business-tools";
+import {receiptCartItemsHash} from "./single-agent-commerce-effect-receipts.js";
 import { finalGate, hardPrecheck, makeBinding, terminalFallback, type TrustedContext,
   type PostEffectRecoveryCompatibility } from "./single-agent-semantic-verifier-boundary.js";
 
@@ -10,6 +11,41 @@ const fixture = corpus.cases.find((c: { evaluator: { caseId: string } }) => c.ev
 const now = new Date(fixture.evaluationAt);
 const draft: string = fixture.finalDraft;
 const trusted: TrustedContext = fixture.trusted;
+
+describe("original receipts across an unchanged-cart negotiation",()=>{
+ const sequence=()=>{
+  const t=structuredClone(trusted);t.state.revision=5;t.state.cartItems=[{productRef:"product",quantity:2}];
+  t.boundSubjects.push({ref:"cart-chain",kind:"CART",label:"Giỏ",bindingVersion:t.state.bindingVersion});
+  t.cartBinding={cartId:"cart-chain",cartVersion:2};
+  const common={subjectRef:"cart-chain",status:"SUCCESS",recipient:t.state.recipient,observedAt:new Date(now.getTime()-1000).toISOString(),expiresAt:new Date(now.getTime()+60000).toISOString()};
+  t.effectReceipts=[{...common,ref:"receipt:open",operationId:"open",effect:"CART_OPENED",stateRevision:4},{...common,ref:"receipt:neg",operationId:"neg",effect:"NEGOTIATION_UPDATED",stateRevision:5}];
+  t.effectReceiptContinuity={kind:"UNCHANGED_CART_NEGOTIATION_V1",cartId:"cart-chain",cartVersion:2,stateRevision:5,bindingVersion:t.state.bindingVersion,
+   recipient:t.state.recipient,cartItemsHash:receiptCartItemsHash(t.state.cartItems),receiptRefs:["receipt:open","receipt:neg"]};
+  return t;
+ };
+ it("keeps original revisions while binding both receipts to an unchanged current cart",()=>{
+  const t=sequence(),b=makeBinding("chain",draft,t);expect(hardPrecheck(t,draft,now)).toBeNull();
+  expect(finalGate({expected:b,response:{kind:"VERDICT",binding:b,result:{verdict:"PASS",violations:[]}},current:t,finalDraft:draft,now}).disposition).toBe("SEND_ELIGIBLE");
+  expect(t.effectReceipts.map(r=>r.stateRevision)).toEqual([4,5]);
+ });
+ it.each(["missing","items","cart","binding","recipient","revision","unknown-ref","gap","expired","wrong-subject","wrong-effect","duplicate-operation","rebased"])("rejects invalid receipt continuity: %s",mode=>{
+  const t=sequence();
+  if(mode==="missing")delete t.effectReceiptContinuity;
+  if(mode==="items")t.state.cartItems=[];
+  if(mode==="cart")t.cartBinding!.cartVersion++;
+  if(mode==="binding")t.effectReceiptContinuity!.bindingVersion="other";
+  if(mode==="recipient")t.effectReceipts[0]!.recipient="other";
+  if(mode==="revision")t.state.revision++;
+  if(mode==="unknown-ref")t.effectReceiptContinuity!.receiptRefs[0]="receipt:unknown";
+  if(mode==="gap")t.effectReceipts[0]!.stateRevision=2;
+  if(mode==="expired")t.effectReceipts[0]!.expiresAt=now.toISOString();
+  if(mode==="wrong-subject")t.effectReceipts[0]!.subjectRef="other-cart";
+  if(mode==="wrong-effect")t.effectReceipts[0]!.effect="PURCHASE_CONFIRMED";
+  if(mode==="duplicate-operation")t.effectReceipts[0]!.operationId="neg";
+  if(mode==="rebased")t.effectReceipts[0]!.stateRevision=5;
+  expect(hardPrecheck(t,draft,now)).not.toBeNull();
+ });
+});
 const binding = makeBinding("opaque-request", draft, trusted);
 const pass = () => ({ kind: "VERDICT" as const, binding: structuredClone(binding), result: { verdict: "PASS", violations: [] } });
 const gate = (response = pass(), current = structuredClone(trusted), currentDraft = draft, at = now, includeDiagnostic = false) =>

@@ -340,7 +340,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
     const value=JSON.parse(p.text);
     if(Array.isArray(value.assets))value.assets=value.assets.map(({assetRef:_internal,...visible})=>visible);
     return {ref:p.ref,text:JSON.stringify(value)};
-   }),receipts:c.effectReceipts,
+   }),receipts:c.effectReceipts,...(c.effectReceiptContinuity?{effectReceiptContinuity:c.effectReceiptContinuity}:{}),
    state};
  const sharedComponentRefs=new Map();
  const sharedReads=sharedSingleItemReads(ownerView.products);

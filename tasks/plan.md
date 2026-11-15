@@ -1,4 +1,8 @@
-## Current — kế hoạch sửa nguồn lời văn và thương lượng, 2026-11-15
+## Current — receipt continuity and independent quote repair, 2026-11-15
+
+Owner authorizes code/data-contract repair and J4 ×5 / two-shirt control ×1 rerun, keeping prompts unchanged. Preserve original receipts with bounded unchanged-cart continuity validation; let independent quote reads survive a proved pre-commit RECORD source rejection; present pending request versus benefit grant as distinct structured facts. [Implementation and readiness](../docs/specs/evidence/c3-sales-context-implementation-20261115/RECEIPT_QUOTE_REPAIR_20261115.md). Fresh source capture, clean-source seal/preflight and all 18 turns precede whole-run review. No production changes or qualification GO.
+
+## Previous — kế hoạch sửa nguồn lời văn và thương lượng, 2026-11-15
 
 Kế hoạch [Revision2](../docs/specs/c3-phase-c-sales-context-contract-plan-20261115.md) đã [review độc lập APPROVE](../docs/specs/evidence/c3-sales-context-contract-plan-20261115/README.md) ở đúng hash. Scope W0 inventory/provenance → W1 phục hồi nguyên tắc diễn đạt → W2 projection giữ full nguồn/caveats → W3 pending evidence theo contract → W4 đo riêng và native từ đầu. Base7cdd2e80, chưa implementation/provider. Trần dự kiến324generation, chỉ native khi replay đạt. Giữ STOP của phép đo §23.
 
