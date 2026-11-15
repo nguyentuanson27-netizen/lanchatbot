@@ -101,12 +101,15 @@ export function createPersistedCommerceReceiptReader(input: {
   return async operationId => {
     const event = await input.store.readCommittedSalesCycleEvent(input.scope.pageId, input.scope.conversationId, operationId);
     const current = await input.repository.read(input.conversationKey);
-    const effect = event?.commandKind === "NEGOTIATION_EVENT"?"NEGOTIATION_UPDATED":event?.commandKind === "CART_OPENED" ? "CART_OPENED" : event?.commandKind === "CART_MUTATED" ? "CART_MUTATED"
-      : event?.commandKind === "CONFIRM_PURCHASE" ? "PURCHASE_CONFIRMED" : null;
-    if (!event || !effect || !current?.cart || current.revision !== event.stateRevisionAfter || current.cart.value.cartId !== event.cartId) return null;
-    return { ref: `receipt:${operationId}`, operationId, subjectRef: event.cartId, effect, status: "SUCCESS",
+    const pendingEffect=event?.commandKind==="PENDING_NEGOTIATION_RECORDED"?"NEGOTIATION_REQUEST_RECORDED":event?.commandKind==="PENDING_NEGOTIATION_INVALIDATED"?"NEGOTIATION_REQUEST_INVALIDATED":null;
+    const effect = pendingEffect??(event?.commandKind === "NEGOTIATION_EVENT"?"NEGOTIATION_UPDATED":event?.commandKind === "CART_OPENED" ? "CART_OPENED" : event?.commandKind === "CART_MUTATED" ? "CART_MUTATED"
+      : event?.commandKind === "CONFIRM_PURCHASE" ? "PURCHASE_CONFIRMED" : null);
+    const subject=pendingEffect?current?.pendingNegotiation?.productId:current?.cart?.value.cartId;
+    const expiresAt=pendingEffect?current?.pendingNegotiation?.expiresAt:current?.cart?.expiresAt;
+    if (!event || !effect ||!subject||!expiresAt||!current||current.revision !== event.stateRevisionAfter || (!pendingEffect&&subject!==event.cartId)) return null;
+    return { ref: `receipt:${operationId}`, operationId, subjectRef:subject, effect, status: "SUCCESS",
       stateRevision: event.stateRevisionAfter, recipient: input.scope.recipient, observedAt: event.occurredAt.toISOString(),
-      expiresAt: new Date(Math.min(Date.parse(current.cart.expiresAt), event.occurredAt.getTime()+300_000)).toISOString() };
+      expiresAt: new Date(Math.min(Date.parse(expiresAt), event.occurredAt.getTime()+300_000)).toISOString() };
   };
 }
 
@@ -141,6 +144,8 @@ export async function prepareNativeCommerceTransition(input: {
     ...(draft ? { cartIdentity: draft.identity, ...(draft.lines[0] ? { cartLineId: draft.lines[0].lineId } : {}) } : {}),
     ...(command.kind === "CART_OPENED" ? { cartExpiresAt: command.expiresAt } : {}),
   }, ...(command.kind==="NEGOTIATION_EVENT"?{nativeNegotiation:command,nativeNegotiationInbound:trustedPorts.resolveInboundMessage(command.sourceMessageId)}:{}),
+    ...(command.kind==="PENDING_NEGOTIATION_RECORDED"||command.kind==="PENDING_NEGOTIATION_INVALIDATED"?{nativePendingNegotiation:command}:{}),
+    ...(command.kind==="NEGOTIATION_EVENT"&&command.cartOpeningCommandId?{nativeCartCreationReceipt:trustedPorts.resolveCartCreationReceipt?.(command.cartOpeningCommandId)??null}:{}),
     ...(mutation && command.kind === "CART_MUTATED" ? { nativeMutation: { command, mutation } } : {}) });
 }
 

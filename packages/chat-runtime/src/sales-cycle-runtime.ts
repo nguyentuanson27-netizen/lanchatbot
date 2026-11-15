@@ -24,6 +24,11 @@ import {
   type BankTransferPolicyReferenceV1,
   type VersionedBusinessReferenceV1,
   PancakeTagCommandV2Schema,
+  PendingNegotiationV1Schema,
+  pendingNegotiationIdPreimageV1,
+  pendingNegotiationAfterOpeningV1,
+  pendingNegotiationAfterActivationV1,
+  type PendingNegotiationV1,
   type PancakeTagCommandV2,
 } from "@lana/contracts";
 import {
@@ -64,6 +69,8 @@ export interface SalesCycleRuntimeState {
   readonly cart: { readonly value: CartV1; readonly expiresAt: string } | null;
   readonly commerceContext: { readonly shopId: string; readonly policyRef: VersionedBusinessReferenceV1 } | null;
   readonly negotiation: NegotiationStateV2 | null;
+  /** Optional on pre-existing schema-v2 records. This grants no price support until activation. */
+  readonly pendingNegotiation?:PendingNegotiationV1|null;
   /** Encrypted at rest by the production adapter; never copied to analytics. */
   readonly checkoutDraft: CheckoutDraftV1 | null;
   /**
@@ -78,6 +85,8 @@ export interface SalesCycleRuntimeState {
 }
 
 export type SalesCycleCommand =
+  | { readonly kind:"PENDING_NEGOTIATION_RECORDED";readonly commandId:string;readonly pending:PendingNegotiationV1 }
+  | { readonly kind:"PENDING_NEGOTIATION_INVALIDATED";readonly commandId:string;readonly pendingId:string;readonly sourceMessageId:string }
   | { readonly kind: "FACTS_PRESENTED"; readonly commandId: string }
   | { readonly kind: "MEASUREMENTS_REQUIRED"; readonly commandId: string }
   | { readonly kind: "SIZE_RECOMMENDED"; readonly commandId: string }
@@ -119,6 +128,8 @@ export type SalesCycleCommand =
     }
   | {
       readonly kind: "NEGOTIATION_EVENT";
+      readonly pendingId?:string;
+      readonly cartOpeningCommandId?:string;
       readonly commandId: string;
       readonly expectedNegotiationVersion: number;
       readonly sourceMessageId: string;
@@ -189,6 +200,7 @@ export interface ResolvedCartMutationV1 {
 }
 
 export interface SalesCycleTrustedPortsV1 {
+  resolveCartCreationReceipt?(commandId:string):{commandId:string;cartId:string;stateRevision:number;observedAt:string}|null;
   resolveCartDraft(reference: VersionedBusinessReferenceV1): ResolvedCartDraftV1 | null;
   resolveCartMutation(reference: VersionedBusinessReferenceV1, cart: CartV1): ResolvedCartMutationV1 | null;
   resolveShopPolicy(reference: VersionedBusinessReferenceV1): PolicyBundleV1 | null;
@@ -455,6 +467,30 @@ function applySalesCycleCommandUnchecked(input: ApplySalesCycleCommandInput): Sa
     return { status: "REJECTED", state, reasonCode: "SALES_CYCLE_TERMINAL" };
   }
 
+
+  if(command.kind==="PENDING_NEGOTIATION_RECORDED"){
+    const parsed=PendingNegotiationV1Schema.safeParse(command.pending);
+    if(!parsed.success||cartAlive(state,now))return {status:"REJECTED",state,reasonCode:"PENDING_NEGOTIATION_INVALID"};
+    const pending=parsed.data;
+    const inbound=resolveVerifiedCustomerInbound({state,sourceMessageId:pending.sourceMessageId,notBefore:pending.sourceObservedAt,now,ports:input.trustedPorts});
+    const id=createHash("sha256").update(pendingNegotiationIdPreimageV1(pending)).digest("hex");
+    if(!inbound||inbound.observedAt!==pending.sourceObservedAt||pending.pendingId!==id||
+      pending.status!=="PENDING"||pending.cartOpeningCommandId!==null||pending.activatedByCartId!==null||
+      Date.parse(pending.recordedAt)>now.getTime()||Date.parse(pending.recordedAt)<Date.parse(pending.sourceObservedAt)||Date.parse(pending.sourceObservedAt)>now.getTime()||
+      Date.parse(pending.expiresAt)<=now.getTime()||Date.parse(pending.expiresAt)>Date.parse(pending.sourceObservedAt)+CART_TTL_MS_V1||
+      resolveTrustedPolicy(pending.policyRef,input.trustedPorts)===null)
+      return {status:"REJECTED",state,reasonCode:"PENDING_NEGOTIATION_SOURCE"};
+    return {status:"APPLIED",state:withCommand(state,command.kind,"APPLIED",command.commandId,now,{pendingNegotiation:pending}),
+      confirmation:null,paymentInstruction:null,desiredPancakeTag:null,transferToHuman:false};
+  }
+  if(command.kind==="PENDING_NEGOTIATION_INVALIDATED"){
+    const pending=state.pendingNegotiation;
+    const inbound=resolveVerifiedCustomerInbound({state,sourceMessageId:command.sourceMessageId,notBefore:pending?.recordedAt??now.toISOString(),now,ports:input.trustedPorts});
+    if(!pending||pending.pendingId!==command.pendingId||pending.status!=="PENDING"||!inbound)
+      return {status:"REJECTED",state,reasonCode:"PENDING_NEGOTIATION_INVALID"};
+    return {status:"APPLIED",state:withCommand(state,command.kind,"APPLIED",command.commandId,now,{pendingNegotiation:{...pending,status:"INVALIDATED"}}),
+      confirmation:null,paymentInstruction:null,desiredPancakeTag:null,transferToHuman:false};
+  }
   if (command.kind === "FACTS_PRESENTED" || command.kind === "MEASUREMENTS_REQUIRED" || command.kind === "SIZE_RECOMMENDED") {
     const transitionAllowed =
       (command.kind === "FACTS_PRESENTED" && (state.stage === "DISCOVERY" || state.stage === "FACTS_PRESENTED")) ||
@@ -499,7 +535,9 @@ function applySalesCycleCommandUnchecked(input: ApplySalesCycleCommandInput): Sa
       now,
     });
     if (negotiation.status === "BLOCKED") return { status: "REJECTED", state, reasonCode: `NEGOTIATION_${negotiation.reasonCode}` };
-    const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, { stage: "CART_OPEN", cart: { value: creation.cart, expiresAt: command.expiresAt }, commerceContext: { shopId: draft.shopId, policyRef: draft.policyRef }, negotiation: negotiation.state, checkoutDraft: null, preview: null });
+    const pending=state.pendingNegotiation;
+    const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, { stage: "CART_OPEN", cart: { value: creation.cart, expiresAt: command.expiresAt }, commerceContext: { shopId: draft.shopId, policyRef: draft.policyRef }, negotiation: negotiation.state, checkoutDraft: null, preview: null,
+      ...(pending?{pendingNegotiation:pendingNegotiationAfterOpeningV1(pending,creation.cart,draft.policyRef,command.commandId,now.toISOString())}:{}) });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
 
@@ -614,7 +652,18 @@ function applySalesCycleCommandUnchecked(input: ApplySalesCycleCommandInput): Sa
     if (!cartAlive(state, now) || state.negotiation === null || state.commerceContext === null) return { status: "REJECTED", state, reasonCode: "CART_EXPIRED_OR_MISSING" };
     const policy = resolveTrustedPolicy(state.commerceContext.policyRef, input.trustedPorts);
     if (policy === null) return { status: "REJECTED", state, reasonCode: "SHOP_POLICY_UNTRUSTED" };
-    const inbound = resolveVerifiedCustomerInbound({ state, sourceMessageId: command.sourceMessageId, notBefore: state.cart.value.createdAt, now, ports: input.trustedPorts });
+    const pending=command.pendingId?state.pendingNegotiation:null;
+    const activated=pending&&command.cartOpeningCommandId?pendingNegotiationAfterActivationV1(pending,state.cart.value,state.commerceContext.policyRef,command.cartOpeningCommandId,now.toISOString()):null;
+    let inbound:VerifiedInboundMessageV1|null;
+    if(command.pendingId){
+      const opening=input.trustedPorts?.resolveCartCreationReceipt?.(command.cartOpeningCommandId??"");
+      if(!pending||pending.pendingId!==command.pendingId||!activated||command.intent!=="PRICE_OBJECTION"||
+        command.sourceMessageId!==pending.sourceMessageId||!opening||opening.commandId!==command.cartOpeningCommandId||
+        opening.cartId!==state.cart.value.cartId||opening.observedAt!==state.cart.value.createdAt||
+        !Number.isSafeInteger(opening.stateRevision)||opening.stateRevision<1||opening.stateRevision>state.revision||!state.processedCommandIds.includes(opening.commandId))
+        return {status:"REJECTED",state,reasonCode:"PENDING_NEGOTIATION_ACTIVATION_INVALID"};
+      inbound={messageId:pending.sourceMessageId,...state.routing,senderType:"CUSTOMER",observedAt:pending.sourceObservedAt,attachments:[]};
+    }else inbound = resolveVerifiedCustomerInbound({ state, sourceMessageId: command.sourceMessageId, notBefore: state.cart.value.createdAt, now, ports: input.trustedPorts });
     if (inbound === null) return { status: "REJECTED", state, reasonCode: "INBOUND_EVIDENCE_UNTRUSTED" };
     const snapshot = negotiationSnapshot(state.cart.value, state.commerceContext.shopId);
     if (snapshot === null) return { status: "REJECTED", state, reasonCode: "CART_PRICE_FACT_INVALID" };
@@ -632,7 +681,8 @@ function applySalesCycleCommandUnchecked(input: ApplySalesCycleCommandInput): Sa
     const repriced = applyCanonicalCartDecisionV2({ cart: state.cart.value, expectedCartVersion: state.cart.value.revision, mutation: null, shopId: state.commerceContext.shopId, policy, customerState: decision.state.customerState, now });
     if (repriced.status === "BLOCKED") return { status: "REJECTED", state, reasonCode: `CART_REPRICE_${repriced.reasonCode}` };
     const negotiation = { ...decision.state, cartVersion: repriced.cart.revision, updatedAt: now.toISOString() };
-    const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, { stage: "CART_OPEN", cart: { value: repriced.cart, expiresAt: state.cart.expiresAt }, negotiation, preview: null });
+    const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, { stage: "CART_OPEN", cart: { value: repriced.cart, expiresAt: state.cart.expiresAt }, negotiation, preview: null,
+      ...(activated?{pendingNegotiation:activated}:{}) });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
 

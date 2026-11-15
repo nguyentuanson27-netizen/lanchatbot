@@ -800,9 +800,11 @@ test('tool product identities are restricted to bound products, not offer eviden
 test('negotiation exposes intent and current source quote without model-selected money, tier or policy',()=>{
  const r=request();r.availableTools=['record_negotiation'];
  const d=buildGeminiCommerceRequest(r).tools[0].functionDeclarations[0];
- assert.deepEqual(Object.keys(d.parameters.properties),['intent','sourceQuote']);
- assert.deepEqual(d.parameters.required,['intent','sourceQuote']);
- assert.deepEqual(d.parameters.properties.intent.enum,['PRICE_OBJECTION','PURCHASE_READY']);
+ const schema=d.parametersJsonSchema;
+ assert.equal(schema.additionalProperties,false);
+ assert.deepEqual(Object.keys(schema.properties),['action','intent','sourceQuote','subjectRef','offerType','pendingRef']);
+ assert.deepEqual(schema.anyOf.map(branch=>branch.required),[['intent','sourceQuote'],['action','pendingRef']]);
+ assert.deepEqual(schema.properties.intent.enum,['PRICE_OBJECTION','PURCHASE_READY']);
 });
 
 test('read results do not advertise an output-only field as an alternative input parameter',()=>{

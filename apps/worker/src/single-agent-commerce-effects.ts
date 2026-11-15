@@ -12,6 +12,8 @@ import type { TerminalOutcome, TrustedContext } from "./single-agent-semantic-ve
 import { formatCartLineSelection, selectionsMatchCartLines } from "./realtime-sales-cycle.js";
 import {selectionChoiceResolution,validSelectionEvidence,selectionEvidenceWithExpiry,selectionOptionScope,mergeSelectionEvidence,selectionMeaningHash,selectionQueryKey,expandSelectionOptions,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
 import { CommerceEffectCommitError, type CommerceEffectFailureStage } from "./single-agent-commerce-effect-failure.js";
+import {CART_TTL_MS_V1,PendingNegotiationV1Schema,pendingNegotiationIdPreimageV1,pendingNegotiationAfterActivationV1,type PendingNegotiationV1} from "@lana/contracts";
+import {createHash} from "node:crypto";
 
 const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase", "record_negotiation"]);
 export type CommerceCommandResult =
@@ -73,6 +75,14 @@ export async function createCommerceEffectTools(input: {
     return cart ? { cartId: cart.cartId, cartVersion: cart.revision, subtotalVnd: cart.subtotalVnd,
       shippingFeeVnd: cart.shippingFeeVnd, discountTotalVnd: cart.discountTotalVnd, grandTotalVnd: cart.grandTotalVnd } : null;
   };
+  function pendingSupportView(){
+    const pending=current.pendingNegotiation;
+    if(!pending||pending.status!=="PENDING"||Date.parse(pending.expiresAt)<=input.clock().getTime())return undefined;
+    const eligible=current.cart&&current.commerceContext&&pending.cartOpeningCommandId?
+      pendingNegotiationAfterActivationV1(pending,current.cart.value,current.commerceContext.policyRef,pending.cartOpeningCommandId,input.clock().toISOString()):null;
+    return {pendingRef:pending.pendingId,subjectRef:pending.productId,offerType:pending.offerId,status:"NOT_EVALUATED",
+      canApply:!!eligible,blockedReason:eligible?null:current.cart?"CART_BINDING_CHANGED":"CART_REQUIRED"};
+  }
   async function terminalOutcome(): Promise<TerminalOutcome | null> {
     // An unproved effect blocks every reply, including an otherwise harmless
     // ACK. Recovery of a rejected draft is not a substitute for this send gate.
@@ -100,7 +110,7 @@ export async function createCommerceEffectTools(input: {
       if(!ref||ref.id!==policy.policy.policyBundleId||ref.version!==policy.policy.policyVersion||
         ref.contentHash!==computeBusinessContentHash(policy.policy))throw new Error("TRANSACTION_POLICY_BINDING_CHANGED");
     }
-    const base = input.base.snapshot(), subjects = [...base.boundSubjects];
+    const base = input.base.snapshot(), subjects = [...base.boundSubjects],pendingSupport=pendingSupportView();
     const active = activeSelections();
     if (current.cart) {
       subjects.push({ ref: current.cart.value.cartId, kind: "CART", label: "Giỏ hàng hiện tại", bindingVersion: base.state.bindingVersion });
@@ -118,6 +128,7 @@ export async function createCommerceEffectTools(input: {
     const supersededVariantRefs = new Set<string>();
     return buildReadOnlyContext({ state: { ...base.state, ...authority, conversationRevision: authority?.revision ?? base.state.revision, revision: current.revision,
       salesStage: current.stage, cartItems: cartItems(active),
+      ...(pendingSupport?{pendingSupport}:{}),
       checkoutStatus: { publicIntake:publicCheckoutState(current),previewAvailable: current.stage === "ORDER_PREVIEW" && current.preview !== null, purchaseConfirmed: current.confirmation !== null,
         missingFields: [!current.checkoutDraft?.fullName && "FULL_NAME", !current.checkoutDraft?.phone && "PHONE", !current.checkoutDraft?.address && "ADDRESS", !current.checkoutDraft?.paymentMethod && "PAYMENT_METHOD"].filter(Boolean) },
       ...(current.stage === "HANDED_OFF" ? { permission: false, conversationOwner: "HUMAN" } : {}),
@@ -197,19 +208,25 @@ export async function createCommerceEffectTools(input: {
     }
   }
   function recordReceipt(operationId: string, effect: string, expectedRevision: number) {
-    if (current.revision !== expectedRevision || !current.processedCommandIds.includes(operationId) || !current.cart || current.stage === "HANDED_OFF") return false;
-    receipt = { ref: `receipt:${operationId}`, operationId, subjectRef: current.cart.value.cartId, status: "SUCCESS", effect,
+    const pendingEffect=effect.startsWith("NEGOTIATION_REQUEST_");
+    const subject=pendingEffect?current.pendingNegotiation?.productId:current.cart?.value.cartId;
+    const expiresAt=pendingEffect?current.pendingNegotiation?.expiresAt:current.cart?.expiresAt;
+    if (current.revision !== expectedRevision || !current.processedCommandIds.includes(operationId) || !subject||!expiresAt || current.stage === "HANDED_OFF") return false;
+    receipt = { ref: `receipt:${operationId}`, operationId, subjectRef: subject, status: "SUCCESS", effect,
       stateRevision: current.revision, recipient: turnRecipient, observedAt: current.updatedAt,
-      expiresAt: new Date(Math.min(Date.parse(current.cart.expiresAt), Date.parse(current.updatedAt) + 300_000)).toISOString() };
+      expiresAt: new Date(Math.min(Date.parse(expiresAt), Date.parse(current.updatedAt) + 300_000)).toISOString() };
     receiptConversationRevision = authority?.revision ?? input.base.snapshot().state.revision;
     receiptBindingVersion = turnBinding;
     return true;
   }
   function acceptReceipt(recovered: TrustedContext["effectReceipts"][number] | null | undefined, operationId: string, allowed: string[]) {
+    const pendingEffect=recovered?.effect.startsWith("NEGOTIATION_REQUEST_");
+    const subject=pendingEffect?current.pendingNegotiation?.productId:current.cart?.value.cartId;
+    const expiresAt=pendingEffect?current.pendingNegotiation?.expiresAt:current.cart?.expiresAt;
     if (!recovered || recovered.operationId !== operationId || recovered.status !== "SUCCESS" || !allowed.includes(recovered.effect) ||
-      !current.processedCommandIds.includes(operationId) || recovered.stateRevision !== current.revision || recovered.subjectRef !== current.cart?.value.cartId || recovered.recipient !== turnRecipient ||
+      !subject||!expiresAt||!current.processedCommandIds.includes(operationId) || recovered.stateRevision !== current.revision || recovered.subjectRef !== subject || recovered.recipient !== turnRecipient ||
       !Number.isFinite(Date.parse(recovered.observedAt)) || !Number.isFinite(Date.parse(recovered.expiresAt)) || Date.parse(recovered.observedAt) > input.clock().getTime() ||
-      Date.parse(recovered.expiresAt) <= input.clock().getTime() || Date.parse(recovered.expiresAt) > Date.parse(current.cart.expiresAt)) return false;
+      Date.parse(recovered.expiresAt) <= input.clock().getTime() || Date.parse(recovered.expiresAt) > Date.parse(expiresAt)) return false;
     receipt = recovered; receiptConversationRevision = authority?.revision ?? input.base.snapshot().state.revision; receiptBindingVersion = turnBinding;
     return true;
   }
@@ -228,10 +245,27 @@ export async function createCommerceEffectTools(input: {
       const authorizedRevision = current.revision;
       phase="VALIDATION";
       const a = toolArgs(call.args, call.name === "add_to_cart" ? ["subjectRef", "offerType", "size", "color", "quantity"] :
-        call.name === "change_cart_item" ? ["subjectRef", "action", "quantity", "size", "color", "componentRole", "targetSubjectRef", "offerType"] : call.name === "record_negotiation" ? ["intent","sourceQuote"] : []);
+        call.name === "change_cart_item" ? ["subjectRef", "action", "quantity", "size", "color", "componentRole", "targetSubjectRef", "offerType"] : call.name === "record_negotiation" ? ["intent","sourceQuote","subjectRef","offerType","action","pendingRef"] : []);
       if (!a) return { status: "REJECTED", reason: "TOOL_ARGUMENTS" };
       let negotiationSource: NonNullable<typeof input.negotiationSources>[number] | undefined;
-      if(call.name==="record_negotiation"){
+      const supportAction=call.name==="record_negotiation"?(a.action??"RECORD"):null;
+      let pendingRecord=false,targetExpiry:string|undefined;
+      let pendingActivation:PendingNegotiationV1|undefined;
+      let openingReceipt:TrustedContext["effectReceipts"][number]|null=null;
+      if(call.name==="record_negotiation"&&supportAction!=="RECORD"){
+        if(!["APPLY_PENDING","CANCEL_PENDING"].includes(String(supportAction))||typeof a.pendingRef!=="string"||
+          Object.keys(a).some(k=>!["action","pendingRef"].includes(k)))return {status:"REJECTED",reason:"TOOL_ARGUMENTS"};
+        const pending=current.pendingNegotiation;
+        if(!pending||pending.pendingId!==a.pendingRef)return {status:"REJECTED",reason:"PENDING_NEGOTIATION_INVALID"};
+        if(supportAction==="APPLY_PENDING"){
+          if(!current.cart||!pending.cartOpeningCommandId||!current.negotiation)return {status:"REJECTED",reason:"PENDING_NEGOTIATION_INVALID"};
+          openingReceipt=await input.readReceipt?.(pending.cartOpeningCommandId)??
+            (receipt?.operationId===pending.cartOpeningCommandId?receipt:null);
+          pendingActivation=pending;
+          negotiationSource={text:"",sourceMessageId:pending.sourceMessageId,observedAt:pending.sourceObservedAt};
+        }
+      }
+      if(call.name==="record_negotiation"&&supportAction==="RECORD"){
         const quote=a.sourceQuote;
         if(!["PRICE_OBJECTION","PURCHASE_READY"].includes(String(a.intent))||
           typeof quote!=="string"||!quote.trim()||Buffer.byteLength(quote)>512)return {status:"REJECTED",reason:"NEGOTIATION_SOURCE_OR_CART"};
@@ -239,9 +273,17 @@ export async function createCommerceEffectTools(input: {
         negotiationSource=matches[0];
         if(matches.length!==1||!negotiationSource?.sourceMessageId||
           negotiationSource.text.indexOf(quote)!==negotiationSource.text.lastIndexOf(quote))return {status:"REJECTED",reason:"NEGOTIATION_SOURCE_OR_CART"};
-        if(!current.cart||!current.negotiation)return {status:"REJECTED",reason:"NEGOTIATION_CONTEXT_REQUIRED",data:{
+        if(!current.cart||!current.negotiation){
+          const view=input.base.snapshot(),literal=view.policyLiterals.find(p=>p.ref===`offers:${a.subjectRef}`);
+          const target=typeof a.subjectRef==="string"&&view.boundSubjects.some(s=>s.kind==="PRODUCT"&&s.ref===a.subjectRef);
+          let offers:unknown;try{offers=literal?JSON.parse(literal.text).availableOffers:null;}catch{}
+          pendingRecord=a.intent==="PRICE_OBJECTION"&&negotiationSource.sourceMessageId===input.scope.sourceMessageId&&!!target&&
+            typeof a.offerType==="string"&&Array.isArray(offers)&&offers.includes(a.offerType)&&!!literal?.expiresAt&&Date.parse(literal.expiresAt)>input.clock().getTime();
+          if(pendingRecord)targetExpiry=literal!.expiresAt!;
+          else return {status:"REJECTED",reason:"NEGOTIATION_CONTEXT_REQUIRED",data:{
           effectCommitted:false,negotiationStatus:"NOT_EVALUATED",supportAvailability:"UNKNOWN",
           missing:[...(!current.cart?["CART"]:[]),...(!current.negotiation?["NEGOTIATION"]:[])]}};
+        }
       }
       if (call.name === "add_to_cart" && (typeof a.offerType !== "string" || !a.offerType.trim())) {
         return { status: "REJECTED", reason: "OFFER_REQUIRED" };
@@ -272,15 +314,18 @@ export async function createCommerceEffectTools(input: {
       phase="AUTHORITY";
       if (!await input.authorize(effect, current)) return { status: "REJECTED", reason: "EFFECT_PERMISSION" };
       const operationId = commerceHash({ pageId: input.scope.pageId, conversationId: input.scope.conversationId,
-        sourceMessageId: negotiationSource?.sourceMessageId ?? input.scope.sourceMessageId, tool: call.name, ...(call.name==="record_negotiation"?{}:{args:a}) });
-      const effectName = call.name==="record_negotiation"?"NEGOTIATION_UPDATED":call.name === "confirm_purchase" ? "PURCHASE_CONFIRMED" : effect === "CART_OPEN" ? "CART_OPENED" : "CART_MUTATED";
+        sourceMessageId: negotiationSource?.sourceMessageId ?? input.scope.sourceMessageId, tool: call.name,
+        ...(pendingRecord?{pendingAction:"RECORD",productId:a.subjectRef,offerId:a.offerType,episodeId:input.identity.salesEpisodeId}:
+          supportAction==="APPLY_PENDING"||supportAction==="CANCEL_PENDING"?{pendingAction:supportAction,pendingRef:a.pendingRef,cartId:current.cart?.value.cartId??null}:call.name==="record_negotiation"?{}:{args:a}) });
+      const effectName = pendingRecord?"NEGOTIATION_REQUEST_RECORDED":supportAction==="CANCEL_PENDING"?"NEGOTIATION_REQUEST_INVALIDATED":call.name==="record_negotiation"?"NEGOTIATION_UPDATED":call.name === "confirm_purchase" ? "PURCHASE_CONFIRMED" : effect === "CART_OPEN" ? "CART_OPENED" : "CART_MUTATED";
       if (current.processedCommandIds.includes(operationId)) {
         const recovered = receipt?.operationId === operationId ? receipt : await input.readReceipt?.(operationId);
-        const allowed = call.name==="record_negotiation"?["NEGOTIATION_UPDATED"]:call.name === "confirm_purchase" ? ["PURCHASE_CONFIRMED"] : call.name === "change_cart_item" ? ["CART_MUTATED"] : ["CART_OPENED", "CART_MUTATED"];
+        const allowed = call.name==="record_negotiation"?[effectName]:call.name === "confirm_purchase" ? ["PURCHASE_CONFIRMED"] : call.name === "change_cart_item" ? ["CART_MUTATED"] : ["CART_OPENED", "CART_MUTATED"];
         if (!acceptReceipt(recovered, operationId, allowed)) return { status: "REJECTED", reason: "NOT_A_SUCCESS_RECEIPT" };
         await refreshSelections();
         return { status: "OK", data: { operationId, duplicate: true, cart: current.cart?.value, cartItems: cartItems(), cartQuote: cartQuote() } };
       }
+      if(supportAction==="APPLY_PENDING"&&!openingReceipt)return {status:"REJECTED",reason:"PENDING_NEGOTIATION_CART_RECEIPT"};
       phase="SOURCE";policy = await input.policy();
       publicPolicyLiteral(policy, input.scope.pageId, input.scope.shopId, input.clock());
       const policyRef = { id: policy.policy.policyBundleId, version: policy.policy.policyVersion, contentHash: computeBusinessContentHash(policy.policy) };
@@ -327,9 +372,27 @@ export async function createCommerceEffectTools(input: {
         mutationRef: { id: operationId, version: "1", contentHash: computeBusinessContentHash({ mutation }) }, mutationReasonCode: mutation.kind === "REPLACE_LINE" ? "LINE_REPLACED" : mutation.kind === "ADD_LINE" ? "LINE_ADDED" : mutation.kind === "REMOVE_LINE" ? "LINE_REMOVED" : mutation.kind === "SET_COMPONENT_VARIANT" ? "VARIANT_CHANGED" : "QUANTITY_CHANGED" };
       else if (call.name === "confirm_purchase") command = { kind: "CONFIRM_PURCHASE", commandId: operationId,
         intent: { source: "MODEL_STRUCTURED_OUTPUT", intent: "PURCHASE_CONFIRMATION", sourceMessageId: input.scope.sourceMessageId } };
-      else if(call.name==="record_negotiation")command={kind:"NEGOTIATION_EVENT",commandId:operationId,expectedNegotiationVersion:current.negotiation!.stateVersion,
-        sourceMessageId:negotiationSource!.sourceMessageId,intent:a.intent as "PRICE_OBJECTION"|"PURCHASE_READY",reasonCode:a.intent==="PRICE_OBJECTION"?"PRICE_OBJECTION":null};
+      else if(call.name==="record_negotiation"){
+        if(pendingRecord){
+          const at=input.clock();
+          const pending=PendingNegotiationV1Schema.parse({schemaVersion:1,pendingId:"0".repeat(64),sourceMessageId:negotiationSource!.sourceMessageId,
+            sourceTextHash:commerceHash(negotiationSource!.text),sourceObservedAt:negotiationSource!.observedAt,
+            productId:a.subjectRef,offerId:a.offerType,salesEpisodeId:input.identity.salesEpisodeId,customerProfileId:input.identity.customerProfileId,
+            policyRef:{id:policy.policy.policyBundleId,version:policy.policy.policyVersion,contentHash:computeBusinessContentHash(policy.policy)},
+            recordedAt:at.toISOString(),expiresAt:new Date(Math.min(Date.parse(targetExpiry!),Date.parse(negotiationSource!.observedAt)+CART_TTL_MS_V1)).toISOString(),
+            status:"PENDING",cartOpeningCommandId:null,activatedByCartId:null});
+          pending.pendingId=createHash("sha256").update(pendingNegotiationIdPreimageV1(pending)).digest("hex");
+          command={kind:"PENDING_NEGOTIATION_RECORDED",commandId:operationId,pending};
+        }else if(supportAction==="CANCEL_PENDING")command={kind:"PENDING_NEGOTIATION_INVALIDATED",commandId:operationId,pendingId:String(a.pendingRef),sourceMessageId:input.scope.sourceMessageId};
+        else command={kind:"NEGOTIATION_EVENT",commandId:operationId,expectedNegotiationVersion:current.negotiation!.stateVersion,
+          sourceMessageId:negotiationSource!.sourceMessageId,intent:pendingActivation?"PRICE_OBJECTION":a.intent as "PRICE_OBJECTION"|"PURCHASE_READY",
+          reasonCode:pendingActivation||a.intent==="PRICE_OBJECTION"?"PRICE_OBJECTION":null,
+          ...(pendingActivation?{pendingId:pendingActivation.pendingId,cartOpeningCommandId:pendingActivation.cartOpeningCommandId!}:{})};
+      }
       const ports: SalesCycleTrustedPortsV1 = {
+        resolveCartCreationReceipt:id=>openingReceipt&&openingReceipt.operationId===id&&openingReceipt.effect==="CART_OPENED"&&
+          openingReceipt.status==="SUCCESS"&&openingReceipt.recipient===turnRecipient&&Date.parse(openingReceipt.expiresAt)>input.clock().getTime()?
+          {commandId:id,cartId:openingReceipt.subjectRef,stateRevision:openingReceipt.stateRevision,observedAt:openingReceipt.observedAt}:null,
         resolveCartDraft: r => draft && r.contentHash === computeBusinessContentHash(draft) ? draft : null,
         resolveCartMutation: r => mutation && r.contentHash === computeBusinessContentHash({ mutation }) ? { mutation } : null,
         resolveShopPolicy: r => policy && r.contentHash === computeBusinessContentHash(policy.policy) ? policy.policy : null,
@@ -403,7 +466,11 @@ export async function createCommerceEffectTools(input: {
       await refreshSelections();
       if (result?.status === "APPLIED" && result.transferToHuman) committedTerminal = {
         reason: "PURCHASE_CONFIRMED", revision: current.revision, operationId, conversationRevision: authority?.revision ?? input.scope.revision };
+      const pendingSupport=pendingSupportView();
       return { status: "OK", data: { operationId, effect: effectName, cart: current.cart?.value, cartItems: cartItems(), cartQuote: cartQuote(),
+        ...(pendingRecord?{supportEvaluation:{status:"NOT_EVALUATED",supportAvailability:"UNKNOWN",pendingRef:current.pendingNegotiation!.pendingId,
+          pendingCommitted:true,negotiationApplied:false}}:{}),
+        ...(pendingSupport?{pendingSupport}:{}),
         purchaseConfirmed: current.confirmation !== null, externalOrderCreated: false } };
     } catch { if (commitAttempted) uncertain = true; return { status: "UNAVAILABLE", reason: "COMMERCE_UNAVAILABLE" }; }
     };

@@ -29,7 +29,7 @@ for(const final of [false,true])test(`owner groups exact current fit and unknown
   meaning:SUPPORT_NOT_EVALUATED_MEANING});
  // Option A: the meaning comes first and tells the owner the customer's next step; it promises and denies nothing.
  assert.equal(Object.keys(n)[0],'supportEvaluation');assert.match(n.supportEvaluation.meaning,/Hỗ trợ riêng chưa được xét/u);
- assert.match(n.supportEvaluation.meaning,/Shop xét khi khách hỏi lại sau khi đã có giỏ/u);
+ assert.match(n.supportEvaluation.meaning,/không bắt khách hỏi lại/u);
  assert(!Object.hasOwn(n,'negotiationStatus'));assert(!Object.hasOwn(n,'supportAvailability'));assert(!Object.hasOwn(n,'missing'));
  assert(Buffer.byteLength(JSON.stringify(wire))<=65536);
 });

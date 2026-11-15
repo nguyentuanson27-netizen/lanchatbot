@@ -109,6 +109,10 @@ describe("Phase 3 sales-cycle contracts", () => {
       ["PAYMENT_RECEIPT_RECEIVED", "HANDOFF", "PURCHASE_CONFIRMED", "HANDED_OFF"],
     ] as const;
     const validKeys = new Set(valid.map((tuple) => tuple.join("|")));
+    for(const kind of ["PENDING_NEGOTIATION_RECORDED","PENDING_NEGOTIATION_INVALIDATED"]){
+      for(const stage of ["DISCOVERY","FACTS_PRESENTED","MEASUREMENTS_REQUIRED","SIZE_RECOMMENDED","CART_OPEN","ORDER_PREVIEW"])
+        validKeys.add([kind,"APPLIED",stage,stage].join("|"));
+    }
     const stages = SalesCycleStageV1Schema.options;
 
     expect(new Set(SALES_CYCLE_COMMAND_KINDS_V1).size)

@@ -12,6 +12,7 @@ import {
 import {
   CheckoutRevalidationV1Schema,
   canonicalJsonV1,
+  PendingNegotiationTransitionV1Schema,
   canonicalCartVariantScopeV2,
   canonicalCartStateHashPreimageV1,
   canonicalCartStateV1,
@@ -104,6 +105,8 @@ export interface RealtimeSalesCycleInput {
   readonly nativeNegotiation?: Extract<SalesCycleCommand,{kind:"NEGOTIATION_EVENT"}>;
   /** Exact message resolved by the native adapter, independent of the batch's commit source. */
   readonly nativeNegotiationInbound?: VerifiedInboundMessageV1 | null;
+  readonly nativePendingNegotiation?:Extract<SalesCycleCommand,{kind:"PENDING_NEGOTIATION_RECORDED"|"PENDING_NEGOTIATION_INVALIDATED"}>;
+  readonly nativeCartCreationReceipt?:ReturnType<NonNullable<SalesCycleTrustedPortsV1["resolveCartCreationReceipt"]>>;
   readonly paymentReceiptInbound?: VerifiedInboundMessageV1;
   readonly pageId: string;
   readonly conversationId: string;
@@ -935,6 +938,7 @@ export async function evaluateRealtimeSalesCycle(
       (references.get(canonicalJson(reference)) as ResolvedCartMutationV1 | undefined) ?? null,
     resolveShopPolicy: (reference) =>
       (references.get(canonicalJson(reference)) as ReturnType<SalesCycleTrustedPortsV1["resolveShopPolicy"]> | undefined) ?? null,
+    resolveCartCreationReceipt:commandId=>input.nativeCartCreationReceipt?.commandId===commandId?input.nativeCartCreationReceipt:null,
     resolveInboundMessage: (sourceMessageId) => input.nativeNegotiation?.sourceMessageId === sourceMessageId &&
       input.nativeNegotiationInbound?.messageId === sourceMessageId ? input.nativeNegotiationInbound
       : input.paymentReceiptInbound?.messageId === sourceMessageId ? input.paymentReceiptInbound : sourceMessageId === input.messageId ? inbound : null,
@@ -1073,6 +1077,11 @@ export async function evaluateRealtimeSalesCycle(
           ? null
           : computeBusinessContentHash(resolvedMutation).replace(/^sha256:/u, ""),
         ...(negotiationTransitionEvidence === null ? {} : { negotiationTransitionEvidence }),
+        ...((command.kind==="PENDING_NEGOTIATION_RECORDED"||command.kind==="PENDING_NEGOTIATION_INVALIDATED"||
+          (command.kind==="NEGOTIATION_EVENT"&&command.pendingId))?{pendingNegotiationTransition:PendingNegotiationTransitionV1Schema.parse({
+            schemaVersion:1,action:command.kind==="PENDING_NEGOTIATION_RECORDED"?"RECORDED":command.kind==="PENDING_NEGOTIATION_INVALIDATED"?"INVALIDATED":"ACTIVATED",
+            sourceMessageIdHash:input.canonicalBuyingIntent.sourceMessageIdHash,commandIdHash:createHash("sha256").update(command.commandId).digest("hex"),
+            before:before.pendingNegotiation??null,after:state.pendingNegotiation,appliedAt:input.now.toISOString()})}:{}),
         ...(checkoutDetailsTransitionEvidence === null
           ? {}
           : { checkoutDetailsTransitionEvidence }),
@@ -1266,7 +1275,7 @@ export async function evaluateRealtimeSalesCycle(
   const plan = (): RealtimeSalesCyclePlan<SalesCycleRuntimeState> | null => {
     if (events.length === 0) return null;
     const cartExpiry = state.cart ? new Date(state.cart.expiresAt) : null;
-    const expiresAt = cartExpiry ?? new Date(input.now.getTime() + CART_TTL_MS_V1);
+    const expiresAt = cartExpiry ?? (state.pendingNegotiation?new Date(state.pendingNegotiation.expiresAt):new Date(input.now.getTime() + CART_TTL_MS_V1));
     const batchWithPlaceholder = cartMutationReceipts.length === 0
       ? null
       : {
@@ -1428,6 +1437,11 @@ export async function evaluateRealtimeSalesCycle(
     };
   };
 
+  if(input.nativePendingNegotiation){
+    const result=apply(input.nativePendingNegotiation);
+    if(result.status!=="APPLIED")return failedOutput(result.status==="REJECTED"?result.reasonCode:"NATIVE_PENDING_NEGOTIATION_REJECTED");
+    return {handled:true,messages:[],plan:plan(),transferToHuman:false,desiredTag:null,reasonCode:null};
+  }
   if(input.nativeNegotiation){
     const command=input.nativeNegotiation;
     if(!ports.resolveInboundMessage(command.sourceMessageId)||!state.cart||!state.negotiation)return failedOutput("NATIVE_NEGOTIATION_SOURCE");

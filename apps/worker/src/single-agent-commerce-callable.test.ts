@@ -8,7 +8,7 @@ describe("structured callable closure",()=>{
  it("keeps add→confirm/change/negotiation without a cart at generation start",()=>{
    const r={context:context(),availableTools:["add_to_cart","change_cart_item","confirm_purchase","record_negotiation","recommend_size","apply_customer_state"],toolsAllowed:true,toolBudget:{roundsRemaining:1,callsRemaining:3}};
    expect(commerceCallableTools(r)).toEqual(r.availableTools);
-   r.toolBudget.callsRemaining=1;expect(commerceCallableTools(r)).toEqual(["add_to_cart","recommend_size","apply_customer_state"]);
+   r.toolBudget.callsRemaining=1;expect(commerceCallableTools(r)).toEqual(["add_to_cart","record_negotiation","recommend_size","apply_customer_state"]);
  });
  it("removes only tools unreachable without refs or a legal predecessor",()=>{
    const c=context();c.boundSubjects=[];

@@ -19,7 +19,8 @@ export function commerceCallableTools(request: Pick<OwnerRequest,"availableTools
     if(name==="quote_product")return calls>=1&&subjects.some(s=>s.kind==="PRODUCT"); // Media feasibility reserves its own actual work.
     if(["read_product","recommend_size","add_to_cart","select_product_media","view_product_media"].includes(name))return product;
     if(name==="change_cart_item")return line;
-    if(name==="confirm_purchase"||name==="record_negotiation")return cart||created;
+    if(name==="record_negotiation")return product||cart||created;
+    if(name==="confirm_purchase")return cart||created;
     // quote_cart can use the configured quoteInput without a persisted cart.
     // Unknown/extension capabilities are retained, never guessed unreachable.
     return true;

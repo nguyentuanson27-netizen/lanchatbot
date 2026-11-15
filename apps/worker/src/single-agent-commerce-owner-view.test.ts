@@ -89,7 +89,7 @@ describe("price support asked for before a cart exists (option A)",()=>{
  });
  it("promises nothing, denies nothing and names the next step",()=>{
   expect(SUPPORT_NOT_EVALUATED_MEANING).toMatch(/Không hứa mức hỗ trợ và không nói là không có/u);
-  expect(SUPPORT_NOT_EVALUATED_MEANING).toMatch(/Hỏi lựa chọn khách còn thiếu để lên giỏ. Shop xét khi khách hỏi lại sau khi đã có giỏ/u);
+  expect(SUPPORT_NOT_EVALUATED_MEANING).toMatch(/Khách chỉ hỏi giá thì báo giá hiện hành/u);
   expect(SUPPORT_NOT_EVALUATED_MEANING).toMatch(/^Chỉ dùng khi khách xin hỗ trợ giá\./u);
   expect(SUPPORT_NOT_EVALUATED_MEANING).not.toMatch(/\d/u);
  });

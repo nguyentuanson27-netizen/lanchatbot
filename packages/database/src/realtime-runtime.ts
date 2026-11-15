@@ -11,6 +11,11 @@ import {
   canonicalCartStateHashPreimageV1,
   canonicalCartStateV1,
   canonicalJsonV1,
+  PendingNegotiationV1Schema,
+  PendingNegotiationTransitionV1Schema,
+  pendingNegotiationIdPreimageV1,
+  pendingNegotiationAfterOpeningV1,
+  pendingNegotiationAfterActivationV1,
   cartMutationAuthorityBindingHashPreimageV1,
   cartMutationBatchEvidenceHashPreimageV1,
   cartMutationReceiptHashPreimageV1,
@@ -177,6 +182,7 @@ export interface RealtimeSalesCycleEventPlan {
   readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | "SET_COMPONENT_VARIANT" | "REPLACE_LINE" | null;
   readonly mutationPayloadHash?: string | null;
   readonly negotiationTransitionEvidence?: import("@lana/contracts").NegotiationTransitionEvidenceV1;
+  readonly pendingNegotiationTransition?: import("@lana/contracts").PendingNegotiationTransitionV1;
   readonly checkoutDetailsTransitionEvidence?: import("@lana/contracts").CheckoutDetailsTransitionEvidenceV1;
   readonly clarificationTransitionEvidence?: import("@lana/contracts").ClarificationTransitionEvidenceV1;
   readonly previewArtifact?: OrderPreviewV1;
@@ -1013,6 +1019,62 @@ function validateLockedCanonicalCartTransitionV1(
   }
 }
 
+
+/** Replay the small pending field against the locked state before permitting any cart repricing. */
+export async function validateLockedPendingNegotiationTransitionV1(client:Pick<PoolClient,"query">,pageId:string,conversationId:string,
+ plan:RealtimeSalesCyclePlan<unknown>,lockedState:unknown,currentSourceMessageIdHash:string|null,now:Date,
+ commandFingerprint?:(commandId:string)=>string):Promise<void>{
+ const locked=salesStateRecordV1(lockedState),proposed=salesStateRecordV1(plan.state);
+ let pending=locked.pendingNegotiation==null?null:PendingNegotiationV1Schema.parse(locked.pendingNegotiation);
+ for(const event of plan.events.filter(e=>e.outcome==="APPLIED")){
+  if(event.commandKind==="CART_OPENED"&&pending){
+   const cart=cartFromSalesStateV1(plan.state),context=salesStateRecordV1(proposed.commerceContext);
+   pending=pendingNegotiationAfterOpeningV1(pending,cart,context.policyRef as import("@lana/contracts").VersionedBusinessReferenceV1,
+    event.commandId,event.occurredAt.toISOString());
+  }else if(event.pendingNegotiationTransition){
+   const t=PendingNegotiationTransitionV1Schema.parse(event.pendingNegotiationTransition);
+   if(!currentSourceMessageIdHash||t.sourceMessageIdHash!==currentSourceMessageIdHash||
+    t.sourceMessageIdHash!==plan.sourceMessageIdHash||t.commandIdHash!==sha256TextV1(event.commandId)||
+    t.appliedAt!==event.occurredAt.toISOString()||Date.parse(t.appliedAt)>now.getTime()+MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1||
+    canonicalJsonV1(t.before)!==canonicalJsonV1(pending))throw Error("PENDING_NEGOTIATION_EVIDENCE_MISMATCH");
+   if(event.commandKind==="PENDING_NEGOTIATION_RECORDED"){
+    const after=t.after;
+    if(t.action!=="RECORDED"||Date.parse(String(salesStateRecordV1(locked.cart).expiresAt))>Date.parse(t.appliedAt)||after.status!=="PENDING"||
+     after.pendingId!==sha256TextV1(pendingNegotiationIdPreimageV1(after))||
+     sha256TextV1(after.sourceMessageId)!==currentSourceMessageIdHash||Date.parse(after.recordedAt)>Date.parse(t.appliedAt)||
+     after.cartOpeningCommandId!==null||after.activatedByCartId!==null||
+     Date.parse(after.sourceObservedAt)>Date.parse(after.recordedAt)||Date.parse(after.expiresAt)<=Date.parse(t.appliedAt)||
+     Date.parse(after.expiresAt)>Date.parse(after.sourceObservedAt)+CART_TTL_MS_V1)throw Error("PENDING_NEGOTIATION_RECORD_INVALID");
+    pending=after;
+   }else if(event.commandKind==="PENDING_NEGOTIATION_INVALIDATED"){
+    if(!pending||pending.status!=="PENDING"||t.action!=="INVALIDATED"||
+     canonicalJsonV1(t.after)!==canonicalJsonV1({...pending,status:"INVALIDATED"}))throw Error("PENDING_NEGOTIATION_INVALIDATION_INVALID");
+    pending=t.after;
+   }else if(event.commandKind==="NEGOTIATION_EVENT"){
+    const cart=cartFromSalesStateV1(lockedState),context=salesStateRecordV1(locked.commerceContext);
+    const next=pending&&pending.cartOpeningCommandId?pendingNegotiationAfterActivationV1(pending,cart,
+     context.policyRef as import("@lana/contracts").VersionedBusinessReferenceV1,pending.cartOpeningCommandId,t.appliedAt):null;
+    if(!pending||!next||t.action!=="ACTIVATED"||canonicalJsonV1(next)!==canonicalJsonV1(t.after)||
+     event.negotiationTransitionEvidence?.observedAt!==pending.sourceObservedAt||
+     event.negotiationTransitionEvidence?.intent!=="PRICE_OBJECTION"||
+     event.negotiationTransitionEvidence?.eventIdHash!==sha256TextV1("inbound:"+pending.sourceMessageId))
+      throw Error("PENDING_NEGOTIATION_ACTIVATION_INVALID");
+    if(!commandFingerprint)throw Error("PENDING_NEGOTIATION_CART_RECEIPT");
+    const receipt=await client.query<{state_revision_after:number;occurred_at:Date}>(
+     "SELECT state_revision_after,occurred_at FROM sales_cycle_events WHERE page_id=$1 AND conversation_id=$2 AND command_id_hash=$3 AND command_kind='CART_OPENED' AND outcome='APPLIED' AND cart_id=$4",
+     [pageId,conversationId,commandFingerprint(pending.cartOpeningCommandId!),cart.cartId]);
+    const row=receipt.rows[0];
+    if(!row||row.state_revision_after>Number(locked.revision)||row.occurred_at.toISOString()!==cart.createdAt||
+     !(locked.processedCommandIds as string[]).includes(pending.cartOpeningCommandId!))
+      throw Error("PENDING_NEGOTIATION_CART_RECEIPT");
+    pending=next;
+   }else throw Error("PENDING_NEGOTIATION_UNEXPECTED");
+  }else if(event.commandKind==="PENDING_NEGOTIATION_RECORDED"||event.commandKind==="PENDING_NEGOTIATION_INVALIDATED")
+    throw Error("PENDING_NEGOTIATION_EVIDENCE_REQUIRED");
+ }
+ const after=proposed.pendingNegotiation==null?null:PendingNegotiationV1Schema.parse(proposed.pendingNegotiation);
+ if(canonicalJsonV1(after)!==canonicalJsonV1(pending))throw Error("PENDING_NEGOTIATION_REPLAY_MISMATCH");
+}
 const MAX_SALES_PROCESSED_COMMAND_IDS_V1 = 100;
 const SALES_STATE_TOP_LEVEL_KEYS_V2 = new Set([
   "schemaVersion",
@@ -1023,6 +1085,7 @@ const SALES_STATE_TOP_LEVEL_KEYS_V2 = new Set([
   "cart",
   "commerceContext",
   "negotiation",
+  "pendingNegotiation",
   "checkoutDraft",
   "clarification",
   "preview",
@@ -1134,7 +1197,7 @@ function validateLockedProtectedSalesStateTransitionV1(
         break;
       case "CART_OPENED":
         if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
-        ["cart", "commerceContext", "negotiation", "checkoutDraft", "preview"]
+        ["cart", "commerceContext", "negotiation", "checkoutDraft", "preview", "pendingNegotiation"]
           .forEach((key) => ownedFields.add(key));
         break;
       case "CART_MUTATED":
@@ -1142,6 +1205,12 @@ function validateLockedProtectedSalesStateTransitionV1(
       case "NEGOTIATION_EVENT":
         if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
         ["cart", "negotiation", "preview"].forEach((key) => ownedFields.add(key));
+        if(event.commandKind==="NEGOTIATION_EVENT")ownedFields.add("pendingNegotiation");
+        break;
+      case "PENDING_NEGOTIATION_RECORDED":
+      case "PENDING_NEGOTIATION_INVALIDATED":
+        if(event.outcome!=="APPLIED")throw new Error("SALES_STATE_OUTCOME_INVALID");
+        ownedFields.add("pendingNegotiation");
         break;
       case "CHECKOUT_DETAILS_CAPTURED":
         if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
@@ -1177,6 +1246,7 @@ function validateLockedProtectedSalesStateTransitionV1(
     "cart",
     "commerceContext",
     "negotiation",
+    "pendingNegotiation",
     "checkoutDraft",
     "clarification",
     "preview",
@@ -1366,6 +1436,8 @@ function validateLockedProtectedSalesArtifactsV1(
     case "FACTS_PRESENTED":
     case "MEASUREMENTS_REQUIRED":
     case "SIZE_RECOMMENDED":
+    case "PENDING_NEGOTIATION_RECORDED":
+    case "PENDING_NEGOTIATION_INVALIDATED":
       if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
       break;
     default:
@@ -3787,6 +3859,8 @@ export class PostgresRealtimeRuntimeStore {
       validateLockedSalesStateEnvelopeV1(
         plan as RealtimeSalesCyclePlan<unknown>, lockedState, pageId, conversationId,
       );
+      await validateLockedPendingNegotiationTransitionV1(client,pageId,conversationId,
+        plan as RealtimeSalesCyclePlan<unknown>,lockedState,currentSourceMessageIdHash,now,id=>this.cipher.fingerprint(id,"sales-cycle-command:v1"));
       validateLockedCartExpiryBindingV1(
         plan as RealtimeSalesCyclePlan<unknown>, lockedState, lockedRow.cart_expires_at,
       );

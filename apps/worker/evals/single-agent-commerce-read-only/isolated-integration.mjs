@@ -35,6 +35,7 @@ import {statefulPreflight,createStatefulProvider} from './stateful-provider.mjs'
 import {isolatedHandoffRecords,handoffContentHash} from './candidate-handoff.mjs';
 import {publicCapturedAttachments,publicCapturedTextHashes} from './delivery-capture.mjs';
 import {assertDiagnosticFlags,diagnosticPreflight,claimDiagnostic} from '../single-agent-commerce-qualification/diagnostic.mjs';
+import {claimContextNative} from '../single-agent-commerce-qualification/sales-context-campaign.mjs';
 import {admitPreparedCommerceContext} from './preparation-admission.mjs';
 import {collectSafety} from '../single-agent-commerce-qualification/collect-safety.mjs';
 import {cartSelectionFromSnapshot} from '../../dist/realtime-sales-catalog.js';
@@ -62,7 +63,9 @@ const phaseCTools=phaseC||phaseCInitial?Object.assign({},...await Promise.all([
 const providerRun=!!phaseC||process.argv.includes('--provider-run'),providerPreflight=process.argv.includes('--provider-preflight');
 const checkPrefixIndex=process.argv.indexOf('--check-prefix'),checkPrefix=j2j1Input?'C j2 j1 campaign':phaseCInitial?'C initial state capture':checkPrefixIndex<0?null:process.argv[checkPrefixIndex+1];
 assert(checkPrefixIndex<0||(!providerRun&&!providerPreflight&&typeof checkPrefix==='string'&&checkPrefix.length>0&&checkPrefix.length<=128),'DETERMINISTIC_CHECK_PREFIX_ONLY');
-const providerFreeze=phaseCDiagnostic?diagnosticPreflight(root,phaseC,phaseCArg('--phase-c-world')):phaseC?phaseCTools.candidatePreflight(root,phaseC,phaseCArg('--phase-c-world')):providerRun||providerPreflight?statefulPreflight(root):null;
+const contextProof=phaseCArg('--sales-context-campaign')?{campaignPath:phaseCArg('--sales-context-campaign'),seal:phaseCArg('--sales-context-seal'),
+ kind:phaseCArg('--sales-context-job'),scorePath:phaseCArg('--sales-context-score')}:undefined;
+const providerFreeze=phaseCDiagnostic?diagnosticPreflight(root,phaseC,phaseCArg('--phase-c-world'),contextProof):phaseC?phaseCTools.candidatePreflight(root,phaseC,phaseCArg('--phase-c-world')):providerRun||providerPreflight?statefulPreflight(root):null;
 if(providerPreflight){console.log(JSON.stringify({status:'PREFLIGHT_PASS',...providerFreeze.registration,providerGenerations:0}));process.exit(0);}
 if(phaseC){
  if(!phaseCDiagnostic)phaseCTools.requirePassingSafety(providerFreeze.sealed,phaseCArg('--phase-c-safety'));
@@ -73,6 +76,7 @@ if(phaseC){
   assert.equal(JSON.stringify(absolute.config),JSON.stringify(providerFreeze.sealed.config),'C_ABSOLUTE_CONFIG_CHANGED');
   providerFreeze.registration.arm='C3';
  }else{assert(!phaseCArg('--phase-c-arm')||phaseCArg('--phase-c-arm')==='CANDIDATE');providerFreeze.registration.arm='CANDIDATE';}
+ if(contextProof)claimContextNative(contextProof,providerFreeze.sealed,providerFreeze.world,providerFreeze.sealed.runSourceSha);
  if(phaseCDiagnostic)claimDiagnostic(phaseC,providerFreeze.sealed);
  else phaseCTools.claimDispatch(phaseC,providerFreeze.registration.arm==='C3'?'C3':'NATIVE',providerFreeze.sealed);
 }
@@ -116,6 +120,8 @@ try{
   await pool.query(clarificationDown);assert.equal(await commandConstraint(),originalCommandConstraint);await pool.query(clarificationUp);
  });
  report.schemaFiles=files;report.testDatabase=databaseName;save();
+ const pendingMigration='0036_pending_negotiation_commands.up.sql';
+ await pool.query(readFileSync(resolve(migrationRoot,pendingMigration),'utf8'));files.push(pendingMigration);save();
  const cipher=new LocalEnvelopeCipher(randomBytes(32).toString('hex'),'c3-b-test-only');
  runtime=new PostgresRealtimeRuntimeStore(testUrl.toString(),cipher,3);
  inbox=new PostgresRealtimeInboxStore(testUrl.toString(),cipher,{customerDebounceMs:1000,maxPoolSize:2});
@@ -1450,6 +1456,60 @@ try{
   await j.drain();await j.drain();
   if(process.argv.includes('--candidate-handoff'))assert.deepEqual(j.capture,[]);
   assert(!JSON.stringify(j.capturePayloads).includes('c3-private-receipt'));
+ });
+
+ await check('C pending support records before cart and activates once after committed cart creation',async()=>{
+  assert(!providerRun&&!phaseC&&!phaseCInitial,'SYNTHETIC_ONLY');
+  const commit=runtime.commitWithinTransaction.bind(runtime);
+  runtime.commitWithinTransaction=async(...args)=>{try{return await commit(...args);}catch(error){
+   report.pendingCommitFailure=error instanceof Error&&/^[A-Z][A-Z0-9_]{1,100}$/.test(error.message)?error.message:'UNCLASSIFIED';
+   const plan=args[1]?.salesCyclePlan;
+   report.pendingExpiryDiagnostic=plan?{expiresAt:plan.expiresAt,cartExpiresAt:plan.cartExpiresAt,transactionNow:args[2],
+    deltaMs:plan.expiresAt.getTime()-args[2].getTime(),commands:plan.events.map(e=>e.commandKind)}:null;save();throw error;
+  }};
+  const j=await statefulFixture({media:true,canonicalOfferIds:true});
+  let pendingRef;
+  const first=await j.turn('Chị lấy hai áo size M, shop bớt thêm cho chị được không?',[
+   native([{name:'read_product',args:{subjectRef:'SM613',offerType:'DIRECT'}}]),
+   native([{name:'record_negotiation',args:{intent:'PRICE_OBJECTION',sourceQuote:'shop bớt thêm cho chị được không?',subjectRef:'SM613',offerType:'DIRECT'}}]),
+   request=>{
+    const result=request.contents.at(-1).parts[0].functionResponse.response;
+    assert.equal(result.status,'OK',JSON.stringify(result));
+    assert.equal(result.data.supportEvaluation.negotiationApplied,false);
+    pendingRef=result.data.supportEvaluation.pendingRef;
+    assert(!request.context.state.cartQuote);
+    return say('Chị lấy màu navy hay trắng ạ?');
+   }]);
+  assert.equal(first.result.terminal.disposition,'SEND_ELIGIBLE',JSON.stringify(first.result));
+  assert(pendingRef);await j.drain();
+  let quote;
+  const second=await j.turn('Lấy navy cho chị nhé.',[
+   native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy',quantity:2}}]),
+   native([{name:'record_negotiation',args:{action:'APPLY_PENDING',pendingRef}}]),
+   request=>{
+    const result=request.contents.at(-1).parts[0].functionResponse.response;
+    assert.equal(result.status,'OK',JSON.stringify(result));
+    assert.equal(result.data.effect,'NEGOTIATION_UPDATED');
+    quote=request.context.state.cartQuote;assert(quote);
+    return say('Dạ, hai áo navy size M của chị nhé.');
+   }]);
+  assert.equal(second.result.terminal.disposition,'SEND_ELIGIBLE',JSON.stringify(second.result));
+  await j.drain();
+  const third=await j.turn('Cả ship hết bao nhiêu em?',[
+   native([{name:'record_negotiation',args:{action:'APPLY_PENDING',pendingRef}}]),
+   request=>{
+    const result=request.contents.at(-1).parts[0].functionResponse.response;
+    assert.equal(result.status,'OK',JSON.stringify(result));assert.equal(result.data.duplicate,true);
+    assert.equal(request.context.state.cartQuote.grandTotalVnd,quote.grandTotalVnd);
+    return say('Tổng cả ship '+quote.grandTotalVnd.toLocaleString('vi-VN')+'đ chị nhé.');
+   }]);
+  assert.equal(third.result.terminal.disposition,'SEND_ELIGIBLE',JSON.stringify(third.result));
+  const events=(await pool.query('SELECT command_kind FROM sales_cycle_events WHERE conversation_id=$1',[j.bound.conversationId])).rows;
+  assert.equal(events.filter(e=>e.command_kind==='PENDING_NEGOTIATION_RECORDED').length,1);
+  assert.equal(events.filter(e=>e.command_kind==='NEGOTIATION_EVENT').length,1);
+  assert.equal(events.filter(e=>e.command_kind==='CART_OPENED').length,1);
+  report.pendingSupport={recordedBeforeCart:true,cartCreationReceipt:true,activatedOnce:true,originalSourceTimePreserved:true,providerGenerations:0};
+  runtime.commitWithinTransaction=commit;
  });
  await check('B composed N7 one negotiation event updates the persisted quote and cart reprice retains its evidence',async()=>{
   const j=await statefulFixture();await j.turn('Chị lấy áo SM613 navy size M nhé',[native([{name:'add_to_cart',args:{subjectRef:'SM613',offerType:'DIRECT',size:'M',color:'navy'}}]),say('Dạ chị.')]);await j.drain();

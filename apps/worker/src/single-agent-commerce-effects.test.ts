@@ -1105,3 +1105,46 @@ describe("code-owned commerce effects and recovery", () => {
       cartVersion: s.current().cart!.value.revision, grandTotalVnd: s.current().cart!.value.grandTotalVnd });
   });
 });
+
+describe("deferred support uses actual committed request and cart receipts",()=>{
+ it("records without a concession and consumes after an authorized cart commit",async()=>{
+  const s=await setup(),f=fixtureProduct();
+  s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+  expect((await s.tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}})).status).toBe("OK");
+  const recorded=await s.tools.invoke({name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao",subjectRef:"SM613",offerType:"DIRECT"}});
+  expect(recorded).toMatchObject({status:"OK",data:{effect:"NEGOTIATION_REQUEST_RECORDED",supportEvaluation:{negotiationApplied:false,pendingCommitted:true}}});
+  expect(s.current().cart).toBeNull();expect(s.current().negotiation).toBeNull();
+  const pending=s.current().pendingNegotiation!;
+  expect(s.tools.snapshot().state.pendingSupport).toMatchObject({pendingRef:pending.pendingId,canApply:false});
+  expect((await s.tools.invoke(s.add)).status).toBe("OK");
+  const activated=await s.tools.invoke({name:"record_negotiation",args:{action:"APPLY_PENDING",pendingRef:pending.pendingId}});
+  expect(activated.reason).toBeUndefined();
+  expect(activated).toMatchObject({status:"OK",data:{effect:"NEGOTIATION_UPDATED"}});
+  expect(s.current().pendingNegotiation?.status).toBe("ACTIVATED");
+  expect(s.current().negotiation?.consumedObjectionEvidenceIds).toHaveLength(1);
+  const count=s.commits.length;
+  const duplicate=await s.tools.invoke({name:"record_negotiation",args:{action:"APPLY_PENDING",pendingRef:pending.pendingId}});
+  expect(duplicate.status).toBe("OK");expect(s.commits).toHaveLength(count);
+ });
+ it("rejects an unbound offer and never calls selection just to record support",async()=>{
+  const s=await setup();await s.tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}});
+  const before=structuredClone(s.current());
+  expect(await s.tools.invoke({name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao",subjectRef:"SM613",offerType:"invented"}}))
+   .toMatchObject({status:"REJECTED",reason:"NEGOTIATION_CONTEXT_REQUIRED"});
+  expect(s.current()).toEqual(before);expect(s.select).not.toHaveBeenCalled();
+ });
+});
+
+it.each(["mutation","ordinary-negotiation"] as const)("does not offer pending activation after %s changes the cart",async mode=>{
+ const s=await setup(),f=fixtureProduct();
+ s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+ await s.tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}});
+ const record=await s.tools.invoke({name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao",subjectRef:"SM613",offerType:"DIRECT"}});
+ expect(record.status).toBe("OK");
+ await s.tools.invoke(s.add);expect(s.tools.snapshot().state.pendingSupport).toMatchObject({canApply:true});
+ const result=await s.tools.invoke(mode==="mutation"?{name:"change_cart_item",args:{subjectRef:s.current().cart!.value.lines[0]!.lineId,action:"SET_QUANTITY",quantity:2}}:
+  {name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao"}});
+ expect(result.status).toBe("OK");
+ expect(s.tools.snapshot().state.pendingSupport).toMatchObject({canApply:false,blockedReason:"CART_BINDING_CHANGED"});
+ expect(result.data).toMatchObject({pendingSupport:{canApply:false}});
+});
