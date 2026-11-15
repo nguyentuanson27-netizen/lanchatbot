@@ -1,0 +1,47 @@
+{
+  "source": "3814464c9558d035da7a1818e3bc3c4223fcd331",
+  "attempts": 9,
+  "turns": 21,
+  "dispositions": {
+    "SEND_ELIGIBLE": 8,
+    "HANDOFF": 6,
+    "NO_SEND": 7
+  },
+  "requests": 30,
+  "offlineJudge": {
+    "packets": 14,
+    "requests": 14,
+    "valid": 14,
+    "inputTokens": 495312,
+    "outputTokens": 10878,
+    "identity": {
+      "model": "gpt-6.1-sol",
+      "effort": "high",
+      "version": "gpt-6.1-sol",
+      "cliVersion": "0.159.2",
+      "rubricHash": "95f8bb5e0e436fa5fc7d6286fb34028e6d631f54e4549b4f1984db8a24c01d88",
+      "schemaHash": "79b1d3bac15af9cf8355a8dd65320befddb775d5ef055a6cd3d34e5162139b29",
+      "retry": 0,
+      "maximumJudgeRequests": 14,
+      "packetBytesLimit": 262144
+    },
+    "packetHash": "9b99a79f9ce04312a6c148305f50c4d3111aa01f288af0d4c8d2e2af1930433e"
+  },
+  "j2RescoredExistingTraces": {
+    "baseline": {
+      "whole": 2,
+      "voice": 2,
+      "facts": 4,
+      "material": 1
+    },
+    "candidate": {
+      "whole": 2,
+      "voice": 2,
+      "facts": 5,
+      "material": 0
+    }
+  },
+  "batchMismatch": 6,
+  "qualificationEligible": false,
+  "status": "STOP"
+}

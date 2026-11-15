@@ -1,0 +1,844 @@
+{
+  "identity": {
+    "model": "gpt-6.1-sol",
+    "effort": "high",
+    "version": "gpt-6.1-sol",
+    "cliVersion": "0.159.2",
+    "rubricHash": "95f8bb5e0e436fa5fc7d6286fb34028e6d631f54e4549b4f1984db8a24c01d88",
+    "schemaHash": "79b1d3bac15af9cf8355a8dd65320befddb775d5ef055a6cd3d34e5162139b29",
+    "retry": 0,
+    "maximumJudgeRequests": 14,
+    "packetBytesLimit": 262144
+  },
+  "packetHash": "9b99a79f9ce04312a6c148305f50c4d3111aa01f288af0d4c8d2e2af1930433e",
+  "rows": [
+    {
+      "id": "4c18b744fb50dc727f8153a08d231a436289bb1d7a5feca8df57f86a8425c00a",
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Lượt đầu hỏi màu gọn, tự nhiên, đúng kết quả áo M trắng sẵn/Be đặt trước. Tuy nhiên, handoff khi khách xin hỗ trợ làm mạch bán hàng dừng; câu hỏi tổng gửi Cần Thơ không được trả lời dù có giá áo 499.000đ và ship 30.000đ, tổng cơ bản 529.000đ. Không tự áp giảm giá, freeship hay nhận đã thanh toán; lượt cuối im lặng đúng trạng thái HUMAN nhưng toàn hội thoại chưa hoàn thành nhu cầu khách."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 20634,
+        "output_tokens": 988,
+        "total_tokens": 21622,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 797
+        }
+      },
+      "latencyMs": 23833,
+      "error": null
+    },
+    {
+      "id": "b2d94c102d39c80e430c8c437d69a53501bedf2546dd61f36032b41674abc67c",
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": false,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              }
+            ],
+            "reason": "Lượt đầu hỏi màu ngắn gọn, đúng kết quả tool: trắng có sẵn, be đặt trước. Sau đó HANDOFF rồi im lặng khiến yêu cầu hỗ trợ và hỏi tổng tiền chưa được giải quyết, dù nguồn đủ tính một áo 499.000đ + ship 30.000đ = 529.000đ trước hỗ trợ. Không có receipt ưu đãi nhưng cũng không tự giảm tiền, freeship hay nhận khách đã thanh toán; thiếu hoàn thành, chưa có sai factual/action gây hậu quả."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 20609,
+        "output_tokens": 1008,
+        "total_tokens": 21617,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 822
+        }
+      },
+      "latencyMs": 33346,
+      "error": null
+    },
+    {
+      "id": "ca567eefcd4c7e91d85184861e017c6fc97ebe1d3ed783e924458e967924d02c",
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": false,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              }
+            ],
+            "reason": "Lượt đầu hỏi màu gọn, tự nhiên; áo M trắng có sẵn và be đặt trước đúng kết quả tool. Sau đó HANDOFF rồi NO_SEND khiến yêu cầu hỗ trợ giá và tổng gửi Cần Thơ chưa được trả lời dù đủ nguồn tính 499.000 + 30.000 = 529.000đ. NO_SEND đúng trạng thái HUMAN nhưng mạch bán hàng chưa hoàn thành. Không tự áp dụng giảm giá, freeship, concession chưa có receipt hay nhận đã thanh toán."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 20615,
+        "output_tokens": 970,
+        "total_tokens": 21585,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 788
+        }
+      },
+      "latencyMs": 40336,
+      "error": null
+    },
+    {
+      "id": "47c9f4db41fc04e2edea1c9f020f7ead343182ff41f2123703ed56b1dd8af927",
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Lượt đầu hỏi màu gọn, tự nhiên, đúng kết quả tool: áo M trắng có sẵn, be đặt trước. Tuy nhiên, handoff ở yêu cầu hỗ trợ rồi im lặng khi khách hỏi tổng khiến nhu cầu mua chưa được giải quyết; tổng cơ sở là 499.000đ + 30.000đ ship = 529.000đ, chưa có receipt ưu đãi. Không tự giảm giá, freeship, nhận đã thanh toán hay viện dẫn quote chưa gửi; lỗi chính là thiếu hoàn thành, không phải sai thông tin."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 20623,
+        "output_tokens": 877,
+        "total_tokens": 21500,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 684
+        }
+      },
+      "latencyMs": 37398,
+      "error": null
+    },
+    {
+      "id": "98e99a7310ee3e6a6caba11fc0d308be4e731bea8d3f62ab46e5cfc288d251bb",
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": false,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              }
+            ],
+            "reason": "Lượt đầu hỏi chọn Trắng sẵn hàng hay Be đặt trước đúng kết quả tool, gửi ảnh hợp lệ. Sau đó handoff và im lặng khiến yêu cầu hỗ trợ giá, tính tổng gửi Cần Thơ bị bỏ dở dù có nguồn giá áo 499.000đ và ship 30.000đ; cần báo tổng 529.000đ và tiếp tục chốt màu. Không tự giảm giá, freeship hay nhận đã thanh toán; lượt cuối không gửi đúng trạng thái HUMAN nhưng toàn mạch chưa hoàn thành việc khách cần."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 20598,
+        "output_tokens": 575,
+        "total_tokens": 21173,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 383
+        }
+      },
+      "latencyMs": 24628,
+      "error": null
+    },
+    {
+      "id": "edf9c7ed776d0dc9223cb0529d20dd57267f106981445a6d5c365054087986fa",
+      "caseId": "c-20261028-s15",
+      "repetition": 4,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Xác nhận đúng sở thích màu be, có receipt cập nhật hồ sơ và state tương ứng; không tự tạo giỏ hay đơn. Giá áo lẻ 499.000đ và tình trạng đặt trước khớp kết quả đọc offer AO. Lời đáp lịch sự, gọn, chỉ mở lời tư vấn size chứ không ép chốt mua."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 25548,
+        "output_tokens": 236,
+        "total_tokens": 25784,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 105
+        }
+      },
+      "latencyMs": 11778,
+      "error": null
+    },
+    {
+      "id": "fa8c0106f006e81f182eceda0ac12d97a07e7dc89d29fd1f94f0f1e429d6a611",
+      "caseId": "c-20261028-s15",
+      "repetition": 5,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": false,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": false,
+                "factsPass": true
+              }
+            ],
+            "reason": "Khách chỉ nói thích màu be và cảm ơn, nhưng người bán chuyển sang báo giá, quảng cáo chất liệu và hỏi size, chưa đáp đúng nhịp ACK nhẹ nhàng. Giá 499.000đ và trạng thái đặt trước có nguồn tool; không tạo giỏ/đơn hoặc nhận đã lưu sở thích khi chưa có receipt."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 25336,
+        "output_tokens": 318,
+        "total_tokens": 25654,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 189
+        }
+      },
+      "latencyMs": 13625,
+      "error": null
+    },
+    {
+      "id": "4bb0c20536bb6b6747422fe206edcc90009a4591f8607077a94210c3dd41a970",
+      "caseId": "c-context-preorder",
+      "repetition": 1,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": false,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": false,
+                "factsPass": true
+              }
+            ],
+            "reason": "Báo đúng giá 699.000đ, đúng tình trạng đặt trước và gửi ảnh có nguồn. Tuy nhiên, khách đã chấp nhận đặt trước và chỉ hỏi giá, người bán vẫn nhắc lại rồi kể dài chất liệu, cấu tạo và form váy, khiến lượt trả lời thiên về đọc catalogue, chưa gọn và sát mạch khách. Không có thông tin hay thao tác sai gây hậu quả."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 14718,
+        "output_tokens": 284,
+        "total_tokens": 15002,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 141
+        }
+      },
+      "latencyMs": 11598,
+      "error": null
+    },
+    {
+      "id": "6fa7815f90a74e658a3bc2bb5ca6cbbdc8dbd53bc5a1cd2d21985e253a80b256",
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "order": [
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": false,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": false,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              }
+            ],
+            "reason": "Nguồn đủ để tiếp tục bán nhưng lượt đầu chuyển người thật, không lưu yêu cầu hỗ trợ trước giỏ. Hai lượt sau đều im lặng: chưa tạo giỏ hai áo trắng size M, chưa áp dụng pending theo receipt và chưa trả lời tổng cả ship. Không có phát ngôn sai hay thao tác cấp giảm sai; vấn đề là bỏ dở nhu cầu mua hàng."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 13935,
+        "output_tokens": 494,
+        "total_tokens": 14429,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 337
+        }
+      },
+      "latencyMs": 19788,
+      "error": null
+    },
+    {
+      "id": "e499f9dd87ef961ee737b8ff77ea41326a5d2977253d131a6e910baea3e94ad7",
+      "caseId": "c-20261028-j2",
+      "repetition": 1,
+      "order": [
+        0,
+        1
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": false,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Đã thay 56kg bằng 51kg, giữ chiều cao 162 và đủ ba vòng trong hồ sơ; lượt cuối lưu RELAXED và chạy lại engine đúng revision, kết quả vẫn là M cho áo. Không có sai lệch size hay thao tác. Tuy nhiên lượt hai đọc lại toàn bộ thông tin khách vừa bổ sung rồi lặp gần nguyên khuôn trả lời trước, làm giọng máy móc."
+          },
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Trả lời gọn, chọn thông tin ngực và cân nặng mới để xác nhận thay vì đọc lại mọi số đo. Receipt và state chứng minh đã giữ 162cm, cập nhật 51kg cùng ba vòng; sở thích RELAXED được dùng ở revision 5 và engine tiếp tục khuyến nghị M đúng phần áo. Cụm “thoải mái nhất” hơi mạnh nhưng trong mạch này vẫn là lời tư vấn chọn size, không phải cam kết vừa tuyệt đối."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 62437,
+        "output_tokens": 1241,
+        "total_tokens": 63678,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 917
+        }
+      },
+      "latencyMs": 44880,
+      "error": null
+    },
+    {
+      "id": "6610032e26e809472b92903fe8dda8259a999656ed06141705f14900f2bdbc54",
+      "caseId": "c-20261028-j2",
+      "repetition": 2,
+      "order": [
+        0,
+        1
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": false,
+            "factsPass": false,
+            "materialIssue": true,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": false
+              }
+            ],
+            "reason": "Đã thay 56kg bằng 51kg, giữ chiều cao 162 và số đo 88–70–94; engine trả M đúng hồ sơ ở từng revision, lượt cuối có dùng RELAXED. Lượt 2 đọc lại dàn số khách vừa cung cấp nên hơi máy móc. Lượt 3 biến khuyến nghị M thành lời “đảm bảo vừa vặn, thoải mái và giữ form đẹp”, vượt bằng chứng engine và tạo cam kết về độ vừa thực tế."
+          },
+          {
+            "wholePass": false,
+            "voicePass": false,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Cập nhật đúng 51kg thay 56kg, giữ chiều cao 162 và số đo 88–70–94; chốt M theo engine đúng customer/revision, kể cả khi đã dùng RELAXED. Lượt cuối giải thích bằng đặc tính áo nhẹ, bay, thoáng có nguồn và không đưa bảo đảm tuyệt đối. Tuy nhiên lượt 2 chủ yếu đọc lại toàn bộ số đo vừa nhận, khiến giọng tư vấn máy móc hơn cần thiết."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 62566,
+        "output_tokens": 873,
+        "total_tokens": 63439,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 449
+        }
+      },
+      "latencyMs": 29842,
+      "error": null
+    },
+    {
+      "id": "31c5433ba707619510411e4069d59f44916d4ea240799f828f5bb31bc6205fdf",
+      "caseId": "c-20261028-j2",
+      "repetition": 3,
+      "order": [
+        1,
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Tư vấn gọn, đúng nhu cầu chọn size áo. Hồ sơ đã thay 56kg bằng 51kg, giữ chiều cao 162 và đủ ba số đo; lượt cuối lưu và dùng RELAXED. Cả ba lần chọn M đều khớp engine RECOMMENDED đúng khách và revision. Cách nói hơi lặp nhưng vẫn tự nhiên, không bảo đảm độ vừa tuyệt đối."
+          },
+          {
+            "wholePass": false,
+            "voicePass": false,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              }
+            ],
+            "reason": "Cập nhật đúng 51kg, giữ chiều cao và ba số đo; RELAXED được dùng ở revision 5, kết quả M đúng engine qua cả ba lượt. Tuy nhiên lượt hai đọc lại toàn bộ số đo mới, lượt ba lại nhắc ngực, eo và cân nặng trong ngoặc, khiến lời tư vấn nặng tính đọc hồ sơ và máy móc. Không có sai thông tin hay thao tác gây hậu quả."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 62543,
+        "output_tokens": 751,
+        "total_tokens": 63294,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 355
+        }
+      },
+      "latencyMs": 22389,
+      "error": null
+    },
+    {
+      "id": "d484045992d91a2194e692509213dc678f732b3c9936492e4f41fbd55b2c28d2",
+      "caseId": "c-20261028-j2",
+      "repetition": 4,
+      "order": [
+        0,
+        1
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Đã thay 56kg bằng 51kg, giữ chiều cao 162 và đủ số đo 88–70–94 trong hồ sơ. Lượt cuối lưu RELAXED và chạy lại engine đúng khách, revision 5, vẫn được khuyên áo M. Trả lời đúng nhu cầu, ảnh mở đầu hợp lệ; dẫn chứng vải mềm liên quan sở thích thoải mái. Câu cuối hơi tô đậm và có lỗi gõ “thơ Hàn”, nhưng chưa thành bảo đảm độ vừa tuyệt đối hay lỗi có hậu quả."
+          },
+          {
+            "wholePass": false,
+            "voicePass": false,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              }
+            ],
+            "reason": "Dữ liệu và size đúng: sau các lần bị từ chối ở lượt 2, lần gọi cuối thành công với revision 4, đủ hồ sơ đã sửa; lượt 3 dùng RELAXED ở revision 5 và engine khuyên áo M. Tuy nhiên, lặp nguyên câu mời “chuẩn bị luôn bộ này” cả ba lượt khiến giọng máy móc, thúc mua cả bộ khi khách vẫn đang hỏi size áo. Đây là vấn đề giọng và bám nhu cầu, không phải thao tác mua sai đã thực hiện."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 62673,
+        "output_tokens": 1182,
+        "total_tokens": 63855,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 733
+        }
+      },
+      "latencyMs": 39956,
+      "error": null
+    },
+    {
+      "id": "4f7d0981a2b77c16f23e5aac8e1ac92a7d275b6f5dc75c909fa743cae0f3afa3",
+      "caseId": "c-20261028-j2",
+      "repetition": 5,
+      "order": [
+        1,
+        0
+      ],
+      "rating": {
+        "arms": [
+          {
+            "wholePass": false,
+            "voicePass": false,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": false,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Đã thay 56kg bằng 51kg, giữ chiều cao và ba vòng; lượt cuối dùng RELAXED, chốt M đúng engine và revision hồ sơ. Tuy nhiên, lượt 2 đọc lại toàn bộ cân nặng và ba số đo khiến lời tư vấn giống xác nhận dữ liệu hơn trò chuyện tự nhiên. Dẫn chứng chất liệu ở lượt cuối phù hợp nhu cầu thoải mái; không có sai thông tin hay thao tác có hậu quả."
+          },
+          {
+            "wholePass": true,
+            "voicePass": true,
+            "factsPass": true,
+            "materialIssue": false,
+            "turns": [
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              },
+              {
+                "voicePass": true,
+                "factsPass": true
+              }
+            ],
+            "reason": "Cập nhật và lưu đúng 51kg, chiều cao 162 cùng ba vòng; preference RELAXED được đưa vào lần tư vấn cuối. Cả ba lượt chọn M đều có engine RECOMMENDED đúng khách và revision hiện tại. Lời đáp hơi lặp cách diễn đạt nhưng ngắn, bám nhu cầu chọn size áo và không bảo đảm độ vừa tuyệt đối."
+          }
+        ]
+      },
+      "status": "OK",
+      "providerRequests": 1,
+      "usage": {
+        "input_tokens": 62477,
+        "output_tokens": 1081,
+        "total_tokens": 63558,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_30m_tokens": 0,
+            "ttl_12h_tokens": 0
+          }
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 687
+        }
+      },
+      "latencyMs": 35877,
+      "error": null
+    }
+  ]
+}
