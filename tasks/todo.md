@@ -1,5 +1,7 @@
 ## Current — receipt continuity / independent quote repair, 2026-11-15
 
+- [x] Owner-requested rerun of J4 repetitions2/5 completed atd14594a0 with identical executable/config and same world; 2attempts/6turns,18native+2judge requests,all6SEND and no MALFORMED. Judge repetition2PASS, repetition5materialFAIL: unsupported "giá niêm yết tốt nhất" while support NOT_EVALUATED, despite verifierPASS. Original malformed outcomes retained; Phase C STOP. [Rerun evidence](../docs/specs/evidence/c3-sales-context-implementation-20261115/J4_MALFORMED_RERUN_20261115.md).
+
 - [x] Reproduce lost CART_OPENED receipt and quote cancellation after validation-only RECORD refusal; implement with unchanged prompts and original receipt revisions.
 - [x] 642 worker / 102 protocol-adapter / 18 existing protected-boundary / 22 protected-claim/reply-assembly tests and worker build/noEmit/lint PASS; self-review scope/freshness/budget/receipt invariants.
 - [x] Fresh world83facf10, clean source978fc83d and both preflights PASS; all6attempts/18terminal turns executed and reviewed. Control1/1whole PASS, all3sent with original ledger-backed cart/support receipts. J4 3/5PASS; repetitions2/5 stop on Gemini HTTP200 MALFORMED_FUNCTION_CALL, remain failed in denominator. 38native+6judge generation requests, 12SEND/2HANDOFF/4NO_SEND. [Evidence](../docs/specs/evidence/c3-sales-context-implementation-20261115/RECEIPT_QUOTE_REPAIR_20261115.md).
