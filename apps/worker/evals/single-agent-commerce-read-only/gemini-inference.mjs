@@ -402,7 +402,8 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  const body={systemInstruction:{parts:[{text:request.instructions}]},
   contents:[{role:'user',parts:[{text:JSON.stringify({turnTime:publicTurnTime(request.turnTime),trusted:ownerView,
     ...(request.historyMetadata?.publicCartEvents.length?{untrusted:{acceptedCommunicationHistory:publicCommunicationHistoryMetadata(request.historyMetadata)}}:{})})}]},...replyContents],
-  tools:callable.length?[{functionDeclarations:callable}]:[],toolConfig:{functionCallingConfig:{mode:callable.length?'AUTO':'NONE'}},
+  tools:callable.length?[{functionDeclarations:callable}]:[],
+  toolConfig:{functionCallingConfig:{mode:callable.length?(request.validateNativeToolCalls===true?'VALIDATED':'AUTO'):'NONE'}},
   generationConfig:{candidateCount:1,responseMimeType:'text/plain',maxOutputTokens:8192,thinkingConfig:{thinkingLevel:'HIGH',includeThoughts:false}}};
  const signatureBytes=ownerSignatureBytes(body),requestBytes=bytes(body)-signatureBytes;
  const toolResponseBytes=body.contents.slice(1).reduce((n,m)=>n+m.parts.reduce((k,p)=>k+(p.functionResponse?bytes(p.functionResponse):0),0),0);

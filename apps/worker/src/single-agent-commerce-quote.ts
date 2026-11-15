@@ -8,6 +8,7 @@ import {decodeCommerceMediaArgs} from "./single-agent-commerce-media.js";
 import {offerKind} from "./realtime-sales-catalog.js";
 import {normalizeCatalogToken} from "@lana/business-tools";
 import {validSelectionEvidence,selectionChoiceResolution} from "./single-agent-commerce-selection-evidence.js";
+import {unestablishedPriceFloor} from "./single-agent-commerce-pricing-view.js";
 
 export const EXPLICIT_QUOTE_TASK={version:"EXPLICIT_QUOTE_V3",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:1,readOnlyBatch:false,maxPerTurn:2} as const;
 export type ExplicitQuoteTask=typeof EXPLICIT_QUOTE_TASK;
@@ -105,6 +106,7 @@ export function withExplicitQuoteTask(base:CommerceTools,scope:CommerceScope,fir
   const evidence={kind:"PRE_CART_TOTAL_V1",calculationBasis:"PRE_CART_POLICY",appliesNegotiationReceipt:false,
    benefitAuthorization:{scope:"ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",status:"NOT_GRANTED",grantedBenefits:[],receiptRef:null},
    negotiationAssessment:"NOT_EVALUATED",
+   negotiatedPriceFloor:unestablishedPriceFloor(),
    standardPromotion:{status:result.adjustments.some(a=>a.ruleId==="SHOP_WIDE_MULTI_ITEM_PERCENT")?"APPLIED":"NOT_APPLIED",
     parentProductUnits:result.parentProductUnitCount,
     minimumParentProductUnits:p.multiItemOffer.minimumProductCount,discountBps:p.multiItemOffer.discountBps,
@@ -199,6 +201,7 @@ export function withExplicitQuoteTask(base:CommerceTools,scope:CommerceScope,fir
    openingProofs.set(a.subjectRef,{ref:`opening-quote:${hash}`,text:JSON.stringify(proof),sourceVersion:hash,observedAt:clock().toISOString(),expiresAt:expiries[0]??null});
   }
   return {status:"OK",data:{...data,quoteTaskStatus:"PREPARED_PENDING_FINAL_GATE",calculationBasis:"PRE_CART_POLICY",appliesNegotiationReceipt:false,
+   negotiatedPriceFloor:unestablishedPriceFloor(),
    benefitAuthorization:{scope:"ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",status:"NOT_GRANTED",grantedBenefits:[],receiptRef:null},
    currentCartQuoteRef:offerTypes.length===1?currentCartRef(current,{subjectRef:a.subjectRef,offerType:offerTypes[0]!,quantity:typeof a.quantity==="number"?a.quantity:undefined,...(typeof a.color==="string"?{color:a.color}:{})}):null,...(preCartQuote?{preCartQuote}:{})}};
  }

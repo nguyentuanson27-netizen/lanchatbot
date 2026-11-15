@@ -1,5 +1,6 @@
 import {assertOpeningProductMediaRule} from '../../dist/single-agent-commerce-opening-media.js';
-// Reuses the approved native B inference/serialization. No prompt changes, retry or new model role.
+// Reuses native B inference/serialization and the approved bounded owner retry.
+import {NO_USABLE_OWNER_OUTPUT} from '../../dist/single-agent-commerce-read-only.js';
 import assert from 'node:assert/strict';
 import {assertScenarioReadiness,assertProspectiveOpeningReadiness} from './source-readiness.mjs';
 import {readFileSync,appendFileSync} from 'node:fs';
@@ -67,6 +68,15 @@ const metrics=(t,latencyMs)=>{const v={latencyMs,inputTokens:t?.inputTokens??t?.
  return {...v,unavailable:Object.fromEntries(['inputTokens','outputTokens','costUSD'].filter(k=>v[k]===null).map(k=>[k,'PROVIDER_NOT_EXPOSED']))};};
 export function createCandidateProvider({preflight,out,dependencies={}}){
  const {m,world}=preflight,facts=frozenFacts(world);
+ const retryPolicy=read(new URL('./owner-decisions.json',import.meta.url)).convergencePlanDecisions.ownerGenerationRetry;
+ const retryableOwnerFailure=g=>{
+  if(retryPolicy?.status!=='APPROVED'||retryPolicy.maximumRetriesPerTurn!==1||retryPolicy.countsAgainstOwnerGenerationCap!==true||
+   g.role!=='OWNER'||g.providerRequests!==1||g.status==='TIMEOUT')return false;
+  const t=g.telemetry;
+  return g.failureLayer==='MODEL_OUTPUT'&&t?.httpStatus===200&&NO_USABLE_OWNER_OUTPUT.has(t.failureCode)||
+   retryPolicy.transientHttp?.status==='APPROVED'&&g.failureLayer==='PROVIDER'&&t?.failureCode==='GENERATION_HTTP'&&
+   (t.httpStatus===429||Number.isInteger(t.httpStatus)&&t.httpStatus>=500&&t.httpStatus<=599);
+ };
  if(preflight.registration.maximumGenerationRequests>0)assertOpeningProductMediaRule(preflight.registration.openingMediaRule);
  const ownerPrompt=readFileSync(new URL('../single-agent-commerce-read-only/prompts/owner.vi.txt',import.meta.url),'utf8'),
   verifierPrompt=readFileSync(new URL('../single-agent-commerce-read-only/prompts/verifier.vi.txt',import.meta.url),'utf8');
@@ -121,7 +131,10 @@ export function createCandidateProvider({preflight,out,dependencies={}}){
   const scenario=preflight.sealed.corpus.scenarios.find(s=>s.id===slot.caseId);assert(active.turnIndex>=0&&active.turnIndex<scenario.turns.length,'C_REGISTERED_TURN');
   assert(slot.mode!=='SAFETY'||role==='VERIFIER','C_SAFETY_ROLE');
   const same=generations.filter(g=>g.slotId===active.slotId&&g.turnIndex===active.turnIndex);
-  assert(same.filter(g=>g.role===role).length<(role==='OWNER'?3:1)&&!same.some(g=>g.status!=='OK'),'C_REGISTERED_ROLE_CAP_OR_PRIOR_FAILURE');
+  const failures=same.filter(g=>g.status!=='OK');
+  assert(same.filter(g=>g.role===role).length<(role==='OWNER'?3:1)&&
+   (failures.length===0||failures.length===1&&retryableOwnerFailure(failures[0])&&
+    (role==='OWNER'||same.at(-1)?.role==='OWNER'&&same.at(-1)?.status==='OK')),'C_REGISTERED_ROLE_CAP_OR_PRIOR_FAILURE');
   assert(generations.filter(g=>g.slotId===slot.slotId).length<(slot.maximumGenerations??scenario.turns.length*(slot.mode==='SAFETY'?1:4)),
    'C_CASE_GENERATION_BUDGET');
   const model=role==='OWNER'?m.models.conversation:m.models.verifier;
@@ -137,7 +150,7 @@ export function createCandidateProvider({preflight,out,dependencies={}}){
     await assertScenarioReadiness(world,scenario,dependencies.unitFixture&&dependencies.readinessClock?dependencies.readinessClock():new Date(),preflight.registration.openingMediaRule);
    }
    const original=role==='OWNER'?withNativePresentation({
-    ...request,showVerifiedOfferTerms:preflight.registration.salesVoiceOfferTerms===true,
+    ...request,validateNativeToolCalls:true,showVerifiedOfferTerms:preflight.registration.salesVoiceOfferTerms===true,
     salesContextPresentation:preflight.registration.salesContextPresentation===true,
    },'VI_DATA_BLOCKS_COMPACT_V2'):request;
    const body=role==='OWNER'?buildGeminiCommerceRequest(original,undefined,undefined,value=>{preDispatchBudget=value;}):buildVerifierRequest(m,original);
@@ -172,7 +185,14 @@ export function createCandidateProvider({preflight,out,dependencies={}}){
    audit('ERROR',row);throw error;
   }finally{if(inFlight===row)inFlight=null;}
  }
- const tracked=(role,request)=>{const work=generate(role,request);pending.add(work);work.then(()=>pending.delete(work),()=>pending.delete(work));return work;};
+ const tracked=(role,request)=>{
+  const work=generate(role,request).catch(error=>{
+   if(!generations.some(g=>g.id===request.generationId))audit('ADMISSION_REJECTED',{
+    id:request.generationId,role,reason:error.message==='C_REGISTERED_ROLE_CAP_OR_PRIOR_FAILURE'?error.message:'C_GENERATION_ADMISSION_REJECTED',providerRequests:0});
+   throw error;
+  });
+  pending.add(work);work.then(()=>pending.delete(work),()=>pending.delete(work));return work;
+ };
  const ports={ownerPrompt,verifierPrompt,counters,facts,close:()=>facts.close(),assertSource:()=>assertCandidateSource(preflight),
   admitPreparedContext:request=>admitPreparedCommerceContext(m,verifierPrompt,request),
   async attachReference({baselineRoot,baselineBuild}){

@@ -15,6 +15,7 @@ import { CommerceEffectCommitError, type CommerceEffectFailureStage } from "./si
 import {CART_TTL_MS_V1,PendingNegotiationV1Schema,pendingNegotiationIdPreimageV1,pendingNegotiationAfterActivationV1,type PendingNegotiationV1} from "@lana/contracts";
 import {createHash} from "node:crypto";
 import {receiptCartItemsHash} from "./single-agent-commerce-effect-receipts.js";
+import {unestablishedPriceFloor} from "./single-agent-commerce-pricing-view.js";
 
 const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase", "record_negotiation", "apply_pending_negotiation", "cancel_pending_negotiation"]);
 export type CommerceCommandResult =
@@ -75,7 +76,10 @@ export async function createCommerceEffectTools(input: {
   const cartQuote = () => {
     const cart = current.cart?.value;
     return cart ? { cartId: cart.cartId, cartVersion: cart.revision, subtotalVnd: cart.subtotalVnd,
-      shippingFeeVnd: cart.shippingFeeVnd, discountTotalVnd: cart.discountTotalVnd, grandTotalVnd: cart.grandTotalVnd } : null;
+      shippingFeeVnd: cart.shippingFeeVnd, discountTotalVnd: cart.discountTotalVnd, grandTotalVnd: cart.grandTotalVnd,
+      appliedAdjustments:cart.adjustments.map(a=>({kind:a.kind,amountVnd:a.amountVnd,percentageBps:a.percentageBps,
+        decisionId:a.policyAuthorization.decisionId,policyRuleId:a.policyAuthorization.ruleId})),
+      negotiatedPriceFloor:unestablishedPriceFloor() } : null;
   };
   function pendingSupportView(){
     const pending=current.pendingNegotiation;
@@ -83,6 +87,7 @@ export async function createCommerceEffectTools(input: {
     const eligible=current.cart&&current.commerceContext&&pending.cartOpeningCommandId?
       pendingNegotiationAfterActivationV1(pending,current.cart.value,current.commerceContext.policyRef,pending.cartOpeningCommandId,input.clock().toISOString()):null;
     return {pendingRef:pending.pendingId,subjectRef:pending.productId,offerType:pending.offerId,status:"NOT_EVALUATED",
+      negotiatedPriceFloor:unestablishedPriceFloor(),
       benefitAuthorization:{scope:"ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",status:"NOT_GRANTED",grantedBenefits:[],receiptRef:null},
       canApply:!!eligible,blockedReason:eligible?null:current.cart?"CART_BINDING_CHANGED":"CART_REQUIRED"};
   }

@@ -836,7 +836,7 @@ test('the actual final-only HTTP body has no declarations and its hash and tool-
 test('captured requests distinguish configured capabilities from permission to call tools this generation',async()=>{
  for(const availableTools of [['read_product','read_policy'],['read_product','add_to_cart','confirm_purchase']]){
   for(const toolsAllowed of [true,false]){
-   const r=request();Object.assign(r,{availableTools,toolsAllowed,toolBudget:{roundsRemaining:toolsAllowed?1:0,callsRemaining:3}});
+   const r=request();Object.assign(r,{availableTools,toolsAllowed,validateNativeToolCalls:true,toolBudget:{roundsRemaining:toolsAllowed?1:0,callsRemaining:3}});
    let wire;
    const result=await createGeminiCommerceInference(config,{getToken:async()=>'test-token',fetchImpl:async(_url,init)=>{
     wire=JSON.parse(init.body);return new Response(JSON.stringify(body([{text:'Dạ chị.'}])));
@@ -845,7 +845,7 @@ test('captured requests distinguish configured capabilities from permission to c
    assert.deepEqual(execution.availableTools,availableTools);
    assert.equal(execution.toolsAllowed,toolsAllowed);
    assert.deepEqual(wire.tools.flatMap(t=>t.functionDeclarations.map(d=>d.name)),toolsAllowed?availableTools:[]);
-   assert.equal(wire.toolConfig.functionCallingConfig.mode,toolsAllowed?'AUTO':'NONE');
+   assert.equal(wire.toolConfig.functionCallingConfig.mode,toolsAllowed?'VALIDATED':'NONE');
    assert.equal(result.telemetry.providerRequests,1);
   }
  }
@@ -884,14 +884,14 @@ test('rollback keeps bounded execution data and native dialogue outside system i
 });
 
 test('terminal phase exposes only handoff while retaining completed tool turns as data',()=>{
- const r=request();r.availableTools=['search_products','read_product','request_handoff'];r.toolsAllowed=false;r.terminalHandoffAllowed=true;
+ const r=request();r.availableTools=['search_products','read_product','request_handoff'];r.toolsAllowed=false;r.terminalHandoffAllowed=true;r.validateNativeToolCalls=true;
  r.toolBudget={roundsRemaining:0,callsRemaining:0};
  r.contents.push({role:'model',parts:[{functionCall:{name:'read_product',args:{subjectRef:'P1'}}}]},
   {role:'user',parts:[{functionResponse:{name:'read_product',response:{status:'OK'}}}]});
  const body=buildGeminiCommerceRequest(r),execution=JSON.parse(body.contents[0].parts[0].text).trusted.execution;
  assert.deepEqual(execution.callableTools,['request_handoff']);assert.equal(execution.phase,'TERMINAL_HANDOFF_OR_REPLY');
  assert.deepEqual(body.tools.flatMap(t=>t.functionDeclarations.map(d=>d.name)),['request_handoff']);
- assert.equal(body.toolConfig.functionCallingConfig.mode,'AUTO');
+ assert.equal(body.toolConfig.functionCallingConfig.mode,'VALIDATED');
  assert.match(JSON.stringify(body.contents),/completedToolTurns/);
  assert.equal(body.contents.some(c=>c.parts.some(p=>p.functionCall||p.functionResponse)),false);
 });

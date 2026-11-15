@@ -444,6 +444,19 @@ describe("code-owned commerce effects and recovery", () => {
     expect(failed.data).toBeUndefined();
   });
 
+  it("preserves applied benefit amounts and policy decisions in the public quote without declaring an absolute price floor",async()=>{
+    const s=await setup();await s.tools.invoke({...s.add,args:{...s.add.args,quantity:2}});
+    const r=await s.tools.invoke({name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao"}});
+    expect(r.status).toBe("OK");
+    const view=(r.data as {cartQuote:Record<string,unknown>}).cartQuote,cart=s.current().cart!.value;
+    expect(view.appliedAdjustments).toEqual(cart.adjustments.map(a=>({kind:a.kind,amountVnd:a.amountVnd,
+      percentageBps:a.percentageBps,decisionId:a.policyAuthorization.decisionId,policyRuleId:a.policyAuthorization.ruleId})));
+    expect(view.appliedAdjustments).toEqual(expect.arrayContaining([expect.objectContaining({kind:"PERCENT_DISCOUNT",amountVnd:49900}),
+      expect.objectContaining({kind:"FREE_SHIPPING",amountVnd:25000})]));
+    expect(view).toMatchObject({shippingFeeVnd:25000,negotiatedPriceFloor:{status:"NOT_ESTABLISHED",amountVnd:null}});
+    expect(s.tools.snapshot().state.cartQuote).toEqual(view);
+  });
+
   it("recovers the current negotiated discount and total without claiming an additional discount",async()=>{
     const s=await setup();await s.tools.invoke(s.add);
     await s.tools.invoke({name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao"}});

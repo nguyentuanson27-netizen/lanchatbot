@@ -107,6 +107,9 @@ describe("explicit quote operation",()=>{
   const r=await s.tools.invoke({...quote,args:{...quote.args,quantity:1,deliveryRegion:"Cần Thơ"}});
   expect(r).toMatchObject({status:"OK",data:{preCartQuote:{grandTotalVnd:524000,quantity:1,deliveryRegion:"Cần Thơ"}}});
   expect(r).toMatchObject({data:{preCartQuote:{standardPromotion:{status:"NOT_APPLIED",parentProductUnits:1},negotiationAssessment:"NOT_EVALUATED"}}});
+  expect(r).toMatchObject({data:{preCartQuote:{negotiatedPriceFloor:{status:"NOT_ESTABLISHED",amountVnd:null}}}});
+  const proof=s.tools.snapshot().policyLiterals.find(p=>p.ref.startsWith("pre-cart-quote:"))!;
+  expect(JSON.parse(proof.text).negotiatedPriceFloor).toEqual({status:"NOT_ESTABLISHED",amountVnd:null});
   expect(s.tools.snapshot().state.cartQuote).toBeUndefined();expect(s.tools.snapshot().effectReceipts).toHaveLength(0);
   const before=s.tools.snapshot();expect(before.policyLiterals.some(p=>p.ref.startsWith("pre-cart-quote:"))).toBe(true);
   s.f.snapshot.offers.DIRECT!.sale_price=599000;s.f.snapshot.offers.DIRECT!.rows[0]!.sale_price=599000;

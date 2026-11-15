@@ -84,12 +84,35 @@ test('actual native client ledger captures one HTTP body, CompactV2 and exposed 
  assert(g.requestBody.contents[0].parts[0].text.startsWith('Thời điểm'));assert.equal(g.requestHash,digest(g.requestBody));
  await assert.rejects(f.provider.owner(f.request),/DUPLICATE_GENERATION_ID/);assert.equal(posts,1);
 });
-test('401/429/5xx are single failed generations with no retry or next call in the same turn',async t=>{
- for(const status of [401,429,500]){
-  let posts=0;const f=setup(t,{fetchImpl:async()=>{posts++;return new Response('unit-error',{status});}});
+test('401 remains terminal with one counted request',async t=>{
+ let posts=0;const f=setup(t,{fetchImpl:async()=>{posts++;return new Response('unit-error',{status:401});}});
   await assert.rejects(f.provider.owner(f.request));assert.equal(posts,1);
   assert.equal(f.provider.observed()[0].providerRequests,1);assert.equal(f.provider.observed()[0].status,'PROVIDER_ERROR');
   await assert.rejects(f.provider.owner({...f.request,generationId:'unit-second'}),/ROLE_CAP_OR_PRIOR_FAILURE/);assert.equal(posts,1);
+});
+
+test('approved owner retry accepts one fresh generation after unusable output, then permits the verifier',async t=>{
+ let posts=0;const f=setup(t,{fetchImpl:async()=>++posts===1?new Response(JSON.stringify({modelVersion:'gemini-3.5-flash-lite',candidates:[{
+  finishReason:'MALFORMED_FUNCTION_CALL',content:{role:'model',parts:[]}}]})):response(),
+  verifier:async()=>({result:{verdict:'PASS',violations:[]},telemetry:{providerRequests:1}})});
+ await assert.rejects(f.provider.owner(f.request));
+ await f.provider.owner({...f.request,generationId:'unit-owner-retry'});
+ const draft='Dạ chị.',binding=makeBinding('unit-verifier',draft,f.request.context);
+ await f.provider.verifier({generationId:'unit-verifier',instructions:f.provider.verifierPrompt,trusted:f.request.context,
+  finalDraft:draft,latest:f.runtimeInput.latest,history:[],binding,signal:new AbortController().signal});
+ assert.deepEqual(f.provider.observed().map(g=>g.status),['MALFORMED','OK','OK']);assert.equal(posts,2);
+});
+
+test('429 and 5xx share one owner retry; a second failed attempt is terminal and audited',async t=>{
+ for(const status of [429,500]){
+  let posts=0;const f=setup(t,{fetchImpl:async()=>{posts++;return new Response('unit-error',{status});}});
+  await assert.rejects(f.provider.owner(f.request));
+  await assert.rejects(f.provider.owner({...f.request,generationId:'unit-retry'}));
+  assert.equal(posts,2);assert.equal(f.provider.observed().length,2);
+  await assert.rejects(f.provider.owner({...f.request,generationId:'unit-forbidden-third'}),/ROLE_CAP_OR_PRIOR_FAILURE/);
+  assert.equal(posts,2);
+  const audit=readFileSync(resolve(f.out,'NATIVE_REQUESTS.jsonl'),'utf8').trim().split('\n').map(JSON.parse);
+  assert(audit.some(r=>r.phase==='ADMISSION_REJECTED'&&r.value.id==='unit-forbidden-third'));
  }
 });
 test('auth failure and request-shape failure remain registered with zero upstream generations',async t=>{
