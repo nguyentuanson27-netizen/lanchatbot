@@ -3327,4 +3327,5 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 
 - [x] Lập Revision1 theo 43 cặp đã chạy, gọi review độc lập và xử lý hai blocker về source fallback và thời điểm message trước giỏ.
 - [x] Revision2 được cùng reviewer APPROVE tại SHA-256 f200cf4dfe0c43e5a9c2befc25e0cd1a01caf7a2423af7f1c6e23d7ab050354a sau kiểm compatibility state cũ. [Kế hoạch và quyết định](../docs/specs/evidence/c3-sales-context-contract-plan-20261115/README.md).
-- [ ] Triển khai W0–W4 khi được yêu cầu. Kế hoạch gồm contract extension cho pending negotiation, projection giữ raw/caveats, kiểm riêng tác động và native mới từ đầu. Trần324generation chưa sử dụng. Chưa nhận giọng/PhaseC GO.
+- [x] Triển khai W0–W4 và sửa theo review độc lập đến APPROVE. Pending negotiation chạy qua PostgreSQL cô lập, replay offline chuẩn bị đủ 12 cặp, native controls giữ đúng bốn lần thử. [Triển khai và kiểm tra](../docs/specs/evidence/c3-sales-context-implementation-20261115/IMPLEMENTATION.md).
+- [ ] Khi có yêu cầu chạy model, seal replay và chạy theo trần đã duyệt. Native cần nguồn còn hiệu lực và replay PASS. Chưa có điểm chất lượng của gói sửa này.
