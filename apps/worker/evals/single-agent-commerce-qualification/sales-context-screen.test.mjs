@@ -66,6 +66,16 @@ test('native campaign guard refuses other slots, altered replay proof and excess
  g.beforeGeneration({generations:[],active,role:'OWNER'});
  assert.throws(()=>g.beforeGeneration({generations:[],active:{...active,slotId:'other'},role:'OWNER'}),/CONTEXT_UNREGISTERED_SLOT/);
  assert.throws(()=>g.beforeGeneration({generations:Array.from({length:24},()=>active),active,role:'OWNER'}),/CONTEXT_JOB_CAP/);
+ campaign.targetedRerun={kind:'OWNER_REQUESTED_FAILED_CASE_RERUN',parentCampaignHash:'f'.repeat(64),
+  evidenceRef:'Owner requested failed cases',selection:{CONTROLS:[{caseId:scripts[2].id,repetition:1}]}};
+ proof.seal=digest(campaign);
+ const subset=checkedContextJob({...proof,registration,world,source});
+ assert.equal(subset.slotIds.length,1);assert.equal(subset.turns,3);assert.equal(subset.maximumGenerationRequests,12);
+ const subsetGuard=contextGenerationGuard({load:()=>proof,registration,world,source});
+ assert.throws(()=>subsetGuard.beforeGeneration({generations:[],active,role:'OWNER'}),/CONTEXT_UNREGISTERED_SLOT/);
+ campaign.targetedRerun.selection.CONTROLS.push({caseId:scripts[2].id,repetition:1});proof.seal=digest(campaign);
+ assert.throws(()=>checkedContextJob({...proof,registration,world,source}),/CONTEXT_RERUN_SELECTION/);
+ delete campaign.targetedRerun;proof.seal=digest(campaign);
  proof.score={...score,status:'STOP'};assert.throws(()=>g.check(),/CONTEXT_REPLAY_SCORE_CHANGED/);
 });
 

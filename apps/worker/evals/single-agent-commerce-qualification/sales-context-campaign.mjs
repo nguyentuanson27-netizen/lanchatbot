@@ -42,6 +42,19 @@ export function checkedContextJob({campaign,seal,kind,registration,world,score,s
  if(kind==='BASELINE_J2')assert(selected.every(s=>s.caseId==='c-20261028-j2')&&
   selected.map(s=>s.repetition).sort().join(',')==='1,2,3,4,5','CONTEXT_BASELINE_J2_ONLY');
  assert.equal(selected.reduce((n,s)=>n+registration.corpus.scenarios.find(c=>c.id===s.caseId).turns.length,0),job.turns);
+ if(campaign.targetedRerun){
+  const rerun=campaign.targetedRerun;
+  assert(kind!=='BASELINE_J2'&&rerun.kind==='OWNER_REQUESTED_FAILED_CASE_RERUN'&&
+   typeof rerun.evidenceRef==='string'&&rerun.evidenceRef.trim()&&/^[a-f0-9]{64}$/u.test(rerun.parentCampaignHash),
+   'CONTEXT_RERUN_AUTHORITY');
+  const choices=rerun.selection[kind];
+  assert(Array.isArray(choices)&&choices.length>0&&choices.every(c=>typeof c.caseId==='string'&&Number.isInteger(c.repetition)),
+   'CONTEXT_RERUN_SELECTION');
+  const slots=choices.map(c=>selected.find(s=>s.caseId===c.caseId&&s.repetition===c.repetition));
+  assert(slots.every(Boolean)&&new Set(slots.map(s=>s.slotId)).size===slots.length,'CONTEXT_RERUN_SELECTION');
+  const turns=slots.reduce((n,s)=>n+registration.corpus.scenarios.find(c=>c.id===s.caseId).turns.length,0);
+  return {...job,slotIds:slots.map(s=>s.slotId),turns,maximumGenerationRequests:turns*4,targetedRerun:true};
+ }
  return job;
 }
 export function contextGenerationGuard({load,registration,world,source}){

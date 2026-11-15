@@ -30,7 +30,7 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
   if(slotIds!==undefined)assert.deepEqual([...slotIds].sort(),[...preflight.contextJob.slotIds].sort(),'CONTEXT_JOB_SLOT_SET');
   slotIds=preflight.contextJob.slotIds;
  }
- if(reg.config.salesVoiceOfferTerms===true||reg.config.salesContextScreen===true){
+ if(!preflight.contextJob?.targetedRerun&&(reg.config.salesVoiceOfferTerms===true||reg.config.salesContextScreen===true)){
   const selected=salesVoiceSlotIds(reg);
   // One sealed single-arm campaign, no arbitrary expansion through diagnostic slot selection.
   if(slotIds!==undefined)assert.deepEqual([...slotIds].sort(),[...selected].sort(),'D_SALES_VOICE_SLOT_SET');
