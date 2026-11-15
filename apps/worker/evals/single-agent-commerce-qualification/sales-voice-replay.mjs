@@ -74,7 +74,7 @@ export function finalOwnerWire(rows,slotId,turnIndex){
  assert.equal(digest(verifier.requestBody),verifier.requestHash,'VOICE_REPLAY_VERIFIER_CAPTURE_HASH');
  const frame=JSON.parse(verifier.requestBody.input[0].content[0].text);
  assert.equal(frame.untrusted.finalDraft,results.at(-1).value.output.text,'VOICE_REPLAY_DRAFT_BINDING');
- return {wire,runtimeInput,id,requestHash,claims:frame.trusted.protectedClaims};
+ return {wire,runtimeInput,id,requestHash,claims:frame.trusted.protectedClaims,sourceProducts:frame.trusted.runtimeProducts??[]};
 }
 
 const loadRows=path=>readFileSync(path,'utf8').trim().split(/\r?\n/u).map(JSON.parse);
@@ -91,7 +91,7 @@ function measuredCases(stage,registration,journals){
    capture:every?capture:captures[first]??null,sourceRepetition:every?i+1:first+1}));
  });
 }
-const stages={VOICE:voiceControls,OFFERS:offerControls};
+const stages={VOICE:voiceControls,OFFERS:offerControls,CONTEXT:['OPENING_AD_QUOTE']};
 
 // Judge sees only the public dialogue and code data needed to check the reply, without the treatment labels.
 function judgeOrder(reg,slot){
@@ -216,7 +216,7 @@ function validate(reg){
  assert.deepEqual(reg.model,modelConfig);
  assert.match(reg.seed,/^[a-f0-9]{64}$/u);
  assert.equal(reg.retry,0);
- const count=reg.stage==='VOICE'?34:reg.stage==='OFFERS'?9:0;
+ const count=reg.stage==='VOICE'?34:reg.stage==='OFFERS'?9:reg.stage==='CONTEXT'?12:0;
  assert(count&&reg.slots.length===count);
  assert.equal(reg.maximumOwnerRequests,count*2);
  assert.equal(reg.maximumJudgeRequests,count);

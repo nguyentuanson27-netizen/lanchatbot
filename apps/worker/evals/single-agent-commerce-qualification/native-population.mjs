@@ -26,7 +26,11 @@ export function selectRegisteredNativeSlots(registration,arm,slotIds){
 }
 export async function collectNativePopulation({preflight,providerPorts,sessionFactory,snapshot,historyStore,out,seedPath,queue,branchSelector,slotIds}){
  const reg=preflight.sealed,identity=reg.identity,arm=preflight.registration.arm??'CANDIDATE',seed=JSON.parse(readFileSync(seedPath,'utf8')).seed;
- if(reg.config.salesVoiceOfferTerms===true){
+ if(preflight.contextJob){
+  if(slotIds!==undefined)assert.deepEqual([...slotIds].sort(),[...preflight.contextJob.slotIds].sort(),'CONTEXT_JOB_SLOT_SET');
+  slotIds=preflight.contextJob.slotIds;
+ }
+ if(reg.config.salesVoiceOfferTerms===true||reg.config.salesContextScreen===true){
   const selected=salesVoiceSlotIds(reg);
   // One sealed single-arm campaign, no arbitrary expansion through diagnostic slot selection.
   if(slotIds!==undefined)assert.deepEqual([...slotIds].sort(),[...selected].sort(),'D_SALES_VOICE_SLOT_SET');
@@ -41,11 +45,12 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
  save();
  // One attempt per registered slot: every repetition of a case starts from its own fresh session.
  const registered=reg.slots.filter(s=>s.arm===arm&&s.mode!=='SAFETY');
- assert(registered.length===cases.length*reg.config.repetitions&&new Set(registered.map(s=>s.slotId)).size===registered.length,'C_SLOT_POPULATION');
+ const repetitions=preflight.contextJob?.kind==='CONTROLS'?1:reg.config.repetitions;
+ assert(registered.length===cases.length*repetitions&&new Set(registered.map(s=>s.slotId)).size===registered.length,'C_SLOT_POPULATION');
  for(const slot of selectRegisteredNativeSlots(reg,arm,slotIds)){
   const scenarioIndex=attempts.findIndex(attempt=>attempt.slotId===slot.slotId);
   const scenario=cases.find(s=>s.id===slot.caseId);
-  assert(scenario&&Number.isInteger(slot.repetition)&&slot.repetition>=1&&slot.repetition<=reg.config.repetitions&&
+  assert(scenario&&Number.isInteger(slot.repetition)&&slot.repetition>=1&&slot.repetition<=repetitions&&
    registered.filter(s=>s.caseId===slot.caseId&&s.repetition===slot.repetition).length===1,'C_SLOT_REPETITION');
   if(queue.blocked()){
    attempts[scenarioIndex]={...slot,identity,status:'NOT_RUN',reason:'PERSISTED_QUEUE_BLOCKED'};save();continue;
@@ -68,7 +73,13 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
     generationStart=providerPorts.observed().length,captureStart=session.capture.length,attachmentStart=session.capturePayloads.length;
    providerPorts.setSlot({slotId:slot.slotId,turnIndex:i,runtimeInput:input});
    let observed,errorCode=null;
-   try{observed=await session.turn(input.latest,[],{slot:slot.slotId+':'+i});if(observed.qualification?.status==='VALID')await session.drain();}
+   try{
+    const adsControl=preflight.contextJob?.kind==='CONTROLS'&&scenario.id==='c-context-opening'&&i===0;
+    const message=adsControl?{messages:[{text:input.latest,attachments:[],adsContext:{source:'ADS',
+     adTitle:input.initialProductCodes[0],postId:null,adId:null,ref:null}}]}:{};
+    observed=await session.turn(input.latest,[],{slot:slot.slotId+':'+i,...message});
+    if(observed.qualification?.status==='VALID')await session.drain();
+   }
    catch(error){errorCode=/^[A-Z0-9_]+$/.test(error.message)?error.message:'NATIVE_ATTEMPT_ERROR';a.status='ERROR';}
    if(!await providerPorts.awaitSettled()){errorCode='UNKNOWN_PROVIDER_COMPLETION';a.status='ERROR';queue.latch(slot.slotId,errorCode);}
    const after=await snapshot(session),gens=providerPorts.observed().slice(generationStart),terminal=observed?.result?.terminal;

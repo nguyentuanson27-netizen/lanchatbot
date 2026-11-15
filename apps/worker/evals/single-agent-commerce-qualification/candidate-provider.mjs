@@ -138,6 +138,7 @@ export function createCandidateProvider({preflight,out,dependencies={}}){
    }
    const original=role==='OWNER'?withNativePresentation({
     ...request,showVerifiedOfferTerms:preflight.registration.salesVoiceOfferTerms===true,
+    salesContextPresentation:preflight.registration.salesContextPresentation===true,
    },'VI_DATA_BLOCKS_COMPACT_V2'):request;
    const body=role==='OWNER'?buildGeminiCommerceRequest(original,undefined,undefined,value=>{preDispatchBudget=value;}):buildVerifierRequest(m,original);
    row.requestBody=body;row.requestHash=digest(body);

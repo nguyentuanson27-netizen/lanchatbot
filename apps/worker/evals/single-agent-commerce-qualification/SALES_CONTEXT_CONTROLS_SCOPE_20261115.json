@@ -1,0 +1,38 @@
+{
+  "name": "SALES_CONTEXT_CONTROLS_20261115",
+  "purpose": "DEVELOPMENT_ONLY_NOT_QUALIFICATION",
+  "maximumCases": 4,
+  "maximumNativeCustomerTurns": 6,
+  "maximumVerifierOnlyProbes": 0,
+  "maximumGenerationRequests": 24,
+  "maximumOwnerGenerationsPerNativeTurn": 3,
+  "maximumVerifierGenerationsPerTurn": 1,
+  "generationRetry": 0,
+  "customerScriptsHash": "eacd17e924b81e86fa3e34d76386b70772c9274bad5ce9843f61d5fadab1ef3c",
+  "cases": [
+    {
+      "sourceCase": "c-context-thanks",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-context-preorder",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    },
+    {
+      "sourceCase": "c-context-two-units",
+      "mode": "JOURNEY",
+      "turns": 3,
+      "maximumGenerationRequests": 12
+    },
+    {
+      "sourceCase": "c-context-opening",
+      "mode": "SINGLE",
+      "turns": 1,
+      "maximumGenerationRequests": 4
+    }
+  ]
+}

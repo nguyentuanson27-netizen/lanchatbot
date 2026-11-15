@@ -8,6 +8,7 @@ import {digest,qualificationIdentity,runtimeProjection,validateConfig} from './q
 import {assertCurrentCandidate,assertApprovedDecisions} from './source-identity.mjs';
 import {assertCandidateSource} from './candidate-provider.mjs';
 import {salesVoiceSlotIds} from './native-population.mjs';
+import {contextGenerationGuard,loadContextProof} from './sales-context-campaign.mjs';
 import {frozenFacts} from './frozen-world.mjs';
 import {assertJudgeSourceInventory} from './evaluator-source.mjs';
 import {hardPrecheck} from '../../dist/single-agent-semantic-verifier-boundary.js';
@@ -23,6 +24,7 @@ export const FULL_NATIVE_REMAINDER_SCOPE=read(new URL('./FULL_NATIVE_REMAINDER_S
 export const PURCHASE_MISSING_SCOPE=read(new URL('./PURCHASE_MISSING_SCOPE_20261103.json',import.meta.url));
 export const B_PRESERVING_SCOPES=[...['PREFIX','REMAINDER','CHECKOUT'].map(n=>read(new URL(`./B_PRESERVING_${n}_SCOPE_20261104.json`,import.meta.url))),...['R1','R2'].map(n=>read(new URL(`./TARGET_REPAIR_${n}_SCOPE_20261105.json`,import.meta.url)))];
 B_PRESERVING_SCOPES.push(read(new URL('./TOOL_CONTRACT_SCREEN_SCOPE_20261109.json',import.meta.url)));
+B_PRESERVING_SCOPES.push(...['PRIMARY','CONTROLS'].map(n=>read(new URL(`./SALES_CONTEXT_${n}_SCOPE_20261115.json`,import.meta.url))));
 export function diagnosticScope(corpus){
  const name=corpus.provenance?.diagnosticScope;
  const repairScope=B_PRESERVING_SCOPES.find(s=>s.name===name);if(repairScope)return repairScope;
@@ -32,6 +34,9 @@ export function diagnosticScope(corpus){
 // Owner decision D3 (2026-11-10): a development run may repeat every case on the same frozen world so that a
 // change is judged on a pass rate per case, not on one sample. Each repetition is its own slot with its own
 // session and caps; repetition 1 keeps the historical slot identity.
+export function diagnosticRepetitions(corpus, approvedRepetitions){
+ return diagnosticScope(corpus).name==='SALES_CONTEXT_CONTROLS_20261115'?1:approvedRepetitions;
+}
 export function diagnosticSlots(corpus,repetitions=1){
  const scope=diagnosticScope(corpus);
  assert(Number.isInteger(repetitions)&&repetitions>=1&&repetitions<=10,'D_REPETITIONS');
@@ -51,8 +56,12 @@ export function validateDiagnostic(reg,world){
  validateConfig(reg.config);assert.equal(reg.config.retry,0);
  if(reg.config.salesVoiceOfferTerms!==undefined)assert(reg.config.salesVoiceOfferTerms===true&&
   scope.maximumCases===13&&reg.config.repetitions===5&&salesVoiceSlotIds(reg).length===25,'D_SALES_VOICE_SCOPE');
+ if(reg.config.salesContextScreen!==undefined)assert(reg.config.salesContextScreen===true&&scope.name==='SALES_CONTEXT_PRIMARY_20261115'&&
+  reg.config.repetitions===5&&salesVoiceSlotIds(reg).length===25,'D_SALES_CONTEXT_SCOPE');
+ if(scope.name==='SALES_CONTEXT_CONTROLS_20261115')assert(reg.config.repetitions===5&&reg.config.salesContextPresentation===true,'D_SALES_CONTEXT_CONTROL_SCOPE');
+ if(reg.config.salesContextPresentation!==undefined)assert(reg.config.salesContextPresentation===true&&scope.name.startsWith('SALES_CONTEXT_'),'D_SALES_CONTEXT_PRESENTATION_SCOPE');
  assert.deepEqual(reg.identity,qualificationIdentity(reg.config));assert.equal(reg.worldHash,digest(world));frozenFacts(world);
- assert.equal(reg.corpusHash,digest(reg.corpus));assert.deepEqual(reg.slots,diagnosticSlots(reg.corpus,reg.config.repetitions));
+ assert.equal(reg.corpusHash,digest(reg.corpus));assert.deepEqual(reg.slots,diagnosticSlots(reg.corpus,diagnosticRepetitions(reg.corpus,reg.config.repetitions)));
  assert(reg.review?.status==='APPROVED'&&reg.review.corpusHash===reg.corpusHash&&reg.review.worldHash===reg.worldHash&&
   reg.review.sourceChecksHash===digest(reg.sourceChecks)&&reg.review.reviewer&&reg.review.evidenceRef&&reg.review.newProviderResultsObserved===0,'D_INPUT_REVIEW');
  assert(Number.isFinite(Date.parse(reg.registeredAt))&&Date.parse(reg.registeredAt)<=Date.now(),'D_REGISTRATION_TIME');
@@ -88,7 +97,7 @@ export function diagnosticControl(reg,{checkSource}){
    assert(!stopped,'D_BATCH_STOPPED:'+stopped);
    try{
     checkSource();assert(generations.every(g=>Number.isInteger(g.providerRequests)&&g.providerRequests>=0&&g.providerRequests<=1&&g.status!=='PENDING'),'D_ACCOUNTING_UNKNOWN');
-    assert(generations.length<scope.maximumGenerationRequests*(reg.config?.repetitions??1),'D_BATCH_CAP');
+    assert(generations.length<scope.maximumGenerationRequests*diagnosticRepetitions(reg.corpus,reg.config?.repetitions??1),'D_BATCH_CAP');
     for(const s of reg.slots){const rows=generations.filter(g=>g.slotId===s.slotId);assert(rows.length<=s.maximumGenerations,'D_ACTUAL_CAP_VIOLATION');
      for(let i=0;i<reg.corpus.scenarios.find(c=>c.id===s.caseId).turns.length;i++)for(const r of ['OWNER','VERIFIER'])assert(rows.filter(g=>g.turnIndex===i&&g.role===r).length<=(r==='OWNER'?3:1),'D_ACTUAL_CAP_VIOLATION');}
     assert(reg.slots.some(s=>s.slotId===active?.slotId&&(s.mode!=='SAFETY'||role==='VERIFIER')),'D_UNREGISTERED_DISPATCH');
@@ -109,13 +118,14 @@ export function assertDiagnosticFlags(argv){
 }
 export function diagnosticProviderRegistration(sealed){
  const openingMediaRule=sealed.config?.candidate?.openingMediaRule;assertOpeningProductMediaRule(openingMediaRule);
- const salesVoice=sealed.config.salesVoiceOfferTerms===true;
+ const salesVoice=sealed.config.salesVoiceOfferTerms===true||sealed.config.salesContextScreen===true;
  assertProspectiveOpeningReadiness(sealed.corpus,openingMediaRule);
  return {sourceSha:sealed.runSourceSha,mode:'PHASE_C_DEVELOPMENT_DIAGNOSTIC_ONLY',arm:'CANDIDATE',openingMediaRule,
-  maximumGenerationRequests:salesVoice?180:diagnosticScope(sealed.corpus).maximumGenerationRequests*(sealed.config?.repetitions??1),ownerContextPresentation:'VI_DATA_BLOCKS_COMPACT_V2',
-  ...(salesVoice?{salesVoiceOfferTerms:true}:{})};
+  maximumGenerationRequests:salesVoice?180:diagnosticScope(sealed.corpus).maximumGenerationRequests*diagnosticRepetitions(sealed.corpus,sealed.config?.repetitions??1),ownerContextPresentation:'VI_DATA_BLOCKS_COMPACT_V2',
+  ...(sealed.config.salesVoiceOfferTerms?{salesVoiceOfferTerms:true}:{}),
+  ...(sealed.config.salesContextPresentation?{salesContextPresentation:true}:{})};
 }
-export function diagnosticPreflight(root,registrationPath,worldPath){
+export function diagnosticPreflight(root,registrationPath,worldPath,contextProof){
  const sealed=read(registrationPath),world=read(worldPath);validateDiagnostic(sealed,world);
  assertProspectiveOpeningReadiness(sealed.corpus,sealed.config.candidate.openingMediaRule);
  assert.equal(execFileSync('git',['status','--porcelain'],{cwd:root,encoding:'utf8'}).trim(),'','C_DIRTY_SOURCE');
@@ -126,6 +136,15 @@ export function diagnosticPreflight(root,registrationPath,worldPath){
  assert.deepEqual(m.models.conversation,sealed.config.candidate.model);assert.deepEqual(m.models.verifier,sealed.config.candidate.verifier.model);
  const p={root,sealed,world,m,codex,config:world.config,registration:diagnosticProviderRegistration(sealed)};
  p.diagnosticControl=diagnosticControl(sealed,{checkSource:()=>{assertCandidateSource(p);for(const snapshot of sealed.sourceChecks)assert.equal(hardPrecheck(snapshot,'Dạ.',new Date()),null,'D_SOURCE_INVALIDATED');}});
- p.diagnosticControl.beforeGeneration({generations:[],active:{slotId:sealed.slots[0].slotId,turnIndex:0},role:'OWNER'});
+ if(diagnosticScope(sealed.corpus).name.startsWith('SALES_CONTEXT_')){
+  assert(contextProof,'CONTEXT_CAMPAIGN_REQUIRED');
+  const required=diagnosticScope(sealed.corpus).name==='SALES_CONTEXT_PRIMARY_20261115'?'CANDIDATE':'CONTROLS';
+  assert.equal(contextProof.kind,required,'CONTEXT_JOB_KIND');
+  const guard=contextGenerationGuard({load:()=>loadContextProof(contextProof),registration:sealed,world,source:sealed.runSourceSha});
+  p.contextJob=guard.job;p.registration.maximumGenerationRequests=guard.job.maximumGenerationRequests;
+  const ordinary=p.diagnosticControl;
+  p.diagnosticControl={...ordinary,beforeGeneration(args){guard.beforeGeneration(args);ordinary.beforeGeneration(args);}};
+ }
+ p.diagnosticControl.beforeGeneration({generations:[],active:{slotId:p.contextJob?.slotIds[0]??sealed.slots[0].slotId,turnIndex:0},role:'OWNER'});
  return p;
 }

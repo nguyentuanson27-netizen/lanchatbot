@@ -8,9 +8,23 @@ import {hardPrecheck} from '../../dist/single-agent-semantic-verifier-boundary.j
 import {frozenCatalog,frozenFacts} from './frozen-world.mjs';
 import {digest,validateCorpus,runtimeProjection} from './qualification.mjs';
 import {sourceReadiness,assertTaskReadinessSpec} from './source-readiness.mjs';
+import {diagnosticScope,diagnosticSlots} from './diagnostic.mjs';
 import {judgeSourceInventory,assertJudgeSourceInventory} from './evaluator-source.mjs';
-export async function bindCorpus({draft,world,bindings,initialStateArtifact}){
+export async function bindCorpus({draft,world,bindings,initialStateArtifact,diagnosticOpeningMediaRule}){
+ const diagnostic=diagnosticOpeningMediaRule!==undefined;
  const worldHash=digest(world);
+ let frozenScriptsHash;
+ const scripts=c=>c.scenarios.map(s=>({id:s.id,mode:s.mode,turns:s.turns,customerPolicy:s.customerPolicy??null}));
+ if(diagnostic){
+  const scope=diagnosticScope(draft);
+  assert(draft.provenance?.developmentOnly===true&&(['SALES_CONTEXT_PRIMARY_20261115','SALES_CONTEXT_CONTROLS_20261115'].includes(scope.name)||
+   scope.name==='TOOL_CONTRACT_SCREEN_20261109'&&initialStateArtifact.sourceSha==='7cdd2e80b0ebda08f0176082ea09885a63a76fe2'),
+  'C_CONTEXT_BINDING_SCOPE');
+  assert(draft.scenarios.every(s=>s.mode!=='SAFETY'),'C_CONTEXT_BINDING_PROBES');
+  frozenScriptsHash=scope.customerScriptsHash;
+  assert.equal(digest(scripts(draft)),frozenScriptsHash,'D_CUSTOMER_SCRIPTS_CHANGED');
+  diagnosticSlots(draft);
+ }
  assert(world.sourceWrites===0&&world.providerRequests===0,'C_WORLD_SOURCE_READS_ONLY');
  assert(bindings.review?.status==='APPROVED'&&bindings.review.worldHash===worldHash&&bindings.review.newProviderResultsObserved===0&&
   bindings.review.reviewer&&bindings.review.evidenceRef,'C_BINDINGS_REVIEW_REQUIRED');
@@ -36,7 +50,11 @@ export async function bindCorpus({draft,world,bindings,initialStateArtifact}){
    const result=await tools.invoke(call);assert(result.status==='OK'||call.name==='select_product_media'&&
     result.status==='UNAVAILABLE'&&result.reason==='NO_VERIFIED_MATCHING_MEDIA','C_CASE_SOURCE_UNAVAILABLE');}
   const trusted=tools.snapshot();assert.deepEqual(await tools.readback(),trusted,'C_WORLD_CHANGED_DURING_BINDING');
-  for(const t of s.turns)t.initialProductCodes=[...b.initialProductCodes];
+  if(diagnostic){
+   assert(digest(s.turns[0].initialProductCodes)===digest(b.initialProductCodes),'C_CONTEXT_BINDING_PRODUCTS');
+   assert.equal(hardPrecheck(trusted,'Dạ.',at),null,'D_SOURCE_INVALIDATED');
+   s.diagnosticTrusted=trusted;
+  }else for(const t of s.turns)t.initialProductCodes=[...b.initialProductCodes];
   if(s.mode==='SAFETY'){
    assert(typeof b.latest==='string'&&typeof b.finalDraft==='string'&&b.latest.trim()&&b.finalDraft.trim()&&
     b.expectedUnsafe===s.evaluator.unsafe&&Array.isArray(b.sourceRefs)&&b.sourceRefs.length>0&&b.reason,'C_SAFETY_BINDING_AND_LABEL_REVIEW');
@@ -58,19 +76,22 @@ export async function bindCorpus({draft,world,bindings,initialStateArtifact}){
    const kind=b.judgeSourceKind??(b.initialProductCodes.length?'INITIAL_PRODUCTS':judgeCodes.length?'DISCOVERY_POOL':null);
    assert(kind,'C_JUDGE_SOURCE_REQUIREMENTS');
    assert(b.readiness?.checks?.every(q=>q.facet==='POLICY'||judgeCodes.includes(q.productId)),'C_READINESS_SUBJECT_COVERAGE');
-   s.judgeContext={sourceReadiness:await sourceReadiness(world,b.readiness,at),sourceRequirements:{kind,productCodes:judgeCodes},sourceInventory:judgeSourceInventory(world,judgeCodes,
+   s.judgeContext={sourceReadiness:await sourceReadiness(world,b.readiness,at,diagnosticOpeningMediaRule),sourceRequirements:{kind,productCodes:judgeCodes},sourceInventory:judgeSourceInventory(world,judgeCodes,
     {noProductLookupRequired:b.noProductLookupRequired===true}),facts:trusted.protectedClaims,policy:trusted.policyLiterals,products:trusted.runtimeProducts??[],
     initialState:initialStateArtifact.publicState,capabilities:bindings.capabilities};
    assertJudgeSourceInventory(s.judgeContext.sourceInventory,worldHash,world,s);
    if(b.nativeCodeOwnedTurns)s.nativeCodeOwnedTurns=b.nativeCodeOwnedTurns;
   }
-  runtimeProjection(s,0);
+  if(diagnostic)for(let n=0;n<s.turns.length;n++)runtimeProjection(s,n,{acceptedHistory:[]});
+  else runtimeProjection(s,0);
  }
  corpus.status='SOURCE_BOUND_REQUIRES_FINAL_CORPUS_REVIEW';
  corpus.provenance.sourceBindingsPending=false;corpus.provenance.bindingArtifactHash=digest(bindings);
  corpus.review={status:'PENDING',worldHash,newProviderResultsObserved:0,bindingsReviewHash:digest(bindings.review),
   initialStateArtifactHash:digest(initialStateArtifact)};
- validateCorpus(corpus);return corpus;
+ if(diagnostic)assert.equal(digest(scripts(corpus)),frozenScriptsHash,'D_CUSTOMER_SCRIPTS_CHANGED');
+ else validateCorpus(corpus);
+ return corpus;
 }
 if(process.argv[1]?.endsWith('bind-corpus.mjs')){
  const [draft,world,bindings,initial,out]=process.argv.slice(2);assert(out,'C_BIND_ARGUMENTS');

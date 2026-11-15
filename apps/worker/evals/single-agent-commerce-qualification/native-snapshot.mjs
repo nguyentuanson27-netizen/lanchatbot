@@ -15,7 +15,10 @@ export async function readSessionSnapshot({runtime,pool,historyStore,session}){
    cart:sales.state.cart?.value??null,preview:sales.state.preview?.value??null,confirmation:sales.state.confirmation?.value??null,
    ...(sales.state.preview?{checkoutPreviewProof:{id:sales.state.preview.previewId,hash:sales.state.preview.previewHash,cartId:sales.state.preview.cartId,cartVersion:sales.state.preview.cartVersion}}:{}),
    profile:{revision:profile.profile.revision,measurements:profile.profile.measurements,fitPreference:profile.profile.fitPreference,preferences:profile.profile.preferences},
-   negotiation:sales.state.negotiation??null,checkoutPublic:publicCheckoutState(sales.state)},
+   negotiation:sales.state.negotiation??null,checkoutPublic:publicCheckoutState(sales.state),
+   ...(sales.state.pendingNegotiation?{pendingSupportProof:{id:sales.state.pendingNegotiation.pendingId,
+    status:sales.state.pendingNegotiation.status,sourceObservedAt:sales.state.pendingNegotiation.sourceObservedAt,
+    cartId:sales.state.pendingNegotiation.activatedByCartId}}:{})},
   events:(await pool.query('SELECT command_id_hash,command_kind,outcome,state_revision_after FROM sales_cycle_events WHERE conversation_id=$1 ORDER BY occurred_at',[b.conversationId])).rows,
   receipts:(await Promise.all(sales.state.processedCommandIds.map(async id=>{const event=await runtime.readCommittedSalesCycleEvent(b.pageId,b.conversationId,id);
    return event?{operation_id:id,kind:'COMMITTED_SALES_EVENT',commandKind:event.commandKind,stateRevisionAfter:event.stateRevisionAfter,occurredAt:event.occurredAt.toISOString()}:null;}))).filter(Boolean),
