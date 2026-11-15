@@ -10,6 +10,7 @@ import {CART_WRITE_TOOLS,presentCartWriteResult,presentNegotiationResult,present
 import {HandoffReasonV2Schema,canonicalJsonV1,CustomerProfileV1Schema,CommerceHistoryMetadataV1Schema} from '@lana/contracts';
 import {presentOwnerData,presentCompactOwnerData} from './owner-data-presentation.mjs';
 import {presentVerifiedOfferTerms} from './owner-offer-terms.mjs';
+import {presentSalesContext} from './owner-sales-context.mjs';
 import {compactOwnerProducts,compactCurrentFacts,compactSelectionResult,sharedSingleItemReads} from './owner-product-tables.mjs';
 
 const requireThat=(ok,reason)=>{if(!ok)throw new Error(reason);};
@@ -405,6 +406,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   requireThat(['VI_DATA_BLOCKS_V1','VI_DATA_BLOCKS_COMPACT_V2'].includes(request.ownerContextPresentation),'OWNER_PRESENTATION');
   if(request.ownerContextPresentation==='VI_DATA_BLOCKS_V1')return presentOwnerData(value);
   const compact=presentCompactOwnerData(value);
+  if(request.salesContextPresentation===true)return presentSalesContext(compact,c.runtimeProducts??[],c.protectedClaims);
   if(request.showVerifiedOfferTerms!==true)return compact;
   const presented=presentVerifiedOfferTerms(compact,c.protectedClaims);
   const withinBound=ownerTextBytes(presented)<=OWNER_REQUEST_MAX_BYTES&&bytes(presented)<=OWNER_IMAGE_BOUNDS.maxRequestBytes;
