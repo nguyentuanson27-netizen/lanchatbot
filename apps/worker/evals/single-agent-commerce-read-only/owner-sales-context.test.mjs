@@ -10,7 +10,7 @@ function wire(p=product){
  return {contents:[{role:'user',parts:[{text:[['Thời điểm xử lý',{processingAt:'2026-11-15T00:01:00.000Z'}],['Sản phẩm',[p]]].map(([k,v])=>k+'\n'+JSON.stringify(v)).join('\n\n')}]},
  {role:'user',parts:[{text:'Chị xem áo này nhé.'}]},
  {role:'model',parts:[{functionCall:{name:'read_product',args:{subjectRef:'P1',offerTypes:[]}},thoughtSignature:'signed-byte-sequence'}]},
- {role:'user',parts:[{functionResponse:{name:'read_product',response:{status:'OK',data:structuredClone(p)}}}]}],tools:[{x:1}],systemInstruction:{parts:[{text:'owner'}]}};
+ {role:'user',parts:[{functionResponse:{name:'read_product',response:{status:'OK',data:{...structuredClone(p),content:{...structuredClone(p.content),metadata:source.content.metadata}}}}}]}],tools:[{x:1}],systemInstruction:{parts:[{text:'owner'}]}};
 }
 const sections=b=>readCompactSections(b.contents[0],{expandProducts:false});
 test('source projection keeps exact raw and caveats in same request with no callable tools',()=>{
@@ -74,4 +74,15 @@ test('normal adapter entry keeps source and protected evidence in a compact cand
  assert.deepEqual(candidate.tools,original.tools);
  assert.deepEqual(candidate.generationConfig,original.generationConfig);
  assert.doesNotMatch(JSON.stringify(candidate),/salesContextPresentation|caseId|rubric|expectedSafe/);
+});
+
+test('historical tool provenance cannot be replaced by current provenance even when text matches',()=>{
+ for(const metadata of [undefined,{...source.content.metadata,sourceVersion:'OLD'},
+  {...source.content.metadata,observedAt:'2025-01-01T00:00:00.000Z'},
+  {...source.content.metadata,authority:'OTHER'}]){
+  const w=wire();w.contents.at(-1).parts[0].functionResponse.response.data.content.metadata=metadata;
+  const before=structuredClone(w.contents.at(-1));
+  const out=presentSalesContext(w,[source],[]);
+  assert.deepEqual(out.contents.at(-1),before);
+ }
 });
