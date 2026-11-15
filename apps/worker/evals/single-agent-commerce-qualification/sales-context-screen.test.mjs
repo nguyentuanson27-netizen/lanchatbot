@@ -145,3 +145,15 @@ test('control registration passes source binding with four slots while decisions
   assert.equal(attempts.length,4);assert(attempts.every(s=>s.status==='NOT_RUN'));
  }finally{rmSync(out,{recursive:true});}
 });
+
+test('explicit post-STOP diagnostic keeps both source identities and binds the exact replay score',async()=>{
+ const {assertContextReplayAuthority}=await import('./sales-context-campaign.mjs');
+ const {digest}=await import('./qualification.mjs');
+ const score={stage:'CONTEXT',status:'STOP',sourceSha:'b'.repeat(40)};
+ const ownerDecision={kind:'OWNER_REQUESTED_NATIVE_DIAGNOSTIC',replaySourceSha:score.sourceSha,
+  nativeSourceSha:'c'.repeat(40),replayScoreHash:digest(score),evidenceRef:'owner message reference',qualificationEligible:false};
+ assert.throws(()=>assertContextReplayAuthority(score),/CONTEXT_REPLAY_NOT_PASSED/);
+ assert.doesNotThrow(()=>assertContextReplayAuthority(score,ownerDecision));
+ assert.throws(()=>assertContextReplayAuthority({...score,rows:[]},ownerDecision),/CONTEXT_OVERRIDE_BINDING/);
+ assert.throws(()=>assertContextReplayAuthority(score,{...ownerDecision,qualificationEligible:true}),/CONTEXT_OVERRIDE_BINDING/);
+});

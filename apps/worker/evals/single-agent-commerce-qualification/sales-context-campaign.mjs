@@ -6,13 +6,27 @@ import {digest} from './qualification.mjs';
 const read=p=>JSON.parse(readFileSync(p,'utf8'));
 const kinds=['BASELINE_J2','CANDIDATE','CONTROLS'];
 
+export function assertContextReplayAuthority(score,decision){
+ assert.equal(score.stage,'CONTEXT');
+ if(decision===undefined){
+  assert.equal(score.status,'PASS','CONTEXT_REPLAY_NOT_PASSED');
+  return;
+ }
+ assert.equal(score.status,'STOP','CONTEXT_OVERRIDE_REQUIRES_STOP');
+ assert(decision.kind==='OWNER_REQUESTED_NATIVE_DIAGNOSTIC'&&
+  decision.replayScoreHash===digest(score)&&decision.replaySourceSha===score.sourceSha&&
+  /^[a-f0-9]{40}$/u.test(decision.nativeSourceSha)&&typeof decision.evidenceRef==='string'&&decision.evidenceRef.trim()&&
+  decision.qualificationEligible===false,'CONTEXT_OVERRIDE_BINDING');
+}
+
 /** The same campaign is rechecked at preflight and immediately before each generation. */
 export function checkedContextJob({campaign,seal,kind,registration,world,score,source}){
  assert.equal(digest(campaign),seal,'CONTEXT_CAMPAIGN_SEAL');
  assert(kinds.includes(kind),'CONTEXT_JOB_KIND');
  assert.equal(campaign.kind,'SALES_CONTEXT_NATIVE_CAMPAIGN');
  assert.equal(campaign.replayScoreHash,digest(score),'CONTEXT_REPLAY_SCORE_CHANGED');
- assert.equal(score.stage,'CONTEXT');assert.equal(score.status,'PASS','CONTEXT_REPLAY_NOT_PASSED');
+ assertContextReplayAuthority(score,campaign.ownerDecision);
+ if(campaign.ownerDecision&&kind!=='BASELINE_J2')assert.equal(campaign.ownerDecision.nativeSourceSha,source,'CONTEXT_OVERRIDE_SOURCE');
  assert.equal(campaign.worldHash,digest(world),'CONTEXT_WORLD_CHANGED');
  const job=campaign.jobs.find(j=>j.kind===kind);
  assert(job&&job.source===source&&registration.runSourceSha===source,'CONTEXT_JOB_SOURCE');

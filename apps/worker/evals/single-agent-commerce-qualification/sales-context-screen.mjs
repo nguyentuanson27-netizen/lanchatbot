@@ -8,6 +8,7 @@ import {pathToFileURL} from 'node:url';
 import {resolve} from 'node:path';
 import {digest,byteHash,read,write} from './bc-control.mjs';
 import {finalOwnerWire,assertReplayWire,replayJudgePacket,scoreReplay,dispatchReplay} from './sales-voice-replay.mjs';
+import {assertContextReplayAuthority} from './sales-context-campaign.mjs';
 import {contextJudgeIdentity} from './sales-context-judge.mjs';
 import {presentSalesContext} from '../single-agent-commerce-read-only/owner-sales-context.mjs';
 
@@ -85,12 +86,12 @@ export function scoreContextReplay(reg,results,grades){
 }
 
 /** Three existing native executions share one campaign cap and the exact same frozen world. */
-export function nativeContextJobs({score,baseline,candidate,controls}){
- assert.equal(score?.stage,'CONTEXT');assert.equal(score.status,'PASS','CONTEXT_REPLAY_NOT_PASSED');
+export function nativeContextJobs({score,baseline,candidate,controls,ownerDecision}){
+ assertContextReplayAuthority(score,ownerDecision);
  assert.equal(baseline.runSourceSha,CONTEXT_BASELINE_SHA,'CONTEXT_BASELINE_SOURCE');
  assert([baseline,candidate,controls].every(reg=>reg.slots.every(s=>s.mode!=='SAFETY')),'CONTEXT_NATIVE_NO_PROBES');
  assert.equal(baseline.worldHash,candidate.worldHash);assert.equal(candidate.worldHash,controls.worldHash);
- assert.equal(candidate.runSourceSha,score.sourceSha,'CONTEXT_REPLAY_SOURCE_CHANGED');
+ assert.equal(candidate.runSourceSha,ownerDecision?.nativeSourceSha??score.sourceSha,'CONTEXT_REPLAY_SOURCE_CHANGED');
  assert.equal(controls.runSourceSha,candidate.runSourceSha);
  assert.equal(score.rows?.length,12,'CONTEXT_REPLAY_DENOMINATOR');
  for(const key of ['registrationHash','resultsHash','gradesHash'])assert.match(score[key],/^[0-9a-f]{64}$/);
@@ -121,6 +122,7 @@ export function nativeContextJobs({score,baseline,candidate,controls}){
   for(const list of byCase.values())assert.deepEqual(list.sort(),job.kind==='CONTROLS'?[1]:[1,2,3,4,5]);
  }
  return {kind:'SALES_CONTEXT_NATIVE_CAMPAIGN',replayScoreHash:digest(score),worldHash:candidate.worldHash,budget:CONTEXT_BUDGET,
+  ...(ownerDecision?{ownerDecision}:{}),
   jobs:jobs.map(j=>({kind:j.kind,source:j.reg.runSourceSha,registrationHash:digest(j.reg),slotIds:j.slots.map(s=>s.slotId),
    turns:j.turns,maximumGenerationRequests:j.turns*4}))};
 }
@@ -144,7 +146,7 @@ export function contextNativeDrafts(preparedCorpus,reviewedControls){
 if(process.argv[1]&&pathToFileURL(resolve(process.argv[1])).href===import.meta.url){
  const {positionals,values:v}=parseArgs({allowPositionals:true,options:{registration:{type:'string'},journal:{type:'string',multiple:true},
   controls:{type:'string'},out:{type:'string'},seed:{type:'string'},seal:{type:'string'},results:{type:'string'},grades:{type:'string'},
-  baseline:{type:'string'},candidate:{type:'string'},score:{type:'string'},campaign:{type:'string'},job:{type:'string'},root:{type:'string'},world:{type:'string'},'opening-journal':{type:'string'},'native-input':{type:'string'},'native-seed':{type:'string'}}});
+  baseline:{type:'string'},candidate:{type:'string'},score:{type:'string'},campaign:{type:'string'},job:{type:'string'},root:{type:'string'},world:{type:'string'},'opening-journal':{type:'string'},'owner-decision':{type:'string'},'native-input':{type:'string'},'native-seed':{type:'string'}}});
  const [command]=positionals;
  if(command==='prepare'){
   assert.equal(git('status','--porcelain'),'','CONTEXT_DIRTY_SOURCE');
@@ -161,7 +163,19 @@ if(process.argv[1]&&pathToFileURL(resolve(process.argv[1])).href===import.meta.u
  }else if(command==='judge-packet')write(v.out,replayJudgePacket(read(v.registration),read(v.results)));
  else if(command==='score')write(v.out,scoreContextReplay(read(v.registration),read(v.results),read(v.grades)));
  else if(command==='corpus'){const drafts=contextNativeDrafts(read(v.registration).corpus??read(v.registration),read(v.controls));write(v.out+'-primary.json',drafts.primary);write(v.out+'-controls.json',drafts.controls);}
- else if(command==='native-jobs')write(v.out,nativeContextJobs({score:read(v.score),baseline:read(v.baseline),candidate:read(v.candidate),controls:read(v.controls)}));
+ else if(command==='native-jobs'){
+  const score=read(v.score),candidate=read(v.candidate),ownerDecision=v['owner-decision']?read(v['owner-decision']):undefined;
+  if(ownerDecision){
+   assert.equal(git('status','--porcelain'),'','CONTEXT_DIRTY_SOURCE');
+   assert.equal(git('rev-parse','HEAD'),candidate.runSourceSha,'CONTEXT_OVERRIDE_SOURCE');
+   const allowed=new Set(['sales-context-campaign.mjs','sales-context-screen.mjs','sales-context-screen.test.mjs']
+    .map(name=>'apps/worker/evals/single-agent-commerce-qualification/'+name));
+   const changed=git('diff','--name-only',score.sourceSha,candidate.runSourceSha).split(/\r?\n/u);
+   assert(changed.every(path=>allowed.has(path)||path.startsWith('docs/specs/evidence/c3-sales-context-implementation-20261115/')||
+    path==='tasks/todo.md'),'CONTEXT_OVERRIDE_CANDIDATE_CHANGED');
+  }
+  write(v.out,nativeContextJobs({score,candidate,baseline:read(v.baseline),controls:read(v.controls),ownerDecision}));
+ }
  else if(command==='native-dispatch'){
   const {dispatchContextNative}=await import('./sales-context-campaign.mjs');
   dispatchContextNative({proof:{campaignPath:v.campaign,seal:v.seal,kind:v.job,scorePath:v.score},registrationPath:v.registration,
