@@ -1,0 +1,582 @@
+{
+  "status": "PASS",
+  "worldHash": "6b0c5c9f78bcaea8e53ee53776be6be72e8926ebe271c376db2523938344af10",
+  "jobs": [
+    {
+      "kind": "CANDIDATE",
+      "requests": 45,
+      "selectedAttempts": 5,
+      "testDatabaseDropped": true,
+      "source": "247ecf7bce47bf13689685a336b2f1e09044390e"
+    },
+    {
+      "kind": "CONTROLS",
+      "requests": 7,
+      "selectedAttempts": 1,
+      "testDatabaseDropped": true,
+      "source": "247ecf7bce47bf13689685a336b2f1e09044390e"
+    }
+  ],
+  "conversations": [
+    {
+      "kind": "CANDIDATE",
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turns": [
+        {
+          "turn": 0,
+          "customer": "Chị lấy áo của bộ váy Thạch Thảo size M.",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ, áo lẻ Set váy Thạch Thảo size M hiện có màu Trắng (hàng có sẵn) và màu Be (hàng đặt trước). Chị lấy màu nào để em thêm vào giỏ cho mình ạ?"
+            ],
+            "images": [
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+              },
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg"
+              }
+            ]
+          },
+          "error": null,
+          "recoveryReason": null,
+          "tools": [
+            {
+              "name": "read_product",
+              "status": "OK",
+              "reason": null
+            },
+            {
+              "name": "select_product_media",
+              "status": "OK",
+              "reason": null
+            },
+            {
+              "name": "read_product",
+              "status": "OK",
+              "reason": null
+            },
+            {
+              "name": "select_product_media",
+              "status": "OK",
+              "reason": null
+            },
+            {
+              "name": "add_to_cart",
+              "status": "UNAVAILABLE",
+              "reason": "SELECTION_UNAVAILABLE"
+            }
+          ],
+          "generationCounts": {
+            "owner": 3,
+            "verifier": 1
+          }
+        },
+        {
+          "turn": 1,
+          "customer": "Shop hỗ trợ thêm cho chị được chút nào không?",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ, áo lẻ Set váy Thạch Thảo size M có giá 499.000đ ạ. Em đã ghi nhận yêu cầu hỗ trợ của chị rồi ạ. \n\nChị chọn màu Trắng (hàng có sẵn) hay Be (hàng đặt trước) để em kiểm tra phương án hỗ trợ và thêm vào giỏ cho mình nhé ạ!"
+            ],
+            "images": []
+          },
+          "error": null,
+          "recoveryReason": null,
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null
+            }
+          ],
+          "generationCounts": {
+            "owner": 2,
+            "verifier": 1
+          }
+        },
+        {
+          "turn": 2,
+          "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "HANDOFF",
+            "messages": [],
+            "images": [],
+            "reason": "RESPONSE_UNAVAILABLE"
+          },
+          "error": null,
+          "recoveryReason": "FAIL",
+          "tools": [
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null
+            }
+          ],
+          "generationCounts": {
+            "owner": 2,
+            "verifier": 1
+          }
+        }
+      ]
+    },
+    {
+      "kind": "CANDIDATE",
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turns": [
+        {
+          "turn": 0,
+          "customer": "Chị lấy áo của bộ váy Thạch Thảo size M.",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ, mẫu áo thạch thảo size M có hai màu là **Trắng** (sẵn hàng) và **Be** (đặt trước). Chị lấy màu nào ạ?"
+            ],
+            "images": [
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+              },
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg"
+              }
+            ]
+          },
+          "error": null,
+          "recoveryReason": null,
+          "tools": [
+            {
+              "name": "add_to_cart",
+              "status": "UNAVAILABLE",
+              "reason": "SELECTION_UNAVAILABLE"
+            },
+            {
+              "name": "select_product_media",
+              "status": "OK",
+              "reason": null
+            }
+          ],
+          "generationCounts": {
+            "owner": 2,
+            "verifier": 1
+          }
+        },
+        {
+          "turn": 1,
+          "customer": "Shop hỗ trợ thêm cho chị được chút nào không?",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ áo thạch thảo size M có giá 499.000đ ạ. Em đã ghi nhận yêu cầu hỗ trợ của chị để hệ thống xem xét khi lên đơn nhé. \n\nChị lấy áo màu Trắng (sẵn hàng) hay màu Be (đặt trước) ạ?"
+            ],
+            "images": []
+          },
+          "error": null,
+          "recoveryReason": null,
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null
+            }
+          ],
+          "generationCounts": {
+            "owner": 2,
+            "verifier": 1
+          }
+        },
+        {
+          "turn": 2,
+          "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ áo thạch thảo size M có giá 499.000đ, phí vận chuyển về Cần Thơ là 30.000đ, tổng cộng là 529.000đ chị nhé."
+            ],
+            "images": []
+          },
+          "error": null,
+          "recoveryReason": null,
+          "tools": [
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null
+            }
+          ],
+          "generationCounts": {
+            "owner": 2,
+            "verifier": 1
+          }
+        }
+      ]
+    },
+    {
+      "kind": "CANDIDATE",
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turns": [
+        {
+          "turn": 0,
+          "customer": "Chị lấy áo của bộ váy Thạch Thảo size M.",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ, áo lẻ váy Thạch Thảo size M có hai màu là Trắng (sẵn hàng) và Be (đặt trước). Chị lấy màu nào ạ?"
+            ],
+            "images": [
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+              }
+            ]
+          },
+          "error": null,
+          "recoveryReason": null,
+          "tools": [
+            {
+              "name": "add_to_cart",
+              "status": "UNAVAILABLE",
+              "reason": "SELECTION_UNAVAILABLE"
+            }
+          ],
+          "generationCounts": {
+            "owner": 2,
+            "verifier": 1
+          }
+        },
+        {
+          "turn": 1,
+          "customer": "Shop hỗ trợ thêm cho chị được chút nào không?",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ, em đã ghi nhận yêu cầu hỗ trợ giá của chị rồi ạ. Áo lẻ Thạch Thảo size M có giá 499.000đ. Chị lấy màu Trắng (sẵn hàng) hay Be (đặt trước) để em hỗ trợ tiếp cho mình nhé ạ?"
+            ],
+            "images": []
+          },
+          "error": null,
+          "recoveryReason": null,
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null
+            }
+          ],
+          "generationCounts": {
+            "owner": 2,
+            "verifier": 1
+          }
+        },
+        {
+          "turn": 2,
+          "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "HANDOFF",
+            "messages": [],
+            "images": [],
+            "reason": "RESPONSE_UNAVAILABLE"
+          },
+          "error": null,
+          "recoveryReason": "OWNER_TOOL_MODE",
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "REJECTED",
+              "reason": "NEGOTIATION_SOURCE_OR_CART"
+            },
+            {
+              "name": "quote_product",
+              "status": "REJECTED",
+              "reason": "QUOTE_BATCH_STOPPED"
+            }
+          ],
+          "generationCounts": {
+            "owner": 2,
+            "verifier": 0
+          }
+        }
+      ]
+    },
+    {
+      "kind": "CANDIDATE",
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turns": [
+        {
+          "turn": 0,
+          "customer": "Chị lấy áo của bộ váy Thạch Thảo size M.",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Chị lấy áo Thạch Thảo size M màu Trắng hay Be ạ?"
+            ],
+            "images": [
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+              }
+            ]
+          },
+          "error": null,
+          "recoveryReason": null,
+          "tools": [
+            {
+              "name": "add_to_cart",
+              "status": "UNAVAILABLE",
+              "reason": "SELECTION_UNAVAILABLE"
+            }
+          ],
+          "generationCounts": {
+            "owner": 2,
+            "verifier": 1
+          }
+        },
+        {
+          "turn": 1,
+          "customer": "Shop hỗ trợ thêm cho chị được chút nào không?",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Áo Thạch Thảo size M có giá 499.000đ chị ạ. Em đã ghi nhận yêu cầu hỗ trợ giá của chị để hệ thống xem xét khi lên đơn nhé. \n\nÁo size M hiện có màu Trắng sẵn hàng và màu Be đặt trước. Chị lấy màu nào ạ?"
+            ],
+            "images": []
+          },
+          "error": null,
+          "recoveryReason": null,
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null
+            }
+          ],
+          "generationCounts": {
+            "owner": 2,
+            "verifier": 1
+          }
+        },
+        {
+          "turn": 2,
+          "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ, áo Thạch Thảo size M có giá 499.000đ, phí vận chuyển về Cần Thơ là 30.000đ, tổng cộng là 529.000đ chị nhé. \n\nChị lấy màu Trắng (sẵn hàng) hay màu Be (đặt trước) ạ?"
+            ],
+            "images": []
+          },
+          "error": null,
+          "recoveryReason": null,
+          "tools": [
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null
+            }
+          ],
+          "generationCounts": {
+            "owner": 2,
+            "verifier": 1
+          }
+        }
+      ]
+    },
+    {
+      "kind": "CANDIDATE",
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turns": [
+        {
+          "turn": 0,
+          "customer": "Chị lấy áo của bộ váy Thạch Thảo size M.",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ, áo lẻ Set váy Thạch Thảo size M hiện có 2 màu: Trắng (hàng có sẵn) và Be (hàng đặt trước ạ). Chị lấy màu nào ạ?"
+            ],
+            "images": [
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+              }
+            ]
+          },
+          "error": null,
+          "recoveryReason": null,
+          "tools": [
+            {
+              "name": "add_to_cart",
+              "status": "UNAVAILABLE",
+              "reason": "SELECTION_UNAVAILABLE"
+            }
+          ],
+          "generationCounts": {
+            "owner": 2,
+            "verifier": 1
+          }
+        },
+        {
+          "turn": 1,
+          "customer": "Shop hỗ trợ thêm cho chị được chút nào không?",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ, áo lẻ Set váy Thạch Thảo có giá 499.000đ chị ạ. Yêu cầu hỗ trợ giá của chị em đã ghi nhận lại rồi ạ. \n\nChị lấy màu Trắng hay Be để em thêm vào giỏ và kiểm tra mức hỗ trợ cho mình nhé ạ?"
+            ],
+            "images": []
+          },
+          "error": null,
+          "recoveryReason": null,
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null
+            }
+          ],
+          "generationCounts": {
+            "owner": 2,
+            "verifier": 1
+          }
+        },
+        {
+          "turn": 2,
+          "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ, áo lẻ Set váy Thạch Thảo giá 499.000đ, phí ship về Cần Thơ là 30.000đ, tổng cộng là 529.000đ chị ạ. \n\nChị lấy màu Trắng hay Be để em thêm vào giỏ cho mình nhé ạ?"
+            ],
+            "images": []
+          },
+          "error": null,
+          "recoveryReason": null,
+          "tools": [
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null
+            }
+          ],
+          "generationCounts": {
+            "owner": 2,
+            "verifier": 1
+          }
+        }
+      ]
+    },
+    {
+      "kind": "CONTROLS",
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "turns": [
+        {
+          "turn": 0,
+          "customer": "Chị lấy hai áo Thạch Thảo size M, shop bớt thêm cho chị được không?",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ, em đã ghi nhận yêu cầu hỗ trợ giá của chị rồi ạ. \n\nHai áo Thạch Thảo size M có giá niêm yết 499.000đ/chiếc. Khi mua từ 2 sản phẩm, đơn hàng được tự động áp dụng ưu đãi giảm 5% của shop: tổng tiền hàng 998.000đ, giảm 49.900đ, phí vận chuyển 30.000đ, tổng thanh toán là 978.100đ ạ.\n\nChị có muốn em thêm 2 áo size M này vào giỏ hàng để tiếp tục hỗ trợ chị không ạ?"
+            ],
+            "images": [
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+              }
+            ]
+          },
+          "error": null,
+          "recoveryReason": null,
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null
+            }
+          ],
+          "generationCounts": {
+            "owner": 2,
+            "verifier": 1
+          }
+        },
+        {
+          "turn": 1,
+          "customer": "Lấy trắng em nhé.",
+          "terminal": {
+            "disposition": "HANDOFF",
+            "messages": [],
+            "images": [],
+            "reason": "RESPONSE_UNAVAILABLE"
+          },
+          "error": null,
+          "recoveryReason": "FAIL",
+          "tools": [
+            {
+              "name": "add_to_cart",
+              "status": "OK",
+              "reason": null
+            },
+            {
+              "name": "add_to_cart",
+              "status": "OK",
+              "reason": null
+            },
+            {
+              "name": "apply_pending_negotiation",
+              "status": "OK",
+              "reason": null
+            }
+          ],
+          "generationCounts": {
+            "owner": 3,
+            "verifier": 1
+          }
+        },
+        {
+          "turn": 2,
+          "customer": "Cả ship hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "NO_SEND",
+            "messages": [],
+            "images": [],
+            "reason": "HUMAN_OWNS_CONVERSATION"
+          },
+          "error": null,
+          "recoveryReason": null,
+          "tools": [],
+          "generationCounts": {
+            "owner": 0,
+            "verifier": 0
+          }
+        }
+      ]
+    }
+  ],
+  "providerRequestsForAudit": 0
+}

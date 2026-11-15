@@ -3340,5 +3340,6 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Trace both failures to lost turn-local selection evidence and mixed arguments on overloaded negotiation tools.
 - [x] Restore current pending-selection source reads under the existing work budget; separate pending command schemas with unchanged receipt/domain authority.
 - [x] Observed RED→GREEN; 531 worker / 83 adapter tests and worker build/noEmit/lint PASS.
-- [ ] Seal and execute J4 ×5 plus two-shirt control ×1; review all 18 terminal turns together. [Repair evidence](../docs/specs/evidence/c3-sales-context-implementation-20261115/COLOR_PENDING_FIX_20261115.md).
+- [x] Clean source247ecf7b, same-world preflight and 6/6 attempts / 18 turns executed and reviewed. J4 turn-2 colour evidence/send5/5; two-shirt support activates at turn2. 52 native +6 valid judge requests, no transport error;14 SEND/3 HANDOFF/1 NO_SEND. [Repair evidence](../docs/specs/evidence/c3-sales-context-implementation-20261115/COLOR_PENDING_FIX_20261115.md).
+- [ ] Remaining STOP: J4 promises unapproved support or unnecessarily repeats RECORD; two-shirt activation replaces the cart-open receipt in verifier context, so its valid cart acknowledgement is blocked and the next turn NO_SEND. Whole-turn judge J4 3/5, control0/1; do not call these end-to-end PASS.
 

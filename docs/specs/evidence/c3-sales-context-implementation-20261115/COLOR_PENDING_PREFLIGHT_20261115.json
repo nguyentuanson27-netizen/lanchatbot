@@ -1,0 +1,22 @@
+{
+  "worldHash": "6b0c5c9f78bcaea8e53ee53776be6be72e8926ebe271c376db2523938344af10",
+  "checks": [
+    {
+      "kind": "CANDIDATE",
+      "slots": 5,
+      "turns": 15,
+      "cap": 60,
+      "registrationHash": "73aa7149e129e178c7e063a2be9fec2a53a05312ed31bf589d1422663d532c1d",
+      "source": "247ecf7bce47bf13689685a336b2f1e09044390e"
+    },
+    {
+      "kind": "CONTROLS",
+      "slots": 1,
+      "turns": 3,
+      "cap": 12,
+      "registrationHash": "ebc06c729156c2a08947664041d9834ef318173f6a91cabefe37a29e8de6a472",
+      "source": "247ecf7bce47bf13689685a336b2f1e09044390e"
+    }
+  ],
+  "providerRequests": 0
+}
