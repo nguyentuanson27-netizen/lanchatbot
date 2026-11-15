@@ -1,0 +1,48 @@
+{
+  "counts": [
+    {
+      "kind": "BASELINE_J2",
+      "turns": 15,
+      "planned": 15,
+      "registered": 5,
+      "requests": 45,
+      "generations": 45,
+      "sendPasses": 15,
+      "sourceSha": "7cdd2e80b0ebda08f0176082ea09885a63a76fe2",
+      "testDatabaseDropped": true,
+      "firewall": "PASS",
+      "exactFinalDraft": "PASS",
+      "traceHashes": "PASS"
+    },
+    {
+      "kind": "CANDIDATE",
+      "turns": 45,
+      "planned": 45,
+      "registered": 25,
+      "requests": 101,
+      "generations": 101,
+      "sendPasses": 28,
+      "sourceSha": "9a65450fdf29b1c5c544465bf61c450d3c22f133",
+      "testDatabaseDropped": true,
+      "firewall": "PASS",
+      "exactFinalDraft": "PASS",
+      "traceHashes": "PASS"
+    },
+    {
+      "kind": "CONTROLS",
+      "turns": 6,
+      "planned": 6,
+      "registered": 4,
+      "requests": 17,
+      "generations": 17,
+      "sendPasses": 6,
+      "sourceSha": "9a65450fdf29b1c5c544465bf61c450d3c22f133",
+      "testDatabaseDropped": true,
+      "firewall": "PASS",
+      "exactFinalDraft": "PASS",
+      "traceHashes": "PASS"
+    }
+  ],
+  "liveSends": 0,
+  "providerRequestsForAudit": 0
+}

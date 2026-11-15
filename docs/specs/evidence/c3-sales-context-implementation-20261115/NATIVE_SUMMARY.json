@@ -1,0 +1,217 @@
+{
+  "qualificationEligible": false,
+  "replayStatus": "STOP",
+  "nativeGate": "STOP",
+  "runs": [
+    {
+      "kind": "BASELINE_J2",
+      "registered": 5,
+      "plannedTurns": 15,
+      "attempts": {
+        "EXECUTED": 5
+      },
+      "turns": 15,
+      "dispositions": {
+        "SEND_ELIGIBLE": 15
+      },
+      "reasons": {},
+      "generations": {
+        "OWNER": {
+          "requests": 30,
+          "status": {
+            "OK": 30
+          },
+          "latencyP50P95": [
+            6296,
+            8782
+          ],
+          "input": 335231,
+          "output": 23235
+        },
+        "VERIFIER": {
+          "requests": 15,
+          "status": {
+            "OK": 15
+          },
+          "latencyP50P95": [
+            11448,
+            18593
+          ],
+          "input": 138394,
+          "output": 1274
+        }
+      },
+      "counted": 45,
+      "persistedStarts": 45,
+      "reported": 45,
+      "testDatabaseDropped": true,
+      "diagnosticStop": null,
+      "unattributed": []
+    },
+    {
+      "kind": "CANDIDATE",
+      "registered": 25,
+      "plannedTurns": 45,
+      "attempts": {
+        "EXECUTED": 25
+      },
+      "turns": 45,
+      "dispositions": {
+        "SEND_ELIGIBLE": 28,
+        "HANDOFF": 11,
+        "NO_SEND": 6
+      },
+      "reasons": {
+        "DEPENDENCY_FAILURE": 2,
+        "RESPONSE_UNAVAILABLE": 9,
+        "HUMAN_OWNS_CONVERSATION": 6
+      },
+      "generations": {
+        "OWNER": {
+          "requests": 71,
+          "status": {
+            "OK": 70,
+            "PROVIDER_ERROR": 1
+          },
+          "latencyP50P95": [
+            6440,
+            15576
+          ],
+          "input": 827537,
+          "output": 77088
+        },
+        "VERIFIER": {
+          "requests": 30,
+          "status": {
+            "OK": 30
+          },
+          "latencyP50P95": [
+            12836,
+            23401
+          ],
+          "input": 285891,
+          "output": 2597
+        }
+      },
+      "counted": 101,
+      "persistedStarts": 101,
+      "reported": 101,
+      "testDatabaseDropped": true,
+      "diagnosticStop": null,
+      "unattributed": []
+    },
+    {
+      "kind": "CONTROLS",
+      "registered": 4,
+      "plannedTurns": 6,
+      "attempts": {
+        "EXECUTED": 4
+      },
+      "turns": 6,
+      "dispositions": {
+        "SEND_ELIGIBLE": 6
+      },
+      "reasons": {},
+      "generations": {
+        "OWNER": {
+          "requests": 11,
+          "status": {
+            "OK": 11
+          },
+          "latencyP50P95": [
+            7393,
+            22060
+          ],
+          "input": 124387,
+          "output": 11344
+        },
+        "VERIFIER": {
+          "requests": 6,
+          "status": {
+            "OK": 6
+          },
+          "latencyP50P95": [
+            9186,
+            16102
+          ],
+          "input": 49963,
+          "output": 422
+        }
+      },
+      "counted": 17,
+      "persistedStarts": 17,
+      "reported": 17,
+      "testDatabaseDropped": true,
+      "diagnosticStop": null,
+      "unattributed": []
+    }
+  ],
+  "score": {
+    "status": "STOP",
+    "summary": {
+      "c-20261028-j2": {
+        "complete": 0,
+        "voice": [
+          5,
+          5
+        ],
+        "facts": [
+          0,
+          0
+        ]
+      },
+      "c-20261028-j4": {
+        "complete": 0,
+        "voice": [
+          0,
+          0
+        ],
+        "facts": [
+          0,
+          0
+        ]
+      },
+      "c-20261028-s15": {
+        "complete": 3,
+        "voice": [
+          4
+        ],
+        "facts": [
+          3
+        ]
+      },
+      "c-20261028-s08": {
+        "complete": 5,
+        "voice": [
+          5
+        ],
+        "facts": [
+          5
+        ]
+      }
+    },
+    "j2net": [
+      0,
+      0
+    ],
+    "baselineComplete": 0,
+    "controlPass": 2,
+    "silent": 5,
+    "material": true,
+    "support": "NOT_EXERCISED"
+  },
+  "judge": {
+    "expected": 24,
+    "graded": 24,
+    "requests": 24,
+    "latencyP50P95": [
+      19264,
+      32588
+    ],
+    "input": 314193,
+    "output": 9317,
+    "status": {
+      "OK": 24
+    }
+  }
+}
