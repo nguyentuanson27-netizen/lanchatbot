@@ -1148,3 +1148,25 @@ it.each(["mutation","ordinary-negotiation"] as const)("does not offer pending ac
  expect(s.tools.snapshot().state.pendingSupport).toMatchObject({canApply:false,blockedReason:"CART_BINDING_CHANGED"});
  expect(result.data).toMatchObject({pendingSupport:{canApply:false}});
 });
+
+it("executes W3 record-and-quote then activate-and-quote through the existing guarded batch path",async()=>{
+ const s=await setup(),f=fixtureProduct(),sourceQuote="Giá hơi cao, bớt cho chị được không?";
+ s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+ const quoted=()=>withExplicitQuoteTask({...s.base,...s.tools,availableTools:["read_product","request_handoff","add_to_cart","record_negotiation"]},s.scope,false,async()=>s.policy.policy,()=>commerceNow);
+ const first=quoted();
+ expect((await first.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}})).status).toBe("OK");
+ const quote={name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity:2}};
+ const record={name:"record_negotiation",args:{action:"RECORD",intent:"PRICE_OBJECTION",sourceQuote,subjectRef:"SM613",offerType:"DIRECT"}};
+ const recorded=await first.invokeBatch([record,quote]);
+ expect(recorded.map(r=>r.status),JSON.stringify(recorded)).toEqual(["OK","OK"]);
+ expect(s.current().pendingNegotiation?.status).toBe("PENDING");
+ expect(s.current().cart).toBeNull();expect(s.current().negotiation).toBeNull();
+ expect((await s.tools.invoke({...s.add,args:{...s.add.args,quantity:2}})).status).toBe("OK");
+ const activation={name:"record_negotiation",args:{action:"APPLY_PENDING",pendingRef:s.current().pendingNegotiation!.pendingId}};
+ const applied=await quoted().invokeBatch([activation,quote]);
+ expect(applied.map(r=>r.status)).toEqual(["OK","OK"]);
+ expect(s.current().pendingNegotiation?.status).toBe("ACTIVATED");
+ expect(s.current().negotiation?.consumedObjectionEvidenceIds).toHaveLength(1);
+ const count=s.commits.length;
+ expect((await s.tools.invoke(activation)).status).toBe("OK");expect(s.commits).toHaveLength(count);
+});

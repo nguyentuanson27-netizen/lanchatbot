@@ -20,7 +20,7 @@ const isWriter=(c:CommerceToolCall)=>["apply_customer_state","record_negotiation
  (c.name==="read_product"&&(c.args as {customerSelected?:unknown}|null)?.customerSelected===true);
 function batchShape(c:CommerceToolCall):boolean {
  const fields:Record<string,string[]>={quote_product:["subjectRef","offerTypes","color","quantity","deliveryRegion"],read_product:["subjectRef","offerType","offerTypes","detailsOnly","color","size","deliveryRegion","customerSelected"],
-  read_policy:[],apply_customer_state:["ops"],record_negotiation:["intent","sourceQuote"],select_product_media:["subjectRef","intent","color","componentRole","deliveryMode","requiredEvidence"],view_product_media:["subjectRef","intent","color","componentRole","requiredEvidence"]};
+  read_policy:[],apply_customer_state:["ops"],record_negotiation:["action","intent","sourceQuote","subjectRef","offerType","pendingRef"],select_product_media:["subjectRef","intent","color","componentRole","deliveryMode","requiredEvidence"],view_product_media:["subjectRef","intent","color","componentRole","requiredEvidence"]};
  if(!fields[c.name])return false;const a=toolArgs(c.args,fields[c.name]!);if(!a)return false;
  if(c.name==="read_policy")return true;
  if(c.name==="apply_customer_state")return Array.isArray(a.ops)&&a.ops.length>0&&a.ops.length<=8&&a.ops.every(o=>{
@@ -32,7 +32,13 @@ function batchShape(c:CommerceToolCall):boolean {
   if(op.field.startsWith("preferences."))return CustomerPreferenceV1Schema.shape.colors.safeParse(op.value).success;
   return typeof op.sourceQuote==="string"&&!!op.sourceQuote.trim()&&op.sourceQuote.length<=160&&(op.field==="fitPreference"?["FITTED","REGULAR","RELAXED"].includes(String(op.value)):typeof op.value==="number"&&Number.isFinite(op.value));
  });
- if(c.name==="record_negotiation")return ["PRICE_OBJECTION","PURCHASE_READY"].includes(String(a.intent))&&boundedText(a.sourceQuote,512);
+ if(c.name==="record_negotiation"){
+  const action=a.action===undefined?"RECORD":a.action;
+  if(action!=="RECORD")return ["APPLY_PENDING","CANCEL_PENDING"].includes(String(action))&&
+   typeof a.pendingRef==="string"&&/^[a-f0-9]{64}$/.test(a.pendingRef)&&Object.keys(a).every(k=>["action","pendingRef"].includes(k));
+  return a.pendingRef===undefined&&["PRICE_OBJECTION","PURCHASE_READY"].includes(String(a.intent))&&boundedText(a.sourceQuote,512)&&
+   (a.subjectRef===undefined||boundedText(a.subjectRef,128))&&(a.offerType===undefined||boundedText(a.offerType,64));
+ }
  if(c.name==="select_product_media"||c.name==="view_product_media")return decodeCommerceMediaArgs(a)!==null;
  if(!boundedText(a.subjectRef,128))return false;
  for(const [k,n]of [["color",64],["size",16],["deliveryRegion",128]] as const)if(a[k]!==undefined&&!boundedText(a[k],n))return false;

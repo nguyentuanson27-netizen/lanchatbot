@@ -340,3 +340,25 @@ it('the no-I/O proof getter never substitutes a different read colour and preser
  expect(s.tools.quotePriceEvidence!({subjectRef:'SM613',offerTypes:['DIRECT'],color:'be'})).toHaveLength(1);
  expect(s.readProduct.mock.calls.length).toBe(reads);expect(t.quoteTaskWork?.()).toEqual([{reservedUnits:1,readInvocations:1,selectionInvocations:0}]);
 });
+
+it.each([undefined,"RECORD"])("admits the W3 negotiation record before a quote with action %s", action=>{
+ const writer={name:"record_negotiation",args:{...(action?{action}:{}),intent:"PRICE_OBJECTION",sourceQuote:"Bớt cho chị",
+  subjectRef:"SM613",offerType:"DIRECT"}};
+ expect(quoteBatchWork([writer,quote])).toMatchObject({units:2,quotes:1});
+});
+it.each(["APPLY_PENDING","CANCEL_PENDING"])("admits the bounded W3 %s writer before a quote",action=>{
+ expect(quoteBatchWork([{name:"record_negotiation",args:{action,pendingRef:"a".repeat(64)}},quote]))
+  .toMatchObject({units:2,quotes:1});
+});
+it.each([
+ {action:null,intent:"PRICE_OBJECTION",sourceQuote:"Bớt cho chị"},
+ {action:"UNKNOWN",intent:"PRICE_OBJECTION",sourceQuote:"Bớt cho chị"},
+ {action:"RECORD",intent:"PRICE_OBJECTION",sourceQuote:"Bớt cho chị",pendingRef:"a".repeat(64)},
+ {action:"APPLY_PENDING",pendingRef:"not-a-bound-reference"},
+ {action:"CANCEL_PENDING",pendingRef:"a".repeat(64),sourceQuote:"Bỏ hỗ trợ"},
+ {intent:"PRICE_OBJECTION",sourceQuote:"Bớt cho chị",subjectRef:"x".repeat(129)},
+ {intent:"PRICE_OBJECTION",sourceQuote:"Bớt cho chị",offerType:""},
+ {intent:"PRICE_OBJECTION",sourceQuote:"Bớt cho chị",amount:20000},
+])("refuses invalid W3 negotiation batch arguments %j",args=>{
+ expect(quoteBatchWork([{name:"record_negotiation",args},quote])).toBeNull();
+});
