@@ -83,7 +83,7 @@ export async function createCommerceEffectTools(input: {
     const eligible=current.cart&&current.commerceContext&&pending.cartOpeningCommandId?
       pendingNegotiationAfterActivationV1(pending,current.cart.value,current.commerceContext.policyRef,pending.cartOpeningCommandId,input.clock().toISOString()):null;
     return {pendingRef:pending.pendingId,subjectRef:pending.productId,offerType:pending.offerId,status:"NOT_EVALUATED",
-      benefitAuthorization:{scope:"THIS_PENDING_REQUEST",status:"NOT_GRANTED",grantedBenefits:[],receiptRef:null},
+      benefitAuthorization:{scope:"ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",status:"NOT_GRANTED",grantedBenefits:[],receiptRef:null},
       canApply:!!eligible,blockedReason:eligible?null:current.cart?"CART_BINDING_CHANGED":"CART_REQUIRED"};
   }
   async function terminalOutcome(): Promise<TerminalOutcome | null> {
@@ -164,7 +164,7 @@ export async function createCommerceEffectTools(input: {
       // Reuse the selection readback: a known contradiction invalidates this
       // receipt's current scope; unavailable source data adds no new assertion.
       receipts: [...stateReceipts, ...(receipt && active.length === selections.size ? receiptSequence : [])],
-      ...(cart&&receipt&&receiptSequence.length>1&&receiptStateHash===commerceHash(current)?{receiptContinuity:{kind:"UNCHANGED_CART_NEGOTIATION_V1" as const,cartId:cart.cartId,cartVersion:cart.revision,
+      ...(cart&&receipt&&receiptSequence.length>1&&receiptStateHash===commerceHash(current)&&receiptSequence.every(r=>current.processedCommandIds.includes(r.operationId))?{receiptContinuity:{kind:"UNCHANGED_CART_NEGOTIATION_V1" as const,cartId:cart.cartId,cartVersion:cart.revision,
         stateRevision:receipt!.stateRevision,bindingVersion:turnBinding,recipient:turnRecipient,cartItemsHash:receiptCartItemsHash(cartItems(active)),receiptRefs:receiptSequence.map(r=>r.ref)}}:{}),
       ...(cart ? { cartBinding: { cartId: cart.cartId, cartVersion: cart.revision } } : {}) });
   };

@@ -103,7 +103,7 @@ export function withExplicitQuoteTask(base:CommerceTools,scope:CommerceScope,fir
    closingEvidence:{previousState:null,purchaseReady:false,priceObjectionCount:0,secondConcessionAlreadyApplied:false},now:at,authorizationNow:at});
   if(result.status!=="AUTHORIZED")return null;
   const evidence={kind:"PRE_CART_TOTAL_V1",calculationBasis:"PRE_CART_POLICY",appliesNegotiationReceipt:false,
-   benefitAuthorization:{scope:"THIS_PRE_CART_QUOTE",status:"NOT_GRANTED",grantedBenefits:[],receiptRef:null},
+   benefitAuthorization:{scope:"ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",status:"NOT_GRANTED",grantedBenefits:[],receiptRef:null},
    negotiationAssessment:"NOT_EVALUATED",
    standardPromotion:{status:result.adjustments.some(a=>a.ruleId==="SHOP_WIDE_MULTI_ITEM_PERCENT")?"APPLIED":"NOT_APPLIED",
     parentProductUnits:result.parentProductUnitCount,
@@ -199,7 +199,7 @@ export function withExplicitQuoteTask(base:CommerceTools,scope:CommerceScope,fir
    openingProofs.set(a.subjectRef,{ref:`opening-quote:${hash}`,text:JSON.stringify(proof),sourceVersion:hash,observedAt:clock().toISOString(),expiresAt:expiries[0]??null});
   }
   return {status:"OK",data:{...data,quoteTaskStatus:"PREPARED_PENDING_FINAL_GATE",calculationBasis:"PRE_CART_POLICY",appliesNegotiationReceipt:false,
-   benefitAuthorization:{scope:"THIS_PRE_CART_QUOTE",status:"NOT_GRANTED",grantedBenefits:[],receiptRef:null},
+   benefitAuthorization:{scope:"ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",status:"NOT_GRANTED",grantedBenefits:[],receiptRef:null},
    currentCartQuoteRef:offerTypes.length===1?currentCartRef(current,{subjectRef:a.subjectRef,offerType:offerTypes[0]!,quantity:typeof a.quantity==="number"?a.quantity:undefined,...(typeof a.color==="string"?{color:a.color}:{})}):null,...(preCartQuote?{preCartQuote}:{})}};
  }
  // A proven missing purchase choice does not imply that a read-only quote needs

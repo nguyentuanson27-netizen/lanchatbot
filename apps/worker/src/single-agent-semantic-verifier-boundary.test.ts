@@ -28,7 +28,7 @@ describe("original receipts across an unchanged-cart negotiation",()=>{
   expect(finalGate({expected:b,response:{kind:"VERDICT",binding:b,result:{verdict:"PASS",violations:[]}},current:t,finalDraft:draft,now}).disposition).toBe("SEND_ELIGIBLE");
   expect(t.effectReceipts.map(r=>r.stateRevision)).toEqual([4,5]);
  });
- it.each(["missing","items","cart","binding","recipient","revision","unknown-ref","gap","expired","wrong-subject","wrong-effect","duplicate-operation","rebased"])("rejects invalid receipt continuity: %s",mode=>{
+ it.each(["missing","items","cart","binding","recipient","revision","unknown-ref","gap","expired","wrong-subject","wrong-effect","duplicate-operation","rebased","negative"])("rejects invalid receipt continuity: %s",mode=>{
   const t=sequence();
   if(mode==="missing")delete t.effectReceiptContinuity;
   if(mode==="items")t.state.cartItems=[];
@@ -43,6 +43,7 @@ describe("original receipts across an unchanged-cart negotiation",()=>{
   if(mode==="wrong-effect")t.effectReceipts[0]!.effect="PURCHASE_CONFIRMED";
   if(mode==="duplicate-operation")t.effectReceipts[0]!.operationId="neg";
   if(mode==="rebased")t.effectReceipts[0]!.stateRevision=5;
+  if(mode==="negative"){t.state.revision=0;t.effectReceiptContinuity!.stateRevision=0;t.effectReceipts[0]!.stateRevision=-1;t.effectReceipts[1]!.stateRevision=0;}
   expect(hardPrecheck(t,draft,now)).not.toBeNull();
  });
 });

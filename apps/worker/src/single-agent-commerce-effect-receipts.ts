@@ -25,7 +25,7 @@ export function validatedReceiptContinuity(context:TrustedContext):Set<string>|n
  if(ordered[0]!.effect!=="CART_OPENED"||ordered.at(-1)!.stateRevision!==s.revision||
   new Set(ordered.map(r=>r.operationId)).size!==ordered.length||
   ordered.some((r,i)=>r.subjectRef!==cart.cartId||r.status!=="SUCCESS"||r.recipient!==s.recipient||
-    !Number.isSafeInteger(r.stateRevision)||i>0&&(r.effect!=="NEGOTIATION_UPDATED"||r.stateRevision!==ordered[i-1]!.stateRevision+1||
+    !Number.isSafeInteger(r.stateRevision)||r.stateRevision<0||i>0&&(r.effect!=="NEGOTIATION_UPDATED"||r.stateRevision!==ordered[i-1]!.stateRevision+1||
       Date.parse(r.observedAt)<Date.parse(ordered[i-1]!.observedAt))))return null;
  return new Set(p.receiptRefs);
 }
