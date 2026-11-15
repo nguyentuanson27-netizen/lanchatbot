@@ -2,7 +2,8 @@
 
 - [x] Reproduce lost CART_OPENED receipt and quote cancellation after validation-only RECORD refusal; implement with unchanged prompts and original receipt revisions.
 - [x] 642 worker / 102 protocol-adapter / 18 existing protected-boundary / 22 protected-claim/reply-assembly tests and worker build/noEmit/lint PASS; self-review scope/freshness/budget/receipt invariants.
-- [ ] Fresh source/initial-state capture, seal, execute and review J4 ×5 plus two-shirt control ×1. [Evidence](../docs/specs/evidence/c3-sales-context-implementation-20261115/RECEIPT_QUOTE_REPAIR_20261115.md). Historical STOP retained.
+- [x] Fresh world83facf10, clean source978fc83d and both preflights PASS; all6attempts/18terminal turns executed and reviewed. Control1/1whole PASS, all3sent with original ledger-backed cart/support receipts. J4 3/5PASS; repetitions2/5 stop on Gemini HTTP200 MALFORMED_FUNCTION_CALL, remain failed in denominator. 38native+6judge generation requests, 12SEND/2HANDOFF/4NO_SEND. [Evidence](../docs/specs/evidence/c3-sales-context-implementation-20261115/RECEIPT_QUOTE_REPAIR_20261115.md).
+- [ ] Phase C STOP: malformed owner function-call completions and their pre-transport local retry errors remain; no automatic extra sampling. Independent quote-after-refused-RECORD is GREEN in deterministic tests but not exercised by this native sample.
 
 ## Phase C · Kết quả N=5 ngày 13/11/2026
 

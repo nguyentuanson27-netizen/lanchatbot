@@ -1,0 +1,196 @@
+{
+  "implementationBaseSha": "9fd209c4e23bf80656df4880c6a04597fd15a974",
+  "nativeSourceSha": "978fc83dcae93fbb21fd2f72485d50429589d788",
+  "worldHash": "83facf100a289302c2a34911c699856895c5ac446a78562671305162480a033c",
+  "exactSameWorldComparison": false,
+  "sourceCaptureFailures": [
+    {
+      "source": "5ef00a83",
+      "directory": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-receipt-quote-model-5ef00a83-20261115-225942",
+      "reason": "C_CAPTURE_POS_CHANGED",
+      "productId": "SV461",
+      "beforeSyncedAt": "2026-11-15T15:29:47.807Z",
+      "afterSyncedAt": "2026-11-15T15:59:47.910Z",
+      "providerGenerations": 0
+    }
+  ],
+  "sourceCaptureLogHash": "35383f84418b4fb6df5f41c201356cd8227dd6d4ae0dbb7a2508fe8e16fe23cc",
+  "campaignSeal": "a80c530ba84bb0be4c4cc02b2ad327a13a86e0a392a98840b08f91e016b788d4",
+  "qualificationEligible": false,
+  "jobs": {
+    "CANDIDATE": {
+      "runSourceSha": "978fc83dcae93fbb21fd2f72485d50429589d788",
+      "registrationHash": "ae6e0792de45ea6edfaffa8159060b1f78494eddca077e61a1b95f70dc02b62e",
+      "corpusHash": "2a39692682d8022a11042bd5611de908a26c8a32b0359ef3b27958f36a88b9d8",
+      "candidate": {
+        "sourceSha": "978fc83dcae93fbb21fd2f72485d50429589d788",
+        "model": {
+          "provider": "VERTEX_AI",
+          "model": "gemini-3.5-flash-lite",
+          "version": "gemini-3.5-flash-lite",
+          "effort": "high",
+          "location": "global",
+          "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+          "generationConfig": {
+            "candidateCount": 1,
+            "responseMimeType": "text/plain",
+            "maxOutputTokens": 8192,
+            "thinkingConfig": {
+              "thinkingLevel": "HIGH",
+              "includeThoughts": false
+            },
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "retry": 0,
+            "timeoutMs": 90000
+          }
+        },
+        "promptHash": "a29e54165dc0bd4809060e7bae28a51f4e024366b55257484dee2bd9a5f131cd",
+        "openingMediaRule": {
+          "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2"
+        },
+        "contextPolicyHash": "ac8ed513e98debd19bbe3b904543df1ae49684cfeafe894b7c8c25ad194f1693",
+        "toolContractHash": "0291b405444a7a8127a7aef7ef53f3e3a652ca53a63b3101a2835112baac71c3",
+        "assemblyHash": "2851ed1430f3f9048d5ce414fe79df9d718a29fdc4a4004b79179afb3cbd8f2c",
+        "runtimeHash": "104ccc105a5c4b2842fd09d29efdf6e7af2da871f213882fcf2ef8389443fe2d",
+        "verifier": {
+          "model": {
+            "provider": "OPENAI",
+            "model": "gpt-6.1-sol",
+            "version": "gpt-6.1-sol",
+            "effort": "high",
+            "credentialRoute": "CODEX_CHATGPT_LOGIN",
+            "generationConfig": {
+              "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+              "cliVersion": "0.159.2",
+              "wireApi": "responses",
+              "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+              "tools": [],
+              "tool_choice": "none",
+              "parallel_tool_calls": false,
+              "store": false,
+              "stream": true,
+              "reasoningEffort": "high",
+              "temperature": "OMITTED_PROVIDER_DEFAULT",
+              "topP": "OMITTED_PROVIDER_DEFAULT",
+              "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+              "timeoutMs": 90000,
+              "maxResponseBytes": 1048576,
+              "relayUpstreamRequestsPerAttempt": 1,
+              "retry": 0,
+              "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+              "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+            }
+          },
+          "promptHash": "ca2c883564b4800f76dcfe7b11b2298fbb4930efd7a3095667f44e965153f7b3",
+          "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+          "serializationHash": "be6d02ed3d0106cb995626769e47d37b417b6655d43c8bfb2b2f4b80f3f8e6d7",
+          "bindingHash": "c98a52a23eea25f21877b9127a8650521e0c0abec60fa21d72e6a7b364564dab",
+          "boundsHash": "6179ba4eb906926b3b58c2cd754f53c4e511bc4d8b2a6e0049d2463a32a1c26b"
+        }
+      },
+      "initialStateHash": "a8094ce0ea6c7763743e22a77297b98e6d80fa7ace9d8a74b49772345275d524",
+      "selectedSlots": [
+        {
+          "caseId": "c-20261028-j4",
+          "repetition": 1
+        },
+        {
+          "caseId": "c-20261028-j4",
+          "repetition": 2
+        },
+        {
+          "caseId": "c-20261028-j4",
+          "repetition": 3
+        },
+        {
+          "caseId": "c-20261028-j4",
+          "repetition": 4
+        },
+        {
+          "caseId": "c-20261028-j4",
+          "repetition": 5
+        }
+      ]
+    },
+    "CONTROLS": {
+      "runSourceSha": "978fc83dcae93fbb21fd2f72485d50429589d788",
+      "registrationHash": "82702a3d7082be7c16eb6470f0bbc6239c1bbfe19a041049d9feb859081f1707",
+      "corpusHash": "c73cdae1c4abe15636c5f50b78507991855b0726602390b0be45832b609f9bdc",
+      "candidate": {
+        "sourceSha": "978fc83dcae93fbb21fd2f72485d50429589d788",
+        "model": {
+          "provider": "VERTEX_AI",
+          "model": "gemini-3.5-flash-lite",
+          "version": "gemini-3.5-flash-lite",
+          "effort": "high",
+          "location": "global",
+          "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+          "generationConfig": {
+            "candidateCount": 1,
+            "responseMimeType": "text/plain",
+            "maxOutputTokens": 8192,
+            "thinkingConfig": {
+              "thinkingLevel": "HIGH",
+              "includeThoughts": false
+            },
+            "temperature": "OMITTED_PROVIDER_DEFAULT",
+            "topP": "OMITTED_PROVIDER_DEFAULT",
+            "retry": 0,
+            "timeoutMs": 90000
+          }
+        },
+        "promptHash": "a29e54165dc0bd4809060e7bae28a51f4e024366b55257484dee2bd9a5f131cd",
+        "openingMediaRule": {
+          "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2"
+        },
+        "contextPolicyHash": "ac8ed513e98debd19bbe3b904543df1ae49684cfeafe894b7c8c25ad194f1693",
+        "toolContractHash": "0291b405444a7a8127a7aef7ef53f3e3a652ca53a63b3101a2835112baac71c3",
+        "assemblyHash": "2851ed1430f3f9048d5ce414fe79df9d718a29fdc4a4004b79179afb3cbd8f2c",
+        "runtimeHash": "104ccc105a5c4b2842fd09d29efdf6e7af2da871f213882fcf2ef8389443fe2d",
+        "verifier": {
+          "model": {
+            "provider": "OPENAI",
+            "model": "gpt-6.1-sol",
+            "version": "gpt-6.1-sol",
+            "effort": "high",
+            "credentialRoute": "CODEX_CHATGPT_LOGIN",
+            "generationConfig": {
+              "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+              "cliVersion": "0.159.2",
+              "wireApi": "responses",
+              "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+              "tools": [],
+              "tool_choice": "none",
+              "parallel_tool_calls": false,
+              "store": false,
+              "stream": true,
+              "reasoningEffort": "high",
+              "temperature": "OMITTED_PROVIDER_DEFAULT",
+              "topP": "OMITTED_PROVIDER_DEFAULT",
+              "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+              "timeoutMs": 90000,
+              "maxResponseBytes": 1048576,
+              "relayUpstreamRequestsPerAttempt": 1,
+              "retry": 0,
+              "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+              "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+            }
+          },
+          "promptHash": "ca2c883564b4800f76dcfe7b11b2298fbb4930efd7a3095667f44e965153f7b3",
+          "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+          "serializationHash": "be6d02ed3d0106cb995626769e47d37b417b6655d43c8bfb2b2f4b80f3f8e6d7",
+          "bindingHash": "c98a52a23eea25f21877b9127a8650521e0c0abec60fa21d72e6a7b364564dab",
+          "boundsHash": "6179ba4eb906926b3b58c2cd754f53c4e511bc4d8b2a6e0049d2463a32a1c26b"
+        }
+      },
+      "initialStateHash": "a8094ce0ea6c7763743e22a77297b98e6d80fa7ace9d8a74b49772345275d524",
+      "selectedSlots": [
+        {
+          "caseId": "c-context-two-units",
+          "repetition": 1
+        }
+      ]
+    }
+  }
+}

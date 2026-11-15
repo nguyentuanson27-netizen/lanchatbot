@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "providerRequests": 0,
+  "rows": [
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "turn": 1,
+      "cartId": "b882c907-245b-5ab8-8f1e-66b2fc2c4a9d",
+      "receipts": [
+        {
+          "ref": "receipt:9c43af394190e22482087d6ede6f4071c19be700ba5e5d42c344d5ad1712af02",
+          "effect": "CART_OPENED",
+          "originalStateRevision": 5,
+          "observedAt": "2026-11-15T16:11:11.534Z"
+        },
+        {
+          "ref": "receipt:1446510228ac8058454530964490637716e1da8a98dbfc7c5708b3c6f758d53e",
+          "effect": "NEGOTIATION_UPDATED",
+          "originalStateRevision": 6,
+          "observedAt": "2026-11-15T16:11:21.175Z"
+        }
+      ],
+      "currentStateRevision": 6,
+      "originalLedgerRevisionsAndTimesMatch": true,
+      "verdict": {
+        "verdict": "PASS",
+        "violations": []
+      }
+    }
+  ]
+}

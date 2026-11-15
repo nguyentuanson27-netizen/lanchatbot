@@ -1,0 +1,3909 @@
+{
+  "source": "978fc83dcae93fbb21fd2f72485d50429589d788",
+  "worldHash": "83facf100a289302c2a34911c699856895c5ac446a78562671305162480a033c",
+  "attempts": 6,
+  "turns": 18,
+  "nativeGenerationRequests": 38,
+  "dispositions": {
+    "SEND_ELIGIBLE": 12,
+    "HANDOFF": 2,
+    "NO_SEND": 4
+  },
+  "qualificationEligible": false,
+  "cases": [
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turns": [
+        {
+          "turn": 0,
+          "terminal": "SEND_ELIGIBLE",
+          "reason": null,
+          "recoveryReason": null,
+          "artifactHash": "8114457100e5cf3275784277719d7350144ff7b3145ee6e5321149d40c24e205",
+          "tools": [
+            {
+              "name": "add_to_cart",
+              "status": "UNAVAILABLE",
+              "reason": "SELECTION_UNAVAILABLE",
+              "data": {
+                "effectCommitted": false,
+                "choiceResolution": {
+                  "kind": "NEEDS_CUSTOMER_CHOICE",
+                  "field": "COLOR",
+                  "evidenceHash": "1faa36bd307ba0cb322e66aa0eeef58f191560cef0840741817fb94dd55cfc51",
+                  "completeness": "ALL_EXACT_TUPLES_FOR_QUERY",
+                  "optionRefs": [
+                    "6630ab22babc50f91e2018419a58c4aaa2b4cdc8d9b6be1e8e052280700c6921",
+                    "f75d0d833394583f749d9c48ed79d700d599f1e83e74ffb6653280230e1e06fa"
+                  ]
+                }
+              }
+            }
+          ],
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "exposedReceipts": [],
+          "effectReceiptContinuity": null,
+          "ledgerReceipts": [],
+          "colourEvidence": [
+            {
+              "productId": "SV2447",
+              "selectionEvidence": [
+                {
+                  "allSourceValuesForQuery": null,
+                  "color": null,
+                  "colorSemantics": "UNRECORDED_IS_NOT_A_PHYSICAL_COLOR",
+                  "completeness": "ALL_EXACT_TUPLES_FOR_QUERY",
+                  "contentHash": "1faa36bd307ba0cb322e66aa0eeef58f191560cef0840741817fb94dd55cfc51",
+                  "expiresAt": "2026-11-15T17:59:47.910Z",
+                  "kind": "CANDIDATE_SELECTION_V3",
+                  "observedAt": "2026-11-15T15:59:47.910Z",
+                  "offerType": "AO",
+                  "options": [
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "6630ab22babc50f91e2018419a58c4aaa2b4cdc8d9b6be1e8e052280700c6921",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "f75d0d833394583f749d9c48ed79d700d599f1e83e74ffb6653280230e1e06fa",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "PRE_ORDER"
+                    }
+                  ],
+                  "productId": "SV2447",
+                  "quantity": 1,
+                  "size": "M",
+                  "sourceHash": "f979e36cf6516dc244d5e137e038100a4ccc2fb026f0be6c329c769d6610442f",
+                  "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default"
+                }
+              ]
+            }
+          ],
+          "after": {
+            "owner": "BOT",
+            "stage": "DISCOVERY",
+            "salesRevision": 0,
+            "pendingSupportProof": null,
+            "cart": {}
+          },
+          "runtimeGenerationRecords": [
+            {
+              "id": "a60ae20a-f3b9-45fe-9b8d-daf760f7ff07:owner:1",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 6500.625599999999,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "a60ae20a-f3b9-45fe-9b8d-daf760f7ff07:owner:2",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 4583.982800000005,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "a60ae20a-f3b9-45fe-9b8d-daf760f7ff07:verifier:1",
+              "role": "verifier",
+              "status": "OK",
+              "latencyMs": 7733.697099999998,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": null,
+                "failureStage": null,
+                "failureCode": null
+              }
+            }
+          ]
+        },
+        {
+          "turn": 1,
+          "terminal": "SEND_ELIGIBLE",
+          "reason": null,
+          "recoveryReason": null,
+          "artifactHash": "c44a2c7ed8e136c129d1fbe1b3d0f72444f1661271eb365add6c5994d032d489",
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "c729a2a02f945917be055f8f966d0f986359c0c458c4eaacc361096579dab53c",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "e996c1942215a498af49f6ef3ce46bc8a666ae9706672dea3d6a760ca14757cb",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "e996c1942215a498af49f6ef3ce46bc8a666ae9706672dea3d6a760ca14757cb",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "blockedReason": "CART_REQUIRED"
+                }
+              }
+            }
+          ],
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "exposedReceipts": [
+            {
+              "effect": "NEGOTIATION_REQUEST_RECORDED",
+              "expiresAt": "2026-11-15T16:16:04.720Z",
+              "observedAt": "2026-11-15T16:11:04.720Z",
+              "operationId": "c729a2a02f945917be055f8f966d0f986359c0c458c4eaacc361096579dab53c",
+              "recipient": "40b8b39451e53543865b5de931d18c1f46e71c6f828e54f1f3ba8b9d12d0bf0f",
+              "ref": "receipt:c729a2a02f945917be055f8f966d0f986359c0c458c4eaacc361096579dab53c",
+              "stateRevision": 1,
+              "status": "SUCCESS",
+              "subjectRef": "SV2447"
+            }
+          ],
+          "effectReceiptContinuity": null,
+          "ledgerReceipts": [
+            {
+              "operation_id": "c729a2a02f945917be055f8f966d0f986359c0c458c4eaacc361096579dab53c",
+              "kind": "COMMITTED_SALES_EVENT",
+              "commandKind": "PENDING_NEGOTIATION_RECORDED",
+              "stateRevisionAfter": 1,
+              "occurredAt": "2026-11-15T16:11:04.720Z"
+            }
+          ],
+          "colourEvidence": [
+            {
+              "productId": "SV2447",
+              "selectionEvidence": [
+                {
+                  "allSourceValuesForQuery": null,
+                  "color": null,
+                  "colorSemantics": "UNRECORDED_IS_NOT_A_PHYSICAL_COLOR",
+                  "completeness": "ALL_EXACT_TUPLES_FOR_QUERY",
+                  "contentHash": "1faa36bd307ba0cb322e66aa0eeef58f191560cef0840741817fb94dd55cfc51",
+                  "expiresAt": "2026-11-15T17:59:47.910Z",
+                  "kind": "CANDIDATE_SELECTION_V3",
+                  "observedAt": "2026-11-15T15:59:47.910Z",
+                  "offerType": "AO",
+                  "options": [
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "6630ab22babc50f91e2018419a58c4aaa2b4cdc8d9b6be1e8e052280700c6921",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "f75d0d833394583f749d9c48ed79d700d599f1e83e74ffb6653280230e1e06fa",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "PRE_ORDER"
+                    }
+                  ],
+                  "productId": "SV2447",
+                  "quantity": 1,
+                  "size": "M",
+                  "sourceHash": "f979e36cf6516dc244d5e137e038100a4ccc2fb026f0be6c329c769d6610442f",
+                  "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default"
+                }
+              ]
+            }
+          ],
+          "after": {
+            "owner": "BOT",
+            "stage": "DISCOVERY",
+            "salesRevision": 1,
+            "pendingSupportProof": {
+              "id": "e996c1942215a498af49f6ef3ce46bc8a666ae9706672dea3d6a760ca14757cb",
+              "status": "PENDING",
+              "sourceObservedAt": "2026-11-15T16:10:51.952Z",
+              "cartId": null
+            },
+            "cart": {}
+          },
+          "runtimeGenerationRecords": [
+            {
+              "id": "48cfc433-67a1-4b4d-a3db-782e48859eae:owner:1",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 5578.194999999992,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "48cfc433-67a1-4b4d-a3db-782e48859eae:owner:2",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 5054.450100000002,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "48cfc433-67a1-4b4d-a3db-782e48859eae:verifier:1",
+              "role": "verifier",
+              "status": "OK",
+              "latencyMs": 9817.693100000004,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": null,
+                "failureStage": null,
+                "failureCode": null
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "terminal": "SEND_ELIGIBLE",
+          "reason": null,
+          "recoveryReason": null,
+          "artifactHash": "511026501c4755b5d936550482be33b98fc7164b314c2d80eafc6240568c1a34",
+          "tools": [
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "benefitAuthorization": {
+                  "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                  "status": "NOT_GRANTED",
+                  "grantedBenefits": [],
+                  "receiptRef": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "standardPromotion": {
+                    "status": "NOT_APPLIED",
+                    "parentProductUnits": 1,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 1,
+                  "deliveryRegion": "Cần Thơ",
+                  "subtotalVnd": 499000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 0,
+                  "grandTotalVnd": 529000,
+                  "priceHash": "9eeb0c578fa3bdf4f353dd391a31253e9fcfb4b2c355a08595aa968ead195360",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:3:40b8b39451e53543865b5de931d18c1f46e71c6f828e54f1f3ba8b9d12d0bf0f",
+                  "recipient": "40b8b39451e53543865b5de931d18c1f46e71c6f828e54f1f3ba8b9d12d0bf0f"
+                }
+              }
+            }
+          ],
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "exposedReceipts": [],
+          "effectReceiptContinuity": null,
+          "ledgerReceipts": [
+            {
+              "operation_id": "c729a2a02f945917be055f8f966d0f986359c0c458c4eaacc361096579dab53c",
+              "kind": "COMMITTED_SALES_EVENT",
+              "commandKind": "PENDING_NEGOTIATION_RECORDED",
+              "stateRevisionAfter": 1,
+              "occurredAt": "2026-11-15T16:11:04.720Z"
+            }
+          ],
+          "colourEvidence": [
+            {
+              "productId": "SV2447",
+              "selectionEvidence": [
+                {
+                  "allSourceValuesForQuery": null,
+                  "color": null,
+                  "colorSemantics": "UNRECORDED_IS_NOT_A_PHYSICAL_COLOR",
+                  "completeness": "ALL_EXACT_TUPLES_FOR_QUERY",
+                  "contentHash": "dc98f0d670d3894ac902254777468b2fce8fc55d9f89db34ea9d21ad84179d4d",
+                  "expiresAt": "2026-11-15T17:59:47.910Z",
+                  "kind": "CANDIDATE_SELECTION_V3",
+                  "observedAt": "2026-11-15T15:59:47.910Z",
+                  "offerType": "AO",
+                  "options": [
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "3ec31c31211683e9c3cd1bc2107df05bd5d14288819570dac17da526d3ed9076",
+                      "reasonCode": null,
+                      "size": "S",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "6630ab22babc50f91e2018419a58c4aaa2b4cdc8d9b6be1e8e052280700c6921",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "cecc4060bba1ee57f2b012d87f691537ec45de47d10931b8c098b52a99eeaef4",
+                      "reasonCode": null,
+                      "size": "L",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "8929367aa3680ccb6b3443431309598d7fa7595c72f5591802ba03be4afc37e4",
+                      "reasonCode": null,
+                      "size": "XL",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "a485c33ff3499ef8dab265c9852fe3a12b2f70da74db9a9eef61dbe69e480af0",
+                      "reasonCode": null,
+                      "size": "S",
+                      "status": "PRE_ORDER"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "f75d0d833394583f749d9c48ed79d700d599f1e83e74ffb6653280230e1e06fa",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "PRE_ORDER"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "188e0210c8358078d9ae581da298f27421b2b8196331aebd7f71dc98150fd544",
+                      "reasonCode": null,
+                      "size": "L",
+                      "status": "PRE_ORDER"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "5232332794ca69de03e3fc7b5b1622751e44334e7e9fe878ab44c1a6037fb3e1",
+                      "reasonCode": null,
+                      "size": "XL",
+                      "status": "PRE_ORDER"
+                    }
+                  ],
+                  "productId": "SV2447",
+                  "quantity": 1,
+                  "size": null,
+                  "sourceHash": "f979e36cf6516dc244d5e137e038100a4ccc2fb026f0be6c329c769d6610442f",
+                  "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default"
+                },
+                {
+                  "allSourceValuesForQuery": null,
+                  "color": null,
+                  "colorSemantics": "UNRECORDED_IS_NOT_A_PHYSICAL_COLOR",
+                  "completeness": "ALL_EXACT_TUPLES_FOR_QUERY",
+                  "contentHash": "1faa36bd307ba0cb322e66aa0eeef58f191560cef0840741817fb94dd55cfc51",
+                  "expiresAt": "2026-11-15T17:59:47.910Z",
+                  "kind": "CANDIDATE_SELECTION_V3",
+                  "observedAt": "2026-11-15T15:59:47.910Z",
+                  "offerType": "AO",
+                  "options": [
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "6630ab22babc50f91e2018419a58c4aaa2b4cdc8d9b6be1e8e052280700c6921",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "f75d0d833394583f749d9c48ed79d700d599f1e83e74ffb6653280230e1e06fa",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "PRE_ORDER"
+                    }
+                  ],
+                  "productId": "SV2447",
+                  "quantity": 1,
+                  "size": "M",
+                  "sourceHash": "f979e36cf6516dc244d5e137e038100a4ccc2fb026f0be6c329c769d6610442f",
+                  "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default"
+                }
+              ]
+            }
+          ],
+          "after": {
+            "owner": "BOT",
+            "stage": "DISCOVERY",
+            "salesRevision": 1,
+            "pendingSupportProof": {
+              "id": "e996c1942215a498af49f6ef3ce46bc8a666ae9706672dea3d6a760ca14757cb",
+              "status": "PENDING",
+              "sourceObservedAt": "2026-11-15T16:10:51.952Z",
+              "cartId": null
+            },
+            "cart": {}
+          },
+          "runtimeGenerationRecords": [
+            {
+              "id": "bba289c7-1f12-4b2a-84d8-6cc53cfbf220:owner:1",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 5802.911200000002,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "bba289c7-1f12-4b2a-84d8-6cc53cfbf220:owner:2",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 4123.491899999994,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "bba289c7-1f12-4b2a-84d8-6cc53cfbf220:verifier:1",
+              "role": "verifier",
+              "status": "OK",
+              "latencyMs": 8402.022399999987,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": null,
+                "failureStage": null,
+                "failureCode": null
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turns": [
+        {
+          "turn": 0,
+          "terminal": "HANDOFF",
+          "reason": "DEPENDENCY_FAILURE",
+          "recoveryReason": "PROVIDER_ERROR",
+          "artifactHash": "cd0e9dfe66d03d117f96935a15b333f65e0c75f06c0391675647a5786c867956",
+          "tools": [],
+          "verdict": null,
+          "exposedReceipts": [],
+          "effectReceiptContinuity": null,
+          "ledgerReceipts": [],
+          "after": {
+            "owner": "HUMAN",
+            "stage": "DISCOVERY",
+            "salesRevision": 0,
+            "pendingSupportProof": null,
+            "cart": {}
+          },
+          "runtimeGenerationRecords": [
+            {
+              "id": "2f8cb033-2a88-45c5-ab65-73c4a8f01405:owner:1",
+              "role": "owner",
+              "status": "PROVIDER_ERROR",
+              "latencyMs": 9715.688500000018,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "MALFORMED_FUNCTION_CALL",
+                "failureStage": "COMPLETION",
+                "failureCode": "OWNER_FINISH_REASON"
+              }
+            },
+            {
+              "id": "2f8cb033-2a88-45c5-ab65-73c4a8f01405:owner:2",
+              "role": "owner",
+              "status": "PROVIDER_ERROR",
+              "latencyMs": 675.6036000000022,
+              "telemetry": {
+                "providerRequests": null,
+                "httpStatus": null,
+                "finishReason": null,
+                "failureStage": null,
+                "failureCode": null
+              }
+            }
+          ]
+        },
+        {
+          "turn": 1,
+          "terminal": "NO_SEND",
+          "reason": "HUMAN_OWNS_CONVERSATION",
+          "recoveryReason": null,
+          "artifactHash": "7daef4984399380c173be2465b31795dcebc9973c149b7e80131d2d30f30e726",
+          "tools": [],
+          "verdict": null,
+          "exposedReceipts": [],
+          "effectReceiptContinuity": null,
+          "ledgerReceipts": [],
+          "after": {
+            "owner": "HUMAN",
+            "stage": "DISCOVERY",
+            "salesRevision": 0,
+            "pendingSupportProof": null,
+            "cart": {}
+          },
+          "runtimeGenerationRecords": []
+        },
+        {
+          "turn": 2,
+          "terminal": "NO_SEND",
+          "reason": "HUMAN_OWNS_CONVERSATION",
+          "recoveryReason": null,
+          "artifactHash": "304a5bc8f3413d934df431abf73fe8d0d3ff8e605132969d0736f180c26a44df",
+          "tools": [],
+          "verdict": null,
+          "exposedReceipts": [],
+          "effectReceiptContinuity": null,
+          "ledgerReceipts": [],
+          "after": {
+            "owner": "HUMAN",
+            "stage": "DISCOVERY",
+            "salesRevision": 0,
+            "pendingSupportProof": null,
+            "cart": {}
+          },
+          "runtimeGenerationRecords": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turns": [
+        {
+          "turn": 0,
+          "terminal": "SEND_ELIGIBLE",
+          "reason": null,
+          "recoveryReason": null,
+          "artifactHash": "585d97103716211244b65b6c37461fcd9b0cfceffd4bd4379ed41ed0c8b16b13",
+          "tools": [
+            {
+              "name": "add_to_cart",
+              "status": "UNAVAILABLE",
+              "reason": "SELECTION_UNAVAILABLE",
+              "data": {
+                "effectCommitted": false,
+                "choiceResolution": {
+                  "kind": "NEEDS_CUSTOMER_CHOICE",
+                  "field": "COLOR",
+                  "evidenceHash": "1faa36bd307ba0cb322e66aa0eeef58f191560cef0840741817fb94dd55cfc51",
+                  "completeness": "ALL_EXACT_TUPLES_FOR_QUERY",
+                  "optionRefs": [
+                    "6630ab22babc50f91e2018419a58c4aaa2b4cdc8d9b6be1e8e052280700c6921",
+                    "f75d0d833394583f749d9c48ed79d700d599f1e83e74ffb6653280230e1e06fa"
+                  ]
+                }
+              }
+            }
+          ],
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "exposedReceipts": [],
+          "effectReceiptContinuity": null,
+          "ledgerReceipts": [],
+          "colourEvidence": [
+            {
+              "productId": "SV2447",
+              "selectionEvidence": [
+                {
+                  "allSourceValuesForQuery": null,
+                  "color": null,
+                  "colorSemantics": "UNRECORDED_IS_NOT_A_PHYSICAL_COLOR",
+                  "completeness": "ALL_EXACT_TUPLES_FOR_QUERY",
+                  "contentHash": "1faa36bd307ba0cb322e66aa0eeef58f191560cef0840741817fb94dd55cfc51",
+                  "expiresAt": "2026-11-15T17:59:47.910Z",
+                  "kind": "CANDIDATE_SELECTION_V3",
+                  "observedAt": "2026-11-15T15:59:47.910Z",
+                  "offerType": "AO",
+                  "options": [
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "6630ab22babc50f91e2018419a58c4aaa2b4cdc8d9b6be1e8e052280700c6921",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "f75d0d833394583f749d9c48ed79d700d599f1e83e74ffb6653280230e1e06fa",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "PRE_ORDER"
+                    }
+                  ],
+                  "productId": "SV2447",
+                  "quantity": 1,
+                  "size": "M",
+                  "sourceHash": "f979e36cf6516dc244d5e137e038100a4ccc2fb026f0be6c329c769d6610442f",
+                  "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default"
+                }
+              ]
+            }
+          ],
+          "after": {
+            "owner": "BOT",
+            "stage": "DISCOVERY",
+            "salesRevision": 0,
+            "pendingSupportProof": null,
+            "cart": {}
+          },
+          "runtimeGenerationRecords": [
+            {
+              "id": "b365987d-a69e-4797-a30e-47ef4fb8156a:owner:1",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 5339.492200000008,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "b365987d-a69e-4797-a30e-47ef4fb8156a:owner:2",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 4053.611499999999,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "b365987d-a69e-4797-a30e-47ef4fb8156a:verifier:1",
+              "role": "verifier",
+              "status": "OK",
+              "latencyMs": 7730.780700000003,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": null,
+                "failureStage": null,
+                "failureCode": null
+              }
+            }
+          ]
+        },
+        {
+          "turn": 1,
+          "terminal": "SEND_ELIGIBLE",
+          "reason": null,
+          "recoveryReason": null,
+          "artifactHash": "f7f3c15590cce9b33269b2f0992515e11e6b04a3f1a1ed2f65d3502cb1327cfc",
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "4b17ac8ae6c9f311bb1062912308f8ce98b7cdef24af313bcb7940d36f0baa61",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "ea9b49a9cf6d023d4680cf7c6f3095a0c70e3fa944d7d84910c804c842854df8",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "ea9b49a9cf6d023d4680cf7c6f3095a0c70e3fa944d7d84910c804c842854df8",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "blockedReason": "CART_REQUIRED"
+                }
+              }
+            }
+          ],
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "exposedReceipts": [
+            {
+              "effect": "NEGOTIATION_REQUEST_RECORDED",
+              "expiresAt": "2026-11-15T16:18:23.782Z",
+              "observedAt": "2026-11-15T16:13:23.782Z",
+              "operationId": "4b17ac8ae6c9f311bb1062912308f8ce98b7cdef24af313bcb7940d36f0baa61",
+              "recipient": "3f76723ca0efd63a253091c6395c52347db09bde0c191c00bbf9f0da9ef9650b",
+              "ref": "receipt:4b17ac8ae6c9f311bb1062912308f8ce98b7cdef24af313bcb7940d36f0baa61",
+              "stateRevision": 1,
+              "status": "SUCCESS",
+              "subjectRef": "SV2447"
+            }
+          ],
+          "effectReceiptContinuity": null,
+          "ledgerReceipts": [
+            {
+              "operation_id": "4b17ac8ae6c9f311bb1062912308f8ce98b7cdef24af313bcb7940d36f0baa61",
+              "kind": "COMMITTED_SALES_EVENT",
+              "commandKind": "PENDING_NEGOTIATION_RECORDED",
+              "stateRevisionAfter": 1,
+              "occurredAt": "2026-11-15T16:13:23.782Z"
+            }
+          ],
+          "colourEvidence": [
+            {
+              "productId": "SV2447",
+              "selectionEvidence": [
+                {
+                  "allSourceValuesForQuery": null,
+                  "color": null,
+                  "colorSemantics": "UNRECORDED_IS_NOT_A_PHYSICAL_COLOR",
+                  "completeness": "ALL_EXACT_TUPLES_FOR_QUERY",
+                  "contentHash": "1faa36bd307ba0cb322e66aa0eeef58f191560cef0840741817fb94dd55cfc51",
+                  "expiresAt": "2026-11-15T17:59:47.910Z",
+                  "kind": "CANDIDATE_SELECTION_V3",
+                  "observedAt": "2026-11-15T15:59:47.910Z",
+                  "offerType": "AO",
+                  "options": [
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "6630ab22babc50f91e2018419a58c4aaa2b4cdc8d9b6be1e8e052280700c6921",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "f75d0d833394583f749d9c48ed79d700d599f1e83e74ffb6653280230e1e06fa",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "PRE_ORDER"
+                    }
+                  ],
+                  "productId": "SV2447",
+                  "quantity": 1,
+                  "size": "M",
+                  "sourceHash": "f979e36cf6516dc244d5e137e038100a4ccc2fb026f0be6c329c769d6610442f",
+                  "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default"
+                }
+              ]
+            }
+          ],
+          "after": {
+            "owner": "BOT",
+            "stage": "DISCOVERY",
+            "salesRevision": 1,
+            "pendingSupportProof": {
+              "id": "ea9b49a9cf6d023d4680cf7c6f3095a0c70e3fa944d7d84910c804c842854df8",
+              "status": "PENDING",
+              "sourceObservedAt": "2026-11-15T16:13:12.118Z",
+              "cartId": null
+            },
+            "cart": {}
+          },
+          "runtimeGenerationRecords": [
+            {
+              "id": "fcc63648-09b0-49c2-bb62-880f8f3e38fd:owner:1",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 5114.033800000005,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "fcc63648-09b0-49c2-bb62-880f8f3e38fd:owner:2",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 4555.2920999999915,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "fcc63648-09b0-49c2-bb62-880f8f3e38fd:verifier:1",
+              "role": "verifier",
+              "status": "OK",
+              "latencyMs": 9849.591199999995,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": null,
+                "failureStage": null,
+                "failureCode": null
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "terminal": "SEND_ELIGIBLE",
+          "reason": null,
+          "recoveryReason": null,
+          "artifactHash": "b6b432c87828b23fc01e3a3af3c5fa9251d02a6028b70ade7b20f275180f3f69",
+          "tools": [
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "benefitAuthorization": {
+                  "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                  "status": "NOT_GRANTED",
+                  "grantedBenefits": [],
+                  "receiptRef": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "standardPromotion": {
+                    "status": "NOT_APPLIED",
+                    "parentProductUnits": 1,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 1,
+                  "deliveryRegion": "Cần Thơ",
+                  "subtotalVnd": 499000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 0,
+                  "grandTotalVnd": 529000,
+                  "priceHash": "9eeb0c578fa3bdf4f353dd391a31253e9fcfb4b2c355a08595aa968ead195360",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:9:3f76723ca0efd63a253091c6395c52347db09bde0c191c00bbf9f0da9ef9650b",
+                  "recipient": "3f76723ca0efd63a253091c6395c52347db09bde0c191c00bbf9f0da9ef9650b"
+                }
+              }
+            }
+          ],
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "exposedReceipts": [],
+          "effectReceiptContinuity": null,
+          "ledgerReceipts": [
+            {
+              "operation_id": "4b17ac8ae6c9f311bb1062912308f8ce98b7cdef24af313bcb7940d36f0baa61",
+              "kind": "COMMITTED_SALES_EVENT",
+              "commandKind": "PENDING_NEGOTIATION_RECORDED",
+              "stateRevisionAfter": 1,
+              "occurredAt": "2026-11-15T16:13:23.782Z"
+            }
+          ],
+          "colourEvidence": [
+            {
+              "productId": "SV2447",
+              "selectionEvidence": [
+                {
+                  "allSourceValuesForQuery": null,
+                  "color": null,
+                  "colorSemantics": "UNRECORDED_IS_NOT_A_PHYSICAL_COLOR",
+                  "completeness": "ALL_EXACT_TUPLES_FOR_QUERY",
+                  "contentHash": "dc98f0d670d3894ac902254777468b2fce8fc55d9f89db34ea9d21ad84179d4d",
+                  "expiresAt": "2026-11-15T17:59:47.910Z",
+                  "kind": "CANDIDATE_SELECTION_V3",
+                  "observedAt": "2026-11-15T15:59:47.910Z",
+                  "offerType": "AO",
+                  "options": [
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "3ec31c31211683e9c3cd1bc2107df05bd5d14288819570dac17da526d3ed9076",
+                      "reasonCode": null,
+                      "size": "S",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "6630ab22babc50f91e2018419a58c4aaa2b4cdc8d9b6be1e8e052280700c6921",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "cecc4060bba1ee57f2b012d87f691537ec45de47d10931b8c098b52a99eeaef4",
+                      "reasonCode": null,
+                      "size": "L",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "8929367aa3680ccb6b3443431309598d7fa7595c72f5591802ba03be4afc37e4",
+                      "reasonCode": null,
+                      "size": "XL",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "a485c33ff3499ef8dab265c9852fe3a12b2f70da74db9a9eef61dbe69e480af0",
+                      "reasonCode": null,
+                      "size": "S",
+                      "status": "PRE_ORDER"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "f75d0d833394583f749d9c48ed79d700d599f1e83e74ffb6653280230e1e06fa",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "PRE_ORDER"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "188e0210c8358078d9ae581da298f27421b2b8196331aebd7f71dc98150fd544",
+                      "reasonCode": null,
+                      "size": "L",
+                      "status": "PRE_ORDER"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "5232332794ca69de03e3fc7b5b1622751e44334e7e9fe878ab44c1a6037fb3e1",
+                      "reasonCode": null,
+                      "size": "XL",
+                      "status": "PRE_ORDER"
+                    }
+                  ],
+                  "productId": "SV2447",
+                  "quantity": 1,
+                  "size": null,
+                  "sourceHash": "f979e36cf6516dc244d5e137e038100a4ccc2fb026f0be6c329c769d6610442f",
+                  "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default"
+                },
+                {
+                  "allSourceValuesForQuery": null,
+                  "color": null,
+                  "colorSemantics": "UNRECORDED_IS_NOT_A_PHYSICAL_COLOR",
+                  "completeness": "ALL_EXACT_TUPLES_FOR_QUERY",
+                  "contentHash": "1faa36bd307ba0cb322e66aa0eeef58f191560cef0840741817fb94dd55cfc51",
+                  "expiresAt": "2026-11-15T17:59:47.910Z",
+                  "kind": "CANDIDATE_SELECTION_V3",
+                  "observedAt": "2026-11-15T15:59:47.910Z",
+                  "offerType": "AO",
+                  "options": [
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "6630ab22babc50f91e2018419a58c4aaa2b4cdc8d9b6be1e8e052280700c6921",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "f75d0d833394583f749d9c48ed79d700d599f1e83e74ffb6653280230e1e06fa",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "PRE_ORDER"
+                    }
+                  ],
+                  "productId": "SV2447",
+                  "quantity": 1,
+                  "size": "M",
+                  "sourceHash": "f979e36cf6516dc244d5e137e038100a4ccc2fb026f0be6c329c769d6610442f",
+                  "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default"
+                }
+              ]
+            }
+          ],
+          "after": {
+            "owner": "BOT",
+            "stage": "DISCOVERY",
+            "salesRevision": 1,
+            "pendingSupportProof": {
+              "id": "ea9b49a9cf6d023d4680cf7c6f3095a0c70e3fa944d7d84910c804c842854df8",
+              "status": "PENDING",
+              "sourceObservedAt": "2026-11-15T16:13:12.118Z",
+              "cartId": null
+            },
+            "cart": {}
+          },
+          "runtimeGenerationRecords": [
+            {
+              "id": "b003257d-8f5d-47f1-9406-3db06f69d045:owner:1",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 7069.025700000027,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "b003257d-8f5d-47f1-9406-3db06f69d045:owner:2",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 3821.4801999999618,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "b003257d-8f5d-47f1-9406-3db06f69d045:verifier:1",
+              "role": "verifier",
+              "status": "OK",
+              "latencyMs": 7317.686099999992,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": null,
+                "failureStage": null,
+                "failureCode": null
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turns": [
+        {
+          "turn": 0,
+          "terminal": "SEND_ELIGIBLE",
+          "reason": null,
+          "recoveryReason": null,
+          "artifactHash": "89c44f1c9a4c282d4cc92cf3a3358182d7abc316cac465ed47a24b981b3346b4",
+          "tools": [
+            {
+              "name": "add_to_cart",
+              "status": "UNAVAILABLE",
+              "reason": "SELECTION_UNAVAILABLE",
+              "data": {
+                "effectCommitted": false,
+                "choiceResolution": {
+                  "kind": "NEEDS_CUSTOMER_CHOICE",
+                  "field": "COLOR",
+                  "evidenceHash": "1faa36bd307ba0cb322e66aa0eeef58f191560cef0840741817fb94dd55cfc51",
+                  "completeness": "ALL_EXACT_TUPLES_FOR_QUERY",
+                  "optionRefs": [
+                    "6630ab22babc50f91e2018419a58c4aaa2b4cdc8d9b6be1e8e052280700c6921",
+                    "f75d0d833394583f749d9c48ed79d700d599f1e83e74ffb6653280230e1e06fa"
+                  ]
+                }
+              }
+            }
+          ],
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "exposedReceipts": [],
+          "effectReceiptContinuity": null,
+          "ledgerReceipts": [],
+          "colourEvidence": [
+            {
+              "productId": "SV2447",
+              "selectionEvidence": [
+                {
+                  "allSourceValuesForQuery": null,
+                  "color": null,
+                  "colorSemantics": "UNRECORDED_IS_NOT_A_PHYSICAL_COLOR",
+                  "completeness": "ALL_EXACT_TUPLES_FOR_QUERY",
+                  "contentHash": "1faa36bd307ba0cb322e66aa0eeef58f191560cef0840741817fb94dd55cfc51",
+                  "expiresAt": "2026-11-15T17:59:47.910Z",
+                  "kind": "CANDIDATE_SELECTION_V3",
+                  "observedAt": "2026-11-15T15:59:47.910Z",
+                  "offerType": "AO",
+                  "options": [
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "6630ab22babc50f91e2018419a58c4aaa2b4cdc8d9b6be1e8e052280700c6921",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "f75d0d833394583f749d9c48ed79d700d599f1e83e74ffb6653280230e1e06fa",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "PRE_ORDER"
+                    }
+                  ],
+                  "productId": "SV2447",
+                  "quantity": 1,
+                  "size": "M",
+                  "sourceHash": "f979e36cf6516dc244d5e137e038100a4ccc2fb026f0be6c329c769d6610442f",
+                  "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default"
+                }
+              ]
+            }
+          ],
+          "after": {
+            "owner": "BOT",
+            "stage": "DISCOVERY",
+            "salesRevision": 0,
+            "pendingSupportProof": null,
+            "cart": {}
+          },
+          "runtimeGenerationRecords": [
+            {
+              "id": "84f72ca1-84b8-4dae-8a36-a7e30ce57a8e:owner:1",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 6268.482400000037,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "84f72ca1-84b8-4dae-8a36-a7e30ce57a8e:owner:2",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 3899.652000000002,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "84f72ca1-84b8-4dae-8a36-a7e30ce57a8e:verifier:1",
+              "role": "verifier",
+              "status": "OK",
+              "latencyMs": 10527.694600000046,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": null,
+                "failureStage": null,
+                "failureCode": null
+              }
+            }
+          ]
+        },
+        {
+          "turn": 1,
+          "terminal": "SEND_ELIGIBLE",
+          "reason": null,
+          "recoveryReason": null,
+          "artifactHash": "8c60e902b91a79828e8c768a87af9ae3d523406c3a1e19309ebb6edc9228d660",
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "149aed5ec3f850ba9939fb72bbbd0046fc4402eb1da353f61956539d568516a3",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "6b667a4856e38f52ec292bcf1dbb0ce2f3e4e2bad9b3ab9a07a798a22080dbbc",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "6b667a4856e38f52ec292bcf1dbb0ce2f3e4e2bad9b3ab9a07a798a22080dbbc",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "blockedReason": "CART_REQUIRED"
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "benefitAuthorization": {
+                  "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                  "status": "NOT_GRANTED",
+                  "grantedBenefits": [],
+                  "receiptRef": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "standardPromotion": {
+                    "status": "NOT_APPLIED",
+                    "parentProductUnits": 1,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 1,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 499000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 0,
+                  "grandTotalVnd": 529000,
+                  "priceHash": "9eeb0c578fa3bdf4f353dd391a31253e9fcfb4b2c355a08595aa968ead195360",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:11:74d9f0b5a100a0b250355d52e7e31cfa8c85330934c8f51e53c83bca770d1162",
+                  "recipient": "74d9f0b5a100a0b250355d52e7e31cfa8c85330934c8f51e53c83bca770d1162"
+                }
+              }
+            }
+          ],
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "exposedReceipts": [
+            {
+              "effect": "NEGOTIATION_REQUEST_RECORDED",
+              "expiresAt": "2026-11-15T16:20:18.007Z",
+              "observedAt": "2026-11-15T16:15:18.007Z",
+              "operationId": "149aed5ec3f850ba9939fb72bbbd0046fc4402eb1da353f61956539d568516a3",
+              "recipient": "74d9f0b5a100a0b250355d52e7e31cfa8c85330934c8f51e53c83bca770d1162",
+              "ref": "receipt:149aed5ec3f850ba9939fb72bbbd0046fc4402eb1da353f61956539d568516a3",
+              "stateRevision": 1,
+              "status": "SUCCESS",
+              "subjectRef": "SV2447"
+            }
+          ],
+          "effectReceiptContinuity": null,
+          "ledgerReceipts": [
+            {
+              "operation_id": "149aed5ec3f850ba9939fb72bbbd0046fc4402eb1da353f61956539d568516a3",
+              "kind": "COMMITTED_SALES_EVENT",
+              "commandKind": "PENDING_NEGOTIATION_RECORDED",
+              "stateRevisionAfter": 1,
+              "occurredAt": "2026-11-15T16:15:18.007Z"
+            }
+          ],
+          "colourEvidence": [
+            {
+              "productId": "SV2447",
+              "selectionEvidence": [
+                {
+                  "allSourceValuesForQuery": null,
+                  "color": null,
+                  "colorSemantics": "UNRECORDED_IS_NOT_A_PHYSICAL_COLOR",
+                  "completeness": "ALL_EXACT_TUPLES_FOR_QUERY",
+                  "contentHash": "dc98f0d670d3894ac902254777468b2fce8fc55d9f89db34ea9d21ad84179d4d",
+                  "expiresAt": "2026-11-15T17:59:47.910Z",
+                  "kind": "CANDIDATE_SELECTION_V3",
+                  "observedAt": "2026-11-15T15:59:47.910Z",
+                  "offerType": "AO",
+                  "options": [
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "3ec31c31211683e9c3cd1bc2107df05bd5d14288819570dac17da526d3ed9076",
+                      "reasonCode": null,
+                      "size": "S",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "6630ab22babc50f91e2018419a58c4aaa2b4cdc8d9b6be1e8e052280700c6921",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "cecc4060bba1ee57f2b012d87f691537ec45de47d10931b8c098b52a99eeaef4",
+                      "reasonCode": null,
+                      "size": "L",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "8929367aa3680ccb6b3443431309598d7fa7595c72f5591802ba03be4afc37e4",
+                      "reasonCode": null,
+                      "size": "XL",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "a485c33ff3499ef8dab265c9852fe3a12b2f70da74db9a9eef61dbe69e480af0",
+                      "reasonCode": null,
+                      "size": "S",
+                      "status": "PRE_ORDER"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "f75d0d833394583f749d9c48ed79d700d599f1e83e74ffb6653280230e1e06fa",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "PRE_ORDER"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "188e0210c8358078d9ae581da298f27421b2b8196331aebd7f71dc98150fd544",
+                      "reasonCode": null,
+                      "size": "L",
+                      "status": "PRE_ORDER"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "5232332794ca69de03e3fc7b5b1622751e44334e7e9fe878ab44c1a6037fb3e1",
+                      "reasonCode": null,
+                      "size": "XL",
+                      "status": "PRE_ORDER"
+                    }
+                  ],
+                  "productId": "SV2447",
+                  "quantity": 1,
+                  "size": null,
+                  "sourceHash": "f979e36cf6516dc244d5e137e038100a4ccc2fb026f0be6c329c769d6610442f",
+                  "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default"
+                },
+                {
+                  "allSourceValuesForQuery": null,
+                  "color": null,
+                  "colorSemantics": "UNRECORDED_IS_NOT_A_PHYSICAL_COLOR",
+                  "completeness": "ALL_EXACT_TUPLES_FOR_QUERY",
+                  "contentHash": "1faa36bd307ba0cb322e66aa0eeef58f191560cef0840741817fb94dd55cfc51",
+                  "expiresAt": "2026-11-15T17:59:47.910Z",
+                  "kind": "CANDIDATE_SELECTION_V3",
+                  "observedAt": "2026-11-15T15:59:47.910Z",
+                  "offerType": "AO",
+                  "options": [
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "6630ab22babc50f91e2018419a58c4aaa2b4cdc8d9b6be1e8e052280700c6921",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "f75d0d833394583f749d9c48ed79d700d599f1e83e74ffb6653280230e1e06fa",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "PRE_ORDER"
+                    }
+                  ],
+                  "productId": "SV2447",
+                  "quantity": 1,
+                  "size": "M",
+                  "sourceHash": "f979e36cf6516dc244d5e137e038100a4ccc2fb026f0be6c329c769d6610442f",
+                  "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default"
+                }
+              ]
+            }
+          ],
+          "after": {
+            "owner": "BOT",
+            "stage": "DISCOVERY",
+            "salesRevision": 1,
+            "pendingSupportProof": {
+              "id": "6b667a4856e38f52ec292bcf1dbb0ce2f3e4e2bad9b3ab9a07a798a22080dbbc",
+              "status": "PENDING",
+              "sourceObservedAt": "2026-11-15T16:15:03.828Z",
+              "cartId": null
+            },
+            "cart": {}
+          },
+          "runtimeGenerationRecords": [
+            {
+              "id": "057a5449-9453-4aab-9db9-ebba5dcdbdaf:owner:1",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 7416.972000000009,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "057a5449-9453-4aab-9db9-ebba5dcdbdaf:owner:2",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 4044.7987999999896,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "057a5449-9453-4aab-9db9-ebba5dcdbdaf:verifier:1",
+              "role": "verifier",
+              "status": "OK",
+              "latencyMs": 9885.868599999987,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": null,
+                "failureStage": null,
+                "failureCode": null
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "terminal": "SEND_ELIGIBLE",
+          "reason": null,
+          "recoveryReason": null,
+          "artifactHash": "62619df72763da1dea9649df00b66b60c0cbfdd38585f30aa6c7170e0a1ad641",
+          "tools": [
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "benefitAuthorization": {
+                  "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                  "status": "NOT_GRANTED",
+                  "grantedBenefits": [],
+                  "receiptRef": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "standardPromotion": {
+                    "status": "NOT_APPLIED",
+                    "parentProductUnits": 1,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 1,
+                  "deliveryRegion": "Cần Thơ",
+                  "subtotalVnd": 499000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 0,
+                  "grandTotalVnd": 529000,
+                  "priceHash": "9eeb0c578fa3bdf4f353dd391a31253e9fcfb4b2c355a08595aa968ead195360",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:12:74d9f0b5a100a0b250355d52e7e31cfa8c85330934c8f51e53c83bca770d1162",
+                  "recipient": "74d9f0b5a100a0b250355d52e7e31cfa8c85330934c8f51e53c83bca770d1162"
+                }
+              }
+            }
+          ],
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "exposedReceipts": [],
+          "effectReceiptContinuity": null,
+          "ledgerReceipts": [
+            {
+              "operation_id": "149aed5ec3f850ba9939fb72bbbd0046fc4402eb1da353f61956539d568516a3",
+              "kind": "COMMITTED_SALES_EVENT",
+              "commandKind": "PENDING_NEGOTIATION_RECORDED",
+              "stateRevisionAfter": 1,
+              "occurredAt": "2026-11-15T16:15:18.007Z"
+            }
+          ],
+          "colourEvidence": [
+            {
+              "productId": "SV2447",
+              "selectionEvidence": [
+                {
+                  "allSourceValuesForQuery": null,
+                  "color": null,
+                  "colorSemantics": "UNRECORDED_IS_NOT_A_PHYSICAL_COLOR",
+                  "completeness": "ALL_EXACT_TUPLES_FOR_QUERY",
+                  "contentHash": "dc98f0d670d3894ac902254777468b2fce8fc55d9f89db34ea9d21ad84179d4d",
+                  "expiresAt": "2026-11-15T17:59:47.910Z",
+                  "kind": "CANDIDATE_SELECTION_V3",
+                  "observedAt": "2026-11-15T15:59:47.910Z",
+                  "offerType": "AO",
+                  "options": [
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "3ec31c31211683e9c3cd1bc2107df05bd5d14288819570dac17da526d3ed9076",
+                      "reasonCode": null,
+                      "size": "S",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "6630ab22babc50f91e2018419a58c4aaa2b4cdc8d9b6be1e8e052280700c6921",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "cecc4060bba1ee57f2b012d87f691537ec45de47d10931b8c098b52a99eeaef4",
+                      "reasonCode": null,
+                      "size": "L",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "8929367aa3680ccb6b3443431309598d7fa7595c72f5591802ba03be4afc37e4",
+                      "reasonCode": null,
+                      "size": "XL",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "a485c33ff3499ef8dab265c9852fe3a12b2f70da74db9a9eef61dbe69e480af0",
+                      "reasonCode": null,
+                      "size": "S",
+                      "status": "PRE_ORDER"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "f75d0d833394583f749d9c48ed79d700d599f1e83e74ffb6653280230e1e06fa",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "PRE_ORDER"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "188e0210c8358078d9ae581da298f27421b2b8196331aebd7f71dc98150fd544",
+                      "reasonCode": null,
+                      "size": "L",
+                      "status": "PRE_ORDER"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "5232332794ca69de03e3fc7b5b1622751e44334e7e9fe878ab44c1a6037fb3e1",
+                      "reasonCode": null,
+                      "size": "XL",
+                      "status": "PRE_ORDER"
+                    }
+                  ],
+                  "productId": "SV2447",
+                  "quantity": 1,
+                  "size": null,
+                  "sourceHash": "f979e36cf6516dc244d5e137e038100a4ccc2fb026f0be6c329c769d6610442f",
+                  "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default"
+                },
+                {
+                  "allSourceValuesForQuery": null,
+                  "color": null,
+                  "colorSemantics": "UNRECORDED_IS_NOT_A_PHYSICAL_COLOR",
+                  "completeness": "ALL_EXACT_TUPLES_FOR_QUERY",
+                  "contentHash": "1faa36bd307ba0cb322e66aa0eeef58f191560cef0840741817fb94dd55cfc51",
+                  "expiresAt": "2026-11-15T17:59:47.910Z",
+                  "kind": "CANDIDATE_SELECTION_V3",
+                  "observedAt": "2026-11-15T15:59:47.910Z",
+                  "offerType": "AO",
+                  "options": [
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "6630ab22babc50f91e2018419a58c4aaa2b4cdc8d9b6be1e8e052280700c6921",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "f75d0d833394583f749d9c48ed79d700d599f1e83e74ffb6653280230e1e06fa",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "PRE_ORDER"
+                    }
+                  ],
+                  "productId": "SV2447",
+                  "quantity": 1,
+                  "size": "M",
+                  "sourceHash": "f979e36cf6516dc244d5e137e038100a4ccc2fb026f0be6c329c769d6610442f",
+                  "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default"
+                }
+              ]
+            }
+          ],
+          "after": {
+            "owner": "BOT",
+            "stage": "DISCOVERY",
+            "salesRevision": 1,
+            "pendingSupportProof": {
+              "id": "6b667a4856e38f52ec292bcf1dbb0ce2f3e4e2bad9b3ab9a07a798a22080dbbc",
+              "status": "PENDING",
+              "sourceObservedAt": "2026-11-15T16:15:03.828Z",
+              "cartId": null
+            },
+            "cart": {}
+          },
+          "runtimeGenerationRecords": [
+            {
+              "id": "5f4ba0cc-bd39-42f9-9d6c-426b3980f36d:owner:1",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 6291.0616000000155,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "5f4ba0cc-bd39-42f9-9d6c-426b3980f36d:owner:2",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 3444.859300000011,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "5f4ba0cc-bd39-42f9-9d6c-426b3980f36d:verifier:1",
+              "role": "verifier",
+              "status": "OK",
+              "latencyMs": 8998.195199999958,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": null,
+                "failureStage": null,
+                "failureCode": null
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turns": [
+        {
+          "turn": 0,
+          "terminal": "HANDOFF",
+          "reason": "DEPENDENCY_FAILURE",
+          "recoveryReason": "PROVIDER_ERROR",
+          "artifactHash": "5cebb633e7d7f6b80a7b64078028696f90b3c08ef1ea517186488e54ae707ab9",
+          "tools": [],
+          "verdict": null,
+          "exposedReceipts": [],
+          "effectReceiptContinuity": null,
+          "ledgerReceipts": [],
+          "after": {
+            "owner": "HUMAN",
+            "stage": "DISCOVERY",
+            "salesRevision": 0,
+            "pendingSupportProof": null,
+            "cart": {}
+          },
+          "runtimeGenerationRecords": [
+            {
+              "id": "25b6dfac-3608-4f42-a1bd-d79eb42a1f82:owner:1",
+              "role": "owner",
+              "status": "PROVIDER_ERROR",
+              "latencyMs": 13978.569299999974,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "MALFORMED_FUNCTION_CALL",
+                "failureStage": "COMPLETION",
+                "failureCode": "OWNER_FINISH_REASON"
+              }
+            },
+            {
+              "id": "25b6dfac-3608-4f42-a1bd-d79eb42a1f82:owner:2",
+              "role": "owner",
+              "status": "PROVIDER_ERROR",
+              "latencyMs": 708.0636999999988,
+              "telemetry": {
+                "providerRequests": null,
+                "httpStatus": null,
+                "finishReason": null,
+                "failureStage": null,
+                "failureCode": null
+              }
+            }
+          ]
+        },
+        {
+          "turn": 1,
+          "terminal": "NO_SEND",
+          "reason": "HUMAN_OWNS_CONVERSATION",
+          "recoveryReason": null,
+          "artifactHash": "2ddb80b2ef7aab82b3ac6de2fe81e5c1bba126536b2a401835c2872b08e54f12",
+          "tools": [],
+          "verdict": null,
+          "exposedReceipts": [],
+          "effectReceiptContinuity": null,
+          "ledgerReceipts": [],
+          "after": {
+            "owner": "HUMAN",
+            "stage": "DISCOVERY",
+            "salesRevision": 0,
+            "pendingSupportProof": null,
+            "cart": {}
+          },
+          "runtimeGenerationRecords": []
+        },
+        {
+          "turn": 2,
+          "terminal": "NO_SEND",
+          "reason": "HUMAN_OWNS_CONVERSATION",
+          "recoveryReason": null,
+          "artifactHash": "9e57dd42743f6a86d6a1e1b779a9747884dc9d319b189df3d842af566a29b437",
+          "tools": [],
+          "verdict": null,
+          "exposedReceipts": [],
+          "effectReceiptContinuity": null,
+          "ledgerReceipts": [],
+          "after": {
+            "owner": "HUMAN",
+            "stage": "DISCOVERY",
+            "salesRevision": 0,
+            "pendingSupportProof": null,
+            "cart": {}
+          },
+          "runtimeGenerationRecords": []
+        }
+      ]
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "turns": [
+        {
+          "turn": 0,
+          "terminal": "SEND_ELIGIBLE",
+          "reason": null,
+          "recoveryReason": null,
+          "artifactHash": "fbd0f0b879cb8754e127ffe58922715e1049712d3a86b273f19c17fb360b910c",
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "33b0357c9f83544ed938094f8588f33c46dc1c483b9832a4955c76a77bb482a9",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "fac144c6f8786ed9fa7f3c35f1d87e5caec96c7f4900368255cd8cdf651a591f",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "fac144c6f8786ed9fa7f3c35f1d87e5caec96c7f4900368255cd8cdf651a591f",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "blockedReason": "CART_REQUIRED"
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "benefitAuthorization": {
+                  "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                  "status": "NOT_GRANTED",
+                  "grantedBenefits": [],
+                  "receiptRef": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "standardPromotion": {
+                    "status": "APPLIED",
+                    "parentProductUnits": 2,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 2,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 998000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 49900,
+                  "grandTotalVnd": 978100,
+                  "priceHash": "9eeb0c578fa3bdf4f353dd391a31253e9fcfb4b2c355a08595aa968ead195360",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:1:60a302ef329789888328f7de03bf86123280615993b05e620c6b7e5a545c37ab",
+                  "recipient": "60a302ef329789888328f7de03bf86123280615993b05e620c6b7e5a545c37ab"
+                }
+              }
+            },
+            {
+              "name": "select_product_media",
+              "status": "OK",
+              "reason": null,
+              "data": {}
+            }
+          ],
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "exposedReceipts": [
+            {
+              "effect": "NEGOTIATION_REQUEST_RECORDED",
+              "expiresAt": "2026-11-15T16:15:26.775Z",
+              "observedAt": "2026-11-15T16:10:26.775Z",
+              "operationId": "33b0357c9f83544ed938094f8588f33c46dc1c483b9832a4955c76a77bb482a9",
+              "recipient": "60a302ef329789888328f7de03bf86123280615993b05e620c6b7e5a545c37ab",
+              "ref": "receipt:33b0357c9f83544ed938094f8588f33c46dc1c483b9832a4955c76a77bb482a9",
+              "stateRevision": 1,
+              "status": "SUCCESS",
+              "subjectRef": "SV2447"
+            }
+          ],
+          "effectReceiptContinuity": null,
+          "ledgerReceipts": [
+            {
+              "operation_id": "33b0357c9f83544ed938094f8588f33c46dc1c483b9832a4955c76a77bb482a9",
+              "kind": "COMMITTED_SALES_EVENT",
+              "commandKind": "PENDING_NEGOTIATION_RECORDED",
+              "stateRevisionAfter": 1,
+              "occurredAt": "2026-11-15T16:10:26.775Z"
+            }
+          ],
+          "colourEvidence": [
+            {
+              "productId": "SV2447",
+              "selectionEvidence": [
+                {
+                  "allSourceValuesForQuery": null,
+                  "color": null,
+                  "colorSemantics": "UNRECORDED_IS_NOT_A_PHYSICAL_COLOR",
+                  "completeness": "ALL_EXACT_TUPLES_FOR_QUERY",
+                  "contentHash": "dc98f0d670d3894ac902254777468b2fce8fc55d9f89db34ea9d21ad84179d4d",
+                  "expiresAt": "2026-11-15T17:59:47.910Z",
+                  "kind": "CANDIDATE_SELECTION_V3",
+                  "observedAt": "2026-11-15T15:59:47.910Z",
+                  "offerType": "AO",
+                  "options": [
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "3ec31c31211683e9c3cd1bc2107df05bd5d14288819570dac17da526d3ed9076",
+                      "reasonCode": null,
+                      "size": "S",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "6630ab22babc50f91e2018419a58c4aaa2b4cdc8d9b6be1e8e052280700c6921",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "cecc4060bba1ee57f2b012d87f691537ec45de47d10931b8c098b52a99eeaef4",
+                      "reasonCode": null,
+                      "size": "L",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "TRẮNG",
+                      "identityHash": "8929367aa3680ccb6b3443431309598d7fa7595c72f5591802ba03be4afc37e4",
+                      "reasonCode": null,
+                      "size": "XL",
+                      "status": "IN_STOCK"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "a485c33ff3499ef8dab265c9852fe3a12b2f70da74db9a9eef61dbe69e480af0",
+                      "reasonCode": null,
+                      "size": "S",
+                      "status": "PRE_ORDER"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "f75d0d833394583f749d9c48ed79d700d599f1e83e74ffb6653280230e1e06fa",
+                      "reasonCode": null,
+                      "size": "M",
+                      "status": "PRE_ORDER"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "188e0210c8358078d9ae581da298f27421b2b8196331aebd7f71dc98150fd544",
+                      "reasonCode": null,
+                      "size": "L",
+                      "status": "PRE_ORDER"
+                    },
+                    {
+                      "color": "BE",
+                      "identityHash": "5232332794ca69de03e3fc7b5b1622751e44334e7e9fe878ab44c1a6037fb3e1",
+                      "reasonCode": null,
+                      "size": "XL",
+                      "status": "PRE_ORDER"
+                    }
+                  ],
+                  "productId": "SV2447",
+                  "quantity": 1,
+                  "size": null,
+                  "sourceHash": "f979e36cf6516dc244d5e137e038100a4ccc2fb026f0be6c329c769d6610442f",
+                  "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default"
+                }
+              ]
+            }
+          ],
+          "after": {
+            "owner": "BOT",
+            "stage": "DISCOVERY",
+            "salesRevision": 1,
+            "pendingSupportProof": {
+              "id": "fac144c6f8786ed9fa7f3c35f1d87e5caec96c7f4900368255cd8cdf651a591f",
+              "status": "PENDING",
+              "sourceObservedAt": "2026-11-15T16:10:11.678Z",
+              "cartId": null
+            },
+            "cart": {}
+          },
+          "runtimeGenerationRecords": [
+            {
+              "id": "f8a00f64-1594-4436-8859-d21752a96454:owner:1",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 7009.232400000001,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "f8a00f64-1594-4436-8859-d21752a96454:owner:2",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 4509.3894999999975,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "f8a00f64-1594-4436-8859-d21752a96454:verifier:1",
+              "role": "verifier",
+              "status": "OK",
+              "latencyMs": 9235.908900000002,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": null,
+                "failureStage": null,
+                "failureCode": null
+              }
+            }
+          ]
+        },
+        {
+          "turn": 1,
+          "terminal": "SEND_ELIGIBLE",
+          "reason": null,
+          "recoveryReason": null,
+          "artifactHash": "9ddc58f4e9e1991231c06cdb89db53e0be5b8fcb4a69124846941f5ccc8db367",
+          "tools": [
+            {
+              "name": "add_to_cart",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "9c43af394190e22482087d6ede6f4071c19be700ba5e5d42c344d5ad1712af02",
+                "effect": "CART_OPENED",
+                "cartQuote": {
+                  "cartId": "b882c907-245b-5ab8-8f1e-66b2fc2c4a9d",
+                  "cartVersion": 1,
+                  "subtotalVnd": 998000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 49900,
+                  "grandTotalVnd": 978100
+                },
+                "pendingSupport": {
+                  "pendingRef": "fac144c6f8786ed9fa7f3c35f1d87e5caec96c7f4900368255cd8cdf651a591f",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": true,
+                  "blockedReason": null
+                }
+              }
+            },
+            {
+              "name": "add_to_cart",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "9c43af394190e22482087d6ede6f4071c19be700ba5e5d42c344d5ad1712af02",
+                "effect": "CART_OPENED",
+                "cartQuote": {
+                  "cartId": "b882c907-245b-5ab8-8f1e-66b2fc2c4a9d",
+                  "cartVersion": 1,
+                  "subtotalVnd": 998000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 49900,
+                  "grandTotalVnd": 978100
+                },
+                "pendingSupport": {
+                  "pendingRef": "fac144c6f8786ed9fa7f3c35f1d87e5caec96c7f4900368255cd8cdf651a591f",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": true,
+                  "blockedReason": null
+                }
+              }
+            },
+            {
+              "name": "apply_pending_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "1446510228ac8058454530964490637716e1da8a98dbfc7c5708b3c6f758d53e",
+                "effect": "NEGOTIATION_UPDATED",
+                "cartQuote": {
+                  "cartId": "b882c907-245b-5ab8-8f1e-66b2fc2c4a9d",
+                  "cartVersion": 2,
+                  "subtotalVnd": 998000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 79900,
+                  "grandTotalVnd": 948100
+                }
+              }
+            }
+          ],
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "exposedReceipts": [
+            {
+              "effect": "CART_OPENED",
+              "expiresAt": "2026-11-15T16:16:11.534Z",
+              "observedAt": "2026-11-15T16:11:11.534Z",
+              "operationId": "9c43af394190e22482087d6ede6f4071c19be700ba5e5d42c344d5ad1712af02",
+              "recipient": "60a302ef329789888328f7de03bf86123280615993b05e620c6b7e5a545c37ab",
+              "ref": "receipt:9c43af394190e22482087d6ede6f4071c19be700ba5e5d42c344d5ad1712af02",
+              "stateRevision": 5,
+              "status": "SUCCESS",
+              "subjectRef": "b882c907-245b-5ab8-8f1e-66b2fc2c4a9d"
+            },
+            {
+              "effect": "NEGOTIATION_UPDATED",
+              "expiresAt": "2026-11-15T16:16:21.175Z",
+              "observedAt": "2026-11-15T16:11:21.175Z",
+              "operationId": "1446510228ac8058454530964490637716e1da8a98dbfc7c5708b3c6f758d53e",
+              "recipient": "60a302ef329789888328f7de03bf86123280615993b05e620c6b7e5a545c37ab",
+              "ref": "receipt:1446510228ac8058454530964490637716e1da8a98dbfc7c5708b3c6f758d53e",
+              "stateRevision": 6,
+              "status": "SUCCESS",
+              "subjectRef": "b882c907-245b-5ab8-8f1e-66b2fc2c4a9d"
+            }
+          ],
+          "effectReceiptContinuity": {
+            "bindingVersion": "commerce:2:60a302ef329789888328f7de03bf86123280615993b05e620c6b7e5a545c37ab",
+            "cartId": "b882c907-245b-5ab8-8f1e-66b2fc2c4a9d",
+            "cartItemsHash": "a1e9ff2d25bbf9a3b6aa42694e2ea234e5374a3173cb468070ad45f46303c733",
+            "cartVersion": 2,
+            "kind": "UNCHANGED_CART_NEGOTIATION_V1",
+            "receiptRefs": [
+              "receipt:9c43af394190e22482087d6ede6f4071c19be700ba5e5d42c344d5ad1712af02",
+              "receipt:1446510228ac8058454530964490637716e1da8a98dbfc7c5708b3c6f758d53e"
+            ],
+            "recipient": "60a302ef329789888328f7de03bf86123280615993b05e620c6b7e5a545c37ab",
+            "stateRevision": 6
+          },
+          "ledgerReceipts": [
+            {
+              "operation_id": "33b0357c9f83544ed938094f8588f33c46dc1c483b9832a4955c76a77bb482a9",
+              "kind": "COMMITTED_SALES_EVENT",
+              "commandKind": "PENDING_NEGOTIATION_RECORDED",
+              "stateRevisionAfter": 1,
+              "occurredAt": "2026-11-15T16:10:26.775Z"
+            },
+            {
+              "operation_id": "sales:stateful-787908a5-cdfb-46e0-be9b-548983193cd4:0:facts",
+              "kind": "COMMITTED_SALES_EVENT",
+              "commandKind": "FACTS_PRESENTED",
+              "stateRevisionAfter": 2,
+              "occurredAt": "2026-11-15T16:11:11.534Z"
+            },
+            {
+              "operation_id": "sales:stateful-787908a5-cdfb-46e0-be9b-548983193cd4:0:measurements",
+              "kind": "COMMITTED_SALES_EVENT",
+              "commandKind": "MEASUREMENTS_REQUIRED",
+              "stateRevisionAfter": 3,
+              "occurredAt": "2026-11-15T16:11:11.534Z"
+            },
+            {
+              "operation_id": "sales:stateful-787908a5-cdfb-46e0-be9b-548983193cd4:0:size",
+              "kind": "COMMITTED_SALES_EVENT",
+              "commandKind": "SIZE_RECOMMENDED",
+              "stateRevisionAfter": 4,
+              "occurredAt": "2026-11-15T16:11:11.534Z"
+            },
+            {
+              "operation_id": "9c43af394190e22482087d6ede6f4071c19be700ba5e5d42c344d5ad1712af02",
+              "kind": "COMMITTED_SALES_EVENT",
+              "commandKind": "CART_OPENED",
+              "stateRevisionAfter": 5,
+              "occurredAt": "2026-11-15T16:11:11.534Z"
+            },
+            {
+              "operation_id": "1446510228ac8058454530964490637716e1da8a98dbfc7c5708b3c6f758d53e",
+              "kind": "COMMITTED_SALES_EVENT",
+              "commandKind": "NEGOTIATION_EVENT",
+              "stateRevisionAfter": 6,
+              "occurredAt": "2026-11-15T16:11:21.175Z"
+            }
+          ],
+          "colourEvidence": [],
+          "after": {
+            "owner": "BOT",
+            "stage": "CART_OPEN",
+            "salesRevision": 6,
+            "pendingSupportProof": {
+              "id": "fac144c6f8786ed9fa7f3c35f1d87e5caec96c7f4900368255cd8cdf651a591f",
+              "status": "ACTIVATED",
+              "sourceObservedAt": "2026-11-15T16:10:11.678Z",
+              "cartId": "b882c907-245b-5ab8-8f1e-66b2fc2c4a9d"
+            },
+            "cart": {
+              "cartId": "b882c907-245b-5ab8-8f1e-66b2fc2c4a9d",
+              "revision": 2,
+              "lines": [
+                {
+                  "lineId": "9c43af39-4190-5224-8208-7d6ede6f4071",
+                  "parentProductId": "SV2447",
+                  "offerId": "AO",
+                  "offerKind": "DIRECT",
+                  "quantity": 2,
+                  "components": [
+                    {
+                      "componentProductId": "SV2447_AO",
+                      "componentSku": "SV2447_AO",
+                      "componentRole": "TOP",
+                      "color": "TRẮNG",
+                      "size": "M",
+                      "quantity": 1
+                    }
+                  ],
+                  "allowMixedSizes": false,
+                  "allowComponentSale": false,
+                  "posUnitPriceVnd": 499000,
+                  "priceAuthority": {
+                    "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+                    "shopId": "LANA_DESIGN",
+                    "parentProductId": "SV2447",
+                    "offerId": "AO",
+                    "offerPriceKind": "DIRECT",
+                    "componentProductId": null,
+                    "metadata": {
+                      "authority": "PANCAKE_POS",
+                      "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default",
+                      "observedAt": "2026-11-15T15:59:47.910Z",
+                      "expiresAt": "2026-11-17T15:59:47.910Z",
+                      "freshForSeconds": 172800,
+                      "freshnessState": "FRESH"
+                    }
+                  },
+                  "lineTotalVnd": 998000
+                }
+              ],
+              "adjustments": [
+                {
+                  "adjustmentId": "02603eac-cdda-534f-8f99-57fc1eeb93f7",
+                  "kind": "PERCENT_DISCOUNT",
+                  "amountVnd": 49900,
+                  "percentageBps": 500,
+                  "policyAuthorization": {
+                    "policyBundleId": "admin-policy:1198992073286645",
+                    "policyBundleVersion": "cf056b94651b9b37df96732539c59e1c",
+                    "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+                    "decisionId": "8c1dccbc-eb95-5aab-86da-56028bec6abc",
+                    "authorizedAt": "2026-11-15T16:11:21.175Z"
+                  }
+                },
+                {
+                  "adjustmentId": "52afcad1-52e6-5830-9c25-5ff547f11605",
+                  "kind": "FREE_SHIPPING",
+                  "amountVnd": 30000,
+                  "percentageBps": null,
+                  "policyAuthorization": {
+                    "policyBundleId": "admin-policy:1198992073286645",
+                    "policyBundleVersion": "cf056b94651b9b37df96732539c59e1c",
+                    "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+                    "decisionId": "ca2532ea-bdd0-5b88-af4e-1dcf567e7437",
+                    "authorizedAt": "2026-11-15T16:11:21.175Z"
+                  }
+                }
+              ],
+              "subtotalVnd": 998000,
+              "shippingFeeVnd": 30000,
+              "discountTotalVnd": 79900,
+              "grandTotalVnd": 948100
+            }
+          },
+          "runtimeGenerationRecords": [
+            {
+              "id": "6979cb07-b2b3-492f-a533-99da56ae3d3b:owner:1",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 7306.748300000007,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "6979cb07-b2b3-492f-a533-99da56ae3d3b:owner:2",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 3911.641800000012,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "6979cb07-b2b3-492f-a533-99da56ae3d3b:owner:3",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 7599.109000000011,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "6979cb07-b2b3-492f-a533-99da56ae3d3b:verifier:1",
+              "role": "verifier",
+              "status": "OK",
+              "latencyMs": 10736.15419999999,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": null,
+                "failureStage": null,
+                "failureCode": null
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "terminal": "SEND_ELIGIBLE",
+          "reason": null,
+          "recoveryReason": null,
+          "artifactHash": "2f6e0c2dcf426c68834a71a1fe577da6c503a32fd7edcf14b5087819f60eb0da",
+          "tools": [],
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "exposedReceipts": [],
+          "effectReceiptContinuity": null,
+          "ledgerReceipts": [
+            {
+              "operation_id": "33b0357c9f83544ed938094f8588f33c46dc1c483b9832a4955c76a77bb482a9",
+              "kind": "COMMITTED_SALES_EVENT",
+              "commandKind": "PENDING_NEGOTIATION_RECORDED",
+              "stateRevisionAfter": 1,
+              "occurredAt": "2026-11-15T16:10:26.775Z"
+            },
+            {
+              "operation_id": "sales:stateful-787908a5-cdfb-46e0-be9b-548983193cd4:0:facts",
+              "kind": "COMMITTED_SALES_EVENT",
+              "commandKind": "FACTS_PRESENTED",
+              "stateRevisionAfter": 2,
+              "occurredAt": "2026-11-15T16:11:11.534Z"
+            },
+            {
+              "operation_id": "sales:stateful-787908a5-cdfb-46e0-be9b-548983193cd4:0:measurements",
+              "kind": "COMMITTED_SALES_EVENT",
+              "commandKind": "MEASUREMENTS_REQUIRED",
+              "stateRevisionAfter": 3,
+              "occurredAt": "2026-11-15T16:11:11.534Z"
+            },
+            {
+              "operation_id": "sales:stateful-787908a5-cdfb-46e0-be9b-548983193cd4:0:size",
+              "kind": "COMMITTED_SALES_EVENT",
+              "commandKind": "SIZE_RECOMMENDED",
+              "stateRevisionAfter": 4,
+              "occurredAt": "2026-11-15T16:11:11.534Z"
+            },
+            {
+              "operation_id": "9c43af394190e22482087d6ede6f4071c19be700ba5e5d42c344d5ad1712af02",
+              "kind": "COMMITTED_SALES_EVENT",
+              "commandKind": "CART_OPENED",
+              "stateRevisionAfter": 5,
+              "occurredAt": "2026-11-15T16:11:11.534Z"
+            },
+            {
+              "operation_id": "1446510228ac8058454530964490637716e1da8a98dbfc7c5708b3c6f758d53e",
+              "kind": "COMMITTED_SALES_EVENT",
+              "commandKind": "NEGOTIATION_EVENT",
+              "stateRevisionAfter": 6,
+              "occurredAt": "2026-11-15T16:11:21.175Z"
+            }
+          ],
+          "colourEvidence": [],
+          "after": {
+            "owner": "BOT",
+            "stage": "CART_OPEN",
+            "salesRevision": 6,
+            "pendingSupportProof": {
+              "id": "fac144c6f8786ed9fa7f3c35f1d87e5caec96c7f4900368255cd8cdf651a591f",
+              "status": "ACTIVATED",
+              "sourceObservedAt": "2026-11-15T16:10:11.678Z",
+              "cartId": "b882c907-245b-5ab8-8f1e-66b2fc2c4a9d"
+            },
+            "cart": {
+              "cartId": "b882c907-245b-5ab8-8f1e-66b2fc2c4a9d",
+              "revision": 2,
+              "lines": [
+                {
+                  "lineId": "9c43af39-4190-5224-8208-7d6ede6f4071",
+                  "parentProductId": "SV2447",
+                  "offerId": "AO",
+                  "offerKind": "DIRECT",
+                  "quantity": 2,
+                  "components": [
+                    {
+                      "componentProductId": "SV2447_AO",
+                      "componentSku": "SV2447_AO",
+                      "componentRole": "TOP",
+                      "color": "TRẮNG",
+                      "size": "M",
+                      "quantity": 1
+                    }
+                  ],
+                  "allowMixedSizes": false,
+                  "allowComponentSale": false,
+                  "posUnitPriceVnd": 499000,
+                  "priceAuthority": {
+                    "priceFactRef": "price:sha256:150b7a8a052ceba9fe92d0c6ff4dc9de489ea024004b87a182c60f35ee723105",
+                    "shopId": "LANA_DESIGN",
+                    "parentProductId": "SV2447",
+                    "offerId": "AO",
+                    "offerPriceKind": "DIRECT",
+                    "componentProductId": null,
+                    "metadata": {
+                      "authority": "PANCAKE_POS",
+                      "sourceVersion": "isolated-test-color:0937f15a2c41060b:p2-default",
+                      "observedAt": "2026-11-15T15:59:47.910Z",
+                      "expiresAt": "2026-11-17T15:59:47.910Z",
+                      "freshForSeconds": 172800,
+                      "freshnessState": "FRESH"
+                    }
+                  },
+                  "lineTotalVnd": 998000
+                }
+              ],
+              "adjustments": [
+                {
+                  "adjustmentId": "02603eac-cdda-534f-8f99-57fc1eeb93f7",
+                  "kind": "PERCENT_DISCOUNT",
+                  "amountVnd": 49900,
+                  "percentageBps": 500,
+                  "policyAuthorization": {
+                    "policyBundleId": "admin-policy:1198992073286645",
+                    "policyBundleVersion": "cf056b94651b9b37df96732539c59e1c",
+                    "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+                    "decisionId": "8c1dccbc-eb95-5aab-86da-56028bec6abc",
+                    "authorizedAt": "2026-11-15T16:11:21.175Z"
+                  }
+                },
+                {
+                  "adjustmentId": "52afcad1-52e6-5830-9c25-5ff547f11605",
+                  "kind": "FREE_SHIPPING",
+                  "amountVnd": 30000,
+                  "percentageBps": null,
+                  "policyAuthorization": {
+                    "policyBundleId": "admin-policy:1198992073286645",
+                    "policyBundleVersion": "cf056b94651b9b37df96732539c59e1c",
+                    "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+                    "decisionId": "ca2532ea-bdd0-5b88-af4e-1dcf567e7437",
+                    "authorizedAt": "2026-11-15T16:11:21.175Z"
+                  }
+                }
+              ],
+              "subtotalVnd": 998000,
+              "shippingFeeVnd": 30000,
+              "discountTotalVnd": 79900,
+              "grandTotalVnd": 948100
+            }
+          },
+          "runtimeGenerationRecords": [
+            {
+              "id": "25daa76a-4c9d-477c-8e55-9c6e74c397b8:owner:1",
+              "role": "owner",
+              "status": "OK",
+              "latencyMs": 6443.6872999999905,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": "STOP",
+                "failureStage": null,
+                "failureCode": null
+              }
+            },
+            {
+              "id": "25daa76a-4c9d-477c-8e55-9c6e74c397b8:verifier:1",
+              "role": "verifier",
+              "status": "OK",
+              "latencyMs": 8145.44219999999,
+              "telemetry": {
+                "providerRequests": 1,
+                "httpStatus": 200,
+                "finishReason": null,
+                "failureStage": null,
+                "failureCode": null
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "providerGenerations": [
+    {
+      "id": "a60ae20a-f3b9-45fe-9b8d-daf760f7ff07:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 1,
+      "requestHash": "33f49039e8ee91c0d65218f49a39e5665d2a0bf4d5b8871ace09a0759f626ba8",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5736.799600000006,
+        "inputTokens": 10831,
+        "outputTokens": 1336,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 0,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "82d415a3cb758ded1c15653417a54f0bcbacc443bcc0d01ce10b63c6f137052f"
+    },
+    {
+      "id": "a60ae20a-f3b9-45fe-9b8d-daf760f7ff07:owner:2",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "a723e6680d6a3e88dcf60137049c6ee844e7108c944003b85e4174b4371fccb1",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3811.8816000000006,
+        "inputTokens": 13664,
+        "outputTokens": 543,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 0,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "82d415a3cb758ded1c15653417a54f0bcbacc443bcc0d01ce10b63c6f137052f"
+    },
+    {
+      "id": "a60ae20a-f3b9-45fe-9b8d-daf760f7ff07:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "47a6eda2fc2f24c92b325fc46ca6065b0144bf2c7e299cd03cd7816d4ddd514a",
+      "modelConfigHash": "509a50df561e12528b0d837c79a0c478a0c5339ba8626c5d87937521ea569395",
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 7068.216499999995,
+        "inputTokens": 9641,
+        "outputTokens": 64,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 0,
+      "httpStatus": 200,
+      "finishReason": null,
+      "requestSchemaHash": null
+    },
+    {
+      "id": "48cfc433-67a1-4b4d-a3db-782e48859eae:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "b6e5f7fce266c46dcd61a03d90123d09eab9489b0c01d51dd0f587380cc830f9",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4918.646800000002,
+        "inputTokens": 11324,
+        "outputTokens": 957,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 1,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "dcd8cb1f5223416f9f16bdb3a6dd6d150066ad7b4751f44bd93447e4dec13c72"
+    },
+    {
+      "id": "48cfc433-67a1-4b4d-a3db-782e48859eae:owner:2",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "c29125d0da56b3d362cb1c847402f2ee4d641b6e13e195bcb3a8cd0ad8ce2c64",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4341.080000000002,
+        "inputTokens": 13576,
+        "outputTokens": 770,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 1,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "e8e48a36db99c5e2d605296b505189ad2d7df18085472e1218a0097ef4c85ed0"
+    },
+    {
+      "id": "48cfc433-67a1-4b4d-a3db-782e48859eae:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "c52e7f6971a3651cdceb18f07b12260f062480098adbfb6733d3e854ee57199a",
+      "modelConfigHash": "509a50df561e12528b0d837c79a0c478a0c5339ba8626c5d87937521ea569395",
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 9144.001000000004,
+        "inputTokens": 9459,
+        "outputTokens": 81,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 1,
+      "httpStatus": 200,
+      "finishReason": null,
+      "requestSchemaHash": null
+    },
+    {
+      "id": "bba289c7-1f12-4b2a-84d8-6cc53cfbf220:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "9076f61a3550fc2bace3d2655f5d6592758c807d9be170915d8c61034f541598",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5090.186400000006,
+        "inputTokens": 11572,
+        "outputTokens": 1096,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 2,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "e8e48a36db99c5e2d605296b505189ad2d7df18085472e1218a0097ef4c85ed0"
+    },
+    {
+      "id": "bba289c7-1f12-4b2a-84d8-6cc53cfbf220:owner:2",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "17947f9b1f79b8a8832e2f8fba304ec751e198256e82a5394997cfd918e99c7d",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3417.8285000000033,
+        "inputTokens": 16047,
+        "outputTokens": 425,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 2,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "e8e48a36db99c5e2d605296b505189ad2d7df18085472e1218a0097ef4c85ed0"
+    },
+    {
+      "id": "bba289c7-1f12-4b2a-84d8-6cc53cfbf220:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "ab97220779ecd5971a530a7ab8c94bef119a2d2e08109d5180e932bfb205c827",
+      "modelConfigHash": "509a50df561e12528b0d837c79a0c478a0c5339ba8626c5d87937521ea569395",
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 7657.911900000006,
+        "inputTokens": 11010,
+        "outputTokens": 70,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 2,
+      "httpStatus": 200,
+      "finishReason": null,
+      "requestSchemaHash": null
+    },
+    {
+      "id": "2f8cb033-2a88-45c5-ab65-73c4a8f01405:owner:1",
+      "role": "OWNER",
+      "status": "MALFORMED",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "7a83be84629454ecbec9f92047c40393097e367f7431e223260e1cf187352cb9",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 8954.343500000017,
+        "inputTokens": 10837,
+        "outputTokens": 2012,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 0,
+      "httpStatus": 200,
+      "finishReason": "MALFORMED_FUNCTION_CALL",
+      "requestSchemaHash": "82d415a3cb758ded1c15653417a54f0bcbacc443bcc0d01ce10b63c6f137052f"
+    },
+    {
+      "id": "b365987d-a69e-4797-a30e-47ef4fb8156a:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "293fb1833f65dbe6a35faef9c09513745aab5777959cff1ecbc032f0c476a166",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4651.520499999984,
+        "inputTokens": 10836,
+        "outputTokens": 935,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 0,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "82d415a3cb758ded1c15653417a54f0bcbacc443bcc0d01ce10b63c6f137052f"
+    },
+    {
+      "id": "b365987d-a69e-4797-a30e-47ef4fb8156a:owner:2",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "6245f5f96101e85ed13c1d8b5a57eed5552bcc9c6c07492b543b3a9d8c68a6f9",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3382.459899999987,
+        "inputTokens": 13268,
+        "outputTokens": 333,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 0,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "82d415a3cb758ded1c15653417a54f0bcbacc443bcc0d01ce10b63c6f137052f"
+    },
+    {
+      "id": "b365987d-a69e-4797-a30e-47ef4fb8156a:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "e607099102cad6c4c08a726c99b5d8f0ae1dbe4a589a74ab1791b2f50597a60e",
+      "modelConfigHash": "509a50df561e12528b0d837c79a0c478a0c5339ba8626c5d87937521ea569395",
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 7020.069400000008,
+        "inputTokens": 9589,
+        "outputTokens": 65,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 0,
+      "httpStatus": 200,
+      "finishReason": null,
+      "requestSchemaHash": null
+    },
+    {
+      "id": "fcc63648-09b0-49c2-bb62-880f8f3e38fd:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "c9931fde04ab0629df674abfe0eff91eedce09ac227d314abfff0f6efa85d3ec",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4441.921700000006,
+        "inputTokens": 11332,
+        "outputTokens": 968,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 1,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "dcd8cb1f5223416f9f16bdb3a6dd6d150066ad7b4751f44bd93447e4dec13c72"
+    },
+    {
+      "id": "fcc63648-09b0-49c2-bb62-880f8f3e38fd:owner:2",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "dc453e34e9a5d63a8324be705b4ce1680975a3628e2268eb53f4be628a8b88ab",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3865.29369999998,
+        "inputTokens": 13588,
+        "outputTokens": 603,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 1,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "e8e48a36db99c5e2d605296b505189ad2d7df18085472e1218a0097ef4c85ed0"
+    },
+    {
+      "id": "fcc63648-09b0-49c2-bb62-880f8f3e38fd:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "a10356ff4dc5a60ac4ae492e5508fcc715f82a996e2778a8411feb3b3c0980c0",
+      "modelConfigHash": "509a50df561e12528b0d837c79a0c478a0c5339ba8626c5d87937521ea569395",
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 9093.898599999986,
+        "inputTokens": 9449,
+        "outputTokens": 105,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 1,
+      "httpStatus": 200,
+      "finishReason": null,
+      "requestSchemaHash": null
+    },
+    {
+      "id": "b003257d-8f5d-47f1-9406-3db06f69d045:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "05d5bd1f208dec7485f83ac5a9cbb5d623ff5a785ecca45d41a2ebca1aee20e7",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6375.594299999997,
+        "inputTokens": 11594,
+        "outputTokens": 1716,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 2,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "e8e48a36db99c5e2d605296b505189ad2d7df18085472e1218a0097ef4c85ed0"
+    },
+    {
+      "id": "b003257d-8f5d-47f1-9406-3db06f69d045:owner:2",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "848779f0390ccabd7a88d9de3f48ad52d64bb3cf7a2cbb5fd9dd0c160ef17c89",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3125.216599999985,
+        "inputTokens": 16671,
+        "outputTokens": 436,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 2,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "e8e48a36db99c5e2d605296b505189ad2d7df18085472e1218a0097ef4c85ed0"
+    },
+    {
+      "id": "b003257d-8f5d-47f1-9406-3db06f69d045:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "22d8b108df37657833366ea736afb1c435420c91f4a96efc16a140a13a3a5076",
+      "modelConfigHash": "509a50df561e12528b0d837c79a0c478a0c5339ba8626c5d87937521ea569395",
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 6635.851200000034,
+        "inputTokens": 10957,
+        "outputTokens": 70,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 2,
+      "httpStatus": 200,
+      "finishReason": null,
+      "requestSchemaHash": null
+    },
+    {
+      "id": "84f72ca1-84b8-4dae-8a36-a7e30ce57a8e:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "323b0e96c54658b5a5453df559d56eab139d9b5a6fce016cda6c8b65b8576cc6",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5607.565500000026,
+        "inputTokens": 10834,
+        "outputTokens": 1102,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 0,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "82d415a3cb758ded1c15653417a54f0bcbacc443bcc0d01ce10b63c6f137052f"
+    },
+    {
+      "id": "84f72ca1-84b8-4dae-8a36-a7e30ce57a8e:owner:2",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "4aef332a30211fa8ce888d86d9cc32a76e70eb1de47c7461e621e4f264ecd3ab",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3236.3687999999966,
+        "inputTokens": 13433,
+        "outputTokens": 284,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 0,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "82d415a3cb758ded1c15653417a54f0bcbacc443bcc0d01ce10b63c6f137052f"
+    },
+    {
+      "id": "84f72ca1-84b8-4dae-8a36-a7e30ce57a8e:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "2c6ac9e967638fd63bdc4ad7d69ea6d9c0a80d55d146dbbbffb5054ef066dadf",
+      "modelConfigHash": "509a50df561e12528b0d837c79a0c478a0c5339ba8626c5d87937521ea569395",
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 9854.136100000003,
+        "inputTokens": 9636,
+        "outputTokens": 53,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 0,
+      "httpStatus": 200,
+      "finishReason": null,
+      "requestSchemaHash": null
+    },
+    {
+      "id": "057a5449-9453-4aab-9db9-ebba5dcdbdaf:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "7d20013662146526450dae87c940a88dbe4d67b65599226f65f54a5ebf9de909",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6763.434699999983,
+        "inputTokens": 11333,
+        "outputTokens": 1920,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 1,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "dcd8cb1f5223416f9f16bdb3a6dd6d150066ad7b4751f44bd93447e4dec13c72"
+    },
+    {
+      "id": "057a5449-9453-4aab-9db9-ebba5dcdbdaf:owner:2",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "a9b7ac3051b2afbf335fbc2e2e92bc0c835ed909b1c59ae4d23e8c9477d667c1",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3345.7533000000403,
+        "inputTokens": 17920,
+        "outputTokens": 392,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 1,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "e8e48a36db99c5e2d605296b505189ad2d7df18085472e1218a0097ef4c85ed0"
+    },
+    {
+      "id": "057a5449-9453-4aab-9db9-ebba5dcdbdaf:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "629d7482a679f31995a00e8b8ddcc0b0851be713342eadb366a657d45fbf2c56",
+      "modelConfigHash": "509a50df561e12528b0d837c79a0c478a0c5339ba8626c5d87937521ea569395",
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 9213.826300000015,
+        "inputTokens": 11653,
+        "outputTokens": 86,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 1,
+      "httpStatus": 200,
+      "finishReason": null,
+      "requestSchemaHash": null
+    },
+    {
+      "id": "5f4ba0cc-bd39-42f9-9d6c-426b3980f36d:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "de8a29200e6b6aa3c0c613a5a3821c4d57fd94a0ab75376e9f4591dfd5c3fef6",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5654.8670000000275,
+        "inputTokens": 11594,
+        "outputTokens": 1215,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 2,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "e8e48a36db99c5e2d605296b505189ad2d7df18085472e1218a0097ef4c85ed0"
+    },
+    {
+      "id": "5f4ba0cc-bd39-42f9-9d6c-426b3980f36d:owner:2",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "b2945ebada8a3bf49f9f8f891f72e096023bf597f506009246247fbcf88267bb",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 2895.7173000000184,
+        "inputTokens": 16191,
+        "outputTokens": 231,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 2,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "e8e48a36db99c5e2d605296b505189ad2d7df18085472e1218a0097ef4c85ed0"
+    },
+    {
+      "id": "5f4ba0cc-bd39-42f9-9d6c-426b3980f36d:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "c9f6d65809570448942febd98ac0a0e2b6075b5972e3e5edc3dddffff25697f6",
+      "modelConfigHash": "509a50df561e12528b0d837c79a0c478a0c5339ba8626c5d87937521ea569395",
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 8310.803899999999,
+        "inputTokens": 10965,
+        "outputTokens": 65,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 2,
+      "httpStatus": 200,
+      "finishReason": null,
+      "requestSchemaHash": null
+    },
+    {
+      "id": "25b6dfac-3608-4f42-a1bd-d79eb42a1f82:owner:1",
+      "role": "OWNER",
+      "status": "MALFORMED",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "38c867da68f76399020a3f36800b08c2f5c3ee0b0468e8040b0bc645c8f58c02",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 13430.05190000002,
+        "inputTokens": 10836,
+        "outputTokens": 1158,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 0,
+      "httpStatus": 200,
+      "finishReason": "MALFORMED_FUNCTION_CALL",
+      "requestSchemaHash": "82d415a3cb758ded1c15653417a54f0bcbacc443bcc0d01ce10b63c6f137052f"
+    },
+    {
+      "id": "f8a00f64-1594-4436-8859-d21752a96454:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 1,
+      "requestHash": "fdbc525f2ddf06ac56565a6055ba129a72188fa74713a78611d030026e99e34a",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6373.265400000004,
+        "inputTokens": 10843,
+        "outputTokens": 1314,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "turn": 0,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "82d415a3cb758ded1c15653417a54f0bcbacc443bcc0d01ce10b63c6f137052f"
+    },
+    {
+      "id": "f8a00f64-1594-4436-8859-d21752a96454:owner:2",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "69309687ee04b1829821bbbd499d96091e3cad1dbe95b32368039e4620ee323a",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3820.533599999995,
+        "inputTokens": 17270,
+        "outputTokens": 535,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "turn": 0,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "38822cf3ef18b26da081ba8e30edfd4003e844802c6e67266cb56b0f21568257"
+    },
+    {
+      "id": "f8a00f64-1594-4436-8859-d21752a96454:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "bb5fc1109c28493cd1181cf245a77fac3e5345a5ea4746f38716dd67c67c0740",
+      "modelConfigHash": "509a50df561e12528b0d837c79a0c478a0c5339ba8626c5d87937521ea569395",
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 8448.877400000005,
+        "inputTokens": 12401,
+        "outputTokens": 111,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "turn": 0,
+      "httpStatus": 200,
+      "finishReason": null,
+      "requestSchemaHash": null
+    },
+    {
+      "id": "6979cb07-b2b3-492f-a533-99da56ae3d3b:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "c8550f25b8d550da6d3b912bc1b2c802aa53b29f22bf12f5d0dcdee65a39c5cf",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6572.765700000004,
+        "inputTokens": 10977,
+        "outputTokens": 1780,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "turn": 1,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "e8e48a36db99c5e2d605296b505189ad2d7df18085472e1218a0097ef4c85ed0"
+    },
+    {
+      "id": "6979cb07-b2b3-492f-a533-99da56ae3d3b:owner:2",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "0950d31d60fbb4939b2ad38008a933f2330dbba1869c48e8ab11deb13c38156e",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3004.655799999993,
+        "inputTokens": 14435,
+        "outputTokens": 345,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "turn": 1,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "e8e48a36db99c5e2d605296b505189ad2d7df18085472e1218a0097ef4c85ed0"
+    },
+    {
+      "id": "6979cb07-b2b3-492f-a533-99da56ae3d3b:owner:3",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "81eaabf62e4f9d75f0ef0a10ac6ebe0c30cfab5489d987ae2b97aa9b3ab90ebe",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6890.9072000000015,
+        "inputTokens": 11071,
+        "outputTokens": 1637,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "turn": 1,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "7e5f00711d8f28412d7fede9893344e963d94898ae92a272bc53eef117b73517"
+    },
+    {
+      "id": "6979cb07-b2b3-492f-a533-99da56ae3d3b:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "49a2850fd45008083078d575ebb5a522c40388ebfa9c2f8558b0417f121d3826",
+      "modelConfigHash": "509a50df561e12528b0d837c79a0c478a0c5339ba8626c5d87937521ea569395",
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 10077.334799999997,
+        "inputTokens": 10005,
+        "outputTokens": 105,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "turn": 1,
+      "httpStatus": 200,
+      "finishReason": null,
+      "requestSchemaHash": null
+    },
+    {
+      "id": "25daa76a-4c9d-477c-8e55-9c6e74c397b8:owner:1",
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "f17f9dc05bb5a098be9b0d8b4b9072adba1709473c02e15d7504f3b869208e59",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5741.726999999984,
+        "inputTokens": 11230,
+        "outputTokens": 1436,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "turn": 2,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "requestSchemaHash": "dcd8cb1f5223416f9f16bdb3a6dd6d150066ad7b4751f44bd93447e4dec13c72"
+    },
+    {
+      "id": "25daa76a-4c9d-477c-8e55-9c6e74c397b8:verifier:1",
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "a638bb556e789724e50a950a0f5092d973cae7bc062329b62f93c010cead8dcc",
+      "modelConfigHash": "509a50df561e12528b0d837c79a0c478a0c5339ba8626c5d87937521ea569395",
+      "observedModelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 7446.5360999999975,
+        "inputTokens": 8759,
+        "outputTokens": 98,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "turn": 2,
+      "httpStatus": 200,
+      "finishReason": null,
+      "requestSchemaHash": null
+    }
+  ],
+  "completionErrors": [
+    {
+      "id": "2f8cb033-2a88-45c5-ab65-73c4a8f01405:owner:1",
+      "role": "OWNER",
+      "status": "MALFORMED",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "7a83be84629454ecbec9f92047c40393097e367f7431e223260e1cf187352cb9",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 8954.343500000017,
+        "inputTokens": 10837,
+        "outputTokens": 2012,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 0,
+      "httpStatus": 200,
+      "finishReason": "MALFORMED_FUNCTION_CALL",
+      "requestSchemaHash": "82d415a3cb758ded1c15653417a54f0bcbacc443bcc0d01ce10b63c6f137052f",
+      "failureLayer": "MODEL_OUTPUT",
+      "failureStage": "COMPLETION",
+      "failureCode": "OWNER_FINISH_REASON",
+      "malformedCallShape": {
+        "inspectedParts": 0,
+        "truncated": false,
+        "calls": []
+      }
+    },
+    {
+      "id": "25b6dfac-3608-4f42-a1bd-d79eb42a1f82:owner:1",
+      "role": "OWNER",
+      "status": "MALFORMED",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "38c867da68f76399020a3f36800b08c2f5c3ee0b0468e8040b0bc645c8f58c02",
+      "modelConfigHash": "63407db56b0ef5979abc5e8ea4805d4365d5c76c4103f83bd2e3fdd5442d8d88",
+      "observedModelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 13430.05190000002,
+        "inputTokens": 10836,
+        "outputTokens": 1158,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 0,
+      "httpStatus": 200,
+      "finishReason": "MALFORMED_FUNCTION_CALL",
+      "requestSchemaHash": "82d415a3cb758ded1c15653417a54f0bcbacc443bcc0d01ce10b63c6f137052f",
+      "failureLayer": "MODEL_OUTPUT",
+      "failureStage": "COMPLETION",
+      "failureCode": "OWNER_FINISH_REASON",
+      "malformedCallShape": {
+        "inspectedParts": 0,
+        "truncated": false,
+        "calls": []
+      }
+    }
+  ],
+  "metrics": {
+    "OWNER": {
+      "requests": 26,
+      "statusCounts": {
+        "OK": 24,
+        "MALFORMED": 2
+      },
+      "inputTokens": 333107,
+      "outputTokens": 25479,
+      "latencyP50Ms": 4651.520499999984,
+      "latencyP95Ms": 8954.343500000017,
+      "costUSD": null,
+      "costUnavailableReason": "PROVIDER_NOT_EXPOSED"
+    },
+    "VERIFIER": {
+      "requests": 12,
+      "statusCounts": {
+        "OK": 12
+      },
+      "inputTokens": 123524,
+      "outputTokens": 973,
+      "latencyP50Ms": 8310.803899999999,
+      "latencyP95Ms": 10077.334799999997,
+      "costUSD": null,
+      "costUnavailableReason": "PROVIDER_NOT_EXPOSED"
+    }
+  },
+  "judge": {
+    "requests": 6,
+    "validRatings": 6,
+    "wholePass": 4,
+    "rows": [
+      {
+        "caseId": "c-20261028-j4",
+        "repetition": 1,
+        "status": "OK",
+        "rating": {
+          "arms": [
+            {
+              "wholePass": true,
+              "voicePass": true,
+              "factsPass": true,
+              "materialIssue": false,
+              "turns": [
+                {
+                  "voicePass": true,
+                  "factsPass": true
+                },
+                {
+                  "voicePass": true,
+                  "factsPass": true
+                },
+                {
+                  "voicePass": true,
+                  "factsPass": true
+                }
+              ],
+              "reason": "Hỏi màu còn thiếu đúng lựa chọn tool trả về: Trắng sẵn hàng, Be đặt trước; có ảnh mở đầu hợp lệ. Yêu cầu hỗ trợ giá được ghi nhận bằng receipt nhưng chưa được cấp ưu đãi, nên không tự giảm hay freeship. Lượt cuối báo đúng quote một áo AO: 499.000đ + ship Cần Thơ 30.000đ = 529.000đ, không giả đã chốt đơn hoặc thanh toán. Giọng lịch sự, rõ ràng; nhắc lại câu hỏi màu hợp lý vì khách chưa chọn."
+            }
+          ]
+        }
+      },
+      {
+        "caseId": "c-20261028-j4",
+        "repetition": 2,
+        "status": "OK",
+        "rating": {
+          "arms": [
+            {
+              "wholePass": false,
+              "voicePass": false,
+              "factsPass": true,
+              "materialIssue": false,
+              "turns": [
+                {
+                  "voicePass": false,
+                  "factsPass": true
+                },
+                {
+                  "voicePass": false,
+                  "factsPass": true
+                },
+                {
+                  "voicePass": false,
+                  "factsPass": true
+                }
+              ],
+              "reason": "Nguồn đủ bán offer AO riêng nhưng lượt đầu handoff im lặng, hai lượt sau tiếp tục NO_SEND nên không giúp khách mua áo M, trả lời xin hỗ trợ hay báo tổng gửi Cần Thơ (499.000đ + 30.000đ = 529.000đ khi chưa có receipt ưu đãi). Không phát sinh giảm giá, freeship, xác nhận thanh toán hay thông tin sai; lỗi chính là bỏ dở phục vụ khách."
+            }
+          ]
+        }
+      },
+      {
+        "caseId": "c-20261028-j4",
+        "repetition": 3,
+        "status": "OK",
+        "rating": {
+          "arms": [
+            {
+              "wholePass": true,
+              "voicePass": true,
+              "factsPass": true,
+              "materialIssue": false,
+              "turns": [
+                {
+                  "voicePass": true,
+                  "factsPass": true
+                },
+                {
+                  "voicePass": true,
+                  "factsPass": true
+                },
+                {
+                  "voicePass": true,
+                  "factsPass": true
+                }
+              ],
+              "reason": "Hỏi màu đúng lựa chọn tool trả về: Trắng có sẵn, Be đặt trước; không nhận vơ đã thêm giỏ. Yêu cầu hỗ trợ giá đã có receipt ghi nhận nhưng chưa được duyệt, lời đáp không tự hứa giảm hay freeship. Báo đúng một áo AO 499.000đ + ship Cần Thơ 30.000đ = 529.000đ theo actual quote, không áp giảm số lượng hay giả đã thanh toán. Giọng lịch sự, đủ ý; hỏi lại màu hợp lý vì khách vẫn chưa chọn."
+            }
+          ]
+        }
+      },
+      {
+        "caseId": "c-20261028-j4",
+        "repetition": 4,
+        "status": "OK",
+        "rating": {
+          "arms": [
+            {
+              "wholePass": true,
+              "voicePass": true,
+              "factsPass": true,
+              "materialIssue": false,
+              "turns": [
+                {
+                  "voicePass": true,
+                  "factsPass": true
+                },
+                {
+                  "voicePass": true,
+                  "factsPass": true
+                },
+                {
+                  "voicePass": true,
+                  "factsPass": true
+                }
+              ],
+              "reason": "Hỏi màu đúng lựa chọn thực tế của áo M: Trắng có sẵn, Be đặt trước; không tự chọn thay khách. Yêu cầu hỗ trợ đã được ghi nhận đúng receipt, không bị diễn giải thành ưu đãi đã duyệt. Báo đúng một áo 499.000đ + ship Cần Thơ 30.000đ = 529.000đ, không tự giảm tiền/freeship hay nhận đã thanh toán. Lời thoại gọn, tự nhiên, đáp ứng câu hỏi từng lượt."
+            }
+          ]
+        }
+      },
+      {
+        "caseId": "c-20261028-j4",
+        "repetition": 5,
+        "status": "OK",
+        "rating": {
+          "arms": [
+            {
+              "wholePass": false,
+              "voicePass": false,
+              "factsPass": true,
+              "materialIssue": false,
+              "turns": [
+                {
+                  "voicePass": false,
+                  "factsPass": true
+                },
+                {
+                  "voicePass": false,
+                  "factsPass": true
+                },
+                {
+                  "voicePass": false,
+                  "factsPass": true
+                }
+              ],
+              "reason": "Nguồn đủ để bán offer AO riêng size M, nhưng lượt đầu handoff mà không tra cứu hay tư vấn; hai lượt sau tiếp tục im lặng nên chưa giúp khách mua hoặc trả lời xin hỗ trợ và tổng tiền. Theo nguồn, một áo 499.000đ + ship Cần Thơ 30.000đ = 529.000đ, chưa có receipt ưu đãi. Không có phát ngôn sai, tự giảm giá/freeship hay nhận đã thanh toán; NO_SEND sau khi HUMAN tiếp quản đúng trạng thái nhưng không khắc phục việc bán hàng chưa hoàn thành."
+            }
+          ]
+        }
+      },
+      {
+        "caseId": "c-context-two-units",
+        "repetition": 1,
+        "status": "OK",
+        "rating": {
+          "arms": [
+            {
+              "wholePass": true,
+              "voicePass": true,
+              "factsPass": true,
+              "materialIssue": false,
+              "turns": [
+                {
+                  "voicePass": true,
+                  "factsPass": true
+                },
+                {
+                  "voicePass": true,
+                  "factsPass": true
+                },
+                {
+                  "voicePass": true,
+                  "factsPass": true
+                }
+              ],
+              "reason": "Lượt đầu lưu yêu cầu hỗ trợ ở trạng thái pending, chưa hứa cấp thêm; giảm 5% là ưu đãi số lượng có nguồn. Khi khách chọn trắng, giỏ thực có đúng 2 áo M và pending được kích hoạt một lần; hai bản ghi add_to_cart cùng operationId không tạo thêm hàng. Tổng 948.100đ và mức giảm 79.900đ khớp giỏ revision 2, gồm giảm 49.900đ và hỗ trợ ship 30.000đ. Lời đáp lịch sự, rõ; câu mời chốt ở lượt hai hơi chung chung nhưng không ảnh hưởng đáng kể."
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "totalGenerationRequests": 44,
+  "nativeAdditionalAuthRequests": 2,
+  "rootCauseChecks": {
+    "currentReceiptProofMatchesOriginalLedger": true,
+    "controlActivationTurn": 2,
+    "controlAllThreeTurnsSent": true,
+    "independentReadAfterRejectedRecordNative": "NOT_EXERCISED; covered by deterministic RED-GREEN tests",
+    "j4WholeConversationPass": 3,
+    "j4RegisteredAttempts": 5,
+    "j4MalformedFirstTurnAttempts": [
+      2,
+      5
+    ],
+    "oldBenefitPromiseRejectionsObserved": 0,
+    "verifierFailures": 0
+  },
+  "accounting": {
+    "CANDIDATE": {
+      "STARTED": 29,
+      "REQUEST": 29,
+      "AUTH_STARTED": 1,
+      "DISPATCHED": 20,
+      "RESULT": 27,
+      "VERIFIER_DISPATCHED": 9,
+      "VERIFIER_RESULT": 9,
+      "ERROR": 2
+    },
+    "CONTROLS": {
+      "STARTED": 9,
+      "REQUEST": 9,
+      "AUTH_STARTED": 1,
+      "DISPATCHED": 6,
+      "RESULT": 9,
+      "VERIFIER_DISPATCHED": 3,
+      "VERIFIER_RESULT": 3
+    }
+  }
+}
