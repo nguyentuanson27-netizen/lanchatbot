@@ -15,7 +15,7 @@ import { CommerceEffectCommitError, type CommerceEffectFailureStage } from "./si
 import {CART_TTL_MS_V1,PendingNegotiationV1Schema,pendingNegotiationIdPreimageV1,pendingNegotiationAfterActivationV1,type PendingNegotiationV1} from "@lana/contracts";
 import {createHash} from "node:crypto";
 
-const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase", "record_negotiation"]);
+const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase", "record_negotiation", "apply_pending_negotiation", "cancel_pending_negotiation"]);
 export type CommerceCommandResult =
   | { status: "APPLIED"; state: SalesCycleRuntimeState; transferToHuman: boolean }
   | { status: "DUPLICATE"; state: SalesCycleRuntimeState }
@@ -232,6 +232,11 @@ export async function createCommerceEffectTools(input: {
   }
   async function invokeEffect(call: CommerceToolCall): Promise<CommerceToolResult> {
     if (!names.has(call.name)) return input.base.invoke(call);
+    if(call.name==="apply_pending_negotiation"||call.name==="cancel_pending_negotiation"){
+      const args=toolArgs(call.args,["pendingRef"]);
+      if(!args)return {status:"REJECTED",reason:"TOOL_ARGUMENTS",failureStage:"VALIDATION"};
+      call={name:"record_negotiation",args:{...args,action:call.name==="apply_pending_negotiation"?"APPLY_PENDING":"CANCEL_PENDING"}};
+    }
     let phase:CommerceEffectFailureStage="AUTHORITY";
     const execute = async():Promise<CommerceToolResult> => {
     try { await refreshAuthority(); } catch { return { status: "UNAVAILABLE", reason: "CURRENT_AUTHORITY_UNAVAILABLE" }; }
@@ -490,7 +495,25 @@ export async function createCommerceEffectTools(input: {
   }
   // Establish current evidence before the owner/verifier sees this turn, including existing carts on later turns.
   await refreshSelections();
-  return { invoke, snapshot, noCommitNegotiationResult(result){
+  return { invoke, snapshot, async preparePendingSelections(admit,control){
+    const state=input.base.snapshot().state;
+    if(!state.permission||!state.privacyAllowed||state.conversationOwner!=="BOT"||state.bindingVersion!==turnBinding||state.recipient!==turnRecipient)return 0;
+    const pending=state.pendingPurchase as {lines:import("./single-agent-commerce-read-only.js").PendingPurchaseLine[]}|undefined;
+    const lines=pending?.lines??[],max=control?.maxCalls??6;
+    if(!Number.isSafeInteger(max)||max<0||max>6||lines.length>max)throw Error("PREPARATION_BUDGET");
+    const saved=new Map(selectionObservations),savedSelections=new Map(selections);
+    try{
+      for(const [index,line]of lines.entries()){
+        control?.onDispatch();
+        const lineId=commerceUuid(commerceHash({pendingRead:line,index}));
+        await selection(line.productId,{size:line.size,color:line.color,quantity:line.quantity},lineId,line.offerType,line.missing==="COLOR");
+        selections.delete(lineId); // This was a source read, never an active cart selection.
+      }
+      if(lines.length&&admit&&!admit(snapshot(),{chargedUnits:lines.length,kind:"FINAL"}))throw Error("PREPARATION_ADMISSION");
+      return lines.length;
+    }catch(error){selectionObservations.clear();for(const [key,value]of saved)selectionObservations.set(key,value);
+      selections.clear();for(const [key,value]of savedSelections)selections.set(key,value);throw error;}
+  }, noCommitNegotiationResult(result){
     const proof=noCommitNegotiations.get(result),s=snapshot().state;
     return !!proof&&!uncertain&&s.permission&&s.privacyAllowed&&s.conversationOwner==="BOT"&&s.bindingVersion===turnBinding&&s.recipient===turnRecipient&&
       proof.state===commerceHash(current)&&proof.authority===commerceHash(authority??input.scope);

@@ -16,13 +16,14 @@ export function validateQuoteTask(value:unknown):asserts value is ExplicitQuoteT
  if(commerceHash(value)!==commerceHash(EXPLICIT_QUOTE_TASK))throw new Error("QUOTE_TASK_CONFIG");
 }
 const boundedText=(v:unknown,n:number):v is string=>typeof v==="string"&&!!v.trim()&&Buffer.byteLength(v)<=n;
-const isWriter=(c:CommerceToolCall)=>["apply_customer_state","record_negotiation"].includes(c.name)||
+const isWriter=(c:CommerceToolCall)=>["apply_customer_state","record_negotiation","apply_pending_negotiation","cancel_pending_negotiation"].includes(c.name)||
  (c.name==="read_product"&&(c.args as {customerSelected?:unknown}|null)?.customerSelected===true);
 function batchShape(c:CommerceToolCall):boolean {
  const fields:Record<string,string[]>={quote_product:["subjectRef","offerTypes","color","quantity","deliveryRegion"],read_product:["subjectRef","offerType","offerTypes","detailsOnly","color","size","deliveryRegion","customerSelected"],
-  read_policy:[],apply_customer_state:["ops"],record_negotiation:["action","intent","sourceQuote","subjectRef","offerType","pendingRef"],select_product_media:["subjectRef","intent","color","componentRole","deliveryMode","requiredEvidence"],view_product_media:["subjectRef","intent","color","componentRole","requiredEvidence"]};
+  read_policy:[],apply_customer_state:["ops"],record_negotiation:["action","intent","sourceQuote","subjectRef","offerType","pendingRef"],apply_pending_negotiation:["pendingRef"],cancel_pending_negotiation:["pendingRef"],select_product_media:["subjectRef","intent","color","componentRole","deliveryMode","requiredEvidence"],view_product_media:["subjectRef","intent","color","componentRole","requiredEvidence"]};
  if(!fields[c.name])return false;const a=toolArgs(c.args,fields[c.name]!);if(!a)return false;
  if(c.name==="read_policy")return true;
+ if(c.name==="apply_pending_negotiation"||c.name==="cancel_pending_negotiation")return typeof a.pendingRef==="string"&&/^[a-f0-9]{64}$/.test(a.pendingRef);
  if(c.name==="apply_customer_state")return Array.isArray(a.ops)&&a.ops.length>0&&a.ops.length<=8&&a.ops.every(o=>{
   const op=toolArgs(o,["op","field","value","sourceQuote"]);
   if(!op||!["SET","REPLACE","CLEAR"].includes(String(op.op))||!boundedText(op.field,128)||

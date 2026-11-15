@@ -4,6 +4,42 @@ import {fixtureProduct,fixturePolicy,fixtureSizeInput,commerceScope,commerceNow}
 import {finalGate,makeBinding} from "./single-agent-semantic-verifier-boundary.js";
 import {createCommerceTools} from "./single-agent-commerce.js";
 import {runCommerceTurn} from "./single-agent-commerce-read-only.js";
+import {fixtureProfile} from "./single-agent-commerce.test-support.js";
+import {createSalesCycleRuntimeState} from "@lana/chat-runtime";
+import {cartSelectionFromSnapshot} from "./realtime-sales-catalog.js";
+
+it.each(["fresh","changed","stale-note","unbound","budget"] as const)("rehydrates pending selection from current sources with charged preparation: %s",async mode=>{
+ const scope=commerceScope(),f=fixtureProduct(),profile=fixtureProfile();
+ f.snapshot.offers.DIRECT!.rows.push({...structuredClone(f.snapshot.offers.DIRECT!.rows[0]!),color:"be"});
+ profile.profile.pendingPurchase={lines:[{productId:mode==="unbound"?"OTHER":"SM613",offerType:"DIRECT",size:"M",color:null,quantity:1,missing:"COLOR"}],
+  recordedAt:new Date(commerceNow.getTime()-(mode==="stale-note"?86400001:0)).toISOString()};
+ const current=createSalesCycleRuntimeState("pending-prep",{pageId:scope.pageId,conversationId:scope.conversationId},commerceNow);
+ const select=vi.fn(async q=>cartSelectionFromSnapshot(f.snapshot,{...q,selectionMode:"CANDIDATE_TUPLES"},commerceNow));
+ const tools=await createCommerceTools({read:{scope,clock:()=>commerceNow,policy:fixturePolicy,initialProducts:[f.product],
+  catalog:{readProduct:async()=>structuredClone(f),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}},
+  state:{store:{read:async()=>structuredClone(profile),compareAndSwap:vi.fn(async()=>false)},sourceMessages:[],sizeInput:async()=>{throw Error("NOT_USED");}},
+  effects:{conversationKey:"pending-prep",repository:{read:async()=>structuredClone(current),compareAndSwap:vi.fn(async()=>false)},
+   identity:{cartId:"50000000-0000-4000-8000-000000000001",salesEpisodeId:"60000000-0000-4000-8000-000000000001",customerProfileId:profile.profile.profileId},
+   policy:async()=>(await fixturePolicy()).bundle!,authorize:async()=>true,select,readAuthority:async()=>scope,readReceipt:async()=>null,
+   executeCommand:async()=>{throw Error("NO_WRITE_DURING_PREPARATION");}}});
+ const dispatch=vi.fn(),admit=vi.fn<import("./single-agent-commerce-read-only-tools.js").PreparationAdmission>(()=>true);
+ if(mode==="budget"){
+  await expect(tools.prepare!(admit,{maxCalls:1,onDispatch:dispatch})).rejects.toThrow("PREPARATION_BUDGET");
+  expect(select).not.toHaveBeenCalled();expect(dispatch).toHaveBeenCalledTimes(1);return;
+ }
+ const expected=["stale-note","unbound"].includes(mode)?1:2;
+ expect(await tools.prepare!(admit,{maxCalls:6,onDispatch:dispatch})).toBe(expected);
+ expect(dispatch).toHaveBeenCalledTimes(expected);
+ expect(select).toHaveBeenCalledTimes(expected-1);expect(current.cart).toBeNull();
+ if(expected===1){expect(tools.snapshot().runtimeProducts?.[0]?.selectionEvidence??[]).toEqual([]);return;}
+ const context=tools.snapshot(),proof=context.runtimeProducts?.[0]?.selectionEvidence?.[0];
+ expect(proof?.options.map(o=>o.color)).toEqual(expect.arrayContaining(["navy","be"]));
+ expect(admit.mock.calls.at(-1)?.[1]).toMatchObject({chargedUnits:2,kind:"FINAL"});
+ if(mode==="changed"){
+  f.snapshot.offers.DIRECT!.rows[0]!.stock_quantity=0;
+  await expect(tools.readback()).rejects.toThrow();
+ }else expect((await tools.readback()).runtimeProducts?.[0]?.selectionEvidence).toEqual([proof]);
+});
 const setup=(mode="normal")=>{
  const f=fixtureProduct(),readProduct=vi.fn(async()=>structuredClone(f));
  if(mode==="many"){const template=f.snapshot.offers.DIRECT!;f.snapshot.offers=Object.fromEntries(["AO","CV","SET","QUAN"].map(name=>[name,{...structuredClone(template),rows:template.rows.map(r=>({...r,offer_type:name}))}]));}

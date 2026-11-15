@@ -95,6 +95,7 @@ export async function createCommerceTools(input: {
       readReceipt:id=>observed("RECEIPT",{operationId:id},()=>effects.readReceipt(id)),base: tools, scope, clock });
     availableTools.push("add_to_cart", "change_cart_item", "confirm_purchase");
     if(input.effects.negotiationSources?.length)availableTools.push("record_negotiation");
+    availableTools.push("apply_pending_negotiation","cancel_pending_negotiation");
   }
   // State/effect adapters expose their own explicit surface. Attach these
   // code-only proofs after composition so they cannot be lost between layers.
@@ -148,7 +149,10 @@ export async function createCommerceTools(input: {
     ...(hints?{mediaCapabilities:()=>hints.get(composed.snapshot()),mediaCapabilityDiagnostics:()=>hints.takeDiagnostics()}:{}),
     async prepare(admit,control){
       const previous=composed.snapshot(),before=new Set(previous.protectedClaims.map(c=>commerceHash(c))),beforeMetadata=new Set(previous.policyLiterals.map(p=>commerceHash(p)));
-      const charged=await readTools.prepare((_context,work)=>{const context=composed.snapshot();return context.boundSubjects.length<=8&&context.protectedClaims.length<=32&&(context.runtimeProducts?.length??0)<=4&&(!admit||admit(context,work));},control);
+      let charged=await readTools.prepare((_context,work)=>{const context=composed.snapshot();return context.boundSubjects.length<=8&&context.protectedClaims.length<=32&&(context.runtimeProducts?.length??0)<=4&&(!admit||admit(context,work));},control);
+      const pendingCharged=await composed.preparePendingSelections?.((context,work)=>context.boundSubjects.length<=8&&context.protectedClaims.length<=32&&(context.runtimeProducts?.length??0)<=4&&
+        (!admit||admit(context,{kind:work?.kind??"FINAL",chargedUnits:charged+(work?.chargedUnits??0)})),control?{...control,maxCalls:control.maxCalls-charged}:undefined)??0;
+      charged+=pendingCharged;
       const after=composed.snapshot();
       coverage.observePrepared({protectedClaims:after.protectedClaims.filter(c=>!before.has(commerceHash(c))),metadata:after.policyLiterals.filter(p=>p.ref.startsWith("offers:")&&!beforeMetadata.has(commerceHash(p)))});
       return charged;

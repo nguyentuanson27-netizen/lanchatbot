@@ -16,6 +16,10 @@ export function commerceCallableTools(request: Pick<OwnerRequest,"availableTools
   return configured.filter(name=>{
     if(name==="request_handoff")return true;
     if(calls<1)return false;
+    if(name==="apply_pending_negotiation"||name==="cancel_pending_negotiation"){
+      const pending=request.context.state.pendingSupport as {canApply?:boolean}|undefined;
+      return !!pending&&(name==="cancel_pending_negotiation"||pending.canApply===true||created);
+    }
     if(name==="quote_product")return calls>=1&&subjects.some(s=>s.kind==="PRODUCT"); // Media feasibility reserves its own actual work.
     if(["read_product","recommend_size","add_to_cart","select_product_media","view_product_media"].includes(name))return product;
     if(name==="change_cart_item")return line;

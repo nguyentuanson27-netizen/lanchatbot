@@ -202,7 +202,7 @@ export function createCommerceHandoffTools(input: {
     if (committed || uncertain || pending) return { status: "REJECTED", reason: "HANDOFF_TERMINAL" };
     if (call.name !== "request_handoff") {
       const result=await input.base.invoke(call);
-      if(call.name==="record_negotiation"&&result.status==="OK"){
+      if(["record_negotiation","apply_pending_negotiation","cancel_pending_negotiation"].includes(call.name)&&result.status==="OK"){
         // Effects already read back their own durable commit and authority. Do
         // not overlay that revision with this wrapper's pre-write cache, nor
         // accept a later external revision merely because it is newer.

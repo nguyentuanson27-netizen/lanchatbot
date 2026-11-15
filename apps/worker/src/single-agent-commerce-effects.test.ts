@@ -170,7 +170,15 @@ it("carries a purchase that still lacks a colour into the next turn's owner view
  const lines=["M","L"].map(size=>({productId:"SM613",offerType:"DIRECT",size,color:null,quantity:1,missing:"COLOR"}));
  expect(stored.profile.pendingPurchase).toEqual({lines,recordedAt:commerceNow.toISOString()});expect(s.commits).toHaveLength(0);
  // Next turn: new tools from the same stores. The customer asks for the total.
- const second=await turn(),context=second.snapshot();
+ const second=await turn(),dispatched=vi.fn();
+ const readsBefore=s.select.mock.calls.length;
+ await expect(second.preparePendingSelections!(()=>true,{maxCalls:1,onDispatch:dispatched})).rejects.toThrow("PREPARATION_BUDGET");
+ expect(s.select).toHaveBeenCalledTimes(readsBefore);expect(dispatched).not.toHaveBeenCalled();
+ expect(await second.preparePendingSelections!(()=>true,{maxCalls:2,onDispatch:dispatched})).toBe(2);
+ expect(dispatched).toHaveBeenCalledTimes(2);
+ const context=second.snapshot();
+ expect(context.runtimeProducts?.[0]?.selectionEvidence).toHaveLength(2);
+ expect(context.runtimeProducts?.[0]?.selectionEvidence?.[0]?.options.map(o=>o.color)).toEqual(expect.arrayContaining(["navy","be"]));
  expect(context.state.pendingPurchase).toEqual({lines,recordedAt:commerceNow.toISOString()});
  const wire=buildGeminiCommerceRequest({generationId:"test:pending",context,instructions:"Tư vấn theo nguồn.",availableTools:second.availableTools,toolWorkAccounting:"PRIMITIVE_WORK_V2",
   toolsAllowed:true,toolBudget:{callsRemaining:6,roundsRemaining:2},contents:[{role:"user",parts:[{text:"Em báo lại tổng cả phí ship cho chị nhé."}]}],
@@ -1116,8 +1124,12 @@ describe("deferred support uses actual committed request and cart receipts",()=>
   expect(s.current().cart).toBeNull();expect(s.current().negotiation).toBeNull();
   const pending=s.current().pendingNegotiation!;
   expect(s.tools.snapshot().state.pendingSupport).toMatchObject({pendingRef:pending.pendingId,canApply:false});
+  expect((await s.tools.invoke({name:"apply_pending_negotiation",args:{pendingRef:pending.pendingId}})).status).not.toBe("OK");
   expect((await s.tools.invoke(s.add)).status).toBe("OK");
-  const activated=await s.tools.invoke({name:"record_negotiation",args:{action:"APPLY_PENDING",pendingRef:pending.pendingId}});
+  const commitsBefore=s.commits.length;
+  expect((await s.tools.invoke({name:"apply_pending_negotiation",args:{pendingRef:pending.pendingId,sourceQuote:"Giá hơi cao"}})).reason).toBe("TOOL_ARGUMENTS");
+  expect(s.commits).toHaveLength(commitsBefore);
+  const activated=await s.tools.invoke({name:"apply_pending_negotiation",args:{pendingRef:pending.pendingId}});
   expect(activated.reason).toBeUndefined();
   expect(activated).toMatchObject({status:"OK",data:{effect:"NEGOTIATION_UPDATED"}});
   expect(s.current().pendingNegotiation?.status).toBe("ACTIVATED");
@@ -1152,7 +1164,7 @@ it.each(["mutation","ordinary-negotiation"] as const)("does not offer pending ac
 it("executes W3 record-and-quote then activate-and-quote through the existing guarded batch path",async()=>{
  const s=await setup(),f=fixtureProduct(),sourceQuote="Giá hơi cao, bớt cho chị được không?";
  s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
- const quoted=()=>withExplicitQuoteTask({...s.base,...s.tools,availableTools:["read_product","request_handoff","add_to_cart","record_negotiation"]},s.scope,false,async()=>s.policy.policy,()=>commerceNow);
+ const quoted=()=>withExplicitQuoteTask({...s.base,...s.tools,availableTools:["read_product","request_handoff","add_to_cart","record_negotiation","apply_pending_negotiation"]},s.scope,false,async()=>s.policy.policy,()=>commerceNow);
  const first=quoted();
  expect((await first.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}})).status).toBe("OK");
  const quote={name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity:2}};
@@ -1162,7 +1174,7 @@ it("executes W3 record-and-quote then activate-and-quote through the existing gu
  expect(s.current().pendingNegotiation?.status).toBe("PENDING");
  expect(s.current().cart).toBeNull();expect(s.current().negotiation).toBeNull();
  expect((await s.tools.invoke({...s.add,args:{...s.add.args,quantity:2}})).status).toBe("OK");
- const activation={name:"record_negotiation",args:{action:"APPLY_PENDING",pendingRef:s.current().pendingNegotiation!.pendingId}};
+ const activation={name:"apply_pending_negotiation",args:{pendingRef:s.current().pendingNegotiation!.pendingId}};
  const applied=await quoted().invokeBatch([activation,quote]);
  expect(applied.map(r=>r.status)).toEqual(["OK","OK"]);
  expect(s.current().pendingNegotiation?.status).toBe("ACTIVATED");

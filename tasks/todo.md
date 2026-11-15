@@ -3335,3 +3335,10 @@ Implemented/self-reviewed existing price-card builder into first-contact read_pr
 - [x] Chạy lại các ca lỗi trên 3814464c: 9 attempt / 21 lượt, 30 generation native, 0 provider error; 8 send / 6 silent handoff / 7 HUMAN no-send. J4 5/5 và control hai áo đều vướng quoteBatchWork chỉ nhận intent/sourceQuote trong khi W3 thêm action/subjectRef/offerType. Chấm lại 5 cặp J2 cũ bằng trace động: candidate đúng dữ kiện 5/5, cả hai arm whole/giọng 2/5. [Kết quả, root cause và lịch sử](../docs/specs/evidence/c3-sales-context-implementation-20261115/FAILED_CASE_RERUN_20261115.md). STOP.
 
 - [x] Fix batch thương lượng 09ac48e7, rồi đồng bộ receipt/schema W3 ở 9d5108ca sau native phát hiện thêm hai chỗ chưa tương thích. RED→GREEN; worker focused 478 và adapter 83 PASS; build/noEmit/lint PASS. Chạy cả hai bản, mỗi bản J4 N5 và hai áo N1 (6 attempt / 18 lượt). Bản cuối J4 1/5 đi đủ, bốn lần bị verifier chặn vì context màu; control hai áo kích hoạt đúng một lần ở lượt 3, còn chậm và trình bày miễn ship chưa rõ. Native 44 request, 0 error; judge 5/6 hợp lệ, một transport error giữ mẫu số. [Bản sửa, tất cả hội thoại, kết quả và phần còn lại](../docs/specs/evidence/c3-sales-context-implementation-20261115/NEGOTIATION_BATCH_FIX_20261115.md). STOP.
+# Current — J4 colour context / pending support repair, 2026-11-15
+
+- [x] Trace both failures to lost turn-local selection evidence and mixed arguments on overloaded negotiation tools.
+- [x] Restore current pending-selection source reads under the existing work budget; separate pending command schemas with unchanged receipt/domain authority.
+- [x] Observed RED→GREEN; 531 worker / 83 adapter tests and worker build/noEmit/lint PASS.
+- [ ] Seal and execute J4 ×5 plus two-shirt control ×1; review all 18 terminal turns together. [Repair evidence](../docs/specs/evidence/c3-sales-context-implementation-20261115/COLOR_PENDING_FIX_20261115.md).
+

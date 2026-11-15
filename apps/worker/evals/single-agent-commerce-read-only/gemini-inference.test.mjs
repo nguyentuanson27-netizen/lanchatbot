@@ -734,7 +734,7 @@ test('state/effect capabilities are explicit and the accepted quote reaches the 
  const r=request();r.context.state.cartQuote={grandTotalVnd:524000};
  const built=buildGeminiCommerceRequest(r,[...stateDeclarations,...effectDeclarations]);
  const names=built.tools[0].functionDeclarations.map(d=>d.name);
- assert.deepEqual(names,['apply_customer_state','recommend_size','quote_cart','record_negotiation','add_to_cart','change_cart_item','confirm_purchase']);
+ assert.deepEqual(names,['apply_customer_state','recommend_size','quote_cart','record_negotiation','apply_pending_negotiation','cancel_pending_negotiation','add_to_cart','change_cart_item','confirm_purchase']);
  const fields=stateDeclarations[0].parametersJsonSchema.properties.ops.items.properties;
  assert.ok(fields.field.enum.includes('WAIST_CM'));
  assert.ok(!fields.field.enum.includes('permission'));
@@ -802,8 +802,8 @@ test('negotiation exposes intent and current source quote without model-selected
  const d=buildGeminiCommerceRequest(r).tools[0].functionDeclarations[0];
  const schema=d.parametersJsonSchema;
  assert.equal(schema.additionalProperties,false);
- assert.deepEqual(Object.keys(schema.properties),['action','intent','sourceQuote','subjectRef','offerType','pendingRef']);
- assert.deepEqual(schema.anyOf.map(branch=>branch.required),[['intent','sourceQuote'],['action','pendingRef']]);
+ assert.deepEqual(Object.keys(schema.properties),['action','intent','sourceQuote','subjectRef','offerType']);
+ assert.deepEqual(schema.anyOf.map(branch=>branch.required),[['intent','sourceQuote']]);
  assert.deepEqual(schema.properties.intent.enum,['PRICE_OBJECTION','PURCHASE_READY']);
 });
 
@@ -1118,10 +1118,12 @@ test('response stream reset and abort retain exactly one generation request with
 test('negotiation JSON schema keeps pending actions separate from a new objection',async()=>{
  const {default:Ajv}=await import('ajv');
  const validate=new Ajv({strict:false}).compile(effectDeclarations.find(d=>d.name==='record_negotiation').parametersJsonSchema);
- for(const action of ['APPLY_PENDING','CANCEL_PENDING']){
-  assert.equal(validate({action,pendingRef:'a'.repeat(64)}),true);
+ for(const [action,name] of [['APPLY_PENDING','apply_pending_negotiation'],['CANCEL_PENDING','cancel_pending_negotiation']]){
+  assert.equal(validate({action,pendingRef:'a'.repeat(64)}),false);
+  const pending=new Ajv({strict:false}).compile(effectDeclarations.find(d=>d.name===name).parametersJsonSchema);
+  assert.equal(pending({pendingRef:'a'.repeat(64)}),true);
   for(const extra of [{sourceQuote:'Bớt cho chị'},{intent:'PRICE_OBJECTION'},{subjectRef:'P1'},{offerType:'AO'}])
-   assert.equal(validate({action,pendingRef:'a'.repeat(64),...extra}),false);
+   assert.equal(pending({pendingRef:'a'.repeat(64),...extra}),false);
  }
  assert.equal(validate({action:'RECORD',intent:'PRICE_OBJECTION',sourceQuote:'Bớt cho chị',subjectRef:'P1',offerType:'AO'}),true);
  assert.equal(validate({intent:'PRICE_OBJECTION',sourceQuote:'Bớt cho chị'}),true);

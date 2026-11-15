@@ -79,6 +79,8 @@ export interface CommerceTools {
   /** Sticky request-local missing source for an explicitly requested media proof. */
   requiredMediaUnavailable?():boolean;
   prepare?(admit?:import("./single-agent-commerce-read-only-tools.js").PreparationAdmission, control?:import("./single-agent-commerce-read-only-tools.js").PreparationControl): Promise<number>;
+  /** Re-read pending purchase queries; the stored note itself grants no factual authority. */
+  preparePendingSelections?(admit?:import("./single-agent-commerce-read-only-tools.js").PreparationAdmission, control?:import("./single-agent-commerce-read-only-tools.js").PreparationControl): Promise<number>;
   availableTools?: readonly string[];
   invoke(call: CommerceToolCall): Promise<CommerceToolResult>;
   invokeBatch(calls: CommerceToolCall[],terminalMediaControl?:import('./single-agent-commerce-read-only-tools.js').PreparationControl): Promise<CommerceToolResult[]>;
