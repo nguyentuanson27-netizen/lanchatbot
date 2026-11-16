@@ -1,4 +1,11 @@
-## Current — dữ kiện báo giá và bounded retry, 2026-11-16
+## Current — code xét hỗ trợ khi mở giỏ, báo giá khi draft bị chặn, giọng chat, 2026-11-16
+
+- [x] Code xét lời xin hỗ trợ đã lưu trong `add_to_cart` mở giỏ; `pendingSupport.evaluation` thay `blockedReason`; lệnh lặp trả cùng shape; verdict chặn draft gửi tổng trước giỏ do code dựng. Prompt owner có bốn luật giọng, không ví dụ. [Chi tiết](../docs/specs/evidence/c3-sales-context-implementation-20261115/SUPPORT_EVALUATION_QUOTE_REPLY_20261116.md).
+- [ ] Chạy lại J4 ×5 và control hai áo ×5 trên world đã dùng; lưu violation của verifier và args tool vào audit.
+- [ ] Quyết định có mở rộng audit `qualification.mjs` cho `VERIFIED_QUOTE_REPLY` và thêm tiêu chí giọng riêng vào rubric judge hay không.
+- [ ] Phase C STOP cho tới khi có lượt model sau bản sửa này.
+
+## Previous — dữ kiện báo giá và bounded retry, 2026-11-16
 
 - [x] Sửa dữ kiện báo giá, chi tiết ưu đãi và guard retry; 342 runtime, 124 Node, 18 protected claim boundary và 22 claim/reply assembly test đã qua. Worker build và lint đã qua.
 - [x] Chạy đủ 6 hội thoại, 18 lượt trên `4673fdc4`. J4 đạt 4/5, control đạt 0/1. Native 49 request, chấm mù 6 request. [Kết quả và hội thoại](../docs/specs/evidence/c3-sales-context-implementation-20261115/PRICE_AUTHORITY_REPAIR_20261116.md).

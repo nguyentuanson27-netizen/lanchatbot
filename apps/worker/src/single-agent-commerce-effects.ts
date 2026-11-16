@@ -15,7 +15,7 @@ import { CommerceEffectCommitError, type CommerceEffectFailureStage } from "./si
 import {CART_TTL_MS_V1,PendingNegotiationV1Schema,pendingNegotiationIdPreimageV1,pendingNegotiationAfterActivationV1,type PendingNegotiationV1} from "@lana/contracts";
 import {createHash} from "node:crypto";
 import {receiptCartItemsHash} from "./single-agent-commerce-effect-receipts.js";
-import {unestablishedPriceFloor} from "./single-agent-commerce-pricing-view.js";
+import {unestablishedPriceFloor,supportEvaluationStep,type SupportWaitingFor} from "./single-agent-commerce-pricing-view.js";
 
 const names = new Set(["add_to_cart", "change_cart_item", "confirm_purchase", "record_negotiation", "apply_pending_negotiation", "cancel_pending_negotiation"]);
 export type CommerceCommandResult =
@@ -33,6 +33,12 @@ export async function createCommerceEffectTools(input: {
   policy: () => Promise<RuntimePolicyBundle>;
   select: (query: CartSelectionQuery) => Promise<CartSelectionResult>;
   selectionMaxAgeSeconds?:number;
+  /**
+   * Owner decision 2026-11-16: a support request stored before the cart is evaluated by code, once, in the
+   * same add_to_cart that opens the matching cart. It reuses the guarded activation command and its receipts.
+   * apply_pending_negotiation stays as the recovery path for an evaluation that did not complete.
+   */
+  evaluateStoredSupportAtCartOpening?:boolean;
   /** Current public batch messages; code resolves the exact quote's evidence identity. */
   negotiationSources?: readonly { text: string; sourceMessageId: string; observedAt: string }[];
   trustedPorts?: SalesCycleTrustedPortsV1;
@@ -86,11 +92,26 @@ export async function createCommerceEffectTools(input: {
     if(!pending||pending.status!=="PENDING"||Date.parse(pending.expiresAt)<=input.clock().getTime())return undefined;
     const eligible=current.cart&&current.commerceContext&&pending.cartOpeningCommandId?
       pendingNegotiationAfterActivationV1(pending,current.cart.value,current.commerceContext.policyRef,pending.cartOpeningCommandId,input.clock().toISOString()):null;
+    // What the customer still has to choose for this exact item; a cart is never the thing being waited for.
+    const wanted=(input.base.snapshot().state.pendingPurchase as {lines?:{productId?:unknown;offerType?:unknown;missing?:unknown}[]}|undefined)?.lines;
+    const missing=(Array.isArray(wanted)?wanted:[]).filter(l=>l.productId===pending.productId&&l.offerType===pending.offerId&&(l.missing==="COLOR"||l.missing==="SIZE"))
+      .map(l=>l.missing as SupportWaitingFor);
+    const waitingFor:SupportWaitingFor[]=current.cart?[]:missing.length?[...new Set(missing)]:["CUSTOMER_PURCHASE_CHOICE"];
     return {pendingRef:pending.pendingId,subjectRef:pending.productId,offerType:pending.offerId,status:"NOT_EVALUATED",
       negotiatedPriceFloor:unestablishedPriceFloor(),
       benefitAuthorization:{scope:"ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",status:"NOT_GRANTED",grantedBenefits:[],receiptRef:null},
-      canApply:!!eligible,blockedReason:eligible?null:current.cart?"CART_BINDING_CHANGED":"CART_REQUIRED"};
+      canApply:!!eligible,
+      evaluation:supportEvaluationStep(!current.cart?"MATCHING_CART_OPENS":eligible?"NOT_COMPLETED_AT_CART_OPENING":"REQUEST_DIFFERS_FROM_CART",waitingFor)};
   }
+  // One result shape for a first commit and for its replay, so a repeated call never reads as an empty outcome.
+  const effectData=(operationId:string,effectName:string,pendingRecord:boolean)=>{
+    const pendingSupport=pendingSupportView(),pending=current.pendingNegotiation;
+    return { operationId, effect: effectName, cart: current.cart?.value, cartItems: cartItems(), cartQuote: cartQuote(),
+      ...(pendingRecord&&pending?.status==="PENDING"?{supportEvaluation:{status:"NOT_EVALUATED",supportAvailability:"UNKNOWN",pendingRef:pending.pendingId,
+        pendingCommitted:true,negotiationApplied:false}}:{}),
+      ...(pendingSupport?{pendingSupport}:{}),
+      purchaseConfirmed: current.confirmation !== null, externalOrderCreated: false };
+  };
   async function terminalOutcome(): Promise<TerminalOutcome | null> {
     // An unproved effect blocks every reply, including an otherwise harmless
     // ACK. Recovery of a rejected draft is not a substitute for this send gate.
@@ -349,7 +370,8 @@ export async function createCommerceEffectTools(input: {
         const allowed = call.name==="record_negotiation"?[effectName]:call.name === "confirm_purchase" ? ["PURCHASE_CONFIRMED"] : call.name === "change_cart_item" ? ["CART_MUTATED"] : ["CART_OPENED", "CART_MUTATED"];
         if (!acceptReceipt(recovered, operationId, allowed)) return { status: "REJECTED", reason: "NOT_A_SUCCESS_RECEIPT" };
         await refreshSelections();
-        return { status: "OK", data: { operationId, duplicate: true, cart: current.cart?.value, cartItems: cartItems(), cartQuote: cartQuote() } };
+        // The replayed receipt names the effect that actually committed (a cart may have been opened by this very command).
+        return { status: "OK", data: { ...effectData(operationId,recovered!.effect,pendingRecord), duplicate: true } };
       }
       if(supportAction==="APPLY_PENDING"&&!openingReceipt)return {status:"REJECTED",reason:"PENDING_NEGOTIATION_CART_RECEIPT"};
       if(supportAction==="APPLY_PENDING"&&!receipt&&openingReceipt)
@@ -494,19 +516,39 @@ export async function createCommerceEffectTools(input: {
       await refreshSelections();
       if (result?.status === "APPLIED" && result.transferToHuman) committedTerminal = {
         reason: "PURCHASE_CONFIRMED", revision: current.revision, operationId, conversationRevision: authority?.revision ?? input.scope.revision };
-      const pendingSupport=pendingSupportView();
-      return { status: "OK", data: { operationId, effect: effectName, cart: current.cart?.value, cartItems: cartItems(), cartQuote: cartQuote(),
-        ...(pendingRecord?{supportEvaluation:{status:"NOT_EVALUATED",supportAvailability:"UNKNOWN",pendingRef:current.pendingNegotiation!.pendingId,
-          pendingCommitted:true,negotiationApplied:false}}:{}),
-        ...(pendingSupport?{pendingSupport}:{}),
-        purchaseConfirmed: current.confirmation !== null, externalOrderCreated: false } };
+      return { status: "OK", data: effectData(operationId,effectName,pendingRecord) };
     } catch { if (commitAttempted) uncertain = true; return { status: "UNAVAILABLE", reason: "COMMERCE_UNAVAILABLE" }; }
     };
     const result=await execute();
     return result.status==="OK"?result:{...result,failureStage:result.failureStage??phase};
   }
+  /**
+   * The cart this add_to_cart just opened carries a stored support request: evaluate it now through the existing
+   * activation command (authority, source, CAS, opening receipt and its own receipt are all checked there).
+   * The opening stays a success whatever the evaluation returns; an unproved second commit blocks the turn
+   * through the same UNKNOWN_COMMIT gate as any other effect.
+   */
+  async function evaluateStoredSupport(opened: CommerceToolResult, requested: {pendingRef:string}|undefined): Promise<CommerceToolResult> {
+    const {pendingSupport:_stale,...data}=opened.data as Record<string,unknown>;
+    const notEvaluated=(reason:string):CommerceToolResult=>{const pendingSupport=pendingSupportView();
+      return {status:"OK",data:{...data,cartItems:cartItems(),cartQuote:cartQuote(),
+        supportEvaluation:{status:"NOT_EVALUATED",evaluatedBy:"CODE_AT_CART_OPENING",negotiationApplied:false,reason},...(pendingSupport?{pendingSupport}:{})}};};
+    const view=pendingSupportView();
+    if(!view||view.pendingRef!==requested?.pendingRef||!view.canApply)return notEvaluated("REQUEST_DIFFERS_FROM_CART");
+    const grandTotalBeforeVnd=current.cart?.value.grandTotalVnd??null;
+    const applied=await invokeEffect({name:"apply_pending_negotiation",args:{pendingRef:view.pendingRef}});
+    if(uncertain)return applied.status==="OK"?{status:"UNAVAILABLE",reason:"UNKNOWN_COMMIT"}:applied;
+    if(applied.status!=="OK")return notEvaluated(applied.reason??"SUPPORT_EVALUATION_UNAVAILABLE");
+    const after=applied.data as {operationId?:unknown;cart?:unknown;cartItems?:unknown;cartQuote?:unknown};
+    return {status:"OK",data:{...data,cart:after.cart,cartItems:after.cartItems,cartQuote:after.cartQuote,
+      supportEvaluation:{status:"EVALUATED",evaluatedBy:"CODE_AT_CART_OPENING",negotiationApplied:true,supportOperationId:after.operationId,
+        grandTotalBeforeVnd,grandTotalAfterVnd:current.cart?.value.grandTotalVnd??null}}};
+  }
   async function invoke(call: CommerceToolCall): Promise<CommerceToolResult> {
-    const result = await invokeEffect(call);
+    const stored=input.evaluateStoredSupportAtCartOpening===true&&call.name==="add_to_cart"&&!current.cart?pendingSupportView():undefined;
+    let result = await invokeEffect(call);
+    if(stored&&result.status==="OK"&&(result.data as {effect?:unknown;duplicate?:unknown}|undefined)?.effect==="CART_OPENED"&&
+      (result.data as {duplicate?:unknown}).duplicate!==true&&!uncertain)result=await evaluateStoredSupport(result,stored);
     if(call.name==="record_negotiation"&&["NEGOTIATION_CONTEXT_REQUIRED","NEGOTIATION_SOURCE_OR_CART"].includes(result.reason??"")&&result.failureStage==="VALIDATION"&&!uncertain&&
       ((call.args as {action?:unknown}|null)?.action??"RECORD")==="RECORD"){
       result.data={...(result.data as Record<string,unknown>|undefined),effectCommitted:false,...(pendingSupportView()?{pendingSupport:pendingSupportView()}: {})};

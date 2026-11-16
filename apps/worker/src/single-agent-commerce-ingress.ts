@@ -325,7 +325,9 @@ export async function runPersistedCommerceIngress(input: {
   const selectedMedia = [...(tools.mediaSelection?.() ?? [])];
   let attachments;
   try{attachments=physicalCommerceMedia(selectedMedia);}catch{return {...result,...await closeWithoutSend('MEDIA_ATTACHMENT_CONFLICT')};}
-  const generatedPass = result.terminal.disposition === "SEND_ELIGIBLE" && result.terminal.reason === "PASS";
+  // A verifier-approved draft, or the code-built sentence for a total this turn proved after its draft was rejected.
+  // Both state only current verified facts, so both carry the turn's claims and its already selected product photos.
+  const generatedPass = result.terminal.disposition === "SEND_ELIGIBLE" && ["PASS","VERIFIED_QUOTE_REPLY"].includes(result.terminal.reason);
   if(input.openingMediaRule&&tools.openingMediaReady?.(world,generatedPass?selectedMedia:[])!==true){
     const terminal=await tools.recoverFallback?.({disposition:"FALLBACK",reason:"PREPARATION_UNAVAILABLE",text:null,fallbackId:null})??noSend("OPENING_MEDIA_UNPROVED").terminal;
     return {...result,terminal,recovery:{originalDisposition:result.terminal.disposition,originalReason:"OPENING_MEDIA_EGRESS"},

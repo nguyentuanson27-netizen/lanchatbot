@@ -68,8 +68,8 @@
     }
   },
   "promptHashes": {
-    "owner": "a29e54165dc0bd4809060e7bae28a51f4e024366b55257484dee2bd9a5f131cd",
-    "verifier": "ca2c883564b4800f76dcfe7b11b2298fbb4930efd7a3095667f44e965153f7b3"
+    "owner": "3d94082edc5412188ec922ce581304ccb8771c3e302dba6ba0bf29f7f494028c",
+    "verifier": "23e3315044995f2c5e8fc6ca0b242bc74e68b48f232fb7fefc8ce9528ca7d7bf"
   },
   "verdictSchema": {
     "type": "object",
@@ -142,9 +142,9 @@
   },
   "terminalMap": {
     "PASS": "SEND_ELIGIBLE_SEND_DISABLED",
-    "FAIL": "SILENT_HANDOFF_OR_NO_SEND",
-    "UNCERTAIN": "SILENT_HANDOFF_OR_NO_SEND",
-    "MALFORMED": "SILENT_HANDOFF_OR_NO_SEND",
+    "FAIL": "VERIFIED_QUOTE_REPLY_OR_SILENT_HANDOFF_OR_NO_SEND",
+    "UNCERTAIN": "VERIFIED_QUOTE_REPLY_OR_SILENT_HANDOFF_OR_NO_SEND",
+    "MALFORMED": "VERIFIED_QUOTE_REPLY_OR_SILENT_HANDOFF_OR_NO_SEND",
     "TIMEOUT": "SILENT_HANDOFF_OR_NO_SEND",
     "PROVIDER_ERROR": "SILENT_HANDOFF_OR_NO_SEND",
     "STALE": "SILENT_HANDOFF_OR_NO_SEND",
@@ -197,5 +197,13 @@
     "customerText": false,
     "images": false,
     "effectReplay": false
+  },
+  "verifiedQuoteReply": {
+    "kind": "PRE_CART_QUOTE_V1",
+    "afterVerdicts": ["FAIL", "UNCERTAIN", "MALFORMED"],
+    "source": "SINGLE_CURRENT_PRE_CART_TOTAL_PROOF",
+    "modelText": false,
+    "reverification": "DETERMINISTIC_PRECHECK_ONLY",
+    "withCartOrPreparedHandoff": "SILENT_HANDOFF"
   }
 }

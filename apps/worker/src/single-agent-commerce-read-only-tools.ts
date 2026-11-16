@@ -38,6 +38,9 @@ export interface CommerceToolResult { status: "OK" | "REJECTED" | "UNAVAILABLE" 
   failureStage?: import("./single-agent-commerce-effect-failure.js").CommerceEffectFailureStage }
 export interface QuotePriceQuery {subjectRef:string;offerTypes:readonly string[];color?:string}
 export interface QuotePriceEvidence {offerType:string;claim:Extract<ProtectedClaimV1,{type:"PRICE"}>;sourceVersion:string;observedAt:string;expiresAt:string}
+/** Customer-facing names code may use for a selling option. An offer outside both lists has no code-owned name. */
+export const COMPONENT_OFFER_LABELS:Readonly<Record<string,string>>={AO:"Áo lẻ",CV:"Chân váy lẻ",QUAN:"Quần lẻ"};
+export const WHOLE_PRODUCT_OFFERS:readonly string[]=["DIRECT","SET","SET_VAY","SET_QUAN"];
 export function toolArgs(value: unknown, fields: readonly string[]): Record<string, unknown> | null {
   return value !== null && typeof value === "object" && !Array.isArray(value) &&
     Object.keys(value).every(k => fields.includes(k)) ? value as Record<string, unknown> : null;
@@ -471,9 +474,9 @@ export function createReadOnlyTools(input: {
     claims.set(readKey, nextClaims);
     reads.set(readKey, structuredClone(args));
     preparationContexts.delete(id);
-    const componentLabel = ({AO:"Áo lẻ",CV:"Chân váy lẻ",QUAN:"Quần lẻ"} as Record<string,string>)[selected.offer ?? ""];
+    const componentLabel = COMPONENT_OFFER_LABELS[selected.offer ?? ""];
     // Offer count cannot bind parent attributes to a component, even when it is the only offer left.
-    const wholeProduct = ["DIRECT","SET","SET_VAY","SET_QUAN"].includes(selected.offer ?? "");
+    const wholeProduct = WHOLE_PRODUCT_OFFERS.includes(selected.offer ?? "");
     const pair=`${id}:${selected.offer}`,previousPriceRead=priceReads.get(pair);
     if(typeof args.offerType!=="string"||summarizeAll||(!wholeProduct&&!componentLabel)||previousPriceRead&&previousPriceRead.readKey!==readKey)ambiguousPriceRead=true;
     else priceReads.set(pair,{readKey,label:[componentLabel?`${componentLabel} — ${p.title}`:p.title,

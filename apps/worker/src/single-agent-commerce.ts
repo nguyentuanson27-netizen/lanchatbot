@@ -88,7 +88,7 @@ export async function createCommerceTools(input: {
   }
   if (input.effects) {
     const effects=input.effects;
-    tools = await createCommerceEffectTools({ ...effects,selectionMaxAgeSeconds:input.read.maxFactAgeSeconds??1200,
+    tools = await createCommerceEffectTools({ ...effects,evaluateStoredSupportAtCartOpening:true,selectionMaxAgeSeconds:input.read.maxFactAgeSeconds??1200,
       repository:{read:key=>observed("SALES_STATE",{},()=>effects.repository.read(key)),
         compareAndSwap:update=>effects.repository.compareAndSwap(update)},
       select:q=>observed("CART_SELECTION",q,()=>effects.select(q)),

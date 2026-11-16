@@ -1,5 +1,5 @@
 import {describe,it,expect} from "vitest";
-import {presentCartWriteResult,presentNegotiationResult,presentPreCartQuoteResult,presentPendingPurchase,PENDING_PURCHASE_MEANING,SUPPORT_NOT_EVALUATED_MEANING} from "./single-agent-commerce-owner-view.js";
+import {presentCartWriteResult,presentNegotiationResult,presentPreCartQuoteResult,presentPendingPurchase,PENDING_PURCHASE_MEANING,SUPPORT_NOT_EVALUATED_MEANING,SUPPORT_AT_CART_OPENING_MEANING} from "./single-agent-commerce-owner-view.js";
 
 const option=(color:string|null,status:string,hash:string)=>({size:"M",color,status,reasonCode:null,identityHash:hash.repeat(64),
  productId:"SV2447",offerType:"AO",quantity:1,sourceVersion:"pos-v1",observedAt:"2026-11-10T09:00:00.000Z",expiresAt:"2026-11-10T09:20:00.000Z"});
@@ -124,5 +124,21 @@ describe("pending purchase shown to the owner (PR 392 case J1)",()=>{
   const view=presentPendingPurchase(pending,{quoteCallable:false})!;
   expect(view.meaning).toBe(PENDING_PURCHASE_MEANING.PLAIN);expect(view).not.toHaveProperty("quoteRequests");expect(view.meaning).not.toMatch(/quote_product/u);
   for(const bad of [undefined,null,{},{lines:[]},{lines:[{...line("M"),missing:"OTHER"}]},{lines:[{...line("M"),quantity:1.5}]}])expect(presentPendingPurchase(bad)).toBeNull();
+ });
+});
+
+describe("support evaluated by code while the cart opened",()=>{
+ const opened=(supportEvaluation:Record<string,unknown>)=>({status:"OK",data:{operationId:"op",effect:"CART_OPENED",cartItems:[],cartQuote:{grandTotalVnd:948100},supportEvaluation}});
+ it("tells the owner the total already reflects the evaluated request, or that it was not evaluated",()=>{
+  const evaluated=presentCartWriteResult(opened({status:"EVALUATED",evaluatedBy:"CODE_AT_CART_OPENING",negotiationApplied:true}));
+  expect(evaluated.data.supportEvaluation).toEqual({status:"EVALUATED",evaluatedBy:"CODE_AT_CART_OPENING",negotiationApplied:true,meaning:SUPPORT_AT_CART_OPENING_MEANING.EVALUATED});
+  expect(evaluated.data.outcome).toMatchObject({done:true,cartChanged:true});
+  const pending=presentCartWriteResult(opened({status:"NOT_EVALUATED",evaluatedBy:"CODE_AT_CART_OPENING",negotiationApplied:false,reason:"EFFECT_PERMISSION"}));
+  expect(pending.data.supportEvaluation).toMatchObject({status:"NOT_EVALUATED",meaning:SUPPORT_AT_CART_OPENING_MEANING.NOT_EVALUATED});
+  expect(SUPPORT_AT_CART_OPENING_MEANING.NOT_EVALUATED).toMatch(/không nói đã có hay không có ưu đãi thêm/u);
+ });
+ it("leaves an ordinary cart write without a support statement",()=>{
+  const {supportEvaluation:_none,...data}=opened({}).data;
+  expect(presentCartWriteResult({status:"OK",data}).data).not.toHaveProperty("supportEvaluation");
  });
 });

@@ -1,4 +1,8 @@
-## Current — dữ kiện báo giá và bounded retry, 2026-11-16
+## Current — code xét hỗ trợ khi mở giỏ, báo giá khi draft bị chặn, giọng chat, 2026-11-16
+
+Owner duyệt bốn hướng sửa sau review vòng `4673fdc4` và viết lại mục giọng không kèm ví dụ. Code tự xét lời xin hỗ trợ đã lưu ngay trong `add_to_cart` mở giỏ; owner và verifier đọc cùng `pendingSupport.evaluation`; lệnh lặp trả cùng shape; verdict chặn draft vẫn gửi tổng trước giỏ do code dựng. Chưa chạy model, Phase C giữ STOP. [Bản sửa và giới hạn](../docs/specs/evidence/c3-sales-context-implementation-20261115/SUPPORT_EVALUATION_QUOTE_REPLY_20261116.md).
+
+## Previous — dữ kiện báo giá và bounded retry, 2026-11-16
 
 Code cung cấp trạng thái giá thấp nhất chưa xác lập và chi tiết khoản giảm đã cấp từ giỏ hiện tại. Adapter Phase C áp dụng chính sách retry đã duyệt và mode `VALIDATED`. Đo lại J4 ×5 và control hai áo ×1 cùng world. [Bản sửa và kết quả](../docs/specs/evidence/c3-sales-context-implementation-20261115/PRICE_AUTHORITY_REPAIR_20261116.md).
 

@@ -40,6 +40,11 @@ const MEANING={
  NOT_DONE:"Thao tác chưa thực hiện, giỏ không đổi. Xử lý theo reason; không báo đã xong.",
  UNKNOWN:"Chưa xác nhận được giỏ đã đổi hay chưa. Không báo đã xong và không gọi lại lệnh này.",
 } as const;
+/** A support request stored before the cart, evaluated by code while this command opened the cart. */
+export const SUPPORT_AT_CART_OPENING_MEANING={
+ EVALUATED:"Lời xin hỗ trợ khách gửi trước đó vừa được xét khi món vào giỏ. cartQuote là tổng sau khi xét: báo tổng này, chỉ nêu khoản ưu đãi có trong appliedAdjustments, không tự thêm mức giảm.",
+ NOT_EVALUATED:"Món đã vào giỏ nhưng lời xin hỗ trợ khách gửi trước đó chưa được xét cho giỏ này. Báo tổng theo cartQuote; không nói đã có hay không có ưu đãi thêm.",
+} as const;
 
 /** `quoteCallable`: whether quote_product can actually be called in the generation this result is shown to. */
 export function presentCartWriteResult(result:OwnerToolResult,options:{quoteCallable?:boolean}={}):OwnerToolResult&{data:Json} {
@@ -47,7 +52,11 @@ export function presentCartWriteResult(result:OwnerToolResult,options:{quoteCall
  // A route the owner cannot take in this generation is not offered.
  if(options.quoteCallable===false)delete data.preCartQuoteRequest;
  const quotable=options.quoteCallable!==false&&record(data.preCartQuoteRequest);
- if(result.status==="OK")return {...result,data:{outcome:{done:true,cartChanged:true,meaning:MEANING.DONE} satisfies CartWriteOutcome,...data}};
+ if(result.status==="OK"){
+  const support=record(data.supportEvaluation)&&data.supportEvaluation.evaluatedBy==="CODE_AT_CART_OPENING"?data.supportEvaluation:null;
+  if(support)data.supportEvaluation={...support,meaning:SUPPORT_AT_CART_OPENING_MEANING[support.status==="EVALUATED"?"EVALUATED":"NOT_EVALUATED"]};
+  return {...result,data:{outcome:{done:true,cartChanged:true,meaning:MEANING.DONE} satisfies CartWriteOutcome,...data}};
+ }
  const choice=record(data.choiceResolution)?data.choiceResolution:null;
  const proved=data.effectCommitted===false||NOT_COMMITTED.includes(result.failureStage as CommerceEffectFailureStage);
  if(!proved)return {...result,data:{outcome:{done:"UNKNOWN",cartChanged:"UNKNOWN",meaning:MEANING.UNKNOWN} satisfies CartWriteOutcome,...data}};
@@ -77,7 +86,7 @@ export function presentCartWriteResult(result:OwnerToolResult,options:{quoteCall
  * nothing can be granted or promised here. The owner is told exactly that and what the customer does next.
  */
 export const SUPPORT_NOT_EVALUATED_MEANING="Chỉ dùng khi khách xin hỗ trợ giá. Giá hiện tại và ưu đãi thường đã có trong báo giá. Hỗ trợ riêng chưa được xét. "+
- "Không hứa mức hỗ trợ và không nói là không có. Khách chỉ hỏi giá thì báo giá hiện hành. Khách đã muốn mua thì hỏi lựa chọn còn thiếu. Yêu cầu hỗ trợ đã lưu được xét khi giỏ đủ điều kiện; không bắt khách hỏi lại.";
+ "Không hứa mức hỗ trợ và không nói là không có. Khách chỉ hỏi giá thì báo giá hiện hành. Khách đã muốn mua thì hỏi lựa chọn còn thiếu. Lời xin hỗ trợ đã lưu được code tự xét ngay khi món vào giỏ; không bắt khách hỏi lại và không thêm giỏ chỉ để xét.";
 /** A refused negotiation record that needs a cart: its meaning, never the internal status words alone. */
 export function presentNegotiationResult(result:OwnerToolResult):OwnerToolResult {
  const data=record(result.data)?result.data:null;

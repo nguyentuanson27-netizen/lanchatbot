@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {buildGeminiCommerceRequest,FIT_EVALUATION_MEANING} from './gemini-inference.mjs';
 import {readCompactSections} from './owner-data-presentation.mjs';
-import {SUPPORT_NOT_EVALUATED_MEANING} from '../../dist/single-agent-commerce-owner-view.js';
+import {SUPPORT_NOT_EVALUATED_MEANING,SUPPORT_AT_CART_OPENING_MEANING} from '../../dist/single-agent-commerce-owner-view.js';
 
 const request=(name,data,final=false)=>({generationId:'meaning:1',instructions:'Tư vấn',ownerContextPresentation:'VI_DATA_BLOCKS_COMPACT_V2',
  context:{boundSubjects:[],protectedClaims:[],runtimeProducts:[],policyLiterals:[],effectReceipts:[],state:{revision:1}},
@@ -132,3 +132,18 @@ for(const final of [false,true])test(`a quote without a cart carries the same su
  assert(!Object.hasOwn(result(buildGeminiCommerceRequest(withCart),final),'supportEvaluation'));
 });
 
+
+test('owner wire carries the code-evaluated support result and the shared pending evaluation step',()=>{
+ const evaluation={by:'CODE',when:'MATCHING_CART_OPENS',waitingFor:['COLOR'],meaning:'Lời xin hỗ trợ giá cho món này đã lưu, chưa xét.'};
+ const r=request('add_to_cart',{operationId:'op',effect:'CART_OPENED',cartItems:[],cartQuote:{grandTotalVnd:948100},
+  supportEvaluation:{status:'EVALUATED',evaluatedBy:'CODE_AT_CART_OPENING',negotiationApplied:true,grandTotalBeforeVnd:978100,grandTotalAfterVnd:948100}});
+ r.availableTools=['read_policy','add_to_cart'];
+ r.context.state.pendingSupport={pendingRef:'a'.repeat(64),subjectRef:'P',offerType:'AO',status:'NOT_EVALUATED',canApply:false,evaluation};
+ const wire=buildGeminiCommerceRequest(r),view=result(wire,false);
+ assert.equal(view.supportEvaluation.status,'EVALUATED');assert.equal(view.supportEvaluation.meaning,SUPPORT_AT_CART_OPENING_MEANING.EVALUATED);
+ assert.equal(view.supportEvaluation.grandTotalAfterVnd,948100);
+ // The same code-owned step the verifier reads in trusted state is in the owner's frame, with no cart to create named.
+ const frame=wire.contents[0].parts[0].text;
+ assert.match(frame,/MATCHING_CART_OPENS/u);assert.match(frame,/COLOR/u);assert.match(frame,/Lời xin hỗ trợ giá cho món này đã lưu, chưa xét\./u);
+ assert.doesNotMatch(frame,/CART_REQUIRED|blockedReason/u);
+});

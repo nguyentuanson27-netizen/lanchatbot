@@ -25,7 +25,7 @@ function fixtureSelection(snapshot: ReturnType<typeof fixtureProduct>["snapshot"
   return { ...result, shopId: commerceScope().shopId, line: { ...result.line,
     priceAuthority: { ...result.line.priceAuthority!, shopId: commerceScope().shopId } } };
 }
-async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi cao, bớt cho chị được không?"],unprovedEffect=false) {
+async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi cao, bớt cho chị được không?"],unprovedEffect=false,evaluateStoredSupportAtCartOpening=false) {
   const scope = commerceScope(), f = fixtureProduct(), policy = (await fixturePolicy()).bundle!;
   let current = createSalesCycleRuntimeState("test-cycle", { pageId: scope.pageId, conversationId: scope.conversationId }, commerceNow);
   // Existing domain precondition, representing earlier verified size advice; never fake it in the effect tool.
@@ -51,7 +51,7 @@ async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi c
     sourceAuthority: "POS_SNAPSHOT" as const, stockStatus: "IN_STOCK" as const, stockAvailableQuantity: 4,
     sourceObservedAt: commerceNow.toISOString(), sourceExpiresAt: new Date(commerceNow.getTime()+1_200_000).toISOString() }; });
   const readPolicy = vi.fn(async () => policy);
-  const tools = await createCommerceEffectTools({ base, scope, clock, conversationKey: "test-cycle", repository, authorize,
+  const tools = await createCommerceEffectTools({ base, scope, clock, conversationKey: "test-cycle", repository, authorize,evaluateStoredSupportAtCartOpening,
     ...(unprovedEffect?{executeCommand:async()=>{throw new CommerceEffectCommitError("READBACK");}}:{}),
     policy: readPolicy,negotiationSources:negotiationTexts.map((text,i)=>({text,sourceMessageId:i===0?scope.sourceMessageId:`other-message-${i}`,observedAt:commerceNow.toISOString()})),
     resolveBankTransferPolicy: () => bankPolicy,
@@ -1194,7 +1194,7 @@ it.each(["mutation","ordinary-negotiation"] as const)("does not offer pending ac
  const result=await s.tools.invoke(mode==="mutation"?{name:"change_cart_item",args:{subjectRef:s.current().cart!.value.lines[0]!.lineId,action:"SET_QUANTITY",quantity:2}}:
   {name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao"}});
  expect(result.status).toBe("OK");
- expect(s.tools.snapshot().state.pendingSupport).toMatchObject({canApply:false,blockedReason:"CART_BINDING_CHANGED"});
+ expect(s.tools.snapshot().state.pendingSupport).toMatchObject({canApply:false,evaluation:{by:"CODE",when:"REQUEST_DIFFERS_FROM_CART",waitingFor:[]}});
  expect(result.data).toMatchObject({pendingSupport:{canApply:false}});
 });
 
@@ -1232,4 +1232,92 @@ it("continues independent quote after proved no-commit rejection of an old objec
  s.setCurrent({...s.current(),revision:s.current().revision+1});
  await s.tools.readback();
  expect(s.tools.noCommitNegotiationResult!(result[0]!)).toBe(false);
+});
+
+describe("code evaluates a stored support request when the matching cart opens",()=>{
+ const record={name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao",subjectRef:"SM613",offerType:"DIRECT"}};
+ async function stored(evaluate=true){
+  const s=await setup(()=>commerceNow,undefined,false,evaluate),f=fixtureProduct();
+  s.select.mockImplementation(async q=>fixtureSelection(f.snapshot,{...q!,selectionMode:"CANDIDATE_TUPLES"}) as never);
+  expect((await s.tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}})).status).toBe("OK");
+  return s;
+ }
+ it("tells owner and verifier the same next step and what the customer still has to choose, not a cart to create",async()=>{
+  const s=await stored();
+  expect((await s.tools.invoke(record)).status).toBe("OK");
+  const view=s.tools.snapshot().state.pendingSupport as Record<string,unknown>;
+  expect(view).toMatchObject({status:"NOT_EVALUATED",canApply:false,evaluation:{by:"CODE",when:"MATCHING_CART_OPENS",waitingFor:["CUSTOMER_PURCHASE_CHOICE"]}});
+  expect(view).not.toHaveProperty("blockedReason");
+  expect((view.evaluation as {meaning:string}).meaning).toContain("Code tự xét một lần ngay khi món này vào giỏ");
+  // The colour the customer has not chosen for this exact item comes from the stored purchase note.
+  const snapshot=s.base.snapshot;
+  s.base.snapshot=()=>{const c=snapshot();c.state.pendingPurchase={lines:[{productId:"SM613",offerType:"DIRECT",size:"M",color:null,quantity:1,missing:"COLOR"},
+   {productId:"OTHER",offerType:"DIRECT",size:null,color:"navy",quantity:1,missing:"SIZE"}]};return c;};
+  expect(s.tools.snapshot().state.pendingSupport).toMatchObject({evaluation:{when:"MATCHING_CART_OPENS",waitingFor:["COLOR"]}});
+ });
+ it("returns the stored request again for a repeated record instead of an empty result, without another commit",async()=>{
+  const s=await stored();
+  const first=await s.tools.invoke(record),count=s.commits.length;
+  const repeated=await s.tools.invoke(record);
+  expect(repeated).toMatchObject({status:"OK",data:{duplicate:true}});
+  expect(s.commits).toHaveLength(count);
+  const {duplicate:_duplicate,...same}=repeated.data as Record<string,unknown>;
+  expect(same).toEqual(first.data);
+  expect(same).toMatchObject({effect:"NEGOTIATION_REQUEST_RECORDED",supportEvaluation:{status:"NOT_EVALUATED",pendingCommitted:true,negotiationApplied:false},
+   pendingSupport:{canApply:false,evaluation:{when:"MATCHING_CART_OPENS"}}});
+ });
+ it("evaluates once inside the add_to_cart that opens the cart, with both receipts and the evaluated total",async()=>{
+  const s=await stored();
+  await s.tools.invoke(record);const pending=s.current().pendingNegotiation!,before=s.commits.length;
+  const opened=await s.tools.invoke(s.add);
+  expect(opened).toMatchObject({status:"OK",data:{effect:"CART_OPENED",supportEvaluation:{status:"EVALUATED",evaluatedBy:"CODE_AT_CART_OPENING",negotiationApplied:true}}});
+  expect(opened.data).not.toHaveProperty("pendingSupport");
+  expect(s.commits).toHaveLength(before+2);
+  expect(s.current().pendingNegotiation).toMatchObject({pendingId:pending.pendingId,status:"ACTIVATED"});
+  expect(s.current().negotiation?.consumedObjectionEvidenceIds).toHaveLength(1);
+  const context=s.tools.snapshot(),cart=s.current().cart!.value;
+  expect(context.state.pendingSupport).toBeUndefined();
+  expect((opened.data as {cartQuote:unknown}).cartQuote).toEqual(context.state.cartQuote);
+  expect(context.state.cartQuote).toMatchObject({cartVersion:cart.revision,grandTotalVnd:cart.grandTotalVnd});
+  expect((opened.data as {supportEvaluation:{grandTotalAfterVnd:number}}).supportEvaluation.grandTotalAfterVnd).toBe(cart.grandTotalVnd);
+  expect(context.effectReceipts.map(r=>r.effect)).toEqual(["CART_OPENED","NEGOTIATION_UPDATED"]);
+  expect(context.effectReceiptContinuity?.receiptRefs).toEqual(context.effectReceipts.map(r=>r.ref));
+  expect(hardPrecheck(context,"Dạ chị.",commerceNow)).toBeNull();
+  // Nothing is left to evaluate: the explicit command replays the same commit and writes nothing.
+  const count=s.commits.length;
+  expect((await s.tools.invoke({name:"apply_pending_negotiation",args:{pendingRef:pending.pendingId}})).status).toBe("OK");
+  expect(s.commits).toHaveLength(count);
+ });
+ it("keeps the opened cart when the evaluation is refused before commit and leaves the explicit command as recovery",async()=>{
+  const s=await stored();
+  await s.tools.invoke(record);const pending=s.current().pendingNegotiation!,before=s.commits.length;
+  // add_to_cart is authorised twice (validation and pre-commit); the evaluation that follows is refused.
+  let calls=0;s.authorize.mockImplementation(async()=>++calls<=2);
+  const opened=await s.tools.invoke(s.add);
+  expect(opened).toMatchObject({status:"OK",data:{effect:"CART_OPENED",supportEvaluation:{status:"NOT_EVALUATED",negotiationApplied:false,reason:"EFFECT_PERMISSION"},
+   pendingSupport:{canApply:true,evaluation:{when:"NOT_COMPLETED_AT_CART_OPENING",waitingFor:[]}}}});
+  expect(s.commits).toHaveLength(before+1);
+  expect(s.current().cart).not.toBeNull();expect(s.current().pendingNegotiation?.status).toBe("PENDING");
+  expect(await s.tools.terminalOutcome!()).toBeNull();
+  s.authorize.mockImplementation(async()=>true);
+  expect(await s.tools.invoke({name:"apply_pending_negotiation",args:{pendingRef:pending.pendingId}})).toMatchObject({status:"OK",data:{effect:"NEGOTIATION_UPDATED"}});
+  expect(s.current().pendingNegotiation?.status).toBe("ACTIVATED");
+ });
+ it("blocks the turn when the evaluation commit cannot be proved, instead of presenting the cart as settled",async()=>{
+  const s=await stored();
+  await s.tools.invoke(record);
+  const cas=s.repository.compareAndSwap as ReturnType<typeof vi.fn>,write=cas.getMockImplementation()!;
+  let writes=0;cas.mockImplementation(async update=>{if(++writes===2){await write(update);s.setCurrent({...s.current(),revision:s.current().revision+1});throw new Error("response lost");}return write(update);});
+  const opened=await s.tools.invoke(s.add);
+  expect(opened.status).not.toBe("OK");
+  expect(await s.tools.terminalOutcome!()).toMatchObject({disposition:"NO_SEND",reason:"UNKNOWN_COMMIT"});
+ });
+ it("does not evaluate when the option is off: the stored request stays for the explicit command",async()=>{
+  const s=await stored(false);
+  await s.tools.invoke(record);const before=s.commits.length;
+  const opened=await s.tools.invoke(s.add);
+  expect(opened.data).not.toHaveProperty("supportEvaluation");
+  expect(opened.data).toMatchObject({pendingSupport:{canApply:true}});
+  expect(s.commits).toHaveLength(before+1);
+ });
 });

@@ -61,6 +61,8 @@ export interface CommerceTools {
   quoteTaskWork?(): readonly import("./single-agent-commerce-quote.js").QuoteTaskWork[];
   handoffSources?(): import("@lana/contracts").CommerceHandoffSourceCheckV1[] | null;
   boundedPrice?(): { text: string; claims: import("@lana/contracts").ProtectedClaimV1[] } | null;
+  /** Code-built reply from the one pre-cart total computed in this turn, re-derived against `current`. No model text, no I/O. */
+  verifiedQuoteReply?(current: TrustedContext): { kind: "PRE_CART_QUOTE_V1"; text: string; evidenceRef: string } | null;
   /** Exact completed read proof only, no I/O and no cart-variant substitution. */
   quotePriceEvidence?(query:import("./single-agent-commerce-read-only-tools.js").QuotePriceQuery):readonly import("./single-agent-commerce-read-only-tools.js").QuotePriceEvidence[];
   sealHandoffReply?(text: string, trusted: TrustedContext, images: readonly import("./single-agent-commerce-media-delivery.js").MediaDeliveryImage[]): string;
@@ -444,10 +446,24 @@ export async function runCommerceTurn(input: {
     const terminal = finalGate({ expected: binding, response, current, finalDraft: draft, now: boundaryCheckedAt, includeDiagnostic: true,
       fallback: gateFallback() });
     input.tools.diagnostic?.("FINAL_GATE",terminal.disposition);
-    return { ...await finish(terminal), ...(terminal.diagnostic ? { currentPublicContext: current } : {}),
-      ...(input.captureBoundaryWitness ? { boundaryWitness: { expected: binding,
-        currentBinding: makeBinding(binding.requestId, draft, current), checkedAt: boundaryCheckedAt.toISOString(), terminal,
-        currentPublicContext: current, responseKind: response.kind } } : {}) };
+    const boundaryWitness = () => input.captureBoundaryWitness ? { boundaryWitness: { expected: binding,
+      currentBinding: makeBinding(binding.requestId, draft, current), checkedAt: boundaryCheckedAt.toISOString(), terminal,
+      currentPublicContext: current, responseKind: response.kind } } : {};
+    // Owner decision 2026-11-16 (amends D1): a verdict against the owner's draft removes that draft only. The gate
+    // has just proved the world current, so a total already computed and proved in this turn is sent as a code-built
+    // sentence that passes the same deterministic precheck. It is never re-verified by a model and never a repair of
+    // the draft. Verifier errors, stale worlds, prepared handoffs and any cart keep the existing silent handoff.
+    const quoteReply = terminal.disposition === "FALLBACK" && response.kind === "VERDICT" && !input.tools.handoffStatus?.()
+      ? input.tools.verifiedQuoteReply?.(current) ?? null : null;
+    if (quoteReply && hardPrecheck(current, quoteReply.text, boundaryCheckedAt) === null) {
+      input.tools.diagnostic?.("FINAL_GATE","SEND_ELIGIBLE","VERIFIED_QUOTE_REPLY");
+      // The witness keeps the gate's own decision on the owner's draft; codeReply names what was sent instead.
+      return { ...await finish({ disposition: "SEND_ELIGIBLE", reason: "VERIFIED_QUOTE_REPLY", text: quoteReply.text, fallbackId: null }),
+        codeReply: { kind: quoteReply.kind, evidenceRef: quoteReply.evidenceRef, rejectedDraftReason: terminal.reason,
+          ...(terminal.semanticDiagnostic ? { rejectedDraftDiagnostic: terminal.semanticDiagnostic as unknown } : {}) },
+        ...boundaryWitness() };
+    }
+    return { ...await finish(terminal), ...(terminal.diagnostic ? { currentPublicContext: current } : {}), ...boundaryWitness() };
   }
   return finish(fallback("BUDGET"));
 }

@@ -158,6 +158,66 @@
       ],
       "rollbackNote": "CustomerProfileV1 is a strict schema: a release older than this change cannot parse a profile that carries the field."
     },
+    "storedSupportEvaluation": {
+      "status": "APPROVED_IMPLEMENTED",
+      "approvedAt": "2026-11-16",
+      "ownerAnswer": "làm 1 đến 4",
+      "rule": "CODE_EVALUATES_A_STORED_SUPPORT_REQUEST_ONCE_INSIDE_THE_ADD_TO_CART_THAT_OPENS_THE_MATCHING_CART",
+      "reuses": "THE_EXISTING_GUARDED_ACTIVATION_COMMAND_WITH_ITS_AUTHORITY_SOURCE_CAS_AND_RECEIPT_CHECKS",
+      "explicitCommand": "apply_pending_negotiation IS OFFERED ONLY WHEN pendingSupport.canApply IS TRUE, AS RECOVERY",
+      "sharedProcessFact": "state.pendingSupport.evaluation IS READ BY BOTH OWNER AND VERIFIER AND NAMES WHAT THE CUSTOMER STILL HAS TO CHOOSE",
+      "replayedCommand": "A REPEATED COMMAND RETURNS THE SAME RESULT SHAPE AS ITS FIRST COMMIT",
+      "transactionInvariantsChanged": false,
+      "promptsChanged": [
+        "owner.vi.txt",
+        "verifier.vi.txt (one sentence on pendingSupport.evaluation)"
+      ]
+    },
+    "D1_amendment_verifiedQuoteReply": {
+      "status": "APPROVED_IMPLEMENTED",
+      "approvedAt": "2026-11-16",
+      "ownerAnswer": "làm 1 đến 4",
+      "amends": "D1_codeOwnedRecoveryReply",
+      "rule": "A_VERDICT_AGAINST_THE_DRAFT_SENDS_THE_CODE_BUILT_SENTENCE_FOR_THE_SINGLE_PRE_CART_TOTAL_PROVED_IN_THIS_TURN",
+      "afterVerdicts": [
+        "FAIL",
+        "UNCERTAIN",
+        "MALFORMED"
+      ],
+      "sentenceUses": [
+        "CATALOG_TITLE",
+        "CODE_OWNED_OFFER_NAME",
+        "QUANTITY",
+        "AMOUNTS_OF_THE_CURRENT_PROOF"
+      ],
+      "neverUses": [
+        "THE_REJECTED_DRAFT",
+        "MODEL_SUPPLIED_DELIVERY_REGION_OR_COLOUR",
+        "A_SECOND_MODEL_CALL"
+      ],
+      "stillSilentHandoff": [
+        "VERIFIER_TIMEOUT_OR_PROVIDER_ERROR",
+        "STALE_WORLD",
+        "ANY_CART",
+        "A_PREPARED_HANDOFF",
+        "NO_TOTAL_OR_MORE_THAN_ONE_TOTAL",
+        "AN_OFFER_CODE_CANNOT_NAME"
+      ],
+      "formalQualificationAudit": "NOT_EXTENDED: qualification.mjs still requires a PASS verdict bound to the sent text, so a code reply is reported BLOCKED there until that rule is reviewed"
+    },
+    "chatVoice": {
+      "status": "APPROVED_IMPLEMENTED",
+      "approvedAt": "2026-11-16",
+      "ownerAnswer": "ko ví dụ",
+      "rule": "FOUR_VOICE_RULES_IN_THE_OWNER_PROMPT_WITHOUT_EXAMPLE_SENTENCES",
+      "rules": [
+        "AT_MOST_TWO_ANSWER_SENTENCES_AND_ONE_QUESTION_BY_DEFAULT",
+        "ONLY_WHAT_IS_NEW_THIS_TURN",
+        "NO_SYSTEM_OR_PROCESS_WORDS",
+        "NO_OPENER_OR_PARTICLE_ON_EVERY_SENTENCE"
+      ],
+      "measured": "NOT_YET: no native run after this prompt change"
+    },
     "pushToPullRequestBranch": {
       "status": "STANDING_PERMISSION",
       "approvedAt": "2026-11-12",

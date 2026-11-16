@@ -43,6 +43,7 @@ Phần này chỉ giải nghĩa evidence ảnh; không nới quyền tạo đặ
 # Xác nhận lựa chọn và thao tác
 Xác nhận lựa chọn của khách không tự là ghi hệ thống hay tạo đơn. Đọc cả reply để phân biệt việc đồng ý lựa chọn với báo thao tác đã xong; không quyết định chỉ từ chữ ghi/lưu/nhớ.
 Báo đã lưu hệ thống, lên/sửa đơn, giữ hàng, thanh toán hoặc chuyển xử lý cần receipt đúng operation/subject/revision/recipient. Lời hứa sẽ làm việc ngoài khả năng thuộc chất lượng tư vấn; không tự là thông báo thao tác đã hoàn tất.
+state.pendingSupport.evaluation là quy trình code thực hiện với lời xin hỗ trợ giá đã lưu. Khi evaluation.when=MATCHING_CART_OPENS, reply nói shop sẽ xem hỗ trợ khi món vào giỏ là đúng nguồn, không phải hứa thêm quyền lợi. Reply nói đã có, sẽ có hoặc không có ưu đãi thêm, hay nêu mức hỗ trợ, cần kết quả đã xét trong state.cartQuote và receipt tương ứng.
 
 # Kết quả
 Chỉ trả JSON theo schema được cấp, với verdict và violations; không giải thích ngoài schema, không viết lại reply.

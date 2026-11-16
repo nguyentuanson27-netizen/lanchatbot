@@ -5,11 +5,12 @@ import {commerceScope,commerceNow,fixturePolicy,fixtureProduct} from "./single-a
 const context=()=>createReadOnlyTools({scope:commerceScope(),clock:()=>commerceNow,initialProducts:[fixtureProduct().product],policy:fixturePolicy,
   catalog:{readProduct:async()=>fixtureProduct(),searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}}).snapshot();
 describe("structured callable closure",()=>{
- it("exposes a pending command only for a committed pending ref and keeps cart-then-apply reachable",()=>{
+ it("offers the explicit evaluation only for a stored request code could not finish, never because a cart could be created",()=>{
    const c=context(),r={context:c,availableTools:["add_to_cart","apply_pending_negotiation","cancel_pending_negotiation"],toolsAllowed:true,toolBudget:{roundsRemaining:1,callsRemaining:2}};
    expect(commerceCallableTools(r)).toEqual(["add_to_cart"]);
+   // Stored before a cart: code evaluates it when the cart opens, so the owner is not offered the command.
    c.state.pendingSupport={canApply:false,pendingRef:"a".repeat(64)};
-   expect(commerceCallableTools(r)).toEqual(r.availableTools);
+   expect(commerceCallableTools(r)).toEqual(["add_to_cart","cancel_pending_negotiation"]);
    r.toolBudget.callsRemaining=1;expect(commerceCallableTools(r)).toEqual(["add_to_cart","cancel_pending_negotiation"]);
    c.state.pendingSupport={canApply:true,pendingRef:"a".repeat(64)};
    expect(commerceCallableTools(r)).toEqual(r.availableTools);

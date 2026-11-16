@@ -1,6 +1,6 @@
 import type {TrustedContext} from "./single-agent-semantic-verifier-boundary.js";
 import type {CommerceTools,PendingPurchaseLine} from "./single-agent-commerce-read-only.js";
-import {toolArgs,type CommerceToolCall,type CommerceToolResult,type CommerceScope,type QuotePriceQuery,type QuotePriceEvidence} from "./single-agent-commerce-read-only-tools.js";
+import {toolArgs,COMPONENT_OFFER_LABELS,WHOLE_PRODUCT_OFFERS,type CommerceToolCall,type CommerceToolResult,type CommerceScope,type QuotePriceQuery,type QuotePriceEvidence} from "./single-agent-commerce-read-only-tools.js";
 import {commerceHash} from "./single-agent-commerce-read-only-context.js";
 import {ProtectedClaimV1Schema,CustomerPreferenceV1Schema,PRICE_INVENTORY_FRESH_FOR_SECONDS,type ProtectedClaimV1,type PolicyBundleV1} from "@lana/contracts";
 import {evaluateShopPolicy} from "@lana/business-tools";
@@ -256,7 +256,30 @@ export function withExplicitQuoteTask(base:CommerceTools,scope:CommerceScope,fir
   if(changed)await base.setPendingPurchase(pendingThisTurn.size?[...pendingThisTurn.values()].slice(-4):null);
   return routed;
  }
- return {...base,availableTools,openingQuoteTargets:()=>[...openingProofs.keys()],toolWorkAccounting:"PRIMITIVE_WORK_V2",quoteTaskWork:()=>structuredClone(work),
+ // Owner decision 2026-11-16: when the verifier rejects the owner's draft, a total this turn already computed and
+ // proved is still told to the customer. The sentence is assembled from the catalog title, a code-owned offer name
+ // and the amounts of the current proof only; delivery region and colour are model-supplied arguments and stay out.
+ const money=(n:number)=>n.toLocaleString("vi-VN");
+ function verifiedQuoteReply(current:TrustedContext){
+  if(quoteRequests.size!==1||quoteLiterals.size!==1||current.cartBinding||(Array.isArray(current.state.cartItems)&&current.state.cartItems.length>0))return null;
+  const q=[...quoteRequests.values()][0]!,literal=[...quoteLiterals.values()][0]!,now=clock().getTime();
+  if(!literal.expiresAt||Date.parse(literal.expiresAt)<=now||Date.parse(literal.observedAt)>now||
+   current.policyLiterals.filter(p=>p.ref===literal.ref&&p.text===literal.text).length!==1||
+   current.state.bindingVersion!==scope.bindingVersion||current.state.recipient!==scope.recipient)return null;
+  let e:Record<string,unknown>;try{e=JSON.parse(literal.text) as Record<string,unknown>;}catch{return null;}
+  const amount=(v:unknown):v is number=>typeof v==="number"&&Number.isSafeInteger(v)&&v>=0;
+  if(e.kind!=="PRE_CART_TOTAL_V1"||e.subjectRef!==q.subjectRef||e.offerType!==q.offerType||e.quantity!==q.quantity||
+   !Number.isInteger(q.quantity)||q.quantity<1||!amount(e.grandTotalVnd)||e.grandTotalVnd<=0||!amount(e.shippingFeeVnd)||!amount(e.discountTotalVnd)||
+   e.bindingVersion!==current.state.bindingVersion||e.recipient!==current.state.recipient)return null;
+  const title=current.boundSubjects.find(s=>s.kind==="PRODUCT"&&s.ref===q.subjectRef&&s.bindingVersion===scope.bindingVersion)?.label?.trim();
+  const component=COMPONENT_OFFER_LABELS[q.offerType];
+  if(!title||Buffer.byteLength(title)>256||(!component&&!WHOLE_PRODUCT_OFFERS.includes(q.offerType)))return null;
+  const item=component?`${component.toLocaleLowerCase("vi-VN")} của ${title}`:title;
+  const included=[...(e.shippingFeeVnd>0?[`đã gồm ${money(e.shippingFeeVnd)}đ phí giao hàng`]:[]),...(e.discountTotalVnd>0?[`đã trừ ưu đãi ${money(e.discountTotalVnd)}đ`]:[])];
+  return {kind:"PRE_CART_QUOTE_V1" as const,evidenceRef:literal.ref,
+   text:`Dạ ${q.quantity} ${item} hết ${money(e.grandTotalVnd)}đ chị nhé${included.length?`, ${included.join(" và ")}`:""}.`};
+ }
+ return {...base,availableTools,verifiedQuoteReply,openingQuoteTargets:()=>[...openingProofs.keys()],toolWorkAccounting:"PRIMITIVE_WORK_V2",quoteTaskWork:()=>structuredClone(work),
   snapshot:()=>withQuote(base.snapshot()),readback:async()=>{
    const current=await base.readback();
    for(const p of priceProofs.values())if(commerceHash(sourcePrices(p.query))!==commerceHash(p.evidence))throw Error("QUOTE_PRICE_SOURCE_CHANGED");

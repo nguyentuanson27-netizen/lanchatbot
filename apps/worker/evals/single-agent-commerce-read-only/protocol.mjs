@@ -46,8 +46,12 @@ export function validateToolWorkAccounting(r){
 export function validateProtocol(m){
  check(m.fallbackDelivery?.mode==='SILENT_HANDOFF'&&m.fallbackDelivery.unavailable==='NO_SEND'&&
   m.fallbackDelivery.customerText===false&&m.fallbackDelivery.images===false&&m.fallbackDelivery.effectReplay===false,'FALLBACK_DELIVERY_POLICY');
- check(JSON.stringify(m.terminalMap)===JSON.stringify({PASS:'SEND_ELIGIBLE_SEND_DISABLED',FAIL:'SILENT_HANDOFF_OR_NO_SEND',
-  UNCERTAIN:'SILENT_HANDOFF_OR_NO_SEND',MALFORMED:'SILENT_HANDOFF_OR_NO_SEND',TIMEOUT:'SILENT_HANDOFF_OR_NO_SEND',
+ // Owner decision 2026-11-16: a verdict against the draft may still send the code-built pre-cart total. The static
+ // fallback text stays undeliverable; verifier errors and stale worlds keep the silent handoff.
+ check(JSON.stringify(m.verifiedQuoteReply)===JSON.stringify({kind:'PRE_CART_QUOTE_V1',afterVerdicts:['FAIL','UNCERTAIN','MALFORMED'],
+  source:'SINGLE_CURRENT_PRE_CART_TOTAL_PROOF',modelText:false,reverification:'DETERMINISTIC_PRECHECK_ONLY',withCartOrPreparedHandoff:'SILENT_HANDOFF'}),'VERIFIED_QUOTE_REPLY_POLICY');
+ check(JSON.stringify(m.terminalMap)===JSON.stringify({PASS:'SEND_ELIGIBLE_SEND_DISABLED',FAIL:'VERIFIED_QUOTE_REPLY_OR_SILENT_HANDOFF_OR_NO_SEND',
+  UNCERTAIN:'VERIFIED_QUOTE_REPLY_OR_SILENT_HANDOFF_OR_NO_SEND',MALFORMED:'VERIFIED_QUOTE_REPLY_OR_SILENT_HANDOFF_OR_NO_SEND',TIMEOUT:'SILENT_HANDOFF_OR_NO_SEND',
   PROVIDER_ERROR:'SILENT_HANDOFF_OR_NO_SEND',STALE:'SILENT_HANDOFF_OR_NO_SEND',PERMISSION:'NO_SEND',PRIVACY:'NO_SEND',RECIPIENT:'NO_SEND'}),'TERMINAL_DISPOSITION_MAP');
  if(m.quoteTask!==undefined)check(JSON.stringify(Object.entries(m.quoteTask).sort())===JSON.stringify(Object.entries({version:'EXPLICIT_QUOTE_V3',toolWorkAccounting:'PRIMITIVE_WORK_V2',normalUnits:1,readOnlyBatch:false,maxPerTurn:2}).sort()),'QUOTE_TASK_CONFIG');
  check(m.schemaVersion===1&&m.sendEnabled===false&&m.ownerGenerations===3&&m.toolRounds===2&&m.toolCalls===6&&m.verifierGenerations===1,'PROTOCOL');

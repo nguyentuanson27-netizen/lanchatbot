@@ -365,3 +365,51 @@ it.each([
 ])("refuses invalid W3 negotiation batch arguments %j",args=>{
  expect(quoteBatchWork([{name:"record_negotiation",args},quote])).toBeNull();
 });
+
+describe("a rejected draft does not take a proved total with it",()=>{
+ const total={name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity:2,deliveryRegion:"Cần Thơ, và em hứa giảm thêm"}};
+ const turn=async(s:Awaited<ReturnType<typeof setup>>,verifier:()=>Promise<{result:unknown}>,calls:{name:string;args:unknown}[]=[total])=>{
+  let n=0;
+  return runCommerceTurn({scope:s.scope,tools:s.tools,clock:()=>commerceNow,latest:"Hai áo cả ship hết bao nhiêu, bớt cho chị được không?",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm",verifier,
+   owner:async():Promise<OwnerGeneration>=>++n===1&&calls.length?{kind:"TOOLS",calls,content:{role:"model",parts:calls.map(functionCall=>({functionCall}))}}:
+    {kind:"FINAL",text:"Hai áo tổng 978.100đ, hệ thống sẽ tự động duyệt giảm thêm cho chị."}});
+ };
+ it("sends the code-built total from the current proof and keeps the conversation with the bot",async()=>{
+  const s=await setup(true,false);
+  const r=await turn(s,async()=>({result:{verdict:"FAIL",violations:[]}}));
+  const proof=JSON.parse(s.tools.snapshot().policyLiterals.find(p=>p.ref.startsWith("pre-cart-quote:"))!.text) as {grandTotalVnd:number;shippingFeeVnd:number;discountTotalVnd:number};
+  expect(proof.discountTotalVnd).toBeGreaterThan(0);
+  expect(r.terminal).toEqual({disposition:"SEND_ELIGIBLE",reason:"VERIFIED_QUOTE_REPLY",fallbackId:null,
+   text:`Dạ 2 ${s.f.product.title} hết ${proof.grandTotalVnd.toLocaleString("vi-VN")}đ chị nhé, đã gồm ${proof.shippingFeeVnd.toLocaleString("vi-VN")}đ phí giao hàng và đã trừ ưu đãi ${proof.discountTotalVnd.toLocaleString("vi-VN")}đ.`});
+  expect(r).toMatchObject({recovery:null,codeReply:{kind:"PRE_CART_QUOTE_V1",rejectedDraftReason:"FAIL"}});
+  // Neither the rejected draft nor a model-supplied argument reaches the customer.
+  expect(r.terminal.text).not.toMatch(/tự động|Cần Thơ|hứa/u);
+  expect(s.tools.handoffStatus!()).toBeNull();expect(s.authority().state.conversationOwner).toBe("BOT");
+  expect(s.tools.snapshot().effectReceipts).toHaveLength(0);
+ });
+ it("still sends the owner's own draft when the verifier passes it",async()=>{
+  const s=await setup(true,false);
+  const r=await turn(s,async()=>({result:{verdict:"PASS",violations:[]}}));
+  expect(r.terminal).toMatchObject({disposition:"SEND_ELIGIBLE",reason:"PASS"});expect(r).not.toHaveProperty("codeReply");
+ });
+ it.each(["no total","verifier error","two totals"] as const)("keeps the silent handoff when there is no single proved total or no verdict: %s",async mode=>{
+  const s=await setup(true,false);
+  if(mode==="two totals"){s.f.snapshot.offers.AO=structuredClone(s.f.snapshot.offers.DIRECT!);s.f.snapshot.offers.AO!.rows.forEach(r=>{r.offer_type="AO";});}
+  const r=await turn(s,mode==="verifier error"?async()=>{throw new Error("PROVIDER_ERROR");}:async()=>({result:{verdict:"FAIL",violations:[]}}),
+   mode==="no total"?[]:
+   mode==="two totals"?[total,{name:"quote_product",args:{subjectRef:"SM613",offerTypes:["AO"],quantity:1}}]:[total]);
+  expect(r.terminal.disposition).not.toBe("SEND_ELIGIBLE");expect(r.terminal.text).toBeNull();expect(r).not.toHaveProperty("codeReply");
+  expect(r.recovery).not.toBeNull();
+ });
+ it("names a single-item offer with the code-owned label and refuses an offer it cannot name or a changed binding",async()=>{
+  const s=await setup(true,false);s.f.snapshot.offers.AO=structuredClone(s.f.snapshot.offers.DIRECT!);s.f.snapshot.offers.AO!.rows.forEach(r=>{r.offer_type="AO";});
+  await s.tools.prepare!();
+  expect((await s.tools.invoke({name:"quote_product",args:{subjectRef:"SM613",offerTypes:["AO"],quantity:1}})).status).toBe("OK");
+  const current=await s.tools.readback(),reply=s.tools.verifiedQuoteReply!(current)!;
+  expect(reply.text).toMatch(new RegExp(`^Dạ 1 áo lẻ của ${s.f.product.title} hết [0-9.]+đ chị nhé`,"u"));
+  expect(current.policyLiterals.some(p=>p.ref===reply.evidenceRef)).toBe(true);
+  expect(s.tools.verifiedQuoteReply!({...current,state:{...current.state,recipient:"other"}})).toBeNull();
+  expect(s.tools.verifiedQuoteReply!({...current,policyLiterals:current.policyLiterals.filter(p=>p.ref!==reply.evidenceRef)})).toBeNull();
+  expect(s.tools.verifiedQuoteReply!({...current,cartBinding:{cartId:"c",cartVersion:1}})).toBeNull();
+ });
+});

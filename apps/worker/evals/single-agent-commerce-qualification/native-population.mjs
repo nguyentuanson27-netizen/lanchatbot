@@ -102,6 +102,7 @@ export async function collectNativePopulation({preflight,providerPorts,sessionFa
     historyAfter:after.publicHistory.history,historyTrace:{before:before.publicHistory.trace,after:after.publicHistory.trace},
     beforeStateHash:digest(before.publicState),afterStateHash:digest(after.publicState),safetyFindings:outputFindings,
     elapsedMs:performance.now()-turnStart,...(b?{verification:{...b,generationId:verifier.id,verdict:verifier.verdict?.verdict},
+     ...(observed?.result?.codeReply?{codeReply:observed.result.codeReply}:{}),
      finalGate:{status:actual.disposition==='SEND_ELIGIBLE'&&witness?.terminal?.disposition==='SEND_ELIGIBLE'?'ALLOWED':'BLOCKED',
       requestId:witness?.expected?.requestId??b.requestId,draftHash:witness?.expected?.finalDraftHash??b.draftHash,
       snapshotHash:witness?.currentBinding?.trustedSnapshotId??b.snapshotHash,nativeWitness:witness??null}}:{})};
