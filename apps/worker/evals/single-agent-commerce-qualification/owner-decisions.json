@@ -59,7 +59,10 @@
     "D1_codeOwnedRecoveryReply": "REJECTED_HANDOFF_ONLY",
     "D2_ownerRequestBound": {
       "status": "APPROVED",
-      "textBytes": 65536,
+      "textBytes": 70000,
+      "previousTextBytes": 65536,
+      "amendedAt": "2026-11-18",
+      "ownerAnswer": "tăng giới hạn lên 70000 byte và chạy lại",
       "providerSignatureBytes": 65536,
       "signaturesCountedAgainstText": false
     },

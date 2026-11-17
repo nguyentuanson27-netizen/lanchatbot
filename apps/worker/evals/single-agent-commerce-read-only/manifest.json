@@ -11,7 +11,7 @@
   "ownerFinalRequest": "TEXT_WITH_COMPLETED_TOOL_DATA",
   "toolResultAccounting": "BATCH_EXCLUDING_EXACT_CURRENT_PRODUCT_DUPLICATES",
   "requestBounds": {
-    "ownerWireBytes": 65536,
+    "ownerWireBytes": 70000,
     "verifierWireBytes": 65536
   },
   "implementationBaseSha": "296cdcfbf5759f5bf9cbb24acf3dc63005589361",

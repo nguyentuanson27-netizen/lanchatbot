@@ -32,9 +32,9 @@ test('CompactV2 applies the existing image frame cap separately from the unchang
  let budget;const result=buildGeminiCommerceRequest(r,undefined,undefined,value=>{budget=value;});
  assert(Buffer.byteLength(JSON.stringify(result))>65536);assert(Buffer.byteLength(JSON.stringify(result))<=1507328);
  assert.equal(result.contents[1].parts[1].inlineData.data,data);
- assert.equal(budget.inlineImageBytes,60000);assert.equal(budget.textLimitBytes,65536);assert(Object.values(budget).every(v=>typeof v==='number'));
- assert(budget.presentedTextFrameBytes<=65536);
- const oversized=request();oversized.ownerContextPresentation='VI_DATA_BLOCKS_COMPACT_V2';oversized.instructions='x'.repeat(65536);
+ assert.equal(budget.inlineImageBytes,60000);assert.equal(budget.textLimitBytes,70000);assert(Object.values(budget).every(v=>typeof v==='number'));
+ assert(budget.presentedTextFrameBytes<=70000);
+ const oversized=request();oversized.ownerContextPresentation='VI_DATA_BLOCKS_COMPACT_V2';oversized.instructions='x'.repeat(70000);
  assert.throws(()=>buildGeminiCommerceRequest(oversized),/OWNER_REQUEST_BOUND/);
 });
 test('Gemini 3.8 Flash uses its exact endpoint without unsupported candidateCount',async()=>{
@@ -602,16 +602,16 @@ test('historical multi-offer results are compared locally rather than against ne
  assert.equal(JSON.parse(out.contents[0].parts[0].text).trusted.facts.find(f=>f.scope.variantId==='offer:RP42:SET'&&f.type==='PRICE').value.amountVnd,610000);
 });
 
-test('the serialized B owner HTTP body owns the exact 65536-byte bound before any auth or generation request',async()=>{
+test('the serialized B owner HTTP body owns the exact 70000-byte bound before any auth or generation request',async()=>{
  const r=request();r.instructions='';
  const baseline=Buffer.byteLength(JSON.stringify(buildGeminiCommerceRequest(r)));
- for(const size of [65535,65536]){
+ for(const size of [69999,70000]){
   r.instructions='x'.repeat(size-baseline);assert.equal(Buffer.byteLength(JSON.stringify(buildGeminiCommerceRequest(r))),size);
  }
  r.instructions+='x';let auth=0,dispatch=0;
  const infer=createGeminiCommerceInference(config,{getToken:async()=>{auth++;return 'test-token';},fetchImpl:async()=>{dispatch++;}});
  await assert.rejects(infer(r),e=>{
-  assert.equal(e.telemetry.requestBytes,65537);
+  assert.equal(e.telemetry.requestBytes,70001);
   return e.telemetry.failureCode==='OWNER_REQUEST_BOUND'&&e.telemetry.providerRequests===0;
  });
  assert.equal(auth,0);assert.equal(dispatch,0);

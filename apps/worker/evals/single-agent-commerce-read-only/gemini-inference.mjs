@@ -39,8 +39,8 @@ export function publicCommunicationHistoryMetadata(value){
 // Provider thought signatures are opaque continuation tokens the request must return unchanged; they are
 // bounded on their own so that one signed tool round cannot crowd out the facts the reply needs.
 // Signatures of 11 KiB per signed turn were observed; two tool rounds are allowed, and a retained
-// regression control carries 37 KiB, so the signature bound equals the text bound.
-export const OWNER_REQUEST_MAX_BYTES=65536;
+// regression control carries 37 KiB. Signatures retain their own 65536-byte bound.
+export const OWNER_REQUEST_MAX_BYTES=70000;
 export const OWNER_SIGNATURE_MAX_BYTES=65536;
 export const ownerSignatureBytes=body=>(body?.contents??[]).reduce((n,m)=>n+(m.parts??[]).reduce((k,p)=>
  k+(typeof p.thoughtSignature==='string'?Buffer.byteLength(p.thoughtSignature):0),0),0);

@@ -86,8 +86,8 @@ test('protocol identity is fixed before any provider invocation',()=>{
 });
 
 test('B request bounds are frozen per role and reject silent owner or verifier changes',()=>{
- assert.deepEqual(manifest.requestBounds,{ownerWireBytes:65536,verifierWireBytes:65536});
- for(const requestBounds of [undefined,{ownerWireBytes:32768,verifierWireBytes:32768},{ownerWireBytes:65536,verifierWireBytes:49152}])
+ assert.deepEqual(manifest.requestBounds,{ownerWireBytes:70000,verifierWireBytes:65536});
+ for(const requestBounds of [undefined,{ownerWireBytes:32768,verifierWireBytes:32768},{ownerWireBytes:70000,verifierWireBytes:49152}])
   assert.throws(()=>validateProtocol({...manifest,requestBounds}),/REQUEST_BOUNDS/);
 });
 test('verifier request retains a bounded multi-product context instead of failing before provider dispatch',()=>{

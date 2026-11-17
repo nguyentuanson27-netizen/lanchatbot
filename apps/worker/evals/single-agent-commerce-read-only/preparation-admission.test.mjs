@@ -20,7 +20,7 @@ test('admits current summary against actual native owner and reserved verifier w
  await assert.doesNotReject(()=>tools.readback());
 });
 test('oversized actual native serialization rejects the whole unadmitted staged set without replacing previously admitted data or making generation',async()=>{
- const tools=setup(),before=tools.snapshot();await assert.rejects(tools.prepare(context=>admitPreparedCommerceContext(manifest,verifier,{...request(context),instructions:'x'.repeat(65536)})),/PREPARATION_ADMISSION/);
+ const tools=setup(),before=tools.snapshot();await assert.rejects(tools.prepare(context=>admitPreparedCommerceContext(manifest,verifier,{...request(context),instructions:'x'.repeat(70000)})),/PREPARATION_ADMISSION/);
  assert.deepEqual(tools.snapshot(),before);
 });
 test('exact selected tuple proof reaches both owner and verifier native requests',async()=>{
@@ -30,5 +30,5 @@ test('exact selected tuple proof reaches both owner and verifier native requests
  const finalDraft='Chị xem lựa chọn này nhé.',verifierBody=buildVerifierRequest(manifest,{instructions:verifier,finalDraft,trusted:context,
   latest:'Áo này giá bao nhiêu em?',history:[],binding:makeBinding('opaque',finalDraft,context)});
  assert(JSON.stringify(ownerBody).includes(e.contentHash));assert(JSON.stringify(verifierBody).includes(e.contentHash));
- assert(Buffer.byteLength(JSON.stringify(ownerBody))<=65536);assert(Buffer.byteLength(JSON.stringify(verifierBody))<=65536);
+ assert(Buffer.byteLength(JSON.stringify(ownerBody))<=70000);assert(Buffer.byteLength(JSON.stringify(verifierBody))<=65536);
 });

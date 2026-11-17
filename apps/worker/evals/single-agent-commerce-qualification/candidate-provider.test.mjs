@@ -32,9 +32,9 @@ function setup(t,dependencies={}){
 }
 test('pre-dispatch owner bound retains measured budget with zero auth or provider requests',async t=>{
  let posts=0;const f=setup(t,{fetchImpl:async()=>{posts++;throw Error('MUST_NOT_DISPATCH');}});
- await assert.rejects(f.provider.owner({...f.request,instructions:'x'.repeat(65536)}),error=>{
+ await assert.rejects(f.provider.owner({...f.request,instructions:'x'.repeat(70000)}),error=>{
   assert.equal(error.telemetry.providerRequests,0);assert.equal(error.telemetry.authRequests,0);
-  assert(error.telemetry.requestBudget.textFrameBytes>65536);assert.equal(error.telemetry.failureStage,'BUILD');return true;
+  assert(error.telemetry.requestBudget.textFrameBytes>70000);assert.equal(error.telemetry.failureStage,'BUILD');return true;
  });
  const row=f.provider.observed()[0];assert.equal(row.providerRequests,0);assert.equal(posts,0);
  assert.equal(row.telemetry.failureCode,'OWNER_REQUEST_BOUND');assert.equal(row.failureLayer,'PRE_DISPATCH');
