@@ -1,4 +1,8 @@
-## Current — code xét hỗ trợ khi mở giỏ, báo giá khi draft bị chặn, giọng chat, 2026-11-16
+## Current — J4 ×5 và control hai áo ×5 trên head PR392, 2026-11-18
+
+Đã chạy source `f5df827e` với world mới `dfbc11c7`, đủ 10 hội thoại / 30 lượt terminal. Cả hai ca đạt 0/5 vì owner continuation vượt 65.536 byte, sau đó adapter chặn nhánh final. Có 25 native HTTP, 10 judge HTTP, 10 lỗi BUILD và 10 admission rejection. Phase C STOP. [Báo cáo và toàn bộ hội thoại](../docs/specs/evidence/c3-j4-two-shirts-n5-20261118/REPORT.md).
+
+## Previous — code xét hỗ trợ khi mở giỏ, báo giá khi draft bị chặn, giọng chat, 2026-11-16
 
 Owner duyệt bốn hướng sửa sau review vòng `4673fdc4` và viết lại mục giọng không kèm ví dụ. Code tự xét lời xin hỗ trợ đã lưu ngay trong `add_to_cart` mở giỏ; owner và verifier đọc cùng `pendingSupport.evaluation`; lệnh lặp trả cùng shape; verdict chặn draft vẫn gửi tổng trước giỏ do code dựng. Chưa chạy model, Phase C giữ STOP. [Bản sửa và giới hạn](../docs/specs/evidence/c3-sales-context-implementation-20261115/SUPPORT_EVALUATION_QUOTE_REPLY_20261116.md).
 

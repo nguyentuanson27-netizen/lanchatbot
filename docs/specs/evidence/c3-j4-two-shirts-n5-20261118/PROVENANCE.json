@@ -1,0 +1,295 @@
+{
+  "kind": "OWNER_REQUESTED_NATIVE_J4_AND_TWO_SHIRTS_N5",
+  "registeredAt": "2026-11-17T17:39:05.871Z",
+  "source": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0",
+  "worldHash": "dfbc11c72f413c1d4052c49cd574886e8ca413589841f44f5f6654687a5e0403",
+  "models": {
+    "sourceSha": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0",
+    "model": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "promptHash": "3d94082edc5412188ec922ce581304ccb8771c3e302dba6ba0bf29f7f494028c",
+    "openingMediaRule": {
+      "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2"
+    },
+    "contextPolicyHash": "cb898b99aadcedd597dadee07629150f196d7042aec8f4572bcba3ee75e4dd35",
+    "toolContractHash": "a508463e7afe545c9d6b2109e75227d8193dd2aa937f5a0ade401ac6e823a595",
+    "assemblyHash": "3f183d7c6cd3f730adcbf9e61a413a4611c7a93c9bfa3365258b2ed7696e533c",
+    "runtimeHash": "483657b9fe2a3473231ac623c6a55115d49c1a59dc40ad985d825fcacb87dde3",
+    "verifier": {
+      "model": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      },
+      "promptHash": "23e3315044995f2c5e8fc6ca0b242bc74e68b48f232fb7fefc8ce9528ca7d7bf",
+      "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+      "serializationHash": "8ea6aa4f2122e8d7bca1153a5057799bd87b3d7b8d307ce5e4f7647749c76661",
+      "bindingHash": "c98a52a23eea25f21877b9127a8650521e0c0abec60fa21d72e6a7b364564dab",
+      "boundsHash": "6179ba4eb906926b3b58c2cd754f53c4e511bc4d8b2a6e0049d2463a32a1c26b"
+    }
+  },
+  "ownerRequest": "Owner 2026-11-18: J4 x5 and two-shirt control x5 at latest PR392 head",
+  "repetitions": {
+    "c-20261028-j4": 5,
+    "c-context-two-units": 5
+  },
+  "maximumNativeGenerationRequests": 120,
+  "maximumJudgeGenerationRequests": 10,
+  "controlRepetitionAccounting": "FIVE_DISTINCT_REGISTRATIONS_EACH_EXISTING_CONTROL_N1",
+  "providerRequests": 0,
+  "worldCapture": {
+    "status": "CAPTURED",
+    "worldHash": "dfbc11c72f413c1d4052c49cd574886e8ca413589841f44f5f6654687a5e0403",
+    "products": 107,
+    "sourceSha": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0",
+    "testSourceSupplement": {
+      "kind": "OWNER_APPROVED_ISOLATED_COLOR_V1",
+      "configurationHash": "379b0b825749e59132e63388a254357375d62fd11add4c15aa258925942422ef",
+      "publicSourceWorldHash": "6069da82d379c04e1fa46804479e1deeebb44adb2f2bdf7595a9fa1adedfff33",
+      "approvalRefs": [
+        "owner-white-shirt-test-assumption-20261104"
+      ],
+      "changedRows": [
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "S",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "M",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "L",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "XL",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "S",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "M",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "L",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "XL",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        }
+      ],
+      "meaning": "Owner-approved test assumption; not verified physical stock colour or source publication."
+    },
+    "testSupportSupplement": {
+      "kind": "OWNER_APPROVED_TEST_FEEDBACK_HANDOFF_V1",
+      "configurationHash": "d4eee9dc3bd07ad198b3a28cb0416bba03c70f5e8b8d997c81e4f31fdd09fedf",
+      "approvalRef": "owner-feedback-handoff-test-supplement-20261104",
+      "baseWorldHash": "ce4c2d9c893c96e36b6204760178ef6ec268344ba792cc8d14ac86f72ce0ac87",
+      "handoffContentHash": "sha256:5154e9ea1e04200c8f92b9812ddcdae39d20e7cb508f96fafc7613ae3d833d74",
+      "handoffVersionId": "ee92f932-91ea-5490-a2a9-8e6338ae26f2",
+      "meaning": "Owner-approved isolated test feedback; not verified customer provenance. Handoff policy is active only in the test clone."
+    },
+    "testMediaSupplement": {
+      "kind": "OWNER_APPROVED_NEW_TEST_MEDIA_V1",
+      "configurationHash": "c07b0e453200180fab37ebcc3e42aa950326c8631f286bec48484a2f4a46f67d",
+      "approvalRef": "owner-new-test-media-SD023-20261104",
+      "baseWorldHash": "73f1b215443924d599baca940807111ac0d0ca51e5e88fa1b825c1a4931bc2c1",
+      "assets": [
+        {
+          "productId": "SD023",
+          "url": "https://content.pancake.vn/1/s3000x3000/f8/01/35/62/552cb23c4c117004dcb3ac97565a0dec3ed2a2f5371555e7f4ea0001-w:4000-h:6000-l:4576023-t:image/jpeg.jpeg",
+          "sha256": "4a4a5aba84f6bda6b3c392c401beea862877df16c81c6ba3af39e1b6bab7d3bc",
+          "checkedAt": "2026-11-11T09:23:57.805Z"
+        }
+      ],
+      "meaning": "New isolated test assets from actual canonical bytes; not a successful old-hash revalidation or live publication.",
+      "proofReuse": {
+        "previousWorldHash": "1c72f3156501c801e6720df0bc232f03639d235b29256f7b518d270535bd1902",
+        "policy": "REUSE_OWNER_APPROVED_TEST_ASSET_ORIGINAL_CHECK_TIME"
+      }
+    },
+    "providerRequests": 0,
+    "sourceWrites": 0
+  },
+  "jobs": [
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "externalRepetition": null,
+      "registrationHash": "52d06c81cfbb0a82dd3bf41e327529fd7a55b0c509466fd69665f85797c9386f",
+      "seal": "2ff2baa9bb4cfee0f69766c2c3b729d53efc2b6979f35ea4f71cddc33cbf674b",
+      "selectedSlots": [
+        "4857ae22801731a4f7fa84ae753a2322a294396d5503b766ea7ab95112e5f57b",
+        "4a6b85f3d7e78cae16c5b321b3118145890e472d8ae9f6e7052672696a14a6e7",
+        "0aba7c8c201a29e3d20157a41af871e892af41b477c22744d4be8441b146ee12",
+        "2a0e6a970ed012769d190cc966d81ebc47baedc6b76e637a5ca2a2b1db76aa5a",
+        "702656ae67e47fb829f65814408689f5982a647ce2fc8e60ec752524a22cb5f1"
+      ],
+      "turns": 15,
+      "maximumGenerationRequests": 60,
+      "source": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0"
+    },
+    {
+      "batch": 1,
+      "kind": "CONTROLS",
+      "externalRepetition": 1,
+      "registrationHash": "beb28ae02784b95852465d3c5cbf8613e79dfb8b87403b8defdbdc4d5f1e2378",
+      "seal": "2ff2baa9bb4cfee0f69766c2c3b729d53efc2b6979f35ea4f71cddc33cbf674b",
+      "selectedSlots": [
+        "50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0"
+    },
+    {
+      "batch": 2,
+      "kind": "CONTROLS",
+      "externalRepetition": 2,
+      "registrationHash": "f14a0259fa56575909b249e13181c0ec5172f6782a9df9c5ce610e0f59e182c6",
+      "seal": "07b4664c25fe0e35475f0979e91187daab805f75e64179b4fb3178f03d6bbc18",
+      "selectedSlots": [
+        "50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0"
+    },
+    {
+      "batch": 3,
+      "kind": "CONTROLS",
+      "externalRepetition": 3,
+      "registrationHash": "59431fd2122174b334b218f04647db898ad1cc8e0ef8fd80e1a9f5d112354b73",
+      "seal": "ce15d8dd45d2258c673b7bccdd834609ada7db1ef440acc5649f2cc6e1b69819",
+      "selectedSlots": [
+        "50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0"
+    },
+    {
+      "batch": 4,
+      "kind": "CONTROLS",
+      "externalRepetition": 4,
+      "registrationHash": "be424c780d5ee63886e988959c00bfbc6c40d0a65c0861a5510394bc4d3b6b8e",
+      "seal": "1b87189dc493d10d88d9765745050265f89a440d95a467ffe7495745a8dbbefb",
+      "selectedSlots": [
+        "50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0"
+    },
+    {
+      "batch": 5,
+      "kind": "CONTROLS",
+      "externalRepetition": 5,
+      "registrationHash": "5ee40650b21c96541af92323a92972c2bd9d25d50729e4427465f4e294cfbfb4",
+      "seal": "d7f7a5cb5d6f03dd3914cf89b2d67f811d06f2d8d5cf341108d7dbda7b0ceefb",
+      "selectedSlots": [
+        "50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0"
+    }
+  ],
+  "helperIdentity": {
+    "source": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0",
+    "observedAt": "2026-11-17T17:39:53.2993897Z",
+    "files": {
+      "seal.mjs": "ab71b577ac580c0a2ba9e9232191024c3bc20d885d45ea29c2996f3caaf10194",
+      "RUN_PLAN.json": "fb4d87dd065c54f6ed09d5e5f98d35084c063898d5386ac117c71aa95cbf307d",
+      "judge.mjs": "ebf317aa1208b27304fd99e2ab71e4650ac7f278c0951fea6b20d5acf15f7d64",
+      "BATCH_JUDGE_IDENTITY.json": "0c6e41344a5e7d2c9fa16594af27fbaf81ab7a526163cf37f4a60c408e8c630b",
+      "audit.mjs": "5700c504d3ddbee0462973cb2142ed634807dd08bc27abf04851b741bb42ca03",
+      "PREFLIGHT.json": "92dd4f975b7957362b49ccc7f64e133e7e8bb5c6f0578bd21b35fccf429e0d21"
+    },
+    "auditCompatibilityCorrection": {
+      "reason": "Read reason from native result because public captured SEND_ELIGIBLE has no reason field",
+      "hash": "f2bfe4e1ab203ab96967b279512b089dae08be8c19846072b3bbf33b0dd3d71c",
+      "modelInputsChanged": false,
+      "sourceChanged": false
+    },
+    "judgePreparePathCorrection": {
+      "reason": "Read blind seed from first registered job because campaigns have separate directories",
+      "hash": "1c7c30bc22cedd9e8d654f6e69fed2f056262c0dc18e1bca83d6cd3cb917c68e",
+      "judgeProviderRequestsBeforeCorrection": 0,
+      "rubricChanged": false,
+      "modelInputsChanged": false,
+      "sourceChanged": false
+    }
+  }
+}

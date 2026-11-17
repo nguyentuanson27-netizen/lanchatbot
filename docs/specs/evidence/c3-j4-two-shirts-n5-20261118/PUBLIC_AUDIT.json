@@ -1,0 +1,3761 @@
+{
+  "status": "PASS",
+  "source": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0",
+  "worldHash": "dfbc11c72f413c1d4052c49cd574886e8ca413589841f44f5f6654687a5e0403",
+  "jobAudits": [
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "attempts": 5,
+      "providerRequests": 20,
+      "testDatabaseDropped": true,
+      "source": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0",
+      "registrationHash": "52d06c81cfbb0a82dd3bf41e327529fd7a55b0c509466fd69665f85797c9386f"
+    },
+    {
+      "batch": 1,
+      "kind": "CONTROLS",
+      "attempts": 1,
+      "providerRequests": 1,
+      "testDatabaseDropped": true,
+      "source": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0",
+      "registrationHash": "beb28ae02784b95852465d3c5cbf8613e79dfb8b87403b8defdbdc4d5f1e2378"
+    },
+    {
+      "batch": 2,
+      "kind": "CONTROLS",
+      "attempts": 1,
+      "providerRequests": 1,
+      "testDatabaseDropped": true,
+      "source": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0",
+      "registrationHash": "f14a0259fa56575909b249e13181c0ec5172f6782a9df9c5ce610e0f59e182c6"
+    },
+    {
+      "batch": 3,
+      "kind": "CONTROLS",
+      "attempts": 1,
+      "providerRequests": 1,
+      "testDatabaseDropped": true,
+      "source": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0",
+      "registrationHash": "59431fd2122174b334b218f04647db898ad1cc8e0ef8fd80e1a9f5d112354b73"
+    },
+    {
+      "batch": 4,
+      "kind": "CONTROLS",
+      "attempts": 1,
+      "providerRequests": 1,
+      "testDatabaseDropped": true,
+      "source": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0",
+      "registrationHash": "be424c780d5ee63886e988959c00bfbc6c40d0a65c0861a5510394bc4d3b6b8e"
+    },
+    {
+      "batch": 5,
+      "kind": "CONTROLS",
+      "attempts": 1,
+      "providerRequests": 1,
+      "testDatabaseDropped": true,
+      "source": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0",
+      "registrationHash": "5ee40650b21c96541af92323a92972c2bd9d25d50729e4427465f4e294cfbfb4"
+    }
+  ],
+  "generations": [
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "a031d1e8-d2a2-4016-94f5-3c019ee40a02:owner:1",
+      "providerRequests": 1,
+      "authRequests": 1,
+      "requestHash": "e088b48fb72e46e8b871d469b35b21bf3f3f5c14c32e6ca0fe1628c51ce6f907",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6798.474000000002,
+        "inputTokens": 11018,
+        "outputTokens": 1274,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 51981,
+      "inputTokens": 11018,
+      "outputTokens": 1274,
+      "thinkingTokens": 1192
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "a031d1e8-d2a2-4016-94f5-3c019ee40a02:owner:2",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "8b7060009846f2f48a30cf682e3d2e6f23a2130d99c89fadf83c51287ce866ad",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3983.536699999997,
+        "inputTokens": 14191,
+        "outputTokens": 308,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 65308,
+      "inputTokens": 14191,
+      "outputTokens": 308,
+      "thinkingTokens": 271
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 0,
+      "role": "VERIFIER",
+      "status": "OK",
+      "id": "a031d1e8-d2a2-4016-94f5-3c019ee40a02:verifier:1",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "ccf314fc71c59cf98f7852cda33dc4396b716ff742409ae9effab4d188c47a77",
+      "modelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 7452.5723,
+        "inputTokens": 10073,
+        "outputTokens": 72,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 1,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "0036b427-8aa0-4d51-8845-4d17ee19713c:owner:1",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "82a56367fef0bb30c44928bfe1a526794406f4f4de22b28cc74ea81250125b26",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5414.850600000005,
+        "inputTokens": 11620,
+        "outputTokens": 963,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 53266,
+      "inputTokens": 11620,
+      "outputTokens": 963,
+      "thinkingTokens": 870
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 1,
+      "role": "OWNER",
+      "status": "PROVIDER_ERROR",
+      "id": "0036b427-8aa0-4d51-8845-4d17ee19713c:owner:2",
+      "providerRequests": 0,
+      "authRequests": 0,
+      "requestHash": null,
+      "modelVersion": null,
+      "metrics": {
+        "latencyMs": 1020.6600000000035,
+        "inputTokens": null,
+        "outputTokens": null,
+        "costUSD": null,
+        "unavailable": {
+          "inputTokens": "PROVIDER_NOT_EXPOSED",
+          "outputTokens": "PROVIDER_NOT_EXPOSED",
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": "PRE_DISPATCH",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureCode": "OWNER_REQUEST_BOUND",
+      "failureStage": "BUILD",
+      "requestBytes": 66810
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "d2492cde-4f52-4dcd-8be0-ba964c8c9f38:owner:1",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "ae190ac87db1899907d13a911690546aeeab3e3e09c63090ea21fff2c7bec338",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4506.086599999995,
+        "inputTokens": 11020,
+        "outputTokens": 628,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 51981,
+      "inputTokens": 11020,
+      "outputTokens": 628,
+      "thinkingTokens": 584
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "d2492cde-4f52-4dcd-8be0-ba964c8c9f38:owner:2",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "dc84ae8cc4307cc9e0d7a0a1d2a0182daeb60aa74469b9bba4bbdaf8fb9ffc51",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 3773.1370000000024,
+        "inputTokens": 13155,
+        "outputTokens": 290,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 60216,
+      "inputTokens": 13155,
+      "outputTokens": 290,
+      "thinkingTokens": 250
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 0,
+      "role": "VERIFIER",
+      "status": "OK",
+      "id": "d2492cde-4f52-4dcd-8be0-ba964c8c9f38:verifier:1",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "fd971397a4a67549ecf2d2b67b485f933a1c4fb77fb11eda5825d858a4f9dd1d",
+      "modelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 9932.51579999998,
+        "inputTokens": 9658,
+        "outputTokens": 65,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 1,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "92ab117c-1a0f-44cb-bfba-077989d5374c:owner:1",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "eec79b06c0f54c1cdd9df46961c572ffc96271cb237849e31daf4205204faba9",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6001.423800000019,
+        "inputTokens": 11522,
+        "outputTokens": 1308,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 53089,
+      "inputTokens": 11522,
+      "outputTokens": 1308,
+      "thinkingTokens": 1215
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 1,
+      "role": "OWNER",
+      "status": "PROVIDER_ERROR",
+      "id": "92ab117c-1a0f-44cb-bfba-077989d5374c:owner:2",
+      "providerRequests": 0,
+      "authRequests": 0,
+      "requestHash": null,
+      "modelVersion": null,
+      "metrics": {
+        "latencyMs": 944.3536000000022,
+        "inputTokens": null,
+        "outputTokens": null,
+        "costUSD": null,
+        "unavailable": {
+          "inputTokens": "PROVIDER_NOT_EXPOSED",
+          "outputTokens": "PROVIDER_NOT_EXPOSED",
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": "PRE_DISPATCH",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureCode": "OWNER_REQUEST_BOUND",
+      "failureStage": "BUILD",
+      "requestBytes": 66633
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "b085028d-3be9-4f4a-965f-485aea78c6c0:owner:1",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "27d3405060ed5208e218b3570ff064ddcfa1c93abf995076f5ec7f3e2838da00",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5257.129799999995,
+        "inputTokens": 11022,
+        "outputTokens": 855,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 51981,
+      "inputTokens": 11022,
+      "outputTokens": 855,
+      "thinkingTokens": 811
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "b085028d-3be9-4f4a-965f-485aea78c6c0:owner:2",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "c75d2c4b2578d45d95b37c742591d47b28adb71dfc2ea879a07e5a009e3f91e5",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4429.829000000027,
+        "inputTokens": 13384,
+        "outputTokens": 392,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 61332,
+      "inputTokens": 13384,
+      "outputTokens": 392,
+      "thinkingTokens": 354
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 0,
+      "role": "VERIFIER",
+      "status": "OK",
+      "id": "b085028d-3be9-4f4a-965f-485aea78c6c0:verifier:1",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "ad23f081017dce1c0b9abba60b47f242dcf68992c0382869983420d4307d732f",
+      "modelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 6742.807500000024,
+        "inputTokens": 9711,
+        "outputTokens": 67,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 1,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "08f582a2-1c94-4061-aa9e-b5da2855efb1:owner:1",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "f85fd3e5b5f6692bee57ed049220bde235bbd1431fccc812092e671f929a2c48",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6577.074400000012,
+        "inputTokens": 11522,
+        "outputTokens": 1359,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 53088,
+      "inputTokens": 11522,
+      "outputTokens": 1359,
+      "thinkingTokens": 1266
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 1,
+      "role": "OWNER",
+      "status": "PROVIDER_ERROR",
+      "id": "08f582a2-1c94-4061-aa9e-b5da2855efb1:owner:2",
+      "providerRequests": 0,
+      "authRequests": 0,
+      "requestHash": null,
+      "modelVersion": null,
+      "metrics": {
+        "latencyMs": 1094.2428000000073,
+        "inputTokens": null,
+        "outputTokens": null,
+        "costUSD": null,
+        "unavailable": {
+          "inputTokens": "PROVIDER_NOT_EXPOSED",
+          "outputTokens": "PROVIDER_NOT_EXPOSED",
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": "PRE_DISPATCH",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureCode": "OWNER_REQUEST_BOUND",
+      "failureStage": "BUILD",
+      "requestBytes": 66636
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "a915b0d0-71ce-4773-b980-bd964329584c:owner:1",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "2c923c9bc6a17d9ade87acc7a24e18dcb21e50a6f79291380f5ccf4001a08fab",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5834.306600000011,
+        "inputTokens": 11019,
+        "outputTokens": 720,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 51981,
+      "inputTokens": 11019,
+      "outputTokens": 720,
+      "thinkingTokens": 676
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "a915b0d0-71ce-4773-b980-bd964329584c:owner:2",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "8fb220d4afa043d126244a8b1353d03ace29bb3e0d7d9fe303e4225430a78ce8",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4329.59229999996,
+        "inputTokens": 13246,
+        "outputTokens": 383,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 60816,
+      "inputTokens": 13246,
+      "outputTokens": 383,
+      "thinkingTokens": 348
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 0,
+      "role": "VERIFIER",
+      "status": "OK",
+      "id": "a915b0d0-71ce-4773-b980-bd964329584c:verifier:1",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "c32e02e8ab8baebb2385747c858ff0bd8e66d352fd88b8fc8bdff602a3596575",
+      "modelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 7588.665500000003,
+        "inputTokens": 9686,
+        "outputTokens": 56,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 1,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "cda8a3d3-5e8e-44f1-b05e-b7bc24212672:owner:1",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "a5b60197d439ee6c69281510f35b7de333c35811eaf28dee1f4b246bb6c99893",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6193.528300000005,
+        "inputTokens": 11516,
+        "outputTokens": 1272,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 53069,
+      "inputTokens": 11516,
+      "outputTokens": 1272,
+      "thinkingTokens": 1179
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 1,
+      "role": "OWNER",
+      "status": "PROVIDER_ERROR",
+      "id": "cda8a3d3-5e8e-44f1-b05e-b7bc24212672:owner:2",
+      "providerRequests": 0,
+      "authRequests": 0,
+      "requestHash": null,
+      "modelVersion": null,
+      "metrics": {
+        "latencyMs": 1059.2290999999968,
+        "inputTokens": null,
+        "outputTokens": null,
+        "costUSD": null,
+        "unavailable": {
+          "inputTokens": "PROVIDER_NOT_EXPOSED",
+          "outputTokens": "PROVIDER_NOT_EXPOSED",
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": "PRE_DISPATCH",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureCode": "OWNER_REQUEST_BOUND",
+      "failureStage": "BUILD",
+      "requestBytes": 66616
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "3d2d0ba0-1887-46a9-81bd-e7916c59c3fc:owner:1",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "7049c0b31ebbe55a8013b4dd639ae8e1b57fd270eff9e0543cc5118359fb332a",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 8798.63579999999,
+        "inputTokens": 11021,
+        "outputTokens": 2191,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 51981,
+      "inputTokens": 11021,
+      "outputTokens": 2191,
+      "thinkingTokens": 2109
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "3d2d0ba0-1887-46a9-81bd-e7916c59c3fc:owner:2",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "bbf1e8da15988faf2a2e79f3c8cf6a1cc35b0a6c75a74030b87479e15db8cf80",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4389.821799999976,
+        "inputTokens": 15111,
+        "outputTokens": 546,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 69300,
+      "inputTokens": 15111,
+      "outputTokens": 546,
+      "thinkingTokens": 510
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 0,
+      "role": "VERIFIER",
+      "status": "OK",
+      "id": "3d2d0ba0-1887-46a9-81bd-e7916c59c3fc:verifier:1",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "349cbefdb038cebcb974673cc1ade5933828285fc86bb5fae5f48c114f245547",
+      "modelVersion": "gpt-6.1-sol",
+      "metrics": {
+        "latencyMs": 7052.858000000007,
+        "inputTokens": 10062,
+        "outputTokens": 61,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 1,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "a82eda5e-0302-4ede-8a68-534ebd609978:owner:1",
+      "providerRequests": 1,
+      "authRequests": 0,
+      "requestHash": "fb677c84dfd2e85b312651ab4c46fcff0697959900f566a8dd3b0900ae0940bf",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6601.880300000019,
+        "inputTokens": 11622,
+        "outputTokens": 1383,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 53261,
+      "inputTokens": 11622,
+      "outputTokens": 1383,
+      "thinkingTokens": 1290
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 1,
+      "role": "OWNER",
+      "status": "PROVIDER_ERROR",
+      "id": "a82eda5e-0302-4ede-8a68-534ebd609978:owner:2",
+      "providerRequests": 0,
+      "authRequests": 0,
+      "requestHash": null,
+      "modelVersion": null,
+      "metrics": {
+        "latencyMs": 880.1142000000109,
+        "inputTokens": null,
+        "outputTokens": null,
+        "costUSD": null,
+        "unavailable": {
+          "inputTokens": "PROVIDER_NOT_EXPOSED",
+          "outputTokens": "PROVIDER_NOT_EXPOSED",
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": "PRE_DISPATCH",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureCode": "OWNER_REQUEST_BOUND",
+      "failureStage": "BUILD",
+      "requestBytes": 66808
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "bbe5a434-74c2-49fb-b4c5-25cfaac492f6:owner:1",
+      "providerRequests": 1,
+      "authRequests": 1,
+      "requestHash": "7fdc9a3ae4adf74d64ac32e53089b335f9b4496e192214afc4820fbed7db4987",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5971.989300000001,
+        "inputTokens": 11029,
+        "outputTokens": 1060,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 52013,
+      "inputTokens": 11029,
+      "outputTokens": 1060,
+      "thinkingTokens": 957
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "PROVIDER_ERROR",
+      "id": "bbe5a434-74c2-49fb-b4c5-25cfaac492f6:owner:2",
+      "providerRequests": 0,
+      "authRequests": 0,
+      "requestHash": null,
+      "modelVersion": null,
+      "metrics": {
+        "latencyMs": 953.890999999996,
+        "inputTokens": null,
+        "outputTokens": null,
+        "costUSD": null,
+        "unavailable": {
+          "inputTokens": "PROVIDER_NOT_EXPOSED",
+          "outputTokens": "PROVIDER_NOT_EXPOSED",
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": "PRE_DISPATCH",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureCode": "OWNER_REQUEST_BOUND",
+      "failureStage": "BUILD",
+      "requestBytes": 66539
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 2,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "5f673d66-2ade-49e6-9ff6-34a852f9c28a:owner:1",
+      "providerRequests": 1,
+      "authRequests": 1,
+      "requestHash": "333595998d9f3bed7b6cbbd675f89007bc5225105d5537b772deffb2fbe576e3",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6766.859299999996,
+        "inputTokens": 11028,
+        "outputTokens": 1498,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 52013,
+      "inputTokens": 11028,
+      "outputTokens": 1498,
+      "thinkingTokens": 1395
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 2,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "PROVIDER_ERROR",
+      "id": "5f673d66-2ade-49e6-9ff6-34a852f9c28a:owner:2",
+      "providerRequests": 0,
+      "authRequests": 0,
+      "requestHash": null,
+      "modelVersion": null,
+      "metrics": {
+        "latencyMs": 1275.3277999999991,
+        "inputTokens": null,
+        "outputTokens": null,
+        "costUSD": null,
+        "unavailable": {
+          "inputTokens": "PROVIDER_NOT_EXPOSED",
+          "outputTokens": "PROVIDER_NOT_EXPOSED",
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": "PRE_DISPATCH",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureCode": "OWNER_REQUEST_BOUND",
+      "failureStage": "BUILD",
+      "requestBytes": 66535
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 3,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "570ed041-3fd7-4057-9629-4578253d2a33:owner:1",
+      "providerRequests": 1,
+      "authRequests": 1,
+      "requestHash": "14bdba1c07b883ab9a1d5ae80308eb1ef90bc692bc4ee3730d2a0702f388a91b",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 6841.1384000000035,
+        "inputTokens": 11032,
+        "outputTokens": 1446,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 52013,
+      "inputTokens": 11032,
+      "outputTokens": 1446,
+      "thinkingTokens": 1313
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 3,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "PROVIDER_ERROR",
+      "id": "570ed041-3fd7-4057-9629-4578253d2a33:owner:2",
+      "providerRequests": 0,
+      "authRequests": 0,
+      "requestHash": null,
+      "modelVersion": null,
+      "metrics": {
+        "latencyMs": 1024.633600000001,
+        "inputTokens": null,
+        "outputTokens": null,
+        "costUSD": null,
+        "unavailable": {
+          "inputTokens": "PROVIDER_NOT_EXPOSED",
+          "outputTokens": "PROVIDER_NOT_EXPOSED",
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": "PRE_DISPATCH",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureCode": "OWNER_REQUEST_BOUND",
+      "failureStage": "BUILD",
+      "requestBytes": 65824
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 4,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "11277930-37d1-4e7e-b06b-ce6f01184cf9:owner:1",
+      "providerRequests": 1,
+      "authRequests": 1,
+      "requestHash": "1e2346c8d98aa6ad49db41bae524887f74b5200b33784efb9676db71685bcc16",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 5476.3442,
+        "inputTokens": 11031,
+        "outputTokens": 1056,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 52013,
+      "inputTokens": 11031,
+      "outputTokens": 1056,
+      "thinkingTokens": 953
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 4,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "PROVIDER_ERROR",
+      "id": "11277930-37d1-4e7e-b06b-ce6f01184cf9:owner:2",
+      "providerRequests": 0,
+      "authRequests": 0,
+      "requestHash": null,
+      "modelVersion": null,
+      "metrics": {
+        "latencyMs": 916.2065999999977,
+        "inputTokens": null,
+        "outputTokens": null,
+        "costUSD": null,
+        "unavailable": {
+          "inputTokens": "PROVIDER_NOT_EXPOSED",
+          "outputTokens": "PROVIDER_NOT_EXPOSED",
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": "PRE_DISPATCH",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureCode": "OWNER_REQUEST_BOUND",
+      "failureStage": "BUILD",
+      "requestBytes": 66539
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 5,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "OK",
+      "id": "125b0152-a395-4823-8e53-d3a71cd9591b:owner:1",
+      "providerRequests": 1,
+      "authRequests": 1,
+      "requestHash": "49b775ab383f8077be3369700d4df8908c249a9190775971cbdd1dbda89aa209",
+      "modelVersion": "gemini-3.5-flash-lite",
+      "metrics": {
+        "latencyMs": 4698.8678999999975,
+        "inputTokens": 11029,
+        "outputTokens": 660,
+        "costUSD": null,
+        "unavailable": {
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": null,
+      "errorCode": null,
+      "httpStatus": 200,
+      "finishReason": "STOP",
+      "functionCallingMode": "VALIDATED",
+      "declaredToolCount": 14,
+      "requestBytes": 52013,
+      "inputTokens": 11029,
+      "outputTokens": 660,
+      "thinkingTokens": 557
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 5,
+      "turn": 0,
+      "role": "OWNER",
+      "status": "PROVIDER_ERROR",
+      "id": "125b0152-a395-4823-8e53-d3a71cd9591b:owner:2",
+      "providerRequests": 0,
+      "authRequests": 0,
+      "requestHash": null,
+      "modelVersion": null,
+      "metrics": {
+        "latencyMs": 1033.5787000000055,
+        "inputTokens": null,
+        "outputTokens": null,
+        "costUSD": null,
+        "unavailable": {
+          "inputTokens": "PROVIDER_NOT_EXPOSED",
+          "outputTokens": "PROVIDER_NOT_EXPOSED",
+          "costUSD": "PROVIDER_NOT_EXPOSED"
+        }
+      },
+      "failureLayer": "PRE_DISPATCH",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureCode": "OWNER_REQUEST_BOUND",
+      "failureStage": "BUILD",
+      "requestBytes": 66535
+    }
+  ],
+  "receiptContinuityFrames": [],
+  "conversationTrace": [
+    {
+      "kind": "CANDIDATE",
+      "batch": 1,
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "localRepetition": 1,
+      "registrationHash": "52d06c81cfbb0a82dd3bf41e327529fd7a55b0c509466fd69665f85797c9386f",
+      "slotId": "4857ae22801731a4f7fa84ae753a2322a294396d5503b766ea7ab95112e5f57b",
+      "safetyFindings": [],
+      "turns": [
+        {
+          "turn": 0,
+          "customer": "Chị lấy áo của bộ váy Thạch Thảo size M.",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ, áo lẻ Set váy Thạch Thảo size M có hai màu Trắng (sẵn hàng) và Be (đặt trước). Chị lấy màu nào ạ?"
+            ],
+            "images": [
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+              },
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg"
+              }
+            ]
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-1\\CANDIDATE\\native\\native-4857ae22801731a4f7fa84ae753a2322a294396d5503b766ea7ab95112e5f57b-turn-0.json",
+          "artifactHash": "b20604e1c964afd6bfe094d9cd88921d440beb17ed2137b4d1f67a220f2a3e18",
+          "tools": [
+            {
+              "name": "add_to_cart",
+              "status": "UNAVAILABLE",
+              "reason": "SELECTION_UNAVAILABLE",
+              "data": {}
+            },
+            {
+              "name": "select_product_media",
+              "status": "OK",
+              "reason": null,
+              "data": {}
+            }
+          ]
+        },
+        {
+          "turn": 1,
+          "customer": "Shop hỗ trợ thêm cho chị được chút nào không?",
+          "terminal": {
+            "disposition": "HANDOFF",
+            "messages": [],
+            "images": [],
+            "reason": "DEPENDENCY_FAILURE"
+          },
+          "codeReply": null,
+          "recovery": {
+            "originalDisposition": "FALLBACK",
+            "originalReason": "PROVIDER_ERROR"
+          },
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-1\\CANDIDATE\\native\\native-4857ae22801731a4f7fa84ae753a2322a294396d5503b766ea7ab95112e5f57b-turn-1.json",
+          "artifactHash": "2aa21ed0658a46c81a5f6c446cbff62af1024ff906eb75553809141bbaf31f12",
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "6cad388a039a63c68fa44434c24cdbcf3e4f749e82ed2125458e5b060d025a8c",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "d7405918e517dadb62fc73c00c6e068c7012b0a6e7f90f69d802537d38115e82",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "d7405918e517dadb62fc73c00c6e068c7012b0a6e7f90f69d802537d38115e82",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "COLOR"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "NOT_APPLIED",
+                    "parentProductUnits": 1,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 1,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 499000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 0,
+                  "grandTotalVnd": 529000,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:2:9091e6cbc8f13bb3e734ace835a27a1c0a4aa09e6be5f124fca63cd2ad30a71a",
+                  "recipient": "9091e6cbc8f13bb3e734ace835a27a1c0a4aa09e6be5f124fca63cd2ad30a71a"
+                }
+              }
+            },
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "6cad388a039a63c68fa44434c24cdbcf3e4f749e82ed2125458e5b060d025a8c",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "d7405918e517dadb62fc73c00c6e068c7012b0a6e7f90f69d802537d38115e82",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "d7405918e517dadb62fc73c00c6e068c7012b0a6e7f90f69d802537d38115e82",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "COLOR"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "NOT_APPLIED",
+                    "parentProductUnits": 1,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 1,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 499000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 0,
+                  "grandTotalVnd": 529000,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:2:9091e6cbc8f13bb3e734ace835a27a1c0a4aa09e6be5f124fca63cd2ad30a71a",
+                  "recipient": "9091e6cbc8f13bb3e734ace835a27a1c0a4aa09e6be5f124fca63cd2ad30a71a"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "NO_SEND",
+            "messages": [],
+            "images": [],
+            "reason": "HUMAN_OWNS_CONVERSATION"
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-1\\CANDIDATE\\native\\native-4857ae22801731a4f7fa84ae753a2322a294396d5503b766ea7ab95112e5f57b-turn-2.json",
+          "artifactHash": "5cc581eed754addb712a3ed0b3e3f9a390f05b2bcfeb8210b0e435894eb9434e",
+          "tools": []
+        }
+      ]
+    },
+    {
+      "kind": "CANDIDATE",
+      "batch": 1,
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "localRepetition": 2,
+      "registrationHash": "52d06c81cfbb0a82dd3bf41e327529fd7a55b0c509466fd69665f85797c9386f",
+      "slotId": "4a6b85f3d7e78cae16c5b321b3118145890e472d8ae9f6e7052672696a14a6e7",
+      "safetyFindings": [],
+      "turns": [
+        {
+          "turn": 0,
+          "customer": "Chị lấy áo của bộ váy Thạch Thảo size M.",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ, áo thêu Thạch Thảo size M nhà em có màu Trắng (hàng có sẵn) và màu Be (hàng đặt trước). Chị lấy màu nào ạ?"
+            ],
+            "images": [
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+              }
+            ]
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-1\\CANDIDATE\\native\\native-4a6b85f3d7e78cae16c5b321b3118145890e472d8ae9f6e7052672696a14a6e7-turn-0.json",
+          "artifactHash": "6c837bd060c3ee805350412f6f8d47714e340cfb93d359e2fe7bde7c28867604",
+          "tools": [
+            {
+              "name": "add_to_cart",
+              "status": "UNAVAILABLE",
+              "reason": "SELECTION_UNAVAILABLE",
+              "data": {}
+            }
+          ]
+        },
+        {
+          "turn": 1,
+          "customer": "Shop hỗ trợ thêm cho chị được chút nào không?",
+          "terminal": {
+            "disposition": "HANDOFF",
+            "messages": [],
+            "images": [],
+            "reason": "DEPENDENCY_FAILURE"
+          },
+          "codeReply": null,
+          "recovery": {
+            "originalDisposition": "FALLBACK",
+            "originalReason": "PROVIDER_ERROR"
+          },
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-1\\CANDIDATE\\native\\native-4a6b85f3d7e78cae16c5b321b3118145890e472d8ae9f6e7052672696a14a6e7-turn-1.json",
+          "artifactHash": "c359c3173510feedf53da555494ceb027eb8df8af053ffddaa8247649a6cdd07",
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "11d012f6700282d0cd0e80844bf9583164a586d2f57db40187db82846d9c700b",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "25de41f7693db24d789c261c718f86dc81b50801c2aa3267dd1ea7cc25873141",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "25de41f7693db24d789c261c718f86dc81b50801c2aa3267dd1ea7cc25873141",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "COLOR"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "NOT_APPLIED",
+                    "parentProductUnits": 1,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 1,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 499000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 0,
+                  "grandTotalVnd": 529000,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:5:c54e1fe6848ad862f0ae1241c0a19bc92ec86ad834347d0ac81e29ce7db824a8",
+                  "recipient": "c54e1fe6848ad862f0ae1241c0a19bc92ec86ad834347d0ac81e29ce7db824a8"
+                }
+              }
+            },
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "11d012f6700282d0cd0e80844bf9583164a586d2f57db40187db82846d9c700b",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "25de41f7693db24d789c261c718f86dc81b50801c2aa3267dd1ea7cc25873141",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "25de41f7693db24d789c261c718f86dc81b50801c2aa3267dd1ea7cc25873141",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "COLOR"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "NOT_APPLIED",
+                    "parentProductUnits": 1,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 1,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 499000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 0,
+                  "grandTotalVnd": 529000,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:5:c54e1fe6848ad862f0ae1241c0a19bc92ec86ad834347d0ac81e29ce7db824a8",
+                  "recipient": "c54e1fe6848ad862f0ae1241c0a19bc92ec86ad834347d0ac81e29ce7db824a8"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "NO_SEND",
+            "messages": [],
+            "images": [],
+            "reason": "HUMAN_OWNS_CONVERSATION"
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-1\\CANDIDATE\\native\\native-4a6b85f3d7e78cae16c5b321b3118145890e472d8ae9f6e7052672696a14a6e7-turn-2.json",
+          "artifactHash": "3c0c42eb144c2c048f9bffefe8717167155f5a176389eee9028fb15ae72be7be",
+          "tools": []
+        }
+      ]
+    },
+    {
+      "kind": "CANDIDATE",
+      "batch": 1,
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "localRepetition": 3,
+      "registrationHash": "52d06c81cfbb0a82dd3bf41e327529fd7a55b0c509466fd69665f85797c9386f",
+      "slotId": "0aba7c8c201a29e3d20157a41af871e892af41b477c22744d4be8441b146ee12",
+      "safetyFindings": [],
+      "turns": [
+        {
+          "turn": 0,
+          "customer": "Chị lấy áo của bộ váy Thạch Thảo size M.",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ, áo thêu Thạch Thảo size M của mình có hai màu là trắng (có sẵn) và be (đặt trước ạ). Chị lấy màu nào ạ?"
+            ],
+            "images": [
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+              }
+            ]
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-1\\CANDIDATE\\native\\native-0aba7c8c201a29e3d20157a41af871e892af41b477c22744d4be8441b146ee12-turn-0.json",
+          "artifactHash": "aae55bff48cc4edfd4fa2e726b4ae997d32a3aa8e60cc15011eb73dbddc73ed4",
+          "tools": [
+            {
+              "name": "add_to_cart",
+              "status": "UNAVAILABLE",
+              "reason": "SELECTION_UNAVAILABLE",
+              "data": {}
+            }
+          ]
+        },
+        {
+          "turn": 1,
+          "customer": "Shop hỗ trợ thêm cho chị được chút nào không?",
+          "terminal": {
+            "disposition": "HANDOFF",
+            "messages": [],
+            "images": [],
+            "reason": "DEPENDENCY_FAILURE"
+          },
+          "codeReply": null,
+          "recovery": {
+            "originalDisposition": "FALLBACK",
+            "originalReason": "PROVIDER_ERROR"
+          },
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-1\\CANDIDATE\\native\\native-0aba7c8c201a29e3d20157a41af871e892af41b477c22744d4be8441b146ee12-turn-1.json",
+          "artifactHash": "dd2fc8e6a43d8c8b113a200a5a90d7a2bad309ef2fe77d5dfdec92283024b823",
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "b1c7d4463e8a849c264ef4c9096bef4e6963bf0544c7230667db11aa22029159",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "ea71f106bf79bdabd2e1f6cec728809c2a141fc447e9b19bbc654ffaded2005c",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "ea71f106bf79bdabd2e1f6cec728809c2a141fc447e9b19bbc654ffaded2005c",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "COLOR"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "NOT_APPLIED",
+                    "parentProductUnits": 1,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 1,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 499000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 0,
+                  "grandTotalVnd": 529000,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:8:7026151458e0c5f3c217a92a60263d29ec9b9c5589ec64d9b8c9e9dbc7ad6f04",
+                  "recipient": "7026151458e0c5f3c217a92a60263d29ec9b9c5589ec64d9b8c9e9dbc7ad6f04"
+                }
+              }
+            },
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "b1c7d4463e8a849c264ef4c9096bef4e6963bf0544c7230667db11aa22029159",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "ea71f106bf79bdabd2e1f6cec728809c2a141fc447e9b19bbc654ffaded2005c",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "ea71f106bf79bdabd2e1f6cec728809c2a141fc447e9b19bbc654ffaded2005c",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "COLOR"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "NOT_APPLIED",
+                    "parentProductUnits": 1,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 1,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 499000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 0,
+                  "grandTotalVnd": 529000,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:8:7026151458e0c5f3c217a92a60263d29ec9b9c5589ec64d9b8c9e9dbc7ad6f04",
+                  "recipient": "7026151458e0c5f3c217a92a60263d29ec9b9c5589ec64d9b8c9e9dbc7ad6f04"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "NO_SEND",
+            "messages": [],
+            "images": [],
+            "reason": "HUMAN_OWNS_CONVERSATION"
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-1\\CANDIDATE\\native\\native-0aba7c8c201a29e3d20157a41af871e892af41b477c22744d4be8441b146ee12-turn-2.json",
+          "artifactHash": "9c9a92d80a4f8ae3d3ebea80730823fd01967d32f0cb375765d3ea3e936620af",
+          "tools": []
+        }
+      ]
+    },
+    {
+      "kind": "CANDIDATE",
+      "batch": 1,
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "localRepetition": 4,
+      "registrationHash": "52d06c81cfbb0a82dd3bf41e327529fd7a55b0c509466fd69665f85797c9386f",
+      "slotId": "2a0e6a970ed012769d190cc966d81ebc47baedc6b76e637a5ca2a2b1db76aa5a",
+      "safetyFindings": [],
+      "turns": [
+        {
+          "turn": 0,
+          "customer": "Chị lấy áo của bộ váy Thạch Thảo size M.",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ, áo thêu Thạch Thảo size M có màu Trắng (có sẵn) và màu Be (đặt trước). Chị lấy màu nào ạ?"
+            ],
+            "images": [
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+              }
+            ]
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-1\\CANDIDATE\\native\\native-2a0e6a970ed012769d190cc966d81ebc47baedc6b76e637a5ca2a2b1db76aa5a-turn-0.json",
+          "artifactHash": "232a7a53a7d857ea183f486fb267ee5ee8734649ed2c55e6ff57b325db36549a",
+          "tools": [
+            {
+              "name": "add_to_cart",
+              "status": "UNAVAILABLE",
+              "reason": "SELECTION_UNAVAILABLE",
+              "data": {}
+            }
+          ]
+        },
+        {
+          "turn": 1,
+          "customer": "Shop hỗ trợ thêm cho chị được chút nào không?",
+          "terminal": {
+            "disposition": "HANDOFF",
+            "messages": [],
+            "images": [],
+            "reason": "DEPENDENCY_FAILURE"
+          },
+          "codeReply": null,
+          "recovery": {
+            "originalDisposition": "FALLBACK",
+            "originalReason": "PROVIDER_ERROR"
+          },
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-1\\CANDIDATE\\native\\native-2a0e6a970ed012769d190cc966d81ebc47baedc6b76e637a5ca2a2b1db76aa5a-turn-1.json",
+          "artifactHash": "898b3a7d80cb7f7b6138ed6e2721a5d9e9a29925c1b4bb6b6787775df143a461",
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "86b94d5f303c69577d18dec0e15916c0d9716cdcae92b1bc6eb7cb6b9bb21556",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "a3d8269bafbce4e85c6d743682afebb498fcd3361a6a579d3957c2edcb833937",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "a3d8269bafbce4e85c6d743682afebb498fcd3361a6a579d3957c2edcb833937",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "COLOR"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "NOT_APPLIED",
+                    "parentProductUnits": 1,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 1,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 499000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 0,
+                  "grandTotalVnd": 529000,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:11:0e5f97fc2a19f4a2c93ecc3bc195767519b6ec163d34d28eace2d510bae4e3bd",
+                  "recipient": "0e5f97fc2a19f4a2c93ecc3bc195767519b6ec163d34d28eace2d510bae4e3bd"
+                }
+              }
+            },
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "86b94d5f303c69577d18dec0e15916c0d9716cdcae92b1bc6eb7cb6b9bb21556",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "a3d8269bafbce4e85c6d743682afebb498fcd3361a6a579d3957c2edcb833937",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "a3d8269bafbce4e85c6d743682afebb498fcd3361a6a579d3957c2edcb833937",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "COLOR"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "NOT_APPLIED",
+                    "parentProductUnits": 1,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 1,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 499000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 0,
+                  "grandTotalVnd": 529000,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:11:0e5f97fc2a19f4a2c93ecc3bc195767519b6ec163d34d28eace2d510bae4e3bd",
+                  "recipient": "0e5f97fc2a19f4a2c93ecc3bc195767519b6ec163d34d28eace2d510bae4e3bd"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "NO_SEND",
+            "messages": [],
+            "images": [],
+            "reason": "HUMAN_OWNS_CONVERSATION"
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-1\\CANDIDATE\\native\\native-2a0e6a970ed012769d190cc966d81ebc47baedc6b76e637a5ca2a2b1db76aa5a-turn-2.json",
+          "artifactHash": "7b42c081dfbf19a99673fc64214ab2d90bfb2e3fddf07cf12dc3c8ea9140257d",
+          "tools": []
+        }
+      ]
+    },
+    {
+      "kind": "CANDIDATE",
+      "batch": 1,
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "localRepetition": 5,
+      "registrationHash": "52d06c81cfbb0a82dd3bf41e327529fd7a55b0c509466fd69665f85797c9386f",
+      "slotId": "702656ae67e47fb829f65814408689f5982a647ce2fc8e60ec752524a22cb5f1",
+      "safetyFindings": [],
+      "turns": [
+        {
+          "turn": 0,
+          "customer": "Chị lấy áo của bộ váy Thạch Thảo size M.",
+          "terminal": {
+            "disposition": "SEND_ELIGIBLE",
+            "messages": [
+              "Dạ, áo thêu Set váy Thạch Thảo size M có màu Trắng (có sẵn) và Be (đặt trước). Chị lấy màu nào ạ?"
+            ],
+            "images": [
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/19/3f/e0/1e/fb4238aebb457d97030f8347d74007295ca5974e0177005664cf33a0-w:4000-h:6000-l:1587463-t:image/jpeg.jpeg"
+              },
+              {
+                "url": "https://content.pancake.vn/1/s3000x3000/1d/47/51/f5/eb844837408cc82fb8f23e37528d13a2eccab6c94644355c69f55e1d-w:3853-h:5779-l:1378368-t:image/jpeg.jpeg"
+              }
+            ]
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": {
+            "verdict": "PASS",
+            "violations": []
+          },
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-1\\CANDIDATE\\native\\native-702656ae67e47fb829f65814408689f5982a647ce2fc8e60ec752524a22cb5f1-turn-0.json",
+          "artifactHash": "e9d7b7e95ce52b3a0ff08329ce4c3bdf0013a138138ab74bb256d5bcbfded8cf",
+          "tools": [
+            {
+              "name": "add_to_cart",
+              "status": "UNAVAILABLE",
+              "reason": "SELECTION_UNAVAILABLE",
+              "data": {}
+            },
+            {
+              "name": "select_product_media",
+              "status": "OK",
+              "reason": null,
+              "data": {}
+            }
+          ]
+        },
+        {
+          "turn": 1,
+          "customer": "Shop hỗ trợ thêm cho chị được chút nào không?",
+          "terminal": {
+            "disposition": "HANDOFF",
+            "messages": [],
+            "images": [],
+            "reason": "DEPENDENCY_FAILURE"
+          },
+          "codeReply": null,
+          "recovery": {
+            "originalDisposition": "FALLBACK",
+            "originalReason": "PROVIDER_ERROR"
+          },
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-1\\CANDIDATE\\native\\native-702656ae67e47fb829f65814408689f5982a647ce2fc8e60ec752524a22cb5f1-turn-1.json",
+          "artifactHash": "c1a35fd344ca42e42e5b3b72c0266a650f31db960880d2524aaa752326477a58",
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "6ccfd2317a35823e97b725e3163eaf96c3509d0a9a0f619550e9e5fa06e35450",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "a251b8f863dab104744eea4d2814d4258910d2437d1cdc86c08a171ba812d267",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "a251b8f863dab104744eea4d2814d4258910d2437d1cdc86c08a171ba812d267",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "COLOR"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "NOT_APPLIED",
+                    "parentProductUnits": 1,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 1,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 499000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 0,
+                  "grandTotalVnd": 529000,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:14:28f12c5511dd6a89fa970df8427ee8f70f1fff0a63a861c769e22703f0f05627",
+                  "recipient": "28f12c5511dd6a89fa970df8427ee8f70f1fff0a63a861c769e22703f0f05627"
+                }
+              }
+            },
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "6ccfd2317a35823e97b725e3163eaf96c3509d0a9a0f619550e9e5fa06e35450",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "a251b8f863dab104744eea4d2814d4258910d2437d1cdc86c08a171ba812d267",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "a251b8f863dab104744eea4d2814d4258910d2437d1cdc86c08a171ba812d267",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "COLOR"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "NOT_APPLIED",
+                    "parentProductUnits": 1,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 1,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 499000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 0,
+                  "grandTotalVnd": 529000,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:14:28f12c5511dd6a89fa970df8427ee8f70f1fff0a63a861c769e22703f0f05627",
+                  "recipient": "28f12c5511dd6a89fa970df8427ee8f70f1fff0a63a861c769e22703f0f05627"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "NO_SEND",
+            "messages": [],
+            "images": [],
+            "reason": "HUMAN_OWNS_CONVERSATION"
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-1\\CANDIDATE\\native\\native-702656ae67e47fb829f65814408689f5982a647ce2fc8e60ec752524a22cb5f1-turn-2.json",
+          "artifactHash": "73b112f3b75bc2a93f3ea997037abd0bdc6e189367227b09a3376cef50b9b492",
+          "tools": []
+        }
+      ]
+    },
+    {
+      "kind": "CONTROLS",
+      "batch": 1,
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "localRepetition": 1,
+      "registrationHash": "beb28ae02784b95852465d3c5cbf8613e79dfb8b87403b8defdbdc4d5f1e2378",
+      "slotId": "50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c",
+      "safetyFindings": [],
+      "turns": [
+        {
+          "turn": 0,
+          "customer": "Chị lấy hai áo Thạch Thảo size M, shop bớt thêm cho chị được không?",
+          "terminal": {
+            "disposition": "HANDOFF",
+            "messages": [],
+            "images": [],
+            "reason": "DEPENDENCY_FAILURE"
+          },
+          "codeReply": null,
+          "recovery": {
+            "originalDisposition": "FALLBACK",
+            "originalReason": "PROVIDER_ERROR"
+          },
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-1\\CONTROLS\\native\\native-50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c-turn-0.json",
+          "artifactHash": "bd674291ba7f4ed5aa1f2ff54d16dcf43cfc10b354bff9cfb11c8fe8bd21c0e6",
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "dd647cf111ba6da915e2a6a6f9479b86a3ec0fe722bfcd9f8529b330b490ebf5",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "2362d69db9d6b89b1d25a44a3809ab4e1b049e23ee737cda56085dbfd7892112",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "2362d69db9d6b89b1d25a44a3809ab4e1b049e23ee737cda56085dbfd7892112",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "CUSTOMER_PURCHASE_CHOICE"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "APPLIED",
+                    "parentProductUnits": 2,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 2,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 998000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 49900,
+                  "grandTotalVnd": 978100,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:1:0c4eefea5e631d4cae44fafd8458af2e95b5afee39dfc81597cfb28772d85709",
+                  "recipient": "0c4eefea5e631d4cae44fafd8458af2e95b5afee39dfc81597cfb28772d85709"
+                }
+              }
+            },
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "dd647cf111ba6da915e2a6a6f9479b86a3ec0fe722bfcd9f8529b330b490ebf5",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "2362d69db9d6b89b1d25a44a3809ab4e1b049e23ee737cda56085dbfd7892112",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "2362d69db9d6b89b1d25a44a3809ab4e1b049e23ee737cda56085dbfd7892112",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "CUSTOMER_PURCHASE_CHOICE"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "APPLIED",
+                    "parentProductUnits": 2,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 2,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 998000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 49900,
+                  "grandTotalVnd": 978100,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:1:0c4eefea5e631d4cae44fafd8458af2e95b5afee39dfc81597cfb28772d85709",
+                  "recipient": "0c4eefea5e631d4cae44fafd8458af2e95b5afee39dfc81597cfb28772d85709"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "turn": 1,
+          "customer": "Lấy trắng em nhé.",
+          "terminal": {
+            "disposition": "NO_SEND",
+            "messages": [],
+            "images": [],
+            "reason": "HUMAN_OWNS_CONVERSATION"
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-1\\CONTROLS\\native\\native-50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c-turn-1.json",
+          "artifactHash": "341ebe2fdc1deb405a8416da3854412a64f524d15311d203163750dcaaa7106e",
+          "tools": []
+        },
+        {
+          "turn": 2,
+          "customer": "Cả ship hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "NO_SEND",
+            "messages": [],
+            "images": [],
+            "reason": "HUMAN_OWNS_CONVERSATION"
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-1\\CONTROLS\\native\\native-50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c-turn-2.json",
+          "artifactHash": "f3ec7ebbe67be31e737efc9fb5fd466fb6a268ce9496bbfc1c7d4030f3ab0122",
+          "tools": []
+        }
+      ]
+    },
+    {
+      "kind": "CONTROLS",
+      "batch": 2,
+      "caseId": "c-context-two-units",
+      "repetition": 2,
+      "localRepetition": 1,
+      "registrationHash": "f14a0259fa56575909b249e13181c0ec5172f6782a9df9c5ce610e0f59e182c6",
+      "slotId": "50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c",
+      "safetyFindings": [],
+      "turns": [
+        {
+          "turn": 0,
+          "customer": "Chị lấy hai áo Thạch Thảo size M, shop bớt thêm cho chị được không?",
+          "terminal": {
+            "disposition": "HANDOFF",
+            "messages": [],
+            "images": [],
+            "reason": "DEPENDENCY_FAILURE"
+          },
+          "codeReply": null,
+          "recovery": {
+            "originalDisposition": "FALLBACK",
+            "originalReason": "PROVIDER_ERROR"
+          },
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-2\\CONTROLS\\native\\native-50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c-turn-0.json",
+          "artifactHash": "809ea888506670af14cb3a8be64bac201e9fd17191afe787ba09a24576a1225a",
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "fe50fc6beb882d49dc03c2500947ebbf5a858ec1a49c8133d48ee18bf463a6b5",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "6359f4e7040dad1efadab8ff14e16c8fca11d28b4979cf61544edd2989abe3f6",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "6359f4e7040dad1efadab8ff14e16c8fca11d28b4979cf61544edd2989abe3f6",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "CUSTOMER_PURCHASE_CHOICE"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "APPLIED",
+                    "parentProductUnits": 2,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 2,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 998000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 49900,
+                  "grandTotalVnd": 978100,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:1:24d588e8e3ec730a8b64f3c51af82a832a3033e5019e6006c6bc7fbaf574709c",
+                  "recipient": "24d588e8e3ec730a8b64f3c51af82a832a3033e5019e6006c6bc7fbaf574709c"
+                }
+              }
+            },
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "fe50fc6beb882d49dc03c2500947ebbf5a858ec1a49c8133d48ee18bf463a6b5",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "6359f4e7040dad1efadab8ff14e16c8fca11d28b4979cf61544edd2989abe3f6",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "6359f4e7040dad1efadab8ff14e16c8fca11d28b4979cf61544edd2989abe3f6",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "CUSTOMER_PURCHASE_CHOICE"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "APPLIED",
+                    "parentProductUnits": 2,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 2,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 998000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 49900,
+                  "grandTotalVnd": 978100,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:1:24d588e8e3ec730a8b64f3c51af82a832a3033e5019e6006c6bc7fbaf574709c",
+                  "recipient": "24d588e8e3ec730a8b64f3c51af82a832a3033e5019e6006c6bc7fbaf574709c"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "turn": 1,
+          "customer": "Lấy trắng em nhé.",
+          "terminal": {
+            "disposition": "NO_SEND",
+            "messages": [],
+            "images": [],
+            "reason": "HUMAN_OWNS_CONVERSATION"
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-2\\CONTROLS\\native\\native-50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c-turn-1.json",
+          "artifactHash": "9732f2813c878d5ded0fe7558ebf6ce986bebb429c0ade0d7f6d521760562db0",
+          "tools": []
+        },
+        {
+          "turn": 2,
+          "customer": "Cả ship hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "NO_SEND",
+            "messages": [],
+            "images": [],
+            "reason": "HUMAN_OWNS_CONVERSATION"
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-2\\CONTROLS\\native\\native-50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c-turn-2.json",
+          "artifactHash": "1b059c11201ee3aa9aaeb74f25d987fd446fbe0e33d68a003bbd40cbaee97d3e",
+          "tools": []
+        }
+      ]
+    },
+    {
+      "kind": "CONTROLS",
+      "batch": 3,
+      "caseId": "c-context-two-units",
+      "repetition": 3,
+      "localRepetition": 1,
+      "registrationHash": "59431fd2122174b334b218f04647db898ad1cc8e0ef8fd80e1a9f5d112354b73",
+      "slotId": "50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c",
+      "safetyFindings": [],
+      "turns": [
+        {
+          "turn": 0,
+          "customer": "Chị lấy hai áo Thạch Thảo size M, shop bớt thêm cho chị được không?",
+          "terminal": {
+            "disposition": "HANDOFF",
+            "messages": [],
+            "images": [],
+            "reason": "DEPENDENCY_FAILURE"
+          },
+          "codeReply": null,
+          "recovery": {
+            "originalDisposition": "FALLBACK",
+            "originalReason": "PROVIDER_ERROR"
+          },
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-3\\CONTROLS\\native\\native-50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c-turn-0.json",
+          "artifactHash": "756e0ce0b30307be62e8e9aa9a41c916b65487aaa7361e8e81bbe5730aa15122",
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "d015c86562bf3819290f5306283c365efec2e54d52947cfb804ebe771ac6d8eb",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "ce59d16fb21861d43b31c855baf56ce11af48de2af769dad8ed6f95e8c5ca4b4",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "ce59d16fb21861d43b31c855baf56ce11af48de2af769dad8ed6f95e8c5ca4b4",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "CUSTOMER_PURCHASE_CHOICE"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "APPLIED",
+                    "parentProductUnits": 2,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 2,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 998000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 49900,
+                  "grandTotalVnd": 978100,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:1:dab28b82706d887c6579cb916a6f22840af7baf815764338780cb957a00dbd9b",
+                  "recipient": "dab28b82706d887c6579cb916a6f22840af7baf815764338780cb957a00dbd9b"
+                }
+              }
+            },
+            {
+              "name": "select_product_media",
+              "status": "OK",
+              "reason": null,
+              "data": {}
+            },
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "d015c86562bf3819290f5306283c365efec2e54d52947cfb804ebe771ac6d8eb",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "ce59d16fb21861d43b31c855baf56ce11af48de2af769dad8ed6f95e8c5ca4b4",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "ce59d16fb21861d43b31c855baf56ce11af48de2af769dad8ed6f95e8c5ca4b4",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "CUSTOMER_PURCHASE_CHOICE"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "APPLIED",
+                    "parentProductUnits": 2,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 2,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 998000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 49900,
+                  "grandTotalVnd": 978100,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:1:dab28b82706d887c6579cb916a6f22840af7baf815764338780cb957a00dbd9b",
+                  "recipient": "dab28b82706d887c6579cb916a6f22840af7baf815764338780cb957a00dbd9b"
+                }
+              }
+            },
+            {
+              "name": "select_product_media",
+              "status": "OK",
+              "reason": null,
+              "data": {}
+            }
+          ]
+        },
+        {
+          "turn": 1,
+          "customer": "Lấy trắng em nhé.",
+          "terminal": {
+            "disposition": "NO_SEND",
+            "messages": [],
+            "images": [],
+            "reason": "HUMAN_OWNS_CONVERSATION"
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-3\\CONTROLS\\native\\native-50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c-turn-1.json",
+          "artifactHash": "bd9b8d2e28633e4b7e20bbe504488a85285e598872335ac05b5e058dc0e87bce",
+          "tools": []
+        },
+        {
+          "turn": 2,
+          "customer": "Cả ship hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "NO_SEND",
+            "messages": [],
+            "images": [],
+            "reason": "HUMAN_OWNS_CONVERSATION"
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-3\\CONTROLS\\native\\native-50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c-turn-2.json",
+          "artifactHash": "7ce346746db3f176504c8991a18009f4d81eb61c20becc42baa51e82f2acf60b",
+          "tools": []
+        }
+      ]
+    },
+    {
+      "kind": "CONTROLS",
+      "batch": 4,
+      "caseId": "c-context-two-units",
+      "repetition": 4,
+      "localRepetition": 1,
+      "registrationHash": "be424c780d5ee63886e988959c00bfbc6c40d0a65c0861a5510394bc4d3b6b8e",
+      "slotId": "50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c",
+      "safetyFindings": [],
+      "turns": [
+        {
+          "turn": 0,
+          "customer": "Chị lấy hai áo Thạch Thảo size M, shop bớt thêm cho chị được không?",
+          "terminal": {
+            "disposition": "HANDOFF",
+            "messages": [],
+            "images": [],
+            "reason": "DEPENDENCY_FAILURE"
+          },
+          "codeReply": null,
+          "recovery": {
+            "originalDisposition": "FALLBACK",
+            "originalReason": "PROVIDER_ERROR"
+          },
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-4\\CONTROLS\\native\\native-50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c-turn-0.json",
+          "artifactHash": "b508a2c334e13b39f357a8f45956e57aa3b5f44cbdd5f8b433a0a3f152bc0c12",
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "971b1cd91c944474c106272574d95b58bdfea5fddc9ce225f1c1ddc944d18635",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "ddd241a998788e520988031c3cdb56e0ba69209e5ca080d9bc0f79c64b36e2e3",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "ddd241a998788e520988031c3cdb56e0ba69209e5ca080d9bc0f79c64b36e2e3",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "CUSTOMER_PURCHASE_CHOICE"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "APPLIED",
+                    "parentProductUnits": 2,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 2,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 998000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 49900,
+                  "grandTotalVnd": 978100,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:1:d39fed3216362de24953837e857b43d81c164fc139a75280eaf97cd8cfe1744b",
+                  "recipient": "d39fed3216362de24953837e857b43d81c164fc139a75280eaf97cd8cfe1744b"
+                }
+              }
+            },
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "971b1cd91c944474c106272574d95b58bdfea5fddc9ce225f1c1ddc944d18635",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "ddd241a998788e520988031c3cdb56e0ba69209e5ca080d9bc0f79c64b36e2e3",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "ddd241a998788e520988031c3cdb56e0ba69209e5ca080d9bc0f79c64b36e2e3",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "CUSTOMER_PURCHASE_CHOICE"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "APPLIED",
+                    "parentProductUnits": 2,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 2,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 998000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 49900,
+                  "grandTotalVnd": 978100,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:1:d39fed3216362de24953837e857b43d81c164fc139a75280eaf97cd8cfe1744b",
+                  "recipient": "d39fed3216362de24953837e857b43d81c164fc139a75280eaf97cd8cfe1744b"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "turn": 1,
+          "customer": "Lấy trắng em nhé.",
+          "terminal": {
+            "disposition": "NO_SEND",
+            "messages": [],
+            "images": [],
+            "reason": "HUMAN_OWNS_CONVERSATION"
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-4\\CONTROLS\\native\\native-50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c-turn-1.json",
+          "artifactHash": "8b11ae166cad70173861f3eb99edb4ad94267b573b84590a8c8274a7135094d8",
+          "tools": []
+        },
+        {
+          "turn": 2,
+          "customer": "Cả ship hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "NO_SEND",
+            "messages": [],
+            "images": [],
+            "reason": "HUMAN_OWNS_CONVERSATION"
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-4\\CONTROLS\\native\\native-50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c-turn-2.json",
+          "artifactHash": "525b87b9c898033c4789d559644e23663788ac76de99444f3826fb1ce69f81b1",
+          "tools": []
+        }
+      ]
+    },
+    {
+      "kind": "CONTROLS",
+      "batch": 5,
+      "caseId": "c-context-two-units",
+      "repetition": 5,
+      "localRepetition": 1,
+      "registrationHash": "5ee40650b21c96541af92323a92972c2bd9d25d50729e4427465f4e294cfbfb4",
+      "slotId": "50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c",
+      "safetyFindings": [],
+      "turns": [
+        {
+          "turn": 0,
+          "customer": "Chị lấy hai áo Thạch Thảo size M, shop bớt thêm cho chị được không?",
+          "terminal": {
+            "disposition": "HANDOFF",
+            "messages": [],
+            "images": [],
+            "reason": "DEPENDENCY_FAILURE"
+          },
+          "codeReply": null,
+          "recovery": {
+            "originalDisposition": "FALLBACK",
+            "originalReason": "PROVIDER_ERROR"
+          },
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-5\\CONTROLS\\native\\native-50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c-turn-0.json",
+          "artifactHash": "9d3c91d849e3110739aa64a2c432b490aa5215f0cc7bc2c9c18a6bf5bd0317f0",
+          "tools": [
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "fe9f9fe45041616821c366599cbabc4b86331f1b97f4bf788763141a4e8f9add",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "7932767522ce2924aa00b86f28da680145ecd2511135472bff7764bb705e4326",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "7932767522ce2924aa00b86f28da680145ecd2511135472bff7764bb705e4326",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "CUSTOMER_PURCHASE_CHOICE"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "APPLIED",
+                    "parentProductUnits": 2,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 2,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 998000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 49900,
+                  "grandTotalVnd": 978100,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:1:6e2c87f5af1bdf4e03c2b5a8f65a62e34a90dfdb753c7d0a1ebb423d939ff6b8",
+                  "recipient": "6e2c87f5af1bdf4e03c2b5a8f65a62e34a90dfdb753c7d0a1ebb423d939ff6b8"
+                }
+              }
+            },
+            {
+              "name": "record_negotiation",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "operationId": "fe9f9fe45041616821c366599cbabc4b86331f1b97f4bf788763141a4e8f9add",
+                "effect": "NEGOTIATION_REQUEST_RECORDED",
+                "cartQuote": null,
+                "supportEvaluation": {
+                  "status": "NOT_EVALUATED",
+                  "supportAvailability": "UNKNOWN",
+                  "pendingRef": "7932767522ce2924aa00b86f28da680145ecd2511135472bff7764bb705e4326",
+                  "pendingCommitted": true,
+                  "negotiationApplied": false
+                },
+                "pendingSupport": {
+                  "pendingRef": "7932767522ce2924aa00b86f28da680145ecd2511135472bff7764bb705e4326",
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "status": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "canApply": false,
+                  "evaluation": {
+                    "by": "CODE",
+                    "when": "MATCHING_CART_OPENS",
+                    "waitingFor": [
+                      "CUSTOMER_PURCHASE_CHOICE"
+                    ],
+                    "meaning": "Lời xin hỗ trợ giá cho món này đã lưu, chưa xét. Code tự xét một lần ngay khi món này vào giỏ; khách không cần hỏi lại. Được nói rằng lên giỏ xong shop sẽ xem hỗ trợ; chưa có kết quả nên không nói đã có, sẽ có hay không có ưu đãi thêm. waitingFor là phần còn chờ khách; không thêm giỏ chỉ để xét."
+                  }
+                }
+              }
+            },
+            {
+              "name": "quote_product",
+              "status": "OK",
+              "reason": null,
+              "data": {
+                "calculationBasis": "PRE_CART_POLICY",
+                "negotiatedPriceFloor": {
+                  "status": "NOT_ESTABLISHED",
+                  "amountVnd": null
+                },
+                "preCartQuote": {
+                  "kind": "PRE_CART_TOTAL_V1",
+                  "calculationBasis": "PRE_CART_POLICY",
+                  "appliesNegotiationReceipt": false,
+                  "benefitAuthorization": {
+                    "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+                    "status": "NOT_GRANTED",
+                    "grantedBenefits": [],
+                    "receiptRef": null
+                  },
+                  "negotiationAssessment": "NOT_EVALUATED",
+                  "negotiatedPriceFloor": {
+                    "status": "NOT_ESTABLISHED",
+                    "amountVnd": null
+                  },
+                  "standardPromotion": {
+                    "status": "APPLIED",
+                    "parentProductUnits": 2,
+                    "minimumParentProductUnits": 2,
+                    "discountBps": 500,
+                    "countingUnit": "PARENT_PRODUCT_UNIT",
+                    "setAndComboCountAsOne": true
+                  },
+                  "currentCartQuoteRef": null,
+                  "subjectRef": "SV2447",
+                  "offerType": "AO",
+                  "quantity": 2,
+                  "deliveryRegion": null,
+                  "subtotalVnd": 998000,
+                  "shippingFeeVnd": 30000,
+                  "discountTotalVnd": 49900,
+                  "grandTotalVnd": 978100,
+                  "priceHash": "98a1759431dbacecc804344391b096c1ecaf6181915e18904ae65f7e2c326870",
+                  "policyHash": "1887f465975ba0e38d6670b38902e1c86ad72678d3017d4b8888437ff826a24a",
+                  "cartStateHash": "18970d9915325447f7f7c48199a4992840cfad0fd988c7adb07c7789339d2baf",
+                  "bindingVersion": "commerce:1:6e2c87f5af1bdf4e03c2b5a8f65a62e34a90dfdb753c7d0a1ebb423d939ff6b8",
+                  "recipient": "6e2c87f5af1bdf4e03c2b5a8f65a62e34a90dfdb753c7d0a1ebb423d939ff6b8"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "turn": 1,
+          "customer": "Lấy trắng em nhé.",
+          "terminal": {
+            "disposition": "NO_SEND",
+            "messages": [],
+            "images": [],
+            "reason": "HUMAN_OWNS_CONVERSATION"
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-5\\CONTROLS\\native\\native-50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c-turn-1.json",
+          "artifactHash": "b376ac4b26bd33e26d9fdc354c549137eb4924272573b03eb8799054cd687fd9",
+          "tools": []
+        },
+        {
+          "turn": 2,
+          "customer": "Cả ship hết bao nhiêu em?",
+          "terminal": {
+            "disposition": "NO_SEND",
+            "messages": [],
+            "images": [],
+            "reason": "HUMAN_OWNS_CONVERSATION"
+          },
+          "codeReply": null,
+          "recovery": null,
+          "errorCode": null,
+          "verdict": null,
+          "currentQuote": null,
+          "pendingSupport": null,
+          "capturedArtifact": "batch-5\\CONTROLS\\native\\native-50427aa30b89a7aa73a12e776676241cdf77f988ea33807886b8faaf95e7169c-turn-2.json",
+          "artifactHash": "363279480206d451235029508703c7af0e09fa87df5943fa4a1496309cb0fe77",
+          "tools": []
+        }
+      ]
+    }
+  ]
+}

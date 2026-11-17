@@ -1,0 +1,75 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 1,
+      "recordedRequests": 1,
+      "cartCreated": false
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 1,
+      "recordedRequests": 1,
+      "cartCreated": false
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 1,
+      "recordedRequests": 1,
+      "cartCreated": false
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 1,
+      "recordedRequests": 1,
+      "cartCreated": false
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 1,
+      "recordedRequests": 1,
+      "cartCreated": false
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "turn": 0,
+      "recordedRequests": 1,
+      "cartCreated": false
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 2,
+      "turn": 0,
+      "recordedRequests": 1,
+      "cartCreated": false
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 3,
+      "turn": 0,
+      "recordedRequests": 1,
+      "cartCreated": false
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 4,
+      "turn": 0,
+      "recordedRequests": 1,
+      "cartCreated": false
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 5,
+      "turn": 0,
+      "recordedRequests": 1,
+      "cartCreated": false
+    }
+  ]
+}

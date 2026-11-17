@@ -1,9 +1,15 @@
-## Current — code xét hỗ trợ khi mở giỏ, báo giá khi draft bị chặn, giọng chat, 2026-11-16
+## Current — J4 ×5 và control hai áo ×5, 2026-11-18
+
+- [x] Refresh PR392 về `f5df827e`, build/lint, 400 test runtime và 138 test adapter qua. Chụp nguồn mới, khóa 10 hội thoại / 30 lượt và chạy đủ tất cả.
+- [x] Đối soát 25 native HTTP, 10 judge HTTP cùng 10 lỗi BUILD / 10 admission rejection có 0 HTTP. Cả J4 và control đạt 0/5. [Lịch sử, lỗi và cấu hình](../docs/specs/evidence/c3-j4-two-shirts-n5-20261118/REPORT.md).
+- [ ] Phase C STOP. Continuation quá giới hạn, adapter chặn tiếp bước chuyển sang final. Tự xét hỗ trợ khi mở giỏ và báo giá từ proof chưa được thực thi trong vòng model này.
+
+## Previous — code xét hỗ trợ khi mở giỏ, báo giá khi draft bị chặn, giọng chat, 2026-11-16
 
 - [x] Code xét lời xin hỗ trợ đã lưu trong `add_to_cart` mở giỏ; `pendingSupport.evaluation` thay `blockedReason`; lệnh lặp trả cùng shape; verdict chặn draft gửi tổng trước giỏ do code dựng. Prompt owner có bốn luật giọng, không ví dụ. [Chi tiết](../docs/specs/evidence/c3-sales-context-implementation-20261115/SUPPORT_EVALUATION_QUOTE_REPLY_20261116.md).
-- [ ] Chạy lại J4 ×5 và control hai áo ×5 trên world đã dùng; lưu violation của verifier và args tool vào audit.
+- [x] Đã chạy J4 ×5 và control hai áo ×5 ngày 18/11. World cũ hết freshness nên đã chụp nguồn mới, lưu violation và tool args vào audit.
 - [ ] Quyết định có mở rộng audit `qualification.mjs` cho `VERIFIED_QUOTE_REPLY` và thêm tiêu chí giọng riêng vào rubric judge hay không.
-- [ ] Phase C STOP cho tới khi có lượt model sau bản sửa này.
+- [ ] Phase C STOP sau lượt model 18/11 vì request continuation và guard final nêu trên.
 
 ## Previous — dữ kiện báo giá và bounded retry, 2026-11-16
 

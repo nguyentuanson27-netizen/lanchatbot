@@ -1,0 +1,355 @@
+{
+  "failures": [
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "0036b427-8aa0-4d51-8845-4d17ee19713c:owner:2",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureLayer": "PRE_DISPATCH",
+      "providerRequests": 0,
+      "telemetry": {
+        "providerRequests": 0,
+        "authRequests": 0,
+        "failureStage": "BUILD",
+        "failureCode": "OWNER_REQUEST_BOUND",
+        "requestBudget": {
+          "textFrameBytes": 65293,
+          "systemBytes": 22483,
+          "toolSchemaBytes": 18520,
+          "trustedFrameBytes": 18346,
+          "dialogueBytes": 10279,
+          "toolResponseBytes": 4284,
+          "signatureBytes": 4600,
+          "textLimitBytes": 65536,
+          "signatureLimitBytes": 65536,
+          "presentedTextFrameBytes": 66810
+        },
+        "requestBytes": 66810
+      }
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "92ab117c-1a0f-44cb-bfba-077989d5374c:owner:2",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureLayer": "PRE_DISPATCH",
+      "providerRequests": 0,
+      "telemetry": {
+        "providerRequests": 0,
+        "authRequests": 0,
+        "failureStage": "BUILD",
+        "failureCode": "OWNER_REQUEST_BOUND",
+        "requestBudget": {
+          "textFrameBytes": 65116,
+          "systemBytes": 22483,
+          "toolSchemaBytes": 18520,
+          "trustedFrameBytes": 18346,
+          "dialogueBytes": 11598,
+          "toolResponseBytes": 4284,
+          "signatureBytes": 6096,
+          "textLimitBytes": 65536,
+          "signatureLimitBytes": 65536,
+          "presentedTextFrameBytes": 66633
+        },
+        "requestBytes": 66633
+      }
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "08f582a2-1c94-4061-aa9e-b5da2855efb1:owner:2",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureLayer": "PRE_DISPATCH",
+      "providerRequests": 0,
+      "telemetry": {
+        "providerRequests": 0,
+        "authRequests": 0,
+        "failureStage": "BUILD",
+        "failureCode": "OWNER_REQUEST_BOUND",
+        "requestBudget": {
+          "textFrameBytes": 65119,
+          "systemBytes": 22483,
+          "toolSchemaBytes": 18520,
+          "trustedFrameBytes": 18346,
+          "dialogueBytes": 11757,
+          "toolResponseBytes": 4286,
+          "signatureBytes": 6252,
+          "textLimitBytes": 65536,
+          "signatureLimitBytes": 65536,
+          "presentedTextFrameBytes": 66636
+        },
+        "requestBytes": 66636
+      }
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "cda8a3d3-5e8e-44f1-b05e-b7bc24212672:owner:2",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureLayer": "PRE_DISPATCH",
+      "providerRequests": 0,
+      "telemetry": {
+        "providerRequests": 0,
+        "authRequests": 0,
+        "failureStage": "BUILD",
+        "failureCode": "OWNER_REQUEST_BOUND",
+        "requestBudget": {
+          "textFrameBytes": 65099,
+          "systemBytes": 22483,
+          "toolSchemaBytes": 18520,
+          "trustedFrameBytes": 18348,
+          "dialogueBytes": 11519,
+          "toolResponseBytes": 4285,
+          "signatureBytes": 6036,
+          "textLimitBytes": 65536,
+          "signatureLimitBytes": 65536,
+          "presentedTextFrameBytes": 66616
+        },
+        "requestBytes": 66616
+      }
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "a82eda5e-0302-4ede-8a68-534ebd609978:owner:2",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureLayer": "PRE_DISPATCH",
+      "providerRequests": 0,
+      "telemetry": {
+        "providerRequests": 0,
+        "authRequests": 0,
+        "failureStage": "BUILD",
+        "failureCode": "OWNER_REQUEST_BOUND",
+        "requestBudget": {
+          "textFrameBytes": 65291,
+          "systemBytes": 22483,
+          "toolSchemaBytes": 18520,
+          "trustedFrameBytes": 18348,
+          "dialogueBytes": 12243,
+          "toolResponseBytes": 4285,
+          "signatureBytes": 6568,
+          "textLimitBytes": 65536,
+          "signatureLimitBytes": 65536,
+          "presentedTextFrameBytes": 66808
+        },
+        "requestBytes": 66808
+      }
+    },
+    {
+      "batch": 1,
+      "kind": "CONTROLS",
+      "id": "bbe5a434-74c2-49fb-b4c5-25cfaac492f6:owner:2",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureLayer": "PRE_DISPATCH",
+      "providerRequests": 0,
+      "telemetry": {
+        "providerRequests": 0,
+        "authRequests": 0,
+        "failureStage": "BUILD",
+        "failureCode": "OWNER_REQUEST_BOUND",
+        "requestBudget": {
+          "textFrameBytes": 65022,
+          "systemBytes": 22483,
+          "toolSchemaBytes": 18509,
+          "trustedFrameBytes": 18668,
+          "dialogueBytes": 9985,
+          "toolResponseBytes": 4438,
+          "signatureBytes": 4888,
+          "textLimitBytes": 65536,
+          "signatureLimitBytes": 65536,
+          "presentedTextFrameBytes": 66539
+        },
+        "requestBytes": 66539
+      }
+    },
+    {
+      "batch": 2,
+      "kind": "CONTROLS",
+      "id": "5f673d66-2ade-49e6-9ff6-34a852f9c28a:owner:2",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureLayer": "PRE_DISPATCH",
+      "providerRequests": 0,
+      "telemetry": {
+        "providerRequests": 0,
+        "authRequests": 0,
+        "failureStage": "BUILD",
+        "failureCode": "OWNER_REQUEST_BOUND",
+        "requestBudget": {
+          "textFrameBytes": 65018,
+          "systemBytes": 22483,
+          "toolSchemaBytes": 18509,
+          "trustedFrameBytes": 18668,
+          "dialogueBytes": 12293,
+          "toolResponseBytes": 4436,
+          "signatureBytes": 7200,
+          "textLimitBytes": 65536,
+          "signatureLimitBytes": 65536,
+          "presentedTextFrameBytes": 66535
+        },
+        "requestBytes": 66535
+      }
+    },
+    {
+      "batch": 3,
+      "kind": "CONTROLS",
+      "id": "570ed041-3fd7-4057-9629-4578253d2a33:owner:2",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureLayer": "PRE_DISPATCH",
+      "providerRequests": 0,
+      "telemetry": {
+        "providerRequests": 0,
+        "authRequests": 0,
+        "failureStage": "BUILD",
+        "failureCode": "OWNER_REQUEST_BOUND",
+        "requestBudget": {
+          "textFrameBytes": 65824,
+          "systemBytes": 22483,
+          "toolSchemaBytes": 17290,
+          "trustedFrameBytes": 19244,
+          "dialogueBytes": 12910,
+          "toolResponseBytes": 5729,
+          "signatureBytes": 6368,
+          "textLimitBytes": 65536,
+          "signatureLimitBytes": 65536
+        },
+        "requestBytes": 65824
+      }
+    },
+    {
+      "batch": 4,
+      "kind": "CONTROLS",
+      "id": "11277930-37d1-4e7e-b06b-ce6f01184cf9:owner:2",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureLayer": "PRE_DISPATCH",
+      "providerRequests": 0,
+      "telemetry": {
+        "providerRequests": 0,
+        "authRequests": 0,
+        "failureStage": "BUILD",
+        "failureCode": "OWNER_REQUEST_BOUND",
+        "requestBudget": {
+          "textFrameBytes": 65022,
+          "systemBytes": 22483,
+          "toolSchemaBytes": 18509,
+          "trustedFrameBytes": 18668,
+          "dialogueBytes": 9901,
+          "toolResponseBytes": 4438,
+          "signatureBytes": 4804,
+          "textLimitBytes": 65536,
+          "signatureLimitBytes": 65536,
+          "presentedTextFrameBytes": 66539
+        },
+        "requestBytes": 66539
+      }
+    },
+    {
+      "batch": 5,
+      "kind": "CONTROLS",
+      "id": "125b0152-a395-4823-8e53-d3a71cd9591b:owner:2",
+      "errorCode": "OWNER_REQUEST_BOUND",
+      "failureLayer": "PRE_DISPATCH",
+      "providerRequests": 0,
+      "telemetry": {
+        "providerRequests": 0,
+        "authRequests": 0,
+        "failureStage": "BUILD",
+        "failureCode": "OWNER_REQUEST_BOUND",
+        "requestBudget": {
+          "textFrameBytes": 65018,
+          "systemBytes": 22483,
+          "toolSchemaBytes": 18509,
+          "trustedFrameBytes": 18668,
+          "dialogueBytes": 7925,
+          "toolResponseBytes": 4436,
+          "signatureBytes": 2832,
+          "textLimitBytes": 65536,
+          "signatureLimitBytes": 65536,
+          "presentedTextFrameBytes": 66535
+        },
+        "requestBytes": 66535
+      }
+    }
+  ],
+  "admissionRejections": [
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "0036b427-8aa0-4d51-8845-4d17ee19713c:owner:3",
+      "role": "OWNER",
+      "reason": "C_REGISTERED_ROLE_CAP_OR_PRIOR_FAILURE",
+      "providerRequests": 0
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "92ab117c-1a0f-44cb-bfba-077989d5374c:owner:3",
+      "role": "OWNER",
+      "reason": "C_REGISTERED_ROLE_CAP_OR_PRIOR_FAILURE",
+      "providerRequests": 0
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "08f582a2-1c94-4061-aa9e-b5da2855efb1:owner:3",
+      "role": "OWNER",
+      "reason": "C_REGISTERED_ROLE_CAP_OR_PRIOR_FAILURE",
+      "providerRequests": 0
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "cda8a3d3-5e8e-44f1-b05e-b7bc24212672:owner:3",
+      "role": "OWNER",
+      "reason": "C_REGISTERED_ROLE_CAP_OR_PRIOR_FAILURE",
+      "providerRequests": 0
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "a82eda5e-0302-4ede-8a68-534ebd609978:owner:3",
+      "role": "OWNER",
+      "reason": "C_REGISTERED_ROLE_CAP_OR_PRIOR_FAILURE",
+      "providerRequests": 0
+    },
+    {
+      "batch": 1,
+      "kind": "CONTROLS",
+      "id": "bbe5a434-74c2-49fb-b4c5-25cfaac492f6:owner:3",
+      "role": "OWNER",
+      "reason": "C_REGISTERED_ROLE_CAP_OR_PRIOR_FAILURE",
+      "providerRequests": 0
+    },
+    {
+      "batch": 2,
+      "kind": "CONTROLS",
+      "id": "5f673d66-2ade-49e6-9ff6-34a852f9c28a:owner:3",
+      "role": "OWNER",
+      "reason": "C_REGISTERED_ROLE_CAP_OR_PRIOR_FAILURE",
+      "providerRequests": 0
+    },
+    {
+      "batch": 3,
+      "kind": "CONTROLS",
+      "id": "570ed041-3fd7-4057-9629-4578253d2a33:owner:3",
+      "role": "OWNER",
+      "reason": "C_REGISTERED_ROLE_CAP_OR_PRIOR_FAILURE",
+      "providerRequests": 0
+    },
+    {
+      "batch": 4,
+      "kind": "CONTROLS",
+      "id": "11277930-37d1-4e7e-b06b-ce6f01184cf9:owner:3",
+      "role": "OWNER",
+      "reason": "C_REGISTERED_ROLE_CAP_OR_PRIOR_FAILURE",
+      "providerRequests": 0
+    },
+    {
+      "batch": 5,
+      "kind": "CONTROLS",
+      "id": "125b0152-a395-4823-8e53-d3a71cd9591b:owner:3",
+      "role": "OWNER",
+      "reason": "C_REGISTERED_ROLE_CAP_OR_PRIOR_FAILURE",
+      "providerRequests": 0
+    }
+  ]
+}
