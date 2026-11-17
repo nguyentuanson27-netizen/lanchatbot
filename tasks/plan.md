@@ -1,5 +1,7 @@
 ## Current — owner 70.000 byte, J4 ×5 và control hai áo ×5, 2026-11-18
 
+Đã review đủ 30 lượt và truy ngược wire về các phần meaning hướng dẫn kể quy trình, fallback `CUSTOMER_PURCHASE_CHOICE` thiếu căn cứ, cùng rubric còn nhận giọng máy móc nhẹ. [Phương án sửa văn phong](../docs/specs/c3-phase-c-sales-voice-source-fix-plan-20261118.md) ưu tiên sửa trạng thái UNKNOWN và projection owner trước, kiểm riêng bằng phép sàng lọc hữu hạn. Chưa triển khai phương án này.
+
 Theo yêu cầu owner, tăng text request owner lên 70.000 byte và chạy lại cùng world, models, prompt và bộ ca. Source `6cb3be51` đạt J4 5/5, control hai áo 5/5, đủ 30/30 lượt SEND_ELIGIBLE. Có 87 native và 10 judge request, 0 BUILD/admission/provider error. Mỗi control kích hoạt hỗ trợ đúng một lần và báo 948.100đ. [Bằng chứng và hội thoại](../docs/specs/evidence/c3-owner-bound-70000-20261118/REPORT.md). Qualification toàn Phase C chưa đo lại.
 
 ## Previous — J4 ×5 và control hai áo ×5 trên head PR392, 2026-11-18

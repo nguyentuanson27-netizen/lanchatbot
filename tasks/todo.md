@@ -1,5 +1,8 @@
 ## Current — owner 70.000 byte, 2026-11-18
 
+- [x] Review 30 lượt và captured wire, lập [phương án sửa văn phong](../docs/specs/c3-phase-c-sales-voice-source-fix-plan-20261118.md).
+- [ ] Triển khai P1/P2 theo phương án, kiểm hồi quy và sàng lọc trước native. Chưa chạy request nào theo kế hoạch văn phong.
+
 - [x] Tăng bound owner/manifest/approval lên 70.000 byte, test 70.000 nhận và 70.001 từ chối. 138 test Node, compile và lint/typecheck qua.
 - [x] Chạy lại đủ J4 ×5 và control ×5 trên `6cb3be51`, cùng world `dfbc11c7`. Cả hai đạt 5/5 theo chấm mù, 30/30 lượt SEND_ELIGIBLE, 0 handoff/NO_SEND. Native 87 request, judge 10 request. [Hội thoại và bằng chứng](../docs/specs/evidence/c3-owner-bound-70000-20261118/REPORT.md).
 - [x] Control cả năm lần mở đúng giỏ hai áo trắng M và xét hỗ trợ một lần, giữ đúng giảm 5% + miễn ship, tổng 948.100đ.
