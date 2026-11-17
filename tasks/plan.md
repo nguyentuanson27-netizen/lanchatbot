@@ -1,4 +1,8 @@
-## Current — J4 ×5 và control hai áo ×5 trên head PR392, 2026-11-18
+## Current — owner 70.000 byte, J4 ×5 và control hai áo ×5, 2026-11-18
+
+Theo yêu cầu owner, tăng text request owner lên 70.000 byte và chạy lại cùng world, models, prompt và bộ ca. Source `6cb3be51` đạt J4 5/5, control hai áo 5/5, đủ 30/30 lượt SEND_ELIGIBLE. Có 87 native và 10 judge request, 0 BUILD/admission/provider error. Mỗi control kích hoạt hỗ trợ đúng một lần và báo 948.100đ. [Bằng chứng và hội thoại](../docs/specs/evidence/c3-owner-bound-70000-20261118/REPORT.md). Qualification toàn Phase C chưa đo lại.
+
+## Previous — J4 ×5 và control hai áo ×5 trên head PR392, 2026-11-18
 
 Đã chạy source `f5df827e` với world mới `dfbc11c7`, đủ 10 hội thoại / 30 lượt terminal. Cả hai ca đạt 0/5 vì owner continuation vượt 65.536 byte, sau đó adapter chặn nhánh final. Có 25 native HTTP, 10 judge HTTP, 10 lỗi BUILD và 10 admission rejection. Phase C STOP. [Báo cáo và toàn bộ hội thoại](../docs/specs/evidence/c3-j4-two-shirts-n5-20261118/REPORT.md).
 

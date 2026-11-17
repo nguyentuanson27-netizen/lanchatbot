@@ -1,4 +1,11 @@
-## Current — J4 ×5 và control hai áo ×5, 2026-11-18
+## Current — owner 70.000 byte, 2026-11-18
+
+- [x] Tăng bound owner/manifest/approval lên 70.000 byte, test 70.000 nhận và 70.001 từ chối. 138 test Node, compile và lint/typecheck qua.
+- [x] Chạy lại đủ J4 ×5 và control ×5 trên `6cb3be51`, cùng world `dfbc11c7`. Cả hai đạt 5/5 theo chấm mù, 30/30 lượt SEND_ELIGIBLE, 0 handoff/NO_SEND. Native 87 request, judge 10 request. [Hội thoại và bằng chứng](../docs/specs/evidence/c3-owner-bound-70000-20261118/REPORT.md).
+- [x] Control cả năm lần mở đúng giỏ hai áo trắng M và xét hỗ trợ một lần, giữ đúng giảm 5% + miễn ship, tổng 948.100đ.
+- [ ] Qualification toàn Phase C chưa chạy lại. Giọng quy trình còn ở một số câu. Guard final sau lỗi BUILD vượt bound vẫn là giới hạn đã ghi nhận.
+
+## Previous — J4 ×5 và control hai áo ×5, 2026-11-18
 
 - [x] Refresh PR392 về `f5df827e`, build/lint, 400 test runtime và 138 test adapter qua. Chụp nguồn mới, khóa 10 hội thoại / 30 lượt và chạy đủ tất cả.
 - [x] Đối soát 25 native HTTP, 10 judge HTTP cùng 10 lỗi BUILD / 10 admission rejection có 0 HTTP. Cả J4 và control đạt 0/5. [Lịch sử, lỗi và cấu hình](../docs/specs/evidence/c3-j4-two-shirts-n5-20261118/REPORT.md).

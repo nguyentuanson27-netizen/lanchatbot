@@ -1,0 +1,669 @@
+{
+  "source": "6cb3be513905cf48230cc977b18832ab23bab8a3",
+  "records": [
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 0,
+      "generationId": "16842998-80d6-430d-91c4-1fd63c9b438f:owner:1",
+      "calls": [
+        {
+          "name": "add_to_cart",
+          "args": {
+            "quantity": 1,
+            "color": null,
+            "subjectRef": "SV2447",
+            "offerType": "AO",
+            "size": "M"
+          },
+          "id": "call_1522679467623415315"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 1,
+      "generationId": "18748dc6-5b80-4d1b-813f-4bb641acbdd4:owner:1",
+      "calls": [
+        {
+          "name": "record_negotiation",
+          "args": {
+            "intent": "PRICE_OBJECTION",
+            "action": "RECORD",
+            "offerType": "AO",
+            "subjectRef": "SV2447",
+            "sourceQuote": "Shop hỗ trợ thêm cho chị được chút nào không?"
+          },
+          "id": "call_724287643192981239"
+        },
+        {
+          "name": "quote_product",
+          "args": {
+            "subjectRef": "SV2447",
+            "quantity": 1,
+            "offerTypes": [
+              "AO"
+            ]
+          },
+          "id": "call_724287643192983504"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 2,
+      "generationId": "5a616338-fa2c-466a-adcf-6ffa2aab7704:owner:1",
+      "calls": [
+        {
+          "name": "quote_product",
+          "args": {
+            "subjectRef": "SV2447",
+            "offerTypes": [
+              "AO"
+            ],
+            "deliveryRegion": "Cần Thơ",
+            "quantity": 1
+          },
+          "id": "call_5434918226203654747"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 0,
+      "generationId": "4ca50e69-ed47-48f6-bcc5-9dba4793ef0e:owner:1",
+      "calls": [
+        {
+          "name": "add_to_cart",
+          "args": {
+            "color": null,
+            "subjectRef": "SV2447",
+            "offerType": "AO",
+            "quantity": 1,
+            "size": "M"
+          },
+          "id": "call_10458796099523175128"
+        },
+        {
+          "name": "select_product_media",
+          "args": {
+            "intent": "GENERIC",
+            "subjectRef": "SV2447"
+          },
+          "id": "call_10458796099523177303"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 1,
+      "generationId": "f635db3b-c909-40e3-86a1-458f25df1302:owner:1",
+      "calls": [
+        {
+          "name": "record_negotiation",
+          "args": {
+            "offerType": "AO",
+            "subjectRef": "SV2447",
+            "action": "RECORD",
+            "intent": "PRICE_OBJECTION",
+            "sourceQuote": "Shop hỗ trợ thêm cho chị được chút nào không?"
+          },
+          "id": "call_11932815646185740261"
+        },
+        {
+          "name": "quote_product",
+          "args": {
+            "quantity": 1,
+            "offerTypes": [
+              "AO"
+            ],
+            "subjectRef": "SV2447"
+          },
+          "id": "call_11932815646185739224"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 2,
+      "generationId": "45e10672-e461-470d-8d05-602cd216b73b:owner:1",
+      "calls": [
+        {
+          "name": "quote_product",
+          "args": {
+            "deliveryRegion": "Cần Thơ",
+            "offerTypes": [
+              "AO"
+            ],
+            "subjectRef": "SV2447",
+            "quantity": 1
+          },
+          "id": "call_16148280408581797425"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 0,
+      "generationId": "d591f438-1ecc-4503-a69a-f15e6cf9513a:owner:1",
+      "calls": [
+        {
+          "name": "add_to_cart",
+          "args": {
+            "offerType": "AO",
+            "quantity": 1,
+            "size": "M",
+            "color": null,
+            "subjectRef": "SV2447"
+          },
+          "id": "call_10152042199505324402"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 1,
+      "generationId": "aca07efc-cae7-4700-9531-3bd4f7b05f80:owner:1",
+      "calls": [
+        {
+          "name": "record_negotiation",
+          "args": {
+            "subjectRef": "SV2447",
+            "action": "RECORD",
+            "intent": "PRICE_OBJECTION",
+            "sourceQuote": "Shop hỗ trợ thêm cho chị được chút nào không?",
+            "offerType": "AO"
+          },
+          "id": "call_12387456973358474631"
+        },
+        {
+          "name": "quote_product",
+          "args": {
+            "offerTypes": [
+              "AO"
+            ],
+            "subjectRef": "SV2447",
+            "quantity": 1
+          },
+          "id": "call_12387456973358474012"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 2,
+      "generationId": "04a6f831-d4f7-43a0-ac15-30d42e1361b4:owner:1",
+      "calls": [
+        {
+          "name": "quote_product",
+          "args": {
+            "offerTypes": [
+              "AO"
+            ],
+            "deliveryRegion": "Cần Thơ",
+            "quantity": 1,
+            "subjectRef": "SV2447"
+          },
+          "id": "call_2460906566969122040"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 0,
+      "generationId": "4ccf2c5b-3642-46b4-9e7e-62a70e92803b:owner:1",
+      "calls": [
+        {
+          "name": "add_to_cart",
+          "args": {
+            "quantity": 1,
+            "offerType": "AO",
+            "size": "M",
+            "color": null,
+            "subjectRef": "SV2447"
+          },
+          "id": "call_7453182218534191606"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 1,
+      "generationId": "39def329-9494-42d8-be99-eb90af0a1022:owner:1",
+      "calls": [
+        {
+          "name": "record_negotiation",
+          "args": {
+            "action": "RECORD",
+            "subjectRef": "SV2447",
+            "intent": "PRICE_OBJECTION",
+            "offerType": "AO",
+            "sourceQuote": "Shop hỗ trợ thêm cho chị được chút nào không?"
+          },
+          "id": "call_9178454739528642187"
+        },
+        {
+          "name": "quote_product",
+          "args": {
+            "offerTypes": [
+              "AO"
+            ],
+            "quantity": 1,
+            "subjectRef": "SV2447"
+          },
+          "id": "call_9178454739528642252"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 2,
+      "generationId": "599a52ef-39ab-4770-a7d8-538fc4d0f4b7:owner:1",
+      "calls": [
+        {
+          "name": "quote_product",
+          "args": {
+            "subjectRef": "SV2447",
+            "offerTypes": [
+              "AO"
+            ],
+            "deliveryRegion": "Cần Thơ",
+            "quantity": 1
+          },
+          "id": "call_15053455177344061534"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 0,
+      "generationId": "f98df38c-9cba-44d1-9410-20f53c62e232:owner:1",
+      "calls": [
+        {
+          "name": "add_to_cart",
+          "args": {
+            "subjectRef": "SV2447",
+            "size": "M",
+            "color": null,
+            "offerType": "AO",
+            "quantity": 1
+          },
+          "id": "call_16516832784201728970"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 1,
+      "generationId": "09f076d8-d792-48cd-935d-0aaa366c5d69:owner:1",
+      "calls": [
+        {
+          "name": "record_negotiation",
+          "args": {
+            "sourceQuote": "Shop hỗ trợ thêm cho chị được chút nào không?",
+            "subjectRef": "SV2447",
+            "intent": "PRICE_OBJECTION",
+            "action": "RECORD",
+            "offerType": "AO"
+          },
+          "id": "call_446760135281946152"
+        },
+        {
+          "name": "quote_product",
+          "args": {
+            "offerTypes": [
+              "AO"
+            ],
+            "quantity": 1,
+            "subjectRef": "SV2447"
+          },
+          "id": "call_446760135281945889"
+        }
+      ]
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 2,
+      "generationId": "723e4026-90c1-435b-85ac-c940aab0e0d7:owner:1",
+      "calls": [
+        {
+          "name": "quote_product",
+          "args": {
+            "subjectRef": "SV2447",
+            "offerTypes": [
+              "AO"
+            ],
+            "quantity": 1,
+            "deliveryRegion": "Cần Thơ"
+          },
+          "id": "call_865178839106239550"
+        }
+      ]
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "turn": 0,
+      "generationId": "5dbe8d14-bd80-41a5-880b-31c0e52bd54f:owner:1",
+      "calls": [
+        {
+          "name": "record_negotiation",
+          "args": {
+            "offerType": "AO",
+            "action": "RECORD",
+            "intent": "PRICE_OBJECTION",
+            "sourceQuote": "Chị lấy hai áo Thạch Thảo size M, shop bớt thêm cho chị được không?",
+            "subjectRef": "SV2447"
+          },
+          "id": "call_8961006303095000238"
+        },
+        {
+          "name": "quote_product",
+          "args": {
+            "offerTypes": [
+              "AO"
+            ],
+            "quantity": 2,
+            "subjectRef": "SV2447"
+          },
+          "id": "call_8961006303095000529"
+        }
+      ]
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "turn": 1,
+      "generationId": "c6747966-97a7-49fe-af2e-8e5055659ea7:owner:1",
+      "calls": [
+        {
+          "name": "read_product",
+          "args": {
+            "subjectRef": "SV2447",
+            "offerType": "AO"
+          },
+          "id": "call_3673750890443773658"
+        },
+        {
+          "name": "add_to_cart",
+          "args": {
+            "offerType": "AO",
+            "color": "trắng",
+            "quantity": 2,
+            "subjectRef": "SV2447",
+            "size": "M"
+          },
+          "id": "call_3673750890443773829"
+        }
+      ]
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 2,
+      "turn": 0,
+      "generationId": "629f21b8-2cbc-4a5b-89d5-f7ae0fddf73e:owner:1",
+      "calls": [
+        {
+          "name": "record_negotiation",
+          "args": {
+            "sourceQuote": "Chị lấy hai áo Thạch Thảo size M, shop bớt thêm cho chị được không?",
+            "intent": "PRICE_OBJECTION",
+            "offerType": "AO",
+            "subjectRef": "SV2447",
+            "action": "RECORD"
+          },
+          "id": "call_11278232579788275492"
+        },
+        {
+          "name": "quote_product",
+          "args": {
+            "offerTypes": [
+              "AO"
+            ],
+            "subjectRef": "SV2447",
+            "quantity": 2
+          },
+          "id": "call_11278232579788272619"
+        },
+        {
+          "name": "select_product_media",
+          "args": {
+            "subjectRef": "SV2447",
+            "intent": "GENERIC"
+          },
+          "id": "call_11278232579788273842"
+        }
+      ]
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 2,
+      "turn": 1,
+      "generationId": "0c826c00-e3ac-4c9f-b2fb-967dbb642e5c:owner:1",
+      "calls": [
+        {
+          "name": "add_to_cart",
+          "args": {
+            "quantity": 2,
+            "color": "trắng",
+            "subjectRef": "SV2447",
+            "offerType": "AO",
+            "size": "M"
+          },
+          "id": "call_2624332090525883008"
+        }
+      ]
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 3,
+      "turn": 0,
+      "generationId": "95ee4e85-d829-4735-80be-89c213127df4:owner:1",
+      "calls": [
+        {
+          "name": "record_negotiation",
+          "args": {
+            "subjectRef": "SV2447",
+            "intent": "PRICE_OBJECTION",
+            "offerType": "AO",
+            "action": "RECORD",
+            "sourceQuote": "Chị lấy hai áo Thạch Thảo size M, shop bớt thêm cho chị được không?"
+          },
+          "id": "call_4867433219517915952"
+        },
+        {
+          "name": "quote_product",
+          "args": {
+            "quantity": 2,
+            "offerTypes": [
+              "AO"
+            ],
+            "subjectRef": "SV2447"
+          },
+          "id": "call_4867433219517915639"
+        },
+        {
+          "name": "select_product_media",
+          "args": {
+            "subjectRef": "SV2447",
+            "intent": "GENERIC"
+          },
+          "id": "call_4867433219517915326"
+        }
+      ]
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 3,
+      "turn": 1,
+      "generationId": "9a71c309-fb57-4b69-80db-263c3fd40026:owner:1",
+      "calls": [
+        {
+          "name": "read_product",
+          "args": {
+            "customerSelected": true,
+            "subjectRef": "SV2447",
+            "offerType": "AO"
+          },
+          "id": "call_6745167760326625648"
+        }
+      ]
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 3,
+      "turn": 1,
+      "generationId": "9a71c309-fb57-4b69-80db-263c3fd40026:owner:2",
+      "calls": [
+        {
+          "name": "add_to_cart",
+          "args": {
+            "size": "M",
+            "quantity": 2,
+            "subjectRef": "SV2447",
+            "color": "TRẮNG",
+            "offerType": "AO"
+          },
+          "id": "call_10257433098599728230"
+        }
+      ]
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 4,
+      "turn": 0,
+      "generationId": "4116ac10-ad1f-451e-80f7-c5d6c751399c:owner:1",
+      "calls": [
+        {
+          "name": "record_negotiation",
+          "args": {
+            "intent": "PRICE_OBJECTION",
+            "sourceQuote": "Chị lấy hai áo Thạch Thảo size M, shop bớt thêm cho chị được không?",
+            "offerType": "AO",
+            "action": "RECORD",
+            "subjectRef": "SV2447"
+          },
+          "id": "call_9450732813583710234"
+        },
+        {
+          "name": "quote_product",
+          "args": {
+            "quantity": 2,
+            "subjectRef": "SV2447",
+            "offerTypes": [
+              "AO"
+            ]
+          },
+          "id": "call_9450732813583711327"
+        }
+      ]
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 4,
+      "turn": 1,
+      "generationId": "44e9d26c-8faa-406a-a4fb-5cb0847484fa:owner:1",
+      "calls": [
+        {
+          "name": "read_product",
+          "args": {
+            "subjectRef": "SV2447",
+            "offerType": "AO"
+          },
+          "id": "call_18068748547636177911"
+        }
+      ]
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 4,
+      "turn": 1,
+      "generationId": "44e9d26c-8faa-406a-a4fb-5cb0847484fa:owner:2",
+      "calls": [
+        {
+          "name": "add_to_cart",
+          "args": {
+            "subjectRef": "SV2447",
+            "color": "TRẮNG",
+            "size": "M",
+            "offerType": "AO",
+            "quantity": 2
+          },
+          "id": "call_2376224624977636444"
+        }
+      ]
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 5,
+      "turn": 0,
+      "generationId": "67a84384-72bb-4e51-bddb-dc04b68665ca:owner:1",
+      "calls": [
+        {
+          "name": "record_negotiation",
+          "args": {
+            "offerType": "AO",
+            "sourceQuote": "Chị lấy hai áo Thạch Thảo size M, shop bớt thêm cho chị được không?",
+            "intent": "PRICE_OBJECTION",
+            "action": "RECORD",
+            "subjectRef": "SV2447"
+          },
+          "id": "call_3113459204060144483"
+        },
+        {
+          "name": "quote_product",
+          "args": {
+            "subjectRef": "SV2447",
+            "quantity": 2,
+            "offerTypes": [
+              "AO"
+            ]
+          },
+          "id": "call_3113459204060144582"
+        },
+        {
+          "name": "select_product_media",
+          "args": {
+            "intent": "GENERIC",
+            "subjectRef": "SV2447",
+            "deliveryMode": "REPLACE"
+          },
+          "id": "call_3113459204060144681"
+        }
+      ]
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 5,
+      "turn": 1,
+      "generationId": "a359973e-8f7f-42cc-b2e3-4e908703c611:owner:1",
+      "calls": [
+        {
+          "name": "add_to_cart",
+          "args": {
+            "subjectRef": "SV2447",
+            "quantity": 2,
+            "color": "trắng",
+            "size": "M",
+            "offerType": "AO"
+          },
+          "id": "call_10975316268308644430"
+        }
+      ]
+    }
+  ]
+}

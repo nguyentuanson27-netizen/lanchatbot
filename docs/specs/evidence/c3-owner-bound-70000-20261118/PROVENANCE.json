@@ -1,0 +1,281 @@
+{
+  "kind": "OWNER_REQUESTED_NATIVE_J4_AND_TWO_SHIRTS_N5",
+  "registeredAt": "2026-11-17T18:13:35.363Z",
+  "source": "6cb3be513905cf48230cc977b18832ab23bab8a3",
+  "worldHash": "dfbc11c72f413c1d4052c49cd574886e8ca413589841f44f5f6654687a5e0403",
+  "models": {
+    "sourceSha": "6cb3be513905cf48230cc977b18832ab23bab8a3",
+    "model": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "promptHash": "3d94082edc5412188ec922ce581304ccb8771c3e302dba6ba0bf29f7f494028c",
+    "openingMediaRule": {
+      "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2"
+    },
+    "contextPolicyHash": "27afc634be5ccde496e1613ad80c659f00911135fb24c60ea645d3481ef2f97a",
+    "toolContractHash": "a508463e7afe545c9d6b2109e75227d8193dd2aa937f5a0ade401ac6e823a595",
+    "assemblyHash": "3f183d7c6cd3f730adcbf9e61a413a4611c7a93c9bfa3365258b2ed7696e533c",
+    "runtimeHash": "b667e559084018a5c3054723300efc6fd59d2e589b8030ddbf6d779496a3da55",
+    "verifier": {
+      "model": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      },
+      "promptHash": "23e3315044995f2c5e8fc6ca0b242bc74e68b48f232fb7fefc8ce9528ca7d7bf",
+      "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+      "serializationHash": "8ea6aa4f2122e8d7bca1153a5057799bd87b3d7b8d307ce5e4f7647749c76661",
+      "bindingHash": "c98a52a23eea25f21877b9127a8650521e0c0abec60fa21d72e6a7b364564dab",
+      "boundsHash": "977a2cbd7041737b8de264bb0737d9bc6070fdac42348213f9236fff052b3953"
+    }
+  },
+  "ownerRequest": "Owner 2026-11-18: increase owner text bound to 70000 bytes and rerun J4 x5 and two-shirt control x5",
+  "repetitions": {
+    "c-20261028-j4": 5,
+    "c-context-two-units": 5
+  },
+  "maximumNativeGenerationRequests": 120,
+  "maximumJudgeGenerationRequests": 10,
+  "controlRepetitionAccounting": "FIVE_DISTINCT_REGISTRATIONS_EACH_EXISTING_CONTROL_N1",
+  "providerRequests": 0,
+  "worldCapture": {
+    "status": "CAPTURED",
+    "worldHash": "dfbc11c72f413c1d4052c49cd574886e8ca413589841f44f5f6654687a5e0403",
+    "products": 107,
+    "sourceSha": "f5df827e2b2a5b23a7129f26e9aee8bc81a52aa0",
+    "testSourceSupplement": {
+      "kind": "OWNER_APPROVED_ISOLATED_COLOR_V1",
+      "configurationHash": "379b0b825749e59132e63388a254357375d62fd11add4c15aa258925942422ef",
+      "publicSourceWorldHash": "6069da82d379c04e1fa46804479e1deeebb44adb2f2bdf7595a9fa1adedfff33",
+      "approvalRefs": [
+        "owner-white-shirt-test-assumption-20261104"
+      ],
+      "changedRows": [
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "S",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "M",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "L",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SV2447",
+          "componentSku": "SV2447-AO",
+          "size": "XL",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "S",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "M",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "L",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        },
+        {
+          "productId": "SQ2447",
+          "componentSku": "SV2447-AO",
+          "size": "XL",
+          "from": "__NO_COLOR__",
+          "to": "TRẮNG"
+        }
+      ],
+      "meaning": "Owner-approved test assumption; not verified physical stock colour or source publication."
+    },
+    "testSupportSupplement": {
+      "kind": "OWNER_APPROVED_TEST_FEEDBACK_HANDOFF_V1",
+      "configurationHash": "d4eee9dc3bd07ad198b3a28cb0416bba03c70f5e8b8d997c81e4f31fdd09fedf",
+      "approvalRef": "owner-feedback-handoff-test-supplement-20261104",
+      "baseWorldHash": "ce4c2d9c893c96e36b6204760178ef6ec268344ba792cc8d14ac86f72ce0ac87",
+      "handoffContentHash": "sha256:5154e9ea1e04200c8f92b9812ddcdae39d20e7cb508f96fafc7613ae3d833d74",
+      "handoffVersionId": "ee92f932-91ea-5490-a2a9-8e6338ae26f2",
+      "meaning": "Owner-approved isolated test feedback; not verified customer provenance. Handoff policy is active only in the test clone."
+    },
+    "testMediaSupplement": {
+      "kind": "OWNER_APPROVED_NEW_TEST_MEDIA_V1",
+      "configurationHash": "c07b0e453200180fab37ebcc3e42aa950326c8631f286bec48484a2f4a46f67d",
+      "approvalRef": "owner-new-test-media-SD023-20261104",
+      "baseWorldHash": "73f1b215443924d599baca940807111ac0d0ca51e5e88fa1b825c1a4931bc2c1",
+      "assets": [
+        {
+          "productId": "SD023",
+          "url": "https://content.pancake.vn/1/s3000x3000/f8/01/35/62/552cb23c4c117004dcb3ac97565a0dec3ed2a2f5371555e7f4ea0001-w:4000-h:6000-l:4576023-t:image/jpeg.jpeg",
+          "sha256": "4a4a5aba84f6bda6b3c392c401beea862877df16c81c6ba3af39e1b6bab7d3bc",
+          "checkedAt": "2026-11-11T09:23:57.805Z"
+        }
+      ],
+      "meaning": "New isolated test assets from actual canonical bytes; not a successful old-hash revalidation or live publication.",
+      "proofReuse": {
+        "previousWorldHash": "1c72f3156501c801e6720df0bc232f03639d235b29256f7b518d270535bd1902",
+        "policy": "REUSE_OWNER_APPROVED_TEST_ASSET_ORIGINAL_CHECK_TIME"
+      }
+    },
+    "providerRequests": 0,
+    "sourceWrites": 0
+  },
+  "jobs": [
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "externalRepetition": null,
+      "registrationHash": "f236fa0dae9bd68172feca0691eafeef11276011e30b8d5171b287d9a14f9847",
+      "seal": "418985eac0118a0b50dfe20a39c4a5dffd30118056a74c800d1045d4c8a40a15",
+      "selectedSlots": [
+        "3cb64d6dc32466f70efd4f7967c5dd887c74c460a976663a41ce6b085f94da7a",
+        "1d88cc21e1ce9c36a7c8838eb71f28ba6ee47ed849c84ee1702b9ad43170686e",
+        "c19885b53392eaf8a38b846d0e1aa4ef40eec48fb0e7ca6164f82f23b276c65f",
+        "b2d92fbb530ec3b8d1bbe25551fabef394f87666224f8b9a7046191365734583",
+        "6c26d68342e17f7cea675949690e37e56b6963ab3dadaa36079187e73e240d03"
+      ],
+      "turns": 15,
+      "maximumGenerationRequests": 60,
+      "source": "6cb3be513905cf48230cc977b18832ab23bab8a3"
+    },
+    {
+      "batch": 1,
+      "kind": "CONTROLS",
+      "externalRepetition": 1,
+      "registrationHash": "d6aaea8d53e039c9fafd04e7500a705ca33e029520379cadcf7754bb4cadbc04",
+      "seal": "418985eac0118a0b50dfe20a39c4a5dffd30118056a74c800d1045d4c8a40a15",
+      "selectedSlots": [
+        "cb7d998a176a3af53d6015ea23b7b82aa0351f0715e4efc1154ce2237c242e59"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "6cb3be513905cf48230cc977b18832ab23bab8a3"
+    },
+    {
+      "batch": 2,
+      "kind": "CONTROLS",
+      "externalRepetition": 2,
+      "registrationHash": "855a77555c36c529dd34b339ab7b35b91db01b9f58d12e18070359f8a8ff98f1",
+      "seal": "b077754052b0af0c881f81f895d8da13ddb4a8b0839d14ec9ca4814b3cb3f37e",
+      "selectedSlots": [
+        "cb7d998a176a3af53d6015ea23b7b82aa0351f0715e4efc1154ce2237c242e59"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "6cb3be513905cf48230cc977b18832ab23bab8a3"
+    },
+    {
+      "batch": 3,
+      "kind": "CONTROLS",
+      "externalRepetition": 3,
+      "registrationHash": "82c40f9dc3003920f04b44a1af5bee3f8f23ab005edf35a131cfd72846884c22",
+      "seal": "e4c7065a8679e8984fece6925b6e29f2bf23dcb6f8f98b90956622758d5a4a0d",
+      "selectedSlots": [
+        "cb7d998a176a3af53d6015ea23b7b82aa0351f0715e4efc1154ce2237c242e59"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "6cb3be513905cf48230cc977b18832ab23bab8a3"
+    },
+    {
+      "batch": 4,
+      "kind": "CONTROLS",
+      "externalRepetition": 4,
+      "registrationHash": "5069248dd503a294effc5d62a0b10677bdf6c8fd7526617aaf424d22e983d0d9",
+      "seal": "a138e4dda78b1848cd92cfb5e1e3d242b4ed483f825cf5dce1ca070624e0ac5f",
+      "selectedSlots": [
+        "cb7d998a176a3af53d6015ea23b7b82aa0351f0715e4efc1154ce2237c242e59"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "6cb3be513905cf48230cc977b18832ab23bab8a3"
+    },
+    {
+      "batch": 5,
+      "kind": "CONTROLS",
+      "externalRepetition": 5,
+      "registrationHash": "e52fbfc299288bd615206f44a3d0a6fb88cf2da4fc9d632b55ff5a2ce87b05de",
+      "seal": "135b0bc0f3d89b3760abffed2bcf0bcbe5daa14efc6314c0745cd73ab9429ffe",
+      "selectedSlots": [
+        "cb7d998a176a3af53d6015ea23b7b82aa0351f0715e4efc1154ce2237c242e59"
+      ],
+      "turns": 3,
+      "maximumGenerationRequests": 12,
+      "source": "6cb3be513905cf48230cc977b18832ab23bab8a3"
+    }
+  ],
+  "helperIdentity": {
+    "source": "6cb3be513905cf48230cc977b18832ab23bab8a3",
+    "observedAt": "2026-11-17T18:14:47.8436569Z",
+    "files": {
+      "audit.mjs": "f2bfe4e1ab203ab96967b279512b089dae08be8c19846072b3bbf33b0dd3d71c",
+      "BATCH_JUDGE_IDENTITY.json": "0c6e41344a5e7d2c9fa16594af27fbaf81ab7a526163cf37f4a60c408e8c630b",
+      "seal.mjs": "4a9a2d6bf34e797226e8246e579388f7861bf57cd57ad903b39868a56e026332",
+      "PREFLIGHT.json": "4a719469913328666e2c34e0d66c2f3c8855d8af33b68e527a5524f744409848",
+      "RUN_PLAN.json": "2c025c3767f6506454c514074160e9fa98f04235bc6f124d398d86f67fdd6b13",
+      "judge.mjs": "1c7c30bc22cedd9e8d654f6e69fed2f056262c0dc18e1bca83d6cd3cb917c68e"
+    }
+  }
+}

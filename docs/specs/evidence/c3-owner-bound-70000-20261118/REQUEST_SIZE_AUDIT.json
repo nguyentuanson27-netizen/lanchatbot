@@ -1,0 +1,579 @@
+{
+  "source": "6cb3be513905cf48230cc977b18832ab23bab8a3",
+  "ownerRequests": 57,
+  "abovePreviousTextBound": 10,
+  "maximumPresentedTextFrameBytes": 67360,
+  "textLimit": 70000,
+  "rows": [
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "16842998-80d6-430d-91c4-1fd63c9b438f:owner:1",
+      "requestBytes": 51981,
+      "presentedTextFrameBytes": 51027,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "16842998-80d6-430d-91c4-1fd63c9b438f:owner:2",
+      "requestBytes": 60342,
+      "presentedTextFrameBytes": 56604,
+      "textLimitBytes": 70000,
+      "signatureBytes": 2784,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "18748dc6-5b80-4d1b-813f-4bb641acbdd4:owner:1",
+      "requestBytes": 53056,
+      "presentedTextFrameBytes": 52102,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "18748dc6-5b80-4d1b-813f-4bb641acbdd4:owner:2",
+      "requestBytes": 73570,
+      "presentedTextFrameBytes": 66596,
+      "textLimitBytes": 70000,
+      "signatureBytes": 6020,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "5a616338-fa2c-466a-adcf-6ffa2aab7704:owner:1",
+      "requestBytes": 54771,
+      "presentedTextFrameBytes": 53817,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "5a616338-fa2c-466a-adcf-6ffa2aab7704:owner:2",
+      "requestBytes": 72204,
+      "presentedTextFrameBytes": 62426,
+      "textLimitBytes": 70000,
+      "signatureBytes": 8824,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "4ca50e69-ed47-48f6-bcc5-9dba4793ef0e:owner:1",
+      "requestBytes": 51981,
+      "presentedTextFrameBytes": 51027,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "4ca50e69-ed47-48f6-bcc5-9dba4793ef0e:owner:2",
+      "requestBytes": 69031,
+      "presentedTextFrameBytes": 58669,
+      "textLimitBytes": 70000,
+      "signatureBytes": 9408,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "f635db3b-c909-40e3-86a1-458f25df1302:owner:1",
+      "requestBytes": 53290,
+      "presentedTextFrameBytes": 52336,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "f635db3b-c909-40e3-86a1-458f25df1302:owner:2",
+      "requestBytes": 74032,
+      "presentedTextFrameBytes": 66838,
+      "textLimitBytes": 70000,
+      "signatureBytes": 6240,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "45e10672-e461-470d-8d05-602cd216b73b:owner:1",
+      "requestBytes": 54950,
+      "presentedTextFrameBytes": 53996,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "45e10672-e461-470d-8d05-602cd216b73b:owner:2",
+      "requestBytes": 69465,
+      "presentedTextFrameBytes": 62607,
+      "textLimitBytes": 70000,
+      "signatureBytes": 5904,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "d591f438-1ecc-4503-a69a-f15e6cf9513a:owner:1",
+      "requestBytes": 51981,
+      "presentedTextFrameBytes": 51027,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "d591f438-1ecc-4503-a69a-f15e6cf9513a:owner:2",
+      "requestBytes": 63640,
+      "presentedTextFrameBytes": 56606,
+      "textLimitBytes": 70000,
+      "signatureBytes": 6080,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "aca07efc-cae7-4700-9531-3bd4f7b05f80:owner:1",
+      "requestBytes": 53073,
+      "presentedTextFrameBytes": 52119,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "aca07efc-cae7-4700-9531-3bd4f7b05f80:owner:2",
+      "requestBytes": 75035,
+      "presentedTextFrameBytes": 66621,
+      "textLimitBytes": 70000,
+      "signatureBytes": 7460,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "04a6f831-d4f7-43a0-ac15-30d42e1361b4:owner:1",
+      "requestBytes": 54806,
+      "presentedTextFrameBytes": 53852,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "04a6f831-d4f7-43a0-ac15-30d42e1361b4:owner:2",
+      "requestBytes": 70771,
+      "presentedTextFrameBytes": 62461,
+      "textLimitBytes": 70000,
+      "signatureBytes": 7356,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "4ccf2c5b-3642-46b4-9e7e-62a70e92803b:owner:1",
+      "requestBytes": 51981,
+      "presentedTextFrameBytes": 51027,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "4ccf2c5b-3642-46b4-9e7e-62a70e92803b:owner:2",
+      "requestBytes": 64146,
+      "presentedTextFrameBytes": 56604,
+      "textLimitBytes": 70000,
+      "signatureBytes": 6588,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "39def329-9494-42d8-be99-eb90af0a1022:owner:1",
+      "requestBytes": 53085,
+      "presentedTextFrameBytes": 52131,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "39def329-9494-42d8-be99-eb90af0a1022:owner:2",
+      "requestBytes": 72846,
+      "presentedTextFrameBytes": 66632,
+      "textLimitBytes": 70000,
+      "signatureBytes": 5260,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "599a52ef-39ab-4770-a7d8-538fc4d0f4b7:owner:1",
+      "requestBytes": 54746,
+      "presentedTextFrameBytes": 53792,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "599a52ef-39ab-4770-a7d8-538fc4d0f4b7:owner:2",
+      "requestBytes": 70304,
+      "presentedTextFrameBytes": 62406,
+      "textLimitBytes": 70000,
+      "signatureBytes": 6944,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "f98df38c-9cba-44d1-9410-20f53c62e232:owner:1",
+      "requestBytes": 51981,
+      "presentedTextFrameBytes": 51027,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "f98df38c-9cba-44d1-9410-20f53c62e232:owner:2",
+      "requestBytes": 60724,
+      "presentedTextFrameBytes": 56606,
+      "textLimitBytes": 70000,
+      "signatureBytes": 3164,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "09f076d8-d792-48cd-935d-0aaa366c5d69:owner:1",
+      "requestBytes": 53072,
+      "presentedTextFrameBytes": 52118,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "09f076d8-d792-48cd-935d-0aaa366c5d69:owner:2",
+      "requestBytes": 74697,
+      "presentedTextFrameBytes": 66615,
+      "textLimitBytes": 70000,
+      "signatureBytes": 7128,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "723e4026-90c1-435b-85ac-c940aab0e0d7:owner:1",
+      "requestBytes": 54735,
+      "presentedTextFrameBytes": 53781,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "id": "723e4026-90c1-435b-85ac-c940aab0e0d7:owner:2",
+      "requestBytes": 71921,
+      "presentedTextFrameBytes": 62391,
+      "textLimitBytes": 70000,
+      "signatureBytes": 8576,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CONTROLS",
+      "id": "5dbe8d14-bd80-41a5-880b-31c0e52bd54f:owner:1",
+      "requestBytes": 52013,
+      "presentedTextFrameBytes": 51059,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CONTROLS",
+      "id": "5dbe8d14-bd80-41a5-880b-31c0e52bd54f:owner:2",
+      "requestBytes": 73729,
+      "presentedTextFrameBytes": 66535,
+      "textLimitBytes": 70000,
+      "signatureBytes": 6240,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CONTROLS",
+      "id": "c6747966-97a7-49fe-af2e-8e5055659ea7:owner:1",
+      "requestBytes": 52718,
+      "presentedTextFrameBytes": 51764,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CONTROLS",
+      "id": "c6747966-97a7-49fe-af2e-8e5055659ea7:owner:2",
+      "requestBytes": 69523,
+      "presentedTextFrameBytes": 61349,
+      "textLimitBytes": 70000,
+      "signatureBytes": 7220,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 1,
+      "kind": "CONTROLS",
+      "id": "6f05f9b4-bc86-426f-8a93-1b7fd733cc21:owner:1",
+      "requestBytes": 52716,
+      "presentedTextFrameBytes": 51762,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 2,
+      "kind": "CONTROLS",
+      "id": "629f21b8-2cbc-4a5b-89d5-f7ae0fddf73e:owner:1",
+      "requestBytes": 52013,
+      "presentedTextFrameBytes": 51059,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 2,
+      "kind": "CONTROLS",
+      "id": "629f21b8-2cbc-4a5b-89d5-f7ae0fddf73e:owner:2",
+      "requestBytes": 73531,
+      "presentedTextFrameBytes": 67341,
+      "textLimitBytes": 70000,
+      "signatureBytes": 5236,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 2,
+      "kind": "CONTROLS",
+      "id": "0c826c00-e3ac-4c9f-b2fb-967dbb642e5c:owner:1",
+      "requestBytes": 52926,
+      "presentedTextFrameBytes": 51972,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 2,
+      "kind": "CONTROLS",
+      "id": "0c826c00-e3ac-4c9f-b2fb-967dbb642e5c:owner:2",
+      "requestBytes": 64110,
+      "presentedTextFrameBytes": 57864,
+      "textLimitBytes": 70000,
+      "signatureBytes": 5292,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 2,
+      "kind": "CONTROLS",
+      "id": "5a66c7c6-e66a-48e6-9eea-6e7f3f0fe731:owner:1",
+      "requestBytes": 52935,
+      "presentedTextFrameBytes": 51981,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 3,
+      "kind": "CONTROLS",
+      "id": "95ee4e85-d829-4735-80be-89c213127df4:owner:1",
+      "requestBytes": 52013,
+      "presentedTextFrameBytes": 51059,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 3,
+      "kind": "CONTROLS",
+      "id": "95ee4e85-d829-4735-80be-89c213127df4:owner:2",
+      "requestBytes": 71285,
+      "presentedTextFrameBytes": 67335,
+      "textLimitBytes": 70000,
+      "signatureBytes": 2996,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 3,
+      "kind": "CONTROLS",
+      "id": "9a71c309-fb57-4b69-80db-263c3fd40026:owner:1",
+      "requestBytes": 53055,
+      "presentedTextFrameBytes": 52101,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 3,
+      "kind": "CONTROLS",
+      "id": "9a71c309-fb57-4b69-80db-263c3fd40026:owner:2",
+      "requestBytes": 62920,
+      "presentedTextFrameBytes": 55750,
+      "textLimitBytes": 70000,
+      "signatureBytes": 6216,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 3,
+      "kind": "CONTROLS",
+      "id": "9a71c309-fb57-4b69-80db-263c3fd40026:owner:3",
+      "requestBytes": 46320,
+      "presentedTextFrameBytes": 45366,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 3,
+      "kind": "CONTROLS",
+      "id": "7bc667d9-904e-42e2-9510-4c688a2ffdd8:owner:1",
+      "requestBytes": 53104,
+      "presentedTextFrameBytes": 52150,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 4,
+      "kind": "CONTROLS",
+      "id": "4116ac10-ad1f-451e-80f7-c5d6c751399c:owner:1",
+      "requestBytes": 52013,
+      "presentedTextFrameBytes": 51059,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 4,
+      "kind": "CONTROLS",
+      "id": "4116ac10-ad1f-451e-80f7-c5d6c751399c:owner:2",
+      "requestBytes": 71973,
+      "presentedTextFrameBytes": 66535,
+      "textLimitBytes": 70000,
+      "signatureBytes": 4484,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 4,
+      "kind": "CONTROLS",
+      "id": "44e9d26c-8faa-406a-a4fb-5cb0847484fa:owner:1",
+      "requestBytes": 52904,
+      "presentedTextFrameBytes": 51950,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 4,
+      "kind": "CONTROLS",
+      "id": "44e9d26c-8faa-406a-a4fb-5cb0847484fa:owner:2",
+      "requestBytes": 60319,
+      "presentedTextFrameBytes": 55453,
+      "textLimitBytes": 70000,
+      "signatureBytes": 3912,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 4,
+      "kind": "CONTROLS",
+      "id": "44e9d26c-8faa-406a-a4fb-5cb0847484fa:owner:3",
+      "requestBytes": 46005,
+      "presentedTextFrameBytes": 45051,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 4,
+      "kind": "CONTROLS",
+      "id": "1e7e986f-cf69-4617-bb3a-6932999487cf:owner:1",
+      "requestBytes": 52887,
+      "presentedTextFrameBytes": 51933,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 5,
+      "kind": "CONTROLS",
+      "id": "67a84384-72bb-4e51-bddb-dc04b68665ca:owner:1",
+      "requestBytes": 52013,
+      "presentedTextFrameBytes": 51059,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 5,
+      "kind": "CONTROLS",
+      "id": "67a84384-72bb-4e51-bddb-dc04b68665ca:owner:2",
+      "requestBytes": 72102,
+      "presentedTextFrameBytes": 67360,
+      "textLimitBytes": 70000,
+      "signatureBytes": 3788,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 5,
+      "kind": "CONTROLS",
+      "id": "a359973e-8f7f-42cc-b2e3-4e908703c611:owner:1",
+      "requestBytes": 53063,
+      "presentedTextFrameBytes": 52109,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 5,
+      "kind": "CONTROLS",
+      "id": "a359973e-8f7f-42cc-b2e3-4e908703c611:owner:2",
+      "requestBytes": 66141,
+      "presentedTextFrameBytes": 58003,
+      "textLimitBytes": 70000,
+      "signatureBytes": 7184,
+      "signatureLimitBytes": 65536
+    },
+    {
+      "batch": 5,
+      "kind": "CONTROLS",
+      "id": "dcf07c97-7fdb-4da3-8de9-c184ce5c1814:owner:1",
+      "requestBytes": 53116,
+      "presentedTextFrameBytes": 52162,
+      "textLimitBytes": 70000,
+      "signatureBytes": 0,
+      "signatureLimitBytes": 65536
+    }
+  ]
+}

@@ -1,0 +1,258 @@
+{
+  "source": "6cb3be513905cf48230cc977b18832ab23bab8a3",
+  "worldHash": "dfbc11c72f413c1d4052c49cd574886e8ca413589841f44f5f6654687a5e0403",
+  "cases": 2,
+  "attempts": 10,
+  "terminalTurns": 30,
+  "terminalCounts": {
+    "SEND_ELIGIBLE": 30
+  },
+  "sourceFreshnessClock": "ACTUAL_WALL_CLOCK",
+  "nativeProviderRequests": 87,
+  "judgeProviderRequests": 10,
+  "providerRegisteredAttempts": 87,
+  "localBuildRejections": 0,
+  "localAdmissionRejections": 0,
+  "completeRuntimeGenerationAttemptCount": 87,
+  "generationOutcomes": {
+    "OWNER:OK": 57,
+    "VERIFIER:OK": 30
+  },
+  "models": {
+    "sourceSha": "6cb3be513905cf48230cc977b18832ab23bab8a3",
+    "model": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "promptHash": "3d94082edc5412188ec922ce581304ccb8771c3e302dba6ba0bf29f7f494028c",
+    "openingMediaRule": {
+      "version": "FIRST_CONTACT_UNIQUE_OR_CART_IMAGE_V2"
+    },
+    "contextPolicyHash": "27afc634be5ccde496e1613ad80c659f00911135fb24c60ea645d3481ef2f97a",
+    "toolContractHash": "a508463e7afe545c9d6b2109e75227d8193dd2aa937f5a0ade401ac6e823a595",
+    "assemblyHash": "3f183d7c6cd3f730adcbf9e61a413a4611c7a93c9bfa3365258b2ed7696e533c",
+    "runtimeHash": "b667e559084018a5c3054723300efc6fd59d2e589b8030ddbf6d779496a3da55",
+    "verifier": {
+      "model": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      },
+      "promptHash": "23e3315044995f2c5e8fc6ca0b242bc74e68b48f232fb7fefc8ce9528ca7d7bf",
+      "schemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+      "serializationHash": "8ea6aa4f2122e8d7bca1153a5057799bd87b3d7b8d307ce5e4f7647749c76661",
+      "bindingHash": "c98a52a23eea25f21877b9127a8650521e0c0abec60fa21d72e6a7b364564dab",
+      "boundsHash": "977a2cbd7041737b8de264bb0737d9bc6070fdac42348213f9236fff052b3953"
+    }
+  },
+  "owner": {
+    "requests": 57,
+    "latencyP50Ms": 5603.253599999996,
+    "latencyP95Ms": 8448.13500000001,
+    "inputTokens": 774531,
+    "outputTokens": 58436,
+    "usageExposed": 57
+  },
+  "verifier": {
+    "requests": 30,
+    "latencyP50Ms": 7468.13949999999,
+    "latencyP95Ms": 12071.956500000015,
+    "inputTokens": 324869,
+    "outputTokens": 3020,
+    "usageExposed": 30
+  },
+  "providerErrorsOrTimeouts": 0,
+  "localBuildRequestBytes": {
+    "minimum": null,
+    "maximum": null,
+    "limit": 70000
+  },
+  "codeReplies": 0,
+  "continuityFrames": 5,
+  "testDatabasesDropped": true,
+  "voiceMeasuredOnCustomerVisibleTextOnly": true,
+  "cost": "NOT_EXPOSED",
+  "liveSends": 0,
+  "results": [
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE"
+      ],
+      "wholePass": true,
+      "voicePass": true,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Hỏi màu còn thiếu đúng lựa chọn tool trả về: Trắng có sẵn, Be đặt trước; giữ size M khách đã chọn. Yêu cầu hỗ trợ đã được ghi nhận nhưng chưa xét, lời đáp không hứa giảm giá hay freeship. Tổng một áo gửi Cần Thơ 499.000đ + 30.000đ = 529.000đ khớp quote thực, không áp giảm theo số lượng hoặc giả đã thanh toán. Giọng lịch sự, gọn; nhắc lại câu hỏi màu hợp lý vì khách chưa chọn."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE"
+      ],
+      "wholePass": true,
+      "voicePass": true,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Giọng tự nhiên, gọn và đúng mạch hỏi mua. Hỏi màu theo kết quả tool xác nhận áo M Trắng có sẵn, Be đặt trước; chưa tự chọn màu hay nhận đã lên giỏ. Yêu cầu hỗ trợ đã được lưu và chỉ hẹn xem xét sau khi đủ màu, không tự giảm giá hoặc freeship. Tổng một áo gửi Cần Thơ 499.000đ + 30.000đ = 529.000đ khớp quote thực tế; không áp ưu đãi số lượng hay nói khách đã thanh toán."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE"
+      ],
+      "wholePass": true,
+      "voicePass": true,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Trả lời gọn, đúng mạch mua áo lẻ size M; hỏi màu theo lựa chọn tool xác nhận, không tự thêm giỏ khi khách chưa chọn. Yêu cầu hỗ trợ đã được ghi nhận bằng receipt và chỉ hẹn xem xét, không hứa giảm tiền hay freeship. Tổng gửi Cần Thơ 499.000đ + 30.000đ = 529.000đ khớp quote cho một áo; không tự áp giảm theo số lượng, không nói khách đã thanh toán hay đơn đã chốt."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE"
+      ],
+      "wholePass": true,
+      "voicePass": true,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Hỏi màu đúng phần còn thiếu, phân biệt trắng có sẵn và be đặt trước theo kết quả tool, kèm ảnh hợp lệ. Yêu cầu hỗ trợ đã được lưu nhưng chưa xét; lời đáp chỉ hẹn xem xét khi lên giỏ, không tự giảm giá hay freeship. Báo đúng một áo AO size M 499.000đ + ship Cần Thơ 30.000đ = 529.000đ; không giả đã chốt đơn hoặc thanh toán. Giọng gọn, tự nhiên và bám nhu cầu."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE"
+      ],
+      "wholePass": true,
+      "voicePass": true,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Trả lời gọn, đúng mạch mua áo lẻ size M; hỏi màu còn thiếu theo kết quả tool, phân biệt trắng có sẵn và be đặt trước. Yêu cầu hỗ trợ đã được ghi nhận nhưng chưa xét, lời thoại chỉ hẹn shop xem chứ không tự hứa giảm hay freeship. Tổng gửi Cần Thơ đúng quote một áo: 499.000đ + 30.000đ ship = 529.000đ; không nhận đã vào giỏ, chốt đơn hay thanh toán khi chưa có."
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE"
+      ],
+      "wholePass": true,
+      "voicePass": true,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Lời đáp tự nhiên, đúng nhu cầu. Lượt đầu lưu yêu cầu hỗ trợ, chưa hứa cấp thêm ưu đãi; tổng 978.100đ gồm ship đúng ưu đãi số lượng cho hai áo. Khi khách chọn trắng, giỏ được tạo đúng 2 áo M trắng và pending được kích hoạt một lần theo receipt, hỗ trợ miễn ship đưa tổng về 948.100đ. Lượt cuối báo đúng tổng hiện hành, không cộng lại phí ship hay nhân sai đơn vị ưu đãi."
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 2,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE"
+      ],
+      "wholePass": true,
+      "voicePass": true,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Lượt đầu lưu pending đúng receipt, chưa hứa có hỗ trợ thêm; tổng 978.100đ chỉ gồm giảm 5% theo hai áo và ship. Khi khách chọn trắng, giỏ được tạo đúng 2 áo M trắng, pending kích hoạt một lần và miễn 30.000đ ship; hai lượt sau báo đúng tổng hiện hành 948.100đ, không nhận đã tạo đơn. Giọng lịch sự, dễ hiểu, dù cách nói về hệ thống xét ưu đãi hơi máy móc."
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 3,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE"
+      ],
+      "wholePass": true,
+      "voicePass": true,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Đã lưu yêu cầu hỗ trợ trước giỏ, không hứa cấp thêm ưu đãi; mức giảm 5% và tổng 978.100đ ban đầu đúng báo giá hai áo. Khi khách chọn trắng, giỏ được tạo đúng 2 áo M trắng và pending được kích hoạt một lần theo receipt, thêm miễn ship, đưa tổng về 948.100đ. Lượt cuối báo đúng tổng hiện hành, không áp dụng hỗ trợ lặp. Giọng lịch sự, dễ hiểu; cách nhắc hệ thống và hỏi chốt hơi khuôn nhưng không ảnh hưởng đáng kể."
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 4,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE"
+      ],
+      "wholePass": true,
+      "voicePass": true,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Đã lưu yêu cầu hỗ trợ trước giỏ, không hứa cấp thêm ưu đãi; mức giảm 5% và tổng 978.100đ ban đầu đúng báo giá hai áo. Khi khách chọn trắng, giỏ có đúng 2 áo AO size M, pending được kích hoạt một lần và receipt cấp miễn ship. Hai lượt sau báo đúng tổng hiện hành 948.100đ, không cộng lại phí ship hay nhân sai đơn vị ưu đãi. Lượt đầu hơi thiên về diễn giải hệ thống và hỏi xác nhận dư, nhưng vẫn rõ ràng; các lượt sau gọn, đúng ý khách."
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 5,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE"
+      ],
+      "wholePass": true,
+      "voicePass": true,
+      "factsPass": true,
+      "materialIssue": false,
+      "judgeReason": "Đã lưu yêu cầu hỗ trợ trước giỏ, không hứa cấp thêm ưu đãi; mức 5% và tổng tạm 978.100đ đúng báo giá hai áo. Khi khách chọn trắng, giỏ có đúng 2 áo M trắng, pending được kích hoạt một lần và receipt xác nhận miễn ship. Hai lượt sau báo đúng tổng hiện hành 948.100đ. Giọng lịch sự, rõ việc, dù lượt đầu hơi thiên về diễn giải hệ thống."
+    }
+  ]
+}
