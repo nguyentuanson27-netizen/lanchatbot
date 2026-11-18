@@ -125,17 +125,20 @@ async function dispatch(reg,seal,out){
   check(reg,seal);write(resolve(out,s.id+'-'+arm+'.started.json'),{id:s.id,arm,requestHash:s.armHashes[arm],startedAt:new Date().toISOString()});
   const result=await send(s.arms[arm],s.armHashes[arm]);assert([0,1].includes(result.telemetry.providerRequests));
   const status=result.status==='OK'&&result.output.kind!=='FINAL'?'TOOL_CALL_NOT_EXECUTED':result.status;
-  const row={id:s.id,arm,status,text:status==='OK'?result.output.text:null,telemetry:result.telemetry};
+  const row={id:s.id,arm,status,text:status==='OK'?result.output.text:null,telemetry:result.telemetry,
+   ...(result.stage?{stage:result.stage,errorCode:result.errorCode}:{})};
   write(resolve(out,s.id+'-'+arm+'.result.json'),{...row,raw:result.raw});rows.push(row);
   write(resolve(out,'RESULTS.json'),{registrationHash:seal,rows});
  }
 }
 async function judge(reg,results,out){
+ check(reg,results.registrationHash);
  const packets=packet(reg,results);assert(!existsSync(out));mkdirSync(out);write(resolve(out,'PACKETS.json'),packets);
  const role=read('apps/worker/evals/single-agent-commerce-read-only/manifest.json').models.verifier;
  assert.equal(role.model,'gpt-6.1-sol');assert.equal(role.effort,'high');inspectCodex();
  const ratings={},accounting=[];
  for(const p of packets){
+  check(reg,results.registrationHash);
   const {packetId,...data}=p;
   const request={model:'gpt-6.1-sol',reasoning:{effort:'high'},instructions:rubric,
    input:[{type:'message',role:'user',content:[{type:'input_text',text:JSON.stringify(data)}]}],tools:[],tool_choice:'none',parallel_tool_calls:false,store:false,stream:true,
