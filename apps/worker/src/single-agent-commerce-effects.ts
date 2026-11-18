@@ -564,7 +564,17 @@ export async function createCommerceEffectTools(input: {
   }
   // Establish current evidence before the owner/verifier sees this turn, including existing carts on later turns.
   await refreshSelections();
-  return { invoke, snapshot, async preparePendingSelections(admit,control){
+  return { invoke, snapshot,
+    preCartSupportEvidence(target,quotePolicy){
+      const pending=current.pendingNegotiation,at=input.clock().getTime();
+      if(uncertain||current.cart||current.negotiation||!pending||pending.status!=="PENDING"||pending.cartOpeningCommandId!==null||pending.activatedByCartId!==null||
+        pending.productId!==target.subjectRef||pending.offerId!==target.offerType||pending.salesEpisodeId!==input.identity.salesEpisodeId||
+        pending.customerProfileId!==input.identity.customerProfileId||pending.policyRef.id!==quotePolicy.policyBundleId||pending.policyRef.version!==quotePolicy.policyVersion||
+        pending.policyRef.contentHash!==computeBusinessContentHash(quotePolicy)||!Number.isFinite(at)||Date.parse(pending.expiresAt)<=at||
+        Date.parse(pending.recordedAt)>at||Date.parse(pending.sourceObservedAt)>at||
+        pending.pendingId!==createHash("sha256").update(pendingNegotiationIdPreimageV1(pending)).digest("hex"))return null;
+      return {pendingRef:pending.pendingId,sourceMessageId:pending.sourceMessageId,sourceObservedAt:pending.sourceObservedAt,expiresAt:pending.expiresAt};
+    },async preparePendingSelections(admit,control){
     const state=input.base.snapshot().state;
     if(!state.permission||!state.privacyAllowed||state.conversationOwner!=="BOT"||state.bindingVersion!==turnBinding||state.recipient!==turnRecipient)return 0;
     const pending=state.pendingPurchase as {lines:import("./single-agent-commerce-read-only.js").PendingPurchaseLine[]}|undefined;

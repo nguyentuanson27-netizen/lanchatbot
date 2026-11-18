@@ -12,6 +12,13 @@ const needsColour=(completeness="ALL_EXACT_TUPLES_FOR_QUERY")=>({status:"UNAVAIL
  choiceResolution:{kind:"NEEDS_CUSTOMER_CHOICE",field:"COLOR",evidenceHash:"e".repeat(64),completeness,optionRefs:["a".repeat(64),"b".repeat(64)]},
  preCartQuoteRequest:{tool:"quote_product",target:{subjectRef:"SV2447",offerTypes:["AO"]}}}});
 
+it("keeps a computed pre-cart support offer distinct from an applied benefit",()=>{
+ const supportEvaluation={status:"QUOTED",pendingRef:"pending",supportAvailability:"AVAILABLE",negotiationApplied:false,additionalDiscountVnd:30000};
+ const r={status:"OK",data:{calculationBasis:"PRE_CART_POLICY",appliesNegotiationReceipt:false,
+  preCartQuote:{grandTotalVnd:948100,supportEvaluation,benefitAuthorization:{status:"NOT_GRANTED",receiptRef:null}}}};
+ expect(presentPreCartQuoteResult(r)).toMatchObject({data:{supportEvaluation,preCartQuote:r.data.preCartQuote}});
+});
+
 describe("cart write result shown to the owner",()=>{
  it("states that nothing was added and names the colours to ask for",()=>{
   const raw=needsColour(),before=structuredClone(raw),view=presentCartWriteResult(raw);

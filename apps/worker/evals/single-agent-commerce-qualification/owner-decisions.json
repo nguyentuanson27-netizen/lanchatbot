@@ -184,7 +184,16 @@
       "promptsChanged": [
         "owner.vi.txt",
         "verifier.vi.txt (one sentence on pendingSupport.evaluation)"
-      ]
+      ],
+      "preCartQuoteAmendment": {
+        "approvedAt": "2026-11-18",
+        "ownerAnswer": "lý do chính là cơ chế hứa hỗ trợ nhưng khi lên giỏ mới có mức chính xác; làm đi",
+        "plan": "docs/specs/c3-phase-c-pre-cart-support-quote-plan-20261118.md",
+        "rule": "QUOTE_FIRST_AUTHENTICATED_OBJECTION_WITH_EXISTING_POLICY_BEFORE_CART_REVALIDATE_AT_COMMIT",
+        "quoteIsGrantReceipt": false,
+        "repeatedReadsMayEscalate": false,
+        "modelMeasurement": "NOT_RUN"
+      }
     },
     "D1_amendment_verifiedQuoteReply": {
       "status": "APPROVED_IMPLEMENTED",

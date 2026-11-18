@@ -1244,13 +1244,103 @@ describe("code evaluates a stored support request when the matching cart opens",
   expect((await s.tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}})).status).toBe("OK");
   return s;
  }
+ it.each([1,2])("quotes support before a cart without consuming evidence, then commits the same price for %s units",async quantity=>{
+  const s=await stored();await s.tools.invoke(record);
+  const before=structuredClone(s.current()),count=s.commits.length;
+  const tools=withExplicitQuoteTask({...s.tools,quotePriceEvidence:s.base.quotePriceEvidence!,availableTools:["read_product","request_handoff","add_to_cart"]},s.scope,false,async()=>s.policy.policy,()=>commerceNow);
+  const result=await tools.invoke({name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity}});
+  const total=quantity===1?499000:948100;
+  expect(result).toMatchObject({status:"OK",data:{appliesNegotiationReceipt:false,preCartQuote:{grandTotalVnd:total,
+   negotiationAssessment:"QUOTED",benefitAuthorization:{status:"NOT_GRANTED",receiptRef:null},
+   supportEvaluation:{status:"QUOTED",pendingRef:before.pendingNegotiation!.pendingId,additionalDiscountVnd:25000,negotiationApplied:false}}}});
+  expect(s.current()).toEqual(before);expect(s.commits).toHaveLength(count);
+  const original=tools.snapshot(),text="Cả ship hết số tiền shop vừa báo chị nhé.";
+  const binding=makeBinding("pre-cart-support",text,original);
+  const response={kind:"VERDICT" as const,result:{verdict:"PASS",violations:[]},binding};
+  expect(finalGate({response,expected:binding,current:await tools.readback(),finalDraft:text,now:commerceNow}).disposition).toBe("SEND_ELIGIBLE");
+  expect(s.current()).toEqual(before);expect(s.commits).toHaveLength(count);
+  expect((await tools.invoke({...s.add,args:{...s.add.args,quantity}})).status).toBe("OK");
+  expect(s.current().cart!.value.grandTotalVnd).toBe(total);
+  expect(s.current().negotiation?.consumedObjectionEvidenceIds).toHaveLength(1);
+  expect(tools.snapshot().effectReceipts.map(r=>r.effect)).toEqual(["CART_OPENED","NEGOTIATION_UPDATED"]);
+  const after=tools.snapshot(),afterBinding=makeBinding("after-cart",text,after);
+  expect(after.policyLiterals.some(p=>p.ref.startsWith("pre-cart-quote:"))).toBe(false);
+  expect(finalGate({expected:afterBinding,response:{...response,binding:afterBinding},current:await tools.readback(),finalDraft:text,now:commerceNow}).disposition).toBe("SEND_ELIGIBLE");
+ });
+ it("reuses admitted prices after a later record without stale NOT_EVALUATED state or another read",async()=>{
+  const s=await stored(),tools=withExplicitQuoteTask({...s.tools,quotePriceEvidence:s.base.quotePriceEvidence!,availableTools:["read_product","request_handoff","record_negotiation"]},s.scope,false,async()=>s.policy.policy,()=>commerceNow);
+  const result=await tools.invoke({name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity:1}});
+  expect(result).toMatchObject({data:{preCartQuote:{negotiationAssessment:"NOT_EVALUATED",grandTotalVnd:524000}}});
+  await tools.invoke(record);
+  const before=tools.snapshot(),pending=before.state.pendingSupport as {priceQuote:{grandTotalVnd:number}};
+  expect(pending.priceQuote.grandTotalVnd).toBe(499000);
+  expect(result).toMatchObject({data:{preCartQuote:{negotiationAssessment:"NOT_EVALUATED"}}}); // Historical result is immutable.
+  const text="Dạ cả ship là 499.000đ.",binding=makeBinding("later-record",text,before);
+  expect(finalGate({expected:binding,response:{kind:"VERDICT",binding,result:{verdict:"PASS",violations:[]}},current:await tools.readback(),finalDraft:text,now:commerceNow}).disposition).toBe("SEND_ELIGIBLE");
+  expect(tools.quoteTaskWork?.()).toEqual([{reservedUnits:1,readInvocations:1,selectionInvocations:0}]);
+  expect(s.commits).toHaveLength(1);expect(s.current().cart).toBeNull();
+ });
+ it("supports authenticated record then quote in one batch, without opening a cart",async()=>{
+  const s=await stored(),tools=withExplicitQuoteTask({...s.tools,quotePriceEvidence:s.base.quotePriceEvidence!,availableTools:["read_product","request_handoff","record_negotiation"]},s.scope,false,async()=>s.policy.policy,()=>commerceNow);
+  const result=await tools.invokeBatch([record,{name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity:1}}]);
+  expect(result.map(r=>r.status)).toEqual(["OK","OK"]);
+  expect(result[1]).toMatchObject({data:{preCartQuote:{grandTotalVnd:499000,negotiationAssessment:"QUOTED"}}});
+  expect(s.commits).toHaveLength(1);expect(s.current().cart).toBeNull();expect(s.current().negotiation).toBeNull();
+ });
+ it("recalculates the actual purchase quantity instead of committing an older quoted amount",async()=>{
+  const s=await stored();await s.tools.invoke(record);
+  const tools=withExplicitQuoteTask({...s.tools,quotePriceEvidence:s.base.quotePriceEvidence!,availableTools:["read_product","request_handoff","add_to_cart"]},s.scope,false,async()=>s.policy.policy,()=>commerceNow);
+  await tools.invoke({name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity:1}});
+  const before=tools.snapshot(),text="Tổng 499.000đ.",binding=makeBinding("old-quantity",text,before);
+  await tools.invoke({...s.add,args:{...s.add.args,quantity:2}});
+  expect(s.current().cart!.value.grandTotalVnd).toBe(948100);
+  expect(finalGate({expected:binding,response:{kind:"VERDICT",binding,result:{verdict:"PASS",violations:[]}},current:await tools.readback(),finalDraft:text,now:commerceNow}).disposition).not.toBe("SEND_ELIGIBLE");
+ });
+ it.each(["no-record","other-product","other-offer","policy-hash","episode","profile","expired","future"])("refuses a support quote without exact pending proof: %s",async mode=>{
+  const s=await stored();if(mode!=="no-record")await s.tools.invoke(record);
+  const p=structuredClone(s.policy.policy),target={subjectRef:"SM613",offerType:"DIRECT"};
+  if(mode==="other-product")target.subjectRef="OTHER";if(mode==="other-offer")target.offerType="AO";
+  if(mode==="policy-hash")p.shipping.defaultFeeVnd+=1;
+  if(["episode","profile","expired","future"].includes(mode)){
+   const state=structuredClone(s.current()),pending=state.pendingNegotiation!;
+   if(mode==="episode")pending.salesEpisodeId="60000000-0000-4000-8000-000000000099";
+   if(mode==="profile")pending.customerProfileId="30000000-0000-4000-8000-000000000099";
+   if(mode==="expired")pending.expiresAt=commerceNow.toISOString();
+   if(mode==="future")pending.sourceObservedAt=new Date(commerceNow.getTime()+1000).toISOString();
+   const {pendingNegotiationIdPreimageV1}=await import("@lana/contracts");const {createHash}=await import("node:crypto");
+   pending.pendingId=createHash("sha256").update(pendingNegotiationIdPreimageV1(pending)).digest("hex");
+   s.setCurrent(state);await s.tools.readback();
+  }
+  expect(s.tools.preCartSupportEvidence!(target,p)).toBeNull();
+ });
+ it.each(["cancel","replace-same-price","policy-same-version","expired"])("invalidates an old support quote after %s",async mode=>{
+  const s=await stored();await s.tools.invoke(record);
+  const tools=withExplicitQuoteTask({...s.tools,quotePriceEvidence:s.base.quotePriceEvidence!,availableTools:["read_product","request_handoff"]},s.scope,false,async()=>s.policy.policy,()=>commerceNow);
+  await tools.invoke({name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],quantity:1}});
+  const before=tools.snapshot(),text="Dạ cả phí giao hàng là 499.000đ chị nhé.",binding=makeBinding("quoted-support",text,before);
+  const response={kind:"VERDICT" as const,result:{verdict:"PASS",violations:[]},binding};
+  if(mode==="cancel")await s.tools.invoke({name:"cancel_pending_negotiation",args:{pendingRef:s.current().pendingNegotiation!.pendingId}});
+  if(mode==="replace-same-price"){
+   const state=structuredClone(s.current());state.pendingNegotiation!.sourceMessageId="replacement";
+   const {pendingNegotiationIdPreimageV1}=await import("@lana/contracts");const {createHash}=await import("node:crypto");
+   state.pendingNegotiation!.pendingId=createHash("sha256").update(pendingNegotiationIdPreimageV1(state.pendingNegotiation!)).digest("hex");
+   s.setCurrent(state);
+  }
+  if(mode==="policy-same-version")s.policy.policy.negotiation.finalConcession.fixedDiscountVnd+=1;
+  const current=await tools.readback(),now=mode==="expired"?new Date(s.current().pendingNegotiation!.expiresAt):commerceNow;
+  expect(finalGate({response,expected:binding,current,finalDraft:text,now}).disposition).not.toBe("SEND_ELIGIBLE");
+  if(mode==="replace-same-price"){
+   const old=JSON.parse(before.policyLiterals.find(p=>p.ref.startsWith("pre-cart-quote:"))!.text),updated=JSON.parse(current.policyLiterals.find(p=>p.ref.startsWith("pre-cart-quote:"))!.text);
+   expect(updated.grandTotalVnd).toBe(old.grandTotalVnd);expect(updated.supportEvaluation.pendingRef).not.toBe(old.supportEvaluation.pendingRef);
+  }
+ });
  it("tells owner and verifier the same next step and what the customer still has to choose, not a cart to create",async()=>{
   const s=await stored();
   expect((await s.tools.invoke(record)).status).toBe("OK");
   const view=s.tools.snapshot().state.pendingSupport as Record<string,unknown>;
   expect(view).toMatchObject({status:"NOT_EVALUATED",canApply:false,evaluation:{by:"CODE",when:"MATCHING_CART_OPENS",waitingForStatus:"UNKNOWN",waitingFor:[]}});
   expect(view).not.toHaveProperty("blockedReason");
-  expect((view.evaluation as {meaning:string}).meaning).toContain("Code tự xét một lần ngay khi món này vào giỏ");
+  expect((view.evaluation as {meaning:string}).meaning).not.toContain("lên giỏ xong shop sẽ xem hỗ trợ");
   // The colour the customer has not chosen for this exact item comes from the stored purchase note.
   const snapshot=s.base.snapshot;
   s.base.snapshot=()=>{const c=snapshot();c.state.pendingPurchase={lines:[{productId:"SM613",offerType:"DIRECT",size:"M",color:null,quantity:1,missing:"COLOR"},

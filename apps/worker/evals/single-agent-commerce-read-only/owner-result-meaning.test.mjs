@@ -13,6 +13,26 @@ const request=(name,data,final=false)=>({generationId:'meaning:1',instructions:'
  toolsAllowed:!final,toolBudget:{callsRemaining:final?0:2,roundsRemaining:final?0:1},availableTools:['read_policy'],signal:new AbortController().signal});
 const result=(wire,final)=>final?readCompactSections(wire.contents[0]).find(s=>s.label==='Lịch sử công cụ đã hoàn tất').value[0].completedToolTurns.at(-1).parts[0].functionResponse.response.data:
  wire.contents.at(-1).parts[0].functionResponse.response.data;
+for(const final of [false,true])test('pre-cart support quote survives both owner surfaces without becoming a grant '+final,()=>{
+ const supportEvaluation={status:'QUOTED',pendingRef:'a'.repeat(64),supportAvailability:'AVAILABLE',negotiationApplied:false,additionalDiscountVnd:30000};
+ const quote={kind:'PRE_CART_TOTAL_V1',subjectRef:'P',offerType:'AO',quantity:2,grandTotalVnd:948100,
+  negotiationAssessment:'QUOTED',supportEvaluation,benefitAuthorization:{status:'NOT_GRANTED',receiptRef:null}};
+ const data={calculationBasis:'PRE_CART_POLICY',appliesNegotiationReceipt:false,preCartQuote:quote};
+ const r=request('quote_product',data,final);
+ r.context.state.pendingSupport={status:'QUOTED',pendingRef:supportEvaluation.pendingRef,priceQuote:{grandTotalVnd:948100},supportEvaluation};
+ r.context.policyLiterals=[{ref:'pre-cart-quote:hash',text:JSON.stringify(quote)}];
+ const raw=structuredClone(r.contents),trusted=structuredClone(r.context),wire=buildGeminiCommerceRequest(r),view=result(wire,final);
+ assert.deepEqual(view.supportEvaluation,supportEvaluation);assert.deepEqual(view.preCartQuote,quote);
+ assert.equal(view.appliesNegotiationReceipt,false);assert.equal(view.preCartQuote.benefitAuthorization.receiptRef,null);
+ assert.deepEqual(r.contents,raw);assert.deepEqual(r.context,trusted);
+ if(!final)assert.deepEqual(wire.contents[2],raw[1]);
+ const header=readCompactSections(wire.contents[0]).find(s=>s.label==='Hồ sơ và trạng thái hiện tại').value;
+ assert.equal(header.pendingSupport.status,'QUOTED');assert.deepEqual(header.pendingSupport.supportEvaluation,supportEvaluation);
+ const manifest=JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url),'utf8'));
+ const verifier=buildVerifierRequest(manifest,{instructions:'Verify',finalDraft:'Dạ cả ship là 948.100đ.',trusted:r.context,
+  binding:makeBinding('support-quote','Dạ cả ship là 948.100đ.',r.context),latest:'Shop bớt thêm được không?',history:[]});
+ assert.deepEqual(JSON.parse(verifier.input[0].content[0].text).trusted,r.context);
+});
 for(const final of [false,true])test(`owner groups exact current fit and unknown negotiation in ${final?'final completed trace':'native continuation'} without changing raw or signed parts`,()=>{
  const data={status:'RECOMMENDED',action:'REPLY',fitScope:{kind:'COMPONENT',parentProductId:'P',componentProductId:'C',componentRole:'PANTS'},
   sizeSourceHash:'a'.repeat(64),missingInputs:[],recommendedSizes:[{componentProductId:'C',componentRole:'PANTS',size:'M'}],inputFitPreference:null,alternativeSizes:[]};

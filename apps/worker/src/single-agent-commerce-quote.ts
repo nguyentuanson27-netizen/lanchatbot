@@ -87,25 +87,34 @@ export function withExplicitQuoteTask(base:CommerceTools,scope:CommerceScope,fir
   })?values:[];
  };
  const quoteRequests=new Map<string,QuoteRequest>(),quoteLiterals=new Map<string,ReturnType<CommerceTools["snapshot"]>["policyLiterals"][number]>();
- async function total(current:ReturnType<CommerceTools["snapshot"]>,q:QuoteRequest){
-  if(!policy)return null;
+ const quotePolicies=new Map<string,PolicyBundleV1>(),quoteCartStates=new Map<string,string>();
+ const cartStateHash=(c:TrustedContext)=>commerceHash({binding:c.cartBinding??null,items:c.state.cartItems??[]});
+ function calculate(current:ReturnType<CommerceTools["snapshot"]>,q:QuoteRequest,p:PolicyBundleV1){
   const key=JSON.stringify([q.subjectRef,q.offerType]);quoteLiterals.delete(key);
-  const p=await policy();
   const candidates=sourcePrices({subjectRef:q.subjectRef,offerTypes:[q.offerType],...(q.color?{color:q.color}:{})}).map(v=>v.claim);
   if(candidates.length!==1)return null;
   const price=candidates[0]!,at=clock(),kind=offerKind(q.offerType,1);
   if(!price.provenance.expiresAt||Date.parse(price.provenance.expiresAt)<=at.getTime())return null;
-  const result=evaluateShopPolicy({policy:p,lines:[{lineId:"pre-cart-selection",shopId:scope.shopId,parentProductId:q.subjectRef,offerKind:kind,quantity:q.quantity,
+  const lines=[{lineId:"pre-cart-selection",shopId:scope.shopId,parentProductId:q.subjectRef,offerKind:kind,quantity:q.quantity,
    priceEvidence:{authority:"PANCAKE_POS",shopId:scope.shopId,parentProductId:q.subjectRef,offerKind:kind,sourceVersion:price.provenance.sourceVersion,
     // The calculator's canonical POS policy uses 48h from the original source
     // clock; the quote proof below retains the stricter runtime claim expiry.
     observedAt:price.provenance.observedAt,expiresAt:new Date(Date.parse(price.provenance.observedAt)+PRICE_INVENTORY_FRESH_FOR_SECONDS*1000).toISOString(),
-    freshForSeconds:PRICE_INVENTORY_FRESH_FOR_SECONDS,unitPriceVnd:price.value.amountVnd}}],
-   closingEvidence:{previousState:null,purchaseReady:false,priceObjectionCount:0,secondConcessionAlreadyApplied:false},now:at,authorizationNow:at});
+    freshForSeconds:PRICE_INVENTORY_FRESH_FOR_SECONDS,unitPriceVnd:price.value.amountVnd}}] as const;
+  const closing={previousState:null,purchaseReady:false,priceObjectionCount:0,secondConcessionAlreadyApplied:false} as const;
+  const standard=evaluateShopPolicy({policy:p,lines,closingEvidence:closing,now:at,authorizationNow:at});
+  if(standard.status!=="AUTHORIZED")return null;
+  const support=!current.cartBinding&&!(Array.isArray(current.state.cartItems)&&current.state.cartItems.length)?base.preCartSupportEvidence?.(q,p):null;
+  // The first pending objection is evaluated by the same policy used by activation. Reads never advance its tier.
+  const result=support?evaluateShopPolicy({policy:p,lines,closingEvidence:{...closing,priceObjectionCount:1},now:at,authorizationNow:at}):standard;
   if(result.status!=="AUTHORIZED")return null;
+  const supportEvaluation=support?{status:"QUOTED" as const,pendingRef:support.pendingRef,sourceMessageId:support.sourceMessageId,
+   supportAvailability:result.grandTotalVnd<standard.grandTotalVnd?"AVAILABLE":"NOT_AVAILABLE",negotiationApplied:false,
+   additionalDiscountVnd:standard.grandTotalVnd-result.grandTotalVnd,grandTotalBeforeVnd:standard.grandTotalVnd,grandTotalAfterVnd:result.grandTotalVnd}:undefined;
   const evidence={kind:"PRE_CART_TOTAL_V1",calculationBasis:"PRE_CART_POLICY",appliesNegotiationReceipt:false,
    benefitAuthorization:{scope:"ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",status:"NOT_GRANTED",grantedBenefits:[],receiptRef:null},
-   negotiationAssessment:"NOT_EVALUATED",
+   negotiationAssessment:support?"QUOTED":"NOT_EVALUATED",
+   ...(supportEvaluation?{supportEvaluation,quotedAdjustments:result.adjustments}:{}),
    negotiatedPriceFloor:unestablishedPriceFloor(),
    standardPromotion:{status:result.adjustments.some(a=>a.ruleId==="SHOP_WIDE_MULTI_ITEM_PERCENT")?"APPLIED":"NOT_APPLIED",
     parentProductUnits:result.parentProductUnitCount,
@@ -113,12 +122,33 @@ export function withExplicitQuoteTask(base:CommerceTools,scope:CommerceScope,fir
     countingUnit:p.multiItemOffer.countingUnit,setAndComboCountAsOne:p.multiItemOffer.setAndComboCountAsOne},
    currentCartQuoteRef:currentCartRef(current,q),...q,subtotalVnd:result.subtotalVnd,shippingFeeVnd:result.shippingFeeVnd,
    discountTotalVnd:result.discountTotalVnd,grandTotalVnd:result.grandTotalVnd,priceHash:commerceHash(price),policyHash:commerceHash(p),
-   cartStateHash:commerceHash({binding:current.cartBinding??null,items:current.state.cartItems??[]}),bindingVersion:current.state.bindingVersion,recipient:current.state.recipient};
-  const hash=commerceHash(evidence),expiry=Math.min(Date.parse(price.provenance.expiresAt!),p.effectiveUntil?Date.parse(p.effectiveUntil):Infinity);
+   cartStateHash:cartStateHash(current),bindingVersion:current.state.bindingVersion,recipient:current.state.recipient};
+  const hash=commerceHash(evidence),expiry=Math.min(Date.parse(price.provenance.expiresAt!),p.effectiveUntil?Date.parse(p.effectiveUntil):Infinity,support?Date.parse(support.expiresAt):Infinity);
   quoteLiterals.set(key,{ref:`pre-cart-quote:${hash}`,text:JSON.stringify(evidence),sourceVersion:hash,observedAt:price.provenance.observedAt,expiresAt:new Date(expiry).toISOString()});
   return evidence;
  }
- const withQuote=(current:ReturnType<CommerceTools["snapshot"]>)=>({...current,policyLiterals:[...current.policyLiterals,...[...priceProofs.values()].map(v=>v.literal),...quoteLiterals.values(),...openingProofs.values()]});
+ async function total(current:TrustedContext,q:QuoteRequest){
+  if(!policy)return null;
+  const p=await policy(),key=JSON.stringify([q.subjectRef,q.offerType]);quotePolicies.set(key,structuredClone(p));
+  return calculate(current,q,p);
+ }
+ const withQuote=(current:ReturnType<CommerceTools["snapshot"]>)=>{
+  // Refresh from already admitted price/policy evidence when a pending request changes. No tool or state writes.
+  // A cart change ends this pre-cart quote; final readback must not invent a replacement quote after the verifier.
+  for(const [key,q]of quoteRequests){
+   if(quoteCartStates.get(key)!==cartStateHash(current)){quoteRequests.delete(key);quotePolicies.delete(key);quoteLiterals.delete(key);continue;}
+   const p=quotePolicies.get(key);if(p)calculate(current,q,p);
+  }
+  const pending=current.state.pendingSupport as {pendingRef?:string}|undefined;
+  const quoted=[...quoteLiterals.values()].map(l=>({literal:l,quote:JSON.parse(l.text)})).filter(({literal,quote})=>
+   literal.expiresAt&&Date.parse(literal.expiresAt)>clock().getTime()&&quote.supportEvaluation?.pendingRef===pending?.pendingRef&&
+   quote.cartStateHash===cartStateHash(current));
+  const match=quoted.length===1?quoted[0]:undefined;
+  return {...current,state:{...current.state,...(pending&&match?{pendingSupport:{...pending,status:"QUOTED",
+    priceQuote:{evidenceRef:match.literal.ref,subjectRef:match.quote.subjectRef,offerType:match.quote.offerType,quantity:match.quote.quantity,
+     grandTotalVnd:match.quote.grandTotalVnd}}}:{})},
+   policyLiterals:[...current.policyLiterals,...[...priceProofs.values()].map(v=>v.literal),...quoteLiterals.values(),...openingProofs.values()]};
+ };
  // Returning totals reuse the same bounded read/policy calculation, without
  // turning a later price question into another opening image task.
  const opening=firstContact===true,followUp=firstContact===false&&!!policy;
@@ -187,7 +217,8 @@ export function withExplicitQuoteTask(base:CommerceTools,scope:CommerceScope,fir
   }))return fail("PRICE_UNAVAILABLE");
   let preCartQuote:unknown=null;
   if(a.quantity!==undefined||a.deliveryRegion!==undefined){const q={subjectRef:a.subjectRef,offerType:offerTypes[0]!,quantity:Number(a.quantity??1),deliveryRegion:typeof a.deliveryRegion==="string"?a.deliveryRegion:null,...(typeof a.color==="string"?{color:a.color}:{})};
-   quoteRequests.set(batch.targets[0]!,q);preCartQuote=await total(base.snapshot(),q);if(!preCartQuote)return fail("PRICE_UNAVAILABLE");}
+   quoteRequests.set(batch.targets[0]!,q);quoteCartStates.set(batch.targets[0]!,cartStateHash(base.snapshot()));
+   preCartQuote=await total(base.snapshot(),q);if(!preCartQuote)return fail("PRICE_UNAVAILABLE");}
   for(const source of sources){
    const proof={kind:"QUOTE_OFFER_PRICE_V1",calculationBasis:"PRE_CART_ONLY",appliesNegotiationReceipt:false,subjectRef:a.subjectRef,
     requestId:scope.requestId,bindingVersion:scope.bindingVersion,recipient:scope.recipient,...source,claimHash:commerceHash(source.claim)};
@@ -282,6 +313,7 @@ export function withExplicitQuoteTask(base:CommerceTools,scope:CommerceScope,fir
  return {...base,availableTools,verifiedQuoteReply,openingQuoteTargets:()=>[...openingProofs.keys()],toolWorkAccounting:"PRIMITIVE_WORK_V2",quoteTaskWork:()=>structuredClone(work),
   snapshot:()=>withQuote(base.snapshot()),readback:async()=>{
    const current=await base.readback();
+   withQuote(current);
    for(const p of priceProofs.values())if(commerceHash(sourcePrices(p.query))!==commerceHash(p.evidence))throw Error("QUOTE_PRICE_SOURCE_CHANGED");
    quoteLiterals.clear();for(const q of quoteRequests.values())await total(current,q);return withQuote(current);
   },

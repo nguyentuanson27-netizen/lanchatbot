@@ -65,6 +65,9 @@ export interface CommerceTools {
   verifiedQuoteReply?(current: TrustedContext): { kind: "PRE_CART_QUOTE_V1"; text: string; evidenceRef: string } | null;
   /** Exact completed read proof only, no I/O and no cart-variant substitution. */
   quotePriceEvidence?(query:import("./single-agent-commerce-read-only-tools.js").QuotePriceQuery):readonly import("./single-agent-commerce-read-only-tools.js").QuotePriceEvidence[];
+  /** No I/O: authenticated first support request for an exact pre-cart target and current policy. Never consumes an objection. */
+  preCartSupportEvidence?(target:{subjectRef:string;offerType:string},policy:import("@lana/contracts").PolicyBundleV1):
+    {pendingRef:string;sourceMessageId:string;sourceObservedAt:string;expiresAt:string}|null;
   sealHandoffReply?(text: string, trusted: TrustedContext, images: readonly import("./single-agent-commerce-media-delivery.js").MediaDeliveryImage[]): string;
   completeHandoff?(outcome: TerminalOutcome, readback: () => Promise<TrustedContext>): Promise<TerminalOutcome>;
   /** Code-only recovery: atomically transfer ownership without customer output. */

@@ -104,8 +104,8 @@ export function presentCartWriteResult(result:OwnerToolResult,options:{quoteCall
 
 /**
  * Price support asked for before a cart exists (owner decision 2026-11-12, option A). The negotiation
- * engine evaluates support only against a cart, and its evidence must follow the cart's creation, so
- * the result exposes the unevaluated status and the missing prerequisite.
+ * engine commits benefits against a cart. A current computed quote can offer support before that commit;
+ * legacy refused records without a quote still expose the unevaluated status.
  */
 /** Group the unevaluated status of a refused record with its actual prerequisites. */
 export function presentNegotiationResult(result:OwnerToolResult):OwnerToolResult {
@@ -119,7 +119,9 @@ export function presentNegotiationResult(result:OwnerToolResult):OwnerToolResult
 export function presentPreCartQuoteResult(result:OwnerToolResult):OwnerToolResult {
  const data=record(result.data)?result.data:null;
  if(result.status!=="OK"||!data||data.calculationBasis!=="PRE_CART_POLICY"||data.appliesNegotiationReceipt!==false)return result;
- return {...result,data:{...structuredClone(data),supportEvaluation:{status:"NOT_EVALUATED",supportAvailability:"UNKNOWN",missing:["CART"]}}};
+ const quote=record(data.preCartQuote)?data.preCartQuote:null;
+ const support=record(quote?.supportEvaluation)&&quote.supportEvaluation.status==="QUOTED"?quote.supportEvaluation:null;
+ return {...result,data:{...structuredClone(data),supportEvaluation:support?structuredClone(support):{status:"NOT_EVALUATED",supportAvailability:"UNKNOWN",missing:["CART"]}}};
 }
 
 /**
