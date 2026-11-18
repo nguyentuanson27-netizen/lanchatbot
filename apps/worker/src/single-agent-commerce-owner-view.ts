@@ -121,7 +121,10 @@ export function presentPreCartQuoteResult(result:OwnerToolResult):OwnerToolResul
  if(result.status!=="OK"||!data||data.calculationBasis!=="PRE_CART_POLICY"||data.appliesNegotiationReceipt!==false)return result;
  const quote=record(data.preCartQuote)?data.preCartQuote:null;
  const support=record(quote?.supportEvaluation)&&quote.supportEvaluation.status==="QUOTED"?quote.supportEvaluation:null;
- return {...result,data:{...structuredClone(data),supportEvaluation:support?structuredClone(support):{status:"NOT_EVALUATED",supportAvailability:"UNKNOWN",missing:["CART"]}}};
+ const view=structuredClone(data);
+ // One owner copy of the result; the canonical quote and verifier source retain the full nested proof.
+ if(support)delete (view.preCartQuote as Json).supportEvaluation;
+ return {...result,data:{...view,supportEvaluation:support?structuredClone(support):{status:"NOT_EVALUATED",supportAvailability:"UNKNOWN",missing:["CART"]}}};
 }
 
 /**

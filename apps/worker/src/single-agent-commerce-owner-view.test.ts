@@ -16,7 +16,10 @@ it("keeps a computed pre-cart support offer distinct from an applied benefit",()
  const supportEvaluation={status:"QUOTED",pendingRef:"pending",supportAvailability:"AVAILABLE",negotiationApplied:false,additionalDiscountVnd:30000};
  const r={status:"OK",data:{calculationBasis:"PRE_CART_POLICY",appliesNegotiationReceipt:false,
   preCartQuote:{grandTotalVnd:948100,supportEvaluation,benefitAuthorization:{status:"NOT_GRANTED",receiptRef:null}}}};
- expect(presentPreCartQuoteResult(r)).toMatchObject({data:{supportEvaluation,preCartQuote:r.data.preCartQuote}});
+ const projected=presentPreCartQuoteResult(r) as typeof r&{data:{supportEvaluation:unknown}};
+ expect(projected.data.supportEvaluation).toEqual(supportEvaluation);
+ expect(projected.data.preCartQuote).toEqual({grandTotalVnd:948100,benefitAuthorization:{status:"NOT_GRANTED",receiptRef:null}});
+ expect(r.data.preCartQuote.supportEvaluation).toEqual(supportEvaluation);
 });
 
 describe("cart write result shown to the owner",()=>{

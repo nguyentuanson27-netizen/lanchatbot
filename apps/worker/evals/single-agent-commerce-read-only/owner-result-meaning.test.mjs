@@ -22,7 +22,8 @@ for(const final of [false,true])test('pre-cart support quote survives both owner
  r.context.state.pendingSupport={status:'QUOTED',pendingRef:supportEvaluation.pendingRef,priceQuote:{grandTotalVnd:948100},supportEvaluation};
  r.context.policyLiterals=[{ref:'pre-cart-quote:hash',text:JSON.stringify(quote)}];
  const raw=structuredClone(r.contents),trusted=structuredClone(r.context),wire=buildGeminiCommerceRequest(r),view=result(wire,final);
- assert.deepEqual(view.supportEvaluation,supportEvaluation);assert.deepEqual(view.preCartQuote,quote);
+ const {supportEvaluation:_support,...quoteAmounts}=quote;
+ assert.deepEqual(view.supportEvaluation,supportEvaluation);assert.deepEqual(view.preCartQuote,quoteAmounts);
  assert.equal(view.appliesNegotiationReceipt,false);assert.equal(view.preCartQuote.benefitAuthorization.receiptRef,null);
  assert.deepEqual(r.contents,raw);assert.deepEqual(r.context,trusted);
  if(!final)assert.deepEqual(wire.contents[2],raw[1]);
