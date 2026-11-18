@@ -1,7 +1,8 @@
 ## Current — owner 70.000 byte, 2026-11-18
 
 - [x] Review 30 lượt và captured wire, lập [phương án sửa văn phong](../docs/specs/c3-phase-c-sales-voice-source-fix-plan-20261118.md).
-- [ ] Triển khai P1/P2 theo phương án, kiểm hồi quy và sàng lọc trước native. Chưa chạy request nào theo kế hoạch văn phong.
+- [x] Triển khai P1/P2 tại `7fb18936`; self-review, bổ sung regression lịch sử sau ADD/QUOTE rồi review độc lập APPROVE đúng SHA. 741 test worker, 142 test Node, build/typecheck/lint qua. [Bản sửa và review](../docs/specs/evidence/c3-sales-voice-source-fix-20261118/IMPLEMENTATION.md).
+- [ ] Đo sàng lọc trước native theo plan. Model sau P1/P2 NOT_RUN; P3 chưa thực hiện. Chưa kết luận giọng cải thiện hoặc Phase C GO.
 
 - [x] Tăng bound owner/manifest/approval lên 70.000 byte, test 70.000 nhận và 70.001 từ chối. 138 test Node, compile và lint/typecheck qua.
 - [x] Chạy lại đủ J4 ×5 và control ×5 trên `6cb3be51`, cùng world `dfbc11c7`. Cả hai đạt 5/5 theo chấm mù, 30/30 lượt SEND_ELIGIBLE, 0 handoff/NO_SEND. Native 87 request, judge 10 request. [Hội thoại và bằng chứng](../docs/specs/evidence/c3-owner-bound-70000-20261118/REPORT.md).

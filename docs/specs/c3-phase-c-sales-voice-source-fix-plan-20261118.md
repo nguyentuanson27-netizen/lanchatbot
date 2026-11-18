@@ -1,6 +1,6 @@
 # Phase C · sửa nguồn gây lời văn quy trình và câu hỏi thừa
 
-Ngày 18/11/2026. Trạng thái đề xuất, chưa triển khai hoặc chạy model theo kế hoạch này.
+Ngày 18/11/2026. P1/P2 đã triển khai tại `7fb18936468c4e4df02e7cb5784650e8d21bebf0` và được review độc lập **APPROVE CODE** trên đúng SHA. Chưa chạy model theo kế hoạch này; P3 và các phép đo bên dưới chưa thực hiện. [Bản sửa, kiểm tra và giới hạn](evidence/c3-sales-voice-source-fix-20261118/IMPLEMENTATION.md) · [Review độc lập](evidence/c3-sales-voice-source-fix-20261118/INDEPENDENT_REVIEW.md).
 Base `05ff46a8c18f83f0f9bc61d833599de2bf30a90d`. Source của 30 lượt vừa review là `6cb3be513905cf48230cc977b18832ab23bab8a3`.
 
 Mục tiêu là giúp khách mua thuận tiện bằng lời nói ngắn, rõ và sát câu hỏi. Giữ việc báo đúng giá, hỏi màu cần thiết và xét hỗ trợ đúng một lần đã đạt trong vòng 70.000 byte.
