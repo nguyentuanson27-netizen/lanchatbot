@@ -59,10 +59,12 @@ function prepare(inputs){
   assert(capture,'SUPPORT_SCREEN_CAPTURE');captures.push({label:kind+':'+rep+':'+turn,control:false,capture});
  }
  const opening=read(inputs.controls).OPENING_AD_QUOTE;
- const old=read(inputs.oldRegistration).slots.find(s=>s.label==='c-20261028-j2:1');
- assert(old?.arms&&opening?.wire);
+ const correctionRegistration=read(pin(inputs.correctionRegistration));
+ const correctionSlot=correctionRegistration.slots.find(s=>s.caseId==='c-20261028-j2'&&s.repetition===1);
+ const correction=finalOwnerWire(journal(pin(inputs.correctionJournal)),correctionSlot.slotId,1);
+ assert(correction?.wire&&opening?.wire);
  captures.push({label:'OPENING_AD_QUOTE',control:true,capture:opening},
-  {label:'MEASUREMENT_CORRECTION',control:true,capture:{wire:old.arms[0],runtimeInput:old.judgeInput}});
+  {label:'MEASUREMENT_CORRECTION',control:true,capture:correction});
  const promptPath=pin('apps/worker/evals/single-agent-commerce-read-only/prompts/owner.vi.txt');
  const prompt=readFileSync(promptPath,'utf8'),seed=randomBytes(32).toString('hex');
  const slots=captures.map(({label,control,capture},index)=>{
