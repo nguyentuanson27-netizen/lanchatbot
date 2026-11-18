@@ -2,7 +2,8 @@
 
 - [x] Review 30 lượt và captured wire, lập [phương án sửa văn phong](../docs/specs/c3-phase-c-sales-voice-source-fix-plan-20261118.md).
 - [x] Triển khai P1/P2 tại `7fb18936`; self-review, bổ sung regression lịch sử sau ADD/QUOTE rồi review độc lập APPROVE đúng SHA. 741 test worker, 142 test Node, build/typecheck/lint qua. [Bản sửa và review](../docs/specs/evidence/c3-sales-voice-source-fix-20261118/IMPLEMENTATION.md).
-- [ ] Đo sàng lọc trước native theo plan. Model sau P1/P2 NOT_RUN; P3 chưa thực hiện. Chưa kết luận giọng cải thiện hoặc Phase C GO.
+- [x] Sàng lọc tám cặp sau P1/P2, đủ 16 owner + 8 judge; **STOP**, voice 1/6, net wins −3, không provider error/retry. Sửa riêng bộ ghi và resume 14 request chưa gửi, giữ hai request cũ và source riêng. Harness/recovery được review độc lập APPROVE; 3 test PASS. [Hội thoại và finding](../docs/specs/evidence/c3-support-source-screen-20261118/REPORT.md).
+- [ ] P3 và native chưa thực hiện vì screen STOP. Chưa có giọng cải thiện hoặc Phase C GO; cần xử lý xung đột chỉ dẫn và ranh giới chấm control trước phép đo mới.
 
 - [x] Tăng bound owner/manifest/approval lên 70.000 byte, test 70.000 nhận và 70.001 từ chối. 138 test Node, compile và lint/typecheck qua.
 - [x] Chạy lại đủ J4 ×5 và control ×5 trên `6cb3be51`, cùng world `dfbc11c7`. Cả hai đạt 5/5 theo chấm mù, 30/30 lượt SEND_ELIGIBLE, 0 handoff/NO_SEND. Native 87 request, judge 10 request. [Hội thoại và bằng chứng](../docs/specs/evidence/c3-owner-bound-70000-20261118/REPORT.md).

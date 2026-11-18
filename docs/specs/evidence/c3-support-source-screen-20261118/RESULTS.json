@@ -1,0 +1,639 @@
+[
+  {
+    "label": "CANDIDATE:1:1",
+    "control": false,
+    "captureHash": "6ec0eb06828f8a269605236410ec7f21e5c5fba19619b38e14667fed378c4d11",
+    "armHashes": [
+      "94812261f7a169bc284175d819c17f685882b9464da8a702350361637107805e",
+      "2687d55954a98fd505c3b5b262c638487af0bdf0d11b4a9e4f12567182021930"
+    ],
+    "identicalInputs": false,
+    "dialogue": {
+      "latest": "Shop hỗ trợ thêm cho chị được chút nào không?",
+      "history": [
+        {
+          "role": "shop",
+          "text": "{\"event\":\"RECENT_SHOP_IMAGES_ACCEPTED\",\"completeHistory\":false,\"customerViewed\":\"UNKNOWN\",\"images\":[{\"productId\":\"SV2447\",\"assetRef\":\"asset:1d468b542cef730ec27e5adf3a1fcc4d4a8ff56a3660ac9c875a51b8fd5a8f77\",\"status\":\"SENT_ACCEPTED\",\"occurredAt\":\"2026-11-17T18:14:51.293Z\"}]}"
+        },
+        {
+          "role": "customer",
+          "text": "Chị lấy áo của bộ váy Thạch Thảo size M."
+        },
+        {
+          "role": "shop",
+          "text": "Áo Thạch Thảo size M có hai màu Trắng (có sẵn) và Be (đặt trước), chị lấy màu nào ạ?"
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "baseline": {
+      "id": "cf42ccf1f736ab1e9e91129c6d0134165e49c0b33a9737b5c1657bef7efabeda",
+      "arm": 0,
+      "status": "OK",
+      "text": "Áo Thạch Thảo size M giá 499.000đ chị nha, lên giỏ xong shop sẽ xem xét hỗ trợ thêm cho mình. Chị lấy màu Trắng hay Be ạ?",
+      "telemetry": {
+        "providerRequests": 1,
+        "authRequests": 0,
+        "httpStatus": 200,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "inputTokens": 17791,
+        "outputTokens": 410,
+        "cost": null,
+        "requestHash": "94812261f7a169bc284175d819c17f685882b9464da8a702350361637107805e",
+        "latencyMs": 2527.4454000000005
+      },
+      "originalSource": "0f393fc356a717d3c6a8fb4f34ea87aa31c168db",
+      "originalRegistrationHash": "74600b8358e3e551efa8d48a62a4fc404949a1a1b091cb201245056691f7dcf3",
+      "resultPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-support-source-screen-20261118\\owner\\cf42ccf1f736ab1e9e91129c6d0134165e49c0b33a9737b5c1657bef7efabeda-0.result.json",
+      "grade": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialRegression": false,
+        "controlPass": true,
+        "reason": "Báo đúng giá 499.000đ, chỉ nói shop sẽ xem xét hỗ trợ chứ không hứa được giảm. Hỏi màu là đúng lựa chọn còn thiếu của món khách đã đồng ý mua."
+      }
+    },
+    "treatment": {
+      "id": "cf42ccf1f736ab1e9e91129c6d0134165e49c0b33a9737b5c1657bef7efabeda",
+      "arm": 1,
+      "status": "OK",
+      "text": "Áo lẻ Thạch Thảo giá 499.000đ chị nhé, khi chị chọn màu trắng có sẵn hay be đặt trước, hệ thống sẽ tự động áp dụng mức hỗ trợ tốt nhất cho đơn. Chị lấy màu nào ạ?",
+      "telemetry": {
+        "providerRequests": 1,
+        "authRequests": 1,
+        "httpStatus": 200,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "inputTokens": 17535,
+        "outputTokens": 396,
+        "cost": null,
+        "requestHash": "2687d55954a98fd505c3b5b262c638487af0bdf0d11b4a9e4f12567182021930",
+        "latencyMs": 3393.9754999999996
+      },
+      "originalSource": "0f393fc356a717d3c6a8fb4f34ea87aa31c168db",
+      "originalRegistrationHash": "74600b8358e3e551efa8d48a62a4fc404949a1a1b091cb201245056691f7dcf3",
+      "resultPath": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-support-source-screen-20261118\\owner\\cf42ccf1f736ab1e9e91129c6d0134165e49c0b33a9737b5c1657bef7efabeda-1.result.json",
+      "grade": {
+        "voicePass": false,
+        "factsComplete": false,
+        "materialRegression": true,
+        "controlPass": true,
+        "reason": "Giá và tình trạng màu đúng, nhưng kể cơ chế hệ thống và hứa tự động áp dụng “mức hỗ trợ tốt nhất” khi hỗ trợ chưa được xét, chưa có quyền lợi nào được cấp."
+      }
+    },
+    "blindPreferred": "B",
+    "blindOrder": [
+      1,
+      0
+    ]
+  },
+  {
+    "label": "CANDIDATE:3:1",
+    "control": false,
+    "captureHash": "3ccaa20efb19183d99cc005790e7b59f54073a99dbbc7eb575cdaf9cb2eacf40",
+    "armHashes": [
+      "45c55a39ae697077d60f696fbbe9ba5a40da7f3f91b75dd2ce5100dc2160714c",
+      "027730c268c8aa48b5a3641d7a396cdd493d5a53c863da427de7dd71ba3482a7"
+    ],
+    "identicalInputs": false,
+    "dialogue": {
+      "latest": "Shop hỗ trợ thêm cho chị được chút nào không?",
+      "history": [
+        {
+          "role": "shop",
+          "text": "{\"event\":\"RECENT_SHOP_IMAGES_ACCEPTED\",\"completeHistory\":false,\"customerViewed\":\"UNKNOWN\",\"images\":[{\"productId\":\"SV2447\",\"assetRef\":\"asset:1d468b542cef730ec27e5adf3a1fcc4d4a8ff56a3660ac9c875a51b8fd5a8f77\",\"status\":\"SENT_ACCEPTED\",\"occurredAt\":\"2026-11-17T18:18:47.923Z\"}]}"
+        },
+        {
+          "role": "customer",
+          "text": "Chị lấy áo của bộ váy Thạch Thảo size M."
+        },
+        {
+          "role": "shop",
+          "text": "Dạ, áo thêu Thạch Thảo size M có màu trắng (có sẵn) và màu be (đặt trước ạ). Chị lấy màu nào ạ?"
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "baseline": {
+      "id": "d17599ab06f004d638c6b6da1de4acd12a593e004469d0af4c9a5a2e6f98c950",
+      "arm": 0,
+      "status": "OK",
+      "text": "Áo thêu Thạch Thảo size M có giá 499.000đ ạ. Em đã ghi nhận yêu cầu hỗ trợ giá của chị; khi chị chọn màu và lên giỏ, hệ thống sẽ tự động kiểm tra phần hỗ trợ cho mình nhé. \n\nChị lấy áo màu trắng hay màu be ạ?",
+      "telemetry": {
+        "providerRequests": 1,
+        "authRequests": 1,
+        "httpStatus": 200,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "inputTokens": 17991,
+        "outputTokens": 352,
+        "cost": null,
+        "requestHash": "45c55a39ae697077d60f696fbbe9ba5a40da7f3f91b75dd2ce5100dc2160714c",
+        "latencyMs": 2781.5279000000005
+      },
+      "grade": {
+        "voicePass": false,
+        "factsComplete": true,
+        "materialRegression": false,
+        "controlPass": true,
+        "reason": "Báo đúng giá 499.000đ, thể hiện hỗ trợ còn chờ xét và hỏi đúng màu còn thiếu, không hứa ưu đãi. Tuy nhiên, kể việc ghi nhận rồi hệ thống tự kiểm tra khi lên giỏ khiến câu nặng quy trình nội bộ."
+      }
+    },
+    "treatment": {
+      "id": "d17599ab06f004d638c6b6da1de4acd12a593e004469d0af4c9a5a2e6f98c950",
+      "arm": 1,
+      "status": "OK",
+      "text": "Áo thêu Thạch Thảo có giá 499.000đ chị ạ. Chị chọn màu trắng (có sẵn) hay màu be (đặt trước) để em lên đơn cho mình nhé!",
+      "telemetry": {
+        "providerRequests": 1,
+        "authRequests": 0,
+        "httpStatus": 200,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "inputTokens": 17735,
+        "outputTokens": 341,
+        "cost": null,
+        "requestHash": "027730c268c8aa48b5a3641d7a396cdd493d5a53c863da427de7dd71ba3482a7",
+        "latencyMs": 2785.8885
+      },
+      "grade": {
+        "voicePass": false,
+        "factsComplete": false,
+        "materialRegression": false,
+        "controlPass": true,
+        "reason": "Giá và tình trạng hai màu đều đúng, hỏi màu giúp tiếp tục mua. Nhưng khách đang xin hỗ trợ thêm mà câu chỉ báo giá và chốt màu, bỏ qua việc hỗ trợ riêng chưa được xét."
+      }
+    },
+    "blindPreferred": "A",
+    "blindOrder": [
+      0,
+      1
+    ]
+  },
+  {
+    "label": "CONTROLS:3:0",
+    "control": false,
+    "captureHash": "50f99b8e639e5c1a99304017c42857b90b120cbc4c7f4266f1ff86ae01c58390",
+    "armHashes": [
+      "49ee604a875fec0346a9232bc73cc66e51018efa131e6b30d5c01b3410d78835",
+      "c047bca355845f609a9e51b3040b3c56dc3f230ed9fd47f2e8c68c85d3444b76"
+    ],
+    "identicalInputs": false,
+    "dialogue": {
+      "latest": "Chị lấy hai áo Thạch Thảo size M, shop bớt thêm cho chị được không?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "baseline": {
+      "id": "e5def5eeb6d1e579f5c258ed5122a2e00fbebab90b2bcb9d737eb3e552424536",
+      "arm": 0,
+      "status": "OK",
+      "text": "Áo Thạch Thảo có giá 499.000đ một chiếc, khi mua 2 chiếc chị được giảm 5% theo ưu đãi chung, tổng cộng là 978.100đ gồm phí ship ạ. \n\nYêu cầu hỗ trợ giá của chị em đã ghi nhận, khi chị thêm vào giỏ shop sẽ xem xét thêm cho mình nhé!",
+      "telemetry": {
+        "providerRequests": 1,
+        "authRequests": 0,
+        "httpStatus": 200,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "inputTokens": 17403,
+        "outputTokens": 698,
+        "cost": null,
+        "requestHash": "49ee604a875fec0346a9232bc73cc66e51018efa131e6b30d5c01b3410d78835",
+        "latencyMs": 4085.8661999999986
+      },
+      "grade": {
+        "voicePass": false,
+        "factsComplete": true,
+        "materialRegression": false,
+        "controlPass": false,
+        "reason": "Giá và tổng sau ưu đãi đúng; diễn đạt việc hỗ trợ thêm còn chờ xem xét, không hứa cấp. Tự nhiên hơn A nhưng vẫn đẩy khách sang thao tác thêm giỏ dù đã nói mua, chưa hỏi màu để tiếp tục. Không giữ đầy đủ form báo giá mở đầu và thiếu ảnh."
+      }
+    },
+    "treatment": {
+      "id": "e5def5eeb6d1e579f5c258ed5122a2e00fbebab90b2bcb9d737eb3e552424536",
+      "arm": 1,
+      "status": "OK",
+      "text": "Dạ, áo lẻ Thạch Thảo size M có giá 499.000đ/chiếc, khi lấy 2 chiếc chị sẽ được tự động áp dụng ưu đãi giảm 5% còn 948.100đ (tổng thanh toán gồm phí ship 30.000đ là 978.100đ). Em đã ghi nhận yêu cầu hỗ trợ giá, chị thêm món vào giỏ để hệ thống kiểm tra mức hỗ trợ tiếp theo cho mình nhé ạ!",
+      "telemetry": {
+        "providerRequests": 1,
+        "authRequests": 0,
+        "httpStatus": 200,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "inputTokens": 17131,
+        "outputTokens": 572,
+        "cost": null,
+        "requestHash": "c047bca355845f609a9e51b3040b3c56dc3f230ed9fd47f2e8c68c85d3444b76",
+        "latencyMs": 75580.9924
+      },
+      "grade": {
+        "voicePass": false,
+        "factsComplete": true,
+        "materialRegression": false,
+        "controlPass": false,
+        "reason": "Báo đúng giá, giảm 5% và tổng 978.100đ; không khẳng định đã được hỗ trợ thêm. Tuy nhiên, khách đã nói lấy hai áo mà lại hướng dẫn thêm giỏ để hệ thống kiểm tra, thay vì hỏi màu còn thiếu. Báo giá mở đầu thiếu dòng size theo nguồn và ảnh."
+      }
+    },
+    "blindPreferred": "B",
+    "blindOrder": [
+      1,
+      0
+    ]
+  },
+  {
+    "label": "CONTROLS:4:0",
+    "control": false,
+    "captureHash": "945ccdbb7b36e062e617d6ac41ae16ce34a5f6cc6052fecf21c1e8bde96b4c6d",
+    "armHashes": [
+      "24a9d002dd26b495f35a34adc8b25f4af06cdfbc1f66779cead3fb91d55de943",
+      "68abc56f9aacf4b14a2690b21749ef50385af7ab6ce23af31c6ca3a07c9e7296"
+    ],
+    "identicalInputs": false,
+    "dialogue": {
+      "latest": "Chị lấy hai áo Thạch Thảo size M, shop bớt thêm cho chị được không?",
+      "history": [],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "baseline": {
+      "id": "3bad40964c64c85412901b98663918edb5b9d58bd774bf1edf173a74157ef524",
+      "arm": 0,
+      "status": "OK",
+      "text": "Dạ, hai áo Thạch Thảo size M có giá 499.000đ/chiếc. Khi mua từ 2 chiếc, shop tự động giảm 5% còn tổng 978.100đ (đã gồm 30.000đ ship ạ). \n\nYêu cầu hỗ trợ thêm của chị em đã lưu lại, khi chị lên giỏ hàng hệ thống sẽ tự xét ạ. Chị có muốn em thêm vào giỏ luôn không ạ?",
+      "telemetry": {
+        "providerRequests": 1,
+        "authRequests": 0,
+        "httpStatus": 200,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "inputTokens": 17462,
+        "outputTokens": 481,
+        "cost": null,
+        "requestHash": "24a9d002dd26b495f35a34adc8b25f4af06cdfbc1f66779cead3fb91d55de943",
+        "latencyMs": 2734.913499999995
+      },
+      "grade": {
+        "voicePass": false,
+        "factsComplete": true,
+        "materialRegression": false,
+        "controlPass": false,
+        "reason": "Giá, giảm 5% và tổng gồm ship đều đúng; không khẳng định đã được hỗ trợ thêm. Tuy nhiên, khách đã nói lấy hai áo mà vẫn hỏi có muốn thêm giỏ, thay vì hỏi màu còn thiếu. Không giữ form báo giá mở đầu, thiếu dòng size và ảnh theo nguồn."
+      }
+    },
+    "treatment": {
+      "id": "3bad40964c64c85412901b98663918edb5b9d58bd774bf1edf173a74157ef524",
+      "arm": 1,
+      "status": "OK",
+      "text": "Dạ, hai áo Thạch Thảo size M có giá 499.000đ/cái (tổng 998.000đ). Khi mua từ 2 chiếc, chị được giảm ngay 5% theo ưu đãi chung còn 948.100đ (phí vận chuyển 30.000đ, tổng cộng là 978.100đ). \n\nEm đã ghi nhận yêu cầu bớt thêm của chị; chị cho hai áo vào giỏ để hệ thống kiểm tra ưu đãi tốt nhất cho mình nhé ạ!",
+      "telemetry": {
+        "providerRequests": 1,
+        "authRequests": 0,
+        "httpStatus": 200,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "inputTokens": 17190,
+        "outputTokens": 709,
+        "cost": null,
+        "requestHash": "68abc56f9aacf4b14a2690b21749ef50385af7ab6ce23af31c6ca3a07c9e7296",
+        "latencyMs": 3713.2072999999946
+      },
+      "grade": {
+        "voicePass": false,
+        "factsComplete": true,
+        "materialRegression": false,
+        "controlPass": false,
+        "reason": "Tính đúng tiền hàng, ưu đãi chung và phí ship, chưa hứa mức giảm thêm. Nhưng đẩy khách tự cho hàng vào giỏ để hệ thống kiểm tra, không hỏi màu để tiếp tục mua; cách nói “ưu đãi tốt nhất” cũng kém rõ hơn A về hỗ trợ chưa xét. Thiếu form báo giá mở đầu, dòng size và ảnh theo nguồn."
+      }
+    },
+    "blindPreferred": "A",
+    "blindOrder": [
+      0,
+      1
+    ]
+  },
+  {
+    "label": "CONTROLS:3:1",
+    "control": false,
+    "captureHash": "c589edb77487ec129372232ca64ccd647dd396178e947d550bce0dc78a5ec4b4",
+    "armHashes": [
+      "1d80f8e83cc95e7b44ad443efe3bf56ab24faafc0369423a0f254fbc45d51277",
+      "1d80f8e83cc95e7b44ad443efe3bf56ab24faafc0369423a0f254fbc45d51277"
+    ],
+    "identicalInputs": true,
+    "dialogue": {
+      "latest": "Lấy trắng em nhé.",
+      "history": [
+        {
+          "role": "shop",
+          "text": "{\"event\":\"RECENT_SHOP_IMAGES_ACCEPTED\",\"completeHistory\":false,\"customerViewed\":\"UNKNOWN\",\"images\":[{\"productId\":\"SV2447\",\"assetRef\":\"asset:1d468b542cef730ec27e5adf3a1fcc4d4a8ff56a3660ac9c875a51b8fd5a8f77\",\"status\":\"SENT_ACCEPTED\",\"occurredAt\":\"2026-11-17T18:20:00.911Z\"},{\"productId\":\"SV2447\",\"assetRef\":\"asset:dd576b00ea6b3597c810ac34c66dead82235ce5db30bbdd01a3e809e1349604f\",\"status\":\"SENT_ACCEPTED\",\"occurredAt\":\"2026-11-17T18:20:01.829Z\"}]}"
+        },
+        {
+          "role": "customer",
+          "text": "Chị lấy hai áo Thạch Thảo size M, shop bớt thêm cho chị được không?"
+        },
+        {
+          "role": "shop",
+          "text": "Dạ áo Thạch Thảo có giá 499.000đ/chiếc chị ạ. Khi lấy 2 chiếc, hệ thống tự động áp dụng ưu đãi giảm 5%, tổng thanh toán là 978.100đ (đã bao gồm 30.000đ phí vận chuyển). \n\nYêu cầu hỗ trợ thêm của chị em đã lưu lại, khi món vào giỏ hệ thống sẽ xét tiếp cho mình nhé ạ. Chị có muốn em thêm 2 áo size M vào giỏ luôn không ạ?"
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "baseline": {
+      "id": "749f8a1a060d813639a62d36e0021cdf7a5bbb1603174ee66645f26e693d938d",
+      "arm": 0,
+      "status": "OK",
+      "text": "Dạ em đã thêm 2 áo Thạch Thảo màu trắng size M vào giỏ cho chị ạ. Tổng thanh toán sau khi giảm 5% và miễn phí vận chuyển là 948.100đ. Chị có muốn em hỗ trợ chốt đơn luôn không ạ?",
+      "telemetry": {
+        "providerRequests": 1,
+        "authRequests": 0,
+        "httpStatus": 200,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "inputTokens": 13031,
+        "outputTokens": 1430,
+        "cost": null,
+        "requestHash": "1d80f8e83cc95e7b44ad443efe3bf56ab24faafc0369423a0f254fbc45d51277",
+        "latencyMs": 4482.1823
+      },
+      "grade": {
+        "voicePass": false,
+        "factsComplete": true,
+        "materialRegression": false,
+        "controlPass": true,
+        "reason": "Xác nhận đúng 2 áo trắng size M và tổng 948.100đ sau giảm 5%, miễn phí vận chuyển. Tuy nhiên, hỏi lại có muốn chốt đơn không là thừa khi khách đã nói lấy hàng và chọn màu."
+      }
+    },
+    "treatment": {
+      "id": "749f8a1a060d813639a62d36e0021cdf7a5bbb1603174ee66645f26e693d938d",
+      "arm": 1,
+      "status": "OK",
+      "text": "Em đã thêm 2 áo Thạch Thảo màu trắng size M vào giỏ cho chị rồi ạ. Tổng thanh toán là 948.100đ (đã gồm ưu đãi giảm 5% và miễn phí vận chuyển).",
+      "telemetry": {
+        "providerRequests": 1,
+        "authRequests": 0,
+        "httpStatus": 200,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "inputTokens": 13031,
+        "outputTokens": 1732,
+        "cost": null,
+        "requestHash": "1d80f8e83cc95e7b44ad443efe3bf56ab24faafc0369423a0f254fbc45d51277",
+        "latencyMs": 5951.247100000008
+      },
+      "grade": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialRegression": false,
+        "controlPass": true,
+        "reason": "Xác nhận ngắn gọn thao tác thêm giỏ đã có bằng chứng, đúng số lượng, màu, size và tổng tiền cùng ưu đãi hiện tại; không hỏi lại ý định mua."
+      }
+    },
+    "blindPreferred": "B",
+    "blindOrder": [
+      0,
+      1
+    ]
+  },
+  {
+    "label": "CONTROLS:3:2",
+    "control": false,
+    "captureHash": "a871cd7b676f01a78a0dc245ee797710dbfafb7b8ad9895d3370ce31c6c74715",
+    "armHashes": [
+      "030023fd314f2e1b7f9a55574ceb62535271471a67c00054751300710a6fa054",
+      "030023fd314f2e1b7f9a55574ceb62535271471a67c00054751300710a6fa054"
+    ],
+    "identicalInputs": true,
+    "dialogue": {
+      "latest": "Cả ship hết bao nhiêu em?",
+      "history": [
+        {
+          "role": "shop",
+          "text": "{\"event\":\"RECENT_SHOP_IMAGES_ACCEPTED\",\"completeHistory\":false,\"customerViewed\":\"UNKNOWN\",\"images\":[{\"productId\":\"SV2447\",\"assetRef\":\"asset:1d468b542cef730ec27e5adf3a1fcc4d4a8ff56a3660ac9c875a51b8fd5a8f77\",\"status\":\"SENT_ACCEPTED\",\"occurredAt\":\"2026-11-17T18:20:00.911Z\"},{\"productId\":\"SV2447\",\"assetRef\":\"asset:dd576b00ea6b3597c810ac34c66dead82235ce5db30bbdd01a3e809e1349604f\",\"status\":\"SENT_ACCEPTED\",\"occurredAt\":\"2026-11-17T18:20:01.829Z\"}]}"
+        },
+        {
+          "role": "customer",
+          "text": "Chị lấy hai áo Thạch Thảo size M, shop bớt thêm cho chị được không?"
+        },
+        {
+          "role": "shop",
+          "text": "Dạ áo Thạch Thảo có giá 499.000đ/chiếc chị ạ. Khi lấy 2 chiếc, hệ thống tự động áp dụng ưu đãi giảm 5%, tổng thanh toán là 978.100đ (đã bao gồm 30.000đ phí vận chuyển). \n\nYêu cầu hỗ trợ thêm của chị em đã lưu lại, khi món vào giỏ hệ thống sẽ xét tiếp cho mình nhé ạ. Chị có muốn em thêm 2 áo size M vào giỏ luôn không ạ?"
+        },
+        {
+          "role": "customer",
+          "text": "Lấy trắng em nhé."
+        },
+        {
+          "role": "shop",
+          "text": "Dạ em đã thêm 2 chiếc áo Thạch Thảo màu trắng size M vào giỏ cho mình rồi ạ. Tổng thanh toán là 948.100đ (đã gồm ưu đãi giảm 5% và miễn phí vận chuyển). Chị có muốn em hỗ trợ chốt đơn luôn không ạ?"
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "baseline": {
+      "id": "1ddc84e98c2ee1a4eb90e9e02812f70cb939d8b148a84d101e3938999f106d72",
+      "arm": 0,
+      "status": "OK",
+      "text": "Dạ tổng đơn của mình gồm cả ship là 948.100đ chị ạ (được giảm 5% và miễn phí vận chuyển 30.000đ). Chị có muốn em chốt đơn luôn không ạ?",
+      "telemetry": {
+        "providerRequests": 1,
+        "authRequests": 0,
+        "httpStatus": 200,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "inputTokens": 11576,
+        "outputTokens": 1324,
+        "cost": null,
+        "requestHash": "030023fd314f2e1b7f9a55574ceb62535271471a67c00054751300710a6fa054",
+        "latencyMs": 4574.704500000007
+      },
+      "grade": {
+        "voicePass": false,
+        "factsComplete": true,
+        "materialRegression": false,
+        "controlPass": true,
+        "reason": "Tổng 948.100đ, giảm 5% và miễn phí ship đều đúng nguồn. Câu hỏi chốt đơn lặp lại không cần thiết khi chị đã chọn mua và chỉ đang hỏi tổng tiền."
+      }
+    },
+    "treatment": {
+      "id": "1ddc84e98c2ee1a4eb90e9e02812f70cb939d8b148a84d101e3938999f106d72",
+      "arm": 1,
+      "status": "OK",
+      "text": "Dạ tổng thanh toán gồm cả ship là 948.100đ chị nhé, đơn của mình đã được miễn phí vận chuyển 30.000đ ạ. Chị có muốn em chốt đơn luôn không ạ?",
+      "telemetry": {
+        "providerRequests": 1,
+        "authRequests": 0,
+        "httpStatus": 200,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "inputTokens": 11576,
+        "outputTokens": 1735,
+        "cost": null,
+        "requestHash": "030023fd314f2e1b7f9a55574ceb62535271471a67c00054751300710a6fa054",
+        "latencyMs": 5569.135699999999
+      },
+      "grade": {
+        "voicePass": false,
+        "factsComplete": true,
+        "materialRegression": false,
+        "controlPass": true,
+        "reason": "Báo đúng tổng 948.100đ đã miễn phí ship. Tuy nhiên, lại hỏi có muốn chốt đơn dù chị đã nói lấy hai áo trắng size M và shop đã hỏi chốt ở lượt trước."
+      }
+    },
+    "blindPreferred": "TIE",
+    "blindOrder": [
+      1,
+      0
+    ]
+  },
+  {
+    "label": "OPENING_AD_QUOTE",
+    "control": true,
+    "captureHash": "1732134a89379c735d7357bda0e015fab817b122af82f1463a42ec73fb937772",
+    "armHashes": [
+      "fb382e81d89223b089daf7744b97bb32a95b81f816bc7d49f502106ed3c3d696",
+      "fb382e81d89223b089daf7744b97bb32a95b81f816bc7d49f502106ed3c3d696"
+    ],
+    "identicalInputs": true,
+    "dialogue": {
+      "latest": "Bộ này bao nhiêu em?",
+      "history": [],
+      "initialProductCodes": []
+    },
+    "baseline": {
+      "id": "8ccf2f44e65243b698102ad9efcc15e91e327d03984bf84038f97fc81abcad63",
+      "arm": 0,
+      "status": "OK",
+      "text": "Set váy Thạch Thảo có giá 799.000đ, chất tơ Hàn thêu nổi kết hợp chân váy ren mềm, form nhẹ bay tự nhiên ạ. Mẫu này có đủ size S, M, L, XL, chị chọn size nào ạ?",
+      "telemetry": {
+        "providerRequests": 1,
+        "authRequests": 0,
+        "httpStatus": 200,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "inputTokens": 10839,
+        "outputTokens": 694,
+        "cost": null,
+        "requestHash": "fb382e81d89223b089daf7744b97bb32a95b81f816bc7d49f502106ed3c3d696",
+        "latencyMs": 2909.3704
+      },
+      "grade": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialRegression": false,
+        "controlPass": false,
+        "reason": "Trả lời tự nhiên, đúng giá 799.000đ, chất liệu và các size có sẵn; hỏi size giúp khách chọn mua. Tuy nhiên, báo giá mở đầu thiếu mã SV2447 và ảnh sản phẩm theo nguồn."
+      }
+    },
+    "treatment": {
+      "id": "8ccf2f44e65243b698102ad9efcc15e91e327d03984bf84038f97fc81abcad63",
+      "arm": 1,
+      "status": "OK",
+      "text": "Set váy Thạch Thảo giá 799.000đ ạ. Chất liệu áo tơ Hàn thêu và chân váy ren tơ Hàn mềm, form nhẹ nhàng, bay tự nhiên. \n\nSet có sẵn các size S, M, L, XL, chị lấy size nào ạ?",
+      "telemetry": {
+        "providerRequests": 1,
+        "authRequests": 0,
+        "httpStatus": 200,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "inputTokens": 10839,
+        "outputTokens": 690,
+        "cost": null,
+        "requestHash": "fb382e81d89223b089daf7744b97bb32a95b81f816bc7d49f502106ed3c3d696",
+        "latencyMs": 2447.2939999999944
+      },
+      "grade": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialRegression": false,
+        "controlPass": false,
+        "reason": "Giọng bán hàng tự nhiên, báo đúng giá, chất liệu và size; câu hỏi chọn size phù hợp với lượt hỏi giá. Tuy nhiên, báo giá mở đầu cũng thiếu mã SV2447 và ảnh sản phẩm theo nguồn."
+      }
+    },
+    "blindPreferred": "TIE",
+    "blindOrder": [
+      0,
+      1
+    ]
+  },
+  {
+    "label": "MEASUREMENT_CORRECTION",
+    "control": true,
+    "captureHash": "98ae3bfde3e502c64754bbbdb79e8924adfdb304de778b6050324063e6032791",
+    "armHashes": [
+      "78e4c4654175df35d83f11fe586ce5e25f52490ee5208dcc3adf112b3fffa779",
+      "78e4c4654175df35d83f11fe586ce5e25f52490ee5208dcc3adf112b3fffa779"
+    ],
+    "identicalInputs": true,
+    "dialogue": {
+      "latest": "Chị nhắn nhầm cân nặng, 51kg thôi em nhé. Ngực 88, eo 70, mông 94.",
+      "history": [
+        {
+          "role": "shop",
+          "text": "{\"event\":\"RECENT_SHOP_IMAGES_ACCEPTED\",\"completeHistory\":false,\"customerViewed\":\"UNKNOWN\",\"images\":[{\"productId\":\"SV2447\",\"assetRef\":\"asset:1d468b542cef730ec27e5adf3a1fcc4d4a8ff56a3660ac9c875a51b8fd5a8f77\",\"status\":\"SENT_ACCEPTED\",\"occurredAt\":\"2026-11-13T09:37:05.886Z\"}]}"
+        },
+        {
+          "role": "customer",
+          "text": "Chị muốn chọn size áo của bộ váy Thạch Thảo, cao 1m62 nặng 56kg."
+        },
+        {
+          "role": "shop",
+          "text": "Dạ, với chiều cao 1m62 và nặng 56kg, áo trong set váy Thạch Thảo chị mặc size M là phù hợp nhất ạ."
+        }
+      ],
+      "initialProductCodes": [
+        "SV2447"
+      ]
+    },
+    "baseline": {
+      "id": "6f1b975675add6bc5cef287f265b62ac33741afae56b978c83e11c14e7ccf291",
+      "arm": 0,
+      "status": "OK",
+      "text": "Dạ, với số đo mới (ngực 88, eo 70, 51kg), áo thêu Thạch Thảo chị vẫn mặc **size M** vừa vặn nhất ạ. Chị có muốn chốt áo size M này không ạ?",
+      "telemetry": {
+        "providerRequests": 1,
+        "authRequests": 0,
+        "httpStatus": 200,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "inputTokens": 12885,
+        "outputTokens": 448,
+        "cost": null,
+        "requestHash": "78e4c4654175df35d83f11fe586ce5e25f52490ee5208dcc3adf112b3fffa779",
+        "latencyMs": 2252.2969999999914
+      },
+      "grade": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialRegression": true,
+        "controlPass": false,
+        "reason": "Đáp đúng nhu cầu chọn size áo và giữ size M theo kết quả hiện hành. Tuy nhiên, “vừa vặn nhất” biến size đề xuất thành khẳng định độ vừa khi mặc, vượt thông tin được xác minh; không có ưu thế đáng kể so với A."
+      }
+    },
+    "treatment": {
+      "id": "6f1b975675add6bc5cef287f265b62ac33741afae56b978c83e11c14e7ccf291",
+      "arm": 1,
+      "status": "OK",
+      "text": "Dạ, với số đo mới của chị (ngực 88, eo 70, cân nặng 51kg), áo trong set Thạch Thảo chị vẫn mặc size M vừa đẹp ạ. Chị có muốn chốt áo size M này luôn không ạ?",
+      "telemetry": {
+        "providerRequests": 1,
+        "authRequests": 0,
+        "httpStatus": 200,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "inputTokens": 12885,
+        "outputTokens": 423,
+        "cost": null,
+        "requestHash": "78e4c4654175df35d83f11fe586ce5e25f52490ee5208dcc3adf112b3fffa779",
+        "latencyMs": 2161.9554999999964
+      },
+      "grade": {
+        "voicePass": true,
+        "factsComplete": true,
+        "materialRegression": true,
+        "controlPass": false,
+        "reason": "Đáp tự nhiên, dùng đúng kết quả size M cho áo theo số đo đã sửa; hỏi chốt mua không lặp ý khách đã xác nhận. Tuy nhiên, “vừa đẹp” khẳng định thêm hiệu quả mặc mà kết quả tư vấn size chưa xác minh."
+      }
+    },
+    "blindPreferred": "TIE",
+    "blindOrder": [
+      1,
+      0
+    ]
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "kind": "EVALUATOR_EXECUTOR_REPAIR_WITHOUT_GENERATION_REPLAY",
+  "originalSource": "0f393fc356a717d3c6a8fb4f34ea87aa31c168db",
+  "resumedSource": "8403c407d20ec27524e33bbab3a7849eaf130383",
+  "originalRegistrationHash": "74600b8358e3e551efa8d48a62a4fc404949a1a1b091cb201245056691f7dcf3",
+  "failure": "EEXIST immutable RESULTS.json aggregate after second completed owner request",
+  "retainedOwnerAttempts": 2,
+  "remainingOwnerAttempts": 14,
+  "identicalWireHashes": true,
+  "generationRetry": 0,
+  "unknownCompletions": 0,
+  "independentReview": "APPROVE HARNESS REPAIR at8403c407",
+  "changes": "Aggregate once; immutable per-attempt files retained and exact undispatched slots resumed",
+  "modelOrRuntimeChanged": false
+}

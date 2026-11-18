@@ -1,0 +1,131 @@
+{
+  "date": "2026-11-18",
+  "codeSource": "7fb18936468c4e4df02e7cb5784650e8d21bebf0",
+  "firstExecutionSource": "0f393fc356a717d3c6a8fb4f34ea87aa31c168db",
+  "resumeAndJudgeSource": "8403c407d20ec27524e33bbab3a7849eaf130383",
+  "originalRegistrationHash": "74600b8358e3e551efa8d48a62a4fc404949a1a1b091cb201245056691f7dcf3",
+  "registrationHash": "0d51cd36f6e726d4e4659902db3586c9df16e67749f32dc03d16868b021af85d",
+  "models": {
+    "owner": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "judge": {
+      "model": "gpt-6.1-sol",
+      "effort": "high",
+      "blind": true,
+      "independent": true,
+      "rubricHash": "5d74d0c9ae3fdee14d3d807aee47b01c090917b2369a9a13884918de3e230159",
+      "schemaHash": "2fc1541d09752ded5f75ab9886dae83149a58069463faecb300e3ea289051ee9",
+      "retry": 0,
+      "providerConfig": {
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "version": "gpt-6.1-sol",
+        "effort": "high",
+        "credentialRoute": "CODEX_CHATGPT_LOGIN",
+        "generationConfig": {
+          "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+          "cliVersion": "0.159.2",
+          "wireApi": "responses",
+          "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+          "tools": [],
+          "tool_choice": "none",
+          "parallel_tool_calls": false,
+          "store": false,
+          "stream": true,
+          "reasoningEffort": "high",
+          "temperature": "OMITTED_PROVIDER_DEFAULT",
+          "topP": "OMITTED_PROVIDER_DEFAULT",
+          "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+          "timeoutMs": 90000,
+          "maxResponseBytes": 1048576,
+          "relayUpstreamRequestsPerAttempt": 1,
+          "retry": 0,
+          "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+          "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+        }
+      }
+    },
+    "semanticVerifier": "NOT_RUN_IN_DIAGNOSTIC"
+  },
+  "promptHash": "3d94082edc5412188ec922ce581304ccb8771c3e302dba6ba0bf29f7f494028c",
+  "inputArtifacts": [
+    {
+      "path": "c3-j4-two-shirts-70000-6cb3be51-20261118-011012\\RUN_PLAN.json",
+      "sha256": "2c025c3767f6506454c514074160e9fa98f04235bc6f124d398d86f67fdd6b13"
+    },
+    {
+      "path": "c3-sales-voice-voice-controls-20261115.json",
+      "sha256": "57a84f7a2dc206e8a2ac86a0e51943f9e4dc2212da086b25145149ae1c56ead1"
+    },
+    {
+      "path": "c3-sales-voice-registration-3357270a-20261115.json",
+      "sha256": "fc1c3e59d4ef88a789130c8b43f4bc830fa646684577289fe301b6d5bf4323c6"
+    },
+    {
+      "path": "c3-j4-two-shirts-70000-6cb3be51-20261118-011012\\batch-1\\CANDIDATE\\REGISTRATION.json",
+      "sha256": "491a4dbce5d38a49632e3d89e4e781a72faa26510e9cc1b021c66056b4cf65ce"
+    },
+    {
+      "path": "c3-j4-two-shirts-70000-6cb3be51-20261118-011012\\batch-1\\CANDIDATE\\native\\NATIVE_REQUESTS.jsonl",
+      "sha256": "6afef69c071f5cb6da5e66ccb1b6904af226f1537e6c697ee8ccb9c04be33c9a"
+    },
+    {
+      "path": "c3-j4-two-shirts-70000-6cb3be51-20261118-011012\\batch-3\\CONTROLS\\REGISTRATION.json",
+      "sha256": "dd0253ec08de6c9bee8dab3842bcaf971941ad9d9263df5db257d98458b74079"
+    },
+    {
+      "path": "c3-j4-two-shirts-70000-6cb3be51-20261118-011012\\batch-3\\CONTROLS\\native\\NATIVE_REQUESTS.jsonl",
+      "sha256": "b7f006b025bcff1212579413b05f9d0e961a8dc7b7dc3e36b0696228bb623dc4"
+    },
+    {
+      "path": "c3-j4-two-shirts-70000-6cb3be51-20261118-011012\\batch-4\\CONTROLS\\REGISTRATION.json",
+      "sha256": "076b4c457167512ec289f764b4bbec212fbb3daf42ea0d91cb047a0fd9d0d257"
+    },
+    {
+      "path": "c3-j4-two-shirts-70000-6cb3be51-20261118-011012\\batch-4\\CONTROLS\\native\\NATIVE_REQUESTS.jsonl",
+      "sha256": "0aa4d06a2208ee34805ba297335b93603fe80985aa2a4d8fd0dbcca2aba7883a"
+    },
+    {
+      "path": "c3-sales-repair-5dfde94b-sealed-20261113\\REGISTRATION.json",
+      "sha256": "005575f84f110d99c7ffb3d1983c8307125a5fafa5e385a531ef6fe57fbc04c8"
+    },
+    {
+      "path": "c3-sales-repair-5dfde94b-native-r1-20261113\\NATIVE_REQUESTS.jsonl",
+      "sha256": "10891a9b1ab7004943f102a06f2a7b8cc371cdaa28ed63c303d91633be709f25"
+    },
+    {
+      "path": "lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\prompts\\owner.vi.txt",
+      "sha256": "3d94082edc5412188ec922ce581304ccb8771c3e302dba6ba0bf29f7f494028c"
+    }
+  ],
+  "controls": "FIRST_REGISTERED_OPENING_AD_AND_ORIGINAL_J2_R1_CAPTURE_WITH_CURRENT_PROMPT_ON_BOTH_ARMS",
+  "ownerRequest": "chạy mode đi",
+  "localRun": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-support-source-screen-20261118",
+  "retries": 0,
+  "toolsExecuted": 0,
+  "sendEnabled": false,
+  "native": "NOT_RUN_SCREEN_STOP",
+  "harnessIndependentReviews": [
+    "APPROVE HARNESS 0f393fc356a717d3c6a8fb4f34ea87aa31c168db",
+    "APPROVE HARNESS REPAIR 8403c407d20ec27524e33bbab3a7849eaf130383"
+  ]
+}

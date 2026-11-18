@@ -1,6 +1,6 @@
 # Phase C · sửa nguồn gây lời văn quy trình và câu hỏi thừa
 
-Ngày 18/11/2026. P1/P2 đã triển khai tại `7fb18936468c4e4df02e7cb5784650e8d21bebf0` và được review độc lập **APPROVE CODE** trên đúng SHA. Chưa chạy model theo kế hoạch này; P3 và các phép đo bên dưới chưa thực hiện. [Bản sửa, kiểm tra và giới hạn](evidence/c3-sales-voice-source-fix-20261118/IMPLEMENTATION.md) · [Review độc lập](evidence/c3-sales-voice-source-fix-20261118/INDEPENDENT_REVIEW.md).
+Ngày 18/11/2026. P1/P2 đã triển khai tại `7fb18936468c4e4df02e7cb5784650e8d21bebf0` và được review độc lập **APPROVE CODE** trên đúng SHA. Đã chạy sàng lọc tám cặp, 16 owner + 8 judge: **STOP**, giọng P1/P2 1/6, thắng ròng −3. Không chạy native; P3 chưa thực hiện. [Kết quả đầy đủ và giới hạn cách chấm](evidence/c3-support-source-screen-20261118/REPORT.md) · [Bản sửa và kiểm tra](evidence/c3-sales-voice-source-fix-20261118/IMPLEMENTATION.md) · [Review code](evidence/c3-sales-voice-source-fix-20261118/INDEPENDENT_REVIEW.md).
 Base `05ff46a8c18f83f0f9bc61d833599de2bf30a90d`. Source của 30 lượt vừa review là `6cb3be513905cf48230cc977b18832ab23bab8a3`.
 
 Mục tiêu là giúp khách mua thuận tiện bằng lời nói ngắn, rõ và sát câu hỏi. Giữ việc báo đúng giá, hỏi màu cần thiết và xét hỗ trợ đúng một lần đã đạt trong vòng 70.000 byte.
@@ -82,7 +82,7 @@ Chạy J4 ×5 và control ×5 từ lượt đầu, cùng world còn hiệu lực
 - Giọng đạt ít nhất 4/5 tại từng vị trí đích, gồm J4 lượt xin hỗ trợ và hỏi tổng, control lượt đầu, chọn màu và hỏi tổng. Hoàn thành mỗi ca ít nhất 4/5, lỗi fact/state/effect/privacy bằng 0.
 - Báo riêng câu hỏi xác nhận thừa, giải thích quy trình dư và thông tin cần thiết bị cắt. Không chấm bằng bộ từ khóa.
 
-Trần native **120 request** cộng **10 judge**, toàn kế hoạch tối đa **154 request** nếu qua bước sàng lọc. Đây là quần thể development đã xem kết quả, không đại diện holdout. Không tự thêm lần chạy hay chọn mẫu tốt để thay mẫu lỗi. Chưa có request nào thực hiện theo kế hoạch này.
+Trần native **120 request** cộng **10 judge**, toàn kế hoạch tối đa **154 request** nếu qua bước sàng lọc. Đây là quần thể development đã xem kết quả, không đại diện holdout. Không tự thêm lần chạy hay chọn mẫu tốt để thay mẫu lỗi. Thực tế đã dùng đủ 24 request sàng lọc và dừng vì STOP; native 0 request. Sự cố ghi aggregate được sửa với hai request đã hoàn tất giữ nguyên, chỉ chạy tiếp 14 request owner chưa gửi; chi tiết source và seal trong report.
 
 ## 4. Rút kinh nghiệm từ các vòng trước
 
