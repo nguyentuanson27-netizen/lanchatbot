@@ -117,19 +117,40 @@ export function scoreSupportScreen(reg,results,grades){
   voiceDenominator:6,netWins:main.reduce((n,r)=>n+r.netWin,0),rows,providerRequests:results.rows.reduce((n,r)=>n+r.telemetry.providerRequests,0),
   native:ok?'ELIGIBLE_NOT_RUN':'NOT_RUN_SCREEN_STOP',toolsExecuted:0,sendEnabled:false};
 }
+export function readCompletedAttempts(reg,directory){
+ const rows=[];
+ for(const s of reg.slots)for(const arm of s.order){
+  const prefix=resolve(directory,s.id+'-'+arm),started=existsSync(prefix+'.started.json'),finished=existsSync(prefix+'.result.json');
+  assert(!started||finished,'SUPPORT_SCREEN_UNKNOWN_COMPLETION');
+  if(!finished)continue;
+  const r=read(prefix+'.result.json');assert(started&&r.id===s.id&&r.arm===arm&&r.telemetry.requestHash===s.armHashes[arm],'SUPPORT_SCREEN_RESUME_BINDING');
+  assert([0,1].includes(r.telemetry.providerRequests));
+  const {raw:_raw,...row}=r;rows.push({...row,originalSource:reg.source,originalRegistrationHash:digest(reg),resultPath:prefix+'.result.json'});
+ }
+ return rows;
+}
+function prepareResume(path,directory){
+ const original=read(path),source=head();
+ const changed=git('diff','--name-only',original.source,source).split(/\r?\n/u).filter(Boolean);
+ assert(changed.length>0&&changed.every(p=>p==='apps/worker/evals/single-agent-commerce-qualification/support-source-screen.mjs'||p==='apps/worker/evals/single-agent-commerce-qualification/support-source-screen.test.mjs'),'SUPPORT_SCREEN_REPAIR_SCOPE');
+ return {...original,source,resume:{source:original.source,registrationHash:digest(original),registrationPath:resolve(path),directory:resolve(directory),
+  completed:readCompletedAttempts(original,directory)}};
+}
 async function dispatch(reg,seal,out){
  check(reg,seal);assert(!existsSync(out));mkdirSync(out);
  const send=createCapturedOwnerSender({projectId:read(process.env.C3_VERTEX_CREDENTIAL_FILE).project_id,model}, {assertBody:assertReplayWire});
- const rows=[];
+ const rows=reg.resume?structuredClone(reg.resume.completed):[];
+ if(reg.resume){assert.equal(digest(read(reg.resume.registrationPath)),reg.resume.registrationHash);assert.deepEqual(readCompletedAttempts(read(reg.resume.registrationPath),reg.resume.directory),rows);}
  for(const s of reg.slots)for(const arm of s.order){
+  if(rows.some(r=>r.id===s.id&&r.arm===arm))continue;
   check(reg,seal);write(resolve(out,s.id+'-'+arm+'.started.json'),{id:s.id,arm,requestHash:s.armHashes[arm],startedAt:new Date().toISOString()});
   const result=await send(s.arms[arm],s.armHashes[arm]);assert([0,1].includes(result.telemetry.providerRequests));
   const status=result.status==='OK'&&result.output.kind!=='FINAL'?'TOOL_CALL_NOT_EXECUTED':result.status;
   const row={id:s.id,arm,status,text:status==='OK'?result.output.text:null,telemetry:result.telemetry,
    ...(result.stage?{stage:result.stage,errorCode:result.errorCode}:{})};
   write(resolve(out,s.id+'-'+arm+'.result.json'),{...row,raw:result.raw});rows.push(row);
-  write(resolve(out,'RESULTS.json'),{registrationHash:seal,rows});
  }
+ write(resolve(out,'RESULTS.json'),{registrationHash:seal,rows});
 }
 async function judge(reg,results,out){
  check(reg,results.registrationHash);
@@ -160,6 +181,7 @@ async function judge(reg,results,out){
 if(process.argv[1]&&pathToFileURL(resolve(process.argv[1])).href===import.meta.url){
  const [command,...args]=process.argv.slice(2);
  if(command==='prepare'){const [config,out]=args;const reg=prepare(read(config));write(out,reg);console.log(JSON.stringify({source:reg.source,seal:digest(reg),slots:reg.slots.length,ownerCap:16,judgeCap:8}));}
+ else if(command==='prepare-resume'){const [path,directory,out]=args;const reg=prepareResume(path,directory);check(reg,digest(reg));write(out,reg);console.log(JSON.stringify({source:reg.source,seal:digest(reg),retained:reg.resume.completed.length,remaining:16-reg.resume.completed.length}));}
  else if(command==='dispatch'){const [path,seal,out]=args;await dispatch(read(path),seal,out);}
  else if(command==='judge'){const [path,results,out]=args;await judge(read(path),read(results),out);}
  else if(command==='score'){const [path,results,grades,out]=args;const score=scoreSupportScreen(read(path),read(results),read(grades));write(out,score);console.log(JSON.stringify(score));}

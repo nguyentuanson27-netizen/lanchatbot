@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {projectCapturedSupport} from './support-source-screen.mjs';
+import {projectCapturedSupport,readCompletedAttempts} from './support-source-screen.mjs';
+import {mkdtempSync,writeFileSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 import {readCompactSections} from '../single-agent-commerce-read-only/owner-data-presentation.mjs';
 
 for(const final of [false,true])test('replay uses only approved support fields and retains all other wire bytes '+final,()=>{
@@ -22,4 +25,14 @@ for(const final of [false,true])test('replay uses only approved support fields a
  assert.equal(projected[1].parts[0].functionResponse.response.data.operationId,'op');
  assert.deepEqual(projected[2].parts[0].functionResponse.response.data.preCartQuote,{grandTotalVnd:529000});
  assert.deepEqual(projected[2].parts[0].functionResponse.response.data.supportEvaluation,{status:'NOT_EVALUATED',missing:['CART']});
+});
+test('resume preserves completed errors and refuses unknown completion without replay',()=>{
+ const directory=mkdtempSync(join(tmpdir(),'support-source-resume-'));
+ const reg={source:'old',slots:[{id:'id',order:[0,1],armHashes:['hash0','hash1']}]};
+ const file=(suffix,value)=>writeFileSync(join(directory,'id-0.'+suffix+'.json'),JSON.stringify(value));
+ file('started',{});assert.throws(()=>readCompletedAttempts(reg,directory),/UNKNOWN_COMPLETION/u);
+ file('result',{id:'id',arm:0,status:'PROVIDER_ERROR',text:null,telemetry:{requestHash:'hash0',providerRequests:1}});
+ const rows=readCompletedAttempts(reg,directory);assert.equal(rows.length,1);assert.equal(rows[0].status,'PROVIDER_ERROR');assert.equal(rows[0].originalSource,'old');
+ file('result',{id:'id',arm:0,telemetry:{requestHash:'changed',providerRequests:1}});
+ assert.throws(()=>readCompletedAttempts(reg,directory),/RESUME_BINDING/u);
 });
