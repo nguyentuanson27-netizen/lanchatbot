@@ -70,3 +70,5 @@ git diff --check
 ```
 
 Prepare ban đầu đã phát hiện thiếu initialProductCodes trong control cũ và một lần worktree bẩn do đặt nhầm file backup; đều sửa trước generation, 0 provider. Dispatch đầu lỗi ghi aggregate sau hai HTTP; resume, judge và score đều exit 0. Score trả STOP là kết quả phép đo, không phải lỗi tiến trình. Không có chạy native bị giấu hoặc request lỗi bị bỏ mẫu số.
+
+Bản Markdown bỏ khoảng trắng cuối dòng để qua diff-check; text gốc trong RESULTS.json giữ nguyên. Kiểm JSON, mẫu số và mẫu credential công khai đã qua.

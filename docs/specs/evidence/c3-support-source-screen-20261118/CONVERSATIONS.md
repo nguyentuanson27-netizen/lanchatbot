@@ -49,7 +49,7 @@ Khách hiện tại: Shop hỗ trợ thêm cho chị được chút nào không?
 Baseline:
 
 ```text
-Áo thêu Thạch Thảo size M có giá 499.000đ ạ. Em đã ghi nhận yêu cầu hỗ trợ giá của chị; khi chị chọn màu và lên giỏ, hệ thống sẽ tự động kiểm tra phần hỗ trợ cho mình nhé. 
+Áo thêu Thạch Thảo size M có giá 499.000đ ạ. Em đã ghi nhận yêu cầu hỗ trợ giá của chị; khi chị chọn màu và lên giỏ, hệ thống sẽ tự động kiểm tra phần hỗ trợ cho mình nhé.
 
 Chị lấy áo màu trắng hay màu be ạ?
 ```
@@ -75,7 +75,7 @@ Khách hiện tại: Chị lấy hai áo Thạch Thảo size M, shop bớt thêm
 Baseline:
 
 ```text
-Áo Thạch Thảo có giá 499.000đ một chiếc, khi mua 2 chiếc chị được giảm 5% theo ưu đãi chung, tổng cộng là 978.100đ gồm phí ship ạ. 
+Áo Thạch Thảo có giá 499.000đ một chiếc, khi mua 2 chiếc chị được giảm 5% theo ưu đãi chung, tổng cộng là 978.100đ gồm phí ship ạ.
 
 Yêu cầu hỗ trợ giá của chị em đã ghi nhận, khi chị thêm vào giỏ shop sẽ xem xét thêm cho mình nhé!
 ```
@@ -101,7 +101,7 @@ Khách hiện tại: Chị lấy hai áo Thạch Thảo size M, shop bớt thêm
 Baseline:
 
 ```text
-Dạ, hai áo Thạch Thảo size M có giá 499.000đ/chiếc. Khi mua từ 2 chiếc, shop tự động giảm 5% còn tổng 978.100đ (đã gồm 30.000đ ship ạ). 
+Dạ, hai áo Thạch Thảo size M có giá 499.000đ/chiếc. Khi mua từ 2 chiếc, shop tự động giảm 5% còn tổng 978.100đ (đã gồm 30.000đ ship ạ).
 
 Yêu cầu hỗ trợ thêm của chị em đã lưu lại, khi chị lên giỏ hàng hệ thống sẽ tự xét ạ. Chị có muốn em thêm vào giỏ luôn không ạ?
 ```
@@ -109,7 +109,7 @@ Yêu cầu hỗ trợ thêm của chị em đã lưu lại, khi chị lên giỏ
 P1/P2:
 
 ```text
-Dạ, hai áo Thạch Thảo size M có giá 499.000đ/cái (tổng 998.000đ). Khi mua từ 2 chiếc, chị được giảm ngay 5% theo ưu đãi chung còn 948.100đ (phí vận chuyển 30.000đ, tổng cộng là 978.100đ). 
+Dạ, hai áo Thạch Thảo size M có giá 499.000đ/cái (tổng 998.000đ). Khi mua từ 2 chiếc, chị được giảm ngay 5% theo ưu đãi chung còn 948.100đ (phí vận chuyển 30.000đ, tổng cộng là 978.100đ).
 
 Em đã ghi nhận yêu cầu bớt thêm của chị; chị cho hai áo vào giỏ để hệ thống kiểm tra ưu đãi tốt nhất cho mình nhé ạ!
 ```
@@ -128,7 +128,7 @@ Shop: {"event":"RECENT_SHOP_IMAGES_ACCEPTED","completeHistory":false,"customerVi
 
 Khách: Chị lấy hai áo Thạch Thảo size M, shop bớt thêm cho chị được không?
 
-Shop: Dạ áo Thạch Thảo có giá 499.000đ/chiếc chị ạ. Khi lấy 2 chiếc, hệ thống tự động áp dụng ưu đãi giảm 5%, tổng thanh toán là 978.100đ (đã bao gồm 30.000đ phí vận chuyển). 
+Shop: Dạ áo Thạch Thảo có giá 499.000đ/chiếc chị ạ. Khi lấy 2 chiếc, hệ thống tự động áp dụng ưu đãi giảm 5%, tổng thanh toán là 978.100đ (đã bao gồm 30.000đ phí vận chuyển).
 
 Yêu cầu hỗ trợ thêm của chị em đã lưu lại, khi món vào giỏ hệ thống sẽ xét tiếp cho mình nhé ạ. Chị có muốn em thêm 2 áo size M vào giỏ luôn không ạ?
 
@@ -160,7 +160,7 @@ Shop: {"event":"RECENT_SHOP_IMAGES_ACCEPTED","completeHistory":false,"customerVi
 
 Khách: Chị lấy hai áo Thạch Thảo size M, shop bớt thêm cho chị được không?
 
-Shop: Dạ áo Thạch Thảo có giá 499.000đ/chiếc chị ạ. Khi lấy 2 chiếc, hệ thống tự động áp dụng ưu đãi giảm 5%, tổng thanh toán là 978.100đ (đã bao gồm 30.000đ phí vận chuyển). 
+Shop: Dạ áo Thạch Thảo có giá 499.000đ/chiếc chị ạ. Khi lấy 2 chiếc, hệ thống tự động áp dụng ưu đãi giảm 5%, tổng thanh toán là 978.100đ (đã bao gồm 30.000đ phí vận chuyển).
 
 Yêu cầu hỗ trợ thêm của chị em đã lưu lại, khi món vào giỏ hệ thống sẽ xét tiếp cho mình nhé ạ. Chị có muốn em thêm 2 áo size M vào giỏ luôn không ạ?
 
@@ -203,7 +203,7 @@ Set váy Thạch Thảo có giá 799.000đ, chất tơ Hàn thêu nổi kết h�
 P1/P2:
 
 ```text
-Set váy Thạch Thảo giá 799.000đ ạ. Chất liệu áo tơ Hàn thêu và chân váy ren tơ Hàn mềm, form nhẹ nhàng, bay tự nhiên. 
+Set váy Thạch Thảo giá 799.000đ ạ. Chất liệu áo tơ Hàn thêu và chân váy ren tơ Hàn mềm, form nhẹ nhàng, bay tự nhiên.
 
 Set có sẵn các size S, M, L, XL, chị lấy size nào ạ?
 ```
