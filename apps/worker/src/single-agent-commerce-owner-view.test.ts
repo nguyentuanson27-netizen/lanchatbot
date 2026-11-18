@@ -1,5 +1,5 @@
 import {describe,it,expect} from "vitest";
-import {presentCartWriteResult,presentNegotiationResult,presentPreCartQuoteResult,presentPendingPurchase,PENDING_PURCHASE_MEANING,SUPPORT_NOT_EVALUATED_MEANING,SUPPORT_AT_CART_OPENING_MEANING} from "./single-agent-commerce-owner-view.js";
+import {presentCartWriteResult,presentNegotiationResult,presentPreCartQuoteResult,presentPendingPurchase,presentPendingSupport,presentSupportResult,PENDING_PURCHASE_MEANING} from "./single-agent-commerce-owner-view.js";
 
 const option=(color:string|null,status:string,hash:string)=>({size:"M",color,status,reasonCode:null,identityHash:hash.repeat(64),
  productId:"SV2447",offerType:"AO",quantity:1,sourceVersion:"pos-v1",observedAt:"2026-11-10T09:00:00.000Z",expiresAt:"2026-11-10T09:20:00.000Z"});
@@ -81,17 +81,16 @@ describe("price support asked for before a cart exists (option A)",()=>{
   preCartQuote:{negotiationAssessment:"NOT_EVALUATED",grandTotalVnd:529000}}});
  it("tells the owner what is unknown and what the customer does next, on both routes",()=>{
   const a=presentNegotiationResult(refused()).data as Record<string,unknown>,b=presentPreCartQuoteResult(quote()).data as Record<string,unknown>;
-  expect(a).toEqual({supportEvaluation:{status:"NOT_EVALUATED",supportAvailability:"UNKNOWN",missing:["CART","NEGOTIATION"],meaning:SUPPORT_NOT_EVALUATED_MEANING},effectCommitted:false});
+  expect(a).toEqual({supportEvaluation:{status:"NOT_EVALUATED",supportAvailability:"UNKNOWN",missing:["CART","NEGOTIATION"]},effectCommitted:false});
   expect(Object.keys(a)[0]).toBe("supportEvaluation");
-  expect(b.supportEvaluation).toEqual({status:"NOT_EVALUATED",supportAvailability:"UNKNOWN",missing:["CART"],meaning:SUPPORT_NOT_EVALUATED_MEANING});
+  expect(b.supportEvaluation).toEqual({status:"NOT_EVALUATED",supportAvailability:"UNKNOWN",missing:["CART"]});
   // The quote itself is untouched: the total and the field the prompt names are still there.
   expect(b).toMatchObject({calculationBasis:"PRE_CART_POLICY",preCartQuote:{negotiationAssessment:"NOT_EVALUATED",grandTotalVnd:529000}});
  });
- it("promises nothing, denies nothing and names the next step",()=>{
-  expect(SUPPORT_NOT_EVALUATED_MEANING).toMatch(/Không hứa mức hỗ trợ và không nói là không có/u);
-  expect(SUPPORT_NOT_EVALUATED_MEANING).toMatch(/Khách chỉ hỏi giá thì báo giá hiện hành/u);
-  expect(SUPPORT_NOT_EVALUATED_MEANING).toMatch(/^Chỉ dùng khi khách xin hỗ trợ giá\./u);
-  expect(SUPPORT_NOT_EVALUATED_MEANING).not.toMatch(/\d/u);
+ it("keeps an unassessed request distinct from a grant or a denial",()=>{
+  const view=presentNegotiationResult(refused()).data as Record<string,unknown>;
+  expect(view.supportEvaluation).toEqual({status:"NOT_EVALUATED",supportAvailability:"UNKNOWN",missing:["CART","NEGOTIATION"]});
+  expect(view).not.toHaveProperty("cartQuote");
  });
  it("leaves every other result as it was",()=>{
   const evaluated={status:"OK",data:{effectCommitted:true,negotiationStatus:"EVALUATED",supportAvailability:"AVAILABLE",cartQuote:{grandTotalVnd:499000}}};
@@ -131,14 +130,39 @@ describe("support evaluated by code while the cart opened",()=>{
  const opened=(supportEvaluation:Record<string,unknown>)=>({status:"OK",data:{operationId:"op",effect:"CART_OPENED",cartItems:[],cartQuote:{grandTotalVnd:948100},supportEvaluation}});
  it("tells the owner the total already reflects the evaluated request, or that it was not evaluated",()=>{
   const evaluated=presentCartWriteResult(opened({status:"EVALUATED",evaluatedBy:"CODE_AT_CART_OPENING",negotiationApplied:true}));
-  expect(evaluated.data.supportEvaluation).toEqual({status:"EVALUATED",evaluatedBy:"CODE_AT_CART_OPENING",negotiationApplied:true,meaning:SUPPORT_AT_CART_OPENING_MEANING.EVALUATED});
+  expect(evaluated.data.supportEvaluation).toEqual({status:"EVALUATED",evaluatedBy:"CODE_AT_CART_OPENING",negotiationApplied:true});
   expect(evaluated.data.outcome).toMatchObject({done:true,cartChanged:true});
   const pending=presentCartWriteResult(opened({status:"NOT_EVALUATED",evaluatedBy:"CODE_AT_CART_OPENING",negotiationApplied:false,reason:"EFFECT_PERMISSION"}));
-  expect(pending.data.supportEvaluation).toMatchObject({status:"NOT_EVALUATED",meaning:SUPPORT_AT_CART_OPENING_MEANING.NOT_EVALUATED});
-  expect(SUPPORT_AT_CART_OPENING_MEANING.NOT_EVALUATED).toMatch(/không nói đã có hay không có ưu đãi thêm/u);
+  expect(pending.data.supportEvaluation).toEqual({status:"NOT_EVALUATED",evaluatedBy:"CODE_AT_CART_OPENING",negotiationApplied:false,reason:"EFFECT_PERMISSION"});
  });
  it("leaves an ordinary cart write without a support statement",()=>{
   const {supportEvaluation:_none,...data}=opened({}).data;
   expect(presentCartWriteResult({status:"OK",data}).data).not.toHaveProperty("supportEvaluation");
+ });
+});
+describe("support facts shown to the owner",()=>{
+ it.each([
+  [undefined,["CUSTOMER_PURCHASE_CHOICE"],"MATCHING_CART_OPENS","UNKNOWN",[]],
+  [undefined,[],"MATCHING_CART_OPENS","UNKNOWN",[]],
+  [undefined,["COLOR"],"MATCHING_CART_OPENS","KNOWN",["COLOR"]],
+  ["KNOWN",[],"NOT_COMPLETED_AT_CART_OPENING","KNOWN",[]],
+  ["UNKNOWN",["SIZE"],"MATCHING_CART_OPENS","UNKNOWN",[]],
+  ["KNOWN",["SIZE"],"REQUEST_DIFFERS_FROM_CART","UNKNOWN",[]],
+ ])("normalizes waiting state %s / %j / %s", (status,fields,when,expectedStatus,expectedFields)=>{
+  const pending={pendingRef:"ref",subjectRef:"P",offerType:"AO",canApply:false,
+   evaluation:{by:"CODE",when,waitingFor:fields,...(status?{waitingForStatus:status}:{}),meaning:"PROCESS_CANARY"}};
+  const before=structuredClone(pending),view=presentPendingSupport(pending) as {evaluation:Record<string,unknown>};
+  expect(view.evaluation).toEqual({by:"CODE",when,waitingFor:expectedFields,waitingForStatus:expectedStatus});
+  expect(pending).toEqual(before);
+ });
+ it("preserves amounts, proof fields and unrelated meanings while removing support prose",()=>{
+  const raw={status:"OK",data:{operationId:"op",effect:"CART_OPENED",receiptRef:"receipt:op",
+   cartQuote:{cartId:"cart",cartVersion:2,grandTotalVnd:948100,appliedAdjustments:[{kind:"FREE_SHIPPING",amountVnd:30000}]},
+   outcome:{done:true,meaning:"CART_OUTCOME"},pendingPurchase:{meaning:"QUOTE_ROUTE"},
+   supportEvaluation:{status:"EVALUATED",negotiationApplied:true,supportOperationId:"support-op",grandTotalAfterVnd:948100,meaning:"SUPPORT_PROCESS"}}};
+  const before=structuredClone(raw),projected=presentSupportResult(raw);
+  const {meaning:_meaning,...facts}=raw.data.supportEvaluation;
+  expect(projected).toEqual({...raw,data:{...raw.data,supportEvaluation:facts}});
+  expect(raw).toEqual(before);
  });
 });

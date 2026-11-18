@@ -6,7 +6,7 @@ import {createHash} from 'node:crypto';
 import {createServiceAccountAssertion,vertexGenerateEndpoint} from '../../dist/vertex.js';
 import {omitCurrentProductDuplicates} from '../../dist/single-agent-commerce-read-only-context.js';
 import {sizeRequestScope} from '../../dist/single-agent-commerce-state.js';
-import {CART_WRITE_TOOLS,presentCartWriteResult,presentNegotiationResult,presentPreCartQuoteResult,presentPendingPurchase} from '../../dist/single-agent-commerce-owner-view.js';
+import {CART_WRITE_TOOLS,presentCartWriteResult,presentNegotiationResult,presentPreCartQuoteResult,presentPendingPurchase,presentPendingSupport,presentSupportResult} from '../../dist/single-agent-commerce-owner-view.js';
 import {HandoffReasonV2Schema,canonicalJsonV1,CustomerProfileV1Schema,CommerceHistoryMetadataV1Schema} from '@lana/contracts';
 import {presentOwnerData,presentCompactOwnerData} from './owner-data-presentation.mjs';
 import {presentVerifiedOfferTerms} from './owner-offer-terms.mjs';
@@ -266,6 +266,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   if(['add_to_cart','change_cart_item','confirm_purchase','record_negotiation','apply_pending_negotiation','cancel_pending_negotiation'].includes(response.name)){
    if(Array.isArray(data.cartItems))delete data.cart;
    if(compactV2)response.response.data=compactSelectionResult(data,c.runtimeProducts??[]);
+   response.response=presentSupportResult(response.response);
   }
   const presented=response.response.data;
   // These are code-owned result meanings, not extra facts or a prose classifier.
@@ -273,7 +274,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
   if(presented.preCartQuoteRequest&&!quoteCallable)delete presented.preCartQuoteRequest;
   // Support asked for before a cart: one code-owned statement of what is and is not known, on both routes.
   if(response.name==='record_negotiation')response.response=presentNegotiationResult(response.response);
-  if(response.name==='quote_product')response.response=presentPreCartQuoteResult(response.response);
+  if(response.name==='quote_product')response.response=presentSupportResult(presentPreCartQuoteResult(response.response));
   if(response.name==='recommend_size'&&response.response.status==='OK'){
    const fitEvaluation=presentFitEvaluation(data);
    if(fitEvaluation){presented.fitEvaluation=fitEvaluation;for(const k of [...FIT_FIELDS,'profileRevision','measurementFingerprint'])delete presented[k];}
@@ -291,6 +292,7 @@ export function buildGeminiCommerceRequest(request,declarations=readOnlyDeclarat
  const state=Object.fromEntries(['currentProductId','consideredSize','salesStage','customerMeasurements','fitPreference','preferences','cartQuote','cartItems','checkoutStatus',
   'customerProfileId','customerProfileRevision','measurementFingerprint','sizeMeasurementFingerprints','sizeFitTargets','customerStateUpdatePending','pendingSupport']
   .filter(k=>Object.hasOwn(c.state,k)).map(k=>[k,c.state[k]]));
+ if(state.pendingSupport)state.pendingSupport=presentPendingSupport(state.pendingSupport);
  if(Array.isArray(state.customerMeasurements))state.customerMeasurements=state.customerMeasurements.map(measurement);
  // What the customer asked to buy and could not yet be added, with the quote route when this generation can take it.
  const pendingPurchase=presentPendingPurchase(c.state.pendingPurchase,{quoteCallable});

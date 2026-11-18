@@ -169,6 +169,16 @@
       "reuses": "THE_EXISTING_GUARDED_ACTIVATION_COMMAND_WITH_ITS_AUTHORITY_SOURCE_CAS_AND_RECEIPT_CHECKS",
       "explicitCommand": "apply_pending_negotiation IS OFFERED ONLY WHEN pendingSupport.canApply IS TRUE, AS RECOVERY",
       "sharedProcessFact": "state.pendingSupport.evaluation IS READ BY BOTH OWNER AND VERIFIER AND NAMES WHAT THE CUSTOMER STILL HAS TO CHOOSE",
+      "presentationAmendment": {
+        "approvedAt": "2026-11-18",
+        "ownerAnswer": "tiến hành fix đi; gọi review độc lập -> fix cho đến khi approve",
+        "plan": "docs/specs/c3-phase-c-sales-voice-source-fix-plan-20261118.md",
+        "waitingForStatus": "KNOWN_ONLY_WITH_MATCHING_CHOICE_EVIDENCE_OR_AN_ELIGIBLE_CART_ELSE_UNKNOWN",
+        "ownerProjection": "STRUCTURED_SUPPORT_FACTS_WITHOUT_SUPPORT_MEANING_PROSE",
+        "legacyPurchaseChoice": "UNKNOWN_EMPTY_WAITING_FIELDS",
+        "verifierSourceRetained": true,
+        "modelMeasurement": "NOT_RUN"
+      },
       "replayedCommand": "A REPEATED COMMAND RETURNS THE SAME RESULT SHAPE AS ITS FIRST COMMIT",
       "transactionInvariantsChanged": false,
       "promptsChanged": [

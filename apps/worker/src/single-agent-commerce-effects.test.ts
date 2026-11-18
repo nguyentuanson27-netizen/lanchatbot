@@ -1194,7 +1194,9 @@ it.each(["mutation","ordinary-negotiation"] as const)("does not offer pending ac
  const result=await s.tools.invoke(mode==="mutation"?{name:"change_cart_item",args:{subjectRef:s.current().cart!.value.lines[0]!.lineId,action:"SET_QUANTITY",quantity:2}}:
   {name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao"}});
  expect(result.status).toBe("OK");
- expect(s.tools.snapshot().state.pendingSupport).toMatchObject({canApply:false,evaluation:{by:"CODE",when:"REQUEST_DIFFERS_FROM_CART",waitingFor:[]}});
+ const baseSnapshot=s.base.snapshot;
+ s.base.snapshot=()=>{const c=baseSnapshot();c.state.pendingPurchase={lines:[{productId:"SM613",offerType:"DIRECT",missing:"COLOR"}]};return c;};
+ expect(s.tools.snapshot().state.pendingSupport).toMatchObject({canApply:false,evaluation:{by:"CODE",when:"REQUEST_DIFFERS_FROM_CART",waitingForStatus:"UNKNOWN",waitingFor:[]}});
  expect(result.data).toMatchObject({pendingSupport:{canApply:false}});
 });
 
@@ -1246,15 +1248,32 @@ describe("code evaluates a stored support request when the matching cart opens",
   const s=await stored();
   expect((await s.tools.invoke(record)).status).toBe("OK");
   const view=s.tools.snapshot().state.pendingSupport as Record<string,unknown>;
-  expect(view).toMatchObject({status:"NOT_EVALUATED",canApply:false,evaluation:{by:"CODE",when:"MATCHING_CART_OPENS",waitingFor:["CUSTOMER_PURCHASE_CHOICE"]}});
+  expect(view).toMatchObject({status:"NOT_EVALUATED",canApply:false,evaluation:{by:"CODE",when:"MATCHING_CART_OPENS",waitingForStatus:"UNKNOWN",waitingFor:[]}});
   expect(view).not.toHaveProperty("blockedReason");
   expect((view.evaluation as {meaning:string}).meaning).toContain("Code tự xét một lần ngay khi món này vào giỏ");
   // The colour the customer has not chosen for this exact item comes from the stored purchase note.
   const snapshot=s.base.snapshot;
   s.base.snapshot=()=>{const c=snapshot();c.state.pendingPurchase={lines:[{productId:"SM613",offerType:"DIRECT",size:"M",color:null,quantity:1,missing:"COLOR"},
    {productId:"OTHER",offerType:"DIRECT",size:null,color:"navy",quantity:1,missing:"SIZE"}]};return c;};
-  expect(s.tools.snapshot().state.pendingSupport).toMatchObject({evaluation:{when:"MATCHING_CART_OPENS",waitingFor:["COLOR"]}});
+  expect(s.tools.snapshot().state.pendingSupport).toMatchObject({evaluation:{when:"MATCHING_CART_OPENS",waitingForStatus:"KNOWN",waitingFor:["COLOR"]}});
  });
+ it.each([
+  ["same target size", "SM613","DIRECT","SIZE","KNOWN",["SIZE"]],
+  ["other product", "OTHER","DIRECT","COLOR","UNKNOWN",[]],
+  ["other offer", "SM613","AO","COLOR","UNKNOWN",[]],
+ ])("reports only a proved missing choice: %s",async(_name,productId,offerType,missing,status,fields)=>{
+  const s=await stored();await s.tools.invoke(record);
+  const snapshot=s.base.snapshot;
+  s.base.snapshot=()=>{const c=snapshot();c.state.pendingPurchase={lines:[{productId,offerType,missing}]};return c;};
+  expect(s.tools.snapshot().state.pendingSupport).toMatchObject({evaluation:{waitingForStatus:status,waitingFor:fields}});
+ });
+ it.each(["Giá hơi cao, bớt cho chị được không?","Chị lấy hai áo. Giá hơi cao, bớt cho chị được không?"])(
+  "does not infer a missing purchase decision from a request with no choice record: %s",async text=>{
+   const s=await setup(()=>commerceNow,[text]);
+   await s.tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}});
+   expect((await s.tools.invoke(record)).status).toBe("OK");
+   expect(s.tools.snapshot().state.pendingSupport).toMatchObject({evaluation:{waitingForStatus:"UNKNOWN",waitingFor:[]}});
+  });
  it("returns the stored request again for a repeated record instead of an empty result, without another commit",async()=>{
   const s=await stored();
   const first=await s.tools.invoke(record),count=s.commits.length;
@@ -1295,7 +1314,7 @@ describe("code evaluates a stored support request when the matching cart opens",
   let calls=0;s.authorize.mockImplementation(async()=>++calls<=2);
   const opened=await s.tools.invoke(s.add);
   expect(opened).toMatchObject({status:"OK",data:{effect:"CART_OPENED",supportEvaluation:{status:"NOT_EVALUATED",negotiationApplied:false,reason:"EFFECT_PERMISSION"},
-   pendingSupport:{canApply:true,evaluation:{when:"NOT_COMPLETED_AT_CART_OPENING",waitingFor:[]}}}});
+   pendingSupport:{canApply:true,evaluation:{when:"NOT_COMPLETED_AT_CART_OPENING",waitingForStatus:"KNOWN",waitingFor:[]}}}});
   expect(s.commits).toHaveLength(before+1);
   expect(s.current().cart).not.toBeNull();expect(s.current().pendingNegotiation?.status).toBe("PENDING");
   expect(await s.tools.terminalOutcome!()).toBeNull();

@@ -96,12 +96,13 @@ export async function createCommerceEffectTools(input: {
     const wanted=(input.base.snapshot().state.pendingPurchase as {lines?:{productId?:unknown;offerType?:unknown;missing?:unknown}[]}|undefined)?.lines;
     const missing=(Array.isArray(wanted)?wanted:[]).filter(l=>l.productId===pending.productId&&l.offerType===pending.offerId&&(l.missing==="COLOR"||l.missing==="SIZE"))
       .map(l=>l.missing as SupportWaitingFor);
-    const waitingFor:SupportWaitingFor[]=current.cart?[]:missing.length?[...new Set(missing)]:["CUSTOMER_PURCHASE_CHOICE"];
+    const waitingFor:SupportWaitingFor[]=current.cart?[]:[...new Set(missing)];
+    const waitingForStatus=eligible||(!current.cart&&missing.length>0)?"KNOWN":"UNKNOWN";
     return {pendingRef:pending.pendingId,subjectRef:pending.productId,offerType:pending.offerId,status:"NOT_EVALUATED",
       negotiatedPriceFloor:unestablishedPriceFloor(),
       benefitAuthorization:{scope:"ADDITIONAL_SUPPORT_FOR_THIS_PENDING_REQUEST",status:"NOT_GRANTED",grantedBenefits:[],receiptRef:null},
       canApply:!!eligible,
-      evaluation:supportEvaluationStep(!current.cart?"MATCHING_CART_OPENS":eligible?"NOT_COMPLETED_AT_CART_OPENING":"REQUEST_DIFFERS_FROM_CART",waitingFor)};
+      evaluation:supportEvaluationStep(!current.cart?"MATCHING_CART_OPENS":eligible?"NOT_COMPLETED_AT_CART_OPENING":"REQUEST_DIFFERS_FROM_CART",waitingFor,waitingForStatus)};
   }
   // One result shape for a first commit and for its replay, so a repeated call never reads as an empty outcome.
   const effectData=(operationId:string,effectName:string,pendingRecord:boolean)=>{

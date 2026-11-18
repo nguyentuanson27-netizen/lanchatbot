@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {buildGeminiCommerceRequest,FIT_EVALUATION_MEANING} from './gemini-inference.mjs';
 import {readCompactSections} from './owner-data-presentation.mjs';
-import {SUPPORT_NOT_EVALUATED_MEANING,SUPPORT_AT_CART_OPENING_MEANING} from '../../dist/single-agent-commerce-owner-view.js';
+import {buildVerifierRequest} from './protocol.mjs';
+import {makeBinding} from '../../dist/single-agent-semantic-verifier-boundary.js';
 
 const request=(name,data,final=false)=>({generationId:'meaning:1',instructions:'Tư vấn',ownerContextPresentation:'VI_DATA_BLOCKS_COMPACT_V2',
  context:{boundSubjects:[],protectedClaims:[],runtimeProducts:[],policyLiterals:[],effectReceipts:[],state:{revision:1}},
@@ -25,11 +26,8 @@ for(const final of [false,true])test(`owner groups exact current fit and unknown
  const nr=request('record_negotiation',{effectCommitted:false,negotiationStatus:'NOT_EVALUATED',supportAvailability:'UNKNOWN',missing:['CART','NEGOTIATION']},final);
  nr.contents.at(-1).parts[0].functionResponse.response.status='REJECTED';nr.contents.at(-1).parts[0].functionResponse.response.reason='NEGOTIATION_CONTEXT_REQUIRED';
  const n=result(buildGeminiCommerceRequest(nr),final);
- assert.equal(n.effectCommitted,false);assert.deepEqual(n.supportEvaluation,{status:'NOT_EVALUATED',supportAvailability:'UNKNOWN',missing:['CART','NEGOTIATION'],
-  meaning:SUPPORT_NOT_EVALUATED_MEANING});
- // Option A: the meaning comes first and tells the owner the customer's next step; it promises and denies nothing.
- assert.equal(Object.keys(n)[0],'supportEvaluation');assert.match(n.supportEvaluation.meaning,/Hỗ trợ riêng chưa được xét/u);
- assert.match(n.supportEvaluation.meaning,/không bắt khách hỏi lại/u);
+ assert.equal(n.effectCommitted,false);assert.deepEqual(n.supportEvaluation,{status:'NOT_EVALUATED',supportAvailability:'UNKNOWN',missing:['CART','NEGOTIATION']});
+ assert.equal(Object.keys(n)[0],'supportEvaluation');assert(!Object.hasOwn(n.supportEvaluation,'meaning'));
  assert(!Object.hasOwn(n,'negotiationStatus'));assert(!Object.hasOwn(n,'supportAvailability'));assert(!Object.hasOwn(n,'missing'));
  assert(Buffer.byteLength(JSON.stringify(wire))<=65536);
 });
@@ -114,8 +112,7 @@ for(const final of [false,true])test(`historical fit and negotiation results sta
  nr.context.state.cartQuote={grandTotalVnd:499000};
  const nbody=buildGeminiCommerceRequest(nr),nturns=final?readCompactSections(nbody.contents[0]).find(s=>s.label==='Lịch sử công cụ đã hoàn tất').value[0].completedToolTurns:nbody.contents;
  const results=nturns.flatMap(m=>m.parts.flatMap(p=>p.functionResponse?[p.functionResponse.response.data]:[]));
- assert.deepEqual(results[0].supportEvaluation,{status:'NOT_EVALUATED',supportAvailability:'UNKNOWN',missing:['CART'],
-  meaning:SUPPORT_NOT_EVALUATED_MEANING});
+ assert.deepEqual(results[0].supportEvaluation,{status:'NOT_EVALUATED',supportAvailability:'UNKNOWN',missing:['CART']});
  assert(!Object.hasOwn(results[0],'cartQuote'));
  assert.equal(results[1].cartQuote.grandTotalVnd,499000);assert.equal(results[1].effectCommitted,true);
 });
@@ -124,7 +121,7 @@ for(const final of [false,true])test(`a quote without a cart carries the same su
   preCartQuote:{negotiationAssessment:'NOT_EVALUATED',grandTotalVnd:529000}},final);
  r.availableTools=['quote_product'];r.toolWorkAccounting='PRIMITIVE_WORK_V2';
  const before=structuredClone(r.contents),view=result(buildGeminiCommerceRequest(r),final);
- assert.deepEqual(view.supportEvaluation,{status:'NOT_EVALUATED',supportAvailability:'UNKNOWN',missing:['CART'],meaning:SUPPORT_NOT_EVALUATED_MEANING});
+ assert.deepEqual(view.supportEvaluation,{status:'NOT_EVALUATED',supportAvailability:'UNKNOWN',missing:['CART']});
  assert.equal(view.preCartQuote.grandTotalVnd,529000);assert.equal(view.preCartQuote.negotiationAssessment,'NOT_EVALUATED');
  assert.deepEqual(r.contents,before);
  const withCart=request('quote_product',{subjectRef:'P',calculationBasis:'CART',appliesNegotiationReceipt:true},final);
@@ -140,10 +137,68 @@ test('owner wire carries the code-evaluated support result and the shared pendin
  r.availableTools=['read_policy','add_to_cart'];
  r.context.state.pendingSupport={pendingRef:'a'.repeat(64),subjectRef:'P',offerType:'AO',status:'NOT_EVALUATED',canApply:false,evaluation};
  const wire=buildGeminiCommerceRequest(r),view=result(wire,false);
- assert.equal(view.supportEvaluation.status,'EVALUATED');assert.equal(view.supportEvaluation.meaning,SUPPORT_AT_CART_OPENING_MEANING.EVALUATED);
+ assert.equal(view.supportEvaluation.status,'EVALUATED');assert(!Object.hasOwn(view.supportEvaluation,'meaning'));
  assert.equal(view.supportEvaluation.grandTotalAfterVnd,948100);
  // The same code-owned step the verifier reads in trusted state is in the owner's frame, with no cart to create named.
  const frame=wire.contents[0].parts[0].text;
- assert.match(frame,/MATCHING_CART_OPENS/u);assert.match(frame,/COLOR/u);assert.match(frame,/Lời xin hỗ trợ giá cho món này đã lưu, chưa xét\./u);
+ assert.match(frame,/MATCHING_CART_OPENS/u);assert.match(frame,/COLOR/u);assert(!frame.includes(evaluation.meaning));
  assert.doesNotMatch(frame,/CART_REQUIRED|blockedReason/u);
+});
+for (const final of [false,true]) for(const current of ['legacy','settled']) test('support owner projection retains facts without process prose ('+(final?'final':'native')+', '+current+')',()=>{
+ const legacy={pendingRef:'a'.repeat(64),subjectRef:'P',offerType:'AO',status:'NOT_EVALUATED',canApply:false,
+  evaluation:{by:'CODE',when:'MATCHING_CART_OPENS',waitingFor:['CUSTOMER_PURCHASE_CHOICE'],meaning:'SUPPORT_PROCESS_CANARY'}};
+ const adjustment={kind:'FREE_SHIPPING',amountVnd:30000,decisionId:'policy-decision'};
+ const r=request('record_negotiation',{operationId:'record-op',effect:'NEGOTIATION_REQUEST_RECORDED',pendingSupport:legacy,
+  supportEvaluation:{status:'NOT_EVALUATED',pendingCommitted:true,negotiationApplied:false,meaning:'RECORD_PROCESS_CANARY'}},final);
+ if(current==='legacy')r.context.state.pendingSupport=structuredClone(legacy);
+ r.contents.splice(0,0,{role:'model',parts:[{text:'ACCEPTED_HISTORY_CANARY'}]});
+ r.contents.push(
+  {role:'model',parts:[{functionCall:{name:'quote_product',args:{subjectRef:'P',offerTypes:['AO']},id:'quote-call'},thoughtSignature:'quote-signature'}]},
+  {role:'user',parts:[{functionResponse:{name:'quote_product',id:'quote-call',response:{status:'OK',data:{
+   calculationBasis:'PRE_CART_POLICY',appliesNegotiationReceipt:false,
+   preCartQuote:{negotiationAssessment:'NOT_EVALUATED',grandTotalVnd:978100}}}}}]},
+  {role:'model',parts:[{functionCall:{name:'add_to_cart',args:{subjectRef:'P',offerType:'AO',color:'white',size:'M',quantity:2},id:'add-call'},thoughtSignature:'add-signature'}]},
+  {role:'user',parts:[{functionResponse:{name:'add_to_cart',id:'add-call',response:{status:'OK',data:{
+   operationId:'cart-op',effect:'CART_OPENED',cartItems:[{productRef:'P',quantity:2}],
+   cartQuote:{cartId:'cart',cartVersion:2,grandTotalVnd:948100,appliedAdjustments:[adjustment]},
+   supportEvaluation:{status:'EVALUATED',evaluatedBy:'CODE_AT_CART_OPENING',negotiationApplied:true,
+    supportOperationId:'support-op',grandTotalBeforeVnd:978100,grandTotalAfterVnd:948100,meaning:'ADD_PROCESS_CANARY'}}}}}]});
+ r.context.state.cartQuote={cartId:'cart',cartVersion:2,grandTotalVnd:948100};
+ if(current==='settled')r.contents.push(
+  {role:'model',parts:[{functionCall:{name:'quote_product',args:{subjectRef:'P',offerTypes:['AO']},id:'cart-quote-call'},thoughtSignature:'cart-quote-signature'}]},
+  {role:'user',parts:[{functionResponse:{name:'quote_product',id:'cart-quote-call',response:{status:'OK',data:{
+   calculationBasis:'CART',appliesNegotiationReceipt:true,cartQuote:{grandTotalVnd:948100}}}}}]});
+ const raw={...structuredClone(r),signal:r.signal},wire=buildGeminiCommerceRequest(r);
+ const sections=readCompactSections(wire.contents[0]),state=sections.find(s=>s.label==='Hồ sơ và trạng thái hiện tại').value;
+ const expectedEvaluation={by:'CODE',when:'MATCHING_CART_OPENS',waitingFor:[],waitingForStatus:'UNKNOWN'};
+ if(current==='legacy')assert.deepEqual(state.pendingSupport.evaluation,expectedEvaluation);
+ else {assert(!Object.hasOwn(state,'pendingSupport'));assert.equal(state.cartQuote.grandTotalVnd,948100);}
+ const turns=final?sections.find(s=>s.label==='Lịch sử công cụ đã hoàn tất').value[0].completedToolTurns:wire.contents;
+ const responses=turns.flatMap(m=>m.parts.flatMap(p=>p.functionResponse?[p.functionResponse]:[]));
+ assert.deepEqual(responses.map(x=>x.id),['c1','quote-call','add-call',...(current==='settled'?['cart-quote-call']:[])]);
+ assert.deepEqual(responses[0].response.data.pendingSupport.evaluation,expectedEvaluation);
+ assert.equal(responses[0].response.data.supportEvaluation.status,'NOT_EVALUATED');
+ assert.equal(responses[0].response.data.operationId,'record-op');
+ assert.equal(responses[1].response.data.preCartQuote.grandTotalVnd,978100);
+ assert.equal(responses[1].response.data.supportEvaluation.status,'NOT_EVALUATED');
+ assert.deepEqual(responses[2].response.data.cartQuote.appliedAdjustments,[adjustment]);
+ assert.equal(responses[2].response.data.supportEvaluation.supportOperationId,'support-op');
+ assert.equal(responses[2].response.data.supportEvaluation.grandTotalAfterVnd,948100);
+ for(const x of responses)if(x.response.data.supportEvaluation)assert(!Object.hasOwn(x.response.data.supportEvaluation,'meaning'));
+ if(current==='settled'){
+  assert.equal(responses[3].response.data.cartQuote.grandTotalVnd,948100);
+  assert(!Object.hasOwn(responses[3].response.data,'supportEvaluation'));
+ }
+ assert(!JSON.stringify(wire).includes('SUPPORT_PROCESS_CANARY'));
+ assert(!JSON.stringify(wire).includes('RECORD_PROCESS_CANARY'));
+ assert(!JSON.stringify(wire).includes('ADD_PROCESS_CANARY'));
+ assert(JSON.stringify(wire).includes('ACCEPTED_HISTORY_CANARY'));
+ if(!final)assert.deepEqual(wire.contents.filter(m=>m.parts.some(p=>p.functionCall)),raw.contents.filter(m=>m.parts.some(p=>p.functionCall)));
+ assert.deepEqual(r,raw);
+ const manifest=JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url),'utf8'));
+ const verifier=buildVerifierRequest(manifest,{instructions:'Verify',finalDraft:'Dạ chị.',trusted:r.context,
+  binding:makeBinding('wire-check','Dạ chị.',r.context),latest:'Chị lấy hai áo.',history:[]});
+ const verifiedFrame=JSON.parse(verifier.input[0].content[0].text);
+ assert.deepEqual(verifiedFrame.trusted,r.context);
+ if(current==='legacy')assert.equal(verifiedFrame.trusted.state.pendingSupport.evaluation.meaning,'SUPPORT_PROCESS_CANARY');
 });

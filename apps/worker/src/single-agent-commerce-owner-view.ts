@@ -24,6 +24,36 @@ export interface CartWriteOutcome {
 }
 type Json=Record<string,unknown>;
 const record=(v:unknown):v is Json=>!!v&&typeof v==="object"&&!Array.isArray(v);
+
+/** Owner-only view of a pending request. The original remains available to the verifier. */
+export function presentPendingSupport(value:unknown):unknown {
+ if(!record(value))return value;
+ const view=structuredClone(value);
+ if(!record(view.evaluation))return view;
+ const {meaning:_meaning,...evaluation}=view.evaluation;
+ const fields=evaluation.waitingFor;
+ const validFields=Array.isArray(fields)&&fields.every(field=>field==="COLOR"||field==="SIZE");
+ // Older snapshots had no status. Only a concrete missing field can be recovered from that shape.
+ const known=evaluation.when!=="REQUEST_DIFFERS_FROM_CART"&&validFields&&
+  (evaluation.waitingForStatus==="KNOWN"||
+   !Object.hasOwn(evaluation,"waitingForStatus")&&fields.length>0);
+ evaluation.waitingForStatus=known?"KNOWN":"UNKNOWN";
+ evaluation.waitingFor=known?[...fields]:[];
+ view.evaluation=evaluation;
+ return view;
+}
+
+/** Project only the support paths owned by commerce tools; unrelated meanings are retained. */
+export function presentSupportResult(result:OwnerToolResult):OwnerToolResult {
+ if(!record(result.data))return result;
+ const data=structuredClone(result.data);
+ if(record(data.pendingSupport))data.pendingSupport=presentPendingSupport(data.pendingSupport);
+ if(record(data.supportEvaluation)){
+  const {meaning:_meaning,...facts}=data.supportEvaluation;
+  data.supportEvaluation=facts;
+ }
+ return {...result,data};
+}
 /** Stages that end before, or with an explicit refusal of, the write. */
 const NOT_COMMITTED:readonly CommerceEffectFailureStage[]=["VALIDATION","AUTHORITY","SOURCE","DOMAIN","CAS"];
 /** Source bookkeeping the owner cannot use; the product section and verifier keep it. */
@@ -40,12 +70,6 @@ const MEANING={
  NOT_DONE:"Thao tác chưa thực hiện, giỏ không đổi. Xử lý theo reason; không báo đã xong.",
  UNKNOWN:"Chưa xác nhận được giỏ đã đổi hay chưa. Không báo đã xong và không gọi lại lệnh này.",
 } as const;
-/** A support request stored before the cart, evaluated by code while this command opened the cart. */
-export const SUPPORT_AT_CART_OPENING_MEANING={
- EVALUATED:"Lời xin hỗ trợ khách gửi trước đó vừa được xét khi món vào giỏ. cartQuote là tổng sau khi xét: báo tổng này, chỉ nêu khoản ưu đãi có trong appliedAdjustments, không tự thêm mức giảm.",
- NOT_EVALUATED:"Món đã vào giỏ nhưng lời xin hỗ trợ khách gửi trước đó chưa được xét cho giỏ này. Báo tổng theo cartQuote; không nói đã có hay không có ưu đãi thêm.",
-} as const;
-
 /** `quoteCallable`: whether quote_product can actually be called in the generation this result is shown to. */
 export function presentCartWriteResult(result:OwnerToolResult,options:{quoteCallable?:boolean}={}):OwnerToolResult&{data:Json} {
  const data:Json=record(result.data)?structuredClone(result.data):{};
@@ -53,8 +77,6 @@ export function presentCartWriteResult(result:OwnerToolResult,options:{quoteCall
  if(options.quoteCallable===false)delete data.preCartQuoteRequest;
  const quotable=options.quoteCallable!==false&&record(data.preCartQuoteRequest);
  if(result.status==="OK"){
-  const support=record(data.supportEvaluation)&&data.supportEvaluation.evaluatedBy==="CODE_AT_CART_OPENING"?data.supportEvaluation:null;
-  if(support)data.supportEvaluation={...support,meaning:SUPPORT_AT_CART_OPENING_MEANING[support.status==="EVALUATED"?"EVALUATED":"NOT_EVALUATED"]};
   return {...result,data:{outcome:{done:true,cartChanged:true,meaning:MEANING.DONE} satisfies CartWriteOutcome,...data}};
  }
  const choice=record(data.choiceResolution)?data.choiceResolution:null;
@@ -83,23 +105,21 @@ export function presentCartWriteResult(result:OwnerToolResult,options:{quoteCall
 /**
  * Price support asked for before a cart exists (owner decision 2026-11-12, option A). The negotiation
  * engine evaluates support only against a cart, and its evidence must follow the cart's creation, so
- * nothing can be granted or promised here. The owner is told exactly that and what the customer does next.
+ * the result exposes the unevaluated status and the missing prerequisite.
  */
-export const SUPPORT_NOT_EVALUATED_MEANING="Chỉ dùng khi khách xin hỗ trợ giá. Giá hiện tại và ưu đãi thường đã có trong báo giá. Hỗ trợ riêng chưa được xét. "+
- "Không hứa mức hỗ trợ và không nói là không có. Khách chỉ hỏi giá thì báo giá hiện hành. Khách đã muốn mua thì hỏi lựa chọn còn thiếu. Lời xin hỗ trợ đã lưu được code tự xét ngay khi món vào giỏ; không bắt khách hỏi lại và không thêm giỏ chỉ để xét.";
-/** A refused negotiation record that needs a cart: its meaning, never the internal status words alone. */
+/** Group the unevaluated status of a refused record with its actual prerequisites. */
 export function presentNegotiationResult(result:OwnerToolResult):OwnerToolResult {
  const data=record(result.data)?result.data:null;
  if(result.status!=="REJECTED"||result.reason!=="NEGOTIATION_CONTEXT_REQUIRED"||!data||data.effectCommitted!==false||data.negotiationStatus!=="NOT_EVALUATED"||
   data.supportAvailability!=="UNKNOWN"||!Array.isArray(data.missing)||!data.missing.length||!data.missing.every(k=>k==="CART"||k==="NEGOTIATION"))return result;
  const {negotiationStatus,supportAvailability,missing,...rest}=structuredClone(data);
- return {...result,data:{supportEvaluation:{status:negotiationStatus,supportAvailability,missing,meaning:SUPPORT_NOT_EVALUATED_MEANING},...rest}};
+ return {...result,data:{supportEvaluation:{status:negotiationStatus,supportAvailability,missing},...rest}};
 }
-/** A quote computed without a cart applies no negotiation receipt: say so in the same words as a refused record. */
+/** A pre-cart quote carries the same structured support status as a refused record. */
 export function presentPreCartQuoteResult(result:OwnerToolResult):OwnerToolResult {
  const data=record(result.data)?result.data:null;
  if(result.status!=="OK"||!data||data.calculationBasis!=="PRE_CART_POLICY"||data.appliesNegotiationReceipt!==false)return result;
- return {...result,data:{...structuredClone(data),supportEvaluation:{status:"NOT_EVALUATED",supportAvailability:"UNKNOWN",missing:["CART"],meaning:SUPPORT_NOT_EVALUATED_MEANING}}};
+ return {...result,data:{...structuredClone(data),supportEvaluation:{status:"NOT_EVALUATED",supportAvailability:"UNKNOWN",missing:["CART"]}}};
 }
 
 /**
