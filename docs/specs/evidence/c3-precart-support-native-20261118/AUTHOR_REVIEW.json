@@ -1,0 +1,50 @@
+{
+  "judgeTaskPass": {
+    "J4": 5,
+    "TWO_SHIRTS": 4
+  },
+  "judgeMaterialIssues": 0,
+  "judgeVoicePass": {
+    "J4": 5,
+    "TWO_SHIRTS": 4
+  },
+  "actualTerminals": {
+    "SEND_ELIGIBLE": 29,
+    "HANDOFF": 1,
+    "NO_SEND": 0
+  },
+  "authorFindings": [
+    {
+      "id": "F1",
+      "severity": "HIGH_EXPERIENCE",
+      "case": "two-shirts repetition3 turn3",
+      "finding": "Silent handoff with sufficient current total and existing ledger benefit; verifier missing current receipt context."
+    },
+    {
+      "id": "F2",
+      "severity": "MEDIUM_SALES",
+      "case": "two-shirts first reply repetitions1,3,4,5",
+      "finding": "Asks purchase/cart confirmation although customer already requests two shirts; fails to ask color then. Script supplies white next, so task score hides this next-step weakness."
+    },
+    {
+      "id": "F3",
+      "severity": "MEDIUM_TOOL_USE",
+      "case": "J4 repetitions3,4 turn3",
+      "finding": "Treats an ordinary total question as a fresh PRICE_OBJECTION; creates a second pending record. Same first-tier amount, no repeated grant."
+    },
+    {
+      "id": "F4",
+      "severity": "LOW_VOICE",
+      "case": "two-shirts first reply2,3 and later closing5",
+      "finding": "System language, typo chơn, long promotion enumeration and repeated closing remain."
+    },
+    {
+      "id": "F5",
+      "severity": "ROBUSTNESS",
+      "case": "J4 repetition2 turn1",
+      "finding": "HTTP200 MALFORMED_FUNCTION_CALL recovered by one frozen-policy bounded owner retry, retained in denominator."
+    }
+  ],
+  "overall": "STOP_PHASE_C; pre-cart quote mechanism observed working for both cases; full qualification and remaining experience defects unresolved",
+  "notControlledComparison": true
+}

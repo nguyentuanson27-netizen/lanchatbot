@@ -1,0 +1,33 @@
+{
+  "ownerRequest": "chạy model",
+  "runSourceSha": "98bff18b1941663c62120a044d71f45b430e2e47",
+  "scope": {
+    "J4": 5,
+    "TWO_SHIRTS": 5,
+    "turns": 30
+  },
+  "models": {
+    "owner": "gemini-3.5-flash-lite HIGH",
+    "verifier": "gpt-6.1-sol HIGH",
+    "offlineJudge": "gpt-6.1-sol HIGH"
+  },
+  "generationCaps": {
+    "native": 120,
+    "offlineJudge": 10,
+    "automaticGenerationRetry": 0
+  },
+  "taskPassMinimumPerCase": 4,
+  "voiceMinimumPerTargetTurn": 4,
+  "materialSafetyStateEffectPrivacyErrorsAllowed": 0,
+  "evaluation": "Whole-customer-outcome and voice separately, no keyword matching. All failures retained; no mid-run fix.",
+  "targets": {
+    "J4": "After authenticated request, current code support quote permits concrete price before cart; exact total from current quote; ask color only for purchase; no best-price or benefit-already-applied claim without receipt.",
+    "TWO_SHIRTS": "First reply offers actual computed support for two shirts without cart prerequisite. After customer chooses white, actual cart supports receipt and same quantity total; no duplicate discount or repeated activation."
+  },
+  "expectedNumbers": "Derived from fresh policy/POS and actual quote, not hardcoded historical529000. Current expected one-shirt fee waiver and two-unit promotion+fee waiver verified in preflight.",
+  "customerScripts": "Unchanged fixed J4 and two-shirt scripts from prior registration.",
+  "sourceFreshness": "Actual wall clock; fresh capture and initial store; retain test assumptions unchanged.",
+  "sourceWrites": 0,
+  "liveSends": 0,
+  "oneWholeRunReviewAfterCompletion": true
+}

@@ -3,7 +3,9 @@
 - [x] Sửa code tính mức hỗ trợ trước giỏ bằng pending xác thực + policy engine hiện hành; không tạo giỏ giả, không cấp model mức/tier. Tạo giỏ revalidate/reprice và ghi bằng receipt.
 - [x] Bảo toàn QUOTED/NOT_GRANTED, lịch sử và canonical verifier source; invalidation khi đổi nguồn/pending/giỏ/expiry; bỏ một bản trùng ở owner view để giữ bound.
 - [x] Quan sát RED→GREEN, 759 worker và 155 Node PASS; build/compile/typecheck/lint qua; review độc lập exact `ecdbf325` APPROVE. [Bằng chứng](../docs/specs/evidence/c3-pre-cart-support-quote-20261118/IMPLEMENTATION.md).
-- [ ] Chạy model với source/prompt/config seal mới; chưa đánh giá giọng hoặc native J4/control trên cơ chế này. Phase C giữ STOP.
+- [x] Chụp nguồn/initial state mới, seal/preflight sáu job; chạy đủ J4 ×5 và hai áo ×5 trên `98bff18b`, 30 lượt và chấm mù sau khi hoàn tất. Quote hỗ trợ trước giỏ trong 10/10 lần; judge 5/5 và 4/5, 29 SEND/1 silent HANDOFF. [Report và hội thoại](../docs/specs/evidence/c3-precart-support-native-20261118/REPORT.md).
+- [x] Đối soát 90 native +10 judge HTTP, malformed một lần và một bounded runtime retry trong cap đã duyệt; không claim zero retry theo field prereg mơ hồ. Sáu DB model và DB initial đã dọn, live/source writes 0; size bound/frame/firewall/binding PASS.
+- [ ] Phase C STOP. Cần xử lý bằng chứng receipt ở lượt sau, hỏi lại mua thay vì màu, RECORD dư khi hỏi tổng; giọng vẫn có hạn chế được giữ riêng với điểm judge. Không tự sửa/chạy thêm trong lượt đo.
 
 ## Previous — owner 70.000 byte, 2026-11-18
 

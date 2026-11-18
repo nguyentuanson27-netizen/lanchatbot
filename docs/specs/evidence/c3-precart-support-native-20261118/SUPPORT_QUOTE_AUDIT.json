@@ -1,0 +1,527 @@
+{
+  "status": "PASS_STRUCTURAL_BINDINGS",
+  "rows": [
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "quotedSupportTurns": 2,
+      "pendingRecords": 1,
+      "negotiationEvents": 0,
+      "finalCartTotalVnd": null,
+      "preCartQuoteAndCartAgree": null,
+      "finalPendingStatus": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "quotedSupportTurns": 2,
+      "pendingRecords": 1,
+      "negotiationEvents": 0,
+      "finalCartTotalVnd": null,
+      "preCartQuoteAndCartAgree": null,
+      "finalPendingStatus": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "quotedSupportTurns": 2,
+      "pendingRecords": 2,
+      "negotiationEvents": 0,
+      "finalCartTotalVnd": null,
+      "preCartQuoteAndCartAgree": null,
+      "finalPendingStatus": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "quotedSupportTurns": 2,
+      "pendingRecords": 2,
+      "negotiationEvents": 0,
+      "finalCartTotalVnd": null,
+      "preCartQuoteAndCartAgree": null,
+      "finalPendingStatus": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "quotedSupportTurns": 2,
+      "pendingRecords": 1,
+      "negotiationEvents": 0,
+      "finalCartTotalVnd": null,
+      "preCartQuoteAndCartAgree": null,
+      "finalPendingStatus": null
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "quotedSupportTurns": 1,
+      "pendingRecords": 1,
+      "negotiationEvents": 1,
+      "finalCartTotalVnd": 948100,
+      "preCartQuoteAndCartAgree": true,
+      "finalPendingStatus": null
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 2,
+      "quotedSupportTurns": 1,
+      "pendingRecords": 1,
+      "negotiationEvents": 1,
+      "finalCartTotalVnd": 948100,
+      "preCartQuoteAndCartAgree": true,
+      "finalPendingStatus": null
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 3,
+      "quotedSupportTurns": 1,
+      "pendingRecords": 1,
+      "negotiationEvents": 1,
+      "finalCartTotalVnd": 948100,
+      "preCartQuoteAndCartAgree": true,
+      "finalPendingStatus": null
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 4,
+      "quotedSupportTurns": 1,
+      "pendingRecords": 1,
+      "negotiationEvents": 1,
+      "finalCartTotalVnd": 948100,
+      "preCartQuoteAndCartAgree": true,
+      "finalPendingStatus": null
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 5,
+      "quotedSupportTurns": 1,
+      "pendingRecords": 1,
+      "negotiationEvents": 1,
+      "finalCartTotalVnd": 948100,
+      "preCartQuoteAndCartAgree": true,
+      "finalPendingStatus": null
+    }
+  ],
+  "quotes": [
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 1,
+      "evidenceRef": "pre-cart-quote:8fd9c2d33b4c6ce14096d1aa485ee8cd779dd3cd72a7944efd7b5ca1a2d5478a",
+      "quantity": 1,
+      "grandTotalVnd": 499000,
+      "standardTotalVnd": 529000,
+      "additionalSupportVnd": 30000,
+      "quotedAdjustments": [
+        {
+          "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+          "kind": "FREE_SHIPPING",
+          "amountVnd": 30000,
+          "percentageBps": null
+        }
+      ],
+      "benefitAuthorization": {
+        "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+        "status": "NOT_GRANTED",
+        "grantedBenefits": [],
+        "receiptRef": null
+      },
+      "expiresAt": "2026-11-18T10:59:59.222Z",
+      "verifierVerdict": "PASS"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 2,
+      "evidenceRef": "pre-cart-quote:fb15f57381b29ae4c8c5f7f08b757b4e90ea040129bf286c24bcefbaf6a60552",
+      "quantity": 1,
+      "grandTotalVnd": 499000,
+      "standardTotalVnd": 529000,
+      "additionalSupportVnd": 30000,
+      "quotedAdjustments": [
+        {
+          "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+          "kind": "FREE_SHIPPING",
+          "amountVnd": 30000,
+          "percentageBps": null
+        }
+      ],
+      "benefitAuthorization": {
+        "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+        "status": "NOT_GRANTED",
+        "grantedBenefits": [],
+        "receiptRef": null
+      },
+      "expiresAt": "2026-11-18T10:59:59.222Z",
+      "verifierVerdict": "PASS"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 1,
+      "evidenceRef": "pre-cart-quote:f1ae4a5ee93a56a685fa4fd226f03774df6c7a47cd0f7ef336bd2a703e7dbc36",
+      "quantity": 1,
+      "grandTotalVnd": 499000,
+      "standardTotalVnd": 529000,
+      "additionalSupportVnd": 30000,
+      "quotedAdjustments": [
+        {
+          "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+          "kind": "FREE_SHIPPING",
+          "amountVnd": 30000,
+          "percentageBps": null
+        }
+      ],
+      "benefitAuthorization": {
+        "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+        "status": "NOT_GRANTED",
+        "grantedBenefits": [],
+        "receiptRef": null
+      },
+      "expiresAt": "2026-11-18T10:59:59.222Z",
+      "verifierVerdict": "PASS"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 2,
+      "evidenceRef": "pre-cart-quote:49522a14c7cf0e0d517955137a1bef2f19fb4157951da9feeb27b87c4aebb4c1",
+      "quantity": 1,
+      "grandTotalVnd": 499000,
+      "standardTotalVnd": 529000,
+      "additionalSupportVnd": 30000,
+      "quotedAdjustments": [
+        {
+          "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+          "kind": "FREE_SHIPPING",
+          "amountVnd": 30000,
+          "percentageBps": null
+        }
+      ],
+      "benefitAuthorization": {
+        "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+        "status": "NOT_GRANTED",
+        "grantedBenefits": [],
+        "receiptRef": null
+      },
+      "expiresAt": "2026-11-18T10:59:59.222Z",
+      "verifierVerdict": "PASS"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 1,
+      "evidenceRef": "pre-cart-quote:9e13af0650a07b6a526e7b5f0ea750eef7786e6944ecc6ad357484d51dcb9381",
+      "quantity": 1,
+      "grandTotalVnd": 499000,
+      "standardTotalVnd": 529000,
+      "additionalSupportVnd": 30000,
+      "quotedAdjustments": [
+        {
+          "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+          "kind": "FREE_SHIPPING",
+          "amountVnd": 30000,
+          "percentageBps": null
+        }
+      ],
+      "benefitAuthorization": {
+        "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+        "status": "NOT_GRANTED",
+        "grantedBenefits": [],
+        "receiptRef": null
+      },
+      "expiresAt": "2026-11-18T10:59:59.222Z",
+      "verifierVerdict": "PASS"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 2,
+      "evidenceRef": "pre-cart-quote:d6d7fe06d124574e25dbba74ad839c0fb789fbafae59e7f39902d9e36b5f6335",
+      "quantity": 1,
+      "grandTotalVnd": 499000,
+      "standardTotalVnd": 529000,
+      "additionalSupportVnd": 30000,
+      "quotedAdjustments": [
+        {
+          "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+          "kind": "FREE_SHIPPING",
+          "amountVnd": 30000,
+          "percentageBps": null
+        }
+      ],
+      "benefitAuthorization": {
+        "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+        "status": "NOT_GRANTED",
+        "grantedBenefits": [],
+        "receiptRef": null
+      },
+      "expiresAt": "2026-11-18T10:59:59.222Z",
+      "verifierVerdict": "PASS"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 1,
+      "evidenceRef": "pre-cart-quote:68cfe1888b0187c1f0781f384d8737069395ab47ba044eb45d9c3af8c0409bbe",
+      "quantity": 1,
+      "grandTotalVnd": 499000,
+      "standardTotalVnd": 529000,
+      "additionalSupportVnd": 30000,
+      "quotedAdjustments": [
+        {
+          "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+          "kind": "FREE_SHIPPING",
+          "amountVnd": 30000,
+          "percentageBps": null
+        }
+      ],
+      "benefitAuthorization": {
+        "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+        "status": "NOT_GRANTED",
+        "grantedBenefits": [],
+        "receiptRef": null
+      },
+      "expiresAt": "2026-11-18T10:59:59.222Z",
+      "verifierVerdict": "PASS"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 2,
+      "evidenceRef": "pre-cart-quote:38946a522113798fe05fb8b38fe6ab55f4ae5c497878d0967cf457e95c7b2dc1",
+      "quantity": 1,
+      "grandTotalVnd": 499000,
+      "standardTotalVnd": 529000,
+      "additionalSupportVnd": 30000,
+      "quotedAdjustments": [
+        {
+          "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+          "kind": "FREE_SHIPPING",
+          "amountVnd": 30000,
+          "percentageBps": null
+        }
+      ],
+      "benefitAuthorization": {
+        "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+        "status": "NOT_GRANTED",
+        "grantedBenefits": [],
+        "receiptRef": null
+      },
+      "expiresAt": "2026-11-18T10:59:59.222Z",
+      "verifierVerdict": "PASS"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 1,
+      "evidenceRef": "pre-cart-quote:80d9794ee37e7ef63d194664f6788d7006a7c69e5799b393ee9036ae66b20b98",
+      "quantity": 1,
+      "grandTotalVnd": 499000,
+      "standardTotalVnd": 529000,
+      "additionalSupportVnd": 30000,
+      "quotedAdjustments": [
+        {
+          "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+          "kind": "FREE_SHIPPING",
+          "amountVnd": 30000,
+          "percentageBps": null
+        }
+      ],
+      "benefitAuthorization": {
+        "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+        "status": "NOT_GRANTED",
+        "grantedBenefits": [],
+        "receiptRef": null
+      },
+      "expiresAt": "2026-11-18T10:59:59.222Z",
+      "verifierVerdict": "PASS"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 2,
+      "evidenceRef": "pre-cart-quote:611741cbf7f5cdb6389a1c611786bec268b674f67f5460c2786ece4aac75809d",
+      "quantity": 1,
+      "grandTotalVnd": 499000,
+      "standardTotalVnd": 529000,
+      "additionalSupportVnd": 30000,
+      "quotedAdjustments": [
+        {
+          "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+          "kind": "FREE_SHIPPING",
+          "amountVnd": 30000,
+          "percentageBps": null
+        }
+      ],
+      "benefitAuthorization": {
+        "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+        "status": "NOT_GRANTED",
+        "grantedBenefits": [],
+        "receiptRef": null
+      },
+      "expiresAt": "2026-11-18T10:59:59.222Z",
+      "verifierVerdict": "PASS"
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "turn": 0,
+      "evidenceRef": "pre-cart-quote:f74c0fe0776127dbb09bc6168df4d97a25f73cd68ac0a171391f5df6ea0e9cba",
+      "quantity": 2,
+      "grandTotalVnd": 948100,
+      "standardTotalVnd": 978100,
+      "additionalSupportVnd": 30000,
+      "quotedAdjustments": [
+        {
+          "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+          "kind": "PERCENT_DISCOUNT",
+          "amountVnd": 49900,
+          "percentageBps": 500
+        },
+        {
+          "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+          "kind": "FREE_SHIPPING",
+          "amountVnd": 30000,
+          "percentageBps": null
+        }
+      ],
+      "benefitAuthorization": {
+        "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+        "status": "NOT_GRANTED",
+        "grantedBenefits": [],
+        "receiptRef": null
+      },
+      "expiresAt": "2026-11-18T10:59:59.222Z",
+      "verifierVerdict": "PASS"
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 2,
+      "turn": 0,
+      "evidenceRef": "pre-cart-quote:ba6033b4d1bc5586721ffe2379c3918eaad7b2f04bf17e6be1754c7b3b941333",
+      "quantity": 2,
+      "grandTotalVnd": 948100,
+      "standardTotalVnd": 978100,
+      "additionalSupportVnd": 30000,
+      "quotedAdjustments": [
+        {
+          "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+          "kind": "PERCENT_DISCOUNT",
+          "amountVnd": 49900,
+          "percentageBps": 500
+        },
+        {
+          "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+          "kind": "FREE_SHIPPING",
+          "amountVnd": 30000,
+          "percentageBps": null
+        }
+      ],
+      "benefitAuthorization": {
+        "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+        "status": "NOT_GRANTED",
+        "grantedBenefits": [],
+        "receiptRef": null
+      },
+      "expiresAt": "2026-11-18T10:59:59.222Z",
+      "verifierVerdict": "PASS"
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 3,
+      "turn": 0,
+      "evidenceRef": "pre-cart-quote:2e76a4474650fdf821de93ca6fd9daf3ecd70ba69e0785c83cf38490e9ae6e66",
+      "quantity": 2,
+      "grandTotalVnd": 948100,
+      "standardTotalVnd": 978100,
+      "additionalSupportVnd": 30000,
+      "quotedAdjustments": [
+        {
+          "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+          "kind": "PERCENT_DISCOUNT",
+          "amountVnd": 49900,
+          "percentageBps": 500
+        },
+        {
+          "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+          "kind": "FREE_SHIPPING",
+          "amountVnd": 30000,
+          "percentageBps": null
+        }
+      ],
+      "benefitAuthorization": {
+        "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+        "status": "NOT_GRANTED",
+        "grantedBenefits": [],
+        "receiptRef": null
+      },
+      "expiresAt": "2026-11-18T10:59:59.222Z",
+      "verifierVerdict": "PASS"
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 4,
+      "turn": 0,
+      "evidenceRef": "pre-cart-quote:27f5b0d80be092651912dd6dc8f0b0b435de6d11e0e2565eafb211f59e0a8962",
+      "quantity": 2,
+      "grandTotalVnd": 948100,
+      "standardTotalVnd": 978100,
+      "additionalSupportVnd": 30000,
+      "quotedAdjustments": [
+        {
+          "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+          "kind": "PERCENT_DISCOUNT",
+          "amountVnd": 49900,
+          "percentageBps": 500
+        },
+        {
+          "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+          "kind": "FREE_SHIPPING",
+          "amountVnd": 30000,
+          "percentageBps": null
+        }
+      ],
+      "benefitAuthorization": {
+        "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+        "status": "NOT_GRANTED",
+        "grantedBenefits": [],
+        "receiptRef": null
+      },
+      "expiresAt": "2026-11-18T10:59:59.222Z",
+      "verifierVerdict": "PASS"
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 5,
+      "turn": 0,
+      "evidenceRef": "pre-cart-quote:6c522de95e55ba1c3e389d52bab1f855c8247f0bb5e8b647fdf0be49d2cc5e5b",
+      "quantity": 2,
+      "grandTotalVnd": 948100,
+      "standardTotalVnd": 978100,
+      "additionalSupportVnd": 30000,
+      "quotedAdjustments": [
+        {
+          "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+          "kind": "PERCENT_DISCOUNT",
+          "amountVnd": 49900,
+          "percentageBps": 500
+        },
+        {
+          "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+          "kind": "FREE_SHIPPING",
+          "amountVnd": 30000,
+          "percentageBps": null
+        }
+      ],
+      "benefitAuthorization": {
+        "scope": "ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",
+        "status": "NOT_GRANTED",
+        "grantedBenefits": [],
+        "receiptRef": null
+      },
+      "expiresAt": "2026-11-18T10:59:59.222Z",
+      "verifierVerdict": "PASS"
+    }
+  ]
+}

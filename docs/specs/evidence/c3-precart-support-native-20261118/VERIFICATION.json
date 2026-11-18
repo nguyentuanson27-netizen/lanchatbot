@@ -1,0 +1,78 @@
+{
+  "source": "98bff18b1941663c62120a044d71f45b430e2e47",
+  "jobs": [
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "externalRepetition": null,
+      "source": "98bff18b1941663c62120a044d71f45b430e2e47",
+      "sourceDirty": false,
+      "testDatabaseDropped": true,
+      "providerGenerations": 46
+    },
+    {
+      "batch": 1,
+      "kind": "CONTROLS",
+      "externalRepetition": 1,
+      "source": "98bff18b1941663c62120a044d71f45b430e2e47",
+      "sourceDirty": false,
+      "testDatabaseDropped": true,
+      "providerGenerations": 10
+    },
+    {
+      "batch": 2,
+      "kind": "CONTROLS",
+      "externalRepetition": 2,
+      "source": "98bff18b1941663c62120a044d71f45b430e2e47",
+      "sourceDirty": false,
+      "testDatabaseDropped": true,
+      "providerGenerations": 9
+    },
+    {
+      "batch": 3,
+      "kind": "CONTROLS",
+      "externalRepetition": 3,
+      "source": "98bff18b1941663c62120a044d71f45b430e2e47",
+      "sourceDirty": false,
+      "testDatabaseDropped": true,
+      "providerGenerations": 8
+    },
+    {
+      "batch": 4,
+      "kind": "CONTROLS",
+      "externalRepetition": 4,
+      "source": "98bff18b1941663c62120a044d71f45b430e2e47",
+      "sourceDirty": false,
+      "testDatabaseDropped": true,
+      "providerGenerations": 8
+    },
+    {
+      "batch": 5,
+      "kind": "CONTROLS",
+      "externalRepetition": 5,
+      "source": "98bff18b1941663c62120a044d71f45b430e2e47",
+      "sourceDirty": false,
+      "testDatabaseDropped": true,
+      "providerGenerations": 9
+    }
+  ],
+  "helperHashesMatch": true,
+  "zeroUnknownCompletions": true,
+  "all30CapturedTurnArtifactsAndOutboxHashes": "PASS",
+  "requestEvaluatorFirewall": "PASS actual request bodies against all caseIds before publication",
+  "sourceBinding": {
+    "worldHash": "4c84080583bf34204156718464c52a1fb33b868d0c48c6b52a96527730cccfbf",
+    "capturedAt": "2026-11-18T09:00:35.743Z",
+    "clock": "ACTUAL_WALL_CLOCK"
+  },
+  "privateBlindSeedPublished": false,
+  "rawNativeSignaturesPublished": false,
+  "liveSends": 0,
+  "shopSourceWrites": 0,
+  "currentRunVerification": {
+    "workerEmitCompile": "PASS",
+    "workerLintNoEmit": "PASS",
+    "focusedNodeTests": 38,
+    "note": "Implementation759worker/155Node suite belongs to prior implementation, not rerun for this unchanged-source native batch."
+  }
+}

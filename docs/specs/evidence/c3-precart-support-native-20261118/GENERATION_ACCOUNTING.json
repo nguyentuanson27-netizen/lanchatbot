@@ -1,0 +1,93 @@
+{
+  "source": "98bff18b1941663c62120a044d71f45b430e2e47",
+  "nativeStartedAttempts": 90,
+  "nativeTerminalAttempts": 90,
+  "nativeHttpRequests": 90,
+  "nativeOwnerHttp": 60,
+  "nativeVerifierHttp": 30,
+  "judgeHttp": 10,
+  "totalModelHttp": 100,
+  "zeroUnknownCompletions": true,
+  "actualLocalBuildFailures": 0,
+  "providerHttpTransportErrors": 0,
+  "malformedHttp200Completions": 1,
+  "runtimeBoundedOwnerRetryCount": 1,
+  "runtimeBoundedOwnerRetryEvidence": [
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 0,
+      "failedIds": [
+        "501f7912-d6b1-4d3c-a635-577260678a30:owner:1"
+      ],
+      "subsequentIds": [
+        "501f7912-d6b1-4d3c-a635-577260678a30:owner:2",
+        "501f7912-d6b1-4d3c-a635-577260678a30:owner:3"
+      ],
+      "withinThreeOwnerCap": true
+    }
+  ],
+  "transportAutomaticGenerationRetries": 0,
+  "localAdmissionRejections": 0,
+  "errors": [
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 0,
+      "phase": "ERROR",
+      "id": "501f7912-d6b1-4d3c-a635-577260678a30:owner:1",
+      "role": "OWNER",
+      "status": "MALFORMED",
+      "providerRequests": 1,
+      "errorCode": "PROVIDER_ERROR",
+      "failureLayer": "MODEL_OUTPUT",
+      "telemetry": {
+        "generationId": "501f7912-d6b1-4d3c-a635-577260678a30:owner:1",
+        "providerRequests": 1,
+        "authRequests": 0,
+        "httpStatus": 200,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "inputTokens": 11157,
+        "outputTokens": 694,
+        "cost": null,
+        "finishReason": "MALFORMED_FUNCTION_CALL",
+        "mediaCapabilityAudit": [
+          {
+            "includedProducts": 1,
+            "bytes": 819
+          }
+        ],
+        "requestBudget": {
+          "textFrameBytes": 50138,
+          "systemBytes": 22722,
+          "toolSchemaBytes": 18501,
+          "trustedFrameBytes": 8557,
+          "dialogueBytes": 93,
+          "toolResponseBytes": 0,
+          "signatureBytes": 0,
+          "textLimitBytes": 70000,
+          "signatureLimitBytes": 65536,
+          "presentedTextFrameBytes": 51655,
+          "basePresentedFrameBytes": 51655,
+          "inlineImageBytes": 0,
+          "frameLimitBytes": 70000
+        },
+        "requestSchemaHash": "add9093f9413ff76b3757815ef57f2c3cee8b26c2ba7f55a2c38ca0a1084e932",
+        "requestBytes": 52609,
+        "requestHash": "268be72a8100d60509634e464c6335c99257a38fa7b430edade0a9a4e9664746",
+        "functionCallingMode": "VALIDATED",
+        "declaredToolCount": 14,
+        "thinkingTokens": 650,
+        "rawFinishReason": "MALFORMED_FUNCTION_CALL",
+        "malformedCallShape": {
+          "inspectedParts": 0,
+          "truncated": false,
+          "calls": []
+        },
+        "failureStage": "COMPLETION",
+        "failureCode": "OWNER_FINISH_REASON"
+      }
+    }
+  ],
+  "preregistrationNote": "MEASUREMENT_CONTRACT automaticGenerationRetry=0 was overbroad: native source already has owner-approved one bounded runtime retry per turn. One occurred, inside owner cap3 and total120. All requests retained. Transport itself did not retry. Do not claim zero generation retry or clean adherence to that hand-authored field."
+}

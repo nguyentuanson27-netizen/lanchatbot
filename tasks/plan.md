@@ -1,6 +1,8 @@
 ## Current — báo giá hỗ trợ trước giỏ, 2026-11-18
 
-Owner chốt sửa cơ chế thay vì tiếp tục kể việc hỗ trợ chỉ xét sau khi vào giỏ. Đã triển khai quote từ pending đã xác thực và cùng policy engine, chưa ghi ưu đãi; tạo giỏ kiểm lại và có receipt. Source `ecdbf325` được review độc lập APPROVE, final 759 worker/155 Node PASS, build/compile/lint qua. [Implementation và giới hạn](../docs/specs/evidence/c3-pre-cart-support-quote-20261118/IMPLEMENTATION.md). Quote không tăng tier khi đọc lại; thay pending/policy/giỏ/expiry chặn binding cũ. Model sau sửa chưa chạy, Phase C STOP. Cần init/seal lại và đo hành trình từ đầu trên cơ chế mới.
+Đã chạy model trên `98bff18b`, đủ J4 ×5 và control ×5 / 30 lượt: 29 SEND, 1 silent HANDOFF. Cả 10 lần báo được hỗ trợ trước giỏ; J4 giữ 499.000đ và các giỏ control đúng 948.100đ/activation một lần. Judge J4 5/5, control 4/5; một handoff thừa do receipt lượt trước không được đưa vào context verifier. [Report và đủ hội thoại](../docs/specs/evidence/c3-precart-support-native-20261118/REPORT.md). 90 native +10 judge HTTP; một malformed được bounded runtime retry theo policy hiện hành, giữ đủ mẫu số. Không claim zero retry vì field prereg viết quá rộng. Phase C STOP; giọng/bước tiếp theo và RECORD dư vẫn còn, chưa tự sửa/chạy thêm.
+
+Owner chốt sửa cơ chế thay vì tiếp tục kể việc hỗ trợ chỉ xét sau khi vào giỏ. Đã triển khai quote từ pending đã xác thực và cùng policy engine, chưa ghi ưu đãi; tạo giỏ kiểm lại và có receipt. Source `ecdbf325` được review độc lập APPROVE, final 759 worker/155 Node PASS, build/compile/lint qua. [Implementation và giới hạn](../docs/specs/evidence/c3-pre-cart-support-quote-20261118/IMPLEMENTATION.md). Quote không tăng tier khi đọc lại; thay pending/policy/giỏ/expiry chặn binding cũ. Model đã init/seal lại và chạy hành trình từ đầu như kết quả trên.
 
 ## Previous — owner 70.000 byte, J4 ×5 và control hai áo ×5, 2026-11-18
 

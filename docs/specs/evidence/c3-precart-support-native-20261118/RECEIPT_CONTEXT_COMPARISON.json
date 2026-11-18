@@ -1,0 +1,116 @@
+{
+  "rows": [
+    {
+      "repetition": 3,
+      "currentCartQuote": {
+        "appliedAdjustments": [
+          {
+            "amountVnd": 49900,
+            "decisionId": "9d7ff899-eff7-5182-8ff1-854a9877a659",
+            "kind": "PERCENT_DISCOUNT",
+            "percentageBps": 500,
+            "policyRuleId": "SHOP_WIDE_MULTI_ITEM_PERCENT"
+          },
+          {
+            "amountVnd": 30000,
+            "decisionId": "e153ba51-502b-562b-91f7-d72d93845496",
+            "kind": "FREE_SHIPPING",
+            "percentageBps": null,
+            "policyRuleId": "SHOP_WIDE_SECOND_FREE_SHIPPING"
+          }
+        ],
+        "cartId": "f4eb7b4f-bbaf-5b06-8d5e-bb9245865b1a",
+        "cartVersion": 2,
+        "discountTotalVnd": 79900,
+        "grandTotalVnd": 948100,
+        "negotiatedPriceFloor": {
+          "amountVnd": null,
+          "status": "NOT_ESTABLISHED"
+        },
+        "shippingFeeVnd": 30000,
+        "subtotalVnd": 998000
+      },
+      "providedEffectReceipts": [],
+      "draft": "Dạ, tổng thanh toán gồm cả ship của chị là 948.100đ ạ. Phí ship 30.000đ đã được shop miễn phí hoàn toàn rồi chị nhé. Chị chốt đơn luôn giúp em nha?",
+      "verdict": {
+        "verdict": "FAIL",
+        "violations": [
+          {
+            "kind": "EFFECT_WITHOUT_RECEIPT",
+            "protectedRef": "f4eb7b4f-bbaf-5b06-8d5e-bb9245865b1a",
+            "excerpt": "Phí ship 30.000đ đã được shop miễn phí hoàn toàn rồi chị nhé.",
+            "basis": "cartQuote có khoản FREE_SHIPPING 30.000đ và hỗ trợ tổng tiền đã nêu, nhưng effectReceipts rỗng. Lời xác nhận shop đã thực hiện miễn phí vận chuyển cần receipt áp dụng ưu đãi tương ứng."
+          }
+        ]
+      },
+      "ledgerReceipts": [
+        {
+          "operation_id": "da0fa065dee1858686281b5a5fb10b1d955c0a9b402a9345a2f379a5783f3a9f",
+          "commandKind": "CART_OPENED",
+          "stateRevisionAfter": 5,
+          "occurredAt": "2026-11-18T09:18:04.194Z"
+        },
+        {
+          "operation_id": "0b2e38535ba945f92c5e2f7591a2471e32339ed9dbe747a96693bfc51021abb1",
+          "commandKind": "NEGOTIATION_EVENT",
+          "stateRevisionAfter": 6,
+          "occurredAt": "2026-11-18T09:18:13.843Z"
+        }
+      ],
+      "sourceArtifactHash": "d6716db182be8bcacfa18b47abd1819c596a3e99670de903ff0dfa16b56bb460"
+    },
+    {
+      "repetition": 4,
+      "currentCartQuote": {
+        "appliedAdjustments": [
+          {
+            "amountVnd": 49900,
+            "decisionId": "2496330a-2275-53fb-bd30-2bc1693fd79d",
+            "kind": "PERCENT_DISCOUNT",
+            "percentageBps": 500,
+            "policyRuleId": "SHOP_WIDE_MULTI_ITEM_PERCENT"
+          },
+          {
+            "amountVnd": 30000,
+            "decisionId": "639895ad-1639-5466-90ef-a09b90edf3c7",
+            "kind": "FREE_SHIPPING",
+            "percentageBps": null,
+            "policyRuleId": "SHOP_WIDE_SECOND_FREE_SHIPPING"
+          }
+        ],
+        "cartId": "dc04dd40-3b41-5052-8b51-c63b4a5236df",
+        "cartVersion": 2,
+        "discountTotalVnd": 79900,
+        "grandTotalVnd": 948100,
+        "negotiatedPriceFloor": {
+          "amountVnd": null,
+          "status": "NOT_ESTABLISHED"
+        },
+        "shippingFeeVnd": 30000,
+        "subtotalVnd": 998000
+      },
+      "providedEffectReceipts": [],
+      "draft": "Phí ship của đơn là 30.000đ nhưng mình được miễn phí ship luôn rồi chị ạ, tổng cộng đơn hàng gồm cả ship là 948.100đ chị nha.",
+      "verdict": {
+        "verdict": "PASS",
+        "violations": []
+      },
+      "ledgerReceipts": [
+        {
+          "operation_id": "072d659f028379e659640949f81cf730cf36f30a3d074ead98443befb3e1d436",
+          "commandKind": "CART_OPENED",
+          "stateRevisionAfter": 5,
+          "occurredAt": "2026-11-18T09:22:31.591Z"
+        },
+        {
+          "operation_id": "47fc5a1281fbd711fb8cb6bc4c5cac43b8d38577661f8f63c1a1e1f212275cf3",
+          "commandKind": "NEGOTIATION_EVENT",
+          "stateRevisionAfter": 6,
+          "occurredAt": "2026-11-18T09:22:40.762Z"
+        }
+      ],
+      "sourceArtifactHash": "a53f3b2cbac1cd7e933c28ced90dc351f18c12c7d345045386d2b52cfbe49d6a"
+    }
+  ],
+  "interpretation": "Ledger has applied benefit from prior turn in both; current verifier receives same adjustment types/amounts but no effectReceipts. One rejected, one passed. Evidence gap plus semantic verdict variance; not missing shop policy or wrong total."
+}

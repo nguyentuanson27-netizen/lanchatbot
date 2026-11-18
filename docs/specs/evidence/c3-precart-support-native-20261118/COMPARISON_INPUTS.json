@@ -1,0 +1,16 @@
+{
+  "oldSource": "6cb3be513905cf48230cc977b18832ab23bab8a3",
+  "currentSource": "98bff18b1941663c62120a044d71f45b430e2e47",
+  "oldWorldHash": "dfbc11c72f413c1d4052c49cd574886e8ca413589841f44f5f6654687a5e0403",
+  "newWorldHash": "4c84080583bf34204156718464c52a1fb33b868d0c48c6b52a96527730cccfbf",
+  "ownerModelConfigUnchanged": true,
+  "verifierModelConfigUnchanged": true,
+  "oldOwnerPromptHash": "3d94082edc5412188ec922ce581304ccb8771c3e302dba6ba0bf29f7f494028c",
+  "newOwnerPromptHash": "d8056c7aa10481b40902e910238245c16d223aadf4c33c758c76a7bc92a44d28",
+  "oldVerifierPromptHash": "23e3315044995f2c5e8fc6ca0b242bc74e68b48f232fb7fefc8ce9528ca7d7bf",
+  "newVerifierPromptHash": "660780392f367824c7b6bc574a786e461671d7261d1d08b93a6db7c5e4e685c7",
+  "runtimeChange": "P1/P2 support view plus concrete pre-cart support quote; source/prompt is not controlled paired replay",
+  "scriptsAndRepetitions": "Same J4 and two-shirt messages, N5 each",
+  "expectedBehaviorChange": "First authenticated support request may now be quoted before cart; old529000/978100 must not override newly calculated499000/948100.",
+  "providerRequests": 0
+}
