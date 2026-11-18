@@ -1,0 +1,58 @@
+{
+  "kind": "SYNTHETIC_CAPACITY_ONLY_NOT_A_PROVIDER_OR_SEMANTIC_RUN",
+  "source": "031394a1a555cd387c63b9ace334093d3bc54650",
+  "bound": 70000,
+  "maximum": 69997,
+  "rows": [
+    {
+      "label": "CANDIDATE:1:1",
+      "beforeBytes": 66317,
+      "afterBytes": 69316,
+      "supportPayload": true
+    },
+    {
+      "label": "CANDIDATE:3:1",
+      "beforeBytes": 66342,
+      "afterBytes": 69341,
+      "supportPayload": true
+    },
+    {
+      "label": "CONTROLS:3:0",
+      "beforeBytes": 67006,
+      "afterBytes": 69997,
+      "supportPayload": true
+    },
+    {
+      "label": "CONTROLS:4:0",
+      "beforeBytes": 66206,
+      "afterBytes": 69197,
+      "supportPayload": true
+    },
+    {
+      "label": "CONTROLS:3:1",
+      "beforeBytes": 46320,
+      "afterBytes": 46572,
+      "supportPayload": false
+    },
+    {
+      "label": "CONTROLS:3:2",
+      "beforeBytes": 53104,
+      "afterBytes": 53751,
+      "supportPayload": false
+    },
+    {
+      "label": "OPENING_AD_QUOTE",
+      "beforeBytes": 50582,
+      "afterBytes": 51619,
+      "supportPayload": false
+    },
+    {
+      "label": "MEASUREMENT_CORRECTION",
+      "beforeBytes": 51849,
+      "afterBytes": 52726,
+      "supportPayload": false
+    }
+  ],
+  "providerRequests": 0,
+  "note": "Historical eight frames with current prompt/tool descriptions and full additional support payload; 256-byte source id and two adjustments. Does not prove all future native frames fit."
+}

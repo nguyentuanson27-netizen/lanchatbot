@@ -2,6 +2,8 @@
 
 Owner yêu cầu triển khai sau khi xác định nút thắt: khách cần giá để quyết định mua nhưng phải vào giỏ mới có kết quả hỗ trợ. Base `0291d37c830b120e6f794e63d1b25b83041b3a51`. Scope implementation, chưa chạy provider trong lượt này.
 
+Đã triển khai tại `ecdbf32591941f65ed31798a7b021445160da46d`, review độc lập APPROVE CODE, 759 test worker và 155 Node PASS. [Implementation, lệnh thực chạy và giới hạn](evidence/c3-pre-cart-support-quote-20261118/IMPLEMENTATION.md). Model sau sửa NOT_RUN; Phase C giữ STOP chờ đo.
+
 ## Thiết kế
 
 1. Giữ record_negotiation để lưu lời xin có source message xác thực. Không parser, không cấp cho model quyền chọn tier/mức giảm. Không có lời xin đã được code nhận thì quote_product giữ giá/ưu đãi thường.

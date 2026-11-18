@@ -1,4 +1,8 @@
-## Current — owner 70.000 byte, J4 ×5 và control hai áo ×5, 2026-11-18
+## Current — báo giá hỗ trợ trước giỏ, 2026-11-18
+
+Owner chốt sửa cơ chế thay vì tiếp tục kể việc hỗ trợ chỉ xét sau khi vào giỏ. Đã triển khai quote từ pending đã xác thực và cùng policy engine, chưa ghi ưu đãi; tạo giỏ kiểm lại và có receipt. Source `ecdbf325` được review độc lập APPROVE, final 759 worker/155 Node PASS, build/compile/lint qua. [Implementation và giới hạn](../docs/specs/evidence/c3-pre-cart-support-quote-20261118/IMPLEMENTATION.md). Quote không tăng tier khi đọc lại; thay pending/policy/giỏ/expiry chặn binding cũ. Model sau sửa chưa chạy, Phase C STOP. Cần init/seal lại và đo hành trình từ đầu trên cơ chế mới.
+
+## Previous — owner 70.000 byte, J4 ×5 và control hai áo ×5, 2026-11-18
 
 Đã chạy sàng lọc P1/P2 đủ tám cặp: 16 owner + 8 judge, provider error/retry 0. **STOP**, giọng nhóm đích 1/6, thắng ròng −3; không chạy native/P3. Hai control có giới hạn chấm về ảnh/code và kết luận size cần đối chiếu; nhóm đích vẫn không đạt khi tách hai control. Giữ nguyên hai request trước lỗi bộ ghi và chỉ resume 14 request chưa gửi. [Toàn bộ kết quả, root cause và hướng tiếp theo](../docs/specs/evidence/c3-support-source-screen-20261118/REPORT.md).
 

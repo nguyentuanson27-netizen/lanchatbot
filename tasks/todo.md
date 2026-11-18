@@ -1,4 +1,11 @@
-## Current — owner 70.000 byte, 2026-11-18
+## Current — báo giá hỗ trợ trước giỏ, 2026-11-18
+
+- [x] Sửa code tính mức hỗ trợ trước giỏ bằng pending xác thực + policy engine hiện hành; không tạo giỏ giả, không cấp model mức/tier. Tạo giỏ revalidate/reprice và ghi bằng receipt.
+- [x] Bảo toàn QUOTED/NOT_GRANTED, lịch sử và canonical verifier source; invalidation khi đổi nguồn/pending/giỏ/expiry; bỏ một bản trùng ở owner view để giữ bound.
+- [x] Quan sát RED→GREEN, 759 worker và 155 Node PASS; build/compile/typecheck/lint qua; review độc lập exact `ecdbf325` APPROVE. [Bằng chứng](../docs/specs/evidence/c3-pre-cart-support-quote-20261118/IMPLEMENTATION.md).
+- [ ] Chạy model với source/prompt/config seal mới; chưa đánh giá giọng hoặc native J4/control trên cơ chế này. Phase C giữ STOP.
+
+## Previous — owner 70.000 byte, 2026-11-18
 
 - [x] Review 30 lượt và captured wire, lập [phương án sửa văn phong](../docs/specs/c3-phase-c-sales-voice-source-fix-plan-20261118.md).
 - [x] Triển khai P1/P2 tại `7fb18936`; self-review, bổ sung regression lịch sử sau ADD/QUOTE rồi review độc lập APPROVE đúng SHA. 741 test worker, 142 test Node, build/typecheck/lint qua. [Bản sửa và review](../docs/specs/evidence/c3-sales-voice-source-fix-20261118/IMPLEMENTATION.md).

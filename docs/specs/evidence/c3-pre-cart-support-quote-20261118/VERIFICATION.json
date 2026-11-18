@@ -1,0 +1,24 @@
+{
+  "implementationBaseSha": "0291d37c830b120e6f794e63d1b25b83041b3a51",
+  "codeSha": "ecdbf32591941f65ed31798a7b021445160da46d",
+  "firstCodeSha": "031394a1a555cd387c63b9ace334093d3bc54650",
+  "ownerRequest": "lý do chính là cơ chế hứa hỗ trợ nhưng khi lên giỏ mới có mức chính xác; làm đi",
+  "promptHashes": {
+    "owner": "d8056c7aa10481b40902e910238245c16d223aadf4c33c758c76a7bc92a44d28",
+    "verifier": "660780392f367824c7b6bc574a786e461671d7261d1d08b93a6db7c5e4e685c7"
+  },
+  "modelsUnchanged": true,
+  "boundsAndToolBudgetsUnchanged": true,
+  "workerTests": 759,
+  "nodeTests": 155,
+  "workerBuild": "PASS; canonical dependency prebuild and worker compile, final projection additionally compiled/typechecked",
+  "finalTypecheckAndLint": "PASS",
+  "independentReview": "APPROVE CODE exact ecdbf32591941f65ed31798a7b021445160da46d",
+  "modelGenerations": 0,
+  "nativeQuality": "NOT_RUN",
+  "newPostgresTransactionTest": "NOT_RUN",
+  "sharedSourceChanged": false,
+  "remoteCi": "NOT_VERIFIED",
+  "liveSends": 0,
+  "shopSourceWrites": 0
+}
