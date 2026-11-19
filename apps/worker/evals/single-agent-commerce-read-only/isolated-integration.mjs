@@ -65,6 +65,7 @@ const checkPrefixIndex=process.argv.indexOf('--check-prefix'),checkPrefix=j2j1In
 assert(checkPrefixIndex<0||(!providerRun&&!providerPreflight&&typeof checkPrefix==='string'&&checkPrefix.length>0&&checkPrefix.length<=128),'DETERMINISTIC_CHECK_PREFIX_ONLY');
 const contextProof=phaseCArg('--sales-context-campaign')?{campaignPath:phaseCArg('--sales-context-campaign'),seal:phaseCArg('--sales-context-seal'),
  kind:phaseCArg('--sales-context-job'),scorePath:phaseCArg('--sales-context-score')}:undefined;
+const smokeMode=checkPrefix==='PREPROD smoke ';
 const providerFreeze=phaseCDiagnostic?diagnosticPreflight(root,phaseC,phaseCArg('--phase-c-world'),contextProof):phaseC?phaseCTools.candidatePreflight(root,phaseC,phaseCArg('--phase-c-world')):providerRun||providerPreflight?statefulPreflight(root):null;
 if(providerPreflight){console.log(JSON.stringify({status:'PREFLIGHT_PASS',...providerFreeze.registration,providerGenerations:0}));process.exit(0);}
 if(phaseC){
@@ -92,7 +93,7 @@ const check=async(name,fn)=>{if((checkPrefix&&!name.startsWith(checkPrefix))||pr
   'B composed no-chart fallback','B composed mixed media','B composed N5 ','B composed missing private checkout','B composed configured private dependency'].some(prefix=>name.startsWith(prefix))) ||
  (process.argv.includes('--media-handoff-only')&&!name.startsWith('B composed candidate first')&&!name.startsWith('B composed no-chart fallback')&&!name.startsWith('B composed mixed media')))return;
  try{await fn();report.cases.push({name,status:'PASS'});save();console.log(name+': PASS');}
- catch(error){report.cases.push({name,status:'FAIL',error:error.message});save();throw error;}};
+ catch(error){report.cases.push({name,status:'FAIL',error:error.message});save();if(!smokeMode)throw error;}};
 const adminUrl=process.env.C3_B_TEST_ADMIN_DATABASE_URL;assert(adminUrl,'C3_B_TEST_ADMIN_DATABASE_URL');
 const databaseName='c3_b_test_'+randomBytes(8).toString('hex');
 assert(/^c3_b_test_[a-f0-9]{16}$/.test(databaseName));
@@ -654,7 +655,8 @@ try{
   const syntheticNow=async()=>{const r=await pool.query(`SELECT GREATEST(clock_timestamp(),
     COALESCE(MAX(accepted_at)+interval '1 millisecond',clock_timestamp())) AS observed_at
     FROM meta_outbox WHERE page_id=$1 AND conversation_id=$2`,[pageId,bound.conversationId]);return r.rows[0].observed_at;};
-  async function turn(text,outputs,{verdict='PASS',inspect=()=>{},beforeCommit=async()=>{},afterVerify=async()=>{},messages=null,loseCommitReply=false,rollbackCommitReply=false,slot='DETERMINISTIC_TURN',testQuoteTask,testOpeningMediaRule,testQualificationValidator}={}){
+  async function turn(text,outputs,{verdict='PASS',inspect=()=>{},beforeCommit=async()=>{},afterVerify=async()=>{},messages=null,loseCommitReply=false,rollbackCommitReply=false,slot='DETERMINISTIC_TURN',testQuoteTask,testOpeningMediaRule,testQualificationValidator,testModels}={}){
+   assert(!testModels||smokeMode&&!live,'TEST_MODELS_SMOKE_ONLY');
    if(attemptQueue.blocked())return attemptQueue.run(slot,()=>{throw Error('BLOCKED_WORK_MUST_NOT_RUN');});
    assert(!live||(!testQuoteTask&&!testOpeningMediaRule&&!testQualificationValidator),'TEST_HOOK_FORBIDDEN_IN_PROVIDER_RUN');
    const now=await syntheticNow(),id='stateful-'+randomUUID(),envelope={schemaVersion:1,customerSendEnabled:false,routing:{owner:'APP'},message:{schemaVersion:1,traceId:randomUUID(),eventKey:id,pageId,messageId:id,
@@ -673,10 +675,11 @@ try{
     ...(phaseC&&providerPorts.evaluationTurn?{evaluationTurn:providerPorts.evaluationTurn}:{}),
     ...(live&&(j2j1Input?providerPorts.m:providerFreeze.m).quoteTask?{quoteTask:(j2j1Input?providerPorts.m:providerFreeze.m).quoteTask}:testQuoteTask?{quoteTask:testQuoteTask}:{}),read,facts,policy,resolveTagId:()=> 'synthetic-tag',clock:()=>new Date(),
     ...(live?{handoffReply:{approvedHoldingHashes:(j2j1Input?providerPorts.m:providerFreeze.m).handoffReply.approvedHoldingHashes}}:deferredHandoff?{handoffReply:{approvedHoldingHashes:[commerceHash(dependencyHoldingReply)]}}:{}),
-    ownerPrompt:live?providerPorts.ownerPrompt:'Synthetic owner transport, never a provider run.',verifierPrompt:live?providerPorts.verifierPrompt:'Synthetic verifier transport.',
-    owner:async request=>{owners++;inspect(request);toolResponses.push(...request.contents.flatMap(c=>c.parts.flatMap(p=>p.functionResponse?[p.functionResponse]:[])));if(live)return providerPorts.owner(request);
+    ownerPrompt:live?providerPorts.ownerPrompt:testModels?.ownerPrompt??'Synthetic owner transport, never a provider run.',
+    verifierPrompt:live?providerPorts.verifierPrompt:testModels?.verifierPrompt??'Synthetic verifier transport.',
+    owner:async request=>{owners++;inspect(request);toolResponses.push(...request.contents.flatMap(c=>c.parts.flatMap(p=>p.functionResponse?[p.functionResponse]:[])));if(live)return providerPorts.owner(request);if(testModels)return testModels.owner(request);
       const next=outputs.shift();if(!next)throw new Error('CONTROLLED_GENERATION_FAILURE');return typeof next==='function'?next(request):next;},
-    verifier:async request=>{verifiers++;const v=live?await providerPorts.verifier(request):{result:{verdict,violations:[]}};await afterVerify();return v;}});
+    verifier:async request=>{verifiers++;const v=live?await providerPorts.verifier(request):testModels?await testModels.verifier(request):{result:{verdict,violations:[]}};await afterVerify();return v;}});
    return retainObservedAttempt({result,owners,verifiers,batch,toolResponses,inboundMessages,diagnostics},
     {queue:attemptQueue,slot,validate:testQualificationValidator??validateToolWorkAccounting});
   }
@@ -730,6 +733,10 @@ try{
    revokeMediaProof:()=>{assert(revalidatedMedia);product.product.images[0].revalidation={status:'INVALID'};},
    refreshPosSource:mode=>{product.snapshot.synced_at=new Date(mode==='expired'?Date.now()-3*3600000:Date.now()).toISOString();
     if(mode==='stock-change')product.snapshot.offers.DIRECT.rows[0].stock_quantity=1;}};
+ }
+ if(smokeMode){
+  const {runPreprodSmoke}=await import('./preprod-smoke.mjs');
+  await runPreprodSmoke({root,report,check,statefulFixture,pool,runtime,inbox,pageId,save});
  }
  const native=(calls)=>({kind:'TOOLS',calls,content:{role:'model',parts:calls.map(c=>({functionCall:c}))}}),say=text=>({kind:'FINAL',text});
  await check('C price-intent-media missing wearer proof blocks writer-first quote and hands off silently',async()=>{
