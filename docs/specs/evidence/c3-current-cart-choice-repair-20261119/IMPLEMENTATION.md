@@ -47,6 +47,8 @@ Worker build cùng dependency prebuild, typecheck/noEmit, lint, dataset boundary
 
 [Probe](probe-capacity.mjs) đọc 60 owner request đã capture của native trước, thay prompt hiện hành và chèn payload lựa chọn hai màu đại diện tại quote response, gồm completed tool turns. Đỉnh từ **69.015 lên 69.283 / 70.000 byte**, overflow 0, provider request 0. [Số đo đầy đủ](CAPACITY.json). Đây là probe synthetic trên frame lịch sử; không bảo đảm mọi dữ liệu hoặc hành trình tương lai vừa bound. Không tăng budget hay bound.
 
-Giữ nguyên model, số role, schema verdict, tool/request/generation budget và retry policy hiện hành. Owner prompt hash `7f87a56de66eb9e313a7c29642e0f7233645c33d9417a057d8e343070d15bdd5`; verifier `bdbe9e0a43c6c597caf9302fc0fa613d4c672442a032e2980199a15e48e7a587`.
+Giữ nguyên model, số role, schema verdict, tool/request/generation budget và retry policy hiện hành. Owner prompt hash `7f87a56de66eb9e313a7c29642e0f7233645c33d9417a057d8e343070d15bdd5`; verifier `fa3ab818444aedd06a25a5a4f7956bc25e3162125e109d845430011e2635909c`.
 
 Chưa chứng minh verifier thật sẽ nhất quán, owner hết RECORD thừa ở câu hỏi tổng, hoặc giọng/bước tiếp theo cải thiện. Code không thể phân loại ý định câu khách bằng identity; một tin mới bị owner gắn nhãn sai vẫn có thể đi đường record mới. Kiểm thực tế cần run identity/source/config mới, init/seal/preflight và giữ đầy đủ attempt, không tái dùng kết quả cũ. Không có GO, merge hoặc deploy trong thay đổi này.
+
+Exact Git blob check phát hiện hash verifier tính theo CRLF sau bước ghi file Windows; đã chuẩn hóa LF, tính lại hash và kiểm cả working file lẫn Git blob khớp manifest. Không thay nội dung prompt. Protocol/verifier tests được chạy lại sau chuẩn hóa.
