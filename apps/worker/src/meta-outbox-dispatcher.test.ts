@@ -55,7 +55,29 @@ function store(row: ClaimedMetaOutbox): MetaOutboxDispatchStore {
   };
 }
 
+it("does not send a bound media group through a legacy gate or stale cached sequence-zero approval", async () => {
+  const row = { ...claim(), mediaBinding: { kind: "C3_MEDIA_GROUP_V1" } }, saved = store(row);
+  const legacy = { authorize: vi.fn(async () => ({ status: "ALLOWED" as const, reasonCode: null, blockingTag: null, observedAt: new Date() })) };
+  expect((await resolveMetaResponseGroupGate(row, saved, legacy)).status).toBe("BLOCKED");
+  const capable = { ...legacy, supportsCommerceMediaBinding: true as const };
+  expect((await resolveMetaResponseGroupGate(row, saved, capable)).status).toBe("ALLOWED");
+  capable.authorize.mockResolvedValueOnce({ status: "BLOCKED" as never, reasonCode: "SOURCE_CHANGED" as never, blockingTag: null, observedAt: new Date() });
+  expect((await resolveMetaResponseGroupGate(row, saved, capable)).status).toBe("BLOCKED");
+});
+
 describe("MetaOutboxDispatcher", () => {
+  it("persists a deterministic media refusal in Outbox without fabricating a Pancake blocking tag", async () => {
+    const row = { ...claim(), mediaBinding: { kind: "C3_MEDIA_GROUP_V1" } }, repository = store(row);
+    vi.mocked(repository.recordMetaResponseGroupGate).mockImplementation(async () => { throw new Error("meta_response_group_gate_state_ck"); });
+    const delivery = { send: vi.fn() };
+    const dispatcher = new MetaOutboxDispatcher(repository, delivery, { get: () => "page-token" },
+      { supportsCommerceMediaBinding: true, authorize: async () => ({ status: "BLOCKED", reasonCode: "C3_MEDIA_DELIVERY_BINDING_CHANGED", blockingTag: null, observedAt: new Date() }) },
+      { workerId: "sender" });
+    expect(await dispatcher.processOne()).toBe(true);
+    expect(repository.recordMetaResponseGroupGate).not.toHaveBeenCalled();
+    expect(repository.markMetaManualReview).toHaveBeenCalled();
+    expect(delivery.send).not.toHaveBeenCalled();
+  });
   it("marks accepted only after Meta returns provider evidence", async () => {
     const repository = store(claim());
     const delivery: MetaDeliveryPort = {
@@ -233,6 +255,22 @@ describe("PancakeMetaPreSendGate", () => {
 });
 
 describe("resolveMetaResponseGroupGate", () => {
+  it("refuses a handoff binding when the delivery gate does not support it", async () => {
+    const c = { ...claim(), handoffBinding: { kind: "C3_HANDOFF_GROUP_V1" } }, repository = store(c);
+    const gate: MetaPreSendGate = { authorize: vi.fn() };
+    expect(await resolveMetaResponseGroupGate(c, repository, gate)).toMatchObject({ status: "BLOCKED", source: "C3_COMMERCE" });
+    expect(gate.authorize).not.toHaveBeenCalled(); expect(repository.recordMetaResponseGroupGate).not.toHaveBeenCalled();
+  });
+  it("revalidates an allowed handoff before sequence zero after retry, and reuses it for descendants", async () => {
+    const c = { ...claim(), handoffBinding: { kind: "C3_HANDOFF_GROUP_V1" } }, repository = store(c);
+    const gate: MetaPreSendGate = { supportsCommerceHandoffBinding: true, authorize: vi.fn(async () => ({ status: "ALLOWED" as const, reasonCode: null, blockingTag: null, observedAt: new Date() })) };
+    await resolveMetaResponseGroupGate(c, repository, gate);
+    await resolveMetaResponseGroupGate(c, repository, gate);
+    await resolveMetaResponseGroupGate({ ...c, sequenceNo: 1 }, repository, gate);
+    expect(gate.authorize).toHaveBeenCalledTimes(2);
+    vi.mocked(gate.authorize).mockResolvedValue({ status: "BLOCKED", reasonCode: "POLICY_CHANGED", blockingTag: null, observedAt: new Date() });
+    expect(await resolveMetaResponseGroupGate(c, repository, gate)).toMatchObject({ status: "BLOCKED", source: "C3_COMMERCE" });
+  });
   it("retries an unverified sequence 0 and reuses one durable allowed snapshot for descendants", async () => {
     const repository = store(claim());
     const gate: MetaPreSendGate = {

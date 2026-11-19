@@ -130,6 +130,18 @@ function input(now = new Date("2026-08-16T10:01:00.000Z")) {
 }
 
 describe("Context V2 exact-message claim gate", () => {
+  it("keeps old until-replaced media through commit and exact-message readback", async () => {
+    const capture = withContext(builtCapture(), {
+      verifiedClaims: [{schemaVersion:1,claimId:"00000000-0000-4000-8000-000000000001",type:"PRODUCT_MEDIA",
+        scope:{kind:"PRODUCT",productId:"SD398",variantId:null},value:{assetId:"asset:old",assetSha256:hash("a")},
+        provenance:{authority:"MEDIA_SELECTOR_V2",sourceVersion:"media:1",evidenceRef:"image:SD398",contentHash:hash("1"),
+          observedAt:"2025-01-01T00:00:00.000Z",expiresAt:null},authorization:"NONE"}],
+      verifiedClaimTypes:["PRODUCT_MEDIA"],verifiedClaimSetHash:hash("9"),
+    });
+    expect(prepareContextV2CaptureForCommit(capture,input().now)).toEqual(capture);
+    await expect(inspectContextV2Capture(clientWith([{capture}]),input())).resolves.toMatchObject({kind:"BUILT_VALID"});
+  });
+
   it("persists a deterministic terminal capture with conflict-safe identity", async () => {
     const query = vi.fn(async (
       _sql: string,

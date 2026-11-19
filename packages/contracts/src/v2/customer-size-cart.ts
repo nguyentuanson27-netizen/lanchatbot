@@ -4,6 +4,7 @@ import {
   ProductComponentRoleSchema,
 } from "./product-policy-media.js";
 import { CanonicalProductIdV1Schema } from "./canonical-identifiers.js";
+import {SizeFitTargetV1Schema} from "./size-fit-target.js";
 
 const DateTimeSchema = z.string().datetime();
 const ConfidenceSchema = z.number().min(0).max(1);
@@ -111,6 +112,23 @@ export const CustomerProfileV1Schema = z
       materials: [],
     }),
     sizeHistory: z.array(CustomerSizeHistoryV1Schema).max(50).default([]),
+    sizeAdviceTargets: z.array(SizeFitTargetV1Schema).max(4).optional(),
+    shoppingSelection:z.object({productId:CanonicalProductIdV1Schema,offerType:z.string().trim().min(1).max(64)}).strict().optional(),
+    /**
+     * Items the customer asked to buy that could not enter a cart because a colour or size is still
+     * missing. A note for the next turn, never a cart line, a price or proof of an order.
+     */
+    pendingPurchase: z.object({
+      lines: z.array(z.object({
+        productId: CanonicalProductIdV1Schema,
+        offerType: z.string().trim().min(1).max(64),
+        size: z.string().trim().min(1).max(16).nullable(),
+        color: z.string().trim().min(1).max(64).nullable(),
+        quantity: z.number().int().min(1).max(20),
+        missing: z.enum(["COLOR", "SIZE"]),
+      }).strict()).min(1).max(4),
+      recordedAt: DateTimeSchema,
+    }).strict().optional(),
     createdAt: DateTimeSchema,
     updatedAt: DateTimeSchema,
   })
@@ -229,6 +247,7 @@ export const SizeChartV1Schema = z
     brand: z.string().trim().min(1).max(128),
     category: z.string().trim().min(1).max(128),
     componentRole: ProductComponentRoleSchema.nullable(),
+    capacitySelection: z.literal("SMALLEST_FITTING_BODY_MAXIMUM").optional(),
     boundaryPolicy: z.enum([
       "PREFER_SMALLER_SIZE",
       "PREFER_LARGER_SIZE",

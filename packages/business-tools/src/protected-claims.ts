@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
 import {
   canonicalJsonV1,
+  sameSizeFitTarget,
+  type SizeFitTargetV1,
   ProtectedClaimV1Schema,
   type BusinessFactEnvelopeV1,
   type CartV1,
@@ -17,6 +19,7 @@ export interface BuildProtectedClaimsFromVerifiedFactsV1Input {
   readonly facts: BusinessFactEnvelopeV1 | null;
   readonly sizeClaim: SizeRecommendationProtectedClaimV1 | null;
   readonly expectedProductId?: string | null;
+  readonly expectedFitTarget?:SizeFitTargetV1;
 }
 
 export interface BuildProtectedClaimsFromVerifiedFactSetV1Input {
@@ -225,7 +228,9 @@ export function buildProtectedClaimsFromVerifiedFactsV1(
   const sizeClaim = input.sizeClaim;
   if (sizeClaim !== null) {
     const expectedProductId = input.expectedProductId ?? facts?.productId ?? null;
-    if (expectedProductId !== null && sizeClaim.productId !== expectedProductId) {
+    const expectedFitTarget=input.expectedFitTarget??{kind:"PRODUCT" as const,productId:expectedProductId??sizeClaim.productId};
+    const actualFitTarget=sizeClaim.fitTarget??{kind:"PRODUCT" as const,productId:sizeClaim.productId};
+    if ((expectedProductId !== null && sizeClaim.productId !== expectedProductId)||!sameSizeFitTarget(actualFitTarget,expectedFitTarget)) {
       reasonCodes.add("PROTECTED_CLAIM_PRODUCT_SCOPE_MISMATCH");
     } else {
       claims.push(ProtectedClaimV1Schema.parse({
@@ -246,6 +251,7 @@ export function buildProtectedClaimsFromVerifiedFactsV1(
           expiresAt: sizeClaim.expiresAt,
         },
         value: {
+          ...(sizeClaim.fitTarget?{fitTarget:sizeClaim.fitTarget}:{}),
           recommendedSizes: sizeClaim.value.recommendedSizes,
           alternativeSizes: sizeClaim.value.alternativeSizes,
           customerProfileId: sizeClaim.customerProfileId,
@@ -377,7 +383,7 @@ export function buildProtectedMediaClaimsV1(input: Readonly<{
   imageUrls: readonly string[];
   sourceVersion: string;
   observedAt: string;
-  expiresAt: string;
+  expiresAt: string | null;
 }>): readonly ProtectedClaimV1[] {
   return [...new Set(input.imageUrls)].map((imageUrl) => {
     const assetSha256 = sha256(imageUrl);

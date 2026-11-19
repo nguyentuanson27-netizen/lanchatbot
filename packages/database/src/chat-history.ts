@@ -589,6 +589,27 @@ export class PostgresChatHistoryStore {
     });
   }
 
+  /** Scoped existence proof, not an inference from a truncated dialogue window. */
+  async hasPriorAcceptedShopOutput(input:{pageId:string;conversationId:string;customerHash:string;before:Date}):Promise<boolean>{
+    if(!(input.before instanceof Date)||!Number.isFinite(input.before.getTime()))throw new Error("CHAT_HISTORY_CUTOFF");
+    const result=await this.pool.query<{accepted:boolean}>(
+      `SELECT (EXISTS (
+         SELECT 1 FROM meta_outbox o
+         WHERE o.page_id=c.page_id AND o.conversation_id=c.conversation_id AND o.customer_hash=c.customer_hash
+           AND o.status IN ('SENT_ACCEPTED','DELIVERED','READ') AND o.meta_message_id IS NOT NULL
+           AND o.accepted_at IS NOT NULL AND o.accepted_at < $4
+       ) OR EXISTS (
+         SELECT 1 FROM messages m
+         WHERE m.page_id=c.page_id AND m.conversation_id=c.conversation_id AND m.customer_hash=c.customer_hash
+           AND m.direction='OUTBOUND' AND m.sender_type='HUMAN'
+           AND m.occurred_at < $4 AND m.received_at < $4
+       )) AS accepted
+       FROM conversations c WHERE c.page_id=$1 AND c.conversation_id=$2 AND c.customer_hash=$3`,
+      [input.pageId,input.conversationId,input.customerHash,input.before]);
+    if(result.rowCount!==1||typeof result.rows[0]?.accepted!=="boolean")throw new Error("CHAT_HISTORY_CONVERSATION_SCOPE_MISMATCH");
+    return result.rows[0].accepted;
+  }
+
   async listConversationHistory(
     conversationId: string,
     options: { readonly limit?: number; readonly before?: Date } = {},

@@ -1,3 +1,4 @@
+import {canonicalJsonV1} from "@lana/contracts";
 /**
  * Product Image Recognition V2 — dedicated catalog publisher (Phase 3).
  *
@@ -22,7 +23,8 @@ import type {
   ImageRecognitionPublisherPort,
 } from "./image-recognition-qdrant.js";
 import type { QdrantJob } from "./p23c-jobs.js";
-import { pointBelongsToShard } from "./p23c-jobs.js";
+import { pointBelongsToShard,canonicalForHash,HASH_SCHEMA } from "./p23c-jobs.js";
+import {createHash} from "node:crypto";
 import type { RecognitionImageEmbeddingPort } from "./gemini-embedding-2-client.js";
 import type { RecognitionImagePreparationPort } from "./media-recognition-v2-image-pipeline.js";
 import {
@@ -31,11 +33,12 @@ import {
   type MediaRecognitionV2Config,
 } from "./media-recognition-v2-config.js";
 
-export type RecognitionPublishAction = "FULL_EMBED" | "NOOP" | "DELETE" | "HOLD";
+export type RecognitionPublishAction = "FULL_EMBED" | "PAYLOAD_ONLY" | "NOOP" | "DELETE" | "HOLD";
 
 export type RecognitionPublishReason =
   | "TARGET_MISSING"
   | "SOURCE_HASH_CHANGED"
+  | "COLOR_METADATA_CHANGED"
   | "PIPELINE_VERSION_CHANGED"
   | "TARGET_CURRENT"
   | "DELETE_REQUESTED"
@@ -124,6 +127,14 @@ function text(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
+// Delivery-only color metadata does not require another recognition embedding.
+function recognitionSourceHash(job:QdrantJob):string {
+ const keys=["image_verified_product_color","image_color_binding_sha256","image_color_binding_status"];
+ if(!keys.some(k=>Object.hasOwn(job.payload,k)))return job.source_hash;
+ const payload=Object.fromEntries(Object.entries(job.payload).filter(([k])=>!keys.includes(k)));
+ return createHash("sha256").update(JSON.stringify(canonicalForHash({hash_schema:HASH_SCHEMA,point_id:job.point_id,payload}))).digest("hex");
+}
+
 /** Decision contract from spec §9 / plan Task 3.2. */
 export function planRecognitionPoint(
   job: QdrantJob,
@@ -144,6 +155,10 @@ export function planRecognitionPoint(
   }
   if (!target) return { action: "FULL_EMBED", reason: "TARGET_MISSING" };
   if (target.sourceHash !== job.source_hash) {
+    const contentHash=recognitionSourceHash(job);
+    if(target.embeddingPipelineVersion===embeddingPipelineVersion&&
+      (target.payload.recognition_content_hash??target.sourceHash)===contentHash)
+      return {action:"PAYLOAD_ONLY",reason:"COLOR_METADATA_CHANGED"};
     return { action: "FULL_EMBED", reason: "SOURCE_HASH_CHANGED" };
   }
   if (target.embeddingPipelineVersion !== embeddingPipelineVersion) {
@@ -161,6 +176,8 @@ export function recognitionPointPayload(
   const payload = job.payload ?? {};
   return {
     product_id: text(payload.product_id) || text(payload.ma_sp),
+    ...Object.fromEntries(["image_verified_product_color","image_color_binding_sha256","image_color_binding_status"]
+      .filter(key=>Object.hasOwn(payload,key)).map(key=>[key,payload[key]])),
     ma_sp: text(payload.ma_sp),
     brand: text(payload.brand),
     image_url: job.image_url,
@@ -175,6 +192,7 @@ export function recognitionPointPayload(
     image_content_sha256: text(payload.image_content_sha256),
     active: true,
     source_hash: job.source_hash,
+    recognition_content_hash: recognitionSourceHash(job),
     embedding_pipeline_version: config.embeddingPipelineVersion,
     published_at: publishedAt,
   };
@@ -232,6 +250,19 @@ export class P23cRecognitionPublisher {
       if (action === "DELETE") {
         await this.options.target.deletePoint(job.point_id, controller.signal);
         return { ...base, status: "DELETED", error: "" };
+      }
+      if(action==="PAYLOAD_ONLY"){
+        const current=await this.options.target.getPoint(job.point_id,controller.signal);
+        if(!current||planRecognitionPoint(job,current,this.options.config.embeddingPipelineVersion).action!=="PAYLOAD_ONLY"||!this.options.target.overwritePayload)
+          throw Error("COLOR_METADATA_SOURCE_CHANGED");
+        const payload={...current.payload,source_hash:job.source_hash,recognition_content_hash:recognitionSourceHash(job)} as Record<string,unknown>;
+        for(const key of ["image_verified_product_color","image_color_binding_sha256","image_color_binding_status"]){
+          delete payload[key];if(Object.hasOwn(job.payload,key))payload[key]=job.payload[key];
+        }
+        await this.options.target.overwritePayload(job.point_id,payload,controller.signal);
+        const actual=await this.options.target.getPoint(job.point_id,controller.signal);
+        if(!actual||actual.sourceHash!==job.source_hash||canonicalJsonV1(actual.payload)!==canonicalJsonV1(payload))throw Error("COLOR_METADATA_READBACK_UNCONFIRMED");
+        return {...base,status:"SUCCESS",error:""};
       }
       // Build and validate the complete point before touching the target.
       const canonical = await this.options.images.prepareFromUrl(
@@ -334,7 +365,7 @@ export class P23cRecognitionPublisher {
       }
 
       const actionable = planned.filter(
-        (plan) => plan.action === "FULL_EMBED" || plan.action === "DELETE",
+        (plan) => plan.action === "FULL_EMBED" || plan.action === "PAYLOAD_ONLY" || plan.action === "DELETE",
       );
       const held = planned.filter((plan) => plan.action === "HOLD");
       const noop = planned.filter((plan) => plan.action === "NOOP");

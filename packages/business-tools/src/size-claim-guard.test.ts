@@ -86,6 +86,10 @@ function guard(reply: string, claim: SizeRecommendationProtectedClaimV1 | null, 
 }
 
 describe("BF-04 size recommendation detector", () => {
+  it("rejects component claims in the legacy product-only guard",()=>{
+    const claim=verifiedClaim({fitTarget:{kind:"COMPONENT",parentProductId:"SD398",componentProductId:"SD398-AO",componentRole:"TOP"}});
+    expect(guard("Chị hợp size L.",claim).blockedReasonCodes).toContain("SIZE_RECOMMENDATION_PRODUCT_SCOPE_MISMATCH");
+  });
   it("catches semantic paraphrases, Vietnamese diacritics, ASCII fold and ranges", () => {
     expect(detectConcreteSizeRecommendations("Theo số đo, chị hợp size L.")).toEqual(["L"]);
     expect(detectConcreteSizeRecommendations("Chi hop kich co M-den L.")).toEqual(["L", "M"]);

@@ -493,6 +493,7 @@ function sizeClaimReason(
   input: GuardInput,
 ): string | null {
   const context = input.sizeClaimContext;
+  if(claim.fitTarget?.kind==="COMPONENT")return "SIZE_RECOMMENDATION_PRODUCT_SCOPE_MISMATCH";
   if (!context) return "SIZE_RECOMMENDATION_MISSING_PROVENANCE";
   if (claim.source !== "VERIFIED_SIZE_ENGINE_V1" || !claim.evidenceRef) {
     return "SIZE_RECOMMENDATION_SOURCE_INVALID";

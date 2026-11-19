@@ -190,7 +190,7 @@ export function canonicalFfmpegArguments(maxDimension: number): string[] {
     "-hide_banner",
     "-loglevel", "error",
     "-nostdin",
-    "-autorotate", "1",
+    "-autorotate",
     "-i", "pipe:0",
     "-frames:v", "1",
     "-vf",

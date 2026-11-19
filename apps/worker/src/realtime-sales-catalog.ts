@@ -1,4 +1,7 @@
 import { createHash } from "node:crypto";
+import { canonicalCartVariantScopeV2, cartComponentsMayShareStockV2 } from "@lana/contracts";
+import { southernDestination } from "./southern-delivery-region.js";
+import {selectionEvidenceFromOptions,selectionSourceHash,expandSelectionOptions,type CandidateSelectionEvidence} from "./single-agent-commerce-selection-evidence.js";
 import {
   CartLineV1Schema,
   type CartLineV1,
@@ -26,6 +29,7 @@ interface RawBomComponent {
 }
 
 interface RawOfferRow {
+  readonly inventory_source?: unknown;
   readonly price_sku?: unknown;
   readonly component_1_sku?: unknown;
   readonly component_2_sku?: unknown;
@@ -41,6 +45,11 @@ interface RawOfferRow {
 }
 
 export interface CartSelectionQuery {
+  /** Code-owned candidate adapter mode. Legacy callers retain their matching contract. */
+  readonly selectionMode?: "CANDIDATE_TUPLES" | undefined;
+  /** Code-owned replacement prerequisite; never auto-select a physical colour. */
+  readonly requireColorChoice?: boolean | undefined;
+  readonly selectionMaxAgeSeconds?:number;
   readonly shopAlias: string;
   readonly productId: string;
   readonly offerType: string | null;
@@ -67,6 +76,8 @@ export type CartSelectionResult =
       readonly sourceAuthority: "POS_SNAPSHOT";
       readonly stockStatus: "IN_STOCK" | "PRE_ORDER";
       readonly stockAvailableQuantity: number;
+      /** Internal source counter identity, never an inferred child-stock capacity. */
+      readonly stockCounter?: { readonly source: string; readonly unit: "ITEM" | "PARENT_OFFER" | "DERIVED_MIN"; readonly identity: string } | null;
       readonly sourceObservedAt: string;
       readonly sourceExpiresAt: string;
     }
@@ -84,7 +95,37 @@ export type CartSelectionResult =
       readonly reasonCode: string;
       readonly availableSizes: readonly string[];
       readonly availableColors: readonly string[];
+      readonly selectionOptions?: readonly CandidateCartOption[];
+      readonly selectionEvidence?:CandidateSelectionEvidence;
     };
+
+export interface CandidateCartOption {
+  productId:string;offerType:string;size:string|null;color:string|null;quantity:number;
+  status:"IN_STOCK"|"PRE_ORDER"|"OUT_OF_STOCK"|"UNKNOWN";reasonCode:string|null;
+  sourceVersion:string;observedAt:string;expiresAt:string;identityHash:string;
+}
+
+/** Bounded exact tuples, never a cross-product or an assertion of a missing physical color. */
+export function candidateCartOptions(raw:unknown,query:CartSelectionQuery,now:Date):CandidateCartOption[]{
+ const parsed=CatalogSnapshotV3Schema.safeParse(raw);if(!parsed.success)return [];
+ const s=parsed.data;if(normalizeCatalogToken(s.shop_alias)!==normalizeCatalogToken(query.shopAlias)||normalizeCatalogToken(s.product_id)!==normalizeCatalogToken(query.productId))return [];
+ const selected=resolveOffer(s,query.offerType);if(!selected||selected[1].rows.length>64)return [];
+ const [offer,entry]=selected,seen=new Set<string>();
+ return entry.rows.flatMap(row=>{
+  const size=text(row.size)||null,color=text(row.color)||null;
+  if(query.size&&normalizeCatalogToken(query.size)!==normalizeCatalogToken(size??""))return [];
+  if(query.color&&normalizeCatalogToken(query.color)!==normalizeCatalogToken(color??""))return [];
+  const identityHash=createHash("sha256").update(canonicalJson({offer,size,color,priceSku:row.price_sku,components:row.components,
+   component1:row.component_1_sku,component2:row.component_2_sku,parent:row.parent_variation_id,parentSku:row.parent_variation_sku})).digest("hex");
+  if(seen.has(identityHash))return [];seen.add(identityHash);
+  const resolved=cartSelectionFromSnapshot(s,{...query,selectionMode:undefined,requireColorChoice:undefined,offerType:offer,size,color},now);
+  const validStatus=normalizeCatalogToken(text(row.stock_status))==="OK";
+  return [{productId:s.product_id,offerType:offer,size,color,quantity:query.quantity,
+   status:!validStatus?"UNKNOWN":resolved.status==="READY"?resolved.stockStatus:resolved.status==="OUT_OF_STOCK"?"OUT_OF_STOCK":"UNKNOWN",
+   reasonCode:!validStatus?"CART_STOCK_STATUS_UNVERIFIED":resolved.status==="READY"?null:resolved.reasonCode,
+   sourceVersion:s.release_id,observedAt:s.synced_at,expiresAt:new Date(Date.parse(s.synced_at)+PRICE_FRESH_SECONDS*1000).toISOString(),identityHash} as CandidateCartOption];
+ });
+}
 
 export interface VerifiedVariantQuery {
   readonly shopAlias: string;
@@ -133,7 +174,7 @@ function positiveQuantity(value: unknown): number {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : 1;
 }
 
-function componentRole(value: string): ProductComponentRole {
+export function catalogComponentRole(value: string): ProductComponentRole {
   const sku = normalizeCatalogToken(value);
   if (/(?:^|_)AO$/u.test(sku)) return "TOP";
   if (/(?:^|_)(?:CV|CHAN_VAY)$/u.test(sku)) return "SKIRT";
@@ -143,7 +184,7 @@ function componentRole(value: string): ProductComponentRole {
   return "OTHER";
 }
 
-function offerKind(value: string, componentCount: number): CartLineV1["offerKind"] {
+export function offerKind(value: string, componentCount: number): CartLineV1["offerKind"] {
   const normalized = normalizeCatalogToken(value);
   if (normalized === "COMBO_3" || componentCount === 3) return "COMBO_3";
   if (/^(?:SET|COMPOSITE)/u.test(normalized) || componentCount > 1) return "SET";
@@ -169,14 +210,20 @@ function resolveOffer(snapshot: CatalogSnapshotV3, requested: string | null) {
   return null;
 }
 
-function resolveRegion(snapshot: CatalogSnapshotV3, address: string) {
+export function resolveCatalogDeliveryRegion(snapshot: CatalogSnapshotV3, address: string) {
   const normalized = normalizeCatalogToken(address);
   const entries = Object.entries(snapshot.shipping_eta);
+  const southern = southernDestination(address);
+  if (southern === "CONFLICT") return null;
   const exact = entries
     .filter(([region]) => normalized.includes(normalizeCatalogToken(region)))
     .sort((left, right) => normalizeCatalogToken(right[0]).length - normalizeCatalogToken(left[0]).length)
     .at(0);
   if (exact) return exact;
+  if (southern === "MATCH") {
+    const shared = entries.find(([region]) => normalizeCatalogToken(region) === "MIEN_NAM");
+    if (shared) return shared;
+  }
   return entries.find(([region]) =>
     ["TOAN_QUOC", "DEFAULT", "OTHER", "VIET_NAM"].includes(normalizeCatalogToken(region))
   ) ?? null;
@@ -365,20 +412,35 @@ export function cartSelectionFromSnapshot(
   if (!selectedOffer) return failed("NOT_FOUND", "CART_OFFER_NOT_FOUND");
   const [offerName, offer] = selectedOffer;
   const rows = offer.rows as readonly RawOfferRow[];
+  const candidate=query.selectionMode==="CANDIDATE_TUPLES";
+  if(query.requireColorChoice&&(!candidate||query.color!==null))return failed("INVALID","CART_COLOR_CHOICE_CONTRACT");
+  const options=candidate?candidateCartOptions(snapshot,query,now):[];
+  const evidenceExpiry=Math.min(expiresAt.getTime(),observedAt+(query.selectionMaxAgeSeconds??PRICE_FRESH_SECONDS)*1000,
+    snapshot.fulfillment_policy?.eta_valid_until.trim()?Date.parse(snapshot.fulfillment_policy.eta_valid_until):Infinity);
+  const selectionEvidence=candidate?selectionEvidenceFromOptions({productId:snapshot.product_id,offerType:offerName,size:query.size,color:query.color,quantity:query.quantity,
+    sourceVersion:snapshot.release_id,sourceHash:selectionSourceHash(snapshot),observedAt:snapshot.synced_at,expiresAt:new Date(evidenceExpiry).toISOString()},options,now):null;
+  const rejected=(status:Exclude<CartSelectionResult["status"],"READY">,reason:string,scopeRows:readonly RawOfferRow[]=rows):CartSelectionResult=>
+    candidate?{status,reasonCode:reason,availableSizes:[],availableColors:[],selectionOptions:selectionEvidence?expandSelectionOptions(selectionEvidence):[],...(selectionEvidence?{selectionEvidence}:{})}:failed(status,reason,scopeRows);
   if (normalizeCatalogToken(offer.price_status) !== "OK") {
-    return failed("PRICE_UNAVAILABLE", `CART_${normalizeCatalogToken(offer.price_status)}`, rows);
+    return rejected("PRICE_UNAVAILABLE", `CART_${normalizeCatalogToken(offer.price_status)}`, rows);
   }
 
   const size = query.size ? normalizeCatalogToken(query.size) : null;
-  if (!size) return failed("SIZE_REQUIRED", "CART_SIZE_REQUIRED", rows);
+  if (!size) return rejected("SIZE_REQUIRED", "CART_SIZE_REQUIRED", rows);
   let matching = rows.filter((row) => normalizeCatalogToken(text(row.size)) === size);
-  if (matching.length === 0) return failed("VARIANT_UNAVAILABLE", "CART_SIZE_NOT_FOUND", rows);
+  if (matching.length === 0) return rejected("VARIANT_UNAVAILABLE", "CART_SIZE_NOT_FOUND", rows);
 
   const color = query.color ? normalizeCatalogToken(query.color) : null;
   const colors = availableValues(matching, "color");
-  if (!color && colors.length > 1) return failed("COLOR_REQUIRED", "CART_COLOR_REQUIRED", matching);
+  if(candidate&&!color){
+   const usable=options.filter(o=>["IN_STOCK","PRE_ORDER"].includes(o.status));
+   if(query.requireColorChoice&&usable.length)return rejected("COLOR_REQUIRED","CART_COLOR_REQUIRED",matching);
+   if(usable.length===1)matching=matching.filter(r=>text(r.color)===usable[0]!.color&&text(r.size)===usable[0]!.size);
+   else if(usable.length>1)return rejected("COLOR_REQUIRED","CART_COLOR_REQUIRED",matching);
+   else return rejected("INVALID","CART_SELECTION_DATA_UNRESOLVED",matching);
+  }else if (!color && colors.length > 1) return rejected("COLOR_REQUIRED", "CART_COLOR_REQUIRED", matching);
   if (color) matching = matching.filter((row) => normalizeCatalogToken(text(row.color)) === color);
-  if (matching.length === 0) return failed("VARIANT_UNAVAILABLE", "CART_COLOR_NOT_FOUND", rows);
+  if (matching.length === 0) return rejected("VARIANT_UNAVAILABLE", "CART_COLOR_NOT_FOUND", rows);
   if (matching.length > 1) {
     const fingerprints = new Set(matching.map((row) => canonicalJson({
       price_sku: row.price_sku,
@@ -386,25 +448,26 @@ export function cartSelectionFromSnapshot(
       sale_price: row.sale_price,
       components: row.components,
     })));
-    if (fingerprints.size > 1) return failed("INVALID", "CART_VARIANT_AMBIGUOUS", matching);
+    if (fingerprints.size > 1||candidate&&new Set(matching.map(r=>canonicalJson({color:r.color,size:r.size,parent:r.parent_variation_id,parentSku:r.parent_variation_sku,components:r.components}))).size>1) return rejected("INVALID", "CART_VARIANT_AMBIGUOUS", matching);
   }
   const row = matching[0]!;
+  if(candidate&&normalizeCatalogToken(text(row.stock_status))!=="OK")return rejected("OUT_OF_STOCK","CART_STOCK_STATUS_UNVERIFIED",matching);
   const unitPrice = typeof row.sale_price === "number"
     ? row.sale_price
     : offer.sale_price;
   if (!Number.isInteger(unitPrice) || unitPrice === null || unitPrice < 0) {
-    return failed("PRICE_UNAVAILABLE", "CART_PRICE_NOT_FOUND", rows);
+    return rejected("PRICE_UNAVAILABLE", "CART_PRICE_NOT_FOUND", rows);
   }
   const stockQuantity = typeof row.stock_quantity === "number" ? row.stock_quantity : null;
   const policy = snapshot.fulfillment_policy;
   if (stockQuantity === null) {
-    return failed("OUT_OF_STOCK", "CART_STOCK_UNAVAILABLE", matching);
+    return rejected("OUT_OF_STOCK", "CART_STOCK_UNAVAILABLE", matching);
   }
   if (stockQuantity === 0 && !policy?.can_order_when_zero) {
-    return failed("OUT_OF_STOCK", "CART_VARIANT_OUT_OF_STOCK", matching);
+    return rejected("OUT_OF_STOCK", "CART_VARIANT_OUT_OF_STOCK", matching);
   }
   if (stockQuantity !== null && stockQuantity < query.quantity && !policy?.can_order_when_zero) {
-    return failed("OUT_OF_STOCK", "CART_QUANTITY_EXCEEDS_STOCK", matching);
+    return rejected("OUT_OF_STOCK", "CART_QUANTITY_EXCEEDS_STOCK", matching);
   }
 
   const rawComponents = Array.isArray(row.components)
@@ -427,7 +490,7 @@ export function cartSelectionFromSnapshot(
     return {
       componentProductId: productId,
       componentSku,
-      componentRole: componentRole(productId),
+      componentRole: catalogComponentRole(productId),
       color: text(component.color) || text(row.color) || null,
       size: text(component.size) || text(row.size) || null,
       quantity: positiveQuantity(component.quantity),
@@ -438,13 +501,14 @@ export function cartSelectionFromSnapshot(
     components.length === 0 ||
     (kind === "SET" && components.length < 2) ||
     (kind === "COMBO_3" && components.length !== 3)
-  ) return failed("INVALID", "CART_BOM_INVALID", matching);
+  ) return rejected("INVALID", "CART_BOM_INVALID", matching);
 
   let eta: { minDays: number; maxDays: number } | null = null;
   let etaVersion: string | null = null;
   let etaExpiresAt: string | null = null;
   if (query.deliveryAddress) {
-    const region = resolveRegion(snapshot, query.deliveryAddress);
+    const region = resolveCatalogDeliveryRegion(snapshot, query.deliveryAddress);
+    if (!region) return rejected("ETA_UNAVAILABLE", "CART_ETA_REGION_UNRESOLVED", matching);
     const zeroStock = stockQuantity === 0 && policy?.can_order_when_zero === true;
     const prepMin = zeroStock ? policy?.zero_stock_prep_min_days : policy?.prep_min_days;
     const prepMax = zeroStock ? policy?.zero_stock_prep_max_days : policy?.prep_max_days;
@@ -453,14 +517,14 @@ export function cartSelectionFromSnapshot(
     if (
       prepMin === null || prepMin === undefined || prepMax === null || prepMax === undefined ||
       transitMin === null || transitMax === null
-    ) return failed("ETA_UNAVAILABLE", "CART_ETA_UNAVAILABLE", matching);
+    ) return rejected("ETA_UNAVAILABLE", "CART_ETA_UNAVAILABLE", matching);
     const rawEtaValidUntil = text(policy?.eta_valid_until);
     const etaValidUntil = rawEtaValidUntil === "" ? null : Date.parse(rawEtaValidUntil);
     if (etaValidUntil !== null && !Number.isFinite(etaValidUntil)) {
-      return failed("ETA_UNAVAILABLE", "CART_ETA_TIMESTAMP_INVALID", matching);
+      return rejected("ETA_UNAVAILABLE", "CART_ETA_TIMESTAMP_INVALID", matching);
     }
     if (etaValidUntil !== null && etaValidUntil <= now.getTime()) {
-      return failed("ETA_UNAVAILABLE", "CART_ETA_STALE", matching);
+      return rejected("ETA_UNAVAILABLE", "CART_ETA_STALE", matching);
     }
     eta = { minDays: prepMin + transitMin, maxDays: prepMax + transitMax };
     etaExpiresAt = new Date(Math.min(
@@ -478,6 +542,13 @@ export function cartSelectionFromSnapshot(
   const parentProductId = normalizeCatalogToken(snapshot.product_id);
   const offerId = normalizeCatalogToken(offerName);
   const priceVersion = version("price", { parentProductId, offerId, unitPrice });
+  const stockCounter = stockCounterFromRowV2(row, offer as unknown as Record<string, unknown>);
+  if ((text(row.inventory_source) || text((offer as unknown as Record<string, unknown>).inventory_source)) && !stockCounter)
+    return rejected("INVALID", "CART_INVENTORY_SOURCE_UNRESOLVED", matching);
+  if(stockCounter?.unit==="ITEM"&&(components.length!==1||components[0]!.quantity!==1||
+    normalizeCatalogToken(components[0]!.size??"")!==normalizeCatalogToken(text(row.size))||
+    normalizeCatalogToken(components[0]!.color??"")!==normalizeCatalogToken(text(row.color))))
+    return rejected("INVALID","CART_INVENTORY_UNIT_MISMATCH",matching);
   const inventoryVersion = version("inventory", {
     parentProductId,
     offerId,
@@ -485,6 +556,7 @@ export function cartSelectionFromSnapshot(
     size: text(row.size),
     stockQuantity,
     components,
+    stockCounter,
   });
   const sizeVersion = version("size", {
     parentProductId,
@@ -535,7 +607,45 @@ export function cartSelectionFromSnapshot(
     sourceAuthority: "POS_SNAPSHOT",
     stockStatus: stockQuantity < query.quantity ? "PRE_ORDER" : "IN_STOCK",
     stockAvailableQuantity: stockQuantity,
+    stockCounter,
     sourceObservedAt: snapshot.synced_at,
     sourceExpiresAt: expiresAt.toISOString(),
   };
+}
+
+function stockCounterFromRowV2(row: RawOfferRow, offer: Record<string, unknown>):
+  NonNullable<Extract<CartSelectionResult, { status: "READY" }>["stockCounter"]> | null {
+  const source = text(row.inventory_source) || text(offer.inventory_source);
+  if (text(row.inventory_source) && text(offer.inventory_source) && row.inventory_source !== offer.inventory_source) return null;
+  const size=text(row.size), color=text(row.color);
+  if (!size || !color) return null;
+  if (source === "PANCAKE_DIRECT") {
+    const sku=text(row.component_1_sku);
+    if (!sku || text(row.component_2_sku)) return null;
+    return {source,unit:"ITEM",identity:JSON.stringify([normalizeCatalogToken(sku),normalizeCatalogToken(size),normalizeCatalogToken(color)])};
+  }
+  if (source === "PANCAKE_BOM") {
+    const id=text(row.parent_variation_id);
+    if (!id || id.includes("|")) return null;
+    return {source,unit:"PARENT_OFFER",identity:id};
+  }
+  if (source === "FALLBACK_SKU_RULE") return {source,unit:"DERIVED_MIN",identity:JSON.stringify([
+    text(row.component_1_sku),text(row.component_2_sku),size,color])};
+  return null;
+}
+
+/** Source independence is checked here; DB replay derives logical keys/overlap from full cart lines. */
+export function cartSelectionsHaveIndependentStockV2(selections: readonly Extract<CartSelectionResult, {status:"READY"}>[]): boolean {
+  const key=(s:Extract<CartSelectionResult,{status:"READY"}>)=>canonicalCartVariantScopeV2(s.line,t=>createHash("sha256").update(t,"utf8").digest("hex"));
+  for(let i=0;i<selections.length;i++)for(let j=i+1;j<selections.length;j++){
+    const a=selections[i]!,b=selections[j]!;
+    if(key(a)===key(b)){
+      if(a.versions.inventory!==b.versions.inventory||JSON.stringify(a.stockCounter??null)!==JSON.stringify(b.stockCounter??null))return false;
+      continue;
+    }
+    if(cartComponentsMayShareStockV2(a.line,b.line))return false;
+    if(!a.stockCounter||!b.stockCounter||a.stockCounter.unit==="DERIVED_MIN"||b.stockCounter.unit==="DERIVED_MIN")return false;
+    if(a.stockCounter.source===b.stockCounter.source&&a.stockCounter.unit===b.stockCounter.unit&&a.stockCounter.identity===b.stockCounter.identity)return false;
+  }
+  return true;
 }

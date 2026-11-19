@@ -29,6 +29,8 @@ export const SALES_CYCLE_COMMAND_KINDS_V1 = [
   "CART_OPENED",
   "CART_MUTATED",
   "NEGOTIATION_EVENT",
+  "PENDING_NEGOTIATION_RECORDED",
+  "PENDING_NEGOTIATION_INVALIDATED",
   "CART_READY",
   "CHECKOUT_DETAILS_CAPTURED",
   "CLARIFICATION_REQUESTED",
@@ -97,12 +99,13 @@ export const SalesCycleClarificationStateV1Schema = z.object({
   reasonCode: SalesCycleClarificationReasonV1Schema,
   missingFields: z.array(z.string().min(1).max(80)).min(1).max(10),
   productId: CanonicalProductIdV1Schema.nullable(),
-  attemptCount: z.number().int().min(1).max(10),
+  attemptCount: z.number().int().min(0).max(10),
   maxAttempts: z.number().int().min(1).max(10),
-  askedQuestionFingerprints: z.array(BareSha256Schema).min(1).max(10),
+  askedQuestionFingerprints: z.array(BareSha256Schema).min(0).max(10),
   lastRequestedAt: DateTimeSchema,
 }).strict().superRefine((value, context) => {
-  if (value.attemptCount > value.maxAttempts ||
+  if ((value.attemptCount === 0 && (value.missingFields.length !== 1 || value.missingFields[0] !== "PAYMENT_METHOD")) ||
+    value.attemptCount > value.maxAttempts ||
     value.askedQuestionFingerprints.length !== value.attemptCount ||
     new Set(value.askedQuestionFingerprints).size !== value.askedQuestionFingerprints.length ||
     [...value.missingFields].sort().some((field, index) => field !== value.missingFields[index]) ||
@@ -208,6 +211,8 @@ const NON_TERMINAL_SALES_STAGES_V1 = [
  * a compile-time error.
  */
 export const SALES_STAGE_TRANSITIONS_V1 = {
+  PENDING_NEGOTIATION_RECORDED: [{ outcome:"APPLIED", stageBefore:NON_TERMINAL_SALES_STAGES_V1, stageAfter:["SAME"] }],
+  PENDING_NEGOTIATION_INVALIDATED: [{ outcome:"APPLIED", stageBefore:NON_TERMINAL_SALES_STAGES_V1, stageAfter:["SAME"] }],
   FACTS_PRESENTED: [{
     outcome: "APPLIED",
     stageBefore: ["DISCOVERY", "FACTS_PRESENTED"],
@@ -539,3 +544,47 @@ export const PancakeTagCommandV2Schema = z
   })
   .strict();
 export type PancakeTagCommandV2 = z.infer<typeof PancakeTagCommandV2Schema>;
+
+/** An authenticated request to consider support, without a cart or a granted concession. */
+export const PendingNegotiationV1Schema=z.object({
+ schemaVersion:z.literal(1),pendingId:BareSha256Schema,sourceMessageId:z.string().min(1).max(256),
+ sourceTextHash:BareSha256Schema,sourceObservedAt:DateTimeSchema,
+ productId:CanonicalProductIdV1Schema,offerId:z.string().min(1).max(128),
+ salesEpisodeId:z.string().uuid(),customerProfileId:z.string().uuid(),policyRef:VersionedBusinessReferenceV1Schema,
+ recordedAt:DateTimeSchema,expiresAt:DateTimeSchema,
+ status:z.enum(["PENDING","ACTIVATED","INVALIDATED"]),
+ cartOpeningCommandId:z.string().min(1).max(256).nullable(),activatedByCartId:z.string().uuid().nullable(),
+}).strict();
+export type PendingNegotiationV1=z.infer<typeof PendingNegotiationV1Schema>;
+export function pendingNegotiationIdPreimageV1(value:PendingNegotiationV1):string{
+ const {pendingId:_id,status:_status,cartOpeningCommandId:_open,activatedByCartId:_cart,...source}=PendingNegotiationV1Schema.parse(value);
+ return "PENDING_NEGOTIATION_V1\n"+canonicalJsonV1(source);
+}
+export const PendingNegotiationTransitionV1Schema=z.object({
+ schemaVersion:z.literal(1),action:z.enum(["RECORDED","INVALIDATED","ACTIVATED"]),
+ sourceMessageIdHash:BareSha256Schema,commandIdHash:BareSha256Schema,
+ before:PendingNegotiationV1Schema.nullable(),after:PendingNegotiationV1Schema,
+ appliedAt:DateTimeSchema,
+}).strict();
+export type PendingNegotiationTransitionV1=z.infer<typeof PendingNegotiationTransitionV1Schema>;
+
+type PendingNegotiationCart = {
+ readonly cartId:string;readonly revision:number;readonly salesEpisodeId:string;readonly customerProfileId:string;readonly createdAt:string;
+ readonly lines:readonly {readonly parentProductId:string;readonly offerId:string}[];
+};
+/** Exact identity/policy matching, shared by runtime and locked database replay. */
+export function pendingNegotiationAfterOpeningV1(pending:PendingNegotiationV1,cart:PendingNegotiationCart,
+ policyRef:VersionedBusinessReferenceV1,commandId:string,at:string):PendingNegotiationV1{
+ if(pending.status!=="PENDING")return pending;
+ const matches=pending.salesEpisodeId===cart.salesEpisodeId&&pending.customerProfileId===cart.customerProfileId&&
+  cart.lines.length>0&&cart.lines.every(l=>l.parentProductId===pending.productId&&l.offerId===pending.offerId)&&
+  canonicalJsonV1(pending.policyRef)===canonicalJsonV1(policyRef)&&Date.parse(pending.expiresAt)>Date.parse(at)&&
+  Date.parse(pending.recordedAt)<=Date.parse(cart.createdAt);
+ return {...pending,status:matches?"PENDING":"INVALIDATED",cartOpeningCommandId:matches?commandId:null};
+}
+export function pendingNegotiationAfterActivationV1(pending:PendingNegotiationV1,cart:PendingNegotiationCart,
+ policyRef:VersionedBusinessReferenceV1,commandId:string,at:string):PendingNegotiationV1|null{
+ if(pending.status!=="PENDING"||pending.cartOpeningCommandId!==commandId||cart.revision!==1)return null;
+ const bound=pendingNegotiationAfterOpeningV1(pending,cart,policyRef,commandId,at);
+ return bound.status==="PENDING"?{...bound,status:"ACTIVATED",activatedByCartId:cart.cartId}:null;
+}
