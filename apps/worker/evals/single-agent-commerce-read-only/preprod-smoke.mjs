@@ -44,10 +44,13 @@ export async function runPreprodSmoke({root,report,check,statefulFixture,pool,ru
   assert.equal(prior.sendEnabled,false);
   assert.deepEqual(prior.cases.map(c=>[c.status,c.error??null]),[['PASS',null],['FAIL','FIT_ENGINE_DID_NOT_PROVE_M'],['PASS',null]]);
  }
+ const traceAdd=process.argv.includes('--preprod-smoke-trace-add');
+ assert(!traceAdd||prior,'SMOKE_TRACE_REQUIRES_ORIGINAL_RUN');
  const selected=prior?['FIT_CHECKOUT']:ids;
+ const trace=[];
  const checkCase=(id,label,fn)=>selected.includes(id)?check(PREPROD_SMOKE_PREFIX+label,fn):undefined;
  const ledger=[],evidence={};
- report.smoke={source,client,expectedCases:selected,priorSmokeSource:prior?.sourceSha??null,maximumGenerations:20,generationRetry:0,
+ report.smoke={source,client,expectedCases:selected,...(traceAdd?{trace}:{}),priorSmokeSource:prior?.sourceSha??null,maximumGenerations:20,generationRetry:0,
   configuredRoles:{owner:manifest.models.conversation,verifier:manifest.models.verifier},
   scope:'REAL_ISOLATED_POSTGRES_SYNTHETIC_CATALOG_STUB_DELIVERY_REAL_OWNER_VERIFIER',liveSend:false,evidence,ledger};
  save();
@@ -87,7 +90,25 @@ export async function runPreprodSmoke({root,report,check,statefulFixture,pool,ru
   return {ownerPrompt,verifierPrompt,owner:r=>{
    const body=buildGeminiCommerceRequest({...r,ownerContextPresentation:'VI_DATA_BLOCKS_COMPACT_V2'});
    assertRuntimeFirewall(body,ids);
-   return call('OWNER',()=>sender(body,sha(JSON.stringify(body))));
+   const hash=sha(JSON.stringify(body));
+   if(!traceAdd)return call('OWNER',()=>sender(body,hash));
+   const entry={index,hash,toolsAllowed:r.toolsAllowed,callableTools:r.callableTools,
+    replies:r.contents.flatMap(m=>m.parts).flatMap(p=>{
+     const x=p.functionResponse;
+     if(!x)return [];
+     const data=x.response?.data;
+     return [{name:x.name,status:x.response?.status,reason:x.response?.reason??null,failureStage:x.response?.failureStage??null,
+      effect:data?.effect??null,effectCommitted:data?.effectCommitted??null,operationId:data?.operationId??null,
+      cartLines:data?.cartItems??null,cartQuote:data?.cartQuote??null}];
+    }),contextCart:r.context.state.cartQuote??null,receipts:r.context.effectReceipts.map(x=>({effect:x.effect,status:x.status})),
+    outboundTools:body.tools.flatMap(x=>x.functionDeclarations.map(t=>t.name))};
+   trace.push(entry);save();
+   return call('OWNER',async()=>{
+    const result=await sender(body,hash);
+    entry.output=result.output?.kind==='TOOLS'?{kind:'TOOLS',calls:result.output.calls}:
+     result.output?.kind==='FINAL'?{kind:'FINAL',text:result.output.text}:null;
+    save();return result;
+   });
   },verifier:r=>call('VERIFIER',()=>verify(r))};
  }
  const outbox=j=>pool.query('SELECT response_group_id,sequence_no,status FROM meta_outbox WHERE conversation_id=$1 ORDER BY created_at,sequence_no',[j.bound.conversationId]).then(r=>r.rows);
@@ -105,6 +126,9 @@ export async function runPreprodSmoke({root,report,check,statefulFixture,pool,ru
    textCount:oneText(payloads).length,images:payloads.filter(p=>p.attachment?.type==='image').map(p=>p.attachment.payload.url),
    toolResults:r.toolResponses.filter(p=>p.name==='recommend_size').map(p=>({status:p.response?.data?.status,
     role:p.response?.data?.fitTarget?.componentRole??null,recommendedSizes:p.response?.data?.recommendedSizes??[]}))};
+  if(traceAdd)entry.diagnostic={recovery:r.result.recovery??null,handoff:r.result.handoff??null,
+   readCoverage:r.result.readCoverage??null,openingMediaWork:r.result.openingMediaWork??null,
+   timings:r.result.generations.map(g=>({role:g.role,status:g.status})),actions:r.diagnostics};
   // Private checkout text is verified in memory and never written into smoke evidence.
   if(index===0)entry.publicOutput=oneText(payloads);
   evidence[id].push(entry);save();
@@ -153,6 +177,7 @@ export async function runPreprodSmoke({root,report,check,statefulFixture,pool,ru
   assert.equal(commerceHash(await j.state()),commerceHash(before));
   assert.deepEqual(await outbox(j),rows);
   add.entry.duplicateWebhook={inserted:false,duplicateCart:false,duplicateMessages:0};save();
+  if(traceAdd)return;
   await attempt(j,'FIT_CHECKOUT','Chốt đơn cho chị nhé.');
   const privateInput=await attempt(j,'FIT_CHECKOUT','Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: 12 Đường thử nghiệm, Quận 1, TP Hồ Chí Minh\nCOD');
   assert.equal(privateInput.r.owners,0,'PRIVATE_INPUT_REACHED_OWNER');
