@@ -1215,26 +1215,35 @@ it.each(["ad", "explicit", "missing-ad"])("composes ingress with the real scoped
 });
 
 
-it.each(["unchanged","ads-total","revision","media"])("explicit quote uses the real group egress before committing: %s",async mode=>{
+it.each(["unchanged","ads-total","ads-two-offers","revision","media"])("explicit quote uses the real group egress before committing: %s",async mode=>{
  const {EXPLICIT_QUOTE_TASK}=await import("./single-agent-commerce-quote.js");
- const f=fixture(),p=f.products[0]!.product;f.message.text="SM613 bao nhiêu em?";
- if(mode==="ads-total")Object.assign(f.message,{adsContext:{source:"ADS",adTitle:p.productId,postId:null,adId:null,ref:null}});
+ const f=fixture(),{product:p,snapshot}=f.products[0]!;f.message.text="SM613 bao nhiêu em?";
+ const fromAd=mode==="ads-total"||mode==="ads-two-offers";
+ if(fromAd)Object.assign(f.message,{adsContext:{source:"ADS",adTitle:p.productId,postId:null,adId:null,ref:null}});
  p.images=[{url:"https://content.pancake.vn/front.jpg",role:"PRIMARY",angle:"FRONT",imageType:"MODEL",intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
  let n=0;f.verifier.mockImplementation(async()=>{if(mode==="revision")f.changeRevision();if(mode==="media")p.images=[];return {result:{verdict:"PASS",violations:[]}};});
- const call={name:"quote_product",args:{subjectRef:"SM613",offerTypes:["DIRECT"],...(mode==="ads-total"?{quantity:1}:{})}};
- const draft=mode==="ads-total"?"Áo 499.000đ, cả ship 524.000đ chị nhé.":"Áo 499.000đ chị nhé.";
+ if(mode==="ads-two-offers"){
+  snapshot.offers.AO=structuredClone(snapshot.offers.DIRECT!);
+  snapshot.offers.AO.list_price=399_000;
+  snapshot.offers.AO.sale_price=399_000;
+  snapshot.offers.AO.rows.forEach(row=>{row.offer_type="AO";row.sale_price=399_000;});
+ }
+ const offerTypes=mode==="ads-two-offers"?["DIRECT","AO"]:["DIRECT"];
+ const call={name:"quote_product",args:{subjectRef:"SM613",offerTypes,...(mode==="ads-total"?{quantity:1}:{})}};
+ const draft=mode==="ads-two-offers"?"Mẫu này 499.000đ, áo lẻ 399.000đ chị nhé.":mode==="ads-total"?"Áo 499.000đ, cả ship 524.000đ chị nhé.":"Áo 499.000đ chị nhé.";
  const result=await f.run(async r=>{
   if(++n===1)return {kind:"TOOLS",calls:[call],content:{role:"model",parts:[{functionCall:call}]}};
-  if(mode==="ads-total"){
+  if(fromAd){
    expect(JSON.parse(r.context.policyLiterals.find(l=>l.ref==="conversation-entry")!.text)).toEqual({firstContact:true,fromAd:true});
-   expect(r.contents.at(-1)!.parts[0]!.functionResponse?.response).toMatchObject({
-    status:"OK",data:{preCartQuote:{subjectRef:"SM613",offerType:"DIRECT",quantity:1,grandTotalVnd:524000}}
-   });
+   const part=r.contents.at(-1)!.parts[0] as {functionResponse:{response:unknown}};
+   expect(part.functionResponse.response).toMatchObject({status:"OK",data:mode==="ads-total"
+    ?{preCartQuote:{subjectRef:"SM613",offerType:"DIRECT",quantity:1,grandTotalVnd:524000}}
+    :{sellingOptions:[{offerType:"DIRECT"},{offerType:"AO"}]}});
   }
   return {kind:"FINAL",text:draft};
  },undefined,EXPLICIT_QUOTE_TASK);
  const messages=f.commit.mock.calls.flatMap(c=>c[1].metaPlan?.messages??[]);
- if(mode==="unchanged"||mode==="ads-total"){expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(messages).toEqual([{kind:"TEXT",text:draft},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);}
+ if(mode==="unchanged"||fromAd){expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(messages).toEqual([{kind:"TEXT",text:draft},{kind:"IMAGE",imageUrl:p.images[0]!.url}]);}
  else{expect(result.terminal.disposition).toBe("NO_SEND");expect(messages).toEqual([]);}
  expect(f.verifier).toHaveBeenCalledOnce();
 });
