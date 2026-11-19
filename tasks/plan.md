@@ -2,7 +2,7 @@
 
 Đã triển khai phạm vi sau review độc lập phương án: verifier phân biệt ưu đãi hiện có trong cartQuote với thao tác mới; replay pending chỉ cùng source event đã xử lý, kiểm policy/identity/hạn và trả read-only không receipt mới; quote có lựa chọn màu với query nguồn, không suy ý định mua hoặc tồn cho quantity/size khác. Thay chỉ dẫn owner đang trùng, cập nhật prompt hashes. [Implementation, lệnh kiểm và giới hạn](../docs/specs/evidence/c3-current-cart-choice-repair-20261119/IMPLEMENTATION.md).
 
-RED 3 lỗi quan sát trước sửa; final 1.273 worker/134 Node PASS, build/typecheck/lint/dataset/diff PASS. Probe 60 frame cũ với payload lựa chọn synthetic: 69.283/70.000 byte, 0 overflow. Chưa chạy model hoặc review độc lập code; chưa chứng minh hết RECORD dư/giọng cứng/verifier từ chối thừa. Phase C STOP; run mới cần init/seal/preflight, không tự chạy.
+RED 3 lỗi quan sát trước sửa; final 1.273 worker/134 Node PASS, build/typecheck/lint/dataset/diff PASS. Probe 60 frame cũ với payload lựa chọn synthetic: 69.283/70.000 byte, 0 overflow. [Review độc lập](../docs/specs/evidence/c3-current-cart-choice-repair-20261119/INDEPENDENT_REVIEW.md) APPROVE CODE đúng `cdbbaa99`, tự kiểm 359 test và hai dạng owner wire PASS; không có finding cần sửa. Chưa chạy model, chưa chứng minh hết RECORD dư/giọng cứng/verifier từ chối thừa. Phase C STOP; run mới cần init/seal/preflight, không tự chạy.
 
 ## Previous — báo giá hỗ trợ trước giỏ, 2026-11-18
 

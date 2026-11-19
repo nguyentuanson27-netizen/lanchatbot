@@ -9,7 +9,7 @@ Ngày 19/11/2026. Implementation base `2e292e7b8e72e7fa58cf90714c1395c528252cfd`
 - **Context lựa chọn:** quote_product đặt choiceOptions cạnh giá, chỉ từ selectionEvidence hợp lệ và có hash trong runtimeProducts hiện tại. Ghi rõ query nguồn (qty1, chưa lọc size nếu đúng như vậy), màu được nguồn ghi, completeness và purchaseStock=NOT_CHECKED. Không tạo pendingPurchase từ quantity hoặc suy ý định mua. ADD vẫn kiểm đúng màu/size/số lượng.
 - **Owner prompt:** thay các đoạn hiện có để phân biệt lời xin hỗ trợ mới với hỏi lại tổng; tiếp tục từ ý muốn mua và hỏi lựa chọn còn thiếu, không mời chốt lại sau câu hỏi tổng đã đủ dữ kiện. Không thêm ví dụ riêng cho J4/control, regex hoặc luật cấm từ mới. Owner prompt từ 22.632 xuống 22.601 byte; cập nhật hash owner/verifier trong manifest.
 
-Review phương án ban đầu yêu cầu sửa vì nguy cơ nuốt yêu cầu thương lượng mới. Implementation dùng giới hạn chặt hơn: **cùng source event đã xử lý**, không chỉ cùng product/offer. Chưa có review độc lập code trong lượt này; đã self-review diff.
+Review phương án ban đầu yêu cầu sửa vì nguy cơ nuốt yêu cầu thương lượng mới. Implementation dùng giới hạn chặt hơn: **cùng source event đã xử lý**, không chỉ cùng product/offer. Sau self-review, reviewer độc lập **APPROVE CODE** tại `cdbbaa99fc08aadc2ded657a4465242fc094daac`, không có finding cần sửa; tự chạy 359 test và hai dạng wire probe PASS. [Kết luận review](INDEPENDENT_REVIEW.md).
 
 ## Kiểm tra thực chạy
 
