@@ -3,7 +3,8 @@
 - [x] Ghi owner GO để lập kế hoạch rollout/chuyển đổi. Giữ A/B STOP và các trạng thái qualification/replacement theo bằng chứng. [Quyết định và lỗi còn mở](../docs/specs/c3-phase-c-owner-bypass-20261119.md).
 - [ ] Lập kế hoạch PREPROD giới hạn, ưu tiên theo dõi P07 (sai size lọt verifier), S11 (tồn đúng biến thể/số lượng), J3 (mất tư vấn trong tin thực nhận) và giữ đối chứng S04.
 - [x] Chạy đúng ba ca khác nhau trên adapter thật với gửi Meta/Pancake tắt. ADS và thiếu bảng size PASS. Ca giao dịch dùng đúng M, giỏ và webhook trùng đạt kiểm, nhưng handoff ngay sau khi ghi giỏ nên checkout chưa đạt. Chạy lại riêng ca 2 sau lỗi harness, tổng 12 lượt model. [Kết quả](../docs/specs/evidence/c3-preprod-send-disabled-smoke-20261119/REPORT.md).
-- [ ] Giữ candidate chưa bật trên trang test. Điều tra DEPENDENCY_FAILURE ở ca 2 trước bước bật.
+- [x] Tái hiện ca 2. Claim SIZE_FIT theo sản phẩm/phần áo bị so với biến thể mới của giỏ ở hard precheck. Giỏ có receipt, precheck STALE trước verifier rồi silent handoff. [Bằng chứng và hướng sửa](../docs/specs/evidence/c3-preprod-send-disabled-smoke-20261119/CASE_2_ROOT_CAUSE.md).
+- [ ] Giữ candidate chưa bật. Sửa ràng buộc scope fit ở ca 2 và kiểm lại checkout.
 
 ## Current — Phase C owner reply evidence, 2026-11-19
 
