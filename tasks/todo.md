@@ -4,7 +4,8 @@
 - [ ] Lập kế hoạch PREPROD giới hạn, ưu tiên theo dõi P07 (sai size lọt verifier), S11 (tồn đúng biến thể/số lượng), J3 (mất tư vấn trong tin thực nhận) và giữ đối chứng S04.
 - [x] Chạy đúng ba ca khác nhau trên adapter thật với gửi Meta/Pancake tắt. ADS và thiếu bảng size PASS. Ca giao dịch dùng đúng M, giỏ và webhook trùng đạt kiểm, nhưng handoff ngay sau khi ghi giỏ nên checkout chưa đạt. Chạy lại riêng ca 2 sau lỗi harness, tổng 12 lượt model. [Kết quả](../docs/specs/evidence/c3-preprod-send-disabled-smoke-20261119/REPORT.md).
 - [x] Tái hiện ca 2. Claim SIZE_FIT theo sản phẩm/phần áo bị so với biến thể mới của giỏ ở hard precheck. Giỏ có receipt, precheck STALE trước verifier rồi silent handoff. [Bằng chứng và hướng sửa](../docs/specs/evidence/c3-preprod-send-disabled-smoke-20261119/CASE_2_ROOT_CAUSE.md).
-- [ ] Giữ candidate chưa bật. Sửa ràng buộc scope fit ở ca 2 và kiểm lại checkout.
+- [x] Ca 2 chạy lại sau sửa scope fit và chỉ dẫn giọng. Công nhận M, ghi giỏ một lần, preview 529.000đ và tới PURCHASE_CONFIRMED. Bỏ câu kể thêm giỏ trong mẫu chạy. Giọng câu ACK và câu tư vấn size còn hạn chế. [Kết quả](../docs/specs/evidence/c3-preprod-send-disabled-smoke-20261119/CASE_2_FIX.md).
+- [ ] Candidate chưa bật trên trang test. ADS và thiếu chart có PASS từ lượt trước, chưa chạy lại trên source ca 2.
 
 ## Current — Phase C owner reply evidence, 2026-11-19
 
