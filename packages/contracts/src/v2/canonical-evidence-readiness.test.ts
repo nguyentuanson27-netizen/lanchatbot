@@ -19,6 +19,16 @@ import {
 const HASH = "a".repeat(64);
 const OTHER_HASH = "b".repeat(64);
 
+it("allows until-replaced expiry only for protected media, never price or stock",()=>{
+  const price=productClaim("PRICE","P-001");
+  const media={...price,type:"PRODUCT_MEDIA",provenance:{...price.provenance,authority:"MEDIA_SELECTOR_V2",expiresAt:null},
+    value:{assetId:"asset-1",assetSha256:HASH}};
+  expect(ProtectedClaimV1Schema.safeParse(media).success).toBe(true);
+  expect(ProtectedClaimV1Schema.safeParse({...media,provenance:{...media.provenance,authority:"POS_LIVE"}}).success).toBe(false);
+  for(const type of ["PRICE","STOCK"] as const){const c=productClaim(type,"P-001");
+    expect(ProtectedClaimV1Schema.safeParse({...c,provenance:{...c.provenance,expiresAt:null}}).success).toBe(false);}
+});
+
 function productClaim(
   type: "PRICE" | "STOCK" | "ETA",
   productId: string,
@@ -378,6 +388,14 @@ describe("DF06 deterministic readiness contract", () => {
       ],
     }).conflict).toBe(true);
   });
+  it("uses each outbound claim's actual subject rather than requiring a product-by-type matrix", () => {
+    const input = { effect: "PROTECTED_OUTBOUND" as const, productIds: ["P-001", "P-002"], cartId: null, cartVersion: null,
+      protectedClaimTypes: ["PRICE", "STOCK"] as const, claims: [productClaim("PRICE", "P-001"), productClaim("STOCK", "P-002")] };
+    expect(validateEffectClaimSemanticsV1(input)).toEqual({ missing: false, conflict: false });
+    expect(validateEffectClaimSemanticsV1({ ...input, productIds: [...input.productIds, "P-003"] }).missing).toBe(true);
+    expect(validateEffectClaimSemanticsV1({ ...input, protectedClaimTypes: ["ETA"] }).missing).toBe(true);
+    expect(validateEffectClaimSemanticsV1({ ...input, claims: [] }).missing).toBe(true);
+  });
 
   it("requires exact offer-scoped cart claims with matching price and orderable stock", () => {
     const line = {
@@ -447,6 +465,22 @@ describe("DF06 deterministic readiness contract", () => {
       lines: [line, { ...line, quantity: 2 }],
       claims: exact,
     }).mismatch).toBe(true);
+  });
+
+  it("checks parent catalog media once for outbound without requiring it per cart offer", () => {
+    const media = ProtectedClaimV1Schema.parse({...productClaim("PRICE", "P-001"), type:"PRODUCT_MEDIA",
+      provenance:{...productClaim("PRICE", "P-001").provenance,authority:"MEDIA_SELECTOR_V2"},
+      value:{assetId:"asset-1",assetSha256:HASH}});
+    const input={effect:"PROTECTED_OUTBOUND" as const,lines:[{parentProductId:"P-001",offerId:"SET",quantity:1,posUnitPriceVnd:699000,priceFactRef:null}],
+      protectedClaimTypes:["PRODUCT_MEDIA"] as const,claims:[media]};
+    expect(validateCartEffectClaimSemanticsV1(input)).toEqual({missing:false,conflict:false,mismatch:false});
+    expect(validateCartEffectClaimSemanticsV1({...input,claims:[]}).missing).toBe(true);
+    expect(validateCartEffectClaimSemanticsV1({...input,claims:[{...media,scope:{kind:"PRODUCT",productId:"P-001",variantId:"WRONG"}}]}).mismatch).toBe(true);
+    const otherMedia={...media,scope:{kind:"PRODUCT" as const,productId:"OTHER",variantId:null}};
+    expect(validateCartEffectClaimSemanticsV1({...input,claims:[otherMedia]})).toEqual({missing:false,conflict:false,mismatch:false});
+    // Overall outbound scope still owns catalog identity; cart semantics must not substitute for it.
+    expect(validateEffectClaimSemanticsV1({effect:"PROTECTED_OUTBOUND",productIds:["P-001"],cartId:null,cartVersion:null,
+      protectedClaimTypes:["PRODUCT_MEDIA"],claims:[otherMedia]}).missing).toBe(true);
   });
 
   it("keeps purchase confirmation evidence deterministic, typed, and non-authorizing", () => {
@@ -599,7 +633,7 @@ describe("DF06 deterministic readiness contract", () => {
     }).success).toBe(false);
   });
 
-  it("supports payload-only protected outbound readiness with a deterministic hash", () => {
+  it.each([{ productIds: ["SP-001"] }, { productIds: [] }])("supports payload-only protected outbound readiness with product scope $productIds", ({ productIds }) => {
     expect(DeterministicEffectReadinessV1Schema.parse({
       schemaVersion: 1,
       rulesetVersion: "DETERMINISTIC_EFFECT_READINESS_V1",
@@ -610,7 +644,7 @@ describe("DF06 deterministic readiness contract", () => {
       sourceMessageIdHash: HASH,
       conversationRevision: 7,
       salesCycleRevision: 3,
-      productIds: ["SP-001"],
+      productIds,
       cartId: null,
       cartVersion: null,
       cartStateHash: null,
@@ -627,7 +661,7 @@ describe("DF06 deterministic readiness contract", () => {
         sourceMessageIdHash: HASH,
         conversationRevision: 7,
         salesCycleRevision: 3,
-        productIds: ["SP-001"],
+        productIds,
         cart: null,
         preview: null,
         claimSetHash: null,
@@ -699,4 +733,23 @@ describe("DF06 deterministic readiness contract", () => {
       authorization: "NONE",
     }).success).toBe(false);
   });
+});
+
+
+describe("component fit conflict identity",()=>{
+ const fit=(target:Record<string,unknown>|undefined,hash=HASH)=>ProtectedClaimV1Schema.parse({
+  ...productClaim("PRICE","P-001",hash),type:"SIZE_FIT",provenance:{...productClaim("PRICE","P-001",hash).provenance,authority:"VERIFIED_SIZE_ENGINE_V1"},
+  value:{...(target?{fitTarget:target}:{}),recommendedSizes:["M"],alternativeSizes:[],customerProfileId:"3f4c7f35-3ac1-4bb1-a398-1f6fc5b6e361",customerProfileRevision:1,measurementFingerprint:HASH,evidenceBasis:"BODY_PROFILE"}});
+ const top={kind:"COMPONENT",parentProductId:"P-001",componentProductId:"P-001-AO",componentRole:"TOP"};
+ const pants={kind:"COMPONENT",parentProductId:"P-001",componentProductId:"P-001-QUAN",componentRole:"PANTS"};
+ const check=(claims:ProtectedClaimV1[])=>validateEffectClaimSemanticsV1({effect:"PROTECTED_OUTBOUND",productIds:["P-001"],cartId:null,cartVersion:null,protectedClaimTypes:["SIZE_FIT"],claims});
+ it("allows independent targets but still conflicts on the same target",()=>{
+  expect(check([fit(top),fit(pants,OTHER_HASH)])).toEqual({missing:false,conflict:false});
+  expect(check([fit(top),fit(top,OTHER_HASH)]).conflict).toBe(true);
+  expect(check([fit(undefined),fit({kind:"PRODUCT",productId:"P-001"},OTHER_HASH)]).conflict).toBe(true);
+  expect(check([fit(undefined),fit(top,OTHER_HASH)]).conflict).toBe(false);
+ });
+ it("rejects a forged component parent at the contract boundary",()=>{
+  expect(()=>fit({...top,parentProductId:"OTHER"})).toThrow();
+ });
 });

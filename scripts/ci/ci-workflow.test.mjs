@@ -48,7 +48,7 @@ function stepBlock(job, stepName) {
   return nextStepOffset === -1 ? rest : rest.slice(0, nextStepOffset);
 }
 
-test("CI keeps one check job until lana-ci runner parallelism is explicitly available", () => {
+test("CI keeps one canonical check job on GitHub-hosted Linux", () => {
   const jobsMarker = "\njobs:\n";
   const jobsStart = workflow.indexOf(jobsMarker);
   assert.notEqual(jobsStart, -1, "CI workflow is missing jobs section");
@@ -59,7 +59,7 @@ test("CI keeps one check job until lana-ci runner parallelism is explicitly avai
 
   const check = jobBlock("check");
   assert.match(check, /name:\s*pnpm check/);
-  assert.match(check, /runs-on:\s*\[self-hosted, Linux, X64, lana-ci\]/);
+  assert.match(check, /runs-on:\s*ubuntu-24\.04\s*$/m);
 });
 
 test("CI preserves mandatory gates and selector-driven code lanes", () => {

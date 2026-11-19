@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import {spawnSync} from "node:child_process";
 import {
   FfmpegRecognitionImageTranscoder,
   MediaRecognitionV2ImagePipeline,
@@ -12,6 +13,12 @@ import {
   safeRecognitionImageUrl,
   type RecognitionImageTranscoder,
 } from "./media-recognition-v2-image-pipeline.js";
+
+it.runIf(spawnSync("ffmpeg",["-version"],{windowsHide:true}).status===0)("decodes a real PNG through the installed ffmpeg with canonical input options",async()=>{
+  const input=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=","base64");
+  const output=await new FfmpegRecognitionImageTranscoder().transcode(input,canonicalFfmpegArguments(1024),new AbortController().signal,8000);
+  expect(readImageDimensions(output)).toEqual({width:1,height:1});
+});
 
 /** Minimal PNG: 8-byte signature + IHDR length/type + width/height. */
 function png(width: number, height: number): Buffer {
@@ -74,7 +81,7 @@ describe("shared V2 image preparation", () => {
     // A crop or pad stage would discard garment boundaries or local details.
     expect(filter).not.toContain("crop");
     expect(filter).not.toContain("pad=");
-    expect(filter).toContain("-autorotate 1");
+    expect(filter).toContain("-autorotate -i");
     expect(filter).toContain("-vcodec png");
   });
 

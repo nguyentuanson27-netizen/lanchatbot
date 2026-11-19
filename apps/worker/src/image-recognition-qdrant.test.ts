@@ -470,3 +470,10 @@ describe("recognition publisher operations", () => {
     expect(new ImageRecognitionSearchError("X", true)).toBeInstanceOf(Error);
   });
 });
+
+it("overwrites metadata of the exact point without sending vectors",async()=>{
+ const s=adapter(()=>new Response(JSON.stringify({status:"ok",result:{status:"completed"}})));
+ await s.instance.overwritePayload("point-1",{image_color_binding_status:"INVALID"},new AbortController().signal);
+ expect(s.calls).toHaveLength(1);expect(s.calls[0]!.url).toContain("/points/payload?wait=true");expect(s.calls[0]!.init.method).toBe("PUT");
+ expect(JSON.parse(String(s.calls[0]!.init.body))).toEqual({points:["point-1"],payload:{image_color_binding_status:"INVALID"}});
+});

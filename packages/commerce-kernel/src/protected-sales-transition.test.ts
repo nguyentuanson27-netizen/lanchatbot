@@ -3,6 +3,7 @@ import { PolicyBundleV1Schema } from "@lana/contracts";
 import {
   applyCheckoutDetailsTransitionV1,
   applySalesClarificationTransitionV1,
+  clarificationAfterCheckoutCaptureV1,
   computeCanonicalOrderPreviewHashV1,
   deriveCanonicalPurchaseConfirmationV1,
   replayCanonicalCartRepriceNegotiationV1,
@@ -68,6 +69,24 @@ const policy = PolicyBundleV1Schema.parse({
 });
 
 describe("protected sales transition kernel", () => {
+  it("resets a pending payment budget only for a new required field and preserves the unresolved choice", () => {
+    const q = { reasonCode: "CHECKOUT_DETAILS_MISSING" as const, missingFields: ["PAYMENT_METHOD"], productId: "CB182",
+      attemptCount: 2, maxAttempts: 3, askedQuestionFingerprints: ["a".repeat(64), "b".repeat(64)], lastRequestedAt: now.toISOString() };
+    const before = { fullName: null, phone: null, address: null, paymentMethod: "COD" as const, updatedAt: now.toISOString() };
+    const after = { ...before, fullName: "Khach thu" };
+    const progressed = clarificationAfterCheckoutCaptureV1(q, before, after, { fullName: "Khach thu" });
+    expect(progressed).toEqual({ ...q, attemptCount: 0, askedQuestionFingerprints: [] });
+    expect(applySalesClarificationTransitionV1({ current: progressed, transition: { kind: "REQUESTED", reasonCode: q.reasonCode,
+      missingFields: ["PAYMENT_METHOD"], productId: q.productId, questionFingerprint: "c".repeat(64), maxAttempts: 3 }, appliedAt: now }))
+      .toMatchObject({ status: "APPLIED", clarification: { attemptCount: 1, askedQuestionFingerprints: ["c".repeat(64)] } });
+    expect(clarificationAfterCheckoutCaptureV1(q, after, { ...after, fullName: "Ten sua" }, { fullName: "Ten sua" })).toEqual(q);
+    expect(clarificationAfterCheckoutCaptureV1(q, after, after, { fullName: "Khach thu" })).toEqual(q);
+    expect(clarificationAfterCheckoutCaptureV1(q, before, before, { paymentMethod: "COD" }))
+      .toEqual({ ...q, missingFields: ["FULL_NAME"] });
+    expect(applySalesClarificationTransitionV1({ current: q, transition: { kind: "REQUESTED", reasonCode: q.reasonCode,
+      missingFields: ["PAYMENT_METHOD"], productId: "OTHER42", questionFingerprint: "c".repeat(64), maxAttempts: 3 }, appliedAt: now }))
+      .toMatchObject({ status: "APPLIED", clarification: { attemptCount: 3 } });
+  });
   it("derives clarification request, retry, and resolution without trusted ports", () => {
     const request = {
       kind: "REQUESTED" as const,

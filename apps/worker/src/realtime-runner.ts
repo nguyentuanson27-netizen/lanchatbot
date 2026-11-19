@@ -1,3 +1,4 @@
+import type { CommercePreprodIngress } from "./single-agent-commerce-preprod-ingress.js";
 import { createHash } from "node:crypto";
 import {
   buildCanonicalDecisionEvidenceV1,
@@ -240,6 +241,7 @@ interface RunnerInboundBatch extends ClaimedInboundBatch<InboundEnvelopeV1> {
 
 type BatchCommitStatus =
   | "COMMITTED"
+  | "RETAINED"
   | "SUPERSEDED"
   | "NOT_REQUESTED"
   | "INBOX_ONLY";
@@ -2302,6 +2304,7 @@ export class RealtimeRunner {
     SalesCycleRuntimeState
   > | undefined;
   #commerceFreshProcessAuthority: Df13CommerceFreshProcessExecutorPort | undefined;
+  #commercePreprodIngress: CommercePreprodIngress | undefined;
 
   constructor(
     private readonly inbox: RealtimeInboxPort,
@@ -2501,6 +2504,13 @@ export class RealtimeRunner {
     throw new Error("CUSTOMER_PROFILE_REVISION_CONFLICT");
   }
 
+  bindCommercePreprodIngress(ingress: CommercePreprodIngress): void {
+    if (this.#commercePreprodIngress || this.#commerceFreshProcessAuthority || this.#commerceExecutor) {
+      throw new Error("C3_COMMERCE_PREPROD_ROUTE_CONFLICT");
+    }
+    this.#commercePreprodIngress = ingress;
+  }
+
   private async resolveBusinessFactQueries(
     queries: BusinessFactQueriesV2,
     products: readonly StableProductDocument[],
@@ -2514,8 +2524,10 @@ export class RealtimeRunner {
   }
 
   async processOne(): Promise<boolean> {
+    const claimStartedMs = performance.now();
     const batch = await this.claimNextWork();
     if (!batch) return false;
+    if (batch.nativeBatch && await this.#commercePreprodIngress?.process(batch, claimStartedMs)) return true;
     try {
       // This is only a cost-saving hint. A newer message can still arrive
       // after this check, so every real customer/page-echo commit below also

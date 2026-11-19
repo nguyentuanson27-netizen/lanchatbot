@@ -1,0 +1,191 @@
+import {describe,it,expect,vi} from "vitest";
+import {createConversationState} from "@lana/conversation-engine";
+import {createCommerceTools} from "./single-agent-commerce.js";
+import {runCommerceTurn,type OwnerGeneration} from "./single-agent-commerce-read-only.js";
+import type {HandoffAuthority} from "./single-agent-commerce-handoff.js";
+import {commerceNow,commerceScope,fixturePolicy,fixtureProduct,fixtureProfile,fixtureSizeInput} from "./single-agent-commerce.test-support.js";
+import {createSalesCycleRuntimeState} from "@lana/chat-runtime";
+import {cartSelectionFromSnapshot} from "./realtime-sales-catalog.js";
+import {OPENING_PRODUCT_MEDIA_RULE} from "./single-agent-commerce-opening-media.js";
+
+async function setup(mode:"missing-pos"|"complete"|"policy-error"="missing-pos",commitMode:"ok"|"denied"|"unknown"="ok") {
+ const scope=commerceScope(),product=fixtureProduct("QU714"),original=(await fixturePolicy()).bundle!;
+ const policy={...original,artifacts:{...original.artifacts,handoffMatrix:{schemaVersion:1 as const,kind:"HANDOFF_MATRIX" as const,sourceMetadata:original.artifacts.shopPolicy.sourceMetadata,
+  rules:(["PRICE_UNAVAILABLE","STOCK_UNAVAILABLE","ETA_UNAVAILABLE","POLICY_UNAVAILABLE","SIZE_RULE_UNAVAILABLE","DEPENDENCY_FAILURE"] as const).map(reason=>({
+   reason,customerMessagePolicy:"SILENT_HANDOFF" as const,holdingReply:null,tag:"NHAN_VIEN" as const}))}}};
+ let current:HandoffAuthority={...scope,fence:1,stateVersion:scope.revision,state:{...createConversationState({conversationId:scope.conversationId,routingOwner:"APP",now:commerceNow}),revision:scope.revision}};
+ const commit=vi.fn(async ({next}:{next:HandoffAuthority})=>{
+  if(commitMode==="unknown")throw Error("COMMIT_UNKNOWN");if(commitMode==="denied")return false;current=structuredClone(next);return true;
+ });
+ const read={scope,clock:()=>commerceNow,initialProducts:[product.product],policy:async()=>{
+  if(mode==="policy-error")throw Error("POLICY_SOURCE_UNAVAILABLE");return fixturePolicy();
+ },catalog:{readProduct:async()=>({...product,snapshot:mode==="missing-pos"?null:product.snapshot}),searchText:async()=>({status:"NOT_FOUND" as const,reasonCode:"NO_CANDIDATES" as const})}};
+ const handoff={read:async()=>structuredClone(current),commit,policy:async()=>policy};
+ return {scope,product,read,handoff,commit,current:()=>current};
+}
+const native=(name:string,args:unknown):OwnerGeneration=>({kind:"TOOLS",calls:[{name,args}],content:{role:"model",parts:[{functionCall:{name,args}}]}});
+
+describe("missing shop information uses real handoff; missing customer input stays conversational",()=>{
+ it.each([true,false])("enforces an unknown-colour shop gap before asking for customer size (size provided=%s)",async hasSize=>{
+  const s=await setup("complete"),profile=fixtureProfile(),row=s.product.snapshot.offers.DIRECT!.rows[0]!;
+  row.color="__NO_COLOR__";
+  s.product.snapshot.offers.DIRECT!.rows.push({...structuredClone(row),color:"be"});
+  const cycle=createSalesCycleRuntimeState(s.scope.conversationId,{pageId:s.scope.pageId,conversationId:s.scope.conversationId},commerceNow);
+  const mutate=vi.fn(),commitCart=vi.fn(),policy=(await fixturePolicy()).bundle!;
+  const tools=await createCommerceTools({read:s.read,handoff:s.handoff,
+   state:{store:{read:async()=>structuredClone(profile),compareAndSwap:vi.fn()},sourceMessages:[],sizeInput:async()=>fixtureSizeInput()},
+   effects:{conversationKey:s.scope.conversationId,repository:{read:async()=>structuredClone(cycle),compareAndSwap:commitCart},
+    identity:{cartId:"50000000-0000-4000-8000-000000000001",salesEpisodeId:"60000000-0000-4000-8000-000000000001",customerProfileId:profile.profile.profileId},
+    authorize:async()=>true,policy:async()=>policy,select:async q=>cartSelectionFromSnapshot(s.product.snapshot,{...q,selectionMode:"CANDIDATE_TUPLES"},commerceNow),
+    executeCommand:mutate,readAuthority:async()=>({...s.scope,revision:s.current().stateVersion,conversationOwner:s.current().state.conversationOwner}),readReceipt:async()=>null}});
+  const result=await tools.invoke({name:"add_to_cart",args:{subjectRef:"QU714",offerType:"DIRECT",color:null,...(hasSize?{size:"M"}:{})}});
+  expect(result).toMatchObject({status:"UNAVAILABLE",data:{choiceResolution:{kind:"SHOP_DATA_MISSING"},shopDataGap:"SHOP_COLOR_UNRECORDED"}});
+  expect(await tools.terminalOutcome!()).toMatchObject({disposition:"HANDOFF",text:null});
+  expect(s.commit).toHaveBeenCalledOnce();expect(mutate).not.toHaveBeenCalled();expect(commitCart).not.toHaveBeenCalled();
+ });
+ it.each(["ok","denied","unknown"] as const)("unsupported component sizing uses silent handoff with %s authority",async mode=>{
+  const s=await setup("complete",mode),profile=fixtureProfile(),sizeInput=vi.fn(async()=>fixtureSizeInput());
+  const tools=await createCommerceTools({read:s.read,handoff:s.handoff,state:{store:{read:async()=>structuredClone(profile),compareAndSwap:vi.fn()},sourceMessages:[],sizeInput}});
+  const result=await tools.invoke({name:"recommend_size",args:{subjectRef:"QU714",fitScope:"COMPONENT",componentRole:"PANTS"}});
+  expect(result).toMatchObject({status:"UNAVAILABLE",reason:"SIZE_SOURCE_UNAVAILABLE"});expect(sizeInput).not.toHaveBeenCalled();
+  expect(await tools.terminalOutcome!()).toMatchObject({disposition:mode==="ok"?"HANDOFF":"NO_SEND",text:null});expect(s.commit).toHaveBeenCalledOnce();
+  expect(tools.snapshot().protectedClaims.filter(c=>(c as {type:string}).type==="SIZE_FIT")).toEqual([]);
+ });
+ it("hands off a failed product source read before another owner or verifier",async()=>{
+  const s=await setup();s.read.catalog.readProduct=async()=>{throw Error("SOURCE_OFFLINE");};
+  const tools=await createCommerceTools({read:s.read,handoff:s.handoff});
+  const owner=vi.fn(async()=>native("read_product",{subjectRef:"QU714",offerType:"DIRECT"})),verifier=vi.fn();
+  const result=await runCommerceTurn({scope:s.scope,tools,owner,verifier,clock:s.read.clock,latest:"Quần size M còn không, bao nhiêu em?",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm"});
+  expect(result.terminal).toMatchObject({disposition:"HANDOFF",reason:"DEPENDENCY_FAILURE",text:null});
+  expect(s.current().state.conversationOwner).toBe("HUMAN");expect(s.commit).toHaveBeenCalledOnce();
+  expect(owner).not.toHaveBeenCalled();expect(verifier).not.toHaveBeenCalled();
+  await tools.invokeBatch([{name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT"}}]);expect(s.commit).toHaveBeenCalledOnce();
+ });
+ it.each(["denied","unknown"] as const)("does not claim a transfer or resume model advice after an unproved %s handoff",async mode=>{
+  const s=await setup("missing-pos",mode);s.read.catalog.readProduct=async()=>{throw Error("SOURCE_OFFLINE");};
+  const tools=await createCommerceTools({read:s.read,handoff:s.handoff});
+  const owner=vi.fn(async()=>native("read_product",{subjectRef:"QU714",offerType:"DIRECT"})),verifier=vi.fn();
+  const result=await runCommerceTurn({scope:s.scope,tools,owner,verifier,clock:s.read.clock,latest:"Quần bao nhiêu em?",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm"});
+  expect(result.terminal).toMatchObject({disposition:"NO_SEND",text:null});expect(s.commit).toHaveBeenCalledOnce();
+  expect(owner).not.toHaveBeenCalled();expect(verifier).not.toHaveBeenCalled();
+  expect(await tools.invokeBatch([{name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT"}}])).toMatchObject([{status:"REJECTED"}]);
+  expect(s.commit).toHaveBeenCalledOnce();
+ });
+ it("hands off policy read failure when independent handoff authority remains available",async()=>{
+  const s=await setup("policy-error"),tools=await createCommerceTools({read:s.read,handoff:s.handoff});
+  await tools.invokeBatch([{name:"read_policy",args:{}}]);
+  expect(await tools.terminalOutcome!()).toMatchObject({disposition:"HANDOFF",reason:"POLICY_UNAVAILABLE"});expect(s.commit).toHaveBeenCalledOnce();
+ });
+ it("keeps a material-only read usable when offers are unknown but description is available",async()=>{
+  const s=await setup(),tools=await createCommerceTools({read:s.read,handoff:s.handoff});
+  expect(await tools.invoke({name:"read_product",args:{subjectRef:"QU714",detailsOnly:true}})).toMatchObject({status:"OK",data:{availableOffers:null,content:expect.anything()}});
+  expect(await tools.terminalOutcome!()).toBeNull();expect(s.commit).not.toHaveBeenCalled();
+ });
+ it("does not hand off valid quote reads or rejected model arguments",async()=>{
+  const s=await setup("complete"),tools=await createCommerceTools({read:s.read,handoff:s.handoff});
+  expect(await tools.invoke({name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT"}})).toMatchObject({status:"OK",data:{availability:{price:{status:"OK"}}}});
+  expect(await tools.invoke({name:"read_product",args:{subjectRef:"invented"}})).toMatchObject({status:"REJECTED"});
+  expect(await tools.terminalOutcome!()).toBeNull();expect(s.commit).not.toHaveBeenCalled();
+ });
+ it("lets the owner answer only the verified price when incidental stock is unknown",async()=>{
+  const s=await setup("complete");s.product.snapshot.offers.DIRECT!.rows[0]!.stock_quantity=null;
+  const tools=await createCommerceTools({read:s.read,handoff:s.handoff});
+  let turns=0;
+  const owner=vi.fn(async():Promise<OwnerGeneration>=>++turns===1?native("read_product",{subjectRef:"QU714",offerType:"DIRECT"}):{kind:"FINAL",text:"Quần 499.000đ chị nhé."});
+  const verifier=vi.fn(async()=>({result:{verdict:"PASS",violations:[]}}));
+  const result=await runCommerceTurn({scope:s.scope,tools,owner,verifier,clock:s.read.clock,latest:"Quần này bao nhiêu tiền em?",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm"});
+  expect(result.terminal).toMatchObject({disposition:"SEND_ELIGIBLE",text:"Quần 499.000đ chị nhé."});
+  expect(s.commit).not.toHaveBeenCalled();expect(owner).toHaveBeenCalledTimes(2);expect(verifier).toHaveBeenCalledOnce();
+ });
+ it.each([
+  {reason:"STOCK_UNAVAILABLE",latest:"Quần này còn hàng không em?"},
+  {reason:"PRICE_UNAVAILABLE",latest:"Quần này bao nhiêu tiền em?"},
+  {reason:"ETA_UNAVAILABLE",latest:"Giao về miền Nam mất mấy ngày em?"},
+ ])("commits the owner's relevant $reason handoff after a partial read",async({reason,latest})=>{
+  const s=await setup(reason==="PRICE_UNAVAILABLE"?"missing-pos":"complete");
+  if(reason==="STOCK_UNAVAILABLE")s.product.snapshot.offers.DIRECT!.rows[0]!.stock_quantity=null;
+  const tools=await createCommerceTools({read:s.read,handoff:s.handoff});let turns=0;
+  const owner=vi.fn(async()=>++turns===1?native("read_product",{subjectRef:"QU714",offerType:"DIRECT",...(reason==="ETA_UNAVAILABLE"?{deliveryRegion:"MIEN-NAM"}:{})}):native("request_handoff",{reason})),verifier=vi.fn();
+  const result=await runCommerceTurn({scope:s.scope,tools,owner,verifier,clock:s.read.clock,latest,history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm"});
+  expect(result.terminal).toMatchObject({disposition:"HANDOFF",reason});expect(s.commit).toHaveBeenCalledOnce();
+  expect(owner).toHaveBeenCalledTimes(2);expect(verifier).not.toHaveBeenCalled();
+ });
+ it("retains a partial read with unknown ETA for the owner to assess against the request",async()=>{
+  const s=await setup("complete"),tools=await createCommerceTools({read:s.read,handoff:s.handoff});
+  await tools.invoke({name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT",deliveryRegion:"MIEN-NAM"}});
+  expect(await tools.terminalOutcome!()).toBeNull();expect(s.commit).not.toHaveBeenCalled();
+ });
+ it.each(["GENERIC","FEEDBACK"])("returns missing %s media to the owner, then honours a relevant silent handoff",async intent=>{
+  const s=await setup("complete"),tools=await createCommerceTools({read:s.read,handoff:s.handoff,media:{allowedHostSuffixes:["content.pancake.vn"]}});
+  const result=await tools.invoke({name:"select_product_media",args:{subjectRef:"QU714",intent}});
+  expect(result).toMatchObject({status:"UNAVAILABLE",reason:"NO_VERIFIED_MATCHING_MEDIA"});
+  expect(await tools.terminalOutcome!()).toBeNull();expect(s.commit).not.toHaveBeenCalled();
+  await tools.invoke({name:"request_handoff",args:{reason:"DEPENDENCY_FAILURE"}});
+  expect(await tools.terminalOutcome!()).toMatchObject({disposition:"HANDOFF",reason:"DEPENDENCY_FAILURE"});expect(s.commit).toHaveBeenCalledOnce();
+ });
+ it("keeps an acknowledgement conversational after an incidental media lookup fails, with verifier mandatory",async()=>{
+  const s=await setup("complete"),tools=await createCommerceTools({read:s.read,handoff:s.handoff,media:{allowedHostSuffixes:["content.pancake.vn"]}});
+  let n=0;const verifier=vi.fn(async()=>({result:{verdict:"PASS",violations:[]}}));
+  const result=await runCommerceTurn({scope:s.scope,tools,owner:async()=>++n===1?native("select_product_media",{subjectRef:"QU714",intent:"FEEDBACK"}):{kind:"FINAL",text:"Dạ, em cảm ơn chị nhé."},
+   verifier,clock:s.read.clock,latest:"Chị thích màu be, cảm ơn em nhé.",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm"});
+  expect(result.terminal).toMatchObject({disposition:"SEND_ELIGIBLE",text:"Dạ, em cảm ơn chị nhé."});
+  expect(n).toBe(2);expect(verifier).toHaveBeenCalledOnce();expect(s.commit).not.toHaveBeenCalled();expect(tools.mediaSelection!()).toEqual([]);
+ });
+ it("still blocks a missing code-required opening image before owner generation",async()=>{
+  const s=await setup("complete"),tools=await createCommerceTools({read:{...s.read,entry:{firstContact:true,fromAd:false}},handoff:s.handoff,
+   media:{allowedHostSuffixes:["content.pancake.vn"]},openingMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+  const owner=vi.fn(),verifier=vi.fn();
+  const result=await runCommerceTurn({scope:s.scope,tools,owner,verifier,clock:s.read.clock,latest:"Mẫu này bao nhiêu em?",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm"});
+  expect(result.terminal).toMatchObject({disposition:"HANDOFF",text:null});expect(owner).not.toHaveBeenCalled();expect(verifier).not.toHaveBeenCalled();
+ });
+ it("finishes a genuinely missing requested image by silent handoff through the normal owner loop",async()=>{
+  const s=await setup("complete"),tools=await createCommerceTools({read:s.read,handoff:s.handoff,media:{allowedHostSuffixes:["content.pancake.vn"]}});
+  let n=0;const verifier=vi.fn();
+  const result=await runCommerceTurn({scope:s.scope,tools,owner:async()=>++n===1?native("select_product_media",{subjectRef:"QU714",intent:"FEEDBACK"}):native("request_handoff",{reason:"DEPENDENCY_FAILURE"}),
+   verifier,clock:s.read.clock,latest:"Gửi chị ảnh khách mặc quần nhé.",history:[],ownerPrompt:"Tư vấn",verifierPrompt:"Kiểm"});
+  expect(result.terminal).toMatchObject({disposition:"HANDOFF",text:null});expect(n).toBe(2);expect(verifier).not.toHaveBeenCalled();
+  expect(s.commit).toHaveBeenCalledOnce();expect(tools.mediaSelection!()).toEqual([]);
+ });
+ it.each(["ok","denied","unknown"] as const)("keeps explicit missing-media recovery silent under a legacy holding policy (%s)",async mode=>{
+  const s=await setup("complete",mode),original=await s.handoff.policy();
+  const handoff={...s.handoff,policy:async()=>({...original,artifacts:{...original.artifacts,handoffMatrix:{...original.artifacts.handoffMatrix!,
+   rules:original.artifacts.handoffMatrix!.rules.map(r=>({...r,customerMessagePolicy:"HOLDING_REPLY_THEN_HANDOFF" as const,holdingReply:"Bên em sẽ kiểm tra rồi báo chị nhé."}))}}})};
+  const tools=await createCommerceTools({read:s.read,handoff,media:{allowedHostSuffixes:["content.pancake.vn"]}});
+  await tools.invoke({name:"select_product_media",args:{subjectRef:"QU714",intent:"FEEDBACK"}});
+  expect(await tools.invoke({name:"request_handoff",args:{reason:"DEPENDENCY_FAILURE",untrustedOverride:true}})).toMatchObject({status:"REJECTED"});
+  expect(s.commit).not.toHaveBeenCalled();
+  await tools.invokeBatch([{name:"request_handoff",args:{reason:"DEPENDENCY_FAILURE"}}]);
+  expect(await tools.terminalOutcome!()).toMatchObject({disposition:mode==="ok"?"HANDOFF":"NO_SEND",text:null});
+  expect(s.commit).toHaveBeenCalledOnce();
+ });
+ it("does not invent a handoff capability in the isolated read-only harness",async()=>{
+  const s=await setup(),tools=await createCommerceTools({read:s.read});
+  const result=await tools.invoke({name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT"}});
+  expect(result).toMatchObject({status:"OK",data:{availability:{price:{status:"UNAVAILABLE"}}}});
+  expect(tools.availableTools).not.toContain("request_handoff");expect(s.commit).not.toHaveBeenCalled();
+ });
+ it("asks for missing customer measurements without handing off a product with a verified chart",async()=>{
+  const s=await setup("complete"),profile=fixtureProfile();profile.profile.measurements=[];profile.fieldEvidence={};
+  const tools=await createCommerceTools({read:s.read,handoff:s.handoff,state:{store:{read:async()=>structuredClone(profile),compareAndSwap:async()=>true},sourceMessages:[],sizeInput:async()=>fixtureSizeInput()}});
+  const result=await tools.invoke({name:"recommend_size",args:{subjectRef:"QU714"}});
+  expect(result).toMatchObject({status:"OK",data:{missingInputs:expect.any(Array)}});
+  expect((result.data as {missingInputs:string[]}).missingInputs.length).toBeGreaterThan(0);
+  expect(await tools.terminalOutcome!()).toBeNull();expect(s.commit).not.toHaveBeenCalled();
+ });
+ it("hands off unavailable size sources instead of misclassifying them as bad customer measurements",async()=>{
+  const s=await setup("complete"),profile=fixtureProfile();
+  const tools=await createCommerceTools({read:s.read,handoff:s.handoff,state:{store:{read:async()=>structuredClone(profile),compareAndSwap:async()=>true},sourceMessages:[],sizeInput:async()=>{throw Error("SIZE_SOURCE_OFFLINE");}}});
+  expect(await tools.invoke({name:"recommend_size",args:{subjectRef:"QU714"}})).toMatchObject({status:"UNAVAILABLE",reason:"SIZE_SOURCE_UNAVAILABLE"});
+  expect(await tools.terminalOutcome!()).toMatchObject({disposition:"HANDOFF",reason:"SIZE_RULE_UNAVAILABLE"});expect(s.commit).toHaveBeenCalledOnce();
+ });
+});
+
+it.each(["ok","denied","unknown"] as const)("required source handoff stays silent under a holding-message policy (%s)",async mode=>{
+ const s=await setup("missing-pos",mode);s.read.catalog.readProduct=async()=>{throw Error("SOURCE_OFFLINE");};
+ const tools=await createCommerceTools({read:s.read,handoff:s.handoff});
+ await tools.invoke({name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT"}});
+ const terminal=await tools.terminalOutcome!();expect(terminal?.text).toBeNull();
+ expect(terminal?.disposition).toBe(mode==="ok"?"HANDOFF":"NO_SEND");expect(s.commit).toHaveBeenCalledOnce();
+ expect(s.commit.mock.calls[0]![0]).toMatchObject({decision:{customerMessages:[],customerMessagePolicy:"SILENT_HANDOFF"}});
+ await tools.invoke({name:"read_product",args:{subjectRef:"QU714",offerType:"DIRECT"}});expect(s.commit).toHaveBeenCalledOnce();
+});

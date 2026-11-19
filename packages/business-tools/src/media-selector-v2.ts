@@ -164,7 +164,7 @@ function isMediaFresh(product: ProductFactsV2, now: Date): boolean {
   return metadata.authority === "QDRANT_STABLE"
     && metadata.freshnessState === "FRESH"
     && Date.parse(metadata.observedAt) <= now.getTime()
-    && Date.parse(metadata.expiresAt) > now.getTime();
+    && (metadata.expiresAt===null||Date.parse(metadata.expiresAt) > now.getTime());
 }
 
 function resolveComponentId(

@@ -27,6 +27,7 @@ export type CanonicalNegotiationEvidenceV1 =
       readonly evidenceId: string;
       readonly mutationReasonCode:
         | "LINE_ADDED"
+        | "LINE_REPLACED"
         | "LINE_REMOVED"
         | "QUANTITY_CHANGED"
         | "VARIANT_CHANGED"
@@ -131,6 +132,7 @@ export interface CanonicalNegotiationStateV1 {
 
 export type CanonicalCartMutationReasonV1 =
   | "LINE_ADDED"
+  | "LINE_REPLACED"
   | "LINE_REMOVED"
   | "QUANTITY_CHANGED"
   | "VARIANT_CHANGED"

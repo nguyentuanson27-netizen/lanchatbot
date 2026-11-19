@@ -15,6 +15,7 @@ import {
 
 export type CanonicalCartMutationV2 =
   | { readonly kind: "ADD_LINE"; readonly line: CartLineV1 }
+  | { readonly kind: "REPLACE_LINE"; readonly lineId: string; readonly line: CartLineV1 }
   | { readonly kind: "REMOVE_LINE"; readonly lineId: string }
   | { readonly kind: "SET_QUANTITY"; readonly lineId: string; readonly quantity: number }
   | {
@@ -103,6 +104,11 @@ function mutate(
   }
   const index = lines.findIndex(({ lineId }) => lineId === mutation.lineId);
   if (index < 0) return null;
+  if (mutation.kind === "REPLACE_LINE") {
+    const parsed = CartLineV1Schema.safeParse(mutation.line);
+    if (!parsed.success || parsed.data.lineId !== mutation.lineId) return null;
+    return lines.map((line, i) => i === index ? parsed.data : line);
+  }
   if (mutation.kind === "REMOVE_LINE") {
     return lines.filter((_, lineIndex) => lineIndex !== index);
   }

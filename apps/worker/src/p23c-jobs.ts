@@ -365,6 +365,16 @@ export function buildApprovedQdrantJobs(
       metadata_verified: verified,
     };
 
+    // New manual binding is independent of visual/AI colors. An invalid pair remains explicit.
+    const color = typeof row.VERIFIED_PRODUCT_COLOR === "string" ? row.VERIFIED_PRODUCT_COLOR.trim() : "";
+    const colorHash = typeof row.COLOR_BINDING_IMAGE_HASH === "string" ? row.COLOR_BINDING_IMAGE_HASH.trim().toLowerCase() : "";
+    if([row.VERIFIED_PRODUCT_COLOR,row.COLOR_BINDING_IMAGE_HASH].some(v=>v!=null&&(typeof v!=="string"||v.trim()!==""))){
+      const valid=verified && reviewStatus==="APPROVED" && Buffer.byteLength(color)<=64 && !!color &&
+        /^[a-f0-9]{64}$/.test(colorHash) && colorHash===imageContentSha256;
+      payload.image_color_binding_status=valid?"VALID":"INVALID";
+      if(valid){payload.image_verified_product_color=color;payload.image_color_binding_sha256=colorHash;}
+    }
+
     const contextual = [
       payload.title, payload.category, ...visualColors, ...visualMaterials, imageType, ...intents,
       angle, detailType, ...partsVisible, profile?.style_primary, profile?.style_secondary,

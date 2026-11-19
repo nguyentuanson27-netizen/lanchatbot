@@ -88,9 +88,9 @@ function contextFreshForCommerce(
   }
   if (context.verifiedClaims.some(({ provenance }) => {
     const observedAt = Date.parse(provenance.observedAt);
-    const expiresAt = Date.parse(provenance.expiresAt);
-    return !Number.isFinite(observedAt) || !Number.isFinite(expiresAt) ||
-      observedAt > nowMs + 5 * 60_000 || expiresAt <= nowMs;
+    const expiresAt = provenance.expiresAt === null ? null : Date.parse(provenance.expiresAt);
+    return !Number.isFinite(observedAt) || observedAt > nowMs + 5 * 60_000 ||
+      (expiresAt !== null && (!Number.isFinite(expiresAt) || expiresAt <= nowMs));
   })) return false;
   if (context.cartReadiness !== null) {
     const readinessExpiry = Date.parse(context.cartReadiness.expiresAt);
@@ -130,9 +130,9 @@ export function prepareContextV2CaptureForCommit(
   if (capture.status === "BLOCKED" || capture.context === null) return capture;
   const staleClaim = capture.context.verifiedClaims.some(({ provenance }) => {
     const observedAt = Date.parse(provenance.observedAt);
-    const expiresAt = Date.parse(provenance.expiresAt);
-    return !Number.isFinite(observedAt) || !Number.isFinite(expiresAt) ||
-      observedAt > nowMs + 5 * 60_000 || expiresAt <= nowMs;
+    const expiresAt = provenance.expiresAt === null ? null : Date.parse(provenance.expiresAt);
+    return !Number.isFinite(observedAt) || observedAt > nowMs + 5 * 60_000 ||
+      (expiresAt !== null && (!Number.isFinite(expiresAt) || expiresAt <= nowMs));
   });
   if (staleClaim) {
     return blockedAtCommit(capture, "CONTEXT_V2_CLAIM_EXPIRED_AT_COMMIT");

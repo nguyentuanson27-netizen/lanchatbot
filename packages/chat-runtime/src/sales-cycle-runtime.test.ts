@@ -1,5 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { PolicyBundleV1Schema } from "@lana/contracts";
+
+it("records a scoped support request before cart without granting a concession", () => {
+ const state=createSalesCycleRuntimeState("conversation-hash",routing,now);
+ const pending={schemaVersion:1,pendingId:"a".repeat(64),sourceMessageId:"support-source",sourceTextHash:"b".repeat(64),
+  sourceObservedAt:now.toISOString(),productId:line.parentProductId,offerId:line.offerId,
+  salesEpisodeId:cartDraft.identity.salesEpisodeId,customerProfileId:cartDraft.identity.customerProfileId,
+  policyRef,recordedAt:now.toISOString(),expiresAt:new Date(now.getTime()+600000).toISOString(),
+  status:"PENDING",cartOpeningCommandId:null,activatedByCartId:null};
+ pending.pendingId=createHash("sha256").update(pendingNegotiationIdPreimageV1(PendingNegotiationV1Schema.parse(pending))).digest("hex");
+ const result=applySalesCycleCommand({state,expectedRevision:0,command:{kind:"PENDING_NEGOTIATION_RECORDED",commandId:"support-pending",pending} as never,
+  now,trustedPorts:trustedPorts()});
+ expect(result.status).toBe("APPLIED");
+ if(result.status!=="APPLIED")throw Error(result.status);
+ expect(result.state.cart).toBeNull();expect(result.state.negotiation).toBeNull();
+ expect((result.state as unknown as {pendingNegotiation:{status:string}}).pendingNegotiation.status).toBe("PENDING");
+});
+import { PolicyBundleV1Schema, CART_TTL_MS_V1, pendingNegotiationIdPreimageV1, PendingNegotiationV1Schema } from "@lana/contracts";
+import { createHash } from "node:crypto";
 import {
   canonicalCartPolicyLinesV2,
   canonicalNegotiationEventFingerprintV1,
@@ -188,6 +205,48 @@ function addPreview(state: SalesCycleRuntimeState, payment: "COD" | "BANK_TRANSF
 const confirmationIntent = { source: "MODEL_STRUCTURED_OUTPUT" as const, intent: "PURCHASE_CONFIRMATION" as const, sourceMessageId: "mid-ok-1" };
 
 describe("Phase 3 sales-cycle runtime", () => {
+ it("keeps the payment blocker after actual private-field progress resets its question budget to zero",()=>{
+  const cart=addCart();
+  let state={...cart,checkoutDraft:{...cart.checkoutDraft!,fullName:null},clarification:{reasonCode:"CHECKOUT_DETAILS_MISSING" as const,
+   missingFields:["PAYMENT_METHOD"],productId:"CB182",attemptCount:2,maxAttempts:3,
+   askedQuestionFingerprints:["a".repeat(64),"b".repeat(64)],lastRequestedAt:now.toISOString()}};
+  const run=(command:Parameters<typeof applySalesCycleCommand>[0]["command"])=>applySalesCycleCommand({state,expectedRevision:state.revision,command,now,trustedPorts:trustedPorts()});
+  const captured=run({kind:"CHECKOUT_DETAILS_CAPTURED",commandId:"actual-name-progress",details:{fullName:recipient.fullName}});
+  expect(captured).toMatchObject({status:"APPLIED",state:{clarification:{attemptCount:0,missingFields:["PAYMENT_METHOD"],askedQuestionFingerprints:[]}}});
+  const progressed=captured.state;
+  expect(applySalesCycleCommand({state:progressed,expectedRevision:progressed.revision,command:{kind:"PREVIEW_CREATED",commandId:"zero-preview",preview:preview()},now})).toMatchObject({status:"REJECTED",reasonCode:"PAYMENT_CHOICE_UNRESOLVED"});
+  expect(applySalesCycleCommand({state:progressed,expectedRevision:progressed.revision,command:{kind:"CONFIRM_PURCHASE",commandId:"zero-confirm",intent:confirmationIntent},now})).toMatchObject({status:"REJECTED",reasonCode:"PAYMENT_CHOICE_UNRESOLVED"});
+  expect(applySalesCycleCommand({state:progressed,expectedRevision:progressed.revision,command:{kind:"CLARIFICATION_REQUESTED",commandId:"first-after-progress",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["PAYMENT_METHOD"],productId:"CB182",questionFingerprint:"c".repeat(64),maxAttempts:3},now})).toMatchObject({status:"APPLIED",state:{clarification:{attemptCount:1}}});
+  expect(applySalesCycleCommand({state:progressed,expectedRevision:progressed.revision,command:{kind:"CHECKOUT_DETAILS_CAPTURED",commandId:"actual-name-progress",details:{fullName:recipient.fullName}},now})).toMatchObject({status:"DUPLICATE",state:progressed});
+ });
+ it("payment clarification blocks direct preview/confirm and cannot be resolved by other intake fields",()=>{
+  let state=addPreview(addCart());
+  const run=(command:Parameters<typeof applySalesCycleCommand>[0]["command"])=>applySalesCycleCommand({state,expectedRevision:state.revision,command,now,trustedPorts:trustedPorts()});
+  const pending=run({kind:"CLARIFICATION_REQUESTED",commandId:"payment-unclear",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["PAYMENT_METHOD"],productId:null,questionFingerprint:"a".repeat(64),maxAttempts:3});
+  expect(pending.status).toBe("APPLIED");state=pending.state;
+  expect(run({kind:"PREVIEW_CREATED",commandId:"preview-stale-method",preview:preview()}).status).toBe("REJECTED");
+  expect(run({kind:"CLARIFICATION_RESOLVED",commandId:"fake-resolve"}).status).toBe("REJECTED");
+  expect(run({kind:"CLARIFICATION_REQUESTED",commandId:"fake-replace",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["FULL_NAME"],productId:null,questionFingerprint:"b".repeat(64),maxAttempts:3}).status).toBe("REJECTED");
+  expect(run({kind:"CLARIFICATION_REQUESTED",commandId:"fake-widen",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["FULL_NAME","PAYMENT_METHOD"],productId:null,questionFingerprint:"b".repeat(64),maxAttempts:3}).status).toBe("REJECTED");
+  state=run({kind:"CHECKOUT_DETAILS_CAPTURED",commandId:"other-field",details:{fullName:recipient.fullName}}).state;
+  expect(state.clarification?.missingFields).toEqual(["PAYMENT_METHOD"]);
+  expect(run({kind:"CONFIRM_PURCHASE",commandId:"confirm-stale-method",intent:{source:"DETERMINISTIC_CLASSIFIER",intent:"PURCHASE_CONFIRMATION",sourceMessageId:"new-source"}})).toMatchObject({status:"REJECTED",reasonCode:"PAYMENT_CHOICE_UNRESOLVED"});
+  state=run({kind:"CHECKOUT_DETAILS_CAPTURED",commandId:"payment-chosen",details:{paymentMethod:"COD"}}).state;
+  expect(state.preview).toBeNull();
+  expect(state.clarification?.missingFields).toEqual(["ORDER_PREVIEW"]);
+  expect(state.clarification?.attemptCount).toBe(1);
+  expect(run({kind:"CLARIFICATION_REQUESTED",commandId:"fake-replace-preview",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["FULL_NAME"],productId:null,questionFingerprint:"b".repeat(64),maxAttempts:3})).toMatchObject({status:"REJECTED",reasonCode:"PAYMENT_RECAPTURE_PREVIEW_REQUIRED"});
+  const disputedAgain=run({kind:"CLARIFICATION_REQUESTED",commandId:"payment-disputed-again",reasonCode:"CHECKOUT_DETAILS_MISSING",missingFields:["PAYMENT_METHOD"],productId:null,questionFingerprint:"b".repeat(64),maxAttempts:3});
+  expect(disputedAgain).toMatchObject({status:"APPLIED",state:{clarification:{attemptCount:2,askedQuestionFingerprints:["a".repeat(64),"b".repeat(64)]}}});
+  expect(run({kind:"CLARIFICATION_RESOLVED",commandId:"fake-resolve-preview"})).toMatchObject({status:"REJECTED",reasonCode:"PAYMENT_RECAPTURE_PREVIEW_REQUIRED"});
+  expect(run({kind:"CONFIRM_PURCHASE",commandId:"fake-confirm-preview",intent:confirmationIntent})).toMatchObject({status:"REJECTED",reasonCode:"PAYMENT_RECAPTURE_PREVIEW_REQUIRED"});
+  const stalePreview=run({kind:"PREVIEW_CREATED",commandId:"bad-fresh-preview",preview:{...preview(),expiresAt:now.toISOString()}});
+  expect(stalePreview.status).toBe("REJECTED");
+  expect(stalePreview.state.clarification).toEqual(state.clarification);
+  const fresh=run({kind:"PREVIEW_CREATED",commandId:"fresh-preview-after-choice",preview:preview()});
+  expect(fresh.status).toBe("APPLIED"); state=fresh.state;
+  expect(state.clarification).toBeNull();
+ });
   it("rejects caller-supplied commerce data when trusted resolvers are absent or content is tampered", () => {
     let state = createSalesCycleRuntimeState("conversation-hash", routing, now);
     for (const [kind, commandId] of [["FACTS_PRESENTED", "facts"], ["MEASUREMENTS_REQUIRED", "measure"], ["SIZE_RECOMMENDED", "size"]] as const) {
@@ -507,4 +566,53 @@ describe("Phase 3 sales-cycle runtime", () => {
     });
     expect(resolved).toMatchObject({ status: "APPLIED", state: { clarification: null } });
   });
+});
+
+function pendingSupportCart(){
+ let state=createSalesCycleRuntimeState("conversation-hash",routing,now);
+ const request=PendingNegotiationV1Schema.parse({schemaVersion:1,pendingId:"0".repeat(64),sourceMessageId:"support-before-cart",sourceTextHash:"b".repeat(64),
+  sourceObservedAt:now.toISOString(),productId:line.parentProductId,offerId:line.offerId,
+  salesEpisodeId:cartDraft.identity.salesEpisodeId,customerProfileId:cartDraft.identity.customerProfileId,policyRef,
+  recordedAt:now.toISOString(),expiresAt:new Date(now.getTime()+600000).toISOString(),status:"PENDING",cartOpeningCommandId:null,activatedByCartId:null});
+ request.pendingId=createHash("sha256").update(pendingNegotiationIdPreimageV1(request)).digest("hex");
+ const recorded=applySalesCycleCommand({state,expectedRevision:0,command:{kind:"PENDING_NEGOTIATION_RECORDED",commandId:"pending-record",pending:request},now,trustedPorts:trustedPorts()});
+ if(recorded.status!=="APPLIED")throw Error(recorded.status);
+ state=recorded.state;
+ for(const kind of ["FACTS_PRESENTED","MEASUREMENTS_REQUIRED","SIZE_RECOMMENDED"] as const){
+  const result=applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind,commandId:kind},now});
+  if(result.status!=="APPLIED")throw Error(result.status);state=result.state;
+ }
+ const later=new Date(now.getTime()+1000);
+ const opened=applySalesCycleCommand({state,expectedRevision:state.revision,command:{kind:"CART_OPENED",commandId:"open-after-pending",cartDraftRef,expiresAt:new Date(later.getTime()+CART_TTL_MS_V1).toISOString()},now:later,trustedPorts:trustedPorts()});
+ if(opened.status!=="APPLIED")throw Error(opened.status);
+ const ports={...trustedPorts(),resolveCartCreationReceipt:()=>({commandId:"open-after-pending",cartId,stateRevision:opened.state.revision,observedAt:later.toISOString()})};
+ const command={kind:"NEGOTIATION_EVENT" as const,commandId:"activate-pending",expectedNegotiationVersion:1,sourceMessageId:request.sourceMessageId,
+  intent:"PRICE_OBJECTION" as const,reasonCode:"PRICE_OBJECTION",pendingId:request.pendingId,cartOpeningCommandId:"open-after-pending"};
+ return {state:opened.state,ports,command,later};
+}
+it("keeps the normal old-message gate and activates only committed bound pending support",()=>{
+ const s=pendingSupportCart();
+ const {pendingId:_ref,cartOpeningCommandId:_receipt,...normal}=s.command;
+ const oldPorts={...s.ports,resolveInboundMessage:(id:string)=>({...routing,messageId:id,senderType:"CUSTOMER" as const,observedAt:now.toISOString(),attachments:[]})};
+ const normalResult=applySalesCycleCommand({...s,expectedRevision:s.state.revision,command:normal,now:s.later,trustedPorts:oldPorts});
+ expect(normalResult).toMatchObject({status:"REJECTED",reasonCode:"INBOUND_EVIDENCE_UNTRUSTED"});
+ const result=applySalesCycleCommand({...s,expectedRevision:s.state.revision,command:s.command,now:s.later,trustedPorts:s.ports});
+ expect(result.status).toBe("APPLIED");
+ if(result.status!=="APPLIED")throw Error(result.status);
+ expect(result.state.pendingNegotiation?.status).toBe("ACTIVATED");
+ expect(result.state.pendingNegotiation?.sourceObservedAt).toBe(now.toISOString());
+ expect(result.state.negotiation?.customerState).toBe("HESITANT");
+ expect(result.state.negotiation?.consumedObjectionEvidenceIds).toEqual(["inbound:support-before-cart"]);
+ expect(applySalesCycleCommand({state:result.state,expectedRevision:result.state.revision,command:s.command,now:s.later,trustedPorts:s.ports}).status).toBe("DUPLICATE");
+ expect(applySalesCycleCommand({state:result.state,expectedRevision:result.state.revision,command:{...s.command,commandId:"again"},now:s.later,trustedPorts:s.ports}).status).toBe("REJECTED");
+});
+it.each(["receipt","target","policy","expired","cancelled"] as const)("rejects pending support after %s changes",fault=>{
+ const s=pendingSupportCart();let state=structuredClone(s.state);
+ const ports={...s.ports};
+ if(fault==="receipt")ports.resolveCartCreationReceipt=()=>null as never;
+ if(fault==="target")state={...state,pendingNegotiation:{...state.pendingNegotiation!,productId:"OTHER"}};
+ if(fault==="policy")state={...state,pendingNegotiation:{...state.pendingNegotiation!,policyRef:{...policyRef,version:"other"}}};
+ if(fault==="expired")state={...state,pendingNegotiation:{...state.pendingNegotiation!,expiresAt:now.toISOString()}};
+ if(fault==="cancelled")state={...state,pendingNegotiation:{...state.pendingNegotiation!,status:"INVALIDATED"}};
+ expect(applySalesCycleCommand({state,expectedRevision:state.revision,command:s.command,now:s.later,trustedPorts:ports}).status).toBe("REJECTED");
 });

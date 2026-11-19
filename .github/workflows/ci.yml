@@ -22,7 +22,7 @@ concurrency:
 jobs:
   check:
     name: pnpm check
-    runs-on: [self-hosted, Linux, X64, lana-ci]
+    runs-on: ubuntu-24.04
     timeout-minutes: 35
     services:
       postgres:

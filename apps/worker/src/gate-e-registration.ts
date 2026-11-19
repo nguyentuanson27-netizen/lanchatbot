@@ -544,7 +544,7 @@ function businessFactsFromContext(context: ContextV2) {
   const observedAt = productClaims[0]?.provenance.observedAt ??
     "2026-08-17T00:00:00.000Z";
   const expiresAt = productClaims
-    .map(({ provenance }) => provenance.expiresAt)
+    .flatMap(({ provenance }) => provenance.expiresAt === null ? [] : [provenance.expiresAt])
     .sort()[0] ?? "2026-08-18T00:00:00.000Z";
   return BusinessFactEnvelopeV1Schema.parse({
     schemaVersion: 1,
@@ -598,6 +598,7 @@ function runtimeSizeGuardInput(
     .filter((claim) => referencedClaimHashes.has(claim.provenance.contentHash))
     .map((claim) => {
       if (claim.scope.kind !== "PRODUCT" ||
+          claim.value.fitTarget?.kind === "COMPONENT" ||
           claim.provenance.authority !== "VERIFIED_SIZE_ENGINE_V1" ||
           claim.value.evidenceBasis !== "MEASUREMENTS" ||
           !claim.provenance.evidenceRef.includes(

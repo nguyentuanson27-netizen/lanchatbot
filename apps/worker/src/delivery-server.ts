@@ -1,8 +1,11 @@
+import { QdrantStableCatalogReader } from "@lana/business-tools";
 import { readFileSync } from "node:fs";
 import {
   LocalEnvelopeCipher,
   PostgresChatHistoryStore,
+  PostgresRealtimeInboxStore,
   PostgresRealtimeRuntimeStore,
+  PostgresRuntimePolicyStore,
 } from "@lana/database";
 import {
   FetchHttpTransport,
@@ -22,6 +25,7 @@ import {
 import { PancakeTagDispatcher } from "./pancake-tag-dispatcher.js";
 import { createDeliveryHealthServer } from "./delivery-health.js";
 import { RedisChatHistoryStore } from "./redis-chat-history.js";
+import { createCommercePreprodDeliveryGate } from "./single-agent-commerce-preprod-delivery.js";
 
 function required(name: string): string {
   const value = process.env[name]?.trim();
@@ -95,13 +99,12 @@ const dataKey = secretOrEnvironment(
   "REALTIME_DATA_KEY",
   "REALTIME_DATA_KEY_FILE",
 );
-const store = new PostgresRealtimeRuntimeStore(
-  required("DATABASE_URL"),
-  new LocalEnvelopeCipher(
-    dataKey,
-    process.env.REALTIME_DATA_KEY_REF?.trim() || "local-kek-v1",
-  ),
+const databaseUrl = required("DATABASE_URL");
+const cipher = new LocalEnvelopeCipher(
+  dataKey,
+  process.env.REALTIME_DATA_KEY_REF?.trim() || "local-kek-v1",
 );
+const store = new PostgresRealtimeRuntimeStore(databaseUrl, cipher);
 const canonicalHistory = process.env.HISTORY_WRITE_ENABLED === "true"
   ? new PostgresChatHistoryStore(required("DATABASE_URL"), {
       analyticsHashSalt: secretOrEnvironment(
@@ -149,6 +152,30 @@ const pancake = new PancakeHandoffAdapter(
     },
   ]),
 );
+const baseGate = new PancakeMetaPreSendGate(pancake);
+const commerceGate = process.env.C3_COMMERCE_PREPROD_DELIVERY_ENABLED === "true"
+  ? (() => {
+      const policyChannel = required("RUNTIME_POLICY_CHANNEL");
+      if (policyChannel !== "PUBLISHED" && policyChannel !== "CANARY_LIVE") {
+        throw new Error("C3_COMMERCE_DELIVERY_LIVE_POLICY_REQUIRED");
+      }
+      const inbox = new PostgresRealtimeInboxStore(databaseUrl, cipher);
+      const policyStore = new PostgresRuntimePolicyStore(databaseUrl);
+      const catalog = new QdrantStableCatalogReader({
+        baseUrl: required("QDRANT_BASE_URL"),
+        apiKey: secretOrEnvironment("QDRANT_API_KEY", "QDRANT_API_KEY_FILE"),
+        collection: required("QDRANT_COLLECTION"),
+        timeoutMs: boundedInteger("QDRANT_TIMEOUT_MS", 15_000, 1_000, 60_000),
+      });
+      const allowedHostSuffixes = required("PRODUCT_SEARCH_ALLOWED_IMAGE_HOSTS")
+        .split(",").map(host => host.trim()).filter(Boolean);
+      const gate = createCommercePreprodDeliveryGate({
+        pageId, base: baseGate, clock: () => new Date(), store, inbox, policyStore,
+        policyChannel, catalog, allowedHostSuffixes,
+      });
+      return { gate, inbox, policyStore };
+    })()
+  : undefined;
 const metaDispatcher = new MetaOutboxDispatcher(
   store,
   new MetaDeliveryAdapter(new FetchHttpTransport(), {
@@ -163,7 +190,7 @@ const metaDispatcher = new MetaOutboxDispatcher(
     ),
   }),
   new SinglePageMetaTokenRegistry(pageId, metaToken),
-  new PancakeMetaPreSendGate(pancake),
+  commerceGate?.gate ?? baseGate,
   {
     workerId:
       process.env.META_OUTBOX_WORKER_ID?.trim() ||
@@ -247,6 +274,8 @@ while (!stopping) {
 await new Promise<void>((resolve, reject) => {
   healthServer.close((error) => error ? reject(error) : resolve());
 });
+await commerceGate?.inbox.close();
+await commerceGate?.policyStore.close();
 await store.close();
 await history?.close();
 await canonicalHistory?.close();

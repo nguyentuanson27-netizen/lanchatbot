@@ -20,6 +20,12 @@ const CONFIG: HashV3Config = {
 const SHA_A = "a".repeat(64);
 const SHA_B = "b".repeat(64);
 
+it("keeps check evidence out of semantic and embedding hashes",()=>{
+ const original={ma_sp:"P1",image_url:"https://content.pancake.vn/a.jpg",image_content_sha256:SHA_A};
+ expect(computePointHashes("point1",{...original,image_revalidation:{version:1,status:"VERIFIED",checkedAt:"2026-10-28T00:00:00.000Z",metadataSha256:SHA_B}},CONFIG))
+   .toEqual(computePointHashes("point1",original,CONFIG));
+});
+
 const payload = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
   ma_sp: "SD395",
   brand: "lanadesign",
@@ -257,4 +263,10 @@ describe("P2.3C Hash v3", () => {
     expect(batch.selected[0]?.action).toBe("PAYLOAD_ONLY");
     expect(batch.selected[0]?.reason).toBe("URL_CHANGED_SAME_CONTENT");
   });
+});
+
+it("color provenance changes payload/provenance hashes without changing embedding identity",()=>{
+ const a=computePointHashes("p",payload(),CONFIG);
+ const b=computePointHashes("p",payload({image_verified_product_color:"be",image_color_binding_sha256:SHA_A,image_color_binding_status:"VALID"}),CONFIG);
+ expect(b.embedding_hash).toBe(a.embedding_hash);expect(b.payload_hash).not.toBe(a.payload_hash);expect(b.provenance_hash).not.toBe(a.provenance_hash);
 });
