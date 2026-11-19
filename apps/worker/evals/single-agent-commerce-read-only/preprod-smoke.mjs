@@ -152,7 +152,24 @@ export async function runPreprodSmoke({root,report,check,statefulFixture,pool,ru
  });
  await checkCase('FIT_CHECKOUT','2 engine fit through cart and checkout with duplicate webhook',async()=>{
   const j=await statefulFixture({componentFit:true,media:true});
-  const fit=await attempt(j,'FIT_CHECKOUT','Chị cao 1m60, nặng 55kg. Bình thường chị hay mặc L, em xem giúp áo SM613 mặc size nào nhé.');
+  const fitLatest='Chị cao 1m60, nặng 55kg. Bình thường chị hay mặc L, em xem giúp áo SM613 mặc size nào nhé.';
+  let fit;
+  if(traceAdd){
+   // Rebuild the successful public prefix using the exact observed tool shape.
+   // Only the target add-to-cart turn gets provider requests in this diagnostic.
+   const fitCall={name:'recommend_size',args:{subjectRef:'SM613',fitScope:'COMPONENT',componentRole:'TOP',customerStateOps:[
+    {op:'SET',field:'measurements.HEIGHT_CM',value:160,sourceQuote:'Chị cao 1m60'},
+    {op:'SET',field:'measurements.WEIGHT_KG',value:55,sourceQuote:'nặng 55kg'}]}};
+   const priorFit='Dạ với chiều cao 1m60 và nặng 55kg, áo sơ mi SM613 phom suông em đề xuất mình mặc size M nha chị. Thường chị hay mặc size L, chị tham khảo size M giúp em nhé ạ!';
+   const seeded=await j.turn(fitLatest,[
+    {kind:'TOOLS',calls:[fitCall],content:{role:'model',parts:[{functionCall:fitCall}]}},{kind:'FINAL',text:priorFit}
+   ],{testQuoteTask:EXPLICIT_QUOTE_TASK,testOpeningMediaRule:OPENING_PRODUCT_MEDIA_RULE});
+   await j.drain();
+   const evidenceFit=seeded.toolResponses.find(x=>x.name==='recommend_size')?.response.data;
+   const entry={index:0,scriptedPrefix:true,toolResults:[{status:evidenceFit?.status,recommendedSizes:evidenceFit?.recommendedSizes??[]}]};
+   evidence.FIT_CHECKOUT=[entry];save();
+   fit={terminal:seeded.result.terminal,entry,payloads:j.capturePayloads};
+  }else fit=await attempt(j,'FIT_CHECKOUT',fitLatest);
   assert.equal(fit.terminal.disposition,'SEND_ELIGIBLE');
   const recommended=fit.entry.toolResults.filter(x=>x.status==='RECOMMENDED').flatMap(x=>x.recommendedSizes.map(choice=>choice.size));
   assert(recommended.length>0&&recommended.every(x=>x==='M'),'FIT_ENGINE_DID_NOT_PROVE_M');
@@ -177,7 +194,7 @@ export async function runPreprodSmoke({root,report,check,statefulFixture,pool,ru
   assert.equal(commerceHash(await j.state()),commerceHash(before));
   assert.deepEqual(await outbox(j),rows);
   add.entry.duplicateWebhook={inserted:false,duplicateCart:false,duplicateMessages:0};save();
-  if(traceAdd)return;
+  if(traceAdd){assert.equal(add.terminal.disposition,'SEND_ELIGIBLE','SMOKE_ADD_TRACE_TERMINAL');return;}
   await attempt(j,'FIT_CHECKOUT','Chốt đơn cho chị nhé.');
   const privateInput=await attempt(j,'FIT_CHECKOUT','Tên: Khách thử nghiệm\nSĐT: 0900000000\nĐịa chỉ: 12 Đường thử nghiệm, Quận 1, TP Hồ Chí Minh\nCOD');
   assert.equal(privateInput.r.owners,0,'PRIVATE_INPUT_REACHED_OWNER');
