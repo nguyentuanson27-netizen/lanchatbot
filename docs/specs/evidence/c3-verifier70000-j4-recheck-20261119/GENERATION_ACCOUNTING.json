@@ -1,0 +1,331 @@
+{
+  "source": "82c86a3c67d1f12f0f87f6956e0c44c68b265957",
+  "generations": [
+    {
+      "id": 1,
+      "phase": "J4_RECHECK",
+      "turn": 1,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 5147.573099999994,
+      "model": "gemini-3.5-flash-lite",
+      "httpStatus": 200,
+      "inputTokens": 11435,
+      "outputTokens": 1506
+    },
+    {
+      "id": 2,
+      "phase": "J4_RECHECK",
+      "turn": 1,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1316.5532000000094,
+      "model": "gemini-3.5-flash-lite",
+      "httpStatus": 200,
+      "inputTokens": 16844,
+      "outputTokens": 57
+    },
+    {
+      "id": 3,
+      "phase": "J4_RECHECK",
+      "turn": 1,
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 6496,
+      "model": "gpt-6.1-sol",
+      "httpStatus": 200,
+      "inputTokens": 11716,
+      "outputTokens": 83
+    },
+    {
+      "id": 4,
+      "phase": "J4_RECHECK",
+      "turn": 2,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 6086.557100000005,
+      "model": "gemini-3.5-flash-lite",
+      "httpStatus": 200,
+      "inputTokens": 11432,
+      "outputTokens": 1751
+    },
+    {
+      "id": 5,
+      "phase": "J4_RECHECK",
+      "turn": 2,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2488.230899999995,
+      "model": "gemini-3.5-flash-lite",
+      "httpStatus": 200,
+      "inputTokens": 17213,
+      "outputTokens": 354
+    },
+    {
+      "id": 6,
+      "phase": "J4_RECHECK",
+      "turn": 2,
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 6097,
+      "model": "gpt-6.1-sol",
+      "httpStatus": 200,
+      "inputTokens": 11616,
+      "outputTokens": 80
+    },
+    {
+      "id": 7,
+      "phase": "J4_RECHECK",
+      "turn": 3,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 7723.565800000011,
+      "model": "gemini-3.5-flash-lite",
+      "httpStatus": 200,
+      "inputTokens": 11439,
+      "outputTokens": 2567
+    },
+    {
+      "id": 8,
+      "phase": "J4_RECHECK",
+      "turn": 3,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2985.4567999999854,
+      "model": "gemini-3.5-flash-lite",
+      "httpStatus": 200,
+      "inputTokens": 17926,
+      "outputTokens": 767
+    },
+    {
+      "id": 9,
+      "phase": "J4_RECHECK",
+      "turn": 3,
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 7247,
+      "model": "gpt-6.1-sol",
+      "httpStatus": 200,
+      "inputTokens": 11697,
+      "outputTokens": 72
+    },
+    {
+      "id": 10,
+      "phase": "J4_RECHECK",
+      "turn": 4,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4578.0697999999975,
+      "model": "gemini-3.5-flash-lite",
+      "httpStatus": 200,
+      "inputTokens": 11429,
+      "outputTokens": 1391
+    },
+    {
+      "id": 11,
+      "phase": "J4_RECHECK",
+      "turn": 4,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 2814.0595999999787,
+      "model": "gemini-3.5-flash-lite",
+      "httpStatus": 200,
+      "inputTokens": 16710,
+      "outputTokens": 612
+    },
+    {
+      "id": 12,
+      "phase": "J4_RECHECK",
+      "turn": 4,
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 5196,
+      "model": "gpt-6.1-sol",
+      "httpStatus": 200,
+      "inputTokens": 11659,
+      "outputTokens": 74
+    },
+    {
+      "id": 13,
+      "phase": "J4_RECHECK",
+      "turn": 5,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 4890.016000000003,
+      "model": "gemini-3.5-flash-lite",
+      "httpStatus": 200,
+      "inputTokens": 11461,
+      "outputTokens": 1434
+    },
+    {
+      "id": 14,
+      "phase": "J4_RECHECK",
+      "turn": 5,
+      "role": "OWNER",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 1732.0349000000278,
+      "model": "gemini-3.5-flash-lite",
+      "httpStatus": 200,
+      "inputTokens": 16753,
+      "outputTokens": 234
+    },
+    {
+      "id": 15,
+      "phase": "J4_RECHECK",
+      "turn": 5,
+      "role": "VERIFIER",
+      "status": "OK",
+      "providerRequests": 1,
+      "latencyMs": 5121,
+      "model": "gpt-6.1-sol",
+      "httpStatus": 200,
+      "inputTokens": 11674,
+      "outputTokens": 77
+    }
+  ],
+  "wire": [
+    {
+      "id": 1,
+      "role": "OWNER",
+      "wireBytes": 53596,
+      "textBytes": 53596,
+      "signatureBytes": 0,
+      "requestHash": "51b97be8c1885df1f6adc8b25ef595517bf56be7a4da5e452da4dd469b96eea9"
+    },
+    {
+      "id": 2,
+      "role": "OWNER",
+      "wireBytes": 70166,
+      "textBytes": 63154,
+      "signatureBytes": 7012,
+      "requestHash": "19c29df157e10198bf6fb86e9d83d343962618d7cf55e2ccff5ef668ab113b66"
+    },
+    {
+      "id": 3,
+      "role": "VERIFIER",
+      "wireBytes": 44764,
+      "textBytes": null,
+      "signatureBytes": null,
+      "requestHash": "205a3263f2949b583a8db46cd51ebffac2b38a3d8637e59e8e743a2bc5835adf"
+    },
+    {
+      "id": 4,
+      "role": "OWNER",
+      "wireBytes": 53582,
+      "textBytes": 53582,
+      "signatureBytes": 0,
+      "requestHash": "44d0ae8a0fb5f2ad044dfbfcc9efd8d0caf8cf0b620a7fb3e1921639d4110d01"
+    },
+    {
+      "id": 5,
+      "role": "OWNER",
+      "wireBytes": 72525,
+      "textBytes": 64097,
+      "signatureBytes": 8428,
+      "requestHash": "3855c9f292a908d4b4448a8fb38d0aea87042a92af385e91e928062b395c2180"
+    },
+    {
+      "id": 6,
+      "role": "VERIFIER",
+      "wireBytes": 44725,
+      "textBytes": null,
+      "signatureBytes": null,
+      "requestHash": "ac98ccb520cbc59499780dc28b58424eeaff454ce8270734a4266c7c4c9de349"
+    },
+    {
+      "id": 7,
+      "role": "OWNER",
+      "wireBytes": 53563,
+      "textBytes": 53563,
+      "signatureBytes": 0,
+      "requestHash": "0837b46f0f3527044238c410bcd78fad07c93db6ed7f0d6dce5a3c5eed2c2250"
+    },
+    {
+      "id": 8,
+      "role": "OWNER",
+      "wireBytes": 75523,
+      "textBytes": 63119,
+      "signatureBytes": 12404,
+      "requestHash": "d81e90a6f0bb59440813cf6b0990f07d3ecab8b2de8370b7b9f10fc5468a6971"
+    },
+    {
+      "id": 9,
+      "role": "VERIFIER",
+      "wireBytes": 44717,
+      "textBytes": null,
+      "signatureBytes": null,
+      "requestHash": "e962de9473b4326d0eb4c66741cb88c06590cfdbacf8f92578bed5990b3ef93d"
+    },
+    {
+      "id": 10,
+      "role": "OWNER",
+      "wireBytes": 53581,
+      "textBytes": 53581,
+      "signatureBytes": 0,
+      "requestHash": "917518c9da44703429bdca465b78f8a58fb54f059462a73478bc972f40c2dc16"
+    },
+    {
+      "id": 11,
+      "role": "OWNER",
+      "wireBytes": 69746,
+      "textBytes": 63138,
+      "signatureBytes": 6608,
+      "requestHash": "295a53d1dee980c92f7ad9ac2816cd24c7eb4d9a2482bc228fcfe7c5f5b1b101"
+    },
+    {
+      "id": 12,
+      "role": "VERIFIER",
+      "wireBytes": 44737,
+      "textBytes": null,
+      "signatureBytes": null,
+      "requestHash": "55f365b78c78ce61ece910ff28d3372c0bdc0867337dab56dac7b471f6a3b8a9"
+    },
+    {
+      "id": 13,
+      "role": "OWNER",
+      "wireBytes": 53678,
+      "textBytes": 53678,
+      "signatureBytes": 0,
+      "requestHash": "e0c85455046f784b52ead2cbc75651807c89c3e2cd2efb3cca15058afa252d8b"
+    },
+    {
+      "id": 14,
+      "role": "OWNER",
+      "wireBytes": 69867,
+      "textBytes": 63239,
+      "signatureBytes": 6628,
+      "requestHash": "65bca9608afa3c20445f19c4cc44dc4ad77919143999cc269d336fa8006c369b"
+    },
+    {
+      "id": 15,
+      "role": "VERIFIER",
+      "wireBytes": 44873,
+      "textBytes": null,
+      "signatureBytes": null,
+      "requestHash": "e84ba67c508c31af36ae6438e799a6dbe9a251554bac6fcc839cabf5524e6258"
+    }
+  ],
+  "unknownAttempts": 0,
+  "priorAbort": {
+    "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-verifier70000-j4-five-2d81c264-20261119-092836",
+    "source": "2d81c26493b79eab12dec9be4c95f8cf960b855d",
+    "completedProviderRequests": 1,
+    "preSendLocalRejection": 1,
+    "rawAccountingPreserved": true,
+    "continuationNotResumedBecauseDisposableDatabaseWasDropped": true
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "runSourceSha": "82c86a3c67d1f12f0f87f6956e0c44c68b265957",
+  "worldHash": "02f5aaec99f1b22de1ca944ec950a1febbf85db37a2dfd0e2107b7dd412579ac",
+  "measuredTurns": 5,
+  "scriptedFixtureTurns": 10,
+  "SEND_ELIGIBLE": 5,
+  "verifierPASS": 5,
+  "newCommerceEventsDuringMeasuredTurns": 0,
+  "nativeRequests": 15,
+  "priorAbortKnownRequests": 1,
+  "allKnownRequests": 16,
+  "newRunUnknownAttempts": 0,
+  "rawOldUnknownRetainedWithPreSendReconciliation": true,
+  "databaseDropped": true,
+  "liveSends": 0,
+  "sourceWrites": 0,
+  "runtimeCodeUnchangedDuringRun": true,
+  "files": [
+    {
+      "name": "ABORT_RAW_ACCOUNTING.json",
+      "sha256": "2792a473609640740c234b0bc3004f2d00bf9670f1ff47580596aeac0cb227af"
+    },
+    {
+      "name": "ADMISSION_RECHECK.json",
+      "sha256": "c1b6c33afb4caf9640e4a0c3cd34346e95c85ddc6a85f6c73861716ecfc5f921"
+    },
+    {
+      "name": "CONVERSATIONS.md",
+      "sha256": "673e098400bd46ea94235c52068cb691f0e1d34b1792c05dc2d8f5fb0aeac5c1"
+    },
+    {
+      "name": "GENERATION_ACCOUNTING.json",
+      "sha256": "0cd9e77e2a4aae35aca4c310d75f8dcbd360a0178f2e8c8d7728a5f66866b804"
+    },
+    {
+      "name": "METRICS.json",
+      "sha256": "a19277d8693a701184e8d28f71a7a480421724907fdf2e41324447d2f799c213"
+    },
+    {
+      "name": "PREFIX.json",
+      "sha256": "cd385ea3b6f53ef5d01b9bf1d4661d199238d8b5868caf6350effdb68d511caf"
+    },
+    {
+      "name": "PRE_SEND_RECONCILIATION.json",
+      "sha256": "c63ab5cc43f0e4fd289e06810a6343674eefa85ad2fc3ced8c8070e5711099f0"
+    },
+    {
+      "name": "PRIOR_ABORT.json",
+      "sha256": "baba7999e155dec6e971a6e0099f793cb283fa583bbd53b2a5d556f492f73399"
+    },
+    {
+      "name": "PROVENANCE.json",
+      "sha256": "5c2ac18473e08c2ffce44067ee8853a7809b688e6640aa45dce1d336006964df"
+    },
+    {
+      "name": "PUBLIC_RESULTS.json",
+      "sha256": "960c946a426d14db8ed118acf8782fc63461e4d5d43b8baa66aaae21076288cd"
+    },
+    {
+      "name": "SEAL.json",
+      "sha256": "deeac27db49e9d1c9536141e6b19b4894101560ce72df6569b167ea39df71dfb"
+    },
+    {
+      "name": "SUMMARY.json",
+      "sha256": "61f1ec192f37cb0eb81d3f5e4775f5f6ca874d6cd9fd29356805c9b1f46c41fb"
+    },
+    {
+      "name": "WORLD_CAPTURE.json",
+      "sha256": "ebebf31028bfa3aca410e2c673be2b7e9e2a54c8fbb4163d5e7e90017f42c734"
+    }
+  ]
+}

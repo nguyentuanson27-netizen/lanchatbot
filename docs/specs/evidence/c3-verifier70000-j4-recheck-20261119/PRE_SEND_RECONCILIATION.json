@@ -1,0 +1,14 @@
+{
+  "kind": "READ_ONLY_PRE_SEND_ASSERTION_REPRODUCTION",
+  "rawAccountingUnchanged": true,
+  "blockedGenerationId": 2,
+  "error": "J1_TEXT_BOUND",
+  "ownerTextBytes": 63152,
+  "signatureBytes": 12692,
+  "rawBytes": 75844,
+  "fetchCallsInExactPreSendReproduction": 0,
+  "reconciledProviderRequestsForBlockedCall": 0,
+  "knownTotalProviderRequestsForAbortedRun": 1,
+  "providerCallsAddedByProbe": 0,
+  "reason": "assertBody is synchronous first operation before auth/generation; exact captured body reproduces failure before fetch"
+}

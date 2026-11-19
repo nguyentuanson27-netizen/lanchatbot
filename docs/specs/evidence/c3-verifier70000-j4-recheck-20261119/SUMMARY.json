@@ -1,0 +1,32 @@
+{
+  "source": "82c86a3c67d1f12f0f87f6956e0c44c68b265957",
+  "captureSourceSha": "2d81c26493b79eab12dec9be4c95f8cf960b855d",
+  "worldHash": "02f5aaec99f1b22de1ca944ec950a1febbf85db37a2dfd0e2107b7dd412579ac",
+  "registeredMeasuredTurns": 5,
+  "completedMeasuredTurns": 5,
+  "scriptedSetupTurns": 10,
+  "terminalCounts": {
+    "SEND_ELIGIBLE": 5,
+    "HANDOFF": 0,
+    "NO_SEND": 0
+  },
+  "providerRequests": 15,
+  "providerErrors": 0,
+  "judgeRequests": 0,
+  "priorAbortedAttempts": 1,
+  "priorAbortedProviderRequests": 1,
+  "totalProviderRequestsIncludingAbort": 16,
+  "completeAttemptDenominatorIncludingAbort": 6,
+  "generationRetriesInCompletedRun": 0,
+  "maximumOwnerTextBytes": 64097,
+  "maximumOwnerSignatureBytes": 12404,
+  "maximumVerifierWireBytes": 44873,
+  "oldFiveTerminalCounts": {
+    "HANDOFF": 5
+  },
+  "testDatabaseDropped": true,
+  "liveSends": 0,
+  "sourceWrites": 0,
+  "wholeJourneyStabilityTest": false,
+  "phaseCStatus": "STOP_UNCHANGED"
+}

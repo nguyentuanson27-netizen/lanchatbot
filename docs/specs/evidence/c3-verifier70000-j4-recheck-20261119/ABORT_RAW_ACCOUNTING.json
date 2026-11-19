@@ -1,0 +1,38 @@
+{
+  "attempted": 2,
+  "knownProviderRequests": 1,
+  "unknownAttempts": 1,
+  "providerRequests": null,
+  "generations": [
+    {
+      "phase": "J4_RECHECK",
+      "turn": 1,
+      "arm": "A",
+      "role": "OWNER",
+      "id": 1,
+      "status": "OK",
+      "providerRequests": 1,
+      "telemetry": {
+        "providerRequests": 1,
+        "authRequests": 1,
+        "httpStatus": 200,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "inputTokens": 11431,
+        "outputTokens": 2728,
+        "cost": null,
+        "requestHash": "8874b2e6415a7486bacbe40ce2310fa534aab8df454f0ad0355c04fbd42c8ab7",
+        "latencyMs": 8959.373600000006
+      }
+    },
+    {
+      "phase": "J4_RECHECK",
+      "turn": 1,
+      "arm": "A",
+      "role": "OWNER",
+      "id": 2,
+      "status": "UNKNOWN",
+      "providerRequests": null,
+      "telemetry": null
+    }
+  ]
+}

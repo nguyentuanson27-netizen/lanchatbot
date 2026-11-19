@@ -6,7 +6,8 @@
 - [x] Chạy đủ 10 hội thoại/30 lượt trên `48a27a1b`: 25 SEND/5 silent HANDOFF, 72 native +10 judge, không retry; 9 điểm/1 judge provider error giữ mẫu số. Hai áo đúng giỏ/tổng cả năm; J4 lượt cuối preparation fail trước model cả năm. [Đủ lịch sử và review](../docs/specs/evidence/c3-current-cart-choice-native-20261119/REPORT.md).
 - [x] Chẩn đoán component reconstruction năm J4 bằng serializers thật: verifier reserved wire overflow 5/5; đổi riêng prompt cũ qua, thu read scope về AO + pending/prompt mới qua. [Root cause và phương án sửa code/context](../docs/specs/evidence/c3-current-cart-choice-native-20261119/ROOT_CAUSE.md), provider0. Chưa exact native store replay.
 - [x] Theo lựa chọn owner, tăng verifier wire 70.000 đồng bộ; RED 2→GREEN, 142 Node/worker compile/lint PASS. Giữ prompt/gates, thêm targeted five-turn harness với scripted prefix rõ nguồn.
-- [ ] Chạy đúng năm lượt J4 cuối trên source mới đã seal; chưa triển khai staged preparation rộng. Giọng/RECORD còn hạn chế, Phase C STOP; không deploy/live send.
+- [x] Targeted source `82c86a3c` đủ 5 final turns: 5 SEND_ELIGIBLE/PASS, đúng 499.000đ, không commerce event mới. 15 request, cộng 1 request của run abort harness có reconciliation =16; không retry. 10 prefix fixture turns không generation; final 143 Node PASS. [Bằng chứng](../docs/specs/evidence/c3-verifier70000-j4-recheck-20261119/REPORT.md).
+- [ ] Whole-journey quality/qualification chưa chạy lại. Giọng/RECORD còn hạn chế, Phase C STOP; không deploy/live send.
 
 ## Previous — báo giá hỗ trợ trước giỏ, 2026-11-18
 

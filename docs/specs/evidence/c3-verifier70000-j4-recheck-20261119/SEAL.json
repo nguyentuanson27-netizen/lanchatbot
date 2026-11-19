@@ -1,0 +1,84 @@
+{
+  "source": "82c86a3c67d1f12f0f87f6956e0c44c68b265957",
+  "worldHash": "02f5aaec99f1b22de1ca944ec950a1febbf85db37a2dfd0e2107b7dd412579ac",
+  "inputHash": "3aa394bd6bbf134563da54eca9ff1fa31017d73244be31b3b70c68cf7bb2ba1e",
+  "prefixHash": "33dab6adb34a460c2cb6a5d508b633cdc6d2862dc54f0884b107b2d3011f337b",
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "7f87a56de66eb9e313a7c29642e0f7233645c33d9417a057d8e343070d15bdd5",
+    "verifier": "fa3ab818444aedd06a25a5a4f7956bc25e3162125e109d845430011e2635909c"
+  },
+  "bounds": {
+    "ownerWireBytes": 70000,
+    "verifierWireBytes": 70000
+  },
+  "helpers": [
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-verifier70000-j4-five-82c86a3c-20261119-094045\\seal.mjs",
+      "sha256": "51391a4bea8443c181f5092a2db863fe3f2b0832ef20bee85dcb8d58731a9522"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\c3-current-cart-choice-launch-20261119.py",
+      "sha256": "c9877e6ee9c72f6141473d302c2ba5651b91d763baaba68d9fd65ec6fa95a286"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\model-code-division-run-20261019\\raw\\credential-launcher.py",
+      "sha256": "84a43f0c8ba5c46a48db6552f61910d2e93e198f5b6807c4afc4de8d581eeab3"
+    },
+    {
+      "path": "C:\\Users\\nguye\\Documents\\Sản phẩm AI\\lanchatbot-c3-semantic-verifier-checkpoint-a-20261005\\apps\\worker\\evals\\single-agent-commerce-read-only\\source-session.py",
+      "sha256": "94b6cac60dff03506badc1751ba4e8ea54cce278ec82ff448eeb0e8a6a44294d"
+    }
+  ],
+  "providerRequests": 0
+}

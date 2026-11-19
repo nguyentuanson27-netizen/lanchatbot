@@ -1,0 +1,20 @@
+{
+  "OWNER": {
+    "requests": 10,
+    "p50Ms": 2985.4567999999854,
+    "p95Ms": 7723.565800000011,
+    "inputTokens": 142642,
+    "outputTokens": 10673,
+    "errors": 0,
+    "cost": "NOT_EXPOSED"
+  },
+  "VERIFIER": {
+    "requests": 5,
+    "p50Ms": 6097,
+    "p95Ms": 7247,
+    "inputTokens": 58362,
+    "outputTokens": 386,
+    "errors": 0,
+    "cost": "NOT_EXPOSED"
+  }
+}
