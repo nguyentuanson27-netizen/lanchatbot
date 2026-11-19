@@ -1,3 +1,9 @@
+## Current — Phase C GO theo bypass tạm thời, 2026-11-19
+
+- [x] Ghi owner GO để lập kế hoạch rollout/chuyển đổi. Giữ A/B STOP và các trạng thái qualification/replacement theo bằng chứng. [Quyết định và lỗi còn mở](../docs/specs/c3-phase-c-owner-bypass-20261119.md).
+- [ ] Lập kế hoạch PREPROD giới hạn, ưu tiên theo dõi P07 (sai size lọt verifier), S11 (tồn đúng biến thể/số lượng), J3 (mất tư vấn trong tin thực nhận) và giữ đối chứng S04.
+- [ ] Lên phạm vi kiểm adapter thật với gửi tin tắt, tiêu chí dừng và đường quay lại C3. Kích hoạt cần quyết định riêng.
+
 ## Current — Phase C owner reply evidence, 2026-11-19
 
 - [x] Triển khai projection tổng tiền và trạng thái màu theo bằng chứng đã xác minh. Kiểm ADS qua Compact V2, verifier và Outbox test.

@@ -1,3 +1,7 @@
+## Current — Phase C GO theo bypass tạm thời, 2026-11-19
+
+Owner quyết định GO để mở kế hoạch rollout/chuyển đổi. A/B vẫn STOP, native 6 ca/10 lượt chưa chạy, qualification/replacement còn thiếu bằng chứng. P07, S11, J3 và hạn chế P06/S15 được giữ trong backlog. Bước tiếp theo là khóa phạm vi PREPROD, thiết kế kiểm adapter thật với gửi tin tắt và đường quay lại C3. Quyền kích hoạt do owner chốt riêng. [Quyết định và thứ tự công việc](../docs/specs/c3-phase-c-owner-bypass-20261119.md).
+
 ## Current — ưu đãi hiện hành và lựa chọn mua, 2026-11-19
 
 Owner chọn sửa nhỏ trước: tăng verifier wire lên 70.000 đồng bộ builder/manifest/tests, giữ nguyên prompt và gate; targeted recheck đúng năm lượt hỏi tổng J4 bằng prefix fixture public, không sinh lại 15 lượt. Implementation RED 2→GREEN, 142 Node tests/compile/lint PASS. [Phạm vi và cách đo](../docs/specs/c3-verifier-70000-j4-recheck-20261119.md). Native run phải seal source/config mới; không triển khai staged preparation rộng ở lượt này.
