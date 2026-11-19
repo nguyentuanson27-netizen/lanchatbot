@@ -1,0 +1,221 @@
+[
+  {
+    "caseId": "c-po-20261031-p07",
+    "reason": "Engine đề xuất M cho cả áo và quần, danh sách size thay thế rỗng. Shop vẫn tư vấn có thể chọn quần L theo thói quen. Verifier PASS.",
+    "turns": [
+      {
+        "turn": 1,
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "recovery": null,
+        "draftIfUnsent": null,
+        "verifierViolations": [],
+        "tools": [
+          {
+            "name": "recommend_size",
+            "status": "OK",
+            "reason": null
+          },
+          {
+            "name": "recommend_size",
+            "status": "OK",
+            "reason": null
+          }
+        ],
+        "toolWork": {
+          "proposed": 2,
+          "executed": 4,
+          "rejected": 0
+        },
+        "generations": [
+          {
+            "role": "OWNER",
+            "status": "OK",
+            "httpStatus": 200,
+            "error": null
+          },
+          {
+            "role": "OWNER",
+            "status": "OK",
+            "httpStatus": 200,
+            "error": null
+          },
+          {
+            "role": "VERIFIER",
+            "status": "OK",
+            "httpStatus": 200,
+            "error": null
+          }
+        ],
+        "rawHash": "fb5934d66df9ddd072faf8780e8df6de4c6f0c8ff75f93d5f75611320787e5a2"
+      }
+    ]
+  },
+  {
+    "caseId": "c-20261028-s11",
+    "reason": "Khách hỏi đúng be, L, hai bộ. Hai dòng tồn set chỉ xác nhận L không gắn màu. Trả “đều còn sẵn size L” khiến câu hỏi có thể bị hiểu là đã xác nhận be và số lượng. Câu hỏi set quần hay váy vẫn hữu ích.",
+    "turns": [
+      {
+        "turn": 1,
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "recovery": null,
+        "draftIfUnsent": null,
+        "verifierViolations": [],
+        "tools": [
+          {
+            "name": "read_product",
+            "status": "OK",
+            "reason": null
+          },
+          {
+            "name": "read_product",
+            "status": "OK",
+            "reason": null
+          }
+        ],
+        "toolWork": {
+          "proposed": 2,
+          "executed": 6,
+          "rejected": 0
+        },
+        "generations": [
+          {
+            "role": "OWNER",
+            "status": "OK",
+            "httpStatus": 200,
+            "error": null
+          },
+          {
+            "role": "OWNER",
+            "status": "OK",
+            "httpStatus": 200,
+            "error": null
+          },
+          {
+            "role": "VERIFIER",
+            "status": "OK",
+            "httpStatus": 200,
+            "error": null
+          }
+        ],
+        "rawHash": "260ef7e2e86f6e464c3133bb0d302aa4a380742ef5ada3551446698be637ec43"
+      }
+    ]
+  },
+  {
+    "caseId": "c-20261028-j3",
+    "reason": "Lượt đầu draft hứa hàm ý tồn be bị verifier chặn. Shop nhận được báo giá tĩnh 529.000đ từ proof nhưng mất phần phối với quần nâu. Hai lượt sau tư vấn phối váy và giữ đúng ý lấy áo.",
+    "turns": [
+      {
+        "turn": 1,
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "VERIFIED_QUOTE_REPLY",
+        "recovery": null,
+        "draftIfUnsent": "Áo lẻ trong set Thạch Thảo có giá 499.000đ, chất tơ Hàn thêu mềm nhẹ, mặc cùng quần nâu ở nhà xinh và hợp lắm ạ. \n\nMẫu này có màu trắng và be đủ size S, M, L, XL, chị lấy màu và size nào ạ?",
+        "verifierViolations": [
+          {
+            "code": "UNSUPPORTED_PROTECTED_ASSERTION",
+            "reason": "Lời báo có đủ size cho cả hai màu hàm ý màu be cũng đang sẵn hàng. selectionEvidence của áo lẻ chỉ xác nhận màu trắng S–XL là IN_STOCK; màu be S–XL đều là PRE_ORDER."
+          }
+        ],
+        "tools": [
+          {
+            "name": "quote_product",
+            "status": "OK",
+            "reason": null
+          },
+          {
+            "name": "select_product_media",
+            "status": "OK",
+            "reason": null
+          }
+        ],
+        "toolWork": {
+          "proposed": 2,
+          "executed": 4,
+          "rejected": 0
+        },
+        "generations": [
+          {
+            "role": "OWNER",
+            "status": "OK",
+            "httpStatus": 200,
+            "error": null
+          },
+          {
+            "role": "OWNER",
+            "status": "OK",
+            "httpStatus": 200,
+            "error": null
+          },
+          {
+            "role": "VERIFIER",
+            "status": "OK",
+            "httpStatus": 200,
+            "error": null
+          }
+        ],
+        "rawHash": "5a3961431b9abc330ea50653b089908b3fab5a11be833db24af76c1c23720461"
+      },
+      {
+        "turn": 2,
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "recovery": null,
+        "draftIfUnsent": null,
+        "verifierViolations": [],
+        "tools": [],
+        "toolWork": {
+          "proposed": 0,
+          "executed": 1,
+          "rejected": 0
+        },
+        "generations": [
+          {
+            "role": "OWNER",
+            "status": "OK",
+            "httpStatus": 200,
+            "error": null
+          },
+          {
+            "role": "VERIFIER",
+            "status": "OK",
+            "httpStatus": 200,
+            "error": null
+          }
+        ],
+        "rawHash": "f242d039481546bbfa954b3ac35bc3805d723031ba24d98c01f42f755e46d686"
+      },
+      {
+        "turn": 3,
+        "disposition": "SEND_ELIGIBLE",
+        "reason": "PASS",
+        "recovery": null,
+        "draftIfUnsent": null,
+        "verifierViolations": [],
+        "tools": [],
+        "toolWork": {
+          "proposed": 0,
+          "executed": 1,
+          "rejected": 0
+        },
+        "generations": [
+          {
+            "role": "OWNER",
+            "status": "OK",
+            "httpStatus": 200,
+            "error": null
+          },
+          {
+            "role": "VERIFIER",
+            "status": "OK",
+            "httpStatus": 200,
+            "error": null
+          }
+        ],
+        "rawHash": "ff6d75f2fc4c40b80e4b575b92a3a27da7d3770113bcaa6cb5376d2b8282fe87"
+      }
+    ]
+  }
+]

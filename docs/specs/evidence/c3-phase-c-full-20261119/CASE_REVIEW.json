@@ -1,0 +1,215 @@
+{
+  "type": "AUTHOR_WHOLE_CONVERSATION_REVIEW",
+  "formalQualification": false,
+  "counts": {
+    "TASK_OK": 26,
+    "MATERIAL_FAIL": 3,
+    "EXPECTED_HANDOFF": 5
+  },
+  "cases": [
+    {
+      "caseId": "c-po-20261031-p06",
+      "priorStatus": "MATERIAL_FAIL",
+      "status": "TASK_OK",
+      "finding": "Báo 989.000đ cho combo 3 món và 1.019.000đ cả ship. Có ảnh đúng mẫu, không đoán loại của từng món."
+    },
+    {
+      "caseId": "c-po-20261031-p07",
+      "priorStatus": "TASK_OK",
+      "status": "MATERIAL_FAIL",
+      "finding": "Engine đề xuất M cho cả áo và quần, danh sách size thay thế rỗng. Shop vẫn tư vấn có thể chọn quần L theo thói quen. Verifier PASS."
+    },
+    {
+      "caseId": "c-po-20261031-p08",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Thêm set M lúc đầu, báo đúng 829.000đ. Khi khách đổi sang áo lẻ, code giữ nguyên giỏ và yêu cầu chọn màu. Câu “Em đổi sang” dễ làm khách tưởng giỏ đã đổi."
+    },
+    {
+      "caseId": "c-20261028-j1",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Giữ hai áo M và L, báo đúng 978.100đ trước khi có giỏ và hỏi màu còn thiếu. Hỏi lại màu ở lượt cuối là cần cho bước mua, có thể gọn hơn."
+    },
+    {
+      "caseId": "c-po-20261031-p04",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Chọn M từ engine, báo đúng 799.000đ khi khách hỏi giá set váy. Lượt tư vấn lặp chiều cao và cân nặng."
+    },
+    {
+      "caseId": "c-po-20261031-p09",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Phân biệt hai set cùng tên, sau đó dùng đúng set quần M và giá 769.000đ. “Em lưu” dễ gợi việc ghi trạng thái khi trace chỉ đọc."
+    },
+    {
+      "caseId": "c-20261028-s03",
+      "priorStatus": "EXPECTED_HANDOFF",
+      "status": "EXPECTED_HANDOFF",
+      "finding": "Ảnh chi tiết mặt trước thiếu xác nhận chụp gần phần ren. Verifier chặn lời hứa gửi đúng chi tiết. Handoff im lặng."
+    },
+    {
+      "caseId": "c-20261028-s13",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Báo 499.000đ tiền áo, 30.000đ phí ship, tổng 529.000đ và hỏi màu, size. Nêu màu be đặt trước sẽ giúp khách quyết dễ hơn."
+    },
+    {
+      "caseId": "c-20261028-s15",
+      "priorStatus": "MATERIAL_FAIL",
+      "status": "TASK_OK",
+      "finding": "Ghi nhận màu be, nói đúng hàng đặt trước và đưa lựa chọn tư vấn size. Chuyển ngay sang giá và hỏi thêm phối đồ làm câu trả lời hơi giống quảng cáo."
+    },
+    {
+      "caseId": "c-20261028-s16",
+      "priorStatus": "MATERIAL_FAIL",
+      "status": "EXPECTED_HANDOFF",
+      "finding": "Owner yêu cầu bàn giao im lặng khi nguồn ảnh thiếu xác nhận là khách mặc. Nhu cầu ảnh vẫn cần shop bổ sung nguồn."
+    },
+    {
+      "caseId": "c-20261028-j2",
+      "priorStatus": "MATERIAL_FAIL",
+      "status": "TASK_OK",
+      "finding": "Dùng 51kg thay 56kg, giữ thông số còn lại và RELAXED. Engine trả M cả ba lượt. Câu trả lời vẫn đọc lại số đo và diễn đạt như bảo đảm mặc thoải mái."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "priorStatus": "MATERIAL_FAIL",
+      "status": "TASK_OK",
+      "finding": "Cả ba lượt có reply. Xét hỗ trợ ở lượt 2, giữ đúng 499.000đ cả ship ở lượt 3. RECORD dư bị từ chối, giỏ vẫn rỗng và không có ưu đãi thứ hai. Câu chốt lặp ở hai lượt cuối."
+    },
+    {
+      "caseId": "c-20261028-j6",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Giỏ và tổng đúng, giữ COD và hỏi tên còn thiếu bằng code intake. Chưa có thao tác chốt đơn trước khi đủ thông tin."
+    },
+    {
+      "caseId": "c-po-20261031-p01",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Báo đúng áo lẻ 499.000đ, có ảnh. Cụm “đủ các size … với hai màu” dễ gợi be đang sẵn, dù bước sau còn xác minh màu."
+    },
+    {
+      "caseId": "c-po-20261031-p02",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Báo riêng quần 429.000đ, hỏi size và có ảnh. Phần chất liệu thêm dài so với câu hỏi mua quần."
+    },
+    {
+      "caseId": "c-po-20261031-p03",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Đúng chân váy M còn, báo thêm giá 449.000đ và có ảnh."
+    },
+    {
+      "caseId": "c-po-20261031-p10",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Tìm ra hai ứng viên và hỏi phân biệt mẫu trước khi trả tồn."
+    },
+    {
+      "caseId": "c-po-20261031-h01",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Cho biết trắng sẵn, be đặt trước trước khi yêu cầu khách chọn màu. Giỏ chưa được tạo."
+    },
+    {
+      "caseId": "c-po-20261031-h02",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Báo đúng giá set và món lẻ, tồn S và đặt trước các size khác, kèm ảnh. Câu trả lời vẫn dày thông tin."
+    },
+    {
+      "caseId": "c-20261028-s05",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Chọn một set hợp bữa ăn gia đình và gửi ảnh đúng set. Mã SKU và chuỗi tính từ làm lời tư vấn giống danh mục."
+    },
+    {
+      "caseId": "c-20261028-s06",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Trả lời phối được với quần nâu, có lý do về màu sắc. Đoạn giá, tồn và hỏi size kéo dài câu tư vấn phối."
+    },
+    {
+      "caseId": "c-20261028-s08",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Chọn Diệp An đi lễ, đưa Odette khi cần hàng sớm. Cuối câu hỏi lại chọn mẫu làm lời khuyên bớt dứt khoát."
+    },
+    {
+      "caseId": "c-20261028-s09",
+      "priorStatus": "MATERIAL_FAIL",
+      "status": "TASK_OK",
+      "finding": "Đọc đúng customer FAQ. Ưu tiên giặt tay và cho phép giặt máy cùng túi giặt/chế độ nhẹ đúng policy."
+    },
+    {
+      "caseId": "c-20261028-s10",
+      "priorStatus": "EXPECTED_HANDOFF",
+      "status": "EXPECTED_HANDOFF",
+      "finding": "Handoff im lặng theo nhánh đổi đơn cũ, chưa có xác nhận đổi màu."
+    },
+    {
+      "caseId": "c-20261028-s12",
+      "priorStatus": "EXPECTED_HANDOFF",
+      "status": "EXPECTED_HANDOFF",
+      "finding": "Handoff im lặng theo nhánh lỗi sản phẩm, giữ thao tác đổi ở đúng thẩm quyền."
+    },
+    {
+      "caseId": "c-20261028-s14",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Để khách xem thêm và kết thúc tự nhiên, không kéo sang chốt đơn."
+    },
+    {
+      "caseId": "c-20261028-s01",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Báo 999.000đ đúng set, ảnh đi kèm. Bước hỏi size phù hợp, phần mô tả có thể ngắn hơn."
+    },
+    {
+      "caseId": "c-20261028-s02",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Báo đúng áo lẻ 499.000đ, có ảnh. Đặt trắng và be cùng một ngoặc khiến khách khó biết màu nào đang sẵn."
+    },
+    {
+      "caseId": "c-20261028-s04",
+      "priorStatus": "MATERIAL_FAIL",
+      "status": "TASK_OK",
+      "finding": "Trả đúng hai màu, phân biệt trắng sẵn và be đặt trước sau khi đọc nguồn."
+    },
+    {
+      "caseId": "c-20261028-s07",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Chọn M theo engine và dùng preference mặc rộng. Đọc lại chiều cao/cân nặng và dùng “chị nhé ạ” làm câu cứng."
+    },
+    {
+      "caseId": "c-20261028-s11",
+      "priorStatus": "EXPECTED_HANDOFF",
+      "status": "MATERIAL_FAIL",
+      "finding": "Khách hỏi đúng be, L, hai bộ. Hai dòng tồn set chỉ xác nhận L không gắn màu. Trả “đều còn sẵn size L” khiến câu hỏi có thể bị hiểu là đã xác nhận be và số lượng. Câu hỏi set quần hay váy vẫn hữu ích."
+    },
+    {
+      "caseId": "c-20261028-j3",
+      "priorStatus": "TASK_OK",
+      "status": "MATERIAL_FAIL",
+      "finding": "Lượt đầu draft hứa hàm ý tồn be bị verifier chặn. Shop nhận được báo giá tĩnh 529.000đ từ proof nhưng mất phần phối với quần nâu. Hai lượt sau tư vấn phối váy và giữ đúng ý lấy áo."
+    },
+    {
+      "caseId": "c-20261028-j5",
+      "priorStatus": "EXPECTED_HANDOFF",
+      "status": "EXPECTED_HANDOFF",
+      "finding": "Bàn giao đơn cũ ở lượt đầu. Hai lượt sau giữ quyền HUMAN và không phát tin."
+    },
+    {
+      "caseId": "c-20261104-checkout-complete",
+      "priorStatus": "TASK_OK",
+      "status": "TASK_OK",
+      "finding": "Đi đủ bảy lượt, nhận đúng từng trường checkout, đưa preview COD 829.000đ rồi bàn giao sau xác nhận. Dữ liệu riêng tư giả lập được giữ ở code intake."
+    }
+  ]
+}

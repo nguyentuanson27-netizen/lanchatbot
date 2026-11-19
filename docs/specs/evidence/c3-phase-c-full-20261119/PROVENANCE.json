@@ -1,0 +1,364 @@
+{
+  "sourceSha": "992e360f677bb3c391986ef201339b087e38606a",
+  "worldHash": "1d113b3b44d28a93cbc11c5eb74cd5808f7249186ac7738ac3c8a54934d39a8e",
+  "capturedAt": "2026-11-19T04:05:04.786Z",
+  "casesScheduled": 34,
+  "turnsScheduled": 55,
+  "casesExecuted": 34,
+  "turnsExecuted": 55,
+  "casesRegisteredIncludingUnselectedRepetitions": 170,
+  "executedRepetitions": 1,
+  "selectedRepetition": 1,
+  "maximumGenerations": 220,
+  "groups": [
+    {
+      "label": "r1",
+      "registeredSlots": 20,
+      "selectedCases": 4,
+      "executedCases": 4,
+      "expectedTurns": 7,
+      "executedTurns": 7,
+      "terminals": {
+        "SEND_ELIGIBLE": 7
+      },
+      "generationAttempts": 21,
+      "generationRequests": 21,
+      "registrationHash": "fee968f7d24fe0270b6bd895071b1490031d8a35d66b6c3413d3754a16e2203d",
+      "corpusHash": "55157ddd7e957ebb3911532536e2be9505aa2587d636310c44c7b0ca6c92dfaf",
+      "selectionHash": "bd6c2002c8060a44463e13fd783c90200b2c387643bcfefcadee17fa3eeaecc6",
+      "journalHash": "1b4bf88c92afcbeae4b1073f5d9f7d4c605ae24c1a2dcc41fd94bf853f96c844",
+      "testDatabaseDropped": true,
+      "diagnosticStop": null,
+      "dispatchExitCode": 0
+    },
+    {
+      "label": "r2",
+      "registeredSlots": 45,
+      "selectedCases": 9,
+      "executedCases": 9,
+      "expectedTurns": 17,
+      "executedTurns": 17,
+      "terminals": {
+        "SEND_ELIGIBLE": 13,
+        "HANDOFF": 2,
+        "CODE_OWNED_SEND": 2
+      },
+      "generationAttempts": 44,
+      "generationRequests": 44,
+      "registrationHash": "cbe2b557cb7620e45e23d78e73c05ad1816b4741a5cf37eb91930a1397603384",
+      "corpusHash": "2c928e7d38944ac8142c776d05081f9327af7d5109ed80ae2ec23c8936a399cf",
+      "selectionHash": "d0226035153e7ed88d098687a8157f18b8ff775c04d7ba65c0366decf4a4e55e",
+      "journalHash": "fce17e351603431969bf03491bc40b6342d249f05450f636170e50af62b354af",
+      "testDatabaseDropped": true,
+      "diagnosticStop": null,
+      "dispatchExitCode": 0
+    },
+    {
+      "label": "remainder",
+      "registeredSlots": 100,
+      "selectedCases": 20,
+      "executedCases": 20,
+      "expectedTurns": 24,
+      "executedTurns": 24,
+      "terminals": {
+        "SEND_ELIGIBLE": 19,
+        "HANDOFF": 3,
+        "NO_SEND": 2
+      },
+      "generationAttempts": 60,
+      "generationRequests": 60,
+      "registrationHash": "6e19f8ca46430a68a04d40939352f33e5245faee3389851abb730678985c9412",
+      "corpusHash": "6fdd2ac2031d9fb3cef5ee614e495968bfba10035497dd33bb25c26ad52b42e7",
+      "selectionHash": "17098e1d754d106738fe442809018b648c3f5b5402a5523892c053d7dafa6dd6",
+      "journalHash": "fb6a81a887a7ac3705a39767dba824a5534ee2d4e4e6419721f0659ef36af348",
+      "testDatabaseDropped": true,
+      "diagnosticStop": null,
+      "dispatchExitCode": 0
+    },
+    {
+      "label": "checkout",
+      "registeredSlots": 5,
+      "selectedCases": 1,
+      "executedCases": 1,
+      "expectedTurns": 7,
+      "executedTurns": 7,
+      "terminals": {
+        "SEND_ELIGIBLE": 1,
+        "CODE_OWNED_SEND": 5,
+        "HANDOFF": 1
+      },
+      "generationAttempts": 5,
+      "generationRequests": 5,
+      "registrationHash": "b1e5c4cdce3944491db227d1affddfa464a5455d7f1cbdf894994764f1e73229",
+      "corpusHash": "a116da72d2b29876d6aa9a2fd86058a5622df0ca4ba587765c60e822d1d16336",
+      "selectionHash": "ba918ac8f7d47f321f4a6c98910b36e9d6f1b4881d30ed4fde47c3422c79dec9",
+      "journalHash": "b84a6272e56d3aca0f2e13230033cb1fb71eec0092ef93150a23c9300c31e3d6",
+      "testDatabaseDropped": true,
+      "diagnosticStop": null,
+      "dispatchExitCode": 0
+    }
+  ],
+  "groupsPreflight": [
+    {
+      "label": "r1",
+      "status": "PREFLIGHT_PASS",
+      "source": "992e360f677bb3c391986ef201339b087e38606a",
+      "registrationHash": "fee968f7d24fe0270b6bd895071b1490031d8a35d66b6c3413d3754a16e2203d",
+      "worldHash": "1d113b3b44d28a93cbc11c5eb74cd5808f7249186ac7738ac3c8a54934d39a8e",
+      "maximumGenerations": 28,
+      "registrationMaximumGenerations": 140,
+      "selectedRepetition": 1,
+      "selectionHash": "bd6c2002c8060a44463e13fd783c90200b2c387643bcfefcadee17fa3eeaecc6",
+      "cases": 4,
+      "turns": 7,
+      "providerRequests": 0,
+      "codexVersion": "codex-cli 0.159.2"
+    },
+    {
+      "label": "r2",
+      "status": "PREFLIGHT_PASS",
+      "source": "992e360f677bb3c391986ef201339b087e38606a",
+      "registrationHash": "cbe2b557cb7620e45e23d78e73c05ad1816b4741a5cf37eb91930a1397603384",
+      "worldHash": "1d113b3b44d28a93cbc11c5eb74cd5808f7249186ac7738ac3c8a54934d39a8e",
+      "maximumGenerations": 68,
+      "registrationMaximumGenerations": 340,
+      "selectedRepetition": 1,
+      "selectionHash": "d0226035153e7ed88d098687a8157f18b8ff775c04d7ba65c0366decf4a4e55e",
+      "cases": 9,
+      "turns": 17,
+      "providerRequests": 0,
+      "codexVersion": "codex-cli 0.159.2"
+    },
+    {
+      "label": "remainder",
+      "status": "PREFLIGHT_PASS",
+      "source": "992e360f677bb3c391986ef201339b087e38606a",
+      "registrationHash": "6e19f8ca46430a68a04d40939352f33e5245faee3389851abb730678985c9412",
+      "worldHash": "1d113b3b44d28a93cbc11c5eb74cd5808f7249186ac7738ac3c8a54934d39a8e",
+      "maximumGenerations": 96,
+      "registrationMaximumGenerations": 480,
+      "selectedRepetition": 1,
+      "selectionHash": "17098e1d754d106738fe442809018b648c3f5b5402a5523892c053d7dafa6dd6",
+      "cases": 20,
+      "turns": 24,
+      "providerRequests": 0,
+      "codexVersion": "codex-cli 0.159.2"
+    },
+    {
+      "label": "checkout",
+      "status": "PREFLIGHT_PASS",
+      "source": "992e360f677bb3c391986ef201339b087e38606a",
+      "registrationHash": "b1e5c4cdce3944491db227d1affddfa464a5455d7f1cbdf894994764f1e73229",
+      "worldHash": "1d113b3b44d28a93cbc11c5eb74cd5808f7249186ac7738ac3c8a54934d39a8e",
+      "maximumGenerations": 28,
+      "registrationMaximumGenerations": 140,
+      "selectedRepetition": 1,
+      "selectionHash": "ba918ac8f7d47f321f4a6c98910b36e9d6f1b4881d30ed4fde47c3422c79dec9",
+      "cases": 1,
+      "turns": 7,
+      "providerRequests": 0,
+      "codexVersion": "codex-cli 0.159.2"
+    }
+  ],
+  "models": {
+    "conversation": {
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
+      "effort": "high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "generationConfig": {
+        "candidateCount": 1,
+        "responseMimeType": "text/plain",
+        "maxOutputTokens": 8192,
+        "thinkingConfig": {
+          "thinkingLevel": "HIGH",
+          "includeThoughts": false
+        },
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "retry": 0,
+        "timeoutMs": 90000
+      }
+    },
+    "verifier": {
+      "provider": "OPENAI",
+      "model": "gpt-6.1-sol",
+      "version": "gpt-6.1-sol",
+      "effort": "high",
+      "credentialRoute": "CODEX_CHATGPT_LOGIN",
+      "generationConfig": {
+        "transport": "CODEX_CLI_BOUNDED_INFERENCE_RELAY",
+        "cliVersion": "0.159.2",
+        "wireApi": "responses",
+        "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+        "tools": [],
+        "tool_choice": "none",
+        "parallel_tool_calls": false,
+        "store": false,
+        "stream": true,
+        "reasoningEffort": "high",
+        "temperature": "OMITTED_PROVIDER_DEFAULT",
+        "topP": "OMITTED_PROVIDER_DEFAULT",
+        "maxOutputTokens": "OMITTED_CODEX_BACKEND",
+        "timeoutMs": 90000,
+        "maxResponseBytes": 1048576,
+        "relayUpstreamRequestsPerAttempt": 1,
+        "retry": 0,
+        "clientContinuation": "REJECT_WITHOUT_FORWARDING",
+        "errorPolicy": "FIRST_UPSTREAM_ERROR_TERMINATES_ATTEMPT_NO_GENERATION_RETRY"
+      }
+    }
+  },
+  "promptHashes": {
+    "owner": "7f87a56de66eb9e313a7c29642e0f7233645c33d9417a057d8e343070d15bdd5",
+    "verifier": "fa3ab818444aedd06a25a5a4f7956bc25e3162125e109d845430011e2635909c"
+  },
+  "verdictSchemaHash": "19a67ac07104c3417d6c07602334da22fb67a11df87fec4f53a9f4b2b1b46115",
+  "requestBounds": {
+    "ownerWireBytes": 70000,
+    "verifierWireBytes": 70000
+  },
+  "toolRounds": 2,
+  "toolCalls": 6,
+  "configuration": "Compact V2",
+  "evaluatorRetry": 0,
+  "outcomeReview": "AUTHOR_WHOLE_CONVERSATION_REVIEW",
+  "offlineJudgeRequests": 0,
+  "worldCapture": "Read-only POS, policy and catalog; owner-approved assumptions are restricted to test world, exact prior pinned media proof reused.",
+  "dispatchStartedAt": "2026-11-19T04:11:43.595706+00:00",
+  "dispatchCompleted": [
+    {
+      "label": "r1",
+      "startedAt": "2026-11-19T04:11:43.890134+00:00",
+      "completedAt": "2026-11-19T04:17:22.530802+00:00",
+      "exitCode": 0
+    },
+    {
+      "label": "r2",
+      "startedAt": "2026-11-19T04:11:43.887620+00:00",
+      "completedAt": "2026-11-19T04:23:38.570254+00:00",
+      "exitCode": 0
+    },
+    {
+      "label": "checkout",
+      "startedAt": "2026-11-19T04:23:38.803154+00:00",
+      "completedAt": "2026-11-19T04:26:39.984124+00:00",
+      "exitCode": 0
+    },
+    {
+      "label": "remainder",
+      "startedAt": "2026-11-19T04:17:22.743681+00:00",
+      "completedAt": "2026-11-19T04:31:22.654086+00:00",
+      "exitCode": 0
+    }
+  ],
+  "credentialRoute": "Existing configured Vertex and Codex routes; no deployment.",
+  "rawArtifactHashes": [
+    {
+      "file": "WORLD.json",
+      "sha256": "03d45ae70f2a74763e4c1b47d3599f6fc760498f99fe155b527e1f082b69454f"
+    },
+    {
+      "file": "c3-current-cart-choice-launch-20261119.py",
+      "sha256": "c9877e6ee9c72f6141473d302c2ba5651b91d763baaba68d9fd65ec6fa95a286"
+    },
+    {
+      "file": "SEAL.json",
+      "sha256": "69923c80d062420e197aac9cc4ac1bb6d3ba755c258cde464a7937942561aadc"
+    },
+    {
+      "file": "prepare.mjs",
+      "sha256": "860c10639d4e64a82bae8119b43ad6c35cfa78f1607a70df9d4371a7acd73904"
+    },
+    {
+      "file": "seal.mjs",
+      "sha256": "ed3c778a7d88a45a67dd86d45b8627fb96de00fc0df9f42b0062cabd8faa28b5"
+    },
+    {
+      "file": "dispatch.py",
+      "sha256": "ef980bb1f3771d02e6374f3da53918608781cfa30c4ab37b83663d76f3d9f8c6"
+    },
+    {
+      "file": "REGISTRATION.json",
+      "sha256": "3a8a54aebf8cc054f320d032efa52af4441d19538d289df895809bc358fa44c9"
+    },
+    {
+      "file": "SELECTED_SLOT_IDS.json",
+      "sha256": "9be6bb439dc5ec6e70acb0e9801afdeca6f2c8c2b17ce3651ba5fa1aa57d90ec"
+    },
+    {
+      "file": "PRIVATE_BLIND_SEED.json",
+      "sha256": "2ace10e720467da27ab8fe8e92c19bca44255eaf677de33605a68c7103b4c46e"
+    },
+    {
+      "file": "PREFLIGHT.json",
+      "sha256": "1c71b4bebc5f06ca766cdd4023888b3838a94d1001e81a82a6e74f62e7a9e365"
+    },
+    {
+      "file": "REGISTRATION.json",
+      "sha256": "8968388e2bae2e6633cf8978a71042fd0c27cf8cccc6b1befcc99806f4a51ba5"
+    },
+    {
+      "file": "SELECTED_SLOT_IDS.json",
+      "sha256": "f2a3af86ed716257d299c2e22ebc09489697779cf04955da15a0e6882dddfdad"
+    },
+    {
+      "file": "PRIVATE_BLIND_SEED.json",
+      "sha256": "db577a38e922402a9eae9eacf7991003b32e45ecd46d70e0432fb96778a7cd7c"
+    },
+    {
+      "file": "PREFLIGHT.json",
+      "sha256": "1d6bcaf198b0f6a0b09ecf100dfd347e760fa56f827d7f94456304b502345b9d"
+    },
+    {
+      "file": "REGISTRATION.json",
+      "sha256": "ba887806ffb01e6aa11bd707b7a03638f9ca2f79a9f78655ddc3b39b50426ffc"
+    },
+    {
+      "file": "SELECTED_SLOT_IDS.json",
+      "sha256": "48346a29a258b8bcbdec9a7971e7332a566b84c63b1e6b3b868763681fa9f90e"
+    },
+    {
+      "file": "PRIVATE_BLIND_SEED.json",
+      "sha256": "41ca276e3e595e28e31c8a93c14339527161944ca41e023799e6355cb4b2f14c"
+    },
+    {
+      "file": "PREFLIGHT.json",
+      "sha256": "46bc334f86377db6ee642dd8d075791587a8e546d75798b1fe99383933b8b1fc"
+    },
+    {
+      "file": "REGISTRATION.json",
+      "sha256": "6424fa90561cbda49e8d49a24d51409ff55d3809f24ec1ebffedae18bf4f4370"
+    },
+    {
+      "file": "SELECTED_SLOT_IDS.json",
+      "sha256": "a8b5a6891809279f682e3ea8cdda6450494fe0fe51c17a277d7fedcc333c86d2"
+    },
+    {
+      "file": "PRIVATE_BLIND_SEED.json",
+      "sha256": "1b47dd10fb3b92129d375bdcd0f8ec3d3ace812d5b696e8b7b0e3613a078c041"
+    },
+    {
+      "file": "PREFLIGHT.json",
+      "sha256": "147cb17e48d6630189b6282955f04a70ba5d1833327dfd043d42df149c2095eb"
+    }
+  ],
+  "auditSha256": "954d0d17356c32e6786abde12bcc7c841d4b4799c61c1a4c706a17a5e3f5f904",
+  "publicationProjectionSha256": "40f8174249bb5ab21de0b87e6f9fb07a9f6a9ce5504815aa2971495cb9413bb3",
+  "commands": [
+    "python ../c3-current-cart-choice-launch-20261119.py node apps/worker/evals/single-agent-commerce-qualification/capture-world.mjs ../c3-phase-c-full-992e360f-20261119-110449/world ../c3-media-context-model-codes-20261103-02.json --test-media-proof-world ../c3-convergence-model-world-20261111-10/WORLD.json",
+    "python ../c3-current-cart-choice-launch-20261119.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs ../c3-phase-c-full-992e360f-20261119-110449/initial COD --phase-c-initial-world ../c3-phase-c-full-992e360f-20261119-110449/world/WORLD.json",
+    "node \"$c3FullRun/prepare.mjs\"",
+    "node \"$c3FullRun/seal.mjs\"",
+    "python \"$c3FullRun/dispatch.py\" \"$c3FullRun\"",
+    "python ..\\c3-current-cart-choice-launch-20261119.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs $c3FullRun\\r1-run COD --phase-c-diagnostic-registration $c3FullRun\\r1-sealed\\REGISTRATION.json --phase-c-world $c3FullRun\\world\\WORLD.json --phase-c-slot-ids $c3FullRun\\r1-sealed\\SELECTED_SLOT_IDS.json --phase-c-seed $c3FullRun\\r1-sealed\\PRIVATE_BLIND_SEED.json",
+    "python ..\\c3-current-cart-choice-launch-20261119.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs $c3FullRun\\r2-run COD --phase-c-diagnostic-registration $c3FullRun\\r2-sealed\\REGISTRATION.json --phase-c-world $c3FullRun\\world\\WORLD.json --phase-c-slot-ids $c3FullRun\\r2-sealed\\SELECTED_SLOT_IDS.json --phase-c-seed $c3FullRun\\r2-sealed\\PRIVATE_BLIND_SEED.json",
+    "python ..\\c3-current-cart-choice-launch-20261119.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs $c3FullRun\\remainder-run COD --phase-c-diagnostic-registration $c3FullRun\\remainder-sealed\\REGISTRATION.json --phase-c-world $c3FullRun\\world\\WORLD.json --phase-c-slot-ids $c3FullRun\\remainder-sealed\\SELECTED_SLOT_IDS.json --phase-c-seed $c3FullRun\\remainder-sealed\\PRIVATE_BLIND_SEED.json",
+    "python ..\\c3-current-cart-choice-launch-20261119.py node apps/worker/evals/single-agent-commerce-read-only/isolated-integration.mjs $c3FullRun\\checkout-run COD --phase-c-diagnostic-registration $c3FullRun\\checkout-sealed\\REGISTRATION.json --phase-c-world $c3FullRun\\world\\WORLD.json --phase-c-slot-ids $c3FullRun\\checkout-sealed\\SELECTED_SLOT_IDS.json --phase-c-seed $c3FullRun\\checkout-sealed\\PRIVATE_BLIND_SEED.json",
+    "node --test --test-reporter=dot apps/worker/evals/single-agent-commerce-qualification/diagnostic.test.mjs apps/worker/evals/single-agent-commerce-qualification/native-wire.test.mjs apps/worker/evals/single-agent-commerce-qualification/candidate-provider.test.mjs",
+    "node \"$c3FullRun/audit.mjs\" \"$c3FullRun\"",
+    "node \"$c3FullRun/render.mjs\" \"$c3FullRun\" \"$evidence\""
+  ]
+}

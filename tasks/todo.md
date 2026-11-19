@@ -7,7 +7,8 @@
 - [x] Chẩn đoán component reconstruction năm J4 bằng serializers thật: verifier reserved wire overflow 5/5; đổi riêng prompt cũ qua, thu read scope về AO + pending/prompt mới qua. [Root cause và phương án sửa code/context](../docs/specs/evidence/c3-current-cart-choice-native-20261119/ROOT_CAUSE.md), provider0. Chưa exact native store replay.
 - [x] Theo lựa chọn owner, tăng verifier wire 70.000 đồng bộ; RED 2→GREEN, 142 Node/worker compile/lint PASS. Giữ prompt/gates, thêm targeted five-turn harness với scripted prefix rõ nguồn.
 - [x] Targeted source `82c86a3c` đủ 5 final turns: 5 SEND_ELIGIBLE/PASS, đúng 499.000đ, không commerce event mới. 15 request, cộng 1 request của run abort harness có reconciliation =16; không retry. 10 prefix fixture turns không generation; final 143 Node PASS. [Bằng chứng](../docs/specs/evidence/c3-verifier70000-j4-recheck-20261119/REPORT.md).
-- [ ] Whole-journey quality/qualification chưa chạy lại. Giọng/RECORD còn hạn chế, Phase C STOP; không deploy/live send.
+- [x] Full Phase C diagnostic trên `992e360f` đủ 34 ca/55 lượt, 130 generation HTTP, 47 lượt có tin, 6 silent handoff, 2 no-send. Review toàn hội thoại 26 đáp ứng / 3 chưa đạt / 5 handoff đúng; P07, S11, J3 còn finding. [Report và lịch sử](../docs/specs/evidence/c3-phase-c-full-20261119/REPORT.md).
+- [ ] Phase C STOP. Full qualification N=5, chấm mù và C3 A/B chưa thực hiện trong lượt đo này.
 
 ## Previous — báo giá hỗ trợ trước giỏ, 2026-11-18
 
