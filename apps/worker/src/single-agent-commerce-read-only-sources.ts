@@ -6,7 +6,7 @@ import type { CommerceScope, ReadOnlyCatalog } from "./single-agent-commerce-rea
 
 /** The only policy port passed to the resolver is SELECT of active pointers. No pin/audit/cache writer. */
 export function createCommerceReadSources(input: {
-  scope: CommerceScope; channel: RuntimePolicyDatabaseChannel; clock: () => Date;
+  scope: Pick<CommerceScope, "pageId" | "shopAlias">; channel: RuntimePolicyDatabaseChannel; clock: () => Date;
   policyStore: Pick<PostgresRuntimePolicyStore, "loadActivePointers">;
   catalog: Pick<StableCatalogSearchPort, "findByExactCode">;
   search: Pick<ProductSearchService, "searchText">;

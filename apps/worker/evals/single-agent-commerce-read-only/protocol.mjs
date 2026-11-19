@@ -2,11 +2,12 @@ import {createHash} from 'node:crypto';
 import {readFileSync,existsSync} from 'node:fs';
 import {resolve,dirname} from 'node:path';
 import {runCodexModel} from '../single-agent-semantic-verifier/codex-inference.mjs';
-import {OWNER_REQUEST_MAX_BYTES,publicTurnTime,publicCommunicationHistoryMetadata} from './gemini-inference.mjs';
+import {OWNER_REQUEST_MAX_BYTES} from './gemini-inference.mjs';
 import {terminalFallback} from '../../dist/single-agent-semantic-verifier-boundary.js';
 import {createGeminiVerifierModel,GEMINI_VERIFIER_MODEL} from './gemini-verifier.mjs';
 const check=(ok,reason)=>{if(!ok)throw new Error(reason);};
-export const VERIFIER_REQUEST_MAX_BYTES=70000;
+export {buildVerifierRequest,VERIFIER_REQUEST_MAX_BYTES} from './commerce-verifier-wire.mjs';
+import {buildVerifierRequest,VERIFIER_REQUEST_MAX_BYTES} from './commerce-verifier-wire.mjs';
 export const sha256=value=>createHash('sha256').update(value).digest('hex');
 // Eval-only explicit B1 selection. Stateful callers keep the shared full prompt.
 export function readB1OwnerPrompt(registrationPath){
@@ -103,16 +104,6 @@ export function readRegisteredCases(path){
  check(samples.every(c=>['LIVE','POS_UNAVAILABLE'].includes(c.sourceMode??'LIVE')),'SOURCE_MODE');
  return {samples,inputs:samples.map(runtimeCase),hash:sha256(source)};
 }
-export function buildVerifierRequest(m,r){
- check(typeof r.finalDraft==='string'&&bytes(r.finalDraft)<=4096,'DRAFT_BOUND');
- const request={model:m.models.verifier.model,reasoning:{effort:m.models.verifier.effort},instructions:r.instructions,
-  input:[{type:'message',role:'user',content:[{type:'input_text',text:JSON.stringify({requestIdentity:r.binding,turnTime:publicTurnTime(r.turnTime),trusted:r.trusted,
-    untrusted:{latestCustomerMessage:r.latest,recentAcceptedDialogue:r.history,finalDraft:r.finalDraft,
-      ...(r.historyMetadata?.publicCartEvents.length?{acceptedCommunicationHistory:publicCommunicationHistoryMetadata(r.historyMetadata)}:{})}})}]}],
-  tools:[],tool_choice:'none',parallel_tool_calls:false,store:false,stream:true,
-  text:{format:{type:'json_schema',name:'semantic_egress_verdict',strict:true,schema:m.verdictSchema}}};
- check(bytes(request)<=VERIFIER_REQUEST_MAX_BYTES,'VERIFIER_INPUT_BOUND');return request;
-}
 export const geminiVerifier=m=>m.models?.verifier?.provider===GEMINI_VERIFIER_MODEL.provider;
 // The registered verifier identity selects its transport; a caller may still inject one for a test or a controlled comparison.
 function registeredVerifierModel(m){
@@ -132,7 +123,7 @@ export function createCommerceVerifier(m,runModel,onCheckpoint){
  return async r=>{
   if(r.signal.aborted)throw new Error('PROVIDER_TIMEOUT');
   const wire=buildVerifierRequest(m,r);
-  const telemetry=await runModel(m,'verifier',wire,{onCheckpoint: value=>onCheckpoint?.(r.generationId,value)});
+  const telemetry=await runModel(m,'verifier',wire,{signal:r.signal,onCheckpoint: value=>onCheckpoint?.(r.generationId,value)});
   if(telemetry.status!=='OK')throw Object.assign(new Error(telemetry.status==='TIMEOUT'?'PROVIDER_TIMEOUT':'PROVIDER_ERROR'),{telemetry});
   return {result:telemetry.answer,telemetry};
  };

@@ -30,14 +30,16 @@ export function buildGeminiVerifierBody(wire){
 export function createGeminiVerifierModel(config,dependencies={}){
  requireThat(typeof config?.projectId==='string'&&config.projectId.length>0,'VERIFIER_PROJECT');
  const fetchImpl=dependencies.fetchImpl??fetch,timeoutMs=config.timeoutMs??90000;let token=null;
- return async(_manifest,role,wire)=>{
+ return async(_manifest,role,wire,options={})=>{
   requireThat(role==='verifier','VERIFIER_ROLE');
   const body=buildGeminiVerifierBody(wire),text=JSON.stringify(body),started=performance.now();
   const telemetry={status:'PROVIDER_ERROR',provider:GEMINI_VERIFIER_MODEL.provider,model:GEMINI_VERIFIER_MODEL.model,providerRequests:0,authRequests:0,httpStatus:null,
    modelVersion:null,inputTokens:null,outputTokens:null,cost:null,finishReason:null,requestBytes:Buffer.byteLength(text),
    requestHash:createHash('sha256').update(text).digest('hex'),failureStage:'REQUEST'};
-  const signal=AbortSignal.timeout(timeoutMs);
+  const timeout=AbortSignal.timeout(timeoutMs);
+  const signal=options.signal?AbortSignal.any([timeout,options.signal]):timeout;
   try{
+   signal.throwIfAborted();
    if(!token||token.expiresAt-Date.now()<60000){
     telemetry.failureStage='AUTH';
     if(dependencies.getToken)token={value:await dependencies.getToken(),expiresAt:Date.now()+3600000};
@@ -53,6 +55,7 @@ export function createGeminiVerifierModel(config,dependencies={}){
      token={value:data.access_token,expiresAt:Date.now()+(data.expires_in??3600)*1000};
     }
    }
+   signal.throwIfAborted();
    telemetry.failureStage='GENERATION';telemetry.providerRequests=1;
    const response=await fetchImpl(vertexGenerateEndpoint(config.projectId,GEMINI_VERIFIER_MODEL.location,GEMINI_VERIFIER_MODEL.model),{method:'POST',redirect:'error',signal,
     headers:{authorization:'Bearer '+token.value,'content-type':'application/json'},body:text});

@@ -564,7 +564,7 @@ export function createGeminiCommerceInference(config,dependencies={}){
     stage='AUTH';
     if(dependencies.getToken)token={value:await dependencies.getToken(),expiresAt:Date.now()+3600000};
     else {
-     const credential=JSON.parse(readFileSync(process.env.C3_VERTEX_CREDENTIAL_FILE,'utf8'));
+     const credential=dependencies.credential??JSON.parse(readFileSync(process.env.C3_VERTEX_CREDENTIAL_FILE,'utf8'));
      requireThat(credential.type==='service_account'&&credential.project_id===config.projectId,'CREDENTIAL_SCOPE');
      const assertion=createServiceAccountAssertion({email:credential.client_email,privateKey:credential.private_key},Date.now());
      telemetry.authRequests++;

@@ -2045,6 +2045,17 @@ export class PostgresRealtimeRuntimeStore {
     this.pool = new Pool({ connectionString, max: maxPoolSize });
   }
 
+  runInTransaction<T>(livePageId: string, operation: (client: PoolClient) => Promise<T>): Promise<T> {
+    return withTransaction(this.pool, async client => {
+      const page = await client.query(
+        "SELECT page_id FROM pages WHERE page_id = $1 AND routing_owner = 'APP' AND app_send_enabled AND NOT kill_switch FOR UPDATE",
+        [livePageId],
+      );
+      if (page.rowCount !== 1) throw new Error("REALTIME_PAGE_SEND_AUTHORITY_CHANGED");
+      return operation(client);
+    });
+  }
+
   async isOwnMetaMessage(
     pageId: string,
     providerMessageId: string,

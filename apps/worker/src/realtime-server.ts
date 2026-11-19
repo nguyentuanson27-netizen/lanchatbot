@@ -69,6 +69,10 @@ import { QdrantImageRecognitionAdapter } from "./image-recognition-qdrant.js";
 import { resolveMediaRecognitionV2Config } from "./media-recognition-v2-config.js";
 import { VertexMediaReranker } from "./vertex-media-reranker.js";
 
+import { createCommercePreprodIngress } from "./single-agent-commerce-preprod-ingress.js";
+import { createCommercePreprodModels } from "./single-agent-commerce-preprod-models.js";
+import { createCommerceReadSources } from "./single-agent-commerce-read-only-sources.js";
+
 interface N8nVertexCredential {
   email?: unknown;
   privateKey?: unknown;
@@ -349,8 +353,7 @@ const vertexModel = new VertexShadowModel({
     })}\n`);
   },
 });
-const baseProductSearch = new ProductSearchService(
-  new QdrantStableCatalogSearchAdapter({
+const catalog = new QdrantStableCatalogSearchAdapter({
     baseUrl: required("QDRANT_BASE_URL"),
     apiKey: secretOrEnvironment("QDRANT_API_KEY", "QDRANT_API_KEY_FILE"),
     collection: required("QDRANT_COLLECTION"),
@@ -362,8 +365,8 @@ const baseProductSearch = new ProductSearchService(
       1_408,
     ),
     timeoutMs: boundedInteger("QDRANT_TIMEOUT_MS", 15_000, 1_000, 60_000),
-  }),
-  {
+});
+const baseProductSearch = new ProductSearchService(catalog, {
     textMinScore: boundedNumber(
       "PRODUCT_SEARCH_TEXT_MIN_SCORE",
       0.72,
@@ -837,6 +840,39 @@ const runner = df13CommerceStartupInput.mode === "COMMERCE"
 );
 if (df13CommerceStartupInput.mode === "COMMERCE") {
   runner.bindDf13CommerceFreshProcessAuthority(commerceFreshProcessExecutor!);
+}
+if (process.env.C3_COMMERCE_PREPROD_INGRESS_ENABLED === "true") {
+  if (df13CommerceStartupInput.mode !== "LEGACY" || mode !== "LIVE" || !sendEnabled ||
+    process.env.CHATBOT_SEND_ENABLED !== "true" || !pancakeConfigured || !canonicalHistory ||
+    !runtimePolicyStore || runtimePolicyChannel !== "PUBLISHED" || !runnerOptions.salesCycleEnabled) {
+    throw new Error("C3_COMMERCE_PREPROD_RUNTIME_PORTS_UNAVAILABLE");
+  }
+  const pageId = required("META_PAGE_ID");
+  const shopAlias = runnerOptions.shopAlias;
+  const clock = () => new Date();
+  const published = runtimePolicyStore;
+  const models = await createCommercePreprodModels({
+    projectId: required("VERTEX_PROJECT_ID"), serviceAccount: credential.serviceAccount,
+    timeoutMs: boundedInteger("VERTEX_TIMEOUT_MS", 30_000, 5_000, 90_000),
+  });
+  const tagIds = {
+    NHAN_VIEN: pancakeEmployeeTagId, VAN_DON: pancakePostSaleTagId, DA_CHOT_DON: pancakeClosedOrderTagId,
+  };
+  runner.bindCommercePreprodIngress(createCommercePreprodIngress({
+    pageId, shopId: "LANA_DESIGN", shopAlias, leaseMs: runnerOptions.inboxLeaseMs,
+    store: runtime, inbox, history: canonicalHistory, facts, tags, quota, models, clock,
+    media: { allowedHostSuffixes: allowedMediaHostSuffixes }, resolveTagId: tag => tagIds[tag] || null,
+    sources: () => {
+      const sources = createCommerceReadSources({ scope: { pageId, shopAlias }, channel: "PUBLISHED",
+        clock, policyStore: published, catalog, search: baseProductSearch, facts });
+      const policy = async () => {
+        const current = await sources.policy();
+        if (current.status !== "RESOLVED" || !current.mayAffectOutbound) throw new Error("C3_COMMERCE_POLICY_UNAVAILABLE");
+        return current;
+      };
+      return { read: { ...sources, policy, maxFactAgeSeconds: boundedInteger("BUSINESS_FACT_MAX_AGE_SECONDS", 1_200, 60, 86_400) }, policy };
+    },
+  }));
 }
 const pollMs = boundedInteger(
   "REALTIME_POLL_MS",

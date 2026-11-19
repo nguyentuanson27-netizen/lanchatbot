@@ -94,6 +94,8 @@ export function bindCommerceFacts(reader: BusinessFactsReader, scope: { shopAlia
 /** Explicit candidate consumer. Not imported by a production entrypoint; it can enqueue, never dispatch or send. */
 export async function runPersistedCommerceIngress(input: {
   captureBoundaryWitness?: boolean;
+  /** Enforce page and conversation authority for the deployed PREPROD lane. */
+  requireLiveAuthority?: true;
   /** Evaluation-only reference runner; production entrypoints never provide this port. */
   evaluationTurn?: { kind: "PINNED_MAIN_C3"; run: (turn: Parameters<typeof runCommerceTurn>[0],
     state: { sales: SalesCycleRuntimeState; conversationRevision: number; sourceMessagePk: string }) => ReturnType<typeof runCommerceTurn> };
@@ -125,6 +127,12 @@ export async function runPersistedCommerceIngress(input: {
   const record = await input.store.loadOrCreate<ConversationState>(batch.pageId, batch.conversationHash, "APP",
     id => createConversationState({ conversationId: id, routingOwner: "APP", now: input.clock() }), input.clock());
   if (record.conversationId !== input.scope.conversationId) return noSend("CONVERSATION_SCOPE");
+  const pagePermitsCommerce = (row: typeof record) => !input.requireLiveAuthority ||
+    (row.routingOwner === "APP" && row.state.routingOwner === "APP" && row.appSendEnabled && !row.killSwitch);
+  if (!pagePermitsCommerce(record)) {
+    await input.inbox.completeBatch(batch, true);
+    return noSend("INGRESS_PAGE_AUTHORITY");
+  }
   const mediaMessage=messages.find(m=>m.attachments.length>0);
   const attachmentCount=messages.reduce((n,m)=>n+m.attachments.length,0);
   let mediaLink:{eventKey:string;messagePk:string;attachmentCount:number}|undefined;
@@ -147,7 +155,7 @@ export async function runPersistedCommerceIngress(input: {
       input.inbox.readGeneration(scope.pageId, scope.customerHash),
     ]);
     return { ...scope, state: row.state, stateVersion: row.stateVersion, fence: input.fence,
-      bindingVersion: `commerce:${generation}:${scope.recipient}`, permission: row.state.conversationOwner === "BOT" };
+      bindingVersion: `commerce:${generation}:${scope.recipient}`, permission: pagePermitsCommerce(row) && row.state.conversationOwner === "BOT" };
   };
   let priorShopOutput:boolean|null=null,privateMode=false,checkoutMediaUnits=0;
   let publicTools:CommerceTools|undefined,terminalMediaControl:PreparationControl|undefined;
@@ -310,6 +318,7 @@ export async function runPersistedCommerceIngress(input: {
   try { world = await tools.readback(); } catch { return { ...result, ...await closeWithoutSend("EGRESS_READBACK_UNAVAILABLE") }; }
   const current = await readAuthority();
   const verifiedRevision = world.state.conversationRevision;
+  if (!current.permission && input.requireLiveAuthority) return { ...result, ...await closeWithoutSend("EGRESS_PAGE_AUTHORITY") };
   if (typeof verifiedRevision !== "number" || current.stateVersion !== verifiedRevision ||
     commerceHash(accepted) !== commerceHash(makeBinding(scope.requestId, result.terminal.text ?? "", world)) || current.bindingVersion !== scope.bindingVersion) return { ...result, ...await closeWithoutSend("EGRESS_WORLD_CHANGED"),
       egressDiagnostic: { kind: typeof verifiedRevision !== "number" || current.stateVersion !== verifiedRevision ? "CONVERSATION_REVISION" : current.bindingVersion !== scope.bindingVersion ? "AUTHORITY_BINDING" : "TRUSTED_SNAPSHOT",

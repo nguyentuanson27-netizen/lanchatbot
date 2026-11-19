@@ -1,4 +1,10 @@
 services:
+  realtime-worker:
+    environment:
+      C3_COMMERCE_PREPROD_INGRESS_ENABLED: "true"
+      REALTIME_INBOX_LEASE_MS: "240000"
+      RUNTIME_POLICY_CHANNEL: PUBLISHED
+      SALES_CYCLE_ENABLED: "true"
   delivery-worker:
     environment:
       C3_COMMERCE_PREPROD_DELIVERY_ENABLED: "true"
