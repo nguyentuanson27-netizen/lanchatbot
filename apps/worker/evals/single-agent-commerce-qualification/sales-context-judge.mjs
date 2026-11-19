@@ -4,6 +4,7 @@ import {mkdirSync,readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {inspectCodex,runCodexModel} from '../single-agent-semantic-verifier/codex-inference.mjs';
+import {CODEX_SOL_VERIFIER} from '../single-agent-semantic-verifier/codex-sol-verifier.mjs';
 import {digest,write} from './bc-control.mjs';
 
 const judge={model:'gpt-6.1-sol',effort:'high',blind:true,independent:true};
@@ -36,8 +37,7 @@ async function run(mode,packets,packetSeal,out){
  assert.equal(packets.length,size);
  assert(packets.every(p=>/^[a-f0-9]{64}$/u.test(p.packetId)));
  assert.equal(new Set(packets.map(p=>p.packetId)).size,size);
- const source=JSON.parse(readFileSync(new URL('../single-agent-commerce-read-only/manifest.json',import.meta.url),'utf8'));
- const role=source.models.verifier;
+ const role=CODEX_SOL_VERIFIER;
  assert.equal(role.model,judge.model);assert.equal(role.effort,judge.effort);
  assert.equal(inspectCodex().version,'codex-cli '+role.generationConfig.cliVersion);
  mkdirSync(out);

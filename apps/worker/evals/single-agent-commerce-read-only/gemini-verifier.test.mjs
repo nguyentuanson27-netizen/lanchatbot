@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {buildVerifierRequest,createCommerceVerifier} from './protocol.mjs';
+import {buildVerifierRequest,createCommerceVerifier,validateProtocol} from './protocol.mjs';
 import {buildGeminiVerifierBody,createGeminiVerifierModel,GEMINI_VERIFIER_MODEL} from './gemini-verifier.mjs';
 import {makeBinding,finalGate} from '../../dist/single-agent-semantic-verifier-boundary.js';
 import {createReadOnlyTools} from '../../dist/single-agent-commerce-read-only-tools.js';
@@ -15,6 +15,19 @@ const request=(finalDraft='Dạ chị.')=>({generationId:'g:verifier:1',instruct
  binding:makeBinding('g',finalDraft,trusted),signal:new AbortController().signal});
 const answer=(text,extra={})=>new Response(JSON.stringify({modelVersion:'gemini-3.5-flash-lite',usageMetadata:{promptTokenCount:120,candidatesTokenCount:9},
  candidates:[{finishReason:'STOP',content:{role:'model',parts:[{text}]}}],...extra}));
+
+test('the active verifier selects the registered Vertex model and generation settings',()=>{
+ const config=manifest.models.verifier;
+ const body=buildGeminiVerifierBody(buildVerifierRequest(manifest,request()));
+ assert.deepEqual(Object.fromEntries(Object.keys(GEMINI_VERIFIER_MODEL).map(key=>[key,config[key]])),GEMINI_VERIFIER_MODEL);
+ const {candidateCount,responseMimeType,maxOutputTokens,thinkingConfig}=config.generationConfig;
+ const {responseJsonSchema,...wireConfig}=body.generationConfig;
+ assert.deepEqual(wireConfig,{candidateCount,responseMimeType,maxOutputTokens,thinkingConfig});
+ assert.equal(config.generationConfig.requestsPerAttempt,1);
+ assert.equal(config.generationConfig.retry,0);
+ const invalid={...manifest,models:{...manifest.models,verifier:{...config,credentialRoute:'CODEX_CHATGPT_LOGIN'}}};
+ assert.throws(()=>validateProtocol(invalid),/MODEL_IDENTITY/);
+});
 
 test('the provider body carries exactly the registered instructions, message and verdict schema',()=>{
  const wire=buildVerifierRequest(manifest,request()),body=buildGeminiVerifierBody(wire);

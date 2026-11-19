@@ -12,6 +12,7 @@ import {presentPendingSupport,presentSupportResult} from '../../dist/single-agen
 import {readCompactSections} from '../single-agent-commerce-read-only/owner-data-presentation.mjs';
 import {assertNativeRuntime,NATIVE_CODECS} from './native-wire.mjs';
 import {inspectCodex,runCodexModel} from '../single-agent-semantic-verifier/codex-inference.mjs';
+import {CODEX_SOL_VERIFIER} from '../single-agent-semantic-verifier/codex-sol-verifier.mjs';
 
 const git=(...args)=>execFileSync('git',args,{encoding:'utf8'}).trim();
 const head=()=>{assert.equal(git('status','--porcelain'),'','SUPPORT_SCREEN_DIRTY_SOURCE');return git('rev-parse','HEAD');};
@@ -155,7 +156,7 @@ async function dispatch(reg,seal,out){
 async function judge(reg,results,out){
  check(reg,results.registrationHash);
  const packets=packet(reg,results);assert(!existsSync(out));mkdirSync(out);write(resolve(out,'PACKETS.json'),packets);
- const role=read('apps/worker/evals/single-agent-commerce-read-only/manifest.json').models.verifier;
+ const role=CODEX_SOL_VERIFIER;
  assert.equal(role.model,'gpt-6.1-sol');assert.equal(role.effort,'high');inspectCodex();
  const ratings={},accounting=[];
  for(const p of packets){

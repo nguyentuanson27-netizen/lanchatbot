@@ -1,4 +1,5 @@
 // Evaluation only: three captured-world post-read pairs, not current send eligibility.
+import {CODEX_SOL_VERIFIER} from '../single-agent-semantic-verifier/codex-sol-verifier.mjs';
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync,appendFileSync,mkdirSync} from 'node:fs';
 import {resolve} from 'node:path';
@@ -123,7 +124,8 @@ export function renderBlindPairs(records,attempts,mapping){
 async function main(){
  const [out,mode,controls,prepared]=process.argv.slice(2);assert(out&&['--preflight','--run'].includes(mode));
  const identity=readFeedbackRunIdentity();assertCleanFeedbackSource(identity);
- const manifest=validateProtocol(JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url))));
+ const current=JSON.parse(readFileSync(new URL('./manifest.json',import.meta.url)));
+ const manifest=validateProtocol({...current,models:{...current.models,verifier:CODEX_SOL_VERIFIER}});
  const ownerPrompt=readFileSync(new URL('./prompts/owner.vi.txt',import.meta.url),'utf8'),verifierPrompt=readFileSync(new URL('./prompts/verifier.vi.txt',import.meta.url),'utf8');
  const frozen=JSON.parse(readFileSync(new URL('./quote-presentation-run-20261026/frozen-inputs.json',import.meta.url)));
  const bundle=prepareQuoteDiagnostic(frozen,ownerPrompt);

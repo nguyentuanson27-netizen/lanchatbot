@@ -1,5 +1,6 @@
 // Specific runner for the owner-approved J2(12) -> J1(10) -> conditional(8)
 // experiment. Uses the existing disposable PostgreSQL fixture and provider APIs.
+import {CODEX_SOL_VERIFIER} from '../single-agent-semantic-verifier/codex-sol-verifier.mjs';
 import assert from 'node:assert/strict';
 import {readFileSync,appendFileSync} from 'node:fs';
 import {resolve} from 'node:path';
@@ -55,7 +56,8 @@ export async function runJ1Baseline({input,out,ports,seedJ1,fixture,snapshot,now
 export async function createCampaignPorts({root,input,world,out,readPorts}){
  assert(['PREPARE','RUN','RESUME','BASELINE_NATIVE','J4_RECHECK'].includes(input.mode),'CAMPAIGN_MODE');
  assert.equal(digest(world),input.worldHash,'CAMPAIGN_WORLD_CHANGED');
- const m=validateProtocol(read(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/manifest.json')));
+ const current=read(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/manifest.json'));
+ const m=validateProtocol({...current,models:{...current.models,verifier:CODEX_SOL_VERIFIER}});
  const config=read(resolve(root,'apps/worker/evals/single-agent-commerce-read-only/source-config.b1.json'));
  assert.equal(config.vertex.projectId,world.config.vertex.projectId,'CAMPAIGN_PROJECT_CHANGED');
  assert.equal(m.models.conversation.model,'gemini-3.5-flash-lite');assert.equal(m.models.conversation.effort,'high');

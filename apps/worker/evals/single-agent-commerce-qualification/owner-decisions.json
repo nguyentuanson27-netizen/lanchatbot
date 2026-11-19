@@ -77,23 +77,34 @@
     "D4_alternativeOwnerModel": "DEFERRED",
     "verifierModel": {
       "status": "APPROVED",
-      "approvedAt": "2026-11-12",
-      "provider": "OPENAI",
-      "model": "gpt-6.1-sol",
+      "approvedAt": "2026-11-19",
+      "provider": "VERTEX_AI",
+      "model": "gemini-3.5-flash-lite",
+      "version": "gemini-3.5-flash-lite",
       "effort": "high",
-      "ownerAnswer": "dùng 6.1 sol high",
+      "location": "global",
+      "credentialRoute": "C3_VERTEX_CREDENTIAL_FILE",
+      "ownerAnswer": "dùng 3.5 flash lite thay thế sol",
       "supersedes": {
-        "decidedAt": "2026-11-10",
-        "provider": "VERTEX_AI",
-        "model": "gemini-3.5-flash-lite",
-        "outcome": "REVERTED",
-        "evidence": [
-          "apps/worker/evals/single-agent-commerce-qualification/convergence-verifier-screen-run-20261111/REPORT.md",
-          "apps/worker/evals/single-agent-commerce-qualification/convergence-sol-followup-run-20261112/VERIFIER_REPLAY.md"
-        ],
-        "reason": "False PASS on unsupported size advice and an implied wearer photo; false FAIL on ten receipt-backed cart confirmations."
-      },
-      "geminiTransport": "RETAINED_SELECTABLE_BY_MANIFEST_NOT_REGISTERED"
+        "status": "APPROVED",
+        "approvedAt": "2026-11-12",
+        "provider": "OPENAI",
+        "model": "gpt-6.1-sol",
+        "effort": "high",
+        "ownerAnswer": "dùng 6.1 sol high",
+        "supersedes": {
+          "decidedAt": "2026-11-10",
+          "provider": "VERTEX_AI",
+          "model": "gemini-3.5-flash-lite",
+          "outcome": "REVERTED",
+          "evidence": [
+            "apps/worker/evals/single-agent-commerce-qualification/convergence-verifier-screen-run-20261111/REPORT.md",
+            "apps/worker/evals/single-agent-commerce-qualification/convergence-sol-followup-run-20261112/VERIFIER_REPLAY.md"
+          ],
+          "reason": "False PASS on unsupported size advice and an implied wearer photo; false FAIL on ten receipt-backed cart confirmations."
+        },
+        "geminiTransport": "RETAINED_SELECTABLE_BY_MANIFEST_NOT_REGISTERED"
+      }
     },
     "ownerGenerationRetry": {
       "status": "APPROVED",

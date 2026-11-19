@@ -7,7 +7,7 @@ import {RedisBusinessFactsReader} from '../../dist/redis-business-facts.js';
 import {VertexShadowModel} from '../../dist/vertex.js';
 import {createCommerceReadSources} from '../../dist/single-agent-commerce-read-only-sources.js';
 import {createGeminiCommerceInference,buildGeminiCommerceRequest,readOnlyDeclarations,stateDeclarations,effectDeclarations,handoffDeclarations,mediaDeclarations,quoteDeclarations,OWNER_IMAGE_BOUNDS} from './gemini-inference.mjs';
-import {createCommerceVerifier,buildVerifierRequest,validateProtocol,requiredSourceConfig,sha256} from './protocol.mjs';
+import {createCommerceVerifier,geminiVerifier,buildVerifierRequest,validateProtocol,requiredSourceConfig,sha256} from './protocol.mjs';
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
 import {ASSUMPTION,assumedFeedback} from './assumed-feedback.mjs';
 import {candidateDescription,candidateSearchResult} from './candidate-description.mjs';
@@ -65,7 +65,7 @@ export function statefulPreflight(root){
   selection:missingPos?{mode:'THREE_EXISTING_POS_FAILURES_COMPOSED',registered:cases.map(c=>c.caseId),fault:'POS_UNAVAILABLE'}:openingQuotes?{mode:'OPENING_QUOTES_FIVE_TURNS',registered:cases.map(c=>c.caseId)}:mediaFollowup?{mode:'FIVE_MEDIA_JOURNEYS_SEVEN_TURNS',registered:cases.map(c=>c.caseId),prerequisite:'Actual prior terminal/history in each journey; no forced provider fallback.'}:mediaProbe?{mode:'FOUR_INDEPENDENT_MEDIA_INGRESS_TURNS',registered:cases.map(c=>c.caseId)}:journeyOpenings?{mode:'FOUR_OPENINGS_ONLY',registered:cases.map(c=>c.caseId),deferred:selection.deferred,day:new Date().toISOString().slice(0,10)}:negotiationProbe?{mode:'THREE_NEGOTIATION_COMPANION',registered:cases.map(c=>c.caseId),prerequisite:'Actual cart from setup, never synthetic provider completion.'}:{mode:'BASELINE_EIGHT_STATEFUL'},
   ...(through?{throughCase:through,deferredCaseIds:registeredCases.slice(cases.length).map(c=>c.caseId)}:{}),
   selectionHash:sha256(JSON.stringify(cases)),
-  corpusHash:sha256(casesBytes),sourceConfigHash:sha256(configBytes),registeredOutcomes:process.argv.includes('--opening-only')?1:cases.length,publicTurns:process.argv.includes('--opening-only')?1:cases.filter(c=>c.runtime.latest).length,privateCodeTurns:process.argv.includes('--opening-only')?0:cases.filter(c=>c.runtime.privateCheckoutFixture).length,repetitions:1,maximumGenerationRequests:(process.argv.includes('--opening-only')?1:cases.filter(c=>c.runtime.latest).length)*4,retry:0,codex:inspectCodex(),sendEnabled:false}};
+  corpusHash:sha256(casesBytes),sourceConfigHash:sha256(configBytes),registeredOutcomes:process.argv.includes('--opening-only')?1:cases.length,publicTurns:process.argv.includes('--opening-only')?1:cases.filter(c=>c.runtime.latest).length,privateCodeTurns:process.argv.includes('--opening-only')?0:cases.filter(c=>c.runtime.privateCheckoutFixture).length,repetitions:1,maximumGenerationRequests:(process.argv.includes('--opening-only')?1:cases.filter(c=>c.runtime.latest).length)*4,retry:0,codex:geminiVerifier(m)?null:inspectCodex(),sendEnabled:false}};
 }
 
 export async function createStatefulProvider(input){

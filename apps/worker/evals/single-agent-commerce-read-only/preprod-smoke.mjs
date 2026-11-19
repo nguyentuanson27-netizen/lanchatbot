@@ -6,7 +6,7 @@ import {assertReplayWire} from '../single-agent-commerce-qualification/sales-voi
 import {assertRuntimeFirewall} from '../single-agent-commerce-qualification/qualification.mjs';
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
 import {buildGeminiCommerceRequest} from './gemini-inference.mjs';
-import {createCommerceVerifier,validateProtocol} from './protocol.mjs';
+import {createCommerceVerifier,geminiVerifier,validateProtocol} from './protocol.mjs';
 import {OPENING_PRODUCT_MEDIA_RULE} from '../../dist/single-agent-commerce-opening-media.js';
 import {EXPLICIT_QUOTE_TASK} from '../../dist/single-agent-commerce-quote.js';
 import {commerceHash} from '../../dist/single-agent-commerce-read-only-context.js';
@@ -26,8 +26,8 @@ export async function runPreprodSmoke({root,report,check,statefulFixture,pool,ru
  assert.equal(report.sendEnabled,false);
  const load=name=>readFileSync(new URL(name,import.meta.url),'utf8');
  const manifest=validateProtocol(JSON.parse(load('./manifest.json')));
- const client=inspectCodex();
- assert.equal(client.version,'codex-cli '+manifest.models.verifier.generationConfig.cliVersion);
+ const client=geminiVerifier(manifest)?null:inspectCodex();
+ if(client)assert.equal(client.version,'codex-cli '+manifest.models.verifier.generationConfig.cliVersion);
  const config=JSON.parse(load('./source-config.b1.json'));
  assert.equal(JSON.parse(readFileSync(process.env.C3_VERTEX_CREDENTIAL_FILE,'utf8')).project_id,config.vertex.projectId);
  const ownerPrompt=load('./prompts/owner.vi.txt'),verifierPrompt=load('./prompts/verifier.vi.txt');
@@ -83,13 +83,13 @@ export async function runPreprodSmoke({root,report,check,statefulFixture,pool,ru
     const t=result.telemetry;
     assert([0,1].includes(t?.providerRequests),'SMOKE_PROVIDER_ACCOUNTING');
     Object.assign(row,{status:t.status??result.status??'OK',providerRequests:t.providerRequests,model:t.modelVersion??null,
-     error:t.error??t.failureCode??result.errorCode??null,latencyMs:t.latencyMs??null});save();
+     error:t.error??t.failureCode??t.errorCode??result.errorCode??null,latencyMs:t.latencyMs??null});save();
     if(result.status&&result.status!=='OK')throw Object.assign(Error('PROVIDER_ERROR'),{telemetry:t});
     return role==='OWNER'?{...result.output,telemetry:t}:result;
    }catch(error){
     if(row.providerRequests===null){const t=error.telemetry;
      Object.assign(row,{status:t?.status??'UNKNOWN',providerRequests:t?.providerRequests??null,model:t?.modelVersion??null,
-      error:t?.error??error.message,latencyMs:t?.latencyMs??null});save();}
+      error:t?.error??t?.errorCode??error.message,latencyMs:t?.latencyMs??null});save();}
     throw error;
    }
   };

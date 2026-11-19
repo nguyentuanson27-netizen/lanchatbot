@@ -66,7 +66,8 @@ export function validateProtocol(m){
  check(m.models.conversation.provider==='VERTEX_AI'&&['gemini-3.5-flash-lite','gemini-3.8-flash'].includes(m.models.conversation.model)&&m.models.conversation.effort==='high'&&
   m.models.verifier.effort==='high'&&m.models.verifier.generationConfig.retry===0&&
   // Owner decision 2026-11-10: the verifier runs on the owner's Vertex route. The earlier Codex route stays readable for retained evidence.
-  (geminiVerifier(m)?m.models.verifier.model===GEMINI_VERIFIER_MODEL.model&&m.models.verifier.location==='global'
+  (geminiVerifier(m)?m.models.verifier.model===GEMINI_VERIFIER_MODEL.model&&m.models.verifier.location===GEMINI_VERIFIER_MODEL.location&&
+    m.models.verifier.credentialRoute===GEMINI_VERIFIER_MODEL.credentialRoute
    :m.models.verifier.provider==='OPENAI'&&m.models.verifier.model==='gpt-6.1-sol'&&m.models.verifier.generationConfig.reasoningEffort==='high'),'MODEL_IDENTITY');
  const owner=m.models.conversation.generationConfig,v=m.models.verifier.generationConfig;
  check(m.models.conversation.version===m.models.conversation.model&&m.models.conversation.location==='global'&&

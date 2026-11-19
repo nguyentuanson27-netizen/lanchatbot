@@ -3,7 +3,7 @@ import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {resolve,join} from 'node:path';
 import {parseArgs} from 'node:util';
-import {requiredSourceConfig,validateProtocol,readRegisteredCases,createCommerceVerifier,sha256,dispatchRange,
+import {requiredSourceConfig,validateProtocol,readRegisteredCases,createCommerceVerifier,geminiVerifier,sha256,dispatchRange,
  REGISTERED_CASE_COUNT,MAXIMUM_GENERATION_REQUESTS,readB1OwnerPrompt,readImageComparisonCases,readImageComparisonRegistration,imageComparisonSlots,prepareImageComparison,verifyImageComparisonPins,liveDispatchSlots} from './protocol.mjs';
 import {createGeminiCommerceInference,buildGeminiCommerceRequest,readOnlyDeclarations,mediaDeclarations} from './gemini-inference.mjs';
 import {inspectCodex} from '../single-agent-semantic-verifier/codex-inference.mjs';
@@ -37,7 +37,7 @@ if(!['CANARY_SHADOW','CANARY_LIVE','PUBLISHED'].includes(config.channel)||config
  !['shopId','shopAlias','conversationId','customerHash','recipient','bindingVersion','revision'].every(k=>config.scope[k]!==undefined)||
  !/^[a-f0-9]{64}$/.test(config.scope.customerHash)||!/^[a-f0-9]{64}$/.test(config.scope.recipient)||
  !Number.isSafeInteger(config.vertex.embeddingDimension)||config.vertex.embeddingDimension<1)throw new Error('SOURCE_CONFIG');
-const codex=inspectCodex();
+const codex=geminiVerifier(m)?null:inspectCodex();
 if(!args.run&&!args['source-check']){console.log(JSON.stringify({status:'CONFIG_READY_CONNECTIONS_UNVERIFIED',cases:registered,requestBounds:m.requestBounds,providerGenerations:0,codex,sendEnabled:false}));process.exit(0);}
 if(!args.out)throw new Error('NEW_OUTPUT_DIRECTORY_REQUIRED');
 const sourcePaths=['apps/worker/src','apps/worker/package.json','apps/worker/tsconfig.json','tsconfig.base.json','pnpm-lock.yaml',
