@@ -9,7 +9,7 @@ import {makeBinding,finalGate} from "./single-agent-semantic-verifier-boundary.j
 import {quoteBatchWork,withExplicitQuoteTask} from "./single-agent-commerce-quote.js";
 
 const config={version:"EXPLICIT_QUOTE_V3",toolWorkAccounting:"PRIMITIVE_WORK_V2",normalUnits:1,readOnlyBatch:false,maxPerTurn:2} as const;
-async function setup(enabled=true,firstContact:boolean|null=true,secondProduct=false){
+async function setup(enabled=true,firstContact:boolean|null=true,secondProduct=false,candidateEvidence=false){
  const scope=commerceScope(),f=fixtureProduct(),f2=fixtureProduct("SM614");
  f.product.images=[{url:"https://content.pancake.vn/front.jpg",role:"PRIMARY",angle:"FRONT",imageType:"MODEL",intents:[],sortOrder:0,qualityScore:null,feedback:false,reviewStatus:"APPROVED",metadataVerified:true,sourceContentSha256:"a".repeat(64),observedAt:commerceNow.toISOString(),partsVisible:["AO"]}];
  f2.product.images=structuredClone(f.product.images);
@@ -19,7 +19,7 @@ async function setup(enabled=true,firstContact:boolean|null=true,secondProduct=f
   rules:(["PRICE_UNAVAILABLE","DEPENDENCY_FAILURE"] as const).map(reason=>({reason,customerMessagePolicy:"SILENT_HANDOFF" as const,holdingReply:null,tag:"NHAN_VIEN" as const}))}}};
  let authority:HandoffAuthority={...scope,fence:1,stateVersion:scope.revision,state:{...createConversationState({conversationId:scope.conversationId,routingOwner:"APP",now:commerceNow}),revision:scope.revision}};
  const readPolicy=vi.fn(fixturePolicy);
- const tools=await createCommerceTools({read:{scope,clock:()=>commerceNow,entry:{firstContact,fromAd:false},initialProducts:secondProduct?[f.product,f2.product]:[f.product],policy:readPolicy,
+ const tools=await createCommerceTools({read:{scope,clock:()=>commerceNow,candidateEvidence,entry:{firstContact,fromAd:false},initialProducts:secondProduct?[f.product,f2.product]:[f.product],policy:readPolicy,
   catalog:{readProduct,searchText:async()=>({status:"NOT_FOUND",reasonCode:"NO_CANDIDATES"})}},
   media:{allowedHostSuffixes:["pancake.vn"]},handoff:{read:async()=>structuredClone(authority),commit:vi.fn(async change=>{authority=structuredClone(change.next);return true;}),policy:async()=>policy},
   ...(enabled?{quoteTask:config}:{})} as Parameters<typeof createCommerceTools>[0]);
@@ -92,6 +92,30 @@ describe("quote read batches",()=>{
  });
 });
 describe("explicit quote operation",()=>{
+ it("puts source colour choices beside the quote without inventing purchase intent or two-unit stock proof",async()=>{
+  const s=await setup(true,false,false,true),row=s.f.snapshot.offers.DIRECT!.rows[0]!;
+  row.stock_quantity=1;s.f.snapshot.offers.DIRECT!.rows.push({...row,color:"be"});
+  await s.tools.prepare!();const before=s.tools.snapshot();
+  const r=await s.tools.invoke({...quote,args:{...quote.args,quantity:2}});
+  expect(r).toMatchObject({status:"OK",data:{choiceOptions:{purpose:"CUSTOMER_CHOICE_LABELS_ONLY",subjectRef:"SM613",offerType:"DIRECT",
+   query:{quantity:1,size:null,color:null},colors:["navy","be"],complete:true,purchaseStock:"NOT_CHECKED"},preCartQuote:{quantity:2}}});
+  expect(s.tools.snapshot().state.pendingPurchase).toBeUndefined();expect(s.tools.snapshot().state.revision).toBe(before.state.revision);
+  expect(s.tools.snapshot().effectReceipts).toHaveLength(0);expect(s.tools.quoteTaskWork!()).toEqual([{reservedUnits:1,readInvocations:1,selectionInvocations:0}]);
+ });
+ it.each(["absent","invalid-hash","other-target"])("does not manufacture colour choices from %s tuple evidence",async mode=>{
+  const s=await setup(true,false);await s.tools.prepare!();
+  const tools=withExplicitQuoteTask({...s.tools,invoke:async call=>{
+   const result=await s.tools.invoke(call);
+   if(call.name==="read_product"){
+    const data=result.data as {selectionEvidence?:{contentHash:string;productId:string}};
+    if(mode==="absent")delete data.selectionEvidence;
+    if(mode==="invalid-hash")data.selectionEvidence!.contentHash="0".repeat(64);
+    if(mode==="other-target")data.selectionEvidence!.productId="OTHER";
+   }return result;
+  }},s.scope,false,async()=>(await fixturePolicy()).bundle!.policy,()=>commerceNow);
+  const r=await tools.invoke({...quote,args:{...quote.args,quantity:2}});
+  expect(r.status).toBe("OK");expect(r.data).not.toHaveProperty("choiceOptions");
+ });
  it.each([true,false])("blocks an old verifier pass on changed policy or expired quote, firstContact=%s",async firstContact=>{
   const s=await setup(true,firstContact);await s.tools.prepare!();
   await s.tools.invoke({...quote,args:{...quote.args,quantity:2,deliveryRegion:"MIEN-NAM"}});

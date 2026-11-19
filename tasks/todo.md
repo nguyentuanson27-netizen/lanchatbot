@@ -1,4 +1,10 @@
-## Current — báo giá hỗ trợ trước giỏ, 2026-11-18
+## Current — ưu đãi hiện hành và lựa chọn mua, 2026-11-19
+
+- [x] Sửa theo review: current cart benefit khác claim thao tác mới; pending reuse chỉ cùng source event, giữ provenance/expiry và không tạo receipt; quote cấp màu theo query nguồn, chưa xác nhận ý định mua/tồn đúng quantity-size. Thay chỉ dẫn owner hiện có và prompt hashes.
+- [x] TDD RED 3 lỗi trước sửa; final 1.273 worker/134 Node PASS, build/noEmit/lint/dataset/diff PASS. Probe 60 frame, đỉnh 69.283/70.000 byte, 0 overflow. [Bằng chứng và các lệnh](../docs/specs/evidence/c3-current-cart-choice-repair-20261119/IMPLEMENTATION.md).
+- [ ] Model run/review code độc lập và độ ổn định giọng/RECORD/verifier chưa xác minh. Phase C vẫn STOP; không deploy/live send hoặc dùng số đo cũ làm kết quả mới.
+
+## Previous — báo giá hỗ trợ trước giỏ, 2026-11-18
 
 - [x] Sửa code tính mức hỗ trợ trước giỏ bằng pending xác thực + policy engine hiện hành; không tạo giỏ giả, không cấp model mức/tier. Tạo giỏ revalidate/reprice và ghi bằng receipt.
 - [x] Bảo toàn QUOTED/NOT_GRANTED, lịch sử và canonical verifier source; invalidation khi đổi nguồn/pending/giỏ/expiry; bỏ một bản trùng ở owner view để giữ bound.

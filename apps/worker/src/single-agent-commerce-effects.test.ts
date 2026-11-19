@@ -69,6 +69,15 @@ async function setup(clock = () => commerceNow, negotiationTexts = ["Giá hơi c
     setCurrent: (value: SalesCycleRuntimeState) => { current = value; }, setActiveFee:(v:number)=>{activeFee=v;} };
 }
 
+async function resumeEffects(s:Awaited<ReturnType<typeof setup>>,messageId=s.scope.sourceMessageId,text="Giá hơi cao, bớt cho chị được không?"){
+ const scope={...s.scope,sourceMessageId:messageId};
+ const tools=await createCommerceEffectTools({base:s.base,scope,clock:()=>commerceNow,conversationKey:"test-cycle",repository:s.repository,
+  identity:{cartId:"50000000-0000-4000-8000-000000000001",salesEpisodeId:"60000000-0000-4000-8000-000000000001",customerProfileId:fixtureProfile().profile.profileId},
+  authorize:s.authorize,policy:s.readPolicy,select:s.select,
+  negotiationSources:[{text,sourceMessageId:messageId,observedAt:commerceNow.toISOString()}]});
+ return {tools,scope};
+}
+
 describe("replacement choices and negotiation prerequisites",()=>{
  it("keeps a valid unlabelled tuple selectable within its existing offer",async()=>{
   const s=await setup(),f=fixtureProduct();f.snapshot.offers.DIRECT!.rows[0]!.color="__NO_COLOR__";
@@ -455,6 +464,36 @@ describe("code-owned commerce effects and recovery", () => {
       expect.objectContaining({kind:"FREE_SHIPPING",amountVnd:25000})]));
     expect(view).toMatchObject({shippingFeeVnd:25000,negotiatedPriceFloor:{status:"NOT_ESTABLISHED",amountVnd:null}});
     expect(s.tools.snapshot().state.cartQuote).toEqual(view);
+  });
+  it.each([
+   "Dạ, tổng cả ship là 948.100đ. Phí ship đã được shop miễn rồi chị nhé.",
+   "Dạ, hai áo cả ship là 948.100đ, mình được miễn phí ship luôn rồi."
+  ])("exposes current cart benefits on a later turn without inventing a receipt: %s",async text=>{
+   const s=await setup();await s.tools.invoke({...s.add,args:{...s.add.args,quantity:2}});
+   await s.tools.invoke({name:"record_negotiation",args:{intent:"PRICE_OBJECTION",sourceQuote:"Giá hơi cao"}});
+   const {tools,scope}=await resumeEffects(s,"total-question","Cả ship hết bao nhiêu em?"),before=structuredClone(s.current());
+   const verifier=vi.fn(async(request:Parameters<Parameters<typeof runCommerceTurn>[0]["verifier"]>[0])=>{
+    expect(request.finalDraft).toBe(text);expect(request.trusted.effectReceipts).toEqual([]);
+    expect(request.trusted.cartBinding).toEqual({cartId:before.cart!.value.cartId,cartVersion:before.cart!.value.revision});
+    expect(request.trusted.state.cartQuote).toMatchObject({grandTotalVnd:948100,appliedAdjustments:expect.arrayContaining([expect.objectContaining({kind:"FREE_SHIPPING",amountVnd:25000})])});
+    // Scripted verdict checks the envelope and final gate, not model semantics.
+    return {result:{verdict:"PASS",violations:[]}};
+   });
+   const result=await runCommerceTurn({scope,tools,clock:()=>commerceNow,latest:"Cả ship hết bao nhiêu em?",history:[],
+    ownerPrompt:"Tư vấn",verifierPrompt:readFileSync(new URL("../evals/single-agent-commerce-read-only/prompts/verifier.vi.txt",import.meta.url),"utf8"),
+    owner:async()=>({kind:"FINAL",text}),verifier});
+   expect(verifier).toHaveBeenCalledOnce();expect(result.terminal.disposition).toBe("SEND_ELIGIBLE");expect(s.current()).toEqual(before);
+   const binding=makeBinding("benefits",text,tools.snapshot()),response={kind:"VERDICT" as const,binding,result:{verdict:"PASS",violations:[]}};
+   for(const field of ["revision","recipient","permission"]){
+    const changed=structuredClone(tools.snapshot());
+    if(field==="revision")changed.state.revision++;
+    if(field==="recipient")changed.state.recipient="other-recipient";
+    if(field==="permission")changed.state.permission=false;
+    expect(finalGate({expected:binding,response,current:changed,finalDraft:text,now:commerceNow}).disposition).not.toBe("SEND_ELIGIBLE");
+   }
+   expect(finalGate({expected:binding,response,current:tools.snapshot(),finalDraft:text,now:new Date(commerceNow.getTime()+1_200_001)}).disposition).not.toBe("SEND_ELIGIBLE");
+   await s.tools.invoke({name:"change_cart_item",args:{subjectRef:s.current().cart!.value.lines[0]!.lineId,action:"SET_QUANTITY",quantity:1}});
+   expect(finalGate({expected:binding,response,current:await tools.readback(),finalDraft:text,now:commerceNow}).disposition).not.toBe("SEND_ELIGIBLE");
   });
 
   it("recovers the current negotiated discount and total without claiming an additional discount",async()=>{
@@ -1364,16 +1403,38 @@ describe("code evaluates a stored support request when the matching cart opens",
    expect((await s.tools.invoke(record)).status).toBe("OK");
    expect(s.tools.snapshot().state.pendingSupport).toMatchObject({evaluation:{waitingForStatus:"UNKNOWN",waitingFor:[]}});
   });
- it("returns the stored request again for a repeated record instead of an empty result, without another commit",async()=>{
+ it("reuses the exact pending record read-only without renewing provenance or creating another effect",async()=>{
   const s=await stored();
-  const first=await s.tools.invoke(record),count=s.commits.length;
+  await s.tools.invoke(record);const count=s.commits.length,before=structuredClone(s.current());
   const repeated=await s.tools.invoke(record);
-  expect(repeated).toMatchObject({status:"OK",data:{duplicate:true}});
-  expect(s.commits).toHaveLength(count);
-  const {duplicate:_duplicate,...same}=repeated.data as Record<string,unknown>;
-  expect(same).toEqual(first.data);
-  expect(same).toMatchObject({effect:"NEGOTIATION_REQUEST_RECORDED",supportEvaluation:{status:"NOT_EVALUATED",pendingCommitted:true,negotiationApplied:false},
-   pendingSupport:{canApply:false,evaluation:{when:"MATCHING_CART_OPENS"}}});
+  expect(repeated).toMatchObject({status:"OK",data:{duplicate:true,pendingReused:true,effectCommitted:false,
+   pendingSupport:{pendingRef:before.pendingNegotiation!.pendingId,canApply:false,evaluation:{when:"MATCHING_CART_OPENS"}}}});
+  expect(repeated.data).not.toHaveProperty("effect");expect(repeated.data).not.toHaveProperty("operationId");
+  expect(s.commits).toHaveLength(count);expect(s.current()).toEqual(before);
+ });
+ it.each(["policy","expired","source","permission"])("does not reuse a pending record after %s changes",async mode=>{
+  let now=commerceNow;const s=await setup(()=>now);await s.tools.invoke({name:"read_product",args:{subjectRef:"SM613",offerType:"DIRECT"}});
+  await s.tools.invoke(record);const before=structuredClone(s.current()),count=s.commits.length;
+  if(mode==="policy")s.policy.policy.shipping.defaultFeeVnd+=1;
+  if(mode==="expired")now=new Date(before.pendingNegotiation!.expiresAt);
+  if(mode==="permission")s.authorize.mockResolvedValue(false);
+  const result=await s.tools.invoke(mode==="source"?{...record,args:{...record.args,sourceQuote:"không có trong tin khách"}}:record);
+  expect(result.status).toBe("REJECTED");expect(s.current()).toEqual(before);expect(s.commits).toHaveLength(count);
+ });
+ it("reuses the same source across requests without a receipt, but keeps a genuine new request distinct",async()=>{
+  const s=await stored();await s.tools.invoke(record);const before=structuredClone(s.current()),count=s.commits.length;
+  const same=await resumeEffects(s);expect(await same.tools.invoke(record)).toMatchObject({status:"OK",data:{pendingReused:true,effectCommitted:false}});
+  expect(same.tools.snapshot().effectReceipts).toEqual([]);expect(s.current()).toEqual(before);expect(s.commits).toHaveLength(count);
+  const next=await resumeEffects(s,"new-objection","Giá hơi cao, bớt cho chị được không? Lần này chị muốn hỏi thêm.");
+  expect(await next.tools.invoke(record)).toMatchObject({status:"OK",data:{effect:"NEGOTIATION_REQUEST_RECORDED"}});
+  expect(s.current().pendingNegotiation!.sourceMessageId).toBe("new-objection");
+  expect(s.current().pendingNegotiation!.pendingId).not.toBe(before.pendingNegotiation!.pendingId);expect(s.commits).toHaveLength(count+1);
+ });
+ it("rejects reuse when the same message identity carries different source text",async()=>{
+  const s=await stored();await s.tools.invoke(record);const before=structuredClone(s.current());
+  const next=await resumeEffects(s,s.scope.sourceMessageId,"Giá hơi cao, bớt cho chị được không? Nội dung đã đổi.");
+  expect(await next.tools.invoke(record)).toMatchObject({status:"REJECTED",reason:"PENDING_NEGOTIATION_INVALID"});
+  expect(s.current()).toEqual(before);expect(next.tools.snapshot().effectReceipts).toEqual([]);
  });
  it("evaluates once inside the add_to_cart that opens the cart, with both receipts and the evaluated total",async()=>{
   const s=await stored();

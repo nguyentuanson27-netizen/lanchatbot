@@ -1,0 +1,372 @@
+{
+  "kind": "OFFLINE_SYNTHETIC_CAPACITY_NOT_PROVIDER_OR_QUALITY_EVIDENCE",
+  "ownerPromptHash": "7f87a56de66eb9e313a7c29642e0f7233645c33d9417a057d8e343070d15bdd5",
+  "bound": 70000,
+  "requests": 60,
+  "maximumBefore": 69015,
+  "maximumAfter": 69283,
+  "overflowCount": 0,
+  "providerRequests": 0,
+  "rows": [
+    {
+      "requestId": "a1cc5344-5605-4877-90ae-538c131bd2ca:owner:1",
+      "beforeBytes": 52609,
+      "afterBytes": 52578,
+      "inserted": 0
+    },
+    {
+      "requestId": "a1cc5344-5605-4877-90ae-538c131bd2ca:owner:2",
+      "beforeBytes": 58186,
+      "afterBytes": 58155,
+      "inserted": 0
+    },
+    {
+      "requestId": "3e37298c-2eda-4dd9-8bbf-f938109e9d15:owner:1",
+      "beforeBytes": 53667,
+      "afterBytes": 53636,
+      "inserted": 0
+    },
+    {
+      "requestId": "3e37298c-2eda-4dd9-8bbf-f938109e9d15:owner:2",
+      "beforeBytes": 68077,
+      "afterBytes": 68345,
+      "inserted": 1
+    },
+    {
+      "requestId": "99836ae0-d4c9-4513-8840-78bea5f631b9:owner:1",
+      "beforeBytes": 55026,
+      "afterBytes": 54995,
+      "inserted": 0
+    },
+    {
+      "requestId": "99836ae0-d4c9-4513-8840-78bea5f631b9:owner:2",
+      "beforeBytes": 64283,
+      "afterBytes": 64551,
+      "inserted": 1
+    },
+    {
+      "requestId": "501f7912-d6b1-4d3c-a635-577260678a30:owner:1",
+      "beforeBytes": 52609,
+      "afterBytes": 52578,
+      "inserted": 0
+    },
+    {
+      "requestId": "501f7912-d6b1-4d3c-a635-577260678a30:owner:2",
+      "beforeBytes": 52609,
+      "afterBytes": 52578,
+      "inserted": 0
+    },
+    {
+      "requestId": "501f7912-d6b1-4d3c-a635-577260678a30:owner:3",
+      "beforeBytes": 58412,
+      "afterBytes": 58381,
+      "inserted": 0
+    },
+    {
+      "requestId": "0cb635d4-f527-4428-ae23-4fcc2c756135:owner:1",
+      "beforeBytes": 53685,
+      "afterBytes": 53654,
+      "inserted": 0
+    },
+    {
+      "requestId": "0cb635d4-f527-4428-ae23-4fcc2c756135:owner:2",
+      "beforeBytes": 68091,
+      "afterBytes": 68359,
+      "inserted": 1
+    },
+    {
+      "requestId": "6e87e3a6-768a-4d28-ac90-4734bab1aabf:owner:1",
+      "beforeBytes": 55018,
+      "afterBytes": 54987,
+      "inserted": 0
+    },
+    {
+      "requestId": "6e87e3a6-768a-4d28-ac90-4734bab1aabf:owner:2",
+      "beforeBytes": 64275,
+      "afterBytes": 64543,
+      "inserted": 1
+    },
+    {
+      "requestId": "24e69e28-ccf5-4b95-948a-f40e1a5c2d36:owner:1",
+      "beforeBytes": 52609,
+      "afterBytes": 52578,
+      "inserted": 0
+    },
+    {
+      "requestId": "24e69e28-ccf5-4b95-948a-f40e1a5c2d36:owner:2",
+      "beforeBytes": 58188,
+      "afterBytes": 58157,
+      "inserted": 0
+    },
+    {
+      "requestId": "fcac39d2-f542-46af-b9f2-8e76a970c8b8:owner:1",
+      "beforeBytes": 53689,
+      "afterBytes": 53658,
+      "inserted": 0
+    },
+    {
+      "requestId": "fcac39d2-f542-46af-b9f2-8e76a970c8b8:owner:2",
+      "beforeBytes": 68095,
+      "afterBytes": 68363,
+      "inserted": 1
+    },
+    {
+      "requestId": "a14d5db5-3ebe-4d9a-b52c-18a8dfd9799e:owner:1",
+      "beforeBytes": 54982,
+      "afterBytes": 54951,
+      "inserted": 0
+    },
+    {
+      "requestId": "a14d5db5-3ebe-4d9a-b52c-18a8dfd9799e:owner:2",
+      "beforeBytes": 68464,
+      "afterBytes": 68732,
+      "inserted": 1
+    },
+    {
+      "requestId": "0a912c3a-aab2-49c3-bf87-caef3ba17a72:owner:1",
+      "beforeBytes": 52609,
+      "afterBytes": 52578,
+      "inserted": 0
+    },
+    {
+      "requestId": "0a912c3a-aab2-49c3-bf87-caef3ba17a72:owner:2",
+      "beforeBytes": 58188,
+      "afterBytes": 58157,
+      "inserted": 0
+    },
+    {
+      "requestId": "fdff75ca-d6e8-441c-99e8-fe32a3d23da1:owner:1",
+      "beforeBytes": 53698,
+      "afterBytes": 53667,
+      "inserted": 0
+    },
+    {
+      "requestId": "fdff75ca-d6e8-441c-99e8-fe32a3d23da1:owner:2",
+      "beforeBytes": 68107,
+      "afterBytes": 68375,
+      "inserted": 1
+    },
+    {
+      "requestId": "a023bef8-7319-4a02-8a4d-85b9f6edec90:owner:1",
+      "beforeBytes": 54982,
+      "afterBytes": 54951,
+      "inserted": 0
+    },
+    {
+      "requestId": "a023bef8-7319-4a02-8a4d-85b9f6edec90:owner:2",
+      "beforeBytes": 68467,
+      "afterBytes": 68735,
+      "inserted": 1
+    },
+    {
+      "requestId": "2db4ebe4-a759-4fe4-8743-44f03c8aae98:owner:1",
+      "beforeBytes": 52609,
+      "afterBytes": 52578,
+      "inserted": 0
+    },
+    {
+      "requestId": "2db4ebe4-a759-4fe4-8743-44f03c8aae98:owner:2",
+      "beforeBytes": 58184,
+      "afterBytes": 58153,
+      "inserted": 0
+    },
+    {
+      "requestId": "361f466e-0383-4ee2-b39e-fb6713657007:owner:1",
+      "beforeBytes": 53677,
+      "afterBytes": 53646,
+      "inserted": 0
+    },
+    {
+      "requestId": "361f466e-0383-4ee2-b39e-fb6713657007:owner:2",
+      "beforeBytes": 68086,
+      "afterBytes": 68354,
+      "inserted": 1
+    },
+    {
+      "requestId": "4e6b54d0-ed72-47f9-a996-ed5be0bdee37:owner:1",
+      "beforeBytes": 54961,
+      "afterBytes": 54930,
+      "inserted": 0
+    },
+    {
+      "requestId": "4e6b54d0-ed72-47f9-a996-ed5be0bdee37:owner:2",
+      "beforeBytes": 64221,
+      "afterBytes": 64489,
+      "inserted": 1
+    },
+    {
+      "requestId": "f81fa3ef-d9ae-4e84-b18e-e8a680f57499:owner:1",
+      "beforeBytes": 52641,
+      "afterBytes": 52610,
+      "inserted": 0
+    },
+    {
+      "requestId": "f81fa3ef-d9ae-4e84-b18e-e8a680f57499:owner:2",
+      "beforeBytes": 69015,
+      "afterBytes": 69283,
+      "inserted": 1
+    },
+    {
+      "requestId": "12c653c4-0c49-4527-9505-6590f749b57e:owner:1",
+      "beforeBytes": 53096,
+      "afterBytes": 53065,
+      "inserted": 0
+    },
+    {
+      "requestId": "12c653c4-0c49-4527-9505-6590f749b57e:owner:2",
+      "beforeBytes": 56599,
+      "afterBytes": 56568,
+      "inserted": 0
+    },
+    {
+      "requestId": "12c653c4-0c49-4527-9505-6590f749b57e:owner:3",
+      "beforeBytes": 47123,
+      "afterBytes": 47092,
+      "inserted": 0
+    },
+    {
+      "requestId": "3f20cdd1-fb04-4949-aeb6-3ebb2966fc5e:owner:1",
+      "beforeBytes": 53353,
+      "afterBytes": 53322,
+      "inserted": 0
+    },
+    {
+      "requestId": "3f20cdd1-fb04-4949-aeb6-3ebb2966fc5e:owner:2",
+      "beforeBytes": 54118,
+      "afterBytes": 54087,
+      "inserted": 0
+    },
+    {
+      "requestId": "66be410b-b85f-4942-93a1-d97cf9de7ed8:owner:1",
+      "beforeBytes": 52641,
+      "afterBytes": 52610,
+      "inserted": 0
+    },
+    {
+      "requestId": "66be410b-b85f-4942-93a1-d97cf9de7ed8:owner:2",
+      "beforeBytes": 68215,
+      "afterBytes": 68483,
+      "inserted": 1
+    },
+    {
+      "requestId": "74d7864c-0a01-4b29-93fe-01badb34d654:owner:1",
+      "beforeBytes": 52971,
+      "afterBytes": 52940,
+      "inserted": 0
+    },
+    {
+      "requestId": "74d7864c-0a01-4b29-93fe-01badb34d654:owner:2",
+      "beforeBytes": 56464,
+      "afterBytes": 56433,
+      "inserted": 0
+    },
+    {
+      "requestId": "74d7864c-0a01-4b29-93fe-01badb34d654:owner:3",
+      "beforeBytes": 45410,
+      "afterBytes": 45379,
+      "inserted": 0
+    },
+    {
+      "requestId": "defd875f-8dc6-42f6-a53c-8caf20f998cc:owner:1",
+      "beforeBytes": 53319,
+      "afterBytes": 53288,
+      "inserted": 0
+    },
+    {
+      "requestId": "5689c9be-b351-4685-bfb8-a563e410441f:owner:1",
+      "beforeBytes": 52641,
+      "afterBytes": 52610,
+      "inserted": 0
+    },
+    {
+      "requestId": "5689c9be-b351-4685-bfb8-a563e410441f:owner:2",
+      "beforeBytes": 68215,
+      "afterBytes": 68483,
+      "inserted": 1
+    },
+    {
+      "requestId": "dc4fb547-325f-4265-916f-17b18e469a83:owner:1",
+      "beforeBytes": 52918,
+      "afterBytes": 52887,
+      "inserted": 0
+    },
+    {
+      "requestId": "dc4fb547-325f-4265-916f-17b18e469a83:owner:2",
+      "beforeBytes": 58963,
+      "afterBytes": 58932,
+      "inserted": 0
+    },
+    {
+      "requestId": "409cefd7-a93d-4ef0-a74a-3ebf239991e7:owner:1",
+      "beforeBytes": 53323,
+      "afterBytes": 53292,
+      "inserted": 0
+    },
+    {
+      "requestId": "81ce8870-653d-4a81-ae74-091fcfd97962:owner:1",
+      "beforeBytes": 52641,
+      "afterBytes": 52610,
+      "inserted": 0
+    },
+    {
+      "requestId": "81ce8870-653d-4a81-ae74-091fcfd97962:owner:2",
+      "beforeBytes": 68215,
+      "afterBytes": 68483,
+      "inserted": 1
+    },
+    {
+      "requestId": "4ed5b86d-6441-4997-8d63-bee6229807e1:owner:1",
+      "beforeBytes": 52862,
+      "afterBytes": 52831,
+      "inserted": 0
+    },
+    {
+      "requestId": "4ed5b86d-6441-4997-8d63-bee6229807e1:owner:2",
+      "beforeBytes": 58907,
+      "afterBytes": 58876,
+      "inserted": 0
+    },
+    {
+      "requestId": "01b952c9-e5ef-4eb2-98ef-25ebadc648e4:owner:1",
+      "beforeBytes": 53179,
+      "afterBytes": 53148,
+      "inserted": 0
+    },
+    {
+      "requestId": "799c1b78-6f1a-412a-a5e1-2d4e5c920676:owner:1",
+      "beforeBytes": 52641,
+      "afterBytes": 52610,
+      "inserted": 0
+    },
+    {
+      "requestId": "799c1b78-6f1a-412a-a5e1-2d4e5c920676:owner:2",
+      "beforeBytes": 68219,
+      "afterBytes": 68487,
+      "inserted": 1
+    },
+    {
+      "requestId": "ad3869c2-420c-4245-a2fb-027d0e24435f:owner:1",
+      "beforeBytes": 52950,
+      "afterBytes": 52919,
+      "inserted": 0
+    },
+    {
+      "requestId": "ad3869c2-420c-4245-a2fb-027d0e24435f:owner:2",
+      "beforeBytes": 64589,
+      "afterBytes": 64857,
+      "inserted": 1
+    },
+    {
+      "requestId": "ad3869c2-420c-4245-a2fb-027d0e24435f:owner:3",
+      "beforeBytes": 52274,
+      "afterBytes": 52243,
+      "inserted": 0
+    },
+    {
+      "requestId": "88dbf780-2481-4945-8346-ab13f7af0a4d:owner:1",
+      "beforeBytes": 53290,
+      "afterBytes": 53259,
+      "inserted": 0
+    }
+  ]
+}

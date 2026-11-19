@@ -231,7 +231,18 @@ export function withExplicitQuoteTask(base:CommerceTools,scope:CommerceScope,fir
    const hash=commerceHash(proof),expiries=prices.map(c=>(c as {provenance:{expiresAt:string}}).provenance.expiresAt).sort();
    openingProofs.set(a.subjectRef,{ref:`opening-quote:${hash}`,text:JSON.stringify(proof),sourceVersion:hash,observedAt:clock().toISOString(),expiresAt:expiries[0]??null});
   }
+  // These are labels from this read, not a pending purchase or stock proof for
+  // the quoted quantity. The cart selector still checks the customer's exact tuple.
+  const e=data.selectionEvidence;
+  const choiceOptions=offerTypes.length===1&&validSelectionEvidence(e,a.subjectRef,clock())&&e.offerType===offerTypes[0]&&
+   current.runtimeProducts?.some(p=>p.subjectRef===a.subjectRef&&p.selectionEvidence?.some(v=>v.contentHash===e.contentHash))
+   ?{purpose:"CUSTOMER_CHOICE_LABELS_ONLY",subjectRef:e.productId,offerType:e.offerType,
+     query:{quantity:e.quantity,size:e.size,color:e.color},
+     colors:[...new Set(e.options.filter(o=>o.status==="IN_STOCK"||o.status==="PRE_ORDER").map(o=>o.color).filter((v):v is string=>!!v&&v!=="__NO_COLOR__"))],
+     complete:e.completeness==="ALL_EXACT_TUPLES_FOR_QUERY"&&e.options.every(o=>!!o.color&&o.color!=="__NO_COLOR__"),
+     purchaseStock:"NOT_CHECKED",evidenceHash:e.contentHash}:undefined;
   return {status:"OK",data:{...data,quoteTaskStatus:"PREPARED_PENDING_FINAL_GATE",calculationBasis:"PRE_CART_POLICY",appliesNegotiationReceipt:false,
+   ...(choiceOptions?.colors.length?{choiceOptions}:{}),
    negotiatedPriceFloor:unestablishedPriceFloor(),
    benefitAuthorization:{scope:"ADDITIONAL_SUPPORT_IN_THIS_PRE_CART_QUOTE",status:"NOT_GRANTED",grantedBenefits:[],receiptRef:null},
    currentCartQuoteRef:offerTypes.length===1?currentCartRef(current,{subjectRef:a.subjectRef,offerType:offerTypes[0]!,quantity:typeof a.quantity==="number"?a.quantity:undefined,...(typeof a.color==="string"?{color:a.color}:{})}):null,...(preCartQuote?{preCartQuote}:{})}};

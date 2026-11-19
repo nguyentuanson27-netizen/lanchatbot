@@ -367,6 +367,18 @@ export async function createCommerceEffectTools(input: {
           supportAction==="APPLY_PENDING"||supportAction==="CANCEL_PENDING"?{pendingAction:supportAction,pendingRef:a.pendingRef,cartId:current.cart?.value.cartId??null}:call.name==="record_negotiation"?{}:{args:a}) });
       const effectName = pendingRecord?"NEGOTIATION_REQUEST_RECORDED":supportAction==="CANCEL_PENDING"?"NEGOTIATION_REQUEST_INVALIDATED":call.name==="record_negotiation"?"NEGOTIATION_UPDATED":call.name === "confirm_purchase" ? "PURCHASE_CONFIRMED" : effect === "CART_OPEN" ? "CART_OPENED" : "CART_MUTATED";
       if (current.processedCommandIds.includes(operationId)) {
+        if(pendingRecord){
+          // Only the very same source event can reuse this request. A later customer
+          // message keeps its own operation identity, even for the same product.
+          phase="SOURCE";policy=await input.policy();
+          publicPolicyLiteral(policy,input.scope.pageId,input.scope.shopId,input.clock());
+          const pending=current.pendingNegotiation,proof=preCartSupportEvidence({subjectRef:String(a.subjectRef),offerType:String(a.offerType)},policy.policy);
+          if(!proof||!pending||pending.sourceMessageId!==negotiationSource!.sourceMessageId||
+            pending.sourceTextHash!==commerceHash(negotiationSource!.text)||pending.sourceObservedAt!==negotiationSource!.observedAt)
+            return {status:"REJECTED",reason:"PENDING_NEGOTIATION_INVALID"};
+          // Read-only reuse is not a new effect or a receipt for this turn.
+          return {status:"OK",data:{duplicate:true,pendingReused:true,effectCommitted:false,pendingSupport:pendingSupportView()}};
+        }
         const recovered = receipt?.operationId === operationId ? receipt : await input.readReceipt?.(operationId);
         const allowed = call.name==="record_negotiation"?[effectName]:call.name === "confirm_purchase" ? ["PURCHASE_CONFIRMED"] : call.name === "change_cart_item" ? ["CART_MUTATED"] : ["CART_OPENED", "CART_MUTATED"];
         if (!acceptReceipt(recovered, operationId, allowed)) return { status: "REJECTED", reason: "NOT_A_SUCCESS_RECEIPT" };
@@ -564,8 +576,7 @@ export async function createCommerceEffectTools(input: {
   }
   // Establish current evidence before the owner/verifier sees this turn, including existing carts on later turns.
   await refreshSelections();
-  return { invoke, snapshot,
-    preCartSupportEvidence(target,quotePolicy){
+  function preCartSupportEvidence(target:{subjectRef:string;offerType:string},quotePolicy:RuntimePolicyBundle["policy"]){
       const pending=current.pendingNegotiation,at=input.clock().getTime();
       if(uncertain||current.cart||current.negotiation||!pending||pending.status!=="PENDING"||pending.cartOpeningCommandId!==null||pending.activatedByCartId!==null||
         pending.productId!==target.subjectRef||pending.offerId!==target.offerType||pending.salesEpisodeId!==input.identity.salesEpisodeId||
@@ -574,7 +585,9 @@ export async function createCommerceEffectTools(input: {
         Date.parse(pending.recordedAt)>at||Date.parse(pending.sourceObservedAt)>at||
         pending.pendingId!==createHash("sha256").update(pendingNegotiationIdPreimageV1(pending)).digest("hex"))return null;
       return {pendingRef:pending.pendingId,sourceMessageId:pending.sourceMessageId,sourceObservedAt:pending.sourceObservedAt,expiresAt:pending.expiresAt};
-    },async preparePendingSelections(admit,control){
+  }
+  return { invoke, snapshot,preCartSupportEvidence,
+    async preparePendingSelections(admit,control){
     const state=input.base.snapshot().state;
     if(!state.permission||!state.privacyAllowed||state.conversationOwner!=="BOT"||state.bindingVersion!==turnBinding||state.recipient!==turnRecipient)return 0;
     const pending=state.pendingPurchase as {lines:import("./single-agent-commerce-read-only.js").PendingPurchaseLine[]}|undefined;

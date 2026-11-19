@@ -1,4 +1,10 @@
-## Current — báo giá hỗ trợ trước giỏ, 2026-11-18
+## Current — ưu đãi hiện hành và lựa chọn mua, 2026-11-19
+
+Đã triển khai phạm vi sau review độc lập phương án: verifier phân biệt ưu đãi hiện có trong cartQuote với thao tác mới; replay pending chỉ cùng source event đã xử lý, kiểm policy/identity/hạn và trả read-only không receipt mới; quote có lựa chọn màu với query nguồn, không suy ý định mua hoặc tồn cho quantity/size khác. Thay chỉ dẫn owner đang trùng, cập nhật prompt hashes. [Implementation, lệnh kiểm và giới hạn](../docs/specs/evidence/c3-current-cart-choice-repair-20261119/IMPLEMENTATION.md).
+
+RED 3 lỗi quan sát trước sửa; final 1.273 worker/134 Node PASS, build/typecheck/lint/dataset/diff PASS. Probe 60 frame cũ với payload lựa chọn synthetic: 69.283/70.000 byte, 0 overflow. Chưa chạy model hoặc review độc lập code; chưa chứng minh hết RECORD dư/giọng cứng/verifier từ chối thừa. Phase C STOP; run mới cần init/seal/preflight, không tự chạy.
+
+## Previous — báo giá hỗ trợ trước giỏ, 2026-11-18
 
 Đã chạy model trên `98bff18b`, đủ J4 ×5 và control ×5 / 30 lượt: 29 SEND, 1 silent HANDOFF. Cả 10 lần báo được hỗ trợ trước giỏ; J4 giữ 499.000đ và các giỏ control đúng 948.100đ/activation một lần. Judge J4 5/5, control 4/5; một handoff thừa do receipt lượt trước không được đưa vào context verifier. [Report và đủ hội thoại](../docs/specs/evidence/c3-precart-support-native-20261118/REPORT.md). 90 native +10 judge HTTP; một malformed được bounded runtime retry theo policy hiện hành, giữ đủ mẫu số. Không claim zero retry vì field prereg viết quá rộng. Phase C STOP; giọng/bước tiếp theo và RECORD dư vẫn còn, chưa tự sửa/chạy thêm.
 
