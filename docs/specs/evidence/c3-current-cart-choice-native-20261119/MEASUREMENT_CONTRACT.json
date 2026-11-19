@@ -1,0 +1,37 @@
+{
+  "ownerRequest": "Owner 2026-11-19: run independently approved current-cart benefit and purchase-choice repair; J4 x5 and two-shirt control x5 from first turn; all terminal outcomes retained; one review after completion",
+  "runSourceSha": "48a27a1b39e8976face273a57983f91c8ad74cc2",
+  "scope": {
+    "J4": 5,
+    "TWO_SHIRTS": 5,
+    "turns": 30
+  },
+  "models": {
+    "owner": "gemini-3.5-flash-lite HIGH",
+    "verifier": "gpt-6.1-sol HIGH",
+    "offlineJudge": "gpt-6.1-sol HIGH"
+  },
+  "generationCaps": {
+    "native": 120,
+    "offlineJudge": 10,
+    "transportRetry": 0,
+    "approvedRuntimeOwnerRecovery": "Existing bounded recovery, at most one per turn within max 3 owner generations; retain failures and retry accounting; no new evaluator retry"
+  },
+  "taskPassMinimumPerCase": 4,
+  "voiceMinimumPerTargetTurn": 4,
+  "materialSafetyStateEffectPrivacyErrorsAllowed": 0,
+  "evaluation": "Whole-customer-outcome and voice separately, no keyword matching. All failures retained; no mid-run fix.",
+  "targets": {
+    "J4": "After authenticated request, current code support quote permits concrete price before cart; exact total from current quote; ask color only for purchase; no best-price or benefit-already-applied claim without receipt.",
+    "TWO_SHIRTS": "First reply offers actual computed support for two shirts without cart prerequisite. After customer chooses white, actual cart supports receipt and same quantity total; no duplicate discount or repeated activation."
+  },
+  "expectedNumbers": "Derived from fresh policy/POS and actual quote, not hardcoded historical529000. Current expected one-shirt fee waiver and two-unit promotion+fee waiver verified in preflight.",
+  "customerScripts": "Unchanged fixed J4 and two-shirt scripts from prior registration.",
+  "sourceFreshness": "Actual wall clock; fresh capture and initial store; retain test assumptions unchanged.",
+  "sourceWrites": 0,
+  "liveSends": 0,
+  "oneWholeRunReviewAfterCompletion": true,
+  "currentCartBenefits": "Current revalidated cartQuote/appliedAdjustments authorize descriptions of existing benefits; new mutation claims require matching receipts.",
+  "nextStep": "Report first-turn colour question vs redundant purchase confirmation separately; whole-journey completion cannot hide a scripted next customer choice.",
+  "measurementChangesFromPrior": "Judge clarifies current-cart benefits and evaluates purchase next step; do not attribute score differences only to runtime/prompt changes."
+}

@@ -1,0 +1,343 @@
+{
+  "source": "48a27a1b39e8976face273a57983f91c8ad74cc2",
+  "worldHash": "5025411cef9782e97173b9bee63bf68bd900bea6dd31c2a8e445a0507c2cfd1a",
+  "cases": 2,
+  "attempts": 10,
+  "terminalTurns": 30,
+  "terminalCounts": {
+    "SEND_ELIGIBLE": 25,
+    "HANDOFF": 5
+  },
+  "nativeProviderRequests": 72,
+  "registeredGenerationAttempts": 72,
+  "localAdmissionRejections": 0,
+  "generationErrors": 0,
+  "localBuildRejections": 0,
+  "generationOutcomes": {
+    "OWNER:OK": 47,
+    "VERIFIER:OK": 25
+  },
+  "owner": {
+    "providerRequests": 47,
+    "latencyP50Ms": 4985.616399999995,
+    "latencyP95Ms": 8643.803800000009,
+    "inputTokens": 636875,
+    "outputTokens": 44004,
+    "errorCount": 0,
+    "timeoutCount": 0,
+    "cost": "NOT_EXPOSED"
+  },
+  "verifier": {
+    "providerRequests": 25,
+    "latencyP50Ms": 6722.357700000008,
+    "latencyP95Ms": 8130.122199999998,
+    "inputTokens": 274122,
+    "outputTokens": 2419,
+    "errorCount": 0,
+    "timeoutCount": 0,
+    "cost": "NOT_EXPOSED"
+  },
+  "judge": {
+    "registered": 10,
+    "resolved": 9,
+    "unresolved": 1,
+    "providerRequests": 10,
+    "errorCount": 1,
+    "inputTokens": 342919,
+    "outputTokens": 4065,
+    "cost": "NOT_EXPOSED"
+  },
+  "verificationRuntimeLatency": {
+    "count": 25,
+    "p50Ms": 8703.663099999947,
+    "p95Ms": 10514.903599999998
+  },
+  "fallbackCount": 0,
+  "handoffRate": 0.16666666666666666,
+  "noSendCount": 0,
+  "testDatabasesDropped": true,
+  "providerGenerationRetryCount": 0,
+  "providerGenerationRetryBasis": "All native generations OK; journal IDs and dispatches unique; no evaluator or judge retry.",
+  "recommendation": "STOP",
+  "qualificationEligible": false,
+  "liveSends": 0,
+  "sourceWrites": 0,
+  "results": [
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "HANDOFF"
+      ],
+      "judgeStatus": "RESOLVED",
+      "wholePass": false,
+      "voicePass": false,
+      "factsPass": true,
+      "materialIssue": false,
+      "turns": [
+        {
+          "voicePass": true,
+          "factsPass": true
+        },
+        {
+          "voicePass": true,
+          "factsPass": true
+        },
+        {
+          "voicePass": false,
+          "factsPass": true
+        }
+      ],
+      "reason": "Hai lượt đầu hỏi đúng màu còn thiếu và báo hỗ trợ miễn ship 30k đúng quote trước giỏ, không nhận đã ghi ưu đãi. Lượt cuối handoff im lặng, chưa trả lời tổng cho một áo gửi Cần Thơ dù đã có quote và chính sách phí ship đủ căn cứ; không có thông tin sai hay claim thao tác không được chứng minh."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "HANDOFF"
+      ],
+      "judgeStatus": "RESOLVED",
+      "wholePass": false,
+      "voicePass": false,
+      "factsPass": true,
+      "materialIssue": false,
+      "turns": [
+        {
+          "voicePass": true,
+          "factsPass": true
+        },
+        {
+          "voicePass": true,
+          "factsPass": true
+        },
+        {
+          "voicePass": false,
+          "factsPass": true
+        }
+      ],
+      "reason": "Lượt đầu hỏi đúng màu còn thiếu, nêu đúng trắng có sẵn/be đặt trước. Lượt xin hỗ trợ báo đúng quote trước giỏ: miễn phí vận chuyển 30k, tổng 499k; không nhận vơ đã ghi ưu đãi vào giỏ. Tuy nhiên lượt cuối handoff im lặng, chưa trả lời tổng một áo gửi Cần Thơ dù nguồn bán hàng đã đủ. Không có thông tin sai hoặc claim thao tác không được chứng minh."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "HANDOFF"
+      ],
+      "judgeStatus": "RESOLVED",
+      "wholePass": false,
+      "voicePass": false,
+      "factsPass": true,
+      "materialIssue": false,
+      "turns": [
+        {
+          "voicePass": true,
+          "factsPass": true
+        },
+        {
+          "voicePass": true,
+          "factsPass": true
+        },
+        {
+          "voicePass": false,
+          "factsPass": true
+        }
+      ],
+      "reason": "Hai lượt đầu hỏi đúng màu còn thiếu và báo đúng quote hỗ trợ trước giỏ: áo 499.000đ, miễn phí vận chuyển 30.000đ, tổng 499.000đ; không nhận đã ghi ưu đãi vào giỏ. Lượt cuối HANDOFF im lặng vì DEPENDENCY_FAILURE nên chưa trả lời tổng gửi Cần Thơ, dù ca có nguồn bán hàng sẵn sàng. Không có thông tin giá hay claim thao tác sai."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "HANDOFF"
+      ],
+      "judgeStatus": "RESOLVED",
+      "wholePass": false,
+      "voicePass": false,
+      "factsPass": true,
+      "materialIssue": false,
+      "turns": [
+        {
+          "voicePass": true,
+          "factsPass": true
+        },
+        {
+          "voicePass": true,
+          "factsPass": true
+        },
+        {
+          "voicePass": false,
+          "factsPass": true
+        }
+      ],
+      "reason": "Hai lượt đầu hỏi đúng màu còn thiếu và báo đúng quote một áo 499k, hỗ trợ phí ship 30k; không nhận đã ghi ưu đãi vào giỏ. Lượt cuối handoff im lặng nên chưa trả lời tổng gửi về Cần Thơ dù ca đủ nguồn. Không có thông tin sai hay thao tác mua ngoài yêu cầu."
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "HANDOFF"
+      ],
+      "judgeStatus": "RESOLVED",
+      "wholePass": false,
+      "voicePass": false,
+      "factsPass": true,
+      "materialIssue": false,
+      "turns": [
+        {
+          "voicePass": true,
+          "factsPass": true
+        },
+        {
+          "voicePass": true,
+          "factsPass": true
+        },
+        {
+          "voicePass": false,
+          "factsPass": true
+        }
+      ],
+      "reason": "Hai lượt đầu hỏi đúng màu còn thiếu và báo đúng quote trước giỏ: một áo 499.000đ, hỗ trợ phí ship 30.000đ, tổng 499.000đ; không nhận đã ghi ưu đãi vào giỏ. Lượt cuối HANDOFF im lặng vì DEPENDENCY_FAILURE, chưa trả lời tổng gửi Cần Thơ dù nguồn bán hàng đủ để tiếp tục kiểm tra báo giá. Không có thông tin sai hay claim thao tác không có căn cứ."
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE"
+      ],
+      "judgeStatus": "RESOLVED",
+      "wholePass": false,
+      "voicePass": false,
+      "factsPass": true,
+      "materialIssue": false,
+      "turns": [
+        {
+          "voicePass": false,
+          "factsPass": true
+        },
+        {
+          "voicePass": true,
+          "factsPass": true
+        },
+        {
+          "voicePass": true,
+          "factsPass": true
+        }
+      ],
+      "reason": "Lượt đầu báo đúng quote hỗ trợ trước giỏ: giảm 5%, freeship, tổng 948.100đ; không claim đã ghi ưu đãi. Tuy nhiên khách đã lấy hai áo M mà shop chưa hỏi màu còn thiếu để tiếp tục mua; tin chọn trắng dựng sẵn sau đó không bù được thiếu sót này. Lượt hai tạo đúng giỏ 2 áo M trắng và kích hoạt pending một lần, có receipt. Lượt cuối báo đúng tổng hiện hành 948.100đ gồm ship, không trừ phí giao hàng hai lần; mô tả freeship đang có được cartQuote chứng minh dù receipt lượt này rỗng."
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 2,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE"
+      ],
+      "judgeStatus": "RESOLVED",
+      "wholePass": true,
+      "voicePass": true,
+      "factsPass": true,
+      "materialIssue": false,
+      "turns": [
+        {
+          "voicePass": true,
+          "factsPass": true
+        },
+        {
+          "voicePass": true,
+          "factsPass": true
+        },
+        {
+          "voicePass": true,
+          "factsPass": true
+        }
+      ],
+      "reason": "Báo đúng quote trước giỏ: hai áo giảm 5%, hỗ trợ freeship, tổng 948.100đ; câu nói là báo mức cho lựa chọn mua, không nhận đã ghi ưu đãi vào giỏ. Hỏi màu còn thiếu đúng lúc khách đã lấy hai áo M. Khi khách chọn trắng, receipt xác nhận tạo đúng giỏ hai áo M trắng và kích hoạt pending một lần. Lượt cuối kiểm lại tổng khớp cartQuote cùng ưu đãi hiện hữu, không trừ ship hai lần; trả lời tự nhiên, gọn và đúng câu hỏi."
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 3,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE"
+      ],
+      "judgeStatus": "RESOLVED",
+      "wholePass": true,
+      "voicePass": true,
+      "factsPass": true,
+      "materialIssue": false,
+      "turns": [
+        {
+          "voicePass": true,
+          "factsPass": true
+        },
+        {
+          "voicePass": true,
+          "factsPass": true
+        },
+        {
+          "voicePass": true,
+          "factsPass": true
+        }
+      ],
+      "reason": "Lượt đầu báo đúng mức hỗ trợ trước giỏ 948.100đ và hỏi màu còn thiếu; câu mô tả ưu đãi cho hai áo không khẳng định đã ghi hỗ trợ vào giỏ. Khi khách chọn trắng, giỏ được tạo đúng hai áo M trắng và pending được kích hoạt một lần, có receipt. Lượt cuối báo đúng tổng hiện hành, gồm miễn phí ship 30.000đ theo cartQuote, không trừ ship lần nữa; trả lời gọn, đủ câu hỏi của khách."
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 4,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE"
+      ],
+      "judgeStatus": "RESOLVED",
+      "wholePass": false,
+      "voicePass": false,
+      "factsPass": true,
+      "materialIssue": false,
+      "turns": [
+        {
+          "voicePass": false,
+          "factsPass": true
+        },
+        {
+          "voicePass": true,
+          "factsPass": true
+        },
+        {
+          "voicePass": true,
+          "factsPass": true
+        }
+      ],
+      "reason": "Lượt đầu báo đúng quote trước giỏ 948.100đ gồm giảm 5% và hỗ trợ ship, không khẳng định đã ghi ưu đãi vào giỏ; nhưng bỏ sót hỏi màu khi khách đã lấy hai áo M. Tin chọn trắng ở lượt sau không bù được bước dẫn mua thiếu này. Sau đó tạo đúng giỏ hai áo trắng M, kích hoạt pending một lần có receipt; lượt cuối báo đúng tổng hiện hành và miễn ship theo cartQuote, không trừ ship lần nữa."
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 5,
+      "terminals": [
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE",
+        "SEND_ELIGIBLE"
+      ],
+      "judgeStatus": "UNRESOLVED_PROVIDER_ERROR",
+      "wholePass": null,
+      "voicePass": null,
+      "factsPass": null,
+      "materialIssue": null,
+      "reason": "Judge provider request failed; retained in registered denominator; no retry."
+    }
+  ]
+}

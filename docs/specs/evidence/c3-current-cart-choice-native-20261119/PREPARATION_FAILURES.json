@@ -1,0 +1,834 @@
+{
+  "source": "48a27a1b39e8976face273a57983f91c8ad74cc2",
+  "count": 5,
+  "confirmedStage": "prepare before owner generation",
+  "exactThrownReason": "NOT_CAPTURED: runtime catches preparation exceptions as PREPARATION_UNAVAILABLE",
+  "notAttributedToOwnerOrVerifier": true,
+  "failures": [
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "turn": 2,
+      "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "PREPARATION_UNAVAILABLE"
+      },
+      "ownerGenerations": 0,
+      "verifierGenerations": 0,
+      "executedNormalToolInvocations": 2,
+      "diagnostics": [
+        {
+          "ordinal": 1,
+          "parentOrdinal": null,
+          "stage": "RESULT_PROJECTION",
+          "operation": "PROFILE",
+          "status": "STARTED",
+          "selectorHash": "18bda6fc526f3b1908fc2900b7f91229a1f2f789f1a47cad1a782facb6772b47",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 2,
+          "parentOrdinal": 1,
+          "stage": "RESULT_PROJECTION",
+          "operation": "PROFILE",
+          "status": "OK",
+          "selectorHash": "18bda6fc526f3b1908fc2900b7f91229a1f2f789f1a47cad1a782facb6772b47",
+          "reason": null,
+          "resultBytes": 605,
+          "resultHash": "99bc76248e525c9a97f610bc029516e925d5458dc4b8e9d97d5f894aad654c8e"
+        },
+        {
+          "ordinal": 3,
+          "parentOrdinal": null,
+          "stage": "RESULT_PROJECTION",
+          "operation": "SALES_STATE",
+          "status": "STARTED",
+          "selectorHash": "49e8b611e0f6952ee6f5a3148315c691135010808f8dc7686775b27fe6cf05e7",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 4,
+          "parentOrdinal": 3,
+          "stage": "RESULT_PROJECTION",
+          "operation": "SALES_STATE",
+          "status": "OK",
+          "selectorHash": "49e8b611e0f6952ee6f5a3148315c691135010808f8dc7686775b27fe6cf05e7",
+          "reason": null,
+          "resultBytes": 1249,
+          "resultHash": "5705826a443cd399bbdfdf6394501e3e99dcbe1f97a078501c0bf90d647edadf"
+        },
+        {
+          "ordinal": 5,
+          "parentOrdinal": null,
+          "stage": "CATALOG_READ",
+          "operation": "PRODUCT",
+          "status": "STARTED",
+          "selectorHash": "1e9faa9abb6e2fec6fc385690de32aecba841ed4aab6f00bd05b2fe6146b94c8",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 6,
+          "parentOrdinal": null,
+          "stage": "CATALOG_READ",
+          "operation": null,
+          "status": "STARTED",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 7,
+          "parentOrdinal": 6,
+          "stage": "CATALOG_READ",
+          "operation": null,
+          "status": "OK",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": 8883,
+          "resultHash": "49beb16acdb22633549229c6e9f4807d59c4731c6cb78acea50273089df280d0"
+        },
+        {
+          "ordinal": 8,
+          "parentOrdinal": null,
+          "stage": "POS_READ",
+          "operation": null,
+          "status": "STARTED",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 9,
+          "parentOrdinal": 8,
+          "stage": "POS_READ",
+          "operation": null,
+          "status": "OK",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": 11056,
+          "resultHash": "4ce86fa7779334c0247aba9004ae0920c3d2170b80d80275df439b18bbb40e6c"
+        },
+        {
+          "ordinal": 10,
+          "parentOrdinal": 5,
+          "stage": "CATALOG_READ",
+          "operation": "PRODUCT",
+          "status": "OK",
+          "selectorHash": "1e9faa9abb6e2fec6fc385690de32aecba841ed4aab6f00bd05b2fe6146b94c8",
+          "reason": null,
+          "resultBytes": 19963,
+          "resultHash": "aaee7d2bb4893cc3ad65cf9850d55c2db02af5945c09b138c5de8f4173addf47"
+        },
+        {
+          "ordinal": 11,
+          "parentOrdinal": null,
+          "stage": "RESULT_PROJECTION",
+          "operation": "CART_SELECTION",
+          "status": "STARTED",
+          "selectorHash": "adbbb54369daf9a66ad8a688bd33bf856b802b4e142753911527529f897651b0",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 12,
+          "parentOrdinal": 11,
+          "stage": "RESULT_PROJECTION",
+          "operation": "CART_SELECTION",
+          "status": "OK",
+          "selectorHash": "adbbb54369daf9a66ad8a688bd33bf856b802b4e142753911527529f897651b0",
+          "reason": null,
+          "resultBytes": 1688,
+          "resultHash": "d6f2e1660a6669a04f2b1700205ec6a9b9ad6f5ce6389fd105e846c694102665"
+        },
+        {
+          "ordinal": 13,
+          "parentOrdinal": null,
+          "stage": "FINAL_GATE",
+          "operation": null,
+          "status": "HANDOFF",
+          "selectorHash": "c2b5e4bbec41d3b9db2f1c3f058cfd17ae736c7a8c44fb64e412cdfc7ae6e7dc",
+          "reason": "DEPENDENCY_FAILURE",
+          "resultBytes": null,
+          "resultHash": null
+        }
+      ],
+      "nativeArtifactHash": "2bb0a454dbcb050db3fc7c4ad5077ed50de271527fe5c905d9c13431ba3ce1dd"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "turn": 2,
+      "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "PREPARATION_UNAVAILABLE"
+      },
+      "ownerGenerations": 0,
+      "verifierGenerations": 0,
+      "executedNormalToolInvocations": 2,
+      "diagnostics": [
+        {
+          "ordinal": 1,
+          "parentOrdinal": null,
+          "stage": "RESULT_PROJECTION",
+          "operation": "PROFILE",
+          "status": "STARTED",
+          "selectorHash": "18bda6fc526f3b1908fc2900b7f91229a1f2f789f1a47cad1a782facb6772b47",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 2,
+          "parentOrdinal": 1,
+          "stage": "RESULT_PROJECTION",
+          "operation": "PROFILE",
+          "status": "OK",
+          "selectorHash": "18bda6fc526f3b1908fc2900b7f91229a1f2f789f1a47cad1a782facb6772b47",
+          "reason": null,
+          "resultBytes": 605,
+          "resultHash": "d52f4d254430b74f9a1d85c67e40287ffaeebc4656286d653faedd7142bb717e"
+        },
+        {
+          "ordinal": 3,
+          "parentOrdinal": null,
+          "stage": "RESULT_PROJECTION",
+          "operation": "SALES_STATE",
+          "status": "STARTED",
+          "selectorHash": "49e8b611e0f6952ee6f5a3148315c691135010808f8dc7686775b27fe6cf05e7",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 4,
+          "parentOrdinal": 3,
+          "stage": "RESULT_PROJECTION",
+          "operation": "SALES_STATE",
+          "status": "OK",
+          "selectorHash": "49e8b611e0f6952ee6f5a3148315c691135010808f8dc7686775b27fe6cf05e7",
+          "reason": null,
+          "resultBytes": 1249,
+          "resultHash": "549baa4015adf0a6b3b3435094215e7bfe574b625afef4be2b217c5add918dc0"
+        },
+        {
+          "ordinal": 5,
+          "parentOrdinal": null,
+          "stage": "CATALOG_READ",
+          "operation": "PRODUCT",
+          "status": "STARTED",
+          "selectorHash": "1e9faa9abb6e2fec6fc385690de32aecba841ed4aab6f00bd05b2fe6146b94c8",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 6,
+          "parentOrdinal": null,
+          "stage": "CATALOG_READ",
+          "operation": null,
+          "status": "STARTED",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 7,
+          "parentOrdinal": 6,
+          "stage": "CATALOG_READ",
+          "operation": null,
+          "status": "OK",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": 8883,
+          "resultHash": "49beb16acdb22633549229c6e9f4807d59c4731c6cb78acea50273089df280d0"
+        },
+        {
+          "ordinal": 8,
+          "parentOrdinal": null,
+          "stage": "POS_READ",
+          "operation": null,
+          "status": "STARTED",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 9,
+          "parentOrdinal": 8,
+          "stage": "POS_READ",
+          "operation": null,
+          "status": "OK",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": 11056,
+          "resultHash": "4ce86fa7779334c0247aba9004ae0920c3d2170b80d80275df439b18bbb40e6c"
+        },
+        {
+          "ordinal": 10,
+          "parentOrdinal": 5,
+          "stage": "CATALOG_READ",
+          "operation": "PRODUCT",
+          "status": "OK",
+          "selectorHash": "1e9faa9abb6e2fec6fc385690de32aecba841ed4aab6f00bd05b2fe6146b94c8",
+          "reason": null,
+          "resultBytes": 19963,
+          "resultHash": "aaee7d2bb4893cc3ad65cf9850d55c2db02af5945c09b138c5de8f4173addf47"
+        },
+        {
+          "ordinal": 11,
+          "parentOrdinal": null,
+          "stage": "RESULT_PROJECTION",
+          "operation": "CART_SELECTION",
+          "status": "STARTED",
+          "selectorHash": "adbbb54369daf9a66ad8a688bd33bf856b802b4e142753911527529f897651b0",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 12,
+          "parentOrdinal": 11,
+          "stage": "RESULT_PROJECTION",
+          "operation": "CART_SELECTION",
+          "status": "OK",
+          "selectorHash": "adbbb54369daf9a66ad8a688bd33bf856b802b4e142753911527529f897651b0",
+          "reason": null,
+          "resultBytes": 1688,
+          "resultHash": "d6f2e1660a6669a04f2b1700205ec6a9b9ad6f5ce6389fd105e846c694102665"
+        },
+        {
+          "ordinal": 13,
+          "parentOrdinal": null,
+          "stage": "FINAL_GATE",
+          "operation": null,
+          "status": "HANDOFF",
+          "selectorHash": "d9297e297965c308b5ce19a500aba71841ea7eedd967c34b7c38731d9a38c9e4",
+          "reason": "DEPENDENCY_FAILURE",
+          "resultBytes": null,
+          "resultHash": null
+        }
+      ],
+      "nativeArtifactHash": "e42a53d0ed30057d056368fdcce5ebc43894543d15697e93a1391d23ace5b66d"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "turn": 2,
+      "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "PREPARATION_UNAVAILABLE"
+      },
+      "ownerGenerations": 0,
+      "verifierGenerations": 0,
+      "executedNormalToolInvocations": 2,
+      "diagnostics": [
+        {
+          "ordinal": 1,
+          "parentOrdinal": null,
+          "stage": "RESULT_PROJECTION",
+          "operation": "PROFILE",
+          "status": "STARTED",
+          "selectorHash": "18bda6fc526f3b1908fc2900b7f91229a1f2f789f1a47cad1a782facb6772b47",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 2,
+          "parentOrdinal": 1,
+          "stage": "RESULT_PROJECTION",
+          "operation": "PROFILE",
+          "status": "OK",
+          "selectorHash": "18bda6fc526f3b1908fc2900b7f91229a1f2f789f1a47cad1a782facb6772b47",
+          "reason": null,
+          "resultBytes": 605,
+          "resultHash": "93752be89877bdd7cd295ea635de5c1222f3a1a74b7138f37c36f16b34ea6b9d"
+        },
+        {
+          "ordinal": 3,
+          "parentOrdinal": null,
+          "stage": "RESULT_PROJECTION",
+          "operation": "SALES_STATE",
+          "status": "STARTED",
+          "selectorHash": "49e8b611e0f6952ee6f5a3148315c691135010808f8dc7686775b27fe6cf05e7",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 4,
+          "parentOrdinal": 3,
+          "stage": "RESULT_PROJECTION",
+          "operation": "SALES_STATE",
+          "status": "OK",
+          "selectorHash": "49e8b611e0f6952ee6f5a3148315c691135010808f8dc7686775b27fe6cf05e7",
+          "reason": null,
+          "resultBytes": 1249,
+          "resultHash": "8cc4f028cd0ef0971f6959bb732bfbbbdb3f9a12333782801a3b30749637cce0"
+        },
+        {
+          "ordinal": 5,
+          "parentOrdinal": null,
+          "stage": "CATALOG_READ",
+          "operation": "PRODUCT",
+          "status": "STARTED",
+          "selectorHash": "1e9faa9abb6e2fec6fc385690de32aecba841ed4aab6f00bd05b2fe6146b94c8",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 6,
+          "parentOrdinal": null,
+          "stage": "CATALOG_READ",
+          "operation": null,
+          "status": "STARTED",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 7,
+          "parentOrdinal": 6,
+          "stage": "CATALOG_READ",
+          "operation": null,
+          "status": "OK",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": 8883,
+          "resultHash": "49beb16acdb22633549229c6e9f4807d59c4731c6cb78acea50273089df280d0"
+        },
+        {
+          "ordinal": 8,
+          "parentOrdinal": null,
+          "stage": "POS_READ",
+          "operation": null,
+          "status": "STARTED",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 9,
+          "parentOrdinal": 8,
+          "stage": "POS_READ",
+          "operation": null,
+          "status": "OK",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": 11056,
+          "resultHash": "4ce86fa7779334c0247aba9004ae0920c3d2170b80d80275df439b18bbb40e6c"
+        },
+        {
+          "ordinal": 10,
+          "parentOrdinal": 5,
+          "stage": "CATALOG_READ",
+          "operation": "PRODUCT",
+          "status": "OK",
+          "selectorHash": "1e9faa9abb6e2fec6fc385690de32aecba841ed4aab6f00bd05b2fe6146b94c8",
+          "reason": null,
+          "resultBytes": 19963,
+          "resultHash": "aaee7d2bb4893cc3ad65cf9850d55c2db02af5945c09b138c5de8f4173addf47"
+        },
+        {
+          "ordinal": 11,
+          "parentOrdinal": null,
+          "stage": "RESULT_PROJECTION",
+          "operation": "CART_SELECTION",
+          "status": "STARTED",
+          "selectorHash": "adbbb54369daf9a66ad8a688bd33bf856b802b4e142753911527529f897651b0",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 12,
+          "parentOrdinal": 11,
+          "stage": "RESULT_PROJECTION",
+          "operation": "CART_SELECTION",
+          "status": "OK",
+          "selectorHash": "adbbb54369daf9a66ad8a688bd33bf856b802b4e142753911527529f897651b0",
+          "reason": null,
+          "resultBytes": 1688,
+          "resultHash": "d6f2e1660a6669a04f2b1700205ec6a9b9ad6f5ce6389fd105e846c694102665"
+        },
+        {
+          "ordinal": 13,
+          "parentOrdinal": null,
+          "stage": "FINAL_GATE",
+          "operation": null,
+          "status": "HANDOFF",
+          "selectorHash": "65a71b4ea15168832fe30c0536cac62dda3f378bedfa8bfd8f8b74637918619c",
+          "reason": "DEPENDENCY_FAILURE",
+          "resultBytes": null,
+          "resultHash": null
+        }
+      ],
+      "nativeArtifactHash": "dd689f7f8ba7598f885e1f84c3c8e25a83c2a3c40fdbc0bcca3e0f1a9971d0bb"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "turn": 2,
+      "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "PREPARATION_UNAVAILABLE"
+      },
+      "ownerGenerations": 0,
+      "verifierGenerations": 0,
+      "executedNormalToolInvocations": 2,
+      "diagnostics": [
+        {
+          "ordinal": 1,
+          "parentOrdinal": null,
+          "stage": "RESULT_PROJECTION",
+          "operation": "PROFILE",
+          "status": "STARTED",
+          "selectorHash": "18bda6fc526f3b1908fc2900b7f91229a1f2f789f1a47cad1a782facb6772b47",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 2,
+          "parentOrdinal": 1,
+          "stage": "RESULT_PROJECTION",
+          "operation": "PROFILE",
+          "status": "OK",
+          "selectorHash": "18bda6fc526f3b1908fc2900b7f91229a1f2f789f1a47cad1a782facb6772b47",
+          "reason": null,
+          "resultBytes": 605,
+          "resultHash": "f40da6a8aee5fc29e766e77c8dac12caac7067ba83b823077d7e233432abc431"
+        },
+        {
+          "ordinal": 3,
+          "parentOrdinal": null,
+          "stage": "RESULT_PROJECTION",
+          "operation": "SALES_STATE",
+          "status": "STARTED",
+          "selectorHash": "49e8b611e0f6952ee6f5a3148315c691135010808f8dc7686775b27fe6cf05e7",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 4,
+          "parentOrdinal": 3,
+          "stage": "RESULT_PROJECTION",
+          "operation": "SALES_STATE",
+          "status": "OK",
+          "selectorHash": "49e8b611e0f6952ee6f5a3148315c691135010808f8dc7686775b27fe6cf05e7",
+          "reason": null,
+          "resultBytes": 1249,
+          "resultHash": "eb9a977f5a3d001b28484e71732788cbadd8669a7c4defb62a1bb77924fe6999"
+        },
+        {
+          "ordinal": 5,
+          "parentOrdinal": null,
+          "stage": "CATALOG_READ",
+          "operation": "PRODUCT",
+          "status": "STARTED",
+          "selectorHash": "1e9faa9abb6e2fec6fc385690de32aecba841ed4aab6f00bd05b2fe6146b94c8",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 6,
+          "parentOrdinal": null,
+          "stage": "CATALOG_READ",
+          "operation": null,
+          "status": "STARTED",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 7,
+          "parentOrdinal": 6,
+          "stage": "CATALOG_READ",
+          "operation": null,
+          "status": "OK",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": 8883,
+          "resultHash": "49beb16acdb22633549229c6e9f4807d59c4731c6cb78acea50273089df280d0"
+        },
+        {
+          "ordinal": 8,
+          "parentOrdinal": null,
+          "stage": "POS_READ",
+          "operation": null,
+          "status": "STARTED",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 9,
+          "parentOrdinal": 8,
+          "stage": "POS_READ",
+          "operation": null,
+          "status": "OK",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": 11056,
+          "resultHash": "4ce86fa7779334c0247aba9004ae0920c3d2170b80d80275df439b18bbb40e6c"
+        },
+        {
+          "ordinal": 10,
+          "parentOrdinal": 5,
+          "stage": "CATALOG_READ",
+          "operation": "PRODUCT",
+          "status": "OK",
+          "selectorHash": "1e9faa9abb6e2fec6fc385690de32aecba841ed4aab6f00bd05b2fe6146b94c8",
+          "reason": null,
+          "resultBytes": 19963,
+          "resultHash": "aaee7d2bb4893cc3ad65cf9850d55c2db02af5945c09b138c5de8f4173addf47"
+        },
+        {
+          "ordinal": 11,
+          "parentOrdinal": null,
+          "stage": "RESULT_PROJECTION",
+          "operation": "CART_SELECTION",
+          "status": "STARTED",
+          "selectorHash": "adbbb54369daf9a66ad8a688bd33bf856b802b4e142753911527529f897651b0",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 12,
+          "parentOrdinal": 11,
+          "stage": "RESULT_PROJECTION",
+          "operation": "CART_SELECTION",
+          "status": "OK",
+          "selectorHash": "adbbb54369daf9a66ad8a688bd33bf856b802b4e142753911527529f897651b0",
+          "reason": null,
+          "resultBytes": 1688,
+          "resultHash": "d6f2e1660a6669a04f2b1700205ec6a9b9ad6f5ce6389fd105e846c694102665"
+        },
+        {
+          "ordinal": 13,
+          "parentOrdinal": null,
+          "stage": "FINAL_GATE",
+          "operation": null,
+          "status": "HANDOFF",
+          "selectorHash": "c77d0398fd5d7f966c13ce80ebd79e1f210f90090448fe58e4fedf65fcec9d66",
+          "reason": "DEPENDENCY_FAILURE",
+          "resultBytes": null,
+          "resultHash": null
+        }
+      ],
+      "nativeArtifactHash": "8e75f8f5bbd769d87a69cd89247785547c6730dc55b1c1f907ead9d23271f405"
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "turn": 2,
+      "customer": "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?",
+      "terminal": {
+        "disposition": "HANDOFF",
+        "reason": "DEPENDENCY_FAILURE",
+        "text": null,
+        "fallbackId": null
+      },
+      "recovery": {
+        "originalDisposition": "FALLBACK",
+        "originalReason": "PREPARATION_UNAVAILABLE"
+      },
+      "ownerGenerations": 0,
+      "verifierGenerations": 0,
+      "executedNormalToolInvocations": 2,
+      "diagnostics": [
+        {
+          "ordinal": 1,
+          "parentOrdinal": null,
+          "stage": "RESULT_PROJECTION",
+          "operation": "PROFILE",
+          "status": "STARTED",
+          "selectorHash": "18bda6fc526f3b1908fc2900b7f91229a1f2f789f1a47cad1a782facb6772b47",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 2,
+          "parentOrdinal": 1,
+          "stage": "RESULT_PROJECTION",
+          "operation": "PROFILE",
+          "status": "OK",
+          "selectorHash": "18bda6fc526f3b1908fc2900b7f91229a1f2f789f1a47cad1a782facb6772b47",
+          "reason": null,
+          "resultBytes": 605,
+          "resultHash": "8961b09058d4755094ff49dac22407dd3b79be6c89f7ff84bca88cb1591cd79f"
+        },
+        {
+          "ordinal": 3,
+          "parentOrdinal": null,
+          "stage": "RESULT_PROJECTION",
+          "operation": "SALES_STATE",
+          "status": "STARTED",
+          "selectorHash": "49e8b611e0f6952ee6f5a3148315c691135010808f8dc7686775b27fe6cf05e7",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 4,
+          "parentOrdinal": 3,
+          "stage": "RESULT_PROJECTION",
+          "operation": "SALES_STATE",
+          "status": "OK",
+          "selectorHash": "49e8b611e0f6952ee6f5a3148315c691135010808f8dc7686775b27fe6cf05e7",
+          "reason": null,
+          "resultBytes": 1249,
+          "resultHash": "50d34c0b50f90651c690a07933acb39da632c0db0f37ba14b7733ea7bddb44fe"
+        },
+        {
+          "ordinal": 5,
+          "parentOrdinal": null,
+          "stage": "CATALOG_READ",
+          "operation": "PRODUCT",
+          "status": "STARTED",
+          "selectorHash": "1e9faa9abb6e2fec6fc385690de32aecba841ed4aab6f00bd05b2fe6146b94c8",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 6,
+          "parentOrdinal": null,
+          "stage": "CATALOG_READ",
+          "operation": null,
+          "status": "STARTED",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 7,
+          "parentOrdinal": 6,
+          "stage": "CATALOG_READ",
+          "operation": null,
+          "status": "OK",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": 8883,
+          "resultHash": "49beb16acdb22633549229c6e9f4807d59c4731c6cb78acea50273089df280d0"
+        },
+        {
+          "ordinal": 8,
+          "parentOrdinal": null,
+          "stage": "POS_READ",
+          "operation": null,
+          "status": "STARTED",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 9,
+          "parentOrdinal": 8,
+          "stage": "POS_READ",
+          "operation": null,
+          "status": "OK",
+          "selectorHash": "152a23f06b52360d3c28bd0cc0cfaae12aaa32e132670f5b687d6f4d9e322834",
+          "reason": null,
+          "resultBytes": 11056,
+          "resultHash": "4ce86fa7779334c0247aba9004ae0920c3d2170b80d80275df439b18bbb40e6c"
+        },
+        {
+          "ordinal": 10,
+          "parentOrdinal": 5,
+          "stage": "CATALOG_READ",
+          "operation": "PRODUCT",
+          "status": "OK",
+          "selectorHash": "1e9faa9abb6e2fec6fc385690de32aecba841ed4aab6f00bd05b2fe6146b94c8",
+          "reason": null,
+          "resultBytes": 19963,
+          "resultHash": "aaee7d2bb4893cc3ad65cf9850d55c2db02af5945c09b138c5de8f4173addf47"
+        },
+        {
+          "ordinal": 11,
+          "parentOrdinal": null,
+          "stage": "RESULT_PROJECTION",
+          "operation": "CART_SELECTION",
+          "status": "STARTED",
+          "selectorHash": "adbbb54369daf9a66ad8a688bd33bf856b802b4e142753911527529f897651b0",
+          "reason": null,
+          "resultBytes": null,
+          "resultHash": null
+        },
+        {
+          "ordinal": 12,
+          "parentOrdinal": 11,
+          "stage": "RESULT_PROJECTION",
+          "operation": "CART_SELECTION",
+          "status": "OK",
+          "selectorHash": "adbbb54369daf9a66ad8a688bd33bf856b802b4e142753911527529f897651b0",
+          "reason": null,
+          "resultBytes": 1688,
+          "resultHash": "d6f2e1660a6669a04f2b1700205ec6a9b9ad6f5ce6389fd105e846c694102665"
+        },
+        {
+          "ordinal": 13,
+          "parentOrdinal": null,
+          "stage": "FINAL_GATE",
+          "operation": null,
+          "status": "HANDOFF",
+          "selectorHash": "fc6d37869ad83159c903156ed8a61bef1749f7523aca71cbba99f6e031957cb1",
+          "reason": "DEPENDENCY_FAILURE",
+          "resultBytes": null,
+          "resultHash": null
+        }
+      ],
+      "nativeArtifactHash": "cedfc1bd5a309ef570256cc2bc7b9f9157c81f5a5944844fd6a4f7d546349c26"
+    }
+  ]
+}

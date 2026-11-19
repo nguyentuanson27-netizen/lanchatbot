@@ -1,0 +1,27 @@
+{
+  "previousSource": "98bff18b1941663c62120a044d71f45b430e2e47",
+  "currentSource": "48a27a1b39e8976face273a57983f91c8ad74cc2",
+  "cases": [
+    {
+      "caseId": "c-20261028-j4",
+      "turnsUnchanged": true,
+      "customerMessages": [
+        "Chị lấy áo của bộ váy Thạch Thảo size M.",
+        "Shop hỗ trợ thêm cho chị được chút nào không?",
+        "Vậy một áo size M, gửi về Cần Thơ thì hết bao nhiêu em?"
+      ]
+    },
+    {
+      "caseId": "c-context-two-units",
+      "turnsUnchanged": true,
+      "customerMessages": [
+        "Chị lấy hai áo Thạch Thảo size M, shop bớt thêm cho chị được không?",
+        "Lấy trắng em nhé.",
+        "Cả ship hết bao nhiêu em?"
+      ]
+    }
+  ],
+  "sameRuntimeWorld": false,
+  "judgeClarifiedBeforeGeneration": true,
+  "notPairedAB": true
+}

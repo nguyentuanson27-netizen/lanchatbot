@@ -1,0 +1,434 @@
+{
+  "rows": [
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "receipts": [
+        {
+          "kind": "PENDING_NEGOTIATION_RECORDED",
+          "operationId": "008936110fe0a5584884ddc9f85f2e81997e96e341afd3e1d842ef77085ad360",
+          "revision": 1
+        }
+      ],
+      "pendingRecordCount": 1,
+      "negotiationEventCount": 0,
+      "cart": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 2,
+      "receipts": [
+        {
+          "kind": "PENDING_NEGOTIATION_RECORDED",
+          "operationId": "92919e14e6d444bf26650fbea2844bb7e960b39dc078a7b0fe3e75eda6f851d0",
+          "revision": 1
+        }
+      ],
+      "pendingRecordCount": 1,
+      "negotiationEventCount": 0,
+      "cart": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 3,
+      "receipts": [
+        {
+          "kind": "PENDING_NEGOTIATION_RECORDED",
+          "operationId": "88afcf8ca92bb31500053c8e7cf4679b33ab843fc42fe43499d3079497854477",
+          "revision": 1
+        }
+      ],
+      "pendingRecordCount": 1,
+      "negotiationEventCount": 0,
+      "cart": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 4,
+      "receipts": [
+        {
+          "kind": "PENDING_NEGOTIATION_RECORDED",
+          "operationId": "61f67a28e358237af52d950df5f2ac89a29d5617c688be3f65b3712814f7f3be",
+          "revision": 1
+        }
+      ],
+      "pendingRecordCount": 1,
+      "negotiationEventCount": 0,
+      "cart": null
+    },
+    {
+      "caseId": "c-20261028-j4",
+      "repetition": 5,
+      "receipts": [
+        {
+          "kind": "PENDING_NEGOTIATION_RECORDED",
+          "operationId": "b33b3fe3368512cba7eb053408847309a96c8ef5dcf1e64f2f4799813345e888",
+          "revision": 1
+        }
+      ],
+      "pendingRecordCount": 1,
+      "negotiationEventCount": 0,
+      "cart": null
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 1,
+      "receipts": [
+        {
+          "kind": "PENDING_NEGOTIATION_RECORDED",
+          "operationId": "be5e92970e96bc6b004590f7a28caf969907c6e74bd121e10f21a10a1927667b",
+          "revision": 1
+        },
+        {
+          "kind": "FACTS_PRESENTED",
+          "operationId": "sales:stateful-f442b0e5-6b43-44d4-a9c3-201b04155c93:0:facts",
+          "revision": 2
+        },
+        {
+          "kind": "MEASUREMENTS_REQUIRED",
+          "operationId": "sales:stateful-f442b0e5-6b43-44d4-a9c3-201b04155c93:0:measurements",
+          "revision": 3
+        },
+        {
+          "kind": "SIZE_RECOMMENDED",
+          "operationId": "sales:stateful-f442b0e5-6b43-44d4-a9c3-201b04155c93:0:size",
+          "revision": 4
+        },
+        {
+          "kind": "CART_OPENED",
+          "operationId": "5bda2f56c8e764ddfbfb47d444985c42bdf67d3374e7521931737d8a499684f1",
+          "revision": 5
+        },
+        {
+          "kind": "NEGOTIATION_EVENT",
+          "operationId": "04683f0a679cc3dba314eec5a827f5e977f0a162384dd76ab728ee81e617e5a3",
+          "revision": 6
+        }
+      ],
+      "pendingRecordCount": 1,
+      "negotiationEventCount": 1,
+      "cart": {
+        "subtotalVnd": 998000,
+        "shippingFeeVnd": 30000,
+        "discountTotalVnd": 79900,
+        "grandTotalVnd": 948100,
+        "adjustments": [
+          {
+            "adjustmentId": "c5dc86d6-b8b0-5ba0-b9ba-29f22ee5b877",
+            "kind": "PERCENT_DISCOUNT",
+            "amountVnd": 49900,
+            "percentageBps": 500,
+            "policyAuthorization": {
+              "policyBundleId": "admin-policy:1198992073286645",
+              "policyBundleVersion": "cf056b94651b9b37df96732539c59e1c",
+              "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+              "decisionId": "7d3f0b39-45e6-5ef5-93d1-84cb0cabbcfd",
+              "authorizedAt": "2026-11-19T00:45:54.954Z"
+            }
+          },
+          {
+            "adjustmentId": "4322c6ed-bdda-592c-85e9-c191850b6b3a",
+            "kind": "FREE_SHIPPING",
+            "amountVnd": 30000,
+            "percentageBps": null,
+            "policyAuthorization": {
+              "policyBundleId": "admin-policy:1198992073286645",
+              "policyBundleVersion": "cf056b94651b9b37df96732539c59e1c",
+              "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+              "decisionId": "a1b0518d-07c5-5079-9353-668200b2f0b2",
+              "authorizedAt": "2026-11-19T00:45:54.954Z"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 2,
+      "receipts": [
+        {
+          "kind": "PENDING_NEGOTIATION_RECORDED",
+          "operationId": "1a43eaf9bb9cbb0cf25650850d324b246e0d8e0809af6ef9ba687099f2281e34",
+          "revision": 1
+        },
+        {
+          "kind": "FACTS_PRESENTED",
+          "operationId": "sales:stateful-374de6bb-be11-44c9-9262-d47210acf57d:0:facts",
+          "revision": 2
+        },
+        {
+          "kind": "MEASUREMENTS_REQUIRED",
+          "operationId": "sales:stateful-374de6bb-be11-44c9-9262-d47210acf57d:0:measurements",
+          "revision": 3
+        },
+        {
+          "kind": "SIZE_RECOMMENDED",
+          "operationId": "sales:stateful-374de6bb-be11-44c9-9262-d47210acf57d:0:size",
+          "revision": 4
+        },
+        {
+          "kind": "CART_OPENED",
+          "operationId": "57278c5d609f49262730158096f3853c6a29c127ba160b1e8e53d88df3664fc9",
+          "revision": 5
+        },
+        {
+          "kind": "NEGOTIATION_EVENT",
+          "operationId": "74032e07b32a32cf4e7c200f5a0a234350eda835269d87100f912ee42d57bc67",
+          "revision": 6
+        }
+      ],
+      "pendingRecordCount": 1,
+      "negotiationEventCount": 1,
+      "cart": {
+        "subtotalVnd": 998000,
+        "shippingFeeVnd": 30000,
+        "discountTotalVnd": 79900,
+        "grandTotalVnd": 948100,
+        "adjustments": [
+          {
+            "adjustmentId": "0a2c16a4-c180-52f2-b55d-556b7051a91d",
+            "kind": "PERCENT_DISCOUNT",
+            "amountVnd": 49900,
+            "percentageBps": 500,
+            "policyAuthorization": {
+              "policyBundleId": "admin-policy:1198992073286645",
+              "policyBundleVersion": "cf056b94651b9b37df96732539c59e1c",
+              "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+              "decisionId": "f7c521a6-8113-5ccd-8fa3-cd2c5983b27b",
+              "authorizedAt": "2026-11-19T00:48:26.476Z"
+            }
+          },
+          {
+            "adjustmentId": "a0fec8e1-d8c6-594a-b0a5-9f4222af8167",
+            "kind": "FREE_SHIPPING",
+            "amountVnd": 30000,
+            "percentageBps": null,
+            "policyAuthorization": {
+              "policyBundleId": "admin-policy:1198992073286645",
+              "policyBundleVersion": "cf056b94651b9b37df96732539c59e1c",
+              "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+              "decisionId": "edf12d56-ee89-5cfe-932d-8fb3f4ed0c73",
+              "authorizedAt": "2026-11-19T00:48:26.476Z"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 3,
+      "receipts": [
+        {
+          "kind": "PENDING_NEGOTIATION_RECORDED",
+          "operationId": "d00853927a5d5a85d8c0fc475b39d6301da0c74659bf2d51c370028603717453",
+          "revision": 1
+        },
+        {
+          "kind": "FACTS_PRESENTED",
+          "operationId": "sales:stateful-69002977-4a6e-458b-91ed-61c306353d8e:0:facts",
+          "revision": 2
+        },
+        {
+          "kind": "MEASUREMENTS_REQUIRED",
+          "operationId": "sales:stateful-69002977-4a6e-458b-91ed-61c306353d8e:0:measurements",
+          "revision": 3
+        },
+        {
+          "kind": "SIZE_RECOMMENDED",
+          "operationId": "sales:stateful-69002977-4a6e-458b-91ed-61c306353d8e:0:size",
+          "revision": 4
+        },
+        {
+          "kind": "CART_OPENED",
+          "operationId": "bd7267a724d253238ba771d69412d1c04c30d8fa2011488474087539721962b5",
+          "revision": 5
+        },
+        {
+          "kind": "NEGOTIATION_EVENT",
+          "operationId": "7e91ddc404dcd3ba48612f008f4568bee6b4c18be197057a4188facd68e2740f",
+          "revision": 6
+        }
+      ],
+      "pendingRecordCount": 1,
+      "negotiationEventCount": 1,
+      "cart": {
+        "subtotalVnd": 998000,
+        "shippingFeeVnd": 30000,
+        "discountTotalVnd": 79900,
+        "grandTotalVnd": 948100,
+        "adjustments": [
+          {
+            "adjustmentId": "728b52f1-0483-5f8d-a996-cf7a3fd34945",
+            "kind": "PERCENT_DISCOUNT",
+            "amountVnd": 49900,
+            "percentageBps": 500,
+            "policyAuthorization": {
+              "policyBundleId": "admin-policy:1198992073286645",
+              "policyBundleVersion": "cf056b94651b9b37df96732539c59e1c",
+              "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+              "decisionId": "8ce4dafa-83ea-5db6-ae20-0319595301b4",
+              "authorizedAt": "2026-11-19T00:50:56.030Z"
+            }
+          },
+          {
+            "adjustmentId": "d01b0b5a-dc36-5d43-801a-5387e7992c83",
+            "kind": "FREE_SHIPPING",
+            "amountVnd": 30000,
+            "percentageBps": null,
+            "policyAuthorization": {
+              "policyBundleId": "admin-policy:1198992073286645",
+              "policyBundleVersion": "cf056b94651b9b37df96732539c59e1c",
+              "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+              "decisionId": "a3cedde7-3137-57da-8989-9f1f50dad02e",
+              "authorizedAt": "2026-11-19T00:50:56.030Z"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 4,
+      "receipts": [
+        {
+          "kind": "PENDING_NEGOTIATION_RECORDED",
+          "operationId": "81c01acc59b035f40c388a44438b1c5022c00f1c1c705f625e9108ef53ce73bb",
+          "revision": 1
+        },
+        {
+          "kind": "FACTS_PRESENTED",
+          "operationId": "sales:stateful-bc329ebb-b027-4186-9905-3f3df677ac28:0:facts",
+          "revision": 2
+        },
+        {
+          "kind": "MEASUREMENTS_REQUIRED",
+          "operationId": "sales:stateful-bc329ebb-b027-4186-9905-3f3df677ac28:0:measurements",
+          "revision": 3
+        },
+        {
+          "kind": "SIZE_RECOMMENDED",
+          "operationId": "sales:stateful-bc329ebb-b027-4186-9905-3f3df677ac28:0:size",
+          "revision": 4
+        },
+        {
+          "kind": "CART_OPENED",
+          "operationId": "0a6441f6c7fbccc8fdadabdb073ae7645f493606114e6d14242cc67162a7763f",
+          "revision": 5
+        },
+        {
+          "kind": "NEGOTIATION_EVENT",
+          "operationId": "da65adb2a3db703b436fe66b59fe87e63878015db89c8be09b4c933ade5c660e",
+          "revision": 6
+        }
+      ],
+      "pendingRecordCount": 1,
+      "negotiationEventCount": 1,
+      "cart": {
+        "subtotalVnd": 998000,
+        "shippingFeeVnd": 30000,
+        "discountTotalVnd": 79900,
+        "grandTotalVnd": 948100,
+        "adjustments": [
+          {
+            "adjustmentId": "5b2d8fd8-a55b-5f60-8c9a-bd04d9a90369",
+            "kind": "PERCENT_DISCOUNT",
+            "amountVnd": 49900,
+            "percentageBps": 500,
+            "policyAuthorization": {
+              "policyBundleId": "admin-policy:1198992073286645",
+              "policyBundleVersion": "cf056b94651b9b37df96732539c59e1c",
+              "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+              "decisionId": "1434b0c3-b451-54fb-a557-5801eac88cd2",
+              "authorizedAt": "2026-11-19T00:53:17.765Z"
+            }
+          },
+          {
+            "adjustmentId": "93fc0a49-3dbd-542e-ac6a-2c7794a288ad",
+            "kind": "FREE_SHIPPING",
+            "amountVnd": 30000,
+            "percentageBps": null,
+            "policyAuthorization": {
+              "policyBundleId": "admin-policy:1198992073286645",
+              "policyBundleVersion": "cf056b94651b9b37df96732539c59e1c",
+              "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+              "decisionId": "59c16ec0-a295-5f66-b783-4178a89052ae",
+              "authorizedAt": "2026-11-19T00:53:17.765Z"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "c-context-two-units",
+      "repetition": 5,
+      "receipts": [
+        {
+          "kind": "PENDING_NEGOTIATION_RECORDED",
+          "operationId": "36d9741ac97b6f180b9aac150ce44be9e92413bb8afd7ab66d376c9398087e14",
+          "revision": 1
+        },
+        {
+          "kind": "FACTS_PRESENTED",
+          "operationId": "sales:stateful-e5e920b5-7ae4-4460-8555-c1591ac688e1:0:facts",
+          "revision": 2
+        },
+        {
+          "kind": "MEASUREMENTS_REQUIRED",
+          "operationId": "sales:stateful-e5e920b5-7ae4-4460-8555-c1591ac688e1:0:measurements",
+          "revision": 3
+        },
+        {
+          "kind": "SIZE_RECOMMENDED",
+          "operationId": "sales:stateful-e5e920b5-7ae4-4460-8555-c1591ac688e1:0:size",
+          "revision": 4
+        },
+        {
+          "kind": "CART_OPENED",
+          "operationId": "f6996b44407ecfd0cd05545d4ab79988dfe5e88a828a730fbe36b07832498987",
+          "revision": 5
+        },
+        {
+          "kind": "NEGOTIATION_EVENT",
+          "operationId": "33f6861503e6702b77ff1b398fbc0f9f5ebc47038f9006ca903655818fe71161",
+          "revision": 6
+        }
+      ],
+      "pendingRecordCount": 1,
+      "negotiationEventCount": 1,
+      "cart": {
+        "subtotalVnd": 998000,
+        "shippingFeeVnd": 30000,
+        "discountTotalVnd": 79900,
+        "grandTotalVnd": 948100,
+        "adjustments": [
+          {
+            "adjustmentId": "74d6b821-13c4-5607-8290-526b8cb54dc8",
+            "kind": "PERCENT_DISCOUNT",
+            "amountVnd": 49900,
+            "percentageBps": 500,
+            "policyAuthorization": {
+              "policyBundleId": "admin-policy:1198992073286645",
+              "policyBundleVersion": "cf056b94651b9b37df96732539c59e1c",
+              "ruleId": "SHOP_WIDE_MULTI_ITEM_PERCENT",
+              "decisionId": "a99d8195-b07c-51a8-abb2-e492ee3d157a",
+              "authorizedAt": "2026-11-19T00:53:46.242Z"
+            }
+          },
+          {
+            "adjustmentId": "dbb37559-3af4-5f53-b759-e0e1e16392b5",
+            "kind": "FREE_SHIPPING",
+            "amountVnd": 30000,
+            "percentageBps": null,
+            "policyAuthorization": {
+              "policyBundleId": "admin-policy:1198992073286645",
+              "policyBundleVersion": "cf056b94651b9b37df96732539c59e1c",
+              "ruleId": "SHOP_WIDE_SECOND_FREE_SHIPPING",
+              "decisionId": "723af5d1-3d15-5d13-bebb-b90a64c57047",
+              "authorizedAt": "2026-11-19T00:53:46.242Z"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

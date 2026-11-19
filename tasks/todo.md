@@ -3,7 +3,8 @@
 - [x] Sửa theo review: current cart benefit khác claim thao tác mới; pending reuse chỉ cùng source event, giữ provenance/expiry và không tạo receipt; quote cấp màu theo query nguồn, chưa xác nhận ý định mua/tồn đúng quantity-size. Thay chỉ dẫn owner hiện có và prompt hashes.
 - [x] TDD RED 3 lỗi trước sửa; final 1.273 worker/134 Node PASS, build/noEmit/lint/dataset/diff PASS. Probe 60 frame, đỉnh 69.283/70.000 byte, 0 overflow. [Bằng chứng và các lệnh](../docs/specs/evidence/c3-current-cart-choice-repair-20261119/IMPLEMENTATION.md).
 - [x] Review độc lập APPROVE CODE đúng `cdbbaa99`, không finding cần sửa; reviewer tự chạy 359 test và hai dạng owner wire PASS. [Kết luận](../docs/specs/evidence/c3-current-cart-choice-repair-20261119/INDEPENDENT_REVIEW.md).
-- [ ] Model run và độ ổn định giọng/RECORD/verifier chưa xác minh. Phase C vẫn STOP; không deploy/live send hoặc dùng số đo cũ làm kết quả mới.
+- [x] Chạy đủ 10 hội thoại/30 lượt trên `48a27a1b`: 25 SEND/5 silent HANDOFF, 72 native +10 judge, không retry; 9 điểm/1 judge provider error giữ mẫu số. Hai áo đúng giỏ/tổng cả năm; J4 lượt cuối preparation fail trước model cả năm. [Đủ lịch sử và review](../docs/specs/evidence/c3-current-cart-choice-native-20261119/REPORT.md).
+- [ ] Exact exception preparation J4 và độ ổn định giọng/RECORD chưa giải quyết; câu miễn ship control 5/5 qua verifier nhưng không đủ kết luận ổn định toàn bộ. Phase C STOP; không tự fix/rerun/deploy/live send.
 
 ## Previous — báo giá hỗ trợ trước giỏ, 2026-11-18
 

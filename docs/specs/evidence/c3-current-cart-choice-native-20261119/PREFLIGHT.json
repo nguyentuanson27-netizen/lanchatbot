@@ -1,0 +1,49 @@
+{
+  "source": "48a27a1b39e8976face273a57983f91c8ad74cc2",
+  "worldHash": "5025411cef9782e97173b9bee63bf68bd900bea6dd31c2a8e445a0507c2cfd1a",
+  "checks": [
+    {
+      "batch": 1,
+      "kind": "CANDIDATE",
+      "slots": 5,
+      "turns": 15,
+      "cap": 60
+    },
+    {
+      "batch": 1,
+      "kind": "CONTROLS",
+      "slots": 1,
+      "turns": 3,
+      "cap": 12
+    },
+    {
+      "batch": 2,
+      "kind": "CONTROLS",
+      "slots": 1,
+      "turns": 3,
+      "cap": 12
+    },
+    {
+      "batch": 3,
+      "kind": "CONTROLS",
+      "slots": 1,
+      "turns": 3,
+      "cap": 12
+    },
+    {
+      "batch": 4,
+      "kind": "CONTROLS",
+      "slots": 1,
+      "turns": 3,
+      "cap": 12
+    },
+    {
+      "batch": 5,
+      "kind": "CONTROLS",
+      "slots": 1,
+      "turns": 3,
+      "cap": 12
+    }
+  ],
+  "providerRequests": 0
+}
