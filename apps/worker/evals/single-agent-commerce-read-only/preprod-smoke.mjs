@@ -42,11 +42,15 @@ export async function runPreprodSmoke({root,report,check,statefulFixture,pool,ru
   configuredRoles:{owner:manifest.models.conversation,verifier:manifest.models.verifier},
   scope:'REAL_ISOLATED_POSTGRES_SYNTHETIC_CATALOG_STUB_DELIVERY_REAL_OWNER_VERIFIER',liveSend:false,evidence,ledger};
  save();
- const ensureNoLive=async()=>{
-  const row=(await pool.query('SELECT app_send_enabled,kill_switch FROM pages WHERE page_id=$1',[pageId])).rows[0];
-  assert.deepEqual(row,{app_send_enabled:false,kill_switch:true},'LIVE_SEND_MUST_BE_OFF');
+ const ensureTestOnly=async()=>{
+  const row=(await pool.query('SELECT current_database() AS database, page_alias, meta_app_id FROM pages WHERE page_id=$1',[pageId])).rows[0];
+  // The disposable page enables its Outbox for the intercepted transport. External send stays off.
+  assert.match(row.database,/^c3_b_test_[a-f0-9]{16}$/u);
+  assert.equal(row.page_alias,'c3-b-isolated');
+  assert.equal(row.meta_app_id,'synthetic');
+  assert.equal(report.sendEnabled,false);
  };
- await ensureNoLive();
+ await ensureTestOnly();
  function ports(id,index){
   const call=async(role,wire)=>{
    assert.equal(git('rev-parse','HEAD'),source);
@@ -169,7 +173,7 @@ export async function runPreprodSmoke({root,report,check,statefulFixture,pool,ru
   assert.equal(await events(j),1);
   assert.equal((await fixtureState(j)).state.conversationOwner,'HUMAN');
  });
- await ensureNoLive();
+ await ensureTestOnly();
  assert.equal(report.cases.length,3);
  assert(ledger.every(r=>Number.isInteger(r.providerRequests)),'SMOKE_PROVIDER_ACCOUNTING_UNKNOWN');
  report.providerGenerations=ledger.reduce((n,r)=>n+r.providerRequests,0);
