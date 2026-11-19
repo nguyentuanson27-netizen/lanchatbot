@@ -6,6 +6,10 @@ it("accepts a bounded single holding reply binding and rejects private/unbound e
     customerHash: hash, recipientHash: hash, responseGroupId: "group", generation: 1, revision: 2, stateHash: hash, policyHash: hash,
     reason: "DEPENDENCY_FAILURE", rulesetVersion: "rules-v1", messageHashes: [hash] };
   expect(schema.safeParse(b).success).toBe(true);
+  const customerHash = "meta:v1:" + "b".repeat(64);
+  expect(schema.parse({ ...b, customerHash }).customerHash).toBe(customerHash);
+  expect(schema.safeParse({ ...b, recipientHash: customerHash }).success).toBe(false);
+  expect(schema.safeParse({ ...b, customerHash: customerHash + "0" }).success).toBe(false);
   for (const patch of [{ messageHashes: [] }, { messageHashes: Array(7).fill(hash) }, { recipientHash: "recipient" },
     { reason: "UNREGISTERED" }, { privateText: "not permitted" }]) expect(schema.safeParse({ ...b, ...patch }).success).toBe(false);
 });

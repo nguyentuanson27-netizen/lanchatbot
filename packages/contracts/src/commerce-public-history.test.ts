@@ -11,3 +11,16 @@ it("validates numeric/history identities without accepting arbitrary cart text o
     expect(CommercePublicCartEventV1Schema.safeParse({...event,...patch}).success).toBe(false);
   expect(CommercePublicCartSummaryV1Schema.safeParse(event).success).toBe(false);
 });
+
+it("keeps the persisted Meta gateway key distinct from the recipient digest", () => {
+  const hash = "a".repeat(64);
+  const customerHash = "meta:v1:" + hash;
+  const summary = {
+    kind: "C3_PUBLIC_CART_SUMMARY_V1", pageId: "page", conversationId: "conversation",
+    customerHash, recipientHash: hash, responseGroupId: "group", sequence: 0, messageHash: hash,
+    cartId: event.cartId, cartVersion: 2, grandTotalVnd: 499000,
+  };
+  expect(CommercePublicCartSummaryV1Schema.parse(summary).customerHash).toBe(customerHash);
+  expect(CommercePublicCartSummaryV1Schema.safeParse({ ...summary, recipientHash: customerHash }).success).toBe(false);
+  expect(CommercePublicCartSummaryV1Schema.safeParse({ ...summary, customerHash: "meta:v2:" + hash }).success).toBe(false);
+});
