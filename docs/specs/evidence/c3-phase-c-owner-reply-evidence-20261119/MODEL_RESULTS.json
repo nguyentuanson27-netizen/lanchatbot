@@ -1,0 +1,594 @@
+{
+  "status": "STOP",
+  "gates": {
+    "complete": 9,
+    "targetWins": 2,
+    "everyTargetCaseWins": false,
+    "targetFacts": 6,
+    "controls": 3,
+    "materialCandidateFailures": 0
+  },
+  "rows": [
+    {
+      "case": "P06",
+      "caseId": "c-po-20261031-p06",
+      "repetition": 1,
+      "complete": true,
+      "winner": "TIE",
+      "baseline": {
+        "factsComplete": true,
+        "controlPass": true,
+        "materialFailure": false,
+        "reason": "Nêu rõ tổng cả ship 1.019.000đ cho bộ ba món giá 989.000đ, không suy vùng giao. Thông tin size có sẵn S, M, L đúng căn cứ và có bước tiếp theo hữu ích."
+      },
+      "candidate": {
+        "factsComplete": true,
+        "controlPass": true,
+        "materialFailure": false,
+        "reason": "Báo đúng giá bộ ba món 989.000đ, phí ship 30.000đ và tổng 1.019.000đ; không suy vùng giao. Size S, M, L có căn cứ, câu hỏi chọn size giúp khách mua tiếp."
+      },
+      "terminal": "REPLAY_DRAFT_ONLY",
+      "judge": {
+        "status": "OK",
+        "requests": 1
+      },
+      "arms": [
+        {
+          "status": "OK",
+          "telemetry": {
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 13822,
+            "outputTokens": 247,
+            "cost": null,
+            "requestHash": "5b0e72ee8a50a64df2a2625ad47c3d1458451a4d2860561c8121d5208148bc96",
+            "latencyMs": 1786.9242000000004
+          },
+          "errorCode": null,
+          "text": "Cả bộ gồm ba món có giá 989.000đ ạ (tổng gồm ship là 1.019.000đ). Mẫu này có sẵn size S, M, L, chị lấy size nào ạ?"
+        },
+        {
+          "status": "OK",
+          "telemetry": {
+            "providerRequests": 1,
+            "authRequests": 1,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 13793,
+            "outputTokens": 373,
+            "cost": null,
+            "requestHash": "5cf765b11285223bcc7d4636e047f04cc565aada11c19f8dfac631650799a590",
+            "latencyMs": 2949.9047
+          },
+          "errorCode": null,
+          "text": "Cả bộ 3 món giá 989.000đ chị nhé (phí vận chuyển 30.000đ, tổng thanh toán là 1.019.000đ). Mẫu này có các size S, M, L, chị lấy size nào ạ?"
+        }
+      ]
+    },
+    {
+      "case": "P06",
+      "caseId": "c-po-20261031-p06",
+      "repetition": 2,
+      "complete": true,
+      "winner": "TIE",
+      "baseline": {
+        "factsComplete": true,
+        "controlPass": true,
+        "materialFailure": false,
+        "reason": "Nêu đủ giá bộ 3 món 989.000đ, phí ship 30.000đ và tổng 1.019.000đ ngay ý chính, không suy vùng giao. Size S, M, L có căn cứ; hỏi size giúp khách mua tiếp."
+      },
+      "candidate": {
+        "factsComplete": true,
+        "controlPass": true,
+        "materialFailure": false,
+        "reason": "Trả đúng tổng 1.019.000đ đã gồm phí vận chuyển và giá bộ 989.000đ, không suy vùng giao. Hỏi size để kiểm tra là bước tiếp theo hữu ích, tự nhiên."
+      },
+      "terminal": "REPLAY_DRAFT_ONLY",
+      "judge": {
+        "status": "OK",
+        "requests": 1
+      },
+      "arms": [
+        {
+          "status": "OK",
+          "telemetry": {
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 13822,
+            "outputTokens": 238,
+            "cost": null,
+            "requestHash": "5b0e72ee8a50a64df2a2625ad47c3d1458451a4d2860561c8121d5208148bc96",
+            "latencyMs": 1837.012099999999
+          },
+          "errorCode": null,
+          "text": "Cả bộ 3 món giá 989.000đ chị nhé (phí vận chuyển 30.000đ, tổng cộng 1.019.000đ). \n\nMẫu này sẵn size S, M và L, chị lấy size nào ạ?"
+        },
+        {
+          "status": "OK",
+          "telemetry": {
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 13793,
+            "outputTokens": 298,
+            "cost": null,
+            "requestHash": "5cf765b11285223bcc7d4636e047f04cc565aada11c19f8dfac631650799a590",
+            "latencyMs": 1933.1237999999994
+          },
+          "errorCode": null,
+          "text": "Cả bộ 3 món có giá 989.000đ, tổng thanh toán gồm phí vận chuyển là 1.019.000đ chị nhé. Chị lấy size nào để em kiểm tra ạ?"
+        }
+      ]
+    },
+    {
+      "case": "S04",
+      "caseId": "c-20261028-s04",
+      "repetition": 1,
+      "complete": true,
+      "winner": "CANDIDATE",
+      "baseline": {
+        "factsComplete": false,
+        "controlPass": false,
+        "materialFailure": false,
+        "reason": "Nêu đúng hai màu nhưng bỏ điều kiện trắng sẵn hàng, be phải đặt trước, khiến khách thiếu thông tin quan trọng để chọn."
+      },
+      "candidate": {
+        "factsComplete": true,
+        "controlPass": true,
+        "materialFailure": false,
+        "reason": "Nêu đúng trắng sẵn hàng, be đặt trước và phạm vi size S–XL đã kiểm; hỏi màu khách thích để tiếp tục tư vấn."
+      },
+      "terminal": "REPLAY_DRAFT_ONLY",
+      "judge": {
+        "status": "OK",
+        "requests": 1
+      },
+      "arms": [
+        {
+          "status": "OK",
+          "telemetry": {
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 10274,
+            "outputTokens": 655,
+            "cost": null,
+            "requestHash": "e641c627657405f9bbbb6cfd9586c3a67819488198dbc23028785b3cd88c8588",
+            "latencyMs": 2740.8397000000004
+          },
+          "errorCode": null,
+          "text": "Dạ, áo Thạch Thảo hiện có 2 màu là Trắng và Be chị nha."
+        },
+        {
+          "status": "OK",
+          "telemetry": {
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 10352,
+            "outputTokens": 635,
+            "cost": null,
+            "requestHash": "1053422d1a951e4fdd73a1c1e9a0a9658867aee3b74e2a2f450b500bdd4a7ef6",
+            "latencyMs": 2793.375899999999
+          },
+          "errorCode": null,
+          "text": "Dạ, áo Thạch Thảo có hai màu trắng (sẵn hàng) và be (đặt trước) đủ size từ S đến XL, chị thích màu nào ạ?"
+        }
+      ]
+    },
+    {
+      "case": "S04",
+      "caseId": "c-20261028-s04",
+      "repetition": 2,
+      "complete": true,
+      "winner": "CANDIDATE",
+      "baseline": {
+        "factsComplete": false,
+        "controlPass": false,
+        "materialFailure": false,
+        "reason": "Nêu đúng hai màu và có bước hỏi tiếp về size, nhưng thiếu phân biệt trắng có sẵn, be phải đặt trước—điều kiện quan trọng để khách chọn màu."
+      },
+      "candidate": {
+        "factsComplete": true,
+        "controlPass": true,
+        "materialFailure": false,
+        "reason": "Trả lời đúng hai màu, phân biệt rõ trắng có sẵn và be đặt trước; phạm vi size S–XL của cả hai màu đều có căn cứ, không biến size be thành hàng sẵn."
+      },
+      "terminal": "REPLAY_DRAFT_ONLY",
+      "judge": {
+        "status": "OK",
+        "requests": 1
+      },
+      "arms": [
+        {
+          "status": "OK",
+          "telemetry": {
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 10274,
+            "outputTokens": 619,
+            "cost": null,
+            "requestHash": "e641c627657405f9bbbb6cfd9586c3a67819488198dbc23028785b3cd88c8588",
+            "latencyMs": 2597.372299999999
+          },
+          "errorCode": null,
+          "text": "Dạ, mẫu áo Thạch Thảo hiện có hai màu là Trắng và Be chị nhé. Chị thích màu nào để em xem size phù hợp cho mình ạ?"
+        },
+        {
+          "status": "OK",
+          "telemetry": {
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 10352,
+            "outputTokens": 438,
+            "cost": null,
+            "requestHash": "1053422d1a951e4fdd73a1c1e9a0a9658867aee3b74e2a2f450b500bdd4a7ef6",
+            "latencyMs": 2185.306800000002
+          },
+          "errorCode": null,
+          "text": "Dạ áo Thạch Thảo có 2 màu là trắng (có sẵn) và be (đặt trước) đủ size từ S đến XL chị nhé."
+        }
+      ]
+    },
+    {
+      "case": "S15",
+      "caseId": "c-20261028-s15",
+      "repetition": 1,
+      "complete": true,
+      "winner": "TIE",
+      "baseline": {
+        "factsComplete": true,
+        "controlPass": true,
+        "materialFailure": false,
+        "reason": "Nêu đúng giá áo 499.000đ và trạng thái đặt trước của màu be; hỏi tiếp về size để hỗ trợ mua, không thêm cam kết ngoài căn cứ. Chất lượng tương đương phương án A."
+      },
+      "candidate": {
+        "factsComplete": true,
+        "controlPass": true,
+        "materialFailure": false,
+        "reason": "Tiếp nối đúng áo màu be, báo giá 499.000đ và giữ rõ điều kiện hàng đặt trước; mở bước tư vấn size hữu ích, không tự khẳng định size phù hợp hay thời gian giao."
+      },
+      "terminal": "REPLAY_DRAFT_ONLY",
+      "judge": {
+        "status": "OK",
+        "requests": 1
+      },
+      "arms": [
+        {
+          "status": "OK",
+          "telemetry": {
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15005,
+            "outputTokens": 317,
+            "cost": null,
+            "requestHash": "fa30483d17efe0cb6c5d6beb1414e6366d92dacf8bc76e6b3c9fc337889e2296",
+            "latencyMs": 1983.7898000000023
+          },
+          "errorCode": null,
+          "text": "Dạ, áo Thạch Thảo màu be có giá 499.000đ và hiện là hàng đặt trước (pre-order) chị nha. Chị muốn em tư vấn size nào cho mình ạ?"
+        },
+        {
+          "status": "OK",
+          "telemetry": {
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15050,
+            "outputTokens": 387,
+            "cost": null,
+            "requestHash": "c239eebb4d391cb2d548d9b64d584d4741b41b412c875ae347e6881e591b7a11",
+            "latencyMs": 2487.7114
+          },
+          "errorCode": null,
+          "text": "Dạ, áo Thạch Thảo màu be có giá 499.000đ (hàng đặt trước chị nhé). Chị có muốn em tư vấn size phù hợp không ạ?"
+        }
+      ]
+    },
+    {
+      "case": "S15",
+      "caseId": "c-20261028-s15",
+      "repetition": 2,
+      "complete": true,
+      "winner": "TIE",
+      "baseline": {
+        "factsComplete": true,
+        "controlPass": true,
+        "materialFailure": false,
+        "reason": "Nêu đúng giá áo 499.000đ và màu be là hàng đặt trước; hỏi size để tiếp tục mua, không hứa có sẵn hay đã giữ hàng."
+      },
+      "candidate": {
+        "factsComplete": true,
+        "controlPass": true,
+        "materialFailure": false,
+        "reason": "Nêu đúng giá áo, chất liệu và màu be đặt trước với các size S–XL; đề nghị tư vấn theo số đo là bước tiếp theo hữu ích."
+      },
+      "terminal": "REPLAY_DRAFT_ONLY",
+      "judge": {
+        "status": "OK",
+        "requests": 1
+      },
+      "arms": [
+        {
+          "status": "OK",
+          "telemetry": {
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15005,
+            "outputTokens": 447,
+            "cost": null,
+            "requestHash": "fa30483d17efe0cb6c5d6beb1414e6366d92dacf8bc76e6b3c9fc337889e2296",
+            "latencyMs": 2505.7669000000024
+          },
+          "errorCode": null,
+          "text": "Dạ, áo Thạch Thảo màu be có giá 499.000đ (hàng đặt trước) chị nhé. Chị chọn size nào để em chuẩn bị giúp chị ạ?"
+        },
+        {
+          "status": "OK",
+          "telemetry": {
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 15050,
+            "outputTokens": 504,
+            "cost": null,
+            "requestHash": "c239eebb4d391cb2d548d9b64d584d4741b41b412c875ae347e6881e591b7a11",
+            "latencyMs": 2693.634399999999
+          },
+          "errorCode": null,
+          "text": "Áo lẻ Thạch Thảo màu be giá 499.000đ, chất liệu tơ Hàn thêu mềm mại, form nhẹ nhàng thanh thoát. Màu be hiện là hàng đặt trước (pre-order) đủ size từ S đến XL chị nhé. Chị có muốn em tư vấn size chuẩn theo số đo của mình không ạ?"
+        }
+      ]
+    },
+    {
+      "case": "J2/T2",
+      "caseId": "c-20261028-j2",
+      "repetition": 1,
+      "complete": true,
+      "winner": "TIE",
+      "baseline": {
+        "factsComplete": true,
+        "controlPass": true,
+        "materialFailure": false,
+        "reason": "Dẫn chiếu số đo khách vừa sửa và xác nhận vẫn mặc size M đúng cho phần áo; đủ giải đáp, không thêm thông tin ngoài căn cứ."
+      },
+      "candidate": {
+        "factsComplete": true,
+        "controlPass": true,
+        "materialFailure": false,
+        "reason": "Dùng đúng cân nặng đã sửa 51kg và số đo mới, xác nhận size M đúng cho phần áo; trả lời gọn, tự nhiên."
+      },
+      "terminal": "REPLAY_DRAFT_ONLY",
+      "judge": {
+        "status": "OK",
+        "requests": 1
+      },
+      "arms": [
+        {
+          "status": "OK",
+          "telemetry": {
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12952,
+            "outputTokens": 580,
+            "cost": null,
+            "requestHash": "39a43d86196b61c5299b2177bba01677b42430210e891844072834451819c23f",
+            "latencyMs": 3085.914700000001
+          },
+          "errorCode": null,
+          "text": "Dạ với số đo này, áo set Thạch Thảo mình vẫn mặc size M vừa đẹp chị nha."
+        },
+        {
+          "status": "OK",
+          "telemetry": {
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 12952,
+            "outputTokens": 478,
+            "cost": null,
+            "requestHash": "39a43d86196b61c5299b2177bba01677b42430210e891844072834451819c23f",
+            "latencyMs": 2233.9190000000017
+          },
+          "errorCode": null,
+          "text": "Dạ với cân nặng 51kg cùng các số đo mới của chị, áo set Thạch Thảo mình vẫn giữ size M vừa đẹp nha chị."
+        }
+      ]
+    },
+    {
+      "case": "J4/T3",
+      "caseId": "c-20261028-j4",
+      "repetition": 1,
+      "complete": true,
+      "winner": "TIE",
+      "baseline": {
+        "factsComplete": true,
+        "controlPass": true,
+        "materialFailure": false,
+        "reason": "Báo đúng tổng 499.000đ cho một áo size M gửi Cần Thơ, gồm hỗ trợ phí vận chuyển 30.000đ theo báo giá. Hỏi chọn màu là bước tiếp theo hữu ích; tình trạng trắng có sẵn, be đặt trước đã được nêu trong hội thoại."
+      },
+      "candidate": {
+        "factsComplete": true,
+        "controlPass": true,
+        "materialFailure": false,
+        "reason": "Nêu rõ tổng 499.000đ và hỗ trợ phí vận chuyển 30.000đ đúng báo giá, không khẳng định đã áp dụng quyền lợi hay tạo đơn. Hỏi màu để tiếp tục mua, chất lượng tương đương phương án A."
+      },
+      "terminal": "REPLAY_DRAFT_ONLY",
+      "judge": {
+        "status": "OK",
+        "requests": 1
+      },
+      "arms": [
+        {
+          "status": "OK",
+          "telemetry": {
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 17040,
+            "outputTokens": 463,
+            "cost": null,
+            "requestHash": "8b91f281609625b35f503b127408678321478c8fdf92db72eef72a0f74dc1d0f",
+            "latencyMs": 2075.035100000001
+          },
+          "errorCode": null,
+          "text": "Dạ áo thêu size M gửi về Cần Thơ có giá 499k, shop hỗ trợ miễn phí vận chuyển 30k nên tổng thanh toán là 499k ạ. Chị lấy màu trắng hay be để em lên đơn luôn nhé ạ?"
+        },
+        {
+          "status": "OK",
+          "telemetry": {
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 17050,
+            "outputTokens": 484,
+            "cost": null,
+            "requestHash": "e4f8fb4a6eaf06f0ae8bd979fb0c98381f103c22305c9b1b2a5f4ab49fad247d",
+            "latencyMs": 2609.628199999999
+          },
+          "errorCode": null,
+          "text": "Dạ một áo thêu Thạch Thảo size M gửi về Cần Thơ tổng cộng là 499k (shop hỗ trợ miễn phí vận chuyển 30k ạ). Chị chọn lấy màu trắng hay be để em lên đơn nhé ạ?"
+        }
+      ]
+    },
+    {
+      "case": "ADS",
+      "caseId": "c-context-opening",
+      "repetition": 1,
+      "complete": true,
+      "winner": "TIE",
+      "baseline": {
+        "factsComplete": true,
+        "controlPass": true,
+        "materialFailure": false,
+        "reason": "Báo đúng giá cả bộ 989.000đ, áo lẻ 779.000đ và size sẵn S, M, L; giữ rõ hai lựa chọn mua, hỏi size để tiếp tục tư vấn."
+      },
+      "candidate": {
+        "factsComplete": true,
+        "controlPass": true,
+        "materialFailure": false,
+        "reason": "Báo đúng hai mức giá và size sẵn S, M, L; hỏi khách chọn cả bộ hay áo lẻ, giúp xác định nhu cầu trước bước mua tiếp theo."
+      },
+      "terminal": "REPLAY_DRAFT_ONLY",
+      "judge": {
+        "status": "OK",
+        "requests": 1
+      },
+      "arms": [
+        {
+          "status": "OK",
+          "telemetry": {
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 14330,
+            "outputTokens": 514,
+            "cost": null,
+            "requestHash": "5618a528f851b6d84a33782ca1f3a563fe2d6a6e6ccf771c1d7f6f1522f7d5bf",
+            "latencyMs": 2147.011200000001
+          },
+          "errorCode": null,
+          "text": "Dạ, mẫu này bên em có bán cả bộ giá 989.000đ hoặc áo lẻ giá 779.000đ ạ. Sản phẩm có sẵn các size S, M, L, chị lấy theo size nào ạ?"
+        },
+        {
+          "status": "OK",
+          "telemetry": {
+            "providerRequests": 1,
+            "authRequests": 0,
+            "httpStatus": 200,
+            "modelVersion": "gemini-3.5-flash-lite",
+            "inputTokens": 14330,
+            "outputTokens": 473,
+            "cost": null,
+            "requestHash": "5618a528f851b6d84a33782ca1f3a563fe2d6a6e6ccf771c1d7f6f1522f7d5bf",
+            "latencyMs": 2202.061600000001
+          },
+          "errorCode": null,
+          "text": "Dạ, mẫu này em bán cả bộ giá 989.000đ hoặc áo lẻ 779.000đ, sẵn size S, M, L chị ạ. Chị lấy cả bộ hay áo lẻ ạ?"
+        }
+      ]
+    }
+  ],
+  "registrationHash": "4ac0ba84a775cb5a20f793389cf6665f59cf667ac92767d1ed6d791718ef7f55",
+  "worktreeHead": "651021c3cabf1a2f83f6317429454ac98781f5b0",
+  "reviewedSource": "8cfba71f258e36e3120cd496c5ca949fd0a1f3b7",
+  "packetHash": "fff287b6984566055b4563f455a562a7cde9b8edfdac9d8a67b7efcb0df20caa",
+  "ownerHash": "affec4602faf16cb5aa570d9bf21c11bee088b2eb164a96748eb619bf902a230",
+  "judgeHash": "f34ccc2563a2cb20f0f5bda685b984770a0ec50b674a7d57c2d052ce2109eefd",
+  "ownerRequests": 18,
+  "judgeRequests": 9,
+  "seal": {
+    "worktreeHead": "651021c3cabf1a2f83f6317429454ac98781f5b0",
+    "reviewedSource": "8cfba71f258e36e3120cd496c5ca949fd0a1f3b7",
+    "registrationHash": "4ac0ba84a775cb5a20f793389cf6665f59cf667ac92767d1ed6d791718ef7f55",
+    "rubricHash": "2dc0ba644c64d434f5744dc7467642060d8f236627f410d378885f1e49e2cbc2",
+    "runnerHash": "d4be9fd94e561e9296a75e0a60bd475b30dcf4d6a2aeead8a3b427f3579d9bf5",
+    "judgeInstructionHash": "7a9cd8d8ed2014efd5fb7d42fb65c2e3af3c75805ed58e9e91684439ab3b2596",
+    "judgeSchemaHash": "15388658a99163596cdd168c43375be084b01f0ee7b1051c09c4120e02d003da",
+    "judgeClient": {
+      "version": "codex-cli 0.159.2",
+      "binarySha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+    }
+  },
+  "sourceMode": "EXACT_REVIEWED_EXECUTABLE_TREE_ON_DOCUMENTATION_ONLY_DESCENDANT",
+  "retry": 0,
+  "native": {
+    "status": "NOT_RUN_A_B_STOP",
+    "cases": 0,
+    "turns": 0,
+    "providerRequests": 0
+  },
+  "owner": {
+    "model": "gemini-3.5-flash-lite",
+    "version": "gemini-3.5-flash-lite",
+    "effort": "high",
+    "planned": 18,
+    "completed": 18,
+    "providerRequests": 18,
+    "authRequests": 1,
+    "inputTokens": 245246,
+    "outputTokens": 8150,
+    "cost": null,
+    "error": 0,
+    "p50Ms": 2234,
+    "p95Ms": 3086
+  },
+  "judge": {
+    "model": "gpt-6.1-sol",
+    "version": "gpt-6.1-sol",
+    "effort": "high",
+    "offline": true,
+    "planned": 9,
+    "completed": 9,
+    "providerRequests": 9,
+    "inputTokens": 46774,
+    "outputTokens": 2631,
+    "cost": null,
+    "error": 0,
+    "p50Ms": 9918,
+    "p95Ms": 18980
+  }
+}

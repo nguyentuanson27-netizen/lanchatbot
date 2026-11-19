@@ -2,7 +2,8 @@
 
 - [x] Triển khai projection tổng tiền và trạng thái màu theo bằng chứng đã xác minh. Kiểm ADS qua Compact V2, verifier và Outbox test.
 - [x] 159 test Node, 786 worker, build/lint/typecheck/dataset qua. Review độc lập APPROVE `8cfba71f`. Preflight đăng ký 9 cặp trên 6 capture, 0 lượt gọi provider. [Bằng chứng](../docs/specs/evidence/c3-phase-c-owner-reply-evidence-20261119/IMPLEMENTATION.md).
-- [ ] 9 cặp A/B và native 6 ca/10 lượt chưa chạy. Phase C STOP, P07 còn mở.
+- [x] A/B đủ 9 cặp, 27 generation, 0 lỗi/timeout/retry. Bản sửa thắng 2/6, cùng ở S04. Dữ kiện 6/6, đối chứng 3/3. [Báo cáo và cả 18 bản nháp](../docs/specs/evidence/c3-phase-c-owner-reply-evidence-20261119/MODEL_RUN.md).
+- [ ] Native 6 ca/10 lượt dừng theo gate A/B. Phase C STOP, P07 còn mở.
 
 ## Current — rollback giọng tư vấn và review nguyên nhân, 2026-11-19
 
